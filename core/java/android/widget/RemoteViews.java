@@ -669,50 +669,137 @@ public class RemoteViews implements Parcelable, Filter {
         setInt(viewId, "setTextColor", color);
     }
 
+    /**
+     * Call a method taking one boolean on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setBoolean(int viewId, String methodName, boolean value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BOOLEAN, value));
     }
 
+    /**
+     * Call a method taking one byte on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setByte(int viewId, String methodName, byte value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BYTE, value));
     }
 
+    /**
+     * Call a method taking one short on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setShort(int viewId, String methodName, short value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.SHORT, value));
     }
 
+    /**
+     * Call a method taking one int on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setInt(int viewId, String methodName, int value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.INT, value));
     }
 
+    /**
+     * Call a method taking one long on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setLong(int viewId, String methodName, long value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.LONG, value));
     }
 
+    /**
+     * Call a method taking one float on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setFloat(int viewId, String methodName, float value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.FLOAT, value));
     }
 
+    /**
+     * Call a method taking one double on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setDouble(int viewId, String methodName, double value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.DOUBLE, value));
     }
 
+    /**
+     * Call a method taking one char on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setChar(int viewId, String methodName, char value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.CHAR, value));
     }
 
+    /**
+     * Call a method taking one String on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setString(int viewId, String methodName, String value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.STRING, value));
     }
 
+    /**
+     * Call a method taking one CharSequence on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setCharSequence(int viewId, String methodName, CharSequence value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.CHAR_SEQUENCE, value));
     }
 
+    /**
+     * Call a method taking one Uri on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setUri(int viewId, String methodName, Uri value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.URI, value));
     }
 
+    /**
+     * Call a method taking one Bitmap on a view in the layout for this RemoteViews.
+     * @more
+     * <p class="note">The bitmap will be flattened into the parcel if this object is
+     * sent across processes, so it may end up using a lot of memory, and may be fairly slow.</p>
+     *
+     * @param viewId The id of the view whose text should change
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
     public void setBitmap(int viewId, String methodName, Bitmap value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BITMAP, value));
     }
