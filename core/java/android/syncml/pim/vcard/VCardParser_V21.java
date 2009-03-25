@@ -16,21 +16,24 @@
 
 package android.syncml.pim.vcard;
 
-import android.syncml.pim.VParser;
+import android.syncml.pim.VBuilder;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * This class is used to parse vcard. Please refer to vCard Specification 2.1
  */
-public class VCardParser_V21 extends VParser {
+public class VCardParser_V21 {
 
     /** Store the known-type */
-    private static final HashSet<String> mKnownTypeSet = new HashSet<String>(
+    private static final HashSet<String> sKnownTypeSet = new HashSet<String>(
             Arrays.asList("DOM", "INTL", "POSTAL", "PARCEL", "HOME", "WORK",
                     "PREF", "VOICE", "FAX", "MSG", "CELL", "PAGER", "BBS",
                     "MODEM", "CAR", "ISDN", "VIDEO", "AOL", "APPLELINK",
@@ -39,13 +42,40 @@ public class VCardParser_V21 extends VParser {
                     "CGM", "WMF", "BMP", "MET", "PMB", "DIB", "PICT", "TIFF",
                     "PDF", "PS", "JPEG", "QTIME", "MPEG", "MPEG2", "AVI",
                     "WAVE", "AIFF", "PCM", "X509", "PGP"));
+    
+    /** Store the known-value */
+    private static final HashSet<String> sKnownValueSet = new HashSet<String>(
+            Arrays.asList("INLINE", "URL", "CONTENT-ID", "CID"));
+        
+    /** Store the property name available in vCard 2.1 */
+    // NICKNAME is not supported in vCard 2.1, but some vCard may contain.
+    private static final HashSet<String> sAvailablePropertyNameV21 =
+        new HashSet<String>(Arrays.asList(
+                "LOGO", "PHOTO", "LABEL", "FN", "TITLE", "SOUND",
+                "VERSION", "TEL", "EMAIL", "TZ", "GEO", "NOTE", "URL",
+                "BDAY", "ROLE", "REV", "UID", "KEY", "MAILER",
+                "NICKNAME"));
 
-    /** Store the name */
-    private static final HashSet<String> mName = new HashSet<String>(Arrays
-            .asList("LOGO", "PHOTO", "LABEL", "FN", "TITLE", "SOUND",
-                    "VERSION", "TEL", "EMAIL", "TZ", "GEO", "NOTE", "URL",
-                    "BDAY", "ROLE", "REV", "UID", "KEY", "MAILER"));
+    // Though vCard 2.1 specification does not allow "B" encoding, some data may have it.
+    // We allow it for safety...
+    private static final HashSet<String> sAvailableEncodingV21 =
+        new HashSet<String>(Arrays.asList(
+                "7BIT", "8BIT", "QUOTED-PRINTABLE", "BASE64", "B"));
+    
+    // Used only for parsing END:VCARD.
+    private String mPreviousLine;
+    
+    /** The builder to build parsed data */
+    protected VBuilder mBuilder = null;
 
+    /** The encoding type */
+    protected String mEncoding = null;
+    
+    protected final String sDefaultEncoding = "8BIT";
+    
+    // Should not directly read a line from this. Use getLine() instead.
+    protected BufferedReader mReader;
+    
     /**
      * Create a new VCard parser.
      */
@@ -55,916 +85,597 @@ public class VCardParser_V21 extends VParser {
 
     /**
      * Parse the file at the given position
-     *
-     * @param offset
-     *            the given position to parse
-     * @return vcard length
+     * vcard_file   = [wsls] vcard [wsls]
      */
-    protected int parseVFile(int offset) {
-        return parseVCardFile(offset);
+    protected void parseVCardFile() throws IOException, VCardException {
+        while (parseOneVCard()) {
+        }
+    }
+
+    protected String getVersion() {
+        return "2.1";
+    }
+    
+    /**
+     * @return true when the propertyName is a valid property name.
+     */
+    protected boolean isValidPropertyName(String propertyName) {
+        return sAvailablePropertyNameV21.contains(propertyName.toUpperCase());
     }
 
     /**
-     * [wsls] vcard [wsls]
+     * @return true when the encoding is a valid encoding.
      */
-    int parseVCardFile(int offset) {
-        int ret = 0, sum = 0;
-
-        /* remove \t \r\n */
-        while ((ret = parseWsls(offset)) != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        }
-
-        ret = parseVCard(offset); // BEGIN:VCARD ... END:VCARD
-        if (ret != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        } else {
-            return PARSE_ERROR;
-        }
-
-        /* remove \t \r\n */
-        while ((ret = parseWsls(offset)) != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        }
-        return sum;
+    protected boolean isValidEncoding(String encoding) {
+        return sAvailableEncodingV21.contains(encoding.toUpperCase());
     }
-
+    
     /**
-     * "BEGIN" [ws] ":" [ws] "VCARD" [ws] 1*CRLF items *CRLF "END" [ws] ":"
-     * "VCARD"
+     * @return String. It may be null, or its length may be 0
+     * @throws IOException
      */
-    private int parseVCard(int offset) {
-        int ret = 0, sum = 0;
-
-        /* BEGIN */
-        ret = parseString(offset, "BEGIN", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
+    protected String getLine() throws IOException {
+        return mReader.readLine();
+    }
+    
+    /**
+     * @return String with it's length > 0
+     * @throws IOException
+     * @throws VCardException when the stream reached end of line
+     */
+    protected String getNonEmptyLine() throws IOException, VCardException {
+        String line;
+        while (true) {
+            line = getLine();
+            if (line == null) {
+                throw new VCardException("Reached end of buffer.");
+            } else if (line.trim().length() > 0) {
+                return line;
+            }
         }
-        offset += ret;
-        sum += ret;
-
-        /* [ws] */
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        /* colon */
-        ret = parseString(offset, ":", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
+    }
+    
+    /**
+     *  vcard        = "BEGIN" [ws] ":" [ws] "VCARD" [ws] 1*CRLF
+     *                 items *CRLF
+     *                 "END" [ws] ":" [ws] "VCARD"
+     */
+    private boolean parseOneVCard() throws IOException, VCardException {
+        if (!readBeginVCard()) {
+            return false;
         }
-        offset += ret;
-        sum += ret;
-
-        /* [ws] */
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        /* VCARD */
-        ret = parseString(offset, "VCARD", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
+        parseItems();
+        readEndVCard();
+        return true;
+    }
+    
+    /**
+     * @return True when successful. False when reaching the end of line  
+     * @throws IOException
+     * @throws VCardException
+     */
+    protected boolean readBeginVCard() throws IOException, VCardException {
+        String line;
+        while (true) {
+            line = getLine();
+            if (line == null) {
+                return false;
+            } else if (line.trim().length() > 0) {
+                break;
+            }
         }
-        offset += ret;
-        sum += ret;
+        String[] strArray = line.split(":", 2);
+        
+        // Though vCard specification does not allow lower cases,
+        // some data may have them, so we allow it.
+        if (!(strArray.length == 2 &&
+                strArray[0].trim().equalsIgnoreCase("BEGIN") && 
+                strArray[1].trim().equalsIgnoreCase("VCARD"))) {
+            throw new VCardException("BEGIN:VCARD != \"" + line + "\"");
+        }
+        
         if (mBuilder != null) {
             mBuilder.startRecord("VCARD");
         }
 
-        /* [ws] */
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        /* 1*CRLF */
-        ret = parseCrlf(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
+        return true;
+    }
+    
+    protected void readEndVCard() throws VCardException {
+        // Though vCard specification does not allow lower cases,
+        // some data may have them, so we allow it.
+        String[] strArray = mPreviousLine.split(":", 2);
+        if (!(strArray.length == 2 &&
+                strArray[0].trim().equalsIgnoreCase("END") &&
+                strArray[1].trim().equalsIgnoreCase("VCARD"))) {
+            throw new VCardException("END:VCARD != \"" + mPreviousLine + "\"");
         }
-        offset += ret;
-        sum += ret;
-        while ((ret = parseCrlf(offset)) != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        }
-
-        ret = parseItems(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        /* *CRLF */
-        while ((ret = parseCrlf(offset)) != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        }
-
-        /* END */
-        ret = parseString(offset, "END", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        /* [ws] */
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        /* colon */
-        ret = parseString(offset, ":", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        /* [ws] */
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        /* VCARD */
-        ret = parseString(offset, "VCARD", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        // offset += ret;
-        sum += ret;
+        
         if (mBuilder != null) {
             mBuilder.endRecord();
         }
-
-        return sum;
     }
-
+    
     /**
-     * items *CRLF item / item
+     * items = *CRLF item 
+     *       / item
      */
-    private int parseItems(int offset) {
+    protected void parseItems() throws IOException, VCardException {
         /* items *CRLF item / item */
-        int ret = 0, sum = 0;
-
+        boolean ended = false;
+        
         if (mBuilder != null) {
             mBuilder.startProperty();
         }
-        ret = parseItem(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.endProperty();
-        }
 
-        for (;;) {
-            while ((ret = parseCrlf(offset)) != PARSE_ERROR) {
-                offset += ret;
-                sum += ret;
-            }
-            // follow VCARD ,it wont reach endProperty
-            if (mBuilder != null) {
-                mBuilder.startProperty();
-            }
-
-            ret = parseItem(offset);
-            if (ret == PARSE_ERROR) {
-                break;
-            }
-            offset += ret;
-            sum += ret;
+        try {
+            ended = parseItem();
+        } finally {
             if (mBuilder != null) {
                 mBuilder.endProperty();
             }
         }
 
-        return sum;
+        while (!ended) {
+            // follow VCARD ,it wont reach endProperty
+            if (mBuilder != null) {
+                mBuilder.startProperty();
+            }
+            try {
+                ended = parseItem();
+            } finally {
+                if (mBuilder != null) {
+                    mBuilder.endProperty();
+                }
+            }
+        }
     }
 
     /**
-     * item0 / item1 / item2
+     * item      = [groups "."] name    [params] ":" value CRLF
+     *           / [groups "."] "ADR"   [params] ":" addressparts CRLF
+     *           / [groups "."] "ORG"   [params] ":" orgparts CRLF
+     *           / [groups "."] "N"     [params] ":" nameparts CRLF
+     *           / [groups "."] "AGENT" [params] ":" vcard CRLF 
      */
-    private int parseItem(int offset) {
-        int ret = 0, sum = 0;
-        mEncoding = mDefaultEncoding;
+    protected boolean parseItem() throws IOException, VCardException {
+        mEncoding = sDefaultEncoding;
 
-        ret = parseItem0(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
+        // params    = ";" [ws] paramlist
+        String line = getNonEmptyLine();
+        String[] strArray = line.split(":", 2);
+        if (strArray.length < 2) {
+            throw new VCardException("Invalid line(\":\" does not exist): " + line);
         }
-
-        ret = parseItem1(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
+        String propertyValue = strArray[1];
+        String[] groupNameParamsArray = strArray[0].split(";");
+        String groupAndName = groupNameParamsArray[0].trim();
+        String[] groupNameArray = groupAndName.split("\\.");
+        int length = groupNameArray.length;
+        String propertyName = groupNameArray[length - 1];
+        if (mBuilder != null) {
+            mBuilder.propertyName(propertyName);
+            for (int i = 0; i < length - 1; i++) {
+                mBuilder.propertyGroup(groupNameArray[i]);
+            }
         }
-
-        ret = parseItem2(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
+        if (propertyName.equalsIgnoreCase("END")) {
+            mPreviousLine = line;
+            return true;
         }
-
-        return PARSE_ERROR;
+        
+        length = groupNameParamsArray.length;
+        for (int i = 1; i < length; i++) {
+            handleParams(groupNameParamsArray[i]);
+        }
+        
+        if (isValidPropertyName(propertyName) ||
+                propertyName.startsWith("X-")) {
+            if (propertyName.equals("VERSION") &&
+                    !propertyValue.equals(getVersion())) {
+                throw new VCardVersionException("Incompatible version: " + 
+                        propertyValue + " != " + getVersion());
+            }
+            handlePropertyValue(propertyName, propertyValue);
+            return false;
+        } else if (propertyName.equals("ADR") ||
+                propertyName.equals("ORG") ||
+                propertyName.equals("N")) {
+            handleMultiplePropertyValue(propertyName, propertyValue);
+            return false;
+        } else if (propertyName.equals("AGENT")) {
+            handleAgent(propertyValue);
+            return false;
+        }
+        
+        throw new VCardException("Unknown property name: \"" + 
+                propertyName + "\"");
     }
 
-    /** [groups "."] name [params] ":" value CRLF */
-    private int parseItem0(int offset) {
-        int ret = 0, sum = 0, start = offset;
-        String proName = "", proValue = "";
-
-        ret = parseGroupsWithDot(offset);
-        if (ret != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
+    /**
+     * params      = ";" [ws] paramlist
+     * paramlist   = paramlist [ws] ";" [ws] param
+     *             / param
+     * param       = "TYPE" [ws] "=" [ws] ptypeval
+     *             / "VALUE" [ws] "=" [ws] pvalueval
+     *             / "ENCODING" [ws] "=" [ws] pencodingval
+     *             / "CHARSET" [ws] "=" [ws] charsetval
+     *             / "LANGUAGE" [ws] "=" [ws] langval
+     *             / "X-" word [ws] "=" [ws] word
+     *             / knowntype
+     */
+    protected void handleParams(String params) throws VCardException {
+        String[] strArray = params.split("=", 2);
+        if (strArray.length == 2) {
+            String paramName = strArray[0].trim();
+            String paramValue = strArray[1].trim();
+            if (paramName.equals("TYPE")) {
+                handleType(paramValue);
+            } else if (paramName.equals("VALUE")) {
+                handleValue(paramValue);
+            } else if (paramName.equals("ENCODING")) {
+                handleEncoding(paramValue);
+            } else if (paramName.equals("CHARSET")) {
+                handleCharset(paramValue);
+            } else if (paramName.equals("LANGUAGE")) {
+                handleLanguage(paramValue);
+            } else if (paramName.startsWith("X-")) {
+                handleAnyParam(paramName, paramValue);
+            } else {
+                throw new VCardException("Unknown type \"" + paramName + "\"");
+            }
+        } else {
+            handleType(strArray[0]);
         }
-
-        ret = parseName(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
+    }
+    
+    /**
+     * typeval  = knowntype / "X-" word
+     */
+    protected void handleType(String ptypeval) throws VCardException {
+        if (sKnownTypeSet.contains(ptypeval.toUpperCase()) ||
+                ptypeval.startsWith("X-")) {
+            if (mBuilder != null) {
+                mBuilder.propertyParamType("TYPE");
+                mBuilder.propertyParamValue(ptypeval.toUpperCase());
+            }
+        } else {
+            throw new VCardException("Unknown type: \"" + ptypeval + "\"");
+        }        
+    }
+    
+    /**
+     * pvalueval = "INLINE" / "URL" / "CONTENT-ID" / "CID" / "X-" word
+     */
+    protected void handleValue(String pvalueval) throws VCardException {
+        if (sKnownValueSet.contains(pvalueval.toUpperCase()) ||
+                pvalueval.startsWith("X-")) {
+            if (mBuilder != null) {
+                mBuilder.propertyParamType("VALUE");
+                mBuilder.propertyParamValue(pvalueval);
+            }
+        } else {
+            throw new VCardException("Unknown value \"" + pvalueval + "\"");
         }
-        offset += ret;
-        sum += ret;
+    }
+    
+    /**
+     * pencodingval = "7BIT" / "8BIT" / "QUOTED-PRINTABLE" / "BASE64" / "X-" word
+     */
+    protected void handleEncoding(String pencodingval) throws VCardException {
+        if (isValidEncoding(pencodingval) ||
+                pencodingval.startsWith("X-")) {
+            if (mBuilder != null) {
+                mBuilder.propertyParamType("ENCODING");
+                mBuilder.propertyParamValue(pencodingval);
+            }
+            mEncoding = pencodingval;
+        } else {
+            throw new VCardException("Unknown encoding \"" + pencodingval + "\"");
+        }
+    }
+    
+    /**
+     * vCard specification only allows us-ascii and iso-8859-xxx (See RFC 1521),
+     * but some vCard contains other charset, so we allow them. 
+     */
+    protected void handleCharset(String charsetval) {
         if (mBuilder != null) {
-            proName = mBuffer.substring(start, offset).trim();
-            mBuilder.propertyName(proName);
+            mBuilder.propertyParamType("CHARSET");
+            mBuilder.propertyParamValue(charsetval);
         }
-
-        ret = parseParams(offset);
-        if (ret != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
+    }
+    
+    /**
+     * See also Section 7.1 of RFC 1521
+     */
+    protected void handleLanguage(String langval) throws VCardException {
+        String[] strArray = langval.split("-");
+        if (strArray.length != 2) {
+            throw new VCardException("Invalid Language: \"" + langval + "\"");
         }
-
-        ret = parseString(offset, ":", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
+        String tmp = strArray[0];
+        int length = tmp.length();
+        for (int i = 0; i < length; i++) {
+            if (!isLetter(tmp.charAt(i))) {
+                throw new VCardException("Invalid Language: \"" + langval + "\"");
+            }
         }
-        offset += ret;
-        sum += ret;
-
-        start = offset;
-        ret = parseValue(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        proValue = mBuffer.substring(start, offset);
-        if (proName.equals("VERSION") && !proValue.equals("2.1")) {
-            return PARSE_ERROR;
+        tmp = strArray[1];
+        length = tmp.length();
+        for (int i = 0; i < length; i++) {
+            if (!isLetter(tmp.charAt(i))) {
+                throw new VCardException("Invalid Language: \"" + langval + "\"");
+            }
         }
         if (mBuilder != null) {
-            ArrayList<String> v = new ArrayList<String>();
-            v.add(proValue);
-            mBuilder.propertyValues(v);
+            mBuilder.propertyParamType("LANGUAGE");
+            mBuilder.propertyParamValue(langval);
         }
-
-        ret = parseCrlf(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        sum += ret;
-
-        return sum;
     }
 
-    /** "ADR" "ORG" "N" with semi-colon separated content */
-    private int parseItem1(int offset) {
-        int ret = 0, sum = 0, start = offset;
-
-        ret = parseGroupsWithDot(offset);
-        if (ret != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        }
-
-        if ((ret = parseString(offset, "ADR", true)) == PARSE_ERROR
-                && (ret = parseString(offset, "ORG", true)) == PARSE_ERROR
-                && (ret = parseString(offset, "N", true)) == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
+    /**
+     * Mainly for "X-" type. This accepts any kind of type without check.
+     */
+    protected void handleAnyParam(String paramName, String paramValue) {
         if (mBuilder != null) {
-            mBuilder.propertyName(mBuffer.substring(start, offset).trim());
+            mBuilder.propertyParamType(paramName);
+            mBuilder.propertyParamValue(paramValue);
         }
-
-        ret = parseParams(offset);
-        if (ret != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
+    }
+    
+    protected void handlePropertyValue(
+            String propertyName, String propertyValue) throws
+            IOException, VCardException {
+        if (mEncoding == null || mEncoding.equalsIgnoreCase("7BIT")
+                || mEncoding.equalsIgnoreCase("8BIT")
+                || mEncoding.toUpperCase().startsWith("X-")) {
+            if (mBuilder != null) {
+                ArrayList<String> v = new ArrayList<String>();
+                v.add(maybeUnescapeText(propertyValue));
+                mBuilder.propertyValues(v);
+            }
+        } else if (mEncoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
+            String result = getQuotedPrintable(propertyValue);
+            if (mBuilder != null) {
+                ArrayList<String> v = new ArrayList<String>();
+                v.add(result);
+                mBuilder.propertyValues(v);
+            }
+        } else if (mEncoding.equalsIgnoreCase("BASE64") ||
+                mEncoding.equalsIgnoreCase("B")) {
+            String result = getBase64(propertyValue);
+            if (mBuilder != null) {
+                ArrayList<String> v = new ArrayList<String>();
+                v.add(result);
+                mBuilder.propertyValues(v);
+            }            
+        } else {
+            throw new VCardException("Unknown encoding: \"" + mEncoding + "\"");
         }
-
-        ret = parseString(offset, ":", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        start = offset;
-        ret = parseValue(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            int end = 0;
-            ArrayList<String> v = new ArrayList<String>();
-            Pattern p = Pattern
-                    .compile("([^;\\\\]*(\\\\[\\\\;:,])*[^;\\\\]*)(;?)");
-            Matcher m = p.matcher(mBuffer.substring(start, offset));
-            while (m.find()) {
-                String s = escapeTranslator(m.group(1));
-                v.add(s);
-                end = m.end();
-                if (offset == start + end) {
-                    String endValue = m.group(3);
-                    if (";".equals(endValue)) {
-                        v.add("");
+    }
+    
+    protected String getQuotedPrintable(String firstString) throws IOException, VCardException {
+        // Specifically, there may be some padding between = and CRLF.
+        // See the following:
+        //
+        // qp-line := *(qp-segment transport-padding CRLF)
+        //            qp-part transport-padding
+        // qp-segment := qp-section *(SPACE / TAB) "="
+        //             ; Maximum length of 76 characters
+        //
+        // e.g. (from RFC 2045)
+        // Now's the time =
+        // for all folk to come=
+        //  to the aid of their country.
+        if (firstString.trim().endsWith("=")) {
+            // remove "transport-padding"
+            int pos = firstString.length() - 1;
+            while(firstString.charAt(pos) != '=') {
+            }
+            StringBuilder builder = new StringBuilder();
+            builder.append(firstString.substring(0, pos + 1));
+            builder.append("\r\n");
+            String line;
+            while (true) {
+                line = getLine();
+                if (line == null) {
+                    throw new VCardException(
+                            "File ended during parsing quoted-printable String");
+                }
+                if (line.trim().endsWith("=")) {
+                    // remove "transport-padding"
+                    pos = line.length() - 1;
+                    while(line.charAt(pos) != '=') {
                     }
+                    builder.append(line.substring(0, pos + 1));
+                    builder.append("\r\n");
+                } else {
+                    builder.append(line);
                     break;
                 }
             }
-            mBuilder.propertyValues(v);
+            return builder.toString(); 
+        } else {
+            return firstString;
         }
-
-        ret = parseCrlf(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        sum += ret;
-
-        return sum;
     }
-
-    /** [groups] "." "AGENT" [params] ":" vcard CRLF */
-    private int parseItem2(int offset) {
-        int ret = 0, sum = 0, start = offset;
-
-        ret = parseGroupsWithDot(offset);
-        if (ret != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        }
-
-        ret = parseString(offset, "AGENT", true);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyName(mBuffer.substring(start, offset));
-        }
-
-        ret = parseParams(offset);
-        if (ret != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        }
-
-        ret = parseString(offset, ":", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = parseCrlf(offset);
-        if (ret != PARSE_ERROR) {
-            offset += ret;
-            sum += ret;
-        }
-
-        ret = parseVCard(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyValues(new ArrayList<String>());
-        }
-
-        ret = parseCrlf(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        sum += ret;
-
-        return sum;
-    }
-
-    private int parseGroupsWithDot(int offset) {
-        int ret = 0, sum = 0;
-        /* [groups "."] */
-        ret = parseGroups(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = parseString(offset, ".", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        sum += ret;
-
-        return sum;
-    }
-
-    /** ";" [ws] paramlist */
-    private int parseParams(int offset) {
-        int ret = 0, sum = 0;
-
-        ret = parseString(offset, ";", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        ret = parseParamList(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        sum += ret;
-
-        return sum;
-    }
-
-    /**
-     * paramlist [ws] ";" [ws] param / param
-     */
-    private int parseParamList(int offset) {
-        int ret = 0, sum = 0;
-
-        ret = parseParam(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        int offsetTemp = offset;
-        int sumTemp = sum;
-        for (;;) {
-            ret = removeWs(offsetTemp);
-            offsetTemp += ret;
-            sumTemp += ret;
-
-            ret = parseString(offsetTemp, ";", false);
-            if (ret == PARSE_ERROR) {
-                return sum;
+    
+    protected String getBase64(String firstString) throws IOException, VCardException {
+        StringBuilder builder = new StringBuilder();
+        builder.append(firstString);
+        
+        while (true) {
+            String line = getLine();
+            if (line == null) {
+                throw new VCardException(
+                        "File ended during parsing BASE64 binary");
             }
-            offsetTemp += ret;
-            sumTemp += ret;
-
-            ret = removeWs(offsetTemp);
-            offsetTemp += ret;
-            sumTemp += ret;
-
-            ret = parseParam(offsetTemp);
-            if (ret == PARSE_ERROR) {
+            if (line.length() == 0) {
                 break;
             }
-            offsetTemp += ret;
-            sumTemp += ret;
-
-            // offset = offsetTemp;
-            sum = sumTemp;
+            builder.append(line);
         }
-        return sum;
+        
+        return builder.toString();
     }
-
+    
     /**
-     * param0 / param1 / param2 / param3 / param4 / param5 / knowntype<BR>
-     * TYPE / VALUE / ENDCODING / CHARSET / LANGUAGE ...
+     * Mainly for "ADR", "ORG", and "N"
+     * We do not care the number of strnosemi here.
+     * 
+     * addressparts = 0*6(strnosemi ";") strnosemi
+     *              ; PO Box, Extended Addr, Street, Locality, Region,
+     *                Postal Code, Country Name
+     * orgparts     = *(strnosemi ";") strnosemi
+     *              ; First is Organization Name,
+     *                remainder are Organization Units.
+     * nameparts    = 0*4(strnosemi ";") strnosemi
+     *              ; Family, Given, Middle, Prefix, Suffix.
+     *              ; Example:Public;John;Q.;Reverend Dr.;III, Esq.
+     * strnosemi    = *(*nonsemi ("\;" / "\" CRLF)) *nonsemi
+     *              ; To include a semicolon in this string, it must be escaped
+     *              ; with a "\" character.
+     *              
+     * We are not sure whether we should add "\" CRLF to each value.
+     * For now, we exclude them.               
      */
-    private int parseParam(int offset) {
-        int ret = 0, sum = 0;
-
-        ret = parseParam0(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
+    protected void handleMultiplePropertyValue(
+            String propertyName, String propertyValue) throws IOException, VCardException {
+        // vCard 2.1 does not allow QUOTED-PRINTABLE here, but some data have it.
+        if (mEncoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
+            propertyValue = getQuotedPrintable(propertyValue);
         }
-
-        ret = parseParam1(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
-        }
-
-        ret = parseParam2(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
-        }
-
-        ret = parseParam3(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
-        }
-
-        ret = parseParam4(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
-        }
-
-        ret = parseParam5(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
-        }
-
-        int start = offset;
-        ret = parseKnownType(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamType(null);
-            mBuilder.propertyParamValue(mBuffer.substring(start, offset));
-        }
-
-        return sum;
-    }
-
-    /** "TYPE" [ws] "=" [ws] ptypeval */
-    private int parseParam0(int offset) {
-        int ret = 0, sum = 0, start = offset;
-
-        ret = parseString(offset, "TYPE", true);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamType(mBuffer.substring(start, offset));
-        }
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        ret = parseString(offset, "=", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        start = offset;
-        ret = parsePTypeVal(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamValue(mBuffer.substring(start, offset));
-        }
-
-        return sum;
-
-    }
-
-    /** "VALUE" [ws] "=" [ws] pvalueval */
-    private int parseParam1(int offset) {
-        int ret = 0, sum = 0, start = offset;
-
-        ret = parseString(offset, "VALUE", true);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamType(mBuffer.substring(start, offset));
-        }
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        ret = parseString(offset, "=", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        start = offset;
-        ret = parsePValueVal(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamValue(mBuffer.substring(start, offset));
-        }
-
-        return sum;
-    }
-
-    /** "ENCODING" [ws] "=" [ws] pencodingval */
-    private int parseParam2(int offset) {
-        int ret = 0, sum = 0, start = offset;
-
-        ret = parseString(offset, "ENCODING", true);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamType(mBuffer.substring(start, offset));
-        }
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        ret = parseString(offset, "=", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        start = offset;
-        ret = parsePEncodingVal(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamValue(mBuffer.substring(start, offset));
-        }
-
-        return sum;
-
-    }
-
-    /** "CHARSET" [ws] "=" [ws] charsetval */
-    private int parseParam3(int offset) {
-        int ret = 0, sum = 0, start = offset;
-
-        ret = parseString(offset, "CHARSET", true);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamType(mBuffer.substring(start, offset));
-        }
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        ret = parseString(offset, "=", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        start = offset;
-        ret = parseCharsetVal(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamValue(mBuffer.substring(start, offset));
-        }
-
-        return sum;
-    }
-
-    /** "LANGUAGE" [ws] "=" [ws] langval */
-    private int parseParam4(int offset) {
-        int ret = 0, sum = 0, start = offset;
-
-        ret = parseString(offset, "LANGUAGE", true);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamType(mBuffer.substring(start, offset));
-        }
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        ret = parseString(offset, "=", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        start = offset;
-        ret = parseLangVal(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamValue(mBuffer.substring(start, offset));
-        }
-
-        return sum;
-
-    }
-
-    /** "X-" word [ws] "=" [ws] word */
-    private int parseParam5(int offset) {
-        int ret = 0, sum = 0, start = offset;
-
-        ret = parseXWord(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamType(mBuffer.substring(start, offset));
-        }
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        ret = parseString(offset, "=", false);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        ret = removeWs(offset);
-        offset += ret;
-        sum += ret;
-
-        start = offset;
-        ret = parseWord(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-        if (mBuilder != null) {
-            mBuilder.propertyParamValue(mBuffer.substring(start, offset));
-        }
-
-        return sum;
-    }
-
-    /**
-     * knowntype: "DOM" / "INTL" / ...
-     */
-    private int parseKnownType(int offset) {
-        String word = getWord(offset);
-
-        if (mKnownTypeSet.contains(word.toUpperCase())) {
-            return word.length();
-        }
-        return PARSE_ERROR;
-    }
-
-    /** knowntype / "X-" word */
-    private int parsePTypeVal(int offset) {
-        int ret = 0, sum = 0;
-
-        ret = parseKnownType(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
-        }
-
-        ret = parseXWord(offset);
-        if (ret != PARSE_ERROR) {
-            sum += ret;
-            return sum;
-        }
-        sum += ret;
-
-        return sum;
-    }
-
-    /** "LOGO" /.../ XWord, case insensitive */
-    private int parseName(int offset) {
-        int ret = 0;
-        ret = parseXWord(offset);
-        if (ret != PARSE_ERROR) {
-            return ret;
-        }
-        String word = getWord(offset).toUpperCase();
-        if (mName.contains(word)) {
-            return word.length();
-        }
-        return PARSE_ERROR;
-    }
-
-    /** groups "." word / word */
-    private int parseGroups(int offset) {
-        int ret = 0, sum = 0;
-
-        ret = parseWord(offset);
-        if (ret == PARSE_ERROR) {
-            return PARSE_ERROR;
-        }
-        offset += ret;
-        sum += ret;
-
-        for (;;) {
-            ret = parseString(offset, ".", false);
-            if (ret == PARSE_ERROR) {
-                break;
+        
+        if (propertyValue.endsWith("\\")) {
+            StringBuilder builder = new StringBuilder();
+            // builder.append(propertyValue);
+            builder.append(propertyValue.substring(0, propertyValue.length() - 1));
+            try {
+                String line;
+                while (true) {
+                    line = getNonEmptyLine();
+                    // builder.append("\r\n");
+                    // builder.append(line);
+                    if (!line.endsWith("\\")) {
+                        builder.append(line);
+                        break;
+                    } else {
+                        builder.append(line.substring(0, line.length() - 1));
+                    }
+                }
+            } catch (IOException e) {
+                throw new VCardException(
+                        "IOException is throw during reading propertyValue" + e);
             }
-
-            int ret1 = parseWord(offset);
-            if (ret1 == PARSE_ERROR) {
-                break;
-            }
-            offset += ret + ret1;
-            sum += ret + ret1;
+            // Now, propertyValue may contain "\r\n"
+            propertyValue = builder.toString();
         }
-        return sum;
+
+        if (mBuilder != null) {
+            // In String#replaceAll() and Pattern class, "\\\\" means single slash. 
+
+            final String IMPOSSIBLE_STRING = "\0";
+            // First replace two backslashes with impossible strings.
+            propertyValue = propertyValue.replaceAll("\\\\\\\\", IMPOSSIBLE_STRING);
+
+            // Now, split propertyValue with ; whose previous char is not back slash.
+            Pattern pattern = Pattern.compile("(?<!\\\\);");
+            // TODO: limit should be set in accordance with propertyName?
+            String[] strArray = pattern.split(propertyValue, -1); 
+            ArrayList<String> arrayList = new ArrayList<String>();
+            for (String str : strArray) {
+                // Replace impossible strings with original two backslashes
+                arrayList.add(
+                        unescapeText(str.replaceAll(IMPOSSIBLE_STRING, "\\\\\\\\")));
+            }
+            mBuilder.propertyValues(arrayList);
+        }
     }
-
+    
     /**
-     * Translate escape characters("\\", "\;") which define in vcard2.1 spec.
-     * But for fault tolerance, we will translate "\:" and "\,", which isn't
-     * define in vcard2.1 explicitly, as the same behavior as other client.
-     *
-     * @param str:
-     *            the string will be translated.
-     * @return the string which do not contain any escape character in vcard2.1
+     * vCard 2.1 specifies AGENT allows one vcard entry. It is not encoded at all.
      */
-    private String escapeTranslator(String str) {
-        if (null == str)
-            return null;
+    protected void handleAgent(String propertyValue) throws IOException, VCardException {
+        String[] strArray = propertyValue.split(":", 2);
+        if (!(strArray.length == 2 ||
+                strArray[0].trim().equalsIgnoreCase("BEGIN") && 
+                strArray[1].trim().equalsIgnoreCase("VCARD"))) {
+            throw new VCardException("BEGIN:VCARD != \"" + propertyValue + "\"");
+        }
+        parseItems();
+        readEndVCard();
+    }
+    
+    /**
+     * For vCard 3.0.
+     */
+    protected String maybeUnescapeText(String text) {
+        return text;
+    }
+    
+    /**
+     * Convert escaped text into unescaped text.
+     */
+    protected String unescapeText(String text) {
+        // Original vCard 2.1 specification does not allow transformation
+        // "\:" -> ":", "\," -> ",", and "\\" -> "\", but previous implementation of
+        // this class allowed them, so keep it as is.
+        // In String#replaceAll(), "\\\\" means single slash. 
+        return text.replaceAll("\\\\;", ";")
+            .replaceAll("\\\\:", ":")
+            .replaceAll("\\\\,", ",")
+            .replaceAll("\\\\\\\\", "\\\\");
+    }
+    
+    /**
+     * Parse the given stream and constructs VCardDataBuilder object.
+     * Note that vCard 2.1 specification allows "CHARSET" parameter, and some career sets
+     * local encoding to it. For example, Japanese phone career uses Shift_JIS, which
+     * is not formally allowed in vCard specification.
+     * As a result, there is a case where the encoding given here does not do well with
+     * the "CHARSET".
+     * 
+     * In order to avoid such cases, It may be fine to use "ISO-8859-1" as an encoding,
+     * and to encode each localized String afterward.
+     * 
+     * RFC 2426 "recommends" (not forces) to use UTF-8, so it may be OK to use
+     * UTF-8 as an encoding when parsing vCard 3.0. But note that some Japanese
+     * phone uses Shift_JIS as a charset (e.g. W61SH), and another uses
+     * "CHARSET=SHIFT_JIS", which is explicitly prohibited in vCard 3.0 specification
+     * (e.g. W53K). 
+     *      
+     * @param is
+     *            The source to parse.
+     * @param charset
+     *            The charset.
+     * @param builder
+     *            The v builder which used to construct data.
+     * @return Return true for success, otherwise false.
+     * @throws IOException
+     */
+    public boolean parse(InputStream is, String charset, VBuilder builder)
+            throws IOException, VCardException {
+        // TODO: If we really need to allow only CRLF as line break,
+        // we will have to develop our own BufferedReader().
+        mReader = new BufferedReader(new InputStreamReader(is, charset));
+        
+        mBuilder = builder;
 
-        String tmp = str.replace("\\\\", "\n\r\n");
-        tmp = tmp.replace("\\;", ";");
-        tmp = tmp.replace("\\:", ":");
-        tmp = tmp.replace("\\,", ",");
-        tmp = tmp.replace("\n\r\n", "\\");
-        return tmp;
+        if (mBuilder != null) {
+            mBuilder.start();
+        }
+        parseVCardFile();
+        if (mBuilder != null) {
+            mBuilder.end();
+        }
+        return true;
+    }
+    
+    private boolean isLetter(char ch) {
+        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+            return true;
+        }
+        return false;
     }
 }
