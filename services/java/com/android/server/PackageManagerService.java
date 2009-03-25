@@ -1948,7 +1948,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 // The signature has changed, but this package is in the system
                 // image...  let's recover!
-                pkg.mSignatures = pkgSetting.signatures.mSignatures;
+                pkgSetting.signatures.mSignatures = pkg.mSignatures;
                 // However...  if this package is part of a shared user, but it
                 // doesn't match the signature of the shared user, let's fail.
                 // What this means is that you can't change the signatures
