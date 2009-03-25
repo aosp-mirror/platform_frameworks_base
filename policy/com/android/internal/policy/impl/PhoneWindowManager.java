@@ -296,13 +296,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return false;
     }
     
+    /*
+     * We always let the sensor be switched on by default except when
+     * the user has explicitly disabled sensor based rotation or when the
+     * screen is switched off.
+     */
     boolean needSensorRunningLp() {
         if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
             // If the application has explicitly requested to follow the
             // orientation, then we need to turn the sensor or.
             return true;
         }
-        if (mAccelerometerDefault != 0) {
+        if (mAccelerometerDefault == 0) {
             // If the setting for using the sensor by default is enabled, then
             // we will always leave it on.  Note that the user could go to
             // a window that forces an orientation that does not use the
@@ -311,9 +316,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // orientation for a little bit, which can cause orientation
             // changes to lag, so we'd like to keep it always on.  (It will
             // still be turned off when the screen is off.)
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
     
     /*
