@@ -929,6 +929,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     private void sendNotificationLocked(boolean on, int why)
     {
+        if (!on) {
+            mStillNeedSleepNotification = false;
+        }
+
         // Add to the queue.
         int index = 0;
         while (mBroadcastQueue[index] != -1) {
