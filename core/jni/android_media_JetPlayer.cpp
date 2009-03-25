@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-//FIXME: remove log before release
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 #define LOG_TAG "JET_JNI"
 
 
