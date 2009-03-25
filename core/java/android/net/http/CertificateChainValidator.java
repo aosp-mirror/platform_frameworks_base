@@ -43,7 +43,8 @@ class CertificateChainValidator {
     /**
      * The singleton instance of the certificate chain validator
      */
-    private static CertificateChainValidator sInstance;
+    private static final CertificateChainValidator sInstance
+            = new CertificateChainValidator();
 
     /**
      * Default trust manager (used to perform CA certificate validation)
@@ -54,10 +55,6 @@ class CertificateChainValidator {
      * @return The singleton instance of the certificator chain validator
      */
     public static CertificateChainValidator getInstance() {
-        if (sInstance == null) {
-            sInstance = new CertificateChainValidator();
-        }
-
         return sInstance;
     }
 
@@ -159,13 +156,11 @@ class CertificateChainValidator {
         // report back to the user.
         //
         try {
-            synchronized (mDefaultTrustManager) {
-                mDefaultTrustManager.checkServerTrusted(
-                    serverCertificates, "RSA");
+            mDefaultTrustManager.checkServerTrusted(
+                serverCertificates, "RSA");
 
-                // no errors!!!
-                return null;
-            }
+            // no errors!!!
+            return null;
         } catch (CertificateException e) {
             if (HttpLog.LOGV) {
                 HttpLog.v(
@@ -191,10 +186,8 @@ class CertificateChainValidator {
         // check if the last certificate in the chain (root) is trusted
         X509Certificate[] rootCertificateChain = { currCertificate };
         try {
-            synchronized (mDefaultTrustManager) {
-                mDefaultTrustManager.checkServerTrusted(
-                    rootCertificateChain, "RSA");
-            }
+            mDefaultTrustManager.checkServerTrusted(
+                rootCertificateChain, "RSA");
         } catch (CertificateExpiredException e) {
             String errorMessage = e.getMessage();
             if (errorMessage == null) {

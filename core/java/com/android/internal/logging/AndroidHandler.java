@@ -151,7 +151,7 @@ public class AndroidHandler extends Handler {
             Log.e("AndroidHandler", "Error logging message.", e);
         }
     }
-    
+
     /**
      * Converts a {@link java.util.logging.Logger} logging level into an Android one.
      * 
@@ -159,20 +159,16 @@ public class AndroidHandler extends Handler {
      * 
      * @return The resulting Android logging level. 
      */
-    static int getAndroidLevel(Level level)
-    {
+    static int getAndroidLevel(Level level) {
         int value = level.intValue();
-        
-        if (value >= Level.SEVERE.intValue()) {
+        if (value >= 1000) { // SEVERE
             return Log.ERROR;
-        } else if (value >= Level.WARNING.intValue()) {
+        } else if (value >= 900) { // WARNING
             return Log.WARN;
-        } else if (value >= Level.INFO.intValue()) {
+        } else if (value >= 800) { // INFO
             return Log.INFO;
-        } else if (value >= Level.CONFIG.intValue()) {
+        } else {
             return Log.DEBUG;
-        }  else {
-            return Log.VERBOSE;
         }
     }
     

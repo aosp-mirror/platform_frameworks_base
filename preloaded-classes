@@ -241,6 +241,7 @@ android.net.http.AndroidHttpClient$1
 android.net.http.AndroidHttpClient$2
 android.net.http.AndroidHttpClient$CurlLogger
 android.net.http.DomainNameChecker
+android.net.http.CertificateChainValidator
 android.net.http.EventHandler
 android.net.http.HttpsConnection
 android.net.http.RequestQueue
