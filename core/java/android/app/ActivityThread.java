@@ -3487,9 +3487,11 @@ public final class ActivityThread {
             callbacks.get(i).onLowMemory();
         }
 
-        // Ask SQLite to free up as much memory as it can, mostly from it's page caches
-        int sqliteReleased = SQLiteDatabase.releaseMemory();
-        EventLog.writeEvent(SQLITE_MEM_RELEASED_EVENT_LOG_TAG, sqliteReleased);
+        // Ask SQLite to free up as much memory as it can, mostly from its page caches.
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            int sqliteReleased = SQLiteDatabase.releaseMemory();
+            EventLog.writeEvent(SQLITE_MEM_RELEASED_EVENT_LOG_TAG, sqliteReleased);
+        }
 
         BinderInternal.forceGc("mem");
     }
