@@ -588,6 +588,7 @@ class NotificationManagerService extends INotificationManager.Stub
                     long identity = Binder.clearCallingIdentity();
                     try {
                         r.statusBarKey = mStatusBarService.addIcon(icon, n);
+                        mHardware.pulseBreathingLight();
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);

@@ -21,8 +21,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.os.Hardware;
 import android.os.IHardwareService;
+import android.os.Message;
 import android.os.Power;
 import android.os.PowerManager;
 import android.os.Process;
@@ -44,6 +46,9 @@ public class HardwareService extends IHardwareService.Stub {
 
     static final int LIGHT_FLASH_NONE = 0;
     static final int LIGHT_FLASH_TIMED = 1;
+
+    private boolean mAttentionLightOn;
+    private boolean mPulsing;
 
     HardwareService(Context context) {
         // Reset the hardware to a default state, in case this is a runtime
@@ -217,9 +222,47 @@ public class HardwareService extends IHardwareService.Stub {
 
     public void setAttentionLight(boolean on) {
         // Not worthy of a permission.  We shouldn't have a flashlight permission.
-        setLight_native(mNativePointer, LIGHT_ID_ATTENTION, on ? 0xffffffff : 0,
-                LIGHT_FLASH_NONE, 0, 0);
+        synchronized (this) {
+            mAttentionLightOn = on;
+            mPulsing = false;
+            setLight_native(mNativePointer, LIGHT_ID_ATTENTION, on ? 0xffffffff : 0,
+                    LIGHT_FLASH_NONE, 0, 0);
+        }
     }
+
+    public void pulseBreathingLight() {
+        synchronized (this) {
+            // HACK: Added at the last minute of cupcake -- design this better;
+            // Don't reuse the attention light -- make another one.
+            if (false) {
+                Log.d(TAG, "pulseBreathingLight mAttentionLightOn=" + mAttentionLightOn
+                        + " mPulsing=" + mPulsing);
+            }
+            if (!mAttentionLightOn && !mPulsing) {
+                mPulsing = true;
+                setLight_native(mNativePointer, LIGHT_ID_ATTENTION, 0xff101010,
+                        LIGHT_FLASH_NONE, 0, 0);
+                mH.sendMessageDelayed(Message.obtain(mH, 1), 3000);
+            }
+        }
+    }
+
+    private Handler mH = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            synchronized (this) {
+                if (false) {
+                    Log.d(TAG, "pulse cleanup handler firing mPulsing=" + mPulsing);
+                }
+                if (mPulsing) {
+                    mPulsing = false;
+                    setLight_native(mNativePointer, LIGHT_ID_ATTENTION,
+                            mAttentionLightOn ? 0xffffffff : 0,
+                            LIGHT_FLASH_NONE, 0, 0);
+                }
+            }
+        }
+    };
 
     private void doCancelVibrate() {
         synchronized (this) {
