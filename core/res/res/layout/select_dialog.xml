@@ -23,7 +23,8 @@
     This layout file is inflated and used as the ListView to display the items.
     Assign an ID so its state will be saved/restored.
 -->
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+<view class="com.android.internal.app.AlertController$RecycleListView"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+android:id/select_dialog_listview"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
