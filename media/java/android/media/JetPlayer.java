@@ -63,6 +63,12 @@ public class JetPlayer
     private static final int JET_EVENT_CHAN_SHIFT  = 14; // shift to get MIDI channel to bit 0
     private static final int JET_EVENT_TRACK_SHIFT = 18; // shift to get track ID to bit 0
     private static final int JET_EVENT_SEG_SHIFT   = 24; // shift to get segment ID to bit 0
+    
+    // to keep in sync with values used in external/sonivox/arm-wt-22k/Android.mk
+    // Jet rendering audio parameters
+    private static final int JET_OUTPUT_RATE = 22050; // _SAMPLE_RATE_22050 in Android.mk
+    private static final int JET_OUTPUT_CHANNEL_CONFIG =
+            AudioFormat.CHANNEL_CONFIGURATION_STEREO; // NUM_OUTPUT_CHANNELS=2 in Android.mk
 
     
     //--------------------------------------------
@@ -102,8 +108,9 @@ public class JetPlayer
     // Constructor, finalize
     //------------------------
     public static JetPlayer getJetPlayer() {
-        if (singletonRef == null)
+        if (singletonRef == null) {
             singletonRef = new JetPlayer();
+        }
         return singletonRef;
     }
     
@@ -121,10 +128,19 @@ public class JetPlayer
         if ((mInitializationLooper = Looper.myLooper()) == null) {
             mInitializationLooper = Looper.getMainLooper();
         }
-                
-        native_setup(new WeakReference<JetPlayer>(this),
-                JetPlayer.getMaxTracks(), 
-                1200); //TODO parametrize this (?)
+        
+        int buffSizeInBytes = AudioTrack.getMinBufferSize(JET_OUTPUT_RATE,
+                JET_OUTPUT_CHANNEL_CONFIG, AudioFormat.ENCODING_PCM_16BIT);
+        
+        if ((buffSizeInBytes != AudioTrack.ERROR) 
+                && (buffSizeInBytes != AudioTrack.ERROR_BAD_VALUE)) {
+                            
+            native_setup(new WeakReference<JetPlayer>(this),
+                    JetPlayer.getMaxTracks(),
+                    // bytes to frame conversion: sample format is ENCODING_PCM_16BIT, 2 channels
+                    // 1200 == minimum buffer size in frames on generation 1 hardware
+                    Math.max(1200, buffSizeInBytes / 4));
+        }
     }
     
     
