@@ -30,6 +30,7 @@ import android.telephony.gsm.SmsMessage;
 import android.text.TextUtils;
 import android.text.util.Regex;
 import android.util.Config;
+import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -1103,18 +1104,22 @@ public final class Telephony {
                 uriBuilder.appendQueryParameter("recipient", recipient);
             }
 
+            Uri uri = uriBuilder.build();
             Cursor cursor = SqliteWrapper.query(context, context.getContentResolver(),
-                    uriBuilder.build(), ID_PROJECTION, null, null, null);
+                    uri, ID_PROJECTION, null, null, null);
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
                         return cursor.getLong(0);
+                    } else {
+                        Log.e(TAG, "getOrCreateThreadId returned no rows!");
                     }
                 } finally {
                     cursor.close();
                 }
             }
 
+            Log.e(TAG, "getOrCreateThreadId failed with uri " + uri.toString());
             throw new IllegalArgumentException("Unable to find or allocate a thread ID.");
         }
     }
