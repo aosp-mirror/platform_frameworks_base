@@ -188,7 +188,7 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 public final class InputMethodManager {
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
     static final String TAG = "InputMethodManager";
 
     static final Object mInstanceSync = new Object();
