@@ -33,7 +33,6 @@ import android.util.Config;
 import android.util.Log;
 import android.util.EventLog;
 import android.util.SparseArray;
-import android.util.DisplayMetrics;
 import android.view.View.MeasureSpec;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -128,6 +127,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mWidth;
     int mHeight;
     Rect mDirty; // will be a graphics.Region soon
+    boolean mIsAnimating;
 
     final View.AttachInfo mAttachInfo;
 
@@ -1183,7 +1183,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         try {
-            if (!dirty.isEmpty()) {
+            if (!dirty.isEmpty() || mIsAnimating) {
                 long startTime;
 
                 if (DEBUG_ORIENTATION || DEBUG_DRAW) {
@@ -1210,6 +1210,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
 
                 dirty.setEmpty();
+                mIsAnimating = false;
                 mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 canvas.translate(0, -yoff);
                 mView.mPrivateFlags |= View.DRAWN;                    

@@ -2327,8 +2327,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
     
             do {
-                if (drawAnimation && parent instanceof View) {
-                    ((View) parent).mPrivateFlags |= DRAW_ANIMATION;
+                if (drawAnimation) {
+                    if (parent instanceof View) {
+                        ((View) parent).mPrivateFlags |= DRAW_ANIMATION;
+                    } else if (parent instanceof ViewRoot) {
+                        ((ViewRoot) parent).mIsAnimating = true;
+                    }
                 }
                 parent = parent.invalidateChildInParent(location, dirty);
             } while (parent != null);
