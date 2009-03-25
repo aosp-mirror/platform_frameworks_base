@@ -423,7 +423,6 @@ public class AudioTrack
     }
     
     /**
-     * @hide
      * Returns the current playback rate in Hz. Note that this rate may differ from one set using
      * {@link #setPlaybackRate(int)} as the value effectively set is implementation-dependent.
      */
@@ -522,7 +521,6 @@ public class AudioTrack
     }
     
     /**
-     * {@hide}
      * Returns the minimum buffer size required for the successful creation of an AudioTrack
      * object to be created in the {@link #MODE_STREAM} mode.
      * @param sampleRateInHz the sample rate expressed in Hertz.
