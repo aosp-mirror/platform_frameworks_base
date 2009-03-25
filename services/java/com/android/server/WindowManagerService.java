@@ -390,6 +390,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
     final Rect mTempRect = new Rect();
     
+    final Configuration mTempConfiguration = new Configuration();
+    
     public static WindowManagerService main(Context context,
             PowerManagerService pm, boolean haveInputMethods) {
         WMThread thr = new WMThread(context, pm, haveInputMethods);
@@ -2174,16 +2176,19 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                                     ActivityInfo.CONFIG_ORIENTATION);
                         }
                     }
-                    return computeNewConfiguration();
+                    return computeNewConfigurationLocked();
                 }
             }
 
             // No obvious action we need to take, but if our current
             // state mismatches the activity maanager's, update it
             if (appConfig != null) {
-                Configuration wmConfig = computeNewConfiguration();
-                if (wmConfig.diff(appConfig) != 0) {
-                    return wmConfig;
+                mTempConfiguration.setToDefaults();
+                if (computeNewConfigurationLocked(mTempConfiguration)) {
+                    if (appConfig.diff(mTempConfiguration) != 0) {
+                        Log.i(TAG, "Config changed: " + mTempConfiguration);
+                        return new Configuration(mTempConfiguration);
+                    }
                 }
             }
         } finally {
@@ -3628,38 +3633,49 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     
     public Configuration computeNewConfiguration() {
         synchronized (mWindowMap) {
-            if (mDisplay == null) {
-                return null;
-            }
-            Configuration config = new Configuration();
-            mQueue.getInputConfiguration(config);
-            final int dw = mDisplay.getWidth();
-            final int dh = mDisplay.getHeight();
-            int orientation = Configuration.ORIENTATION_SQUARE;
-            if (dw < dh) {
-                orientation = Configuration.ORIENTATION_PORTRAIT;
-            } else if (dw > dh) {
-                orientation = Configuration.ORIENTATION_LANDSCAPE;
-            }
-            config.orientation = orientation;
-            config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
-            config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
-            mPolicy.adjustConfigurationLw(config);
-            Log.i(TAG, "Input configuration changed: " + config);
-            long now = SystemClock.uptimeMillis();
-            //Log.i(TAG, "Config changing, gc pending: " + mFreezeGcPending + ", now " + now);
-            if (mFreezeGcPending != 0) {
-                if (now > (mFreezeGcPending+1000)) {
-                    //Log.i(TAG, "Gc!  " + now + " > " + (mFreezeGcPending+1000));
-                    mH.removeMessages(H.FORCE_GC);
-                    Runtime.getRuntime().gc();
-                    mFreezeGcPending = now;
-                }
-            } else {
+            return computeNewConfigurationLocked();
+        }
+    }
+    
+    Configuration computeNewConfigurationLocked() {
+        Configuration config = new Configuration();
+        if (!computeNewConfigurationLocked(config)) {
+            return null;
+        }
+        Log.i(TAG, "Config changed: " + config);
+        long now = SystemClock.uptimeMillis();
+        //Log.i(TAG, "Config changing, gc pending: " + mFreezeGcPending + ", now " + now);
+        if (mFreezeGcPending != 0) {
+            if (now > (mFreezeGcPending+1000)) {
+                //Log.i(TAG, "Gc!  " + now + " > " + (mFreezeGcPending+1000));
+                mH.removeMessages(H.FORCE_GC);
+                Runtime.getRuntime().gc();
                 mFreezeGcPending = now;
             }
-            return config;
+        } else {
+            mFreezeGcPending = now;
         }
+        return config;
+    }
+    
+    boolean computeNewConfigurationLocked(Configuration config) {
+        if (mDisplay == null) {
+            return false;
+        }
+        mQueue.getInputConfiguration(config);
+        final int dw = mDisplay.getWidth();
+        final int dh = mDisplay.getHeight();
+        int orientation = Configuration.ORIENTATION_SQUARE;
+        if (dw < dh) {
+            orientation = Configuration.ORIENTATION_PORTRAIT;
+        } else if (dw > dh) {
+            orientation = Configuration.ORIENTATION_LANDSCAPE;
+        }
+        config.orientation = orientation;
+        config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
+        config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
+        mPolicy.adjustConfigurationLw(config);
+        return true;
     }
     
     // -------------------------------------------------------------
