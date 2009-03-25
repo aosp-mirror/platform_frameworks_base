@@ -85,7 +85,7 @@
                 android:text="@android:string/lockscreen_emergency_call"
                 android:textSize="14sp"
                 android:drawableLeft="@drawable/ic_emergency"
-                android:drawablePadding="3dip"
+                android:drawablePadding="8dip"
                 />
 
         </RelativeLayout>
@@ -108,7 +108,7 @@
                 android:text="@android:string/lockscreen_emergency_call"
                 android:textSize="14sp"
                 android:drawableLeft="@drawable/ic_emergency"
-                android:drawablePadding="3dip"
+                android:drawablePadding="8dip"
                 />
             <Button android:id="@+id/forgotPattern"
                 android:layout_width="0dip"

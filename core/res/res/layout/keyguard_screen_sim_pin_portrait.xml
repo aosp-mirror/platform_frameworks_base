@@ -76,6 +76,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/topDisplayGroup"
+        android:layout_marginTop="10dip"
         android:orientation="vertical"
         >
 
@@ -249,7 +250,7 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:drawableLeft="@android:drawable/ic_emergency"
-        android:drawablePadding="3dip"
+        android:drawablePadding="8dip"
         android:text="@android:string/lockscreen_emergency_call"
         />
 
