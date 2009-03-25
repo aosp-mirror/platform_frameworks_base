@@ -22,7 +22,9 @@ import android.media.AudioManager;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Gravity;
 import android.widget.FrameLayout;
+import android.util.AttributeSet;
 
 /**
  * Base class for keyguard views.  {@link #reset} is where you should
@@ -41,6 +43,13 @@ public abstract class KeyguardViewBase extends FrameLayout {
 
     public KeyguardViewBase(Context context) {
         super(context);
+
+        // drop shadow below status bar in keyguard too
+        mForegroundInPadding = false;
+        setForegroundGravity(Gravity.FILL_HORIZONTAL | Gravity.TOP);
+        setForeground(
+                context.getResources().getDrawable(
+                        com.android.internal.R.drawable.title_bar_shadow));
     }
 
     // used to inject callback
