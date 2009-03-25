@@ -113,13 +113,11 @@
     <string name="global_action_toggle_silent_mode">"マナーモード"</string>
     <string name="global_action_silent_mode_on_status">"サウンドOFF"</string>
     <string name="global_action_silent_mode_off_status">"サウンドON"</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
+    <string name="global_actions_toggle_airplane_mode">"機内モード"</string>
     <string name="global_actions_airplane_mode_on_status">"機内モードON"</string>
     <string name="global_actions_airplane_mode_off_status">"機内モードOFF"</string>
     <string name="safeMode">"セーフモード"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
+    <string name="android_system_label">"Androidシステム"</string>
     <string name="permgrouplab_costMoney">"料金の発生するサービス"</string>
     <string name="permgroupdesc_costMoney">"料金の発生する操作をアプリケーションに許可します。"</string>
     <string name="permgrouplab_messages">"送受信したメッセージ"</string>
@@ -294,10 +292,8 @@
     <string name="permdesc_locationUpdates">"無線通信からの位置更新通知を有効/無効にすることを許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_checkinProperties">"チェックインプロパティへのアクセス"</string>
     <string name="permdesc_checkinProperties">"チェックインサービスがアップロードしたプロパティへの読み書きを許可します。通常のアプリケーションでは使用しません。"</string>
-    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
-    <skip />
+    <string name="permlab_bindGadget">"ウィジェットの選択"</string>
+    <string name="permdesc_bindGadget">"どのアプリケーションがどのウィジェットを使用できるかシステムに指定することをこのアプリケーションに許可します。これにより、アプリケーション間で個人データにアクセスできるようになります。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_modifyPhoneState">"端末ステータスの変更"</string>
     <string name="permdesc_modifyPhoneState">"端末の電話機能のコントロールをアプリケーションに許可します。アプリケーションは、ネットワークの切り替え、携帯電話の無線通信のオン/オフなどを通知せずに行うことができます。"</string>
     <string name="permlab_readPhoneState">"端末ステータスの読み取り"</string>
@@ -397,7 +393,7 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"PINコードを入力"</string>
     <string name="keyguard_password_wrong_pin_code">"PINコードが正しくありません。"</string>
-    <string name="keyguard_label_text">"ロックを解除するにはMENU、0キーの順に押します。"</string>
+    <string name="keyguard_label_text">"MENU、0キーでロック解除"</string>
     <string name="emergency_call_dialog_number_for_display">"緊急通報番号"</string>
     <string name="lockscreen_carrier_default">"(通信サービスなし)"</string>
     <string name="lockscreen_screen_locked">"画面ロック中"</string>
@@ -407,8 +403,7 @@
     <string name="lockscreen_emergency_call">"緊急通報"</string>
     <string name="lockscreen_pattern_correct">"一致しました"</string>
     <string name="lockscreen_pattern_wrong">"やり直してください"</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_plugged_in">"充電中（<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>）"</string>
     <string name="lockscreen_low_battery">"充電してください。"</string>
     <string name="lockscreen_missing_sim_message_short">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message">"SIMカードが挿入されていません"</string>
@@ -424,8 +419,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g>秒後にやり直してください。"</string>
     <string name="lockscreen_forgot_pattern_button_text">"パターンを忘れた場合"</string>
     <string name="lockscreen_glogin_too_many_attempts">"パターンのエラーが多すぎます"</string>
-    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
-    <skip />
+    <string name="lockscreen_glogin_instructions">"Googleアカウントでログインしてロック解除"</string>
     <string name="lockscreen_glogin_username_hint">"ユーザー名 (メール)"</string>
     <string name="lockscreen_glogin_password_hint">"パスワード"</string>
     <string name="lockscreen_glogin_submit_button">"ログイン"</string>
@@ -433,16 +427,13 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
-    <skip />
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"通知を消去"</string>
     <string name="status_bar_no_notifications_title">"通知なし"</string>
     <string name="status_bar_ongoing_events_title">"操作中"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
-    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
-    <skip />
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"充電中..."</string>
     <string name="battery_low_title">"充電してください"</string>
     <string name="battery_low_subtitle">"電池が残り少なくなっています:"</string>
@@ -564,8 +555,7 @@
     <string name="monthly">"毎月"</string>
     <string name="yearly">"毎年"</string>
     <string name="VideoView_error_title">"動画を再生できません"</string>
-    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
-    <skip />
+    <string name="VideoView_error_text_invalid_progressive_playback">"この動画はご使用の端末でストリーミングできません。"</string>
     <string name="VideoView_error_text_unknown">"この動画は再生できません。"</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"AM"</string>
@@ -592,13 +582,11 @@
     <string name="Noon">"正午"</string>
     <string name="midnight">"午前0時"</string>
     <string name="Midnight">"午前0時"</string>
-    <!-- no translation found for month_day (3693060561170538204) -->
-    <skip />
+    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
-    <skip />
+    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g>月"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%B</xliff:g>/<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
@@ -626,9 +614,8 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%b</xliff:g>/<xliff:g id="DAY">%-d</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
-    <skip />
-    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
+    <string name="abbrev_month_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%b</xliff:g>月"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g>/<xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"日曜日"</string>
@@ -811,22 +798,14 @@
     <string name="activity_list_empty">"一致するアクティビティが見つかりません"</string>
     <string name="permlab_pkgUsageStats">"コンポーネント使用状況に関する統計情報の更新"</string>
     <string name="permdesc_pkgUsageStats">"収集されたコンポーネント使用状況に関する統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
-    <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_done (8971516117910934605) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short">"ダブルタップでズームします"</string>
+    <string name="gadget_host_error_inflating">"ウィジェットの展開エラー"</string>
+    <string name="ime_action_go">"移動"</string>
+    <string name="ime_action_search">"検索"</string>
+    <string name="ime_action_send">"送信"</string>
+    <string name="ime_action_next">"次へ"</string>
+    <string name="ime_action_done">"完了"</string>
+    <string name="ime_action_default">"実行"</string>
     <!-- no translation found for dial_number_using (5789176425167573586) -->
     <skip />
     <!-- no translation found for create_contact_using (4947405226788104538) -->
