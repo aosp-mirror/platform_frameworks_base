@@ -1097,6 +1097,16 @@ public abstract class Context {
     public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.accounts.AccountManager} for receiving intents at a
+     * time of your choosing.
+     * TODO STOPSHIP perform a final review of the the account apis before shipping
+     *
+     * @see #getSystemService
+     * @see android.accounts.AccountManager
+     */
+    public static final String ACCOUNT_SERVICE = "account";
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.ActivityManager} for interacting with the global
      * system state.
      *

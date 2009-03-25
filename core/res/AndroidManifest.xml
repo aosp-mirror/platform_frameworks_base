@@ -25,7 +25,7 @@
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that can be used to make the user spend money
          without their direct involvement.  For example, this is the group
          for permissions that allow you to directly place phone calls,
@@ -54,7 +54,7 @@
     <!-- Permissions for accessing messages -->
     <!-- ================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that allow an application to send messages
          on behalf of the user or intercept messages being received by the
          user.  This is primarily intended for SMS/MMS messaging, such as
@@ -104,7 +104,7 @@
     <!-- Permissions for accessing personal info (contacts and calendar) -->
     <!-- =============================================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that provide access to the user's private data,
          such as contacts, calendar events, e-mail messages, etc.  This includes
          both reading and writing of this data (which should generally be
@@ -158,8 +158,8 @@
         android:description="@string/permdesc_writeCalendar" />
 
     <!-- Allows an application to read the user dictionary. This should
-         really only be required by an IME, or a dictionary editor like 
-         the Settings app. 
+         really only be required by an IME, or a dictionary editor like
+         the Settings app.
          @hide Pending API council approval -->
     <permission android:name="android.permission.READ_USER_DICTIONARY"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
@@ -179,7 +179,7 @@
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->
     <eat-comment />
-    
+
     <!-- Used for permissions that allow access to the user's current
          location. -->
     <permission-group android:name="android.permission-group.LOCATION"
@@ -216,7 +216,7 @@
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->
     <eat-comment />
-    
+
     <!-- Used for permissions that provide access to networking services.  The
          main permission here is internet access, but this is also an
          appropriate group for accessing or modifying any network configuration
@@ -257,7 +257,7 @@
     <!-- Permissions for accessing accounts -->
     <!-- ================================== -->
     <eat-comment />
-    
+
     <!-- Permissions for direct access to Google accounts.
          Note that while right now this is only used for Google accounts,
          we expect in the future to have a more general account management
@@ -278,7 +278,7 @@
     <!-- Permissions for accessing hardware -->
     <!-- ================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that provide direct access to the hardware on
          the device.  This includes audio, the camera, vibrator, etc. -->
     <permission-group android:name="android.permission-group.HARDWARE_CONTROLS"
@@ -331,7 +331,7 @@
     <!-- Permissions associated with telephony state -->
     <!-- =========================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that are associated with accessing and modifyign
          telephony state: intercepting outgoing calls, reading
          and modifying the phone state.  Note that
@@ -368,7 +368,7 @@
     <!-- Permissions for low-level system interaction -->
     <!-- ============================================ -->
     <eat-comment />
-    
+
     <!-- Group of permissions that are related to system APIs.  Many
          of these are not permissions the user will be expected to understand,
          and such permissions should generally be marked as "normal" protection
@@ -592,7 +592,7 @@
                 android:description="@string/permdesc_writeApnSettings"
                 android:label="@string/permlab_writeApnSettings" />
 
-    <!-- Allows an application to allow access the subscribed feeds 
+    <!-- Allows an application to allow access the subscribed feeds
          ContentProvider. -->
     <permission android:name="android.permission.SUBSCRIBED_FEEDS_READ"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
@@ -604,7 +604,7 @@
         android:label="@string/permlab_subscribedFeedsWrite"
         android:description="@string/permdesc_subscribedFeedsWrite"
         android:protectionLevel="dangerous" />
-        
+
     <!-- Allows applications to change network connectivity state -->
     <permission android:name="android.permission.CHANGE_NETWORK_STATE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
@@ -648,7 +648,7 @@
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
     <eat-comment />
-    
+
     <!-- Group of permissions that are related to development features.  These
          are not permissions that should appear in normal applications; they
          protect APIs that are intended only to be used for development

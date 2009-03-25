@@ -88,6 +88,8 @@ import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.WindowManagerImpl;
 import android.view.inputmethod.InputMethodManager;
+import android.accounts.AccountManager;
+import android.accounts.IAccountManager;
 
 import com.android.internal.policy.PolicyManager;
 
@@ -150,6 +152,7 @@ class ApplicationContext extends Context {
     private final static boolean DEBUG_ICONS = false;
 
     private static final Object sSync = new Object();
+    private static AccountManager sAccountManager;
     private static AlarmManager sAlarmManager;
     private static PowerManager sPowerManager;
     private static ConnectivityManager sConnectivityManager;
@@ -881,6 +884,8 @@ class ApplicationContext extends Context {
             return getActivityManager();
         } else if (ALARM_SERVICE.equals(name)) {
             return getAlarmManager();
+        } else if (ACCOUNT_SERVICE.equals(name)) {
+            return getAccountManager();
         } else if (POWER_SERVICE.equals(name)) {
             return getPowerManager();
         } else if (CONNECTIVITY_SERVICE.equals(name)) {
@@ -919,6 +924,17 @@ class ApplicationContext extends Context {
         }
 
         return null;
+    }
+
+    private AccountManager getAccountManager() {
+        synchronized (sSync) {
+            if (sAccountManager == null) {
+                IBinder b = ServiceManager.getService(ACCOUNT_SERVICE);
+                IAccountManager service = IAccountManager.Stub.asInterface(b);
+                sAccountManager = new AccountManager(this, service);
+            }
+        }
+        return sAccountManager;
     }
 
     private ActivityManager getActivityManager() {

@@ -52,7 +52,10 @@ LOCAL_SRC_FILES := $(filter-out \
 ##
 ## READ ME: ########################################################
 LOCAL_SRC_FILES += \
-	core/java/android/accounts/IAccountsService.aidl \
+	core/java/android/accounts/IAccountManager.aidl \
+	core/java/android/accounts/IAccountManagerResponse.aidl \
+	core/java/android/accounts/IAccountAuthenticator.aidl \
+	core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IActivityWatcher.aidl \
 	core/java/android/app/IAlarmManager.aidl \
@@ -161,7 +164,10 @@ framework_built := $(LOCAL_BUILT_MODULE)
 # relative to the root of the build tree.
 # ============================================================
 aidl_files := \
-	frameworks/base/core/java/android/accounts/IAccountsService.aidl \
+	frameworks/base/core/java/android/accounts/IAccountManager.aidl \
+	frameworks/base/core/java/android/accounts/IAccountManagerResponse.aidl \
+	frameworks/base/core/java/android/accounts/IAccountAuthenticator.aidl \
+	frameworks/base/core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \

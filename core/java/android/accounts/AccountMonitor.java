@@ -17,16 +17,10 @@
 package android.accounts;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.database.SQLException;
-import android.os.IBinder;
-import android.os.Process;
-import android.os.RemoteException;
-import android.util.Log;
+import android.os.*;
 
 /**
  * A helper class that calls back on the provided
@@ -38,55 +32,15 @@ import android.util.Log;
  * fetch the current list of accounts (that is, when the
  * AccountMonitor is first created, and when the intent is received).
  */
-public class AccountMonitor extends BroadcastReceiver implements ServiceConnection {
+public class AccountMonitor extends BroadcastReceiver {
+    private static final String TAG = "AccountMonitor";
+
     private final Context mContext;
     private final AccountMonitorListener mListener;
     private boolean mClosed = false;
-    private int pending = 0;
 
-    // This thread runs in the background and runs the code to update accounts
-    // in the listener.
-    private class AccountUpdater extends Thread {
-        private IBinder mService;
-
-        public AccountUpdater(IBinder service) {
-            mService = service;
-        }
-
-        @Override
-        public void run() {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            IAccountsService accountsService = IAccountsService.Stub.asInterface(mService);
-            String[] accounts = null;
-            do {
-                try {
-                    accounts = accountsService.getAccounts();
-                } catch (RemoteException e) {
-                    // if the service was killed then the system will restart it and when it does we
-                    // will get another onServiceConnected, at which point we will do a notify.
-                    Log.w("AccountMonitor", "Remote exception when getting accounts", e);
-                    return;
-                }
-
-                synchronized (AccountMonitor.this) {
-                    --pending;
-                    if (pending == 0) {
-                        break;
-                    }
-                }
-            } while (true);
-
-            mContext.unbindService(AccountMonitor.this);
-
-            try {
-                mListener.onAccountsUpdated(accounts);
-            } catch (SQLException e) {
-                // Better luck next time.  If the problem was disk-full,
-                // the STORAGE_OK intent will re-trigger the update.
-                Log.e("AccountMonitor", "Can't update accounts", e);
-            }
-        }
-    }
+    private volatile Looper mServiceLooper;
+    private volatile NotifierHandler mServiceHandler;
 
     /**
      * Initializes the AccountMonitor and initiates a bind to the
@@ -110,8 +64,12 @@ public class AccountMonitor extends BroadcastReceiver implements ServiceConnecti
         intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);  // To recover from disk-full.
         mContext.registerReceiver(this, intentFilter);
 
-        // Send the listener the initial state now.
-        notifyListener();
+        HandlerThread thread = new HandlerThread("AccountMonitorHandlerThread");
+        thread.start();
+        mServiceLooper = thread.getLooper();
+        mServiceHandler = new NotifierHandler(mServiceLooper);
+
+        mServiceHandler.sendEmptyMessage(0);
     }
 
     @Override
@@ -119,45 +77,15 @@ public class AccountMonitor extends BroadcastReceiver implements ServiceConnecti
         notifyListener();
     }
 
-    public void onServiceConnected(ComponentName className, IBinder service) {
-        // Create a background thread to update the accounts.
-        new AccountUpdater(service).start();
-    }
-
-    public void onServiceDisconnected(ComponentName className) {
-    }
-
     private synchronized void notifyListener() {
-        if (pending == 0) {
-            // initiate the bind
-            if (!mContext.bindService(AccountsServiceConstants.SERVICE_INTENT,
-                                      this, Context.BIND_AUTO_CREATE)) {
-                // This is normal if GLS isn't part of this build.
-                Log.w("AccountMonitor",
-                      "Couldn't connect to "  +
-                      AccountsServiceConstants.SERVICE_INTENT +
-                      " (Missing service?)");
-            }
-        } else {
-            // already bound.  bindService will not trigger another
-            // call to onServiceConnected, so instead we make sure
-            // that the existing background thread will call
-            // getAccounts() after this function returns, by
-            // incrementing pending.
-            //
-            // Yes, this else clause contains only a comment.
+        AccountManager accountManager =
+                (AccountManager)mContext.getSystemService(Context.ACCOUNT_SERVICE);
+        Account[] accounts = accountManager.blockingGetAccounts();
+        String[] accountNames = new String[accounts.length];
+        for (int i = 0; i < accounts.length; i++) {
+            accountNames[i] = accounts[i].mName;
         }
-        ++pending;
-    }
-
-    /**
-     * calls close()
-     * @throws Throwable
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
+        mListener.onAccountsUpdated(accountNames);
     }
 
     /**
@@ -169,6 +97,16 @@ public class AccountMonitor extends BroadcastReceiver implements ServiceConnecti
         if (!mClosed) {
             mContext.unregisterReceiver(this);
             mClosed = true;
+        }
+    }
+
+    private final class NotifierHandler extends Handler {
+        public NotifierHandler(Looper looper) {
+            super(looper);
+        }
+
+        public void handleMessage(Message msg) {
+            notifyListener();
         }
     }
 }

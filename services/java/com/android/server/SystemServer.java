@@ -32,12 +32,7 @@ import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.AudioService;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.SystemClock;
-import android.os.SystemProperties;
+import android.os.*;
 import android.provider.Contacts.People;
 import android.provider.Settings;
 import android.server.BluetoothA2dpService;
@@ -45,6 +40,7 @@ import android.server.BluetoothDeviceService;
 import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Log;
+import android.accounts.AccountManagerService;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -116,6 +112,14 @@ class ServerThread extends Thread {
             ActivityManagerService.setSystemProcess();
 
             mContentResolver = context.getContentResolver();
+
+            try {
+                Log.i(TAG, "Starting Account Manager.");
+                ServiceManager.addService(Context.ACCOUNT_SERVICE,
+                        new AccountManagerService(context));
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting Account Manager", e);
+            }
 
             Log.i(TAG, "Starting Content Manager.");
             ContentService.main(context,

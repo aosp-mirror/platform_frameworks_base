@@ -181,6 +181,47 @@ class SyncManager {
                 }
             };
 
+    private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (!mFactoryTest) {
+                AccountMonitorListener listener = new AccountMonitorListener() {
+                    public void onAccountsUpdated(String[] accounts) {
+                        final boolean hadAccountsAlready = mAccounts != null;
+                        // copy the accounts into a new array and change mAccounts to point to it
+                        String[] newAccounts = new String[accounts.length];
+                        System.arraycopy(accounts, 0, newAccounts, 0, accounts.length);
+                        mAccounts = newAccounts;
+
+                        // if a sync is in progress yet it is no longer in the accounts list,
+                        // cancel it
+                        ActiveSyncContext activeSyncContext = mActiveSyncContext;
+                        if (activeSyncContext != null) {
+                            if (!ArrayUtils.contains(newAccounts,
+                                    activeSyncContext.mSyncOperation.account)) {
+                                Log.d(TAG, "canceling sync since the account has been removed");
+                                sendSyncFinishedOrCanceledMessage(activeSyncContext,
+                                        null /* no result since this is a cancel */);
+                            }
+                        }
+
+                        // we must do this since we don't bother scheduling alarms when
+                        // the accounts are not set yet
+                        sendCheckAlarmsMessage();
+
+                        mSyncStorageEngine.doDatabaseCleanup(accounts);
+
+                        if (hadAccountsAlready && mAccounts.length > 0) {
+                            // request a sync so that if the password was changed we will
+                            // retry any sync that failed when it was wrong
+                            startSync(null /* all providers */, null /* no extras */);
+                        }
+                    }
+                };
+                mAccountMonitor = new AccountMonitor(context, listener);
+            }
+        }
+    };
+
     private BroadcastReceiver mConnectivityIntentReceiver =
             new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -241,7 +282,11 @@ class SyncManager {
 
     private static final String SYNCMANAGER_PREFS_FILENAME = "/data/system/syncmanager.prefs";
 
+    private final boolean mFactoryTest;
+
     public SyncManager(Context context, boolean factoryTest) {
+        mFactoryTest = factoryTest;
+
         // Initialize the SyncStorageEngine first, before registering observers
         // and creating threads and so on; it may fail if the disk is full.
         SyncStorageEngine.init(context);
@@ -264,6 +309,9 @@ class SyncManager {
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
+
+        intentFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+        context.registerReceiver(mBootCompletedReceiver, intentFilter);
 
         intentFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
         intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
@@ -288,42 +336,6 @@ class SyncManager {
         mHandleAlarmWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 HANDLE_SYNC_ALARM_WAKE_LOCK);
         mHandleAlarmWakeLock.setReferenceCounted(false);
-
-        if (!factoryTest) {
-            AccountMonitorListener listener = new AccountMonitorListener() {
-                public void onAccountsUpdated(String[] accounts) {
-                    final boolean hadAccountsAlready = mAccounts != null;
-                    // copy the accounts into a new array and change mAccounts to point to it
-                    String[] newAccounts = new String[accounts.length];
-                    System.arraycopy(accounts, 0, newAccounts, 0, accounts.length);
-                    mAccounts = newAccounts;
-
-                    // if a sync is in progress yet it is no longer in the accounts list, cancel it
-                    ActiveSyncContext activeSyncContext = mActiveSyncContext;
-                    if (activeSyncContext != null) {
-                        if (!ArrayUtils.contains(newAccounts,
-                                activeSyncContext.mSyncOperation.account)) {
-                            Log.d(TAG, "canceling sync since the account has been removed");
-                            sendSyncFinishedOrCanceledMessage(activeSyncContext,
-                                    null /* no result since this is a cancel */);
-                        }
-                    }
-
-                    // we must do this since we don't bother scheduling alarms when
-                    // the accounts are not set yet
-                    sendCheckAlarmsMessage();
-
-                    mSyncStorageEngine.doDatabaseCleanup(accounts);
-
-                    if (hadAccountsAlready && mAccounts.length > 0) {
-                        // request a sync so that if the password was changed we will retry any sync
-                        // that failed when it was wrong
-                        startSync(null /* all providers */, null /* no extras */);
-                    }
-                }
-            };
-            mAccountMonitor = new AccountMonitor(context, listener);
-        }
     }
 
     private synchronized void initializeSyncPoll() {
