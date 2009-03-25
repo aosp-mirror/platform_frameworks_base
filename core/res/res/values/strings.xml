@@ -2312,4 +2312,10 @@
     <!-- Long label for a button on a full-screen input method for an unknown action. -->
     <string name="ime_action_default">Execute</string>
     
+    <!-- Strings for search suggestions. These are going here because they are referenced by both 
+         ContactsProvider and GoogleContactsProvider -->
+    <string name="dialNumber">Dial number</string>
+    <string name="createNewContact">New contact</string>
+    <string name="usingNumber">Using <xliff:g id="number">%s</xliff:g></string> 
+    
 </resources>

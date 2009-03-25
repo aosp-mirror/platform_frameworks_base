@@ -830,4 +830,10 @@
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />
+    
+    <!-- Strings for search suggestions. These are going here because they are referenced by both 
+         ContactsProvider and GoogleContactsProvider -->
+    <string name="dialNumber">"Marcar número"</string>
+    <string name="createNewContact">"Contacto nuevo"</string>
+    <string name="usingNumber">"Usar <xliff:g id="NUMBER">%s</xliff:g>"</string>
 </resources>
