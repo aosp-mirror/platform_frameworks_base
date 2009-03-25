@@ -1804,7 +1804,6 @@ status_t GraphicPlane::setOrientation(int orientation)
     if (orientation == ISurfaceComposer::eOrientationDefault) {
         // make sure the default orientation is optimal
         mOrientationTransform.reset();
-        mOrientation = orientation;
         mGlobalTransform = mTransform;
         return NO_ERROR;
     }
@@ -1825,7 +1824,7 @@ status_t GraphicPlane::setOrientation(int orientation)
         GraphicPlane::orientationToTransfrom(orientation, w, h,
                 &mOrientationTransform);
     }
-    mOrientation = orientation;
+    
     mGlobalTransform = mOrientationTransform * mTransform;
     return NO_ERROR;
 }
