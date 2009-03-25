@@ -66,7 +66,7 @@ PRODUCT_COPY_FILES += \
 	$(local_path)/effects/KeypressDelete.ogg:system/media/audio/ui/KeypressDelete.ogg \
 	$(local_path)/effects/KeypressReturn.ogg:system/media/audio/ui/KeypressReturn.ogg \
 	$(local_path)/effects/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
-	$(LOCAL_PATH)/effects/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
+	$(local_path)/effects/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
 	$(local_path)/newwavelabs/CrazyDream.ogg:system/media/audio/ringtones/CrazyDream.ogg \
 	$(local_path)/newwavelabs/DreamTheme.ogg:system/media/audio/ringtones/DreamTheme.ogg \
 	$(local_path)/newwavelabs/Big_Easy.ogg:system/media/audio/ringtones/Big_Easy.ogg \
