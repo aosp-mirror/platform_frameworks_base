@@ -3427,7 +3427,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     private final boolean requestFinishActivityLocked(IBinder token, int resultCode,
             Intent resultData, String reason) {
-        if (localLOGV) Log.v(
+        if (DEBUG_RESULTS) Log.v(
             TAG, "Finishing activity: token=" + token
             + ", result=" + resultCode + ", data=" + resultData);
 
@@ -3490,7 +3490,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // send the result
         HistoryRecord resultTo = r.resultTo;
         if (resultTo != null) {
-            if (DEBUG_RESULTS) Log.v(TAG, "Adding result to " + resultTo);
+            if (DEBUG_RESULTS) Log.v(TAG, "Adding result to " + resultTo
+                    + " who=" + r.resultWho + " req=" + r.requestCode
+                    + " res=" + resultCode + " data=" + resultData);
             if (r.info.applicationInfo.uid > 0) {
                 grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
                         r.packageName, resultData, r);
@@ -3499,6 +3501,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                      resultData);
             r.resultTo = null;
         }
+        else if (DEBUG_RESULTS) Log.v(TAG, "No result destination from " + r);
 
         // Make sure this HistoryRecord is not holding on to other resources,
         // because clients have remote IPC references to this object so we

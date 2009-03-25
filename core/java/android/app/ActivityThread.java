@@ -114,6 +114,7 @@ public final class ActivityThread {
     private static final boolean DEBUG = false;
     private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
     private static final boolean DEBUG_BROADCAST = false;
+    private static final boolean DEBUG_RESULTS = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
@@ -2118,6 +2119,8 @@ public final class ActivityThread {
     public final void sendActivityResult(
             IBinder token, String id, int requestCode,
             int resultCode, Intent data) {
+        if (DEBUG_RESULTS) Log.v(TAG, "sendActivityResult: id=" + id
+                + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
         mAppThread.scheduleSendResult(token, list);
@@ -2993,6 +2996,8 @@ public final class ActivityThread {
                 if (ri.mData != null) {
                     ri.mData.setExtrasClassLoader(r.activity.getClassLoader());
                 }
+                if (DEBUG_RESULTS) Log.v(TAG,
+                        "Delivering result to activity " + r + " : " + ri);
                 r.activity.dispatchActivityResult(ri.mResultWho,
                         ri.mRequestCode, ri.mResultCode, ri.mData);
             } catch (Exception e) {
@@ -3008,7 +3013,7 @@ public final class ActivityThread {
 
     private final void handleSendResult(ResultData res) {
         ActivityRecord r = mActivities.get(res.token);
-        if (localLOGV) Log.v(TAG, "Handling send result to " + r);
+        if (DEBUG_RESULTS) Log.v(TAG, "Handling send result to " + r);
         if (r != null) {
             final boolean resumed = !r.paused;
             if (!r.activity.mFinished && r.activity.mDecor != null
