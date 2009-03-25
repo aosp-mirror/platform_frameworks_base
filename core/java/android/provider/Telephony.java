@@ -233,18 +233,37 @@ public final class Telephony {
          */
         public static boolean moveMessageToFolder(Context context,
                 Uri uri, int folder) {
-            if ((uri == null) || ((folder != MESSAGE_TYPE_INBOX)
-                                  && (folder != MESSAGE_TYPE_OUTBOX)
-                                  && (folder != MESSAGE_TYPE_SENT)
-                                  && (folder != MESSAGE_TYPE_DRAFT)
-                                  && (folder != MESSAGE_TYPE_FAILED)
-                                  && (folder != MESSAGE_TYPE_QUEUED))) {
+            if (uri == null) {
+                return false;
+            }
+            
+            boolean markAsUnread = false;
+            boolean markAsRead = false;
+            switch(folder) {
+            case MESSAGE_TYPE_INBOX:
+            case MESSAGE_TYPE_DRAFT:
+                break;
+            case MESSAGE_TYPE_OUTBOX:
+            case MESSAGE_TYPE_SENT:
+                markAsRead = true;
+                break;
+            case MESSAGE_TYPE_FAILED:
+            case MESSAGE_TYPE_QUEUED:
+                markAsUnread = true;
+                break;
+            default:
                 return false;
             }
 
-            ContentValues values = new ContentValues(1);
+            ContentValues values = new ContentValues(2);
 
             values.put(TYPE, folder);
+            if (markAsUnread) {
+                values.put(READ, Integer.valueOf(0));
+            } else if (markAsRead) {
+                values.put(READ, Integer.valueOf(1));
+            }
+            
             return 1 == SqliteWrapper.update(context, context.getContentResolver(),
                             uri, values, null, null);
         }
