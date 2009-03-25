@@ -62,16 +62,12 @@ private:
 
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
     bool android();
-    bool cylon();
 
     sp<SurfaceComposerClient>       mSession;
     AssetManager mAssets;
-    Texture mLeftTrail;
-    Texture mRightTrail;
-    Texture mBrightSpot;
-    Texture mAndroid[3];
-    int     mWidth;
-    int     mHeight;
+    Texture     mAndroid[2];
+    int         mWidth;
+    int         mHeight;
     EGLDisplay  mDisplay;
     EGLDisplay  mContext;
     EGLDisplay  mSurface;
