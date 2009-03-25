@@ -49,6 +49,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -922,6 +923,20 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
     };
 
+    @Override
+    public void cancel() {
+        // We made sure the IME was displayed, so also make sure it is closed
+        // when we go away.
+        InputMethodManager imm = (InputMethodManager)getContext()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(
+                    getWindow().getDecorView().getWindowToken(), 0);
+        }
+        
+        super.cancel();
+    }
+    
     /**
      * Various ways to launch searches
      */
