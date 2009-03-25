@@ -1693,6 +1693,7 @@ final class DataConnectionTracker extends Handler
 
         if (allApns.isEmpty()) {
             if (DBG) log("No APN found for carrier: " + operator);
+            preferredApn = null;
             notifyNoData(PdpConnection.PdpFailCause.BAD_APN);
         } else {
             preferredApn = getPreferredApn();
@@ -1819,7 +1820,7 @@ final class DataConnectionTracker extends Handler
             cursor.moveToFirst();
             pos = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers._ID));
             for(ApnSetting p:allApns) {
-                if (p.id == pos) {
+                if (p.id == pos && p.canHandleType(mRequestedApnType)) {
                     cursor.close();
                     return p;
                 }
