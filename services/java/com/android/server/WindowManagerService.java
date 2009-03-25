@@ -7799,6 +7799,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             boolean blurring = false;
             boolean dimming = false;
             boolean covered = false;
+            boolean syswin = false;
 
             for (i=N-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
@@ -8058,8 +8059,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         if ((attrFlags&FLAG_KEEP_SCREEN_ON) != 0) {
                             holdScreen = w.mSession;
                         }
-                        if (w.mAttrs.screenBrightness >= 0 && screenBrightness < 0) {
+                        if (!syswin && w.mAttrs.screenBrightness >= 0
+                                && screenBrightness < 0) {
                             screenBrightness = w.mAttrs.screenBrightness;
+                        }
+                        if (attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG
+                                || attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD
+                                || attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_ERROR) {
+                            syswin = true;
                         }
                     }
                     if (w.isFullscreenOpaque(dw, dh)) {
