@@ -416,8 +416,12 @@ status_t MediaPlayer::seekTo_l(int msec)
 
 status_t MediaPlayer::seekTo(int msec)
 {
+    mLockThreadId = getThreadId();
     Mutex::Autolock _l(mLock);
-    return seekTo_l(msec);
+    status_t result = seekTo_l(msec);
+    mLockThreadId = 0;
+
+    return result;
 }
 
 status_t MediaPlayer::reset()
@@ -501,8 +505,9 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     // this will deadlock.
     // 
     // The threadId hack below works around this for the care of prepare
-    // within the same process.
-
+    // and seekTo within the same process.
+    // FIXME: Remember, this is a hack, it's not even a hack that is applied
+    // consistently for all use-cases, this needs to be revisited.
      if (mLockThreadId != getThreadId()) {
         mLock.lock();
         locked = true;
