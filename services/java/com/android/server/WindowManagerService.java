@@ -8551,6 +8551,15 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
     private void startFreezingDisplayLocked() {
         if (mDisplayFrozen) {
+            // Freezing the display also suspends key event delivery, to
+            // keep events from going astray while the display is reconfigured.
+            // If someone has changed orientation again while the screen is
+            // still frozen, the events will continue to be blocked while the
+            // successive orientation change is processed.  To prevent spurious
+            // ANRs, we reset the event dispatch timeout in this case.
+            synchronized (mKeyWaiter) {
+                mKeyWaiter.mWasFrozen = true;
+            }
             return;
         }
         
@@ -8594,10 +8603,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
         Surface.unfreezeDisplay(0);
         
-        // Freezing the display also suspends key event delivery, to
-        // keep events from going astray while the display is reconfigured.
-        // Now that we're back, notify the key waiter that we're alive
-        // again and it should restart its timeouts.
+        // Reset the key delivery timeout on unfreeze, too.  We force a wakeup here
+        // too because regular key delivery processing should resume immediately.
         synchronized (mKeyWaiter) {
             mKeyWaiter.mWasFrozen = true;
             mKeyWaiter.notifyAll();
