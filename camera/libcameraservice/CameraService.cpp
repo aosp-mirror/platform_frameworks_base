@@ -492,6 +492,7 @@ status_t CameraService::Client::startPreview()
 status_t CameraService::Client::startRecording()
 {
     if (mMediaPlayerBeep.get() != NULL) {
+        mMediaPlayerBeep->seekTo(0);
         mMediaPlayerBeep->start();
     }
     return startCameraMode(CAMERA_RECORDING_MODE);
@@ -533,6 +534,7 @@ void CameraService::Client::stopRecording()
     }
 
     if (mMediaPlayerBeep.get() != NULL) {
+        mMediaPlayerBeep->seekTo(0);
         mMediaPlayerBeep->start();
     }
     mHardware->stopRecording();
@@ -733,6 +735,7 @@ void CameraService::Client::shutterCallback(void *user)
 
     // Play shutter sound.
     if (client->mMediaPlayerClick.get() != NULL) {
+        client->mMediaPlayerClick->seekTo(0);
         client->mMediaPlayerClick->start();
     }
 
