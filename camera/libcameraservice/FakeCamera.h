@@ -19,6 +19,7 @@
 #define ANDROID_HARDWARE_FAKECAMERA_H
 
 #include <sys/types.h>
+#include <stdint.h>
 
 namespace android {
 
