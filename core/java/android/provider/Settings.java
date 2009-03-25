@@ -2537,6 +2537,31 @@ public final class Settings {
                 "vending_use_checkout_qa_service";
 
         /**
+         * Default value to use for all/free/priced filter in Market.
+         * Valid values: ALL, FREE, PAID (case insensitive)
+         */
+        public static final String VENDING_DEFAULT_FILTER = "vending_default_filter";
+        /**
+         * Ranking type value to use for the first category tab (currently popular)
+         */
+        public static final String VENDING_TAB_1_RANKING_TYPE = "vending_tab_1_ranking_type";
+
+        /**
+         * Title string to use for first category tab.
+         */
+        public static final String VENDING_TAB_1_TITLE = "vending_tab_1_title";
+
+        /**
+         * Ranking type value to use for the second category tab (currently newest)
+         */
+        public static final String VENDING_TAB_2_RANKING_TYPE = "vending_tab_2_ranking_type";
+
+        /**
+         * Title string to use for second category tab.
+         */
+        public static final String VENDING_TAB_2_TITLE = "vending_tab_2_title";
+
+        /**
          * URL that points to the legal terms of service to display in Settings.
          * <p>
          * This should be a https URL. For a pretty user-friendly URL, use
