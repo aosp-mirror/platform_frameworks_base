@@ -343,7 +343,7 @@ class BluetoothEventLoop {
 
     private void onPasskeyAgentCancel(String address) {
         address = address.toUpperCase();
-        mPasskeyAgentRequestData.remove(address);
+        mBluetoothService.cancelPin(address);
         Intent intent = new Intent(BluetoothIntent.PAIRING_CANCEL_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
