@@ -76,8 +76,7 @@ class BluetoothEventLoop {
                 }
                 break;
             case EVENT_RESTART_BLUETOOTH:
-                mBluetoothService.disable();
-                mBluetoothService.enable();
+                mBluetoothService.restart();
                 break;
             }
         }
@@ -170,6 +169,7 @@ class BluetoothEventLoop {
         if (mode >= 0) {
             Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
             intent.putExtra(BluetoothIntent.SCAN_MODE, mode);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         }
     }
