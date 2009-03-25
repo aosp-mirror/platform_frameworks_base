@@ -20,6 +20,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -28,6 +29,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.INetStatService;
@@ -149,6 +151,8 @@ final class DataConnectionTracker extends Handler
      */
     private ArrayList<ApnSetting> waitingApns = null;
 
+    private ApnSetting preferredApn = null;
+
     /**
      * pdpList holds all the PDP connection, i.e. IP Link in GPRS
      */
@@ -254,6 +258,10 @@ final class DataConnectionTracker extends Handler
     static final int EVENT_APN_CHANGED = 29;
     static final int EVENT_PS_RESTRICT_ENABLED = 30;
     static final int EVENT_PS_RESTRICT_DISABLED = 31;
+
+    static final Uri PREFERAPN_URI = Uri.parse("content://telephony/carriers/preferapn");
+    static final String APN_ID = "apn_id";
+    private boolean canSetPreferApn = false;
 
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver ()
     {
@@ -787,6 +795,8 @@ final class DataConnectionTracker extends Handler
                 String[] types = parseTypes(
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.TYPE)));
                 ApnSetting apn = new ApnSetting(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers._ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NUMERIC)),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NAME)),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.APN)),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROXY)),
@@ -1459,6 +1469,11 @@ final class DataConnectionTracker extends Handler
                     }
                     if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
                         SystemProperties.set("gsm.defaultpdpcontext.active", "true");
+                        if (canSetPreferApn && preferredApn == null) {
+                            Log.d(LOG_TAG, "PREFERED APN is null");
+                            preferredApn = mActiveApn;
+                            setPreferredApn(preferredApn.id);
+                        }
                     } else {
                         SystemProperties.set("gsm.defaultpdpcontext.active", "false");
                     }
@@ -1679,6 +1694,13 @@ final class DataConnectionTracker extends Handler
         if (allApns.isEmpty()) {
             if (DBG) log("No APN found for carrier: " + operator);
             notifyNoData(PdpConnection.PdpFailCause.BAD_APN);
+        } else {
+            preferredApn = getPreferredApn();
+            Log.d(LOG_TAG, "Get PreferredAPN");
+            if (preferredApn != null && !preferredApn.numeric.equals(operator)) {
+                preferredApn = null;
+                setPreferredApn(-1);
+            }
         }
     }
 
@@ -1699,6 +1721,22 @@ final class DataConnectionTracker extends Handler
      */
     private ArrayList<ApnSetting> buildWaitingApns() {
         ArrayList<ApnSetting> apnList = new ArrayList<ApnSetting>();
+        String operator = phone.mSIMRecords.getSIMOperatorNumeric();
+
+        if (mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
+            if (canSetPreferApn && preferredApn != null) {
+                Log.i(LOG_TAG, "Preferred APN:" + operator + ":"
+                        + preferredApn.numeric + ":" + preferredApn);
+                if (preferredApn.numeric.equals(operator)) {
+                    Log.i(LOG_TAG, "Waiting APN set to preferred APN");
+                    apnList.add(preferredApn);
+                    return apnList;
+                } else {
+                    setPreferredApn(-1);
+                    preferredApn = null;
+                }
+            }
+        }
 
         if (allApns != null) {
             for (ApnSetting apn : allApns) {
@@ -1744,5 +1782,54 @@ final class DataConnectionTracker extends Handler
         else {
             reconnectAfterFail(cause, reason);
         }
+    }
+
+    private void setPreferredApn(int pos) {
+        if (!canSetPreferApn) {
+            return;
+        }
+
+        ContentResolver resolver = phone.getContext().getContentResolver();
+        resolver.delete(PREFERAPN_URI, null, null);
+
+        if (pos >= 0) {            
+            ContentValues values = new ContentValues();
+            values.put(APN_ID, pos);
+            resolver.insert(PREFERAPN_URI, values);
+        }
+    }
+
+    private ApnSetting getPreferredApn() {
+        if (allApns.isEmpty()) {
+            return null;
+        }
+
+        Cursor cursor = phone.getContext().getContentResolver().query(
+                PREFERAPN_URI, new String[] { "_id", "name", "apn" }, 
+                null, null, Telephony.Carriers.DEFAULT_SORT_ORDER);
+
+        if (cursor != null) {
+            canSetPreferApn = true;
+        } else {
+            canSetPreferApn = false;
+        }
+
+        if (canSetPreferApn && cursor.getCount() > 0) {
+            int pos;
+            cursor.moveToFirst();
+            pos = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers._ID));
+            for(ApnSetting p:allApns) {
+                if (p.id == pos) {
+                    cursor.close();
+                    return p;
+                }
+            }
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return null;
     }
 }

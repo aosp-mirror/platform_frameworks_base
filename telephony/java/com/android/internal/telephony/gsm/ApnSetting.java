@@ -32,11 +32,15 @@ public class ApnSetting {
     String user;
     String password;
     String[] types;
+    int id;
+    String numeric;
 
 
-    ApnSetting(String carrier, String apn, String proxy, String port,
+    ApnSetting(int id, String numeric, String carrier, String apn, String proxy, String port,
             String mmsc, String mmsProxy, String mmsPort,
             String user, String password, String[] types) {
+        this.id = id;
+        this.numeric = numeric;
         this.carrier = carrier;
         this.apn = apn;
         this.proxy = proxy;
@@ -52,6 +56,8 @@ public class ApnSetting {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(carrier)
+        .append(", ").append(id)
+        .append(", ").append(numeric)
         .append(", ").append(apn)
         .append(", ").append(proxy)
         .append(", ").append(mmsc)
