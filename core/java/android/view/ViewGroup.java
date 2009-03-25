@@ -1407,6 +1407,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
+        // Clear the flag as early as possible to allow draw() implementations
+        // to call invalidate() successfully when doing animations
+        child.mPrivateFlags |= DRAWN;
+
         if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
                 (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
             return more;
@@ -1475,10 +1479,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 canvas.clipRect(0, 0, childWidth, childHeight);
             }
         }
-
-        // Clear the flag as early as possible to allow draw() implementations
-        // to call invalidate() successfully when doing animations
-        child.mPrivateFlags |= DRAWN;
 
         if (hasNoCache) {
             // Fast path for layouts with no backgrounds

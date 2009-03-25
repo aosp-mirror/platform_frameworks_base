@@ -3359,12 +3359,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mPopup.update(this, getErrorX(), getErrorY(), -1, -1);
         }
 
+        restartMarqueeIfNeeded();
+
+        return result;
+    }
+
+    private void restartMarqueeIfNeeded() {
         if (mRestartMarquee && mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             mRestartMarquee = false;
             startMarquee();
         }
-
-        return result;
     }
 
     /**
@@ -3674,6 +3678,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void onDraw(Canvas canvas) {
+        restartMarqueeIfNeeded();
+
         // Draw the background for this view
         super.onDraw(canvas);
 
