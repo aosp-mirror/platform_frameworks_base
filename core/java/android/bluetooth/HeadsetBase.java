@@ -105,7 +105,7 @@ public class HeadsetBase {
 
     /* Process an incoming AT command line
      */
-    protected synchronized void handleInput(String input) {
+    protected void handleInput(String input) {
         acquireWakeLock();
         long timestamp;
 
@@ -267,13 +267,13 @@ public class HeadsetBase {
     }
     private native boolean sendURCNative(String urc);
 
-    private void acquireWakeLock() {
+    private synchronized void acquireWakeLock() {
         if (!mWakeLock.isHeld()) {
             mWakeLock.acquire();
         }
     }
 
-    private void releaseWakeLock() {
+    private synchronized void releaseWakeLock() {
         if (mWakeLock.isHeld()) {
             mWakeLock.release();
         }
