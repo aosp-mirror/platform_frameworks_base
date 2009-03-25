@@ -2723,10 +2723,8 @@ class ApplicationContext extends Context {
                     mTimestamp = mFileStatus.mtime;
                 }
                 
-                // Writing was successful, delete the backup file
-                if (!mBackupFile.delete()) {
-                    Log.e(TAG, "Couldn't delete new backup file " + mBackupFile);
-                }
+                // Writing was successful, delete the backup file if there is one.
+                mBackupFile.delete();
                 return true;
             } catch (XmlPullParserException e) {
                 Log.w(TAG, "writeFileLocked: Got exception:", e);

@@ -188,7 +188,7 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 public final class InputMethodManager {
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true;
     static final String TAG = "InputMethodManager";
 
     static final Object mInstanceSync = new Object();
@@ -426,7 +426,7 @@ public final class InputMethodManager {
         }
     };    
     
-    final InputConnection mDummyInputConnection = new BaseInputConnection(this, true);
+    final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
     
     InputMethodManager(IInputMethodManager service, Looper looper) {
         mService = service;
