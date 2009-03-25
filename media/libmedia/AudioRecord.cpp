@@ -532,7 +532,14 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
         readSize = audioBuffer.size;
 
         // Sanity check on returned size
-        if (ssize_t(readSize) <= 0) break;
+        if (ssize_t(readSize) <= 0) {
+            // The callback is done filling buffers
+            // Keep this thread going to handle timed events and
+            // still try to get more data in intervals of WAIT_PERIOD_MS
+            // but don't just loop and block the CPU, so wait
+            usleep(WAIT_PERIOD_MS*1000);
+            break;
+        }
         if (readSize > reqSize) readSize = reqSize;
 
         audioBuffer.size = readSize;
