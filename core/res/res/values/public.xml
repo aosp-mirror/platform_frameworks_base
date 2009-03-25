@@ -1051,7 +1051,7 @@
   <!-- View ID of the text editor inside of an extracted text layout. -->
   <public type="id" name="inputExtractEditText" id="0x01020025" />
 
-  <!-- View ID of the {@link android.inpUutmethodservice.KeyboardView} within
+  <!-- View ID of the {@link android.inputmethodservice.KeyboardView} within
         an input method's input area. -->
   <public type="id" name="keyboardView" id="0x01020026" />
   <!-- View ID of a {@link android.view.View} to close a popup keyboard -->
