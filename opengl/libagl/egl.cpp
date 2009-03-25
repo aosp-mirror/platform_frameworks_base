@@ -1055,8 +1055,12 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
 {
     if (egl_display_t::is_valid(dpy) == EGL_FALSE)
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+    
+    if (ggl_unlikely(num_config==0)) {
+        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    }
 
-    if (ggl_unlikely(configs==0 || attrib_list==0)) {
+    if (ggl_unlikely(attrib_list==0)) {
         *num_config = 0;
         return EGL_TRUE;
     }
@@ -1102,11 +1106,19 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
     // return the configurations found
     int n=0;
     if (possibleMatch) {
-        for (int i=0 ; config_size && i<numConfigs ; i++) {
-            if (possibleMatch & (1<<i)) {
-               *configs++ = (EGLConfig)i;
-                config_size--;
-                n++;
+        if (configs) {
+            for (int i=0 ; config_size && i<numConfigs ; i++) {
+                if (possibleMatch & (1<<i)) {
+                    *configs++ = (EGLConfig)i;
+                    config_size--;
+                    n++;
+                }
+            }
+        } else {
+            for (int i=0 ; i<numConfigs ; i++) {
+                if (possibleMatch & (1<<i)) {
+                    n++;
+                }
             }
         }
     }

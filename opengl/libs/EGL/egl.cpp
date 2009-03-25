@@ -725,9 +725,8 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
     egl_display_t const * const dp = get_display(dpy);
     if (!dp) return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
-    if (configs == 0) {
-        *num_config = 0;
-        return EGL_TRUE;
+    if (num_config==0) {
+        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
     }
 
     EGLint n;
@@ -784,7 +783,9 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
             if (res && n>0) {
                 // n has to be 0 or 1, by construction, and we already know
                 // which config it will return (since there can be only one).
-                configs[0] = MAKE_CONFIG(i, index);
+                if (configs) {
+                    configs[0] = MAKE_CONFIG(i, index);
+                }
                 *num_config = 1;
             }
         }
@@ -798,19 +799,23 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
         if (cnx->dso) {
             if (cnx->hooks->egl.eglChooseConfig(
                     dp->dpys[i], attrib_list, configs, config_size, &n)) {
-                // now we need to convert these client EGLConfig to our
-                // internal EGLConfig format. This is done in O(n log n).
-                for (int j=0 ; j<n ; j++) {
-                    int index = binarySearch<EGLConfig>(
-                            dp->configs[i], 0, dp->numConfigs[i]-1, configs[j]);
-                    if (index >= 0) {
-                        configs[j] = MAKE_CONFIG(i, index);
-                    } else {
-                        return setError(EGL_BAD_CONFIG, EGL_FALSE);
+                if (configs) {
+                    // now we need to convert these client EGLConfig to our
+                    // internal EGLConfig format. This is done in O(n log n).
+                    for (int j=0 ; j<n ; j++) {
+                        int index = binarySearch<EGLConfig>(
+                                dp->configs[i], 0, dp->numConfigs[i]-1, configs[j]);
+                        if (index >= 0) {
+                            if (configs) {
+                                configs[j] = MAKE_CONFIG(i, index);
+                            }
+                        } else {
+                            return setError(EGL_BAD_CONFIG, EGL_FALSE);
+                        }
                     }
+                    configs += n;
+                    config_size -= n;
                 }
-                configs += n;
-                config_size -= n;
                 *num_config += n;
                 res = EGL_TRUE;
             }
