@@ -51,6 +51,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.android.internal.app.IBatteryStats;
@@ -189,14 +190,14 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         // Remove remoteServiceChannelCallbacks
         HashMap<String, IBluetoothDeviceCallback> callbacksMap =
             mEventLoop.getRemoteServiceChannelCallbacks();
-        IBluetoothDeviceCallback callback;
 
-        for (String address : callbacksMap.keySet()) {
-            callback = callbacksMap.get(address);
+        for (Iterator<String> i = callbacksMap.keySet().iterator(); i.hasNext();) {
+            String address = i.next();
+            IBluetoothDeviceCallback callback = callbacksMap.get(address);
             try {
                 callback.onGetRemoteServiceChannelResult(address, BluetoothError.ERROR_DISABLED);
             } catch (RemoteException e) {}
-            callbacksMap.remove(address);
+            i.remove();
         }
 
         // update mode
