@@ -843,6 +843,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             pw.println("    poke lock '" + p.tag + "':"
                     + ((p.pokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0
                             ? " POKE_LOCK_IGNORE_CHEEK_EVENTS" : "")
+                    + ((p.pokey & POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS) != 0
+                            ? " POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS" : "")
                     + ((p.pokey & POKE_LOCK_SHORT_TIMEOUT) != 0
                             ? " POKE_LOCK_SHORT_TIMEOUT" : "")
                     + ((p.pokey & POKE_LOCK_MEDIUM_TIMEOUT) != 0
@@ -1675,12 +1677,22 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         //mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
         if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)
-            && !((eventType == OTHER_EVENT) || (eventType == BUTTON_EVENT))) {
+                && (eventType == CHEEK_EVENT || eventType == TOUCH_EVENT)) {
             if (false) {
-                Log.d(TAG, "dropping mPokey=0x" + Integer.toHexString(mPokey));
+                Log.d(TAG, "dropping cheek or short event mPokey=0x" + Integer.toHexString(mPokey));
             }
             return;
         }
+
+        if (((mPokey & POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS) != 0)
+                && (eventType == TOUCH_EVENT || eventType == TOUCH_UP_EVENT
+                    || eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT)) {
+            if (false) {
+                Log.d(TAG, "dropping touch mPokey=0x" + Integer.toHexString(mPokey));
+            }
+            return;
+        }
+
 
         if (false) {
             if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)) {
