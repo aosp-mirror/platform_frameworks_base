@@ -304,6 +304,9 @@ public class SensorManager extends IRotationWatcher.Stub
 
                 if (mSensorDataFd == null) {
                     Log.e(TAG, "mSensorDataFd == NULL, exiting");
+                    synchronized (sListeners) {
+                        mThread = null;
+                    }
                     return;
                 }
                 // this thread is guaranteed to be unique
@@ -321,17 +324,16 @@ public class SensorManager extends IRotationWatcher.Stub
                     // wait for an event
                     final int sensor = sensors_data_poll(values, status, timestamp);
 
-                    if (sensor == -1) {
-                        // we lost the connection to the event stream. this happens
-                        // when the last listener is removed.
-                        Log.d(TAG, "_sensors_data_poll() failed, we bail out.");
-                        break;
-                    }
-
                     int accuracy = status[0];
                     synchronized (sListeners) {
-                        if (sListeners.isEmpty()) {
-                            // we have no more listeners, terminate the thread
+                        if (sensor == -1 || sListeners.isEmpty()) {
+                            if (sensor == -1) {
+                                // we lost the connection to the event stream. this happens
+                                // when the last listener is removed.
+                                Log.d(TAG, "_sensors_data_poll() failed, we bail out.");
+                            }
+
+                            // we have no more listeners or polling failed, terminate the thread
                             sensors_data_close();
                             mThread = null;
                             break;
