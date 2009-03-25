@@ -983,7 +983,6 @@ public class EditStyledText extends EditText {
             int pos = current;
             for (; pos < text.length(); pos++) {
                 if (text.charAt(pos) == '\n') {
-                    pos--;
                     break;
                 }
             }
