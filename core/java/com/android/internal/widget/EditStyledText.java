@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import java.util.ArrayList;
+
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -323,7 +325,7 @@ public class EditStyledText extends EditText {
     }
 
     /**
-     * Check editing is started.
+     * Check whether editing is started or not.
      * 
      * @return Whether editing is started or not.
      */
@@ -331,6 +333,11 @@ public class EditStyledText extends EditText {
         return mManager.isEditting();
     }
 
+    /**
+     * Check whether SoftKey is Blocked or not.
+     * 
+     * @return whether SoftKey is Blocked or not.
+     */
     public boolean isSoftKeyBlocked() {
         return mManager.isSoftKeyBlocked();
     }
@@ -353,12 +360,33 @@ public class EditStyledText extends EditText {
         return mManager.getSelectState();
     }
 
+    @Override
+    public Bundle getInputExtras(boolean create) {
+        Bundle bundle = super.getInputExtras(create);
+        if (bundle != null) {
+            bundle.putBoolean("allowEmoji", true);
+        }
+        return bundle;
+    }
+
     /**
      * Get the state of the selection.
      * 
      * @return The state of the selection.
      */
     public String getHtml() {
+        return mConverter.getConvertedBody();
+    }
+
+    /**
+     * Get the state of the selection.
+     * 
+     * @param uris
+     *            The array of used uris.
+     * @return The state of the selection.
+     */
+    public String getHtml(ArrayList<Uri> uris) {
+        mConverter.getUriArray(uris, this.getText());
         return mConverter.getConvertedBody();
     }
 
@@ -421,15 +449,6 @@ public class EditStyledText extends EditText {
         if (mESTInterface != null) {
             mESTInterface.notifyStateChanged(mode, state);
         }
-    }
-
-    @Override
-    public Bundle getInputExtras(boolean create) {
-        Bundle bundle = super.getInputExtras(create);
-        if (bundle != null) {
-            bundle.putBoolean("allowEmoji", true);
-        }
-        return bundle;
     }
 
     /**
@@ -1010,6 +1029,27 @@ public class EditStyledText extends EditText {
                 Log.d(LOG_TAG, "--- getConvertedBody:" + htmlBody);
             }
             return htmlBody;
+        }
+
+        public void getUriArray(ArrayList<Uri> uris, Editable text) {
+            uris.clear();
+            if (DBG) {
+                Log.d(LOG_TAG, "--- getUriArray:");
+            }
+            int len = text.length();
+            int next;
+            for (int i = 0; i < text.length(); i = next) {
+                next = text.nextSpanTransition(i, len, ImageSpan.class);
+                ImageSpan[] images = text.getSpans(i, next, ImageSpan.class);
+                for (int j = 0; j < images.length; j++) {
+                    if (DBG) {
+                        Log.d(LOG_TAG, "--- getUriArray: foundArray" +
+                                ((ImageSpan) images[j]).getSource());
+                    }
+                    uris.add(Uri.parse(
+                            ((ImageSpan) images[j]).toString()));
+                }
+            }
         }
     }
 
