@@ -1,0 +1,5 @@
+BEGIN:VCARD
+VERSION:2.1
+N:;A\;B\\;C\\\;;D;\:E;\\\\;
+FN:A;B\C\;D:E\\
+END:VCARD
