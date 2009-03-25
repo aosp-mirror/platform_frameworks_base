@@ -155,14 +155,17 @@ public class SubscribedFeedsIntentService extends IntentService {
         ContentResolver contentResolver = context.getContentResolver();
         Cursor c = contentResolver.query(SubscribedFeeds.Accounts.CONTENT_URI,
                 sAccountProjection, null, null, null);
-        while (c.moveToNext()) {
-            String account = c.getString(0);
-            if (TextUtils.isEmpty(account)) {
-                continue;
+        try {
+            while (c.moveToNext()) {
+                String account = c.getString(0);
+                if (TextUtils.isEmpty(account)) {
+                    continue;
+                }
+                accounts.add(account);
             }
-            accounts.add(account);
+        } finally {
+            c.close();
         }
-        c.deactivate();
 
         // Clear the auth tokens for all these accounts so that we are sure
         // they will still be valid until the next time we refresh them.

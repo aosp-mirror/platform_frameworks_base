@@ -211,7 +211,7 @@ public class DatabaseUtils {
             sb.append(sqlString);
         sb.append('\'');
     }
-    
+
     /**
      * SQL-escape a string.
      */
@@ -240,7 +240,7 @@ public class DatabaseUtils {
             appendEscapedSQLString(sql, value.toString());
         }
     }
-    
+
     /**
      * Concatenates two SQL WHERE clauses, handling empty or null values.
      * @hide
@@ -252,12 +252,12 @@ public class DatabaseUtils {
         if (TextUtils.isEmpty(b)) {
             return a;
         }
-            
+
         return "(" + a + ") AND (" + b + ")";
     }
-    
+
     /**
-     * return the collation key 
+     * return the collation key
      * @param name
      * @return the collation key
      */
@@ -269,7 +269,7 @@ public class DatabaseUtils {
             return "";
         }
     }
-    
+
     /**
      * return the collation key in hex format
      * @param name
@@ -280,7 +280,7 @@ public class DatabaseUtils {
         char[] keys = Hex.encodeHex(arr);
         return new String(keys, 0, getKeyLen(arr) * 2);
     }
-    
+
     private static int getKeyLen(byte[] arr) {
         if (arr[arr.length - 1] != 0) {
             return arr.length;
@@ -289,16 +289,16 @@ public class DatabaseUtils {
             return arr.length-1;
         }
     }
-    
+
     private static byte[] getCollationKeyInBytes(String name) {
         if (mColl == null) {
             mColl = Collator.getInstance();
             mColl.setStrength(Collator.PRIMARY);
         }
-        return mColl.getCollationKey(name).toByteArray();        
+        return mColl.getCollationKey(name).toByteArray();
     }
-    
-    private static Collator mColl = null;    
+
+    private static Collator mColl = null;
     /**
      * Prints the contents of a Cursor to System.out. The position is restored
      * after printing.
@@ -591,10 +591,12 @@ public class DatabaseUtils {
     public static long queryNumEntries(SQLiteDatabase db, String table) {
         Cursor cursor = db.query(table, countProjection,
                 null, null, null, null, null);
-        cursor.moveToFirst();
-        long count = cursor.getLong(0);
-        cursor.deactivate();
-        return count;
+        try {
+            cursor.moveToFirst();
+            return cursor.getLong(0);
+        } finally {
+            cursor.close();
+        }
     }
 
     /**
