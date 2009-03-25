@@ -567,7 +567,6 @@ public class AudioService extends IAudioService.Stub {
 
     /**
      * @see #setVibrateSetting(int, int)
-     * @hide
      */
     public static int getValueForVibrateSetting(int existingValue, int vibrateType,
             int vibrateSetting) {
@@ -661,7 +660,6 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#playSoundEffect(int, float) */
-    /* @hide FIXME: unhide before release */
     public void playSoundEffectVolume(int effectType, float volume) {
         sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SHARED_MSG, SENDMSG_NOOP,
                 effectType, (int) (volume * 1000), null, 0);
