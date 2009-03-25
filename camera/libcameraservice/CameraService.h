@@ -27,6 +27,8 @@ class android::MemoryHeapBase;
 
 namespace android {
 
+class MediaPlayer;
+
 // ----------------------------------------------------------------------------
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
@@ -177,6 +179,9 @@ private:
                     sp<ISurface>                mSurface;
                     sp<MemoryHeapBase>          mPreviewBuffer;
                     int                         mPreviewCallbackFlag;
+
+                    sp<MediaPlayer>             mMediaPlayerClick;
+                    sp<MediaPlayer>             mMediaPlayerBeep;
 
                     // these are immutable once the object is created,
                     // they don't need to be protected by a lock

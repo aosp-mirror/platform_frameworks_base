@@ -42,7 +42,8 @@ LOCAL_SRC_FILES:=               \
 LOCAL_SHARED_LIBRARIES:= \
     libui \
     libutils \
-    libcutils
+    libcutils \
+    libmedia
 
 LOCAL_MODULE:= libcameraservice
 
