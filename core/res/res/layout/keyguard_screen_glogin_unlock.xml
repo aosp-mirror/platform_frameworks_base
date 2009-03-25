@@ -120,7 +120,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:drawableLeft="@drawable/ic_emergency"
-        android:drawablePadding="3dip"
+        android:drawablePadding="8dip"
         android:text="@android:string/lockscreen_emergency_call"
         />
 
