@@ -164,9 +164,7 @@ status_t BootAnimation::readyToRun() {
 
     // initialize GL
     glShadeModel(GL_FLAT);
-    glEnable(GL_DITHER);
     glEnable(GL_TEXTURE_2D);
-    glEnable(GL_SCISSOR_TEST);
     glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     return NO_ERROR;
@@ -196,8 +194,6 @@ bool BootAnimation::android() {
     glClear(GL_COLOR_BUFFER_BIT);
     eglSwapBuffers(mDisplay, mSurface);
 
-    // wait ~1s
-
     const GLint xc = (mWidth  - mAndroid[0].w) / 2;
     const GLint yc = (mHeight - mAndroid[0].h) / 2;
     const Rect updateRect(xc, yc, xc + mAndroid[0].w, yc + mAndroid[0].h);
@@ -216,7 +212,8 @@ bool BootAnimation::android() {
 
     const nsecs_t startTime = systemTime();
     do {
-        double time = systemTime() - startTime;
+        nsecs_t now = systemTime();
+        double time = now - startTime;
         float t = 4.0f * float(time / us2ns(16667)) / mAndroid[1].w;
         GLint offset = (1 - (t - floorf(t))) * mAndroid[1].w;
         GLint x = xc - offset;
@@ -231,6 +228,11 @@ bool BootAnimation::android() {
         glDrawTexiOES(xc, yc, 0, mAndroid[0].w, mAndroid[0].h);
 
         eglSwapBuffers(mDisplay, mSurface);
+        
+        // 12fps: don't animate too fast to preserve CPU
+        const nsecs_t sleepTime = 83333 - ns2us(systemTime() - now);
+        if (sleepTime > 0)
+            usleep(sleepTime); 
     } while (!exitPending());
 
     glDeleteTextures(1, &mAndroid[0].name);
