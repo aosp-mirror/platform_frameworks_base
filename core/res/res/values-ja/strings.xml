@@ -105,7 +105,7 @@
     <string name="screen_lock">"画面をロック"</string>
     <string name="power_off">"電源オフ"</string>
     <string name="shutdown_progress">"シャットダウン中..."</string>
-    <string name="shutdown_confirm">"携帯電話の電源をオフにします。"</string>
+    <string name="shutdown_confirm">"携帯電話の電源を切ります。"</string>
     <string name="no_recent_tasks">"最近使ったアプリケーションはありません。"</string>
     <string name="global_actions">"携帯電話オプション"</string>
     <string name="global_action_lock">"画面ロック"</string>
@@ -401,7 +401,7 @@
     <string name="keyguard_password_wrong_pin_code">"PINコードが正しくありません。"</string>
     <string name="keyguard_label_text">"ロックを解除するにはMENU、0キーの順に押します。"</string>
     <string name="emergency_call_dialog_number_for_display">"緊急通報番号"</string>
-    <string name="lockscreen_carrier_default">"（サービス登録なし）"</string>
+    <string name="lockscreen_carrier_default">"(通信サービスなし)"</string>
     <string name="lockscreen_screen_locked">"画面ロック中"</string>
     <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除（または緊急通報）"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"MENUキーでロック解除"</string>
@@ -448,7 +448,7 @@
     <string name="battery_status_charging">"充電中..."</string>
     <string name="battery_low_title">"充電してください"</string>
     <string name="battery_low_subtitle">"電池が残り少なくなっています:"</string>
-    <string name="battery_low_percent_format">"残り<xliff:g id="NUMBER">%d%%</xliff:g>未満"</string>
+    <string name="battery_low_percent_format">"残量<xliff:g id="NUMBER">%d%%</xliff:g>以下"</string>
     <string name="factorytest_failed">"出荷時試験が失敗"</string>
     <string name="factorytest_not_system">"FACTORY_TEST操作は、/system/appにインストールされたパッケージのみが対象です。"</string>
     <string name="factorytest_no_action">"FACTORY_TEST操作を行うパッケージは見つかりませんでした。"</string>
@@ -630,8 +630,7 @@
     <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%b</xliff:g>/<xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for abbrev_month_year (5966980891147982768) -->
     <skip />
-    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
-    <string name="abbrev_month_day">"<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"日曜日"</string>
@@ -744,18 +743,18 @@
     <string name="force_close">"強制終了"</string>
     <string name="wait">"待機"</string>
     <string name="debug">"デバッグ"</string>
-    <string name="sendText">"テキストの操作"</string>
-    <string name="volume_ringtone">"着信音の音量"</string>
+    <string name="sendText">"アプリケーションを選択"</string>
+    <string name="volume_ringtone">"着信音量"</string>
     <string name="volume_music">"メディアの音量"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Bluetooth経由で再生中です"</string>
-    <string name="volume_call">"着信音の音量"</string>
-    <string name="volume_bluetooth_call">"Bluetooth着信音の音量"</string>
+    <string name="volume_call">"着信音量"</string>
+    <string name="volume_bluetooth_call">"Bluetooth着信音量"</string>
     <string name="volume_alarm">"アラームの音量"</string>
     <string name="volume_notification">"通知音の音量"</string>
     <string name="volume_unknown">"音量"</string>
     <string name="ringtone_default">"デフォルトの着信音"</string>
-    <string name="ringtone_default_with_actual">"端末既定の着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>）"</string>
-    <string name="ringtone_silent">"無音"</string>
+    <string name="ringtone_default_with_actual">"端末の基本着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent">"サイレント"</string>
     <string name="ringtone_picker_title">"着信音"</string>
     <string name="ringtone_unknown">"不明な着信音"</string>
   <plurals name="wifi_available">
