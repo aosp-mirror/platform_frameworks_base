@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.telephony.TelephonyManager;
 import android.util.PrintWriterPrinter;
 
 import java.io.FileDescriptor;
@@ -146,6 +147,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.notePhoneOffLocked();
+        }
+    }
+    
+    public void notePhoneSignalStrength(int asu) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.notePhoneSignalStrengthLocked(asu);
+        }
+    }
+    
+    public void notePhoneDataConnectionState(int dataType, boolean hasData) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.notePhoneDataConnectionStateLocked(dataType, hasData);
         }
     }
     

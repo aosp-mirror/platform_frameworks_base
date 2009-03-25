@@ -440,6 +440,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void broadcastSignalStrengthChanged(int asu) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.notePhoneSignalStrength(asu);
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        
         Intent intent = new Intent(TelephonyIntents.ACTION_SIGNAL_STRENGTH_CHANGED);
         intent.putExtra(PhoneStateIntentReceiver.INTENT_KEY_ASU, asu);
         mContext.sendStickyBroadcast(intent);
@@ -469,6 +477,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void broadcastDataConnectionStateChanged(int state, boolean isDataConnectivityPossible,
             String reason, String apn, String interfaceName) {
+        // Note: not reporting to the battery stats service here, because the
+        // status bar takes care of that after taking into account all of the
+        // required info.
         Intent intent = new Intent(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(Phone.STATE_KEY, DefaultPhoneNotifier.convertDataState(state).toString());
         if (!isDataConnectivityPossible) {

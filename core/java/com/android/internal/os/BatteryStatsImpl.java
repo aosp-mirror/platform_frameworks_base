@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
@@ -47,7 +48,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 28;
+    private static final int VERSION = 29;
 
     private final File mFile;
     private final File mBackupFile;
@@ -91,6 +92,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     boolean mPhoneOn;
     Timer mPhoneOnTimer;
+    
+    int mPhoneSignalStrengthBin = -1;
+    final Timer[] mPhoneSignalStrengthsTimer = new Timer[NUM_SIGNAL_STRENGTH_BINS];
+    
+    int mPhoneDataConnectionType = -1;
+    final Timer[] mPhoneDataConnectionsTimer = new Timer[NUM_DATA_CONNECTION_TYPES];
     
     boolean mWifiOn;
     Timer mWifiOnTimer;
@@ -307,15 +314,15 @@ public final class BatteryStatsImpl extends BatteryStats {
             return val;
         }
 
-        public void logState() {
-            Log.i("foo", "mNesting=" + mNesting + " mCount=" + mCount
+        public void logState(Printer pw, String prefix) {
+            pw.println(prefix + "mNesting=" + mNesting + " mCount=" + mCount
                     + " mLoadedCount=" + mLoadedCount + " mLastCount=" + mLastCount
                     + " mUnpluggedCount=" + mUnpluggedCount);
-            Log.i("foo", "mTotalTime=" + mTotalTime
+            pw.println(prefix + "mTotalTime=" + mTotalTime
                     + " mLoadedTime=" + mLoadedTime);
-            Log.i("foo", "mLastTime=" + mLastTime
+            pw.println(prefix + "mLastTime=" + mLastTime
                     + " mUnpluggedTime=" + mUnpluggedTime);
-            Log.i("foo", "mUpdateTime=" + mUpdateTime
+            pw.println(prefix + "mUpdateTime=" + mUpdateTime
                     + " mAcquireTime=" + mAcquireTime);
         }
         
@@ -486,6 +493,50 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
     
+    public void notePhoneSignalStrengthLocked(int asu) {
+        // Bin the strength.
+        int bin;
+        if (asu < 0 || asu >= 99) bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        else if (asu >= 16) bin = SIGNAL_STRENGTH_GREAT;
+        else if (asu >= 8)  bin = SIGNAL_STRENGTH_GOOD;
+        else if (asu >= 4)  bin = SIGNAL_STRENGTH_MODERATE;
+        else bin = SIGNAL_STRENGTH_POOR;
+        if (mPhoneSignalStrengthBin != bin) {
+            if (mPhoneSignalStrengthBin >= 0) {
+                mPhoneSignalStrengthsTimer[mPhoneSignalStrengthBin].stopRunningLocked(this);
+            }
+            mPhoneSignalStrengthBin = bin;
+            mPhoneSignalStrengthsTimer[bin].startRunningLocked(this);
+        }
+    }
+    
+    public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData) {
+        int bin = DATA_CONNECTION_NONE;
+        if (hasData) {
+            switch (dataType) {
+                case TelephonyManager.NETWORK_TYPE_EDGE:
+                    bin = DATA_CONNECTION_EDGE;
+                    break;
+                case TelephonyManager.NETWORK_TYPE_GPRS:
+                    bin = DATA_CONNECTION_GPRS;
+                    break;
+                case TelephonyManager.NETWORK_TYPE_UMTS:
+                    bin = DATA_CONNECTION_UMTS;
+                    break;
+                default:
+                    bin = DATA_CONNECTION_OTHER;
+                    break;
+            }
+        }
+        if (mPhoneDataConnectionType != bin) {
+            if (mPhoneDataConnectionType >= 0) {
+                mPhoneDataConnectionsTimer[mPhoneDataConnectionType].stopRunningLocked(this);
+            }
+            mPhoneDataConnectionType = bin;
+            mPhoneDataConnectionsTimer[bin].startRunningLocked(this);
+        }
+    }
+    
     public void noteWifiOnLocked() {
         if (!mWifiOn) {
             mWifiOn = true;
@@ -562,6 +613,18 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     @Override public long getPhoneOnTime(long batteryRealtime, int which) {
         return mPhoneOnTimer.getTotalTime(batteryRealtime, which);
+    }
+    
+    @Override public long getPhoneSignalStrengthTime(int strengthBin,
+            long batteryRealtime, int which) {
+        return mPhoneSignalStrengthsTimer[strengthBin].getTotalTime(
+                batteryRealtime, which);
+    }
+    
+    @Override public long getPhoneDataConnectionTime(int dataType,
+            long batteryRealtime, int which) {
+        return mPhoneDataConnectionsTimer[dataType].getTotalTime(
+                batteryRealtime, which);
     }
     
     @Override public long getWifiOnTime(long batteryRealtime, int which) {
@@ -1617,6 +1680,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         mStartCount++;
         mScreenOnTimer = new Timer(-1, null, mUnpluggables);
         mPhoneOnTimer = new Timer(-2, null, mUnpluggables);
+        for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
+            mPhoneSignalStrengthsTimer[i] = new Timer(-100-i, null, mUnpluggables);
+        }
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            mPhoneDataConnectionsTimer[i] = new Timer(-200-i, null, mUnpluggables);
+        }
         mWifiOnTimer = new Timer(-3, null, mUnpluggables);
         mWifiRunningTimer = new Timer(-4, null, mUnpluggables);
         mBluetoothOnTimer = new Timer(-5, null, mUnpluggables);
@@ -1955,6 +2024,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         mScreenOnTimer.readSummaryFromParcelLocked(in);
         mPhoneOn = false;
         mPhoneOnTimer.readSummaryFromParcelLocked(in);
+        for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
+            mPhoneSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
+        }
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            mPhoneDataConnectionsTimer[i].readSummaryFromParcelLocked(in);
+        }
         mWifiOn = false;
         mWifiOnTimer.readSummaryFromParcelLocked(in);
         mWifiRunning = false;
@@ -2061,6 +2136,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+        for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
+            mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+        }
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            mPhoneDataConnectionsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
+        }
         mWifiOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         mBluetoothOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
@@ -2186,6 +2267,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         mScreenOnTimer = new Timer(-1, null, mUnpluggables, in);
         mPhoneOn = false;
         mPhoneOnTimer = new Timer(-2, null, mUnpluggables, in);
+        for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
+            mPhoneSignalStrengthsTimer[i] = new Timer(-100-i, null, mUnpluggables, in);
+        }
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            mPhoneDataConnectionsTimer[i] = new Timer(-200-i, null, mUnpluggables, in);
+        }
         mWifiOn = false;
         mWifiOnTimer = new Timer(-2, null, mUnpluggables, in);
         mWifiRunning = false;
@@ -2243,6 +2330,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mBatteryLastRealtime);
         mScreenOnTimer.writeToParcel(out, batteryRealtime);
         mPhoneOnTimer.writeToParcel(out, batteryRealtime);
+        for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
+            mPhoneSignalStrengthsTimer[i].writeToParcel(out, batteryRealtime);
+        }
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            mPhoneDataConnectionsTimer[i].writeToParcel(out, batteryRealtime);
+        }
         mWifiOnTimer.writeToParcel(out, batteryRealtime);
         mWifiRunningTimer.writeToParcel(out, batteryRealtime);
         mBluetoothOnTimer.writeToParcel(out, batteryRealtime);
@@ -2286,16 +2379,24 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     public void dumpLocked(Printer pw) {
         if (DEBUG) {
-            Log.i(TAG, "*** Screen timer:");
-            mScreenOnTimer.logState();
-            Log.i(TAG, "*** Phone timer:");
-            mPhoneOnTimer.logState();
-            Log.i(TAG, "*** Wifi timer:");
-            mWifiOnTimer.logState();
-            Log.i(TAG, "*** WifiRunning timer:");
-            mWifiRunningTimer.logState();
-            Log.i(TAG, "*** Bluetooth timer:");
-            mBluetoothOnTimer.logState();
+            pw.println("*** Screen timer:");
+            mScreenOnTimer.logState(pw, "  ");
+            pw.println("*** Phone timer:");
+            mPhoneOnTimer.logState(pw, "  ");
+            for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
+                pw.println("*** Signal strength #" + i + ":");
+                mPhoneSignalStrengthsTimer[i].logState(pw, "  ");
+            }
+            for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+                pw.println("*** Data connection type #" + i + ":");
+                mPhoneDataConnectionsTimer[i].logState(pw, "  ");
+            }
+            pw.println("*** Wifi timer:");
+            mWifiOnTimer.logState(pw, "  ");
+            pw.println("*** WifiRunning timer:");
+            mWifiRunningTimer.logState(pw, "  ");
+            pw.println("*** Bluetooth timer:");
+            mBluetoothOnTimer.logState(pw, "  ");
         }
         super.dumpLocked(pw);
     }

@@ -4,8 +4,6 @@ import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.Map;
 
-import com.android.internal.os.BatteryStatsImpl.Timer;
-
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
@@ -92,6 +90,8 @@ public abstract class BatteryStats implements Parcelable {
     private static final String BATTERY_DATA = "battery";
     private static final String WIFI_LOCK_DATA = "wifilock";
     private static final String MISC_DATA = "misc";
+    private static final String SIGNAL_STRENGTH_DATA = "signal";
+    private static final String DATA_CONNECTION_DATA = "dataconn";
 
     private final StringBuilder mFormatBuilder = new StringBuilder(8);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
@@ -122,7 +122,7 @@ public abstract class BatteryStats implements Parcelable {
         /**
          * Temporary for debugging.
          */
-        public abstract void logState();
+        public abstract void logState(Printer pw, String prefix);
     }
 
     /**
@@ -292,6 +292,48 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract long getPhoneOnTime(long batteryRealtime, int which);
+
+    public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+    public static final int SIGNAL_STRENGTH_POOR = 1;
+    public static final int SIGNAL_STRENGTH_MODERATE = 2;
+    public static final int SIGNAL_STRENGTH_GOOD = 3;
+    public static final int SIGNAL_STRENGTH_GREAT = 4;
+    
+    static final String[] SIGNAL_STRENGTH_NAMES = {
+        "none", "poor", "moderate", "good", "great"
+    };
+    
+    public static final int NUM_SIGNAL_STRENGTH_BINS = 5;
+    
+    /**
+     * Returns the time in milliseconds that the phone has been running with
+     * the given signal strength.
+     * 
+     * {@hide}
+     */
+    public abstract long getPhoneSignalStrengthTime(int strengthBin,
+            long batteryRealtime, int which);
+
+    public static final int DATA_CONNECTION_NONE = 0;
+    public static final int DATA_CONNECTION_GPRS = 1;
+    public static final int DATA_CONNECTION_EDGE = 2;
+    public static final int DATA_CONNECTION_UMTS = 3;
+    public static final int DATA_CONNECTION_OTHER = 4;
+    
+    static final String[] DATA_CONNECTION_NAMES = {
+        "none", "gprs", "edge", "umts", "other"
+    };
+    
+    public static final int NUM_DATA_CONNECTION_TYPES = 5;
+    
+    /**
+     * Returns the time in milliseconds that the phone has been running with
+     * the given data connection.
+     * 
+     * {@hide}
+     */
+    public abstract long getPhoneDataConnectionTime(int dataType,
+            long batteryRealtime, int which);
 
     /**
      * Returns the time in milliseconds that wifi has been on while the device was
@@ -561,6 +603,20 @@ public abstract class BatteryStats implements Parcelable {
                 screenOnTime / 1000, phoneOnTime / 1000, wifiOnTime / 1000,
                 wifiRunningTime / 1000, bluetoothOnTime / 1000);
         
+        // Dump signal strength stats
+        Object[] args = new Object[NUM_SIGNAL_STRENGTH_BINS];
+        for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
+            args[i] = getPhoneSignalStrengthTime(i, batteryRealtime, which) / 1000;
+        }
+        dumpLine(pw, 0 /* uid */, category, SIGNAL_STRENGTH_DATA, args);
+        
+        // Dump network type stats
+        args = new Object[NUM_DATA_CONNECTION_TYPES];
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            args[i] = getPhoneDataConnectionTime(i, batteryRealtime, which) / 1000;
+        }
+        dumpLine(pw, 0 /* uid */, category, DATA_CONNECTION_DATA, args);
+        
         if (which == STATS_UNPLUGGED) {
             dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, getUnpluggedStartLevel(), 
                     getPluggedStartLevel());
@@ -706,16 +762,57 @@ public abstract class BatteryStats implements Parcelable {
         final long wifiOnTime = getWifiOnTime(batteryRealtime, which);
         final long bluetoothOnTime = getBluetoothOnTime(batteryRealtime, which);
         pw.println(prefix
-                + "  Time with screen on: " + formatTimeMs(screenOnTime / 1000)
+                + "  Screen on: " + formatTimeMs(screenOnTime / 1000)
                 + "(" + formatRatioLocked(screenOnTime, whichBatteryRealtime)
-                + "), time with phone on: " + formatTimeMs(phoneOnTime / 1000)
-                + "(" + formatRatioLocked(phoneOnTime, whichBatteryRealtime)
-                + "), time with wifi on: " + formatTimeMs(wifiOnTime / 1000)
+                + "), Phone on: " + formatTimeMs(phoneOnTime / 1000)
+                + "(" + formatRatioLocked(phoneOnTime, whichBatteryRealtime));
+        pw.println(prefix
+                + "  Wifi on: " + formatTimeMs(wifiOnTime / 1000)
                 + "(" + formatRatioLocked(wifiOnTime, whichBatteryRealtime)
-                + "), time with wifi running: " + formatTimeMs(wifiRunningTime / 1000)
+                + "), Wifi running: " + formatTimeMs(wifiRunningTime / 1000)
                 + "(" + formatRatioLocked(wifiRunningTime, whichBatteryRealtime)
-                + "), time with bluetooth on: " + formatTimeMs(bluetoothOnTime / 1000)
+                + "), Bluetooth on: " + formatTimeMs(bluetoothOnTime / 1000)
                 + "(" + formatRatioLocked(bluetoothOnTime, whichBatteryRealtime)+ ")");
+        
+        sb.setLength(0);
+        sb.append("  Signal strengths: ");
+        boolean didOne = false;
+        for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
+            final long time = getPhoneSignalStrengthTime(i, batteryRealtime, which);
+            if (time == 0) {
+                continue;
+            }
+            if (didOne) sb.append(", ");
+            didOne = true;
+            sb.append(SIGNAL_STRENGTH_NAMES[i]);
+            sb.append(" ");
+            sb.append(formatTimeMs(time/1000));
+            sb.append("(");
+            sb.append(formatRatioLocked(time, whichBatteryRealtime));
+            sb.append(")");
+        }
+        if (!didOne) sb.append("No activity");
+        pw.println(sb.toString());
+        
+        sb.setLength(0);
+        sb.append("  Data types: ");
+        didOne = false;
+        for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
+            final long time = getPhoneDataConnectionTime(i, batteryRealtime, which);
+            if (time == 0) {
+                continue;
+            }
+            if (didOne) sb.append(", ");
+            didOne = true;
+            sb.append(DATA_CONNECTION_NAMES[i]);
+            sb.append(" ");
+            sb.append(formatTimeMs(time/1000));
+            sb.append("(");
+            sb.append(formatRatioLocked(time, whichBatteryRealtime));
+            sb.append(")");
+        }
+        if (!didOne) sb.append("No activity");
+        pw.println(sb.toString());
         
         pw.println(" ");
 
