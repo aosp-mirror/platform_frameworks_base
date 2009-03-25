@@ -727,7 +727,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
         } else if (phone) {
             mInput = DialerKeyListener.getInstance();
-            inputType = EditorInfo.TYPE_CLASS_PHONE;
+            mInputType = inputType = EditorInfo.TYPE_CLASS_PHONE;
         } else if (numeric != 0) {
             mInput = DigitsKeyListener.getInstance((numeric & SIGNED) != 0,
                                                    (numeric & DECIMAL) != 0);
