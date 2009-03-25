@@ -32,6 +32,8 @@ interface IBatteryStats {
     void notePhoneOff();
     void noteWifiOn();
     void noteWifiOff();
+    void noteWifiRunning();
+    void noteWifiStopped();
     void noteBluetoothOn();
     void noteBluetoothOff();
     void noteFullWifiLockAcquired(int uid);

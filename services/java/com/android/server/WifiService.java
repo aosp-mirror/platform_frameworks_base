@@ -50,7 +50,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -64,7 +63,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.BatteryStatsService;
 
 /**
@@ -1874,24 +1872,26 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private boolean releaseWifiLockLocked(IBinder lock) {
-        boolean result;
+        boolean hadLock;
         
         WifiLock wifiLock = mLocks.removeLock(lock);
-        result = (wifiLock != null);
-        
-        int uid = Binder.getCallingUid();
-        long ident = Binder.clearCallingIdentity();
-        try {
-            switch(wifiLock.mLockMode) {
-            case (WifiManager.WIFI_MODE_FULL): mBatteryStats.noteFullWifiLockReleased(uid);
-            case (WifiManager.WIFI_MODE_SCAN_ONLY): mBatteryStats.noteScanWifiLockReleased(uid);
+        hadLock = (wifiLock != null);
+
+        if (hadLock) {
+            int uid = Binder.getCallingUid();
+            long ident = Binder.clearCallingIdentity();
+            try {
+                switch(wifiLock.mLockMode) {
+                    case (WifiManager.WIFI_MODE_FULL): mBatteryStats.noteFullWifiLockReleased(uid);
+                    case (WifiManager.WIFI_MODE_SCAN_ONLY): mBatteryStats.noteScanWifiLockReleased(uid);
+                }
+            } catch (RemoteException e) {
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
-        } catch (RemoteException e) {
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
         
         updateWifiState();
-        return result;
+        return hadLock;
     }
 }
