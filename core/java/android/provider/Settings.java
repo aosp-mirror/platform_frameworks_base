@@ -2314,6 +2314,11 @@ public final class Settings {
         public static final String GMAIL_DISALLOW_IMAGE_PREVIEWS = "gmail_disallow_image_previews";
 
         /**
+         * The maximal size in bytes allowed for attachments when composing messages in Gmail
+         */
+        public static final String GMAIL_MAX_ATTACHMENT_SIZE = "gmail_max_attachment_size_bytes";
+
+        /**
          * The timeout in milliseconds that Gmail uses when opening a connection and reading
          * from it. A missing value or a value of -1 instructs Gmail to use the defaults provided
          * by GoogleHttpClient.
