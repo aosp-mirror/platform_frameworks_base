@@ -409,6 +409,7 @@ private:
     int                     mLoopCount;
     uint32_t                mRemainingFrames;
     uint32_t                mMarkerPosition;
+    bool                    mMarkerReached;
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
 };
