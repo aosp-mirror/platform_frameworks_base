@@ -156,7 +156,6 @@ public class TranslateAnimation extends Animation {
         if (mFromYDelta != mToYDelta) {
             dy = mFromYDelta + ((mToYDelta - mFromYDelta) * interpolatedTime);
         }
-
         t.getMatrix().setTranslate(dx, dy);
     }
 
