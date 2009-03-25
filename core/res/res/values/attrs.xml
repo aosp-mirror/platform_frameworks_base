@@ -1221,7 +1221,8 @@
 
     </declare-styleable>
 
-    <!-- Attributes that can be used with {@link android.view.ViewStub}. -->
+    <!-- A {@link android.view.ViewStub} lets you lazily include other XML layouts
+         inside your application at runtime. -->
     <declare-styleable name="ViewStub">
         <!-- Supply an identifier for the layout resource to inflate when the ViewStub
              becomes visible or when forced to do so. The layout resource must be a
