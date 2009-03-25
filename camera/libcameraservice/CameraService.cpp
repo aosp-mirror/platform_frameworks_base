@@ -283,8 +283,14 @@ CameraService::Client::~Client()
 #endif
     }
 
-    mMediaPlayerBeep.clear();
-    mMediaPlayerClick.clear();
+    if (mMediaPlayerBeep.get() != NULL) {
+        mMediaPlayerBeep->disconnect();
+        mMediaPlayerBeep.clear();
+    }
+    if (mMediaPlayerClick.get() != NULL) {
+        mMediaPlayerClick->disconnect();
+        mMediaPlayerClick.clear();
+    }
 
     // make sure we tear down the hardware
     mClientPid = IPCThreadState::self()->getCallingPid();
@@ -711,9 +717,6 @@ status_t CameraService::Client::takePicture()
         return INVALID_OPERATION;
     }
 
-    if (mMediaPlayerClick.get() != NULL) {
-        mMediaPlayerClick->start();
-    }
     return mHardware->takePicture(shutterCallback,
                                   yuvPictureCallback,
                                   jpegPictureCallback,
@@ -750,6 +753,10 @@ void CameraService::Client::shutterCallback(void *user)
             PIXEL_FORMAT_YCbCr_420_SP, transform, 0, client->mHardware->getRawHeap());
 
         client->mSurface->registerBuffers(buffers);
+    }
+
+    if (client->mMediaPlayerClick.get() != NULL) {
+        client->mMediaPlayerClick->start();
     }
 }
 
