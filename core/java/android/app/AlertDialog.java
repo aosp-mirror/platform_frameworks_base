@@ -763,7 +763,16 @@ public class AlertDialog extends Dialog implements DialogInterface {
             P.mForceInverseBackground = useInverseBackground;
             return this;
         }
-        
+
+        /**
+         * @hide
+         */
+        public Builder setRecycleOnMeasureEnabled(boolean enabled) {
+            P.mRecycleOnMeasure = enabled;
+            return this;
+        }
+
+
         /**
          * Creates a {@link AlertDialog} with the arguments supplied to this builder. It does not
          * {@link Dialog#show()} the dialog. This allows the user to do any extra processing

@@ -67,6 +67,10 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogIn
         
         // Set the key listener
         builder.setOnKeyListener(this);
+
+        // Since this is for a menu, disable the recycling of views
+        // This is done by the menu framework anyway
+        builder.setRecycleOnMeasureEnabled(false);
         
         // Show the menu
         mDialog = builder.create();
@@ -97,11 +101,8 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogIn
         }
 
         // Menu shortcut matching
-        if (mMenu.performShortcut(keyCode, event, 0)) {
-            return true;
-        }
-        
-        return false;
+        return mMenu.performShortcut(keyCode, event, 0);
+
     }
 
     /**
