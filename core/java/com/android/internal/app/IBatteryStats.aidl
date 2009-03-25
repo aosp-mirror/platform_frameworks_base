@@ -30,6 +30,8 @@ interface IBatteryStats {
     void noteScreenOff();
     void notePhoneOn();
     void notePhoneOff();
+    void notePhoneSignalStrength(int asu);
+    void notePhoneDataConnectionState(int dataType, boolean hasData);
     void noteWifiOn();
     void noteWifiOff();
     void noteWifiRunning();
