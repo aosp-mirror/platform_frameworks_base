@@ -933,8 +933,13 @@ public class EditStyledText extends EditText {
                 Log.d(LOG_TAG, "--- setStyledTextSpan:" + mMode + ","
                         + start + "," + end);
             }
-            mEST.getText().setSpan(span, start, end,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (start < end) {
+                mEST.getText().setSpan(span, start, end,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                mEST.getText().setSpan(span, end, start,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
 
         private void changeSizeSelectedText(int size) {
