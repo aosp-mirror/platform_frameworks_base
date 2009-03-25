@@ -2365,6 +2365,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         ttoken.startingWindow = null;
                         ttoken.startingMoved = true;
                         startingWindow.mToken = wtoken;
+                        startingWindow.mRootToken = wtoken;
                         startingWindow.mAppToken = wtoken;
                         mWindows.remove(startingWindow);
                         ttoken.windows.remove(startingWindow);
