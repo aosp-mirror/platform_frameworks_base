@@ -26,7 +26,8 @@ import java.io.IOException;
 
 public class VCardParser {
 
-    VParser mParser = null;
+    // TODO: fix this.
+    VCardParser_V21 mParser = null;
 
     public final static String VERSION_VCARD21 = "vcard2.1";
 

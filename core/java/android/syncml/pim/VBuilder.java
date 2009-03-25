@@ -16,7 +16,7 @@
 
 package android.syncml.pim;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface VBuilder {
     void start();
@@ -38,9 +38,14 @@ public interface VBuilder {
     void endProperty();
 
     /**
+     * @param group 
+     */
+    void propertyGroup(String group);
+    
+    /**
      * @param name
-     *            a.N <br>
-     *            a.N
+     *            N <br>
+     *            N
      */
     void propertyName(String name);
 
@@ -58,5 +63,5 @@ public interface VBuilder {
      */
     void propertyParamValue(String value);
 
-    void propertyValues(Collection<String> values);
+    void propertyValues(List<String> values);
 }
