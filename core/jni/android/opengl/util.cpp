@@ -599,6 +599,44 @@ static int getInternalFormat(SkBitmap::Config config)
     }
 }
 
+static int getType(SkBitmap::Config config)
+{
+    switch(config) {
+        case SkBitmap::kA8_Config:
+            return GL_UNSIGNED_BYTE;
+        case SkBitmap::kARGB_4444_Config:
+            return GL_UNSIGNED_SHORT_4_4_4_4;
+        case SkBitmap::kARGB_8888_Config:
+            return GL_UNSIGNED_BYTE;
+        case SkBitmap::kIndex8_Config:
+            return -1; // No type for compressed data.
+        case SkBitmap::kRGB_565_Config:
+            return GL_UNSIGNED_SHORT_5_6_5;
+        default:
+            return -1;
+    }
+}
+
+static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
+        jobject jbitmap)
+{
+    SkBitmap const * nativeBitmap =
+            (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
+    const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap::Config config = bitmap.getConfig();
+    return getInternalFormat(config);
+}
+
+static jint util_getType(JNIEnv *env, jclass clazz,
+        jobject jbitmap)
+{
+    SkBitmap const * nativeBitmap =
+            (SkBitmap const *)env->GetIntField(jbitmap, nativeBitmapID);
+    const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap::Config config = bitmap.getConfig();
+    return getType(config);
+}
+
 static jint util_texImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint internalformat,
         jobject jbitmap, jint type, jint border)
@@ -609,6 +647,9 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     SkBitmap::Config config = bitmap.getConfig();
     if (internalformat < 0) {
         internalformat = getInternalFormat(config);
+    }
+    if (type < 0) {
+        type = getType(config);
     }
     int err = checkFormat(config, internalformat, type);
     if (err)
@@ -694,6 +735,8 @@ static JNINativeMethod gVisiblityMethods[] = {
 
 static JNINativeMethod gUtilsMethods[] = {
     {"nativeClassInit", "()V",                          (void*)nativeUtilsClassInit },
+    { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat }, 
+    { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType }, 
     { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D }, 
     { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D }, 
 };
