@@ -52,7 +52,7 @@ public:
     virtual bool needsBlending() const;
     virtual bool isSecure() const       { return false; }
 private:
-    void drawScaled(float angle, float scale, float alpha) const;
+    void drawScaled(float scale, float alpha) const;
 
     OrientationAnimation* mAnim;
     LayerBitmap mBitmap;
@@ -62,7 +62,6 @@ private:
     bool mOrientationCompleted;
     mutable bool mFirstRedraw;
     mutable float mLastNormalizedTime;
-    mutable float mLastAngle;
     mutable float mLastScale;
     mutable GLuint  mTextureName;
     mutable GLuint  mTextureNameIn;
