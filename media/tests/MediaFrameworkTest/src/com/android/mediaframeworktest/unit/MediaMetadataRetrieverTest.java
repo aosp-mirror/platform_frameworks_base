@@ -22,8 +22,7 @@ import android.graphics.Bitmap;
 import java.io.FileOutputStream;
 import android.test.AndroidTestCase;
 import com.android.mediaframeworktest.MediaNames;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
+import android.test.suitebuilder.annotation.*;
 
 /**
  * WARNING:
@@ -35,7 +34,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     private static final String TAG         = "MediaMetadataRetrieverTest";
    
     // Test album art extraction.
-    @LargeTest
+    @MediumTest
     public static void testAlbumArt() throws Exception {
         Log.v(TAG, "testAlbumArt starts.");
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
@@ -109,7 +108,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
 
     // If the specified call order and valid media file is used, no exception
     // should be thrown.
-    @LargeTest
+    @MediumTest
     public static void testBasicNormalMethodCallSequence() throws Exception {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
@@ -136,7 +135,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
 
     // If setDataSource() has not been called, both captureFrame() and extractMetadata() must
     // return null.
-    @LargeTest
+    @MediumTest
     public static void testBasicAbnormalMethodCallSequence() {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
@@ -145,7 +144,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     }
 
     // Test setDataSource()
-    @LargeTest
+    @MediumTest
     public static void testSetDataSource() {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
@@ -190,7 +189,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     // Due to the lack of permission to access hardware decoder, any calls
     // attempting to capture a frame will fail. These are commented out for now
     // until we find a solution to this access permission problem.
-    @LargeTest
+    @MediumTest
     public static void testIntendedUsage() {
         // By default, capture frame and retrieve metadata
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
