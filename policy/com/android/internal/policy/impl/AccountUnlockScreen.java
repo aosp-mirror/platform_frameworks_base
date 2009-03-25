@@ -19,21 +19,15 @@ package com.android.internal.policy.impl;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
-import android.accounts.AccountsServiceConstants;
-import android.accounts.IAccountsService;
-import android.content.ComponentName;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Rect;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.LoginFilter;
 import android.text.TextWatcher;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,12 +39,9 @@ import android.widget.TextView;
 /**
  * When the user forgets their password a bunch of times, we fall back on their
  * account's login/password to unlock the phone (and reset their lock pattern).
- *
- * <p>This class is useful only on platforms that support the
- * IAccountsService.
  */
 public class AccountUnlockScreen extends RelativeLayout implements KeyguardScreen,
-        View.OnClickListener, ServiceConnection, TextWatcher {
+        View.OnClickListener, TextWatcher {
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
     private static final String LOCK_PATTERN_CLASS =
             "com.android.settings.ChooseLockPattern";
@@ -62,7 +53,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     private final KeyguardScreenCallback mCallback;
     private final LockPatternUtils mLockPatternUtils;
-    private IAccountsService mAccountsService;
+    private AccountManager mAccountManager;
 
     private TextView mTopHeader;
     private TextView mInstructions;
@@ -73,9 +64,6 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     /**
      * AccountUnlockScreen constructor.
-     *
-     * @throws IllegalStateException if the IAccountsService is not
-     * available on the current platform.
      */
     public AccountUnlockScreen(Context context,
             KeyguardScreenCallback callback,
@@ -103,13 +91,11 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
         mEmergencyCall = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCall.setOnClickListener(this);
+    }
 
-        Log.v("AccountUnlockScreen", "debug: Connecting to accounts service");
-        final boolean connected = mContext.bindService(AccountsServiceConstants.SERVICE_INTENT,
-                this, Context.BIND_AUTO_CREATE);
-        if (!connected) {
-            Log.v("AccountUnlockScreen", "debug: Couldn't connect to accounts service");
-            throw new IllegalStateException("couldn't bind to accounts service");
+    void ensureAccountManager() {
+        if (mAccountManager == null) {
+            mAccountManager = (AccountManager)mContext.getSystemService(Context.ACCOUNT_SERVICE);
         }
     }
 
@@ -150,7 +136,6 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     /** {@inheritDoc} */
     public void cleanUp() {
-        mContext.unbindService(this);
     }
 
     /** {@inheritDoc} */
@@ -207,13 +192,9 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
      * @return an account name from the database, or null if we can't
      * find a single best match.
      */
-    private String findIntendedAccount(String username) {
-        String[] accounts = null;
-        try {
-            accounts = mAccountsService.getAccounts();
-        } catch (RemoteException e) {
-            return null;
-        }
+    private Account findIntendedAccount(String username) {
+        ensureAccountManager();
+        Account[] accounts = mAccountManager.blockingGetAccounts();
         if (accounts == null) {
             return null;
         }
@@ -222,18 +203,18 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         // typed only the username (and not the domain), or got
         // the case wrong.
 
-        String bestAccount = null;
+        Account bestAccount = null;
         int bestScore = 0;
-        for (String a: accounts) {
+        for (Account a: accounts) {
             int score = 0;
-            if (username.equals(a)) {
+            if (username.equals(a.mName)) {
                 score = 4;
-            } else if (username.equalsIgnoreCase(a)) {
+            } else if (username.equalsIgnoreCase(a.mName)) {
                 score = 3;
             } else if (username.indexOf('@') < 0) {
-                int i = a.indexOf('@');
+                int i = a.mName.indexOf('@');
                 if (i >= 0) {
-                    String aUsername = a.substring(0, i);
+                    String aUsername = a.mName.substring(0, i);
                     if (username.equals(aUsername)) {
                         score = 2;
                     } else if (username.equalsIgnoreCase(aUsername)) {
@@ -254,25 +235,12 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     private boolean checkPassword() {
         final String login = mLogin.getText().toString();
         final String password = mPassword.getText().toString();
-        try {
-            String account = findIntendedAccount(login);
-            if (account == null) {
-                return false;
-            }
-            return mAccountsService.shouldUnlock(account, password);
-        } catch (RemoteException e) {
+        Account account = findIntendedAccount(login);
+        if (account == null) {
             return false;
         }
-    }
-
-    /** {@inheritDoc} */
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        Log.v("AccountUnlockScreen", "debug: About to grab as interface");
-        mAccountsService = IAccountsService.Stub.asInterface(service);
-    }
-
-    /** {@inheritDoc} */
-    public void onServiceDisconnected(ComponentName name) {
-        mAccountsService = null;
+        // change this to asynchronously issue the request and wait for the response
+        ensureAccountManager();
+        return mAccountManager.authenticateAccount(account, password);
     }
 }

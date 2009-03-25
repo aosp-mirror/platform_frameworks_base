@@ -16,15 +16,10 @@
 
 package com.android.internal.policy.impl;
 
-import android.accounts.AccountsServiceConstants;
-import android.accounts.IAccountsService;
+import android.accounts.AccountManager;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import com.android.internal.telephony.SimCard;
 import android.text.TextUtils;
@@ -131,11 +126,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private final LockPatternUtils mLockPatternUtils;
 
     /**
-     * Used to fetch accounts from GLS.
-     */
-    private ServiceConnection mServiceConnection;
-
-    /**
      * @return Whether we are stuck on the lock screen because the sim is
      *   missing.
      */
@@ -158,9 +148,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             LockPatternUtils lockPatternUtils,
             KeyguardWindowController controller) {
         super(context);
-        
-        asyncCheckForAccount();
-        
+
+        AccountManager accountManager =
+                (AccountManager)context.getSystemService(Context.ACCOUNT_SERVICE);
+        mHasAccount = accountManager.blockingGetAccounts().length > 0;
+
         mRequiresSim =
                 TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));
 
@@ -277,35 +269,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         updateScreen(mMode);
     }
 
-    /** 
-     * Asynchronously checks for at least one account. This will set mHasAccount
-     * to true if an account is found.
-     */
-    private void asyncCheckForAccount() {
-        
-        mServiceConnection = new ServiceConnection() {
-            public void onServiceConnected(ComponentName className, IBinder service) {
-                try {
-                    IAccountsService accountsService = IAccountsService.Stub.asInterface(service);
-                    String accounts[] = accountsService.getAccounts();
-                    mHasAccount = (accounts.length > 0);
-                } catch (RemoteException e) {
-                    // Not much we can do here...
-                    Log.e(TAG, "Gls died while attempting to get accounts: " + e);
-                } finally {
-                    getContext().unbindService(mServiceConnection);
-                    mServiceConnection = null;
-                }
-            }
-
-            public void onServiceDisconnected(ComponentName className) {
-                // nothing to do here
-            }
-        };
-        boolean status = getContext().bindService(AccountsServiceConstants.SERVICE_INTENT,
-                mServiceConnection, Context.BIND_AUTO_CREATE);
-        if (!status) Log.e(TAG, "Failed to bind to GLS while checking for account");
-    }
 
     @Override
     public void reset() {
