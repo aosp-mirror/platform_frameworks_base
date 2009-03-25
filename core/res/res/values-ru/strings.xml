@@ -113,15 +113,11 @@
     <string name="global_action_toggle_silent_mode">"Беззвучный режим"</string>
     <string name="global_action_silent_mode_on_status">"Звук выключен"</string>
     <string name="global_action_silent_mode_off_status">"Звук включен"</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
+    <string name="global_actions_toggle_airplane_mode">"Режим полета"</string>
+    <string name="global_actions_airplane_mode_on_status">"Режим полета ВКЛЮЧЕН"</string>
+    <string name="global_actions_airplane_mode_off_status">"Режим полета ВЫКЛЮЧЕН"</string>
     <string name="safeMode">"Безопасный режим"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
+    <string name="android_system_label">"Система Android"</string>
     <string name="permgrouplab_costMoney">"Платные службы"</string>
     <string name="permgroupdesc_costMoney">"Разрешить приложениям выполнять действия, за которые может взиматься плата."</string>
     <string name="permgrouplab_messages">"Сообщения"</string>
@@ -296,10 +292,8 @@
     <string name="permdesc_locationUpdates">"Разрешает включение/отключение уведомлений о местоположении по радиосвязи. Не используется обычными приложениями."</string>
     <string name="permlab_checkinProperties">"открывать свойства проверки"</string>
     <string name="permdesc_checkinProperties">"Разрешает доступ на чтение и запись к свойствам, загруженным службой проверки. Не используется обычными приложениями."</string>
-    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
-    <skip />
+    <string name="permlab_bindGadget">"выбирать виджеты"</string>
+    <string name="permdesc_bindGadget">"Позволяет приложению сообщить системе, какие приложения могут использовать какие виджеты. Это разрешение позволяет приложениям предоставлять другим приложениям доступ к личной информации. Не предназначено для использования обычными приложениями."</string>
     <string name="permlab_modifyPhoneState">"изменять состояние телефона"</string>
     <string name="permdesc_modifyPhoneState">"Позволяет приложению управлять телефонными функциями устройства. Приложение с такими полномочиями может переключать сети, включать и выключать радиосвязь и т.д., не сообщая вам об этом."</string>
     <string name="permlab_readPhoneState">"считывать состояние телефона"</string>
@@ -409,8 +403,7 @@
     <string name="lockscreen_emergency_call">"Экстренный вызов"</string>
     <string name="lockscreen_pattern_correct">"Верно!"</string>
     <string name="lockscreen_pattern_wrong">"Неверно, попробуйте еще раз"</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_plugged_in">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Подключите зарядное устройство."</string>
     <string name="lockscreen_missing_sim_message_short">"Нет SIM-карты."</string>
     <string name="lockscreen_missing_sim_message">"В телефоне нет SIM-карты."</string>
@@ -426,8 +419,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Забыли комбинацию?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Слишком много попыток ввести комбинацию!"</string>
-    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
-    <skip />
+    <string name="lockscreen_glogin_instructions">"Для разблокировки войдите с помощью своего аккаунта Google"</string>
     <string name="lockscreen_glogin_username_hint">"Имя пользователя (адрес электронной почты)"</string>
     <string name="lockscreen_glogin_password_hint">"Пароль"</string>
     <string name="lockscreen_glogin_submit_button">"Войти"</string>
@@ -435,16 +427,13 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
-    <skip />
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"Очистить уведомления"</string>
     <string name="status_bar_no_notifications_title">"Нет уведомлений"</string>
     <string name="status_bar_ongoing_events_title">"Текущие"</string>
     <string name="status_bar_latest_events_title">"Уведомления"</string>
-    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
-    <skip />
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"Идет зарядка..."</string>
     <string name="battery_low_title">"Подключите зарядное устройство"</string>
     <string name="battery_low_subtitle">"Батарея садится:"</string>
@@ -566,8 +555,7 @@
     <string name="monthly">"Ежемесячно"</string>
     <string name="yearly">"Ежегодно"</string>
     <string name="VideoView_error_title">"Не удается воспроизвести видео"</string>
-    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
-    <skip />
+    <string name="VideoView_error_text_invalid_progressive_playback">"К сожалению, это видео не подходит для потокового воспроизведения на данном устройстве."</string>
     <string name="VideoView_error_text_unknown">"К сожалению, это видео нельзя воспроизвести."</string>
     <string name="VideoView_error_button">"ОК"</string>
     <string name="am">"AM"</string>
@@ -594,13 +582,11 @@
     <string name="Noon">"Полдень"</string>
     <string name="midnight">"полночь"</string>
     <string name="Midnight">"Полночь"</string>
-    <!-- no translation found for month_day (3693060561170538204) -->
-    <skip />
+    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
-    <skip />
+    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g> <xliff:g id="MONTH">%B</xliff:g> г."</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
@@ -628,10 +614,8 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
-    <skip />
-    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
-    <skip />
+    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g> г."</string>
+    <string name="abbrev_month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g>"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"воскресенье"</string>
@@ -814,20 +798,16 @@
     <string name="activity_list_empty">"Подходящих действий не найдено"</string>
     <string name="permlab_pkgUsageStats">"обновлять статистику использования компонентов"</string>
     <string name="permdesc_pkgUsageStats">"Позволяет изменять собранную статистику использования компонентов. Не предназначено для использования обычными приложениями."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <string name="tutorial_double_tap_to_zoom_message_short">"Нажмите дважды для изменения масштаба"</string>
+    <string name="gadget_host_error_inflating">"Ошибка при наполнении виджета"</string>
+    <string name="ime_action_go">"Выбрать"</string>
+    <string name="ime_action_search">"Поиск"</string>
+    <string name="ime_action_send">"Отправить"</string>
+    <string name="ime_action_next">"Далее"</string>
+    <string name="ime_action_done">"Готово"</string>
+    <string name="ime_action_default">"Выполнить"</string>
+    <!-- no translation found for dial_number_using (5789176425167573586) -->
     <skip />
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
-    <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_done (8971516117910934605) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <!-- no translation found for create_contact_using (4947405226788104538) -->
     <skip />
 </resources>

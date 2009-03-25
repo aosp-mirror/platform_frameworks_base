@@ -113,15 +113,11 @@
     <string name="global_action_toggle_silent_mode">"静音模式"</string>
     <string name="global_action_silent_mode_on_status">"声音已关闭"</string>
     <string name="global_action_silent_mode_off_status">"声音已开启"</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
+    <string name="global_actions_toggle_airplane_mode">"飞行模式"</string>
+    <string name="global_actions_airplane_mode_on_status">"飞行模式已开启"</string>
+    <string name="global_actions_airplane_mode_off_status">"飞行模式已关闭"</string>
     <string name="safeMode">"安全模式"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
+    <string name="android_system_label">"Android 系统"</string>
     <string name="permgrouplab_costMoney">"需要您支付费用的服务"</string>
     <string name="permgroupdesc_costMoney">"允许应用程序执行可能需要您支付费用的操作。"</string>
     <string name="permgrouplab_messages">"您的信息"</string>
@@ -296,10 +292,8 @@
     <string name="permdesc_locationUpdates">"允许启用/禁用来自收音机的位置更新通知。普通应用程序不能使用此权限。"</string>
     <string name="permlab_checkinProperties">"访问检入属性"</string>
     <string name="permdesc_checkinProperties">"允许对检入服务上传的属性进行读/写访问。普通应用程序不能使用此权限。"</string>
-    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
-    <skip />
+    <string name="permlab_bindGadget">"选择窗口小部件"</string>
+    <string name="permdesc_bindGadget">"允许应用程序告诉系统哪个应用程序可以使用哪些窗口小部件。具有该权限的应用程序可以允许其他应用程序访问个人数据。普通应用程序不适合使用此权限。"</string>
     <string name="permlab_modifyPhoneState">"修改手机状态"</string>
     <string name="permdesc_modifyPhoneState">"允许应用程序控制设备的手机功能。具有此权限的应用程序可能会切换网络，打开和关闭手机收音机以及类似操作，而不会通知您。"</string>
     <string name="permlab_readPhoneState">"读取手机状态"</string>
@@ -409,8 +403,7 @@
     <string name="lockscreen_emergency_call">"紧急电话"</string>
     <string name="lockscreen_pattern_correct">"正确！"</string>
     <string name="lockscreen_pattern_wrong">"很抱歉，请重试"</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_plugged_in">"正在充电 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"连接您的充电器。"</string>
     <string name="lockscreen_missing_sim_message_short">"没有 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_message">"手机中无 SIM 卡。"</string>
@@ -426,8 +419,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_forgot_pattern_button_text">"忘记了图案？"</string>
     <string name="lockscreen_glogin_too_many_attempts">"图案尝试次数太多！"</string>
-    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
-    <skip />
+    <string name="lockscreen_glogin_instructions">"要解除锁定，请使用您的 Google 帐户登录"</string>
     <string name="lockscreen_glogin_username_hint">"用户名（电子邮件）"</string>
     <string name="lockscreen_glogin_password_hint">"密码"</string>
     <string name="lockscreen_glogin_submit_button">"登录"</string>
@@ -435,16 +427,13 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
-    <skip />
+    <string name="hour_ampm">"<xliff:g id="AMPM">%P</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="AMPM">%p</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
     <string name="status_bar_clear_all_button">"清除通知"</string>
     <string name="status_bar_no_notifications_title">"无通知"</string>
     <string name="status_bar_ongoing_events_title">"正在进行的"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
-    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
-    <skip />
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"正在充电..."</string>
     <string name="battery_low_title">"请连接充电器"</string>
     <string name="battery_low_subtitle">"电量在减少："</string>
@@ -566,8 +555,7 @@
     <string name="monthly">"每月"</string>
     <string name="yearly">"每年"</string>
     <string name="VideoView_error_title">"无法播放视频"</string>
-    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
-    <skip />
+    <string name="VideoView_error_text_invalid_progressive_playback">"抱歉，该视频不适合在此设备上播放。"</string>
     <string name="VideoView_error_text_unknown">"很抱歉，此视频不能播放。"</string>
     <string name="VideoView_error_button">"确定"</string>
     <string name="am">"上午"</string>
@@ -594,13 +582,11 @@
     <string name="Noon">"中午"</string>
     <string name="midnight">"午夜"</string>
     <string name="Midnight">"午夜"</string>
-    <!-- no translation found for month_day (3693060561170538204) -->
-    <skip />
+    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
-    <skip />
+    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日 <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
@@ -628,10 +614,8 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
-    <skip />
-    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
-    <skip />
+    <string name="abbrev_month_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g> 月"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"周日"</string>
@@ -814,20 +798,16 @@
     <string name="activity_list_empty">"找不到匹配的活动"</string>
     <string name="permlab_pkgUsageStats">"更新组件使用情况统计"</string>
     <string name="permdesc_pkgUsageStats">"允许修改收集的组件使用情况统计。普通应用程序不能使用此权限。"</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <string name="tutorial_double_tap_to_zoom_message_short">"双击可以进行缩放控制"</string>
+    <string name="gadget_host_error_inflating">"放大窗口小部件时出错"</string>
+    <string name="ime_action_go">"开始"</string>
+    <string name="ime_action_search">"搜索"</string>
+    <string name="ime_action_send">"发送"</string>
+    <string name="ime_action_next">"下一步"</string>
+    <string name="ime_action_done">"完成"</string>
+    <string name="ime_action_default">"执行"</string>
+    <!-- no translation found for dial_number_using (5789176425167573586) -->
     <skip />
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
-    <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_done (8971516117910934605) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <!-- no translation found for create_contact_using (4947405226788104538) -->
     <skip />
 </resources>

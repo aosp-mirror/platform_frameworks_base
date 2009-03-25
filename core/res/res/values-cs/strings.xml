@@ -113,15 +113,11 @@
     <string name="global_action_toggle_silent_mode">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status">"Zvuk je zapnutý"</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
+    <string name="global_actions_toggle_airplane_mode">"Režim V letadle"</string>
+    <string name="global_actions_airplane_mode_on_status">"Režim V letadle je ZAPNUTÝ"</string>
+    <string name="global_actions_airplane_mode_off_status">"Režim V letadle je VYPNUTÝ"</string>
     <string name="safeMode">"Nouzový režim"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
+    <string name="android_system_label">"Systém Android"</string>
     <string name="permgrouplab_costMoney">"Zpoplatněné služby"</string>
     <string name="permgroupdesc_costMoney">"Umožňuje aplikacím provádět činnosti, které vás mohou stát peníze."</string>
     <string name="permgrouplab_messages">"Vaše zprávy"</string>
@@ -296,10 +292,8 @@
     <string name="permdesc_locationUpdates">"Umožňuje povolit či zakázat aktualizace polohy prostřednictvím bezdrátového připojení. Aplikace toto nastavení obvykle nepoužívají."</string>
     <string name="permlab_checkinProperties">"přístup k vlastnostem Checkin"</string>
     <string name="permdesc_checkinProperties">"Umožňuje čtení i zápis vlastností nahraných službou Checkin. Běžné aplikace toto nastavení obvykle nevyužívají."</string>
-    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
-    <skip />
+    <string name="permlab_bindGadget">"zvolit widgety"</string>
+    <string name="permdesc_bindGadget">"Umožňuje aplikaci sdělit systému, které aplikace mohou používat které widgety. Aplikace s tímto oprávněním mohou zpřístupnit osobní údaje jiným aplikacím. Není určeno pro běžné aplikace."</string>
     <string name="permlab_modifyPhoneState">"změny stavu telefonu"</string>
     <string name="permdesc_modifyPhoneState">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním může přepínat sítě nebo zapnout či vypnout bezdrátové připojení telefonu bez vašeho svolení."</string>
     <string name="permlab_readPhoneState">"zjistit stav telefonu"</string>
@@ -409,8 +403,7 @@
     <string name="lockscreen_emergency_call">"Tísňové volání"</string>
     <string name="lockscreen_pattern_correct">"Správně!"</string>
     <string name="lockscreen_pattern_wrong">"Zkuste to prosím znovu"</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_plugged_in">"Nabíjení (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Připojte dobíjecí zařízení."</string>
     <string name="lockscreen_missing_sim_message_short">"Není vložena SIM karta."</string>
     <string name="lockscreen_missing_sim_message">"V telefonu není žádná karta SIM."</string>
@@ -426,8 +419,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Sekundy zbývající do dalšího pokusu: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Zapomněli jste gesto?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Gesta: Příliš mnoho pokusů"</string>
-    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
-    <skip />
+    <string name="lockscreen_glogin_instructions">"Chcete-li telefon odemknout, přihlaste se pomocí svého účtu Google"</string>
     <string name="lockscreen_glogin_username_hint">"Uživatelské jméno (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint">"Heslo"</string>
     <string name="lockscreen_glogin_submit_button">"Přihlásit se"</string>
@@ -435,16 +427,13 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
-    <skip />
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"Vymazat oznámení"</string>
     <string name="status_bar_no_notifications_title">"Žádná oznámení"</string>
     <string name="status_bar_ongoing_events_title">"Probíhající"</string>
     <string name="status_bar_latest_events_title">"Oznámení"</string>
-    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
-    <skip />
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"Nabíjení..."</string>
     <string name="battery_low_title">"Prosím připojte dobíjecí zařízení"</string>
     <string name="battery_low_subtitle">"Baterie je vybitá:"</string>
@@ -566,8 +555,7 @@
     <string name="monthly">"Měsíčně"</string>
     <string name="yearly">"Ročně"</string>
     <string name="VideoView_error_title">"Video nelze přehrát"</string>
-    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
-    <skip />
+    <string name="VideoView_error_text_invalid_progressive_playback">"Omlouváme se, ale toto video nelze přenášet datovým proudem do tohoto zařízení."</string>
     <string name="VideoView_error_text_unknown">"Toto video bohužel nelze přehrát."</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"dop."</string>
@@ -594,13 +582,11 @@
     <string name="Noon">"Poledne"</string>
     <string name="midnight">"půlnoc"</string>
     <string name="Midnight">"Půlnoc"</string>
-    <!-- no translation found for month_day (3693060561170538204) -->
-    <skip />
+    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
-    <skip />
+    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
@@ -628,10 +614,8 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
-    <skip />
-    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
-    <skip />
+    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"neděle"</string>
@@ -814,20 +798,16 @@
     <string name="activity_list_empty">"Nebyly nalezeny žádné odpovídající aktivity."</string>
     <string name="permlab_pkgUsageStats">"aktualizovat statistiku použití součástí"</string>
     <string name="permdesc_pkgUsageStats">"Umožňuje změnu shromážděných statistických údajů o použití součástí. Není určeno pro běžné aplikace."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <string name="tutorial_double_tap_to_zoom_message_short">"Poklepáním můžete ovládat přiblížení"</string>
+    <string name="gadget_host_error_inflating">"Chyba při spouštění widgetu"</string>
+    <string name="ime_action_go">"Přejít"</string>
+    <string name="ime_action_search">"Hledat"</string>
+    <string name="ime_action_send">"Odeslat"</string>
+    <string name="ime_action_next">"Další"</string>
+    <string name="ime_action_done">"Hotovo"</string>
+    <string name="ime_action_default">"Spustit"</string>
+    <!-- no translation found for dial_number_using (5789176425167573586) -->
     <skip />
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
-    <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_done (8971516117910934605) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <!-- no translation found for create_contact_using (4947405226788104538) -->
     <skip />
 </resources>
