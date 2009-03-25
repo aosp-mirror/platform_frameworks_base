@@ -912,11 +912,11 @@
         android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to collect component usage
-         statistics -->
+         statistics @hide -->
     <permission android:name="android.permission.PACKAGE_USAGE_STATS"
         android:label="@string/permlab_pkgUsageStats"
         android:description="@string/permdesc_pkgUsageStats"
-        android:protectionLevel="normal" />
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to collect battery statistics -->
     <permission android:name="android.permission.BATTERY_STATS"
