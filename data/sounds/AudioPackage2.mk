@@ -10,6 +10,15 @@
 local_path:= frameworks/base/data/sounds
 
 PRODUCT_COPY_FILES += \
+	$(local_path)/F1_MissedCall.ogg:system/media/audio/notifications/F1_MissedCall.ogg \
+	$(local_path)/F1_New_MMS.ogg:system/media/audio/notifications/F1_New_MMS.ogg \
+	$(local_path)/F1_New_SMS.ogg:system/media/audio/notifications/F1_New_SMS.ogg \
+	$(local_path)/Alarm_Buzzer.ogg:system/media/audio/alarms/Alarm_Buzzer.ogg \
+	$(local_path)/Alarm_Beep_01.ogg:system/media/audio/alarms/Alarm_Beep_01.ogg \
+	$(local_path)/Alarm_Beep_02.ogg:system/media/audio/alarms/Alarm_Beep_02.ogg \
+	$(local_path)/Alarm_Classic.ogg:system/media/audio/alarms/Alarm_Classic.ogg \
+	$(local_path)/Alarm_Beep_03.ogg:system/media/audio/alarms/Alarm_Beep_03.ogg \
+	$(local_path)/Alarm_Rooster_02.ogg:system/media/audio/alarms/Alarm_Rooster_02.ogg \
 	$(local_path)/Ring_Classic_02.ogg:system/media/audio/ringtones/Ring_Classic_02.ogg \
 	$(local_path)/Ring_Digital_02.ogg:system/media/audio/ringtones/Ring_Digital_02.ogg \
 	$(local_path)/Ring_Synth_04.ogg:system/media/audio/ringtones/Ring_Synth_04.ogg \
@@ -40,13 +49,26 @@ PRODUCT_COPY_FILES += \
 	$(local_path)/newwavelabs/TwirlAway.ogg:system/media/audio/ringtones/TwirlAway.ogg \
 	$(local_path)/newwavelabs/VeryAlarmed.ogg:system/media/audio/ringtones/VeryAlarmed.ogg \
 	$(local_path)/newwavelabs/World.ogg:system/media/audio/ringtones/World.ogg \
+	$(local_path)/newwavelabs/CaffeineSnake.ogg:system/media/audio/notifications/CaffeineSnake.ogg \
+	$(local_path)/newwavelabs/DearDeer.ogg:system/media/audio/notifications/DearDeer.ogg \
+	$(local_path)/newwavelabs/DontPanic.ogg:system/media/audio/notifications/DontPanic.ogg \
+	$(local_path)/newwavelabs/Highwire.ogg:system/media/audio/notifications/Highwire.ogg \
+	$(local_path)/newwavelabs/KzurbSonar.ogg:system/media/audio/notifications/KzurbSonar.ogg \
+	$(local_path)/newwavelabs/OnTheHunt.ogg:system/media/audio/notifications/OnTheHunt.ogg \
+	$(local_path)/newwavelabs/Voila.ogg:system/media/audio/notifications/Voila.ogg \
+	$(local_path)/notifications/Beat_Box_Android.ogg:system/media/audio/notifications/Beat_Box_Android.ogg \
+	$(local_path)/notifications/Heaven.ogg:system/media/audio/notifications/Heaven.ogg \
+	$(local_path)/notifications/TaDa.ogg:system/media/audio/notifications/TaDa.ogg \
+	$(local_path)/notifications/Tinkerbell.ogg:system/media/audio/notifications/Tinkerbell.ogg \
 	$(local_path)/effects/Effect_Tick.ogg:system/media/audio/ui/Effect_Tick.ogg \
 	$(local_path)/effects/KeypressStandard.ogg:system/media/audio/ui/KeypressStandard.ogg \
 	$(local_path)/effects/KeypressSpacebar.ogg:system/media/audio/ui/KeypressSpacebar.ogg \
 	$(local_path)/effects/KeypressDelete.ogg:system/media/audio/ui/KeypressDelete.ogg \
 	$(local_path)/effects/KeypressReturn.ogg:system/media/audio/ui/KeypressReturn.ogg \
-        $(LOCAL_PATH)/effects/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
+	$(local_path)/effects/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
 	$(LOCAL_PATH)/effects/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
+	$(local_path)/newwavelabs/CrazyDream.ogg:system/media/audio/ringtones/CrazyDream.ogg \
+	$(local_path)/newwavelabs/DreamTheme.ogg:system/media/audio/ringtones/DreamTheme.ogg \
 	$(local_path)/newwavelabs/Big_Easy.ogg:system/media/audio/ringtones/Big_Easy.ogg \
 	$(local_path)/newwavelabs/Bollywood.ogg:system/media/audio/ringtones/Bollywood.ogg \
 	$(local_path)/newwavelabs/Cairo.ogg:system/media/audio/ringtones/Cairo.ogg \
