@@ -731,6 +731,11 @@ void CameraService::Client::shutterCallback(void *user)
         return;
     }
 
+    // Play shutter sound.
+    if (client->mMediaPlayerClick.get() != NULL) {
+        client->mMediaPlayerClick->start();
+    }
+
     // Screen goes black after the buffer is unregistered.
     if (client->mSurface != 0 && !client->mUseOverlay) {
         client->mSurface->unregisterBuffers();
@@ -753,10 +758,6 @@ void CameraService::Client::shutterCallback(void *user)
             PIXEL_FORMAT_YCbCr_420_SP, transform, 0, client->mHardware->getRawHeap());
 
         client->mSurface->registerBuffers(buffers);
-    }
-
-    if (client->mMediaPlayerClick.get() != NULL) {
-        client->mMediaPlayerClick->start();
     }
 }
 
