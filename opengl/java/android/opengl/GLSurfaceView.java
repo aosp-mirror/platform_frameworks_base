@@ -107,12 +107,66 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void setRenderer(Renderer renderer) {
         if (mGLThread != null) {
-            throw new IllegalStateException("setRenderer has already been called for this instance.");
+            throw new IllegalStateException(
+                    "setRenderer has already been called for this instance.");
+        }
+        if (mEGLConfigChooser == null) {
+            mEGLConfigChooser = new SimpleEGLConfigChooser(true);
         }
         mGLThread = new GLThread(renderer);
         mGLThread.start();
     }
 
+    /**
+     * Set the EGLConfigChooser associated with this view. If this method is
+     * called at all, it must be called before {@link #setRenderer(Renderer)}
+     * is called.
+     * <p>
+     * The supplied configChooser will be used to choose a configuration.
+     * @param configChooser
+     */
+    public void setEGLConfigChooser(EGLConfigChooser configChooser) {
+        if (mGLThread != null) {
+            throw new IllegalStateException(
+                    "setRenderer has already been called for this instance.");
+        }
+        mEGLConfigChooser = configChooser;
+    }
+
+    /**
+     * Set the EGLConfigChooser associated with this view. If this method is
+     * called, it must be called before {@link #setRenderer(Renderer)}
+     * is called.
+     * <p>
+     * This method installs a config chooser which will choose a config
+     * as close to 16-bit RGB as possible, with or without an optional depth
+     * buffer as close to 16-bits as possible.
+     * <p>
+     * If no setEGLConfigChooser method is called, then by default the
+     * view will choose a config as close to 16-bit RGB as possible, with
+     * a depth buffer as close to 16-bits as possible.
+     *
+     * @param needDepth
+     */
+    public void setEGLConfigChooser(boolean needDepth) {
+        setEGLConfigChooser(new SimpleEGLConfigChooser(needDepth));
+    }
+
+    /**
+     * Set the EGLConfigChooser associated with this view. If this method is
+     * called, it must be called before {@link #setRenderer(Renderer)}
+     * is called.
+     * <p>
+     * This method installs a config chooser which will choose a config
+     * with at least the specified component sizes, and as close
+     * to the specified component sizes as possible.
+     *
+     */
+    public void setEGLConfigChooser(int redSize, int greenSize, int blueSize,
+            int alphaSize, int depthSize, int stencilSize) {
+        setEGLConfigChooser(new ComponentSizeChooser(redSize, greenSize,
+                blueSize, alphaSize, depthSize, stencilSize));
+    }
     /**
      * Set the rendering mode. When the renderMode is
      * RENDERMODE_CONTINUOUSLY, the renderer is called
@@ -200,11 +254,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public interface Renderer {
         /**
-         * @return the EGL configuration specification desired by the renderer.
-         */
-        int[] getConfigSpec();
-
-        /**
          * Surface created.
          * Called when the surface is created. Called when the application
          * starts, and whenever the GPU is reinitialized. This will
@@ -235,6 +284,140 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
+     * An interface for choosing a configuration from a list of
+     * potential configurations.
+     *
+     */
+    public interface EGLConfigChooser {
+        /**
+         * Choose a configuration from the list. Implementors typically
+         * implement this method by calling
+         * {@link EGL10#eglChooseConfig} and iterating through the results.
+         * @param egl the EGL10 for the current display.
+         * @param display the current display.
+         * @return the chosen configuration.
+         */
+        EGLConfig chooseConfig(EGL10 egl, EGLDisplay display);
+    }
+
+    private static abstract class BaseConfigChooser
+            implements EGLConfigChooser {
+        public BaseConfigChooser(int[] configSpec) {
+            mConfigSpec = configSpec;
+        }
+        public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
+            int[] num_config = new int[1];
+            egl.eglChooseConfig(display, mConfigSpec, null, 0, num_config);
+
+            int numConfigs = num_config[0];
+
+            if (numConfigs <= 0) {
+                throw new IllegalArgumentException(
+                        "No configs match configSpec");
+            }
+
+            EGLConfig[] configs = new EGLConfig[numConfigs];
+            egl.eglChooseConfig(display, mConfigSpec, configs, numConfigs,
+                    num_config);
+            EGLConfig config = chooseConfig(egl, display, configs);
+            if (config == null) {
+                throw new IllegalArgumentException("No config chosen");
+            }
+            return config;
+        }
+
+        abstract EGLConfig chooseConfig(EGL10 egl, EGLDisplay display,
+                EGLConfig[] configs);
+
+        protected int[] mConfigSpec;
+    }
+
+    private static class ComponentSizeChooser extends BaseConfigChooser {
+        public ComponentSizeChooser(int redSize, int greenSize, int blueSize,
+                int alphaSize, int depthSize, int stencilSize) {
+            super(new int[] {
+                    EGL10.EGL_RED_SIZE, redSize,
+                    EGL10.EGL_GREEN_SIZE, greenSize,
+                    EGL10.EGL_BLUE_SIZE, blueSize,
+                    EGL10.EGL_ALPHA_SIZE, alphaSize,
+                    EGL10.EGL_DEPTH_SIZE, depthSize,
+                    EGL10.EGL_STENCIL_SIZE, stencilSize,
+                    EGL10.EGL_NONE});
+            mValue = new int[1];
+            mRedSize = redSize;
+            mGreenSize = greenSize;
+            mBlueSize = blueSize;
+            mAlphaSize = alphaSize;
+            mDepthSize = depthSize;
+            mStencilSize = stencilSize;
+       }
+
+        @Override
+        public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display,
+                EGLConfig[] configs) {
+            EGLConfig closestConfig = null;
+            int closestDistance = 1000;
+            for(EGLConfig config : configs) {
+                int r = findConfigAttrib(egl, display, config,
+                        EGL10.EGL_RED_SIZE, 0);
+                int g = findConfigAttrib(egl, display, config,
+                         EGL10.EGL_GREEN_SIZE, 0);
+                int b = findConfigAttrib(egl, display, config,
+                          EGL10.EGL_BLUE_SIZE, 0);
+                int a = findConfigAttrib(egl, display, config,
+                        EGL10.EGL_ALPHA_SIZE, 0);
+                int d = findConfigAttrib(egl, display, config,
+                        EGL10.EGL_DEPTH_SIZE, 0);
+                int s = findConfigAttrib(egl, display, config,
+                        EGL10.EGL_STENCIL_SIZE, 0);
+                int distance = Math.abs(r - mRedSize)
+                    + Math.abs(g - mGreenSize)
+                    + Math.abs(b - mBlueSize) + Math.abs(a - mAlphaSize)
+                    + Math.abs(d - mDepthSize) + Math.abs(s - mStencilSize);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestConfig = config;
+                }
+            }
+            return closestConfig;
+        }
+
+        private int findConfigAttrib(EGL10 egl, EGLDisplay display,
+                EGLConfig config, int attribute, int defaultValue) {
+
+            if (egl.eglGetConfigAttrib(display, config, attribute, mValue)) {
+                return mValue[0];
+            }
+            return defaultValue;
+        }
+
+        private int[] mValue;
+        // Subclasses can adjust these values:
+        protected int mRedSize;
+        protected int mGreenSize;
+        protected int mBlueSize;
+        protected int mAlphaSize;
+        protected int mDepthSize;
+        protected int mStencilSize;
+        }
+
+    /**
+     * This class will choose a supported surface as close to
+     * RGB565 as possible, with or without a depth buffer.
+     *
+     */
+    private static class SimpleEGLConfigChooser extends ComponentSizeChooser {
+        public SimpleEGLConfigChooser(boolean withDepthBuffer) {
+            super(4, 4, 4, 0, withDepthBuffer ? 16 : 0, 0);
+            // Adjust target values. This way we'll accept a 4444 or
+            // 555 buffer if there's no 565 buffer available.
+            mRedSize = 5;
+            mGreenSize = 6;
+            mBlueSize = 5;
+        }
+    }
+
+    /**
      * An EGL helper class.
      */
 
@@ -247,7 +430,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
          * Initialize EGL for a given configuration spec.
          * @param configSpec
          */
-        public void start(int[] configSpec){
+        public void start(){
             /*
              * Get an EGL instance
              */
@@ -263,12 +446,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              */
             int[] version = new int[2];
             mEgl.eglInitialize(mEglDisplay, version);
-
-            EGLConfig[] configs = new EGLConfig[1];
-            int[] num_config = new int[1];
-            mEgl.eglChooseConfig(mEglDisplay, configSpec, configs, 1,
-                    num_config);
-            mEglConfig = configs[0];
+            mEglConfig = mEGLConfigChooser.chooseConfig(mEgl, mEglDisplay);
 
             /*
             * Create an OpenGL ES context. This must be done only once, an
@@ -418,12 +596,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         private void guardedRun() throws InterruptedException {
             mEglHelper = new EglHelper();
-            /*
-             * Specify a configuration for our opengl session
-             * and grab the first configuration that matches is
-             */
-            int[] configSpec = mRenderer.getConfigSpec();
-            mEglHelper.start(configSpec);
+            mEglHelper.start();
 
             GL10 gl = null;
             boolean tellRendererSurfaceCreated = true;
@@ -463,7 +636,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     mRequestRender = false;
                 }
                 if (needStart) {
-                    mEglHelper.start(configSpec);
+                    mEglHelper.start();
                     tellRendererSurfaceCreated = true;
                     changed = true;
                 }
@@ -656,6 +829,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private boolean mSizeChanged = true;
 
     private GLThread mGLThread;
+    private EGLConfigChooser mEGLConfigChooser;
     private GLWrapper mGLWrapper;
     private int mDebugFlags;
 }
