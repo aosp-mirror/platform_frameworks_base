@@ -56,7 +56,9 @@ public class FrameLayout extends ViewGroup {
     private final Rect mSelfBounds = new Rect();
     private final Rect mOverlayBounds = new Rect();
     private int mForegroundGravity = Gravity.FILL;
-    private boolean mForegroundInPadding = true;
+
+    /** {@hide} */
+    protected boolean mForegroundInPadding = true;
 
     public FrameLayout(Context context) {
         super(context);
