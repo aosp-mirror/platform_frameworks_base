@@ -829,7 +829,4 @@
     <skip />
     <!-- no translation found for ime_action_default (2840921885558045721) -->
     <skip />
-    <!-- Strings for search suggestions. These are going here because they are referenced by both 
-         ContactsProvider and GoogleContactsProvider -->
-    <string name="dialNumber">"発信"</string>
 </resources>
