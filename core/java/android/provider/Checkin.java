@@ -180,6 +180,7 @@ public final class Checkin {
             MARKET_REASON_PARSE_MANIFEST_MALFORMED,
             MARKET_REASON_PARSE_MANIFEST_EMPTY,
             MARKET_REASON_UNKNOWN,
+            MARKET_STALE_INSTALL_ATTEMPT,
         }
     }
 
