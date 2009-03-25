@@ -62,7 +62,7 @@ public class PowerTest extends TestActivity
         return mTests;
     }
     private Test[] mTests = new Test[] {
-        new Test("Touch events don't poke") {
+        new Test("Cheek events don't poke") {
             public void run() {
                 mPokeState |= LocalPowerManager.POKE_LOCK_IGNORE_CHEEK_EVENTS;
                 try {
@@ -72,9 +72,29 @@ public class PowerTest extends TestActivity
                 }
             }
         },
-        new Test("Touch events poke") {
+        new Test("Cheek events poke") {
             public void run() {
                 mPokeState &= ~LocalPowerManager.POKE_LOCK_IGNORE_CHEEK_EVENTS;
+                try {
+                    mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        },
+        new Test("Touch and Cheek events don't poke") {
+            public void run() {
+                mPokeState |= LocalPowerManager.POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS;
+                try {
+                    mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        },
+        new Test("Touch and Cheek events poke") {
+            public void run() {
+                mPokeState &= ~LocalPowerManager.POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS;
                 try {
                     mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
                 } catch (RemoteException e) {
