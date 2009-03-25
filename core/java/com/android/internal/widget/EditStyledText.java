@@ -471,6 +471,7 @@ public class EditStyledText extends EditText {
             if (DBG) {
                 Log.d(LOG_TAG, "--- onStartEdit");
             }
+            Log.d(LOG_TAG, "--- onstartedit:" + this.getSelectionStart() + this.getSelectionEnd());
             handleResetEdit();
             mEST.notifyStateChanged(mMode, mState);
         }
@@ -855,6 +856,7 @@ public class EditStyledText extends EditText {
             if (DBG) {
                 Log.d(LOG_TAG, "Reset Editor");
             }
+            blockSoftKey();
             handleCancel();
             mEditFlag = true;
             mEST.setHintMessage(HINT_MSG_SELECT_START);
@@ -967,8 +969,7 @@ public class EditStyledText extends EditText {
             }
             int pos = current;
             for (; pos > 0; pos--) {
-                if (text.charAt(pos) == '\n') {
-                    pos++;
+                if (text.charAt(pos - 1) == '\n') {
                     break;
                 }
             }
@@ -982,7 +983,7 @@ public class EditStyledText extends EditText {
             }
             int pos = current;
             for (; pos < text.length(); pos++) {
-                if (text.charAt(pos) == '\n') {
+                if (pos > 0 && text.charAt(pos - 1) == '\n') {
                     break;
                 }
             }
