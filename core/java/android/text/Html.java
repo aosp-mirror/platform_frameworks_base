@@ -152,10 +152,13 @@ public class Html {
             next = text.nextSpanTransition(i, len, ParagraphStyle.class);
             ParagraphStyle[] style = text.getSpans(i, next, ParagraphStyle.class);
             String elements = " ";
+            boolean needDiv = false;
+
             for(int j = 0; j < style.length; j++) {
                 if (style[j] instanceof AlignmentSpan) {
                     Layout.Alignment align = 
                         ((AlignmentSpan) style[j]).getAlignment();
+                    needDiv = true;
                     if (align == Layout.Alignment.ALIGN_CENTER) {
                         elements = "align=\"center\" " + elements;
                     } else if (align == Layout.Alignment.ALIGN_OPPOSITE) {
@@ -165,13 +168,13 @@ public class Html {
                     }
                 }
             }
-            if (style.length > 0) {
+            if (needDiv) {
                 out.append("<div " + elements + ">");
             }
 
             withinDiv(out, text, i, next);
 
-            if (style.length > 0) {
+            if (needDiv) {
                 out.append("</div>");
             }
         }
