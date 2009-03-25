@@ -20,14 +20,14 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * A set of GL utilities inspired by the OpenGL Utility Toolkit.
- * 
+ *
  */
 
 public class GLU {
 
     /**
      * Return an error string from a GL or GLU error code.
-     * 
+     *
      * @param error - a GL or GLU error code.
      * @return the error string for the input error code, or NULL if the input
      *         was not a valid GL or GLU error code.
@@ -56,7 +56,7 @@ public class GLU {
     /**
      * Define a viewing transformation in terms of an eye point, a center of
      * view, and an up vector.
-     * 
+     *
      * @param gl a GL10 interface
      * @param eyeX eye point X
      * @param eyeY eye point Y
@@ -89,46 +89,48 @@ public class GLU {
         float sx = fy * upZ - fz * upY;
         float sy = fz * upX - fx * upZ;
         float sz = fx * upY - fy * upX;
-        
+
         // and normalize s
         float rls = 1.0f / Matrix.length(sx, sy, sz);
         sx *= rls;
         sy *= rls;
         sz *= rls;
-        
+
         // compute u = s x f
         float ux = sy * fz - sz * fy;
         float uy = sz * fx - sx * fz;
         float uz = sx * fy - sy * fx;
 
-        float[] m = new float[16];
-        m[0] = sx;
-        m[1] = ux;
-        m[2] = -fx;
-        m[3] = 0.0f;
+        float[] scratch = sScratch;
+        synchronized(scratch) {
+            scratch[0] = sx;
+            scratch[1] = ux;
+            scratch[2] = -fx;
+            scratch[3] = 0.0f;
 
-        m[4] = sy;
-        m[5] = uy;
-        m[6] = -fy;
-        m[7] = 0.0f;
+            scratch[4] = sy;
+            scratch[5] = uy;
+            scratch[6] = -fy;
+            scratch[7] = 0.0f;
 
-        m[8] = sz;
-        m[9] = uz;
-        m[10] = -fz;
-        m[11] = 0.0f;
+            scratch[8] = sz;
+            scratch[9] = uz;
+            scratch[10] = -fz;
+            scratch[11] = 0.0f;
 
-        m[12] = 0.0f;
-        m[13] = 0.0f;
-        m[14] = 0.0f;
-        m[15] = 1.0f;
+            scratch[12] = 0.0f;
+            scratch[13] = 0.0f;
+            scratch[14] = 0.0f;
+            scratch[15] = 1.0f;
 
-        gl.glMultMatrixf(m, 0);
+            gl.glMultMatrixf(scratch, 0);
+        }
         gl.glTranslatef(-eyeX, -eyeY, -eyeZ);
     }
 
     /**
      * Set up a 2D orthographic projection matrix
-     * 
+     *
      * @param gl
      * @param left
      * @param right
@@ -142,7 +144,7 @@ public class GLU {
 
     /**
      * Set up a perspective projection matrix
-     * 
+     *
      * @param gl a GL10 interface
      * @param fovy specifies the field of view angle, in degrees, in the Y
      *        direction.
@@ -170,7 +172,7 @@ public class GLU {
      * <p>
      * Note that you can use the OES_matrix_get extension, if present, to get
      * the current modelView and projection matrices.
-     * 
+     *
      * @param objX object coordinates X
      * @param objY object coordinates Y
      * @param objZ object coordinates Z
@@ -193,34 +195,38 @@ public class GLU {
     public static int gluProject(float objX, float objY, float objZ,
             float[] model, int modelOffset, float[] project, int projectOffset,
             int[] view, int viewOffset, float[] win, int winOffset) {
-        float[] m = new float[16];
-        Matrix.multiplyMM(m, 0, project, projectOffset, model, modelOffset);
+        float[] scratch = sScratch;
+        synchronized(scratch) {
+            final int M_OFFSET = 0; // 0..15
+            final int V_OFFSET = 16; // 16..19
+            final int V2_OFFSET = 20; // 20..23
+            Matrix.multiplyMM(scratch, M_OFFSET, project, projectOffset,
+                    model, modelOffset);
 
-        float[] v = new float[4];
+            scratch[V_OFFSET + 0] = objX;
+            scratch[V_OFFSET + 1] = objY;
+            scratch[V_OFFSET + 2] = objZ;
+            scratch[V_OFFSET + 3] = 1.0f;
 
-        v[0] = objX;
-        v[1] = objY;
-        v[2] = objZ;
-        v[3] = 1.0f;
+            Matrix.multiplyMV(scratch, V2_OFFSET,
+                    scratch, M_OFFSET, scratch, V_OFFSET);
 
-        float[] v2 = new float[4];
+            float w = scratch[V2_OFFSET + 3];
+            if (w == 0.0f) {
+                return GL10.GL_FALSE;
+            }
 
-        Matrix.multiplyMV(v2, 0, m, 0, v, 0);
+            float rw = 1.0f / w;
 
-        float w = v2[3];
-        if (w == 0.0f) {
-            return GL10.GL_FALSE;
+            win[winOffset] =
+                    view[viewOffset] + view[viewOffset + 2]
+                            * (scratch[V2_OFFSET + 0] * rw + 1.0f)
+                            * 0.5f;
+            win[winOffset + 1] =
+                    view[viewOffset + 1] + view[viewOffset + 3]
+                            * (scratch[V2_OFFSET + 1] * rw + 1.0f) * 0.5f;
+            win[winOffset + 2] = (scratch[V2_OFFSET + 2] * rw + 1.0f) * 0.5f;
         }
-
-        float rw = 1.0f / w;
-
-        win[winOffset] =
-                view[viewOffset] + view[viewOffset + 2] * (v2[0] * rw + 1.0f)
-                        * 0.5f;
-        win[winOffset + 1] =
-                view[viewOffset + 1] + view[viewOffset + 3]
-                        * (v2[1] * rw + 1.0f) * 0.5f;
-        win[winOffset + 2] = (v2[2] * rw + 1.0f) * 0.5f;
 
         return GL10.GL_TRUE;
     }
@@ -232,7 +238,7 @@ public class GLU {
      * <p>
      * Note that you can use the OES_matrix_get extension, if present, to get
      * the current modelView and projection matrices.
-     * 
+     *
      * @param winX window coordinates X
      * @param winY window coordinates Y
      * @param winZ window coordinates Z
@@ -255,34 +261,33 @@ public class GLU {
     public static int gluUnProject(float winX, float winY, float winZ,
             float[] model, int modelOffset, float[] project, int projectOffset,
             int[] view, int viewOffset, float[] obj, int objOffset) {
-        float[] pm = new float[16];
-        Matrix.multiplyMM(pm, 0, project, projectOffset, model, modelOffset);
+        float[] scratch = sScratch;
+        synchronized(scratch) {
+            final int PM_OFFSET = 0; // 0..15
+            final int INVPM_OFFSET = 16; // 16..31
+               final int V_OFFSET = 0; // 0..3 Reuses PM_OFFSET space
+            Matrix.multiplyMM(scratch, PM_OFFSET, project, projectOffset,
+                    model, modelOffset);
 
-        float[] invPM = new float[16];
-        if (!Matrix.invertM(invPM, 0, pm, 0)) {
-            return GL10.GL_FALSE;
+            if (!Matrix.invertM(scratch, INVPM_OFFSET, scratch, PM_OFFSET)) {
+                return GL10.GL_FALSE;
+            }
+
+            scratch[V_OFFSET + 0] =
+                    2.0f * (winX - view[viewOffset + 0]) / view[viewOffset + 2]
+                            - 1.0f;
+            scratch[V_OFFSET + 1] =
+                    2.0f * (winY - view[viewOffset + 1]) / view[viewOffset + 3]
+                            - 1.0f;
+            scratch[V_OFFSET + 2] = 2.0f * winZ - 1.0f;
+            scratch[V_OFFSET + 3] = 1.0f;
+
+            Matrix.multiplyMV(obj, objOffset, scratch, INVPM_OFFSET,
+                    scratch, V_OFFSET);
         }
-
-        float[] v = new float[4];
-
-        v[0] =
-                2.0f * (winX - view[viewOffset + 0]) / view[viewOffset + 2]
-                        - 1.0f;
-        v[1] =
-                2.0f * (winY - view[viewOffset + 1]) / view[viewOffset + 3]
-                        - 1.0f;
-        v[2] = 2.0f * winZ - 1.0f;
-        v[3] = 1.0f;
-
-        float[] v2 = new float[4];
-
-        Matrix.multiplyMV(v2, 0, invPM, 0, v, 0);
-
-        obj[objOffset] = v2[0];
-        obj[objOffset + 1] = v2[1];
-        obj[objOffset + 2] = v2[2];
 
         return GL10.GL_TRUE;
     }
 
+    private static final float[] sScratch = new float[32];
  }
