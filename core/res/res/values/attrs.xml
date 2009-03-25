@@ -2525,17 +2525,34 @@
     </declare-styleable>
 
     <declare-styleable name="AccelerateInterpolator">
-        <!-- This is the amount of deceleration to ad when easing in. -->
+        <!-- This is the amount of deceleration to add when easing in. -->
         <attr name="factor" format="float" />
     </declare-styleable>
     
     <declare-styleable name="DecelerateInterpolator">
-        <!-- This is the amount of acceleration to ad when easing out. -->
+        <!-- This is the amount of acceleration to add when easing out. -->
         <attr name="factor" />
     </declare-styleable>
     
     <declare-styleable name="CycleInterpolator">
         <attr name="cycles" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="AnticipateInterpolator">
+        <!-- This is the amount of tension. -->
+        <attr name="tension" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="OvershootInterpolator">
+        <!-- This is the amount of tension. -->
+        <attr name="tension" />
+    </declare-styleable>
+
+    <declare-styleable name="AnticipateOvershootInterpolator">
+        <!-- This is the amount of tension. -->
+        <attr name="tension" />
+        <!-- This is the amount by which to multiply the tension. -->
+        <attr name="extraTension" format="float" />
     </declare-styleable>
 
     <!-- ========================== -->
