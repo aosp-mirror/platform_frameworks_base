@@ -1615,9 +1615,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void screenTurnedOff(int why) {
+        EventLog.writeEvent(70000, 0);
+        mKeyguardMediator.onScreenTurnedOff(why);
         synchronized (mLock) {
-            EventLog.writeEvent(70000, 0);
-            mKeyguardMediator.onScreenTurnedOff(why);
             mScreenOn = false;
             updateOrientationListenerLp();
         }
@@ -1625,9 +1625,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void screenTurnedOn() {
+        EventLog.writeEvent(70000, 1);
+        mKeyguardMediator.onScreenTurnedOn();
         synchronized (mLock) {
-            EventLog.writeEvent(70000, 1);
-            mKeyguardMediator.onScreenTurnedOn();
             mScreenOn = true;
             updateOrientationListenerLp();
         }
