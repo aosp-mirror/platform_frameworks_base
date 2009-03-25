@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Binder;
@@ -92,7 +93,8 @@ public class AudioService extends IAudioService.Stub {
     private AudioHandler mAudioHandler;
     /** @see VolumeStreamState */
     private VolumeStreamState[] mStreamStates;
-
+    private SettingsObserver mSettingsObserver;
+    
     private boolean mMicMute;
     private int mMode;
     private int[] mRoutes = new int[AudioSystem.NUM_MODES];
@@ -157,9 +159,6 @@ public class AudioService extends IAudioService.Stub {
      */
     private int mRingerMode;
 
-    /** @see System#MODE_RINGER_STREAMS_AFFECTED */
-    private int mRingerModeAffectedStreams;
-
     /** @see System#MUTE_STREAMS_AFFECTED */
     private int mMuteAffectedStreams;
 
@@ -181,7 +180,8 @@ public class AudioService extends IAudioService.Stub {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mVolumePanel = new VolumePanel(context, this);
-
+        mSettingsObserver = new SettingsObserver();
+        
         createAudioSystemThread();
         createStreamStates();
         readPersistedSettings();
@@ -275,8 +275,6 @@ public class AudioService extends IAudioService.Stub {
         final ContentResolver cr = mContentResolver;
 
         mRingerMode = System.getInt(cr, System.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
-        mRingerModeAffectedStreams = System.getInt(mContentResolver,
-                System.MODE_RINGER_STREAMS_AFFECTED, 1 << AudioSystem.STREAM_RING);
 
         mVibrateSetting = System.getInt(cr, System.VIBRATE_ON, 0);
 
@@ -494,32 +492,36 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#setRingerMode(int) */
     public void setRingerMode(int ringerMode) {
         if (ringerMode != mRingerMode) {
-            mRingerMode = ringerMode;
-
-            // Adjust volumes via posting message
-            int numStreamTypes = AudioSystem.getNumStreamTypes();
-            if (mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
-                for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                    if (!isStreamAffectedByRingerMode(streamType)) continue;
-                    // Bring back last audible volume
-                    setStreamVolumeInt(streamType, mStreamStates[streamType].mLastAudibleIndex,
-                                       false);
-                }
-            } else {
-                for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                    if (!isStreamAffectedByRingerMode(streamType)) continue;
-                    // Either silent or vibrate, either way volume is 0
-                    setStreamVolumeInt(streamType, 0, false);
-                }
-            }
+            setRingerModeInt(ringerMode);
 
             // Send sticky broadcast
             broadcastRingerMode();
-
-            // Post a persist ringer mode msg
-            sendMsg(mAudioHandler, MSG_PERSIST_RINGER_MODE, SHARED_MSG,
-                    SENDMSG_REPLACE, 0, 0, null, PERSIST_DELAY);
         }
+    }
+
+    private void setRingerModeInt(int ringerMode) {
+        mRingerMode = ringerMode;
+
+        // Adjust volumes via posting message
+        int numStreamTypes = AudioSystem.getNumStreamTypes();
+        if (mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
+            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+                if (!isStreamAffectedByRingerMode(streamType)) continue;
+                // Bring back last audible volume
+                setStreamVolumeInt(streamType, mStreamStates[streamType].mLastAudibleIndex,
+                                   false);
+            }
+        } else {
+            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+                if (!isStreamAffectedByRingerMode(streamType)) continue;
+                // Either silent or vibrate, either way volume is 0
+                setStreamVolumeInt(streamType, 0, false);
+            }
+        }
+        
+        // Post a persist ringer mode msg
+        sendMsg(mAudioHandler, MSG_PERSIST_RINGER_MODE, SHARED_MSG,
+                SENDMSG_REPLACE, 0, 0, null, PERSIST_DELAY);
     }
 
     /** @see AudioManager#shouldVibrate(int) */
@@ -783,7 +785,9 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public boolean isStreamAffectedByRingerMode(int streamType) {
-        return (mRingerModeAffectedStreams & (1 << streamType)) != 0;
+        int ringerModeAffectedStreams = Settings.System.getInt(mContentResolver,
+                Settings.System.MODE_RINGER_STREAMS_AFFECTED, 0);
+        return (ringerModeAffectedStreams & (1 << streamType)) != 0;
     }
 
     public boolean isStreamAffectedByMute(int streamType) {
@@ -1233,4 +1237,25 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    private class SettingsObserver extends ContentObserver {
+        
+        SettingsObserver() {
+            super(new Handler());
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            
+            /*
+             * Ensure all stream types that should be affected by ringer mode
+             * are in the proper state.
+             */
+            setRingerModeInt(getRingerMode());
+        }
+        
+    }
+    
 }
