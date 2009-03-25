@@ -16,11 +16,14 @@
 
 package com.android.internal.policy.impl;
 
+import com.android.internal.telephony.SimCard;
+import com.android.internal.widget.LockPatternUtils;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
-import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.app.StatusBarManager.DISABLE_EXPAND;
+import static android.app.StatusBarManager.DISABLE_NONE;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,15 +33,13 @@ import android.os.LocalPowerManager;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.telephony.TelephonyManager;
 import android.util.Config;
-import android.util.Log;
 import android.util.EventLog;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
-import com.android.internal.telephony.SimCard;
-import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.widget.LockPatternUtils;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -203,6 +204,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     private boolean mKeyboardOpen = false;
 
+    private boolean mScreenOn = false;
+
     /**
      * we send this intent when the keyguard is dismissed.
      */
@@ -232,8 +235,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DELAYED_KEYGUARD_ACTION);
-        filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         context.registerReceiver(mBroadCastReceiver, filter);
         mAlarmManager = (AlarmManager) context
                 .getSystemService(Context.ALARM_SERVICE);
@@ -274,6 +276,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      */
     public void onScreenTurnedOff(int why) {
         synchronized (this) {
+            mScreenOn = false;
             if (DEBUG) Log.d(TAG, "onScreenTurnedOff(" + why + ")");
 
             if (mExitSecureCallback != null) {
@@ -310,6 +313,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      */
     public void onScreenTurnedOn() {
         synchronized (this) {
+            mScreenOn = true;
             mDelayedShowingSequence++;
             if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
             notifyScreenOnLocked();
@@ -436,6 +440,16 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             // if another app is disabling us, don't show
             if (!mExternallyEnabled) {
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
+
+                // note: we *should* set mNeedToReshowWhenReenabled=true here, but that makes
+                // for an occasional ugly flicker in this situation:
+                // 1) receive a call with the screen on (no keyguard) or make a call
+                // 2) screen times out
+                // 3) user hits key to turn screen back on
+                // instead, we reenable the keyguard when we know the screen is off and the call
+                // ends (see the broadcast receiver below)
+                // TODO: clean this up when we have better support at the window manager level
+                // for apps that wish to be on top of the keyguard
                 return;
             }
 
@@ -612,6 +626,19 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 if (mDelayedShowingSequence == sequence) {
                     doKeyguard();
                 }
+            } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)
+                    && TelephonyManager.EXTRA_STATE_IDLE.equals(intent.getStringExtra(
+                            TelephonyManager.EXTRA_STATE))  // call ending
+                    && !mScreenOn                           // screen off
+                    && mExternallyEnabled) {                // not disabled by any app
+
+                // note: this is a way to gracefully reenable the keyguard when the call
+                // ends and the screen is off without always reenabling the keyguard
+                // each time the screen turns off while in call (and having an occasional ugly
+                // flicker while turning back on the screen and disabling the keyguard again).
+                if (DEBUG) Log.d(TAG, "screen is off and call ended, let's make sure the "
+                        + "keyguard is showing");
+                doKeyguard();
             }
         }
     };
