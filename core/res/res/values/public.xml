@@ -1069,6 +1069,8 @@
   <public type="style" name="Animation.InputMethod" id="0x01030056" />
   <public type="style" name="Widget.KeyboardView" id="0x01030057" />
   <public type="style" name="ButtonBar" id="0x01030058" />
+  <public type="style" name="Theme.Panel" id="0x01030059" />
+  <public type="style" name="Theme.Light.Panel" id="0x0103005a" />
   
   <public type="string" name="dialog_alert_title" id="0x01040014" />
   <public type="string" name="VideoView_error_text_invalid_progressive_playback" id="0x01040015" />

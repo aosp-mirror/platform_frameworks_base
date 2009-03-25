@@ -312,19 +312,41 @@
         <item name="windowContentOverlay">@null</item>
     </style>
     
-    <!-- Default theme for input methods, which is used by the
-         {@link android.inputmethodservice.InputMethodService} class.
-         this inherits from Theme.NoTitleBar, but makes the background
-         transparent, the window floating and translucent, and ensures that
-         it does not dim the UI behind it.  This also configures the window
-         with the standard IME animations and visuals. -->
-    <style name="Theme.InputMethod" parent="Theme.NoTitleBar">
+    <!-- Default dark theme for panel windows.  This removes all extraneous
+         window decorations, so you basically have an empty rectangle in which
+         to place your content.  It makes the window floating, with a transparent
+         background, and turns off dimming behind the window. -->
+    <style name="Theme.Panel">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Default light theme for panel windows.  This removes all extraneous
+         window decorations, so you basically have an empty rectangle in which
+         to place your content.  It makes the window floating, with a transparent
+         background, and turns off dimming behind the window. -->
+    <style name="Theme.Light.Panel">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Default theme for input methods, which is used by the
+         {@link android.inputmethodservice.InputMethodService} class.
+         this inherits from Theme.NoTitleBar, but makes the background
+         transparent, the window floating and translucent, and ensures that
+         it does not dim the UI behind it.  This also configures the window
+         with the standard IME animations and visuals. -->
+    <style name="Theme.InputMethod" parent="Theme.Panel">
         <item name="android:windowAnimationStyle">@android:style/Animation.InputMethod</item>
         <item name="android:imeFullscreenBackground">@android:drawable/input_method_fullscreen_background</item>
         <item name="android:imeExtractEnterAnimation">@android:anim/input_method_extract_enter</item>
@@ -332,11 +354,8 @@
     </style>
 
     <!-- Theme for the search input bar. -->
-    <style name="Theme.SearchBar" parent="Theme.Translucent.NoTitleBar">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowIsTranslucent">true</item>
+    <style name="Theme.SearchBar" parent="Theme.Panel">
+        <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.SearchBar</item>
         <item name="windowContentOverlay">@null</item>        
     </style>
