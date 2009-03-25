@@ -5992,7 +5992,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     final boolean clearWhenTaskReset =
                             (target.intent.getFlags()
                                     &Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0;
-                    if (!finishOnTaskLaunch && target.resultTo != null) {
+                    if (!finishOnTaskLaunch && !clearWhenTaskReset && target.resultTo != null) {
                         // If this activity is sending a reply to a previous
                         // activity, we can't do anything with it now until
                         // we reach the start of the reply chain.
@@ -6002,7 +6002,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         if (replyChainEnd < 0) {
                             replyChainEnd = targetI;
                         }
-                    } else if (!finishOnTaskLaunch && allowTaskReparenting
+                    } else if (!finishOnTaskLaunch && !clearWhenTaskReset && allowTaskReparenting
                             && target.taskAffinity != null
                             && !target.taskAffinity.equals(task.affinity)) {
                         // If this activity has an affinity for another
