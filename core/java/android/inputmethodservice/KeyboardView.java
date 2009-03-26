@@ -932,7 +932,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mMiniKeyboard = (KeyboardView) mMiniKeyboardContainer.findViewById(
                         com.android.internal.R.id.keyboardView);
                 View closeButton = mMiniKeyboardContainer.findViewById(
-                        com.android.internal.R.id.button_close);
+                        com.android.internal.R.id.closeButton);
                 if (closeButton != null) closeButton.setOnClickListener(this);
                 mMiniKeyboard.setOnKeyboardActionListener(new OnKeyboardActionListener() {
                     public void onKey(int primaryCode, int[] keyCodes) {

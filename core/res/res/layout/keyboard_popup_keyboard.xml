@@ -35,7 +35,7 @@
             android:popupLayout="@layout/keyboard_popup_keyboard"
             android:keyTextSize="22sp"
             />
-    <ImageButton android:id="@android:id/button_close"
+    <ImageButton android:id="@android:id/closeButton"
         android:background="@android:color/transparent"
         android:src="@drawable/btn_close" 
         android:layout_width="wrap_content"

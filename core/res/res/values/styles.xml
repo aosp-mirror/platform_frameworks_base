@@ -210,11 +210,6 @@
         <item name="android:button">@android:drawable/btn_star</item>
     </style>
 
-    <style name="Widget.CompoundButton.StarButtonless">
-        <item name="android:background">@android:drawable/btn_star_label_background</item>
-        <item name="android:button">@android:drawable/btn_star_buttonless</item>
-    </style>
-
     <style name="Widget.Button.Toggle">
         <item name="android:background">@android:drawable/btn_toggle_bg</item>
         <item name="android:textOn">@android:string/capital_on</item>
