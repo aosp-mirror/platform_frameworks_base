@@ -121,7 +121,8 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
 	telephony/java/com/android/internal/telephony/gsm/ISimPhoneBook.aidl \
 	telephony/java/com/android/internal/telephony/gsm/ISms.aidl \
-	wifi/java/android/net/wifi/IWifiManager.aidl
+	wifi/java/android/net/wifi/IWifiManager.aidl \
+	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)

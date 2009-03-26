@@ -1212,9 +1212,11 @@ public final class GsmMmiCode  extends Handler implements MmiCode
                 } else if (sc.equals(SC_WAIT)) {
                     // Call Waiting includes additional data in the response.
                     sb.append(createQueryCallWaitingResultMessage(ints[1]));
-                } else if (isServiceCodeCallBarring(sc) || (ints[0] == 1)) {
+                } else if (isServiceCodeCallBarring(sc)) {
                     // ints[0] for Call Barring is a bit vector of services
-                    // for all other services, treat it as a boolean
+                    sb.append(createQueryCallBarringResultMessage(ints[0]));                    
+                } else if (ints[0] == 1) {
+                    // for all other services, treat it as a boolean                                    
                     sb.append(context.getText(com.android.internal.R.string.serviceEnabled));
                 } else {
                     sb.append(context.getText(com.android.internal.R.string.mmiError));
@@ -1245,7 +1247,23 @@ public final class GsmMmiCode  extends Handler implements MmiCode
         }
         return sb;
     }
-    
+    private CharSequence
+    createQueryCallBarringResultMessage(int serviceClass)
+    {
+        StringBuilder sb = new StringBuilder(context.getText(com.android.internal.R.string.serviceEnabledFor));
+
+        for (int classMask = 1 
+                    ; classMask <= SERVICE_CLASS_MAX
+                    ; classMask <<= 1 
+        ) {
+            if ((classMask & serviceClass) != 0) {
+                sb.append("\n");
+                sb.append(serviceClassToCFString(classMask & serviceClass));
+            }
+        }
+        return sb;
+    }
+        
     /***
      * TODO: It would be nice to have a method here that can take in a dialstring and
      * figure out if there is an MMI code embedded within it.  This code would replace
