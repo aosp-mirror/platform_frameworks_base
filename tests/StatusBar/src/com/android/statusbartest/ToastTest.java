@@ -33,6 +33,9 @@ import android.widget.Toast;
 import android.widget.TextView;
 import android.os.PowerManager;
 
+import java.io.FileReader;
+import java.io.IOException;
+
 public class ToastTest extends TestActivity
 {
     private final static String TAG = "ToastTest";
@@ -51,7 +54,43 @@ public class ToastTest extends TestActivity
         return mTests;
     }
 
+    private static String readFile(String fn) {
+        FileReader f;
+        int len;
+
+        f = null;
+        try {
+            f = new FileReader(fn);
+            String s = "";
+            char[] cbuf = new char[200];
+            while ((len = f.read(cbuf, 0, cbuf.length)) >= 0) {
+                s += String.valueOf(cbuf, 0, len);
+            }
+            return s;
+        } catch (IOException ex) {
+            return "ERROR";
+        } finally {
+            if (f != null) {
+                try {
+                    f.close();
+                } catch (IOException ex) {
+                    return "ERROR!";
+                }
+            }
+        }
+    }
+
     private Test[] mTests = new Test[] {
+        new Test("Read lights") {
+            public void run()
+            {
+                String text = "freq=" + readFile("/sys/class/leds/red/device/grpfreq")
+                        + "\npwm=" + readFile("/sys/class/leds/red/device/grppwm");
+                mToast1 = Toast.makeText(ToastTest.this, text, Toast.LENGTH_SHORT);
+                mToast1.show();
+            }
+        },
+
         new Test("Make Toast #1") {
             public void run()
             {
