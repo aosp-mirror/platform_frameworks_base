@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Path;
 import com.android.internal.util.ArrayUtils;
 import android.util.Config;
@@ -51,6 +52,8 @@ public abstract class Layout {
             MAX_EMOJI = -1;
         }
     };
+
+    private RectF mEmojiRect;
 
     /**
      * Return how wide a layout would be necessary to display the
@@ -1327,7 +1330,7 @@ public abstract class Layout {
         return right;
     }
 
-    private static void drawText(Canvas canvas,
+    private void drawText(Canvas canvas,
                                  CharSequence text, int start, int end,
                                  int dir, Directions directions,
                                  float x, int top, int y, int bottom,
@@ -1384,8 +1387,26 @@ public abstract class Layout {
                                                  top, y, bottom, paint, workPaint,
                                                  start + j != end);
 
-                            canvas.drawBitmap(bm, x + h, y - bm.getHeight(), paint);
-                            h += bm.getWidth();
+                            if (mEmojiRect == null) {
+                                mEmojiRect = new RectF();
+                            }
+
+                            workPaint.set(paint);
+                            Styled.measureText(paint, workPaint, text,
+                                               start + j, start + j + 1,
+                                               null);
+                                        
+                            float bitmapHeight = bm.getHeight();
+                            float textHeight = -workPaint.ascent();
+                            float scale = textHeight / bitmapHeight;
+                            float width = bm.getWidth() * scale;
+
+                            mEmojiRect.set(x + h, y - textHeight,
+                                           x + h + width, y);
+
+                            canvas.drawBitmap(bm, null, mEmojiRect, paint);
+                            h += width;
+
                             j++;
                             segstart = j + 1;
                         }
@@ -1503,10 +1524,17 @@ public abstract class Layout {
                     }
 
                     if (bm != null) {
+                        workPaint.set(paint);
+                        Styled.measureText(paint, workPaint, text,
+                                           offset, offset + 1, null);
+
+                        float wid = (float) bm.getWidth() *
+                                    -workPaint.ascent() / bm.getHeight();
+
                         if (dir == DIR_RIGHT_TO_LEFT) {
-                            h -= bm.getWidth();
+                            h -= wid;
                         } else {
-                            h += bm.getWidth();
+                            h += wid;
                         }
 
                         j++;
@@ -1587,7 +1615,14 @@ public abstract class Layout {
                     if (bm == null) {
                         h = nextTab(text, start, end, h, tabs);
                     } else {
-                        h += bm.getWidth();
+                        workPaint.set(paint);
+                        Styled.measureText(paint, workPaint, text,
+                                           start + i, start + i + 1, null);
+
+                        float wid = (float) bm.getWidth() *
+                                    -workPaint.ascent() / bm.getHeight();
+
+                        h += wid;
                         i++;
                     }
                 }
@@ -1607,16 +1642,10 @@ public abstract class Layout {
                         bot = fm.bottom;
                     }
 
-                    if (bm != null) {
-                        int ht = -bm.getHeight();
-
-                        if (ht < ab) {
-                            ab = ht;
-                        }
-                        if (ht < top) {
-                            top = ht;
-                        }
-                    }
+                    /*
+                     * No need to take bitmap height into account here,
+                     * since it is scaled to match the text height.
+                     */
                 }
 
                 here = i + 1;

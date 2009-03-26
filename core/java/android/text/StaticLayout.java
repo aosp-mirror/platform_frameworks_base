@@ -567,7 +567,19 @@ extends Layout
                                 getBitmapFromAndroidPua(emoji);
 
                             if (bm != null) {
-                                w += bm.getWidth();
+                                Paint whichPaint;
+
+                                if (spanned == null) {
+                                    whichPaint = paint;
+                                } else {
+                                    whichPaint = mWorkPaint;
+                                }
+
+                                float wid = (float) bm.getWidth() *
+                                            -whichPaint.ascent() /
+                                            bm.getHeight();
+
+                                w += wid;
                                 tab = true;
                                 j++;
                             } else {
