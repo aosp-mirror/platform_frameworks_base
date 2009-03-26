@@ -319,6 +319,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     int mRotation = 0;
     int mRequestedRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    int mLastRotationFlags;
     ArrayList<IRotationWatcher> mRotationWatchers
             = new ArrayList<IRotationWatcher>();
     
@@ -2166,7 +2167,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             
             if (changed) {
                 changed = setRotationUncheckedLocked(
-                        WindowManagerPolicy.USE_LAST_ROTATION, 1);
+                        WindowManagerPolicy.USE_LAST_ROTATION,
+                        mLastRotationFlags & (~Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE));
                 if (changed) {
                     if (freezeThisOneIfNeeded != null) {
                         AppWindowToken wtoken = findAppWindowToken(
@@ -3258,7 +3260,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         mPolicy.enableScreenAfterBoot();
         
         // Make sure the last requested orientation has been applied.
-        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
+        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false,
+                mLastRotationFlags | Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
     }
     
     public void setInTouchMode(boolean mode) {
@@ -3308,6 +3311,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             rotation = mRequestedRotation;
         } else {
             mRequestedRotation = rotation;
+            mLastRotationFlags = animFlags;
         }
         if (DEBUG_ORIENTATION) Log.v(TAG, "Overwriting rotation value from " + rotation);
         rotation = mPolicy.rotationForOrientationLw(mForcedAppOrientation,
@@ -3330,7 +3334,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             Log.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
             mQueue.setOrientation(rotation);
             if (mDisplayEnabled) {
-                Surface.setOrientation(0, rotation);
+                Surface.setOrientation(0, rotation, animFlags);
             }
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
