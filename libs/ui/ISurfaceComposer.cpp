@@ -96,12 +96,13 @@ public:
         return reply.readInt32();
     }
 
-    virtual int setOrientation(DisplayID dpy, int orientation)
+    virtual int setOrientation(DisplayID dpy, int orientation, uint32_t flags)
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
         data.writeInt32(dpy);
         data.writeInt32(orientation);
+        data.writeInt32(flags);
         remote()->transact(BnSurfaceComposer::SET_ORIENTATION, data, &reply);
         return reply.readInt32();
     }
@@ -184,7 +185,8 @@ status_t BnSurfaceComposer::onTransact(
         case SET_ORIENTATION: {
             DisplayID dpy = data.readInt32();
             int orientation = data.readInt32();
-            reply->writeInt32( setOrientation(dpy, orientation) );
+            uint32_t flags = data.readInt32();
+            reply->writeInt32( setOrientation(dpy, orientation, flags) );
         } break;
         case FREEZE_DISPLAY: {
             DisplayID dpy = data.readInt32();

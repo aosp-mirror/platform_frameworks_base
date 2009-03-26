@@ -655,6 +655,7 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
 
             const int dpy = 0;
             const int orientation = mCurrentState.orientation;
+            const uint32_t type = mCurrentState.orientationType;
             GraphicPlane& plane(graphicPlane(dpy));
             plane.setOrientation(orientation);
 
@@ -673,8 +674,8 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
 
             mVisibleRegionsDirty = true;
             mDirtyRegion.set(hw.bounds());
-
-            mOrientationAnimation->onOrientationChanged();
+            mFreezeDisplayTime = 0;
+            mOrientationAnimation->onOrientationChanged(type);
         }
 
         if (mCurrentState.freezeDisplay != mDrawingState.freezeDisplay) {
@@ -1201,7 +1202,8 @@ status_t SurfaceFlinger::unfreezeDisplay(DisplayID dpy, uint32_t flags)
     return NO_ERROR;
 }
 
-int SurfaceFlinger::setOrientation(DisplayID dpy, int orientation)
+int SurfaceFlinger::setOrientation(DisplayID dpy, 
+        int orientation, uint32_t flags)
 {
     if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
         return BAD_VALUE;
@@ -1209,6 +1211,7 @@ int SurfaceFlinger::setOrientation(DisplayID dpy, int orientation)
     Mutex::Autolock _l(mStateLock);
     if (mCurrentState.orientation != orientation) {
         if (uint32_t(orientation)<=eOrientation270 || orientation==42) {
+            mCurrentState.orientationType = flags;
             mCurrentState.orientation = orientation;
             setTransactionFlags(eTransactionNeeded);
             mTransactionCV.wait(mStateLock);
