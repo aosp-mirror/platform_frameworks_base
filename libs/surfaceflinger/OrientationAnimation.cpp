@@ -21,6 +21,7 @@
 #include <limits.h>
 
 #include "LayerOrientationAnim.h"
+#include "LayerOrientationAnimRotate.h"
 #include "OrientationAnimation.h"
 #include "SurfaceFlinger.h"
 #include "VRamHeap.h"
@@ -112,8 +113,14 @@ bool OrientationAnimation::prepare()
     bitmap.getBitmapSurface(&front);
     hw.copyFrontToImage(front);
 
-    LayerOrientationAnim* l = new LayerOrientationAnim(
+    LayerOrientationAnimBase* l;
+    
+    l = new LayerOrientationAnim(
             mFlinger.get(), 0, this, bitmap, bitmapIn);
+
+    //l = new LayerOrientationAnimRotate(
+    //        mFlinger.get(), 0, this, bitmap, bitmapIn);
+
     l->initStates(w, h, 0);
     l->setLayer(INT_MAX-1);
     mFlinger->addLayer(l);

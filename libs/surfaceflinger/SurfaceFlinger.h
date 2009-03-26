@@ -122,6 +122,7 @@ public:
         void                    setDisplayHardware(DisplayHardware *);
         void                    setTransform(const Transform& tr);
         status_t                setOrientation(int orientation);
+        int                     getOrientation() const { return mOrientation; }
 
         const DisplayHardware&  displayHardware() const;
         const Transform&        transform() const;
@@ -133,6 +134,7 @@ private:
         Transform               mTransform;
         Transform               mOrientationTransform;
         Transform               mGlobalTransform;
+        int                     mOrientation;
 };
 
 // ---------------------------------------------------------------------------
