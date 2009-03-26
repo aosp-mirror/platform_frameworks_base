@@ -1373,8 +1373,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     }
 
     private void updateLightsLocked(int newState, int forceState) {
-        int oldState = mPowerState;
-        int difference = (newState ^ oldState) | forceState;
+        final int oldState = mPowerState;
+        final int realDifference = (newState ^ oldState);
+        final int difference = realDifference | forceState;
         if (difference == 0) {
             return;
         }
@@ -1430,22 +1431,29 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
         if ((difference & (SCREEN_ON_BIT | SCREEN_BRIGHT_BIT)) != 0) {
             if (ANIMATE_SCREEN_LIGHTS) {
-                int nominalCurrentValue;
-                switch (oldState & (SCREEN_BRIGHT_BIT|SCREEN_ON_BIT)) {
-                    case SCREEN_BRIGHT_BIT | SCREEN_ON_BIT:
-                        nominalCurrentValue = preferredBrightness;
-                        break;
-                    case SCREEN_ON_BIT:
-                        nominalCurrentValue = Power.BRIGHTNESS_DIM;
-                        break;
-                    case 0:
-                        nominalCurrentValue = Power.BRIGHTNESS_OFF;
-                        break;
-                    case SCREEN_BRIGHT_BIT:
-                    default:
-                        // not possible
-                        nominalCurrentValue = (int)mScreenBrightness.curValue;
-                        break;
+                int nominalCurrentValue = -1;
+                // If there was an actual difference in the light state, then
+                // figure out the "ideal" current value based on the previous
+                // state.  Otherwise, this is a change due to the brightness
+                // override, so we want to animate from whatever the current
+                // value is.
+                if ((realDifference & (SCREEN_ON_BIT | SCREEN_BRIGHT_BIT)) != 0) {
+                    switch (oldState & (SCREEN_BRIGHT_BIT|SCREEN_ON_BIT)) {
+                        case SCREEN_BRIGHT_BIT | SCREEN_ON_BIT:
+                            nominalCurrentValue = preferredBrightness;
+                            break;
+                        case SCREEN_ON_BIT:
+                            nominalCurrentValue = Power.BRIGHTNESS_DIM;
+                            break;
+                        case 0:
+                            nominalCurrentValue = Power.BRIGHTNESS_OFF;
+                            break;
+                        case SCREEN_BRIGHT_BIT:
+                        default:
+                            // not possible
+                            nominalCurrentValue = (int)mScreenBrightness.curValue;
+                            break;
+                    }
                 }
                 if ((newState & SCREEN_BRIGHT_BIT) == 0) {
                     // dim or turn off backlight, depending on if the screen is on
@@ -1575,7 +1583,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 curValue = (float)initialValue;
             }
             targetValue = target;
-            delta = (targetValue-nominalCurrentValue) / stepsToTarget;
+            delta = (targetValue -
+                    (nominalCurrentValue >= 0 ? nominalCurrentValue : curValue))
+                    / stepsToTarget;
             if (mSpew) {
                 String noticeMe = nominalCurrentValue == curValue ? "" : "  ******************";
                 Log.i(TAG, "Setting target " + mask + ": cur=" + curValue
@@ -1596,6 +1606,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             int curIntValue = (int)curValue;
             boolean more = true;
             if (delta == 0) {
+                curValue = curIntValue = targetValue;
                 more = false;
             } else if (delta > 0) {
                 if (curIntValue >= targetValue) {
