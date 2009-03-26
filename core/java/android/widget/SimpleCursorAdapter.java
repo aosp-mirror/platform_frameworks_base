@@ -145,17 +145,17 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
         for (int i = 0; i < count; i++) {
             final View v = holder[i];
             if (v != null) {
-                String text = cursor.getString(from[i]);
-                if (text == null) {
-                    text = "";
-                }
-
                 boolean bound = false;
                 if (binder != null) {
                     bound = binder.setViewValue(v, cursor, from[i]);
                 }
 
                 if (!bound) {
+                    String text = cursor.getString(from[i]);
+                    if (text == null) {
+                        text = "";
+                    }
+
                     if (v instanceof TextView) {
                         setViewText((TextView) v, text);
                     } else if (v instanceof ImageView) {
