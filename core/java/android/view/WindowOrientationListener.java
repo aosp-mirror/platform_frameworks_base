@@ -80,6 +80,7 @@ public abstract class WindowOrientationListener {
         }
         if (mEnabled == false) {
             if (localLOGV) Log.d(TAG, "WindowOrientationListener enabled");
+            mSensorRotation = -1;
             mSensorManager.registerListener(mSensorEventListener, mSensor, mRate);
             mEnabled = true;
         }
@@ -95,11 +96,16 @@ public abstract class WindowOrientationListener {
         }
         if (mEnabled == true) {
             if (localLOGV) Log.d(TAG, "WindowOrientationListener disabled");
+            mSensorRotation = -1;
             mSensorManager.unregisterListener(mSensorEventListener);
             mEnabled = false;
         }
     }
 
+    public int getCurrentRotation() {
+        return mSensorRotation;
+    }
+    
     class SensorEventListenerImpl implements SensorEventListener {
         private static final int _DATA_X = 0;
         private static final int _DATA_Y = 1;

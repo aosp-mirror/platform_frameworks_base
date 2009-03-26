@@ -59,6 +59,8 @@ interface IWindowManager
     void pauseKeyDispatching(IBinder token);
     void resumeKeyDispatching(IBinder token);
     void setEventDispatching(boolean enabled);
+    void addWindowToken(IBinder token, int type);
+    void removeWindowToken(IBinder token);
     void addAppToken(int addPos, IApplicationToken token,
             int groupId, int requestedOrientation, boolean fullscreen);
     void setAppGroupId(IBinder token, int groupId);
@@ -81,8 +83,6 @@ interface IWindowManager
     void moveAppToken(int index, IBinder token);
     void moveAppTokensToTop(in List<IBinder> tokens);
     void moveAppTokensToBottom(in List<IBinder> tokens);
-    void addWindowToken(IBinder token, int type);
-    void removeWindowToken(IBinder token);
 
     // these require DISABLE_KEYGUARD permission
     void disableKeyguard(IBinder token, String tag);
@@ -119,9 +119,9 @@ interface IWindowManager
      * @param alwaysSendConfiguration Flag to force a new configuration to
      * be evaluated.  This can be used when there are other parameters in
      * configuration that are changing.
-     * {@link android.view.Surface}.
+     * @param animFlags Animation flags as per {@link android.view.Surface}.
      */
-    void setRotation(int rotation, boolean alwaysSendConfiguration);
+    void setRotation(int rotation, boolean alwaysSendConfiguration, int animFlags);
 
     /**
      * Retrieve the current screen orientation, constants as per
