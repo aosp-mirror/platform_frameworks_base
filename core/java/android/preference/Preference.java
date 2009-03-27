@@ -92,6 +92,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     private boolean mPersistent = true;
     private String mDependencyKey;
     private Object mDefaultValue;
+    private boolean mDependencyMet = true;
     
     /**
      * @see #setShouldDisableView(boolean)
@@ -594,7 +595,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @return True if this Preference is enabled, false otherwise.
      */
     public boolean isEnabled() {
-        return mEnabled;
+        return mEnabled && mDependencyMet;
     }
 
     /**
@@ -1096,7 +1097,14 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @param disableDependent Set true to disable this Preference.
      */
     public void onDependencyChanged(Preference dependency, boolean disableDependent) {
-        setEnabled(!disableDependent);
+        if (mDependencyMet == disableDependent) {
+            mDependencyMet = !disableDependent;
+
+            // Enabled state can change dependent preferences' states, so notify
+            notifyDependencyChange(shouldDisableDependents());
+
+            notifyChanged();
+        }
     }
     
     /**
