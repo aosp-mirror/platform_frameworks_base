@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"Beller-id standaard ingesteld op \'onbeperkt\'. Volgende oproep: onbeperkt."</string>
     <string name="serviceNotProvisioned">"Service niet voorzien."</string>
     <string name="CLIRPermanent">"De instelling voor beller-id kan niet worden gewijzigd."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"Spraak"</string>
     <string name="serviceClassData">"Gegevens"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -103,15 +113,11 @@
     <string name="global_action_toggle_silent_mode">"Stille modus"</string>
     <string name="global_action_silent_mode_on_status">"Geluid is UIT"</string>
     <string name="global_action_silent_mode_off_status">"Geluid is AAN"</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
+    <string name="global_actions_toggle_airplane_mode">"Vliegmodus"</string>
+    <string name="global_actions_airplane_mode_on_status">"Vliegmodus is AAN"</string>
+    <string name="global_actions_airplane_mode_off_status">"Vliegmodus is UIT"</string>
     <string name="safeMode">"Veilige modus"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
+    <string name="android_system_label">"Android-systeem"</string>
     <string name="permgrouplab_costMoney">"Services waarvoor u moet betalen"</string>
     <string name="permgroupdesc_costMoney">"Toepassingen toestaan activiteiten uit te voeren waarvoor mogelijk kosten in rekening worden gebracht."</string>
     <string name="permgrouplab_messages">"Uw berichten"</string>
@@ -286,8 +292,8 @@
     <string name="permdesc_locationUpdates">"Hiermee kunnen updatemeldingen voor locaties van de radio worden ingeschakeld/uitgeschakeld. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_checkinProperties">"toegang tot checkin-eigenschappen"</string>
     <string name="permdesc_checkinProperties">"Hiermee wordt lees-/schrijftoegang gegeven tot eigenschappen die door de checkin-service zijn geüpload. Niet voor gebruik door normale toepassingen."</string>
-    <string name="permlab_bindGadget">"gadgets kiezen"</string>
-    <string name="permdesc_bindGadget">"Hiermee kan een toepassing het systeem melden welke gadgets door welke toepassing kunnen worden gebruikt. Met deze toestemming kunnen toepassingen andere toepassingen toegang geven tot persoonlijke gegevens. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_bindGadget">"widgets kiezen"</string>
+    <string name="permdesc_bindGadget">"Hiermee kan een toepassing het systeem melden welke widgets door welke toepassing kunnen worden gebruikt. Met deze toestemming kunnen toepassingen andere toepassingen toegang geven tot persoonlijke gegevens. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_modifyPhoneState">"telefoonstatus wijzigen"</string>
     <string name="permdesc_modifyPhoneState">"Hiermee kan de toepassing de telefoonfuncties van het apparaat beheren. Een toepassing met deze machtiging kan schakelen tussen netwerken, de radio van de telefoon in- of uitschakelen en dergelijke zonder dat u hiervan op de hoogte wordt gesteld."</string>
     <string name="permlab_readPhoneState">"telefoonstatus lezen"</string>
@@ -397,15 +403,15 @@
     <string name="lockscreen_emergency_call">"Noodoproep"</string>
     <string name="lockscreen_pattern_correct">"Juist!"</string>
     <string name="lockscreen_pattern_wrong">"Probeer het opnieuw"</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_plugged_in">"Opladen (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Sluit de oplader aan."</string>
     <string name="lockscreen_missing_sim_message_short">"Geen SIM-kaart."</string>
     <string name="lockscreen_missing_sim_message">"Geen SIM-kaart in telefoon."</string>
     <string name="lockscreen_missing_sim_instructions">"Plaats een SIM-kaart."</string>
     <string name="lockscreen_network_locked_message">"Netwerk geblokkeerd"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-kaart is geblokkeerd met PUK-code."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"Neem contact op met de klantenservice."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"SIM-kaart is geblokkeerd."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM-kaart ontgrendelen..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"U heeft uw deblokkeringspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. "\n\n"Probeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
@@ -413,7 +419,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Patroon vergeten?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Te veel patroonpogingen!"</string>
-    <string name="lockscreen_glogin_instructions">"U moet zich aanmelden bij uw Google-account"\n"om te ontgrendelen"</string>
+    <string name="lockscreen_glogin_instructions">"Om te ontgrendelen, moet U zich eerst bij uw Google-account aanmelden"</string>
     <string name="lockscreen_glogin_username_hint">"Gebruikersnaam (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint">"Wachtwoord"</string>
     <string name="lockscreen_glogin_submit_button">"Aanmelden"</string>
@@ -421,16 +427,13 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
-    <skip />
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"Meldingen wissen"</string>
     <string name="status_bar_no_notifications_title">"Geen meldingen"</string>
     <string name="status_bar_ongoing_events_title">"Actief"</string>
     <string name="status_bar_latest_events_title">"Meldingen"</string>
-    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
-    <skip />
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"Opladen..."</string>
     <string name="battery_low_title">"Sluit de oplader aan"</string>
     <string name="battery_low_subtitle">"De accu raakt op:"</string>
@@ -552,6 +555,7 @@
     <string name="monthly">"Maandelijks"</string>
     <string name="yearly">"Jaarlijks"</string>
     <string name="VideoView_error_title">"Video kan niet worden afgespeeld"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback">"Deze video kan helaas niet worden gestreamd naar dit apparaat."</string>
     <string name="VideoView_error_text_unknown">"Deze video kan niet worden afgespeeld."</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"am"</string>
@@ -573,18 +577,16 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"twaalf uur \'s middags"</string>
     <string name="Noon">"Twaalf uur \'s middags"</string>
     <string name="midnight">"middernacht"</string>
     <string name="Midnight">"Middernacht"</string>
-    <!-- no translation found for month_day (3693060561170538204) -->
-    <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
-    <skip />
+    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
@@ -612,11 +614,9 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
-    <skip />
-    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
-    <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"Zondag"</string>
     <string name="day_of_week_long_monday">"Maandag"</string>
@@ -798,18 +798,16 @@
     <string name="activity_list_empty">"Geen overeenkomende activiteiten gevonden"</string>
     <string name="permlab_pkgUsageStats">"gebruiksstatistieken van component bijwerken"</string>
     <string name="permdesc_pkgUsageStats">"Hiermee kunnen verzamelde gebruiksstatistieken van een component worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <string name="tutorial_double_tap_to_zoom_message_short">"Tik twee keer voor zoomregeling"</string>
+    <string name="gadget_host_error_inflating">"Fout bij uitbreiden van widget"</string>
+    <string name="ime_action_go">"Ga"</string>
+    <string name="ime_action_search">"Zoeken"</string>
+    <string name="ime_action_send">"Verzenden"</string>
+    <string name="ime_action_next">"Volgende"</string>
+    <string name="ime_action_done">"Gereed"</string>
+    <string name="ime_action_default">"Uitvoeren"</string>
+    <!-- no translation found for dial_number_using (5789176425167573586) -->
     <skip />
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
-    <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <!-- no translation found for create_contact_using (4947405226788104538) -->
     <skip />
 </resources>

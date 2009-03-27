@@ -367,8 +367,9 @@ status_t MediaRecorder::setParameters(const String8& params) {
     status_t ret = mMediaRecorder->setParameters(params);
     if (OK != ret) {
         LOGE("setParameters(%s) failed: %d", params.string(), ret);
-        mCurrentState = MEDIA_RECORDER_ERROR;
-        return ret;
+        // Do not change our current state to MEDIA_RECORDER_ERROR, failures
+        // of the only currently supported parameters, "max-duration" and
+        // "max-filesize" are _not_ fatal.
     }
 
     return ret;

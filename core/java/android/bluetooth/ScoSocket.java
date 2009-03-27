@@ -76,7 +76,7 @@ public class ScoSocket {
         try {
             if (VDBG) log(this + " SCO OBJECT DTOR");
             destroyNative();
-            releaseWakeLock();
+            releaseWakeLockNow();
         } finally {
             super.finalize();
         }
@@ -98,7 +98,7 @@ public class ScoSocket {
             return true;
         } else {
             mState = STATE_CLOSED;
-            releaseWakeLock();
+            releaseWakeLockNow();
             return false;
         }
     }
@@ -148,7 +148,7 @@ public class ScoSocket {
             mState = STATE_CLOSED;
         }
         mHandler.obtainMessage(mConnectedCode, mState, -1, this).sendToTarget();
-        releaseWakeLock();
+        releaseWakeLockNow();
     }
 
     private synchronized void onAccepted(int result) {
@@ -183,7 +183,19 @@ public class ScoSocket {
 
     private void releaseWakeLock() {
         if (mWakeLock.isHeld()) {
-            if (VDBG) log("mWakeLock.release() " + this);
+            // Keep apps processor awake for a further 2 seconds.
+            // This is a hack to resolve issue http://b/1616263 - in which
+            // we are left in a 80 mA power state when remotely terminating a
+            // call while connected to BT headset "HTC BH S100 " with A2DP and
+            // HFP profiles.
+            if (VDBG) log("mWakeLock.release() in 2 sec" + this);
+            mWakeLock.acquire(2000);
+        }
+    }
+
+    private void releaseWakeLockNow() {
+        if (mWakeLock.isHeld()) {
+            if (VDBG) log("mWakeLock.release() now" + this);
             mWakeLock.release();
         }
     }

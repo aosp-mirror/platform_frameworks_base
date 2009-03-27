@@ -3409,6 +3409,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             if (imm != null && (mPrivateFlags & FOCUSED) != 0) {
                 imm.focusOut(this);
             }
+            if (mPendingCheckForLongPress != null) {
+                removeCallbacks(mPendingCheckForLongPress);
+            }
         } else if (imm != null && (mPrivateFlags & FOCUSED) != 0) {
             imm.focusIn(this);
         }
@@ -7656,7 +7659,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         private int mOriginalWindowAttachCount;
 
         public void run() {
-            if (isPressed() && (mParent != null) && hasWindowFocus()
+            if (isPressed() && (mParent != null)
                     && mOriginalWindowAttachCount == mWindowAttachCount) {
                 if (performLongClick()) {
                     mHasPerformedLongPress = true;

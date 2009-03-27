@@ -15,7 +15,6 @@
 */
 
 #include <hardware_legacy/flashlight.h>
-#include <hardware_legacy/led.h>
 #include <hardware_legacy/power.h>
 
 #include <nativehelper/jni.h>
@@ -23,12 +22,6 @@
 #include <nativehelper/JNIHelp.h>
 
 namespace android {
-
-static jboolean
-setLedState(JNIEnv *env, jobject clazz, jint colorARGB, jint onMS, jint offMS)
-{
-    return set_led_state(colorARGB, onMS, offMS);
-}
 
 static jint
 getFlashlightEnabled(JNIEnv *env, jobject clazz)
@@ -48,24 +41,6 @@ enableCameraFlash(JNIEnv *env, jobject clazz, jint milliseconds)
     enable_camera_flash(milliseconds);
 }
 
-static void
-setScreenBacklight(JNIEnv *env, jobject clazz, jint brightness)
-{
-    set_light_brightness(SCREEN_LIGHT, brightness);
-}
-
-static void
-setKeyboardBacklight(JNIEnv *env, jobject clazz, jboolean on)
-{
-    set_light_brightness(KEYBOARD_LIGHT, (on ? 255 : 0));
-}
-
-static void
-setButtonBacklight(JNIEnv *env, jobject clazz, jboolean on)
-{
-    set_light_brightness(BUTTON_LIGHT, (on ? 255 : 0));
-}
-
 // ============================================================================
 /*
  * JNI registration.
@@ -73,13 +48,9 @@ setButtonBacklight(JNIEnv *env, jobject clazz, jboolean on)
 
 static JNINativeMethod g_methods[] = {
     /* name, signature, funcPtr */
-    { "setLedState",       "(III)I", (void*)setLedState },
     { "getFlashlightEnabled", "()Z", (void*)getFlashlightEnabled },
     { "setFlashlightEnabled", "(Z)V", (void*)setFlashlightEnabled },
     { "enableCameraFlash", "(I)V", (void*)enableCameraFlash },
-    { "setScreenBacklight", "(I)V", (void*)setScreenBacklight },
-    { "setKeyboardBacklight", "(Z)V", (void*)setKeyboardBacklight },
-    { "setButtonBacklight", "(Z)V", (void*)setButtonBacklight },
 };
 
 int register_android_os_Hardware(JNIEnv* env)

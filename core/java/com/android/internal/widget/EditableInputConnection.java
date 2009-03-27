@@ -33,7 +33,7 @@ public class EditableInputConnection extends BaseInputConnection {
     private final TextView mTextView;
 
     public EditableInputConnection(TextView textview) {
-        super(textview, false);
+        super(textview, true);
         mTextView = textview;
     }
 

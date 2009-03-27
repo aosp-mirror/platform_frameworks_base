@@ -68,7 +68,7 @@ import android.util.Log;
  * these broadcasts, the Intent broadcast mechanism here is completely separate
  * from Intents that are used to start Activities with
  * {@link Context#startActivity Context.startActivity()}.
- * There is no way for an BroadcastReceiver
+ * There is no way for a BroadcastReceiver
  * to see or capture Intents used with startActivity(); likewise, when
  * you broadcast an Intent, you will never find or start an Activity.
  * These two operations are semantically very different: starting an
@@ -103,7 +103,7 @@ import android.util.Log;
  * its process before the asynchronous operation completes.
  * 
  * <p>In particular, you may <i>not</i> show a dialog or bind to a service from
- * within an BroadcastReceiver.  For the former, you should instead use the
+ * within a BroadcastReceiver.  For the former, you should instead use the
  * {@link android.app.NotificationManager} API.  For the latter, you can
  * use {@link android.content.Context#startService Context.startService()} to
  * send a command to the service.
@@ -141,7 +141,7 @@ import android.util.Log;
  * <a name="ProcessLifecycle"></a>
  * <h3>Process Lifecycle</h3>
  * 
- * <p>A process that is currently executing an BroadcastReceiver (that is,
+ * <p>A process that is currently executing a BroadcastReceiver (that is,
  * currently running the code in its {@link #onReceive} method) is
  * considered to be a foreground process and will be kept running by the
  * system except under cases of extreme memory pressure.
@@ -156,7 +156,7 @@ import android.util.Log;
  * more important processes.
  * 
  * <p>This means that for longer-running operations you will often use
- * a {@link android.app.Service} in conjunction with an BroadcastReceiver to keep
+ * an {@link android.app.Service} in conjunction with a BroadcastReceiver to keep
  * the containing process active for the entire time of your operation.
  */
 public abstract class BroadcastReceiver {

@@ -58,6 +58,9 @@
 
 namespace android {
 
+static const char* kDeadlockedString = "AudioFlinger may be deadlocked\n";
+static const char* kHardwareLockedString = "Hardware lock is taken\n";
+
 //static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 static const unsigned long kBufferRecoveryInUsecs = 2000;
 static const unsigned long kMaxBufferRecoveryInUsecs = 20000;
@@ -195,7 +198,7 @@ AudioFlinger::~AudioFlinger()
 #ifdef WITH_A2DP
 // setA2dpEnabled_l() must be called with AudioFlinger::mLock held
 void AudioFlinger::setA2dpEnabled_l(bool enable)
-{
+{    
     SortedVector < sp<MixerThread::Track> > tracks;
     SortedVector < wp<MixerThread::Track> > activeTracks;
     
@@ -240,13 +243,8 @@ bool AudioFlinger::streamForcedToSpeaker(int streamType)
     // AudioSystem::routedToA2dpOutput(streamType) == false
     return (streamType == AudioSystem::RING ||
             streamType == AudioSystem::ALARM ||
-            streamType == AudioSystem::NOTIFICATION);
-}
-
-bool AudioFlinger::streamDisablesA2dp(int streamType)
-{
-    return (streamType == AudioSystem::VOICE_CALL ||
-            streamType == AudioSystem::BLUETOOTH_SCO);
+            streamType == AudioSystem::NOTIFICATION ||
+            streamType == AudioSystem::ENFORCED_AUDIBLE);
 }
 
 status_t AudioFlinger::dumpClients(int fd, const Vector<String16>& args)
@@ -301,18 +299,39 @@ status_t AudioFlinger::dumpPermissionDenial(int fd, const Vector<String16>& args
     return NO_ERROR;
 }
 
+static bool tryLock(Mutex& mutex)
+{
+    bool locked = false;
+    for (int i = 0; i < kDumpLockRetries; ++i) {
+        if (mutex.tryLock() == NO_ERROR) {
+            locked = true;
+            break;
+        }
+        usleep(kDumpLockSleep);
+    }
+    return locked;
+}
+
 status_t AudioFlinger::dump(int fd, const Vector<String16>& args)
 {
     if (checkCallingPermission(String16("android.permission.DUMP")) == false) {
         dumpPermissionDenial(fd, args);
     } else {
-        bool locked = false;
-        for (int i = 0; i < kDumpLockRetries; ++i) {
-            if (mLock.tryLock() == NO_ERROR) {
-                locked = true;
-                break;
-            }
-            usleep(kDumpLockSleep);
+        // get state of hardware lock
+        bool hardwareLocked = tryLock(mHardwareLock);
+        if (!hardwareLocked) {
+            String8 result(kHardwareLockedString);
+            write(fd, result.string(), result.size());
+        } else {
+            mHardwareLock.unlock();
+        }
+
+        bool locked = tryLock(mLock);
+
+        // failed to lock - AudioFlinger is probably deadlocked
+        if (!locked) {
+            String8 result(kDeadlockedString);
+            write(fd, result.string(), result.size());
         }
 
         dumpClients(fd, args);
@@ -496,6 +515,14 @@ status_t AudioFlinger::setRouting(int mode, uint32_t routes, uint32_t mask)
         }
         LOGV("setOutput done\n");
     }
+    // setRouting() is always called at least for mode == AudioSystem::MODE_IN_CALL when 
+    // SCO is enabled, whatever current mode is so we can safely handle A2DP disabling only
+    // in this case to avoid doing it several times.
+    if (mode == AudioSystem::MODE_IN_CALL &&
+        (mask & AudioSystem::ROUTE_BLUETOOTH_SCO)) {
+        AutoMutex lock(&mLock);
+        handleRouteDisablesA2dp_l(routes);
+    }
 #endif
 
     // do nothing if only A2DP routing is affected
@@ -619,7 +646,8 @@ status_t AudioFlinger::setStreamVolume(int stream, float value)
         return PERMISSION_DENIED;
     }
 
-    if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES) {
+    if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES ||
+        uint32_t(stream) == AudioSystem::ENFORCED_AUDIBLE) {
         return BAD_VALUE;
     }
 
@@ -663,10 +691,11 @@ status_t AudioFlinger::setStreamMute(int stream, bool muted)
         return PERMISSION_DENIED;
     }
 
-    if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES) {
+    if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES ||
+        uint32_t(stream) == AudioSystem::ENFORCED_AUDIBLE) {
         return BAD_VALUE;
     }
-    
+
 #ifdef WITH_A2DP
     mA2dpMixerThread->setStreamMute(stream, muted);
 #endif
@@ -680,8 +709,6 @@ status_t AudioFlinger::setStreamMute(int stream, bool muted)
     } else {
         mHardwareMixerThread->setStreamMute(stream, muted);
     }
-
-    
 
     return NO_ERROR;
 }
@@ -854,36 +881,29 @@ void AudioFlinger::handleForcedSpeakerRoute(int command)
 }
 
 #ifdef WITH_A2DP
-// handleStreamDisablesA2dp_l() must be called with AudioFlinger::mLock held
-void AudioFlinger::handleStreamDisablesA2dp_l(int command)
+// handleRouteDisablesA2dp_l() must be called with AudioFlinger::mLock held
+void AudioFlinger::handleRouteDisablesA2dp_l(int routes)
 {
-    switch(command) {
-    case ACTIVE_TRACK_ADDED:
-        {
-            if (mA2dpDisableCount++ == 0) {
-                if (mA2dpEnabled) {
-                    setA2dpEnabled_l(false);
-                    mA2dpSuppressed = true;
-                }
-            }
-            LOGV("mA2dpDisableCount incremented to %d", mA2dpDisableCount);
-        }
-        break;
-    case ACTIVE_TRACK_REMOVED:
-        {
-            if (mA2dpDisableCount > 0) {
-                if (--mA2dpDisableCount == 0) {
-                    if (mA2dpSuppressed) {
-                        setA2dpEnabled_l(true);
-                        mA2dpSuppressed = false;
-                    }
-                }
-                LOGV("mA2dpDisableCount decremented to %d", mA2dpDisableCount);
-            } else {
-                LOGE("mA2dpDisableCount is already zero");
+   if (routes & AudioSystem::ROUTE_BLUETOOTH_SCO) {
+        if (mA2dpDisableCount++ == 0) {
+            if (mA2dpEnabled) {
+                setA2dpEnabled_l(false);
+                mA2dpSuppressed = true;
             }
         }
-        break;
+        LOGV("mA2dpDisableCount incremented to %d", mA2dpDisableCount);
+   } else {
+        if (mA2dpDisableCount > 0) {
+            if (--mA2dpDisableCount == 0) {
+                if (mA2dpSuppressed) {
+                    setA2dpEnabled_l(true);
+                    mA2dpSuppressed = false;
+                }
+            }
+            LOGV("mA2dpDisableCount decremented to %d", mA2dpDisableCount);
+        } else {
+            LOGE("mA2dpDisableCount is already zero");
+        }
     }
 }
 #endif
@@ -1517,13 +1537,6 @@ void AudioFlinger::MixerThread::addActiveTrack_l(const wp<Track>& t)
         if (streamForcedToSpeaker(track->type())) {
             mAudioFlinger->handleForcedSpeakerRoute(ACTIVE_TRACK_ADDED);
         }        
-#ifdef WITH_A2DP
-        // AudioFlinger::mLock must be locked before calling
-        // handleStreamDisablesA2dp_l because it calls setA2dpEnabled_l().
-        if (streamDisablesA2dp(track->type())) {
-            mAudioFlinger->handleStreamDisablesA2dp_l(ACTIVE_TRACK_ADDED);
-        }
-#endif
     }
 }
 
@@ -1541,13 +1554,6 @@ void AudioFlinger::MixerThread::removeActiveTrack_l(const wp<Track>& t)
         if (streamForcedToSpeaker(track->type())) {
             mAudioFlinger->handleForcedSpeakerRoute(ACTIVE_TRACK_REMOVED);
         }
-#ifdef WITH_A2DP
-        // AudioFlinger::mLock must be locked before calling
-        // handleStreamDisablesA2dp_l because it calls setA2dpEnabled_l().
-        if (streamDisablesA2dp(track->type())) {
-            mAudioFlinger->handleStreamDisablesA2dp_l(ACTIVE_TRACK_REMOVED);
-        }
-#endif
     }
 }
 
@@ -1615,8 +1621,8 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
                 new(mCblk) audio_track_cblk_t();
                 // clear all buffers
                 mCblk->frameCount = frameCount;
-                mCblk->sampleRate = sampleRate;
-                mCblk->channels = channelCount;
+                mCblk->sampleRate = (uint16_t)sampleRate;
+                mCblk->channels = (uint16_t)channelCount;
                 if (sharedBuffer == 0) {
                     mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
                     memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
@@ -1639,8 +1645,8 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
            new(mCblk) audio_track_cblk_t();
            // clear all buffers
            mCblk->frameCount = frameCount;
-           mCblk->sampleRate = sampleRate;
-           mCblk->channels = channelCount;
+           mCblk->sampleRate = (uint16_t)sampleRate;
+           mCblk->channels = (uint16_t)channelCount;
            mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
            memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
            // Force underrun condition to avoid false underrun callback until first data is
@@ -1697,7 +1703,7 @@ sp<IMemory> AudioFlinger::MixerThread::TrackBase::getCblk() const
 }
 
 int AudioFlinger::MixerThread::TrackBase::sampleRate() const {
-    return mCblk->sampleRate;
+    return (int)mCblk->sampleRate;
 }
 
 int AudioFlinger::MixerThread::TrackBase::channelCount() const {
@@ -1710,11 +1716,12 @@ void* AudioFlinger::MixerThread::TrackBase::getBuffer(uint32_t offset, uint32_t 
     int16_t *bufferEnd = bufferStart + frames * cblk->channels;
 
     // Check validity of returned pointer in case the track control block would have been corrupted.
-    if (bufferStart < mBuffer || bufferStart > bufferEnd || bufferEnd > mBufferEnd) {
-        LOGW("TrackBase::getBuffer buffer out of range:\n    start: %p, end %p , mBuffer %p mBufferEnd %p\n    \
-                server %d, serverBase %d, user %d, userBase %d",
+    if (bufferStart < mBuffer || bufferStart > bufferEnd || bufferEnd > mBufferEnd || 
+            cblk->channels == 2 && ((unsigned long)bufferStart & 3) ) {
+        LOGE("TrackBase::getBuffer buffer out of range:\n    start: %p, end %p , mBuffer %p mBufferEnd %p\n    \
+                server %d, serverBase %d, user %d, userBase %d, channels %d",
                 bufferStart, bufferEnd, mBuffer, mBufferEnd,
-                cblk->server, cblk->serverBase, cblk->user, cblk->userBase);
+                cblk->server, cblk->serverBase, cblk->user, cblk->userBase, cblk->channels);
         return 0;
     }
 
@@ -1881,12 +1888,14 @@ void AudioFlinger::MixerThread::Track::flush()
     // STOPPED state
     mState = STOPPED;
 
+    mCblk->lock.lock();
     // NOTE: reset() will reset cblk->user and cblk->server with
     // the risk that at the same time, the AudioMixer is trying to read
     // data. In this case, getNextBuffer() would return a NULL pointer
     // as audio buffer => the AudioMixer code MUST always test that pointer
     // returned by getNextBuffer() is not NULL!
     reset();
+    mCblk->lock.unlock();
 }
 
 void AudioFlinger::MixerThread::Track::reset()
@@ -2495,19 +2504,6 @@ status_t AudioFlinger::AudioRecordThread::start(MixerThread::RecordTrack* record
 
     mRecordTrack = recordTrack;
 
-#ifdef WITH_A2DP
-    { // scope for lock2
-
-        // AudioFlinger::mLock must be locked before calling
-        // handleStreamDisablesA2dp_l because it calls setA2dpEnabled_l().
-        AutoMutex lock2(&mAudioFlinger->mLock);
-
-        // Currently there is no way to detect if we are recording over SCO,
-        // so we disable A2DP during any recording.
-        mAudioFlinger->handleStreamDisablesA2dp_l(ACTIVE_TRACK_ADDED);
-    }
-#endif
-
     // signal thread to start
     LOGV("Signal record thread");
     mWaitWorkCV.signal();
@@ -2520,18 +2516,6 @@ void AudioFlinger::AudioRecordThread::stop(MixerThread::RecordTrack* recordTrack
     LOGV("AudioRecordThread::stop");
     AutoMutex lock(&mLock);
     if (mActive && (recordTrack == mRecordTrack.get())) {
-#ifdef WITH_A2DP
-        { // scope for lock2
-    
-            // AudioFlinger::mLock must be locked before calling
-            // handleStreamDisablesA2dp_l because it calls setA2dpEnabled_l().
-            AutoMutex lock2(&mAudioFlinger->mLock);
-
-            // Currently there is no way to detect if we are recording over SCO,
-            // so we disable A2DP during any recording.
-            mAudioFlinger->handleStreamDisablesA2dp_l(ACTIVE_TRACK_REMOVED);
-        }
-#endif
         mActive = false;
         mStopped.wait(mLock);
     }

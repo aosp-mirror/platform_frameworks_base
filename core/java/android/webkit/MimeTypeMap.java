@@ -496,6 +496,7 @@ public /* package */ class MimeTypeMap {
             sMimeTypeMap.loadEntry("video/x-msvideo", "avi", false);
             sMimeTypeMap.loadEntry("video/x-sgi-movie", "movie", false);
             sMimeTypeMap.loadEntry("x-conference/x-cooltalk", "ice", false);
+            sMimeTypeMap.loadEntry("x-epoc/x-sisx-app", "sisx", false);
         }
 
         return sMimeTypeMap;

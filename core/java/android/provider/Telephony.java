@@ -30,6 +30,7 @@ import android.telephony.gsm.SmsMessage;
 import android.text.TextUtils;
 import android.text.util.Regex;
 import android.util.Config;
+import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -233,18 +234,37 @@ public final class Telephony {
          */
         public static boolean moveMessageToFolder(Context context,
                 Uri uri, int folder) {
-            if ((uri == null) || ((folder != MESSAGE_TYPE_INBOX)
-                                  && (folder != MESSAGE_TYPE_OUTBOX)
-                                  && (folder != MESSAGE_TYPE_SENT)
-                                  && (folder != MESSAGE_TYPE_DRAFT)
-                                  && (folder != MESSAGE_TYPE_FAILED)
-                                  && (folder != MESSAGE_TYPE_QUEUED))) {
+            if (uri == null) {
+                return false;
+            }
+            
+            boolean markAsUnread = false;
+            boolean markAsRead = false;
+            switch(folder) {
+            case MESSAGE_TYPE_INBOX:
+            case MESSAGE_TYPE_DRAFT:
+                break;
+            case MESSAGE_TYPE_OUTBOX:
+            case MESSAGE_TYPE_SENT:
+                markAsRead = true;
+                break;
+            case MESSAGE_TYPE_FAILED:
+            case MESSAGE_TYPE_QUEUED:
+                markAsUnread = true;
+                break;
+            default:
                 return false;
             }
 
-            ContentValues values = new ContentValues(1);
+            ContentValues values = new ContentValues(2);
 
             values.put(TYPE, folder);
+            if (markAsUnread) {
+                values.put(READ, Integer.valueOf(0));
+            } else if (markAsRead) {
+                values.put(READ, Integer.valueOf(1));
+            }
+            
             return 1 == SqliteWrapper.update(context, context.getContentResolver(),
                             uri, values, null, null);
         }
@@ -1084,18 +1104,22 @@ public final class Telephony {
                 uriBuilder.appendQueryParameter("recipient", recipient);
             }
 
+            Uri uri = uriBuilder.build();
             Cursor cursor = SqliteWrapper.query(context, context.getContentResolver(),
-                    uriBuilder.build(), ID_PROJECTION, null, null, null);
+                    uri, ID_PROJECTION, null, null, null);
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
                         return cursor.getLong(0);
+                    } else {
+                        Log.e(TAG, "getOrCreateThreadId returned no rows!");
                     }
                 } finally {
                     cursor.close();
                 }
             }
 
+            Log.e(TAG, "getOrCreateThreadId failed with uri " + uri.toString());
             throw new IllegalArgumentException("Unable to find or allocate a thread ID.");
         }
     }

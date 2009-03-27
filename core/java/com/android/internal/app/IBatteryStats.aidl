@@ -30,7 +30,19 @@ interface IBatteryStats {
     void noteScreenOff();
     void notePhoneOn();
     void notePhoneOff();
-    void setOnBattery(boolean onBattery);
+    void notePhoneSignalStrength(int asu);
+    void notePhoneDataConnectionState(int dataType, boolean hasData);
+    void noteWifiOn();
+    void noteWifiOff();
+    void noteWifiRunning();
+    void noteWifiStopped();
+    void noteBluetoothOn();
+    void noteBluetoothOff();
+    void noteFullWifiLockAcquired(int uid);
+    void noteFullWifiLockReleased(int uid);
+    void noteScanWifiLockAcquired(int uid);
+    void noteScanWifiLockReleased(int uid);
+    void setOnBattery(boolean onBattery, int level);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 }

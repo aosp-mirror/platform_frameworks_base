@@ -30,7 +30,19 @@ namespace android {
 // ---------------------------------------------------------------------------
 class OrientationAnimation;
 
-class LayerOrientationAnim : public LayerBase
+
+class LayerOrientationAnimBase : public LayerBase
+{
+public:
+    LayerOrientationAnimBase(SurfaceFlinger* flinger, DisplayID display)
+        : LayerBase(flinger, display) {
+    }
+    virtual void onOrientationCompleted() = 0;
+};
+
+// ---------------------------------------------------------------------------
+
+class LayerOrientationAnim : public LayerOrientationAnimBase
 {
 public:    
     static const uint32_t typeInfo;
@@ -40,8 +52,8 @@ public:
     
                 LayerOrientationAnim(SurfaceFlinger* flinger, DisplayID display,
                         OrientationAnimation* anim, 
-                        const LayerBitmap& zoomOut,
-                        const LayerBitmap& zoomIn);
+                        const LayerBitmap& bitmapIn,
+                        const LayerBitmap& bitmapOut);
         virtual ~LayerOrientationAnim();
 
             void onOrientationCompleted();
@@ -52,20 +64,45 @@ public:
     virtual bool needsBlending() const;
     virtual bool isSecure() const       { return false; }
 private:
-    void drawScaled(float scale, float alpha) const;
+    void drawScaled(float scale, float alphaIn, float alphaOut) const;
 
+    class Lerp {
+        float in;
+        float outMinusIn;
+    public:
+        Lerp() : in(0), outMinusIn(0) { }
+        Lerp(float in, float out) : in(in), outMinusIn(out-in) { }
+        float getIn() const { return in; };
+        float getOut() const { return in + outMinusIn; }
+        void set(float in, float out) { 
+            this->in = in; 
+            this->outMinusIn = out-in; 
+        }
+        void setIn(float in) { 
+            this->in = in; 
+        }
+        void setOut(float out) { 
+            this->outMinusIn = out - this->in; 
+        }
+        float operator()(float t) const { 
+            return outMinusIn*t + in; 
+        }
+    };
+    
     OrientationAnimation* mAnim;
-    LayerBitmap mBitmap;
     LayerBitmap mBitmapIn;
+    LayerBitmap mBitmapOut;
     nsecs_t mStartTime;
     nsecs_t mFinishTime;
     bool mOrientationCompleted;
     mutable bool mFirstRedraw;
     mutable float mLastNormalizedTime;
-    mutable float mLastScale;
     mutable GLuint  mTextureName;
     mutable GLuint  mTextureNameIn;
     mutable bool mNeedsBlending;
+    
+    mutable Lerp mAlphaInLerp;
+    mutable Lerp mAlphaOutLerp;
 };
 
 // ---------------------------------------------------------------------------

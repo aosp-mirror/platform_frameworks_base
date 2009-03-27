@@ -69,6 +69,7 @@ public class AutoText {
     private char mTrieUsed;
     private String mText;
     private Locale mLocale;
+    private int mSize;
 
     private AutoText(Resources resources) {
         mLocale = resources.getConfiguration().locale;
@@ -76,12 +77,12 @@ public class AutoText {
     }
 
     /**
-     * Retrieves a possible spelling correction for the specified range
-     * of text.  Returns null if no correction can be found.
-     * The View is used to get the current Locale and Resources.
+     * Returns the instance of AutoText. If the locale has changed, it will create a new
+     * instance of AutoText for the locale.
+     * @param view to get the resources from
+     * @return the single instance of AutoText
      */
-    public static String get(CharSequence src, final int start, final int end,
-                             View view) {
+    private static AutoText getInstance(View view) {
         Resources res = view.getContext().getResources();
         Locale locale = res.getConfiguration().locale;
         AutoText instance;
@@ -94,8 +95,36 @@ public class AutoText {
                 sInstance = instance;
             }
         }
+        
+        return instance;
+    }
+    
+    /**
+     * Retrieves a possible spelling correction for the specified range
+     * of text.  Returns null if no correction can be found.
+     * The View is used to get the current Locale and Resources.
+     */
+    public static String get(CharSequence src, final int start, final int end,
+                             View view) {
+        return getInstance(view).lookup(src, start, end);
+    }
 
-        return instance.lookup(src, start, end);
+    /**
+     * Returns the size of the auto text dictionary. The return value can be zero if there is
+     * no auto correction data available for the current locale.
+     * @param view used to retrieve the current Locale and Resources.
+     * @return the number of entries in the auto text dictionary
+     */
+    public static int getSize(View view) {
+
+        return getInstance(view).getSize(); 
+    }
+
+    /**
+     * Returns the size of the dictionary.
+     */
+    private int getSize() {
+        return mSize;
     }
 
     private String lookup(CharSequence src, final int start, final int end) {
@@ -181,7 +210,9 @@ public class AutoText {
     private void add(String src, char off) {
         int slen = src.length();
         int herep = TRIE_ROOT;
-
+        // Keep track of the size of the dictionary
+        mSize++;
+        
         for (int i = 0; i < slen; i++) {
             char c = src.charAt(i);
             boolean found = false;

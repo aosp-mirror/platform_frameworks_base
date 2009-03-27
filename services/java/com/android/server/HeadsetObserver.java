@@ -98,12 +98,12 @@ class HeadsetObserver extends UEventObserver {
             sendIntent(isUnplug);
 
             if (isUnplug) {
-                // It often takes >200ms to flush the audio pipeline after apps
-                // pause audio playback, but audio route changes are immediate,
-                // so delay the route change by 400ms.
+                // It can take hundreds of ms flush the audio pipeline after
+                // apps pause audio playback, but audio route changes are
+                // immediate, so delay the route change by 1000ms.
                 // This could be improved once the audio sub-system provides an
                 // interface to clear the audio pipeline.
-                mHandler.sendEmptyMessageDelayed(0, 400);
+                mHandler.sendEmptyMessageDelayed(0, 1000);
             } else {
                 updateAudioRoute();
             }

@@ -17,7 +17,6 @@
 package com.android.internal.app;
 
 import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,6 +48,7 @@ import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.util.AttributeSet;
 
 import com.android.internal.R;
 
@@ -361,10 +361,13 @@ public class AlertController {
         if (mView != null) {
             customPanel = (FrameLayout) mWindow.findViewById(R.id.customPanel);
             FrameLayout custom = (FrameLayout) mWindow.findViewById(R.id.custom);
-            custom.addView(mView, new LayoutParams(FILL_PARENT, WRAP_CONTENT));
+            custom.addView(mView, new LayoutParams(FILL_PARENT, FILL_PARENT));
             if (mViewSpacingSpecified) {
                 custom.setPadding(mViewSpacingLeft, mViewSpacingTop, mViewSpacingRight,
                         mViewSpacingBottom);
+            }
+            if (mListView != null) {
+                ((LinearLayout.LayoutParams) customPanel.getLayoutParams()).weight = 0;
             }
         } else {
             mWindow.findViewById(R.id.customPanel).setVisibility(View.GONE);
@@ -456,7 +459,9 @@ public class AlertController {
             
             if (mListView != null) {
                 contentPanel.removeView(mWindow.findViewById(R.id.scrollView));
-                contentPanel.addView(mListView, new LinearLayout.LayoutParams(FILL_PARENT, WRAP_CONTENT));
+                contentPanel.addView(mListView,
+                        new LinearLayout.LayoutParams(FILL_PARENT, FILL_PARENT));
+                contentPanel.setLayoutParams(new LinearLayout.LayoutParams(FILL_PARENT, 0, 1.0f));
             } else {
                 contentPanel.setVisibility(View.GONE);
             }
@@ -667,7 +672,28 @@ public class AlertController {
             }
         }
     }
-    
+
+    public static class RecycleListView extends ListView {
+        boolean mRecycleOnMeasure = true;
+
+        public RecycleListView(Context context) {
+            super(context);
+        }
+
+        public RecycleListView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public RecycleListView(Context context, AttributeSet attrs, int defStyle) {
+            super(context, attrs, defStyle);
+        }
+
+        @Override
+        protected boolean recycleOnMeasure() {
+            return mRecycleOnMeasure;
+        }
+    }
+
     public static class AlertParams {
         public final Context mContext;
         public final LayoutInflater mInflater;
@@ -706,7 +732,8 @@ public class AlertController {
         public boolean mForceInverseBackground;
         public AdapterView.OnItemSelectedListener mOnItemSelectedListener;
         public OnPrepareListViewListener mOnPrepareListViewListener;
-        
+        public boolean mRecycleOnMeasure = true;
+
         /**
          * Interface definition for a callback to be invoked before the ListView
          * will be bound to an adapter.
@@ -782,7 +809,8 @@ public class AlertController {
         }
         
         private void createListView(final AlertController dialog) {
-            final ListView listView = (ListView) mInflater.inflate(R.layout.select_dialog, null);
+            final RecycleListView listView = (RecycleListView)
+                    mInflater.inflate(R.layout.select_dialog, null);
             ListAdapter adapter;
             
             if (mIsMultiChoice) {
@@ -881,6 +909,7 @@ public class AlertController {
             } else if (mIsMultiChoice) {
                 listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             }
+            listView.mRecycleOnMeasure = mRecycleOnMeasure;
             dialog.mListView = listView;
         }
     }

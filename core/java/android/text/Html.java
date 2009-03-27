@@ -28,6 +28,8 @@ import org.xml.sax.XMLReader;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.AlignmentSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
@@ -41,6 +43,7 @@ import android.text.style.SuperscriptSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 import com.android.internal.util.XmlUtils;
 
 import java.io.IOException;
@@ -137,11 +140,51 @@ public class Html {
      */
     public static String toHtml(Spanned text) {
         StringBuilder out = new StringBuilder();
+        withinHtml(out, text);
+        return out.toString();
+    }
+
+    private static void withinHtml(StringBuilder out, Spanned text) {
         int len = text.length();
 
         int next;
         for (int i = 0; i < text.length(); i = next) {
-            next = text.nextSpanTransition(i, len, QuoteSpan.class);
+            next = text.nextSpanTransition(i, len, ParagraphStyle.class);
+            ParagraphStyle[] style = text.getSpans(i, next, ParagraphStyle.class);
+            String elements = " ";
+            boolean needDiv = false;
+
+            for(int j = 0; j < style.length; j++) {
+                if (style[j] instanceof AlignmentSpan) {
+                    Layout.Alignment align = 
+                        ((AlignmentSpan) style[j]).getAlignment();
+                    needDiv = true;
+                    if (align == Layout.Alignment.ALIGN_CENTER) {
+                        elements = "align=\"center\" " + elements;
+                    } else if (align == Layout.Alignment.ALIGN_OPPOSITE) {
+                        elements = "align=\"right\" " + elements;
+                    } else {
+                        elements = "align=\"left\" " + elements;
+                    }
+                }
+            }
+            if (needDiv) {
+                out.append("<div " + elements + ">");
+            }
+
+            withinDiv(out, text, i, next);
+
+            if (needDiv) {
+                out.append("</div>");
+            }
+        }
+    }
+
+    private static void withinDiv(StringBuilder out, Spanned text,
+            int start, int end) {
+        int next;
+        for (int i = start; i < end; i = next) {
+            next = text.nextSpanTransition(i, end, QuoteSpan.class);
             QuoteSpan[] quotes = text.getSpans(i, next, QuoteSpan.class);
 
             for (QuoteSpan quote: quotes) {
@@ -154,8 +197,6 @@ public class Html {
                 out.append("</blockquote>\n");
             }
         }
-
-        return out.toString();
     }
 
     private static void withinBlockquote(StringBuilder out, Spanned text,
@@ -234,11 +275,32 @@ public class Html {
                     // Don't output the dummy character underlying the image.
                     i = next;
                 }
+                if (style[j] instanceof AbsoluteSizeSpan) {
+                    out.append("<font size =\"");
+                    out.append(((AbsoluteSizeSpan) style[j]).getSize() / 6);
+                    out.append("\">");
+                }
+                if (style[j] instanceof ForegroundColorSpan) {
+                    out.append("<font color =\"#");
+                    String color = Integer.toHexString(((ForegroundColorSpan)
+                            style[j]).getForegroundColor() + 0x01000000);
+                    while (color.length() < 6) {
+                        color = "0" + color;
+                    }
+                    out.append(color);
+                    out.append("\">");
+                }
             }
 
             withinStyle(out, text, i, next);
 
             for (int j = style.length - 1; j >= 0; j--) {
+                if (style[j] instanceof ForegroundColorSpan) {
+                    out.append("</font>");
+                }
+                if (style[j] instanceof AbsoluteSizeSpan) {
+                    out.append("</font>");
+                }
                 if (style[j] instanceof URLSpan) {
                     out.append("</a>");
                 }

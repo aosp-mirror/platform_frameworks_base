@@ -273,6 +273,18 @@ public class Contacts {
             Uri.parse("content://contacts/deleted_people");
 
         /**
+         * The content:// style URL for filtering people that have a specific
+         * E-mail or IM address. The filter argument should be passed as an
+         * additional path segment after this URI. This matches any people with
+         * at least one E-mail or IM {@link ContactMethods} that match the
+         * filter.
+         * 
+         * @hide pending API council review
+         */
+        public static final Uri WITH_EMAIL_OR_IM_FILTER_URI =
+            Uri.parse("content://contacts/people/with_email_or_im_filter");
+        
+        /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
@@ -1459,13 +1471,24 @@ public class Contacts {
                 "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
 
         /**
-         * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new contact if no matching
-         * contact found.  Otherwise, default behavior is to prompt user with dialog before creating.
-         *
-         * <P>Type: BOOLEAN</P>
+         * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new
+         * contact if no matching contact found. Otherwise, default behavior is
+         * to prompt user with dialog before creating.
+         * <p>
+         * Type: BOOLEAN
          */
         public static final String EXTRA_FORCE_CREATE =
                 "com.android.contacts.action.FORCE_CREATE";
+        
+        /**
+         * Used with {@link #SHOW_OR_CREATE_CONTACT} to specify an exact
+         * description to be shown when prompting user about creating a new
+         * contact.
+         * <p>
+         * Type: STRING
+         */
+        public static final String EXTRA_CREATE_DESCRIPTION =
+            "com.android.contacts.action.CREATE_DESCRIPTION";
 
         /**
          * Intents related to the Contacts app UI.

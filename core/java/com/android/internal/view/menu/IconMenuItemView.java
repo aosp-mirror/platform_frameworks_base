@@ -28,6 +28,7 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.widget.TextView;
+import android.text.Layout;
 
 /**
  * The item view for each item in the {@link IconMenuView}.  
@@ -236,6 +237,32 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
         positionIcon();
     }
 
+    @Override
+    protected void onTextChanged(CharSequence text, int start, int before, int after) {
+        super.onTextChanged(text, start, before, after);
+
+        // our layout params depend on the length of the text
+        setLayoutParams(getTextAppropriateLayoutParams());
+    }
+
+    /**
+     * @return layout params appropriate for this view.  If layout params already exist, it will
+     *         augment them to be appropriate to the current text size.
+     */
+    IconMenuView.LayoutParams getTextAppropriateLayoutParams() {
+        IconMenuView.LayoutParams lp = (IconMenuView.LayoutParams) getLayoutParams();
+        if (lp == null) {
+            // Default layout parameters
+            lp = new IconMenuView.LayoutParams(
+                    IconMenuView.LayoutParams.FILL_PARENT, IconMenuView.LayoutParams.FILL_PARENT);
+        }
+
+        // Set the desired width of item
+        lp.desiredWidth = (int) Layout.getDesiredWidth(getText(), getPaint());
+
+        return lp;
+    }
+
     /**
      * Positions the icon vertically (horizontal centering is taken care of by
      * the TextView's gravity).
@@ -280,5 +307,5 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
     public boolean showsIcon() {
         return true;
     }
-    
+
 }

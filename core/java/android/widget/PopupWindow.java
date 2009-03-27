@@ -1125,17 +1125,16 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Updates the position and the dimension of the popup window. Width and
-     * height can be set to -1 to update location only.  Calling this function
-     * also updates the window with the current popup state as
-     * described for {@link #update()}.</p>
+     * <p>Updates the position and the dimension of the popup window. Calling this
+     * function also updates the window with the current popup state as described
+     * for {@link #update()}.</p>
      *
      * @param anchor the popup's anchor view
      * @param width the new width, can be -1 to ignore
      * @param height the new height, can be -1 to ignore
      */
     public void update(View anchor, int width, int height) {
-        update(anchor, 0, 0, width, height);
+        update(anchor, false, 0, 0, true, width, height);
     }
 
     /**
@@ -1153,31 +1152,44 @@ public class PopupWindow {
      * @param height the new height, can be -1 to ignore
      */
     public void update(View anchor, int xoff, int yoff, int width, int height) {
+        update(anchor, true, xoff, yoff, true, width, height);
+    }
+
+    private void update(View anchor, boolean updateLocation, int xoff, int yoff,
+            boolean updateDimension, int width, int height) {
+
         if (!isShowing() || mContentView == null) {
             return;
         }
 
         WeakReference<View> oldAnchor = mAnchor;
         if (oldAnchor == null || oldAnchor.get() != anchor ||
-            mAnchorXoff != xoff || mAnchorYoff != yoff) {
+                (updateLocation && (mAnchorXoff != xoff || mAnchorYoff != yoff))) {
             registerForScrollChanged(anchor, xoff, yoff);
         }
 
         WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                 mPopupView.getLayoutParams();
 
-        if (width == -1) {
-            width = mPopupWidth;
-        } else {
-            mPopupWidth = width;
+        if (updateDimension) {
+            if (width == -1) {
+                width = mPopupWidth;
+            } else {
+                mPopupWidth = width;
+            }
+            if (height == -1) {
+                height = mPopupHeight;
+            } else {
+                mPopupHeight = height;
+            }
         }
-        if (height == -1) {
-            height = mPopupHeight;
+
+        if (updateLocation) {
+            mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
         } else {
-            mPopupHeight = height;
+            mAboveAnchor = findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff);            
         }
-        
-        mAboveAnchor = findDropDownPosition(anchor, p, xoff, yoff);
+
         update(p.x, p.y, width, height);
     }
 

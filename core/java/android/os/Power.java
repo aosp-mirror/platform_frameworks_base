@@ -45,26 +45,6 @@ public class Power
     public static native void releaseWakeLock(String id);
 
     /**
-     * Flag to turn on and off the keyboard light.
-     */
-    public static final int KEYBOARD_LIGHT = 0x00000001;
-
-    /**
-     * Flag to turn on and off the screen backlight.
-     */
-    public static final int SCREEN_LIGHT = 0x00000002;
-
-    /**
-     * Flag to turn on and off the button backlight.
-     */
-    public static final int BUTTON_LIGHT = 0x00000004;
-
-    /**
-     * Flags to turn on and off all the backlights.
-     */
-    public static final int ALL_LIGHTS = (KEYBOARD_LIGHT|SCREEN_LIGHT|BUTTON_LIGHT);
-
-    /**
      * Brightness value for fully off
      */
     public static final int BRIGHTNESS_OFF = 0;
@@ -89,14 +69,6 @@ public class Power
      * Screen will stay dim if battery level is <= LOW_BATTERY_THRESHOLD
      */
     public static final int LOW_BATTERY_THRESHOLD = 10;
-
-    /**
-     * Set the brightness for one or more lights
-     *
-     * @param mask flags indicating which lights to change brightness
-     * @param brightness new brightness value (0 = off, 255 = fully bright)
-     */
-    public static native int setLightBrightness(int mask, int brightness);
 
     /**
      * Turn the screen on or off

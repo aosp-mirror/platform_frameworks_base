@@ -16,8 +16,10 @@
 
 package com.android.internal.location;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.IGpsStatusListener;
 import android.location.Location;
@@ -32,9 +34,14 @@ import android.os.SystemClock;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.TelephonyIntents;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -77,6 +84,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * {@hide}
      */
     public static final String EXTRA_ENABLED = "enabled";
+
+    // these need to match GpsPositionMode enum in gps.h
+    private static final int GPS_POSITION_MODE_STANDALONE = 0;
+    private static final int GPS_POSITION_MODE_MS_BASED = 1;
+    private static final int GPS_POSITION_MODE_MS_ASSISTED = 2;
 
     // these need to match GpsStatusValue defines in gps.h
     private static final int GPS_STATUS_NONE = 0;
@@ -135,6 +147,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
     // requested frequency of fixes, in seconds
     private int mFixInterval = 1;
 
+    private int mPositionMode = GPS_POSITION_MODE_STANDALONE;
+
     // true if we started navigation
     private boolean mStarted;
 
@@ -156,7 +170,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private GpsEventThread mEventThread;
     private GpsNetworkThread mNetworkThread;
     private Object mNetworkThreadLock = new Object();
-   
+
+    private String mSuplHost;
+    private int mSuplPort;
+    private boolean mSetSuplServer;
+
     // how often to request NTP time, in milliseconds
     // current setting 4 hours
     private static final long NTP_INTERVAL = 4*60*60*1000; 
@@ -166,6 +184,27 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
     private ILocationCollector mCollector;
 
+    private class TelephonyBroadcastReceiver extends BroadcastReceiver {
+        @Override public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
+                String state = intent.getStringExtra(Phone.STATE_KEY);
+                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+                String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
+
+                if (Config.LOGD) {
+                    Log.d(TAG, "state: " + state +  " apnName: " + apnName + " reason: " + reason);
+                }
+                if ("CONNECTED".equals(state)) {
+                    native_set_supl_apn(apnName);
+                } else {
+                    native_set_supl_apn("");
+                }
+            }
+        }
+    }
+
     public static boolean isSupported() {
         return native_is_supported();
     }
@@ -174,6 +213,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
         super(LocationManager.GPS_PROVIDER);
         mContext = context;
 
+        TelephonyBroadcastReceiver receiver = new TelephonyBroadcastReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
+        context.registerReceiver(receiver, intentFilter);
+
         mProperties = new Properties();
         try {
             File file = new File(PROPERTIES_FILE);
@@ -181,6 +225,16 @@ public class GpsLocationProvider extends LocationProviderImpl {
             mProperties.load(stream);
             stream.close();
             mNtpServer = mProperties.getProperty("NTP_SERVER", null);
+            mSuplHost = mProperties.getProperty("SUPL_HOST");
+            String suplPortString = mProperties.getProperty("SUPL_PORT");
+            if (mSuplHost != null && suplPortString != null) {
+                try {
+                    mSuplPort = Integer.parseInt(suplPortString);
+                    mSetSuplServer = true;
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "unable to parse SUPL_PORT: " + suplPortString);
+                }
+            }
         } catch (IOException e) {
             Log.w(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
         }
@@ -198,7 +252,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
     public boolean requiresNetwork() {
         // We want updateNetworkState() to get called when the network state changes
         // for XTRA and NTP time injection support.
-        return (mNtpServer != null || native_supports_xtra());
+        return (mNtpServer != null || native_supports_xtra() || mSuplHost != null);
     }
 
     public void updateNetworkState(int state) {
@@ -542,7 +596,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
         if (!mStarted) {
             if (Config.LOGV) Log.v(TAG, "startNavigating");
             mStarted = true;
-            if (!native_start(false, mFixInterval)) {
+            if (!native_start(mPositionMode, false, mFixInterval)) {
                 mStarted = false;
                 Log.e(TAG, "native_start failed in startNavigating()");
             }
@@ -806,7 +860,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
                         }
                     }
                     waitTime = getWaitTime();
-                } while (!mDone && ((!mXtraDownloadRequested && waitTime > 0)
+                } while (!mDone && ((!mXtraDownloadRequested && !mSetSuplServer && waitTime > 0)
                         || !mNetworkAvailable));
                 if (Config.LOGD) Log.d(TAG, "NetworkThread out of wake loop");
                 
@@ -830,6 +884,29 @@ public class GpsLocationProvider extends LocationProviderImpl {
                         } else {
                             if (Config.LOGD) Log.d(TAG, "requestTime failed");
                             mNextNtpTime = System.currentTimeMillis() + RETRY_INTERVAL;
+                        }
+                    }
+
+                    // Set the SUPL server address if we have not yet
+                    if (mSetSuplServer) {
+                        try {
+                            InetAddress inetAddress = InetAddress.getByName(mSuplHost);
+                            if (inetAddress != null) {
+                                byte[] addrBytes = inetAddress.getAddress();
+                                long addr = 0;
+                                for (int i = 0; i < addrBytes.length; i++) {
+                                    int temp = addrBytes[i];
+                                    // signed -> unsigned
+                                    if (temp < 0) temp = 256 + temp;
+                                    addr = addr * 256 + temp;
+                                }
+                                // use MS-Based position mode if SUPL support is enabled
+                                mPositionMode = GPS_POSITION_MODE_MS_BASED;
+                                native_set_supl_server((int)addr, mSuplPort);
+                                mSetSuplServer = false; 
+                            }
+                        } catch (UnknownHostException e) {
+                            Log.e(TAG, "unknown host for SUPL server " + mSuplHost);
                         }
                     }
 
@@ -908,7 +985,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private native boolean native_init();
     private native void native_disable();
     private native void native_cleanup();
-    private native boolean native_start(boolean singleFix, int fixInterval);
+    private native boolean native_start(int positionMode, boolean singleFix, int fixInterval);
     private native boolean native_stop();
     private native void native_set_fix_frequency(int fixFrequency);
     private native void native_delete_aiding_data(int flags);
@@ -922,4 +999,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private native void native_inject_time(long time, long timeReference, int uncertainty);
     private native boolean native_supports_xtra();
     private native void native_inject_xtra_data(byte[] data, int length);
+
+    // SUPL Support    
+    private native void native_set_supl_server(int addr, int port);
+    private native void native_set_supl_apn(String apn);
 }

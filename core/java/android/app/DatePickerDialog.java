@@ -47,6 +47,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     private final OnDateSetListener mCallBack;
     private final Calendar mCalendar;
     private final java.text.DateFormat mDateFormat;
+    private final java.text.DateFormat mTitleDateFormat;
     private final String[] mWeekDays;
 
     private int mInitialYear;
@@ -108,6 +109,8 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         mWeekDays = symbols.getShortWeekdays();
         
         mDateFormat = DateFormat.getMediumDateFormat(context);
+        mTitleDateFormat = java.text.DateFormat.
+                                getDateInstance(java.text.DateFormat.FULL);
         mCalendar = Calendar.getInstance();
         updateTitle(mInitialYear, mInitialMonth, mInitialDay);
         
@@ -126,7 +129,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     @Override
     public void show() {
         super.show();
-        
+
         /* Sometimes the full month is displayed causing the title
          * to be very long, in those cases ensure it doesn't wrap to
          * 2 lines (as that looks jumpy) and ensure we ellipsize the end.
@@ -160,8 +163,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         mCalendar.set(Calendar.YEAR, year);
         mCalendar.set(Calendar.MONTH, month);
         mCalendar.set(Calendar.DAY_OF_MONTH, day);
-        String weekday = mWeekDays[mCalendar.get(Calendar.DAY_OF_WEEK)];
-        setTitle(weekday + ", " + mDateFormat.format(mCalendar.getTime()));
+        setTitle(mTitleDateFormat.format(mCalendar.getTime()));
     }
     
     @Override

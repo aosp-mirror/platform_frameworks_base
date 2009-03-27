@@ -261,24 +261,6 @@ class Network {
     }
 
     /**
-     * If we need to stop loading done in a handler (here, browser frame), we
-     * send a message to the handler to stop loading, and remove all loaders
-     * that share the same CallbackProxy in question from all local
-     * handlers (such as ssl-error and http-authentication handler).
-     * @param proxy The CallbackProxy responsible for cancelling the current
-     *              load.
-     */
-    public void resetHandlersAndStopLoading(BrowserFrame frame) {
-        if (Config.LOGV) {
-            Log.v(LOGTAG, "Network.resetHandlersAndStopLoading()");
-        }
-
-        frame.stopLoading();
-        mSslErrorHandler.reset(frame);
-        mHttpAuthHandler.reset(frame);
-    }
-
-    /**
      * Saves the state of network handlers (user SSL and HTTP-authentication
      * preferences).
      * @param outState The out-state to save (write) to.

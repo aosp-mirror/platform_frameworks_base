@@ -19,8 +19,4 @@
     <bag type="configVarying" name="bag">
         <item name="testString">bag finger</item>
     </bag>
-    <item type="configVarying" name="simple_finger">only simple finger</item>
-    <bag type="configVarying" name="bag_finger">
-        <item name="testString">only bag finger</item>
-    </bag>
 </resources>

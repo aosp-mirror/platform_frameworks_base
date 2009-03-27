@@ -744,6 +744,7 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
     
     // Ensure that buffer depth covers at least audio hardware latency
     uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSamplingRate);
+    if (minBufCount < 2) minBufCount = 2;
     uint32_t minFrameCount = (afFrameCount*sampleRateInHertz*minBufCount)/afSamplingRate;
     int minBuffSize = minFrameCount 
             * (audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1)

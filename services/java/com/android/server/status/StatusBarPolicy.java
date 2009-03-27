@@ -17,13 +17,16 @@
 package com.android.server.status;
 
 import com.android.internal.R;
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.telephony.SimCard;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.server.am.BatteryStatsService;
 
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
 import android.content.BroadcastReceiver;
@@ -37,9 +40,11 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -77,9 +82,10 @@ public class StatusBarPolicy {
     private static final int BATTERY_THRESHOLD_WARNING = 1;
     private static final int BATTERY_THRESHOLD_EMPTY = 2;
 
-    private Context mContext;
-    private StatusBarService mService;
-    private Handler mHandler = new StatusBarHandler();
+    private final Context mContext;
+    private final StatusBarService mService;
+    private final Handler mHandler = new StatusBarHandler();
+    private final IBatteryStats mBatteryStats;
 
     // clock
     private Calendar mCalendar;
@@ -143,6 +149,7 @@ public class StatusBarPolicy {
     SimCard.State mSimState = SimCard.State.READY;
     int mPhoneState = TelephonyManager.CALL_STATE_IDLE;
     int mDataState = TelephonyManager.DATA_DISCONNECTED;
+    int mDataNetType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     int mDataActivity = TelephonyManager.DATA_ACTIVITY_NONE;
     ServiceState mServiceState;
     int mSignalAsu = -1;
@@ -222,8 +229,7 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 updateBattery(intent);
             }
-            else if (action.equals(BluetoothIntent.ENABLED_ACTION) ||
-                    action.equals(BluetoothIntent.DISABLED_ACTION) ||
+            else if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
                 updateBluetooth(intent);
@@ -250,6 +256,7 @@ public class StatusBarPolicy {
     private StatusBarPolicy(Context context, StatusBarService service) {
         mContext = context;
         mService = service;
+        mBatteryStats = BatteryStatsService.getService();
 
         // clock
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
@@ -345,8 +352,7 @@ public class StatusBarPolicy {
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
-        filter.addAction(BluetoothIntent.ENABLED_ACTION);
-        filter.addAction(BluetoothIntent.DISABLED_ACTION);
+        filter.addAction(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
         filter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
         filter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -712,8 +718,8 @@ public class StatusBarPolicy {
     }
 
     private final void updateDataNetType() {
-        int net = mPhone.getNetworkType();
-        switch (net) {
+        mDataNetType = mPhone.getNetworkType();
+        switch (mDataNetType) {
             case TelephonyManager.NETWORK_TYPE_EDGE:
                 mDataIconList = sDataNetType_e;
                 break;
@@ -767,6 +773,13 @@ public class StatusBarPolicy {
             mDataData.iconId = com.android.internal.R.drawable.stat_sys_no_sim;
             mService.updateIcon(mDataIcon, mDataData, null);
         }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.notePhoneDataConnectionState(mDataNetType, visible);
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         if (mDataIconVisible != visible) {
             mService.setIconVisibility(mDataIcon, visible);
             mDataIconVisible = visible;
@@ -796,10 +809,10 @@ public class StatusBarPolicy {
         int iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth;
 
         String action = intent.getAction();
-        if (action.equals(BluetoothIntent.DISABLED_ACTION)) {
-            mBluetoothEnabled = false;
-        } else if (action.equals(BluetoothIntent.ENABLED_ACTION)) {
-            mBluetoothEnabled = true;
+        if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION)) {
+            int state = intent.getIntExtra(BluetoothIntent.BLUETOOTH_STATE,
+                                           BluetoothError.ERROR);
+            mBluetoothEnabled = state == BluetoothDevice.BLUETOOTH_STATE_ON;
         } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
             mBluetoothHeadsetState = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
                     BluetoothHeadset.STATE_ERROR);

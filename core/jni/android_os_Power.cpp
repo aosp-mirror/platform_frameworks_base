@@ -70,12 +70,6 @@ setLastUserActivityTimeout(JNIEnv *env, jobject clazz, jlong timeMS)
 }
 
 static int
-setLightBrightness(JNIEnv *env, jobject clazz, jint mask, jint brightness)
-{
-    return set_light_brightness(mask, brightness);
-}
-
-static int
 setScreenState(JNIEnv *env, jobject clazz, jboolean on)
 {
     return set_screen_state(on);
@@ -109,7 +103,6 @@ static JNINativeMethod method_table[] = {
     { "acquireWakeLock", "(ILjava/lang/String;)V", (void*)acquireWakeLock },
     { "releaseWakeLock", "(Ljava/lang/String;)V", (void*)releaseWakeLock },
     { "setLastUserActivityTimeout", "(J)I", (void*)setLastUserActivityTimeout },
-    { "setLightBrightness", "(II)I", (void*)setLightBrightness },
     { "setScreenState", "(Z)I", (void*)setScreenState },
     { "shutdown", "()V", (void*)android_os_Power_shutdown },
     { "reboot", "(Ljava/lang/String;)V", (void*)android_os_Power_reboot },

@@ -38,7 +38,6 @@ import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.Handler;
-import android.os.Hardware;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Power;
@@ -80,6 +79,7 @@ class NotificationManagerService extends INotificationManager.Stub
 
     private WorkerHandler mHandler;
     private StatusBarService mStatusBarService;
+    private HardwareService mHardware;
 
     private NotificationRecord mSoundNotification;
     private AsyncPlayer mSound;
@@ -99,25 +99,11 @@ class NotificationManagerService extends INotificationManager.Stub
     private boolean mBatteryFull;
     private NotificationRecord mLedNotification;
     
-    // Low battery - red, blinking on 0.125s every 3 seconds
-    private static final int BATTERY_LOW_ARGB = 0xFFFF0000;
-    private static final int BATTERY_LOW_ON = 125;
-    private static final int BATTERY_LOW_OFF = 2875;
-
-    // Charging Low - red solid on
-    private static final int CHARGING_LOW_ARGB = 0xFFFF0000;
-    private static final int CHARGING_LOW_ON = 0;
-    private static final int CHARGING_LOW_OFF = 0;
-
-    // Charging - orange solid on
-    private static final int CHARGING_ARGB = 0xFFFFFF00;
-    private static final int CHARGING_ON = 0;
-    private static final int CHARGING_OFF = 0;
-
-    // Charging Full - green solid on
-    private static final int CHARGING_FULL_ARGB = 0xFF00FF00;
-    private static final int CHARGING_FULL_ON = 0;
-    private static final int CHARGING_FULL_OFF = 0;
+    private static final int BATTERY_LOW_ARGB = 0xFFFF0000; // Charging Low - red solid on
+    private static final int BATTERY_MEDIUM_ARGB = 0xFFFFFF00;    // Charging - orange solid on
+    private static final int BATTERY_FULL_ARGB = 0xFF00FF00; // Charging Full - green solid on
+    private static final int BATTERY_BLINK_ON = 125;
+    private static final int BATTERY_BLINK_OFF = 2875;
 
     // Tag IDs for EventLog.
     private static final int EVENT_LOG_ENQUEUE = 2750;
@@ -326,10 +312,12 @@ class NotificationManagerService extends INotificationManager.Stub
         }
     };
 
-    NotificationManagerService(Context context, StatusBarService statusBar)
+    NotificationManagerService(Context context, StatusBarService statusBar,
+            HardwareService hardware)
     {
         super();
         mContext = context;
+        mHardware = hardware;
         mAm = ActivityManagerNative.getDefault();
         mSound = new AsyncPlayer(TAG);
         mSound.setUsesWakeLock(context);
@@ -600,6 +588,7 @@ class NotificationManagerService extends INotificationManager.Stub
                     long identity = Binder.clearCallingIdentity();
                     try {
                         r.statusBarKey = mStatusBarService.addIcon(icon, n);
+                        mHardware.pulseBreathingLight();
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);
@@ -830,34 +819,39 @@ class NotificationManagerService extends INotificationManager.Stub
     // lock on mNotificationList
     private void updateLightsLocked()
     {
-        // battery low has highest priority, then charging
-        if (mBatteryLow && !mBatteryCharging) {
-            Hardware.setLedState(BATTERY_LOW_ARGB, BATTERY_LOW_ON, BATTERY_LOW_OFF);
+        // Battery low always shows, other states only show if charging.
+        if (mBatteryLow) {
+            mHardware.setLightFlashing_UNCHECKED(HardwareService.LIGHT_ID_BATTERY, BATTERY_LOW_ARGB,
+                    HardwareService.LIGHT_FLASH_TIMED, BATTERY_BLINK_ON, BATTERY_BLINK_OFF);
         } else if (mBatteryCharging) {
-            if (mBatteryLow) {
-                Hardware.setLedState(CHARGING_LOW_ARGB, CHARGING_LOW_ON, CHARGING_LOW_OFF);
-            } else if (mBatteryFull) {
-                Hardware.setLedState(CHARGING_FULL_ARGB, CHARGING_FULL_ON, CHARGING_FULL_OFF);
+            if (mBatteryFull) {
+                mHardware.setLightColor_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
+                        BATTERY_FULL_ARGB);
             } else {
-                Hardware.setLedState(CHARGING_ARGB, CHARGING_ON, CHARGING_OFF);
+                mHardware.setLightColor_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
+                        BATTERY_MEDIUM_ARGB);
             }
         } else {
-            // handle notification lights
-            if (mLedNotification == null) {
-                // get next notification, if any
-                int n = mLights.size();
-                if (n > 0) {
-                    mLedNotification = mLights.get(n-1);
-                }
-            }
+            mHardware.setLightOff_UNCHECKED(HardwareService.LIGHT_ID_BATTERY);
+        }
 
-            if (mLedNotification == null) {
-                Hardware.setLedState(0, 0, 0);
-            } else {
-                Hardware.setLedState(mLedNotification.notification.ledARGB,
-                        mLedNotification.notification.ledOnMS,
-                        mLedNotification.notification.ledOffMS);
+        // handle notification lights
+        if (mLedNotification == null) {
+            // get next notification, if any
+            int n = mLights.size();
+            if (n > 0) {
+                mLedNotification = mLights.get(n-1);
             }
+        }
+        if (mLedNotification == null) {
+            mHardware.setLightOff_UNCHECKED(HardwareService.LIGHT_ID_NOTIFICATIONS);
+        } else {
+            mHardware.setLightFlashing_UNCHECKED(
+                    HardwareService.LIGHT_ID_NOTIFICATIONS,
+                    mLedNotification.notification.ledARGB,
+                    HardwareService.LIGHT_FLASH_TIMED,
+                    mLedNotification.notification.ledOnMS,
+                    mLedNotification.notification.ledOffMS);
         }
     }
 

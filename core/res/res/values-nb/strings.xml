@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"Nummervisning er ikke begrenset som standard. Neste anrop: Ikke begrenset"</string>
     <string name="serviceNotProvisioned">"SIM-kortet er ikke tilrettelagt for tjenesten."</string>
     <string name="CLIRPermanent">"Kunne ikke endre innstilling for nummervisning."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"Tale"</string>
     <string name="serviceClassData">"Data"</string>
     <string name="serviceClassFAX">"Fax"</string>
@@ -103,15 +113,11 @@
     <string name="global_action_toggle_silent_mode">"Stillemodus"</string>
     <string name="global_action_silent_mode_on_status">"Lyden er av"</string>
     <string name="global_action_silent_mode_off_status">"Lyden er på"</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
+    <string name="global_actions_toggle_airplane_mode">"Flymodus"</string>
+    <string name="global_actions_airplane_mode_on_status">"Flymodus er på"</string>
+    <string name="global_actions_airplane_mode_off_status">"Flymodus er av"</string>
     <string name="safeMode">"Sikkermodus"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
+    <string name="android_system_label">"Android-system"</string>
     <string name="permgrouplab_costMoney">"Betaltjenester"</string>
     <string name="permgroupdesc_costMoney">"Lar applikasjoner utføre operasjoner som kan koste deg penger."</string>
     <string name="permgrouplab_messages">"Meldinger"</string>
@@ -397,15 +403,15 @@
     <string name="lockscreen_emergency_call">"Nødanrop"</string>
     <string name="lockscreen_pattern_correct">"Riktig!"</string>
     <string name="lockscreen_pattern_wrong">"Beklager, prøv igjen:"</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_plugged_in">"Lader (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Koble til en batterilader."</string>
     <string name="lockscreen_missing_sim_message_short">"Mangler SIM-kort."</string>
     <string name="lockscreen_missing_sim_message">"Ikke noe SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions">"Sett inn et SIM-kort."</string>
     <string name="lockscreen_network_locked_message">"Nettverk ikke tillatt"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-kortet er PUK-låst."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"Vennligst ring kundeservice."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
     <string name="lockscreen_sim_locked_message">"SIM-kortet er låst."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Låser opp SIM-kort…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. "\n\n"Please try again in <xliff:g id="NUMBER_1">%d</xliff:g> seconds."</string>
@@ -413,7 +419,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"Prøv igjen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Glemt mønsteret?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Too many pattern attempts!"</string>
-    <string name="lockscreen_glogin_instructions">"To unlock,"\n"sign in with your Google account"</string>
+    <string name="lockscreen_glogin_instructions">"To unlock,BREAKsign in with your Google account"</string>
     <string name="lockscreen_glogin_username_hint">"Username (email)"</string>
     <string name="lockscreen_glogin_password_hint">"Password"</string>
     <string name="lockscreen_glogin_submit_button">"Sign in"</string>
@@ -421,16 +427,13 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
-    <skip />
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"Fjern varslinger"</string>
     <string name="status_bar_no_notifications_title">"Ingen varslinger"</string>
     <string name="status_bar_ongoing_events_title">"Aktiviteter"</string>
     <string name="status_bar_latest_events_title">"Varslinger"</string>
-    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
-    <skip />
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"Lader…"</string>
     <string name="battery_low_title">"Koble til en lader"</string>
     <string name="battery_low_subtitle">"Batteriet er nesten tomt:"</string>
@@ -551,8 +554,9 @@
     <string name="weekly">"Hver <xliff:g id="DAY">%s</xliff:g>"</string>
     <string name="monthly">"En gang i måneden"</string>
     <string name="yearly">"En gang i året"</string>
-    <string name="VideoView_error_title">"Cannot play video"</string>
-    <string name="VideoView_error_text_unknown">"Sorry, this video cannot be played."</string>
+    <string name="VideoView_error_title">"Kan ikke spille video"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback">"Beklager, denne videoen er ikke gyldig for streaming til denne enheten."</string>
+    <string name="VideoView_error_text_unknown">"Beklager, kan ikke spille denne videoen."</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"AM"</string>
     <string name="pm">"PM"</string>
@@ -573,18 +577,17 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'. '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"middag"</string>
     <string name="Noon">"Middag"</string>
     <string name="midnight">"midnatt"</string>
     <string name="Midnight">"Midnatt"</string>
     <!-- no translation found for month_day (3693060561170538204) -->
     <skip />
-    <!-- no translation found for month (1976700695144952053) -->
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
-    <skip />
+    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
@@ -612,11 +615,10 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
-    <skip />
+    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for abbrev_month_day (3156047263406783231) -->
     <skip />
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"søndag"</string>
     <string name="day_of_week_long_monday">"mandag"</string>
@@ -798,18 +800,16 @@
     <string name="activity_list_empty">"Fant ingen tilsvarende aktiviteter"</string>
     <string name="permlab_pkgUsageStats">"oppdater statistikk over komponentbruk"</string>
     <string name="permdesc_pkgUsageStats">"Tillater endring av innsamlet data om bruk av komponenter. Ikke ment for vanlige applikasjoner."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
+    <string name="tutorial_double_tap_to_zoom_message_short">"Trykk to ganger for zoomkontroll"</string>
+    <string name="gadget_host_error_inflating">"Feil under oppakking av gadget"</string>
+    <string name="ime_action_go">"Gå"</string>
+    <string name="ime_action_search">"Søk"</string>
+    <string name="ime_action_send">"Send"</string>
+    <string name="ime_action_next">"Neste"</string>
+    <string name="ime_action_done">"Utført"</string>
+    <string name="ime_action_default">"Utfør"</string>
+    <!-- no translation found for dial_number_using (5789176425167573586) -->
     <skip />
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
-    <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <!-- no translation found for create_contact_using (4947405226788104538) -->
     <skip />
 </resources>

@@ -21,8 +21,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.os.Hardware;
 import android.os.IHardwareService;
+import android.os.Message;
 import android.os.Power;
 import android.os.PowerManager;
 import android.os.Process;
@@ -35,10 +37,25 @@ import android.util.Log;
 public class HardwareService extends IHardwareService.Stub {
     private static final String TAG = "HardwareService";
 
+    static final int LIGHT_ID_BACKLIGHT = 0;
+    static final int LIGHT_ID_KEYBOARD = 1;
+    static final int LIGHT_ID_BUTTONS = 2;
+    static final int LIGHT_ID_BATTERY = 3;
+    static final int LIGHT_ID_NOTIFICATIONS = 4;
+    static final int LIGHT_ID_ATTENTION = 5;
+
+    static final int LIGHT_FLASH_NONE = 0;
+    static final int LIGHT_FLASH_TIMED = 1;
+
+    private boolean mAttentionLightOn;
+    private boolean mPulsing;
+
     HardwareService(Context context) {
         // Reset the hardware to a default state, in case this is a runtime
         // restart instead of a fresh boot.
         vibratorOff();
+
+        mNativePointer = init_native();
 
         mContext = context;
         PowerManager pm = (PowerManager)context.getSystemService(
@@ -51,9 +68,18 @@ public class HardwareService extends IHardwareService.Stub {
         context.registerReceiver(mIntentReceiver, filter);
     }
 
+    protected void finalize() throws Throwable {
+        finalize_native(mNativePointer);
+        super.finalize();
+    }
+
     public void vibrate(long milliseconds) {
-        vibratePattern(new long[] { 0, milliseconds }, -1,
-                       new Binder());
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires VIBRATE permission");
+        }
+        doCancelVibrate();
+        vibratorOn(milliseconds);
     }
 
     private boolean isAll0(long[] pattern) {
@@ -164,39 +190,79 @@ public class HardwareService extends IHardwareService.Stub {
         Hardware.enableCameraFlash(milliseconds);
     }
 
-    public void setScreenBacklight(int brightness) {
+    public void setBacklights(int brightness) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST) 
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires HARDWARE_TEST permission");
         }
         // Don't let applications turn the screen all the way off
         brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
-        Hardware.setScreenBacklight(brightness);
+        setLightBrightness_UNCHECKED(LIGHT_ID_BACKLIGHT, brightness);
+        setLightBrightness_UNCHECKED(LIGHT_ID_KEYBOARD, brightness);
+        setLightBrightness_UNCHECKED(LIGHT_ID_BUTTONS, brightness);
     }
 
-    public void setKeyboardBacklight(boolean on) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST) 
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires HARDWARE_TEST permission");
-        }
-        Hardware.setKeyboardBacklight(on);
+    void setLightOff_UNCHECKED(int light) {
+        setLight_native(mNativePointer, light, 0, LIGHT_FLASH_NONE, 0, 0);
     }
 
-    public void setButtonBacklight(boolean on) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST) 
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires HARDWARE_TEST permission");
-        }
-        Hardware.setButtonBacklight(on);
+    void setLightBrightness_UNCHECKED(int light, int brightness) {
+        int b = brightness & 0x000000ff;
+        b = 0xff000000 | (b << 16) | (b << 8) | b;
+        setLight_native(mNativePointer, light, b, LIGHT_FLASH_NONE, 0, 0);
     }
 
-    public void setLedState(int colorARGB, int onMS, int offMS) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST) 
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires HARDWARE_TEST permission");
-        }
-        Hardware.setLedState(colorARGB, onMS, offMS);
+    void setLightColor_UNCHECKED(int light, int color) {
+        setLight_native(mNativePointer, light, color, LIGHT_FLASH_NONE, 0, 0);
     }
+
+    void setLightFlashing_UNCHECKED(int light, int color, int mode, int onMS, int offMS) {
+        setLight_native(mNativePointer, light, color, mode, onMS, offMS);
+    }
+
+    public void setAttentionLight(boolean on) {
+        // Not worthy of a permission.  We shouldn't have a flashlight permission.
+        synchronized (this) {
+            mAttentionLightOn = on;
+            mPulsing = false;
+            setLight_native(mNativePointer, LIGHT_ID_ATTENTION, on ? 0xffffffff : 0,
+                    LIGHT_FLASH_NONE, 0, 0);
+        }
+    }
+
+    public void pulseBreathingLight() {
+        synchronized (this) {
+            // HACK: Added at the last minute of cupcake -- design this better;
+            // Don't reuse the attention light -- make another one.
+            if (false) {
+                Log.d(TAG, "pulseBreathingLight mAttentionLightOn=" + mAttentionLightOn
+                        + " mPulsing=" + mPulsing);
+            }
+            if (!mAttentionLightOn && !mPulsing) {
+                mPulsing = true;
+                setLight_native(mNativePointer, LIGHT_ID_ATTENTION, 0xff101010,
+                        LIGHT_FLASH_NONE, 0, 0);
+                mH.sendMessageDelayed(Message.obtain(mH, 1), 3000);
+            }
+        }
+    }
+
+    private Handler mH = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            synchronized (this) {
+                if (false) {
+                    Log.d(TAG, "pulse cleanup handler firing mPulsing=" + mPulsing);
+                }
+                if (mPulsing) {
+                    mPulsing = false;
+                    setLight_native(mNativePointer, LIGHT_ID_ATTENTION,
+                            mAttentionLightOn ? 0xffffffff : 0,
+                            LIGHT_FLASH_NONE, 0, 0);
+                }
+            }
+        }
+    };
 
     private void doCancelVibrate() {
         synchronized (this) {
@@ -206,8 +272,8 @@ public class HardwareService extends IHardwareService.Stub {
                     mThread.notify();
                 }
                 mThread = null;
-                vibratorOff();
             }
+            vibratorOff();
         }
     }
 
@@ -315,6 +381,12 @@ public class HardwareService extends IHardwareService.Stub {
             }
         }
     };
+    
+    private static native int init_native();
+    private static native void finalize_native(int ptr);
+
+    private static native void setLight_native(int ptr, int light, int color, int mode,
+            int onMS, int offMS);
 
     private Context mContext;
     private PowerManager.WakeLock mWakeLock;
@@ -322,6 +394,8 @@ public class HardwareService extends IHardwareService.Stub {
     volatile VibrateThread mThread;
     volatile Death mDeath;
     volatile IBinder mToken;
+
+    private int mNativePointer;
 
     native static void vibratorOn(long milliseconds);
     native static void vibratorOff();

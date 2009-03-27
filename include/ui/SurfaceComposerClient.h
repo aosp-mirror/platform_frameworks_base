@@ -97,7 +97,7 @@ public:
     static status_t unfreezeDisplay(DisplayID dpy, uint32_t flags = 0);
 
     //! Set the orientation of the given display
-    static int setOrientation(DisplayID dpy, int orientation);
+    static int setOrientation(DisplayID dpy, int orientation, uint32_t flags);
 
     // Query the number of displays
     static ssize_t getNumberOfDisplays();

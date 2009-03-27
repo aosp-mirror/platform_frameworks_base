@@ -211,7 +211,7 @@ public class RemoteCallbackList<E extends IInterface> {
             for (Callback cb : mCallbacks.values()) {
                 active[i++] = cb.mCallback;
             }
-            return N;
+            return i;
         }
     }
     

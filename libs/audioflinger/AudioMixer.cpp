@@ -16,6 +16,7 @@
 */
 
 #define LOG_TAG "AudioMixer"
+//#define LOG_NDEBUG 0
 
 #include <stdint.h>
 #include <string.h>
@@ -780,8 +781,10 @@ void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state, void*
 
         // in == NULL can happen if the track was flushed just after having
         // been enabled for mixing.
-        if (in == NULL) {
+        if (in == NULL || ((unsigned long)in & 3)) {
             memset(out, 0, numFrames*MAX_NUM_CHANNELS*sizeof(int16_t));
+            LOGE_IF(((unsigned long)in & 3), "process stereo track: input buffer alignment pb: buffer %p track %d, channels %d, needs %08x",
+                    in, i, t.channelCount, t.needs);
             return;
         }
         size_t outFrames = b.frameCount;

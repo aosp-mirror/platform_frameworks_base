@@ -86,6 +86,7 @@ class ServerThread extends Thread {
         int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
                 : Integer.parseInt(factoryTestStr);
 
+        HardwareService hardware = null;
         PowerManagerService power = null;
         IPackageManager pm = null;
         Context context = null;
@@ -127,9 +128,13 @@ class ServerThread extends Thread {
             BatteryService battery = new BatteryService(context);
             ServiceManager.addService("battery", battery);
 
+            Log.i(TAG, "Starting Hardware Service.");
+            hardware = new HardwareService(context);
+            ServiceManager.addService("hardware", hardware);
+
             // only initialize the power service after we have started the
-            // content providers and the batter service.
-            power.init(context, ActivityManagerService.getDefault(), battery);
+            // hardware service, content providers and the battery service.
+            power.init(context, hardware, ActivityManagerService.getDefault(), battery);
 
             Log.i(TAG, "Starting Alarm Manager.");
             AlarmManagerService alarm = new AlarmManagerService(context);
@@ -171,7 +176,7 @@ class ServerThread extends Thread {
                 int bluetoothOn = Settings.Secure.getInt(mContentResolver,
                     Settings.Secure.BLUETOOTH_ON, 0);
                 if (bluetoothOn > 0) {
-                    bluetooth.enable(null);
+                    bluetooth.enable();
                 }
             }
 
@@ -208,13 +213,6 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Hardware Service.");
-                ServiceManager.addService("hardware", new HardwareService(context));
-            } catch (Throwable e) {
-                Log.e(TAG, "Failure starting Hardware Service", e);
-            }
-
-            try {
                 Log.i(TAG, "Starting NetStat Service.");
                 ServiceManager.addService("netstat", new NetStatService(context));
             } catch (Throwable e) {
@@ -232,7 +230,7 @@ class ServerThread extends Thread {
             try {
                 Log.i(TAG, "Starting Notification Manager.");
                 ServiceManager.addService(Context.NOTIFICATION_SERVICE,
-                        new NotificationManagerService(context, statusBar));
+                        new NotificationManagerService(context, statusBar, hardware));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Notification Manager", e);
             }

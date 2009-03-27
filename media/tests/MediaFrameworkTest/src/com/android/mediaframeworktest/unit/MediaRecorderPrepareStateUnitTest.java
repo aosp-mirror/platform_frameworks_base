@@ -18,7 +18,7 @@ package com.android.mediaframeworktest.unit;
 
 import android.media.MediaRecorder;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.Suppress;
 import java.io.IOException;
 
@@ -59,7 +59,7 @@ public class MediaRecorderPrepareStateUnitTest extends AndroidTestCase implement
         }
     }
 
-    @LargeTest
+    @MediumTest
     public void testPrepare() {
         mTestTemplate.runTestOnMethod(this);
     }

@@ -109,6 +109,23 @@ public class AppWidgetManager {
     public static final String EXTRA_APPWIDGET_IDS = "appWidgetIds";
 
     /**
+     * An intent extra to pass to the AppWidget picker containing a {@link java.util.List} of
+     * {@link AppWidgetProviderInfo} objects to mix in to the list of AppWidgets that are
+     * installed.  (This is how the launcher shows the search widget).
+     */
+    public static final String EXTRA_CUSTOM_INFO = "customInfo";
+
+    /**
+     * An intent extra to pass to the AppWidget picker containing a {@link java.util.List} of
+     * {@link android.os.Bundle} objects to mix in to the list of AppWidgets that are
+     * installed.  It will be added to the extras object on the {@link android.content.Intent}
+     * that is returned from the picker activity.
+     *
+     * {@more}
+     */
+    public static final String EXTRA_CUSTOM_EXTRAS = "customExtras";
+
+    /**
      * A sentiel value that the AppWidget manager will never return as a appWidgetId.
      */
     public static final int INVALID_APPWIDGET_ID = 0;

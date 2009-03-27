@@ -1060,6 +1060,7 @@ public class ListView extends AbsListView {
      *         UNSPECIFIED/AT_MOST modes, false otherwise.
      * @hide
      */
+    @ViewDebug.ExportedProperty
     protected boolean recycleOnMeasure() {
         return true;
     }
@@ -2054,18 +2055,19 @@ public class ListView extends AbsListView {
      */
     private boolean handleHorizontalFocusWithinListItem(int direction) {
         if (direction != View.FOCUS_LEFT && direction != View.FOCUS_RIGHT)  {
-            throw new IllegalArgumentException("direction must be one of {View.FOCUS_LEFT, View.FOCUS_RIGHT}");
+            throw new IllegalArgumentException("direction must be one of"
+                    + " {View.FOCUS_LEFT, View.FOCUS_RIGHT}");
         }
 
         final int numChildren = getChildCount();
         if (mItemsCanFocus && numChildren > 0 && mSelectedPosition != INVALID_POSITION) {
             final View selectedView = getSelectedView();
-            if (selectedView.hasFocus() && selectedView instanceof ViewGroup) {
+            if (selectedView != null && selectedView.hasFocus() &&
+                    selectedView instanceof ViewGroup) {
+
                 final View currentFocus = selectedView.findFocus();
                 final View nextFocus = FocusFinder.getInstance().findNextFocus(
-                        (ViewGroup) selectedView,
-                        currentFocus,
-                        direction);
+                        (ViewGroup) selectedView, currentFocus, direction);
                 if (nextFocus != null) {
                     // do the math to get interesting rect in next focus' coordinates
                     currentFocus.getFocusedRect(mTempRect);
@@ -2079,11 +2081,8 @@ public class ListView extends AbsListView {
                 // if the global result is going to be some other view within this
                 // list.  this is to acheive the overall goal of having
                 // horizontal d-pad navigation remain in the current item.
-                final View globalNextFocus = FocusFinder.getInstance()
-                        .findNextFocus(
-                                (ViewGroup) getRootView(),
-                                currentFocus,
-                                direction);
+                final View globalNextFocus = FocusFinder.getInstance().findNextFocus(
+                        (ViewGroup) getRootView(), currentFocus, direction);
                 if (globalNextFocus != null) {
                     return isViewAncestorOf(globalNextFocus, this);
                 }
@@ -2769,6 +2768,8 @@ public class ListView extends AbsListView {
             final boolean headerDividers = mHeaderDividersEnabled;
             final boolean footerDividers = mFooterDividersEnabled;
             final int first = mFirstPosition;
+            final boolean areAllItemsSelectable = mAreAllItemsSelectable;
+            final ListAdapter adapter = mAdapter;
 
             if (!mStackFromBottom) {
                 int bottom;
@@ -2779,7 +2780,10 @@ public class ListView extends AbsListView {
                             (footerDividers || first + i < footerLimit)) {
                         View child = getChildAt(i);
                         bottom = child.getBottom();
-                        if (bottom < listBottom) {
+                        // Don't draw dividers next to items that are not enabled
+                        if (bottom < listBottom && (areAllItemsSelectable ||
+                                (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                        adapter.isEnabled(first + i + 1))))) {
                             bounds.top = bottom;
                             bounds.bottom = bottom + dividerHeight;
                             drawDivider(canvas, bounds, i);
@@ -2795,7 +2799,10 @@ public class ListView extends AbsListView {
                             (footerDividers || first + i < footerLimit)) {
                         View child = getChildAt(i);
                         top = child.getTop();
-                        if (top > listTop) {
+                        // Don't draw dividers next to items that are not enabled
+                        if (top > listTop && (areAllItemsSelectable ||
+                                (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                        adapter.isEnabled(first + i + 1))))) {
                             bounds.top = top - dividerHeight;
                             bounds.bottom = top;
                             // Give the method the child ABOVE the divider, so we

@@ -21,7 +21,6 @@ import android.text.NoCopySpan;
 import android.text.Layout.Alignment;
 import android.text.Spannable;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.TextView;
 
@@ -82,8 +81,9 @@ public class Touch {
 
         switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
-            buffer.setSpan(new DragState(event.getX(), event.getY()),
-                           0, 0, Spannable.SPAN_MARK_MARK);
+            buffer.setSpan(new DragState(event.getX(), event.getY(),
+                            widget.getScrollX(), widget.getScrollY()),
+                    0, 0, Spannable.SPAN_MARK_MARK);
             return true;
 
         case MotionEvent.ACTION_UP:
@@ -142,15 +142,29 @@ public class Touch {
         return false;
     }
 
+    public static int getInitialScrollX(TextView widget, Spannable buffer) {
+        DragState[] ds = buffer.getSpans(0, buffer.length(), DragState.class);
+        return ds.length > 0 ? ds[0].mScrollX : -1;
+    }
+    
+    public static int getInitialScrollY(TextView widget, Spannable buffer) {
+        DragState[] ds = buffer.getSpans(0, buffer.length(), DragState.class);
+        return ds.length > 0 ? ds[0].mScrollY : -1;
+    }
+    
     private static class DragState implements NoCopySpan {
         public float mX;
         public float mY;
+        public int mScrollX;
+        public int mScrollY;
         public boolean mFarEnough;
         public boolean mUsed;
 
-        public DragState(float x, float y) {
+        public DragState(float x, float y, int scrollX, int scrollY) {
             mX = x;
             mY = y;
+            mScrollX = scrollX;
+            mScrollY = scrollY;
         }
     }
 }

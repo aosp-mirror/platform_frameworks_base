@@ -18,7 +18,7 @@ package com.android.mediaframeworktest.unit;
 
 import android.media.MediaRecorder;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.Suppress;
 
 /**
@@ -54,7 +54,7 @@ public class MediaRecorderSetOutputFormatStateUnitTest extends AndroidTestCase i
         recorder.setOutputFormat(MediaRecorderStateUnitTestTemplate.OUTPUT_FORMAT);
     }
 
-    @LargeTest
+    @MediumTest
     public void testSetOutputFormat() {
         mTestTemplate.runTestOnMethod(this);
     }

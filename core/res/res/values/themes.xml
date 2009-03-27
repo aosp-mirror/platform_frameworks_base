@@ -153,7 +153,6 @@
         <item name="horizontalScrollViewStyle">@android:style/Widget.HorizontalScrollView</item>
         <item name="spinnerStyle">@android:style/Widget.Spinner</item>
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
-        <item name="starStyleButtonless">@android:style/Widget.CompoundButton.StarButtonless</item>
         <item name="tabWidgetStyle">@android:style/Widget.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.TextView</item>
         <item name="webViewStyle">@android:style/Widget.WebView</item>
@@ -185,6 +184,7 @@
          fills the entire screen -->
     <style name="Theme.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
     
     <!-- Theme for a light background with dark text on top.  Set your activity
@@ -218,6 +218,7 @@
 
         <item name="listViewStyle">@android:style/Widget.ListView.White</item>
         <item name="listDivider">@drawable/divider_horizontal_bright</item>
+        <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator.White</item>
     </style>
     
     <!-- Variant of the light theme with no title bar -->
@@ -229,6 +230,7 @@
          fills the entire screen -->
     <style name="Theme.Light.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
     
     <!-- Special variation on the default theme that ensures the background is
@@ -249,6 +251,7 @@
          fills the entire screen -->
     <style name="Theme.Black.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
     
     <!-- Default theme for translucent activities, that is windows that allow you
@@ -269,12 +272,14 @@
          fills the entire screen -->
     <style name="Theme.Translucent.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
     
     <!-- Default theme for activities that don't actually display a UI; that
          is, they finish themselves before being resumed.  -->
     <style name="Theme.NoDisplay">
         <item name="android:windowBackground">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowDisablePreview">true</item>
@@ -291,7 +296,7 @@
         <item name="android:windowTitleStyle">@android:style/DialogWindowTitle</item>
         <item name="android:windowBackground">@android:drawable/panel_background</item>
         <item name="android:windowIsFloating">true</item>
-        <item name="android:windowContentOverlay">@android:drawable/panel_separator</item>
+        <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
     </style>
@@ -303,30 +308,55 @@
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
         <item name="windowIsFloating">true</item>
-        <item name="windowContentOverlay">@drawable/panel_separator</item>
+        <item name="windowContentOverlay">@null</item>
     </style>
     
-    <!-- Default theme for dialog windows and activities, which is used by the
-         {@link android.app.Dialog} class.  This changes the window to be
-         floating (not fill the entire screen), and puts a frame around its
-         contents.  You can set this theme on an activity if you would like to
-         make an activity that looks like a Dialog. -->
-    <style name="Theme.InputMethod" parent="Theme.Light.NoTitleBar">
+    <!-- Default dark theme for panel windows.  This removes all extraneous
+         window decorations, so you basically have an empty rectangle in which
+         to place your content.  It makes the window floating, with a transparent
+         background, and turns off dimming behind the window. -->
+    <style name="Theme.Panel">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Default light theme for panel windows.  This removes all extraneous
+         window decorations, so you basically have an empty rectangle in which
+         to place your content.  It makes the window floating, with a transparent
+         background, and turns off dimming behind the window. -->
+    <style name="Theme.Light.Panel">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Default theme for input methods, which is used by the
+         {@link android.inputmethodservice.InputMethodService} class.
+         this inherits from Theme.NoTitleBar, but makes the background
+         transparent, the window floating and translucent, and ensures that
+         it does not dim the UI behind it.  This also configures the window
+         with the standard IME animations and visuals. -->
+    <style name="Theme.InputMethod" parent="Theme.Panel">
         <item name="android:windowAnimationStyle">@android:style/Animation.InputMethod</item>
+        <item name="android:imeFullscreenBackground">@android:drawable/input_method_fullscreen_background</item>
+        <item name="android:imeExtractEnterAnimation">@android:anim/input_method_extract_enter</item>
+        <item name="android:imeExtractExitAnimation">@android:anim/input_method_extract_exit</item>
     </style>
 
     <!-- Theme for the search input bar. -->
-    <style name="Theme.SearchBar" parent="Theme.Translucent.NoTitleBar">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowIsTranslucent">true</item>
+    <style name="Theme.SearchBar" parent="Theme.Panel">
+        <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.SearchBar</item>
+        <item name="windowContentOverlay">@null</item>        
     </style>
 
     <!-- Menu Themes -->
@@ -358,7 +388,7 @@
         <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowIsFloating">true</item>
-        <item name="windowContentOverlay">@drawable/panel_separator</item>
+        <item name="windowContentOverlay">@null</item>
         <item name="textAppearance">@style/TextAppearance.Theme.Dialog.AppError</item>
     </style>
 </resources>

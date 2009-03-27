@@ -28,7 +28,11 @@
 #include <utils/MemoryHeapBase.h>
 #include <ui/ICameraService.h>
 
+#include <media/mediaplayer.h>
+#include <media/AudioSystem.h>
 #include "CameraService.h"
+
+#include <cutils/properties.h>
 
 namespace android {
 
@@ -151,6 +155,25 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
     }
 }
 
+static sp<MediaPlayer> newMediaPlayer(const char *file) 
+{
+    sp<MediaPlayer> mp = new MediaPlayer();
+    if (mp->setDataSource(file) == NO_ERROR) {
+        char value[PROPERTY_VALUE_MAX];
+        property_get("ro.camera.sound.forced", value, "0");
+        if (atoi(value)) {
+            mp->setAudioStreamType(AudioSystem::ENFORCED_AUDIBLE);
+        } else {
+            mp->setAudioStreamType(AudioSystem::SYSTEM);            
+        }
+        mp->prepare();
+    } else {
+        mp.clear();
+        LOGE("Failed to load CameraService sounds.");
+    }
+    return mp;
+}
+
 CameraService::Client::Client(const sp<CameraService>& cameraService,
         const sp<ICameraClient>& cameraClient, pid_t clientPid)
 {
@@ -160,6 +183,9 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mClientPid = clientPid;
     mHardware = openCameraHardware();
     mUseOverlay = mHardware->useOverlay();
+
+    mMediaPlayerClick = newMediaPlayer("/system/media/audio/ui/camera_click.ogg");
+    mMediaPlayerBeep = newMediaPlayer("/system/media/audio/ui/VideoRecord.ogg");
 
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
@@ -263,6 +289,15 @@ CameraService::Client::~Client()
 #else
         mSurface->unregisterBuffers();
 #endif
+    }
+
+    if (mMediaPlayerBeep.get() != NULL) {
+        mMediaPlayerBeep->disconnect();
+        mMediaPlayerBeep.clear();
+    }
+    if (mMediaPlayerClick.get() != NULL) {
+        mMediaPlayerClick->disconnect();
+        mMediaPlayerClick.clear();
     }
 
     // make sure we tear down the hardware
@@ -464,6 +499,10 @@ status_t CameraService::Client::startPreview()
 
 status_t CameraService::Client::startRecording()
 {
+    if (mMediaPlayerBeep.get() != NULL) {
+        mMediaPlayerBeep->seekTo(0);
+        mMediaPlayerBeep->start();
+    }
     return startCameraMode(CAMERA_RECORDING_MODE);
 }
 
@@ -502,6 +541,10 @@ void CameraService::Client::stopRecording()
         return;
     }
 
+    if (mMediaPlayerBeep.get() != NULL) {
+        mMediaPlayerBeep->seekTo(0);
+        mMediaPlayerBeep->start();
+    }
     mHardware->stopRecording();
     LOGV("stopRecording(), hardware stopped OK");
     mPreviewBuffer.clear();
@@ -696,6 +739,12 @@ void CameraService::Client::shutterCallback(void *user)
     sp<Client> client = getClientFromCookie(user);
     if (client == 0) {
         return;
+    }
+
+    // Play shutter sound.
+    if (client->mMediaPlayerClick.get() != NULL) {
+        client->mMediaPlayerClick->seekTo(0);
+        client->mMediaPlayerClick->start();
     }
 
     // Screen goes black after the buffer is unregistered.

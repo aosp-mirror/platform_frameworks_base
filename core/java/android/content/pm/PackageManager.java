@@ -341,6 +341,14 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_OLDER_SDK = -12;
 
     /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package failed because it contains a content provider with the
+     * same authority as a provider already installed in the system.
+     */
+    public static final int INSTALL_FAILED_CONFLICTING_PROVIDER = -13;
+
+    /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was given a path that is not a file, or does not end with the expected

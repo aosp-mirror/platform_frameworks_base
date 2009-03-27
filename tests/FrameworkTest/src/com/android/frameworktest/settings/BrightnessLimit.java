@@ -49,7 +49,7 @@ public class BrightnessLimit extends Activity implements OnClickListener {
                 ServiceManager.getService("hardware"));
         if (hardware != null) {
             try {
-                hardware.setScreenBacklight(0);
+                hardware.setBacklights(0);
             } catch (RemoteException darn) {
                 
             }

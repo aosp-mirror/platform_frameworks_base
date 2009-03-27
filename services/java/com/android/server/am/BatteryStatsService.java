@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.telephony.TelephonyManager;
 import android.util.PrintWriterPrinter;
 
 import java.io.FileDescriptor;
@@ -148,14 +149,98 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             mStats.notePhoneOffLocked();
         }
     }
+    
+    public void notePhoneSignalStrength(int asu) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.notePhoneSignalStrengthLocked(asu);
+        }
+    }
+    
+    public void notePhoneDataConnectionState(int dataType, boolean hasData) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.notePhoneDataConnectionStateLocked(dataType, hasData);
+        }
+    }
+    
+    public void noteWifiOn() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiOnLocked();
+        }
+    }
+    
+    public void noteWifiOff() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiOffLocked();
+        }
+    }
+
+    public void noteWifiRunning() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiRunningLocked();
+        }
+    }
+
+    public void noteWifiStopped() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiStoppedLocked();
+        }
+    }
+
+    public void noteBluetoothOn() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteBluetoothOnLocked();
+        }
+    }
+    
+    public void noteBluetoothOff() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteBluetoothOffLocked();
+        }
+    }
+    
+    public void noteFullWifiLockAcquired(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteFullWifiLockAcquiredLocked(uid);
+        }
+    }
+    
+    public void noteFullWifiLockReleased(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteFullWifiLockReleasedLocked(uid);
+        }
+    }
+    
+    public void noteScanWifiLockAcquired(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScanWifiLockAcquiredLocked(uid);
+        }
+    }
+    
+    public void noteScanWifiLockReleased(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScanWifiLockReleasedLocked(uid);
+        }
+    }
 
     public boolean isOnBattery() {
         return mStats.isOnBattery();
     }
     
-    public void setOnBattery(boolean onBattery) {
+    public void setOnBattery(boolean onBattery, int level) {
         enforceCallingPermission();
-        mStats.setOnBattery(onBattery);
+        mStats.setOnBattery(onBattery, level);
     }
     
     public long getAwakeTimeBattery() {

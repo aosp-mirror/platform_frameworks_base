@@ -1054,6 +1054,9 @@ public final class Calendar {
             if (cursor == null) {
                 return;
             }
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "missed alarms found: " + cursor.getCount());
+            }
             
             try {
                 while (cursor.moveToNext()) {
@@ -1068,6 +1071,8 @@ public final class Calendar {
                     intent.putExtra(android.provider.Calendar.EVENT_END_TIME, end);
                     PendingIntent sender = PendingIntent.getBroadcast(context,
                             0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    Log.w(TAG, "rescheduling missed alarm, id: " + id + " begin: " + begin
+                            + " end: " + end + " alarmTime: " + alarmTime);
                     manager.set(AlarmManager.RTC_WAKEUP, alarmTime, sender);
                 }
             } finally {

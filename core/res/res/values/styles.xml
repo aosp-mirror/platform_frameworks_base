@@ -154,11 +154,10 @@
     <!-- Status Bar Styles -->
 
     <style name="TextAppearance.StatusBarTitle">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#ffffffff</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
-
 
     <!-- Widget Styles -->
 
@@ -209,11 +208,6 @@
     <style name="Widget.CompoundButton.Star">
         <item name="android:background">@android:drawable/btn_star_label_background</item>
         <item name="android:button">@android:drawable/btn_star</item>
-    </style>
-
-    <style name="Widget.CompoundButton.StarButtonless">
-        <item name="android:background">@android:drawable/btn_star_label_background</item>
-        <item name="android:button">@android:drawable/btn_star_buttonless</item>
     </style>
 
     <style name="Widget.Button.Toggle">
@@ -315,6 +309,10 @@
         <item name="android:textSize">14sp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">5sp</item>
+    </style>
+
+    <style name="Widget.TextView.ListSeparator.White">
+        <item name="android:textColor">?textColorSecondaryInverse</item>
     </style>
 
     <style name="Widget.EditText">
@@ -663,7 +661,6 @@
     </style>
 
     <style name="ZoomControls">
-        <item name="android:background">@android:drawable/zoom_plate</item>
         <item name="android:gravity">bottom</item>
         <item name="android:paddingLeft">15dip</item>
         <item name="android:paddingRight">15dip</item>

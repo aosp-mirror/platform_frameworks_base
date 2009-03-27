@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 #define LOG_TAG "JetPlayer-C"
 
 #include <utils/Log.h>
@@ -194,8 +194,15 @@ int JetPlayer::render() {
     }
 
    while (1) {
+    
         mMutex.lock(); // [[[[[[[[ LOCK ---------------------------------------
 
+        if (mEasData == NULL) {
+            mMutex.unlock();
+            LOGV("JetPlayer::render(): NULL EAS data, exiting render.");
+            goto threadExit;
+        }
+            
         // nothing to render, wait for client thread to wake us up
         while (!mRender)
         {
@@ -255,7 +262,10 @@ int JetPlayer::render() {
     }//while (1)
 
 threadExit:
-    mAudioTrack->flush();
+    if (mAudioTrack) {
+        mAudioTrack->stop();
+        mAudioTrack->flush();
+    }
     if (mAudioBuffer) {
         delete [] mAudioBuffer;
         mAudioBuffer = NULL;

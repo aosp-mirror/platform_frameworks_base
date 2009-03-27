@@ -176,6 +176,9 @@ class BatteryService extends Binder {
     private synchronized final void update() {
         native_update();
 
+        boolean logOutlier = false;
+        long dischargeDuration = 0;
+        
         mBatteryLevelCritical = mBatteryLevel <= CRITICAL_BATTERY_LEVEL;
         if (mAcOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
@@ -199,13 +202,12 @@ class BatteryService extends Binder {
                     // There's no value in this data unless we've discharged at least once and the
                     // battery level has changed; so don't log until it does.
                     if (mDischargeStartTime != 0 && mDischargeStartLevel != mBatteryLevel) {
-                        long duration = SystemClock.elapsedRealtime() - mDischargeStartTime;
-                        EventLog.writeEvent(LOG_BATTERY_DISCHARGE_STATUS, duration,
+                        dischargeDuration = SystemClock.elapsedRealtime() - mDischargeStartTime;
+                        logOutlier = true;
+                        EventLog.writeEvent(LOG_BATTERY_DISCHARGE_STATUS, dischargeDuration,
                                 mDischargeStartLevel, mBatteryLevel);
                         // make sure we see a discharge event before logging again
                         mDischargeStartTime = 0; 
-                        
-                        logOutlier(duration);
                     }
                 } else if (mPlugType == BATTERY_PLUGGED_NONE) {
                     // charging -> discharging or we just powered up
@@ -231,7 +233,8 @@ class BatteryService extends Binder {
                     mPlugType == BATTERY_PLUGGED_NONE) {
                 // We want to make sure we log discharge cycle outliers
                 // if the battery is about to die.
-                logOutlier(SystemClock.elapsedRealtime() - mDischargeStartTime);
+                dischargeDuration = SystemClock.elapsedRealtime() - mDischargeStartTime;
+                logOutlier = true;
             }
             
             // Separate broadcast is sent for power connected / not connected
@@ -254,6 +257,11 @@ class BatteryService extends Binder {
             mLastBatteryLevelCritical = mBatteryLevelCritical;
             
             sendIntent();
+            
+            // This needs to be done after sendIntent() so that we get the lastest battery stats.
+            if (logOutlier && dischargeDuration != 0) {
+                logOutlier(dischargeDuration);
+            }
         }
     }
 
@@ -262,7 +270,7 @@ class BatteryService extends Binder {
         Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         try {
-            mBatteryStats.setOnBattery(mPlugType == BATTERY_PLUGGED_NONE);
+            mBatteryStats.setOnBattery(mPlugType == BATTERY_PLUGGED_NONE, mBatteryLevel);
         } catch (RemoteException e) {
             // Should never happen.
         }

@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 import com.android.internal.util.ArrayUtils;
 import android.util.Log;
@@ -421,11 +422,16 @@ extends Layout
 
                 // dump(chdirs, n, "final");
 
-                // extra: enforce that all tabs go the primary direction
+                // extra: enforce that all tabs and surrogate characters go the
+                // primary direction
+                // TODO: actually do directions right for surrogates
 
                 for (int j = 0; j < n; j++) {
-                    if (chs[j] == '\t')
+                    char c = chs[j];
+
+                    if (c == '\t' || (c >= 0xD800 && c <= 0xDFFF)) {
                         chdirs[j] = SOR;
+                    }
                 }
 
                 // extra: enforce that object replacements go to the
@@ -548,16 +554,41 @@ extends Layout
                     char c = chs[j - start];
                     float before = w;
 
-                    switch (c) {
-                    case '\n':
-                        break;
-
-                    case '\t':
+                    if (c == '\n') {
+                        ;
+                    } else if (c == '\t') {
                         w = Layout.nextTab(sub, start, end, w, null);
                         tab = true;
-                        break;
+                    } else if (c >= 0xD800 && c <= 0xDFFF && j + 1 < next) {
+                        int emoji = Character.codePointAt(chs, j - start);
 
-                    default:
+                        if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
+                            Bitmap bm = EMOJI_FACTORY.
+                                getBitmapFromAndroidPua(emoji);
+
+                            if (bm != null) {
+                                Paint whichPaint;
+
+                                if (spanned == null) {
+                                    whichPaint = paint;
+                                } else {
+                                    whichPaint = mWorkPaint;
+                                }
+
+                                float wid = (float) bm.getWidth() *
+                                            -whichPaint.ascent() /
+                                            bm.getHeight();
+
+                                w += wid;
+                                tab = true;
+                                j++;
+                            } else {
+                                w += widths[j - start + (end - start)];
+                            }
+                        } else {
+                            w += widths[j - start + (end - start)];
+                        }
+                    } else {
                         w += widths[j - start + (end - start)];
                     }
 

@@ -118,20 +118,6 @@ public class SslErrorHandler extends Handler {
     }
 
     /**
-     * Resets the SSL error handler, removes all loaders that
-     * share the same BrowserFrame.
-     */
-    /* package */ synchronized void reset(BrowserFrame frame) {
-        ListIterator<LoadListener> i = mLoaderQueue.listIterator(0);
-        while (i.hasNext()) {
-            LoadListener loader = i.next();
-            if (frame == loader.getFrame()) {
-                i.remove();
-            }
-        }
-    }
-
-    /**
      * Handles SSL error(s) on the way up to the user.
      */
     /* package */ synchronized void handleSslErrorRequest(LoadListener loader) {
@@ -244,12 +230,8 @@ public class SslErrorHandler extends Handler {
                     primary > mSslPrefTable.getInt(host)) {
                     mSslPrefTable.putInt(host, new Integer(primary));
                 }
-
-                loader.handleSslErrorResponse(proceed);
-            } else {
-                loader.handleSslErrorResponse(proceed);
-                mNetwork.resetHandlersAndStopLoading(loader.getFrame());
             }
+            loader.handleSslErrorResponse(proceed);
         }
     }
 }

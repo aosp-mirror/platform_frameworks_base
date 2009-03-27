@@ -46,10 +46,10 @@ class BluetoothEventLoop {
     private Thread mThread;
     private boolean mStarted;
     private boolean mInterrupted;
-    private HashMap<String, Integer> mPasskeyAgentRequestData;
-    private HashMap<String, IBluetoothDeviceCallback> mGetRemoteServiceChannelCallbacks;
-    private BluetoothDeviceService mBluetoothService;
-    private Context mContext;
+    private final HashMap<String, Integer> mPasskeyAgentRequestData;
+    private final HashMap<String, IBluetoothDeviceCallback> mGetRemoteServiceChannelCallbacks;
+    private final BluetoothDeviceService mBluetoothService;
+    private final Context mContext;
 
     private static final int EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 1;
     private static final int EVENT_RESTART_BLUETOOTH = 2;
@@ -76,8 +76,7 @@ class BluetoothEventLoop {
                 }
                 break;
             case EVENT_RESTART_BLUETOOTH:
-                mBluetoothService.disable();
-                mBluetoothService.enable(null);
+                mBluetoothService.restart();
                 break;
             }
         }
@@ -170,6 +169,7 @@ class BluetoothEventLoop {
         if (mode >= 0) {
             Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
             intent.putExtra(BluetoothIntent.SCAN_MODE, mode);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         }
     }
@@ -309,6 +309,12 @@ class BluetoothEventLoop {
         address = address.toUpperCase();
         mPasskeyAgentRequestData.put(address, new Integer(nativeData));
 
+        if (mBluetoothService.getBluetoothState() == BluetoothDevice.BLUETOOTH_STATE_TURNING_OFF) {
+            // shutdown path
+            mBluetoothService.cancelPin(address);
+            return;
+        }
+
         if (mBluetoothService.getBondState().getBondState(address) ==
                 BluetoothDevice.BOND_BONDING) {
             // we initiated the bonding
@@ -337,7 +343,7 @@ class BluetoothEventLoop {
 
     private void onPasskeyAgentCancel(String address) {
         address = address.toUpperCase();
-        mPasskeyAgentRequestData.remove(address);
+        mBluetoothService.cancelPin(address);
         Intent intent = new Intent(BluetoothIntent.PAIRING_CANCEL_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
@@ -347,7 +353,7 @@ class BluetoothEventLoop {
 
     private boolean onAuthAgentAuthorize(String address, String service, String uuid) {
         boolean authorized = false;
-        if (service.endsWith("service_audio")) {
+        if (mBluetoothService.isEnabled() && service.endsWith("service_audio")) {
             BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
             authorized = a2dp.getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {

@@ -1208,11 +1208,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final boolean clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
         if (clipToPadding) {
             saveCount = canvas.save();
-            final int scrollX = mScrollX;
-            final int scrollY = mScrollY;
-            canvas.clipRect(scrollX + mPaddingLeft, scrollY + mPaddingTop,
-                    scrollX + mRight - mLeft - mPaddingRight,
-                    scrollY + mBottom - mTop - mPaddingBottom);
+            canvas.clipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
+                    mScrollX + mRight - mLeft - mPaddingRight,
+                    mScrollY + mBottom - mTop - mPaddingBottom);
 
         }
 
@@ -1346,9 +1344,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final Animation a = child.getAnimation();
         boolean concatMatrix = false;
 
-        final int childWidth = cr - cl;
-        final int childHeight = cb - ct;
-
         if (a != null) {
             if (mInvalidateRegion == null) {
                 mInvalidateRegion = new RectF();
@@ -1357,8 +1352,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             final boolean initialized = a.isInitialized();
             if (!initialized) {
-                a.initialize(childWidth, childHeight, getWidth(), getHeight());
-                a.initializeInvalidateRegion(0, 0, childWidth, childHeight);
+                a.initialize(cr - cl, cb - ct, getWidth(), getHeight());
+                a.initializeInvalidateRegion(0, 0, cr - cl, cb - ct);
                 child.onAnimationStart();
             }
 
@@ -1382,7 +1377,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         invalidate(cl, ct, cr, cb);
                     }
                 } else {
-                    a.getInvalidateRegion(0, 0, childWidth, childHeight, region, transformToApply);
+                    a.getInvalidateRegion(0, 0, cr - cl, cb - ct, region, transformToApply);
 
                     // The child need to draw an animation, potentially offscreen, so
                     // make sure we do not cancel invalidate requests
@@ -1406,6 +1401,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 concatMatrix = (transformType & Transformation.TYPE_MATRIX) != 0;
             }
         }
+
+        // Clear the flag as early as possible to allow draw() implementations
+        // to call invalidate() successfully when doing animations
+        child.mPrivateFlags |= DRAWN;
 
         if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
                 (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
@@ -1470,15 +1469,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
             if (hasNoCache) {
-                canvas.clipRect(sx, sy, sx + childWidth, sy + childHeight);
+                canvas.clipRect(sx, sy, sx + (cr - cl), sy + (cb - ct));
             } else {
-                canvas.clipRect(0, 0, childWidth, childHeight);
+                canvas.clipRect(0, 0, cr - cl, cb - ct);
             }
         }
-
-        // Clear the flag as early as possible to allow draw() implementations
-        // to call invalidate() successfully when doing animations
-        child.mPrivateFlags |= DRAWN;
 
         if (hasNoCache) {
             // Fast path for layouts with no backgrounds
@@ -2327,8 +2322,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
     
             do {
-                if (drawAnimation && parent instanceof View) {
-                    ((View) parent).mPrivateFlags |= DRAW_ANIMATION;
+                if (drawAnimation) {
+                    if (parent instanceof View) {
+                        ((View) parent).mPrivateFlags |= DRAW_ANIMATION;
+                    } else if (parent instanceof ViewRoot) {
+                        ((ViewRoot) parent).mIsAnimating = true;
+                    }
                 }
                 parent = parent.invalidateChildInParent(location, dirty);
             } while (parent != null);

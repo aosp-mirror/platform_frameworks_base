@@ -2,7 +2,7 @@
 <ul>
   <li><?cs 
    if:android.whichdoc != "online" ?>
-    <h2>Android 1.1 SDK, r1</h2><?cs 
+    <h2>Android 1.5 SDK, r1</h2><?cs 
    else ?>
     <h2>Current SDK Release</h2><?cs 
    /if ?>
@@ -22,6 +22,7 @@
   <li>
     <h2>Android System Images</h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Version Notes</a></li>
       <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Version Notes</a></li>
     </ul>
   </li>
@@ -30,6 +31,7 @@
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Android 1.0 SDK, release 2</a></li>
       <li><a href="<?cs var:toroot ?>sdk/1.0_r1/index.html">Android 1.0 SDK, release 1</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/older_releases.html">Older Releases</a></li>
     </ul>
   </li><?cs 
  /if ?>

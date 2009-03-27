@@ -64,7 +64,8 @@ struct audio_track_cblk_t
                 uint16_t    waitTimeMs;      // Cumulated wait time
                 // Padding ensuring that data buffer starts on a cache line boundary (32 bytes). 
                 // See AudioFlinger::TrackBase constructor
-                int32_t     Padding[3];
+                int32_t     Padding[1];
+                // Cache line boundary
                 
                             audio_track_cblk_t();
                 uint32_t    stepUser(uint32_t frameCount);

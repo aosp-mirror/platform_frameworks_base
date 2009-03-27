@@ -19,6 +19,8 @@ package com.android.server;
 import static android.os.LocalPowerManager.CHEEK_EVENT;
 import static android.os.LocalPowerManager.OTHER_EVENT;
 import static android.os.LocalPowerManager.TOUCH_EVENT;
+import static android.os.LocalPowerManager.LONG_TOUCH_EVENT;
+import static android.os.LocalPowerManager.TOUCH_UP_EVENT;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
@@ -317,6 +319,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     int mRotation = 0;
     int mRequestedRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    int mLastRotationFlags;
     ArrayList<IRotationWatcher> mRotationWatchers
             = new ArrayList<IRotationWatcher>();
     
@@ -387,6 +390,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     private ViewServer mViewServer;
 
     final Rect mTempRect = new Rect();
+    
+    final Configuration mTempConfiguration = new Configuration();
     
     public static WindowManagerService main(Context context,
             PowerManagerService pm, boolean haveInputMethods) {
@@ -1294,7 +1299,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             // Update Orientation after adding a window, only if the window needs to be
             // displayed right away
             if (win.isVisibleOrAdding()) {
-                if (updateOrientationFromAppTokens(null) != null) {
+                if (updateOrientationFromAppTokens(null, null) != null) {
                     sendNewConfiguration();
                 }
             }
@@ -1663,7 +1668,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (assignLayers) {
                 assignLayersLocked();
             }
-            newConfig = updateOrientationFromAppTokensLocked(null);
+            newConfig = updateOrientationFromAppTokensLocked(null, null);
             performLayoutAndPlaceSurfacesLocked();
             if (win.mAppToken != null) {
                 win.mAppToken.updateReportedVisibilityLocked();
@@ -2079,6 +2084,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             while (pos >= 0) {
                 AppWindowToken wtoken = mAppTokens.get(pos);
                 pos--;
+                // if we're about to tear down this window, don't use it for orientation
+                if (!wtoken.hidden && wtoken.hiddenRequested) {
+                    continue;
+                }
+
                 if (!haveGroup) {
                     // We ignore any hidden applications on the top.
                     if (wtoken.hiddenRequested || wtoken.willBeHidden) {
@@ -2119,11 +2129,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     }
     
     public Configuration updateOrientationFromAppTokens(
-        IBinder freezeThisOneIfNeeded) {
+            Configuration currentConfig, IBinder freezeThisOneIfNeeded) {
         Configuration config;
         long ident = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
-            config = updateOrientationFromAppTokensLocked(freezeThisOneIfNeeded);
+            config = updateOrientationFromAppTokensLocked(currentConfig, freezeThisOneIfNeeded);
         }
         if (config != null) {
             mLayoutNeeded = true;
@@ -2141,7 +2151,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * android.os.IBinder)
      */
     Configuration updateOrientationFromAppTokensLocked(
-            IBinder freezeThisOneIfNeeded) {
+            Configuration appConfig, IBinder freezeThisOneIfNeeded) {
         boolean changed = false;
         long ident = Binder.clearCallingIdentity();
         try {
@@ -2157,7 +2167,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             
             if (changed) {
                 changed = setRotationUncheckedLocked(
-                        WindowManagerPolicy.USE_LAST_ROTATION);
+                        WindowManagerPolicy.USE_LAST_ROTATION,
+                        mLastRotationFlags & (~Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE));
                 if (changed) {
                     if (freezeThisOneIfNeeded != null) {
                         AppWindowToken wtoken = findAppWindowToken(
@@ -2167,7 +2178,19 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                                     ActivityInfo.CONFIG_ORIENTATION);
                         }
                     }
-                    return computeNewConfiguration();
+                    return computeNewConfigurationLocked();
+                }
+            }
+
+            // No obvious action we need to take, but if our current
+            // state mismatches the activity maanager's, update it
+            if (appConfig != null) {
+                mTempConfiguration.setToDefaults();
+                if (computeNewConfigurationLocked(mTempConfiguration)) {
+                    if (appConfig.diff(mTempConfiguration) != 0) {
+                        Log.i(TAG, "Config changed: " + mTempConfiguration);
+                        return new Configuration(mTempConfiguration);
+                    }
                 }
             }
         } finally {
@@ -2349,6 +2372,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         ttoken.startingWindow = null;
                         ttoken.startingMoved = true;
                         startingWindow.mToken = wtoken;
+                        startingWindow.mRootToken = wtoken;
                         startingWindow.mAppToken = wtoken;
                         mWindows.remove(startingWindow);
                         ttoken.windows.remove(startingWindow);
@@ -3236,7 +3260,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         mPolicy.enableScreenAfterBoot();
         
         // Make sure the last requested orientation has been applied.
-        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false);
+        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false,
+                mLastRotationFlags | Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
     }
     
     public void setInTouchMode(boolean mode) {
@@ -3246,23 +3271,24 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     }
 
     public void setRotation(int rotation, 
-            boolean alwaysSendConfiguration) {
+            boolean alwaysSendConfiguration, int animFlags) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
-                "setOrientation()")) {
+                "setRotation()")) {
             return;
         }
 
-        setRotationUnchecked(rotation, alwaysSendConfiguration);
+        setRotationUnchecked(rotation, alwaysSendConfiguration, animFlags);
     }
     
-    public void setRotationUnchecked(int rotation, boolean alwaysSendConfiguration) {
+    public void setRotationUnchecked(int rotation,
+            boolean alwaysSendConfiguration, int animFlags) {
         if(DEBUG_ORIENTATION) Log.v(TAG,
                 "alwaysSendConfiguration set to "+alwaysSendConfiguration);
         
         long origId = Binder.clearCallingIdentity();
         boolean changed;
         synchronized(mWindowMap) {
-            changed = setRotationUncheckedLocked(rotation);
+            changed = setRotationUncheckedLocked(rotation, animFlags);
         }
         
         if (changed) {
@@ -3279,12 +3305,13 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         Binder.restoreCallingIdentity(origId);
     }
     
-    public boolean setRotationUncheckedLocked(int rotation) {
+    public boolean setRotationUncheckedLocked(int rotation, int animFlags) {
         boolean changed;
         if (rotation == WindowManagerPolicy.USE_LAST_ROTATION) {
             rotation = mRequestedRotation;
         } else {
             mRequestedRotation = rotation;
+            mLastRotationFlags = animFlags;
         }
         if (DEBUG_ORIENTATION) Log.v(TAG, "Overwriting rotation value from " + rotation);
         rotation = mPolicy.rotationForOrientationLw(mForcedAppOrientation,
@@ -3304,9 +3331,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT),
                     2000);
             startFreezingDisplayLocked();
+            Log.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
             mQueue.setOrientation(rotation);
             if (mDisplayEnabled) {
-                Surface.setOrientation(0, rotation);
+                Surface.setOrientation(0, rotation, animFlags);
             }
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
@@ -3611,38 +3639,49 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     
     public Configuration computeNewConfiguration() {
         synchronized (mWindowMap) {
-            if (mDisplay == null) {
-                return null;
-            }
-            Configuration config = new Configuration();
-            mQueue.getInputConfiguration(config);
-            final int dw = mDisplay.getWidth();
-            final int dh = mDisplay.getHeight();
-            int orientation = Configuration.ORIENTATION_SQUARE;
-            if (dw < dh) {
-                orientation = Configuration.ORIENTATION_PORTRAIT;
-            } else if (dw > dh) {
-                orientation = Configuration.ORIENTATION_LANDSCAPE;
-            }
-            config.orientation = orientation;
-            config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
-            config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
-            mPolicy.adjustConfigurationLw(config);
-            Log.i(TAG, "Input configuration changed: " + config);
-            long now = SystemClock.uptimeMillis();
-            //Log.i(TAG, "Config changing, gc pending: " + mFreezeGcPending + ", now " + now);
-            if (mFreezeGcPending != 0) {
-                if (now > (mFreezeGcPending+1000)) {
-                    //Log.i(TAG, "Gc!  " + now + " > " + (mFreezeGcPending+1000));
-                    mH.removeMessages(H.FORCE_GC);
-                    Runtime.getRuntime().gc();
-                    mFreezeGcPending = now;
-                }
-            } else {
+            return computeNewConfigurationLocked();
+        }
+    }
+    
+    Configuration computeNewConfigurationLocked() {
+        Configuration config = new Configuration();
+        if (!computeNewConfigurationLocked(config)) {
+            return null;
+        }
+        Log.i(TAG, "Config changed: " + config);
+        long now = SystemClock.uptimeMillis();
+        //Log.i(TAG, "Config changing, gc pending: " + mFreezeGcPending + ", now " + now);
+        if (mFreezeGcPending != 0) {
+            if (now > (mFreezeGcPending+1000)) {
+                //Log.i(TAG, "Gc!  " + now + " > " + (mFreezeGcPending+1000));
+                mH.removeMessages(H.FORCE_GC);
+                Runtime.getRuntime().gc();
                 mFreezeGcPending = now;
             }
-            return config;
+        } else {
+            mFreezeGcPending = now;
         }
+        return config;
+    }
+    
+    boolean computeNewConfigurationLocked(Configuration config) {
+        if (mDisplay == null) {
+            return false;
+        }
+        mQueue.getInputConfiguration(config);
+        final int dw = mDisplay.getWidth();
+        final int dh = mDisplay.getHeight();
+        int orientation = Configuration.ORIENTATION_SQUARE;
+        if (dw < dh) {
+            orientation = Configuration.ORIENTATION_PORTRAIT;
+        } else if (dw > dh) {
+            orientation = Configuration.ORIENTATION_LANDSCAPE;
+        }
+        config.orientation = orientation;
+        config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
+        config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
+        mPolicy.adjustConfigurationLw(config);
+        return true;
     }
     
     // -------------------------------------------------------------
@@ -3664,6 +3703,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     private static final float CHEEK_THRESHOLD = 0.6f;
     private int mEventState = EVENT_NONE;
     private float mEventSize;
+
     private int eventType(MotionEvent ev) {
         float size = ev.getSize();
         switch (ev.getAction()) {
@@ -3672,7 +3712,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             return (mEventSize > CHEEK_THRESHOLD) ? CHEEK_EVENT : TOUCH_EVENT;
         case MotionEvent.ACTION_UP:
             if (size > mEventSize) mEventSize = size;
-            return (mEventSize > CHEEK_THRESHOLD) ? CHEEK_EVENT : OTHER_EVENT;
+            return (mEventSize > CHEEK_THRESHOLD) ? CHEEK_EVENT : TOUCH_UP_EVENT;
         case MotionEvent.ACTION_MOVE:
             final int N = ev.getHistorySize();
             if (size > mEventSize) mEventSize = size;
@@ -3685,7 +3725,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (ev.getEventTime() < ev.getDownTime() + EVENT_IGNORE_DURATION) {
                 return TOUCH_EVENT;
             } else {
-                return OTHER_EVENT;
+                return LONG_TOUCH_EVENT;
             }
         default:
             // not good
@@ -4053,7 +4093,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         if (downTime == 0) downTime = eventTime;
 
         KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
-                deviceId, scancode);
+                deviceId, scancode, KeyEvent.FLAG_FROM_SYSTEM);
 
         boolean result = dispatchKey(newEvent, Binder.getCallingPid(), Binder.getCallingUid());
         if (sync) {
@@ -5107,7 +5147,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         if (DEBUG_INPUT) Log.v(
                             TAG, "Key repeat: count=" + keyRepeatCount
                             + ", next @ " + nextKeyTime);
-                        dispatchKey(new KeyEvent(lastKey, curTime, keyRepeatCount), 0, 0);
+                        dispatchKey(KeyEvent.changeTimeRepeat(lastKey, curTime, keyRepeatCount), 0, 0);
                         
                     } else {
                         curTime = SystemClock.uptimeMillis();
@@ -5361,6 +5401,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         final Session mSession;
         final IWindow mClient;
         WindowToken mToken;
+        WindowToken mRootToken;
         AppWindowToken mAppToken;
         AppWindowToken mTargetAppToken;
         final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
@@ -5573,6 +5614,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 }
                 appToken = parent;
             }
+            mRootToken = appToken;
             mAppToken = appToken.appWindowToken;
 
             mSurface = null;
@@ -6231,7 +6273,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
          */
         boolean isVisibleNow() {
             return mSurface != null && mPolicyVisibility && !mAttachedHidden
-                    && !mToken.hidden && !mExiting && !mDestroying;
+                    && !mRootToken.hidden && !mExiting && !mDestroying;
         }
 
         /**
@@ -6272,7 +6314,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             final AppWindowToken atoken = mAppToken;
             final boolean animating = atoken != null ? atoken.animating : false;
             return mSurface != null && mPolicyVisibility && !mDestroying
-                    && ((!mAttachedHidden && !mToken.hidden)
+                    && ((!mAttachedHidden && !mRootToken.hidden)
                             || mAnimating || animating);
         }
 
@@ -6431,6 +6473,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                   + " mLastLayer=" + mLastLayer);
             pw.println(prefix + "mSurface=" + mSurface);
             pw.println(prefix + "mToken=" + mToken);
+            pw.println(prefix + "mRootToken=" + mRootToken);
             pw.println(prefix + "mAppToken=" + mAppToken);
             pw.println(prefix + "mTargetAppToken=" + mTargetAppToken);
             pw.println(prefix + "mViewVisibility=0x" + Integer.toHexString(mViewVisibility)
@@ -6939,7 +6982,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         public static final int REMOVE_STARTING = 6;
         public static final int FINISHED_STARTING = 7;
         public static final int REPORT_APPLICATION_TOKEN_WINDOWS = 8;
-        public static final int UPDATE_ORIENTATION = 10;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
         public static final int HOLD_SCREEN_CHANGED = 12;
         public static final int APP_TRANSITION_TIMEOUT = 13;
@@ -7167,11 +7209,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     }
                 } break;
                 
-                case UPDATE_ORIENTATION: {
-                    setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false);
-                    break;
-                }
-                
                 case WINDOW_FREEZE_TIMEOUT: {
                     synchronized (mWindowMap) {
                         Log.w(TAG, "Window freeze timeout expired.");
@@ -7279,7 +7316,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 }
                 
                 case COMPUTE_AND_SEND_NEW_CONFIGURATION: {
-                    if (updateOrientationFromAppTokens(null) != null) {
+                    if (updateOrientationFromAppTokens(null, null) != null) {
                         sendNewConfiguration();
                     }
                     break;
@@ -7458,7 +7495,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     
                 boolean gone = win.mViewVisibility == View.GONE
                         || !win.mRelayoutCalled
-                        || win.mToken.hidden;
+                        || win.mRootToken.hidden;
 
                 // If this view is GONE, then skip it -- keep the current
                 // frame, and let the caller know so they can ignore it
@@ -7762,6 +7799,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             boolean blurring = false;
             boolean dimming = false;
             boolean covered = false;
+            boolean syswin = false;
 
             for (i=N-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
@@ -8021,8 +8059,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         if ((attrFlags&FLAG_KEEP_SCREEN_ON) != 0) {
                             holdScreen = w.mSession;
                         }
-                        if (w.mAttrs.screenBrightness >= 0 && screenBrightness < 0) {
+                        if (!syswin && w.mAttrs.screenBrightness >= 0
+                                && screenBrightness < 0) {
                             screenBrightness = w.mAttrs.screenBrightness;
+                        }
+                        if (attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG
+                                || attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD
+                                || attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_ERROR) {
+                            syswin = true;
                         }
                     }
                     if (w.isFullscreenOpaque(dw, dh)) {
@@ -8507,6 +8551,15 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
     private void startFreezingDisplayLocked() {
         if (mDisplayFrozen) {
+            // Freezing the display also suspends key event delivery, to
+            // keep events from going astray while the display is reconfigured.
+            // If someone has changed orientation again while the screen is
+            // still frozen, the events will continue to be blocked while the
+            // successive orientation change is processed.  To prevent spurious
+            // ANRs, we reset the event dispatch timeout in this case.
+            synchronized (mKeyWaiter) {
+                mKeyWaiter.mWasFrozen = true;
+            }
             return;
         }
         
@@ -8550,10 +8603,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
         Surface.unfreezeDisplay(0);
         
-        // Freezing the display also suspends key event delivery, to
-        // keep events from going astray while the display is reconfigured.
-        // Now that we're back, notify the key waiter that we're alive
-        // again and it should restart its timeouts.
+        // Reset the key delivery timeout on unfreeze, too.  We force a wakeup here
+        // too because regular key delivery processing should resume immediately.
         synchronized (mKeyWaiter) {
             mKeyWaiter.mWasFrozen = true;
             mKeyWaiter.notifyAll();

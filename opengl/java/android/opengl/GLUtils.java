@@ -40,7 +40,6 @@ public final class GLUtils {
 
     /**
      * return the internal format as defined by OpenGL ES of the supplied bitmap.
-     *
      * @param bitmap
      * @return the internal format of the bitmap.
      */
@@ -48,40 +47,30 @@ public final class GLUtils {
         if (bitmap == null) {
             throw new NullPointerException("getInternalFormat can't be used with a null Bitmap");
         }
-        switch (bitmap.getConfig()) {
-            case ALPHA_8:
-                return GL10.GL_ALPHA;
-            case ARGB_4444:
-            case ARGB_8888:
-                return GL10.GL_RGBA;
-            case RGB_565:
-                return GL10.GL_RGB;
+        int result = native_getInternalFormat(bitmap);
+        if (result < 0) {
+            throw new IllegalArgumentException("Unknown internalformat");
         }
-        throw new IllegalArgumentException("Unknown internalformat");
+        return result;
     }
 
     /**
-     * Return the type as defined by OpenGL ES of the supplied bitmap.
+     * Return the type as defined by OpenGL ES of the supplied bitmap, if there
+     * is one. If the bitmap is stored in a compressed format, it may not have
+     * a valid OpenGL ES type.
+     * @throws IllegalArgumentException if the bitmap does not have a type.
+     * @param bitmap
+     * @return the OpenGL ES type of the bitmap.
      */
     public static int getType(Bitmap bitmap) {
         if (bitmap == null) {
             throw new NullPointerException("getType can't be used with a null Bitmap");
         }
-        int type;
-        switch(bitmap.getConfig()) {
-            case ARGB_4444:
-                type = GL10.GL_UNSIGNED_SHORT_4_4_4_4;
-                break;
-            case RGB_565:
-                type = GL10.GL_UNSIGNED_SHORT_5_6_5;
-                break;
-            case ALPHA_8:
-            case ARGB_8888:
-            default:
-                type = GL10.GL_UNSIGNED_BYTE;
-                break;
+        int result = native_getType(bitmap);
+        if (result < 0) {
+            throw new IllegalArgumentException("Unknown type");
         }
-        return type;
+        return result;
     }
 
     /**
@@ -111,15 +100,16 @@ public final class GLUtils {
         if (bitmap == null) {
             throw new NullPointerException("texImage2D can't be used with a null Bitmap");
         }
-        int type = getType(bitmap);
-        if (native_texImage2D(target, level, internalformat, bitmap, type, border)!=0) {
+        if (native_texImage2D(target, level, internalformat, bitmap, -1, border)!=0) {
             throw new IllegalArgumentException("invalid Bitmap format");
         }
     }
 
     /**
      * A version of texImage2D() that takes an explicit type parameter
-     * as defined by the OpenGL ES specification.
+     * as defined by the OpenGL ES specification. The actual type and
+     * internalformat of the bitmap must be compatible with the specified
+     * type and internalformat parameters.
      *
      * @param target
      * @param level
@@ -139,7 +129,8 @@ public final class GLUtils {
     }
 
     /**
-     * A version of texImage2D that determines the internalFormat automatically.
+     * A version of texImage2D that determines the internalFormat and type
+     * automatically.
      *
      * @param target
      * @param level
@@ -151,8 +142,7 @@ public final class GLUtils {
         if (bitmap == null) {
             throw new NullPointerException("texImage2D can't be used with a null Bitmap");
         }
-        int type = getType(bitmap);
-        if (native_texImage2D(target, level, -1, bitmap, type, border)!=0) {
+        if (native_texImage2D(target, level, -1, bitmap, -1, border)!=0) {
             throw new IllegalArgumentException("invalid Bitmap format");
         }
     }
@@ -213,6 +203,8 @@ public final class GLUtils {
 
     native private static void nativeClassInit();
 
+    native private static int native_getInternalFormat(Bitmap bitmap);
+    native private static int native_getType(Bitmap bitmap);
     native private static int native_texImage2D(int target, int level, int internalformat,
             Bitmap bitmap, int type, int border);
     native private static int native_texSubImage2D(int target, int level, int xoffset, int yoffset,

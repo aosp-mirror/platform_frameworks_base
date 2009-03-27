@@ -173,6 +173,7 @@ private:
     };
 
     sp<IMediaPlayer>            mPlayer;
+    thread_id_t                 mLockThreadId;
     Mutex                       mLock;
     Mutex                       mNotifyLock;
     Condition                   mSignal;

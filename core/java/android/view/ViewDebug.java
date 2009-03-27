@@ -19,6 +19,7 @@ package android.view;
 import android.util.Log;
 import android.util.DisplayMetrics;
 import android.content.res.Resources;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Environment;
@@ -800,7 +801,7 @@ public class ViewDebug {
             View view = root.getRootView();
             if (view instanceof ViewGroup) {
                 ViewGroup group = (ViewGroup) view;
-                dumpViewHierarchyWithProperties(group, out, 0);
+                dumpViewHierarchyWithProperties(group.getContext(), group, out, 0);
             }
             out.write("DONE.");
             out.newLine();
@@ -838,9 +839,9 @@ public class ViewDebug {
         return view.getClass().getName().equals(className) && view.hashCode() == hashCode;
     }
 
-    private static void dumpViewHierarchyWithProperties(ViewGroup group,
+    private static void dumpViewHierarchyWithProperties(Context context, ViewGroup group,
             BufferedWriter out, int level) {
-        if (!dumpViewWithProperties(group, out, level)) {
+        if (!dumpViewWithProperties(context, group, out, level)) {
             return;
         }
 
@@ -848,14 +849,16 @@ public class ViewDebug {
         for (int i = 0; i < count; i++) {
             final View view = group.getChildAt(i);
             if (view instanceof ViewGroup) {
-                dumpViewHierarchyWithProperties((ViewGroup) view, out, level + 1);
+                dumpViewHierarchyWithProperties(context, (ViewGroup) view, out, level + 1);
             } else {
-                dumpViewWithProperties(view, out, level + 1);
+                dumpViewWithProperties(context, view, out, level + 1);
             }
         }
     }
 
-    private static boolean dumpViewWithProperties(View view, BufferedWriter out, int level) {
+    private static boolean dumpViewWithProperties(Context context, View view,
+            BufferedWriter out, int level) {
+
         try {
             for (int i = 0; i < level; i++) {
                 out.write(' ');
@@ -864,7 +867,7 @@ public class ViewDebug {
             out.write('@');
             out.write(Integer.toHexString(view.hashCode()));
             out.write(' ');
-            dumpViewProperties(view, out);
+            dumpViewProperties(context, view, out);
             out.newLine();
         } catch (IOException e) {
             Log.w("View", "Error while dumping hierarchy tree");
@@ -945,23 +948,26 @@ public class ViewDebug {
         return methods;
     }
 
-    private static void dumpViewProperties(Object view, BufferedWriter out) throws IOException {
-        dumpViewProperties(view, out, "");
+    private static void dumpViewProperties(Context context, Object view,
+            BufferedWriter out) throws IOException {
+
+        dumpViewProperties(context, view, out, "");
     }
 
-    private static void dumpViewProperties(Object view, BufferedWriter out, String prefix)
-            throws IOException {
+    private static void dumpViewProperties(Context context, Object view,
+            BufferedWriter out, String prefix) throws IOException {
+
         Class<?> klass = view.getClass();
 
         do {
-            exportFields(view, out, klass, prefix);
-            exportMethods(view, out, klass, prefix);
+            exportFields(context, view, out, klass, prefix);
+            exportMethods(context, view, out, klass, prefix);
             klass = klass.getSuperclass();
         } while (klass != Object.class);
     }
     
-    private static void exportMethods(Object view, BufferedWriter out, Class<?> klass,
-            String prefix) throws IOException {
+    private static void exportMethods(Context context, Object view, BufferedWriter out,
+            Class<?> klass, String prefix) throws IOException {
 
         final Method[] methods = getExportedPropertyMethods(klass);
 
@@ -976,9 +982,9 @@ public class ViewDebug {
 
                 if (returnType == int.class) {
                     final ExportedProperty property = sAnnotations.get(method);
-                    if (property.resolveId() && view instanceof View) {
+                    if (property.resolveId() && context != null) {
                         final int id = (Integer) methodValue;
-                        methodValue = resolveId(view, id);
+                        methodValue = resolveId(context, id);
                     } else {
                         final IntToString[] mapping = property.mapping();
                         if (mapping.length > 0) {
@@ -1005,11 +1011,11 @@ public class ViewDebug {
                     final String valuePrefix = prefix + method.getName() + '_';
                     final String suffix = "()";
 
-                    exportUnrolledArray(view, out, property, array, valuePrefix, suffix);
+                    exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
                 } else if (!returnType.isPrimitive()) {
                     final ExportedProperty property = sAnnotations.get(method);
                     if (property.deepExport()) {
-                        dumpViewProperties(methodValue, out, prefix + property.prefix());
+                        dumpViewProperties(context, methodValue, out, prefix + property.prefix());
                         continue;
                     }
                 }
@@ -1021,8 +1027,9 @@ public class ViewDebug {
         }
     }
 
-    private static void exportFields(Object view, BufferedWriter out, Class<?> klass, String prefix)
-            throws IOException {
+    private static void exportFields(Context context, Object view, BufferedWriter out,
+            Class<?> klass, String prefix) throws IOException {
+
         final Field[] fields = getExportedPropertyFields(klass);
 
         int count = fields.length;
@@ -1036,9 +1043,9 @@ public class ViewDebug {
 
                 if (type == int.class) {
                     final ExportedProperty property = sAnnotations.get(field);
-                    if (property.resolveId() && view instanceof View) {
+                    if (property.resolveId() && context != null) {
                         final int id = field.getInt(view);
-                        fieldValue = resolveId(view, id);
+                        fieldValue = resolveId(context, id);
                     } else {
                         final IntToString[] mapping = property.mapping();
                         if (mapping.length > 0) {
@@ -1063,14 +1070,15 @@ public class ViewDebug {
                     final String valuePrefix = prefix + field.getName() + '_';
                     final String suffix = "";
 
-                    exportUnrolledArray(view, out, property, array, valuePrefix, suffix);
+                    exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
 
                     // We exit here!
                     return;
                 } else if (!type.isPrimitive()) {
                     final ExportedProperty property = sAnnotations.get(field);
                     if (property.deepExport()) {
-                        dumpViewProperties(field.get(view), out, prefix + property.prefix());
+                        dumpViewProperties(context, field.get(view), out,
+                                prefix + property.prefix());
                         continue;
                     }
                 }
@@ -1096,7 +1104,7 @@ public class ViewDebug {
         out.write(' ');
     }
 
-    private static void exportUnrolledArray(Object view, BufferedWriter out,
+    private static void exportUnrolledArray(Context context, BufferedWriter out,
             ExportedProperty property, int[] array, String prefix, String suffix)
             throws IOException {
 
@@ -1106,7 +1114,7 @@ public class ViewDebug {
         final IntToString[] mapping = property.mapping();
         final boolean hasMapping = mapping.length > 0;
 
-        final boolean resolveId = property.resolveId() && view instanceof View;
+        final boolean resolveId = property.resolveId() && context != null;
         final int valuesCount = array.length;
 
         for (int j = 0; j < valuesCount; j++) {
@@ -1140,16 +1148,16 @@ public class ViewDebug {
             }
 
             if (resolveId) {
-                value = (String) resolveId(view, intValue);
+                value = (String) resolveId(context, intValue);
             }
 
             writeEntry(out, prefix, name, suffix, value);
         }
     }
 
-    private static Object resolveId(Object view, int id) {
+    private static Object resolveId(Context context, int id) {
         Object fieldValue;
-        final Resources resources = ((View) view).getContext().getResources();
+        final Resources resources = context.getResources();
         if (id >= 0) {
             try {
                 fieldValue = resources.getResourceTypeName(id) + '/' +

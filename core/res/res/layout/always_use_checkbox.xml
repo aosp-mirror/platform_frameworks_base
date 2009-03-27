@@ -16,18 +16,18 @@
 
 <!-- Check box that is displayed in the activity resolver UI for the user
      to make their selection the preferred activity. -->
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="14dip"
-    android:paddingRight="15dip">
+    android:paddingRight="15dip"
+    android:orientation="vertical">
     
     <CheckBox
         android:id="@+id/alwaysUse"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:focusable="true"
         android:clickable="true" />
     
@@ -38,6 +38,5 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:paddingLeft="36dip"
         android:visibility="gone"
-        android:layout_below="@id/alwaysUse"
         android:text="@string/clearDefaultHintMsg" />
-</RelativeLayout>
+</LinearLayout>

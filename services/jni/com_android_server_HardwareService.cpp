@@ -15,18 +15,109 @@
 ** limitations under the License.
 */
 
-#define LOG_TAG "Vibrator"
+#define LOG_TAG "HardwareService"
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include <stdio.h>
 #include "android_runtime/AndroidRuntime.h"
+
 #include <utils/misc.h>
 #include <utils/Log.h>
 #include <hardware_legacy/vibrator.h>
+#include <hardware/hardware.h>
+#include <hardware/lights.h>
+
+#include <stdio.h>
+//#include <string.h>
 
 namespace android
 {
+
+// These values must correspond with the LIGHT_ID constants in
+// HardwareService.java
+enum {
+    LIGHT_INDEX_BACKLIGHT = 0,
+    LIGHT_INDEX_KEYBOARD = 1,
+    LIGHT_INDEX_BUTTONS = 2,
+    LIGHT_INDEX_BATTERY = 3,
+    LIGHT_INDEX_NOTIFICATIONS = 4,
+    LIGHT_INDEX_ATTENTION = 5,
+    LIGHT_COUNT
+};
+
+struct Devices {
+    light_device_t* lights[LIGHT_COUNT];
+};
+
+static light_device_t* get_device(hw_module_t* module, char const* name)
+{
+    int err;
+    hw_device_t* device;
+    err = module->methods->open(module, name, &device);
+    if (err == 0) {
+        return (light_device_t*)device;
+    } else {
+        return NULL;
+    }
+}
+
+static jint init_native(JNIEnv *env, jobject clazz)
+{
+    int err;
+    hw_module_t* module;
+    Devices* devices;
+    
+    devices = (Devices*)malloc(sizeof(Devices));
+
+    err = hw_get_module(LIGHTS_HARDWARE_MODULE_ID, (hw_module_t const**)&module);
+    if (err == 0) {
+        devices->lights[LIGHT_INDEX_BACKLIGHT]
+                = get_device(module, LIGHT_ID_BACKLIGHT);
+        devices->lights[LIGHT_INDEX_KEYBOARD]
+                = get_device(module, LIGHT_ID_KEYBOARD);
+        devices->lights[LIGHT_INDEX_BUTTONS]
+                = get_device(module, LIGHT_ID_BUTTONS);
+        devices->lights[LIGHT_INDEX_BATTERY]
+                = get_device(module, LIGHT_ID_BATTERY);
+        devices->lights[LIGHT_INDEX_NOTIFICATIONS]
+                = get_device(module, LIGHT_ID_NOTIFICATIONS);
+        devices->lights[LIGHT_INDEX_ATTENTION]
+                = get_device(module, LIGHT_ID_ATTENTION);
+    } else {
+        memset(devices, 0, sizeof(Devices));
+    }
+
+    return (jint)devices;
+}
+
+static void finalize_native(JNIEnv *env, jobject clazz, int ptr)
+{
+    Devices* devices = (Devices*)ptr;
+    if (devices == NULL) {
+        return;
+    }
+
+    free(devices);
+}
+
+static void setLight_native(JNIEnv *env, jobject clazz, int ptr,
+        int light, int colorARGB, int flashMode, int onMS, int offMS)
+{
+    Devices* devices = (Devices*)ptr;
+    light_state_t state;
+
+    if (light < 0 || light >= LIGHT_COUNT || devices->lights[light] == NULL) {
+        return ;
+    }
+
+    memset(&state, 0, sizeof(light_state_t));
+    state.color = colorARGB;
+    state.flashMode = flashMode;
+    state.flashOnMS = onMS;
+    state.flashOffMS = offMS;
+
+    devices->lights[light]->set_light(devices->lights[light], &state);
+}
 
 static void vibratorOn(JNIEnv *env, jobject clazz, jlong timeout_ms)
 {
@@ -41,11 +132,14 @@ static void vibratorOff(JNIEnv *env, jobject clazz)
 }
 
 static JNINativeMethod method_table[] = {
+    { "init_native", "()I", (void*)init_native },
+    { "finalize_native", "(I)V", (void*)init_native },
+    { "setLight_native", "(IIIIII)V", (void*)setLight_native },
     { "vibratorOn", "(J)V", (void*)vibratorOn },
     { "vibratorOff", "()V", (void*)vibratorOff }
 };
 
-int register_android_os_Vibrator(JNIEnv *env)
+int register_android_server_HardwareService(JNIEnv *env)
 {
     return jniRegisterNativeMethods(env, "com/android/server/HardwareService",
             method_table, NELEM(method_table));

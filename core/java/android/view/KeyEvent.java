@@ -235,6 +235,22 @@ public class KeyEvent implements Parcelable {
     public static final int FLAG_KEEP_TOUCH_MODE = 0x4;
     
     /**
+     * This mask is set if an event was known to come from a trusted part
+     * of the system.  That is, the event is known to come from the user,
+     * and could not have been spoofed by a third party component.
+     */
+    public static final int FLAG_FROM_SYSTEM = 0x8;
+    
+    /**
+     * This mask is used for compatibility, to identify enter keys that are
+     * coming from an IME whose enter key has been auto-labelled "next" or
+     * "done".  This allows TextView to dispatch these as normal enter keys
+     * for old applications, but still do the appropriate action when
+     * receiving them.
+     */
+    public static final int FLAG_EDITOR_ACTION = 0x10;
+    
+    /**
      * Returns the maximum keycode.
      */
     public static int getMaxKeyCode() {
@@ -440,6 +456,22 @@ public class KeyEvent implements Parcelable {
     }
 
     /**
+     * Make an exact copy of an existing key event.
+     */
+    public KeyEvent(KeyEvent origEvent) {
+        mDownTime = origEvent.mDownTime;
+        mEventTime = origEvent.mEventTime;
+        mAction = origEvent.mAction;
+        mKeyCode = origEvent.mKeyCode;
+        mRepeatCount = origEvent.mRepeatCount;
+        mMetaState = origEvent.mMetaState;
+        mDeviceId = origEvent.mDeviceId;
+        mScancode = origEvent.mScancode;
+        mFlags = origEvent.mFlags;
+        mCharacters = origEvent.mCharacters;
+    }
+
+    /**
      * Copy an existing key event, modifying its time and repeat count.
      * 
      * @param origEvent The existing event to be copied.
@@ -461,12 +493,26 @@ public class KeyEvent implements Parcelable {
     }
 
     /**
+     * Create a new key event that is the same as the given one, but whose
+     * event time and repeat count are replaced with the given value.
+     * 
+     * @param event The existing event to be copied.  This is not modified.
+     * @param eventTime The new event time
+     * (in {@link android.os.SystemClock#uptimeMillis}) of the event.
+     * @param newRepeat The new repeat count of the event.
+     */
+    public static KeyEvent changeTimeRepeat(KeyEvent event, long eventTime,
+            int newRepeat) {
+        return new KeyEvent(event, eventTime, newRepeat);
+    }
+    
+    /**
      * Copy an existing key event, modifying its action.
      * 
      * @param origEvent The existing event to be copied.
      * @param action The new action code of the event.
      */
-    public KeyEvent(KeyEvent origEvent, int action) {
+    private KeyEvent(KeyEvent origEvent, int action) {
         mDownTime = origEvent.mDownTime;
         mEventTime = origEvent.mEventTime;
         mAction = action;
@@ -480,6 +526,30 @@ public class KeyEvent implements Parcelable {
         // when changing the action.
     }
 
+    /**
+     * Create a new key event that is the same as the given one, but whose
+     * action is replaced with the given value.
+     * 
+     * @param event The existing event to be copied.  This is not modified.
+     * @param action The new action code of the event.
+     */
+    public static KeyEvent changeAction(KeyEvent event, int action) {
+        return new KeyEvent(event, action);
+    }
+    
+    /**
+     * Create a new key event that is the same as the given one, but whose
+     * flags are replaced with the given value.
+     * 
+     * @param event The existing event to be copied.  This is not modified.
+     * @param flags The new flags constant.
+     */
+    public static KeyEvent changeFlags(KeyEvent event, int flags) {
+        event = new KeyEvent(event);
+        event.mFlags = flags;
+        return event;
+    }
+    
     /**
      * Don't use in new code, instead explicitly check
      * {@link #getAction()}.

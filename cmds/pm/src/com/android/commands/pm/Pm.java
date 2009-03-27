@@ -528,8 +528,14 @@ public final class Pm {
         case PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY:
             s = "INSTALL_FAILED_MISSING_SHARED_LIBRARY";
             break;
-        case PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE:
-            s = "INSTALL_FAILED_REPLACE_COULDNT_DELETE";
+        case PackageManager.INSTALL_FAILED_DEXOPT:
+            s = "INSTALL_FAILED_DEXOPT";
+            break;
+        case PackageManager.INSTALL_FAILED_OLDER_SDK:
+            s = "INSTALL_FAILED_OLDER_SDK";
+            break;
+        case PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER:
+            s = "INSTALL_FAILED_CONFLICTING_PROVIDER";
             break;
         case PackageManager.INSTALL_PARSE_FAILED_NOT_APK:
             s = "INSTALL_PARSE_FAILED_NOT_APK";
@@ -560,9 +566,6 @@ public final class Pm {
             break;
         case PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY:
             s = "INSTALL_PARSE_FAILED_MANIFEST_EMPTY";
-            break;
-        case PackageManager.INSTALL_FAILED_OLDER_SDK:
-            s = "INSTALL_FAILED_OLDER_SDK";
             break;
         default:
             s = Integer.toString(result);

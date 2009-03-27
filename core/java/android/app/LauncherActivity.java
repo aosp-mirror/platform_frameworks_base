@@ -65,6 +65,7 @@ public abstract class LauncherActivity extends ListActivity {
         public Drawable icon;
         public String packageName;
         public String className;
+        public Bundle extras;
         
         ListItem(PackageManager pm, ResolveInfo resolveInfo, IconResizer resizer) {
             label = resolveInfo.loadLabel(pm);
@@ -115,6 +116,9 @@ public abstract class LauncherActivity extends ListActivity {
             Intent intent = new Intent(mIntent);
             ListItem item = mActivitiesList.get(position);
             intent.setClassName(item.packageName, item.className);
+            if (item.extras != null) {
+                intent.putExtras(item.extras);
+            }
             return intent;
         }
 

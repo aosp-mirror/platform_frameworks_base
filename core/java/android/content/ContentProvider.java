@@ -172,7 +172,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
 
         public ISyncAdapter getSyncAdapter() {
             checkWritePermission(null);
-            return ContentProvider.this.getSyncAdapter().getISyncAdapter();
+            SyncAdapter sa = ContentProvider.this.getSyncAdapter();
+            return sa != null ? sa.getISyncAdapter() : null;
         }
 
         private void checkReadPermission(Uri uri) {

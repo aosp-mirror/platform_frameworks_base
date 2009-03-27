@@ -1000,12 +1000,23 @@ public final class ApacheHttpRequestAndroid {
         return true;
     }
 
+    /**
+     * Called by the main thread to interrupt the child thread.
+     * We do not set mConnectionFailed here as we still need the
+     * ability to receive a null packet for sendPostData().
+     */
+    public synchronized void abort() {
+        if (Config.LOGV) {
+            Log.i(LOG_TAG, "ABORT CALLED");
+        }
+        if (mMethod != null) {
+            mMethod.abort();
+        }
+    }
 
    /**
-     * Interrupt a blocking IO operation. This will cause the child
-     * thread to expediently return from an operation if it was stuck at
-     * the time. Note that this inherently races, and unfortunately
-     * requires the caller to loop.
+     * Interrupt a blocking IO operation and wait for the
+     * thread to complete.
      */
     public synchronized void interrupt() {
         if (Config.LOGV) {

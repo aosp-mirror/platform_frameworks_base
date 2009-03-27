@@ -103,6 +103,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map.Entry;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -2476,7 +2479,8 @@ class ApplicationContext extends Context {
         private final FileStatus mFileStatus = new FileStatus();
         private long mTimestamp;
 
-        private List<OnSharedPreferenceChangeListener> mListeners;
+        private static final Object mContent = new Object();
+        private WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners;
 
         SharedPreferencesImpl(
             File file, int mode, Map initialContents) {
@@ -2487,7 +2491,7 @@ class ApplicationContext extends Context {
             if (FileUtils.getFileStatus(file.getPath(), mFileStatus)) {
                 mTimestamp = mFileStatus.mtime;
             }
-            mListeners = new ArrayList<OnSharedPreferenceChangeListener>();
+            mListeners = new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
         }
 
         public boolean hasFileChanged() {
@@ -2509,9 +2513,7 @@ class ApplicationContext extends Context {
         
         public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
             synchronized(this) {
-                if (!mListeners.contains(listener)) {
-                    mListeners.add(listener);
-                }
+                mListeners.put(listener, mContent);
             }
         }
 
@@ -2620,13 +2622,14 @@ class ApplicationContext extends Context {
 
                 boolean hasListeners;
                 List<String> keysModified = null;
-                List<OnSharedPreferenceChangeListener> listeners = null;
+                Set<OnSharedPreferenceChangeListener> listeners = null;
 
                 synchronized (SharedPreferencesImpl.this) {
                     hasListeners = mListeners.size() > 0;
                     if (hasListeners) {
                         keysModified = new ArrayList<String>();
-                        listeners = new ArrayList<OnSharedPreferenceChangeListener>(mListeners);
+                        listeners =
+                                new HashSet<OnSharedPreferenceChangeListener>(mListeners.keySet());
                     }
 
                     synchronized (this) {
@@ -2635,9 +2638,7 @@ class ApplicationContext extends Context {
                             mClear = false;
                         }
 
-                        Iterator<Entry<String, Object>> it = mModified.entrySet().iterator();
-                        while (it.hasNext()) {
-                            Map.Entry<String, Object> e = it.next();
+                        for (Entry<String, Object> e : mModified.entrySet()) {
                             String k = e.getKey();
                             Object v = e.getValue();
                             if (v == this) {
@@ -2660,10 +2661,10 @@ class ApplicationContext extends Context {
                 if (hasListeners) {
                     for (int i = keysModified.size() - 1; i >= 0; i--) {
                         final String key = keysModified.get(i);
-                        // Call in the order they were registered
-                        final int listenersSize = listeners.size();
-                        for (int j = 0; j < listenersSize; j++) {
-                            listeners.get(j).onSharedPreferenceChanged(SharedPreferencesImpl.this, key);
+                        for (OnSharedPreferenceChangeListener listener : listeners) {
+                            if (listener != null) {
+                                listener.onSharedPreferenceChanged(SharedPreferencesImpl.this, key);
+                            }
                         }
                     }
                 }
@@ -2722,10 +2723,8 @@ class ApplicationContext extends Context {
                     mTimestamp = mFileStatus.mtime;
                 }
                 
-                // Writing was successful, delete the backup file
-                if (!mBackupFile.delete()) {
-                    Log.e(TAG, "Couldn't delete new backup file " + mBackupFile);
-                }
+                // Writing was successful, delete the backup file if there is one.
+                mBackupFile.delete();
                 return true;
             } catch (XmlPullParserException e) {
                 Log.w(TAG, "writeFileLocked: Got exception:", e);

@@ -278,11 +278,11 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
     
     /**
-     * Stop the service, if the most recent time it was started was 
+     * Stop the service if the most recent time it was started was 
      * <var>startId</var>.  This is the same as calling {@link 
      * android.content.Context#stopService} for this particular service but allows you to 
      * safely avoid stopping if there is a start request from a client that you 
-     * haven't yet see in {@link #onStart}. 
+     * haven't yet seen in {@link #onStart}. 
      * 
      * @param startId The most recent start identifier received in {@link 
      *                #onStart}.

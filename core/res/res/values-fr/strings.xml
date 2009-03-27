@@ -54,6 +54,16 @@
     <string name="CLIRDefaultOffNextCallOff">"Par défaut, les identifiants d\'appelant ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="serviceNotProvisioned">"Ce service n\'est pas pris en charge."</string>
     <string name="CLIRPermanent">"Le paramètre Identifiant d\'appelant ne peut pas être modifié."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
     <string name="serviceClassVoice">"Voix"</string>
     <string name="serviceClassData">"Données"</string>
     <string name="serviceClassFAX">"Télécopie"</string>
@@ -103,15 +113,11 @@
     <string name="global_action_toggle_silent_mode">"Mode silencieux"</string>
     <string name="global_action_silent_mode_on_status">"Le son est désactivé."</string>
     <string name="global_action_silent_mode_off_status">"Le son est activé."</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
+    <string name="global_actions_toggle_airplane_mode">"Mode Avion"</string>
+    <string name="global_actions_airplane_mode_on_status">"Le mode Avion est activé."</string>
+    <string name="global_actions_airplane_mode_off_status">"Le mode Avion est désactivé."</string>
     <string name="safeMode">"Mode sécurisé"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
+    <string name="android_system_label">"Système Android"</string>
     <string name="permgrouplab_costMoney">"Services payants"</string>
     <string name="permgroupdesc_costMoney">"Permet aux applications d\'effectuer des opérations payantes."</string>
     <string name="permgrouplab_messages">"Vos messages"</string>
@@ -286,8 +292,8 @@
     <string name="permdesc_locationUpdates">"Permet l\'activation/la désactivation des notifications de mises à jour de la position géographique provenant de la radio. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
     <string name="permlab_checkinProperties">"Accès aux propriétés d\'enregistrement"</string>
     <string name="permdesc_checkinProperties">"Permet un accès en lecture/écriture à des propriétés envoyées par le service d\'inscription. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
-    <string name="permlab_bindGadget">"choisir les gadgets"</string>
-    <string name="permdesc_bindGadget">"Permet à l\'application de signaler au système quels gadgets peuvent être utilisés pour quelle application. Cette autorisation permet aux applications de fournir l\'accès à des données personnelles à d\'autres applications. Cette option n\'est pas utilisée par les applications standard."</string>
+    <string name="permlab_bindGadget">"choisir les widgets"</string>
+    <string name="permdesc_bindGadget">"Permet à l\'application de signaler au système quels widgets peuvent être utilisés par quelle application. Grâce à cette autorisation, les applications peuvent accorder l\'accès à des données personnelles à d\'autres applications. Cette option n\'est pas utilisée par les applications standard."</string>
     <string name="permlab_modifyPhoneState">"Modification de l\'état du téléphone"</string>
     <string name="permdesc_modifyPhoneState">"Permet à une application de contrôler les fonctionnalités téléphoniques de l\'appareil. Une application bénéficiant de cette autorisation peut changer de réseau, éteindre et allumer la radio du téléphone, etc., sans vous en avertir."</string>
     <string name="permlab_readPhoneState">"Lecture de l\'état du téléphone"</string>
@@ -397,23 +403,23 @@
     <string name="lockscreen_emergency_call">"Appel d\'urgence"</string>
     <string name="lockscreen_pattern_correct">"Combinaison correcte !"</string>
     <string name="lockscreen_pattern_wrong">"Désolé. Merci de réessayer."</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_plugged_in">"Chargement (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Branchez votre chargeur."</string>
     <string name="lockscreen_missing_sim_message_short">"Aucune carte SIM n\'a été trouvée."</string>
     <string name="lockscreen_missing_sim_message">"Aucune carte SIM n\'est insérée dans le téléphone."</string>
     <string name="lockscreen_missing_sim_instructions">"Insérez une carte SIM."</string>
-    <string name="lockscreen_network_locked_message">"Réseau bloqué"</string>
+    <string name="lockscreen_network_locked_message">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message">"La carte SIM est verrouillée par code PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"Veuillez contacter l\'assistance clientèle."</string>
-    <string name="lockscreen_sim_locked_message">"La carte SIM est bloquée."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
+    <string name="lockscreen_sim_locked_message">"Téléphone verrouillé"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Déblocage de la carte SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Vous avez mal reproduit le motif de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="lockscreen_failed_attempts_almost_glogin">"Vous avez mal saisi le motif de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez débloquer votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown">"Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Motif oublié ?"</string>
     <string name="lockscreen_glogin_too_many_attempts">"Trop de tentatives de motif !"</string>
-    <string name="lockscreen_glogin_instructions">"Pour débloquer votre téléphone,"\n"connectez-vous à l\'aide de votre compte Google"</string>
+    <string name="lockscreen_glogin_instructions">"Pour déverrouiller le téléphone, connectez-vous à l\'aide de votre compte Google."</string>
     <string name="lockscreen_glogin_username_hint">"Nom d\'utilisateur (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint">"Mot de passe"</string>
     <string name="lockscreen_glogin_submit_button">"Se connecter"</string>
@@ -421,15 +427,13 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
-    <skip />
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"Effacer les notifications"</string>
     <string name="status_bar_no_notifications_title">"Aucune notification"</string>
     <string name="status_bar_ongoing_events_title">"En cours"</string>
     <string name="status_bar_latest_events_title">"Notifications"</string>
-    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"Chargement..."</string>
     <string name="battery_low_title">"Branchez le chargeur"</string>
     <string name="battery_low_subtitle">"Le niveau de la batterie est bas :"</string>
@@ -551,6 +555,7 @@
     <string name="monthly">"Tous les mois"</string>
     <string name="yearly">"Tous les ans"</string>
     <string name="VideoView_error_title">"Échec de la lecture de la vidéo"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback">"Désolé, cette vidéo ne peut être lue sur cet appareil."</string>
     <string name="VideoView_error_text_unknown">"Désolé, impossible de lire cette vidéo."</string>
     <string name="VideoView_error_button">"OK"</string>
     <string name="am">"AM"</string>
@@ -572,17 +577,16 @@
     <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">H</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
+    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"midi"</string>
     <string name="Noon">"Midi"</string>
     <string name="midnight">"minuit"</string>
     <string name="Midnight">"Minuit"</string>
-    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
-    <!-- no translation found for month (1976700695144952053) -->
+    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
-    <skip />
+    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
@@ -610,10 +614,9 @@
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
-    <skip />
-    <string name="abbrev_month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g>"</string>
-    <!-- no translation found for abbrev_month (7304935052615731208) -->
+    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"dimanche"</string>
     <string name="day_of_week_long_monday">"lundi"</string>
@@ -795,17 +798,16 @@
     <string name="activity_list_empty">"Aucune activité correspondante trouvée"</string>
     <string name="permlab_pkgUsageStats">"mettre à jour les données statistiques du composant"</string>
     <string name="permdesc_pkgUsageStats">"Permet de modifier les données statistiques collectées du composant. Cette option n\'est pas utilisée par les applications standard."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short">"Tapez deux fois pour le zoom"</string>
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
+    <string name="tutorial_double_tap_to_zoom_message_short">"Appuyer deux fois pour régler le zoom"</string>
+    <string name="gadget_host_error_inflating">"Erreur lors de l\'agrandissement du widget"</string>
+    <string name="ime_action_go">"OK"</string>
+    <string name="ime_action_search">"Rechercher"</string>
+    <string name="ime_action_send">"Envoyer"</string>
+    <string name="ime_action_next">"Suivant"</string>
+    <string name="ime_action_done">"Terminé"</string>
+    <string name="ime_action_default">"Exécuter"</string>
+    <!-- no translation found for dial_number_using (5789176425167573586) -->
     <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
+    <!-- no translation found for create_contact_using (4947405226788104538) -->
     <skip />
 </resources>

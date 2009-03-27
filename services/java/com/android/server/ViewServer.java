@@ -24,6 +24,9 @@ import java.net.InetAddress;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
 
 /**
  * The ViewServer is local socket server that can be used to communicate with the
@@ -41,7 +44,14 @@ class ViewServer implements Runnable {
     // Debug facility
     private static final String LOG_TAG = "ViewServer";
 
+    private static final String VALUE_PROTOCOL_VERSION = "2";
+    private static final String VALUE_SERVER_VERSION = "2";
+
     // Protocol commands
+    // Returns the protocol version
+    private static final String COMMAND_PROTOCOL_VERSION = "PROTOCOL";
+    // Returns the server version
+    private static final String COMMAND_SERVER_VERSION = "SERVER";
     // Lists all of the available windows in the system
     private static final String COMMAND_WINDOW_MANAGER_LIST = "LIST";
 
@@ -169,7 +179,11 @@ class ViewServer implements Runnable {
                     }
 
                     boolean result;
-                    if (COMMAND_WINDOW_MANAGER_LIST.equalsIgnoreCase(command)) {
+                    if (COMMAND_PROTOCOL_VERSION.equalsIgnoreCase(command)) {
+                        result = writeValue(client, VALUE_PROTOCOL_VERSION);
+                    } else if (COMMAND_SERVER_VERSION.equalsIgnoreCase(command)) {
+                        result = writeValue(client, VALUE_SERVER_VERSION);
+                    } else if (COMMAND_WINDOW_MANAGER_LIST.equalsIgnoreCase(command)) {
                         result = mWindowManager.viewServerListWindows(client);
                     } else {
                         result = mWindowManager.viewServerWindowCommand(client,
@@ -196,5 +210,29 @@ class ViewServer implements Runnable {
                 }
             }
         }
+    }
+
+    private static boolean writeValue(Socket client, String value) {
+        boolean result;
+        BufferedWriter out = null;
+        try {
+            OutputStream clientStream = client.getOutputStream();
+            out = new BufferedWriter(new OutputStreamWriter(clientStream), 8 * 1024);
+            out.write(value);
+            out.write("\n");
+            out.flush();
+            result = true;
+        } catch (Exception e) {
+            result = false;
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    result = false;
+                }
+            }
+        }
+        return result;
     }
 }

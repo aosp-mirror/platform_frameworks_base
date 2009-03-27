@@ -253,6 +253,22 @@ public final class EmojiFactory {
      * is returned. 
      */
     public static native EmojiFactory newAvailableInstance();
+
+    /**
+     * Returns the lowest code point corresponding to an Android
+     * emoji character.
+     */
+    public int getMinimumAndroidPua() {
+        return nativeGetMinimumAndroidPua(mNativeEmojiFactory);
+    }
+
+    /**
+     * Returns the highest code point corresponding to an Android
+     * emoji character.
+     */
+    public int getMaximumAndroidPua() {
+        return nativeGetMaximumAndroidPua(mNativeEmojiFactory);
+    }
     
     // native methods
     

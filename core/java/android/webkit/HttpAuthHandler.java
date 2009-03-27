@@ -80,8 +80,7 @@ public class HttpAuthHandler extends Handler {
                 break;
 
             case AUTH_CANCEL:
-
-                mNetwork.resetHandlersAndStopLoading(loader.getFrame());
+                loader.handleAuthResponse(null, null);
                 break;
         }
 
@@ -123,24 +122,6 @@ public class HttpAuthHandler extends Handler {
         }
 
         return false;
-    }
-
-    /**
-     * Resets the HTTP-authentication request handler, removes
-     * all loaders that share the same BrowserFrame
-     *
-     * @param frame The browser frame
-     */
-    /* package */ void reset(BrowserFrame frame) {
-        synchronized (mLoaderQueue) {
-            ListIterator<LoadListener> i = mLoaderQueue.listIterator(0);
-            while (i.hasNext()) {
-                LoadListener loader = i.next();
-                if (frame == loader.getFrame()) {
-                    i.remove();
-                }
-            }
-        }
     }
 
     /**

@@ -969,6 +969,15 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SEARCH = "android.intent.action.SEARCH";
     /**
+     * Activity Action: Start the platform-defined tutorial
+     * <p>Input: {@link android.app.SearchManager#QUERY getStringExtra(SearchManager.QUERY)}
+     * is the text to search for.  If empty, simply
+     * enter your search results Activity with the search UI activated.
+     * <p>Output: nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SYSTEM_TUTORIAL = "android.intent.action.SYSTEM_TUTORIAL";
+    /**
      * Activity Action: Perform a web search.
      * <p>
      * Input: {@link android.app.SearchManager#QUERY
@@ -1037,7 +1046,7 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SEARCH_LONG_PRESS = "android.intent.action.SEARCH_LONG_PRESS";
-    
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
@@ -1054,7 +1063,7 @@ public class Intent implements Parcelable {
     public static final String ACTION_SCREEN_ON = "android.intent.action.SCREEN_ON";
 
     /**
-     * Broadcast Action: Sent when the user is present after device wakes up (e.g when the 
+     * Broadcast Action: Sent when the user is present after device wakes up (e.g when the
      * keyguard is gone).
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -1127,7 +1136,8 @@ public class Intent implements Parcelable {
     public static final String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
     /**
      * Broadcast Action: A new application package has been installed on the
-     * device. The data contains the name of the package.
+     * device. The data contains the name of the package.  Note that the
+     * newly installed package does <em>not</em> receive this broadcast.
      * <p>My include the following extras:
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
@@ -1137,6 +1147,17 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_ADDED = "android.intent.action.PACKAGE_ADDED";
+    /**
+     * Broadcast Action: A new version of an application package has been
+     * installed, replacing an existing version that was previously installed.
+     * The data contains the name of the package.
+     * <p>My include the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_REPLACED = "android.intent.action.PACKAGE_REPLACED";
     /**
      * Broadcast Action: An existing application package has been removed from
      * the device.  The data contains the name of the package.  The package
@@ -1165,7 +1186,9 @@ public class Intent implements Parcelable {
      * Broadcast Action: The user has restarted a package, and all of its
      * processes have been killed.  All runtime state
      * associated with it (processes, alarms, notifications, etc) should
-     * be removed.  The data contains the name of the package.
+     * be removed.  Note that the restarted package does <em>not</em>
+     * receive this broadcast.
+     * The data contains the name of the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>
@@ -1175,8 +1198,9 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action: The user has cleared the data of a package.  This should
      * be preceded by {@link #ACTION_PACKAGE_RESTARTED}, after which all of
-     * its persistent data is erased and this broadcast sent.  The data contains
-     * the name of the package.
+     * its persistent data is erased and this broadcast sent.
+     * Note that the cleared package does <em>not</em>
+     * receive this broadcast. The data contains the name of the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>
@@ -1212,7 +1236,7 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action:  The charging state, or charge level of the battery has
      * changed.
-     * 
+     *
      * <p class="note">
      * You can <em>not</em> receive this through components declared
      * in manifests, only by exlicitly registering for it with
@@ -1401,7 +1425,7 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_GTALK_SERVICE_DISCONNECTED =
             "android.intent.action.GTALK_DISCONNECTED";
-    
+
     /**
      * Broadcast Action: An input method has been changed.
      * {@hide pending API Council approval}
@@ -1471,12 +1495,12 @@ public class Intent implements Parcelable {
      *
      * <p>The Intent will have the following extra value:
      * <ul>
-     *   <li><em>{@link android.content.Intent#EXTRA_PHONE_NUMBER}</em> - 
+     *   <li><em>{@link android.content.Intent#EXTRA_PHONE_NUMBER}</em> -
      *       the phone number originally intended to be dialed.</li>
      * </ul>
      * <p>Once the broadcast is finished, the resultData is used as the actual
      * number to call.  If  <code>null</code>, no call will be placed.</p>
-     * <p>It is perfectly acceptable for multiple receivers to process the 
+     * <p>It is perfectly acceptable for multiple receivers to process the
      * outgoing call in turn: for example, a parental control application
      * might verify that the user is authorized to place the call at that
      * time, then a number-rewriting application might add an area code if
@@ -1484,7 +1508,7 @@ public class Intent implements Parcelable {
      * <p>For consistency, any receiver whose purpose is to prohibit phone
      * calls should have a priority of 0, to ensure it will see the final
      * phone number to be dialed.
-     * Any receiver whose purpose is to rewrite phone numbers to be called 
+     * Any receiver whose purpose is to rewrite phone numbers to be called
      * should have a positive priority.
      * Negative priorities are reserved for the system for this broadcast;
      * using them may cause problems.</p>
@@ -1493,7 +1517,7 @@ public class Intent implements Parcelable {
      * <p>Emergency calls cannot be intercepted using this mechanism, and
      * other calls cannot be modified to call emergency numbers using this
      * mechanism.
-     * <p>You must hold the 
+     * <p>You must hold the
      * {@link android.Manifest.permission#PROCESS_OUTGOING_CALLS}
      * permission to receive this Intent.</p>
      */
@@ -1730,7 +1754,7 @@ public class Intent implements Parcelable {
      * implying that this is an update).
      */
     public static final String EXTRA_DATA_REMOVED = "android.intent.extra.DATA_REMOVED";
-    
+
     /**
      * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
      * intents to indicate that this is a replacement of the package, so this
@@ -1738,7 +1762,7 @@ public class Intent implements Parcelable {
      * different version of the same package.
      */
     public static final String EXTRA_REPLACING = "android.intent.extra.REPLACING";
-    
+
     /**
      * Used as an int extra field in {@link android.app.AlarmManager} intents
      * to tell the application being invoked how many pending alarms are being
@@ -1748,15 +1772,6 @@ public class Intent implements Parcelable {
      * delivered.
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
-
-    /**
-     * Used as an int extra field in {@link android.content.Intent#ACTION_VOICE_COMMAND}
-     * intents to request which audio route the voice command should prefer.
-     * The value should be a route from {@link android.media.AudioManager}, for
-     * example ROUTE_BLUETOOTH_SCO. Providing this value is optional.
-     * {@hide pending API Council approval}
-     */
-    public static final String EXTRA_AUDIO_ROUTE = "android.intent.extra.AUDIO_ROUTE";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -1802,7 +1817,7 @@ public class Intent implements Parcelable {
      * next task activity) defines an atomic group of activities that the
      * user can move to.  Tasks can be moved to the foreground and background;
      * all of the activities inside of a particular task always remain in
-     * the same order.  See 
+     * the same order.  See
      * <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
      * Activities and Tasks</a> for more details on tasks.
      *
@@ -1833,7 +1848,7 @@ public class Intent implements Parcelable {
      * <p><strong>Because the default system does not include graphical task management,
      * you should not use this flag unless you provide some way for a user to
      * return back to the tasks you have launched.</strong>
-     * 
+     *
      * <p>This flag is ignored if
      * {@link #FLAG_ACTIVITY_NEW_TASK} is not set.
      *
@@ -1922,7 +1937,7 @@ public class Intent implements Parcelable {
      * the user re-launching it from home), this activity and all on top of
      * it will be finished so that the user does not return to them, but
      * instead returns to whatever activity preceeded it.
-     * 
+     *
      * <p>This is useful for cases where you have a logical break in your
      * application.  For example, an e-mail application may have a command
      * to view an attachment, which launches an image view activity to
@@ -1940,31 +1955,31 @@ public class Intent implements Parcelable {
      * If set, this flag will prevent the normal {@link android.app.Activity#onUserLeaveHint}
      * callback from occurring on the current frontmost activity before it is
      * paused as the newly-started activity is brought to the front.
-     * 
+     *
      * <p>Typically, an activity can rely on that callback to indicate that an
      * explicit user action has caused their activity to be moved out of the
      * foreground. The callback marks an appropriate point in the activity's
      * lifecycle for it to dismiss any notifications that it intends to display
      * "until the user has seen them," such as a blinking LED.
-     * 
+     *
      * <p>If an activity is ever started via any non-user-driven events such as
      * phone-call receipt or an alarm handler, this flag should be passed to {@link
      * Context#startActivity Context.startActivity}, ensuring that the pausing
-     * activity does not think the user has acknowledged its notification. 
+     * activity does not think the user has acknowledged its notification.
      */
     public static final int FLAG_ACTIVITY_NO_USER_ACTION = 0x00040000;
     /**
      * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
      * this flag will cause the launched activity to be brought to the front of its
      * task's history stack if it is already running.
-     * 
+     *
      * <p>For example, consider a task consisting of four activities: A, B, C, D.
      * If D calls startActivity() with an Intent that resolves to the component
      * of activity B, then B will be brought to the front of the history stack,
      * with this resulting order:  A, C, D, B.
-     * 
+     *
      * This flag will be ignored if {@link #FLAG_ACTIVITY_CLEAR_TOP} is also
-     * specified. 
+     * specified.
      */
     public static final int FLAG_ACTIVITY_REORDER_TO_FRONT = 0X00020000;
     /**
@@ -1978,11 +1993,11 @@ public class Intent implements Parcelable {
      * will be launched.  Sticky intent state will be recorded properly even
      * if no receivers wind up being called.  If {@link #FLAG_RECEIVER_REGISTERED_ONLY}
      * is specified in the broadcast intent, this flag is unnecessary.
-     * 
+     *
      * <p>This flag is only for use by system sevices as a convenience to
      * avoid having to implement a more complex mechanism around detection
      * of boot completion.
-     * 
+     *
      * @hide
      */
     public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x20000000;
@@ -2142,7 +2157,7 @@ public class Intent implements Parcelable {
 
             // old format Intent URI
             if (!uri.startsWith("#Intent;", i)) return getIntentOld(uri);
-            
+
             // new format
             Intent intent = new Intent(ACTION_VIEW);
 
@@ -2151,7 +2166,7 @@ public class Intent implements Parcelable {
                 intent.mData = Uri.parse(uri.substring(0, i));
             }
             i += "#Intent;".length();
-            
+
             // loop over contents of Intent, all name=value;
             while (!uri.startsWith("end", i)) {
                 int eq = uri.indexOf('=', i);
@@ -2182,7 +2197,7 @@ public class Intent implements Parcelable {
                 else if (uri.startsWith("component=", i)) {
                     intent.mComponent = ComponentName.unflattenFromString(value);
                 }
-                
+
                 // extra
                 else {
                     String key = Uri.decode(uri.substring(i + 2, eq));
@@ -2202,18 +2217,18 @@ public class Intent implements Parcelable {
                     else if (uri.startsWith("s.", i)) b.putShort(key, Short.parseShort(value));
                     else throw new URISyntaxException(uri, "unknown EXTRA type", i);
                 }
-                
+
                 // move to the next item
                 i = semi + 1;
             }
 
             return intent;
-            
+
         } catch (IndexOutOfBoundsException e) {
             throw new URISyntaxException(uri, "illegal Intent URI format", i);
         }
     }
-    
+
     public static Intent getIntentOld(String uri) throws URISyntaxException {
         Intent intent;
 
@@ -2278,7 +2293,7 @@ public class Intent implements Parcelable {
 
             if (uri.regionMatches(i, "extras(", 0, 7)) {
                 i += 7;
-                
+
                 final int closeParen = uri.indexOf(')', i);
                 if (closeParen == -1) throw new URISyntaxException(uri,
                         "EXTRA missing trailing ')'", i);
@@ -2293,7 +2308,7 @@ public class Intent implements Parcelable {
                     i++;
                     String key = uri.substring(i, j);
                     i = j + 1;
-                    
+
                     // get type-value
                     j = uri.indexOf('!', i);
                     if (j == -1 || j >= closeParen) j = closeParen;
@@ -2303,7 +2318,7 @@ public class Intent implements Parcelable {
 
                     // create Bundle if it doesn't already exist
                     if (intent.mExtras == null) intent.mExtras = new Bundle();
-                    
+
                     // add item to bundle
                     try {
                         switch (type) {
@@ -2340,7 +2355,7 @@ public class Intent implements Parcelable {
                     } catch (NumberFormatException e) {
                         throw new URISyntaxException(uri, "EXTRA value can't be parsed", i);
                     }
-                    
+
                     char ch = uri.charAt(i);
                     if (ch == ')') break;
                     if (ch != '!') throw new URISyntaxException(uri, "EXTRA missing '!'", i);
@@ -2543,7 +2558,7 @@ public class Intent implements Parcelable {
     public boolean hasFileDescriptors() {
         return mExtras != null && mExtras.hasFileDescriptors();
     }
-    
+
     /**
      * Retrieve extended data from the intent.
      *
@@ -3910,7 +3925,7 @@ public class Intent implements Parcelable {
     /**
      * Completely replace the extras in the Intent with the extras in the
      * given Intent.
-     * 
+     *
      * @param src The exact extras contained in this Intent are copied
      * into the target intent, replacing any that were previously there.
      */
@@ -3918,11 +3933,11 @@ public class Intent implements Parcelable {
         mExtras = src.mExtras != null ? new Bundle(src.mExtras) : null;
         return this;
     }
-    
+
     /**
      * Completely replace the extras in the Intent with the given Bundle of
      * extras.
-     * 
+     *
      * @param extras The new set of extras in the Intent, or null to erase
      * all extras.
      */
@@ -3930,7 +3945,7 @@ public class Intent implements Parcelable {
         mExtras = extras != null ? new Bundle(extras) : null;
         return this;
     }
-    
+
     /**
      * Remove extended data from the intent.
      *
@@ -4418,12 +4433,12 @@ public class Intent implements Parcelable {
                 }
             }
         }
-        
+
         uri.append("end");
 
         return uri.toString();
     }
-    
+
     public int describeContents() {
         return (mExtras != null) ? mExtras.describeContents() : 0;
     }

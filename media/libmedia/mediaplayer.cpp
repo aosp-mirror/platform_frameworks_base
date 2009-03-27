@@ -91,6 +91,7 @@ MediaPlayer::MediaPlayer()
     mLoop = false;
     mLeftVolume = mRightVolume = 1.0;
     mVideoWidth = mVideoHeight = 0;
+    mLockThreadId = 0;
 }
 
 void MediaPlayer::onFirstRef()
@@ -223,16 +224,24 @@ status_t MediaPlayer::prepare()
 {
     LOGV("prepare");
     Mutex::Autolock _l(mLock);
-    if (mPrepareSync) return -EALREADY;
+    mLockThreadId = getThreadId();
+    if (mPrepareSync) {
+        mLockThreadId = 0;
+        return -EALREADY;
+    }
     mPrepareSync = true;
     status_t ret = prepareAsync_l();
-    if (ret != NO_ERROR) return ret;
+    if (ret != NO_ERROR) {
+        mLockThreadId = 0;
+        return ret;
+    }
 
     if (mPrepareSync) {
         mSignal.wait(mLock);  // wait for prepare done
         mPrepareSync = false;
     }
     LOGV("prepare complete - status=%d", mPrepareStatus);
+    mLockThreadId = 0;
     return mPrepareStatus;
 }
 
@@ -407,8 +416,12 @@ status_t MediaPlayer::seekTo_l(int msec)
 
 status_t MediaPlayer::seekTo(int msec)
 {
+    mLockThreadId = getThreadId();
     Mutex::Autolock _l(mLock);
-    return seekTo_l(msec);
+    status_t result = seekTo_l(msec);
+    mLockThreadId = 0;
+
+    return result;
 }
 
 status_t MediaPlayer::reset()
@@ -485,14 +498,24 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
 {
     LOGV("message received msg=%d, ext1=%d, ext2=%d", msg, ext1, ext2);
     bool send = true;
+    bool locked = false;
 
     // TODO: In the future, we might be on the same thread if the app is
     // running in the same process as the media server. In that case,
     // this will deadlock.
-    mLock.lock();
+    // 
+    // The threadId hack below works around this for the care of prepare
+    // and seekTo within the same process.
+    // FIXME: Remember, this is a hack, it's not even a hack that is applied
+    // consistently for all use-cases, this needs to be revisited.
+     if (mLockThreadId != getThreadId()) {
+        mLock.lock();
+        locked = true;
+    } 
+
     if (mPlayer == 0) {
         LOGV("notify(%d, %d, %d) callback on disconnected mediaplayer", msg, ext1, ext2);
-        mLock.unlock();   // release the lock when done.
+        if (locked) mLock.unlock();   // release the lock when done.
         return;
     }
 
@@ -561,7 +584,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     }
 
     sp<MediaPlayerListener> listener = mListener;
-    mLock.unlock();
+    if (locked) mLock.unlock();
 
     // this prevents re-entrant calls into client code
     if ((listener != 0) && send) {

@@ -41,6 +41,10 @@ public interface BluetoothIntent {
         "android.bluetooth.intent.RSSI";
     public static final String CLASS =
         "android.bluetooth.intent.CLASS";
+    public static final String BLUETOOTH_STATE =
+        "android.bluetooth.intent.BLUETOOTH_STATE";
+    public static final String BLUETOOTH_PREVIOUS_STATE =
+        "android.bluetooth.intent.BLUETOOTH_PREVIOUS_STATE";
     public static final String HEADSET_STATE =
         "android.bluetooth.intent.HEADSET_STATE";
     public static final String HEADSET_PREVIOUS_STATE =
@@ -54,12 +58,12 @@ public interface BluetoothIntent {
     public static final String REASON =
         "android.bluetooth.intent.REASON";
 
+    /** Broadcast when the local Bluetooth device state changes, for example
+     *  when Bluetooth is enabled. Will contain int extra's BLUETOOTH_STATE and
+     *  BLUETOOTH_PREVIOUS_STATE. */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ENABLED_ACTION          =
-        "android.bluetooth.intent.action.ENABLED";
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String DISABLED_ACTION         =
-        "android.bluetooth.intent.action.DISABLED";
+    public static final String BLUETOOTH_STATE_CHANGED_ACTION =
+        "android.bluetooth.intent.action.BLUETOOTH_STATE_CHANGED";
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String NAME_CHANGED_ACTION  =

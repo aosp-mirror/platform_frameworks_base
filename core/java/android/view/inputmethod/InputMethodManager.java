@@ -426,7 +426,7 @@ public final class InputMethodManager {
         }
     };    
     
-    final InputConnection mDummyInputConnection = new BaseInputConnection(this, true);
+    final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
     
     InputMethodManager(IInputMethodManager service, Looper looper) {
         mService = service;

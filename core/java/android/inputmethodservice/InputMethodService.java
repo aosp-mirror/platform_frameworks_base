@@ -22,8 +22,8 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -44,6 +44,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -54,6 +55,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -204,6 +207,10 @@ import java.io.PrintWriter;
  * You can use these to reset and initialize your input state for the current
  * target.  For example, you will often want to clear any input state, and
  * update a soft keyboard to be appropriate for the new inputType.</p>
+ * 
+ * @attr ref android.R.styleable#InputMethodService_imeFullscreenBackground
+ * @attr ref android.R.styleable#InputMethodService_imeExtractEnterAnimation
+ * @attr ref android.R.styleable#InputMethodService_imeExtractExitAnimation
  */
 public class InputMethodService extends AbstractInputMethodService {
     static final String TAG = "InputMethodService";
@@ -211,13 +218,19 @@ public class InputMethodService extends AbstractInputMethodService {
     
     InputMethodManager mImm;
     
+    int mTheme = android.R.style.Theme_InputMethod;
+    
     LayoutInflater mInflater;
+    TypedArray mThemeAttrs;
     View mRootView;
     SoftInputWindow mWindow;
     boolean mInitialized;
     boolean mWindowCreated;
     boolean mWindowAdded;
     boolean mWindowVisible;
+    boolean mWindowWasVisible;
+    boolean mInShowWindow;
+    ViewGroup mFullscreenArea;
     FrameLayout mExtractFrame;
     FrameLayout mCandidatesFrame;
     FrameLayout mInputFrame;
@@ -243,6 +256,7 @@ public class InputMethodService extends AbstractInputMethodService {
     boolean mFullscreenApplied;
     boolean mIsFullscreen;
     View mExtractView;
+    boolean mExtractViewHidden;
     ExtractEditText mExtractEditText;
     ViewGroup mExtractAccessories;
     Button mExtractAction;
@@ -260,8 +274,8 @@ public class InputMethodService extends AbstractInputMethodService {
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer =
             new ViewTreeObserver.OnComputeInternalInsetsListener() {
         public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-            if (isFullscreenMode()) {
-                // In fullscreen mode, we just say the window isn't covering
+            if (isExtractViewShown()) {
+                // In true fullscreen mode, we just say the window isn't covering
                 // any content so we don't impact whatever is behind.
                 View decor = getWindow().getWindow().getDecorView();
                 info.contentInsets.top = info.visibleInsets.top
@@ -519,12 +533,28 @@ public class InputMethodService extends AbstractInputMethodService {
         public int touchableInsets;
     }
     
+    /**
+     * You can call this to customize the theme used by your IME's window.
+     * This theme should typically be one that derives from
+     * {@link android.R.style#Theme_InputMethod}, which is the default theme
+     * you will get.  This must be set before {@link #onCreate}, so you
+     * will typically call it in your constructor with the resource ID
+     * of your custom theme.
+     */
+    public void setTheme(int theme) {
+        if (mWindow != null) {
+            throw new IllegalStateException("Must be called before onCreate()");
+        }
+        mTheme = theme;
+    }
+    
     @Override public void onCreate() {
+        super.setTheme(mTheme);
         super.onCreate();
         mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         mInflater = (LayoutInflater)getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        mWindow = new SoftInputWindow(this);
+        mWindow = new SoftInputWindow(this, mTheme);
         initViews();
         mWindow.getWindow().setLayout(FILL_PARENT, WRAP_CONTENT);
     }
@@ -551,6 +581,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mShowInputRequested = false;
         mShowInputForced = false;
         
+        mThemeAttrs = obtainStyledAttributes(android.R.styleable.InputMethodService);
         mRootView = mInflater.inflate(
                 com.android.internal.R.layout.input_method, null);
         mWindow.setContentView(mRootView);
@@ -560,6 +591,8 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindow.getWindow().setWindowAnimations(
                     com.android.internal.R.style.Animation_InputMethodFancy);
         }
+        mFullscreenArea = (ViewGroup)mRootView.findViewById(com.android.internal.R.id.fullscreenArea);
+        mExtractViewHidden = false;
         mExtractFrame = (FrameLayout)mRootView.findViewById(android.R.id.extractArea);
         mExtractView = null;
         mExtractEditText = null;
@@ -731,14 +764,20 @@ public class InputMethodService extends AbstractInputMethodService {
             if (ic != null) ic.reportFullscreenMode(isFullscreen);
             mFullscreenApplied = true;
             initialize();
-            Drawable bg = onCreateBackgroundDrawable();
-            if (bg == null) {
-                // We need to give the window a real drawable, so that it
-                // correctly sets its mode.
-                bg = getResources().getDrawable(android.R.color.transparent);
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
+                    mFullscreenArea.getLayoutParams();
+            if (isFullscreen) {
+                mFullscreenArea.setBackgroundDrawable(mThemeAttrs.getDrawable(
+                        com.android.internal.R.styleable.InputMethodService_imeFullscreenBackground));
+                lp.height = 0;
+                lp.weight = 1;
+            } else {
+                mFullscreenArea.setBackgroundDrawable(null);
+                lp.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                lp.weight = 0;
             }
-            mWindow.getWindow().setBackgroundDrawable(bg);
-            mExtractFrame.setVisibility(isFullscreen ? View.VISIBLE : View.GONE);
+            ((ViewGroup)mFullscreenArea.getParent()).updateViewLayout(
+                    mFullscreenArea, lp);
             if (isFullscreen) {
                 if (mExtractView == null) {
                     View v = onCreateExtractTextView();
@@ -748,6 +787,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 }
                 startExtractingText(false);
             }
+            updateExtractFrameVisibility();
         }
         
         if (changed) {
@@ -805,12 +845,66 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     /**
+     * Controls the visibility of the extracted text area.  This only applies
+     * when the input method is in fullscreen mode, and thus showing extracted
+     * text.  When false, the extracted text will not be shown, allowing some
+     * of the application to be seen behind.  This is normally set for you
+     * by {@link #onUpdateExtractingVisibility}.  This controls the visibility
+     * of both the extracted text and candidate view; the latter since it is
+     * not useful if there is no text to see.
+     */
+    public void setExtractViewShown(boolean shown) {
+        if (mExtractViewHidden == shown) {
+            mExtractViewHidden = !shown;
+            updateExtractFrameVisibility();
+        }
+    }
+    
+    /**
+     * Return whether the fullscreen extract view is shown.  This will only
+     * return true if {@link #isFullscreenMode()} returns true, and in that
+     * case its value depends on the last call to
+     * {@link #setExtractViewShown(boolean)}.  This effectively lets you
+     * determine if the application window is entirely covered (when this
+     * returns true) or if some part of it may be shown (if this returns
+     * false, though if {@link #isFullscreenMode()} returns true in that case
+     * then it is probably only a sliver of the application).
+     */
+    public boolean isExtractViewShown() {
+        return mIsFullscreen && !mExtractViewHidden;
+    }
+    
+    void updateExtractFrameVisibility() {
+        int vis;
+        if (isFullscreenMode()) {
+            vis = mExtractViewHidden ? View.INVISIBLE : View.VISIBLE;
+            mExtractFrame.setVisibility(View.VISIBLE);
+        } else {
+            vis = View.VISIBLE;
+            mExtractFrame.setVisibility(View.GONE);
+        }
+        updateCandidatesVisibility(mCandidatesVisibility == View.VISIBLE);
+        if (mWindowWasVisible && mFullscreenArea.getVisibility() != vis) {
+            int animRes = mThemeAttrs.getResourceId(vis == View.VISIBLE
+                    ? com.android.internal.R.styleable.InputMethodService_imeExtractEnterAnimation
+                    : com.android.internal.R.styleable.InputMethodService_imeExtractExitAnimation,
+                    0);
+            if (animRes != 0) {
+                mFullscreenArea.startAnimation(AnimationUtils.loadAnimation(
+                        this, animRes));
+            }
+        }
+        mFullscreenArea.setVisibility(vis);
+    }
+    
+    /**
      * Compute the interesting insets into your UI.  The default implementation
      * uses the top of the candidates frame for the visible insets, and the
      * top of the input frame for the content insets.  The default touchable
      * insets are {@link Insets#TOUCHABLE_INSETS_VISIBLE}.
      * 
-     * <p>Note that this method is not called when in fullscreen mode, since
+     * <p>Note that this method is not called when
+     * {@link #isExtractViewShown} returns true, since
      * in that case the application is left as-is behind the input method and
      * not impacted by anything in its UI.
      * 
@@ -821,9 +915,16 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mInputFrame.getVisibility() == View.VISIBLE) {
             mInputFrame.getLocationInWindow(loc);
         } else {
-            loc[1] = 0;
+            View decor = getWindow().getWindow().getDecorView();
+            loc[1] = decor.getHeight();
         }
-        outInsets.contentTopInsets = loc[1];
+        if (isFullscreenMode()) {
+            // In fullscreen mode, we never resize the underlying window.
+            View decor = getWindow().getWindow().getDecorView();
+            outInsets.contentTopInsets = decor.getHeight();
+        } else {
+            outInsets.contentTopInsets = loc[1];
+        }
         if (mCandidatesFrame.getVisibility() == View.VISIBLE) {
             mCandidatesFrame.getLocationInWindow(loc);
         }
@@ -889,11 +990,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * it is hidden.
      */
     public void setCandidatesViewShown(boolean shown) {
-        int vis = shown ? View.VISIBLE : getCandidatesHiddenVisibility();
-        if (mCandidatesVisibility != vis) {
-            mCandidatesFrame.setVisibility(vis);
-            mCandidatesVisibility = vis;
-        }
+        updateCandidatesVisibility(shown);
         if (!mShowInputRequested && mWindowVisible != shown) {
             // If we are being asked to show the candidates view while the app
             // has not asked for the input view to be shown, then we need
@@ -906,17 +1003,26 @@ public class InputMethodService extends AbstractInputMethodService {
         }
     }
     
+    void updateCandidatesVisibility(boolean shown) {
+        int vis = shown ? View.VISIBLE : getCandidatesHiddenVisibility();
+        if (mCandidatesVisibility != vis) {
+            mCandidatesFrame.setVisibility(vis);
+            mCandidatesVisibility = vis;
+        }
+    }
+    
     /**
      * Returns the visibility mode (either {@link View#INVISIBLE View.INVISIBLE}
      * or {@link View#GONE View.GONE}) of the candidates view when it is not
-     * shown.  The default implementation returns GONE when in fullscreen mode,
+     * shown.  The default implementation returns GONE when
+     * {@link #isExtractViewShown} returns true,
      * otherwise VISIBLE.  Be careful if you change this to return GONE in
      * other situations -- if showing or hiding the candidates view causes
      * your window to resize, this can cause temporary drawing artifacts as
      * the resize takes place.
      */
     public int getCandidatesHiddenVisibility() {
-        return isFullscreenMode() ? View.GONE : View.INVISIBLE;
+        return isExtractViewShown() ? View.GONE : View.INVISIBLE;
     }
     
     public void showStatusIcon(int iconResId) {
@@ -989,20 +1095,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 ViewGroup.LayoutParams.FILL_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         mInputView = view;
-    }
-    
-    /**
-     * Called by the framework to create a Drawable for the background of
-     * the input method window.  May return null for no background.  The default
-     * implementation returns a non-null standard background only when in
-     * fullscreen mode.  This is called each time the fullscreen mode changes.
-     */
-    public Drawable onCreateBackgroundDrawable() {
-        if (isFullscreenMode()) {
-            return getResources().getDrawable(
-                    com.android.internal.R.drawable.input_method_fullscreen_background);
-        }
-        return null;
     }
     
     /**
@@ -1174,6 +1266,23 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " mWindowCreated=" + mWindowCreated
                 + " mWindowVisible=" + mWindowVisible
                 + " mInputStarted=" + mInputStarted);
+        
+        if (mInShowWindow) {
+            Log.w(TAG, "Re-entrance in to showWindow");
+            return;
+        }
+        
+        try {
+            mWindowWasVisible = mWindowVisible;
+            mInShowWindow = true;
+            showWindowInner(showInput);
+        } finally {
+            mWindowWasVisible = true;
+            mInShowWindow = false;
+        }
+    }
+    
+    void showWindowInner(boolean showInput) {
         boolean doShowInput = false;
         boolean wasVisible = mWindowVisible;
         mWindowVisible = true;
@@ -1241,6 +1350,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindow.hide();
             mWindowVisible = false;
             onWindowHidden();
+            mWindowWasVisible = false;
         }
     }
     
@@ -1559,7 +1669,7 @@ public class InputMethodService extends AbstractInputMethodService {
     
     boolean doMovementKey(int keyCode, KeyEvent event, int count) {
         final ExtractEditText eet = mExtractEditText;
-        if (isFullscreenMode() && isInputViewShown() && eet != null) {
+        if (isExtractViewShown() && isInputViewShown() && eet != null) {
             // If we are in fullscreen mode, the cursor will move around
             // the extract edit text, but should NOT cause focus to move
             // to other fields.
@@ -1583,10 +1693,10 @@ public class InputMethodService extends AbstractInputMethodService {
                     if (movement.onKeyOther(eet, (Spannable)eet.getText(), event)) {
                         reportExtractedMovement(keyCode, count);
                     } else {
-                        KeyEvent down = new KeyEvent(event, KeyEvent.ACTION_DOWN);
+                        KeyEvent down = KeyEvent.changeAction(event, KeyEvent.ACTION_DOWN);
                         if (movement.onKeyDown(eet,
                                 (Spannable)eet.getText(), keyCode, down)) {
-                            KeyEvent up = new KeyEvent(event, KeyEvent.ACTION_UP);
+                            KeyEvent up = KeyEvent.changeAction(event, KeyEvent.ACTION_UP);
                             movement.onKeyUp(eet,
                                     (Spannable)eet.getText(), keyCode, up);
                             while (--count > 0) {
@@ -1800,18 +1910,52 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     /**
-     * Called when it is time to update the actions available from a full-screen
-     * IME.  You do not need to deal with this if you are using the standard
-     * full screen extract UI.  If replacing it, you will need to re-implement
-     * this to put the action in your own UI and handle it.
+     * Called when the fullscreen-mode extracting editor info has changed,
+     * to determine whether the extracting (extract text and candidates) portion
+     * of the UI should be shown.  The standard implementation hides or shows
+     * the extract area depending on whether it makes sense for the
+     * current editor.  In particular, a {@link InputType#TYPE_NULL}
+     * input type or {@link EditorInfo#IME_FLAG_NO_EXTRACT_UI} flag will
+     * turn off the extract area since there is no text to be shown.
      */
-    public void onUpdateExtractingAccessories(EditorInfo ei) {
+    public void onUpdateExtractingVisibility(EditorInfo ei) {
+        if (ei.inputType == InputType.TYPE_NULL ||
+                (ei.imeOptions&EditorInfo.IME_FLAG_NO_EXTRACT_UI) != 0) {
+            // No reason to show extract UI!
+            setExtractViewShown(false);
+            return;
+        }
+        
+        setExtractViewShown(true);
+    }
+    
+    /**
+     * Called when the fullscreen-mode extracting editor info has changed,
+     * to update the state of its UI such as the action buttons shown.
+     * You do not need to deal with this if you are using the standard
+     * full screen extract UI.  If replacing it, you will need to re-implement
+     * this to put the appropriate action button in your own UI and handle it,
+     * and perform any other changes.
+     * 
+     * <p>The standard implementation turns on or off its accessory area
+     * depending on whether there is an action button, and hides or shows
+     * the entire extract area depending on whether it makes sense for the
+     * current editor.  In particular, a {@link InputType#TYPE_NULL} or 
+     * {@link InputType#TYPE_TEXT_VARIATION_FILTER} input type will turn off the
+     * extract area since there is no text to be shown.
+     */
+    public void onUpdateExtractingViews(EditorInfo ei) {
+        if (!isExtractViewShown()) {
+            return;
+        }
+        
         if (mExtractAccessories == null) {
             return;
         }
         final boolean hasAction = ei.actionLabel != null || (
                 (ei.imeOptions&EditorInfo.IME_MASK_ACTION) != EditorInfo.IME_ACTION_NONE &&
-                (ei.imeOptions&EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0);
+                (ei.imeOptions&EditorInfo.IME_FLAG_NO_ACCESSORY_ACTION) == 0 &&
+                ei.inputType != InputType.TYPE_NULL);
         if (hasAction) {
             mExtractAccessories.setVisibility(View.VISIBLE);
             if (ei.actionLabel != null) {
@@ -1855,7 +1999,8 @@ public class InputMethodService extends AbstractInputMethodService {
             
             try {
                 eet.startInternalChanges();
-                onUpdateExtractingAccessories(ei);
+                onUpdateExtractingVisibility(ei);
+                onUpdateExtractingViews(ei);
                 int inputType = ei.inputType;
                 if ((inputType&EditorInfo.TYPE_MASK_CLASS)
                         == EditorInfo.TYPE_CLASS_TEXT) {
@@ -1890,8 +2035,10 @@ public class InputMethodService extends AbstractInputMethodService {
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method service state for " + this + ":");
         p.println("  mWindowCreated=" + mWindowCreated
-                + " mWindowAdded=" + mWindowAdded
-                + " mWindowVisible=" + mWindowVisible);
+                + " mWindowAdded=" + mWindowAdded);
+        p.println("  mWindowVisible=" + mWindowVisible
+                + " mWindowWasVisible=" + mWindowWasVisible
+                + " mInShowWindow=" + mInShowWindow);
         p.println("  Configuration=" + getResources().getConfiguration());
         p.println("  mToken=" + mToken);
         p.println("  mInputBinding=" + mInputBinding);
@@ -1914,7 +2061,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " mShowInputFlags=0x" + Integer.toHexString(mShowInputFlags));
         p.println("  mCandidatesVisibility=" + mCandidatesVisibility
                 + " mFullscreenApplied=" + mFullscreenApplied
-                + " mIsFullscreen=" + mIsFullscreen);
+                + " mIsFullscreen=" + mIsFullscreen
+                + " mExtractViewHidden=" + mExtractViewHidden);
         
         if (mExtractedText != null) {
             p.println("  mExtractedText:");

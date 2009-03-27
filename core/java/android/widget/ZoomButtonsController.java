@@ -16,23 +16,15 @@
 
 package android.widget;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -42,7 +34,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewRoot;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
@@ -51,29 +42,33 @@ import android.view.WindowManager.LayoutParams;
  * Implementation notes:
  * - The zoom controls are displayed in their own window.
  *   (Easier for the client and better performance)
- * - This window is not touchable, and by default is not focusable.
- * - To make the buttons clickable, it attaches a OnTouchListener to the owner
- *   view and does the hit detection locally.
+ * - This window is never touchable, and by default is not focusable.
+ *   Its rect is quite big (fills horizontally) but has empty space between the
+ *   edges and center.  Touches there should be given to the owner.  Instead of
+ *   having the window touchable and dispatching these empty touch events to the
+ *   owner, we set the window to not touchable and steal events from owner
+ *   via onTouchListener.
+ * - To make the buttons clickable, it attaches an OnTouchListener to the owner
+ *   view and does the hit detection locally (attaches when visible, detaches when invisible).
  * - When it is focusable, it forwards uninteresting events to the owner view's
  *   view hierarchy.
  */
 /**
  * The {@link ZoomButtonsController} handles showing and hiding the zoom
- * controls relative to an owner view. It also gives the client access to the
- * zoom controls container, allowing for additional accessory buttons to be
- * shown in the zoom controls window.
+ * controls and positioning it relative to an owner view. It also gives the
+ * client access to the zoom controls container, allowing for additional
+ * accessory buttons to be shown in the zoom controls window.
  * <p>
- * Typical usage involves the client using the {@link GestureDetector} to
- * forward events from
- * {@link GestureDetector.OnDoubleTapListener#onDoubleTapEvent(MotionEvent)} to
- * {@link #handleDoubleTapEvent(MotionEvent)}. Also, whenever the owner cannot
- * be zoomed further, the client should update
+ * Typically, clients should call {@link #setVisible(boolean) setVisible(true)}
+ * on a touch down or move (no need to call {@link #setVisible(boolean)
+ * setVisible(false)} since it will time out on its own). Also, whenever the
+ * owner cannot be zoomed further, the client should update
  * {@link #setZoomInEnabled(boolean)} and {@link #setZoomOutEnabled(boolean)}.
  * <p>
  * If you are using this with a custom View, please call
  * {@link #setVisible(boolean) setVisible(false)} from the
  * {@link View#onDetachedFromWindow}.
- * 
+ *
  * @hide
  */
 public class ZoomButtonsController implements View.OnTouchListener {
@@ -88,6 +83,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
     private Context mContext;
     private WindowManager mWindowManager;
+    private boolean mAutoDismissControls = true;
 
     /**
      * The view that is being zoomed by this zoom controller.
@@ -118,34 +114,25 @@ public class ZoomButtonsController implements View.OnTouchListener {
      * The {@link #mTouchTargetView}'s location in window, set on touch down.
      */
     private int[] mTouchTargetWindowLocation = new int[2];
+
     /**
      * If the zoom controller is dismissed but the user is still in a touch
      * interaction, we set this to true. This will ignore all touch events until
      * up/cancel, and then set the owner's touch listener to null.
+     * <p>
+     * Otherwise, the owner view would get mismatched events (i.e., touch move
+     * even though it never got the touch down.)
      */
     private boolean mReleaseTouchListenerOnUp;
-
-    /**
-     * Whether we are currently in the double-tap gesture, with the second tap
-     * still being performed (i.e., we're waiting for the second tap's touch up).
-     */
-    private boolean mIsSecondTapDown;
 
     /** Whether the container has been added to the window manager. */
     private boolean mIsVisible;
 
     private Rect mTempRect = new Rect();
     private int[] mTempIntArray = new int[2];
-    
+
     private OnZoomListener mCallback;
 
-    /**
-     * In 1.0, the ZoomControls were to be added to the UI by the client of
-     * WebView, MapView, etc. We didn't want apps to break, so we return a dummy
-     * view in place now.
-     */
-    private InvisibleView mDummyZoomControls;
-    
     /**
      * When showing the zoom, we add the view as a new window. However, there is
      * logic that needs to know the size of the zoom which is determined after
@@ -169,12 +156,6 @@ public class ZoomButtonsController implements View.OnTouchListener {
             mHandler.sendEmptyMessage(MSG_POST_CONFIGURATION_CHANGED);
         }
     };
-
-    /**
-     * The setting name that tracks whether we've shown the zoom tutorial.
-     */
-    private static final String SETTING_NAME_SHOWN_TUTORIAL = "shown_zoom_tutorial";
-    private static Dialog sTutorialDialog;
 
     /** When configuration changes, this is called after the UI thread is idle. */
     private static final int MSG_POST_CONFIGURATION_CHANGED = 2;
@@ -215,7 +196,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
     /**
      * Constructor for the {@link ZoomButtonsController}.
-     * 
+     *
      * @param ownerView The view that is being zoomed by the zoom controls. The
      *            zoom controls will be displayed aligned with this view.
      */
@@ -227,13 +208,13 @@ public class ZoomButtonsController implements View.OnTouchListener {
         mTouchPaddingScaledSq = (int)
                 (ZOOM_CONTROLS_TOUCH_PADDING * mContext.getResources().getDisplayMetrics().density);
         mTouchPaddingScaledSq *= mTouchPaddingScaledSq;
-        
+
         mContainer = createContainer();
     }
 
     /**
      * Whether to enable the zoom in control.
-     * 
+     *
      * @param enabled Whether to enable the zoom in control.
      */
     public void setZoomInEnabled(boolean enabled) {
@@ -242,7 +223,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
     /**
      * Whether to enable the zoom out control.
-     * 
+     *
      * @param enabled Whether to enable the zoom out control.
      */
     public void setZoomOutEnabled(boolean enabled) {
@@ -251,7 +232,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
     /**
      * Sets the delay between zoom callbacks as the user holds a zoom button.
-     * 
+     *
      * @param speed The delay in milliseconds between zoom callbacks.
      */
     public void setZoomSpeed(long speed) {
@@ -264,7 +245,8 @@ public class ZoomButtonsController implements View.OnTouchListener {
         lp.gravity = Gravity.TOP | Gravity.LEFT;
         lp.flags = LayoutParams.FLAG_NOT_TOUCHABLE |
                 LayoutParams.FLAG_NOT_FOCUSABLE |
-                LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+                LayoutParams.FLAG_LAYOUT_NO_LIMITS |
+                LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         lp.height = LayoutParams.WRAP_CONTENT;
         lp.width = LayoutParams.FILL_PARENT;
         lp.type = LayoutParams.TYPE_APPLICATION_PANEL;
@@ -299,7 +281,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
     /**
      * Sets the {@link OnZoomListener} listener that receives callbacks to zoom.
-     * 
+     *
      * @param listener The listener that will be told to zoom.
      */
     public void setOnZoomListener(OnZoomListener listener) {
@@ -310,7 +292,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
      * Sets whether the zoom controls should be focusable. If the controls are
      * focusable, then trackball and arrow key interactions are possible.
      * Otherwise, only touch interactions are possible.
-     * 
+     *
      * @param focusable Whether the zoom controls should be focusable.
      */
     public void setFocusable(boolean focusable) {
@@ -327,8 +309,26 @@ public class ZoomButtonsController implements View.OnTouchListener {
     }
 
     /**
+     * Whether the zoom controls will be automatically dismissed after showing.
+     *
+     * @return Whether the zoom controls will be auto dismissed after showing.
+     */
+    public boolean isAutoDismissed() {
+        return mAutoDismissControls;
+    }
+
+    /**
+     * Sets whether the zoom controls will be automatically dismissed after
+     * showing.
+     */
+    public void setAutoDismissed(boolean autoDismiss) {
+        if (mAutoDismissControls == autoDismiss) return;
+        mAutoDismissControls = autoDismiss;
+    }
+
+    /**
      * Whether the zoom controls are visible to the user.
-     * 
+     *
      * @return Whether the zoom controls are visible to the user.
      */
     public boolean isVisible() {
@@ -337,7 +337,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
     /**
      * Sets whether the zoom controls should be visible to the user.
-     * 
+     *
      * @param visible Whether the zoom controls should be visible to the user.
      */
     public void setVisible(boolean visible) {
@@ -419,7 +419,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
      * <p>
      * The client can add other views to this container to link them with the
      * zoom controls.
-     * 
+     *
      * @return The container of the zoom controls. It will be a layout that
      *         respects the gravity of a child's layout parameters.
      */
@@ -427,43 +427,20 @@ public class ZoomButtonsController implements View.OnTouchListener {
         return mContainer;
     }
 
-    private void dismissControlsDelayed(int delay) {
-        mHandler.removeMessages(MSG_DISMISS_ZOOM_CONTROLS);
-        mHandler.sendEmptyMessageDelayed(MSG_DISMISS_ZOOM_CONTROLS, delay);
+    /**
+     * Gets the view for the zoom controls.
+     *
+     * @return The zoom controls view.
+     */
+    public View getZoomControls() {
+        return mControls;
     }
 
-    /**
-     * Should be called by the client for each event belonging to the second tap
-     * (the down, move, up, and/or cancel events).
-     *
-     * @param event The event belonging to the second tap.
-     * @return Whether the event was consumed.
-     */
-    public boolean handleDoubleTapEvent(MotionEvent event) {
-        int action = event.getAction();
-
-        if (action == MotionEvent.ACTION_DOWN) {
-            int x = (int) event.getX();
-            int y = (int) event.getY();
-
-            /*
-             * This class will consume all events in the second tap (down,
-             * move(s), up). But, the owner already got the second tap's down,
-             * so cancel that. Do this before setVisible, since that call
-             * will set us as a touch listener.
-             */
-            MotionEvent cancelEvent = MotionEvent.obtain(event.getDownTime(),
-                    SystemClock.elapsedRealtime(),
-                    MotionEvent.ACTION_CANCEL, 0, 0, 0);
-            mOwnerView.dispatchTouchEvent(cancelEvent);
-            cancelEvent.recycle();
-
-            setVisible(true);
-            centerPoint(x, y);
-            mIsSecondTapDown = true;
+    private void dismissControlsDelayed(int delay) {
+        if (mAutoDismissControls) {
+            mHandler.removeMessages(MSG_DISMISS_ZOOM_CONTROLS);
+            mHandler.sendEmptyMessageDelayed(MSG_DISMISS_ZOOM_CONTROLS, delay);
         }
-
-        return true;
     }
 
     private void refreshPositioningVariables() {
@@ -477,7 +454,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
         mOwnerView.getLocationOnScreen(mOwnerViewRawLocation);
         mContainerRawLocation[0] = mOwnerViewRawLocation[0];
         mContainerRawLocation[1] = mOwnerViewRawLocation[1] + containerOwnerYOffset;
-        
+
         int[] ownerViewWindowLoc = mTempIntArray;
         mOwnerView.getLocationInWindow(ownerViewWindowLoc);
 
@@ -488,39 +465,30 @@ public class ZoomButtonsController implements View.OnTouchListener {
         if (mIsVisible) {
             mWindowManager.updateViewLayout(mContainer, mContainerLayoutParams);
         }
-        
-    }
 
-    /**
-     * Centers the point (in owner view's coordinates).
-     */
-    private void centerPoint(int x, int y) {
-        if (mCallback != null) {
-            mCallback.onCenter(x, y);
-        }
     }
 
     /* This will only be called when the container has focus. */
     private boolean onContainerKey(KeyEvent event) {
         int keyCode = event.getKeyCode();
         if (isInterestingKey(keyCode)) {
-            
+
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 setVisible(false);
             } else {
                 dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);
             }
-            
+
             // Let the container handle the key
             return false;
-            
+
         } else {
-            
+
             ViewRoot viewRoot = getOwnerViewRoot();
             if (viewRoot != null) {
                 viewRoot.dispatchKey(event);
             }
-            
+
             // We gave the key to the owner, don't let the container handle this key
             return true;
         }
@@ -540,13 +508,13 @@ public class ZoomButtonsController implements View.OnTouchListener {
                 return false;
         }
     }
-    
+
     private ViewRoot getOwnerViewRoot() {
         View rootViewOfOwner = mOwnerView.getRootView();
         if (rootViewOfOwner == null) {
             return null;
         }
-        
+
         ViewParent parentOfRootView = rootViewOfOwner.getParent();
         if (parentOfRootView instanceof ViewRoot) {
             return (ViewRoot) parentOfRootView;
@@ -561,13 +529,6 @@ public class ZoomButtonsController implements View.OnTouchListener {
      */
     public boolean onTouch(View v, MotionEvent event) {
         int action = event.getAction();
-
-        // Consume all events during the second-tap interaction (down, move, up/cancel)
-        boolean consumeEvent = mIsSecondTapDown;
-        if ((action == MotionEvent.ACTION_UP) || (action == MotionEvent.ACTION_CANCEL)) {
-            // The second tap can no longer be down
-            mIsSecondTapDown = false;
-        }
 
         if (mReleaseTouchListenerOnUp) {
             // The controls were dismissed but we need to throw away all events until the up
@@ -609,18 +570,21 @@ public class ZoomButtonsController implements View.OnTouchListener {
                     mOwnerViewRawLocation[1] - targetViewRawY);
             /* Disallow negative coordinates (which can occur due to
              * ZOOM_CONTROLS_TOUCH_PADDING) */
-            if (containerEvent.getX() < 0) {
-                containerEvent.offsetLocation(-containerEvent.getX(), 0);
+            // These are floats because we need to potentially offset away this exact amount
+            float containerX = containerEvent.getX();
+            float containerY = containerEvent.getY();
+            if (containerX < 0 && containerX > -ZOOM_CONTROLS_TOUCH_PADDING) {
+                containerEvent.offsetLocation(-containerX, 0);
             }
-            if (containerEvent.getY() < 0) {
-                containerEvent.offsetLocation(0, -containerEvent.getY());
+            if (containerY < 0 && containerY > -ZOOM_CONTROLS_TOUCH_PADDING) {
+                containerEvent.offsetLocation(0, -containerY);
             }
             boolean retValue = targetView.dispatchTouchEvent(containerEvent);
             containerEvent.recycle();
-            return retValue || consumeEvent;
+            return retValue;
 
         } else {
-            return consumeEvent;
+            return false;
         }
     }
 
@@ -646,7 +610,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
         View closestChild = null;
         int closestChildDistanceSq = Integer.MAX_VALUE;
-        
+
         for (int i = mContainer.getChildCount() - 1; i >= 0; i--) {
             View child = mContainer.getChildAt(i);
             if (child.getVisibility() != View.VISIBLE) {
@@ -657,13 +621,23 @@ public class ZoomButtonsController implements View.OnTouchListener {
             if (frame.contains(containerCoordsX, containerCoordsY)) {
                 return child;
             }
-            
-            int distanceX = Math.min(Math.abs(frame.left - containerCoordsX),
+
+            int distanceX;
+            if (containerCoordsX >= frame.left && containerCoordsX <= frame.right) {
+                distanceX = 0;
+            } else {
+                distanceX = Math.min(Math.abs(frame.left - containerCoordsX),
                     Math.abs(containerCoordsX - frame.right));
-            int distanceY = Math.min(Math.abs(frame.top - containerCoordsY),
-                    Math.abs(containerCoordsY - frame.bottom));
+            }
+            int distanceY;
+            if (containerCoordsY >= frame.top && containerCoordsY <= frame.bottom) {
+                distanceY = 0;
+            } else {
+                distanceY = Math.min(Math.abs(frame.top - containerCoordsY),
+                        Math.abs(containerCoordsY - frame.bottom));
+            }
             int distanceSq = distanceX * distanceX + distanceY * distanceY;
-                        
+
             if ((distanceSq < mTouchPaddingScaledSq) &&
                     (distanceSq < closestChildDistanceSq)) {
                 closestChild = child;
@@ -679,130 +653,27 @@ public class ZoomButtonsController implements View.OnTouchListener {
         refreshPositioningVariables();
     }
 
-    /*
-     * This is static so Activities can call this instead of the Views
-     * (Activities usually do not have a reference to the ZoomButtonsController
-     * instance.)
-     */
-    /**
-     * Shows a "tutorial" (some text) to the user teaching her the new zoom
-     * invocation method. Must call from the main thread.
-     * <p>
-     * It checks the global system setting to ensure this has not been seen
-     * before. Furthermore, if the application does not have privilege to write
-     * to the system settings, it will store this bit locally in a shared
-     * preference.
-     *
-     * @hide This should only be used by our main apps--browser, maps, and
-     *       gallery
-     */
-    public static void showZoomTutorialOnce(Context context) {
-        
-        // TODO: remove this code, but to hit the weekend build, just never show
-        if (true) return;
-        
-        ContentResolver cr = context.getContentResolver();
-        if (Settings.System.getInt(cr, SETTING_NAME_SHOWN_TUTORIAL, 0) == 1) {
-            return;
-        }
-
-        SharedPreferences sp = context.getSharedPreferences("_zoom", Context.MODE_PRIVATE);
-        if (sp.getInt(SETTING_NAME_SHOWN_TUTORIAL, 0) == 1) {
-            return;
-        }
-
-        if (sTutorialDialog != null && sTutorialDialog.isShowing()) {
-            sTutorialDialog.dismiss();
-        }
-
-        LayoutInflater layoutInflater =
-                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        TextView textView = (TextView) layoutInflater.inflate(
-                com.android.internal.R.layout.alert_dialog_simple_text, null)
-                .findViewById(android.R.id.text1);
-        textView.setText(com.android.internal.R.string.tutorial_double_tap_to_zoom_message_short);
-
-        sTutorialDialog = new AlertDialog.Builder(context)
-                .setView(textView)
-                .setIcon(0)
-                .create();
-
-        Window window = sTutorialDialog.getWindow();
-        window.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND |
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
-        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-        sTutorialDialog.show();
-    }
-
-    /** @hide Should only be used by Android platform apps */
-    public static void finishZoomTutorial(Context context, boolean userNotified) {
-        if (sTutorialDialog == null) return;
-
-        sTutorialDialog.dismiss();
-        sTutorialDialog = null;
-
-        // Record that they have seen the tutorial
-        if (userNotified) {
-            try {
-                Settings.System.putInt(context.getContentResolver(), SETTING_NAME_SHOWN_TUTORIAL,
-                        1);
-            } catch (SecurityException e) {
-                /*
-                 * The app does not have permission to clear this global flag, make
-                 * sure the user does not see the message when he comes back to this
-                 * same app at least.
-                 */
-                SharedPreferences sp = context.getSharedPreferences("_zoom", Context.MODE_PRIVATE);
-                sp.edit().putInt(SETTING_NAME_SHOWN_TUTORIAL, 1).commit();
-            }
-        }
-    }
-
-    /** @hide Should only be used by Android platform apps */
-    public void finishZoomTutorial() {
-        finishZoomTutorial(mContext, true);
-    }
-
-    /** @hide Should only be used only be WebView and MapView */
-    public View getDummyZoomControls() {
-        if (mDummyZoomControls == null) {
-            mDummyZoomControls = new InvisibleView(mContext);
-        }
-        return mDummyZoomControls;
-    }
-    
     /**
      * Interface that will be called when the user performs an interaction that
      * triggers some action, for example zooming.
      */
     public interface OnZoomListener {
-        /**
-         * Called when the given point should be centered. The point will be in
-         * owner view coordinates.
-         * 
-         * @param x The x of the point.
-         * @param y The y of the point.
-         */
-        void onCenter(int x, int y);
-        
+
         /**
          * Called when the zoom controls' visibility changes.
-         * 
+         *
          * @param visible Whether the zoom controls are visible.
          */
         void onVisibilityChanged(boolean visible);
-        
+
         /**
          * Called when the owner view needs to be zoomed.
-         * 
+         *
          * @param zoomIn The direction of the zoom: true to zoom in, false to zoom out.
          */
         void onZoom(boolean zoomIn);
     }
-    
+
     private class Container extends FrameLayout {
         public Container(Context context) {
             super(context);
@@ -817,31 +688,6 @@ public class ZoomButtonsController implements View.OnTouchListener {
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
             return onContainerKey(event) ? true : super.dispatchKeyEvent(event);
-        }
-    }
-
-    /**
-     * An InvisibleView is an invisible, zero-sized View for backwards
-     * compatibility
-     */
-    private final class InvisibleView extends View {
-
-        private InvisibleView(Context context) {
-            super(context);
-            setVisibility(GONE);
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            setMeasuredDimension(0, 0);
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-        }
-
-        @Override
-        protected void dispatchDraw(Canvas canvas) {
         }
     }
 

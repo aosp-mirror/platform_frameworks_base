@@ -253,7 +253,15 @@ public class SortCursor extends AbstractCursor
         if (mCursor != null) {
             return mCursor.getColumnNames();
         } else {
-            return new String[0];
+            // All of the cursors may be empty, but they can still return
+            // this information.
+            int length = mCursors.length;
+            for (int i = 0 ; i < length ; i++) {
+                if (mCursors[i] != null) {
+                    return mCursors[i].getColumnNames();
+                }
+            }
+            throw new IllegalStateException("No cursor that can return names");
         }
     }
 

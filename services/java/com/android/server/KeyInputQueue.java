@@ -176,7 +176,7 @@ public abstract class KeyInputQueue {
                 keycode, repeatCount,
                 device != null ? device.mMetaKeysState : 0,
                 device != null ? device.id : -1, scancode,
-                flags);
+                flags | KeyEvent.FLAG_FROM_SYSTEM);
     }
     
     Thread mThread = new Thread("InputDeviceReader") {

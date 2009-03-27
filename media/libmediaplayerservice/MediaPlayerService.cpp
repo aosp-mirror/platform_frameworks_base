@@ -460,6 +460,7 @@ void MediaPlayerService::Client::disconnect()
         Mutex::Autolock l(mLock);
         p = mPlayer;
     }
+    mClient.clear();
     mPlayer.clear();
 
     // clear the notification to prevent callbacks to dead client
