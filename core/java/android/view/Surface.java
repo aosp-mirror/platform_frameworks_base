@@ -118,6 +118,12 @@ public class Surface implements Parcelable {
     public static final int ROTATION_180     = 2;
     public static final int ROTATION_270     = 3;
     
+    /** 
+     * Disable the orientation animation 
+     * {@hide} 
+     */
+    public static final int FLAGS_ORIENTATION_ANIMATION_DISABLE = 0x000000001;
+
     @SuppressWarnings("unused")
     private int mSurface;
     @SuppressWarnings("unused")
@@ -226,9 +232,20 @@ public class Surface implements Parcelable {
      * set the orientation of the given display.
      * @param display
      * @param orientation
+     * @param flags
+     * {@hide}
      */
-    public static native   void setOrientation(int display, int orientation);
+    public static native   void setOrientation(int display, int orientation, int flags);
 
+    /**
+     * set the orientation of the given display.
+     * @param display
+     * @param orientation
+     */
+    public static void setOrientation(int display, int orientation) {
+        setOrientation(display, orientation, 0);
+    }
+    
     /**
      * set surface parameters.
      * needs to be inside open/closeTransaction block

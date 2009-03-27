@@ -167,7 +167,7 @@ public:
     virtual void                        closeGlobalTransaction();
     virtual status_t                    freezeDisplay(DisplayID dpy, uint32_t flags);
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
-    virtual int                         setOrientation(DisplayID dpy, int orientation);
+    virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
     virtual void                        signal() const;
     virtual status_t requestGPU(const sp<IGPUCallback>& callback, 
             gpu_info_t* gpu);
@@ -244,6 +244,7 @@ private:
         }
         LayerVector     layersSortedByZ;
         uint8_t         orientation;
+        uint8_t         orientationType;
         uint8_t         freezeDisplay;
     };
 

@@ -44,10 +44,14 @@ OrientationAnimation::~OrientationAnimation()
 {
 }
 
-void OrientationAnimation::onOrientationChanged()
+void OrientationAnimation::onOrientationChanged(uint32_t type)
 {
-    if (mState == DONE)
-        mState = PREPARE;
+    if (mState == DONE) {
+        mType = type;
+        if (!(type & ISurfaceComposer::eOrientationAnimationDisable)) {
+            mState = PREPARE;
+        }
+    }
 }
 
 void OrientationAnimation::onAnimationFinished()
@@ -82,14 +86,7 @@ bool OrientationAnimation::run_impl()
 
 bool OrientationAnimation::done()
 {
-    if (mFlinger->isFrozen()) {
-        // we are not allowed to draw, but pause a bit to make sure
-        // apps don't end up using the whole CPU, if they depend on
-        // surfaceflinger for synchronization.
-        usleep(8333); // 8.3ms ~ 120fps
-        return true;
-    }
-    return false;
+    return done_impl();
 }
 
 bool OrientationAnimation::prepare()
@@ -115,11 +112,13 @@ bool OrientationAnimation::prepare()
 
     LayerOrientationAnimBase* l;
     
-    l = new LayerOrientationAnim(
-            mFlinger.get(), 0, this, bitmap, bitmapIn);
-
-    //l = new LayerOrientationAnimRotate(
-    //        mFlinger.get(), 0, this, bitmap, bitmapIn);
+    if (mType & 0x80) {
+        l = new LayerOrientationAnimRotate(
+                mFlinger.get(), 0, this, bitmap, bitmapIn);
+    } else {
+        l = new LayerOrientationAnim(
+                mFlinger.get(), 0, this, bitmap, bitmapIn);
+    }
 
     l->initStates(w, h, 0);
     l->setLayer(INT_MAX-1);
