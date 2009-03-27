@@ -967,6 +967,15 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SEARCH = "android.intent.action.SEARCH";
     /**
+     * Activity Action: Start the platform-defined tutorial
+     * <p>Input: {@link android.app.SearchManager#QUERY getStringExtra(SearchManager.QUERY)}
+     * is the text to search for.  If empty, simply
+     * enter your search results Activity with the search UI activated.
+     * <p>Output: nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SYSTEM_TUTORIAL = "android.intent.action.SYSTEM_TUTORIAL";
+    /**
      * Activity Action: Perform a web search.
      * <p>
      * Input: {@link android.app.SearchManager#QUERY
