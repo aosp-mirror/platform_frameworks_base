@@ -353,8 +353,6 @@
         <attr name="spinnerStyle" format="reference" />
         <!-- Default Star style. -->
         <attr name="starStyle" format="reference" />
-        <!-- Buttonless Star style. -->
-        <attr name="starStyleButtonless" format="reference" />
         <!-- Default TabWidget style. -->
         <attr name="tabWidgetStyle" format="reference" />
         <!-- Default TextView style. -->
