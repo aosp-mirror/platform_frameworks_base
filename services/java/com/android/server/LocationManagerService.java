@@ -74,6 +74,7 @@ import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.ILocationCollector;
 import com.android.internal.location.INetworkLocationManager;
 import com.android.internal.location.INetworkLocationProvider;
+import com.android.internal.location.MockProvider;
 import com.android.internal.location.TrackProvider;
 import com.android.server.am.BatteryStatsService;
 
@@ -119,11 +120,7 @@ public class LocationManagerService extends ILocationManager.Stub
     private final Set<String> mDisabledProviders = new HashSet<String>();
 
     // Locations, status values, and extras for mock providers
-    HashMap<String,MockProvider> mMockProviders = new HashMap<String,MockProvider>();
-    private final HashMap<String,Location> mMockProviderLocation = new HashMap<String,Location>();
-    private final HashMap<String,Integer> mMockProviderStatus = new HashMap<String,Integer>();
-    private final HashMap<String,Bundle> mMockProviderStatusExtras = new HashMap<String,Bundle>();
-    private final HashMap<String,Long> mMockProviderStatusUpdateTime = new HashMap<String,Long>();
+    private final HashMap<String,MockProvider> mMockProviders = new HashMap<String,MockProvider>();
 
     private static boolean sProvidersLoaded = false;
 
@@ -1596,12 +1593,12 @@ public class LocationManagerService extends ILocationManager.Stub
             loc.reset();
         }
 
-        // Use the mock location if available
-        Location mockLoc = mMockProviderLocation.get(provider);
-        boolean locationValid;
-        if (mockLoc != null) {
+         boolean locationValid;
+
+       // Use the mock location if available
+        MockProvider mockProvider = mMockProviders.get(provider);
+        if (mockProvider != null && mockProvider.getLocation(loc)) {
             locationValid = true;
-            loc.set(mockLoc);
         } else {
             locationValid = p.getLocation(loc);
         }
@@ -1626,27 +1623,15 @@ public class LocationManagerService extends ILocationManager.Stub
         // Fetch latest status update time
         long newStatusUpdateTime = p.getStatusUpdateTime();
 
-        // Override real time with mock time if present
-        Long mockStatusUpdateTime = mMockProviderStatusUpdateTime.get(provider);
-        if (mockStatusUpdateTime != null) {
-            newStatusUpdateTime = mockStatusUpdateTime.longValue();
-        }
-
-        // Get latest status
+       // Get latest status
         Bundle extras = new Bundle();
         int status = p.getStatus(extras);
 
-        // Override status with mock status if present
-        Integer mockStatus = mMockProviderStatus.get(provider);
-        if (mockStatus != null) {
-            status = mockStatus.intValue();
-        }
-
-        // Override extras with mock extras if present
-        Bundle mockExtras = mMockProviderStatusExtras.get(provider);
-        if (mockExtras != null) {
-            extras.clear();
-            extras.putAll(mockExtras);
+        // Override with mock values if mock provider is present
+        if (mockProvider != null) {
+            status = mockProvider.overrideStatus(status);
+            newStatusUpdateTime = mockProvider.overrideStatusUpdateTime(newStatusUpdateTime);
+            mockProvider.overrideExtras(extras);
         }
 
         ArrayList<Receiver> deadReceivers = null;
@@ -2360,141 +2345,6 @@ public class LocationManagerService extends ILocationManager.Stub
 
     // Mock Providers
 
-    class MockProvider extends LocationProviderImpl {
-        boolean mRequiresNetwork;
-        boolean mRequiresSatellite;
-        boolean mRequiresCell;
-        boolean mHasMonetaryCost;
-        boolean mSupportsAltitude;
-        boolean mSupportsSpeed;
-        boolean mSupportsBearing;
-        int mPowerRequirement;
-        int mAccuracy;
-
-        public MockProvider(String name,  boolean requiresNetwork, boolean requiresSatellite,
-            boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
-            boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
-            super(name);
-
-            mRequiresNetwork = requiresNetwork;
-            mRequiresSatellite = requiresSatellite;
-            mRequiresCell = requiresCell;
-            mHasMonetaryCost = hasMonetaryCost;
-            mSupportsAltitude = supportsAltitude;
-            mSupportsBearing = supportsBearing;
-            mSupportsSpeed = supportsSpeed;
-            mPowerRequirement = powerRequirement;
-            mAccuracy = accuracy;
-        }
-
-        @Override
-        public void disable() {
-            String name = getName();
-            // We shouldn't normally need to lock, since this should only be called
-            // by the service with the lock held, but let's be paranid.
-            synchronized (mLocationListeners) {
-                mEnabledProviders.remove(name);
-                mDisabledProviders.add(name);
-            }
-        }
-
-        @Override
-        public void enable() {
-            String name = getName();
-            // We shouldn't normally need to lock, since this should only be called
-            // by the service with the lock held, but let's be paranid.
-            synchronized (mLocationListeners) {
-                mEnabledProviders.add(name);
-                mDisabledProviders.remove(name);
-            }
-        }
-
-        @Override
-        public boolean getLocation(Location l) {
-            // We shouldn't normally need to lock, since this should only be called
-            // by the service with the lock held, but let's be paranid.
-            synchronized (mLocationListeners) {
-                Location loc = mMockProviderLocation.get(getName());
-                if (loc == null) {
-                    return false;
-                }
-                l.set(loc);
-                return true;
-            }
-        }
-
-        @Override
-        public int getStatus(Bundle extras) {
-            // We shouldn't normally need to lock, since this should only be called
-            // by the service with the lock held, but let's be paranid.
-            synchronized (mLocationListeners) {
-                String name = getName();
-                Integer s = mMockProviderStatus.get(name);
-                int status = (s == null) ? AVAILABLE : s.intValue();
-                Bundle newExtras = mMockProviderStatusExtras.get(name);
-                if (newExtras != null) {
-                    extras.clear();
-                    extras.putAll(newExtras);
-                }
-                return status;
-            }
-        }
-
-        @Override
-        public boolean isEnabled() {
-            // We shouldn't normally need to lock, since this should only be called
-            // by the service with the lock held, but let's be paranid.
-            synchronized (mLocationListeners) {
-                return mEnabledProviders.contains(getName());
-            }
-        }
-
-        @Override
-        public int getAccuracy() {
-            return mAccuracy;
-        }
-
-        @Override
-        public int getPowerRequirement() {
-            return mPowerRequirement;
-        }
-
-        @Override
-        public boolean hasMonetaryCost() {
-            return mHasMonetaryCost;
-        }
-
-        @Override
-        public boolean requiresCell() {
-            return mRequiresCell;
-        }
-
-        @Override
-        public boolean requiresNetwork() {
-            return mRequiresNetwork;
-        }
-
-        @Override
-        public boolean requiresSatellite() {
-            return mRequiresSatellite;
-        }
-
-        @Override
-        public boolean supportsAltitude() {
-            return mSupportsAltitude;
-        }
-
-        @Override
-        public boolean supportsBearing() {
-            return mSupportsBearing;
-        }
-
-        @Override
-        public boolean supportsSpeed() {
-            return mSupportsSpeed;
-        }
-    }
-    
     private void checkMockPermissionsSafe() {
         boolean allowMocks = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ALLOW_MOCK_LOCATION, 0) == 1;
@@ -2521,6 +2371,7 @@ public class LocationManagerService extends ILocationManager.Stub
                 throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
             }
             LocationProviderImpl.addProvider(provider);
+            mMockProviders.put(name, provider);
             updateProvidersLocked();
         }
     }
@@ -2528,11 +2379,12 @@ public class LocationManagerService extends ILocationManager.Stub
     public void removeTestProvider(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLocationListeners) {
-            LocationProviderImpl p = LocationProviderImpl.getProvider(provider);
-            if (p == null) {
+            MockProvider mockProvider = mMockProviders.get(provider);
+            if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
-            LocationProviderImpl.removeProvider(p);
+            LocationProviderImpl.removeProvider(mockProvider);
+            mMockProviders.remove(mockProvider);
             updateProvidersLocked();
         }
     }
@@ -2540,33 +2392,38 @@ public class LocationManagerService extends ILocationManager.Stub
     public void setTestProviderLocation(String provider, Location loc) {
         checkMockPermissionsSafe();
         synchronized (mLocationListeners) {
-            if (LocationProviderImpl.getProvider(provider) == null) {
+            MockProvider mockProvider = mMockProviders.get(provider);
+            if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
-            mMockProviderLocation.put(provider, loc);
+            mockProvider.setLocation(loc);
         }
     }
 
     public void clearTestProviderLocation(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLocationListeners) {
-            if (LocationProviderImpl.getProvider(provider) == null) {
+            MockProvider mockProvider = mMockProviders.get(provider);
+            if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
-            mMockProviderLocation.remove(provider);
+            mockProvider.clearLocation();
         }
     }
 
     public void setTestProviderEnabled(String provider, boolean enabled) {
         checkMockPermissionsSafe();
         synchronized (mLocationListeners) {
-            if (LocationProviderImpl.getProvider(provider) == null) {
+            MockProvider mockProvider = mMockProviders.get(provider);
+            if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
             if (enabled) {
+                mockProvider.enable();
                 mEnabledProviders.add(provider);
                 mDisabledProviders.remove(provider);
             } else {
+                mockProvider.disable();
                 mEnabledProviders.remove(provider);
                 mDisabledProviders.add(provider);
             }
@@ -2577,7 +2434,8 @@ public class LocationManagerService extends ILocationManager.Stub
     public void clearTestProviderEnabled(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLocationListeners) {
-            if (LocationProviderImpl.getProvider(provider) == null) {
+            MockProvider mockProvider = mMockProviders.get(provider);
+            if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
             mEnabledProviders.remove(provider);
@@ -2589,24 +2447,22 @@ public class LocationManagerService extends ILocationManager.Stub
     public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
         checkMockPermissionsSafe();
         synchronized (mLocationListeners) {
-            if (LocationProviderImpl.getProvider(provider) == null) {
+            MockProvider mockProvider = mMockProviders.get(provider);
+            if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
-            mMockProviderStatus.put(provider, new Integer(status));
-            mMockProviderStatusExtras.put(provider, extras);
-            mMockProviderStatusUpdateTime.put(provider, new Long(updateTime));
+            mockProvider.setStatus(status, extras, updateTime);
         }
     }
 
     public void clearTestProviderStatus(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLocationListeners) {
-            if (LocationProviderImpl.getProvider(provider) == null) {
+            MockProvider mockProvider = mMockProviders.get(provider);
+            if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
-            mMockProviderStatus.remove(provider);
-            mMockProviderStatusExtras.remove(provider);
-            mMockProviderStatusUpdateTime.remove(provider);
+            mockProvider.clearStatus();
         }
     }
 
@@ -2730,33 +2586,7 @@ public class LocationManagerService extends ILocationManager.Stub
             if (mMockProviders.size() > 0) {
                 pw.println("  Mock Providers:");
                 for (Map.Entry<String, MockProvider> i : mMockProviders.entrySet()) {
-                    pw.println("    " + i.getKey() + " -> " + i.getValue());
-                }
-            }
-            if (mMockProviderLocation.size() > 0) {
-                pw.println("  Mock Provider Location:");
-                for (Map.Entry<String, Location> i : mMockProviderLocation.entrySet()) {
-                    pw.println("    " + i.getKey() + ":");
-                    i.getValue().dump(new PrintWriterPrinter(pw), "      ");
-                }
-            }
-            if (mMockProviderStatus.size() > 0) {
-                pw.println("  Mock Provider Status:");
-                for (Map.Entry<String, Integer> i : mMockProviderStatus.entrySet()) {
-                    pw.println("    " + i.getKey() + " -> 0x"
-                            + Integer.toHexString(i.getValue()));
-                }
-            }
-            if (mMockProviderStatusExtras.size() > 0) {
-                pw.println("  Mock Provider Status Extras:");
-                for (Map.Entry<String, Bundle> i : mMockProviderStatusExtras.entrySet()) {
-                    pw.println("    " + i.getKey() + " -> " + i.getValue());
-                }
-            }
-            if (mMockProviderStatusUpdateTime.size() > 0) {
-                pw.println("  Mock Provider Status Update Time:");
-                for (Map.Entry<String, Long> i : mMockProviderStatusUpdateTime.entrySet()) {
-                    pw.println("    " + i.getKey() + " -> " + i.getValue());
+                    i.getValue().dump(pw, "      ");
                 }
             }
             pw.println("  Reported GPS UIDs @ seq " + mReportedGpsSeq + ":");
@@ -2768,4 +2598,3 @@ public class LocationManagerService extends ILocationManager.Stub
         }
     }
 }
-
