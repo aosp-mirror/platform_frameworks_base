@@ -65,6 +65,8 @@ LayerOrientationAnimRotate::LayerOrientationAnimRotate(
     mLastAngle = 0;
     mLastScale = 0;
     mNeedsBlending = false;
+    const GraphicPlane& plane(graphicPlane(0));
+    mOriginalTargetOrientation = plane.getOrientation(); 
 }
 
 LayerOrientationAnimRotate::~LayerOrientationAnimRotate()
@@ -117,10 +119,6 @@ void LayerOrientationAnimRotate::onDraw(const Region& clip) const
 {
     // Animation...
 
-    // FIXME: works only for portrait framebuffers
-    const Point size(getPhysicalSize());
-    const float TARGET_SCALE = size.x * (1.0f / size.y);
-    
     const nsecs_t now = systemTime();
     float angle, scale, alpha;
     
@@ -154,6 +152,9 @@ void LayerOrientationAnimRotate::onDraw(const Region& clip) const
             scale = 1.0f;
         }
     } else {
+        // FIXME: works only for portrait framebuffers
+        const Point size(getPhysicalSize());
+        const float TARGET_SCALE = size.x * (1.0f / size.y);
         const float normalizedTime = float(now - mStartTime) / DURATION;
         if (normalizedTime <= 1.0f) {
             mLastNormalizedTime = normalizedTime;
@@ -212,8 +213,7 @@ void LayerOrientationAnimRotate::drawScaled(float f, float s, float alpha) const
     t.format = src.format;
     t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
 
-    const int targetOrientation = plane.getOrientation(); 
-    if (!targetOrientation) {
+    if (!mOriginalTargetOrientation) {
         f = -f;
     }
 
@@ -246,7 +246,7 @@ void LayerOrientationAnimRotate::drawScaled(float f, float s, float alpha) const
     drawWithOpenGL(clip, mTextureName, t);
     
     if (alpha > 0) {
-        const float sign = (!targetOrientation) ? 1.0f : -1.0f;
+        const float sign = (!mOriginalTargetOrientation) ? 1.0f : -1.0f;
         tr.set(f + sign*(M_PI * 0.5f * ROTATION_FACTOR), w*0.5f, h*0.5f);
         tr.scale(s, w*0.5f, h*0.5f);
         tr.transform(self.mVertices[0], 0, 0);
