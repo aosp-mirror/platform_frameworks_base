@@ -2166,7 +2166,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             
             if (changed) {
                 changed = setRotationUncheckedLocked(
-                        WindowManagerPolicy.USE_LAST_ROTATION);
+                        WindowManagerPolicy.USE_LAST_ROTATION, 1);
                 if (changed) {
                     if (freezeThisOneIfNeeded != null) {
                         AppWindowToken wtoken = findAppWindowToken(
@@ -3258,7 +3258,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         mPolicy.enableScreenAfterBoot();
         
         // Make sure the last requested orientation has been applied.
-        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false);
+        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
     }
     
     public void setInTouchMode(boolean mode) {
@@ -3268,23 +3268,24 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     }
 
     public void setRotation(int rotation, 
-            boolean alwaysSendConfiguration) {
+            boolean alwaysSendConfiguration, int animFlags) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
-                "setOrientation()")) {
+                "setRotation()")) {
             return;
         }
 
-        setRotationUnchecked(rotation, alwaysSendConfiguration);
+        setRotationUnchecked(rotation, alwaysSendConfiguration, animFlags);
     }
     
-    public void setRotationUnchecked(int rotation, boolean alwaysSendConfiguration) {
+    public void setRotationUnchecked(int rotation,
+            boolean alwaysSendConfiguration, int animFlags) {
         if(DEBUG_ORIENTATION) Log.v(TAG,
                 "alwaysSendConfiguration set to "+alwaysSendConfiguration);
         
         long origId = Binder.clearCallingIdentity();
         boolean changed;
         synchronized(mWindowMap) {
-            changed = setRotationUncheckedLocked(rotation);
+            changed = setRotationUncheckedLocked(rotation, animFlags);
         }
         
         if (changed) {
@@ -3301,7 +3302,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         Binder.restoreCallingIdentity(origId);
     }
     
-    public boolean setRotationUncheckedLocked(int rotation) {
+    public boolean setRotationUncheckedLocked(int rotation, int animFlags) {
         boolean changed;
         if (rotation == WindowManagerPolicy.USE_LAST_ROTATION) {
             rotation = mRequestedRotation;
@@ -3326,6 +3327,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT),
                     2000);
             startFreezingDisplayLocked();
+            Log.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
             mQueue.setOrientation(rotation);
             if (mDisplayEnabled) {
                 Surface.setOrientation(0, rotation);
@@ -6976,7 +6978,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         public static final int REMOVE_STARTING = 6;
         public static final int FINISHED_STARTING = 7;
         public static final int REPORT_APPLICATION_TOKEN_WINDOWS = 8;
-        public static final int UPDATE_ORIENTATION = 10;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
         public static final int HOLD_SCREEN_CHANGED = 12;
         public static final int APP_TRANSITION_TIMEOUT = 13;
@@ -7203,11 +7204,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     } catch (RemoteException ex) {
                     }
                 } break;
-                
-                case UPDATE_ORIENTATION: {
-                    setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false);
-                    break;
-                }
                 
                 case WINDOW_FREEZE_TIMEOUT: {
                     synchronized (mWindowMap) {
