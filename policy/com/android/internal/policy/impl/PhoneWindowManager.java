@@ -101,6 +101,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean DEBUG_LAYOUT = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
     
@@ -165,7 +166,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Handler mHandler;
 
     boolean mLidOpen;
-    int mSensorRotation = -1;
     boolean mScreenOn = false;
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -206,6 +206,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int ENDCALL_SLEEPS = 0x2;
     static final int DEFAULT_ENDCALL_BEHAVIOR = ENDCALL_SLEEPS;
     int mEndcallBehavior;
+    
+    // Nothing to see here, move along...
+    int mFancyRotationAnimation;
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
@@ -225,13 +228,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.System.ACCELEROMETER_ROTATION), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    "fancy_rotation_anim"), false, this);
             update();
         }
 
         @Override public void onChange(boolean selfChange) {
             update();
             try {
-                mWindowManager.setRotation(USE_LAST_ROTATION, false);
+                mWindowManager.setRotation(USE_LAST_ROTATION, false,
+                        mFancyRotationAnimation);
             } catch (RemoteException e) {
                 // Ignore
             }
@@ -242,6 +248,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             synchronized (mLock) {
                 mEndcallBehavior = Settings.System.getInt(resolver,
                         Settings.System.END_BUTTON_BEHAVIOR, DEFAULT_ENDCALL_BEHAVIOR);
+                mFancyRotationAnimation = Settings.System.getInt(resolver,
+                        "fancy_rotation_anim", 0) != 0 ? 0x80 : 0;
                 int accelerometerDefault = Settings.System.getInt(resolver,
                         Settings.System.ACCELEROMETER_ROTATION, DEFAULT_ACCELEROMETER_ROTATION);
                 if (mAccelerometerDefault != accelerometerDefault) {
@@ -253,7 +261,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 boolean hasSoftInput = imId != null && imId.length() > 0;
                 if (mHasSoftInput != hasSoftInput) {
                     mHasSoftInput = hasSoftInput;
-                    updateRotation();
+                    updateRotation(0);
                 }
             }
         }
@@ -267,41 +275,41 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void onOrientationChanged(int rotation) {
             // Send updates based on orientation value
-            if (rotation != mSensorRotation) {
-                if(localLOGV) Log.i(TAG, "onOrientationChanged, rotation changed from "+rotation+" to "+mSensorRotation);
-                // Update window manager.  The lid rotation hasn't changed,
-                // but we want it to re-evaluate the final rotation in case
-                // it needs to call back and get the sensor orientation.
-                mSensorRotation = rotation;
-                try {
-                    mWindowManager.setRotation(rotation, false);
-                } catch (RemoteException e) {
-                    // Ignore
-                }
+            if (true) Log.i(TAG, "onOrientationChanged, rotation changed to " +rotation);
+            try {
+                mWindowManager.setRotation(rotation, false,
+                        mFancyRotationAnimation);
+            } catch (RemoteException e) {
+                // Ignore
             }
         }                                      
     }
     MyOrientationListener mOrientationListener;
 
-    boolean useSensorForOrientationLp() {
-        if(mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
+    boolean useSensorForOrientationLp(int appOrientation) {
+        if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
             return true;
         }
         if (mAccelerometerDefault != 0 && (
-                mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_USER ||
-                mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
+                appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER ||
+                appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
             return true;
         }
         return false;
     }
     
+    /*
+     * We always let the sensor be switched on by default except when
+     * the user has explicitly disabled sensor based rotation or when the
+     * screen is switched off.
+     */
     boolean needSensorRunningLp() {
         if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
             // If the application has explicitly requested to follow the
             // orientation, then we need to turn the sensor or.
             return true;
         }
-        if (mAccelerometerDefault != 0) {
+        if (mAccelerometerDefault == 0) {
             // If the setting for using the sensor by default is enabled, then
             // we will always leave it on.  Note that the user could go to
             // a window that forces an orientation that does not use the
@@ -310,9 +318,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // orientation for a little bit, which can cause orientation
             // changes to lag, so we'd like to keep it always on.  (It will
             // still be turned off when the screen is off.)
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
     
     /*
@@ -343,9 +351,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!mOrientationSensorEnabled) {
                     mOrientationListener.enable();
                     if(localLOGV) Log.i(TAG, "Enabling listeners");
-                    // We haven't had the sensor on, so don't yet know
-                    // the rotation.
-                    mSensorRotation = -1;
                     mOrientationSensorEnabled = true;
                 }
             } 
@@ -354,7 +359,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (disable && mOrientationSensorEnabled) {
             mOrientationListener.disable();
             if(localLOGV) Log.i(TAG, "Disabling listeners");
-            mSensorRotation = -1;
             mOrientationSensorEnabled = false;
         }
     }
@@ -992,6 +996,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
                 mDockTop = mContentTop = mCurTop = mStatusBar.getFrameLw().bottom;
+                if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mDockBottom="
+                        + mDockBottom + " mContentBottom="
+                        + mContentBottom + " mCurBottom=" + mCurBottom);
             }
         }
     }
@@ -1152,11 +1159,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             df.right = df.bottom = cf.right = cf.bottom = vf.right = vf.bottom = 10000;
         }
 
+        if (DEBUG_LAYOUT) Log.v(TAG, "Compute frame " + attrs.getTitle()
+                + ": sim=#" + Integer.toHexString(sim)
+                + " pf=" + pf.toShortString() + " df=" + df.toShortString()
+                + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
+        
         if (false) {
             if ("com.google.android.youtube".equals(attrs.packageName)
                     && attrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
                 if (true || localLOGV) Log.v(TAG, "Computing frame of " + win +
-                        ": pf=" + pf.toShortString() + " df=" + df.toShortString()
+                        ": sim=#" + Integer.toHexString(sim)
+                        + " pf=" + pf.toShortString() + " df=" + df.toShortString()
                         + " cf=" + cf.toShortString() + " vf=" + vf.toShortString());
             }
         }
@@ -1176,6 +1189,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mCurBottom > top) {
                 mCurBottom = top;
             }
+            if (DEBUG_LAYOUT) Log.v(TAG, "Input method: mDockBottom="
+                    + mDockBottom + " mContentBottom="
+                    + mContentBottom + " mCurBottom=" + mCurBottom);
         }
     }
 
@@ -1252,7 +1268,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (event.keycode == 0) {
                     // lid changed state
                     mLidOpen = event.value == 0;
-                    updateRotation();
+                    updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
                     if (keyguardIsShowingTq()) {
                         if (mLidOpen) {
                             // only do this if it's opening -- closing the device shouldn't turn it
@@ -1602,9 +1618,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void screenTurnedOff(int why) {
+        EventLog.writeEvent(70000, 0);
+        mKeyguardMediator.onScreenTurnedOff(why);
         synchronized (mLock) {
-            EventLog.writeEvent(70000, 0);
-            mKeyguardMediator.onScreenTurnedOff(why);
             mScreenOn = false;
             updateOrientationListenerLp();
         }
@@ -1612,9 +1628,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void screenTurnedOn() {
+        EventLog.writeEvent(70000, 1);
+        mKeyguardMediator.onScreenTurnedOn();
         synchronized (mLock) {
-            EventLog.writeEvent(70000, 1);
-            mKeyguardMediator.onScreenTurnedOn();
             mScreenOn = true;
             updateOrientationListenerLp();
         }
@@ -1682,9 +1698,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mLidOpen) {
                 return Surface.ROTATION_90;
             } else {
-                if (useSensorForOrientationLp()) {
+                if (useSensorForOrientationLp(orientation)) {
                     // If the user has enabled auto rotation by default, do it.
-                    return mSensorRotation >= 0 ? mSensorRotation : lastRotation;
+                    int curRotation = mOrientationListener.getCurrentRotation();
+                    return curRotation >= 0 ? curRotation : lastRotation;
                 }
                 return Surface.ROTATION_0;
             }
@@ -1727,10 +1744,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void enableScreenAfterBoot() {
         readLidState();
-        updateRotation();
+        updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
     }
     
-    void updateRotation() {
+    void updateRotation(int animFlags) {
         mPowerManager.setKeyboardVisibility(mLidOpen);
         int rotation=  Surface.ROTATION_0;
         if (mLidOpen) {
@@ -1740,7 +1757,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         //if lid is closed orientation will be portrait
         try {
             //set orientation on WindowManager
-            mWindowManager.setRotation(rotation, true);
+            mWindowManager.setRotation(rotation, true,
+                    mFancyRotationAnimation | animFlags);
         } catch (RemoteException e) {
             // Ignore
         }
