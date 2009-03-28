@@ -30,10 +30,23 @@
 #include <utils/MemoryHeapBase.h>
 #include <utils/MemoryBase.h>
 #include <media/PVMediaRecorder.h>
+#include <utils/String16.h>
 
 #include "MediaRecorderClient.h"
 
 namespace android {
+
+const char* cameraPermission = "android.permission.CAMERA";
+
+static bool checkPermission(const char* permissionString) {
+#ifndef HAVE_ANDROID_OS
+    return true;
+#endif
+    if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
+    bool ok = checkCallingPermission(String16(permissionString));
+    if (!ok) LOGE("Request requires %s", permissionString);
+    return ok;
+}
 
 status_t MediaRecorderClient::setCamera(const sp<ICamera>& camera)
 {
@@ -60,6 +73,9 @@ status_t MediaRecorderClient::setPreviewSurface(const sp<ISurface>& surface)
 status_t MediaRecorderClient::setVideoSource(int vs)
 {
     LOGV("setVideoSource(%d)", vs);
+    if (!checkPermission(cameraPermission)) {
+        return PERMISSION_DENIED;
+    }
     Mutex::Autolock lock(mLock);
     if (mRecorder == NULL)	{
         LOGE("recorder is not initialized");
