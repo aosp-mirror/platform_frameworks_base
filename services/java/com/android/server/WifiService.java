@@ -89,6 +89,11 @@ public class WifiService extends IWifiManager.Stub {
     private int mPluggedType;
 
     private final LockList mLocks = new LockList();
+    // some wifi lock statistics
+    private int mFullLocksAcquired;
+    private int mFullLocksReleased;
+    private int mScanLocksAcquired;
+    private int mScanLocksReleased;
 
     private final IBatteryStats mBatteryStats;
     
@@ -1731,6 +1736,11 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
         pw.println();
+        pw.println("Locks acquired: " + mFullLocksAcquired + " full, " +
+                mScanLocksAcquired + " scan");
+        pw.println("Locks released: " + mFullLocksReleased + " full, " +
+                mScanLocksReleased + " scan");
+        pw.println();
         pw.println("Locks held:");
         mLocks.dump(pw);
     }
@@ -1852,8 +1862,14 @@ public class WifiService extends IWifiManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             switch(wifiLock.mLockMode) {
-            case (WifiManager.WIFI_MODE_FULL): mBatteryStats.noteFullWifiLockAcquired(uid);
-            case (WifiManager.WIFI_MODE_SCAN_ONLY): mBatteryStats.noteScanWifiLockAcquired(uid);
+            case WifiManager.WIFI_MODE_FULL:
+                ++mFullLocksAcquired;
+                mBatteryStats.noteFullWifiLockAcquired(uid);
+                break;
+            case WifiManager.WIFI_MODE_SCAN_ONLY:
+                ++mScanLocksAcquired;
+                mBatteryStats.noteScanWifiLockAcquired(uid);
+                break;
             }
         } catch (RemoteException e) {
         } finally {
@@ -1882,8 +1898,14 @@ public class WifiService extends IWifiManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 switch(wifiLock.mLockMode) {
-                    case (WifiManager.WIFI_MODE_FULL): mBatteryStats.noteFullWifiLockReleased(uid);
-                    case (WifiManager.WIFI_MODE_SCAN_ONLY): mBatteryStats.noteScanWifiLockReleased(uid);
+                    case WifiManager.WIFI_MODE_FULL:
+                        ++mFullLocksReleased;
+                        mBatteryStats.noteFullWifiLockReleased(uid);
+                        break;
+                    case WifiManager.WIFI_MODE_SCAN_ONLY:
+                        ++mScanLocksReleased;
+                        mBatteryStats.noteScanWifiLockReleased(uid);
+                        break;
                 }
             } catch (RemoteException e) {
             } finally {
