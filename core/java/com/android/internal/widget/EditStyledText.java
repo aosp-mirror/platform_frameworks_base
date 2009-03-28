@@ -16,22 +16,34 @@
 
 package com.android.internal.widget;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
+import android.text.Spanned;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
+import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.text.style.ParagraphStyle;
+import android.text.style.QuoteSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -49,7 +61,7 @@ import android.widget.TextView;
 public class EditStyledText extends EditText {
 
     private static final String LOG_TAG = "EditStyledText";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     /**
      * The modes of editing actions.
@@ -92,6 +104,12 @@ public class EditStyledText extends EditText {
     public static final int HINT_MSG_SELECT_END = 3;
     public static final int HINT_MSG_PUSH_COMPETE = 4;
 
+    
+    /**
+     * The help message strings.
+     */
+    public static final int DEFAULT_BACKGROUND_COLOR = 0x00FFFFFF;
+
     /**
      * EditStyledTextInterface provides functions for notifying messages to
      * calling class.
@@ -109,7 +127,9 @@ public class EditStyledText extends EditText {
      */
     private EditorManager mManager;
     private StyledTextConverter mConverter;
-    private StyledTextToast mToast;
+    private StyledTextDialog mDialog;
+    private Drawable mDefaultBackground;
+    private int mBackgroundColor;
 
     /**
      * EditStyledText extends EditText for managing flow of each editing
@@ -144,7 +164,7 @@ public class EditStyledText extends EditText {
      *            Builder for opening Alert Dialog.
      */
     public void setBuilder(Builder builder) {
-        mToast.setBuilder(builder);
+        mDialog.setBuilder(builder);
     }
 
     /**
@@ -159,7 +179,7 @@ public class EditStyledText extends EditText {
      */
     public void setColorAlertParams(CharSequence colortitle,
             CharSequence[] colornames, CharSequence[] colorints) {
-        mToast.setColorAlertParams(colortitle, colornames, colorints);
+        mDialog.setColorAlertParams(colortitle, colornames, colorints);
     }
 
     /**
@@ -177,13 +197,13 @@ public class EditStyledText extends EditText {
     public void setSizeAlertParams(CharSequence sizetitle,
             CharSequence[] sizenames, CharSequence[] sizedisplayints,
             CharSequence[] sizesendints) {
-        mToast.setSizeAlertParams(sizetitle, sizenames, sizedisplayints,
+        mDialog.setSizeAlertParams(sizetitle, sizenames, sizedisplayints,
                 sizesendints);
     }
 
     public void setAlignAlertParams(CharSequence aligntitle,
             CharSequence[] alignnames) {
-        mToast.setAlignAlertParams(aligntitle, alignnames);
+        mDialog.setAlignAlertParams(aligntitle, alignnames);
     }
 
     @Override
@@ -253,6 +273,13 @@ public class EditStyledText extends EditText {
     }
 
     /**
+     * Start changing "BackgroundColor" action.
+     */
+    public void onStartBackgroundColor() {
+        mManager.onStartBackgroundColor();
+    }
+
+    /**
      * Start changing "Alignment" action.
      */
     public void onStartAlign() {
@@ -300,6 +327,13 @@ public class EditStyledText extends EditText {
         mManager.onInsertImage(resId);
     }
 
+    public void onInsertHorizontalLine() {
+        mManager.onInsertHorizontalLine();
+    }
+
+    public void onClearStyles() {
+        mManager.onClearStyles();
+    }
     /**
      * Set Size of the Item.
      * 
@@ -320,10 +354,37 @@ public class EditStyledText extends EditText {
         mManager.setItemColor(color);
     }
 
+    /**
+     * Set Alignment of the Item.
+     * 
+     * @param color
+     *            The color of the Item.
+     */
     public void setAlignment(Layout.Alignment align) {
         mManager.setAlignment(align);
     }
 
+    /**
+     * Set Background color of View.
+     * 
+     * @param color
+     *            The background color of view.
+     */
+    @Override
+    public void setBackgroundColor(int color) {
+        super.setBackgroundColor(color);
+        mBackgroundColor = color;
+    }
+
+    /**
+     * Set html to EditStyledText.
+     * 
+     * @param html
+     *            The html to be set.
+     */
+    public void setHtml(String html) {
+        mConverter.SetHtml(html);
+    }
     /**
      * Check whether editing is started or not.
      * 
@@ -333,6 +394,14 @@ public class EditStyledText extends EditText {
         return mManager.isEditting();
     }
 
+    /**
+     * Check whether styled text or not.
+     * 
+     * @return Whether styled text or not.
+     */
+    public boolean isStyledText() {
+        return mManager.isStyledText();
+    }
     /**
      * Check whether SoftKey is Blocked or not.
      * 
@@ -362,10 +431,14 @@ public class EditStyledText extends EditText {
 
     @Override
     public Bundle getInputExtras(boolean create) {
+        if (DBG) {
+            Log.d(LOG_TAG, "---getInputExtras");
+        }
         Bundle bundle = super.getInputExtras(create);
         if (bundle != null) {
-            bundle.putBoolean("allowEmoji", true);
+            bundle = new Bundle();
         }
+        bundle.putBoolean("allowEmoji", true);
         return bundle;
     }
 
@@ -375,7 +448,7 @@ public class EditStyledText extends EditText {
      * @return The state of the selection.
      */
     public String getHtml() {
-        return mConverter.getConvertedBody();
+        return mConverter.getHtml();
     }
 
     /**
@@ -386,8 +459,40 @@ public class EditStyledText extends EditText {
      * @return The state of the selection.
      */
     public String getHtml(ArrayList<Uri> uris) {
-        mConverter.getUriArray(uris, this.getText());
-        return mConverter.getConvertedBody();
+        mConverter.getUriArray(uris, getText());
+        return mConverter.getHtml();
+    }
+
+    /**
+     * Get Background color of View.
+     * 
+     * @return The background color of View.
+     */
+    public int getBackgroundColor() {
+        return mBackgroundColor;
+    }
+
+    /**
+     * Get Foreground color of View.
+     * 
+     * @return The background color of View.
+     */
+    public int getForeGroundColor(int pos) {
+        if (DBG) {
+            Log.d(LOG_TAG, "---getForeGroundColor: " + pos);
+        }
+        if (pos < 0 || pos > getText().length()) {
+            Log.e(LOG_TAG, "---getForeGroundColor: Illigal position.");
+            return DEFAULT_BACKGROUND_COLOR;
+        } else {
+            ForegroundColorSpan[] spans =
+                getText().getSpans(pos, pos, ForegroundColorSpan.class);
+            if (spans.length > 0) {
+                return spans[0].getForegroundColor();
+            } else {
+                return DEFAULT_BACKGROUND_COLOR;
+            }
+        }
     }
 
     /**
@@ -396,33 +501,44 @@ public class EditStyledText extends EditText {
     private void init() {
         if (DBG) {
             Log.d(LOG_TAG, "--- init");
-            requestFocus();
         }
+        requestFocus();
+        mDefaultBackground = getBackground();
+        mBackgroundColor = DEFAULT_BACKGROUND_COLOR;
         mManager = new EditorManager(this);
         mConverter = new StyledTextConverter(this);
-        mToast = new StyledTextToast(this);
+        mDialog = new StyledTextDialog(this);
         setMovementMethod(new StyledTextArrowKeyMethod(mManager));
+        mManager.blockSoftKey();
+        mManager.unblockSoftKey();
     }
 
     /**
-     * Show Color Selecting Dialog.
+     * Show Foreground Color Selecting Dialog.
      */
-    private void onShowColorAlert() {
-        mToast.onShowColorAlertDialog();
+    private void onShowForegroundColorAlert() {
+        mDialog.onShowForegroundColorAlertDialog();
+    }
+
+    /**
+     * Show Background Color Selecting Dialog.
+     */
+    private void onShowBackgroundColorAlert() {
+        mDialog.onShowBackgroundColorAlertDialog();
     }
 
     /**
      * Show Size Selecting Dialog.
      */
     private void onShowSizeAlert() {
-        mToast.onShowSizeAlertDialog();
+        mDialog.onShowSizeAlertDialog();
     }
 
     /**
      * Show Alignment Selecting Dialog.
      */
     private void onShowAlignAlert() {
-        mToast.onShowAlignAlertDialog();
+        mDialog.onShowAlignAlertDialog();
     }
 
     /**
@@ -471,7 +587,7 @@ public class EditStyledText extends EditText {
             if (DBG) {
                 Log.d(LOG_TAG, "--- onStartEdit");
             }
-            Log.d(LOG_TAG, "--- onstartedit:" + this.getSelectionStart() + this.getSelectionEnd());
+            Log.d(LOG_TAG, "--- onstartedit:");
             handleResetEdit();
             mEST.notifyStateChanged(mMode, mState);
         }
@@ -532,6 +648,14 @@ public class EditStyledText extends EditText {
             mEST.notifyStateChanged(mMode, mState);
         }
 
+        public void onStartBackgroundColor() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onClickColor");
+            }
+            mEST.onShowBackgroundColorAlert();
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
         public void onStartSelect() {
             if (DBG) {
                 Log.d(LOG_TAG, "--- onClickSelect");
@@ -577,12 +701,7 @@ public class EditStyledText extends EditText {
                 Log.d(LOG_TAG, "--- onInsertImage by URI: " + uri.getPath()
                         + "," + uri.toString());
             }
-            int curpos = mEST.getSelectionStart();
-            mEST.getText().insert(curpos, "a");
-            ImageSpan is = new ImageSpan(mEST.getContext(), uri);
-            mEST.getText().setSpan(is,
-                    curpos, curpos + 1,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            insertImageSpan(new ImageSpan(mEST.getContext(), uri));
             mEST.notifyStateChanged(mMode, mState);
         }
 
@@ -590,12 +709,39 @@ public class EditStyledText extends EditText {
             if (DBG) {
                 Log.d(LOG_TAG, "--- onInsertImage by resID");
             }
-            int curpos = mEST.getSelectionStart();
-            mEST.getText().insert(curpos, "a");
-            mEST.getText().setSpan(new ImageSpan(mEST.getContext(), resID),
-                    curpos, curpos + 1,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            insertImageSpan(new ImageSpan(mEST.getContext(), resID));
             mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onInsertHorizontalLine() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onInsertHorizontalLine:");
+            }
+            insertImageSpan(new HorizontalLineSpan(0xFF000000, mEST));
+            mEST.notifyStateChanged(mMode, mState);
+        }
+
+        public void onClearStyles() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onClearStyles");
+            }
+            Editable txt = mEST.getText();
+            int len = txt.length();
+            Object[] styles = txt.getSpans(0, len, Object.class);
+            for (Object style : styles) {
+                if (style instanceof ParagraphStyle ||
+                        style instanceof QuoteSpan ||
+                        style instanceof CharacterStyle) {
+                    if (style instanceof ImageSpan) {
+                        int start = txt.getSpanStart(style);
+                        int end = txt.getSpanEnd(style);
+                        txt.replace(start, end, "");
+                    }
+                    txt.removeSpan(style);
+                }
+            }
+            mEST.setBackgroundDrawable(mEST.mDefaultBackground);
+            mEST.mBackgroundColor = DEFAULT_BACKGROUND_COLOR;
         }
 
         public void setItemSize(int size) {
@@ -632,8 +778,21 @@ public class EditStyledText extends EditText {
             return mEditFlag;
         }
 
+        /* If the style of the span is added, add check case for that style */
+        public boolean isStyledText() {
+            Editable txt = mEST.getText();
+            int len = txt.length();
+            if (txt.getSpans(0, len -1, ParagraphStyle.class).length > 0 ||
+                    txt.getSpans(0, len -1, QuoteSpan.class).length > 0 ||
+                    txt.getSpans(0, len -1, CharacterStyle.class).length > 0 ||
+                    mEST.mBackgroundColor != DEFAULT_BACKGROUND_COLOR) {
+                return true;
+            }
+            return false;
+        }
+
         public boolean isSoftKeyBlocked() {
-            return this.mSoftKeyBlockFlag;
+            return mSoftKeyBlockFlag;
         }
 
         public int getEditMode() {
@@ -781,7 +940,7 @@ public class EditStyledText extends EditText {
                     mEST.setHintMessage(HINT_MSG_NULL);
                     switch (mode) {
                     case MODE_COLOR:
-                        mEST.onShowColorAlert();
+                        mEST.onShowForegroundColorAlert();
                         break;
                     case MODE_SIZE:
                         mEST.onShowSizeAlert();
@@ -944,7 +1103,7 @@ public class EditStyledText extends EditText {
 
         private void changeSizeSelectedText(int size) {
             if (DBG) {
-                Log.d(LOG_TAG, "--- changeAlign:" + size);
+                Log.d(LOG_TAG, "--- changeSize:" + size);
             }
             setStyledTextSpan(new AbsoluteSizeSpan(size),
                 mCurStart, mCurEnd);
@@ -952,7 +1111,7 @@ public class EditStyledText extends EditText {
 
         private void changeColorSelectedText(int color) {
             if (DBG) {
-                Log.d(LOG_TAG, "--- changeAlign:" + color);
+                Log.d(LOG_TAG, "--- changeColor:" + color);
             }
             setStyledTextSpan(new ForegroundColorSpan(color),
                 mCurStart, mCurEnd);
@@ -979,6 +1138,23 @@ public class EditStyledText extends EditText {
                 }
             }
             return pos;
+        }
+
+        private void insertImageSpan(ImageSpan span) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- insertImageSpan");
+            }
+            if (span != null) {
+                Log.d(LOG_TAG, "--- insertimagespan:" + span.getDrawable().getIntrinsicHeight() + "," + span.getDrawable().getIntrinsicWidth());
+                Log.d(LOG_TAG, "--- insertimagespan:" + span.getDrawable().getClass());
+                int curpos = mEST.getSelectionStart();
+                mEST.getText().insert(curpos, "\uFFFC");
+                mEST.getText().setSpan(span, curpos, curpos + 1,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                mEST.notifyStateChanged(mMode, mState);
+            } else {
+                Log.e(LOG_TAG, "--- insertImageSpan: null span was inserted");
+            }
         }
 
         private int findLineEnd(Editable text, int current) {
@@ -1017,7 +1193,7 @@ public class EditStyledText extends EditText {
                 Log.d(LOG_TAG, "--- unblockSoftKey:");
             }
             mEST.setOnClickListener(null);
-            this.mSoftKeyBlockFlag = false;
+            mSoftKeyBlockFlag = false;
         }
     }
 
@@ -1028,7 +1204,7 @@ public class EditStyledText extends EditText {
             mEST = est;
         }
 
-        public String getConvertedBody() {
+        public String getHtml() {
             String htmlBody = Html.toHtml(mEST.getText());
             if (DBG) {
                 Log.d(LOG_TAG, "--- getConvertedBody:" + htmlBody);
@@ -1056,9 +1232,36 @@ public class EditStyledText extends EditText {
                 }
             }
         }
+
+        public void SetHtml (String html) {
+            final Spanned spanned = Html.fromHtml(html, new Html.ImageGetter() {
+                public Drawable getDrawable(String src) {
+                    Log.d(LOG_TAG, "--- sethtml: src="+src);
+                    if (src.startsWith("content://")) {
+                        Uri uri = Uri.parse(src);
+                        try {
+                            InputStream is = mEST.getContext().getContentResolver().openInputStream(uri);
+                            Bitmap bitmap = BitmapFactory.decodeStream(is);
+                            Drawable drawable = new BitmapDrawable(bitmap);
+                            drawable.setBounds(0, 0,
+                                    drawable.getIntrinsicWidth(),
+                                    drawable.getIntrinsicHeight());
+                            is.close();
+                            return drawable;
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "--- set html: Failed to loaded content " + uri, e);
+                            return null;
+                        }
+                    }
+                    Log.d(LOG_TAG, "  unknown src="+src);
+                    return null;
+                }
+            }, null);
+            mEST.setText(spanned);
+        }
     }
 
-    private class StyledTextToast {
+    private class StyledTextDialog {
         Builder mBuilder;
         CharSequence mColorTitle;
         CharSequence mSizeTitle;
@@ -1071,7 +1274,7 @@ public class EditStyledText extends EditText {
         CharSequence[] mAlignNames;
         EditStyledText mEST;
 
-        public StyledTextToast(EditStyledText est) {
+        public StyledTextDialog(EditStyledText est) {
             mEST = est;
         }
 
@@ -1101,7 +1304,7 @@ public class EditStyledText extends EditText {
             mAlignNames = alignnames;
         }
 
-        public boolean checkColorAlertParams() {
+        private boolean checkColorAlertParams() {
             if (DBG) {
                 Log.d(LOG_TAG, "--- checkParams");
             }
@@ -1120,7 +1323,7 @@ public class EditStyledText extends EditText {
             return true;
         }
 
-        public boolean checkSizeAlertParams() {
+        private boolean checkSizeAlertParams() {
             if (DBG) {
                 Log.d(LOG_TAG, "--- checkParams");
             }
@@ -1140,7 +1343,7 @@ public class EditStyledText extends EditText {
             return true;
         }
 
-        public boolean checkAlignAlertParams() {
+        private boolean checkAlignAlertParams() {
             if (DBG) {
                 Log.d(LOG_TAG, "--- checkAlignAlertParams");
             }
@@ -1154,9 +1357,9 @@ public class EditStyledText extends EditText {
             return true;
         }
 
-        private void onShowColorAlertDialog() {
+        private void onShowForegroundColorAlertDialog() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onShowAlertDialog");
+                Log.d(LOG_TAG, "--- onShowForegroundColorAlertDialog");
             }
             if (!checkColorAlertParams()) {
                 return;
@@ -1176,11 +1379,33 @@ public class EditStyledText extends EditText {
             mBuilder.show();
         }
 
-        private void onShowSizeAlertDialog() {
+        private void onShowBackgroundColorAlertDialog() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onShowAlertDialog");
+                Log.d(LOG_TAG, "--- onShowBackgroundColorAlertDialog");
             }
             if (!checkColorAlertParams()) {
+                return;
+            }
+            mBuilder.setTitle(mColorTitle);
+            mBuilder.setIcon(0);
+            mBuilder.
+            setItems(mColorNames,
+                    new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    Log.d("EETVM", "mBuilder.onclick:" + which);
+                    int color = Integer.parseInt(
+                            (String) mColorInts[which], 16) - 0x01000000;
+                    mEST.setBackgroundColor(color);
+                }
+            });
+            mBuilder.show();
+        }
+
+        private void onShowSizeAlertDialog() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- onShowSizeAlertDialog");
+            }
+            if (!checkSizeAlertParams()) {
                 return;
             }
             mBuilder.setTitle(mSizeTitle);
@@ -1200,7 +1425,7 @@ public class EditStyledText extends EditText {
 
         private void onShowAlignAlertDialog() {
             if (DBG) {
-                Log.d(LOG_TAG, "--- onShowAlertDialog");
+                Log.d(LOG_TAG, "--- onShowAlignAlertDialog");
             }
             if (!checkAlignAlertParams()) {
                 return;
@@ -1356,6 +1581,82 @@ public class EditStyledText extends EditText {
                     break;
             }
             return handled;
+        }
+    }
+
+    public class HorizontalLineSpan extends ImageSpan {
+        public HorizontalLineSpan(int color, View view) {
+            super(new HorizontalLineDrawable(color, view));
+        }
+    }
+    public class HorizontalLineDrawable extends ShapeDrawable {
+        private View mView;
+        public HorizontalLineDrawable(int color, View view) {
+            super(new RectShape());
+            mView = view;
+            renewColor(color);
+            renewBounds(view);
+        }
+        @Override
+        public void draw(Canvas canvas) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- draw:");
+            }
+            renewColor();
+            renewBounds(mView);
+            super.draw(canvas);
+        }
+
+        private void renewBounds(View view) {
+            if (DBG) {
+                int width = mView.getBackground().getBounds().width();
+                int height = mView.getBackground().getBounds().height();
+                Log.d(LOG_TAG, "--- renewBounds:" + width + "," + height);
+                Log.d(LOG_TAG, "--- renewBounds:" + mView.getClass());
+            }
+            int width = mView.getWidth();
+            if (width > 20) {
+                width -= 20;
+            }
+            setBounds(0, 0, width, 2);
+        }
+        private void renewColor(int color) {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- renewColor:" + color);
+            }
+            getPaint().setColor(color);
+        }
+        private void renewColor() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- renewColor:");
+            }
+            if (mView instanceof View) {
+                ImageSpan parent = getParentSpan();
+                Editable text = ((EditStyledText)mView).getText();
+                int start = text.getSpanStart(parent);
+                ForegroundColorSpan[] spans = text.getSpans(start, start, ForegroundColorSpan.class);
+                if (spans.length > 0) {
+                    renewColor(spans[spans.length - 1].getForegroundColor());
+                }
+            }
+        }
+        private ImageSpan getParentSpan() {
+            if (DBG) {
+                Log.d(LOG_TAG, "--- getParentSpan:");
+            }
+            if (mView instanceof EditStyledText) {
+                Editable text = ((EditStyledText)mView).getText();
+                ImageSpan[] images = text.getSpans(0, text.length(), ImageSpan.class);
+                if (images.length > 0) {
+                    for (ImageSpan image: images) {
+                        if (image.getDrawable() == this) {
+                            return image;
+                        }
+                    }
+                }
+            }
+            Log.e(LOG_TAG, "---renewBounds: Couldn't find");
+            return null;
         }
     }
 }
