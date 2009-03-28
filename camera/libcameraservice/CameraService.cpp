@@ -32,6 +32,8 @@
 #include <media/AudioSystem.h>
 #include "CameraService.h"
 
+#include <cutils/properties.h>
+
 namespace android {
 
 extern "C" {
@@ -157,7 +159,13 @@ static sp<MediaPlayer> newMediaPlayer(const char *file)
 {
     sp<MediaPlayer> mp = new MediaPlayer();
     if (mp->setDataSource(file) == NO_ERROR) {
-        mp->setAudioStreamType(AudioSystem::ALARM);
+        char value[PROPERTY_VALUE_MAX];
+        property_get("ro.camera.sound.forced", value, "0");
+        if (atoi(value)) {
+            mp->setAudioStreamType(AudioSystem::ENFORCED_AUDIBLE);
+        } else {
+            mp->setAudioStreamType(AudioSystem::SYSTEM);            
+        }
         mp->prepare();
     } else {
         mp.clear();

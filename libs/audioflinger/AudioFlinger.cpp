@@ -243,7 +243,8 @@ bool AudioFlinger::streamForcedToSpeaker(int streamType)
     // AudioSystem::routedToA2dpOutput(streamType) == false
     return (streamType == AudioSystem::RING ||
             streamType == AudioSystem::ALARM ||
-            streamType == AudioSystem::NOTIFICATION);
+            streamType == AudioSystem::NOTIFICATION ||
+            streamType == AudioSystem::ENFORCED_AUDIBLE);
 }
 
 status_t AudioFlinger::dumpClients(int fd, const Vector<String16>& args)
@@ -645,7 +646,8 @@ status_t AudioFlinger::setStreamVolume(int stream, float value)
         return PERMISSION_DENIED;
     }
 
-    if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES) {
+    if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES ||
+        uint32_t(stream) == AudioSystem::ENFORCED_AUDIBLE) {
         return BAD_VALUE;
     }
 
@@ -680,7 +682,8 @@ status_t AudioFlinger::setStreamMute(int stream, bool muted)
         return PERMISSION_DENIED;
     }
 
-    if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES) {
+    if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES ||
+        uint32_t(stream) == AudioSystem::ENFORCED_AUDIBLE) {
         return BAD_VALUE;
     }
 
