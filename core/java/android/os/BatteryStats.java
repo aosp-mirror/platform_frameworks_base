@@ -851,11 +851,11 @@ public abstract class BatteryStats implements Parcelable {
             }
             if (fullWifiLockOnTime != 0 || scanWifiLockOnTime != 0) {
                 pw.println(prefix + "    Full Wifi Lock Time: " 
-                        + formatTime(fullWifiLockOnTime / 1000) 
+                        + formatTimeMs(fullWifiLockOnTime / 1000) 
                         + "(" + formatRatioLocked(fullWifiLockOnTime, 
                                 whichBatteryRealtime)+ ")");
                 pw.println(prefix + "    Scan Wifi Lock Time: " 
-                        + formatTime(scanWifiLockOnTime / 1000)
+                        + formatTimeMs(scanWifiLockOnTime / 1000)
                         + "(" + formatRatioLocked(scanWifiLockOnTime, 
                                 whichBatteryRealtime)+ ")");
             }
