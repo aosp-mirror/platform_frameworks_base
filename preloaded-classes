@@ -212,7 +212,6 @@ android.location.Location
 android.media.AudioManager
 android.media.IAudioService$Stub
 android.media.IAudioService$Stub$Proxy
-android.media.MediaPlayer
 android.net.LocalSocket
 android.net.LocalSocketAddress
 android.net.LocalSocketAddress$Namespace
