@@ -245,6 +245,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
+            boolean updateRotation = false;
             synchronized (mLock) {
                 mEndcallBehavior = Settings.System.getInt(resolver,
                         Settings.System.END_BUTTON_BEHAVIOR, DEFAULT_ENDCALL_BEHAVIOR);
@@ -261,8 +262,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 boolean hasSoftInput = imId != null && imId.length() > 0;
                 if (mHasSoftInput != hasSoftInput) {
                     mHasSoftInput = hasSoftInput;
-                    updateRotation(0);
+                    updateRotation = true;
                 }
+            }
+            if (updateRotation) {
+                updateRotation(0);
             }
         }
     }
