@@ -60,6 +60,7 @@ private:
     nsecs_t mStartTime;
     nsecs_t mFinishTime;
     bool mOrientationCompleted;
+    int mOriginalTargetOrientation;
     mutable bool mFirstRedraw;
     mutable float mLastNormalizedTime;
     mutable float mLastAngle;
