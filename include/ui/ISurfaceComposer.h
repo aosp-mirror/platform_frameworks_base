@@ -81,6 +81,11 @@ public:
         eOrientation270         = 3,
         eOrientationSwapMask    = 0x01
     };
+    
+    // flags for setOrientation
+    enum {
+        eOrientationAnimationDisable = 0x00000001
+    };
 
     /* create connection with surface flinger, requires
      * ACCESS_SURFACE_FLINGER permission
@@ -100,7 +105,7 @@ public:
     virtual status_t unfreezeDisplay(DisplayID dpy, uint32_t flags) = 0;
 
     /* Set display orientation. recquires ACCESS_SURFACE_FLINGER permission */
-    virtual int setOrientation(DisplayID dpy, int orientation) = 0;
+    virtual int setOrientation(DisplayID dpy, int orientation, uint32_t flags) = 0;
 
     /* signal that we're done booting.
      * recquires ACCESS_SURFACE_FLINGER permission

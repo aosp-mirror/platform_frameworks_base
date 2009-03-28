@@ -36,11 +36,11 @@ public:
                  OrientationAnimation(const sp<SurfaceFlinger>& flinger);
         virtual ~OrientationAnimation();
 
-   void onOrientationChanged();
+   void onOrientationChanged(uint32_t type);
    void onAnimationFinished();
    inline bool run() {
        if (LIKELY(mState == DONE))
-           return false;
+           return done_impl();
        return run_impl();
    }
 
@@ -54,7 +54,18 @@ private:
     };
 
     bool run_impl();
-    bool done();
+    inline bool done_impl() {
+        if (mFlinger->isFrozen()) {
+            // we are not allowed to draw, but pause a bit to make sure
+            // apps don't end up using the whole CPU, if they depend on
+            // surfaceflinger for synchronization.
+            usleep(8333); // 8.3ms ~ 120fps
+            return true;
+        }
+        return false;
+    }
+    
+    bool done();    
     bool prepare();
     bool phase1();
     bool phase2();
@@ -64,6 +75,7 @@ private:
     sp<MemoryDealer> mTemporaryDealer;
     LayerOrientationAnimBase* mLayerOrientationAnim;
     int mState;
+    uint32_t mType;
 };
 
 // ---------------------------------------------------------------------------

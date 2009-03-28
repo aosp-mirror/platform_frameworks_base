@@ -813,10 +813,11 @@ status_t SurfaceComposerClient::unfreezeDisplay(DisplayID dpy, uint32_t flags)
     return sm->unfreezeDisplay(dpy, flags);
 }
 
-int SurfaceComposerClient::setOrientation(DisplayID dpy, int orientation)
+int SurfaceComposerClient::setOrientation(DisplayID dpy, 
+        int orientation, uint32_t flags)
 {
     const sp<ISurfaceComposer>& sm(_get_surface_manager());
-    return sm->setOrientation(dpy, orientation);
+    return sm->setOrientation(dpy, orientation, flags);
 }
 
 status_t SurfaceComposerClient::openTransaction()
