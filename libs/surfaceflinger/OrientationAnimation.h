@@ -62,7 +62,7 @@ private:
 
     sp<SurfaceFlinger> mFlinger;
     sp<MemoryDealer> mTemporaryDealer;
-    LayerOrientationAnim* mLayerOrientationAnim;
+    LayerOrientationAnimBase* mLayerOrientationAnim;
     int mState;
 };
 

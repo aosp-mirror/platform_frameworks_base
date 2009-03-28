@@ -103,6 +103,25 @@ void Transform::set( float xx, float xy,
     mType |= 0x80000000;
 }
 
+void Transform::set(float radian, float x, float y)
+{
+    float r00 = cosf(radian);    float r01 = -sinf(radian);
+    float r10 = sinf(radian);    float r11 =  cosf(radian);
+    mTransform.set(SkMatrix::kMScaleX, SkFloatToScalar(r00));
+    mTransform.set(SkMatrix::kMSkewX, SkFloatToScalar(r01));
+    mTransform.set(SkMatrix::kMSkewY, SkFloatToScalar(r10));
+    mTransform.set(SkMatrix::kMScaleY, SkFloatToScalar(r11));
+    mTransform.set(SkMatrix::kMTransX, SkIntToScalar(x - r00*x - r01*y));
+    mTransform.set(SkMatrix::kMTransY, SkIntToScalar(y - r10*x - r11*y));
+    mType |= 0x80000000 | SkMatrix::kTranslate_Mask;
+}
+
+void Transform::scale(float s, float x, float y)
+{
+    mTransform.postScale(s, s, x, y); 
+    mType |= 0x80000000;
+}
+
 void Transform::set(int tx, int ty)
 {
     if (tx | ty) {

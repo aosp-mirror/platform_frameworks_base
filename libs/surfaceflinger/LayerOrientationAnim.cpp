@@ -22,11 +22,13 @@
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
+#include <utils/StopWatch.h>
 
 #include <core/SkBitmap.h>
 
 #include <ui/EGLDisplaySurface.h>
 
+#include "BlurFilter.h"
 #include "LayerBase.h"
 #include "LayerOrientationAnim.h"
 #include "SurfaceFlinger.h"
@@ -41,22 +43,35 @@ const char* const LayerOrientationAnim::typeID = "LayerOrientationAnim";
 
 // ---------------------------------------------------------------------------
 
+// Animation...
+const float DURATION = ms2ns(200);
+const float BOUNCES_PER_SECOND = 0.5f;
+//const float BOUNCES_AMPLITUDE = 1.0f/16.0f;
+const float BOUNCES_AMPLITUDE = 0;
+const float DIM_TARGET = 0.40f;
+//#define INTERPOLATED_TIME(_t)   ((_t)*(_t))
+#define INTERPOLATED_TIME(_t)   (_t)
+
+// ---------------------------------------------------------------------------
+
 LayerOrientationAnim::LayerOrientationAnim(
         SurfaceFlinger* flinger, DisplayID display, 
         OrientationAnimation* anim, 
-        const LayerBitmap& bitmap,
-        const LayerBitmap& bitmapIn)
-    : LayerBase(flinger, display), mAnim(anim), 
-      mBitmap(bitmap), mBitmapIn(bitmapIn), 
+        const LayerBitmap& bitmapIn,
+        const LayerBitmap& bitmapOut)
+    : LayerOrientationAnimBase(flinger, display), mAnim(anim), 
+      mBitmapIn(bitmapIn), mBitmapOut(bitmapOut), 
       mTextureName(-1), mTextureNameIn(-1)
 {
+    // blur that texture. 
     mStartTime = systemTime();
     mFinishTime = 0;
     mOrientationCompleted = false;
     mFirstRedraw = false;
     mLastNormalizedTime = 0;
-    mLastScale = 0;
     mNeedsBlending = false;
+    mAlphaInLerp.set(1.0f, DIM_TARGET);
+    mAlphaOutLerp.set(0.5f, 1.0f);
 }
 
 LayerOrientationAnim::~LayerOrientationAnim()
@@ -111,14 +126,8 @@ void LayerOrientationAnim::onOrientationCompleted()
 
 void LayerOrientationAnim::onDraw(const Region& clip) const
 {
-    // Animation...
-    const float MIN_SCALE = 0.5f;
-    const float DURATION = ms2ns(200);
-    const float BOUNCES_PER_SECOND = 1.618f;
-    const float BOUNCES_AMPLITUDE = 1.0f/32.0f;
-
     const nsecs_t now = systemTime();
-    float scale, alpha;
+    float alphaIn, alphaOut;
     
     if (mOrientationCompleted) {
         if (mFirstRedraw) {
@@ -126,7 +135,7 @@ void LayerOrientationAnim::onDraw(const Region& clip) const
             
             // make a copy of what's on screen
             copybit_image_t image;
-            mBitmapIn.getBitmapSurface(&image);
+            mBitmapOut.getBitmapSurface(&image);
             const DisplayHardware& hw(graphicPlane(0).displayHardware());
             hw.copyBackToImage(image);
 
@@ -147,37 +156,40 @@ void LayerOrientationAnim::onDraw(const Region& clip) const
         const float duration = DURATION * mLastNormalizedTime;
         const float normalizedTime = (float(now - mFinishTime) / duration);
         if (normalizedTime <= 1.0f) {
-            const float squaredTime = normalizedTime*normalizedTime;
-            scale = (1.0f - mLastScale)*squaredTime + mLastScale;
-            alpha = (1.0f - normalizedTime);
-            alpha *= alpha;
-            alpha *= alpha;
+            const float interpolatedTime = INTERPOLATED_TIME(normalizedTime);
+            alphaIn = mAlphaInLerp.getOut();
+            alphaOut = mAlphaOutLerp(interpolatedTime);
         } else {
             mAnim->onAnimationFinished();
-            scale = 1.0f;
-            alpha = 0.0f;
+            alphaIn = mAlphaInLerp.getOut();
+            alphaOut = mAlphaOutLerp.getOut();
         }
     } else {
         const float normalizedTime = float(now - mStartTime) / DURATION;
         if (normalizedTime <= 1.0f) {
             mLastNormalizedTime = normalizedTime;
-            const float squaredTime = normalizedTime*normalizedTime;
-            scale = (MIN_SCALE-1.0f)*squaredTime + 1.0f;
-            alpha = 1.0f;
+            const float interpolatedTime = INTERPOLATED_TIME(normalizedTime);
+            alphaIn = mAlphaInLerp(interpolatedTime);
+            alphaOut = 0.0f;
         } else {
             mLastNormalizedTime = 1.0f;
             const float to_seconds = DURATION / seconds(1);
-            const float phi = BOUNCES_PER_SECOND * 
-                    (((normalizedTime - 1.0f) * to_seconds)*M_PI*2);
-            scale = MIN_SCALE + BOUNCES_AMPLITUDE * (1.0f - cosf(phi));
-            alpha = 1.0f;
+            alphaIn = mAlphaInLerp.getOut();
+            if (BOUNCES_AMPLITUDE > 0.0f) {
+                const float phi = BOUNCES_PER_SECOND * 
+                        (((normalizedTime - 1.0f) * to_seconds)*M_PI*2);
+                if (alphaIn > 1.0f) alphaIn = 1.0f;
+                else if (alphaIn < 0.0f) alphaIn = 0.0f;
+                alphaIn += BOUNCES_AMPLITUDE * (1.0f - cosf(phi));
+            }
+            alphaOut = 0.0f;
         }
-        mLastScale = scale;
+        mAlphaOutLerp.setIn(alphaIn);
     }
-    drawScaled(scale, alpha);
+    drawScaled(1.0f, alphaIn, alphaOut);
 }
 
-void LayerOrientationAnim::drawScaled(float f, float alpha) const
+void LayerOrientationAnim::drawScaled(float scale, float alphaIn, float alphaOut) const
 {
     copybit_image_t dst;
     const GraphicPlane& plane(graphicPlane(0));
@@ -188,22 +200,30 @@ void LayerOrientationAnim::drawScaled(float f, float alpha) const
     // TODO: with update on demand, we may be able 
     // to not erase the screen at all during the animation 
     if (!mOrientationCompleted) {
-        glDisable(GL_BLEND);
-        glDisable(GL_DITHER);
-        glDisable(GL_SCISSOR_TEST);
-        glClearColor(0,0,0,0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        if (scale==1.0f && (alphaIn>=1.0f || alphaOut>=1.0f)) {
+            // we don't need to erase the screen in that case
+        } else {
+            glDisable(GL_BLEND);
+            glDisable(GL_DITHER);
+            glDisable(GL_SCISSOR_TEST);
+            glClearColor(0,0,0,0);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
     }
     
-    const int w = dst.w*f; 
-    const int h = dst.h*f; 
+    copybit_image_t src;
+    mBitmapIn.getBitmapSurface(&src);
+
+    copybit_image_t srcOut;
+    mBitmapOut.getBitmapSurface(&srcOut);
+
+    const int w = dst.w*scale; 
+    const int h = dst.h*scale; 
     const int xc = uint32_t(dst.w-w)/2;
     const int yc = uint32_t(dst.h-h)/2;
     const copybit_rect_t drect = { xc, yc, xc+w, yc+h }; 
-
-    copybit_image_t src;
-    mBitmap.getBitmapSurface(&src);
     const copybit_rect_t srect = { 0, 0, src.w, src.h };
+    const Region reg(Rect( drect.l, drect.t, drect.r, drect.b ));
 
     int err = NO_ERROR;
     const int can_use_copybit = canUseCopybit();
@@ -211,19 +231,19 @@ void LayerOrientationAnim::drawScaled(float f, float alpha) const
         copybit_device_t* copybit = mFlinger->getBlitEngine();
         copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
         copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
-
-        if (alpha < 1.0f) {
-            copybit_image_t srcIn;
-            mBitmapIn.getBitmapSurface(&srcIn);
-            region_iterator it(Region(Rect( drect.l, drect.t, drect.r, drect.b )));
-            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
-            err = copybit->stretch(copybit, &dst, &srcIn, &drect, &srect, &it);
+        
+        if (alphaIn > 0) {
+            region_iterator it(reg);
+            copybit->set_parameter(copybit, COPYBIT_BLUR, COPYBIT_ENABLE);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, int(alphaIn*255));
+            err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
         }
 
-        if (!err && alpha > 0.0f) {
-            region_iterator it(Region(Rect( drect.l, drect.t, drect.r, drect.b )));
-            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, int(alpha*255));
-            err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
+        if (!err && alphaOut > 0.0f) {
+            region_iterator it(reg);
+            copybit->set_parameter(copybit, COPYBIT_BLUR, COPYBIT_DISABLE);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, int(alphaOut*255));
+            err = copybit->stretch(copybit, &dst, &srcOut, &drect, &srect, &it);
         }
         LOGE_IF(err != NO_ERROR, "copybit failed (%s)", strerror(err));
     }
@@ -238,7 +258,7 @@ void LayerOrientationAnim::drawScaled(float f, float alpha) const
         t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
 
         Transform tr;
-        tr.set(f,0,0,f);
+        tr.set(scale,0,0,scale);
         tr.set(xc, yc);
         
         // FIXME: we should not access mVertices and mDrawingState like that,
@@ -254,9 +274,7 @@ void LayerOrientationAnim::drawScaled(float f, float alpha) const
             self.mDrawingState.flags |= ISurfaceComposer::eLayerFilter;
         }
 
-        if (alpha < 1.0f) {
-            copybit_image_t src;
-            mBitmapIn.getBitmapSurface(&src);
+        if (alphaIn > 0.0f) {
             t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
             if (UNLIKELY(mTextureNameIn == -1LU)) {
                 mTextureNameIn = createTexture();
@@ -264,21 +282,21 @@ void LayerOrientationAnim::drawScaled(float f, float alpha) const
                 const Region dirty(Rect(t.width, t.height));
                 loadTexture(dirty, mTextureNameIn, t, w, h);
             }
-            self.mDrawingState.alpha = 255;
-            const Region clip(Rect( drect.l, drect.t, drect.r, drect.b ));
-            drawWithOpenGL(clip, mTextureName, t);
+            self.mDrawingState.alpha = int(alphaIn*255);
+            drawWithOpenGL(reg, mTextureNameIn, t);
         }
 
-        t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
-        if (UNLIKELY(mTextureName == -1LU)) {
-            mTextureName = createTexture();
-            GLuint w=0, h=0;
-            const Region dirty(Rect(t.width, t.height));
-            loadTexture(dirty, mTextureName, t, w, h);
+        if (alphaOut > 0.0f) {
+            t.data = (GGLubyte*)(intptr_t(srcOut.base) + srcOut.offset);
+            if (UNLIKELY(mTextureName == -1LU)) {
+                mTextureName = createTexture();
+                GLuint w=0, h=0;
+                const Region dirty(Rect(t.width, t.height));
+                loadTexture(dirty, mTextureName, t, w, h);
+            }
+            self.mDrawingState.alpha = int(alphaOut*255);
+            drawWithOpenGL(reg, mTextureName, t);
         }
-        self.mDrawingState.alpha = int(alpha*255);
-        const Region clip(Rect( drect.l, drect.t, drect.r, drect.b ));
-        drawWithOpenGL(clip, mTextureName, t);
     }
 }
 
