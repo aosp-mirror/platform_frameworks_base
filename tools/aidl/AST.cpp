@@ -841,23 +841,6 @@ Document::Write(FILE* to)
         fprintf(to, "package %s;\n", this->package.c_str());
     }
 
-    // gather the types for the import statements
-    set<Type*> types;
-    N = this->classes.size();
-    for (i=0; i<N; i++) {
-        Class* c = this->classes[i];
-        c->GatherTypes(&types);
-    }
-    
-    set<Type*>::iterator it;
-    for (it=types.begin(); it!=types.end(); it++) {
-        Type* t = *it;
-        string pkg = t->Package();
-        if (pkg.length() != 0 && pkg != this->package) {
-            fprintf(to, "import %s;\n", t->ImportType().c_str());
-        }
-    }
-
     N = this->classes.size();
     for (i=0; i<N; i++) {
         Class* c = this->classes[i];

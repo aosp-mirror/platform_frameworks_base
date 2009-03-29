@@ -1577,12 +1577,22 @@ public final class RIL extends BaseCommands implements CommandsInterface
      * {@inheritDoc}
      */
     public void getNeighboringCids(Message response) {
-        RILRequest rr = RILRequest.obtain(
+        /* TODO: Remove this hack when backward compatibility issue is fixed.
+         * RIL_REQUEST_GET_NEIGHBORING_CELL_IDS currently returns REQUEST_NOT_SUPPORTED
+         */
+
+        AsyncResult.forMessage(response).exception =
+            new CommandException(CommandException.Error.REQUEST_NOT_SUPPORTED);
+        response.sendToTarget();
+        response = null;
+
+        /* RILRequest rr = RILRequest.obtain(
                 RILConstants.RIL_REQUEST_GET_NEIGHBORING_CELL_IDS, response);
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 
         send(rr);
+        */
     }
 
     /**

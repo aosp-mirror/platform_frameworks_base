@@ -651,26 +651,35 @@ status_t AudioFlinger::setStreamVolume(int stream, float value)
         return BAD_VALUE;
     }
 
-    mHardwareMixerThread->setStreamVolume(stream, value);
-#ifdef WITH_A2DP
-    mA2dpMixerThread->setStreamVolume(stream, value);
-#endif
-
     status_t ret = NO_ERROR;
+    
     if (stream == AudioSystem::VOICE_CALL ||
         stream == AudioSystem::BLUETOOTH_SCO) {
-        
+        float hwValue = value;
         if (stream == AudioSystem::VOICE_CALL) {
-            value = (float)AudioSystem::logToLinear(value)/100.0f;
+            hwValue = (float)AudioSystem::logToLinear(value)/100.0f;
+            // FIXME: This is a temporary fix to re-base the internally
+            // generated in-call audio so that it is never muted, which is
+            // already the case for the hardware routed in-call audio.
+            // When audio stream handling is reworked, this should be
+            // addressed more cleanly.  Fixes #1324; see discussion at
+            // http://review.source.android.com/8224
+            value = value * 0.99 + 0.01;        
         } else { // (type == AudioSystem::BLUETOOTH_SCO)
-            value = 1.0f;
+            hwValue = 1.0f;
         }
 
         AutoMutex lock(mHardwareLock);
         mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
-        ret = mAudioHardware->setVoiceVolume(value);
+        ret = mAudioHardware->setVoiceVolume(hwValue);
         mHardwareStatus = AUDIO_HW_IDLE;
+        
     }
+    
+    mHardwareMixerThread->setStreamVolume(stream, value);
+#ifdef WITH_A2DP
+    mA2dpMixerThread->setStreamVolume(stream, value);
+#endif
 
     return ret;
 }
@@ -709,7 +718,15 @@ float AudioFlinger::streamVolume(int stream) const
     if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES) {
         return 0.0f;
     }
-    return mHardwareMixerThread->streamVolume(stream);
+    float value = mHardwareMixerThread->streamVolume(stream);
+    
+    if (stream == AudioSystem::VOICE_CALL) {
+        // FIXME: Re-base internally generated in-call audio,
+        // reverse of above in setStreamVolume.
+        value = (value - 0.01) / 0.99;
+    }
+    
+    return value;
 }
 
 bool AudioFlinger::streamMute(int stream) const

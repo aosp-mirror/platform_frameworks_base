@@ -351,23 +351,26 @@ public class SQLiteQueryBuilder
             String groupBy, String having, String sortOrder, String limit) {
         String[] projection = computeProjection(projectionIn);
 
+        StringBuilder where = new StringBuilder();
+
         if (mWhereClause.length() > 0) {
-            mWhereClause.append(')');
+            where.append(mWhereClause.toString());
+            where.append(')');
         }
 
         // Tack on the user's selection, if present.
         if (selection != null && selection.length() > 0) {
             if (mWhereClause.length() > 0) {
-                mWhereClause.append(" AND ");
+                where.append(" AND ");
             }
 
-            mWhereClause.append('(');
-            mWhereClause.append(selection);
-            mWhereClause.append(')');
+            where.append('(');
+            where.append(selection);
+            where.append(')');
         }
 
         return buildQueryString(
-                mDistinct, mTables, projection, mWhereClause.toString(),
+                mDistinct, mTables, projection, where.toString(),
                 groupBy, having, sortOrder, limit);
     }
 

@@ -43,7 +43,7 @@ public class SettingsProvider extends ContentProvider {
     private static final String TABLE_FAVORITES = "favorites";
     private static final String TABLE_OLD_FAVORITES = "old_favorites";
 
-    private DatabaseHelper mOpenHelper;
+    protected DatabaseHelper mOpenHelper;
 
     /**
      * Decode a content URL into the table, projection, and arguments

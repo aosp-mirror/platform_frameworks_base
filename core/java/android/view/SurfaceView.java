@@ -30,8 +30,9 @@ import android.os.ParcelFileDescriptor;
 import android.util.AttributeSet;
 import android.util.Config;
 import android.util.Log;
-import java.util.ArrayList;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 import java.lang.ref.WeakReference;
 

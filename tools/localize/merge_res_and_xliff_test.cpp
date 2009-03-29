@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "merge_res_and_xliff.h"
 
 

@@ -3,6 +3,7 @@
 
 #include "SourcePos.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <map>

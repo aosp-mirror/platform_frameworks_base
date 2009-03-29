@@ -55,7 +55,7 @@ import java.util.List;
  * Database helper class for {@link SettingsProvider}.
  * Mostly just has a bit {@link #onCreate} to initialize the database.
  */
-class DatabaseHelper extends SQLiteOpenHelper {
+public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Path to file containing default bookmarks, relative to ANDROID_ROOT.
      */

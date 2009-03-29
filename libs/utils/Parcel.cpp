@@ -950,14 +950,13 @@ native_handle* Parcel::readNativeHandle(native_handle* (*alloc)(void*, int, int)
             return 0;
         }
     }
-    
     for (int i=0 ; err==NO_ERROR && i<numFds ; i++) {
         h->data[i] = dup(readFileDescriptor());
         if (h->data[i] < 0) err = BAD_VALUE;
     }
-    
+
     err = read(h->data + numFds, sizeof(int)*numInts);
-    
+
     if (err != NO_ERROR) {
         if (alloc == 0) {
             free(h);
