@@ -64,12 +64,6 @@ public:
     vector<Ro*> getAllRo();
 
     /**
-     * Get the private key of the device.
-     * @return the private key.
-     */
-    const string& getDevicePrivateKey() const;
-
-    /**
      * Get ro which contained rights of specific content.
      * @param contentID the specific id of content.
      * @return NULL if not fount otherwise the related ro.
