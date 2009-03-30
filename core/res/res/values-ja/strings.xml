@@ -572,7 +572,7 @@
     <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="full_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'/'<xliff:g id="MONTH">MMMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">d</xliff:g>'日 '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'年'<xliff:g id="MONTH">MMMM</xliff:g>'月'<xliff:g id="DAY">d</xliff:g>'日'"</string>
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>'年'"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'/'<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
@@ -586,16 +586,16 @@
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
-    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g>月"</string>
+    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%B</xliff:g>/<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
     <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日<xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日 <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
     <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
@@ -607,7 +607,7 @@
     <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
     <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> - <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
     <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
@@ -665,18 +665,18 @@
     <string name="month_long_october">"10月"</string>
     <string name="month_long_november">"11月"</string>
     <string name="month_long_december">"12月"</string>
-    <string name="month_medium_january">"1月"</string>
-    <string name="month_medium_february">"2月"</string>
-    <string name="month_medium_march">"3月"</string>
-    <string name="month_medium_april">"4月"</string>
-    <string name="month_medium_may">"5月"</string>
-    <string name="month_medium_june">"6月"</string>
-    <string name="month_medium_july">"7月"</string>
-    <string name="month_medium_august">"8月"</string>
-    <string name="month_medium_september">"9月"</string>
-    <string name="month_medium_october">"10月"</string>
-    <string name="month_medium_november">"11月"</string>
-    <string name="month_medium_december">"12月"</string>
+    <string name="month_medium_january">"1"</string>
+    <string name="month_medium_february">"2"</string>
+    <string name="month_medium_march">"3"</string>
+    <string name="month_medium_april">"4"</string>
+    <string name="month_medium_may">"5"</string>
+    <string name="month_medium_june">"6"</string>
+    <string name="month_medium_july">"7"</string>
+    <string name="month_medium_august">"8"</string>
+    <string name="month_medium_september">"9"</string>
+    <string name="month_medium_october">"10"</string>
+    <string name="month_medium_november">"11"</string>
+    <string name="month_medium_december">"12"</string>
     <string name="month_shortest_january">"1"</string>
     <string name="month_shortest_february">"2"</string>
     <string name="month_shortest_march">"3"</string>
