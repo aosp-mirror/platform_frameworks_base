@@ -493,11 +493,17 @@ static void readLocale(char* language, char* region)
     //LOGD("language=%s region=%s\n", language, region);
 }
 
-void AndroidRuntime::start(const char* className, const bool startSystemServer)
+/*
+ * Start the Dalvik Virtual Machine.
+ *
+ * Various arguments, most determined by system properties, are passed in.
+ * The "mOptions" vector is updated.
+ *
+ * Returns 0 on success.
+ */
+int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 {
-    LOGD("\n>>>>>>>>>>>>>> AndroidRuntime START <<<<<<<<<<<<<<\n");
-
-    JNIEnv* env;
+    int result = -1;
     JavaVMInitArgs initArgs;
     JavaVMOption opt;
     char propBuf[PROPERTY_VALUE_MAX];
@@ -506,24 +512,10 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
-    char* slashClassName = NULL;
-    char* cp;
     bool checkJni = false;
     bool logStdio = false;
     enum { kEMDefault, kEMIntPortable, kEMIntFast } executionMode = kEMDefault;
 
-    blockSigpipe();
-
-    /* 
-     * 'startSystemServer == true' means runtime is obslete and not run from 
-     * init.rc anymore, so we print out the boot start event here.
-     */
-    if (startSystemServer) {
-        /* track our progress through the boot sequence */
-        const int LOG_BOOT_PROGRESS_START = 3000;
-        LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START, 
-                       ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
-    }
 
     property_get("dalvik.vm.checkjni", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
@@ -555,19 +547,6 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
 
     strcpy(jniOptsBuf, "-Xjniopts:");
     property_get("dalvik.vm.jniopts", jniOptsBuf+10, "");
-
-    const char* rootDir = getenv("ANDROID_ROOT");
-    if (rootDir == NULL) {
-        rootDir = "/system";
-        if (!hasDir("/system")) {
-            LOG_FATAL("No root directory specified, and /android does not exist.");
-            return;
-        }
-        setenv("ANDROID_ROOT", rootDir, 1);
-    }
-
-    const char* kernelHack = getenv("LD_ASSUME_KERNEL");
-    //LOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
     /* route exit() to our handler */
     opt.extraInfo = (void*) runtime_exit;
@@ -759,10 +738,60 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
      * If this call succeeds, the VM is ready, and we can start issuing
      * JNI calls.
      */
-    if (JNI_CreateJavaVM(&mJavaVM, &env, &initArgs) < 0) {
+    if (JNI_CreateJavaVM(pJavaVM, pEnv, &initArgs) < 0) {
         LOGE("JNI_CreateJavaVM failed\n");
         goto bail;
     }
+
+    result = 0;
+
+bail:
+    free(stackTraceFile);
+    return result;
+}
+
+/*
+ * Start the Android runtime.  This involves starting the virtual machine
+ * and calling the "static void main(String[] args)" method in the class
+ * named by "className".
+ */
+void AndroidRuntime::start(const char* className, const bool startSystemServer)
+{
+    LOGD("\n>>>>>>>>>>>>>> AndroidRuntime START <<<<<<<<<<<<<<\n");
+
+    char* slashClassName = NULL;
+    char* cp;
+    JNIEnv* env;
+
+    blockSigpipe();
+
+    /* 
+     * 'startSystemServer == true' means runtime is obslete and not run from 
+     * init.rc anymore, so we print out the boot start event here.
+     */
+    if (startSystemServer) {
+        /* track our progress through the boot sequence */
+        const int LOG_BOOT_PROGRESS_START = 3000;
+        LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START, 
+                       ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
+    }
+
+    const char* rootDir = getenv("ANDROID_ROOT");
+    if (rootDir == NULL) {
+        rootDir = "/system";
+        if (!hasDir("/system")) {
+            LOG_FATAL("No root directory specified, and /android does not exist.");
+            goto bail;
+        }
+        setenv("ANDROID_ROOT", rootDir, 1);
+    }
+
+    //const char* kernelHack = getenv("LD_ASSUME_KERNEL");
+    //LOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
+
+    /* start the virtual machine */
+    if (startVm(&mJavaVM, &env) != 0)
+        goto bail;
 
     /*
      * Register android functions.
@@ -833,7 +862,6 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
 
 bail:
     free(slashClassName);
-    free(stackTraceFile);
 }
 
 void AndroidRuntime::start()

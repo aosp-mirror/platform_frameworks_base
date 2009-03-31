@@ -98,6 +98,7 @@ public:
 
 private:
     static int startReg(JNIEnv* env);
+    int startVm(JavaVM** pJavaVM, JNIEnv** pEnv);
 
     Vector<JavaVMOption> mOptions;
 
