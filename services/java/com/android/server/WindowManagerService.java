@@ -5085,6 +5085,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         } else {
                             eventType = LocalPowerManager.OTHER_EVENT;
                         }
+                        try {
+                            mBatteryStats.noteInputEvent();
+                        } catch (RemoteException e) {
+                            // Ignore
+                        }
                         mPowerManager.userActivity(curTime, false, eventType);
                         switch (ev.classType) {
                             case RawInputEvent.CLASS_KEYBOARD:

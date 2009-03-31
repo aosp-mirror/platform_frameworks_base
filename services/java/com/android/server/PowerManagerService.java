@@ -1301,6 +1301,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                         err = Power.setScreenState(true);
                         long identity = Binder.clearCallingIdentity();
                         try {
+                            mBatteryStats.noteScreenBrightness(
+                                    getPreferredBrightness());
                             mBatteryStats.noteScreenOn();
                         } catch (RemoteException e) {
                             Log.w(TAG, "RemoteException calling noteScreenOn on BatteryStatsService", e);
@@ -1455,6 +1457,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                             break;
                     }
                 }
+                int brightness = preferredBrightness;
+                int steps = ANIM_STEPS;
                 if ((newState & SCREEN_BRIGHT_BIT) == 0) {
                     // dim or turn off backlight, depending on if the screen is on
                     // the scale is because the brightness ramp isn't linear and this biases
@@ -1463,7 +1467,6 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     float ratio = (((float)Power.BRIGHTNESS_DIM)/preferredBrightness);
                     if (ratio > 1.0f) ratio = 1.0f;
                     if ((newState & SCREEN_ON_BIT) == 0) {
-                        int steps;
                         if ((oldState & SCREEN_BRIGHT_BIT) != 0) {
                             // was bright
                             steps = ANIM_STEPS;
@@ -1471,10 +1474,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                             // was dim
                             steps = (int)(ANIM_STEPS*ratio*scale);
                         }
-                        mScreenBrightness.setTargetLocked(Power.BRIGHTNESS_OFF,
-                                steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
+                        brightness = Power.BRIGHTNESS_OFF;
                     } else {
-                        int steps;
                         if ((oldState & SCREEN_ON_BIT) != 0) {
                             // was bright
                             steps = (int)(ANIM_STEPS*(1.0f-ratio)*scale);
@@ -1490,13 +1491,19 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                             // will then count going dim as turning off.
                             mScreenOffTime = SystemClock.elapsedRealtime();
                         }
-                        mScreenBrightness.setTargetLocked(Power.BRIGHTNESS_DIM,
-                                steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
+                        brightness = Power.BRIGHTNESS_DIM;
                     }
-                } else {
-                    mScreenBrightness.setTargetLocked(preferredBrightness,
-                            ANIM_STEPS, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
                 }
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    mBatteryStats.noteScreenBrightness(brightness);
+                } catch (RemoteException e) {
+                    // Nothing interesting to do.
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+                mScreenBrightness.setTargetLocked(brightness,
+                        steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
                 startAnimation = true;
             } else {
                 if ((newState & SCREEN_BRIGHT_BIT) == 0) {
@@ -1735,6 +1742,16 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                         mUserState |= SCREEN_BRIGHT;
                     }
 
+                    int uid = Binder.getCallingUid();
+                    long ident = Binder.clearCallingIdentity();
+                    try {
+                        mBatteryStats.noteUserActivity(uid, eventType);
+                    } catch (RemoteException e) {
+                        // Ignore
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                    
                     reactivateWakeLocksLocked();
                     mWakeLockState = mLocks.gatherState();
                     setPowerState(mUserState | mWakeLockState, noChangeLights, true);
@@ -1951,6 +1968,15 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         synchronized (mLocks) {
             Log.d(TAG, "system ready!");
             mDoneBooting = true;
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mBatteryStats.noteScreenBrightness(getPreferredBrightness());
+                mBatteryStats.noteScreenOn();
+            } catch (RemoteException e) {
+                // Nothing interesting to do.
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
             userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
             updateWakeLockLocked();
             mLocks.notifyAll();

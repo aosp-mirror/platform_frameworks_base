@@ -27,13 +27,16 @@ interface IBatteryStats {
     void noteStartGps(int uid);
     void noteStopGps(int uid);
     void noteScreenOn();
+    void noteScreenBrightness(int brightness);
     void noteScreenOff();
+    void noteInputEvent();
+    void noteUserActivity(int uid, int event);
     void notePhoneOn();
     void notePhoneOff();
     void notePhoneSignalStrength(int asu);
     void notePhoneDataConnectionState(int dataType, boolean hasData);
-    void noteWifiOn();
-    void noteWifiOff();
+    void noteWifiOn(int uid);
+    void noteWifiOff(int uid);
     void noteWifiRunning();
     void noteWifiStopped();
     void noteBluetoothOn();
