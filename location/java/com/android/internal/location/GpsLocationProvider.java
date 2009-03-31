@@ -412,6 +412,12 @@ public class GpsLocationProvider extends LocationProviderImpl {
             mNetworkThread = null;
         }
 
+        // The GpsEventThread does not wait for the GPS to shutdown
+        // so we need to report the GPS_STATUS_ENGINE_OFF event here
+        if (mNavigating) {
+            reportStatus(GPS_STATUS_ENGINE_OFF);
+        }
+
         native_cleanup();
     }
 
@@ -797,8 +803,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
         public void run() {
             if (Config.LOGD) Log.d(TAG, "GpsEventThread starting");
-            // thread exits after disable() is called and navigation has stopped
-            while (mEnabled || mNavigating) {
+            // Exit as soon as disable() is called instead of waiting for the GPS to stop.
+            while (mEnabled) {
                 // this will wait for an event from the GPS,
                 // which will be reported via reportLocation or reportStatus
                 native_wait_for_event();
