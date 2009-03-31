@@ -133,11 +133,17 @@ to place 3rd jar files, which are now automatically handled by the Ant script.</
 
 <h2 id="migrate">Migrate your applications</h2>
 
-<p>After updating your SDK, you will likely encounter breakages in your code, due to 
-framework and API changes. You'll need to update your code to match changes in the Android APIs.</p>
+<p>If (and only if) you have written apps in an SDK released previous to
+the Android 1.0 SDK, you will need to migrate your applications. After
+updating your SDK, you may encounter breakages in your code, due to
+framework and API changes. You'll need to update your code to match
+changes in the Android APIs.</p>
 
 <p>One way to start is to open your project in Eclipse and see where the ADT
-identifies errors in your application.</p>
+identifies errors in your application. You can also look up
+specific changes in the Android APIs in the <em>Overview of Changes</em> and <em>
+API Diffs Report</em>, both available in the documentation included with the
+Android 1.0 SDK package.</p>
 
 <p>If you have additional trouble updating your code, visit the 
 <a href="http://groups.google.com/group/android-developers">Android Developers Group</a>
