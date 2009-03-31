@@ -131,11 +131,11 @@ framework and API changes. You'll need to update your code to match the
 latest APIs.</p>
 
 <p>One way to start is to open your project in Eclipse and see where the ADT
-identifies errors in your application. From there, you can lookup
-specific API changes in the Android 1.0 APIs in the 
-<a href="http://code.google.com/android/migrating/changes-overview.html">
-Overview of Changes</a> and <a href="http://code.google.com/android/migrating/changes.html">
-API Diffs Report</a>.</p>
+identifies errors in your application. You can also look up
+specific changes in the Android APIs in the 
+<a href="{@docRoot}sdk/android-1.1.html#api-changes">Android 1.1 Version 
+Notes</a> document.</p>
+
 
 <p>If you have additional trouble updating your code, visit the 
 <a href="http://groups.google.com/group/android-developers">Android Developers Group</a>
