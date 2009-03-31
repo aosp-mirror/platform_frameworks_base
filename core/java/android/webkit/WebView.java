@@ -4405,14 +4405,19 @@ public class WebView extends AbsoluteLayout
 
         int scrollYDelta = 0;
 
-        if (rect.bottom > screenBottom && rect.top > screenTop) {
-            if (rect.height() > height) {
-                scrollYDelta += (rect.top - screenTop);
+        if (rect.bottom > screenBottom) {
+            int oneThirdOfScreenHeight = height / 3;
+            if (rect.height() > 2 * oneThirdOfScreenHeight) {
+                // If the rectangle is too tall to fit in the bottom two thirds
+                // of the screen, place it at the top.
+                scrollYDelta = rect.top - screenTop;
             } else {
-                scrollYDelta += (rect.bottom - screenBottom);
+                // If the rectangle will still fit on screen, we want its
+                // top to be in the top third of the screen.
+                scrollYDelta = rect.top - (screenTop + oneThirdOfScreenHeight);
             }
         } else if (rect.top < screenTop) {
-            scrollYDelta -= (screenTop - rect.top);
+            scrollYDelta = rect.top - screenTop;
         }
 
         int width = getWidth() - getVerticalScrollbarWidth();
