@@ -24,6 +24,7 @@
 
 package android.server;
 
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
@@ -970,8 +971,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      */
     public synchronized int getRemoteClass(String address) {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-            return -1;
+            mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+            return BluetoothClass.ERROR;
         }
         return getRemoteClassNative(address);
     }
@@ -1254,4 +1255,3 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         Log.d(TAG, msg);
     }
 }
-
