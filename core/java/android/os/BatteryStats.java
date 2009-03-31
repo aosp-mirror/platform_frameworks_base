@@ -77,7 +77,11 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Bump the version on this if the checkin format changes.
      */
-    private static final int BATTERY_STATS_CHECKIN_VERSION = 1;
+    private static final int BATTERY_STATS_CHECKIN_VERSION = 2;
+    
+    private static final long BYTES_PER_KB = 1024;
+    private static final long BYTES_PER_MB = 1048576; // 1024^2
+    private static final long BYTES_PER_GB = 1073741824; //1024^3
     
     // TODO: Update this list if you add/change any stats above.
     private static final String[] STAT_NAMES = { "total", "last", "current", "unplugged" };
@@ -482,6 +486,23 @@ public abstract class BatteryStats implements Parcelable {
         return mFormatBuilder.toString();
     }
 
+    private final String formatBytesLocked(long bytes) {
+        mFormatBuilder.setLength(0);
+        
+        if (bytes < BYTES_PER_KB) {
+            return bytes + "B";
+        } else if (bytes < BYTES_PER_MB) {
+            mFormatter.format("%.2fKB", bytes / (double) BYTES_PER_KB);
+            return mFormatBuilder.toString();
+        } else if (bytes < BYTES_PER_GB){
+            mFormatter.format("%.2fMB", bytes / (double) BYTES_PER_MB);
+            return mFormatBuilder.toString();
+        } else {
+            mFormatter.format("%.2fGB", bytes / (double) BYTES_PER_GB);
+            return mFormatBuilder.toString();
+        }
+    }
+
     /**
      *
      * @param sb a StringBuilder object.
@@ -590,6 +611,9 @@ public abstract class BatteryStats implements Parcelable {
        
         StringBuilder sb = new StringBuilder(128);
         
+        SparseArray<? extends Uid> uidStats = getUidStats();
+        final int NU = uidStats.size();
+        
         String category = STAT_NAMES[which];
         
         // Dump "battery" stat
@@ -598,10 +622,42 @@ public abstract class BatteryStats implements Parcelable {
                 whichBatteryUptime / 1000, whichBatteryRealtime / 1000, 
                 totalUptime / 1000, totalRealtime / 1000); 
         
+        // Calculate total network and wakelock times across all uids.
+        long rxTotal = 0;
+        long txTotal = 0;
+        long fullWakeLockTimeTotal = 0;
+        long partialWakeLockTimeTotal = 0;
+        
+        for (int iu = 0; iu < NU; iu++) {
+            Uid u = uidStats.valueAt(iu);
+            rxTotal += u.getTcpBytesReceived(which);
+            txTotal += u.getTcpBytesSent(which);
+            
+            Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
+            if (wakelocks.size() > 0) {
+                for (Map.Entry<String, ? extends BatteryStats.Uid.Wakelock> ent 
+                        : wakelocks.entrySet()) {
+                    Uid.Wakelock wl = ent.getValue();
+                    
+                    Timer fullWakeTimer = wl.getWakeTime(WAKE_TYPE_FULL);
+                    if (fullWakeTimer != null) {
+                        fullWakeLockTimeTotal += fullWakeTimer.getTotalTime(batteryRealtime, which);
+                    }
+
+                    Timer partialWakeTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
+                    if (partialWakeTimer != null) {
+                        partialWakeLockTimeTotal += partialWakeTimer.getTotalTime(
+                            batteryRealtime, which);
+                    }
+                }
+            }
+        }
+        
         // Dump misc stats
         dumpLine(pw, 0 /* uid */, category, MISC_DATA,
                 screenOnTime / 1000, phoneOnTime / 1000, wifiOnTime / 1000,
-                wifiRunningTime / 1000, bluetoothOnTime / 1000);
+                wifiRunningTime / 1000, bluetoothOnTime / 1000, rxTotal, txTotal, 
+                fullWakeLockTimeTotal, partialWakeLockTimeTotal);
         
         // Dump signal strength stats
         Object[] args = new Object[NUM_SIGNAL_STRENGTH_BINS];
@@ -622,8 +678,6 @@ public abstract class BatteryStats implements Parcelable {
                     getPluggedStartLevel());
         }
         
-        SparseArray<? extends Uid> uidStats = getUidStats();
-        final int NU = uidStats.size();
         for (int iu = 0; iu < NU; iu++) {
             final int uid = uidStats.keyAt(iu);
             Uid u = uidStats.valueAt(iu);
@@ -741,6 +795,9 @@ public abstract class BatteryStats implements Parcelable {
         final long totalUptime = computeUptime(rawUptime, which);
         
         StringBuilder sb = new StringBuilder(128);
+        
+        SparseArray<? extends Uid> uidStats = getUidStats();
+        final int NU = uidStats.size();
 
         pw.println(prefix
                 + "  Time on battery: " + formatTimeMs(whichBatteryUptime / 1000)
@@ -773,6 +830,47 @@ public abstract class BatteryStats implements Parcelable {
                 + "(" + formatRatioLocked(wifiRunningTime, whichBatteryRealtime)
                 + "), Bluetooth on: " + formatTimeMs(bluetoothOnTime / 1000)
                 + "(" + formatRatioLocked(bluetoothOnTime, whichBatteryRealtime)+ ")");
+        
+        // Calculate total network and wakelock times across all uids.
+        long rxTotal = 0;
+        long txTotal = 0;
+        long fullWakeLockTimeTotalMicros = 0;
+        long partialWakeLockTimeTotalMicros = 0;
+        
+        for (int iu = 0; iu < NU; iu++) {
+            Uid u = uidStats.valueAt(iu);
+            rxTotal += u.getTcpBytesReceived(which);
+            txTotal += u.getTcpBytesSent(which);
+            
+            Map<String, ? extends BatteryStats.Uid.Wakelock> wakelocks = u.getWakelockStats();
+            if (wakelocks.size() > 0) {
+                for (Map.Entry<String, ? extends BatteryStats.Uid.Wakelock> ent 
+                        : wakelocks.entrySet()) {
+                    Uid.Wakelock wl = ent.getValue();
+                    
+                    Timer fullWakeTimer = wl.getWakeTime(WAKE_TYPE_FULL);
+                    if (fullWakeTimer != null) {
+                        fullWakeLockTimeTotalMicros += fullWakeTimer.getTotalTime(
+                                batteryRealtime, which);
+                    }
+
+                    Timer partialWakeTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
+                    if (partialWakeTimer != null) {
+                        partialWakeLockTimeTotalMicros += partialWakeTimer.getTotalTime(
+                                batteryRealtime, which);
+                    }
+                }
+            }
+        }
+        
+        pw.println(prefix
+                + "  Total received: " + formatBytesLocked(rxTotal)
+                + ", Total sent: " + formatBytesLocked(txTotal));
+        pw.println(prefix
+                + "  Total full wakelock time: " + formatTimeMs(
+                        (fullWakeLockTimeTotalMicros + 500) / 1000)
+                + ", Total partial waklock time: " + formatTimeMs(
+                        (partialWakeLockTimeTotalMicros + 500) / 1000));
         
         sb.setLength(0);
         sb.append("  Signal strengths: ");
@@ -832,8 +930,7 @@ public abstract class BatteryStats implements Parcelable {
         
         pw.println(" ");
 
-        SparseArray<? extends Uid> uidStats = getUidStats();
-        final int NU = uidStats.size();
+
         for (int iu=0; iu<NU; iu++) {
             final int uid = uidStats.keyAt(iu);
             Uid u = uidStats.valueAt(iu);
@@ -846,8 +943,8 @@ public abstract class BatteryStats implements Parcelable {
             long scanWifiLockOnTime = u.getScanWifiLockTime(batteryRealtime, which);
             
             if (tcpReceived != 0 || tcpSent != 0) {
-                pw.println(prefix + "    Network: " + tcpReceived + " bytes received, "
-                        + tcpSent + " bytes sent");
+                pw.println(prefix + "    Network: " + formatBytesLocked(tcpReceived) + " received, "
+                        + formatBytesLocked(tcpSent) + " sent");
             }
             if (fullWifiLockOnTime != 0 || scanWifiLockOnTime != 0) {
                 pw.println(prefix + "    Full Wifi Lock Time: " 
