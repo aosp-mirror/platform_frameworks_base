@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import com.android.internal.app.IBatteryStats;
+import com.android.server.am.BatteryStatsService;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -63,6 +66,8 @@ public class HardwareService extends IHardwareService.Stub {
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.setReferenceCounted(true);
 
+        mBatteryStats = BatteryStatsService.getService();
+        
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mIntentReceiver, filter);
@@ -200,6 +205,14 @@ public class HardwareService extends IHardwareService.Stub {
         setLightBrightness_UNCHECKED(LIGHT_ID_BACKLIGHT, brightness);
         setLightBrightness_UNCHECKED(LIGHT_ID_KEYBOARD, brightness);
         setLightBrightness_UNCHECKED(LIGHT_ID_BUTTONS, brightness);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.noteScreenBrightness(brightness);
+        } catch (RemoteException e) {
+            Log.w(TAG, "RemoteException calling noteScreenBrightness on BatteryStatsService", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     void setLightOff_UNCHECKED(int light) {
@@ -388,9 +401,11 @@ public class HardwareService extends IHardwareService.Stub {
     private static native void setLight_native(int ptr, int light, int color, int mode,
             int onMS, int offMS);
 
-    private Context mContext;
-    private PowerManager.WakeLock mWakeLock;
+    private final Context mContext;
+    private final PowerManager.WakeLock mWakeLock;
 
+    private final IBatteryStats mBatteryStats;
+    
     volatile VibrateThread mThread;
     volatile Death mDeath;
     volatile IBinder mToken;

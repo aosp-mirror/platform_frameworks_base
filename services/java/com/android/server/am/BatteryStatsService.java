@@ -129,6 +129,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
+    public void noteScreenBrightness(int brightness) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteScreenBrightnessLocked(brightness);
+        }
+    }
+    
     public void noteScreenOff() {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -136,6 +143,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    public void noteInputEvent() {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteInputEventLocked();
+        }
+    }
+    
+    public void noteUserActivity(int uid, int event) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteUserActivityLocked(uid, event);
+        }
+    }
+    
     public void notePhoneOn() {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -164,17 +185,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
-    public void noteWifiOn() {
+    public void noteWifiOn(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteWifiOnLocked();
+            mStats.noteWifiOnLocked(uid);
         }
     }
     
-    public void noteWifiOff() {
+    public void noteWifiOff(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteWifiOffLocked();
+            mStats.noteWifiOffLocked(uid);
         }
     }
 
