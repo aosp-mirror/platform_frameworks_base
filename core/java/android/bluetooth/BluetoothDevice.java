@@ -485,7 +485,8 @@ public class BluetoothDevice {
      * Get the major, minor and servics classes of a remote device.
      * These classes are encoded as a 32-bit integer. See BluetoothClass.
      * @param address remote device
-     * @return 32-bit class suitable for use with BluetoothClass.
+     * @return 32-bit class suitable for use with BluetoothClass, or
+     *         BluetoothClass.ERROR on error
      */
     public int getRemoteClass(String address) {
         try {
