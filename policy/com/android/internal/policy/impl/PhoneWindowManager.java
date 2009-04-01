@@ -985,6 +985,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDockBottom = mContentBottom = mCurBottom = displayHeight;
         mDockLayer = 0x10000000;
 
+        mTopFullscreenOpaqueWindowState = null;
+        mForceStatusBar = false;
+        
         // decide where the status bar goes ahead of time
         if (mStatusBar != null) {
             final Rect pf = mTmpParentFrame;
@@ -1056,7 +1059,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     /** {@inheritDoc} */
-    public void layoutWindowLw(WindowState win, WindowManager.LayoutParams attrs, WindowState attached) {
+    public void layoutWindowLw(WindowState win, WindowManager.LayoutParams attrs,
+            WindowState attached) {
         // we've already done the status bar
         if (win == mStatusBar) {
             return;
@@ -1180,6 +1184,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         
         win.computeFrameLw(pf, df, cf, vf);
         
+        if (win.isVisibleLw()) {
+            if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
+                mForceStatusBar = true;
+            } else if (mTopFullscreenOpaqueWindowState == null
+                    && attrs.type >= FIRST_APPLICATION_WINDOW
+                    && attrs.type <= LAST_APPLICATION_WINDOW
+                    && win.fillsScreenLw(mW, mH, false, false)) {
+                if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
+                mTopFullscreenOpaqueWindowState = win;
+            }
+        }
+        
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
         if (attrs.type == TYPE_INPUT_METHOD && !win.getGivenInsetsPendingLw()) {
@@ -1200,39 +1216,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
-    public void finishLayoutLw() {
-    }
-
-    /** {@inheritDoc} */
-    public void beginAnimationLw(int displayWidth, int displayHeight) {
-        mTopFullscreenOpaqueWindowState = null;
-        mForceStatusBar = false;
-    }
-
-    /** {@inheritDoc} */
-    public void animatingWindowLw(WindowState win,
-                                WindowManager.LayoutParams attrs) {
-        if (win.isVisibleLw()) {
-            if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
-                mForceStatusBar = true;
-            } else if (mTopFullscreenOpaqueWindowState == null
-                    && attrs.type >= FIRST_APPLICATION_WINDOW
-                    && attrs.type <= LAST_APPLICATION_WINDOW
-                    && win.fillsScreenLw(mW, mH, true, false)
-                    && win.isVisibleLw()) {
-                mTopFullscreenOpaqueWindowState = win;
-            }
-        }
-    }
-
-    /** {@inheritDoc} */
-    public boolean finishAnimationLw() {
+    public boolean finishLayoutLw() {
         boolean changed = false;
         boolean hiding = false;
         if (mStatusBar != null) {
             //Log.i(TAG, "force=" + mForceStatusBar
             //        + " top=" + mTopFullscreenOpaqueWindowState);
             if (mForceStatusBar) {
+                if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                 changed |= mStatusBar.showLw(true);
             } else if (mTopFullscreenOpaqueWindowState != null) {
                 //Log.i(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
@@ -1243,9 +1234,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 boolean hideStatusBar =
                     (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
                 if (hideStatusBar) {
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Hiding status bar");
                     changed |= mStatusBar.hideLw(true);
                     hiding = true;
                 } else {
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                     changed |= mStatusBar.showLw(true);
                 }
             }
@@ -1263,6 +1256,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         
         return changed;
+    }
+
+    /** {@inheritDoc} */
+    public void beginAnimationLw(int displayWidth, int displayHeight) {
+    }
+
+    /** {@inheritDoc} */
+    public void animatingWindowLw(WindowState win,
+                                WindowManager.LayoutParams attrs) {
+    }
+
+    /** {@inheritDoc} */
+    public boolean finishAnimationLw() {
+        return false;
     }
 
     /** {@inheritDoc} */
