@@ -19,8 +19,8 @@ package android.util;
 /**
  * @hide
  */
-public class PoolFactory {
-    private PoolFactory() {
+public class Pools {
+    private Pools() {
     }
 
     public static <T extends Poolable<T>> Pool<T> simplePool(PoolableManager<T> manager) {
