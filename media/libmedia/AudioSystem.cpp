@@ -258,13 +258,12 @@ int AudioSystem::logToLinear(float volume)
 status_t AudioSystem::getOutputSamplingRate(int* samplingRate, int streamType)
 {
     int output = getOutput(streamType);
+    
+    if (output == NUM_AUDIO_OUTPUT_TYPES) return PERMISSION_DENIED;
 
-    if (gOutSamplingRate[output] == 0) {
-        const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
-        if (af == 0) return PERMISSION_DENIED;
-        // gOutSamplingRate is updated by get_audio_flinger()
-    }
+    // gOutSamplingRate[] is updated by getOutput() which calls get_audio_flinger()
     LOGV("getOutputSamplingRate() streamType %d, output %d, sampling rate %d", streamType, output, gOutSamplingRate[output]);
+    
     *samplingRate = gOutSamplingRate[output];
     
     return NO_ERROR;
@@ -274,14 +273,13 @@ status_t AudioSystem::getOutputFrameCount(int* frameCount, int streamType)
 {
     int output = getOutput(streamType);
 
-    if (gOutFrameCount[output] == 0) {
-        const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
-        if (af == 0) return PERMISSION_DENIED;
-        // gOutFrameCount is updated by get_audio_flinger()
-    }
+    if (output == NUM_AUDIO_OUTPUT_TYPES) return PERMISSION_DENIED;
+
+    // gOutFrameCount[] is updated by getOutput() which calls get_audio_flinger()
     LOGV("getOutputFrameCount() streamType %d, output %d, frame count %d", streamType, output, gOutFrameCount[output]);
 
     *frameCount = gOutFrameCount[output];
+    
     return NO_ERROR;
 }
 
@@ -289,11 +287,9 @@ status_t AudioSystem::getOutputLatency(uint32_t* latency, int streamType)
 {
     int output = getOutput(streamType);
 
-    if (gOutLatency[output] == 0) {
-        const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
-        if (af == 0) return PERMISSION_DENIED;
-        // gOutLatency is updated by get_audio_flinger()
-    }
+    if (output == NUM_AUDIO_OUTPUT_TYPES) return PERMISSION_DENIED;
+
+    // gOutLatency[] is updated by getOutput() which calls get_audio_flinger()
     LOGV("getOutputLatency() streamType %d, output %d, latency %d", streamType, output, gOutLatency[output]);
 
     *latency = gOutLatency[output];
@@ -354,7 +350,12 @@ void AudioSystem::setErrorCallback(audio_error_callback cb) {
 }
 
 int AudioSystem::getOutput(int streamType)
-{  
+{   
+    // make sure that gA2dpEnabled is valid by calling get_audio_flinger() which in turn 
+    // will call gAudioFlinger->isA2dpEnabled()
+    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+    if (af == 0) return NUM_AUDIO_OUTPUT_TYPES;
+
     if (streamType == DEFAULT) {
         streamType = MUSIC;
     }
