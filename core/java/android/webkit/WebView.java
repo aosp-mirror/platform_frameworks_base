@@ -913,7 +913,8 @@ public class WebView extends AbsoluteLayout
      * @hide pending API Council approval
      */
     public void setNetworkAvailable(boolean networkUp) {
-        BrowserFrame.sJavaBridge.setNetworkOnLine(networkUp);
+        mWebViewCore.sendMessage(EventHub.SET_NETWORK_STATE,
+                networkUp ? 1 : 0, 0);
     }
 
     /**
