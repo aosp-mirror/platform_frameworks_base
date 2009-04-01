@@ -226,8 +226,11 @@ public class ClassPathPackageInfoSource {
                 String className = apkClassNames.nextElement();
 
                 if (className.startsWith(packageName)) {
+                    String subPackageName = packageName;
                     int lastPackageSeparator = className.lastIndexOf('.');
-                    String subPackageName = className.substring(0, lastPackageSeparator);
+                    if (lastPackageSeparator > 0) {
+                        subPackageName = className.substring(0, lastPackageSeparator);
+                    }
                     if (subPackageName.length() > packageName.length()) {
                         subpackageNames.add(subPackageName);
                     } else if (isToplevelClass(className)) {
