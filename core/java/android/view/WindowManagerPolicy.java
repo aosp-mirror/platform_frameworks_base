@@ -580,8 +580,11 @@ public interface WindowManagerPolicy {
      * Called when layout of the windows is finished.  After this function has
      * returned, all windows given to layoutWindow() <em>must</em> have had a
      * frame assigned.
+     *  
+     * @return Return true if layout state may have changed (so that another 
+     *         layout will be performed).
      */
-    public void finishLayoutLw();
+    public boolean finishLayoutLw();
 
     /**
      * Called when animation of the windows is about to start.
