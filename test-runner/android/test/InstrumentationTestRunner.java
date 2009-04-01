@@ -300,16 +300,17 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         }
 
         if (testClassesArg == null) {
-            TestSuite testSuite = null;
             if (mPackageOfTests != null) {
                 testSuiteBuilder.includePackages(mPackageOfTests);
             } else {
-                testSuite = getTestSuite();
-                testSuiteBuilder.addTestSuite(testSuite);
-            }
-
-            if (testSuite == null) {
-                testSuiteBuilder.includePackages(getTargetContext().getPackageName());
+                TestSuite testSuite = getTestSuite();
+                if (testSuite != null) {
+                    testSuiteBuilder.addTestSuite(testSuite);
+                } else {
+                    // no package or class bundle arguments were supplied, and no test suite 
+                    // provided so add all tests in application
+                    testSuiteBuilder.includePackages("");
+                }
             }
         } else {
             parseTestClasses(testClassesArg, testSuiteBuilder);
