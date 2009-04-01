@@ -18,6 +18,7 @@
     package="com.android.mediaframeworktest">
     
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <application>    
         <uses-library android:name="android.test.runner" />
         <activity android:label="@string/app_name"
