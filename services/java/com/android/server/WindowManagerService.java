@@ -5085,6 +5085,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         } else {
                             eventType = LocalPowerManager.OTHER_EVENT;
                         }
+                        try {
+                            mBatteryStats.noteInputEvent();
+                        } catch (RemoteException e) {
+                            // Ignore
+                        }
                         mPowerManager.userActivity(curTime, false, eventType);
                         switch (ev.classType) {
                             case RawInputEvent.CLASS_KEYBOARD:
@@ -7480,11 +7485,12 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         final int dh = mDisplay.getHeight();
 
         final int N = mWindows.size();
+        int repeats = 0;
         int i;
 
         // FIRST LOOP: Perform a layout, if needed.
         
-        if (mLayoutNeeded) {
+        while (mLayoutNeeded) {
             mPolicy.beginLayoutLw(dw, dh);
 
             // First perform layout of any root windows (not attached
@@ -7492,10 +7498,18 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             int topAttached = -1;
             for (i = N-1; i >= 0; i--) {
                 WindowState win = (WindowState) mWindows.get(i);
-    
-                boolean gone = win.mViewVisibility == View.GONE
+
+                // Don't do layout of a window if it is not visible, or
+                // soon won't be visible, to avoid wasting time and funky
+                // changes while a window is animating away.
+                final AppWindowToken atoken = win.mAppToken;
+                final boolean gone = win.mViewVisibility == View.GONE
                         || !win.mRelayoutCalled
-                        || win.mRootToken.hidden;
+                        || win.mRootToken.hidden
+                        || (atoken != null && atoken.hiddenRequested)
+                        || !win.mPolicyVisibility
+                        || win.mAttachedHidden
+                        || win.mExiting || win.mDestroying;
 
                 // If this view is GONE, then skip it -- keep the current
                 // frame, and let the caller know so they can ignore it
@@ -7531,8 +7545,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 }
             }
 
-            mPolicy.finishLayoutLw();
-            mLayoutNeeded = false;
+            if (!mPolicy.finishLayoutLw()) {
+                mLayoutNeeded = false;
+            } else if (repeats > 2) {
+                Log.w(TAG, "Layout repeat aborted after too many iterations");
+                mLayoutNeeded = false;
+            } else {
+                repeats++;
+            }
         }
     }
     

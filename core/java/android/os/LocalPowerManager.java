@@ -18,6 +18,8 @@ package android.os;
 
 /** @hide */
 public interface LocalPowerManager {
+    // Note: be sure to update BatteryStats if adding or modifying event constants.
+    
     public static final int OTHER_EVENT = 0;
     public static final int CHEEK_EVENT = 1;
     public static final int TOUCH_EVENT = 2;  // touch events are TOUCH for 300ms, and then either

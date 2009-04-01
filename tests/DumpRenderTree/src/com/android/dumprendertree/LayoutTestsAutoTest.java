@@ -42,6 +42,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Vector;
 
 //TestRecorder creates two files, one for passing tests
@@ -122,6 +124,18 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     static final String ANDROID_EXPECTED_RESULT_DIR = "/sdcard/android/expected_results/";
     static final String LAYOUT_TESTS_LIST_FILE = "/sdcard/android/layout_tests_list.txt";
     static final String TEST_STATUS_FILE = "/sdcard/android/running_test.txt";
+    static final String LAYOUT_TESTS_RESULTS_REFERENCE_FILES[] = {
+          "results/layout_tests_passed.txt",
+          "results/layout_tests_failed.txt",
+          "results/layout_tests_nontext.txt",
+          "results/layout_tests_crashed.txt",
+          "run_layout_tests.py"
+    };
+
+    static final String LAYOUT_RESULTS_FAILED_RESULT_FILE = "results/layout_tests_failed.txt";
+    static final String LAYOUT_RESULTS_NONTEXT_RESULT_FILE = "results/layout_tests_nontext.txt";
+    static final String LAYOUT_RESULTS_CRASHED_RESULT_FILE = "results/layout_tests_crashed.txt";
+    static final String LAYOUT_TESTS_RUNNER = "run_layout_tests.py";
 
     private MyTestRecorder mResultRecorder;
     private Vector<String> mTestList;
@@ -452,4 +466,28 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     public void resumeLayoutTests() {
         executeLayoutTests(true);
     }
+
+    public void copyResultsAndRunnerAssetsToCache() {
+        try {
+            String out_dir = getActivity().getApplicationContext().getCacheDir().getPath() + "/";
+
+            for( int i=0; i< LAYOUT_TESTS_RESULTS_REFERENCE_FILES.length; i++) {
+                InputStream in = getActivity().getAssets().open(LAYOUT_TESTS_RESULTS_REFERENCE_FILES[i]);
+                OutputStream out = new FileOutputStream(out_dir + LAYOUT_TESTS_RESULTS_REFERENCE_FILES[i]);
+
+                byte[] buf = new byte[2048];
+                int len;
+
+                while ((len = in.read(buf)) > 0 ) {
+                    out.write(buf, 0, len);
+                }
+                out.close();
+                in.close();
+            }
+        }catch (IOException e) {
+          e.printStackTrace();
+        }
+
+    }
+
 }

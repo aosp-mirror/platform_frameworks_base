@@ -16,15 +16,22 @@
 
 package com.android.internal.telephony;
 
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RegistrantList;
+import android.os.SystemProperties;
 import android.telephony.ServiceState;
+import android.util.Log;
+import com.android.internal.R;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * (<em>Not for SDK use</em>) 
@@ -108,6 +115,8 @@ public abstract class PhoneBase implements Phone {
         this.mNotifier = notifier;
         this.mContext = context;
         mLooper = Looper.myLooper();
+
+        setLocaleByCarrier();
 
         setUnitTestMode(unitTestMode);
     }
@@ -307,4 +316,89 @@ public abstract class PhoneBase implements Phone {
         }
     }
 
+    /**
+     * Set the locale by matching the carrier string in
+     * a string-array resource
+     */
+    private void setLocaleByCarrier() {
+        String carrier = SystemProperties.get("ro.carrier");
+
+        if (null == carrier || 0 == carrier.length()) {
+            return;
+        }
+
+        CharSequence[] carrierLocales = mContext.
+                getResources().getTextArray(R.array.carrier_locales);
+
+        for (int i = 0; i < carrierLocales.length-1; i+=2) {
+            String c = carrierLocales[i].toString();
+            String l = carrierLocales[i+1].toString();
+            if (carrier.equals(c)) {
+                String language = l.substring(0, 2);
+                String country = "";
+                if (l.length() >=5) {
+                    country = l.substring(3, 5);
+                }
+                setSystemLocale(language, country);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Utility code to set the system locale if it's not set already
+     * @param langauge Two character language code desired
+     * @param country Two character country code desired
+     *
+     *  {@hide}
+     */
+    public void setSystemLocale(String language, String country) {
+        String l = SystemProperties.get("persist.sys.language");
+        String c = SystemProperties.get("persist.sys.country");
+
+        if (null == language) {
+            return; // no match possible
+        }
+        language.toLowerCase();
+        if (null != country) {
+            country = "";
+        }
+        country = country.toUpperCase();
+
+        if((null == l || 0 == l.length()) && (null == c || 0 == c.length())) {
+            try {
+                // try to find a good match
+                String[] locales = mContext.getAssets().getLocales();
+                final int N = locales.length;
+                String bestMatch = null;
+                for(int i = 0; i < N; i++) {
+                    if (locales[i]!=null && locales[i].length() >= 2 &&
+                            locales[i].substring(0,2).equals(language)) {
+                        if (locales[i].length() >= 5 &&
+                                locales[i].substring(3,5).equals(country)) {
+                            bestMatch = locales[i];
+                            break;
+                        } else if (null == bestMatch) {
+                            bestMatch = locales[i];
+                        }
+                    }
+                }
+                if (null != bestMatch) {
+                    IActivityManager am = ActivityManagerNative.getDefault();
+                    Configuration config = am.getConfiguration();
+
+                    if (bestMatch.length() >= 5) {
+                        config.locale = new Locale(bestMatch.substring(0,2),
+                                                   bestMatch.substring(3,5));
+                    } else {
+                        config.locale = new Locale(bestMatch.substring(0,2));
+                    }
+                    config.userSetLocale = true;
+                    am.updateConfiguration(config);
+                }
+            } catch (Exception e) {
+                // Intentionally left blank
+            }
+        }
+    }
 }

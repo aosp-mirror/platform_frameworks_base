@@ -741,22 +741,18 @@ public class ViewDebug {
             final CountDownLatch latch = new CountDownLatch(1);
             final Bitmap[] cache = new Bitmap[1];
 
-            final boolean hasCache = captureView.isDrawingCacheEnabled();
-            final boolean willNotCache = captureView.willNotCacheDrawing();
-
-            if (willNotCache) {
-                // TODO: Should happen on the UI thread
-                captureView.setWillNotCacheDrawing(false);
-            }
-
             root.post(new Runnable() {
                 public void run() {
                     try {
-                        if (!hasCache) {
-                            captureView.buildDrawingCache();
+                        cache[0] = captureView.createSnapshot(
+                                Bitmap.Config.ARGB_8888, 0);
+                    } catch (OutOfMemoryError e) {
+                        try {
+                            cache[0] = captureView.createSnapshot(
+                                    Bitmap.Config.ARGB_4444, 0);
+                        } catch (OutOfMemoryError e2) {
+                            Log.w("View", "Out of memory for bitmap");
                         }
-
-                        cache[0] = captureView.getDrawingCache();
                     } finally {
                         latch.countDown();
                     }
@@ -776,20 +772,15 @@ public class ViewDebug {
                         if (out != null) {
                             out.close();
                         }
+                        cache[0].recycle();
                     }
+                } else {
+                    Log.w("View", "Failed to create capture bitmap!");
+                    clientStream.close();
                 }
             } catch (InterruptedException e) {
                 Log.w("View", "Could not complete the capture of the view " + captureView);
                 Thread.currentThread().interrupt();
-            } finally {
-                if (willNotCache) {
-                    // TODO: Should happen on the UI thread
-                    captureView.setWillNotCacheDrawing(true);
-                }
-                if (!hasCache) {
-                    // TODO: Should happen on the UI thread                    
-                    captureView.destroyDrawingCache();
-                }
             }
         }
     }

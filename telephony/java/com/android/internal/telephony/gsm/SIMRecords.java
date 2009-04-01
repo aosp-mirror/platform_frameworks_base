@@ -27,10 +27,6 @@ import android.os.SystemProperties;
 import android.telephony.gsm.SmsMessage;
 import android.util.Log;
 import java.util.ArrayList;
-import android.app.ActivityManagerNative;
-import android.app.IActivityManager;
-import java.util.Locale;
-import android.content.res.Configuration;
 
 import static com.android.internal.telephony.TelephonyProperties.*;
 import com.android.internal.telephony.SimCard;
@@ -554,48 +550,10 @@ public final class SIMRecords extends Handler implements SimConstants
      * @param mcc Mobile Country Code of the SIM
      */
     private void setLocaleFromMccIfNeeded(int mcc) {
-        String language = SystemProperties.get("persist.sys.language");
-        String country = SystemProperties.get("persist.sys.country");
-        Log.d(LOG_TAG,"setLocaleFromMcc");
-        if((language == null || language.length() == 0) && (country == null || country.length() == 0)) {
-            try {
-                language = MccTable.defaultLanguageForMcc(mcc);
-                country = MccTable.countryCodeForMcc(mcc).toUpperCase();
-                // try to find a good match
-                String[] locales = phone.getContext().getAssets().getLocales();
-                final int N = locales.length;
-                String bestMatch = null;
-                for(int i = 0; i < N; i++) {
-                    Log.d(LOG_TAG," trying "+locales[i]);
-                    if(locales[i]!=null && locales[i].length() >= 2 &&
-                       locales[i].substring(0,2).equals(language)) {
-                        if(locales[i].length() >= 5 &&
-                           locales[i].substring(3,5).equals(country)) {
-                            bestMatch = locales[i];
-                            break;
-                        } else if(bestMatch == null) {
-                            bestMatch = locales[i];
-                        }
-                    }
-                }
-                Log.d(LOG_TAG," got bestmatch = "+bestMatch);
-                if(bestMatch != null) {
-                    IActivityManager am = ActivityManagerNative.getDefault();
-                    Configuration config = am.getConfiguration();
+        String language = MccTable.defaultLanguageForMcc(mcc);
+        String country = MccTable.countryCodeForMcc(mcc);
 
-                    if(bestMatch.length() >= 5) {
-                        config.locale = new Locale(bestMatch.substring(0,2),
-                                                   bestMatch.substring(3,5));
-                    } else {
-                        config.locale = new Locale(bestMatch.substring(0,2));
-                    }
-                    config.userSetLocale = true;
-                    am.updateConfiguration(config);
-               }
-           } catch (Exception e) {
-                // Intentionally left blank
-           }
-        }
+        phone.setSystemLocale(language, country);
     }
 
     //***** Overridden from Handler
