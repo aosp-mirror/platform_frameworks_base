@@ -45,6 +45,10 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.Poolable;
+import android.util.Pool;
+import android.util.PoolFactory;
+import android.util.PoolableManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputConnection;
@@ -7827,26 +7831,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
          * For performance purposes, this class also implements a pool of up to
          * POOL_LIMIT objects that get reused. This reduces memory allocations
          * whenever possible.
-         *
-         * The pool is implemented as a linked list of InvalidateInfo object with
-         * the root pointing to the next available InvalidateInfo. If the root
-         * is null (i.e. when all instances from the pool have been acquired),
-         * then a new InvalidateInfo is created and returned to the caller.
-         *
-         * An InvalidateInfo is sent back to the pool by calling its release()
-         * method. If the pool is full the object is simply discarded.
-         *
-         * This implementation follows the object pool pattern used in the
-         * MotionEvent class.
          */
-        static class InvalidateInfo {
+        static class InvalidateInfo implements Poolable<InvalidateInfo> {
             private static final int POOL_LIMIT = 10;
-            private static final Object sLock = new Object();
+            private static final Pool<InvalidateInfo> sPool = PoolFactory.synchronizedPool(
+                    PoolFactory.finitePool(new PoolableManager<InvalidateInfo>() {
+                        public InvalidateInfo newInstance() {
+                            return new InvalidateInfo();
+                        }
 
-            private static int sAcquiredCount = 0;
-            private static InvalidateInfo sRoot;
+                        public void onAcquired(InvalidateInfo element) {
+                        }
 
-            private InvalidateInfo next;
+                        public void onReleased(InvalidateInfo element) {
+                        }
+                    }, POOL_LIMIT)
+            );
+
+            private InvalidateInfo mNext;
 
             View target;
 
@@ -7855,28 +7857,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             int right;
             int bottom;
 
+            public void setNextPoolable(InvalidateInfo element) {
+                mNext = element;
+            }
+
+            public InvalidateInfo getNextPoolable() {
+                return mNext;
+            }
+
             static InvalidateInfo acquire() {
-                synchronized (sLock) {
-                    if (sRoot == null) {
-                        return new InvalidateInfo();
-                    }
-
-                    InvalidateInfo info = sRoot;
-                    sRoot = info.next;
-                    sAcquiredCount--;
-
-                    return info;
-                }
+                return sPool.acquire();
             }
 
             void release() {
-                synchronized (sLock) {
-                    if (sAcquiredCount < POOL_LIMIT) {
-                        sAcquiredCount++;
-                        next = sRoot;
-                        sRoot = this;
-                    }
-                }
+                sPool.release(this);
             }
         }
 
