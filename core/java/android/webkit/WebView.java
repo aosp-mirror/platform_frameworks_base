@@ -4890,7 +4890,12 @@ public class WebView extends AbsoluteLayout
                                 adapter.getCount(), 0,
                                 listView.getCheckedItemPositions());
                     }});
-                b.setNegativeButton(android.R.string.cancel, null);
+                b.setNegativeButton(android.R.string.cancel,
+                        new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        mWebViewCore.sendMessage(
+                                EventHub.SINGLE_LISTBOX_CHOICE, -2, 0);
+                }});
             }
             final AlertDialog dialog = b.create();
             listView.setAdapter(adapter);
