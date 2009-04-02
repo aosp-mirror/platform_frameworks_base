@@ -196,6 +196,12 @@ public class GoogleHttpClient implements HttpClient {
         }
     }
 
+    public String rewriteURI(String original) {
+        UrlRules rules = UrlRules.getRules(mResolver);
+        UrlRules.Rule rule = rules.matchRule(original);
+        return rule.apply(original);
+    }
+
     public HttpResponse execute(HttpUriRequest request, HttpContext context)
             throws IOException {
         // Rewrite the supplied URL...
@@ -262,7 +268,7 @@ public class GoogleHttpClient implements HttpClient {
      *
      * @param originalUserAgent to modify (however you identify yourself)
      * @return user agent with a "yes, I really can handle gzip" token added.
-     * @deprecated Use {@link #GoogleHttpClient(android.content.ContentResolver, String, boolean)} 
+     * @deprecated Use {@link #GoogleHttpClient(android.content.ContentResolver, String, boolean)}
      */
     public static String getGzipCapableUserAgent(String originalUserAgent) {
         return originalUserAgent + "; gzip";
