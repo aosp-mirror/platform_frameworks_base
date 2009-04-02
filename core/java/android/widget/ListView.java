@@ -3220,6 +3220,29 @@ public class ListView extends AbsListView {
     }
 
     /**
+     * Returns the set of checked items ids. The result is only valid if
+     * the choice mode has not been set to {@link #CHOICE_MODE_SINGLE}.
+     *
+     * @return A new array which contains the id of each checked item in the list.
+     */
+    public long[] getCheckItemIds() {
+        if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null && mAdapter != null) {
+            final SparseBooleanArray states = mCheckStates;
+            final int count = states.size();
+            final long[] ids = new long[count];
+            final ListAdapter adapter = mAdapter;
+
+            for (int i = 0; i < count; i++) {
+                ids[i]= adapter.getItemId(states.keyAt(i));
+            }
+
+            return ids;
+        }
+
+        return new long[0];
+    }
+
+    /**
      * Clear any choices previously set
      */
     public void clearChoices() {
