@@ -46,6 +46,9 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
   private static final int RADIO_TYPE_UNKNOWN = 0;
   private static final int RADIO_TYPE_GSM = 1;
   private static final int RADIO_TYPE_WCDMA = 2;
+  private static final int RADIO_TYPE_CDMA = 3;
+  private static final int RADIO_TYPE_EVDO = 4;
+  private static final int RADIO_TYPE_1xRTT = 5;
 
   /** Simple container for radio data */
   public static final class RadioData {
@@ -102,12 +105,21 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
       }
 
       // Finally get the radio type.
+      //TODO We have to edit the parameter for getNetworkType regarding CDMA
       int type = telephonyManager.getNetworkType();
       if (type == TelephonyManager.NETWORK_TYPE_UMTS) {
         radioData.radioType = RADIO_TYPE_WCDMA;
       } else if (type == TelephonyManager.NETWORK_TYPE_GPRS
                  || type == TelephonyManager.NETWORK_TYPE_EDGE) {
         radioData.radioType = RADIO_TYPE_GSM;
+      } else if (type == TelephonyManager.NETWORK_TYPE_CDMA) {
+          radioData.radioType = RADIO_TYPE_CDMA;
+      } else if (type == TelephonyManager.NETWORK_TYPE_EVDO_0) {
+          radioData.radioType = RADIO_TYPE_EVDO;
+      } else if (type == TelephonyManager.NETWORK_TYPE_EVDO_A) {
+          radioData.radioType = RADIO_TYPE_EVDO;
+      } else if (type == TelephonyManager.NETWORK_TYPE_1xRTT) {
+          radioData.radioType = RADIO_TYPE_1xRTT;
       }
 
       // Print out what we got.

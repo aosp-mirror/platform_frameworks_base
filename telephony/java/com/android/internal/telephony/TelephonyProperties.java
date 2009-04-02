@@ -26,8 +26,11 @@ public interface TelephonyProperties
 {
     //****** Baseband and Radio Interface version
 
-    /** 
-     * Baseband version 
+    //TODO T: property strings do not have to be gsm specific
+    //        change gsm.*operator.*" properties to "operator.*" properties
+
+    /**
+     * Baseband version
      * Availability: property is available any time radio is on
      */
     static final String PROPERTY_BASEBAND_VERSION = "gsm.version.baseband";
@@ -47,6 +50,12 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_OPERATOR_NUMERIC = "gsm.operator.numeric";
 
+    /** 'true' if the device is on a manually selected network
+     *
+     *  Availability: when registered to a network
+     */
+    static final String PROPERTY_OPERATOR_ISMANUAL = "operator.ismanual";
+
     /** 'true' if the device is considered roaming on this network for GSM
      *  purposes.
      *  Availability: when registered to a network
@@ -60,7 +69,7 @@ public interface TelephonyProperties
     static final String PROPERTY_OPERATOR_ISO_COUNTRY = "gsm.operator.iso-country";
 
     //****** SIM Card
-    /** 
+    /**
      * One of <code>"UNKNOWN"</code> <code>"ABSENT"</code> <code>"PIN_REQUIRED"</code>
      * <code>"PUK_REQUIRED"</code> <code>"NETWORK_LOCKED"</code> or <code>"READY"</code>
      */
@@ -70,15 +79,15 @@ public interface TelephonyProperties
      *  provider of the SIM. 5 or 6 decimal digits.
      *  Availablity: SIM state must be "READY"
      */
-    static String PROPERTY_SIM_OPERATOR_NUMERIC = "gsm.sim.operator.numeric";
+    static String PROPERTY_ICC_OPERATOR_NUMERIC = "gsm.sim.operator.numeric";
 
-    /** PROPERTY_SIM_OPERATOR_ALPHA is also known as the SPN, or Service Provider Name. 
+    /** PROPERTY_ICC_OPERATOR_ALPHA is also known as the SPN, or Service Provider Name.
      *  Availablity: SIM state must be "READY"
      */
-    static String PROPERTY_SIM_OPERATOR_ALPHA = "gsm.sim.operator.alpha";
+    static String PROPERTY_ICC_OPERATOR_ALPHA = "gsm.sim.operator.alpha";
 
     /** ISO country code equivalent for the SIM provider's country code*/
-    static String PROPERTY_SIM_OPERATOR_ISO_COUNTRY = "gsm.sim.operator.iso-country";
+    static String PROPERTY_ICC_OPERATOR_ISO_COUNTRY = "gsm.sim.operator.iso-country";
 
     /**
      * Indicates the available radio technology.  Values include: <code>"unknown"</code>,

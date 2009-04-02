@@ -16,10 +16,10 @@
 
 package com.android.unit_tests;
 
-import com.android.internal.telephony.gsm.GsmAlphabet;
-import com.android.internal.telephony.gsm.SmsHeader;
+import com.android.internal.telephony.GsmAlphabet;
+import com.android.internal.telephony.SmsHeader;
+import com.android.internal.telephony.gsm.SmsMessage;
 import com.android.internal.util.HexDump;
-import android.telephony.gsm.SmsMessage;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 

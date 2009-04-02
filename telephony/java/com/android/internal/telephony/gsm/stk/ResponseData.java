@@ -16,8 +16,8 @@
 
 package com.android.internal.telephony.gsm.stk;
 
-import com.android.internal.telephony.gsm.EncodeException;
-import com.android.internal.telephony.gsm.GsmAlphabet;
+import com.android.internal.telephony.EncodeException;
+import com.android.internal.telephony.GsmAlphabet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;

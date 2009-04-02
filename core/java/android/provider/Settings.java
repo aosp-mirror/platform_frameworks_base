@@ -2049,6 +2049,70 @@ public final class Settings {
          * @hide pending API council
          */
         public static final String BACKGROUND_DATA = "background_data";
+
+        /**
+         * The CDMA roaming mode 0 = Home Networks, CDMA default
+         *                       1 = Roaming on Affiliated networks
+         *                       2 = Roaming on any networks
+         * @hide
+         */
+        public static final String CDMA_ROAMING_MODE = "roaming_settings";
+
+        /**
+         * The CDMA subscription mode 0 = RUIM/SIM (default)
+         *                                1 = NV
+         * @hide
+         */
+        public static final String CDMA_SUBSCRIPTION_MODE = "subscription_mode";
+
+        /**
+         * represents current active phone class
+         * 1 = GSM-Phone, 0 = CDMA-Phone
+         * @hide
+         */
+        public static final String CURRENT_ACTIVE_PHONE = "current_active_phone";
+
+        /**
+         * The preferred network mode 7 = Global, CDMA default
+         *                            4 = CDMA only
+         *                            3 = GSM/UMTS only
+         * @hide
+         */
+        public static final String PREFERRED_NETWORK_MODE =
+                "preferred_network_mode";
+
+        /**
+         * CDMA Cell Broadcast SMS
+         *                            0 = CDMA Cell Broadcast SMS disabled
+         *                            1 = CDMA Cell Broadcast SMS enabled
+         * @hide
+         */
+        public static final String CDMA_CELL_BROADCAST_SMS =
+                "cdma_cell_broadcast_sms";
+
+        /**
+         * The cdma subscription 0 = Subscription from RUIM, when available
+         *                       1 = Subscription from NV
+         * @hide
+         */
+        public static final String PREFERRED_CDMA_SUBSCRIPTION =
+                "preferred_cdma_subscription";
+
+        /**
+         * Whether the enhanced voice privacy mode is enabled.
+         * 0 = normal voice privacy
+         * 1 = enhanced voice privacy
+         * @hide
+         */
+        public static final String ENHANCED_VOICE_PRIVACY_ENABLED = "enhanced_voice_privacy_enabled";
+
+        /**
+         * Whether the TTY mode mode is enabled.
+         * 0 = disabled
+         * 1 = enabled
+         * @hide
+         */
+        public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
     }
     
     /**
@@ -3127,13 +3191,13 @@ public final class Settings {
             throw new RuntimeException("this should never happen");
         }
 
-        String imei = TelephonyManager.getDefault().getDeviceId();
-        if (TextUtils.isEmpty(imei)) {
+        String deviceId = TelephonyManager.getDefault().getDeviceId();
+        if (TextUtils.isEmpty(deviceId)) {
             return "";
         }
 
-        byte[] hashedImei = digest.digest(imei.getBytes());
-        String id = new String(Base64.encodeBase64(hashedImei), 0, 12);
+        byte[] hashedDeviceId = digest.digest(deviceId.getBytes());
+        String id = new String(Base64.encodeBase64(hashedDeviceId), 0, 12);
         id = id.replaceAll("/", "_");
         sJidResource = JID_RESOURCE_PREFIX + id;
         return sJidResource;
@@ -3152,3 +3216,4 @@ public final class Settings {
         return "android-" + Long.toHexString(androidId);
     }
 }
+

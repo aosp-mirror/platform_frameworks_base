@@ -97,6 +97,12 @@
     <string name="PwdMmi">Password change</string>
     <!-- Displayed as the title for a success/failure report changing the SIM PIN. -->
     <string name="PinMmi">PIN change</string>
+    <string name="CnipMmi">Calling number present</string>
+    <string name="CnirMmi">Calling number restricted</string>
+    <string name="ThreeWCMmi">Three way calling</string>
+    <string name="RuacMmi">Rejection of undesired annoying calls</string>
+    <string name="CndMmi">Calling number delivery</string>
+    <string name="DndMmi">Do not disturb</string>
 
     <!-- Displayed to confirm to the user that caller ID will be restricted on the next call as usual. -->
     <string name="CLIRDefaultOnNextCallOn">Caller ID defaults to restricted. Next call: Restricted</string>
@@ -2290,6 +2296,7 @@
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
 
+
     <!-- Shown in gadget hosts (e.g. the home screen) when there was an error inflating
     the gadget. -->
     <string name="gadget_host_error_inflating">Error inflating widget</string>
@@ -2316,6 +2323,7 @@
          ContactsProvider and GoogleContactsProvider -->
     <skip />
 
+
     <!-- This string appears (on two lines) when you type a number into contacts search, to let you dial the phone number you typed.  The first line will be in bigger type than the second. -->
     <string name="dial_number_using">Dial number\nusing <xliff:g id="number" example="555">%s</xliff:g></string>
 
@@ -2326,3 +2334,8 @@
     <string-array translatable="false" name="carrier_locales">
     </string-array>    
 </resources>
+
+
+
+
+

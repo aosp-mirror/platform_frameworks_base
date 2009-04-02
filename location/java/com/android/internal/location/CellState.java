@@ -60,9 +60,11 @@ public class CellState {
     }
 
     public CellState(TelephonyManager telephonyManager, CellLocation location, int signalStrength) {
-        GsmCellLocation loc = (GsmCellLocation)location;
-        mLac = loc.getLac(); // example: 6032
-        mCid = loc.getCid(); // example: 31792
+        if (location instanceof GsmCellLocation) {
+            GsmCellLocation loc = (GsmCellLocation)location;
+            mLac = loc.getLac(); // example: 6032
+            mCid = loc.getCid(); // example: 31792
+        }
         mTime = System.currentTimeMillis();
 
         // Get radio type
@@ -72,6 +74,11 @@ public class CellState {
             mRadioType = RADIO_TYPE_GPRS;
         } else if (radioType == TelephonyManager.NETWORK_TYPE_UMTS) {
             mRadioType = RADIO_TYPE_WCDMA;
+        } else if (radioType == TelephonyManager.NETWORK_TYPE_CDMA ||
+                radioType == TelephonyManager.NETWORK_TYPE_EVDO_0 ||
+                radioType == TelephonyManager.NETWORK_TYPE_EVDO_A ||
+                radioType == TelephonyManager.NETWORK_TYPE_1xRTT) {
+            mRadioType = RADIO_TYPE_CDMA;
         }
 
         // Get neighboring cells
@@ -290,3 +297,4 @@ public class CellState {
         }
     }
 }
+

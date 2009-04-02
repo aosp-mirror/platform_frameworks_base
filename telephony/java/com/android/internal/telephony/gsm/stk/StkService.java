@@ -23,11 +23,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 
-import com.android.internal.telephony.gsm.CommandsInterface;
-import com.android.internal.telephony.gsm.GsmSimCard;
+import com.android.internal.telephony.IccUtils;
+import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.EncodeException;
+import com.android.internal.telephony.GsmAlphabet;
+import com.android.internal.telephony.gsm.SimCard;
 import com.android.internal.telephony.gsm.SIMFileHandler;
 import com.android.internal.telephony.gsm.SIMRecords;
-import com.android.internal.telephony.gsm.SimUtils;
 
 import android.util.Config;
 
@@ -115,10 +117,12 @@ class RilMessage {
  */
 public class StkService extends Handler implements AppInterface {
 
+    // Class members
+    private static SIMRecords mSimRecords;
+    
     // Service members.
     private static StkService sInstance;
     private CommandsInterface mCmdIf;
-    private SIMRecords mSimRecords;
     private Context mContext;
     private StkCmdMessage mCurrntCmd = null;
     private StkCmdMessage mMenuCmd = null;
@@ -147,7 +151,7 @@ public class StkService extends Handler implements AppInterface {
 
     /* Intentionally private for singleton */
     private StkService(CommandsInterface ci, SIMRecords sr, Context context,
-            SIMFileHandler fh, GsmSimCard sc) {
+            SIMFileHandler fh, SimCard sc) {
         if (ci == null || sr == null || context == null || fh == null
                 || sc == null) {
             throw new NullPointerException(
@@ -170,6 +174,23 @@ public class StkService extends Handler implements AppInterface {
 
         // Register for SIM ready event.
         mSimRecords.registerForRecordsLoaded(this, MSG_ID_SIM_LOADED, null);
+    }
+
+    public void dispose() {
+        mSimRecords.unregisterForRecordsLoaded(this);
+        mCmdIf.unSetOnStkSessionEnd(this);
+        mCmdIf.unSetOnStkProactiveCmd(this);
+        mCmdIf.unSetOnStkEvent(this);
+        mCmdIf.unSetOnStkCallSetUp(this);
+
+        this.removeCallbacksAndMessages(null);
+
+        //removing instance
+        sInstance = null;
+    }
+
+    protected void finalize() {
+        StkLog.d(this, "Service finalized");
     }
 
     private void handleRilMsg(RilMessage rilMsg) {
@@ -334,7 +355,7 @@ public class StkService extends Handler implements AppInterface {
         }
 
         byte[] rawData = buf.toByteArray();
-        String hexString = SimUtils.bytesToHexString(rawData);
+        String hexString = IccUtils.bytesToHexString(rawData);
         if (Config.LOGD) {
             StkLog.d(this, "TERMINAL RESPONSE: " + hexString);
         }
@@ -380,7 +401,7 @@ public class StkService extends Handler implements AppInterface {
         int len = rawData.length - 2; // minus (tag + length)
         rawData[1] = (byte) len;
 
-        String hexString = SimUtils.bytesToHexString(rawData);
+        String hexString = IccUtils.bytesToHexString(rawData);
 
         mCmdIf.sendEnvelope(hexString, null);
     }
@@ -423,7 +444,7 @@ public class StkService extends Handler implements AppInterface {
         int len = rawData.length - 2; // minus (tag + length)
         rawData[1] = (byte) len;
 
-        String hexString = SimUtils.bytesToHexString(rawData);
+        String hexString = IccUtils.bytesToHexString(rawData);
 
         mCmdIf.sendEnvelope(hexString, null);
     }
@@ -439,7 +460,7 @@ public class StkService extends Handler implements AppInterface {
      * @return The only Service object in the system
      */
     public static StkService getInstance(CommandsInterface ci, SIMRecords sr,
-            Context context, SIMFileHandler fh, GsmSimCard sc) {
+            Context context, SIMFileHandler fh, SimCard sc) {
         if (sInstance == null) {
             if (ci == null || sr == null || context == null || fh == null
                     || sc == null) {
@@ -448,6 +469,17 @@ public class StkService extends Handler implements AppInterface {
             HandlerThread thread = new HandlerThread("Stk Telephony service");
             thread.start();
             sInstance = new StkService(ci, sr, context, fh, sc);
+            StkLog.d(sInstance, "NEW sInstance");
+        } else if ((sr != null) && (mSimRecords != sr)) {
+            StkLog.d(sInstance, String.format(
+                    "Reinitialize the Service with SIMRecords sr=0x%x.", sr));
+            mSimRecords = sr;
+
+            // re-Register for SIM ready event.
+            mSimRecords.registerForRecordsLoaded(sInstance, MSG_ID_SIM_LOADED, null);
+            StkLog.d(sInstance, "sr changed reinitialize and return current sInstance");
+        } else {
+            StkLog.d(sInstance, "Return current sInstance");
         }
         return sInstance;
     }

@@ -1099,4 +1099,12 @@
    <public type="anim" name="anticipate_overshoot_interpolator" id="0x010a0009" />
    <public type="anim" name="bounce_interpolator" id="0x010a000a" />
 
+  <public type="drawable" name="stat_sys_vp_phone_call" id="0x0108022d" />
+  <public type="drawable" name="stat_sys_vp_phone_call_on_hold" id="0x0108022e" />
+
 </resources>
+
+
+
+
+
