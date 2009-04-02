@@ -200,7 +200,8 @@ public class UriMatcher
      */
     public int match(Uri uri)
     {
-        final int li = uri.getPathSegments().size();
+        final List<String> pathSegments = uri.getPathSegments();
+        final int li = pathSegments.size();
 
         UriMatcher node = this;
 
@@ -209,7 +210,7 @@ public class UriMatcher
         }
 
         for (int i=-1; i<li; i++) {
-            String u = i < 0 ? uri.getAuthority() : uri.getPathSegments().get(i);
+            String u = i < 0 ? uri.getAuthority() : pathSegments.get(i);
             ArrayList<UriMatcher> list = node.mChildren;
             if (list == null) {
                 break;
