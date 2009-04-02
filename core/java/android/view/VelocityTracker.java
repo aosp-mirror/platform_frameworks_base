@@ -20,7 +20,7 @@ import android.util.Config;
 import android.util.Log;
 import android.util.Poolable;
 import android.util.Pool;
-import android.util.PoolFactory;
+import android.util.Pools;
 import android.util.PoolableManager;
 
 /**
@@ -41,8 +41,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
     static final int LONGEST_PAST_TIME = 200;
 
     static final VelocityTracker[] mPool = new VelocityTracker[1];
-    private static final Pool<VelocityTracker> sPool = PoolFactory.synchronizedPool(
-            PoolFactory.finitePool(new PoolableManager<VelocityTracker>() {
+    private static final Pool<VelocityTracker> sPool = Pools.synchronizedPool(
+            Pools.finitePool(new PoolableManager<VelocityTracker>() {
                 public VelocityTracker newInstance() {
                     return new VelocityTracker();
                 }
