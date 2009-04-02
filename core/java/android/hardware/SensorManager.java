@@ -616,7 +616,8 @@ public class SensorManager extends IRotationWatcher.Stub
      * @param sensors a bit masks of the sensors to register to
      * @param rate rate of events. This is only a hint to the system. events
      * may be received faster or slower than the specified rate. Usually events
-     * are received faster.
+     * are received faster. The value must be one of {@link #SENSOR_DELAY_NORMAL},
+     * {@link #SENSOR_DELAY_UI}, {@link #SENSOR_DELAY_GAME}, or {@link #SENSOR_DELAY_FASTEST}.
      *
      * @return true if the sensor is supported and successfully enabled
      */
@@ -785,7 +786,9 @@ public class SensorManager extends IRotationWatcher.Stub
      * @param sensor The {@link android.hardware.Sensor Sensor} to register to.
      * @param rate The rate {@link android.hardware.SensorEvent sensor events} are delivered at.
      * This is only a hint to the system. Events may be received faster or
-     * slower than the specified rate. Usually events are received faster.
+     * slower than the specified rate. Usually events are received faster. The value must be
+     * one of {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI}, {@link #SENSOR_DELAY_GAME},
+     * or {@link #SENSOR_DELAY_FASTEST}.
      *
      * @return true if the sensor is supported and successfully enabled.
      *
@@ -802,7 +805,9 @@ public class SensorManager extends IRotationWatcher.Stub
      * @param sensor The {@link android.hardware.Sensor Sensor} to register to.
      * @param rate The rate {@link android.hardware.SensorEvent sensor events} are delivered at.
      * This is only a hint to the system. Events may be received faster or
-     * slower than the specified rate. Usually events are received faster.
+     * slower than the specified rate. Usually events are received faster. The value must be one
+     * of {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI}, {@link #SENSOR_DELAY_GAME}, or
+     * {@link #SENSOR_DELAY_FASTEST}.
      * @param handler The {@link android.os.Handler Handler} the
      * {@link android.hardware.SensorEvent sensor events} will be delivered to.
      *
