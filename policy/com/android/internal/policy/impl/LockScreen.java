@@ -29,7 +29,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.android.internal.telephony.SimCard;
+import com.android.internal.telephony.IccCard;
 
 import java.util.Date;
 
@@ -193,7 +193,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 final View view = mOnlyVisibleWhenSimNotOk[i];
                 view.setVisibility(View.GONE);
             }
-            refreshSimOkHeaders(mUpdateMonitor.getTelephonyPlmn(), mUpdateMonitor.getTelephonySpn());
+            refreshSimOkHeaders(mUpdateMonitor.getTelephonyPlmn(), 
+                                    mUpdateMonitor.getTelephonySpn());
             refreshAlarmDisplay();
             refreshBatteryDisplay();
         } else {
@@ -210,11 +211,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     private void refreshSimBadInfo() {
-        final SimCard.State simState = mUpdateMonitor.getSimState();
-        if (simState == SimCard.State.PUK_REQUIRED) {
+        final IccCard.State simState = mUpdateMonitor.getSimState();
+        if (simState == IccCard.State.PUK_REQUIRED) {
             mHeaderSimBad1.setText(R.string.lockscreen_sim_puk_locked_message);
             mHeaderSimBad2.setText(R.string.lockscreen_sim_puk_locked_instructions);
-        } else if (simState == SimCard.State.ABSENT) {
+        } else if (simState == IccCard.State.ABSENT) {
             mHeaderSimBad1.setText(R.string.lockscreen_missing_sim_message);
             mHeaderSimBad2.setVisibility(View.GONE);
             //mHeaderSimBad2.setText(R.string.lockscreen_missing_sim_instructions);
@@ -226,7 +227,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     private void refreshUnlockIntructions() {
         if (mLockPatternUtils.isLockPatternEnabled()
-                || mUpdateMonitor.getSimState() == SimCard.State.PIN_REQUIRED) {
+                || mUpdateMonitor.getSimState() == IccCard.State.PIN_REQUIRED) {
             mLockInstructions.setText(R.string.lockscreen_instructions_when_pattern_enabled);
         } else {
             mLockInstructions.setText(R.string.lockscreen_instructions_when_pattern_disabled);
@@ -293,8 +294,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     private void refreshSimOkHeaders(CharSequence plmn, CharSequence spn) {
-        final SimCard.State simState = mUpdateMonitor.getSimState();
-        if (simState == SimCard.State.READY) {
+        final IccCard.State simState = mUpdateMonitor.getSimState();
+        if (simState == IccCard.State.READY) {
             if (plmn != null) {
                 mHeaderSimOk1.setVisibility(View.VISIBLE);
                 mHeaderSimOk1.setText(plmn);
@@ -308,22 +309,22 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             } else {
                 mHeaderSimOk2.setVisibility(View.GONE);
             }
-        } else if (simState == SimCard.State.PIN_REQUIRED) {
+        } else if (simState == IccCard.State.PIN_REQUIRED) {
             mHeaderSimOk1.setVisibility(View.VISIBLE);
             mHeaderSimOk1.setText(R.string.lockscreen_sim_locked_message);
             mHeaderSimOk2.setVisibility(View.GONE);
-        } else if (simState == SimCard.State.ABSENT) {
+        } else if (simState == IccCard.State.ABSENT) {
             mHeaderSimOk1.setVisibility(View.VISIBLE);
             mHeaderSimOk1.setText(R.string.lockscreen_missing_sim_message_short);
             mHeaderSimOk2.setVisibility(View.GONE);
-        } else if (simState == SimCard.State.NETWORK_LOCKED) {
+        } else if (simState == IccCard.State.NETWORK_LOCKED) {
             mHeaderSimOk1.setVisibility(View.VISIBLE);
             mHeaderSimOk1.setText(R.string.lockscreen_network_locked_message);
             mHeaderSimOk2.setVisibility(View.GONE);
         }
     }
 
-    public void onSimStateChanged(SimCard.State simState) {
+    public void onSimStateChanged(IccCard.State simState) {
         mSimOk = isSimOk(simState);
         refreshViewsWRTSimOk();
     }
@@ -333,10 +334,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
      *   a special screen with the emergency call button and keep them from
      *   doing anything else.
      */
-    private boolean isSimOk(SimCard.State simState) {
+    private boolean isSimOk(IccCard.State simState) {
         boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
-                && simState == SimCard.State.ABSENT);
-        return !(missingAndNotProvisioned || simState == SimCard.State.PUK_REQUIRED);
+                && simState == IccCard.State.ABSENT);
+        return !(missingAndNotProvisioned || simState == IccCard.State.PUK_REQUIRED);
     }
 
     public void onOrientationChange(boolean inPortrait) {
@@ -369,3 +370,4 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mUpdateMonitor.removeCallback(this);
     }
 }
+
