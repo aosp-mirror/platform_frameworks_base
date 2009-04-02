@@ -125,7 +125,6 @@ extern int register_android_os_Power(JNIEnv *env);
 extern int register_android_os_StatFs(JNIEnv *env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_Hardware(JNIEnv* env);
-extern int register_android_os_Exec(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv *env);
 extern int register_android_os_FileUtils(JNIEnv *env);
@@ -1107,7 +1106,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_database_SQLiteQuery),
     REG_JNI(register_android_database_SQLiteStatement),
     REG_JNI(register_android_os_Debug),
-    REG_JNI(register_android_os_Exec),
     REG_JNI(register_android_os_FileObserver),
     REG_JNI(register_android_os_FileUtils),
     REG_JNI(register_android_os_ParcelFileDescriptor),
