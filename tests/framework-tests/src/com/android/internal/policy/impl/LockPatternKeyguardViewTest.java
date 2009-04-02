@@ -17,8 +17,7 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
-
-import com.android.internal.telephony.SimCard;
+import com.android.internal.telephony.IccCard;
 import android.test.AndroidTestCase;
 import android.view.View;
 import android.view.KeyEvent;
@@ -39,7 +38,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
 
     private static class MockUpdateMonitor extends KeyguardUpdateMonitor {
 
-        public SimCard.State simState = SimCard.State.READY;
+        public IccCard.State simState = IccCard.State.READY;
         public boolean inPortrait = false;
         public boolean keyboardOpen = false;
 
@@ -48,7 +47,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         }
 
         @Override
-        public SimCard.State getSimState() {
+        public IccCard.State getSimState() {
             return simState;
         }
 
@@ -339,7 +338,7 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
 
     public void testMenuDoesntGoToUnlockScreenOnWakeWhenPukLocked() {
         // PUK locked
-        mUpdateMonitor.simState = SimCard.State.PUK_REQUIRED;
+        mUpdateMonitor.simState = IccCard.State.PUK_REQUIRED;
 
         // wake by menu
         mLPKV.wakeWhenReadyTq(KeyEvent.KEYCODE_MENU);

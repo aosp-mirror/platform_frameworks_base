@@ -38,6 +38,7 @@ import android.util.Config;
 import android.util.Log;
 import android.util.Xml;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.telephony.RILConstants;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
@@ -175,7 +176,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Shortcuts, applications, folders
                 db.execSQL("UPDATE favorites SET spanX=1, spanY=1 WHERE itemType<=0");
                 // Photo frames, clocks
-                db.execSQL("UPDATE favorites SET spanX=2, spanY=2 WHERE itemType=1000 or itemType=1002");
+                db.execSQL(
+                    "UPDATE favorites SET spanX=2, spanY=2 WHERE itemType=1000 or itemType=1002");
                 // Search boxes
                 db.execSQL("UPDATE favorites SET spanX=4, spanY=1 WHERE itemType=1001");
                 db.setTransactionSuccessful();
@@ -582,6 +584,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + " VALUES(?,?);");
         
         Resources r = mContext.getResources();
+        loadSetting(stmt, Settings.Secure.CURRENT_ACTIVE_PHONE,
+                RILConstants.CDMA_PHONE);
         loadBooleanSetting(stmt, Settings.System.DIM_SCREEN,
                 R.bool.def_dim_screen);
         loadSetting(stmt, Settings.System.STAY_ON_WHILE_PLUGGED_IN, 
@@ -655,6 +659,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadSetting(stmt, Settings.Secure.WIFI_WATCHDOG_WATCH_LIST, wifiWatchList);
         }
 
+        // Set the preferred network mode to 0 = Global, CDMA default
+        loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE, 
+                RILConstants.PREFERRED_NETWORK_MODE);
+
+        // Enable or disable Cell Broadcast SMS
+        loadSetting(stmt, Settings.Secure.CDMA_CELL_BROADCAST_SMS,
+                RILConstants.CDMA_CELL_BROADCAST_SMS_DISABLED);
+
+        // Set the preferred cdma subscription to 0 = Subscription from RUIM, when available
+        loadSetting(stmt, Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION, 
+                RILConstants.PREFERRED_CDMA_SUBSCRIPTION);
+
         // Don't do this.  The SystemServer will initialize ADB_ENABLED from a
         // persistent system property instead.
         //loadSetting(stmt, Settings.Secure.ADB_ENABLED, 0);
@@ -691,3 +707,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Float.toString(mContext.getResources().getFraction(resid, base, base)));
     }
 }
+

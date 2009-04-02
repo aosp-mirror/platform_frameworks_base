@@ -16,13 +16,6 @@
 
 package com.android.server.status;
 
-import com.android.internal.R;
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.location.GpsLocationProvider;
-import com.android.internal.telephony.SimCard;
-import com.android.internal.telephony.TelephonyIntents;
-import com.android.server.am.BatteryStatsService;
-
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
@@ -58,6 +51,14 @@ import android.view.WindowManagerImpl;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.android.internal.R;
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.location.GpsLocationProvider;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.cdma.TtyIntent;
+import com.android.server.am.BatteryStatsService;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -110,7 +111,10 @@ public class StatusBarPolicy {
     // phone
     private TelephonyManager mPhone;
     private IBinder mPhoneIcon;
+
+    //***** Signal strength icons
     private IconData mPhoneData;
+    //GSM/UMTS
     private static final int[] sSignalImages = new int[] {
             com.android.internal.R.drawable.stat_sys_signal_0,
             com.android.internal.R.drawable.stat_sys_signal_1,
@@ -125,7 +129,32 @@ public class StatusBarPolicy {
             com.android.internal.R.drawable.stat_sys_r_signal_3,
             com.android.internal.R.drawable.stat_sys_r_signal_4
         };
+    //CDMA
+    private static final int[] sSignalImages_cdma = new int[] {
+        com.android.internal.R.drawable.stat_sys_signal_0_cdma,
+        com.android.internal.R.drawable.stat_sys_signal_1_cdma,
+        com.android.internal.R.drawable.stat_sys_signal_2_cdma,
+        com.android.internal.R.drawable.stat_sys_signal_3_cdma,
+        com.android.internal.R.drawable.stat_sys_signal_4_cdma
+    };
+    private static final int[] sSignalImages_r_cdma = new int[] {
+        com.android.internal.R.drawable.stat_sys_r_signal_0_cdma,
+        com.android.internal.R.drawable.stat_sys_r_signal_1_cdma,
+        com.android.internal.R.drawable.stat_sys_r_signal_2_cdma,
+        com.android.internal.R.drawable.stat_sys_r_signal_3_cdma,
+        com.android.internal.R.drawable.stat_sys_r_signal_4_cdma
+    };
+    private static final int[] sSignalImages_ra_cdma = new int[] {
+        com.android.internal.R.drawable.stat_sys_ra_signal_0_cdma,
+        com.android.internal.R.drawable.stat_sys_ra_signal_1_cdma,
+        com.android.internal.R.drawable.stat_sys_ra_signal_2_cdma,
+        com.android.internal.R.drawable.stat_sys_ra_signal_3_cdma,
+        com.android.internal.R.drawable.stat_sys_ra_signal_4_cdma
+    };
+
+    //***** Data connection icons
     private int[] mDataIconList = sDataNetType_g;
+    //GSM/UMTS
     private static final int[] sDataNetType_g = new int[] {
             com.android.internal.R.drawable.stat_sys_data_connected_g,
             com.android.internal.R.drawable.stat_sys_data_in_g,
@@ -144,12 +173,25 @@ public class StatusBarPolicy {
             com.android.internal.R.drawable.stat_sys_data_out_e,
             com.android.internal.R.drawable.stat_sys_data_inandout_e,
         };
+    //CDMA
+    private static final int[] sDataNetType_evdo = new int[] {
+        com.android.internal.R.drawable.stat_sys_data_connected_evdo,
+        com.android.internal.R.drawable.stat_sys_data_in_evdo,
+        com.android.internal.R.drawable.stat_sys_data_out_evdo,
+        com.android.internal.R.drawable.stat_sys_data_inandout_evdo,
+    };
+    private static final int[] sDataNetType_1xrtt = new int[] {
+        com.android.internal.R.drawable.stat_sys_data_connected_1xrtt,
+        com.android.internal.R.drawable.stat_sys_data_in_1xrtt,
+        com.android.internal.R.drawable.stat_sys_data_out_1xrtt,
+        com.android.internal.R.drawable.stat_sys_data_inandout_1xrtt,
+    };
+
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
-    SimCard.State mSimState = SimCard.State.READY;
+    IccCard.State mSimState = IccCard.State.READY;
     int mPhoneState = TelephonyManager.CALL_STATE_IDLE;
     int mDataState = TelephonyManager.DATA_DISCONNECTED;
-    int mDataNetType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     int mDataActivity = TelephonyManager.DATA_ACTIVITY_NONE;
     ServiceState mServiceState;
     int mSignalAsu = -1;
@@ -163,7 +205,7 @@ public class StatusBarPolicy {
     private IBinder mVolumeIcon;
     private IconData mVolumeData;
     private boolean mVolumeVisible;
-    
+
     // bluetooth device status
     private IBinder mBluetoothIcon;
     private IconData mBluetoothData;
@@ -201,6 +243,11 @@ public class StatusBarPolicy {
     // sync is failing the SyncFailing icon is displayed. Otherwise neither are displayed.
     private IBinder mSyncActiveIcon;
     private IBinder mSyncFailingIcon;
+
+    // TTY mode
+    // Icon lit when TTY mode is enabled
+    private IBinder mTTYModeIcon;
+    private IconData mTTYModeEnableIconData;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -250,6 +297,9 @@ public class StatusBarPolicy {
             else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
                 updateSimState(intent);
             }
+            else if (action.equals(TtyIntent.TTY_ENABLED_CHANGE_ACTION)) {
+                updateTTY(intent);
+            }
         }
     };
 
@@ -294,7 +344,13 @@ public class StatusBarPolicy {
         mWifiIcon = service.addIcon(mWifiData, null);
         service.setIconVisibility(mWifiIcon, false);
         // wifi will get updated by the sticky intents
-        
+
+        // TTY status
+        mTTYModeEnableIconData = IconData.makeIcon("tty",
+                null, com.android.internal.R.drawable.stat_sys_tty_mode, 0, 0);
+        mTTYModeIcon = service.addIcon(mTTYModeEnableIconData, null);
+        service.setIconVisibility(mTTYModeIcon, false);
+
         // bluetooth status
         mBluetoothData = IconData.makeIcon("bluetooth",
                 null, com.android.internal.R.drawable.stat_sys_data_bluetooth, 0, 0);
@@ -362,6 +418,7 @@ public class StatusBarPolicy {
         filter.addAction(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION);
         filter.addAction(GpsLocationProvider.GPS_FIX_CHANGE_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
     }
 
@@ -506,7 +563,7 @@ public class StatusBarPolicy {
                 com.android.internal.R.styleable.Theme);
         lp.dimAmount = a.getFloat(android.R.styleable.Theme_backgroundDimAmount, 0.5f);
         a.recycle();
-        
+
         lp.setTitle("Battery");
 
         TextView levelTextView = (TextView)v.findViewById(com.android.internal.R.id.level_percent);
@@ -642,26 +699,26 @@ public class StatusBarPolicy {
     
 
     private final void updateSimState(Intent intent) {
-        String stateExtra = intent.getStringExtra(SimCard.INTENT_KEY_SIM_STATE);
-        if (SimCard.INTENT_VALUE_SIM_ABSENT.equals(stateExtra)) {
-            mSimState = SimCard.State.ABSENT;
+        String stateExtra = intent.getStringExtra(IccCard.INTENT_KEY_ICC_STATE);
+        if (IccCard.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
+            mSimState = IccCard.State.ABSENT;
         }
-        else if (SimCard.INTENT_VALUE_SIM_READY.equals(stateExtra)) {
-            mSimState = SimCard.State.READY;
+        else if (IccCard.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
+            mSimState = IccCard.State.READY;
         }
-        else if (SimCard.INTENT_VALUE_SIM_LOCKED.equals(stateExtra)) {
-            final String lockedReason = intent.getStringExtra(SimCard.INTENT_KEY_LOCKED_REASON);
-            if (SimCard.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
-                mSimState = SimCard.State.PIN_REQUIRED;
+        else if (IccCard.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
+            final String lockedReason = intent.getStringExtra(IccCard.INTENT_KEY_LOCKED_REASON);
+            if (IccCard.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
+                mSimState = IccCard.State.PIN_REQUIRED;
             } 
-            else if (SimCard.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
-                mSimState = SimCard.State.PUK_REQUIRED;
+            else if (IccCard.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
+                mSimState = IccCard.State.PUK_REQUIRED;
             }
             else {
-                mSimState = SimCard.State.NETWORK_LOCKED;
+                mSimState = IccCard.State.NETWORK_LOCKED;
             }
         } else {
-            mSimState = SimCard.State.UNKNOWN;
+            mSimState = IccCard.State.UNKNOWN;
         }
         updateDataIcon();
     }
@@ -707,28 +764,54 @@ public class StatusBarPolicy {
         else asu = 1;
 
         int[] iconList;
-        if (mPhone.isNetworkRoaming()) {
+        if (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
+            switch(ss.getExtendedCdmaRoaming()) {
+            case ServiceState.REGISTRATION_STATE_ROAMING:
+                iconList = this.sSignalImages_r_cdma;
+                break;
+            case ServiceState.REGISTRATION_STATE_ROAMING_AFFILIATE:
+                iconList = this.sSignalImages_ra_cdma;
+                break;
+            default:
+                iconList = this.sSignalImages_cdma;
+            break;
+            }
+        } else if (mPhone.isNetworkRoaming()) {
             iconList = sSignalImages_r;
         } else {
             iconList = sSignalImages;
         }
-        
+
         mPhoneData.iconId = iconList[asu];
         mService.updateIcon(mPhoneIcon, mPhoneData, null);
     }
 
     private final void updateDataNetType() {
-        mDataNetType = mPhone.getNetworkType();
-        switch (mDataNetType) {
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-                mDataIconList = sDataNetType_e;
-                break;
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-                mDataIconList = sDataNetType_3g;
-                break;
-            default:
-                mDataIconList = sDataNetType_g;
-                break;
+        int net = mPhone.getNetworkType();
+        ServiceState ss = this.mServiceState;
+
+        switch (net) {
+
+        case TelephonyManager.NETWORK_TYPE_EDGE:
+            mDataIconList = sDataNetType_e;
+            break;
+        case TelephonyManager.NETWORK_TYPE_UMTS:
+            mDataIconList = sDataNetType_3g;
+            break;
+        case TelephonyManager.NETWORK_TYPE_CDMA:
+            // display 1xRTT for IS95A/B
+            mDataIconList = this.sDataNetType_1xrtt;
+            break;
+        case TelephonyManager.NETWORK_TYPE_1xRTT:
+            mDataIconList = this.sDataNetType_1xrtt;
+            break;
+        case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
+        case TelephonyManager.NETWORK_TYPE_EVDO_A:
+            mDataIconList = sDataNetType_evdo;
+            break;
+        default:
+            mDataIconList = sDataNetType_g;
+        break;
         }
     }
 
@@ -736,9 +819,9 @@ public class StatusBarPolicy {
         int iconId;
         boolean visible = true;
 
-        if (mSimState == SimCard.State.READY || mSimState == SimCard.State.UNKNOWN) {
+        if (mSimState == IccCard.State.READY || mSimState == IccCard.State.UNKNOWN) {
             int data = mDataState;
-            
+
             int[] list = mDataIconList;
 
             ServiceState ss = mServiceState;
@@ -775,7 +858,7 @@ public class StatusBarPolicy {
         }
         long ident = Binder.clearCallingIdentity();
         try {
-            mBatteryStats.notePhoneDataConnectionState(mDataNetType, visible);
+            mBatteryStats.notePhoneDataConnectionState(mPhone.getNetworkType(), visible);
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -865,10 +948,10 @@ public class StatusBarPolicy {
                 } else {
                     iconId = sWifiSignalImages[mLastWifiSignalLevel];
                 }
-                
+
                 // Show the icon since wi-fi is connected
                 mService.setIconVisibility(mWifiIcon, true);
-                
+
             } else {
                 mLastWifiSignalLevel = -1;
                 mIsWifiConnected = false;
@@ -914,6 +997,24 @@ public class StatusBarPolicy {
         }
     }
 
+    private final void updateTTY(Intent intent) {       
+        final String action = intent.getAction();
+        final boolean enabled = intent.getBooleanExtra(TtyIntent.TTY_ENABLED, false);
+
+        Log.i(TAG, "updateTTY: enabled: " + enabled);
+
+        if (enabled) {
+            // TTY is on
+            Log.i(TAG, "updateTTY: set TTY on");
+            mService.updateIcon(mTTYModeIcon, mTTYModeEnableIconData, null);
+            mService.setIconVisibility(mTTYModeIcon, true);          
+        } else {
+            // TTY is off
+            Log.i(TAG, "updateTTY: set TTY off");
+            mService.setIconVisibility(mTTYModeIcon, false);           
+        }
+    }
+
     private class StatusBarHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -927,3 +1028,6 @@ public class StatusBarPolicy {
         }
     }
 }
+
+
+

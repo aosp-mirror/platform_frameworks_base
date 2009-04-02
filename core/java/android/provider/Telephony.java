@@ -26,7 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.telephony.gsm.SmsMessage;
+import android.telephony.SmsMessage;
 import android.text.TextUtils;
 import android.text.util.Regex;
 import android.util.Config;
@@ -46,6 +46,10 @@ public final class Telephony {
     private static final String TAG = "Telephony";
     private static final boolean DEBUG = false;
     private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
+
+    // Constructor
+    public Telephony() {
+    }
 
     /**
      * Base columns for tables that contain text based SMSs.
@@ -1599,5 +1603,7 @@ public final class Telephony {
         public static final String EXTRA_SPN        = "spn";
     }
 }
+
+
 
 
