@@ -340,7 +340,7 @@ public final class CacheManager {
      * @hide - hide createCacheFile since it has a parameter of type headers, which is
      * in a hidden package.
      */
-    // can be called from any thread
+    // only called from WebCore thread
     public static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
         if (!forceCache && mDisabled) {
@@ -349,17 +349,25 @@ public final class CacheManager {
 
         // according to the rfc 2616, the 303 response MUST NOT be cached.
         if (statusCode == 303) {
+            // remove the saved cache if there is any
+            mDataBase.removeCache(url);
             return null;
         }
 
         // like the other browsers, do not cache redirects containing a cookie
         // header.
         if (checkCacheRedirect(statusCode) && !headers.getSetCookie().isEmpty()) {
+            // remove the saved cache if there is any
+            mDataBase.removeCache(url);
             return null;
         }
 
         CacheResult ret = parseHeaders(statusCode, headers, mimeType);
-        if (ret != null) {
+        if (ret == null) {
+            // this should only happen if the headers has "no-store" in the
+            // cache-control. remove the saved cache if there is any
+            mDataBase.removeCache(url);
+        } else {
             setupFiles(url, ret);
             try {
                 ret.outStream = new FileOutputStream(ret.outFile);
