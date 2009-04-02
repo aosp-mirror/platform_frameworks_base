@@ -16,28 +16,31 @@
 
 package com.android.internal.telephony.gsm;
 
+import android.database.Cursor;
+import android.os.Message;
+import android.os.SystemProperties;
+import android.os.SystemService;
+import android.util.Log;
+
+import com.android.internal.telephony.DataLink;
+import com.android.internal.telephony.DataConnectionTracker.State;
+import com.android.internal.telephony.PhoneBase;
+import com.android.internal.util.ArrayUtils;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import android.database.Cursor;
-import android.os.Message;
-import android.os.SystemProperties;
-import android.os.SystemService;
-import com.android.internal.telephony.gsm.DataConnectionTracker.State;
-import com.android.internal.util.ArrayUtils;
-import android.util.Log;
-
 /**
  * Represents a PPP link.
- * 
+ *
  * Ideally this would be managed by the RIL implementation, but
  * we currently have implementations where this is not the case.
  *
  * {@hide}
  */
-final class PppLink extends DataLink implements DataLinkInterface {
+final class PppLink extends DataLink {
     private static final String LOG_TAG = "GSM";
 
     static final String PATH_PPP_OPERSTATE = "/sys/class/net/ppp0/operstate";
@@ -69,11 +72,14 @@ final class PppLink extends DataLink implements DataLinkInterface {
     };
     private final byte[] mCheckPPPBuffer = new byte[32];
 
+    private PhoneBase phone;
+
     int lastPppdExitCode = EXIT_OK;
 
 
-    PppLink(DataConnectionTracker dc) {
+    PppLink(GsmDataConnectionTracker dc, GSMPhone p) {
         super(dc);
+        this.phone = p;
     }
 
     public void connect() {
@@ -131,7 +137,7 @@ final class PppLink extends DataLink implements DataLinkInterface {
                 checkPPP();
 
                 // keep polling in case interface goes down
-                if (dataConnection.state != State.IDLE) {                    
+                if (dataConnection.getState() != State.IDLE) {
                     Message poll = obtainMessage();
                     poll.what = EVENT_POLL_DATA_CONNECTION;
                     sendMessageDelayed(poll, POLL_SYSFS_MILLIS);
@@ -141,7 +147,7 @@ final class PppLink extends DataLink implements DataLinkInterface {
     }
 
     private void checkPPP() {
-        boolean connecting = (dataConnection.state == State.CONNECTING);
+        boolean connecting = (dataConnection.getState() == State.CONNECTING);
 
         try {
             RandomAccessFile file = new RandomAccessFile(PATH_PPP_OPERSTATE, "r");
@@ -152,10 +158,10 @@ final class PppLink extends DataLink implements DataLinkInterface {
             // "unknown" where one might otherwise expect "up"
             if (ArrayUtils.equals(mCheckPPPBuffer, UP_ASCII_STRING, UP_ASCII_STRING.length)
                     || ArrayUtils.equals(mCheckPPPBuffer, UNKNOWN_ASCII_STRING,
-                            UNKNOWN_ASCII_STRING.length) 
-                            && dataConnection.state == State.CONNECTING) {
+                    UNKNOWN_ASCII_STRING.length)
+                    && dataConnection.getState() == State.CONNECTING) {
 
-                Log.i(LOG_TAG, 
+                Log.i(LOG_TAG,
                 "found ppp interface. Notifying GPRS connected");
 
                 if (mLinkChangeRegistrant != null) {
@@ -163,23 +169,23 @@ final class PppLink extends DataLink implements DataLinkInterface {
                 }
 
                 connecting = false;
-            } else if (dataConnection.state == State.CONNECTED 
+            } else if (dataConnection.getState() == State.CONNECTED
                     && ArrayUtils.equals(mCheckPPPBuffer, DOWN_ASCII_STRING,
-                            DOWN_ASCII_STRING.length)) {
+                    DOWN_ASCII_STRING.length)) {
 
-                Log.i(LOG_TAG, 
+                Log.i(LOG_TAG,
                 "ppp interface went down. Reconnecting...");
 
                 if (mLinkChangeRegistrant != null) {
                     mLinkChangeRegistrant.notifyResult(LinkState.LINK_DOWN);
                 }
-            }                                    
+            }
         } catch (IOException ex) {
             if (! (ex instanceof FileNotFoundException)) {
                 Log.i(LOG_TAG, "Poll ppp0 ex " + ex.toString());
             }
 
-            if (dataConnection.state == State.CONNECTED &&
+            if (dataConnection.getState() == State.CONNECTED &&
                     mLinkChangeRegistrant != null) {
                 mLinkChangeRegistrant.notifyResult(LinkState.LINK_DOWN);
             }
@@ -205,5 +211,9 @@ final class PppLink extends DataLink implements DataLinkInterface {
             }
         }
 
+    }
+
+    protected void log(String s) {
+        Log.d(LOG_TAG, "[PppLink] " + s);
     }
 }

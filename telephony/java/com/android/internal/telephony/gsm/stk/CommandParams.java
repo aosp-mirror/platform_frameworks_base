@@ -19,7 +19,7 @@ package com.android.internal.telephony.gsm.stk;
 import android.graphics.Bitmap;
 
 /**
- * Container class for proactive command parameters. 
+ * Container class for proactive command parameters.
  *
  */
 class CommandParams {

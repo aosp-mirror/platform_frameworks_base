@@ -62,11 +62,11 @@ public final class MccTable
     entryForMcc(int mcc)
     {
         int index;
-        
+
         MccEntry m;
 
         m = new MccEntry(mcc, null, 0);
-        
+
         index = Collections.binarySearch(table, m);
 
         if (index < 0) {
@@ -154,7 +154,7 @@ public final class MccTable
 
         /*
          * The table below is built from two resources:
-         * 
+         *
          * 1) ITU "Mobile Network Code (MNC) for the international
          *   identification plan for mobile terminals and mobile users"
          *   which is available as an annex to the ITU operational bulletin
