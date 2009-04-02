@@ -47,7 +47,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.Poolable;
 import android.util.Pool;
-import android.util.PoolFactory;
+import android.util.Pools;
 import android.util.PoolableManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.Animation;
@@ -7890,8 +7890,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
          */
         static class InvalidateInfo implements Poolable<InvalidateInfo> {
             private static final int POOL_LIMIT = 10;
-            private static final Pool<InvalidateInfo> sPool = PoolFactory.synchronizedPool(
-                    PoolFactory.finitePool(new PoolableManager<InvalidateInfo>() {
+            private static final Pool<InvalidateInfo> sPool = Pools.synchronizedPool(
+                    Pools.finitePool(new PoolableManager<InvalidateInfo>() {
                         public InvalidateInfo newInstance() {
                             return new InvalidateInfo();
                         }
