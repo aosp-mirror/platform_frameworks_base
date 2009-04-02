@@ -31,13 +31,15 @@ cp -r out/com generated
 cp -r out/javax generated
 
 rm -rf out
+KEEP_GENERATED=0
 
 # com_google_android_gles_jni_GLImpl.cpp
-if cmp ../../../frameworks/base/core/jni/com_google_android_gles_jni_GLImpl.cpp generated/C/com_google_android_gles_jni_GLImpl.cpp ; then
+if cmp ../../../../../frameworks/base/core/jni/com_google_android_gles_jni_GLImpl.cpp generated/C/com_google_android_gles_jni_GLImpl.cpp ; then
 echo com_google_android_gles_jni_GLImpl.cpp unchanged
 else
-echo Please edit ../../../frameworks/base/core/jni/com_google_android_gles_jni_GLImpl.cpp
-echo Please cp generated/C/com_google_android_gles_jni_GLImpl.cpp ../../../frameworks/base/core/jni
+echo Please p4 edit ../../../../../frameworks/base/core/jni/com_google_android_gles_jni_GLImpl.cpp
+echo Please cp generated/C/com_google_android_gles_jni_GLImpl.cpp ../../../../../frameworks/base/core/jni
+KEEP_GENERATED=1
 fi
 
 # GLImpl.java
@@ -46,6 +48,7 @@ echo GLImpl.java unchanged
 else
 echo Please edit ../../java/com/google/android/gles_jni/GLImpl.java
 echo Please cp generated/com/google/android/gles_jni/GLImpl.java ../../java/com/google/android/gles_jni
+KEEP_GENERATED=1
 fi
 
 # GL.java
@@ -54,6 +57,7 @@ echo GL.java unchanged
 else
 echo Please edit ../../java/javax/microedition/khronos/opengles/GL.java
 echo Please cp generated/javax/microedition/khronos/opengles/GL.java ../../java/javax/microedition/khronos/opengles/GL.java
+KEEP_GENERATED=1
 fi
 
 # GL10.java
@@ -62,6 +66,7 @@ echo GL10.java unchanged
 else
 echo Please edit ../../java/javax/microedition/khronos/opengles/GL10.java
 echo Please cp generated/javax/microedition/khronos/opengles/GL10.java ../../java/javax/microedition/khronos/opengles/GL10.java
+KEEP_GENERATED=1
 fi
 
 # GL10Ext.java
@@ -70,6 +75,7 @@ echo GL10Ext.java unchanged
 else
 echo Please edit ../../java/javax/microedition/khronos/opengles/GL10Ext.java
 echo Please cp generated/javax/microedition/khronos/opengles/GL10Ext.java ../../java/javax/microedition/khronos/opengles/GL10Ext.java
+KEEP_GENERATED=1
 fi
 
 # GL11.java
@@ -78,6 +84,7 @@ echo GL11.java unchanged
 else
 echo Please edit ../../java/javax/microedition/khronos/opengles/GL11.java
 echo Please cp generated/javax/microedition/khronos/opengles/GL11.java ../../java/javax/microedition/khronos/opengles/GL11.java
+KEEP_GENERATED=1
 fi
 
 # GL11Ext.java
@@ -86,6 +93,7 @@ echo GL11Ext.java unchanged
 else
 echo Please edit ../../java/javax/microedition/khronos/opengles/GL11Ext.java
 echo Please cp generated/javax/microedition/khronos/opengles/GL11Ext.java ../../java/javax/microedition/khronos/opengles/GL11Ext.java
+KEEP_GENERATED=1
 fi
 
 # GL11ExtensionPack.java
@@ -94,6 +102,9 @@ echo GL11ExtensionPack.java unchanged
 else
 echo Please edit ../../java/javax/microedition/khronos/opengles/GL11ExtensionPack.java
 echo Please cp generated/javax/microedition/khronos/opengles/GL11ExtensionPack.java ../../java/javax/microedition/khronos/opengles/GL11ExtensionPack.java
+KEEP_GENERATED=1
 fi
 
+if [ $KEEP_GENERATED == "0" ] ; then
 rm -rf generated
+fi
