@@ -21,7 +21,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dip"
-            android:layout_marginBottom="12dip"
+            android:layout_marginBottom="1dip"
             android:layout_marginLeft="10dip"
             android:layout_marginRight="10dip"
             android:layout_centerHorizontal="true" />
@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="12dip"
-            android:layout_marginLeft="15dip"
+            android:layout_marginLeft="10dip"
             android:layout_marginRight="10dip"
             android:layout_alignParentLeft="true"
             android:layout_below="@id/progress"
@@ -40,9 +40,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="12dip"
-            android:layout_marginLeft="10dip"
+            android:layout_marginLeft="50dip"
             android:layout_marginRight="15dip"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentLeft="true"
             android:layout_below="@id/progress"
         />
 </RelativeLayout>
