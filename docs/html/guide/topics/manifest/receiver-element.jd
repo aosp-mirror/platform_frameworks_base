@@ -17,7 +17,7 @@ page.title=&lt;receiver&gt;
 <dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code></dd>
 
 <dt>can contain:</dt>
-<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filer&gt;</a></code>
+<dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code></dd>
 
 <dt>description:</dt>
@@ -47,10 +47,16 @@ The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
 application components, including broadcast receivers.  The 
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and
-{@code &lt;receiver&gt;} attributes must both be "{@code true}" for 
-the broadcast receiver to be enabled.  If either is "{@code false}", it is
-disabled; it cannot be instantiated.
-</p></dd>
+{@code &lt;receiver&gt;} elements must both set {@code android:enabled} equal to
+"{@code true}" for the broadcast receiver to be enabled.  If either is "{@code false}",
+the receiver is disabled and cannot be instantiated.
+</p>
+
+<p>
+The default value depends on whether the broadcast receiver contains intent filters.
+If any intent filters are specified, the default value is "{@code true}".  If no
+filters are specified, the default value is "{@code false}".
+</dd>
 
 <dt><a name="exported"></a>{@code android:exported}</dt>
 <dd>Whether or not the broadcast receiver can receive messages from sources 
@@ -117,8 +123,11 @@ it can also be set as a raw string.
 {@link android.content.BroadcastReceiver}.  This should be a fully qualified 
 class name (such as, "{@code com.example.project.ReportReceiver}").  However, 
 as a shorthand, if the first character of the name is a period (for example, 
-"{@code . ReportReceiver}"), it is appended to the package name specified in 
+"{@code .ReportReceiver}"), it is appended to the package name specified in 
 the <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.  
+
+<p>The {@link android.content.BroadcastReceiver} subclass can be a static inner
+class, although it cannot be an ordinary (non-static) inner class.
 
 <p>
 There is no default.  The name must be specified.

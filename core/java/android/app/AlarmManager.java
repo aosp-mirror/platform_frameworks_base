@@ -29,6 +29,17 @@ import android.os.ServiceManager;
  * if it is not already running.  Registered alarms are retained while the
  * device is asleep (and can optionally wake the device up if they go off
  * during that time), but will be cleared if it is turned off and rebooted.
+ * 
+ * <p>The Alarm Manager holds a CPU wake lock as long as the alarm receiver's
+ * onReceive() method is executing. This guarantees that the phone will not sleep
+ * until you have finished handling the broadcast. Once onReceive() returns, the
+ * Alarm Manager releases this wake lock. This means that the phone will in some
+ * cases sleep as soon as your onReceive() method completes.  If your alarm receiver
+ * called {@link android.content.Context#startService Context.startService()}, it
+ * is possible that the phone will sleep before the requested service is launched.
+ * To prevent this, your BroadcastReceiver and Service will need to implement a
+ * separate wake lock policy to ensure that the phone continues running until the
+ * service becomes available.
  *
  * <p><b>Note: The Alarm Manager is intended for cases where you want to have
  * your application code run at a specific time, even if your application is
