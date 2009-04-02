@@ -2074,6 +2074,8 @@ public class LocationManagerService extends ILocationManager.Stub
     private void updateWakelockStatusLocked(boolean screenOn) {
         log("updateWakelockStatus(): " + screenOn);
 
+        long callerId = Binder.clearCallingIdentity();
+        
         boolean needsLock = false;
         long minTime = Integer.MAX_VALUE;
 
@@ -2117,6 +2119,7 @@ public class LocationManagerService extends ILocationManager.Stub
             mLocationHandler.removeMessages(MESSAGE_RELEASE_WAKE_LOCK);
             releaseWakeLockLocked();
         }
+        Binder.restoreCallingIdentity(callerId);
     }
 
     private void acquireWakeLockLocked() {
