@@ -285,6 +285,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mFancyRotationAnimation);
             } catch (RemoteException e) {
                 // Ignore
+
             }
         }                                      
     }
@@ -1831,3 +1832,4 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 }
+

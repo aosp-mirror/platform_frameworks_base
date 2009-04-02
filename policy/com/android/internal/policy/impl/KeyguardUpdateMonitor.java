@@ -34,7 +34,7 @@ import static android.provider.Telephony.Intents.EXTRA_SHOW_PLMN;
 import static android.provider.Telephony.Intents.EXTRA_SHOW_SPN;
 import static android.provider.Telephony.Intents.EXTRA_SPN;
 import static android.provider.Telephony.Intents.SPN_STRINGS_UPDATED_ACTION;
-import com.android.internal.telephony.SimCard;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyIntents;
 import android.util.Log;
 import com.android.internal.R;
@@ -61,7 +61,7 @@ public class KeyguardUpdateMonitor {
 
     private final Context mContext;
 
-    private SimCard.State mSimState = SimCard.State.READY;
+    private IccCard.State mSimState = IccCard.State.READY;
     private boolean mInPortrait;
     private boolean mKeyboardOpen;
 
@@ -94,38 +94,39 @@ public class KeyguardUpdateMonitor {
 
 
     /**
-     * When we receive a {@link com.android.internal.telephony.TelephonyIntents#ACTION_SIM_STATE_CHANGED} broadcast, and
-     * then pass a result via our handler to {@link KeyguardUpdateMonitor#handleSimStateChange},
+     * When we receive a 
+     * {@link com.android.internal.telephony.TelephonyIntents#ACTION_SIM_STATE_CHANGED} broadcast, 
+     * and then pass a result via our handler to {@link KeyguardUpdateMonitor#handleSimStateChange},
      * we need a single object to pass to the handler.  This class helps decode
      * the intent and provide a {@link SimCard.State} result. 
      */
     private static class SimArgs {
 
-        public final SimCard.State simState;
+        public final IccCard.State simState;
 
         private SimArgs(Intent intent) {
             if (!TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
                 throw new IllegalArgumentException("only handles intent ACTION_SIM_STATE_CHANGED");
             }
-            String stateExtra = intent.getStringExtra(SimCard.INTENT_KEY_SIM_STATE);
-            if (SimCard.INTENT_VALUE_SIM_ABSENT.equals(stateExtra)) {
-                this.simState = SimCard.State.ABSENT;
-            } else if (SimCard.INTENT_VALUE_SIM_READY.equals(stateExtra)) {
-                this.simState = SimCard.State.READY;
-            } else if (SimCard.INTENT_VALUE_SIM_LOCKED.equals(stateExtra)) {
+            String stateExtra = intent.getStringExtra(IccCard.INTENT_KEY_ICC_STATE);
+            if (IccCard.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
+                this.simState = IccCard.State.ABSENT;
+            } else if (IccCard.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
+                this.simState = IccCard.State.READY;
+            } else if (IccCard.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
                 final String lockedReason = intent
-                        .getStringExtra(SimCard.INTENT_KEY_LOCKED_REASON);
-                if (SimCard.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
-                    this.simState = SimCard.State.PIN_REQUIRED;
-                } else if (SimCard.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
-                    this.simState = SimCard.State.PUK_REQUIRED;
+                        .getStringExtra(IccCard.INTENT_KEY_LOCKED_REASON);
+                if (IccCard.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
+                    this.simState = IccCard.State.PIN_REQUIRED;
+                } else if (IccCard.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
+                    this.simState = IccCard.State.PUK_REQUIRED;
                 } else {
-                    this.simState = SimCard.State.UNKNOWN;
+                    this.simState = IccCard.State.UNKNOWN;
                 }
-            } else if (SimCard.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
-                this.simState = SimCard.State.NETWORK_LOCKED;
+            } else if (IccCard.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
+                this.simState = IccCard.State.NETWORK_LOCKED;
             } else {
-                this.simState = SimCard.State.UNKNOWN;
+                this.simState = IccCard.State.UNKNOWN;
             }
         }
 
@@ -195,7 +196,7 @@ public class KeyguardUpdateMonitor {
         mKeyboardOpen = queryKeyboardOpen();
 
         // take a guess to start
-        mSimState = SimCard.State.READY;
+        mSimState = IccCard.State.READY;
         mDevicePluggedIn = true;
         mBatteryLevel = 100;
 
@@ -317,14 +318,14 @@ public class KeyguardUpdateMonitor {
      * Handle {@link #MSG_SIM_STATE_CHANGE}
      */
     private void handleSimStateChange(SimArgs simArgs) {
-        final SimCard.State state = simArgs.simState;
+        final IccCard.State state = simArgs.simState;
 
         if (DEBUG) {
             Log.d(TAG, "handleSimStateChange: intentValue = " + simArgs + " "
                     + "state resolved to " + state.toString());
         }
 
-        if (state != SimCard.State.UNKNOWN && state != mSimState) {
+        if (state != IccCard.State.UNKNOWN && state != mSimState) {
             mSimState = state;
             for (int i = 0; i < mSimStateCallbacks.size(); i++) {
                 mSimStateCallbacks.get(i).onSimStateChanged(state);
@@ -461,7 +462,7 @@ public class KeyguardUpdateMonitor {
      * Callback to notify of sim state change.
      */
     interface SimStateCallback {
-        void onSimStateChanged(SimCard.State simState);
+        void onSimStateChanged(IccCard.State simState);
     }
 
     /**
@@ -489,7 +490,7 @@ public class KeyguardUpdateMonitor {
         mSimStateCallbacks.add(callback);
     }
 
-    public SimCard.State getSimState() {
+    public IccCard.State getSimState() {
         return mSimState;
     }
 
@@ -499,7 +500,7 @@ public class KeyguardUpdateMonitor {
      * broadcast from the telephony code.
      */
     public void reportSimPinUnlocked() {
-        mSimState = SimCard.State.READY;
+        mSimState = IccCard.State.READY;
     }
 
     public boolean isInPortrait() {
