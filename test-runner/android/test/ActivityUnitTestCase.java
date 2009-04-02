@@ -136,7 +136,7 @@ public abstract class ActivityUnitTestCase<T extends Activity>
                 ComponentName cn = new ComponentName(mActivityClass.getPackage().getName(), 
                         mActivityClass.getName());
                 intent.setComponent(cn);
-                ActivityInfo info = null;
+                ActivityInfo info = new ActivityInfo();
                 CharSequence title = mActivityClass.getName();
                 mMockParent = new MockParent();
                 String id = null;
