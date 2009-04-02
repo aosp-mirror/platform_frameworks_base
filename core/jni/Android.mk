@@ -34,7 +34,6 @@ LOCAL_SRC_FILES:= \
 	android_text_AndroidCharacter.cpp \
 	android_text_KeyCharacterMap.cpp \
 	android_os_Debug.cpp \
-	android_os_Exec.cpp \
 	android_os_FileUtils.cpp \
 	android_os_MemoryFile.cpp \
 	android_os_ParcelFileDescriptor.cpp \
