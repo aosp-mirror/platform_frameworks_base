@@ -88,7 +88,9 @@ private:
         friend class A2dpAudioInterface;
                 status_t    init();
                 status_t    close();
-        status_t            setAddress(const char* address);
+                status_t    close_l();
+                status_t    setAddress(const char* address);
+                status_t    setBluetoothEnabled(bool enabled);
 
     private:
                 int         mFd;
@@ -98,6 +100,7 @@ private:
                 char        mA2dpAddress[20];
                 void*       mData;
                 Mutex       mLock;
+                bool        mBluetoothEnabled;
     };
 
     A2dpAudioStreamOut*     mOutput;
