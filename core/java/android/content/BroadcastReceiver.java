@@ -44,14 +44,14 @@ import android.util.Log;
  * <ul>
  * <li> <b>Normal broadcasts</b> (sent with {@link Context#sendBroadcast(Intent)
  * Context.sendBroadcast}) are completely asynchronous.  All receivers of the
- * broadcast are run, in an undefined order, often at the same time.  This is
- * more efficient, but means that receivers can not use the result or abort
+ * broadcast are run in an undefined order, often at the same time.  This is
+ * more efficient, but means that receivers cannot use the result or abort
  * APIs included here.
  * <li> <b>Ordered broadcasts</b> (sent with {@link Context#sendOrderedBroadcast(Intent, String)
  * Context.sendOrderedBroadcast}) are delivered to one receiver at a time.
  * As each receiver executes in turn, it can propagate a result to the next
  * receiver, or it can completely abort the broadcast so that it won't be passed
- * to other receivers.  The order receivers runs in can be controlled with the
+ * to other receivers.  The order receivers run in can be controlled with the
  * {@link android.R.styleable#AndroidManifestIntentFilter_priority
  * android:priority} attribute of the matching intent-filter; receivers with
  * the same priority will be run in an arbitrary order.
@@ -61,8 +61,8 @@ import android.util.Log;
  * situations revert to delivering the broadcast one receiver at a time.  In
  * particular, for receivers that may require the creation of a process, only
  * one will be run at a time to avoid overloading the system with new processes.
- * In this situation, however, the non-ordered semantics hold: these receivers
- * can not return results or abort their broadcast.</p>
+ * In this situation, however, the non-ordered semantics hold: these receivers still
+ * cannot return results or abort their broadcast.</p>
  * 
  * <p>Note that, although the Intent class is used for sending and receiving
  * these broadcasts, the Intent broadcast mechanism here is completely separate
@@ -156,7 +156,7 @@ import android.util.Log;
  * more important processes.
  * 
  * <p>This means that for longer-running operations you will often use
- * an {@link android.app.Service} in conjunction with a BroadcastReceiver to keep
+ * a {@link android.app.Service} in conjunction with a BroadcastReceiver to keep
  * the containing process active for the entire time of your operation.
  */
 public abstract class BroadcastReceiver {
@@ -167,7 +167,7 @@ public abstract class BroadcastReceiver {
      * This method is called when the BroadcastReceiver is receiving an Intent
      * broadcast.  During this time you can use the other methods on
      * BroadcastReceiver to view/modify the current result values.  The function
-     * is normally called from the main thread of its process, so you should
+     * is normally called within the main thread of its process, so you should
      * never perform long-running operations in it (there is a timeout of
      * 10 seconds that the system allows before considering the receiver to
      * be blocked and a candidate to be killed). You cannot launch a popup dialog
@@ -182,6 +182,14 @@ public abstract class BroadcastReceiver {
      * {@link Context#bindService(Intent, ServiceConnection, int)}.  If you wish
      * to interact with a service that is already running, you can use
      * {@link #peekService}.
+     * 
+     * <p>The Intent filters used in {@link android.content.Context#registerReceiver}
+     * and in application manifests are <em>not</em> guaranteed to be exclusive. They
+     * are hints to the operating system about how to find suitable recipients. It is
+     * possible for senders to force delivery to specific recipients, bypassing filter
+     * resolution.  For this reason, {@link #onReceive(Context, Intent) onReceive()}
+     * implementations should respond only to known actions, ignoring any unexpected
+     * Intents that they may receive.
      * 
      * @param context The Context in which the receiver is running.
      * @param intent The Intent being received.
