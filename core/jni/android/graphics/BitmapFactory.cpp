@@ -22,6 +22,7 @@ static jfieldID gOptions_ditherFieldID;
 static jfieldID gOptions_widthFieldID;
 static jfieldID gOptions_heightFieldID;
 static jfieldID gOptions_mimeFieldID;
+static jfieldID gOptions_mCancelID;
 
 static jclass gFileDescriptor_class;
 static jfieldID gFileDescriptor_descriptor;
@@ -204,12 +205,12 @@ class AssetStreamAdaptor : public SkStream {
 public:
     AssetStreamAdaptor(Asset* a) : fAsset(a) {}
     
-	virtual bool rewind() {
+    virtual bool rewind() {
         off_t pos = fAsset->seek(0, SEEK_SET);
         return pos != (off_t)-1;
     }
     
-	virtual size_t read(void* buffer, size_t size) {
+    virtual size_t read(void* buffer, size_t size) {
         ssize_t amount;
         
         if (NULL == buffer) {
@@ -321,6 +322,15 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     decoder->setAllocator(&allocator);
     
     AutoDecoderCancel   adc(options, decoder);
+
+    // To fix the race condition in case "requestCancelDecode"
+    // happens earlier than AutoDecoderCancel object is added
+    // to the gAutoDecoderCancelMutex linked list.
+    if (NULL != options) {
+        if (env->GetBooleanField(options, gOptions_mCancelID)) {
+            return NULL;
+        }
+    }
 
     if (!decoder->decode(stream, bitmap, prefConfig, mode)) {
         return NULL;
@@ -588,6 +598,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_widthFieldID = getFieldIDCheck(env, gOptions_class, "outWidth", "I");
     gOptions_heightFieldID = getFieldIDCheck(env, gOptions_class, "outHeight", "I");
     gOptions_mimeFieldID = getFieldIDCheck(env, gOptions_class, "outMimeType", "Ljava/lang/String;");
+    gOptions_mCancelID = getFieldIDCheck(env, gOptions_class, "mCancel", "Z");
 
     gFileDescriptor_class = make_globalref(env, "java/io/FileDescriptor");
     gFileDescriptor_descriptor = getFieldIDCheck(env, gFileDescriptor_class, "descriptor", "I");
