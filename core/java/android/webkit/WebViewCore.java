@@ -521,7 +521,7 @@ final class WebViewCore {
             "SET_GLOBAL_BOUNDS", // = 116;
             "UPDATE_CACHE_AND_TEXT_ENTRY", // = 117;
             "CLICK", // = 118;
-            "119",
+            "SET_NETWORK_STATE", // = 119;
             "DOC_HAS_IMAGES", // = 120;
             "SET_SNAP_ANCHOR", // = 121;
             "DELETE_SELECTION", // = 122;
@@ -567,6 +567,7 @@ final class WebViewCore {
         static final int SET_GLOBAL_BOUNDS = 116;
         static final int UPDATE_CACHE_AND_TEXT_ENTRY = 117;
         static final int CLICK = 118;
+        static final int SET_NETWORK_STATE = 119;
         static final int DOC_HAS_IMAGES = 120;
         static final int SET_SNAP_ANCHOR = 121;
         static final int DELETE_SELECTION = 122;
@@ -779,6 +780,15 @@ final class WebViewCore {
                                         WebCoreThread.CACHE_TICKER),
                                         WebCoreThread.CACHE_TICKER_INTERVAL);
                             }
+                            break;
+
+                        case SET_NETWORK_STATE:
+                            if (BrowserFrame.sJavaBridge == null) {
+                                throw new IllegalStateException("No WebView " +
+                                        "has been created in this process!");
+                            }
+                            BrowserFrame.sJavaBridge
+                                    .setNetworkOnLine(msg.arg1 == 1);
                             break;
 
                         case CLEAR_CACHE:
