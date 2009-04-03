@@ -1288,7 +1288,7 @@ public final class Settings {
         // Settings moved to Settings.Secure
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Secure#LOCATION_PROVIDERS_ALLOWED}
+         * @deprecated Use {@link android.provider.Settings.Secure#ADB_ENABLED}
          * instead
          */
         @Deprecated
