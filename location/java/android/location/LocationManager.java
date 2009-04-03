@@ -313,20 +313,6 @@ public class LocationManager {
     }
 
     /**
-     * Propagates the enabled/disabled state of the providers from the system
-     * settings to the providers themselves.
-     *
-     * {@hide}
-     */
-    public void updateProviders() {
-        try {
-            mService.updateProviders();
-        } catch (RemoteException ex) {
-            Log.e(TAG, "updateProviders: RemoteException", ex);
-        }
-    }
-
-    /**
      * Returns the next looser power requirement, in the sequence:
      *
      * POWER_LOW -> POWER_MEDIUM -> POWER_HIGH -> NO_REQUIREMENT
