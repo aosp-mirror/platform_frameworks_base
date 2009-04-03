@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.Config;
 import android.util.Log;
 
@@ -46,11 +47,13 @@ public abstract class LocationProviderImpl extends LocationProvider {
     private static HashMap<String, LocationProviderImpl> sProvidersByName
         = new HashMap<String, LocationProviderImpl>();
 
+    private final ILocationManager mLocationManager;
     private boolean mLocationTracking = false;
     private long mMinTime = 0;
 
-    protected LocationProviderImpl(String name) {
+    protected LocationProviderImpl(String name, ILocationManager locationManager) {
         super(name);
+        mLocationManager = locationManager;
     }
 
     public static void addProvider(LocationProviderImpl provider) {
@@ -114,16 +117,24 @@ public abstract class LocationProviderImpl extends LocationProvider {
         return null;
     }
 
+    public void reportLocationChanged(Location location) {
+        try {
+            mLocationManager.setLocation(location);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling ILocationManager.onLocationChanged");
+        }
+    }
+    
     /**
      * Enables this provider.  When enabled, calls to {@link #getStatus()}
-     * and {@link #getLocation} must be handled.  Hardware may be started up
+     * must be handled.  Hardware may be started up
      * when the provider is enabled.
      */
     public abstract void enable();
 
     /**
      * Disables this provider.  When disabled, calls to {@link #getStatus()}
-     * and {@link #getLocation} need not be handled.  Hardware may be shut
+     * need not be handled.  Hardware may be shut
      * down while the provider is disabled.
      */
     public abstract void disable();
@@ -173,15 +184,6 @@ public abstract class LocationProviderImpl extends LocationProvider {
     public long getStatusUpdateTime() {
         return 0;
     }
-
-    /**
-     * Sets a Location object with the information gathered
-     * during the most recent fix.
-     *
-     * @param l location object to set
-     * @return true if a location fix is available
-     */
-    public abstract boolean getLocation(Location l);
 
     /**
      * Notifies the location provider that clients are listening for locations.
