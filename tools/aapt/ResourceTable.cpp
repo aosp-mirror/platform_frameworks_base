@@ -1449,8 +1449,11 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
     if ((result = e->makeItABag(sourcePos)) != NO_ERROR) {
         return result;
     }
- 
-    return e->emptyBag(sourcePos);
+
+    if (replace) { 
+        return e->emptyBag(sourcePos);
+    }
+    return result;
 }
 
 status_t ResourceTable::addBag(const SourcePos& sourcePos,
