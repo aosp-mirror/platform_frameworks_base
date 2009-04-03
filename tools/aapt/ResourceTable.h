@@ -254,7 +254,9 @@ public:
         String16 getParent() const { return mParent; }
 
         status_t makeItABag(const SourcePos& sourcePos);
-        
+
+        status_t emptyBag(const SourcePos& sourcePos);
+ 
         status_t setItem(const SourcePos& pos,
                          const String16& value,
                          const Vector<StringPool::entry_style_span>* style = NULL,
