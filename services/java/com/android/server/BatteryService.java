@@ -229,6 +229,16 @@ class BatteryService extends Binder {
                 EventLog.writeEvent(LOG_BATTERY_LEVEL,
                         mBatteryLevel, mBatteryVoltage, mBatteryTemperature);
             }
+            if (mBatteryLevel != mLastBatteryLevel && mPlugType == BATTERY_PLUGGED_NONE) {
+                // If the battery level has changed and we are on battery, update the current level.
+                // This is used for discharge cycle tracking so this shouldn't be updated while the 
+                // battery is charging.
+                try {
+                    mBatteryStats.recordCurrentLevel(mBatteryLevel);
+                } catch (RemoteException e) {
+                    // Should never happen.
+                }
+            }
             if (mBatteryLevelCritical && !mLastBatteryLevelCritical &&
                     mPlugType == BATTERY_PLUGGED_NONE) {
                 // We want to make sure we log discharge cycle outliers
