@@ -472,15 +472,16 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getBatteryRealtime(long curTime);
     
     /**
-     * Returns the battery percentage level at the last time the device was unplugged from power, 
-     * or the last time it was booted while unplugged.
+     * Returns the battery percentage level at the last time the device was unplugged from power, or
+     * the last time it booted on battery power. 
      */
-    public abstract int getUnpluggedStartLevel();
+    public abstract int getDischargeStartLevel();
     
     /**
-     * Returns the battery percentage level at the last time the device was plugged into power.
+     * Returns the current battery percentage level if we are in a discharge cycle, otherwise
+     * returns the level at the last plug event.
      */
-    public abstract int getPluggedStartLevel();
+    public abstract int getDischargeCurrentLevel();
 
     /**
      * Returns the total, last, or current battery uptime in microseconds.
@@ -774,8 +775,8 @@ public abstract class BatteryStats implements Parcelable {
         dumpLine(pw, 0 /* uid */, category, DATA_CONNECTION_COUNT_DATA, args);
         
         if (which == STATS_UNPLUGGED) {
-            dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, getUnpluggedStartLevel(), 
-                    getPluggedStartLevel());
+            dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, getDischargeStartLevel(), 
+                    getDischargeCurrentLevel());
         }
         
         for (int iu = 0; iu < NU; iu++) {
@@ -1059,13 +1060,15 @@ public abstract class BatteryStats implements Parcelable {
             if (getIsOnBattery()) {
                 pw.println(prefix + "  Device is currently unplugged");
                 pw.println(prefix + "    Discharge cycle start level: " + 
-                        getUnpluggedStartLevel());
+                        getDischargeStartLevel());
+                pw.println(prefix + "    Discharge cycle current level: " +
+                        getDischargeCurrentLevel());
             } else {
                 pw.println(prefix + "  Device is currently plugged into power");
                 pw.println(prefix + "    Last discharge cycle start level: " + 
-                        getUnpluggedStartLevel());
+                        getDischargeStartLevel());
                 pw.println(prefix + "    Last discharge cycle end level: " + 
-                        getPluggedStartLevel());
+                        getDischargeCurrentLevel());
             }
             pw.println(" ");
         }

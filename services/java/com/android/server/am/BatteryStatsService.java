@@ -264,6 +264,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         mStats.setOnBattery(onBattery, level);
     }
     
+    public void recordCurrentLevel(int level) {
+        enforceCallingPermission();
+        mStats.recordCurrentLevel(level);
+    }
+    
     public long getAwakeTimeBattery() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BATTERY_STATS, null);

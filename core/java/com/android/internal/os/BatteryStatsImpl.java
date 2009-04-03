@@ -131,8 +131,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     /*
      * These keep track of battery levels (1-100) at the last plug event and the last unplug event.
      */
-    int mUnpluggedStartLevel;
-    int mPluggedStartLevel;
+    int mDischargeStartLevel;
+    int mDischargeCurrentLevel;
     
     long mLastWriteTime = 0; // Milliseconds
 
@@ -1947,8 +1947,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mRealtimeStart = mTrackBatteryRealtimeStart = SystemClock.elapsedRealtime() * 1000;
         mUnpluggedBatteryUptime = getBatteryUptimeLocked(mUptimeStart);
         mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(mRealtimeStart);
-        mUnpluggedStartLevel = 0;
-        mPluggedStartLevel = 0;
+        mDischargeStartLevel = 0;
+        mDischargeCurrentLevel = 0;
     }
 
     public BatteryStatsImpl(Parcel p) {
@@ -1978,12 +1978,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mTrackBatteryRealtimeStart = realtime;
                     mUnpluggedBatteryUptime = getBatteryUptimeLocked(uptime);
                     mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(realtime);
-                    mUnpluggedStartLevel = level;
+                    mDischargeCurrentLevel = mDischargeStartLevel = level;
                     doUnplug(mUnpluggedBatteryUptime, mUnpluggedBatteryRealtime);
                 } else {
                     mTrackBatteryPastUptime += uptime - mTrackBatteryUptimeStart;
                     mTrackBatteryPastRealtime += realtime - mTrackBatteryRealtimeStart;
-                    mPluggedStartLevel = level;
+                    mDischargeCurrentLevel = level;
                     doPlug(getBatteryUptimeLocked(uptime), getBatteryRealtimeLocked(realtime));
                 }
                 if ((mLastWriteTime + (60 * 1000)) < mSecRealtime) {
@@ -1993,6 +1993,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
         }
+    }
+    
+    public void recordCurrentLevel(int level) {
+        mDischargeCurrentLevel = level;
     }
 
     public long getAwakeTimeBattery() {
@@ -2086,25 +2090,25 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
     
     @Override
-    public int getUnpluggedStartLevel() {
+    public int getDischargeStartLevel() {
         synchronized(this) {
-            return getUnluggedStartLevelLocked();
+            return getDischargeStartLevelLocked();
         }
     }
     
-    public int getUnluggedStartLevelLocked() {
-            return mUnpluggedStartLevel;
+    public int getDischargeStartLevelLocked() {
+            return mDischargeStartLevel;
     }
     
     @Override
-    public int getPluggedStartLevel() {
+    public int getDischargeCurrentLevel() {
         synchronized(this) {
-            return getPluggedStartLevelLocked();
+            return getDischargeCurrentLevelLocked();
         }
     }
     
-    public int getPluggedStartLevelLocked() {
-            return mPluggedStartLevel;
+    public int getDischargeCurrentLevelLocked() {
+            return mDischargeCurrentLevel;
     }
 
     /**
@@ -2266,8 +2270,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mLastUptime = in.readLong();
         mRealtime = in.readLong();
         mLastRealtime = in.readLong();
-        mUnpluggedStartLevel = in.readInt();
-        mPluggedStartLevel = in.readInt();
+        mDischargeStartLevel = in.readInt();
+        mDischargeCurrentLevel = in.readInt();
         
         mStartCount++;
         
@@ -2396,8 +2400,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeLong(computeUptime(NOW_SYS, STATS_CURRENT));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_TOTAL));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_CURRENT));
-        out.writeInt(mUnpluggedStartLevel);
-        out.writeInt(mPluggedStartLevel);
+        out.writeInt(mDischargeStartLevel);
+        out.writeInt(mDischargeCurrentLevel);
         
         
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
@@ -2577,8 +2581,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mTrackBatteryRealtimeStart = in.readLong();
         mUnpluggedBatteryUptime = in.readLong();
         mUnpluggedBatteryRealtime = in.readLong();
-        mUnpluggedStartLevel = in.readInt();
-        mPluggedStartLevel = in.readInt();
+        mDischargeStartLevel = in.readInt();
+        mDischargeCurrentLevel = in.readInt();
         mLastWriteTime = in.readLong();
 
         mPartialTimers.clear();
@@ -2640,8 +2644,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mTrackBatteryRealtimeStart);
         out.writeLong(mUnpluggedBatteryUptime);
         out.writeLong(mUnpluggedBatteryRealtime);
-        out.writeInt(mUnpluggedStartLevel);
-        out.writeInt(mPluggedStartLevel);
+        out.writeInt(mDischargeStartLevel);
+        out.writeInt(mDischargeCurrentLevel);
         out.writeLong(mLastWriteTime);
 
         int size = mUidStats.size();
