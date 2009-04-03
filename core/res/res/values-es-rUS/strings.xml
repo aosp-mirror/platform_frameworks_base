@@ -48,6 +48,18 @@
     <string name="BaMmi">"Restricción de llamadas"</string>
     <string name="PwdMmi">"Cambio de contraseña"</string>
     <string name="PinMmi">"Cambio de PIN"</string>
+    <!-- no translation found for CnipMmi (3110534680557857162) -->
+    <skip />
+    <!-- no translation found for CnirMmi (3062102121430548731) -->
+    <skip />
+    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
+    <skip />
+    <!-- no translation found for RuacMmi (7827887459138308886) -->
+    <skip />
+    <!-- no translation found for CndMmi (3116446237081575808) -->
+    <skip />
+    <!-- no translation found for DndMmi (1265478932418334331) -->
+    <skip />
     <string name="CLIRDefaultOnNextCallOn">"El Identificador de llamadas está predeterminado en restringido. Llamada siguiente: restringida"</string>
     <string name="CLIRDefaultOnNextCallOff">"El Identificador de llamadas está predeterminado en restringido. Llamada siguiente: no restringido"</string>
     <string name="CLIRDefaultOffNextCallOn">"El Identificador de llamadas está predeterminado en no restringido. Llamada siguiente: restringida"</string>
