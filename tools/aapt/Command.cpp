@@ -190,7 +190,7 @@ int doList(Bundle* bundle)
             fprintf(stderr, "ERROR: list -a failed because assets could not be loaded\n");
             goto bail;
         }
-        
+
         const ResTable& res = assets.getResources(false);
         if (&res == NULL) {
             printf("\nNo resource table found.\n");
@@ -198,7 +198,7 @@ int doList(Bundle* bundle)
             printf("\nResource table:\n");
             res.print();
         }
-        
+
         Asset* manifestAsset = assets.openNonAsset("AndroidManifest.xml",
                                                    Asset::ACCESS_BUFFER);
         if (manifestAsset == NULL) {
@@ -212,7 +212,7 @@ int doList(Bundle* bundle)
         }
         delete manifestAsset;
     }
-    
+
     result = 0;
 
 bail:
@@ -318,7 +318,22 @@ enum {
     VERSION_NAME_ATTR = 0x0101021c,
     LABEL_ATTR = 0x01010001,
     ICON_ATTR = 0x01010002,
+    MIN_SDK_VERSION_ATTR = 0x0101020c
 };
+
+const char *getComponentName(String8 &pkgName, String8 &componentName) {
+    ssize_t idx = componentName.find(".");
+    String8 retStr(pkgName);
+    if (idx == 0) {
+        retStr += componentName;
+    } else if (idx < 0) {
+        retStr += ".";
+        retStr += componentName;
+    } else {
+        return componentName.string();
+    }
+    return retStr.string();
+}
 
 /*
  * Handle the "dump" command, to extract select data from an archive.
@@ -327,41 +342,41 @@ int doDump(Bundle* bundle)
 {
     status_t result = UNKNOWN_ERROR;
     Asset* asset = NULL;
-    
+
     if (bundle->getFileSpecCount() < 1) {
         fprintf(stderr, "ERROR: no dump option specified\n");
         return 1;
     }
-    
+
     if (bundle->getFileSpecCount() < 2) {
         fprintf(stderr, "ERROR: no dump file specified\n");
         return 1;
     }
-    
+
     const char* option = bundle->getFileSpecEntry(0);
     const char* filename = bundle->getFileSpecEntry(1);
-    
+
     AssetManager assets;
     if (!assets.addAssetPath(String8(filename), NULL)) {
         fprintf(stderr, "ERROR: dump failed because assets could not be loaded\n");
         return 1;
     }
-    
+
     const ResTable& res = assets.getResources(false);
     if (&res == NULL) {
         fprintf(stderr, "ERROR: dump failed because no resource table was found\n");
         goto bail;
     }
-    
+
     if (strcmp("resources", option) == 0) {
         res.print();
-        
+
     } else if (strcmp("xmltree", option) == 0) {
         if (bundle->getFileSpecCount() < 3) {
             fprintf(stderr, "ERROR: no dump xmltree resource file specified\n");
             goto bail;
         }
-    
+
         for (int i=2; i<bundle->getFileSpecCount(); i++) {
             const char* resname = bundle->getFileSpecEntry(i);
             ResXMLTree tree;
@@ -370,7 +385,7 @@ int doDump(Bundle* bundle)
                 fprintf(stderr, "ERROR: dump failed because resource %p found\n", resname);
                 goto bail;
             }
-            
+
             if (tree.setTo(asset->getBuffer(true),
                            asset->getLength()) != NO_ERROR) {
                 fprintf(stderr, "ERROR: Resource %s is corrupt\n", resname);
@@ -381,13 +396,13 @@ int doDump(Bundle* bundle)
             delete asset;
             asset = NULL;
         }
-        
+
     } else if (strcmp("xmlstrings", option) == 0) {
         if (bundle->getFileSpecCount() < 3) {
             fprintf(stderr, "ERROR: no dump xmltree resource file specified\n");
             goto bail;
         }
-    
+
         for (int i=2; i<bundle->getFileSpecCount(); i++) {
             const char* resname = bundle->getFileSpecEntry(i);
             ResXMLTree tree;
@@ -396,7 +411,7 @@ int doDump(Bundle* bundle)
                 fprintf(stderr, "ERROR: dump failed because resource %p found\n", resname);
                 goto bail;
             }
-            
+
             if (tree.setTo(asset->getBuffer(true),
                            asset->getLength()) != NO_ERROR) {
                 fprintf(stderr, "ERROR: Resource %s is corrupt\n", resname);
@@ -406,7 +421,7 @@ int doDump(Bundle* bundle)
             delete asset;
             asset = NULL;
         }
-        
+
     } else {
         ResXMLTree tree;
         asset = assets.openNonAsset("AndroidManifest.xml",
@@ -415,14 +430,14 @@ int doDump(Bundle* bundle)
             fprintf(stderr, "ERROR: dump failed because no AndroidManifest.xml found\n");
             goto bail;
         }
-        
+
         if (tree.setTo(asset->getBuffer(true),
                        asset->getLength()) != NO_ERROR) {
             fprintf(stderr, "ERROR: AndroidManifest.xml is corrupt\n");
             goto bail;
         }
         tree.restart();
-        
+
         if (strcmp("permissions", option) == 0) {
             size_t len;
             ResXMLTree::event_code_t code;
@@ -471,9 +486,13 @@ int doDump(Bundle* bundle)
             bool withinActivity = false;
             bool isMainActivity = false;
             bool isLauncherActivity = false;
+            bool withinApplication = false;
+            bool withinReceiver = false;
+            String8 pkg;
             String8 activityName;
             String8 activityLabel;
             String8 activityIcon;
+            String8 receiverName;
             while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                 if (code == ResXMLTree::END_TAG) {
                     depth--;
@@ -490,7 +509,7 @@ int doDump(Bundle* bundle)
                         fprintf(stderr, "ERROR: manifest does not start with <manifest> tag\n");
                         goto bail;
                     }
-                    String8 pkg = getAttribute(tree, NULL, "package", NULL);
+                    pkg = getAttribute(tree, NULL, "package", NULL);
                     printf("package: name='%s' ", pkg.string());
                     int32_t versionCode = getIntegerAttribute(tree, VERSION_CODE_ATTR, &error);
                     if (error != "") {
@@ -508,69 +527,118 @@ int doDump(Bundle* bundle)
                         goto bail;
                     }
                     printf("versionName='%s'\n", versionName.string());
-                } else if (depth == 2 && tag == "application") {
-                    String8 label = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
-                    if (error != "") {
-                        fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n", error.string());
-                        goto bail;
+                } else if (depth == 2) {
+                    withinApplication = false;
+                    if (tag == "application") {
+                        withinApplication = true;
+                        String8 label = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
+                         if (error != "") {
+                             fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n", error.string());
+                             goto bail;
+                        }
+                        printf("application: label='%s' ", label.string());
+                        String8 icon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n", error.string());
+                            goto bail;
+                        }
+                        printf("icon='%s'\n", icon.string());
+                    } else if (tag == "uses-sdk") {
+                        int32_t sdkVersion = getIntegerAttribute(tree, MIN_SDK_VERSION_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:minSdkVersion' attribute: %s\n", error.string());
+                            goto bail;
+                        }
+                        if (sdkVersion != -1) {
+                            printf("sdkVersion:'%d'\n", sdkVersion);
+                        }
                     }
-                    printf("application: label='%s' ", label.string());
-
-                    String8 icon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
-                    if (error != "") {
-                        fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n", error.string());
-                        goto bail;
-                    }
-                    printf("icon='%s'\n", icon.string());
-                } else if (depth == 3 && tag == "activity") {
-                    withinActivity = true;
-                    //printf("LOG: withinActivity==true\n");
-
-                    activityName = getAttribute(tree, NAME_ATTR, &error);
-                    if (error != "") {
-                        fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
-                        goto bail;
-                    }
-
-                    activityLabel = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
-                    if (error != "") {
-                        fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n", error.string());
-                        goto bail;
-                    }
-
-                    activityIcon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
-                    if (error != "") {
-                        fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n", error.string());
-                        goto bail;
-                    }
-                } else if (depth == 5 && withinActivity) {
-                    if (tag == "action") {
-                        //printf("LOG: action tag\n");
-                        String8 action = getAttribute(tree, NAME_ATTR, &error);
+                } else if (depth == 3 && withinApplication) {
+                    withinActivity = false;
+                    withinReceiver = false;
+                    if(tag == "activity") {
+                        withinActivity = true;
+                        activityName = getAttribute(tree, NAME_ATTR, &error);
                         if (error != "") {
                             fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
                             goto bail;
                         }
-                        if (action == "android.intent.action.MAIN") {
-                            isMainActivity = true;
-                            //printf("LOG: isMainActivity==true\n");
-                        }
-                    } else if (tag == "category") {
-                        String8 category = getAttribute(tree, NAME_ATTR, &error);
+
+                        activityLabel = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
                         if (error != "") {
-                            fprintf(stderr, "ERROR getting 'name' attribute: %s\n", error.string());
+                            fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n", error.string());
                             goto bail;
                         }
-                        if (category == "android.intent.category.LAUNCHER") {
-                            isLauncherActivity = true;
-                            //printf("LOG: isLauncherActivity==true\n");
-                       }
+
+                        activityIcon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n", error.string());
+                            goto bail;
+                        }
+                    } else if (tag == "uses-library") {
+                        String8 libraryName = getAttribute(tree, NAME_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute for uses-library: %s\n", error.string());
+                            goto bail;
+                        }
+                        printf("uses-library:'%s'\n", libraryName.string());
+                    } else if (tag == "receiver") {
+                        withinReceiver = true;
+                        receiverName = getAttribute(tree, NAME_ATTR, &error);
+
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute for receiver: %s\n", error.string());
+                            goto bail;
+                        }
+                    }
+                } else if (depth == 5) {
+                        if (withinActivity) {
+                            if (tag == "action") {
+                                //printf("LOG: action tag\n");
+                                String8 action = getAttribute(tree, NAME_ATTR, &error);
+                                if (error != "") {
+                                    fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
+                                    goto bail;
+                                }
+                                if (action == "android.intent.action.MAIN") {
+                                    isMainActivity = true;
+                                    //printf("LOG: isMainActivity==true\n");
+                                }
+                        } else if (tag == "category") {
+                            String8 category = getAttribute(tree, NAME_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'name' attribute: %s\n", error.string());
+                                goto bail;
+                            }
+                            if (category == "android.intent.category.LAUNCHER") {
+                                isLauncherActivity = true;
+                                //printf("LOG: isLauncherActivity==true\n");
+                            }
+                        }
+                    } else if (withinReceiver) {
+                        if (tag == "action") {
+                            String8 action = getAttribute(tree, NAME_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:name' attribute for receiver: %s\n", error.string());
+                                goto bail;
+                            }
+                            if (action == "android.appwidget.action.APPWIDGET_UPDATE") {
+                                const char *rName = getComponentName(pkg, receiverName);
+                                if (rName != NULL) {
+                                    printf("gadget-receiver:'%s/%s'\n", pkg.string(), rName);
+                                }
+                            }
+                        }
                     }
                 }
 
+                if (depth < 2) {
+                    withinApplication = false;
+                }
                 if (depth < 3) {
                     //if (withinActivity) printf("LOG: withinActivity==false\n");
                     withinActivity = false;
+                    withinReceiver = false;
                 }
 
                 if (depth < 5) {
@@ -581,8 +649,13 @@ int doDump(Bundle* bundle)
                 }
 
                 if (withinActivity && isMainActivity && isLauncherActivity) {
-                    printf("launchable activity: name='%s' label='%s' icon='%s'\n",
-                           activityName.string(), activityLabel.string(),
+                    printf("launchable activity:");
+                    const char *aName = getComponentName(pkg, activityName);
+                    if (aName != NULL) {
+                        printf(" name='%s'", aName);
+                    }
+                    printf("label='%s' icon='%s'\n",
+                           activityLabel.string(),
                            activityIcon.string());
                 }
             }
@@ -612,7 +685,7 @@ int doDump(Bundle* bundle)
     }
 
     result = NO_ERROR;
-    
+
 bail:
     if (asset) {
         delete asset;
