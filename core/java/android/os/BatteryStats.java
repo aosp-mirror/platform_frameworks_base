@@ -80,33 +80,37 @@ public abstract class BatteryStats implements Parcelable {
      * Include only the run since the last time the device was unplugged in the stats.
      */
     public static final int STATS_UNPLUGGED = 3;
+
+    // NOTE: Update this list if you add/change any stats above.
+    // These characters are supposed to represent "total", "last", "current", 
+    // and "unplugged". They were shortened for effeciency sake.
+    private static final String[] STAT_NAMES = { "t", "l", "c", "u" };
     
     /**
      * Bump the version on this if the checkin format changes.
      */
-    private static final int BATTERY_STATS_CHECKIN_VERSION = 3;
+    private static final int BATTERY_STATS_CHECKIN_VERSION = 4;
     
     private static final long BYTES_PER_KB = 1024;
     private static final long BYTES_PER_MB = 1048576; // 1024^2
     private static final long BYTES_PER_GB = 1073741824; //1024^3
     
-    // TODO: Update this list if you add/change any stats above.
-    private static final String[] STAT_NAMES = { "total", "last", "current", "unplugged" };
 
     private static final String APK_DATA = "apk";
-    private static final String PROCESS_DATA = "process";
-    private static final String SENSOR_DATA = "sensor";
-    private static final String WAKELOCK_DATA = "wakelock";
-    private static final String NETWORK_DATA = "network";
-    private static final String USER_ACTIVITY_DATA = "useract";
-    private static final String BATTERY_DATA = "battery";
-    private static final String WIFI_LOCK_DATA = "wifilock";
-    private static final String MISC_DATA = "misc";
-    private static final String SCREEN_BRIGHTNESS_DATA = "brightness";
-    private static final String SIGNAL_STRENGTH_TIME_DATA = "sigtime";
-    private static final String SIGNAL_STRENGTH_COUNT_DATA = "sigcnt";
-    private static final String DATA_CONNECTION_TIME_DATA = "dconntime";
-    private static final String DATA_CONNECTION_COUNT_DATA = "dconncnt";
+    private static final String PROCESS_DATA = "pr";
+    private static final String SENSOR_DATA = "sr";
+    private static final String WAKELOCK_DATA = "wl";
+    private static final String NETWORK_DATA = "nt";
+    private static final String USER_ACTIVITY_DATA = "ua";
+    private static final String BATTERY_DATA = "bt";
+    private static final String BATTERY_LEVEL_DATA = "lv";
+    private static final String WIFI_LOCK_DATA = "wfl";
+    private static final String MISC_DATA = "m";
+    private static final String SCREEN_BRIGHTNESS_DATA = "br";
+    private static final String SIGNAL_STRENGTH_TIME_DATA = "sgt";
+    private static final String SIGNAL_STRENGTH_COUNT_DATA = "sgc";
+    private static final String DATA_CONNECTION_TIME_DATA = "dct";
+    private static final String DATA_CONNECTION_COUNT_DATA = "dcc";
 
     private final StringBuilder mFormatBuilder = new StringBuilder(8);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
@@ -775,7 +779,7 @@ public abstract class BatteryStats implements Parcelable {
         dumpLine(pw, 0 /* uid */, category, DATA_CONNECTION_COUNT_DATA, args);
         
         if (which == STATS_UNPLUGGED) {
-            dumpLine(pw, 0 /* uid */, category, BATTERY_DATA, getDischargeStartLevel(), 
+            dumpLine(pw, 0 /* uid */, category, BATTERY_LEVEL_DATA, getDischargeStartLevel(), 
                     getDischargeCurrentLevel());
         }
         
@@ -818,11 +822,11 @@ public abstract class BatteryStats implements Parcelable {
                     String linePrefix = "";
                     sb.setLength(0);
                     linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_FULL), batteryRealtime,
-                            "full", which, linePrefix);
+                            "f", which, linePrefix);
                     linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_PARTIAL), batteryRealtime,
-                            "partial", which, linePrefix);
+                            "p", which, linePrefix);
                     linePrefix = printWakeLockCheckin(sb, wl.getWakeTime(WAKE_TYPE_WINDOW), batteryRealtime,
-                            "window", which, linePrefix);
+                            "w", which, linePrefix);
                     
                     // Only log if we had at lease one wakelock...
                     if (sb.length() > 0) {
