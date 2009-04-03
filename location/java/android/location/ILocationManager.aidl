@@ -53,6 +53,9 @@ interface ILocationManager
     boolean isProviderEnabled(String provider);
 
     Location getLastKnownLocation(String provider);
+    
+    /* used by location providers to tell the location manager when it has a new location */
+    void setLocation(in Location location);
 
     String getFromLocation(double latitude, double longitude, int maxResults,
         String language, String country, String variant, String appName, out List<Address> addrs);

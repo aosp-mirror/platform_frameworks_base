@@ -18,6 +18,7 @@ package android.test;
 
 
 import android.location.Criteria;
+import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationProviderImpl;
 import android.os.Bundle;
@@ -36,14 +37,45 @@ public class TestLocationProvider extends LocationProviderImpl {
     public static final float SPEED = 10;
     public static final float BEARING = 1;
     public static final int STATUS = AVAILABLE;
+    private static final long LOCATION_INTERVAL = 1000;
 
     private Location mLocation;
     private boolean mEnabled;
+    private TestLocationProviderThread mThread;
 
-    public TestLocationProvider() {
-        super(PROVIDER_NAME);
+    private class TestLocationProviderThread extends Thread {
+
+        private boolean mDone = false;
+
+        public TestLocationProviderThread() {
+            super("TestLocationProviderThread");
+        }
+
+        public void run() {            
+            // thread exits after disable() is called
+            synchronized (this) {
+                while (!mDone) {
+                    try {
+                        wait(LOCATION_INTERVAL);
+                    } catch (InterruptedException e) {
+                    }
+                    
+                    if (!mDone) {
+                        TestLocationProvider.this.updateLocation();
+                    }
+                }
+            }
+        }
+        
+        synchronized void setDone() {
+            mDone = true;
+            notify();
+        }
+    }
+
+    public TestLocationProvider(ILocationManager locationManager) {
+        super(PROVIDER_NAME, locationManager);
         mLocation = new Location(PROVIDER_NAME);
-        updateLocation();
     }
 
     //LocationProvider methods
@@ -95,25 +127,28 @@ public class TestLocationProvider extends LocationProviderImpl {
 
     //LocationProviderImpl methods
     @Override
-    public void disable() {
+    public synchronized void disable() {
         mEnabled = false;
+        if (mThread != null) {
+            mThread.setDone();
+            try {
+                mThread.join();
+            } catch (InterruptedException e) {
+            }
+            mThread = null;
+        }
     }
 
     @Override
-    public void enable() {
-        mEnabled = true;
+    public synchronized void enable() {
+       mEnabled = true;
+        mThread = new TestLocationProviderThread();
+        mThread.start();
     }
 
     @Override
     public boolean isEnabled() {
         return mEnabled;
-    }
-
-    @Override
-    public boolean getLocation(Location l) {
-        updateLocation();
-        l.set(mLocation);
-        return true;
     }
 
     @Override
@@ -134,6 +169,7 @@ public class TestLocationProvider extends LocationProviderImpl {
         extras.putInt("extraTest", 24);
         mLocation.setExtras(extras);
         mLocation.setTime(time);
+        reportLocationChanged(mLocation);
     }
 
 }
