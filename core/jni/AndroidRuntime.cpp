@@ -512,6 +512,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     bool checkJni = false;
+    bool checkDexSum = false;
     bool logStdio = false;
     enum { kEMDefault, kEMIntPortable, kEMIntFast } executionMode = kEMDefault;
 
@@ -535,6 +536,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
     property_get("dalvik.vm.stack-trace-file", stackTraceFileBuf, "");
+
+    property_get("dalvik.vm.check-dex-sum", propBuf, "");
+    if (strcmp(propBuf, "true") == 0) {
+        checkDexSum = true;
+    }
 
     property_get("log.redirect-stdio", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
@@ -670,6 +676,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         opt.optionString = "-Xint:fast";
         mOptions.add(opt);
     }
+
+    if (checkDexSum) {
+        /* perform additional DEX checksum tests */
+        opt.optionString = "-Xcheckdexsum";
+        mOptions.add(opt);
+    }
+
     if (logStdio) {
         /* convert stdout/stderr to log messages */
         opt.optionString = "-Xlog-stdio";
