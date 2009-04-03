@@ -20,12 +20,7 @@ import android.location.Address;
 import android.location.Location;
 import android.net.wifi.ScanResult;
 
-import com.google.common.io.protocol.ProtoBuf;
-
-import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Interface for network location provider

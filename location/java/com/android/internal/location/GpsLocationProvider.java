@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.IGpsStatusListener;
+import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -209,8 +210,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
         return native_is_supported();
     }
 
-    public GpsLocationProvider(Context context) {
-        super(LocationManager.GPS_PROVIDER);
+    public GpsLocationProvider(Context context, ILocationManager locationManager) {
+        super(LocationManager.GPS_PROVIDER, locationManager);
         mContext = context;
 
         TelephonyBroadcastReceiver receiver = new TelephonyBroadcastReceiver();
@@ -355,7 +356,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
     /**
      * Enables this provider.  When enabled, calls to getStatus()
-     * and getLocation() must be handled.  Hardware may be started up
+     * must be handled.  Hardware may be started up
      * when the provider is enabled.
      */
     @Override
@@ -385,7 +386,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
     /**
      * Disables this provider.  When disabled, calls to getStatus()
-     * and getLocation() need not be handled.  Hardware may be shut
+     * need not be handled.  Hardware may be shut
      * down while the provider is disabled.
      */
     @Override
@@ -446,19 +447,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
     @Override
     public long getStatusUpdateTime() {
         return mStatusUpdateTime;
-    }
-
-    @Override
-    public boolean getLocation(Location l) {
-        synchronized (mLocation) {
-            // don't report locations without latitude and longitude
-            if ((mLocationFlags & LOCATION_HAS_LAT_LONG) == 0) {
-                return false;
-            }
-            l.set(mLocation);
-            l.setExtras(mLocationExtras);
-            return true;
-        }
     }
 
     @Override
@@ -684,6 +672,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
             } else {
                 mLocation.removeAccuracy();
             }
+
+            reportLocationChanged(mLocation);
 
             // Send to collector
             if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG

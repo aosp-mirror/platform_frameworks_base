@@ -16,6 +16,7 @@
 
 package com.android.internal.location;
 
+import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationProviderImpl;
 import android.os.Bundle;
@@ -46,10 +47,11 @@ public class MockProvider extends LocationProviderImpl {
     private boolean mHasStatus;
     private boolean mEnabled;
 
-    public MockProvider(String name,  boolean requiresNetwork, boolean requiresSatellite,
+    public MockProvider(String name,  ILocationManager locationManager,
+        boolean requiresNetwork, boolean requiresSatellite,
         boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
         boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
-        super(name);
+        super(name, locationManager);
 
         mRequiresNetwork = requiresNetwork;
         mRequiresSatellite = requiresSatellite;
@@ -74,15 +76,6 @@ public class MockProvider extends LocationProviderImpl {
     }
 
     @Override
-    public boolean getLocation(Location l) {
-        if (mHasLocation) {
-            l.set(mLocation);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public int getStatus(Bundle extras) {
         if (mHasStatus) {
             extras.clear();
@@ -91,6 +84,11 @@ public class MockProvider extends LocationProviderImpl {
         } else {
             return AVAILABLE;
         }
+    }
+
+    @Override
+    public long getStatusUpdateTime() {
+        return mStatusUpdateTime;
     }
 
     @Override
@@ -146,6 +144,7 @@ public class MockProvider extends LocationProviderImpl {
     public void setLocation(Location l) {
         mLocation.set(l);
         mHasLocation = true;
+        reportLocationChanged(mLocation);
     }
 
     public void clearLocation() {
@@ -164,29 +163,7 @@ public class MockProvider extends LocationProviderImpl {
 
     public void clearStatus() {
         mHasStatus = false;
-    }
-
-    public int overrideStatus(int status) {
-        if (mHasStatus) {
-            return mStatus;
-        } else {
-            return status;
-        }
-    }
-
-    public long overrideStatusUpdateTime(long statusUpdateTime) {
-        if (mHasStatus) {
-            return mStatusUpdateTime;
-        } else {
-            return statusUpdateTime;
-        }
-    }
-
-    public void overrideExtras(Bundle extras) {
-        if (mHasStatus) {
-            extras.clear();
-            extras.putAll(mExtras);
-        }
+        mStatusUpdateTime = 0;
     }
 
     public void dump(PrintWriter pw, String prefix) {

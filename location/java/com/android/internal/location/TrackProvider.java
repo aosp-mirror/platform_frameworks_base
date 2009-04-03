@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import android.location.Criteria;
+import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationProviderImpl;
 import android.os.Bundle;
@@ -50,6 +51,7 @@ public class TrackProvider extends LocationProviderImpl {
     private static final long INTERVAL = 1000L;
 
     private boolean mEnabled = true;
+    private TrackProviderThread mThread;
 
     private double mLatitude;
     private double mLongitude;
@@ -85,6 +87,36 @@ public class TrackProvider extends LocationProviderImpl {
     private float mTrackSpeed = 100.0f; // km/hr - default for kml tracks
 
     private Location mInitialLocation;
+
+    private class TrackProviderThread extends Thread {
+
+        private boolean mDone = false;
+
+        public TrackProviderThread() {
+            super("TrackProviderThread");
+        }
+
+        public void run() {            
+            // thread exits after disable() is called
+            synchronized (this) {
+                while (!mDone) {
+                    try {
+                        wait(INTERVAL);
+                    } catch (InterruptedException e) {
+                    }
+                    
+                    if (!mDone) {
+                        TrackProvider.this.update();
+                    }
+                }
+            }
+        }
+        
+        synchronized void setDone() {
+            mDone = true;
+            notify();
+        }
+    }
 
     private void close(Reader rdr) {
         try {
@@ -392,13 +424,13 @@ public class TrackProvider extends LocationProviderImpl {
         }
     }
 
-    public TrackProvider(String name) {
-        super(name);
+    public TrackProvider(String name, ILocationManager locationManager) {
+        super(name, locationManager);
         setTimes();
     }
 
-    public TrackProvider(String name, File file) {
-        this(name);
+    public TrackProvider(String name, ILocationManager locationManager, File file) {
+        this(name, locationManager);
 
         String filename = file.getName();
         if (filename.endsWith("kml")) {
@@ -429,12 +461,7 @@ public class TrackProvider extends LocationProviderImpl {
     }
 
     private void update() {
-        // Don't update the position at all unless INTERVAL milliseconds
-        // have passed since the last request
         long time = System.currentTimeMillis() - mBaseTime;
-        if (time - mLastTime < INTERVAL) {
-            return;
-        }
 
         List<Waypoint> waypoints = mWaypoints;
         if (waypoints == null) {
@@ -594,12 +621,22 @@ public class TrackProvider extends LocationProviderImpl {
         mTrackSpeed = trackSpeed;
     }
 
-    @Override public void enable() {
-        mEnabled = true;
+    @Override public synchronized void enable() {
+       mEnabled = true;
+        mThread = new TrackProviderThread();
+        mThread.start();
     }
 
-    @Override public void disable() {
+    @Override public synchronized void disable() {
         mEnabled = false;
+        if (mThread != null) {
+            mThread.setDone();
+            try {
+                mThread.join();
+            } catch (InterruptedException e) {
+            }
+            mThread = null;
+        }
     }
 
     @Override public boolean isEnabled() {
@@ -608,31 +645,6 @@ public class TrackProvider extends LocationProviderImpl {
 
     @Override public int getStatus(Bundle extras) {
         return AVAILABLE;
-    }
-
-    @Override public boolean getLocation(Location l) {
-        if (mEnabled) {
-            update();
-            l.setProvider(getName());
-            l.setTime(mTime + mBaseTime);
-            l.setLatitude(mLatitude);
-            l.setLongitude(mLongitude);
-            if (mSupportsAltitude && mHasAltitude) {
-                l.setAltitude(mAltitude);
-            }
-            if (mSupportsBearing && mHasBearing) {
-                l.setBearing(mBearing);
-            }
-            if (mSupportsSpeed && mHasSpeed) {
-                l.setSpeed(mSpeed);
-            }
-            if (mExtras != null) {
-                l.setExtras(mExtras);
-            }
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public Location getInitialLocation() {
