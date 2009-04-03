@@ -2113,6 +2113,46 @@ public final class Settings {
          * @hide
          */
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
+
+        /**
+         * Helper method for determining if a location provider is enabled.
+         * @param cr the content resolver to use
+         * @param provider the location provider to query
+         * @return true if the provider is enabled
+         *
+         * @hide
+         */
+        public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
+            String allowedProviders = Settings.Secure.getString(cr, LOCATION_PROVIDERS_ALLOWED);
+            if (allowedProviders != null) {
+                return (allowedProviders.equals(provider) ||
+                        allowedProviders.contains("," + provider + ",") ||
+                        allowedProviders.startsWith(provider + ",") ||
+                        allowedProviders.endsWith("," + provider));
+            }
+            return false;           
+        }
+
+        /**
+         * Thread-safe method for enabling or disabling a single location provider.
+         * @param cr the content resolver to use
+         * @param provider the location provider to enable or disable
+         * @param enabled true if the provider should be enabled
+         *
+         * @hide
+         */
+        public static final void setLocationProviderEnabled(ContentResolver cr,
+                String provider, boolean enabled) {
+            // to ensure thread safety, we write the provider name with a '+' or '-'
+            // and let the SettingsProvider handle it rather than reading and modifying
+            // the list of enabled providers.
+            if (enabled) {
+                provider = "+" + provider;
+            } else {
+                provider = "-" + provider;
+            }
+            putString(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider);
+        }
     }
     
     /**

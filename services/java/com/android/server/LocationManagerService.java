@@ -28,17 +28,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.IGpsStatusListener;
 import android.location.ILocationListener;
@@ -222,6 +226,9 @@ public class LocationManagerService extends ILocationManager.Stub
     private int mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
     private boolean mWifiEnabled = false;
 
+    // for Settings change notification
+    private ContentQueryMap mSettings;
+
     /**
      * A wrapper class holding either an ILocationListener or a PendingIntent to receive
      * location updates.
@@ -341,6 +348,14 @@ public class LocationManagerService extends ILocationManager.Stub
             }
             synchronized (mLocationListeners) {
                 removeUpdatesLocked(this);
+            }
+        }
+    }
+
+    private final class SettingsObserver implements Observer {
+        public void update(Observable o, Object arg) {
+            synchronized (mLocationListeners) {
+                updateProvidersLocked();
             }
         }
     }
@@ -593,6 +608,16 @@ public class LocationManagerService extends ILocationManager.Stub
         intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         context.registerReceiver(powerStateReceiver, intentFilter);
 
+        // listen for settings changes
+        ContentResolver resolver = mContext.getContentResolver();
+        Cursor settingsCursor = resolver.query(Settings.Secure.CONTENT_URI, null,
+                "(" + Settings.System.NAME + "=?)",
+                new String[]{Settings.Secure.LOCATION_PROVIDERS_ALLOWED},
+                null);
+        mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mLocationHandler);
+        SettingsObserver settingsObserver = new SettingsObserver();
+        mSettings.addObserver(settingsObserver);
+
         // Get the wifi manager
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
@@ -771,12 +796,6 @@ public class LocationManagerService extends ILocationManager.Stub
             }
         }
         return out;
-    }
-
-    public void updateProviders() {
-        synchronized (mLocationListeners) {
-            updateProvidersLocked();
-        }
     }
 
     private void updateProvidersLocked() {
