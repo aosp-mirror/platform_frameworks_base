@@ -738,7 +738,7 @@ public abstract class Context {
     public abstract void removeStickyBroadcast(Intent intent);
 
     /**
-     * Register an BroadcastReceiver to be run in the main activity thread.  The
+     * Register a BroadcastReceiver to be run in the main activity thread.  The
      * <var>receiver</var> will be called with any broadcast Intent that
      * matches <var>filter</var>, in the main application thread.
      *
@@ -762,11 +762,12 @@ public abstract class Context {
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
-     * <p class="note">Note: this method <em>can not be called from an
-     * {@link BroadcastReceiver} component</em>.  It is okay, however, to use
-     * this method from another BroadcastReceiver that has itself been registered with
-     * {@link #registerReceiver}, since the lifetime of such an BroadcastReceiver
-     * is tied to another object (the one that registered it).</p>
+     * <p class="note">Note: this method <em>cannot be called from a
+     * {@link BroadcastReceiver} component;</em> that is, from a BroadcastReceiver
+     * that is declared in an application's manifest.  It is okay, however, to call
+     * this method from another BroadcastReceiver that has itself been registered
+     * at run time with {@link #registerReceiver}, since the lifetime of such a
+     * registered BroadcastReceiver is tied to the object that registered it.</p>
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
