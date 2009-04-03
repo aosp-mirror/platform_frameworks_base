@@ -33,8 +33,6 @@ interface ILocationManager
     List getAllProviders();
     List getProviders(boolean enabledOnly);
 
-    void updateProviders();
-
     void requestLocationUpdates(String provider, long minTime, float minDistance,
         in ILocationListener listener);
     void requestLocationUpdatesPI(String provider, long minTime, float minDistance,
