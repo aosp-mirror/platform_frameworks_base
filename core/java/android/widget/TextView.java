@@ -3920,6 +3920,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         layout.draw(canvas, highlight, mHighlightPaint, voffsetCursor - voffsetText);
 
+        if (mMarquee != null && mMarquee.shouldDrawGhost()) {
+            canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
+            layout.draw(canvas, highlight, mHighlightPaint, voffsetCursor - voffsetText);
+        }
+
         /*  Comment out until we decide what to do about animations
         if (currentTransformation != null) {
             mTextPaint.setLinearTextOn(isLinearTextOn);
@@ -5708,6 +5713,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private static final class Marquee extends Handler {
         // TODO: Add an option to configure this
+        private static final int MARQUEE_DELTA_MAX = 5;
         private static final int MARQUEE_DELAY = 1200;
         private static final int MARQUEE_RESTART_DELAY = 1200;
         private static final int MARQUEE_RESOLUTION = 1000 / 30;
@@ -5726,6 +5732,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private byte mStatus = MARQUEE_STOPPED;
         private float mScrollUnit;
         private float mMaxScroll;
+        float mMaxFadeScroll;
+        private float mGhostStart;
+        private float mGhostOffset;
+        private float mFadeStop;
         private int mRepeatLimit;
 
         float mScroll;
@@ -5801,11 +5811,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (textView != null && textView.mLayout != null) {
                 mStatus = MARQUEE_STARTING;
                 mScroll = 0.0f;
-                mMaxScroll = textView.mLayout.getLineWidth(0) - (textView.getWidth() -
-                        textView.getCompoundPaddingLeft() - textView.getCompoundPaddingRight());
+                final int textWidth = textView.getWidth() - textView.getCompoundPaddingLeft() -
+                        textView.getCompoundPaddingRight();
+                final float lineWidth = textView.mLayout.getLineWidth(0);
+                mGhostStart = lineWidth - textWidth + textWidth / 3.0f;
+                mMaxScroll = mGhostStart + textWidth;
+                mGhostOffset = lineWidth + textWidth / 3.0f;
+                mFadeStop = lineWidth + textWidth / 6.0f;
+                mMaxFadeScroll = mGhostStart + lineWidth + lineWidth;
+
                 textView.invalidate();
                 sendEmptyMessageDelayed(MESSAGE_START, MARQUEE_DELAY);
             }
+        }
+
+        float getGhostOffset() {
+            return mGhostOffset;
+        }
+
+        boolean shouldDrawLeftFade() {
+            return mScroll <= mFadeStop;
+        }
+
+        boolean shouldDrawGhost() {
+            return mStatus == MARQUEE_RUNNING && mScroll > mGhostStart;
         }
 
         boolean isRunning() {
@@ -6433,7 +6462,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
-                return marquee.mScroll / getHorizontalFadingEdgeLength();
+                if (marquee.shouldDrawLeftFade()) {
+                    return marquee.mScroll / getHorizontalFadingEdgeLength();
+                } else {
+                    return 0.0f;
+                }
             } else if (getLineCount() == 1) {
                 switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
@@ -6455,7 +6488,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
-                return (marquee.mMaxScroll - marquee.mScroll) / getHorizontalFadingEdgeLength();
+                return (marquee.mMaxFadeScroll - marquee.mScroll) / getHorizontalFadingEdgeLength();
             } else if (getLineCount() == 1) {
                 switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
