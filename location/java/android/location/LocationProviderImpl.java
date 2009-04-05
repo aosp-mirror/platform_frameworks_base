@@ -16,8 +16,6 @@
 
 package android.location;
 
-import com.android.internal.location.CellState;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -237,15 +235,6 @@ public abstract class LocationProviderImpl extends LocationProvider {
      * @param state data state
      */
     public void updateNetworkState(int state) {
-    }
-
-    /**
-     * Updates the cell state for the given provider. This function must be
-     * overwritten if {@link #requiresCell} returns true.
-     *
-     * @param state cell state
-     */
-    public void updateCellState(CellState state) {
     }
 
     /**
