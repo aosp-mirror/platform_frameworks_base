@@ -64,8 +64,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.telephony.CellLocation;
-import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Config;
 import android.util.Log;
@@ -73,7 +71,6 @@ import android.util.PrintWriterPrinter;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.location.CellState;
 import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.ILocationCollector;
 import com.android.internal.location.INetworkLocationManager;
@@ -576,10 +573,6 @@ public class LocationManagerService extends ILocationManager.Stub
 
         // Listen for Radio changes
         mTelephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-        mTelephonyManager.listen(mPhoneStateListener,
-                PhoneStateListener.LISTEN_CELL_LOCATION |
-                PhoneStateListener.LISTEN_SIGNAL_STRENGTH |
-                PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
 
         // Register for Network (Wifi or Mobile) updates
         NetworkStateBroadcastReceiver networkReceiver = new NetworkStateBroadcastReceiver();
@@ -640,13 +633,6 @@ public class LocationManagerService extends ILocationManager.Stub
                 mNetworkLocationProvider.updateNetworkState(mNetworkState);
                 mNetworkLocationInterface.updateWifiEnabledState(mWifiEnabled);
                 mNetworkLocationInterface.updateCellLockStatus(mCellWakeLockAcquired);
-
-                if (mLastCellState != null) {
-                    if (mCollector != null) {
-                        mCollector.updateCellState(mLastCellState);
-                    }
-                    mNetworkLocationProvider.updateCellState(mLastCellState);
-                }
 
                 // There might be an existing wifi scan available
                 if (mWifiManager != null) {
@@ -796,12 +782,6 @@ public class LocationManagerService extends ILocationManager.Stub
             boolean isEnabled = p.isEnabled();
             String name = p.getName();
             boolean shouldBeEnabled = isAllowedBySettingsLocked(name);
-
-            // Collection is only allowed when network provider is being used
-            if (mCollector != null &&
-                    p.getName().equals(LocationManager.NETWORK_PROVIDER)) {
-                mCollector.updateNetworkProviderStatus(shouldBeEnabled);
-            }
 
             if (isEnabled && !shouldBeEnabled) {
                 updateProviderListenersLocked(name, false);
@@ -1745,117 +1725,6 @@ public class LocationManagerService extends ILocationManager.Stub
         }
     }
 
-    class CellLocationUpdater extends Thread {
-        CellLocation mNextLocation;
-        
-        CellLocationUpdater() {
-            super("CellLocationUpdater");
-        }
-        
-        @Override
-        public void run() {
-            int curAsu = -1;
-            CellLocation curLocation = null;
-            
-            while (true) {
-                // See if there is more work to do...
-                synchronized (mLocationListeners) {
-                    if (curLocation == mNextLocation) {
-                        mCellLocationUpdater = null;
-                        break;
-                    }
-                    
-                    curLocation = mNextLocation;
-                    if (curLocation == null) {
-                        mCellLocationUpdater = null;
-                        break;
-                    }
-                    
-                    curAsu = mLastSignalStrength;
-                    
-                    mNextLocation = null;
-                }
-                
-                try {
-                    // Gets cell state.  This can block so must be done without
-                    // locks held.
-                    CellState cs = new CellState(mTelephonyManager, curLocation, curAsu);
-                    
-                    synchronized (mLocationListeners) {
-                        mLastCellState = cs;
-        
-                        cs.updateSignalStrength(mLastSignalStrength);
-                        cs.updateRadioType(mLastRadioType);
-                        
-                        // Notify collector
-                        if (mCollector != null) {
-                            mCollector.updateCellState(cs);
-                        }
-    
-                        // Updates providers
-                        List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
-                        for (LocationProviderImpl provider : providers) {
-                            if (provider.requiresCell()) {
-                                provider.updateCellState(cs);
-                            }
-                        }
-                    }
-                } catch (RuntimeException e) {
-                    Log.e(TAG, "Exception in PhoneStateListener.onCellLocationChanged:", e);
-                }
-            }
-        }
-    }
-    
-    CellLocationUpdater mCellLocationUpdater = null;
-    CellState mLastCellState = null;
-    int mLastSignalStrength = -1;
-    int mLastRadioType = -1;
-    
-    PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
-
-        @Override
-        public void onCellLocationChanged(CellLocation cellLocation) {
-            synchronized (mLocationListeners) {
-                if (mCellLocationUpdater == null) {
-                    mCellLocationUpdater = new CellLocationUpdater();
-                    mCellLocationUpdater.start();
-                }
-                mCellLocationUpdater.mNextLocation = cellLocation;
-            }
-        }
-
-        @Override
-        public void onSignalStrengthChanged(int asu) {
-            synchronized (mLocationListeners) {
-                mLastSignalStrength = asu;
-    
-                if (mLastCellState != null) {
-                    mLastCellState.updateSignalStrength(asu);
-                }
-            }
-        }
-
-        @Override
-        public void onDataConnectionStateChanged(int state) {
-            synchronized (mLocationListeners) {
-                // Get radio type
-                int radioType = mTelephonyManager.getNetworkType();
-                if (radioType == TelephonyManager.NETWORK_TYPE_GPRS ||
-                    radioType == TelephonyManager.NETWORK_TYPE_EDGE) {
-                    radioType = CellState.RADIO_TYPE_GPRS;
-                } else if (radioType == TelephonyManager.NETWORK_TYPE_UMTS) {
-                    radioType = CellState.RADIO_TYPE_WCDMA;
-                }
-                mLastRadioType = radioType;
-
-                if (mLastCellState != null) {
-                    mLastCellState.updateRadioType(radioType);
-                }
-            }
-        }
-    };
-
     private class PowerStateBroadcastReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -2460,10 +2329,6 @@ public class LocationManagerService extends ILocationManager.Stub
             pw.println("  mGpsNavigating=" + mGpsNavigating);
             pw.println("  mNetworkLocationProvider=" + mNetworkLocationProvider);
             pw.println("  mNetworkLocationInterface=" + mNetworkLocationInterface);
-            pw.println("  mLastSignalStrength=" + mLastSignalStrength
-                    + "  mLastRadioType=" + mLastRadioType);
-            pw.println("  mCellLocationUpdater=" + mCellLocationUpdater);
-            pw.println("  mLastCellState=" + mLastCellState);
             pw.println("  mCollector=" + mCollector);
             pw.println("  mAlarmInterval=" + mAlarmInterval
                     + " mScreenOn=" + mScreenOn

@@ -19,8 +19,6 @@ package com.android.internal.location;
 import android.location.Location;
 import android.net.wifi.ScanResult;
 
-import com.android.internal.location.CellState;
-
 import java.util.List;
 
 /**
@@ -44,22 +42,6 @@ public interface ILocationCollector {
      * @param currentScanResults scan results
      */
     abstract public void updateWifiScanResults(List<ScanResult> currentScanResults);
-
-    /**
-     * Updates the status of the network location provider.
-     *
-     * @param enabled true if user has enabled network location based on Google's database
-     * of wifi points and cell towers.
-     */
-    abstract public void updateNetworkProviderStatus(boolean enabled);
-
-    /**
-     * Updates cell tower state. This is usually always up to date so should be uploaded
-     * each time a new location is available.
-     *
-     * @param newState cell state
-     */
-    abstract public void updateCellState(CellState newState);
 
     /**
      * Updates the battery health. Battery level is healthy if there is greater than
