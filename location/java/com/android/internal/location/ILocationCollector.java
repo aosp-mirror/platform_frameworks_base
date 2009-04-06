@@ -17,9 +17,6 @@
 package com.android.internal.location;
 
 import android.location.Location;
-import android.net.wifi.ScanResult;
-
-import java.util.List;
 
 /**
  * Listens for GPS and cell/wifi changes and anonymously uploads to server for
@@ -35,21 +32,4 @@ public interface ILocationCollector {
      * @param location location object
      */
     abstract public void updateLocation(Location location);
-
-    /**
-     * Updates wifi scan results if collection is enabled
-     *
-     * @param currentScanResults scan results
-     */
-    abstract public void updateWifiScanResults(List<ScanResult> currentScanResults);
-
-    /**
-     * Updates the battery health. Battery level is healthy if there is greater than
-     * {@link #MIN_BATTERY_LEVEL} percentage left or if the device is plugged in
-     *
-     * @param scale maximum scale for battery
-     * @param level current level
-     * @param plugged true if device is plugged in
-     */
-    abstract public void updateBatteryState(int scale, int level, boolean plugged);
 }
