@@ -53,7 +53,6 @@ import android.location.LocationProvider;
 import android.location.LocationProviderImpl;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -136,7 +135,6 @@ public class LocationManagerService extends ILocationManager.Stub
     private static final int MESSAGE_LOCATION_CHANGED = 1;
     private static final int MESSAGE_ACQUIRE_WAKE_LOCK = 2;
     private static final int MESSAGE_RELEASE_WAKE_LOCK = 3;
-    private static final int MESSAGE_INSTALL_NETWORK_LOCATION_PROVIDER = 4;
 
     // Alarm manager and wakelock variables
     private final static String ALARM_INTENT = "com.android.location.ALARM_INTENT";
@@ -199,11 +197,6 @@ public class LocationManagerService extends ILocationManager.Stub
     private HashMap<String,Location> mLastKnownLocation =
         new HashMap<String,Location>();
 
-    // Battery status extras (from com.android.server.BatteryService)
-    private static final String BATTERY_EXTRA_SCALE = "scale";
-    private static final String BATTERY_EXTRA_LEVEL = "level";
-    private static final String BATTERY_EXTRA_PLUGGED = "plugged";
-
     // Last known cell service state
     private TelephonyManager mTelephonyManager;
 
@@ -214,7 +207,6 @@ public class LocationManagerService extends ILocationManager.Stub
     private WifiManager mWifiManager;
 
     private int mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
-    private boolean mWifiEnabled = false;
 
     // for Settings change notification
     private ContentQueryMap mSettings;
@@ -577,8 +569,6 @@ public class LocationManagerService extends ILocationManager.Stub
         // Register for Network (Wifi or Mobile) updates
         NetworkStateBroadcastReceiver networkReceiver = new NetworkStateBroadcastReceiver();
         IntentFilter networkIntentFilter = new IntentFilter();
-        networkIntentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        networkIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         networkIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         networkIntentFilter.addAction(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION);
         context.registerReceiver(networkReceiver, networkIntentFilter);
@@ -589,7 +579,6 @@ public class LocationManagerService extends ILocationManager.Stub
         intentFilter.addAction(ALARM_INTENT);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         context.registerReceiver(powerStateReceiver, intentFilter);
@@ -611,15 +600,6 @@ public class LocationManagerService extends ILocationManager.Stub
         mWifiLock = getWifiWakelockLocked();
     }
 
-    public void setInstallCallback(InstallCallback callback) {
-        synchronized (mLocationListeners) {
-            mLocationHandler.removeMessages(MESSAGE_INSTALL_NETWORK_LOCATION_PROVIDER);
-            Message m = Message.obtain(mLocationHandler, 
-                    MESSAGE_INSTALL_NETWORK_LOCATION_PROVIDER, callback);
-            mLocationHandler.sendMessageAtFrontOfQueue(m);
-        }
-    }
-
     public void setNetworkLocationProvider(INetworkLocationProvider provider) {
         synchronized (mLocationListeners) {
             mNetworkLocationInterface = provider;
@@ -629,22 +609,8 @@ public class LocationManagerService extends ILocationManager.Stub
             updateProvidersLocked();
             
             // notify NetworkLocationProvider of any events it might have missed
-            synchronized (mLocationListeners) {
-                mNetworkLocationProvider.updateNetworkState(mNetworkState);
-                mNetworkLocationInterface.updateWifiEnabledState(mWifiEnabled);
-                mNetworkLocationInterface.updateCellLockStatus(mCellWakeLockAcquired);
-
-                // There might be an existing wifi scan available
-                if (mWifiManager != null) {
-                    List<ScanResult> wifiScanResults = mWifiManager.getScanResults();
-                    if (wifiScanResults != null && wifiScanResults.size() != 0) {
-                        mNetworkLocationInterface.updateWifiScanResults(wifiScanResults);
-                        if (mCollector != null) {
-                            mCollector.updateWifiScanResults(wifiScanResults);
-                        }
-                    }
-                }
-            }
+            mNetworkLocationProvider.updateNetworkState(mNetworkState);
+            mNetworkLocationInterface.updateCellLockStatus(mCellWakeLockAcquired);
         }
     }
 
@@ -1710,13 +1676,6 @@ public class LocationManagerService extends ILocationManager.Stub
                         updateWakelockStatusLocked(mScreenOn);
                         releaseWakeLockLocked();
                     }
-                } else if (msg.what == MESSAGE_INSTALL_NETWORK_LOCATION_PROVIDER) {
-                    synchronized (mLocationListeners) {
-                        Log.d(TAG, "installing network location provider");
-                        INetworkLocationManager.InstallCallback callback =
-                                (INetworkLocationManager.InstallCallback)msg.obj;
-                        callback.installNetworkLocationProvider(LocationManagerService.this);
-                    }
                 }
             } catch (Exception e) {
                 // Log, don't crash!
@@ -1750,19 +1709,6 @@ public class LocationManagerService extends ILocationManager.Stub
                 log("PowerStateBroadcastReceiver: Screen on");
                 synchronized (mLocationListeners) {
                     updateWakelockStatusLocked(true);
-                }
-
-            } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                log("PowerStateBroadcastReceiver: Battery changed");
-                synchronized (mLocationListeners) {
-                    int scale = intent.getIntExtra(BATTERY_EXTRA_SCALE, 100);
-                    int level = intent.getIntExtra(BATTERY_EXTRA_LEVEL, 0);
-                    boolean plugged = intent.getIntExtra(BATTERY_EXTRA_PLUGGED, 0) != 0;
-    
-                    // Notify collector battery state
-                    if (mCollector != null) {
-                        mCollector.updateBatteryState(scale, level, plugged);
-                    }
                 }
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)) {
@@ -1814,25 +1760,7 @@ public class LocationManagerService extends ILocationManager.Stub
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-
-                List<ScanResult> wifiScanResults = mWifiManager.getScanResults();
-
-                if (wifiScanResults == null) {
-                    return;
-                }
-
-                // Notify provider and collector of Wifi scan results
-                synchronized (mLocationListeners) {
-                    if (mCollector != null) {
-                        mCollector.updateWifiScanResults(wifiScanResults);
-                    }
-                    if (mNetworkLocationInterface != null) {
-                        mNetworkLocationInterface.updateWifiScanResults(wifiScanResults);
-                    }
-                }
-
-            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 boolean noConnectivity =
                     intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
                 if (!noConnectivity) {
@@ -1850,26 +1778,6 @@ public class LocationManagerService extends ILocationManager.Stub
                         }
                     }
                 }
-
-            } else if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-                int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                    WifiManager.WIFI_STATE_UNKNOWN);
-
-                if (state == WifiManager.WIFI_STATE_ENABLED) {
-                    mWifiEnabled = true;
-                } else if (state == WifiManager.WIFI_STATE_DISABLED) {
-                    mWifiEnabled = false;
-                } else {
-                    return;
-                }
-
-                // Notify network provider of current wifi enabled state
-                synchronized (mLocationListeners) {
-                    if (mNetworkLocationInterface != null) {
-                        mNetworkLocationInterface.updateWifiEnabledState(mWifiEnabled);
-                    }
-                }
-
             } else if (action.equals(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION)) {
 
                 final boolean enabled = intent.getBooleanExtra(GpsLocationProvider.EXTRA_ENABLED,
