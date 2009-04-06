@@ -1518,7 +1518,7 @@ final class WebViewCore {
     private native void setViewportSettingsFromNative();
     
     // called by JNI
-    private void didFirstLayout() {
+    private void didFirstLayout(boolean standardLoad) {
         // Trick to ensure that the Picture has the exact height for the content
         // by forcing to layout with 0 height after the page is ready, which is
         // indicated by didFirstLayout. This is essential to get rid of the 
@@ -1584,8 +1584,11 @@ final class WebViewCore {
                         scaleLimit).sendToTarget();
                 mRestoredScale = 0;
             } else {
+                // if standardLoad is true, use mViewportInitialScale, otherwise
+                // pass -1 to the WebView to indicate no change of the scale.
                 Message.obtain(mWebView.mPrivateHandler,
-                        WebView.DID_FIRST_LAYOUT_MSG_ID, mViewportInitialScale,
+                        WebView.DID_FIRST_LAYOUT_MSG_ID,
+                        standardLoad ? mViewportInitialScale : -1,
                         mViewportWidth, scaleLimit).sendToTarget();
             }
 
