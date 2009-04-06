@@ -29,17 +29,6 @@ import java.util.List;
  */
 public interface INetworkLocationProvider {
 
-    public interface Callback {
-
-        /**
-         * Callback function to notify of a received network location
-         *
-         * @param location location object that is received. may be null if not a valid location
-         * @param successful true if network query was successful, even if no location was found
-         */
-        void locationReceived(Location location, boolean successful);
-    }
-
     /**
      * Updates the current cell lock status.
      *
