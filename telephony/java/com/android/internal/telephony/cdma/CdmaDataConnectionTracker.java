@@ -304,7 +304,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             return trySetupData(Phone.REASON_DATA_ENABLED);
         } else if (!enable) {
             setEnabled(EXTERNAL_NETWORK_DEFAULT_ID, false);
-            return false;
+            cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+            return true;
         } else // isEnabled && enable
 
         return true;

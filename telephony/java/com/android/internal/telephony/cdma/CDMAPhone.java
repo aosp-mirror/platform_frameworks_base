@@ -68,7 +68,6 @@ public class CDMAPhone extends PhoneBase {
     RuimRecords mRuimRecords;
     RuimCard mRuimCard;
     MyHandler h;
-    ArrayList <FeatureCode> mPendingMMIs = new ArrayList<FeatureCode>();
     RuimPhoneBookInterfaceManager mRuimPhoneBookInterfaceManager;
     RuimSmsInterfaceManager mRuimSmsInterfaceManager;
     PhoneSubInfo mSubInfo;
@@ -245,32 +244,23 @@ public class CDMAPhone extends PhoneBase {
         // Need to make sure dialString gets parsed properly
         String newDialString = PhoneNumberUtils.stripSeparators(dialString);
 
-        FeatureCode fc = FeatureCode.newFromDialString(newDialString, this);
-        if (LOCAL_DEBUG) Log.d(LOG_TAG,
-                "dialing w/ fc '" + fc + "'...");
-        // check for feature code
-        if (fc == null) {
-            // check if call in progress
-            if (!mCT.foregroundCall.isIdle()) {
+        if (!mCT.foregroundCall.isIdle()) {
+            FeatureCode fc = FeatureCode.newFromDialString(newDialString, this);
+            if (fc != null) {
+                //mMmiRegistrants.notifyRegistrants(new AsyncResult(null, fc, null));
+                fc.processCode();
+            } else {
                 FeatureCode digits = new FeatureCode(this);
                 // use dial number as poundString
                 digits.poundString = newDialString;
-                mPendingMMIs.add(fc);
-                mMmiRegistrants.notifyRegistrants(new AsyncResult(null, fc, null));
                 digits.processCode();
-                return null;
-            } else {
-                return mCT.dial(newDialString);
             }
-        } else {
-            mPendingMMIs.add(fc);
-            mMmiRegistrants.notifyRegistrants(new AsyncResult(null, fc, null));
-            fc.processCode();
-
-            // FIXME should this return null or something else?
             return null;
+        } else {
+            return mCT.dial(newDialString);
         }
     }
+
 
     public int getSignalStrengthASU() {
         return mSST.rssi == 99 ? -1 : mSST.rssi;
@@ -278,8 +268,7 @@ public class CDMAPhone extends PhoneBase {
 
     public boolean
     getMessageWaitingIndicator() {
-        Log.e(LOG_TAG, "method getMessageWaitingIndicator is NOT supported in CDMA!");
-        return false;
+        return mRuimRecords.getVoiceMessageWaiting();
     }
 
     public List<? extends MmiCode>
@@ -709,22 +698,23 @@ public class CDMAPhone extends PhoneBase {
         mRuimRecords.setVoiceMessageWaiting(1, mwi ? -1 : 0);
     }
 
+    public void
+    notifyMessageWaitingIndicator() {
+        mNotifier.notifyMessageWaitingChanged(this);
+    }
 
     /**
      * Removes the given FC from the pending list and notifies
      * registrants that it is complete.
      * @param fc FC that is done
      */
-    /*package*/ void onMMIDone(FeatureCode fc) {
+    /*package*/ void onFeatureCodeDone(FeatureCode fc) {
         /* Only notify complete if it's on the pending list.
          * Otherwise, it's already been handled (eg, previously canceled).
          * The exception is cancellation of an incoming USSD-REQUEST, which is
          * not on the list.
          */
-        if (mPendingMMIs.remove(fc)) {
-            mMmiCompleteRegistrants.notifyRegistrants(
-                    new AsyncResult(null, fc, null));
-        }
+         mMmiCompleteRegistrants.notifyRegistrants(new AsyncResult(null, fc, null));
     }
 
     //***** Inner Classes
