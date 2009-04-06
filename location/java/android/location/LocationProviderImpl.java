@@ -119,7 +119,7 @@ public abstract class LocationProviderImpl extends LocationProvider {
         try {
             mLocationManager.setLocation(location);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException calling ILocationManager.onLocationChanged");
+            Log.e(TAG, "RemoteException calling ILocationManager.setLocation");
         }
     }
     

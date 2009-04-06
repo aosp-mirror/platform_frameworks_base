@@ -43,7 +43,7 @@ LOCAL_SRC_FILES := $(filter-out \
 
 ## READ ME: ########################################################
 ##
-## When updading this list of aidl files, consider if that aidl is
+## When updating this list of aidl files, consider if that aidl is
 ## part of the SDK API.  If it is, also add it to the list below that
 ## is preprocessed and distributed with the SDK.  This list should
 ## not contain any aidl files for parcelables, but the one below should
@@ -113,8 +113,10 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
 	im/java/android/im/IImPlugin.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
+	location/java/android/location/ILocationCollector.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
+	location/java/android/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
 	media/java/android/media/IMediaScannerListener.aidl \
 	media/java/android/media/IMediaScannerService.aidl \

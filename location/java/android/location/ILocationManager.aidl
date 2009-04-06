@@ -19,7 +19,9 @@ package android.location;
 import android.app.PendingIntent;
 import android.location.Address;
 import android.location.IGpsStatusListener;
+import android.location.ILocationCollector;
 import android.location.ILocationListener;
+import android.location.ILocationProvider;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -74,4 +76,8 @@ interface ILocationManager
     void clearTestProviderEnabled(String provider);
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime);
     void clearTestProviderStatus(String provider);
+
+    /* for installing Network Location Provider */
+    void setNetworkLocationProvider(ILocationProvider provider);
+    void setLocationCollector(ILocationCollector collector);
 }
