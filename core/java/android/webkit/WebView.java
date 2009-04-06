@@ -4752,6 +4752,7 @@ public class WebView extends AbsoluteLayout
                     if (mInitialScale > 0) {
                         scale = mInitialScale / 100.0f;
                     } else  {
+                        if (initialScale < 0) break;
                         if (mWebViewCore.getSettings().getUseWideViewPort()) {
                             // force viewSizeChanged by setting mLastWidthSent
                             // to 0
