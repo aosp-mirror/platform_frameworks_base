@@ -257,12 +257,12 @@ public final class FeatureCode  extends Handler implements MmiCode {
 
             if (ar.exception != null) {
                 state = State.FAILED;
-                message = context.getText(com.android.internal.R.string.mmiError);
+                message = context.getText(com.android.internal.R.string.fcError);
             } else {
                 state = State.COMPLETE;
-                message = context.getText(com.android.internal.R.string.mmiComplete);
+                message = context.getText(com.android.internal.R.string.fcComplete);
             }
-            phone.onMMIDone(this);
+            phone.onFeatureCodeDone(this);
             break;
         }
     }
@@ -307,6 +307,6 @@ public final class FeatureCode  extends Handler implements MmiCode {
         }
 
         message = sb;
-        phone.onMMIDone(this);
+        phone.onFeatureCodeDone(this);
     }
 }
