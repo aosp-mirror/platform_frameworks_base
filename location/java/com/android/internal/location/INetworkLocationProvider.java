@@ -48,21 +48,6 @@ public interface INetworkLocationProvider {
     abstract public void updateCellLockStatus(boolean acquired);
 
     /**
-     * Notifies the provider if Wifi has been enabled or disabled
-     * by the user
-     *
-     * @param enabled true if wifi is enabled; false otherwise
-     */
-    abstract public void updateWifiEnabledState(boolean enabled);
-
-    /**
-     * Notifies the provider that there are scan results available.
-     *
-     * @param scanResults list of wifi scan results
-     */
-    abstract public void updateWifiScanResults(List<ScanResult> scanResults);
-
-    /**
      * Adds a list of application clients
      * Only used by the NetworkLocationProvider
      *

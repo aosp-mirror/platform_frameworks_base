@@ -25,13 +25,6 @@ import android.content.Context;
  * {@hide}
  */
 public interface INetworkLocationManager {
-
-    /* callback to allow installation to occur in Location Manager's thread */
-    public interface InstallCallback {
-        void installNetworkLocationProvider(INetworkLocationManager manager);
-    }
-    
-    void setInstallCallback(InstallCallback callback);
     void setNetworkLocationProvider(INetworkLocationProvider provider);
     void setLocationCollector(ILocationCollector collector);
 }
