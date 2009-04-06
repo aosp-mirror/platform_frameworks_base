@@ -168,6 +168,11 @@
     <string name="cfTemplateRegisteredTime"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
 
     <!-- android.net.http Error strings --> <skip />
+    <!-- Displayed when a feature code (non-phone number) is dialed and completes successfully. -->
+    <string name="fcComplete">Feature code complete.</string>
+    <!-- Displayed when a feature code (non-phone number) is dialed and completes unsuccessfully. -->
+    <string name="fcError">Connection problem or invalid feature code.</string>
+    <!-- android.net.http Error strings --> <skip />
     <!-- Displayed when a web request was successful. -->
     <string name="httpErrorOk">OK</string>
     <!-- Displayed when a web request failed because we don't know the exact reason. -->

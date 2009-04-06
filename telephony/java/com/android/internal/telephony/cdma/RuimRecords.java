@@ -334,12 +334,27 @@ public final class RuimRecords extends IccRecords {
 
     @Override
     public void setVoiceMessageWaiting(int line, int countWaiting) {
-        Log.i(LOG_TAG, "RuimRecords: setVoiceMessageWaiting not supported.");
+        if (line != 1) {
+            // only profile 1 is supported
+            return;
+        }
+
+        // range check
+        if (countWaiting < 0) {
+            countWaiting = -1;
+        } else if (countWaiting > 0xff) {
+            // C.S0015-B v2, 4.5.12
+            // range: 0-99
+            countWaiting = 0xff;
+        }
+        countVoiceMessages = countWaiting;
+
+        ((CDMAPhone) phone).notifyMessageWaitingIndicator();
     }
 
     private void handleRuimRefresh(int[] result) {
         if (result == null || result.length == 0) {
-	        if (DBG) log("handleRuimRefresh without input");
+            if (DBG) log("handleRuimRefresh without input");
             return;
         }
 
