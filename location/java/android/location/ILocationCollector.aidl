@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package android.location;
 
 import android.location.Location;
 
 /**
- * Listens for GPS and cell/wifi changes and anonymously uploads to server for
- * improving quality of service of NetworkLocationProvider. This service is only enabled when
- * the user has enabled the network location provider.
+ * Listens for GPS and cell/wifi changes and anonymously uploads to server 
+ * for improving quality of service of NetworkLocationProvider. 
+ * This service is only enabled when the user has enabled the 
+ * network location provider.
  *
  * {@hide}
  */
-public interface ILocationCollector {
+oneway interface ILocationCollector {
     /**
      * Updates GPS location if collection is enabled
      *
      * @param location location object
      */
-    abstract public void updateLocation(Location location);
+    void updateLocation(in Location location);
 }

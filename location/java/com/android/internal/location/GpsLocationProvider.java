@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.IGpsStatusListener;
+import android.location.ILocationCollector;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -678,7 +679,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
             // Send to collector
             if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG
                     && mCollector != null) {
-                mCollector.updateLocation(mLocation);
+                try {
+                    mCollector.updateLocation(mLocation);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "mCollector.updateLocation failed");
+                }
             }
         }
 
