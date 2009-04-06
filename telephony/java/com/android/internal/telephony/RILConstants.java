@@ -84,30 +84,30 @@ cat include/telephony/ril.h | \
     int RIL_SIM_PIN = 3;
     int RIL_SIM_PUK = 4;
     int RIL_SIM_NETWORK_PERSONALIZATION = 5;
-    
-    /** 
-     * No restriction at all including voice/SMS/USSD/SS/AV64 
+
+    /**
+     * No restriction at all including voice/SMS/USSD/SS/AV64
      * and packet data.
-     */   
-    int RIL_RESTRICTED_STATE_NONE = 0x00;    
-    /** 
-     * Block emergency call due to restriction. 
-     * But allow all normal voice/SMS/USSD/SS/AV64. 
+     */
+    int RIL_RESTRICTED_STATE_NONE = 0x00;
+    /**
+     * Block emergency call due to restriction.
+     * But allow all normal voice/SMS/USSD/SS/AV64.
      */
     int RIL_RESTRICTED_STATE_CS_EMERGENCY = 0x01;
-    /** 
-     * Block all normal voice/SMS/USSD/SS/AV64 due to restriction. 
-     * Only Emergency call allowed. 
+    /**
+     * Block all normal voice/SMS/USSD/SS/AV64 due to restriction.
+     * Only Emergency call allowed.
      */
     int RIL_RESTRICTED_STATE_CS_NORMAL = 0x02;
-    /** 
-     * Block all voice/SMS/USSD/SS/AV64 
+    /**
+     * Block all voice/SMS/USSD/SS/AV64
      * including emergency call due to restriction.
      */
     int RIL_RESTRICTED_STATE_CS_ALL = 0x04;
-    /** 
-     * Block packet data access due to restriction. 
-     */  
+    /**
+     * Block packet data access due to restriction.
+     */
     int RIL_RESTRICTED_STATE_PS_ALL = 0x10;
 
     int RIL_REQUEST_GET_SIM_STATUS = 1;
@@ -204,10 +204,10 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG = 92;
     int RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG = 93;
     int RIL_REQUEST_CDMA_BROADCAST_ACTIVATION = 94;
-    int RIL_REQUEST_CDMA_SUBSCRIPTION = 99;
-    int RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM = 100;
-    int RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM = 101;
-    int RIL_REQUEST_DEVICE_IDENTITY = 102;
+    int RIL_REQUEST_CDMA_SUBSCRIPTION = 95;
+    int RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM = 96;
+    int RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM = 97;
+    int RIL_REQUEST_DEVICE_IDENTITY = 98;
     int RIL_UNSOL_RESPONSE_BASE = 1000;
     int RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
     int RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED = 1001;
