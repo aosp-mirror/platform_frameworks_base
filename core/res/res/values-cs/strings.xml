@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"Ve výchozím nastavení není identifikace volajícího omezena. Příští hovor: Neomezeno"</string>
     <string name="serviceNotProvisioned">"Služba není zřízena."</string>
     <string name="CLIRPermanent">"Nelze změnit nastavení identifikace volajícího."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"Omezený přístup byl změněn."</string>
+    <string name="RestrictedOnData">"Datová služba je zablokována."</string>
+    <string name="RestrictedOnEmergency">"Tísňová linka je zablokována."</string>
+    <string name="RestrictedOnNormal">"Hlasová služba a služba SMS jsou zablokovány."</string>
+    <string name="RestrictedOnAll">"Veškeré hlasové služby a služby SMS jsou zablokovány."</string>
     <string name="serviceClassVoice">"Hlas"</string>
     <string name="serviceClassData">"Data"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"Prosím vložte kartu SIM."</string>
     <string name="lockscreen_network_locked_message">"Síť je blokována"</string>
     <string name="lockscreen_sim_puk_locked_message">"Karta SIM je zablokována pomocí kódu PUK."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"Další informace naleznete v uživatelské příručce, nebo kontaktujte podporu zákazníků."</string>
     <string name="lockscreen_sim_locked_message">"Karta SIM je zablokována."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Odblokování karty SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nakreslili nesprávné bezpečnostní gesto. "\n\n"Opakujte prosím akci za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"Další"</string>
     <string name="ime_action_done">"Hotovo"</string>
     <string name="ime_action_default">"Spustit"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"Vytočit číslo"\n" <xliff:g id="NUMBER">%s</xliff:g>."</string>
+    <string name="create_contact_using">"Vytvořit kontakt"\n"pro <xliff:g id="NUMBER">%s</xliff:g>."</string>
 </resources>
