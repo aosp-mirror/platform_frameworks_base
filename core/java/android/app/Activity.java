@@ -611,7 +611,7 @@ public class Activity extends ContextThemeWrapper
     private IBinder mToken;
     /*package*/ String mEmbeddedID;
     private Application mApplication;
-    private Intent mIntent;
+    /*package*/ Intent mIntent;
     private ComponentName mComponent;
     /*package*/ ActivityInfo mActivityInfo;
     /*package*/ ActivityThread mMainThread;
