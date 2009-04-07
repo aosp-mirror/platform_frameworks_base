@@ -88,5 +88,9 @@ PRODUCT_COPY_FILES += \
 	$(local_path)/newwavelabs/Shes_All_That.ogg:system/media/audio/ringtones/Shes_All_That.ogg \
 	$(local_path)/newwavelabs/Steppin_Out.ogg:system/media/audio/ringtones/Steppin_Out.ogg \
 	$(local_path)/newwavelabs/Third_Eye.ogg:system/media/audio/ringtones/Third_Eye.ogg \
-	$(local_path)/newwavelabs/Thunderfoot.ogg:system/media/audio/ringtones/Thunderfoot.ogg
+	$(local_path)/newwavelabs/Thunderfoot.ogg:system/media/audio/ringtones/Thunderfoot.ogg \
+	$(local_path)/notifications/moonbeam.ogg:system/media/audio/notifications/moonbeam.ogg \
+	$(local_path)/notifications/pixiedust.ogg:system/media/audio/notifications/pixiedust.ogg \
+	$(local_path)/notifications/pizzicato.ogg:system/media/audio/notifications/pizzicato.ogg \
+	$(local_path)/notifications/tweeters.ogg:system/media/audio/notifications/tweeters.ogg
 
