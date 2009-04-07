@@ -1689,7 +1689,7 @@ public final class ActivityThread {
 
                     r.packageInfo = getPackageInfoNoCheck(
                             r.activityInfo.applicationInfo);
-                    handleLaunchActivity(r);
+                    handleLaunchActivity(r, null);
                 } break;
                 case RELAUNCH_ACTIVITY: {
                     ActivityRecord r = (ActivityRecord)msg.obj;
@@ -2109,7 +2109,7 @@ public final class ActivityThread {
                     + ", comp=" + name
                     + ", token=" + token);
         }
-        return performLaunchActivity(r);
+        return performLaunchActivity(r, null);
     }
 
     public final Activity getActivity(IBinder token) {
@@ -2159,7 +2159,7 @@ public final class ActivityThread {
         queueOrSendMessage(H.CLEAN_UP_CONTEXT, cci);
     }
 
-    private final Activity performLaunchActivity(ActivityRecord r) {
+    private final Activity performLaunchActivity(ActivityRecord r, Intent customIntent) {
         // System.out.println("##### [" + System.currentTimeMillis() + "] ActivityThread.performLaunchActivity(" + r + ")");
 
         ActivityInfo aInfo = r.activityInfo;
@@ -2219,6 +2219,9 @@ public final class ActivityThread {
                         r.lastNonConfigurationInstance, r.lastNonConfigurationChildInstances,
                         config);
                 
+                if (customIntent != null) {
+                    activity.mIntent = customIntent;
+                }
                 r.lastNonConfigurationInstance = null;
                 r.lastNonConfigurationChildInstances = null;
                 activity.mStartedActivity = false;
@@ -2274,14 +2277,14 @@ public final class ActivityThread {
         return activity;
     }
 
-    private final void handleLaunchActivity(ActivityRecord r) {
+    private final void handleLaunchActivity(ActivityRecord r, Intent customIntent) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
 
         if (localLOGV) Log.v(
             TAG, "Handling launch of " + r);
-        Activity a = performLaunchActivity(r);
+        Activity a = performLaunchActivity(r, customIntent);
 
         if (a != null) {
             handleResumeActivity(r.token, false, r.isForward);
@@ -3243,6 +3246,7 @@ public final class ActivityThread {
         }
         
         r.activity.mConfigChangeFlags |= configChanges;
+        Intent currentIntent = r.activity.mIntent;
         
         Bundle savedState = null;
         if (!r.paused) {
@@ -3275,7 +3279,7 @@ public final class ActivityThread {
             r.state = savedState;
         }
         
-        handleLaunchActivity(r);
+        handleLaunchActivity(r, currentIntent);
     }
 
     private final void handleRequestThumbnail(IBinder token) {
