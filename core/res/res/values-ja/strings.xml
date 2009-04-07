@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"既定: 発信者番号通知、次の発信: 通知"</string>
     <string name="serviceNotProvisioned">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent">"発信者番号の設定は変更できません。"</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"アクセス制限が変更されました"</string>
+    <string name="RestrictedOnData">"データサービスがブロックされています。"</string>
+    <string name="RestrictedOnEmergency">"緊急サービスがブロックされています。"</string>
+    <string name="RestrictedOnNormal">"音声/SMSサービスがブロックされています。"</string>
+    <string name="RestrictedOnAll">"すべての音声/SMSサービスがブロックされています。"</string>
     <string name="serviceClassVoice">"音声"</string>
     <string name="serviceClassData">"データ"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"SIMカードを挿入してください。"</string>
     <string name="lockscreen_network_locked_message">"ネットワークがロックされました"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIMカードはPUKでロックされています。"</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"ユーザーガイドを参照するか、お客様サポートにお問い合わせください。"</string>
     <string name="lockscreen_sim_locked_message">"SIMカードはロックされています。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIMカードのロック解除中..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"ロック解除のパターンは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しく指定されていません。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度指定してください。"</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"次へ"</string>
     <string name="ime_action_done">"完了"</string>
     <string name="ime_action_default">"実行"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"発信"</string>
+    <string name="create_contact_using">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"連絡先を新規登録"</string>
 </resources>

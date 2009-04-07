@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"Идентификатор звонящего по умолчанию не ограничен. Следующий вызов: не ограничен"</string>
     <string name="serviceNotProvisioned">"Услуга не предоставляется."</string>
     <string name="CLIRPermanent">"Нельзя изменить настройки идентификатора звонящего."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"Ограничения доступа изменены"</string>
+    <string name="RestrictedOnData">"Служба данных заблокирована."</string>
+    <string name="RestrictedOnEmergency">"Аварийная служба заблокирована."</string>
+    <string name="RestrictedOnNormal">"Служба передачи SMS/голосовых сообщений заблокирована."</string>
+    <string name="RestrictedOnAll">"Все службы передачи SMS/голосовых сообщений заблокированы."</string>
     <string name="serviceClassVoice">"Голос"</string>
     <string name="serviceClassData">"Данные"</string>
     <string name="serviceClassFAX">"ФАКС"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"Вставьте SIM-карту."</string>
     <string name="lockscreen_network_locked_message">"Заблокирована сетью"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-карта заблокирована PUK-кодом."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"См. руководство пользователя или свяжитесь со службой поддержки."</string>
     <string name="lockscreen_sim_locked_message">"SIM-карта заблокирована."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Разблокировка SIM-карты..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Вы неправильно воспроизвели комбинацию разблокировки <xliff:g id="NUMBER_0">%d</xliff:g> раз. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"Далее"</string>
     <string name="ime_action_done">"Готово"</string>
     <string name="ime_action_default">"Выполнить"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"Набрать номер"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"Создать контакт"\n"с номером <xliff:g id="NUMBER">%s</xliff:g>"</string>
 </resources>
