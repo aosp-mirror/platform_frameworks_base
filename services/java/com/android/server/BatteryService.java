@@ -241,10 +241,14 @@ class BatteryService extends Binder {
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
             if (mPlugType != 0 && mLastPlugType == 0) {
-                mContext.sendBroadcast(new Intent(Intent.ACTION_POWER_CONNECTED));
+                Intent intent = new Intent(Intent.ACTION_POWER_CONNECTED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                mContext.sendBroadcast(intent);
             }
             else if (mPlugType == 0 && mLastPlugType != 0) {
-                mContext.sendBroadcast(new Intent(Intent.ACTION_POWER_DISCONNECTED));
+                Intent intent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                mContext.sendBroadcast(intent);
             }
             
             mLastBatteryStatus = mBatteryStatus;
