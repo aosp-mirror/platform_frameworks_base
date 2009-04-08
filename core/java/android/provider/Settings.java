@@ -2443,6 +2443,12 @@ public final class Settings {
         public static final String GMAIL_BUFFER_SERVER_RESPONSE = "gmail_buffer_server_response";
 
         /**
+         * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
+         * an integer where non-zero means true. Defaults to 1.
+         */
+        public static final String GMAIL_DISCARD_ERROR_UPHILL_OP = "gmail_discard_error_uphill_op";
+
+        /**
          * Hostname of the GTalk server.
          */
         public static final String GTALK_SERVICE_HOSTNAME = "gtalk_hostname";
