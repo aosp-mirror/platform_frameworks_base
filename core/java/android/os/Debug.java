@@ -633,6 +633,25 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static final native int getBinderDeathObjectCount();
 
     /**
+     * Primes the register map cache.
+     *
+     * Only works for classes in the bootstrap class loader.  Does not
+     * cause classes to be loaded if they're not already present.
+     *
+     * The classAndMethodDesc argument is a concatentation of the VM-internal
+     * class descriptor, method name, and method descriptor.  Examples:
+     *     Landroid/os/Looper;.loop:()V
+     *     Landroid/app/ActivityThread;.main:([Ljava/lang/String;)V
+     *
+     * @param classAndMethodDesc the method to prepare
+     *
+     * @hide
+     */
+    public static final boolean cacheRegisterMap(String classAndMethodDesc) {
+        return VMDebug.cacheRegisterMap(classAndMethodDesc);
+    }
+
+    /**
      * API for gathering and querying instruction counts.
      *
      * Example usage:
