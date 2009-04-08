@@ -570,7 +570,7 @@
     <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'年'<xliff:g id="MONTH">MMMM</xliff:g>'月'<xliff:g id="DAY">d</xliff:g>'日'"</string>
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>'年'"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'/'<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="AMPM">a</xliff:g><xliff:g id="HOUR">h</xliff:g>'時'<xliff:g id="MINUTE">mm</xliff:g>'分'"</string>
     <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"正午"</string>
     <string name="Noon">"正午"</string>

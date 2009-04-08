@@ -53,7 +53,7 @@
     <string name="CLIRDefaultOffNextCallOn">"El ID de emisor presenta el valor predeterminado de no restringido. Siguiente llamada: Restringido"</string>
     <string name="CLIRDefaultOffNextCallOff">"El ID de emisor presenta el valor predeterminado de no restringido. Siguiente llamada: No restringido"</string>
     <string name="serviceNotProvisioned">"El servicio no se suministra."</string>
-    <string name="CLIRPermanent">"El ID del emisor no se puede modificar."</string>
+    <string name="CLIRPermanent">"El ID de emisor no se puede modificar."</string>
     <string name="RestrictedChangedTitle">"El acceso restringido se ha modificado."</string>
     <string name="RestrictedOnData">"El servicio de datos está bloqueado."</string>
     <string name="RestrictedOnEmergency">"El servicio de emergencia está bloqueado."</string>
@@ -792,7 +792,7 @@
     <string name="activity_list_empty">"No se ha encontrado ninguna actividad coincidente."</string>
     <string name="permlab_pkgUsageStats">"actualizar estadísticas de uso de componentes"</string>
     <string name="permdesc_pkgUsageStats">"Permite la modificación de estadísticas recopiladas sobre el uso de componentes. No está destinado al uso por parte de aplicaciones normales."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short">"Pulsa dos veces para acceder al control de zoom."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short">"Da dos toques para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating">"Error al aumentar el widget"</string>
     <string name="ime_action_go">"Ir"</string>
     <string name="ime_action_search">"Buscar"</string>

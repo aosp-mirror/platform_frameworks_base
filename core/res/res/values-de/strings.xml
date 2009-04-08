@@ -388,12 +388,12 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"PIN-Code eingeben"</string>
     <string name="keyguard_password_wrong_pin_code">"Falscher PIN-Code!"</string>
-    <string name="keyguard_label_text">"Drücken Sie zum Entsperren auf \"Menü\" und dann auf \"0\"."</string>
+    <string name="keyguard_label_text">"Drücken Sie zum Entsperren die Menütaste und dann auf \"0\"."</string>
     <string name="emergency_call_dialog_number_for_display">"Notrufnummer"</string>
     <string name="lockscreen_carrier_default">"(kein Dienst)"</string>
     <string name="lockscreen_screen_locked">"Display gesperrt."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Drücken Sie auf \"Menü\", um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"Drücken Sie zum Entsperren auf \"Menü\"."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Drücken Sie die Menütaste, um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Zum Entsperren die Menütaste drücken"</string>
     <string name="lockscreen_pattern_instructions">"Schema für Entsperrung zeichnen"</string>
     <string name="lockscreen_emergency_call">"Notruf"</string>
     <string name="lockscreen_pattern_correct">"Korrekt!"</string>
@@ -706,7 +706,7 @@
     <string name="dialog_alert_title">"Achtung"</string>
     <string name="capital_on">"EIN"</string>
     <string name="capital_off">"AUS"</string>
-    <string name="whichApplication">"Aktion beenden mit"</string>
+    <string name="whichApplication">"Aktion durchführen mit"</string>
     <string name="alwaysUse">"Standardmäßig für diese Aktion verwenden."</string>
     <string name="clearDefaultHintMsg">"Löschen Sie die Standardeinstellungen unter \"Starteinstellungen &gt; Anwendungen &gt; Anwendungen verwalten\"."</string>
     <string name="chooseActivity">"Aktion auswählen"</string>

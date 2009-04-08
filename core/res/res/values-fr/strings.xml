@@ -345,7 +345,7 @@
     <string name="permdesc_writeDictionary">"Permet à une application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
   <string-array name="phoneTypes">
     <item>"Domicile"</item>
-    <item>"Mobile"</item>
+    <item>"Portable"</item>
     <item>"Bureau"</item>
     <item>"Télécopie bureau"</item>
     <item>"Télécopie domicile"</item>
