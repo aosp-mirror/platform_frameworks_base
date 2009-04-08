@@ -295,7 +295,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             boolean isCheckin = false;
             if (args != null) {
                 for (String arg : args) {
-                    if ("-c".equals(arg)) {
+                    if ("--checkin".equals(arg)) {
                         isCheckin = true;
                         break;
                     }
