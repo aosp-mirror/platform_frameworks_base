@@ -67,8 +67,7 @@ private:
     char *                      mDataSourcePath;
     bool                        mIsDataSourceSet;
     sp<ISurface>                mSurface;
-    void *                      mMemBase;
-    off_t                       mMemSize;
+    int                         mSharedFd;
     status_t                    mInit;
     int                         mDuration;
 
