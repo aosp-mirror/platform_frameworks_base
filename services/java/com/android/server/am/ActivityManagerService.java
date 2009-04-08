@@ -1270,7 +1270,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         mBatteryStatsService.getActiveStatistics().writeLocked();
         
         mUsageStatsService = new UsageStatsService( new File(
-                systemDir, "usagestats.bin").toString());
+                systemDir, "usagestats").toString());
 
         mConfiguration.makeDefault();
         mProcessStats.init();
@@ -8401,7 +8401,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private static final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, List list, String prefix, String[] args) {
-        final boolean isCheckinRequest = scanArgs(args, "-c");
+        final boolean isCheckinRequest = scanArgs(args, "--checkin");
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
         

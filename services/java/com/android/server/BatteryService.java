@@ -84,7 +84,7 @@ class BatteryService extends Binder {
     private static final int CRITICAL_BATTERY_LEVEL = 4; 
 
     private static final int DUMP_MAX_LENGTH = 24 * 1024;
-    private static final String[] DUMPSYS_ARGS = new String[] { "-c", "-u" };
+    private static final String[] DUMPSYS_ARGS = new String[] { "--checkin", "-u" };
     private static final String BATTERY_STATS_SERVICE_NAME = "batteryinfo";
     
     private static final String DUMPSYS_DATA_PATH = "/data/system/";

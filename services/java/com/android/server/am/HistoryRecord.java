@@ -335,14 +335,18 @@ class HistoryRecord extends IApplicationToken.Stub {
     
     public void windowsVisible() {
         synchronized(service) {
-            if (ActivityManagerService.SHOW_ACTIVITY_START_TIME
-                    && startTime != 0) {
+            if (startTime != 0) {
                 long time = SystemClock.uptimeMillis() - startTime;
-                EventLog.writeEvent(ActivityManagerService.LOG_ACTIVITY_LAUNCH_TIME,
-                        System.identityHashCode(this), shortComponentName, time);
-                Log.i(ActivityManagerService.TAG, "Displayed activity "
-                        + shortComponentName
-                        + ": " + time + " ms");
+                if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
+                    EventLog.writeEvent(ActivityManagerService.LOG_ACTIVITY_LAUNCH_TIME,
+                            System.identityHashCode(this), shortComponentName, time);
+                    Log.i(ActivityManagerService.TAG, "Displayed activity "
+                            + shortComponentName
+                            + ": " + time + " ms");
+                }
+                if (time > 0) {
+                    service.mUsageStatsService.noteLaunchTime(realActivity, (int)time);
+                }
                 startTime = 0;
             }
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
