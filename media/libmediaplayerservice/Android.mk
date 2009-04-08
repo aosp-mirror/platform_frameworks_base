@@ -31,8 +31,8 @@ LOCAL_SHARED_LIBRARIES := \
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_SHARED_LIBRARIES += \
-	libopencore_player \
-	libopencore_author
+	libopencoreplayer \
+	libopencoreauthor
 endif
 
 LOCAL_C_INCLUDES := external/tremor/Tremor \

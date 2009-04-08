@@ -12,16 +12,15 @@ LOCAL_SRC_FILES:= \
 	android_media_ResampleInputStream.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libopencore_player \
-	libopencore_author \
+	libopencoreplayer \
+	libopencoreauthor \
 	libandroid_runtime \
 	libnativehelper \
 	libcutils \
 	libutils \
 	libmedia \
 	libsgl \
-	libui \
-	libomx_amrenc_sharedlibrary
+	libui
 
 LOCAL_STATIC_LIBRARIES :=
 
