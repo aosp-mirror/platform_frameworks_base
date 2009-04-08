@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"Anrufer-ID ist standardmäßig nicht beschränkt. Nächster Anruf: Nicht beschränkt"</string>
     <string name="serviceNotProvisioned">"Dienst nicht eingerichtet."</string>
     <string name="CLIRPermanent">"Die Einstellung für die Anrufer-ID kann nicht geändert werden."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"Eingeschränkter Zugriff geändert"</string>
+    <string name="RestrictedOnData">"Daten-Dienst ist gesperrt."</string>
+    <string name="RestrictedOnEmergency">"Notruf ist gesperrt."</string>
+    <string name="RestrictedOnNormal">"Sprach-/SMS-Dienst ist gesperrt."</string>
+    <string name="RestrictedOnAll">"Alle Sprach-/SMS-Dienste sind gesperrt."</string>
     <string name="serviceClassVoice">"Sprachnotiz"</string>
     <string name="serviceClassData">"Daten"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -258,7 +253,7 @@
     <string name="permdesc_accessLocationExtraCommands">"Zugriff auf zusätzliche Dienstanbieterbefehle für Standort. Schädliche Anwendungen könnten so die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_accessFineLocation">"genauer (GPS-) Standort"</string>
     <string name="permdesc_accessFineLocation">"Zugriff auf genaue Standortquellen wie GPS auf dem Telefon (falls verfügbar). Schädliche Anwendungen können damit bestimmen, so Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
-    <string name="permlab_accessCoarseLocation">"Ungefährer (netzwerkbasierter) Standort"</string>
+    <string name="permlab_accessCoarseLocation">"ungefährer (netzwerkbasierter) Standort"</string>
     <string name="permdesc_accessCoarseLocation">"Greift auf Quellen mit ungefähren Standortbestimmungen wie die Datenbank des Mobilfunknetzwerks zu, um falls möglich den ungefähren Standort des Telefons zu bestimmen. Schädliche Anwendungen können damit herauszufinden, wo Sie sich ungefähr befinden."</string>
     <string name="permlab_accessSurfaceFlinger">"Auf SurfaceFlinger zugreifen"</string>
     <string name="permdesc_accessSurfaceFlinger">"Ermöglicht einer Anwendung, die systemnahen SurfaceFlinger-Funktionen zu verwenden."</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"Bitte legen Sie eine SIM-Karte ein."</string>
     <string name="lockscreen_network_locked_message">"Netzwerk gesperrt"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-Karte ist gesperrt. PUK-Eingabe erforderlich."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"Weitere Informationen finden Sie in der Bedienungsanleitung oder wenden Sie sich an den Kundendienst."</string>
     <string name="lockscreen_sim_locked_message">"SIM-Karte ist gesperrt."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM-Karte wird entsperrt..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"Weiter"</string>
     <string name="ime_action_done">"Fertig"</string>
     <string name="ime_action_default">"Ausführen"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"Nummer"\n"mit <xliff:g id="NUMBER">%s</xliff:g> wählen"</string>
+    <string name="create_contact_using">"Neuer Kontakt"\n"mit <xliff:g id="NUMBER">%s</xliff:g> erstellen"</string>
 </resources>
