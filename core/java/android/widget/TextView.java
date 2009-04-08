@@ -1641,6 +1641,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @android.view.RemotableViewMethod
     public void setTextScaleX(float size) {
         if (size != mTextPaint.getTextScaleX()) {
+            mUserSetTextScaleX = true;
             mTextPaint.setTextScaleX(size);
 
             if (mLayout != null) {
@@ -2510,6 +2511,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (text == null) {
             text = "";
         }
+
+        if (!mUserSetTextScaleX) mTextPaint.setTextScaleX(1.0f);
 
         if (text instanceof Spanned &&
             ((Spanned) text).getSpanStart(TextUtils.TruncateAt.MARQUEE) >= 0) {
@@ -4819,16 +4822,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
-            final int height = mLayoutParams.height;
-            // If the size of the view does not depend on the size of the text, try to
-            // start the marquee immediately
-            if (height != LayoutParams.WRAP_CONTENT && height != LayoutParams.FILL_PARENT) {
-                startMarquee();
-            } else {
-                // Defer the start of the marquee until we know our width (see setFrame())
-                mRestartMarquee = true;
+            if (!compressText(ellipsisWidth)) {
+                final int height = mLayoutParams.height;
+                // If the size of the view does not depend on the size of the text, try to
+                // start the marquee immediately
+                if (height != LayoutParams.WRAP_CONTENT && height != LayoutParams.FILL_PARENT) {
+                    startMarquee();
+                } else {
+                    // Defer the start of the marquee until we know our width (see setFrame())
+                    mRestartMarquee = true;
+                }
             }
         }
+    }
+
+    private boolean compressText(float width) {
+        if (width > 0.0f && mLayout != null && getLineCount() == 1 && !mUserSetTextScaleX) {
+            final float textWidth = mLayout.getLineWidth(0);
+            final float overflow = (textWidth - width) / width;
+
+            if (overflow > 0.0f && overflow <= Marquee.MARQUEE_DELTA_MAX) {
+                mTextPaint.setTextScaleX(1.0f - overflow - 0.005f);
+                post(new Runnable() {
+                    public void run() {
+                        requestLayout();
+                    }
+                });
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static int desired(Layout layout) {
@@ -5688,8 +5712,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void startMarquee() {
+        if (compressText(getWidth() - getCompoundPaddingLeft() - getCompoundPaddingRight())) {
+            return;
+        }
+
         if ((mMarquee == null || mMarquee.isStopped()) && (isFocused() || isSelected()) &&
                 getLineCount() == 1 && canMarquee()) {
+
             if (mMarquee == null) mMarquee = new Marquee(this);
             mMarquee.start(mMarqueeRepeatLimit);
         }
@@ -5713,7 +5742,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private static final class Marquee extends Handler {
         // TODO: Add an option to configure this
-        private static final int MARQUEE_DELTA_MAX = 5;
+        private static final float MARQUEE_DELTA_MAX = 0.07f;
         private static final int MARQUEE_DELAY = 1200;
         private static final int MARQUEE_RESTART_DELAY = 1200;
         private static final int MARQUEE_RESOLUTION = 1000 / 30;
@@ -7027,7 +7056,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private ArrayList<TextWatcher>  mListeners = null;
 
     // display attributes
-    private TextPaint mTextPaint;
+    private TextPaint               mTextPaint;
+    private boolean                 mUserSetTextScaleX;
     private Paint                   mHighlightPaint;
     private int                     mHighlightColor = 0xFFBBDDFF;
     private Layout                  mLayout;
