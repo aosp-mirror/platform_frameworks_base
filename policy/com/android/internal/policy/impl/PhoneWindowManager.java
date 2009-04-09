@@ -1385,12 +1385,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     static boolean isMediaKey(int code) {
         if (code == KeyEvent.KEYCODE_HEADSETHOOK || 
-                code == KeyEvent.KEYCODE_PLAYPAUSE ||
-                code == KeyEvent.KEYCODE_STOP || 
-                code == KeyEvent.KEYCODE_NEXTSONG ||
-                code == KeyEvent.KEYCODE_PREVIOUSSONG || 
-                code == KeyEvent.KEYCODE_PREVIOUSSONG ||
-                code == KeyEvent.KEYCODE_FORWARD) {
+                code == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ||
+                code == KeyEvent.KEYCODE_MEDIA_STOP || 
+                code == KeyEvent.KEYCODE_MEDIA_NEXT ||
+                code == KeyEvent.KEYCODE_MEDIA_PREVIOUS || 
+                code == KeyEvent.KEYCODE_MEDIA_PREVIOUS ||
+                code == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD) {
             return true;
         }
         return false;    
