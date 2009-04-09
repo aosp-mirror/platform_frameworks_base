@@ -16,18 +16,27 @@
 
 package android.accounts;
 
-import android.content.*;
-import android.content.res.XmlResourceParser;
-import android.content.res.TypedArray;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.XmlResourceParser;
+import android.content.res.TypedArray;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 import android.util.AttributeSet;
 import android.util.Xml;
 
-import java.util.*;
 import java.io.IOException;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import com.google.android.collect.Maps;
 import org.xmlpull.v1.XmlPullParserException;
@@ -59,6 +68,15 @@ public class AccountAuthenticatorCache {
         };
     }
 
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        getAllAuthenticators();
+        Map<String, AuthenticatorInfo> authenticators = mAuthenticators;
+        fout.println("AccountAuthenticatorCache: " + authenticators.size() + " authenticators");
+        for (AuthenticatorInfo info : authenticators.values()) {
+            fout.println("  " + info);
+        }
+    }
+
     private void monitorPackageChanges() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -73,13 +91,15 @@ public class AccountAuthenticatorCache {
      */
     public class AuthenticatorInfo {
         public final String mType;
-        public final String mComponentShortName;
         public final ComponentName mComponentName;
 
         private AuthenticatorInfo(String type, ComponentName componentName) {
             mType = type;
             mComponentName = componentName;
-            mComponentShortName = componentName.flattenToShortString();
+        }
+
+        public String toString() {
+            return "AuthenticatorInfo: " + mType + ", " + mComponentName;
         }
     }
 

@@ -15,13 +15,12 @@
  */
 
 package android.accounts;
+import android.os.Bundle;
 
 /**
  * The interface used to return responses for asynchronous calls to the {@link IAccountManager}
  */
 oneway interface IAccountManagerResponse {
-        void onStringResult(String value);
-        void onIntResult(int value);
-        void onBooleanResult(boolean value);
-        void onError(int errorCode, String errorMessage);
+    void onResult(in Bundle value);
+    void onError(int errorCode, String errorMessage);
 }

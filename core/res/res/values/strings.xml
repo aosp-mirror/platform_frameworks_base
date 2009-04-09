@@ -129,7 +129,7 @@
     <string name="RestrictedOnNormal">Voice/SMS service is blocked.</string>
     <!-- Displayed to tell the user that all voice service is blocked by access control. -->
     <string name="RestrictedOnAll">All voice/SMS services are blocked.</string>
-    
+
     <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
     <!-- Example: Service was enabled for: Voice, Data -->
     <string name="serviceClassVoice">Voice</string>
@@ -206,6 +206,13 @@
     <!-- Displayed when a request failed because there are too many requests right now. -->
     <string name="httpErrorTooManyRequests">Too many requests are being processed. Try again later.</string>
 
+    <!-- Account notifications --> <skip />
+    <!-- A notification is shown when the AccountManager is unable to
+    supply an auth token without prompting the user to re-enter the
+    password.  This is the text that will scroll through the
+    notification bar (will be seen by the user as he uses another application). -->
+    <string name="notification_title">Sign-in error</string>
+
     <!-- Sync notifications --> <skip />
     <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
     <string name="contentServiceSync">Sync</string>
@@ -276,7 +283,7 @@
 
     <!-- Label for the Android system components when they are shown to the user. -->
     <string name="android_system_label">Android System</string>
-    
+
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_costMoney">Services that cost you money</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1292,7 +1299,7 @@
 
     <!-- Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. -->
     <string name="save_password_label">Confirm</string>
-    
+
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Text in the save password dialog, asking if the browser should remember a password. -->
     <string name="save_password_message">Do you want the browser to remember this password?</string>
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying not to remember this password. -->
@@ -1320,8 +1327,8 @@
     <string name="menu_delete_shortcut_label">delete</string>
 
     <!-- Strings used for search bar --><skip />
-    
-    <!-- This is the default button label in the system-wide search UI. 
+
+    <!-- This is the default button label in the system-wide search UI.
          It is also used by the home screen's search "widget". It should be short -->
     <string name="search_go">Search</string>
 
@@ -1383,7 +1390,7 @@
         <item quantity="one">tomorrow</item>
         <item quantity="other">in <xliff:g id="count">%d</xliff:g> days</item>
     </plurals>
-    
+
     <!-- This is used to express that something occurred some number of abbreviated seconds in the past (e.g., 5 secs ago). -->
     <plurals name="abbrev_num_seconds_ago">
         <item quantity="one">1 sec ago</item>
@@ -1511,7 +1518,7 @@
     <!-- Numeric form of the day. Example: "12/31/2007" -->
     <string name="numeric_date">"<xliff:g id="month" example="12">%m</xliff:g>/<xliff:g id="day" example="31">%d</xliff:g>/<xliff:g id="year" example="2008">%Y</xliff:g>"</string>
 
-    <!-- Format indicating a range of time, from a time on one day to a time on another day. 
+    <!-- Format indicating a range of time, from a time on one day to a time on another day.
          Example: "Mon, Dec 31, 2007, 8am - Tue, Jan 1, 2008, 5pm" -->
     <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="weekday1" example="Monday">%1$s</xliff:g>, <xliff:g id="date1" example="December 31, 2007">%2$s</xliff:g>, <xliff:g id="time1" example="8am">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Tuesday">%4$s</xliff:g>, <xliff:g id="date2" example="January 1, 2008">%5$s</xliff:g>, <xliff:g id="time2" example="5pm">%6$s</xliff:g>"</string>
 
@@ -1519,7 +1526,7 @@
          Example: "Mon, Dec 31, 2007 - Tue, Jan 1, 2008" -->
     <string name="wday1_date1_wday2_date2">"<xliff:g id="weekday1" example="Monday">%1$s</xliff:g>, <xliff:g id="date1" example="Dec 31, 2007">%2$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Thursday">%4$s</xliff:g>, <xliff:g id="date2" example="Jan 1, 2008">%5$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of time, from a time on one day to a time on another day. 
+    <!-- Format indicating a range of time, from a time on one day to a time on another day.
          Example: "Dec 31, 2007, 8am - Jan 1, 2008, 5pm" -->
     <string name="date1_time1_date2_time2">"<xliff:g id="date1" example="Dec 31, 2007">%2$s</xliff:g>, <xliff:g id="time1" example="8am">%3$s</xliff:g> \u2013 <xliff:g id="date2" example="Jan 1, 2008">%5$s</xliff:g>, <xliff:g id="time2" example="5pm">%6$s</xliff:g>"</string>
 
@@ -2216,7 +2223,7 @@
     <string name="usb_storage_button_mount">Mount</string>
     <!-- See USB_STORAGE.   This is the button text to ignore the plugging in of the phone.. -->
     <string name="usb_storage_button_unmount">Don\'t mount</string>
-    <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. --> 
+    <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. -->
     <string name="usb_storage_error_message">There is a problem using your SD card for USB storage.</string>
     <!-- USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
     <string name="usb_storage_notification_title">USB connected</string>
@@ -2237,7 +2244,7 @@
     <string name="usb_storage_stop_button_mount">Turn Off</string>
     <!-- See USB_STORAGE_STOP.   This is the button text to cancel stoping usb storage. -->
     <string name="usb_storage_stop_button_unmount">Cancel</string>
-    <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. --> 
+    <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. -->
     <string name="usb_storage_stop_error_message">We've encountered a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
 
     <!-- External media format dialog strings -->
@@ -2258,10 +2265,10 @@
 
     <!-- Title of the pop-up dialog in which the user switches input method components. -->
     <string name="select_input_method">Select Input Method</string>
-    
+
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
-    
+
     <string name="candidates_style"><u>candidates</u></string>
 
     <!-- External media notification strings -->
@@ -2308,23 +2315,23 @@
 
     <!-- Long label for a button on a full-screen input method for the "Go" action. -->
     <string name="ime_action_go">Go</string>
-    
+
     <!-- Long label for a button on a full-screen input method for the "Search" action. -->
     <string name="ime_action_search">Search</string>
-    
+
     <!-- Long label for a button on a full-screen input method for the "Send" action. -->
     <string name="ime_action_send">Send</string>
-    
+
     <!-- Long label for a button on a full-screen input method for the "Next" action. -->
     <string name="ime_action_next">Next</string>
-    
+
     <!-- Long label for a button on a full-screen input method for the "Done" action. -->
     <string name="ime_action_done">Done</string>
-    
+
     <!-- Long label for a button on a full-screen input method for an unknown action. -->
     <string name="ime_action_default">Execute</string>
-    
-    <!-- Strings for search suggestions. These are going here because they are referenced by both 
+
+    <!-- Strings for search suggestions. These are going here because they are referenced by both
          ContactsProvider and GoogleContactsProvider -->
     <skip />
 
@@ -2337,7 +2344,7 @@
 
     <!-- This string array should be overridden by the manufacture to present a list of carrier-id,locale pairs.  This is used at startup to set a default locale by checking the system property ro.carrier for the carrier-id and searching through this array -->
     <string-array translatable="false" name="carrier_locales">
-    </string-array>    
+    </string-array>
 </resources>
 
 

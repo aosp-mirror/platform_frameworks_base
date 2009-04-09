@@ -16,19 +16,20 @@
 
 package android.accounts;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.ServiceConnection;
-import android.content.Intent;
+import android.util.Log;
 
-import java.util.Map;
 import java.util.ArrayList;
+import java.util.Map;
 
-import com.google.android.collect.Maps;
 import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
 /**
  * A helper object that simplifies binding to Account Authenticators. It uses the
@@ -39,13 +40,14 @@ import com.google.android.collect.Lists;
  * itself succeeds, even if the authenticator is already bound internally.
  */
 public class AuthenticatorBindHelper {
-    final private Handler mHandler;
-    final private Context mContext;
-    final private int mMessageWhatConnected;
-    final private int mMessageWhatDisconnected;
-    final private Map<String, MyServiceConnection> mServiceConnections = Maps.newHashMap();
-    final private Map<String, ArrayList<Callback>> mServiceUsers = Maps.newHashMap();
-    final private AccountAuthenticatorCache mAuthenticatorCache;
+    private static final String TAG = "Accounts";
+    private final Handler mHandler;
+    private final Context mContext;
+    private final int mMessageWhatConnected;
+    private final int mMessageWhatDisconnected;
+    private final Map<String, MyServiceConnection> mServiceConnections = Maps.newHashMap();
+    private final Map<String, ArrayList<Callback>> mServiceUsers = Maps.newHashMap();
+    private final AccountAuthenticatorCache mAuthenticatorCache;
 
     public AuthenticatorBindHelper(Context context,
             AccountAuthenticatorCache authenticatorCache, Handler handler,
@@ -66,8 +68,28 @@ public class AuthenticatorBindHelper {
         // if the authenticator is connecting or connected then return true
         synchronized (mServiceConnections) {
             if (mServiceConnections.containsKey(authenticatorType)) {
+                MyServiceConnection connection = mServiceConnections.get(authenticatorType);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "service connection already exists for " + authenticatorType);
+                }
                 mServiceUsers.get(authenticatorType).add(callback);
+                if (connection.mService != null) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "the service is connected, scheduling a connected message for "
+                                + authenticatorType);
+                    }
+                    connection.scheduleCallbackConnectedMessage(callback);
+                } else {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "the service is *not* connected, waiting for for "
+                                + authenticatorType);
+                    }
+                }
                 return true;
+            }
+
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "there is no service connection for " + authenticatorType);
             }
 
             // otherwise find the component name for the authenticator and initiate a bind
@@ -75,6 +97,10 @@ public class AuthenticatorBindHelper {
             AccountAuthenticatorCache.AuthenticatorInfo authenticatorInfo =
                     mAuthenticatorCache.getAuthenticatorInfo(authenticatorType);
             if (authenticatorInfo == null) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "there is no authenticator for " + authenticatorType
+                            + ", bailing out");
+                }
                 return false;
             }
 
@@ -83,7 +109,13 @@ public class AuthenticatorBindHelper {
             Intent intent = new Intent();
             intent.setAction("android.accounts.AccountAuthenticator");
             intent.setComponent(authenticatorInfo.mComponentName);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "performing bindService to " + authenticatorInfo.mComponentName);
+            }
             if (!mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "bindService to " + authenticatorInfo.mComponentName + " failed");
+                }
                 return false;
             }
 
@@ -94,24 +126,43 @@ public class AuthenticatorBindHelper {
     }
 
     public void unbind(Callback callbackToUnbind) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "unbinding callback " + callbackToUnbind);
+        }
         synchronized (mServiceConnections) {
             for (Map.Entry<String, ArrayList<Callback>> entry : mServiceUsers.entrySet()) {
                 final String authenticatorType = entry.getKey();
                 final ArrayList<Callback> serviceUsers = entry.getValue();
                 for (Callback callback : serviceUsers) {
                     if (callback == callbackToUnbind) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "found callback in service" + authenticatorType);
+                        }
                         serviceUsers.remove(callbackToUnbind);
                         if (serviceUsers.isEmpty()) {
+                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                                Log.v(TAG, "there are no more callbacks for service "
+                                        + authenticatorType + ", unbinding service");
+                            }
                             unbindFromService(authenticatorType);
+                        } else {
+                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                                Log.v(TAG, "leaving service " + authenticatorType
+                                        + " around since there are still callbacks using it");
+                            }
                         }
                         return;
                     }
                 }
             }
+            Log.e(TAG, "did not find callback " + callbackToUnbind + " in any of the services");
         }
     }
 
     private void unbindFromService(String authenticatorType) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "unbindService from " + authenticatorType);
+        }
         mContext.unbindService(mServiceConnections.get(authenticatorType));
         mServiceUsers.remove(authenticatorType);
         mServiceConnections.remove(authenticatorType);
@@ -127,28 +178,49 @@ public class AuthenticatorBindHelper {
     }
 
     private class MyServiceConnection implements ServiceConnection {
-        final private String mAuthenticatorType;
+        private final String mAuthenticatorType;
+        private IBinder mService = null;
 
         public MyServiceConnection(String authenticatorType) {
             mAuthenticatorType = authenticatorType;
         }
 
         public void onServiceConnected(ComponentName name, IBinder service) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "onServiceConnected for account type " + mAuthenticatorType);
+            }
             // post a message for each service user to tell them that the service is connected
             synchronized (mServiceConnections) {
+                mService = service;
                 for (Callback callback : mServiceUsers.get(mAuthenticatorType)) {
-                    final ConnectedMessagePayload payload =
-                            new ConnectedMessagePayload(service, callback);
-                    mHandler.obtainMessage(mMessageWhatConnected, payload).sendToTarget();
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "the service became connected, scheduling a connected "
+                                + "message for " + mAuthenticatorType);
+                    }
+                    scheduleCallbackConnectedMessage(callback);
                 }
             }
         }
 
+        private void scheduleCallbackConnectedMessage(Callback callback) {
+            final ConnectedMessagePayload payload =
+                    new ConnectedMessagePayload(mService, callback);
+            mHandler.obtainMessage(mMessageWhatConnected, payload).sendToTarget();
+        }
+
         public void onServiceDisconnected(ComponentName name) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "onServiceDisconnected for account type " + mAuthenticatorType);
+            }
             // post a message for each service user to tell them that the service is disconnected,
             // and unbind from the service.
             synchronized (mServiceConnections) {
                 for (Callback callback : mServiceUsers.get(mAuthenticatorType)) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "the service became disconnected, scheduling a "
+                                + "disconnected message for "
+                                + mAuthenticatorType);
+                    }
                     mHandler.obtainMessage(mMessageWhatDisconnected, callback).sendToTarget();
                 }
                 unbindFromService(mAuthenticatorType);
@@ -159,10 +231,16 @@ public class AuthenticatorBindHelper {
     boolean handleMessage(Message message) {
         if (message.what == mMessageWhatConnected) {
             ConnectedMessagePayload payload = (ConnectedMessagePayload)message.obj;
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "notifying callback " + payload.mCallback + " that it is connected");
+            }
             payload.mCallback.onConnected(payload.mService);
             return true;
         } else if (message.what == mMessageWhatDisconnected) {
             Callback callback = (Callback)message.obj;
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "notifying callback " + callback + " that it is disconnected");
+            }
             callback.onDisconnected();
             return true;
         } else {

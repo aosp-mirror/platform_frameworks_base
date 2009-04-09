@@ -16,19 +16,37 @@
 
 package android.accounts;
 
-import android.os.*;
-import android.content.*;
-import android.database.sqlite.*;
+import android.content.BroadcastReceiver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.util.Log;
-import android.text.TextUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
-import com.google.android.collect.Maps;
 import com.android.internal.telephony.TelephonyIntents;
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
 /**
  * A system service that provides  account, password, and authtoken management for all
@@ -43,7 +61,7 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
     private static final String DATABASE_NAME = "accounts.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private final Context mContext;
 
@@ -86,7 +104,10 @@ public class AccountManagerService extends IAccountManager.Stub {
     private static final String[] ACCOUNT_NAME_TYPE_PROJECTION =
             new String[]{ACCOUNTS_ID, ACCOUNTS_NAME, ACCOUNTS_TYPE};
     private static final Intent ACCOUNTS_CHANGED_INTENT =
-            new Intent(AccountsServiceConstants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+            new Intent(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+
+    private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
+    private static final int NOTIFICATION_ID = 234;
 
     public class AuthTokenKey {
         public final Account mAccount;
@@ -143,7 +164,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         mSimWatcher = new SimWatcher(mContext);
     }
 
-    public String getPassword(Account account) throws RemoteException {
+    public String getPassword(Account account) {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor cursor = db.query(TABLE_ACCOUNTS, new String[]{ACCOUNTS_PASSWORD},
                 ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
@@ -158,7 +179,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    public String getUserData(Account account, String key) throws RemoteException {
+    public String getUserData(Account account, String key) {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         db.beginTransaction();
         try {
@@ -183,11 +204,23 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    public Account[] getAccounts() throws RemoteException {
+    public String[] getAuthenticatorTypes() {
+        Collection<AccountAuthenticatorCache.AuthenticatorInfo> authenticatorCollection =
+                mAuthenticatorCache.getAllAuthenticators();
+        String[] types = new String[authenticatorCollection.size()];
+        int i = 0;
+        for (AccountAuthenticatorCache.AuthenticatorInfo authenticator : authenticatorCollection) {
+            types[i] = authenticator.mType;
+            i++;
+        }
+        return types;
+    }
+
+    public Account[] getAccounts() {
         return getAccountsByType(null);
     }
 
-    public Account[] getAccountsByType(String accountType) throws RemoteException {
+    public Account[] getAccountsByType(String accountType) {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
         final String selection = accountType == null ? null : (ACCOUNTS_TYPE + "=?");
@@ -207,8 +240,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    public boolean addAccount(Account account, String password, Bundle extras)
-            throws RemoteException {
+    public boolean addAccount(Account account, String password, Bundle extras) {
         // fails if the account already exists
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
@@ -252,15 +284,26 @@ public class AccountManagerService extends IAccountManager.Stub {
         return db.insert(TABLE_EXTRAS, EXTRAS_KEY, values);
     }
 
-    public void removeAccount(Account account) throws RemoteException {
-        // clear out matching authtokens from the cache
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                new String[]{account.mName, account.mType});
-        mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
+    public void removeAccount(Account account) {
+        synchronized (mAuthTokenCache) {
+            ArrayList<AuthTokenKey> keysToRemove = Lists.newArrayList();
+            for (AuthTokenKey key : mAuthTokenCache.keySet()) {
+                if (key.mAccount.equals(account)) {
+                    keysToRemove.add(key);
+                }
+            }
+            for (AuthTokenKey key : keysToRemove) {
+                mAuthTokenCache.remove(key);
+            }
+
+            final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+            db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                    new String[]{account.mName, account.mType});
+            mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
+        }
     }
 
-    public void invalidateAuthToken(String accountType, String authToken) throws RemoteException {
+    public void invalidateAuthToken(String accountType, String authToken) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -272,29 +315,31 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     private void invalidateAuthToken(SQLiteDatabase db, String accountType, String authToken) {
-        Cursor cursor = db.rawQuery(
-                "SELECT " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_ID
-                        + ", " + TABLE_ACCOUNTS + "." + ACCOUNTS_NAME
-                        + ", " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_TYPE
-                        + " FROM " + TABLE_ACCOUNTS
-                        + " JOIN " + TABLE_AUTHTOKENS
-                        + " ON " + TABLE_ACCOUNTS + "." + ACCOUNTS_ID
-                        + " = " + AUTHTOKENS_ACCOUNTS_ID
-                        + " WHERE " + AUTHTOKENS_AUTHTOKEN + " = ? AND "
-                        + TABLE_ACCOUNTS + "." + ACCOUNTS_TYPE + " = ?",
-                new String[]{authToken, accountType});
-        try {
-            while (cursor.moveToNext()) {
-                long authTokenId = cursor.getLong(0);
-                String accountName = cursor.getString(1);
-                String authTokenType = cursor.getString(2);
-                AuthTokenKey key = new AuthTokenKey(new Account(accountName, accountType),
-                        authTokenType);
-                mAuthTokenCache.remove(key);
-                db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ID + "=" + authTokenId, null);
+        synchronized (mAuthTokenCache) {
+            Cursor cursor = db.rawQuery(
+                    "SELECT " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_ID
+                            + ", " + TABLE_ACCOUNTS + "." + ACCOUNTS_NAME
+                            + ", " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_TYPE
+                            + " FROM " + TABLE_ACCOUNTS
+                            + " JOIN " + TABLE_AUTHTOKENS
+                            + " ON " + TABLE_ACCOUNTS + "." + ACCOUNTS_ID
+                            + " = " + AUTHTOKENS_ACCOUNTS_ID
+                            + " WHERE " + AUTHTOKENS_AUTHTOKEN + " = ? AND "
+                            + TABLE_ACCOUNTS + "." + ACCOUNTS_TYPE + " = ?",
+                    new String[]{authToken, accountType});
+            try {
+                while (cursor.moveToNext()) {
+                    long authTokenId = cursor.getLong(0);
+                    String accountName = cursor.getString(1);
+                    String authTokenType = cursor.getString(2);
+                    AuthTokenKey key = new AuthTokenKey(new Account(accountName, accountType),
+                            authTokenType);
+                    mAuthTokenCache.remove(key);
+                    db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ID + "=" + authTokenId, null);
+                }
+            } finally {
+                cursor.close();
             }
-        } finally {
-            cursor.close();
         }
     }
 
@@ -344,20 +389,21 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    public String peekAuthToken(Account account, String authTokenType) throws RemoteException {
-        AuthTokenKey key = new AuthTokenKey(account, authTokenType);
-        if (mAuthTokenCache.containsKey(key)) {
-            return mAuthTokenCache.get(key);
+    public String peekAuthToken(Account account, String authTokenType) {
+        synchronized (mAuthTokenCache) {
+            AuthTokenKey key = new AuthTokenKey(account, authTokenType);
+            if (mAuthTokenCache.containsKey(key)) {
+                return mAuthTokenCache.get(key);
+            }
+            return readAuthTokenFromDatabase(account, authTokenType);
         }
-        return readAuthTokenFromDatabase(account, authTokenType);
     }
 
-    public void setAuthToken(Account account, String authTokenType, String authToken)
-            throws RemoteException {
+    public void setAuthToken(Account account, String authTokenType, String authToken) {
         cacheAuthToken(account, authTokenType, authToken);
     }
 
-    public void setPassword(Account account, String password) throws RemoteException {
+    public void setPassword(Account account, String password) {
         ContentValues values = new ContentValues();
         values.put(ACCOUNTS_PASSWORD, password);
         mOpenHelper.getWritableDatabase().update(TABLE_ACCOUNTS, values,
@@ -366,11 +412,11 @@ public class AccountManagerService extends IAccountManager.Stub {
         mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
     }
 
-    public void clearPassword(Account account) throws RemoteException {
+    public void clearPassword(Account account) {
         setPassword(account, null);
     }
 
-    public void setUserData(Account account, String key, String value) throws RemoteException {
+    public void setUserData(Account account, String key, String value) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -398,66 +444,154 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    public void getAuthToken(IAccountManagerResponse response, Account account,
-            String authTokenType, boolean notifyOnAuthFailure) throws RemoteException {
-        // create a new Session
-        Session session = new GetAuthTokenSession(response, account, authTokenType,
-                notifyOnAuthFailure);
-
+    public void getAuthToken(IAccountManagerResponse response, final Account account,
+            final String authTokenType, final boolean notifyOnAuthFailure,
+            final boolean expectActivityLaunch, final Bundle loginOptions) {
         String authToken = getCachedAuthToken(account, authTokenType);
         if (authToken != null) {
-            session.onStringResult(authToken);
+            try {
+                Bundle result = new Bundle();
+                result.putString(Constants.AUTHTOKEN_KEY, authToken);
+                result.putString(Constants.ACCOUNT_NAME_KEY, account.mName);
+                result.putString(Constants.ACCOUNT_TYPE_KEY, account.mType);
+                response.onResult(result);
+            } catch (RemoteException e) {
+                // if the caller is dead then there is no one to care about remote exceptions
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "failure while notifying response", e);
+                }
+            }
             return;
         }
 
-        session.bind();
+        new Session(response, account.mType, expectActivityLaunch) {
+            protected String toDebugString(long now) {
+                if (loginOptions != null) loginOptions.keySet();
+                return super.toDebugString(now) + ", getAuthToken"
+                        + ", " + account
+                        + ", authTokenType " + authTokenType
+                        + ", loginOptions " + loginOptions
+                        + ", notifyOnAuthFailure " + notifyOnAuthFailure;
+            }
+
+            public void run() throws RemoteException {
+                mAuthenticator.getAuthToken(this, account, authTokenType, loginOptions);
+            }
+
+            public void onResult(Bundle result) {
+                if (result != null) {
+                    String authToken = result.getString(Constants.AUTHTOKEN_KEY);
+                    if (authToken != null) {
+                        String name = result.getString(Constants.ACCOUNT_NAME_KEY);
+                        String type = result.getString(Constants.ACCOUNT_TYPE_KEY);
+                        if (TextUtils.isEmpty(type) || TextUtils.isEmpty(name)) {
+                            onError(Constants.ERROR_CODE_INVALID_RESPONSE,
+                                    "the type and name should not be empty");
+                            return;
+                        }
+                        cacheAuthToken(new Account(name, type), authTokenType, authToken);
+                    }
+
+                    Intent intent = result.getParcelable(Constants.INTENT_KEY);
+                    if (intent != null && notifyOnAuthFailure) {
+                        doNotification(result.getString(Constants.AUTH_FAILED_MESSAGE_KEY), intent);
+                    }
+                }
+                super.onResult(result);
+            }
+        }.bind();
     }
 
-    public void addAccountInteractively(IAccountManagerResponse response, String accountType)
-            throws RemoteException {
-        new AddAccountInteractivelySession(response, accountType).bind();
+
+    public void addAcount(final IAccountManagerResponse response,
+            final String accountType, final String authTokenType,
+            final boolean expectActivityLaunch, final Bundle options) {
+        new Session(response, accountType, expectActivityLaunch) {
+            public void run() throws RemoteException {
+                mAuthenticator.addAccount(this, mAccountType, authTokenType, options);
+            }
+
+            protected String toDebugString(long now) {
+                return super.toDebugString(now) + ", addAccount"
+                        + ", accountType " + accountType;
+            }
+        }.bind();
     }
 
-    public void authenticateAccount(IAccountManagerResponse response, Account account,
-            String password)
-            throws RemoteException {
-        new AuthenticateAccountSession(response, account, password).bind();
+    public void confirmCredentials(IAccountManagerResponse response,
+            final Account account, final boolean expectActivityLaunch) {
+        new Session(response, account.mType, expectActivityLaunch) {
+            public void run() throws RemoteException {
+                mAuthenticator.confirmCredentials(this, account);
+            }
+            protected String toDebugString(long now) {
+                return super.toDebugString(now) + ", confirmCredentials"
+                        + ", " + account;
+            }
+        }.bind();
     }
 
-    public void updatePassword(IAccountManagerResponse response, Account account)
-            throws RemoteException {
-        new UpdatePasswordSession(response, account).bind();
+    public void confirmPassword(IAccountManagerResponse response, final Account account,
+            final String password) {
+        new Session(response, account.mType, false /* expectActivityLaunch */) {
+            public void run() throws RemoteException {
+                mAuthenticator.confirmPassword(this, account, password);
+            }
+            protected String toDebugString(long now) {
+                return super.toDebugString(now) + ", confirmPassword"
+                        + ", " + account;
+            }
+        }.bind();
     }
 
-    public void editProperties(IAccountManagerResponse response, String accountType)
-            throws RemoteException {
-        new EditPropertiesSession(response, accountType).bind();
+    public void updateCredentials(IAccountManagerResponse response, final Account account,
+            final String authTokenType, final boolean expectActivityLaunch,
+            final Bundle loginOptions) {
+        new Session(response, account.mType, expectActivityLaunch) {
+            public void run() throws RemoteException {
+                mAuthenticator.updateCredentials(this, account, authTokenType, loginOptions);
+            }
+            protected String toDebugString(long now) {
+                if (loginOptions != null) loginOptions.keySet();
+                return super.toDebugString(now) + ", updateCredentials"
+                        + ", " + account
+                        + ", authTokenType " + authTokenType
+                        + ", loginOptions " + loginOptions;
+            }
+        }.bind();
     }
 
-    public void getPasswordStrength(IAccountManagerResponse response,
-            String accountType, String password) throws RemoteException {
-        new GetPasswordStrengthSession(response, accountType, password).bind();
-    }
-
-    public void checkUsernameExistence(IAccountManagerResponse response,
-            String accountType, String username) throws RemoteException {
-        new CheckUsernameExistenceSession(response, username, accountType).bind();
+    public void editProperties(IAccountManagerResponse response, final String accountType,
+            final boolean expectActivityLaunch) {
+        new Session(response, accountType, expectActivityLaunch) {
+            public void run() throws RemoteException {
+                mAuthenticator.editProperties(this, mAccountType);
+            }
+            protected String toDebugString(long now) {
+                return super.toDebugString(now) + ", editProperties"
+                        + ", accountType " + accountType;
+            }
+        }.bind();
     }
 
     private boolean cacheAuthToken(Account account, String authTokenType, String authToken) {
-        if (saveAuthTokenToDatabase(account, authTokenType, authToken)) {
-            final AuthTokenKey key = new AuthTokenKey(account, authTokenType);
-            mAuthTokenCache.put(key, authToken);
-            return true;
-        } else {
-            return false;
+        synchronized (mAuthTokenCache) {
+            if (saveAuthTokenToDatabase(account, authTokenType, authToken)) {
+                final AuthTokenKey key = new AuthTokenKey(account, authTokenType);
+                mAuthTokenCache.put(key, authToken);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
     private String getCachedAuthToken(Account account, String authTokenType) {
-        final AuthTokenKey key = new AuthTokenKey(account, authTokenType);
-        if (!mAuthTokenCache.containsKey(key)) return null;
-        return mAuthTokenCache.get(key);
+        synchronized (mAuthTokenCache) {
+            final AuthTokenKey key = new AuthTokenKey(account, authTokenType);
+            if (!mAuthTokenCache.containsKey(key)) return null;
+            return mAuthTokenCache.get(key);
+        }
     }
 
     private long getAccountId(SQLiteDatabase db, Account account) {
@@ -502,34 +636,91 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    private class Session extends IAccountAuthenticatorResponse.Stub
-            implements AuthenticatorBindHelper.Callback {
+    private abstract class Session extends IAccountAuthenticatorResponse.Stub
+            implements AuthenticatorBindHelper.Callback, IBinder.DeathRecipient {
         IAccountManagerResponse mResponse;
         final String mAccountType;
+        final boolean mExpectActivityLaunch;
+        final long mCreationTime;
+
+        private int mNumResults = 0;
+        private int mNumRequestContinued = 0;
+        private int mNumErrors = 0;
+
 
         IAccountAuthenticator mAuthenticator = null;
 
-        public Session(IAccountManagerResponse response, String accountType) {
+        public Session(IAccountManagerResponse response, String accountType,
+                boolean expectActivityLaunch) {
             super();
+            if (response == null) throw new IllegalArgumentException("response is null");
             mResponse = response;
             mAccountType = accountType;
+            mExpectActivityLaunch = expectActivityLaunch;
+            mCreationTime = SystemClock.elapsedRealtime();
+            synchronized (mSessions) {
+                mSessions.put(toString(), this);
+            }
+            try {
+                response.asBinder().linkToDeath(this, 0 /* flags */);
+            } catch (RemoteException e) {
+                mResponse = null;
+                binderDied();
+            }
         }
 
-        IAccountManagerResponse close() {
+        IAccountManagerResponse getResponseAndClose() {
             if (mResponse == null) {
                 // this session has already been closed
                 return null;
             }
-            cancelTimeout();
-            unbind();
             IAccountManagerResponse response = mResponse;
-            mResponse = null;
+            close(); // this clears mResponse so we need to save the response before this call
             return response;
         }
 
+        private void close() {
+            synchronized (mSessions) {
+                if (mSessions.remove(toString()) == null) {
+                    // the session was already closed, so bail out now
+                    return;
+                }
+            }
+            if (mResponse != null) {
+                // stop listening for response deaths
+                mResponse.asBinder().unlinkToDeath(this, 0 /* flags */);
+
+                // clear this so that we don't accidentally send any further results
+                mResponse = null;
+            }
+            cancelTimeout();
+            unbind();
+        }
+
+        public void binderDied() {
+            mResponse = null;
+            close();
+        }
+
+        protected String toDebugString() {
+            return toDebugString(SystemClock.elapsedRealtime());
+        }
+
+        protected String toDebugString(long now) {
+            return "Session: expectLaunch " + mExpectActivityLaunch
+                    + ", connected " + (mAuthenticator != null)
+                    + ", stats (" + mNumResults + "/" + mNumRequestContinued
+                    + "/" + mNumErrors + ")"
+                    + ", lifetime " + ((now - mCreationTime) / 1000.0);
+        }
+
         void bind() {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "initiating bind to authenticator type " + mAccountType);
+            }
             if (!mBindHelper.bind(mAccountType, this)) {
-                onError(6, "bind failure");
+                Log.d(TAG, "bind attempt failed for " + toDebugString());
+                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION, "bind failure");
             }
         }
 
@@ -551,206 +742,87 @@ public class AccountManagerService extends IAccountManager.Stub {
 
         public void onConnected(IBinder service) {
             mAuthenticator = IAccountAuthenticator.Stub.asInterface(service);
-            // do the next step
+            try {
+                run();
+            } catch (RemoteException e) {
+                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION,
+                        "remote exception");
+            }
         }
 
+        public abstract void run() throws RemoteException;
+
         public void onDisconnected() {
-            IAccountManagerResponse response = close();
+            mAuthenticator = null;
+            IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
-                onError(3, "disconnected");
+                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION,
+                        "disconnected");
             }
         }
 
         public void onTimedOut() {
-            IAccountManagerResponse response = close();
+            IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
-                onError(4, "timeout");
+                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION,
+                        "timeout");
             }
         }
 
-        public void onIntResult(int result) throws RemoteException {
-            IAccountManagerResponse response = close();
-            if (response != null) {
-                response.onIntResult(result);
+        public void onResult(Bundle result) {
+            mNumResults++;
+            if (result != null && !TextUtils.isEmpty(result.getString(Constants.AUTHTOKEN_KEY))) {
+                cancelNotification();
             }
-        }
-
-        public void onBooleanResult(boolean result) throws RemoteException {
-            IAccountManagerResponse response = close();
-            if (response != null) {
-                response.onBooleanResult(result);
+            IAccountManagerResponse response;
+            if (mExpectActivityLaunch && result != null
+                    && result.containsKey(Constants.INTENT_KEY)) {
+                response = mResponse;
+            } else {
+                response = getResponseAndClose();
             }
-        }
-
-        public void onStringResult(String result) throws RemoteException {
-            IAccountManagerResponse response = close();
-            if (response != null) {
-                response.onStringResult(result);
-            }
-        }
-
-        public void onError(int errorCode, String errorMessage) {
-            IAccountManagerResponse response = close();
             if (response != null) {
                 try {
-                    response.onError(errorCode, errorMessage);
+                    if (result == null) {
+                        response.onError(Constants.ERROR_CODE_INVALID_RESPONSE,
+                                "null bundle returned");
+                    } else {
+                        response.onResult(result);
+                    }
                 } catch (RemoteException e) {
-                    // error while trying to notify user of an error
+                    // if the caller is dead then there is no one to care about remote exceptions
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "failure while notifying response", e);
+                    }
                 }
             }
         }
-    }
 
-    private class GetAuthTokenSession extends Session {
-        final Account mAccount;
-        final String mAuthTokenType;
-        final boolean mNotifyOnAuthFailure;
-
-        public GetAuthTokenSession(IAccountManagerResponse response,
-                Account account, String authTokenType, boolean interactive) {
-            super(response, account.mType);
-            mAccount = account;
-            mAuthTokenType = authTokenType;
-            mNotifyOnAuthFailure = interactive;
-        }
-
-        public void onConnected(IBinder service) {
-            super.onConnected(service);
-
-            try {
-                mAuthenticator.getAuthToken(this, mAccount.mName, mAccount.mType, mAuthTokenType);
-            } catch (RemoteException e) {
-                onError(4, "remote exception");
-            }
-        }
-
-        public void onStringResult(String result) throws RemoteException {
-            IAccountManagerResponse response = close();
-            if (response != null) {
-                cacheAuthToken(mAccount, mAccountType, result);
-                response.onStringResult(result);
-            }
+        public void onRequestContinued() {
+            mNumRequestContinued++;
         }
 
         public void onError(int errorCode, String errorMessage) {
-            if (mNotifyOnAuthFailure && errorCode == 0 /* TODO: put the real value here */) {
-                // TODO: authentication failed, pop up the notification
+            mNumErrors++;
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Session.onError: " + errorCode + ", " + errorMessage);
             }
-            super.onError(errorCode, errorMessage);
-        }
-    }
-
-    private class CheckUsernameExistenceSession extends Session {
-        final String mUsername;
-
-        public CheckUsernameExistenceSession(IAccountManagerResponse response,
-                String username, String accountType) {
-            super(response, accountType);
-            mUsername = username;
-        }
-
-        public void onConnected(IBinder service) {
-            super.onConnected(service);
-
-            try {
-                mAuthenticator.checkUsernameExistence(this, mAccountType, mUsername);
-            } catch (RemoteException e) {
-                onError(4, "remote exception");
-            }
-        }
-    }
-
-    private class AddAccountInteractivelySession extends Session {
-
-        public AddAccountInteractivelySession(IAccountManagerResponse response,
-                String accountType) {
-            super(response, accountType);
-        }
-
-        public void onConnected(IBinder service) {
-            super.onConnected(service);
-
-            try {
-                mAuthenticator.addAccount(this, mAccountType);
-            } catch (RemoteException e) {
-                onError(4, "remote exception");
-            }
-        }
-    }
-
-    private class AuthenticateAccountSession extends Session {
-        final String mUsername;
-        final String mPassword;
-
-        public AuthenticateAccountSession(IAccountManagerResponse response, Account account,
-                String password) {
-            super(response, account.mType);
-            mUsername = account.mName;
-            mPassword = password;
-        }
-
-        public void onConnected(IBinder service) {
-            super.onConnected(service);
-
-            try {
-                mAuthenticator.authenticateAccount(this, mUsername, mAccountType, mPassword);
-            } catch (RemoteException e) {
-                onError(4, "remote exception");
-            }
-        }
-    }
-
-    private class UpdatePasswordSession extends Session {
-        final String mUsername;
-
-        public UpdatePasswordSession(IAccountManagerResponse response, Account account) {
-            super(response, account.mType);
-            mUsername = account.mName;
-        }
-
-        public void onConnected(IBinder service) {
-            super.onConnected(service);
-
-            try {
-                mAuthenticator.updatePassword(this, mUsername, mAccountType);
-            } catch (RemoteException e) {
-                onError(4, "remote exception");
-            }
-        }
-    }
-
-    private class EditPropertiesSession extends Session {
-        public EditPropertiesSession(IAccountManagerResponse response, String accountType) {
-            super(response, accountType);
-        }
-
-        public void onConnected(IBinder service) {
-            super.onConnected(service);
-
-            try {
-                mAuthenticator.editProperties(this, mAccountType);
-            } catch (RemoteException e) {
-                onError(4, "remote exception");
-            }
-        }
-    }
-
-    private class GetPasswordStrengthSession extends Session {
-        final String mPassword;
-
-        public GetPasswordStrengthSession(IAccountManagerResponse response,
-                String accountType, String password) {
-            super(response, accountType);
-            mPassword = password;
-        }
-
-        public void onConnected(IBinder service) {
-            super.onConnected(service);
-
-            try {
-                mAuthenticator.getPasswordStrength(this, mAccountType, mPassword);
-            } catch (RemoteException e) {
-                onError(4, "remote exception");
+            IAccountManagerResponse response = getResponseAndClose();
+            if (response != null) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Session.onError: responding");
+                }
+                try {
+                    response.onError(errorCode, errorMessage);
+                } catch (RemoteException e) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Session.onError: caught RemoteException while responding", e);
+                    }
+                }
+            } else {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Session.onError: already closed");
+                }
             }
         }
     }
@@ -807,18 +879,32 @@ public class AccountManagerService extends IAccountManager.Stub {
             db.execSQL("CREATE TABLE " + TABLE_META + " ( "
                     + META_KEY + " TEXT PRIMARY KEY NOT NULL, "
                     + META_VALUE + " TEXT)");
+
+            db.execSQL(""
+                    + " CREATE TRIGGER " + TABLE_ACCOUNTS + "Delete DELETE ON " + TABLE_ACCOUNTS
+                    + " BEGIN"
+                    + "   DELETE FROM " + TABLE_AUTHTOKENS
+                    + "     WHERE " + AUTHTOKENS_ACCOUNTS_ID + "=OLD." + ACCOUNTS_ID + " ;"
+                    + "   DELETE FROM " + TABLE_EXTRAS
+                    + "     WHERE " + EXTRAS_ACCOUNTS_ID + "=OLD." + ACCOUNTS_ID + " ;"
+                    + " END");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.e(TAG, "GLS upgrade from version " + oldVersion + " to version " +
-                  newVersion + " not supported");
+            Log.e(TAG, "upgrade from version " + oldVersion + " to version " + newVersion);
 
-            db.execSQL("DROP TABLE " + TABLE_ACCOUNTS);
-            db.execSQL("DROP TABLE " + TABLE_AUTHTOKENS);
-            db.execSQL("DROP TABLE " + TABLE_EXTRAS);
-            db.execSQL("DROP TABLE " + TABLE_META);
-            onCreate(db);
+            if (oldVersion == 1) {
+                db.execSQL(""
+                        + " CREATE TRIGGER " + TABLE_ACCOUNTS + "Delete DELETE ON " + TABLE_ACCOUNTS
+                        + " BEGIN"
+                        + "   DELETE FROM " + TABLE_AUTHTOKENS
+                        + "     WHERE " + AUTHTOKENS_ACCOUNTS_ID + " =OLD." + ACCOUNTS_ID + " ;"
+                        + "   DELETE FROM " + TABLE_EXTRAS
+                        + "     WHERE " + EXTRAS_ACCOUNTS_ID + " =OLD." + ACCOUNTS_ID + " ;"
+                        + " END");
+                oldVersion++;
+            }
         }
 
         @Override
@@ -897,5 +983,37 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     public IBinder onBind(Intent intent) {
         return asBinder();
+    }
+
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        synchronized (mSessions) {
+            final long now = SystemClock.elapsedRealtime();
+            fout.println("AccountManagerService: " + mSessions.size() + " sessions");
+            for (Session session : mSessions.values()) {
+                fout.println("  " + session.toDebugString(now));
+            }
+        }
+
+        fout.println();
+
+        mAuthenticatorCache.dump(fd, fout, args);
+    }
+
+    private void doNotification(CharSequence message, Intent intent) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "doNotification: " + message + " intent:" + intent);
+        }
+
+        // TODO(fredq) add this back in when we fix permissions
+//       Notification n = new Notification(android.R.drawable.stat_sys_warning, null, 0 /* when */);
+//        n.setLatestEventInfo(mContext, mContext.getText(R.string.notification_title), message,
+//            PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
+//        ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
+//                .notify(NOTIFICATION_ID, n);
+    }
+
+    private void cancelNotification() {
+//        ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
+//            .cancel(NOTIFICATION_ID);
     }
 }

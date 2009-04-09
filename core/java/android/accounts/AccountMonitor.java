@@ -60,7 +60,7 @@ public class AccountMonitor extends BroadcastReceiver {
 
         // Register a broadcast receiver to monitor account changes
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(AccountsServiceConstants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+        intentFilter.addAction(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
         intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);  // To recover from disk-full.
         mContext.registerReceiver(this, intentFilter);
 
@@ -77,15 +77,23 @@ public class AccountMonitor extends BroadcastReceiver {
         notifyListener();
     }
 
-    private synchronized void notifyListener() {
-        AccountManager accountManager =
-                (AccountManager)mContext.getSystemService(Context.ACCOUNT_SERVICE);
-        Account[] accounts = accountManager.blockingGetAccounts();
-        String[] accountNames = new String[accounts.length];
-        for (int i = 0; i < accounts.length; i++) {
-            accountNames[i] = accounts[i].mName;
+    private Future1Callback<Account[]> mGetAccountsCallback = new Future1Callback<Account[]>() {
+        public void run(Future1<Account[]> future) {
+            try {
+                Account[] accounts = future.getResult();
+                String[] accountNames = new String[accounts.length];
+                for (int i = 0; i < accounts.length; i++) {
+                    accountNames[i] = accounts[i].mName;
+                }
+                mListener.onAccountsUpdated(accountNames);
+            } catch (OperationCanceledException e) {
+                // the request was canceled
+            }
         }
-        mListener.onAccountsUpdated(accountNames);
+    };
+
+    private synchronized void notifyListener() {
+        AccountManager.get(mContext).getAccounts(mGetAccountsCallback, null /* handler */);
     }
 
     /**

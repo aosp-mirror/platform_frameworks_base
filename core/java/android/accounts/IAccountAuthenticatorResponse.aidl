@@ -15,14 +15,13 @@
  */
 
 package android.accounts;
-import android.os.Parcelable;
+import android.os.Bundle;
 
 /**
  * The interface used to return responses from an {@link IAccountAuthenticator}
  */
 oneway interface IAccountAuthenticatorResponse {
-    void onIntResult(int result);
-    void onBooleanResult(boolean result);
-    void onStringResult(String result);
+    void onResult(in Bundle value);
+    void onRequestContinued();
     void onError(int errorCode, String errorMessage);
 }
