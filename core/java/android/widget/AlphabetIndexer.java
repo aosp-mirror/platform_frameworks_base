@@ -30,7 +30,6 @@ import android.util.SparseIntArray;
  * Your adapter is responsible for updating the cursor by calling {@link #setCursor} if the
  * cursor changes. {@link #getPositionForSection} method does the binary search for the starting 
  * index of a given section (alphabet).
- * @hide pending API council approval
  */
 public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
 

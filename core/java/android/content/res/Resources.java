@@ -756,7 +756,7 @@ public class Resources {
 
     /**
      * Open a data stream for reading a raw resource.  This can only be used
-     * with resources whose value is the name of an asset files -- that is, it can be
+     * with resources whose value is the name of an asset file -- that is, it can be
      * used to open drawable, sound, and raw resources; it will fail on string
      * and color resources.
      *
@@ -766,8 +766,6 @@ public class Resources {
      * @return InputStream Access to the resource data.
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @hide Pending API council approval
      */
     public InputStream openRawResource(int id, TypedValue value) throws NotFoundException {
         getValue(id, value, true);

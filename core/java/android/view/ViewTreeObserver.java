@@ -102,8 +102,6 @@ public final class ViewTreeObserver {
     /**
      * Interface definition for a callback to be invoked when
      * something in the view tree has been scrolled.
-     * 
-     * @hide pending API council approval
      */
     public interface OnScrollChangedListener {
         /**
@@ -115,7 +113,9 @@ public final class ViewTreeObserver {
 
     /**
      * Parameters used with OnComputeInternalInsetsListener.
-     * {@hide pending API Council approval}
+     * 
+     * We are not yet ready to commit to this API and support it, so
+     * @hide
      */
     public final static class InternalInsetsInfo {
         /**
@@ -200,7 +200,9 @@ public final class ViewTreeObserver {
     /**
      * Interface definition for a callback to be invoked when layout has
      * completed and the client can compute its interior insets.
-     * {@hide pending API Council approval}
+     * 
+     * We are not yet ready to commit to this API and support it, so
+     * @hide
      */
     public interface OnComputeInternalInsetsListener {
         /**
@@ -381,8 +383,6 @@ public final class ViewTreeObserver {
      * @param listener The callback to add
      *
      * @throws IllegalStateException If {@link #isAlive()} returns false
-     *
-     * @hide pending API council approval
      */
     public void addOnScrollChangedListener(OnScrollChangedListener listener) {
         checkIsAlive();
@@ -402,8 +402,6 @@ public final class ViewTreeObserver {
      * @throws IllegalStateException If {@link #isAlive()} returns false
      *
      * @see #addOnScrollChangedListener(OnScrollChangedListener)
-     *
-     * @hide pending API council approval
      */
     public void removeOnScrollChangedListener(OnScrollChangedListener victim) {
         checkIsAlive();
@@ -454,7 +452,9 @@ public final class ViewTreeObserver {
      * @param listener The callback to add
      *
      * @throws IllegalStateException If {@link #isAlive()} returns false
-     * {@hide pending API Council approval}
+     * 
+     * We are not yet ready to commit to this API and support it, so
+     * @hide
      */
     public void addOnComputeInternalInsetsListener(OnComputeInternalInsetsListener listener) {
         checkIsAlive();
@@ -475,7 +475,9 @@ public final class ViewTreeObserver {
      * @throws IllegalStateException If {@link #isAlive()} returns false
      *
      * @see #addOnComputeInternalInsetsListener(OnComputeInternalInsetsListener)
-     * {@hide pending API Council approval}
+     * 
+     * We are not yet ready to commit to this API and support it, so
+     * @hide
      */
     public void removeOnComputeInternalInsetsListener(OnComputeInternalInsetsListener victim) {
         checkIsAlive();

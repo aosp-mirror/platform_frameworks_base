@@ -463,14 +463,16 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     }
     
     /**
-     * @hide pending API council approval
+     * This is hidden until the data set change model has been re-evaluated.
+     * @hide
      */
     protected void notifyDataSetChange() {
         mDataSetObservable.notifyChanged();
     }
     
     /**
-     * @hide pending API council approval
+     * This is hidden until the data set change model has been re-evaluated.
+     * @hide
      */
     protected DataSetObservable getDataSetObservable() {
         return mDataSetObservable;
