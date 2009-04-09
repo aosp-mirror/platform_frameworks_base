@@ -43,7 +43,7 @@
     <string name="needPuk2">"SIMカードのロック解除のためPUK2を入力します。"</string>
     <string name="ClipMmi">"着信時の発信者番号"</string>
     <string name="ClirMmi">"発信者番号"</string>
-    <string name="CfMmi">"電話の転送"</string>
+    <string name="CfMmi">"着信転送"</string>
     <string name="CwMmi">"通話中着信"</string>
     <string name="BaMmi">"発信制限"</string>
     <string name="PwdMmi">"パスワードの変更"</string>
