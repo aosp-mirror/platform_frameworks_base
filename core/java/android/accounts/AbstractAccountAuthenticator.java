@@ -16,6 +16,7 @@
 
 package android.accounts;
 
+import android.os.Bundle;
 import android.os.RemoteException;
 
 /**
@@ -24,54 +25,113 @@ import android.os.RemoteException;
  * AccountAuthenticators.
  */
 public abstract class AbstractAccountAuthenticator {
-    private static final String TAG = "AccountAuthenticator";
-
     class Transport extends IAccountAuthenticator.Stub {
-        public void addAccount(IAccountAuthenticatorResponse response, String accountType)
+        public void addAccount(IAccountAuthenticatorResponse response, String accountType,
+                String authTokenType, Bundle options)
                 throws RemoteException {
-            AbstractAccountAuthenticator.this.addAccount(new AccountAuthenticatorResponse(response),
-                    accountType);
+            final Bundle result;
+            try {
+                result = AbstractAccountAuthenticator.this.addAccount(
+                    new AccountAuthenticatorResponse(response),
+                        accountType, authTokenType, options);
+            } catch (NetworkErrorException e) {
+                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+                return;
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "addAccount not supported");
+                return;
+            }
+            if (result != null) {
+                response.onResult(result);
+            }
         }
 
-        public void authenticateAccount(IAccountAuthenticatorResponse
-                response, String name, String type, String password)
-                throws RemoteException {
-            AbstractAccountAuthenticator.this.authenticateAccount(
-                    new AccountAuthenticatorResponse(response), new Account(name, type), password);
+        public void confirmPassword(IAccountAuthenticatorResponse response,
+                Account account, String password) throws RemoteException {
+            boolean result;
+            try {
+                result = AbstractAccountAuthenticator.this.confirmPassword(
+                    new AccountAuthenticatorResponse(response),
+                        account, password);
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "confirmPassword not supported");
+                return;
+            } catch (NetworkErrorException e) {
+                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+                return;
+            }
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(Constants.BOOLEAN_RESULT_KEY, result);
+            response.onResult(bundle);
+        }
+
+        public void confirmCredentials(IAccountAuthenticatorResponse response,
+                Account account) throws RemoteException {
+            final Bundle result;
+            try {
+                result = AbstractAccountAuthenticator.this.confirmCredentials(
+                    new AccountAuthenticatorResponse(response), account);
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "confirmCredentials not supported");
+                return;
+            }
+            if (result != null) {
+                response.onResult(result);
+            }
         }
 
         public void getAuthToken(IAccountAuthenticatorResponse response,
-                String name, String type, String authTokenType)
+                Account account, String authTokenType, Bundle loginOptions)
                 throws RemoteException {
-            AbstractAccountAuthenticator.this.getAuthToken(
-                    new AccountAuthenticatorResponse(response),
-                    new Account(name, type), authTokenType);
+            try {
+                final Bundle result = AbstractAccountAuthenticator.this.getAuthToken(
+                        new AccountAuthenticatorResponse(response), account,
+                        authTokenType, loginOptions);
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "getAuthToken not supported");
+            } catch (NetworkErrorException e) {
+                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+            }
         }
 
-        public void getPasswordStrength(IAccountAuthenticatorResponse response,
-                String accountType, String password)
-                throws RemoteException {
-            AbstractAccountAuthenticator.this.getPasswordStrength(
-                    new AccountAuthenticatorResponse(response), accountType, password);
+        public void updateCredentials(IAccountAuthenticatorResponse response, Account account,
+                String authTokenType, Bundle loginOptions) throws RemoteException {
+            final Bundle result;
+            try {
+                result = AbstractAccountAuthenticator.this.updateCredentials(
+                    new AccountAuthenticatorResponse(response), account,
+                        authTokenType, loginOptions);
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "updateCredentials not supported");
+                return;
+            }
+            if (result != null) {
+                response.onResult(result);
+            }
         }
 
-        public void checkUsernameExistence(IAccountAuthenticatorResponse response,
-                String accountType, String username)
-                throws RemoteException {
-            AbstractAccountAuthenticator.this.checkUsernameExistence(
-                    new AccountAuthenticatorResponse(response), accountType, username);
-        }
-
-        public void updatePassword(IAccountAuthenticatorResponse response, String name, String type)
-                throws RemoteException {
-            AbstractAccountAuthenticator.this.updatePassword(
-                    new AccountAuthenticatorResponse(response), new Account(name, type));
-        }
-
-        public void editProperties(IAccountAuthenticatorResponse response, String accountType)
-                throws RemoteException {
-            AbstractAccountAuthenticator.this.editProperties(
+        public void editProperties(IAccountAuthenticatorResponse response,
+                String accountType) throws RemoteException {
+            final Bundle result;
+            try {
+                result = AbstractAccountAuthenticator.this.editProperties(
                     new AccountAuthenticatorResponse(response), accountType);
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "editProperties not supported");
+                return;
+            }
+            if (result != null) {
+                response.onResult(result);
+            }
         }
     }
 
@@ -86,41 +146,29 @@ public abstract class AbstractAccountAuthenticator {
     }
 
     /**
-     * prompts the user for account information and adds the result to the IAccountManager
+     * Returns a Bundle that contains the Intent of the activity that can be used to edit the
+     * properties. In order to indicate success the activity should call response.setResult()
+     * with a non-null Bundle.
+     * @param response used to set the result for the request. If the Constants.INTENT_KEY
+     *   is set in the bundle then this response field is to be used for sending future
+     *   results if and when the Intent is started.
+     * @param accountType the AccountType whose properties are to be edited.
+     * @return a Bundle containing the result or the Intent to start to continue the request.
+     *   If this is null then the request is considered to still be active and the result should
+     *   sent later using response.
      */
-    public abstract void addAccount(AccountAuthenticatorResponse response, String accountType);
-
-    /**
-     * prompts the user for the credentials of the account
-     */
-    public abstract void authenticateAccount(AccountAuthenticatorResponse response,
-            Account account, String password);
-
-    /**
-     * gets the password by either prompting the user or querying the IAccountManager
-     */
-    public abstract void getAuthToken(AccountAuthenticatorResponse response,
-            Account account, String authTokenType);
-
-    /**
-     * does local analysis or uses a service in the cloud
-     */
-    public abstract void getPasswordStrength(AccountAuthenticatorResponse response,
-        String accountType, String password);
-
-    /**
-     * checks with the login service in the cloud
-     */
-    public abstract void checkUsernameExistence(AccountAuthenticatorResponse response,
-        String accountType, String username);
-
-    /**
-     * prompts the user for a new password and writes it to the IAccountManager
-     */
-    public abstract void updatePassword(AccountAuthenticatorResponse response, Account account);
-
-    /**
-     * launches an activity that lets the user edit and set the properties for an authenticator
-     */
-    public abstract void editProperties(AccountAuthenticatorResponse response, String accountType);
+    public abstract Bundle editProperties(AccountAuthenticatorResponse response,
+            String accountType);
+    public abstract Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
+            String authTokenType, Bundle options) throws NetworkErrorException;
+    /* @deprecated */
+    public abstract boolean confirmPassword(AccountAuthenticatorResponse response,
+            Account account, String password) throws NetworkErrorException;
+    public abstract Bundle confirmCredentials(AccountAuthenticatorResponse response,
+            Account account);
+    public abstract Bundle getAuthToken(AccountAuthenticatorResponse response,
+            Account account, String authTokenType, Bundle loginOptions)
+            throws NetworkErrorException;
+    public abstract Bundle updateCredentials(AccountAuthenticatorResponse response,
+            Account account, String authTokenType, Bundle loginOptions);
 }

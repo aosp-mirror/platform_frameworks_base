@@ -18,6 +18,7 @@ package android.accounts;
 
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.text.TextUtils;
 
 /**
  * Value type that represents an Account in the {@link AccountManager}. This object is
@@ -43,6 +44,12 @@ public class Account implements Parcelable {
     }
 
     public Account(String name, String type) {
+        if (TextUtils.isEmpty(name)) {
+            throw new IllegalArgumentException("the name must not be empty: " + name);
+        }
+        if (TextUtils.isEmpty(type)) {
+            throw new IllegalArgumentException("the type must not be empty: " + type);
+        }
         mName = name;
         mType = type;
     }

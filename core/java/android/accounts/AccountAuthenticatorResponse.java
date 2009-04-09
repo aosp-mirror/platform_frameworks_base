@@ -16,38 +16,38 @@
 
 package android.accounts;
 
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.os.Parcel;
 import android.os.RemoteException;
 
 /**
  * Object that wraps calls to an {@link IAccountAuthenticatorResponse} object.
  * TODO: this interface is still in flux
  */
-public class AccountAuthenticatorResponse {
+public class AccountAuthenticatorResponse implements Parcelable {
     private IAccountAuthenticatorResponse mAccountAuthenticatorResponse;
 
     public AccountAuthenticatorResponse(IAccountAuthenticatorResponse response) {
         mAccountAuthenticatorResponse = response;
     }
 
-    public void onFinished(int result) {
+    public AccountAuthenticatorResponse(Parcel parcel) {
+        mAccountAuthenticatorResponse =
+                IAccountAuthenticatorResponse.Stub.asInterface(parcel.readStrongBinder());
+    }
+
+    public void onResult(Bundle result) {
         try {
-            mAccountAuthenticatorResponse.onIntResult(result);
+            mAccountAuthenticatorResponse.onResult(result);
         } catch (RemoteException e) {
             // this should never happen
         }
     }
 
-    public void onFinished(String result) {
+    public void onRequestContinued() {
         try {
-            mAccountAuthenticatorResponse.onStringResult(result);
-        } catch (RemoteException e) {
-            // this should never happen
-        }
-    }
-
-    public void onFinished(boolean result) {
-        try {
-            mAccountAuthenticatorResponse.onBooleanResult(result);
+            mAccountAuthenticatorResponse.onRequestContinued();
         } catch (RemoteException e) {
             // this should never happen
         }
@@ -61,7 +61,22 @@ public class AccountAuthenticatorResponse {
         }
     }
 
-    public IAccountAuthenticatorResponse getIAccountAuthenticatorResponse() {
-        return mAccountAuthenticatorResponse;
+    public int describeContents() {
+        return 0;
     }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStrongBinder(mAccountAuthenticatorResponse.asBinder());
+    }
+
+    public static final Creator<AccountAuthenticatorResponse> CREATOR =
+            new Creator<AccountAuthenticatorResponse>() {
+        public AccountAuthenticatorResponse createFromParcel(Parcel source) {
+            return new AccountAuthenticatorResponse(source);
+        }
+
+        public AccountAuthenticatorResponse[] newArray(int size) {
+            return new AccountAuthenticatorResponse[size];
+        }
+    };
 }

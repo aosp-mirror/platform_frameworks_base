@@ -17,6 +17,8 @@
 package android.accounts;
 
 import android.accounts.IAccountAuthenticatorResponse;
+import android.accounts.Account;
+import android.os.Bundle;
 
 /**
  * Service that allows the interaction with an authentication server.
@@ -25,36 +27,32 @@ oneway interface IAccountAuthenticator {
     /**
      * prompts the user for account information and adds the result to the IAccountManager
      */
-    void addAccount(in IAccountAuthenticatorResponse response, String accountType);
+    void addAccount(in IAccountAuthenticatorResponse response, String accountType,
+        String authTokenType, in Bundle options);
+
+    /**
+     * Checks that the account/password combination is valid.
+     * @deprecated
+     */
+    void confirmPassword(in IAccountAuthenticatorResponse response,
+        in Account account, String password);
 
     /**
      * prompts the user for the credentials of the account
      */
-    void authenticateAccount(in IAccountAuthenticatorResponse response, String name,
-        String type, String password);
+    void confirmCredentials(in IAccountAuthenticatorResponse response, in Account account);
 
     /**
      * gets the password by either prompting the user or querying the IAccountManager
      */
-    void getAuthToken(in IAccountAuthenticatorResponse response,
-        String name, String type, String authTokenType);
-
-    /**
-     * does local analysis or uses a service in the cloud
-     */
-    void getPasswordStrength(in IAccountAuthenticatorResponse response,
-        String accountType, String password);
-
-    /**
-     * checks with the login service in the cloud
-     */
-    void checkUsernameExistence(in IAccountAuthenticatorResponse response,
-        String accountType, String username);
+    void getAuthToken(in IAccountAuthenticatorResponse response, in Account account,
+        String authTokenType, in Bundle options);
 
     /**
      * prompts the user for a new password and writes it to the IAccountManager
      */
-    void updatePassword(in IAccountAuthenticatorResponse response, String name, String type);
+    void updateCredentials(in IAccountAuthenticatorResponse response, in Account account,
+        String authTokenType, in Bundle options);
 
     /**
      * launches an activity that lets the user edit and set the properties for an authenticator

@@ -26,6 +26,7 @@ import android.os.Bundle;
 interface IAccountManager {
     String getPassword(in Account account);
     String getUserData(in Account account, String key);
+    String[] getAuthenticatorTypes();
     Account[] getAccounts();
     Account[] getAccountsByType(String accountType);
     boolean addAccount(in Account account, String password, in Bundle extras);
@@ -37,19 +38,21 @@ interface IAccountManager {
     void clearPassword(in Account account);
     void setUserData(in Account account, String key, String value);
 
-    // interactive
+    void getAuthToken(in IAccountManagerResponse response, in Account account,
+        String authTokenType, boolean notifyOnAuthFailure, boolean expectActivityLaunch,
+        in Bundle options);
+    void addAcount(in IAccountManagerResponse response, String accountType,
+        String authTokenType, boolean expectActivityLaunch, in Bundle options);
+    void updateCredentials(in IAccountManagerResponse response, in Account account,
+        String authTokenType, boolean expectActivityLaunch, in Bundle options);
+    void editProperties(in IAccountManagerResponse response, String accountType,
+        boolean expectActivityLaunch);
+    void confirmCredentials(in IAccountManagerResponse response, in Account account,
+        boolean expectActivityLaunch);
 
-    void getAuthToken(in IAccountManagerResponse response, in Account account, String authTokenType,
-        boolean notifyOnAuthFailure);
-    void addAccountInteractively(in IAccountManagerResponse response, String accountType);
-    void authenticateAccount(in IAccountManagerResponse response, in Account account,
+    /*
+     * @Deprecated
+     */
+    void confirmPassword(in IAccountManagerResponse response, in Account account,
         String password);
-    void updatePassword(in IAccountManagerResponse response, in Account account);
-    void editProperties(in IAccountManagerResponse response, String accountType);
-
-    // not interactive
-    void getPasswordStrength(in IAccountManagerResponse response, String accountType,
-        String password);
-    void checkUsernameExistence(in IAccountManagerResponse response, String accountType,
-        String username);
 }
