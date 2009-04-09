@@ -149,9 +149,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             KeyguardWindowController controller) {
         super(context);
 
-        AccountManager accountManager =
-                (AccountManager)context.getSystemService(Context.ACCOUNT_SERVICE);
-        mHasAccount = accountManager.blockingGetAccounts().length > 0;
+        mHasAccount = AccountManager.get(context).blockingGetAccounts().length > 0;
 
         mRequiresSim =
                 TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));

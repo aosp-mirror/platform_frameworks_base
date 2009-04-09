@@ -53,7 +53,6 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     private final KeyguardScreenCallback mCallback;
     private final LockPatternUtils mLockPatternUtils;
-    private AccountManager mAccountManager;
 
     private TextView mTopHeader;
     private TextView mInstructions;
@@ -91,12 +90,6 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
         mEmergencyCall = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCall.setOnClickListener(this);
-    }
-
-    void ensureAccountManager() {
-        if (mAccountManager == null) {
-            mAccountManager = (AccountManager)mContext.getSystemService(Context.ACCOUNT_SERVICE);
-        }
     }
 
     public void afterTextChanged(Editable s) {
@@ -193,11 +186,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
      * find a single best match.
      */
     private Account findIntendedAccount(String username) {
-        ensureAccountManager();
-        Account[] accounts = mAccountManager.blockingGetAccounts();
-        if (accounts == null) {
-            return null;
-        }
+        Account[] accounts = AccountManager.get(mContext).blockingGetAccounts();
 
         // Try to figure out which account they meant if they
         // typed only the username (and not the domain), or got
@@ -239,8 +228,14 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         if (account == null) {
             return false;
         }
-        // change this to asynchronously issue the request and wait for the response
-        ensureAccountManager();
-        return mAccountManager.authenticateAccount(account, password);
+        // TODO(fredq) change this to asynchronously issue the request and wait for the response (by
+        // supplying a callback rather than calling get() immediately)
+        try {
+            return AccountManager.get(mContext).confirmPassword(
+                    account, password, null /* callback */, null /* handler */).getResult();
+        } catch (android.accounts.OperationCanceledException e) {
+            // the request was canceled
+            return false;
+        }
     }
 }
