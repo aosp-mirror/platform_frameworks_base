@@ -43,7 +43,7 @@
     <string name="needPuk2">"Geben Sie zum Entsperren der SIM-Karte den PUK2 ein."</string>
     <string name="ClipMmi">"Anrufer-ID für eingehenden Anruf"</string>
     <string name="ClirMmi">"Anrufer-ID für abgehenden Anruf"</string>
-    <string name="CfMmi">"Anrufweiterleitung"</string>
+    <string name="CfMmi">"Rufweiterleitung"</string>
     <string name="CwMmi">"Anklopfen"</string>
     <string name="BaMmi">"Anrufsperre"</string>
     <string name="PwdMmi">"Passwort-Änderung"</string>
@@ -108,9 +108,9 @@
     <string name="global_action_toggle_silent_mode">"Lautlos"</string>
     <string name="global_action_silent_mode_on_status">"Ton ist bereits AUS"</string>
     <string name="global_action_silent_mode_off_status">"Ton ist momentan AN"</string>
-    <string name="global_actions_toggle_airplane_mode">"Flugzeugmodus"</string>
-    <string name="global_actions_airplane_mode_on_status">"Flugzeugmodus ist AN"</string>
-    <string name="global_actions_airplane_mode_off_status">"Flugzeugmodus ist AUS"</string>
+    <string name="global_actions_toggle_airplane_mode">"Flugmodus"</string>
+    <string name="global_actions_airplane_mode_on_status">"Flugmodus ist AN"</string>
+    <string name="global_actions_airplane_mode_off_status">"Flugmodus ist AUS"</string>
     <string name="safeMode">"Abgesicherter Modus"</string>
     <string name="android_system_label">"Android System"</string>
     <string name="permgrouplab_costMoney">"Kostenpflichtige Dienste"</string>
@@ -284,13 +284,13 @@
     <string name="permlab_callPrivileged">"Alle Telefonnummern direkt anrufen"</string>
     <string name="permdesc_callPrivileged">"Ermöglicht der Anwendung, ohne Ihr Eingreifen eine beliebige Telefonnummer zu wählen, einschließlich Notfallnummern. Schädliche Anwendungen können so unnötige und illegale Anrufe an Notdienste tätigen."</string>
     <string name="permlab_locationUpdates">"Benachrichtigungen für Standortaktualisierung steuern"</string>
-    <string name="permdesc_locationUpdates">"Ermöglicht die Aktivierung/Deaktivierung der Radio-Benachrichtigungen über Standort-Updates. Nicht für normale Anwendungen vorgesehen."</string>
+    <string name="permdesc_locationUpdates">"Ermöglicht die Aktivierung/Deaktivierung der Mobilfunkbenachrichtigungen über Standort-Updates. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_checkinProperties">"Auf Check-In-Eigenschaften zugreifen"</string>
     <string name="permdesc_checkinProperties">"Ermöglicht den Schreib-/Lesezugriff auf vom Check-In-Service hochgeladene Elemente. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_bindGadget">"Widgets auswählen"</string>
     <string name="permdesc_bindGadget">"Ermöglicht der Anwendung, dem System zu melden, welche Widgets von welcher Anwendung verwendet werden können. Mit dieser Berechtigung können Anwendungen anderen Anwendungen Zugriff auf persönliche Daten gewähren. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_modifyPhoneState">"Telefonstatus ändern"</string>
-    <string name="permdesc_modifyPhoneState">"Ermöglicht einer Anwendung, die Telefonfunktionen des Gerätes zu steuern. Eine Anwendung mit dieser Berechtigung kann unter anderem das Netzwerk wechseln oder das Radio des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
+    <string name="permdesc_modifyPhoneState">"Ermöglicht einer Anwendung, die Telefonfunktionen des Gerätes zu steuern. Eine Anwendung mit dieser Berechtigung kann unter anderem das Netzwerk wechseln oder die Mobilfunkverbindung des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
     <string name="permlab_readPhoneState">"Telefonstatus lesen"</string>
     <string name="permdesc_readPhoneState">"Ermöglicht der Anwendung, auf die Telefonfunktionen des Gerätes zuzugreifen. Eine Anwendung mit dieser Berechtigung kann unter anderem bestimmen, welche Telefonnummer dieses Telefon verwendet, ob ein Anruf aktiv ist oder mit welcher Nummer der Anrufer verbunden ist."</string>
     <string name="permlab_wakeLock">"Standby-Modus deaktivieren"</string>
@@ -576,7 +576,7 @@
     <string name="Noon">"Mittag"</string>
     <string name="midnight">"Mitternacht"</string>
     <string name="Midnight">"Mitternacht"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
