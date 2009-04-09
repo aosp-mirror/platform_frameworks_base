@@ -161,7 +161,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * @see #setRenderMode(int)
      * @see #requestRender()
      */
-    public final static int RENDERMODE_CONTUOUSLY = 1;
+    public final static int RENDERMODE_CONTINUOUSLY = 1;
 
     /**
      * Check glError() after every GL call and throw an exception if glError indicates
@@ -340,10 +340,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
     /**
      * Set the rendering mode. When renderMode is
-     * RENDERMODE_CONTUOUSLY, the renderer is called
+     * RENDERMODE_CONTINUOUSLY, the renderer is called
      * repeatedly to re-render the scene. When renderMode
      * is RENDERMODE_WHEN_DIRTY, the renderer only rendered when the surface
-     * is created, or when {@link #requestRender} is called. Defaults to RENDERMODE_CONTUOUSLY.
+     * is created, or when {@link #requestRender} is called. Defaults to RENDERMODE_CONTINUOUSLY.
      * <p>
      * Using RENDERMODE_WHEN_DIRTY can improve battery life and overall system performance
      * by allowing the GPU and CPU to idle when the view does not need to be updated.
@@ -351,7 +351,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * This method can only be called after {@link #setRenderer(Renderer)}
      *
      * @param renderMode one of the RENDERMODE_X constants
-     * @see #RENDERMODE_CONTUOUSLY
+     * @see #RENDERMODE_CONTINUOUSLY
      * @see #RENDERMODE_WHEN_DIRTY
      */
     public void setRenderMode(int renderMode) {
@@ -362,7 +362,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * Get the current rendering mode. May be called
      * from any thread. Must not be called before a renderer has been set.
      * @return the current rendering mode.
-     * @see #RENDERMODE_CONTUOUSLY
+     * @see #RENDERMODE_CONTINUOUSLY
      * @see #RENDERMODE_WHEN_DIRTY
      */
     public int getRenderMode() {
@@ -863,7 +863,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mWidth = 0;
             mHeight = 0;
             mRequestRender = true;
-            mRenderMode = RENDERMODE_CONTUOUSLY;
+            mRenderMode = RENDERMODE_CONTINUOUSLY;
             mRenderer = renderer;
             setName("GLThread");
         }
@@ -977,7 +977,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 return true;
             }
 
-            if ((mWidth > 0) && (mHeight > 0) && (mRequestRender || (mRenderMode == RENDERMODE_CONTUOUSLY))) {
+            if ((mWidth > 0) && (mHeight > 0) && (mRequestRender || (mRenderMode == RENDERMODE_CONTINUOUSLY))) {
                 return false;
             }
 
@@ -985,12 +985,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         public void setRenderMode(int renderMode) {
-            if ( !((RENDERMODE_WHEN_DIRTY <= renderMode) && (renderMode <= RENDERMODE_CONTUOUSLY)) ) {
+            if ( !((RENDERMODE_WHEN_DIRTY <= renderMode) && (renderMode <= RENDERMODE_CONTINUOUSLY)) ) {
                 throw new IllegalArgumentException("renderMode");
             }
             synchronized(this) {
                 mRenderMode = renderMode;
-                if (renderMode == RENDERMODE_CONTUOUSLY) {
+                if (renderMode == RENDERMODE_CONTINUOUSLY) {
                     notify();
                 }
             }
