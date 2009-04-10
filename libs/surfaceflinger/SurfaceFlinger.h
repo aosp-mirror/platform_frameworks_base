@@ -26,6 +26,7 @@
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/MemoryDealer.h>
+#include <utils/RefBase.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/ISurfaceComposer.h>
@@ -52,13 +53,10 @@ class Client;
 class BClient;
 class DisplayHardware;
 class FreezeLock;
-class GPUHardwareInterface;
-class IGPUCallback;
 class Layer;
 class LayerBuffer;
 class LayerOrientationAnim;
 class OrientationAnimation;
-class SurfaceHeapManager;
 
 typedef int32_t ClientID;
 
@@ -75,17 +73,13 @@ public:
 
             int32_t                 generateId(int pid);
             void                    free(int32_t id);
-            status_t                bindLayer(LayerBaseClient* layer, int32_t id);
-            sp<MemoryDealer>        createAllocator(uint32_t memory_type);
+            status_t                bindLayer(const sp<LayerBaseClient>& layer, int32_t id);
 
     inline  bool                    isValid(int32_t i) const;
-    inline  const uint8_t*          inUseArray() const;
-    inline  size_t                  numActiveLayers() const;
-    LayerBaseClient*                getLayerUser(int32_t i) const;
-    const Vector<LayerBaseClient*>& getLayers() const { return mLayers; }
+    sp<LayerBaseClient>             getLayerUser(int32_t i) const;
+    const Vector< wp<LayerBaseClient> >& getLayers() const { return mLayers; }
     const sp<IMemory>&              controlBlockMemory() const { return mCblkMemory; }
     void                            dump(const char* what);
-    const sp<SurfaceHeapManager>&   getSurfaceHeapManager() const;
     
     // pointer to this client's control block
     per_client_cblk_t*      ctrlblk;
@@ -95,15 +89,13 @@ public:
 private:
     int                     getClientPid() const { return mPid; }
         
-    int                         mPid;
-    uint32_t                    mBitmap;
-    SortedVector<uint8_t>       mInUse;
-    Vector<LayerBaseClient*>    mLayers;
-    sp<MemoryDealer>            mCblkHeap;
-    sp<SurfaceFlinger>          mFlinger;
-    sp<MemoryDealer>            mSharedHeapAllocator;
-    sp<MemoryDealer>            mPMemAllocator;
-    sp<IMemory>                 mCblkMemory;
+    int                             mPid;
+    uint32_t                        mBitmap;
+    SortedVector<uint8_t>           mInUse;
+    Vector< wp<LayerBaseClient> >   mLayers;
+    sp<MemoryDealer>                mCblkHeap;
+    sp<SurfaceFlinger>              mFlinger;
+    sp<IMemory>                     mCblkMemory;
 };
 
 // ---------------------------------------------------------------------------
@@ -126,6 +118,8 @@ public:
 
         const DisplayHardware&  displayHardware() const;
         const Transform&        transform() const;
+        EGLDisplay              getEGLDisplay() const;
+        
 private:
                                 GraphicPlane(const GraphicPlane&);
         GraphicPlane            operator = (const GraphicPlane&);
@@ -169,28 +163,16 @@ public:
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
     virtual void                        signal() const;
-    virtual status_t requestGPU(const sp<IGPUCallback>& callback, 
-            gpu_info_t* gpu);
-    virtual status_t revokeGPU();
 
             void                        screenReleased(DisplayID dpy);
             void                        screenAcquired(DisplayID dpy);
 
-            const sp<SurfaceHeapManager>& getSurfaceHeapManager() const { 
-                return mSurfaceHeapManager; 
-            }
-
-            const sp<GPUHardwareInterface>& getGPU() const {
-                return mGPU; 
-            }
-
-            copybit_device_t* getBlitEngine() const;
             overlay_control_device_t* getOverlayEngine() const;
 
             
-    status_t removeLayer(LayerBase* layer);
-    status_t addLayer(LayerBase* layer);
-    status_t invalidateLayerVisibility(LayerBase* layer);
+    status_t removeLayer(const sp<LayerBase>& layer);
+    status_t addLayer(const sp<LayerBase>& layer);
+    status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
     
 private:
     friend class BClient;
@@ -205,20 +187,25 @@ private:
             DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
             uint32_t flags);
 
-    LayerBaseClient* createNormalSurfaceLocked(Client* client, DisplayID display,
-            int32_t id, uint32_t w, uint32_t h, PixelFormat format, uint32_t flags);
+    sp<LayerBaseClient> createNormalSurfaceLocked(
+            Client* client, DisplayID display,
+            int32_t id, uint32_t w, uint32_t h, 
+            PixelFormat format, uint32_t flags);
 
-    LayerBaseClient* createBlurSurfaceLocked(Client* client, DisplayID display,
+    sp<LayerBaseClient> createBlurSurfaceLocked(
+            Client* client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
-    LayerBaseClient* createDimSurfaceLocked(Client* client, DisplayID display,
+    sp<LayerBaseClient> createDimSurfaceLocked(
+            Client* client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
-    LayerBaseClient* createPushBuffersSurfaceLocked(Client* client, DisplayID display,
+    sp<LayerBaseClient> createPushBuffersSurfaceLocked(
+            Client* client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
-    status_t    destroySurface(SurfaceID surface_id);
-    status_t    setClientState(ClientID cid, int32_t count, const layer_state_t* states);
+    status_t destroySurface(SurfaceID surface_id);
+    status_t setClientState(ClientID cid, int32_t count, const layer_state_t* states);
 
 
     class LayerVector {
@@ -226,15 +213,15 @@ private:
         inline              LayerVector() { }
                             LayerVector(const LayerVector&);
         inline size_t       size() const { return layers.size(); }
-        inline LayerBase*const* array() const { return layers.array(); }
-        ssize_t             add(LayerBase*, Vector<LayerBase*>::compar_t);
-        ssize_t             remove(LayerBase*);
-        ssize_t             reorder(LayerBase*, Vector<LayerBase*>::compar_t);
-        ssize_t             indexOf(LayerBase* key, size_t guess=0) const;
-        inline LayerBase*   operator [] (size_t i) const { return layers[i]; }
+        inline sp<LayerBase> const* array() const { return layers.array(); }
+        ssize_t             add(const sp<LayerBase>&, Vector< sp<LayerBase> >::compar_t);
+        ssize_t             remove(const sp<LayerBase>&);
+        ssize_t             reorder(const sp<LayerBase>&, Vector< sp<LayerBase> >::compar_t);
+        ssize_t             indexOf(const sp<LayerBase>& key, size_t guess=0) const;
+        inline sp<LayerBase> operator [] (size_t i) const { return layers[i]; }
     private:
-        KeyedVector<LayerBase*, size_t> lookup;
-        Vector<LayerBase*>              layers;
+        KeyedVector< sp<LayerBase> , size_t> lookup;
+        Vector< sp<LayerBase> >              layers;
     };
 
     struct State {
@@ -299,10 +286,9 @@ private:
 
 
             void        destroyConnection(ClientID cid);
-            LayerBaseClient* getLayerUser_l(SurfaceID index) const;
-            status_t    addLayer_l(LayerBase* layer);
-            status_t    removeLayer_l(LayerBase* layer);
-            void        destroy_all_removed_layers_l();
+            sp<LayerBaseClient> getLayerUser_l(SurfaceID index) const;
+            status_t    addLayer_l(const sp<LayerBase>& layer);
+            status_t    removeLayer_l(const sp<LayerBase>& layer);
             void        free_resources_l();
 
             uint32_t    getTransactionFlags(uint32_t flags);
@@ -335,17 +321,15 @@ private:
                 // protected by mStateLock (but we could use another lock)
                 Tokenizer                               mTokens;
                 DefaultKeyedVector<ClientID, Client*>   mClientsMap;
-                DefaultKeyedVector<SurfaceID, LayerBaseClient*>   mLayerMap;
+                DefaultKeyedVector<SurfaceID, sp<LayerBaseClient> >   mLayerMap;
                 GraphicPlane                            mGraphicPlanes[1];
-                SortedVector<LayerBase*>                mRemovedLayers;
+                bool                                    mLayersRemoved;
                 Vector<Client*>                         mDisconnectedClients;
 
                 // constant members (no synchronization needed for access)
                 sp<MemoryDealer>            mServerHeap;
                 sp<IMemory>                 mServerCblkMemory;
                 surface_flinger_cblk_t*     mServerCblk;
-                sp<SurfaceHeapManager>      mSurfaceHeapManager;
-                sp<GPUHardwareInterface>    mGPU;
                 GLuint                      mWormholeTexName;
                 sp<BootAnimation>           mBootAnimation;
                 nsecs_t                     mBootTime;

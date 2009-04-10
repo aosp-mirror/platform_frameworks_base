@@ -2,9 +2,9 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
+	BufferMapper.cpp \
 	Camera.cpp \
 	CameraParameters.cpp \
-	EGLDisplaySurface.cpp \
 	EGLNativeWindowSurface.cpp \
 	EventHub.cpp \
 	EventRecurrence.cpp \

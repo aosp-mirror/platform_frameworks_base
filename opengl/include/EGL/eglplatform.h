@@ -89,11 +89,16 @@ typedef Window   EGLNativeWindowType;
 
 #elif defined(ANDROID)
 
-#include <EGL/eglnatives.h>
+#include <EGL/android_natives.h>
 
-typedef struct egl_native_window_t*     EGLNativeWindowType;
+typedef struct android_native_window_t* EGLNativeWindowType;
 typedef struct egl_native_pixmap_t*     EGLNativePixmapType;
 typedef void*                           EGLNativeDisplayType;
+
+#ifndef EGL_ANDROID_image_native_buffer
+#define EGL_ANDROID_image_native_buffer 1
+#define EGL_NATIVE_BUFFER_ANDROID       0x6000  /* eglCreateImageKHR target */
+#endif
 
 #else
 #error "Platform not recognized"

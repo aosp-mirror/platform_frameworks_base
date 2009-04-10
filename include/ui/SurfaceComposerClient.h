@@ -128,33 +128,16 @@ private:
     status_t    setPosition(Surface* surface, int32_t x, int32_t y);
     status_t    setSize(Surface* surface, uint32_t w, uint32_t h);
     
-    //! Unlock the surface, and specify the dirty region if any
-    status_t    unlockAndPostSurface(Surface* surface);
-    status_t    unlockSurface(Surface* surface);
-
-    status_t    lockSurface(Surface* surface,
-                            Surface::SurfaceInfo* info,
-                            Region* dirty,
-                            bool blocking = true);
-
-    status_t    nextBuffer(Surface* surface,
-                            Surface::SurfaceInfo* info);
+    void        signalServer();
 
     status_t    destroySurface(SurfaceID sid);
 
     void        _init(const sp<ISurfaceComposer>& sm,
                     const sp<ISurfaceFlingerClient>& conn);
-    void        _signal_server();
-    static void _send_dirty_region(layer_cblk_t* lcblk, const Region& dirty);
 
     inline layer_state_t*   _get_state_l(const sp<Surface>& surface);
     layer_state_t*          _lockLayerState(const sp<Surface>& surface);
     inline void             _unlockLayerState();
-
-    status_t validateSurface(
-            per_client_cblk_t const* cblk, Surface const * surface);
-
-    void pinHeap(const sp<IMemoryHeap>& heap);
 
     mutable     Mutex                               mLock;
                 layer_state_t*                      mPrebuiltLayerState;
@@ -167,9 +150,6 @@ private:
                 per_client_cblk_t*          mControl;
                 sp<IMemory>                 mControlMemory;
                 sp<ISurfaceFlingerClient>   mClient;
-                sp<IMemoryHeap>             mSurfaceHeap;
-                uint8_t*                    mSurfaceHeapBase;
-                void*                       mGL;
                 SurfaceFlingerSynchro*      mSignalServer;
 };
 

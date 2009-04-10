@@ -22,7 +22,6 @@
 
 #include <utils/IMemory.h>
 #include <private/ui/LayerState.h>
-#include <EGL/eglnatives.h>
 
 #include "LayerBase.h"
 #include "LayerBitmap.h"
@@ -64,7 +63,7 @@ public:
 
     virtual bool needsBlending() const;
 
-    virtual sp<LayerBaseClient::Surface> getSurface() const;
+    virtual sp<LayerBaseClient::Surface> createSurface() const;
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
@@ -126,8 +125,7 @@ private:
         status_t        mStatus;
         ISurface::BufferHeap mBufferHeap;
         size_t          mBufferSize;
-        mutable sp<MemoryDealer> mTemporaryDealer;
-        mutable LayerBitmap mTempBitmap;
+        mutable sp<android::Buffer>  mTempBitmap;
         mutable GLuint  mTextureName;
     };
     
@@ -179,23 +177,19 @@ private:
     class SurfaceBuffer : public LayerBaseClient::Surface
     {
     public:
-                SurfaceBuffer(SurfaceID id, LayerBuffer* owner);
+                SurfaceBuffer(SurfaceID id, const sp<LayerBuffer>& owner);
         virtual ~SurfaceBuffer();
-        virtual status_t onTransact(
-            uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
+
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
+        
         virtual sp<OverlayRef> createOverlay(
                 uint32_t w, uint32_t h, int32_t format);
-       void disown();
     private:
-        LayerBuffer* getOwner() const {
-            Mutex::Autolock _l(mLock);
-            return mOwner;
+        sp<LayerBuffer> getOwner() const {
+            return static_cast<LayerBuffer*>(Surface::getOwner().get());
         }
-        mutable Mutex   mLock;
-        LayerBuffer*    mOwner;
     };
 
     friend class SurfaceFlinger;
@@ -203,10 +197,8 @@ private:
 
     mutable Mutex   mLock;
     sp<Source>      mSource;
-
     bool            mInvalidate;
     bool            mNeedsBlending;
-    mutable wp<SurfaceBuffer> mClientSurface;
 };
 
 // ---------------------------------------------------------------------------

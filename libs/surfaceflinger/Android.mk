@@ -5,9 +5,9 @@ LOCAL_SRC_FILES:= \
     clz.cpp.arm \
     DisplayHardware/DisplayHardware.cpp \
     DisplayHardware/DisplayHardwareBase.cpp \
-    GPUHardware/GPUHardware.cpp \
     BootAnimation.cpp \
     BlurFilter.cpp.arm \
+    BufferAllocator.cpp \
     CPUGauge.cpp \
     Layer.cpp \
     LayerBase.cpp \
@@ -20,9 +20,10 @@ LOCAL_SRC_FILES:= \
     OrientationAnimation.cpp \
     SurfaceFlinger.cpp \
     Tokenizer.cpp \
-    Transform.cpp \
-    VRamHeap.cpp
+    Transform.cpp
 
+LOCAL_CFLAGS:= -DLOG_TAG=\"SurfaceFlinger\"
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)

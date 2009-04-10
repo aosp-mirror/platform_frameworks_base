@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceFlinger"
-
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
@@ -25,15 +23,10 @@
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
 
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
-
 #include <ui/PixelFormat.h>
-#include <ui/EGLDisplaySurface.h>
 
 #include "LayerBuffer.h"
 #include "SurfaceFlinger.h"
-#include "VRamHeap.h"
 #include "DisplayHardware/DisplayHardware.h"
 
 
@@ -55,30 +48,12 @@ LayerBuffer::LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
 
 LayerBuffer::~LayerBuffer()
 {
-    sp<SurfaceBuffer> s(getClientSurface());
-    if (s != 0) {
-        s->disown();
-        mClientSurface.clear();
-    }
 }
 
-sp<LayerBuffer::SurfaceBuffer> LayerBuffer::getClientSurface() const
+sp<LayerBaseClient::Surface> LayerBuffer::createSurface() const
 {
-    Mutex::Autolock _l(mLock);
-    return mClientSurface.promote();
-}
-
-sp<LayerBaseClient::Surface> LayerBuffer::getSurface() const
-{
-    sp<SurfaceBuffer> s;
-    Mutex::Autolock _l(mLock);
-    s = mClientSurface.promote();
-    if (s == 0) {
-        s = new SurfaceBuffer(clientIndex(),
+    return new SurfaceBuffer(clientIndex(),
                 const_cast<LayerBuffer *>(this));
-        mClientSurface = s;
-    }
-    return s;
 }
 
 bool LayerBuffer::needsBlending() const {
@@ -192,80 +167,47 @@ sp<LayerBuffer::Source> LayerBuffer::clearSource() {
 // LayerBuffer::SurfaceBuffer
 // ============================================================================
 
-LayerBuffer::SurfaceBuffer::SurfaceBuffer(SurfaceID id, LayerBuffer* owner)
-: LayerBaseClient::Surface(id, owner->getIdentity()), mOwner(owner)
+LayerBuffer::SurfaceBuffer::SurfaceBuffer(SurfaceID id, 
+        const sp<LayerBuffer>& owner)
+    : LayerBaseClient::Surface(id, owner->getIdentity(), owner)
 {
 }
 
 LayerBuffer::SurfaceBuffer::~SurfaceBuffer()
 {
     unregisterBuffers();
-    mOwner = 0;
 }
 
-status_t LayerBuffer::SurfaceBuffer::onTransact(
-    uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
+status_t LayerBuffer::SurfaceBuffer::registerBuffers(
+        const ISurface::BufferHeap& buffers)
 {
-    switch (code) {
-        case REGISTER_BUFFERS:
-        case UNREGISTER_BUFFERS:
-        case CREATE_OVERLAY:
-        {
-            // codes that require permission check
-            IPCThreadState* ipc = IPCThreadState::self();
-            const int pid = ipc->getCallingPid();
-            const int self_pid = getpid();
-            if (LIKELY(pid != self_pid)) {
-                // we're called from a different process, do the real check
-                if (!checkCallingPermission(
-                        String16("android.permission.ACCESS_SURFACE_FLINGER")))
-                {
-                    const int uid = ipc->getCallingUid();
-                    LOGE("Permission Denial: "
-                            "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
-                    return PERMISSION_DENIED;
-                }
-            }
-        }
-    }
-    return LayerBaseClient::Surface::onTransact(code, data, reply, flags);
-}
-
-status_t LayerBuffer::SurfaceBuffer::registerBuffers(const ISurface::BufferHeap& buffers)
-{
-    LayerBuffer* owner(getOwner());
-    if (owner)
+    sp<LayerBuffer> owner(getOwner());
+    if (owner != 0)
         return owner->registerBuffers(buffers);
     return NO_INIT;
 }
 
 void LayerBuffer::SurfaceBuffer::postBuffer(ssize_t offset)
 {
-    LayerBuffer* owner(getOwner());
-    if (owner)
+    sp<LayerBuffer> owner(getOwner());
+    if (owner != 0)
         owner->postBuffer(offset);
 }
 
 void LayerBuffer::SurfaceBuffer::unregisterBuffers()
 {
-    LayerBuffer* owner(getOwner());
-    if (owner)
+    sp<LayerBuffer> owner(getOwner());
+    if (owner != 0)
         owner->unregisterBuffers();
 }
 
 sp<OverlayRef> LayerBuffer::SurfaceBuffer::createOverlay(
         uint32_t w, uint32_t h, int32_t format) {
     sp<OverlayRef> result;
-    LayerBuffer* owner(getOwner());
-    if (owner)
+    sp<LayerBuffer> owner(getOwner());
+    if (owner != 0)
         result = owner->createOverlay(w, h, format);
     return result;
-}
-
-void LayerBuffer::SurfaceBuffer::disown()
-{
-    Mutex::Autolock _l(mLock);
-    mOwner = 0;
 }
 
 // ============================================================================
@@ -437,115 +379,27 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     status_t err = NO_ERROR;
     NativeBuffer src(buffer->getBuffer());
     const Rect& transformedBounds = mLayer.getTransformedBounds();
-    const int can_use_copybit = mLayer.canUseCopybit();
 
-    if (can_use_copybit)  {
-        const int src_width  = src.crop.r - src.crop.l;
-        const int src_height = src.crop.b - src.crop.t;
-        int W = transformedBounds.width();
-        int H = transformedBounds.height();
-        if (mLayer.getOrientation() & Transform::ROT_90) {
-            int t(W); W=H; H=t;
-        }
-
-        /* With LayerBuffer, it is likely that we'll have to rescale the
-         * surface, because this is often used for video playback or
-         * camera-preview. Since we want these operation as fast as possible
-         * we make sure we can use the 2D H/W even if it doesn't support
-         * the requested scale factor, in which case we perform the scaling
-         * in several passes. */
-
-        copybit_device_t* copybit = mLayer.mFlinger->getBlitEngine();
-        const float min = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
-        const float mag = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
-
-        float xscale = 1.0f;
-        if (src_width > W*min)          xscale = 1.0f / min;
-        else if (src_width*mag < W)     xscale = mag;
-
-        float yscale = 1.0f;
-        if (src_height > H*min)         yscale = 1.0f / min;
-        else if (src_height*mag < H)    yscale = mag;
-
-        if (UNLIKELY(xscale!=1.0f || yscale!=1.0f)) {
-            if (UNLIKELY(mTemporaryDealer == 0)) {
-                // allocate a memory-dealer for this the first time
-                mTemporaryDealer = mLayer.mFlinger->getSurfaceHeapManager()
-                    ->createHeap(ISurfaceComposer::eHardware);
-                mTempBitmap.init(mTemporaryDealer);
-            }
-
-            const int tmp_w = floorf(src_width  * xscale);
-            const int tmp_h = floorf(src_height * yscale);
-            err = mTempBitmap.setBits(tmp_w, tmp_h, 1, src.img.format);
-
-            if (LIKELY(err == NO_ERROR)) {
-                NativeBuffer tmp;
-                mTempBitmap.getBitmapSurface(&tmp.img);
-                tmp.crop.l = 0;
-                tmp.crop.t = 0;
-                tmp.crop.r = tmp.img.w;
-                tmp.crop.b = tmp.img.h;
-
-                region_iterator tmp_it(Region(Rect(tmp.crop.r, tmp.crop.b)));
-                copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
-                copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
-                copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
-                err = copybit->stretch(copybit,
-                        &tmp.img, &src.img, &tmp.crop, &src.crop, &tmp_it);
-                src = tmp;
-            }
-        }
-
-        const DisplayHardware& hw(mLayer.graphicPlane(0).displayHardware());
-        copybit_image_t dst;
-        hw.getDisplaySurface(&dst);
-        const copybit_rect_t& drect
-            = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
-        const State& s(mLayer.drawingState());
-        region_iterator it(clip);
-        
-        // pick the right orientation for this buffer
-        int orientation = mLayer.getOrientation();
-        if (UNLIKELY(mBufferHeap.transform)) {
-            Transform rot90;
-            GraphicPlane::orientationToTransfrom(
-                    ISurfaceComposer::eOrientation90, 0, 0, &rot90);
-            const Transform& planeTransform(mLayer.graphicPlane(0).transform());
-            const Layer::State& s(mLayer.drawingState());
-            Transform tr(planeTransform * s.transform * rot90);
-            orientation = tr.getOrientation();
-        }
-        
-        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
-        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
-        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
-
-        err = copybit->stretch(copybit,
-                &dst, &src.img, &drect, &src.crop, &it);
-        if (err != NO_ERROR) {
-            LOGE("copybit failed (%s)", strerror(err));
-        }
+    // FIXME: We should model this after the overlay stuff
+    
+    if (UNLIKELY(mTextureName == -1LU)) {
+        mTextureName = mLayer.createTexture();
     }
+    GLuint w = 0;
+    GLuint h = 0;
+    GGLSurface t;
+    t.version = sizeof(GGLSurface);
+    t.width  = src.crop.r;
+    t.height = src.crop.b;
+    t.stride = src.img.w;
+    t.vstride= src.img.h;
+    t.format = src.img.format;
+    t.data = (GGLubyte*)(intptr_t(src.img.base) + src.img.offset);
+    const Region dirty(Rect(t.width, t.height));
 
-    if (!can_use_copybit || err) {
-        if (UNLIKELY(mTextureName == -1LU)) {
-            mTextureName = mLayer.createTexture();
-        }
-        GLuint w = 0;
-        GLuint h = 0;
-        GGLSurface t;
-        t.version = sizeof(GGLSurface);
-        t.width  = src.crop.r;
-        t.height = src.crop.b;
-        t.stride = src.img.w;
-        t.vstride= src.img.h;
-        t.format = src.img.format;
-        t.data = (GGLubyte*)(intptr_t(src.img.base) + src.img.offset);
-        const Region dirty(Rect(t.width, t.height));
-        mLayer.loadTexture(dirty, mTextureName, t, w, h);
-        mLayer.drawWithOpenGL(clip, mTextureName, t, mBufferHeap.transform);
-    }
+    // FIXME: Use EGLImage extension for this
+    mLayer.loadTexture(dirty, mTextureName, t, w, h);
+    mLayer.drawWithOpenGL(clip, mTextureName, t, mBufferHeap.transform);
 }
 
 

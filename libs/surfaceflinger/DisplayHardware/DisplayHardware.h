@@ -22,25 +22,28 @@
 #include <ui/PixelFormat.h>
 #include <ui/Region.h>
 
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
+
+#include <pixelflinger/pixelflinger.h>
 
 #include "DisplayHardware/DisplayHardwareBase.h"
 
 struct overlay_control_device_t;
-struct copybit_device_t;
+struct framebuffer_device_t;
 struct copybit_image_t;
-struct copybit_t;
 
 namespace android {
 
-class EGLDisplaySurface;
+class FramebufferNativeWindow;
 
 class DisplayHardware : public DisplayHardwareBase
 {
 public:
     enum {
         DIRECT_TEXTURE          = 0x00000002,
-        SWAP_RECTANGLE_EXTENSION= 0x00000004,
         COPY_BITS_EXTENSION     = 0x00000008,
         NPOT_EXTENSION          = 0x00000100,
         DRAW_TEXTURE_EXTENSION  = 0x00000200,
@@ -73,10 +76,7 @@ public:
     void        makeCurrent() const;
 
     uint32_t getPageFlipCount() const;
-    void getDisplaySurface(copybit_image_t* img) const;
-    void getDisplaySurface(GGLSurface* fb) const;
     EGLDisplay getEGLDisplay() const { return mDisplay; }
-    copybit_device_t* getBlitEngine() const { return mBlitEngine; }
     overlay_control_device_t* getOverlayEngine() const { return mOverlayEngine; }
     
     void copyFrontToImage(const copybit_image_t& front) const;
@@ -103,8 +103,9 @@ private:
     PixelFormat     mFormat;
     uint32_t        mFlags;
     mutable Region  mDirty;
-    sp<EGLDisplaySurface> mDisplaySurface;
-    copybit_device_t*     mBlitEngine;
+    mutable uint32_t mPageFlipCount;
+    
+    sp<FramebufferNativeWindow> mNativeWindow;
     overlay_control_device_t* mOverlayEngine;
 };
 

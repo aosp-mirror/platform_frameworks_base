@@ -20,63 +20,117 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <hardware/gralloc.h>
+
 #include <utils/Atomic.h>
+
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
-#include <private/ui/SharedState.h>
+#include <ui/Surface.h>
+
+#include <EGL/android_natives.h>
+
 #include <pixelflinger/pixelflinger.h>
 
+#include <private/ui/SharedState.h>
+
+
 class copybit_image_t;
+struct android_native_buffer_t;
 
 namespace android {
 
 // ---------------------------------------------------------------------------
-
 class IMemory;
 class MemoryDealer;
 class LayerBitmap;
 
-// ---------------------------------------------------------------------------
+// ===========================================================================
+// Buffer
+// ===========================================================================
+
+class NativeBuffer;
+
+class Buffer : public SurfaceBuffer
+{
+public:
+    enum {
+        DONT_CLEAR  = 0x00000001,
+        GPU         = 0x00000002,
+        SECURE      = 0x00000004
+    };
+
+    // creates w * h buffer
+    Buffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t flags = 0);
+
+    // return status
+    status_t initCheck() const;
+
+    uint32_t getWidth() const           { return width; }
+    uint32_t getHeight() const          { return height; }
+    uint32_t getStride() const          { return stride; }
+    uint32_t getUsage() const           { return usage; }
+    PixelFormat getPixelFormat() const  { return format; }
+    Rect getBounds() const              { return Rect(width, height); }
+    
+    status_t getBitmapSurface(copybit_image_t* img) const;
+    status_t getBitmapSurface(GGLSurface* surface) const;
+
+    android_native_buffer_t* getNativeBuffer() const;
+    
+private:
+    friend class LightRefBase<Buffer>;
+    Buffer(const Buffer& rhs);
+    ~Buffer();
+    Buffer& operator = (const Buffer& rhs);
+    const Buffer& operator = (const Buffer& rhs) const;
+
+    status_t initSize(uint32_t w, uint32_t h);
+
+    ssize_t                 mInitCheck;
+    uint32_t                mFlags;
+    uint32_t                mVStride;
+};
+
+// ===========================================================================
+// LayerBitmap
+// ===========================================================================
 
 class LayerBitmap
 {
 public:
-
     enum {
-        // erase memory to ensure security when necessary
-        SECURE_BITS = 0x00000001
+        DONT_CLEAR  = Buffer::DONT_CLEAR,
+        GPU         = Buffer::GPU,
+        SECURE      = Buffer::SECURE
     };
+    LayerBitmap();
+    ~LayerBitmap();
 
-                LayerBitmap();
-                ~LayerBitmap();
-    status_t    init(const sp<MemoryDealer>& allocator);
+    status_t init(surface_info_t* info,
+            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags = 0);
 
-    status_t    setBits(uint32_t w, uint32_t h, uint32_t alignment,
-                        PixelFormat format, uint32_t flags = 0);
-    void        clear();
+    status_t setSize(uint32_t w, uint32_t h);
 
-    status_t    getInfo(surface_info_t* info) const;
-    status_t    resize(uint32_t w, uint32_t h);
+    sp<Buffer> allocate();
 
-    const GGLSurface& surface() const   { return mSurface; }
-    Rect bounds() const                 { return Rect(width(), height()); }
-    uint32_t width() const              { return surface().width; }
-    uint32_t height() const             { return surface().height; }
-    uint32_t stride() const             { return surface().stride; }
-    PixelFormat pixelFormat() const     { return surface().format; }
-    void* serverBits() const            { return surface().data; }
-    size_t size() const;
-    const sp<MemoryDealer>& getAllocator() const { return mAllocator; }
-    void getBitmapSurface(copybit_image_t* img) const;
-
+    sp<const Buffer>  getBuffer() const { return mBuffer; }
+    sp<Buffer>        getBuffer()       { return mBuffer; }
+    
+    uint32_t getWidth() const           { return mWidth; }
+    uint32_t getHeight() const          { return mHeight; }
+    PixelFormat getPixelFormat() const  { return mBuffer->getPixelFormat(); }
+    Rect getBounds() const              { return mBuffer->getBounds(); }
+    
 private:
-    sp<MemoryDealer>        mAllocator;
-    sp<IMemory>             mBitsMemory;
-    uint32_t                mAllocFlags;
-    ssize_t                 mOffset;
-    GGLSurface              mSurface;
-    size_t                  mSize;
-    uint32_t                mAlignment;
+    surface_info_t* mInfo;
+    sp<Buffer>      mBuffer;
+    uint32_t        mWidth;
+    uint32_t        mHeight;
+    PixelFormat     mFormat;
+    uint32_t        mFlags;
+    // protects setSize() and allocate()
+    mutable Mutex   mLock;
 };
 
 }; // namespace android

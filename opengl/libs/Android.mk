@@ -7,8 +7,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= 	\
-	EGL/egl.cpp 		\
-	EGL/gpu.cpp			\
+	EGL/egl.cpp 	\
 #
 
 LOCAL_SHARED_LIBRARIES += libcutils libutils libui
@@ -23,6 +22,9 @@ else
     LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
 
+LOCAL_CFLAGS += -DLOG_TAG=\"libEGL\"
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
+
 include $(BUILD_SHARED_LIBRARY)
 
 
@@ -35,7 +37,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= 	\
 	GLES_CM/gl.cpp.arm 		\
-	GLES_CM/gl_logger.cpp 	\
 #
 
 LOCAL_SHARED_LIBRARIES += libcutils libutils libui libEGL
@@ -49,5 +50,8 @@ else
     # we need to access the Bionic private header <bionic_tls.h>
     LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
+
+LOCAL_CFLAGS += -DLOG_TAG=\"libGLESv1\"
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 include $(BUILD_SHARED_LIBRARY)

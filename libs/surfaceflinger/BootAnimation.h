@@ -72,7 +72,6 @@ private:
     EGLDisplay  mContext;
     EGLDisplay  mSurface;
     sp<Surface> mFlingerSurface;
-    sp<EGLNativeWindowSurface> mNativeWindowSurface;
     Barrier mBarrier;
 };
 

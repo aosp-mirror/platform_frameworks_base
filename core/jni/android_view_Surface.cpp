@@ -235,7 +235,8 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
 
     SkCanvas* nativeCanvas = (SkCanvas*)env->GetIntField(canvas, no.native_canvas);
     SkBitmap bitmap;
-    bitmap.setConfig(convertPixelFormat(info.format), info.w, info.h, info.bpr);
+    ssize_t bpr = info.s * bytesPerPixel(info.format);
+    bitmap.setConfig(convertPixelFormat(info.format), info.w, info.h, bpr);
     if (info.w > 0 && info.h > 0) {
         bitmap.setPixels(info.bits);
     } else {
@@ -289,26 +290,8 @@ static void Surface_unlockCanvasAndPost(
 static void Surface_unlockCanvas(
         JNIEnv* env, jobject clazz, jobject argCanvas)
 {
-    jobject canvas = env->GetObjectField(clazz, so.canvas);
-    if (canvas != argCanvas) {
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
-    
-    const sp<Surface>& surface = getSurface(env, clazz);
-    if (!surface->isValid())
-        return;
-    
-    status_t err = surface->unlock();
-    if (err < 0) {
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
-    SkCanvas* nativeCanvas = (SkCanvas*)env->GetIntField(canvas, no.native_canvas);
-    int saveCount = env->GetIntField(clazz, so.saveCount);
-    nativeCanvas->restoreToCount(saveCount);
-    nativeCanvas->setBitmapDevice(SkBitmap());
-    env->SetIntField(clazz, so.saveCount, 0);
+    // XXX: this API has been removed
+    doThrow(env, "java/lang/IllegalArgumentException", NULL);
 }
 
 static void Surface_openTransaction(

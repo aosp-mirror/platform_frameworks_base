@@ -29,26 +29,20 @@
 #include <utils/Errors.h>
 #include <utils/threads.h>
 #include <utils/KeyedVector.h>
-#include <utils/IPCThreadState.h>
 #include <utils/IServiceManager.h>
 #include <utils/IMemory.h>
 #include <utils/Log.h>
 
+#include <ui/DisplayInfo.h>
 #include <ui/ISurfaceComposer.h>
 #include <ui/ISurfaceFlingerClient.h>
 #include <ui/ISurface.h>
 #include <ui/SurfaceComposerClient.h>
-#include <ui/DisplayInfo.h>
 #include <ui/Rect.h>
-#include <ui/Point.h>
 
 #include <private/ui/SharedState.h>
 #include <private/ui/LayerState.h>
 #include <private/ui/SurfaceFlingerSynchro.h>
-
-#include <pixelflinger/pixelflinger.h>
-
-#include <utils/BpBinder.h>
 
 #define VERBOSE(...)	((void)0)
 //#define VERBOSE			LOGD
@@ -109,50 +103,8 @@ static volatile surface_flinger_cblk_t const * get_cblk()
 
 // ---------------------------------------------------------------------------
 
-static void copyBlt(const GGLSurface& dst,
-        const GGLSurface& src, const Region& reg)
-{
-    Region::iterator iterator(reg);
-    if (iterator) {
-        // NOTE: dst and src must be the same format
-        Rect r;
-        const size_t bpp = bytesPerPixel(src.format);
-        const size_t dbpr = dst.stride * bpp;
-        const size_t sbpr = src.stride * bpp;
-        while (iterator.iterate(&r)) {
-            ssize_t h = r.bottom - r.top;
-            if (h) {
-                size_t size = (r.right - r.left) * bpp;
-                uint8_t* s = src.data + (r.left + src.stride * r.top) * bpp;
-                uint8_t* d = dst.data + (r.left + dst.stride * r.top) * bpp;
-                if (dbpr==sbpr && size==sbpr) {
-                    size *= h;
-                    h = 1;
-                }
-                do {
-                    memcpy(d, s, size);
-                    d += dbpr;
-                    s += sbpr;
-                } while (--h > 0);
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-
-surface_flinger_cblk_t::surface_flinger_cblk_t()
-{
-}
-
-// ---------------------------------------------------------------------------
-
-per_client_cblk_t::per_client_cblk_t()
-{
-}
-
 // these functions are used by the clients
-inline status_t per_client_cblk_t::validate(size_t i) const {
+status_t per_client_cblk_t::validate(size_t i) const {
     if (uint32_t(i) >= NUM_LAYERS_MAX)
         return BAD_INDEX;
     if (layers[i].swapState & eInvalidSurface)
@@ -248,8 +200,9 @@ int32_t per_client_cblk_t::lock_layer(size_t i, uint32_t flags)
         index = (state&eIndex) ^ ((state&eFlipRequested)>>1);
 
 	    // make sure this buffer is valid
-	    if (layer->surface[index].bits_offset < 0) {
-	        return status_t(layer->surface[index].bits_offset);
+        status_t err = layer->surface[index].status;
+	    if (err < 0) {
+	        return err;
 	    }
 
         if (inspect) {
@@ -273,7 +226,7 @@ done:
 
 uint32_t per_client_cblk_t::unlock_layer_and_post(size_t i)
 {
-    // atomically set eFlipRequested and clear eLocked and optionnaly
+    // atomically set eFlipRequested and clear eLocked and optionally
     // set eNextFlipPending if eFlipRequested was already set
 
     layer_cblk_t * const layer = layers + i;
@@ -290,7 +243,7 @@ uint32_t per_client_cblk_t::unlock_layer_and_post(size_t i)
 
         if (oldvalue & eFlipRequested)
             newvalue |= eNextFlipPending;
-            // if eFlipRequested was alread set, set eNextFlipPending
+            // if eFlipRequested was already set, set eNextFlipPending
 
     } while (android_atomic_cmpxchg(oldvalue, newvalue, &(layer->swapState)));
 
@@ -298,9 +251,9 @@ uint32_t per_client_cblk_t::unlock_layer_and_post(size_t i)
             int(i), int((layer->flags & eBufferIndex) >> eBufferIndexShift),
             int(newvalue));
 
-    // from this point, the server can kick in at anytime and use the first
+    // from this point, the server can kick in at any time and use the first
     // buffer, so we cannot use it anymore, and we must use the 'other'
-    // buffer instead (or wait if it is not availlable yet, see lock_layer).
+    // buffer instead (or wait if it is not available yet, see lock_layer).
 
     return newvalue;
 }
@@ -376,32 +329,6 @@ status_t SurfaceComposerClient::initCheck() const
     return mStatus;
 }
 
-status_t SurfaceComposerClient::validateSurface(
-        per_client_cblk_t const* cblk, Surface const * surface)
-{
-    SurfaceID index = surface->ID();
-    if (cblk == 0) {
-        LOGE("cblk is null (surface id=%d, identity=%u)",
-                index, surface->getIdentity());
-        return NO_INIT;
-    }
-
-    status_t err = cblk->validate(index);
-    if (err != NO_ERROR) {
-        LOGE("surface (id=%d, identity=%u) is invalid, err=%d (%s)",
-                index, surface->getIdentity(), err, strerror(-err));
-        return err;
-    }
-
-    if (surface->getIdentity() != uint32_t(cblk->layers[index].identity)) {
-        LOGE("using an invalid surface id=%d, identity=%u should be %d",
-                index, surface->getIdentity(), cblk->layers[index].identity);
-        return NO_INIT;
-    }
-
-    return NO_ERROR;
-}
-
 sp<IBinder> SurfaceComposerClient::connection() const
 {
     return (mClient != 0) ? mClient->asBinder() : 0;
@@ -439,7 +366,6 @@ void SurfaceComposerClient::dispose()
 
     sp<IMemory>                 controlMemory;
     sp<ISurfaceFlingerClient>   client;
-    sp<IMemoryHeap>             surfaceHeap;
 
     {
         Mutex::Autolock _lg(gLock);
@@ -462,9 +388,7 @@ void SurfaceComposerClient::dispose()
         delete mPrebuiltLayerState;
         mPrebuiltLayerState = 0;
         controlMemory = mControlMemory;
-        surfaceHeap = mSurfaceHeap;
         mControlMemory.clear();
-        mSurfaceHeap.clear();
         mControl = 0;
         mStatus = NO_INIT;
     }
@@ -528,6 +452,12 @@ ssize_t SurfaceComposerClient::getNumberOfDisplays()
     return n;
 }
 
+
+void SurfaceComposerClient::signalServer()
+{
+    mSignalServer->signal();
+}
+
 sp<Surface> SurfaceComposerClient::createSurface(
         int pid,
         DisplayID display,
@@ -566,186 +496,6 @@ status_t SurfaceComposerClient::destroySurface(SurfaceID sid)
 
     status_t err = mClient->destroySurface(sid);
     return err;
-}
-
-status_t SurfaceComposerClient::nextBuffer(Surface* surface,
-                        Surface::SurfaceInfo* info)
-{
-    SurfaceID index = surface->ID();
-    per_client_cblk_t* const cblk = mControl;
-    status_t err = validateSurface(cblk, surface);
-    if (err != NO_ERROR)
-        return err;
-
-    int32_t backIdx = surface->mBackbufferIndex;
-    layer_cblk_t* const lcblk = &(cblk->layers[index]);
-    const surface_info_t* const front = lcblk->surface + (1-backIdx);
-        info->w      = front->w;
-        info->h      = front->h;
-        info->format = front->format;
-        info->base   = surface->heapBase(1-backIdx);
-        info->bits   = reinterpret_cast<void*>(intptr_t(info->base) + front->bits_offset);
-        info->bpr    = front->bpr;
-
-    return 0;
-}
-
-status_t SurfaceComposerClient::lockSurface(
-        Surface* surface,
-        Surface::SurfaceInfo* other,
-        Region* dirty,
-        bool blocking)
-{
-    Mutex::Autolock _l(surface->getLock());
-
-    SurfaceID index = surface->ID();
-    per_client_cblk_t* const cblk = mControl;
-    status_t err = validateSurface(cblk, surface);
-    if (err != NO_ERROR)
-        return err;
-
-    int32_t backIdx = cblk->lock_layer(size_t(index),
-            per_client_cblk_t::BLOCKING);
-    if (backIdx >= 0) {
-        surface->mBackbufferIndex = backIdx;
-        layer_cblk_t* const lcblk = &(cblk->layers[index]);
-        const surface_info_t* const back = lcblk->surface + backIdx;
-        const surface_info_t* const front = lcblk->surface + (1-backIdx);
-            other->w      = back->w;
-            other->h      = back->h;
-            other->format = back->format;
-            other->base   = surface->heapBase(backIdx);
-            other->bits   = reinterpret_cast<void*>(intptr_t(other->base) + back->bits_offset);
-            other->bpr    = back->bpr;
-
-        const Rect bounds(other->w, other->h);
-        Region newDirtyRegion;
-
-        if (back->flags & surface_info_t::eBufferDirty) {
-            /* it is safe to write *back here, because we're guaranteed
-             * SurfaceFlinger is not touching it (since it just granted
-             * access to us) */
-            const_cast<surface_info_t*>(back)->flags &=
-                    ~surface_info_t::eBufferDirty;
-
-            // content is meaningless in this case and the whole surface
-            // needs to be redrawn.
-
-            newDirtyRegion.set(bounds);
-            if (dirty) {
-                *dirty = newDirtyRegion;
-            }
-
-            //if (bytesPerPixel(other->format) == 4) {
-            //    android_memset32(
-            //        (uint32_t*)other->bits, 0xFF00FF00, other->h * other->bpr);
-            //} else {
-            //    android_memset16( // fill with green
-            //        (uint16_t*)other->bits, 0x7E0, other->h * other->bpr);
-            //}
-        }
-        else
-        {
-            if (dirty) {
-                dirty->andSelf(Region(bounds));
-                newDirtyRegion = *dirty;
-            } else {
-                newDirtyRegion.set(bounds);
-            }
-
-            Region copyback;
-            if (!(lcblk->flags & eNoCopyBack)) {
-                const Region previousDirtyRegion(surface->dirtyRegion());
-                copyback = previousDirtyRegion.subtract(newDirtyRegion);
-            }
-
-            if (!copyback.isEmpty()) {
-                // copy front to back
-                GGLSurface cb;
-                    cb.version = sizeof(GGLSurface);
-                    cb.width = back->w;
-                    cb.height = back->h;
-                    cb.stride = back->stride;
-                    cb.data = (GGLubyte*)surface->heapBase(backIdx);
-                    cb.data += back->bits_offset;
-                    cb.format = back->format;
-
-                GGLSurface t;
-                    t.version = sizeof(GGLSurface);
-                    t.width = front->w;
-                    t.height = front->h;
-                    t.stride = front->stride;
-                    t.data = (GGLubyte*)surface->heapBase(1-backIdx);
-                    t.data += front->bits_offset;
-                    t.format = front->format;
-
-                //const Region copyback(lcblk->region + 1-backIdx);
-                copyBlt(cb, t, copyback);
-            }
-        }
-
-        // update dirty region
-        surface->setDirtyRegion(newDirtyRegion);
-    }
-    return (backIdx < 0) ? status_t(backIdx) : status_t(NO_ERROR);
-}
-
-void SurfaceComposerClient::_signal_server()
-{
-    mSignalServer->signal();
-}
-
-void SurfaceComposerClient::_send_dirty_region(
-        layer_cblk_t* lcblk, const Region& dirty)
-{
-    const int32_t index = (lcblk->flags & eBufferIndex) >> eBufferIndexShift;
-    flat_region_t* flat_region = lcblk->region + index;
-    status_t err = dirty.write(flat_region, sizeof(flat_region_t));
-    if (err < NO_ERROR) {
-        // region doesn't fit, use the bounds
-        const Region reg(dirty.bounds());
-        reg.write(flat_region, sizeof(flat_region_t));
-    }
-}
-
-status_t SurfaceComposerClient::unlockAndPostSurface(Surface* surface)
-{
-    Mutex::Autolock _l(surface->getLock());
-
-    SurfaceID index = surface->ID();
-    per_client_cblk_t* const cblk = mControl;
-    status_t err = validateSurface(cblk, surface);
-    if (err != NO_ERROR)
-        return err;
-
-    Region dirty(surface->dirtyRegion());
-    const Rect& swapRect(surface->swapRectangle());
-    if (swapRect.isValid()) {
-        dirty.set(swapRect);
-    }
-
-    // transmit the dirty region
-    layer_cblk_t* const lcblk = &(cblk->layers[index]);
-    _send_dirty_region(lcblk, dirty);
-    uint32_t newstate = cblk->unlock_layer_and_post(size_t(index));
-    if (!(newstate & eNextFlipPending))
-        _signal_server();
-    return NO_ERROR;
-}
-
-status_t SurfaceComposerClient::unlockSurface(Surface* surface)
-{
-    Mutex::Autolock _l(surface->getLock());
-
-    SurfaceID index = surface->ID();
-    per_client_cblk_t* const cblk = mControl;
-    status_t err = validateSurface(cblk, surface);
-    if (err != NO_ERROR)
-        return err;
-
-    layer_cblk_t* const lcblk = &(cblk->layers[index]);
-    cblk->unlock_layer(size_t(index));
-    return NO_ERROR;
 }
 
 void SurfaceComposerClient::openGlobalTransaction()
@@ -870,7 +620,7 @@ layer_state_t* SurfaceComposerClient::_get_state_l(const sp<Surface>& surface)
 {
     SurfaceID index = surface->ID();
     per_client_cblk_t* const cblk = mControl;
-    status_t err = validateSurface(cblk, surface.get());
+    status_t err = surface->validate(cblk);
     if (err != NO_ERROR)
         return 0;
 
@@ -972,7 +722,6 @@ status_t SurfaceComposerClient::setFlags(Surface* surface,
     _unlockLayerState();
     return NO_ERROR;
 }
-
 
 status_t SurfaceComposerClient::setTransparentRegionHint(
         Surface* surface, const Region& transparentRegion)

@@ -14,8 +14,6 @@
  ** limitations under the License.
  */
 
-#define LOG_TAG "GLLogger"
-
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
@@ -38,6 +36,8 @@
 #include <cutils/memory.h>
 
 #include <utils/RefBase.h>
+#include <utils/threads.h>
+#include <utils/KeyedVector.h>
 
 #include "hooks.h"
 #include "egl_impl.h"
@@ -55,7 +55,14 @@ namespace android {
 static char const * const gVendorString     = "Android";
 static char const * const gVersionString    = "1.31 Android META-EGL";
 static char const * const gClientApiString  = "OpenGL ES";
-static char const * const gExtensionString  = "";
+static char const * const gExtensionString  = 
+        "EGL_KHR_image "
+        "KHR_image_base "
+        "KHR_image_pixmap "
+        "EGL_ANDROID_image_native_buffer "
+        ;
+
+// ----------------------------------------------------------------------------
 
 template <int MAGIC>
 struct egl_object_t
@@ -69,9 +76,9 @@ private:
 
 struct egl_display_t : public egl_object_t<'_dpy'>
 {
-    EGLDisplay  dpys[2];
-    EGLConfig*  configs[2];
-    EGLint      numConfigs[2];
+    EGLDisplay  dpys[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
+    EGLConfig*  configs[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
+    EGLint      numConfigs[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
     EGLint      numTotalConfigs;
     char const* extensionsString;
     volatile int32_t refs;
@@ -81,27 +88,21 @@ struct egl_display_t : public egl_object_t<'_dpy'>
         char const * clientApi;
         char const * extensions;
     };
-    strings_t   queryString[2];
+    strings_t   queryString[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
 };
 
 struct egl_surface_t : public egl_object_t<'_srf'>
 {
     egl_surface_t(EGLDisplay dpy, EGLSurface surface,
-            NativeWindowType window, int impl, egl_connection_t const* cnx) 
-    : dpy(dpy), surface(surface), window(window), impl(impl), cnx(cnx)
+            int impl, egl_connection_t const* cnx) 
+    : dpy(dpy), surface(surface), impl(impl), cnx(cnx)
     {
         // NOTE: window must be incRef'ed and connected already
     }
     ~egl_surface_t() {
-        if (window) {
-            if (window->disconnect)
-                window->disconnect(window);
-            window->decRef(window);
-        }
     }
     EGLDisplay                  dpy;
     EGLSurface                  surface;
-    NativeWindowType            window;
     int                         impl;
     egl_connection_t const*     cnx;
 };
@@ -119,6 +120,18 @@ struct egl_context_t : public egl_object_t<'_ctx'>
     EGLSurface                  draw;
     int                         impl;
     egl_connection_t const*     cnx;
+};
+
+struct egl_image_t : public egl_object_t<'_img'>
+{
+    egl_image_t(EGLDisplay dpy, EGLContext context)
+        : dpy(dpy), context(context)
+    {
+        memset(images, 0, sizeof(images));
+    }
+    EGLDisplay dpy;
+    EGLConfig context;
+    EGLImageKHR images[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
 };
 
 struct tls_t
@@ -156,7 +169,7 @@ static char const * const egl_names[] = {
 
 // ----------------------------------------------------------------------------
 
-egl_connection_t gEGLImpl[2];
+egl_connection_t gEGLImpl[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
 static egl_display_t gDisplay[NUM_DISPLAYS];
 static pthread_mutex_t gThreadLocalStorageKeyMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t gEGLThreadLocalStorageKey = -1;
@@ -261,13 +274,7 @@ EGLContext getContext() {
     return tls->ctx;
 }
 
-
 /*****************************************************************************/
-
-class ISurfaceComposer;
-const sp<ISurfaceComposer>& getSurfaceFlinger();
-request_gpu_t* gpu_acquire(void* user);
-int gpu_release(void*, request_gpu_t* gpu);
 
 static __attribute__((noinline))
 void *load_driver(const char* driver, gl_hooks_t* hooks)
@@ -278,42 +285,59 @@ void *load_driver(const char* driver, gl_hooks_t* hooks)
             driver, dlerror());
 
     if (dso) {
-        void** curr;
+        // first find the symbol for eglGetProcAddress
+        
+        typedef __eglMustCastToProperFunctionPointerType (*getProcAddressType)(
+                const char*);
+        
+        getProcAddressType getProcAddress = 
+            (getProcAddressType)dlsym(dso, "eglGetProcAddress");
+        
+        LOGE_IF(!getProcAddress, 
+                "can't find eglGetProcAddress() in %s", driver);        
+        
+        __eglMustCastToProperFunctionPointerType* curr;
         char const * const * api;
-        gl_hooks_t::gl_t* gl = &hooks->gl;
-        curr = (void**)gl;
-        api = gl_names;
-        while (*api) {
-            void* f = dlsym(dso, *api);
-            //LOGD("<%s> @ 0x%p", *api, f);
-            if (f == NULL) {
-                //LOGW("<%s> not found in %s", *api, driver);
-                f = (void*)gl_unimplemented;
-            }
-            *curr++ = f;
-            api++;
-        }
+
         gl_hooks_t::egl_t* egl = &hooks->egl;
-        curr = (void**)egl;
+        curr = (__eglMustCastToProperFunctionPointerType*)egl;
         api = egl_names;
         while (*api) {
-            void* f = dlsym(dso, *api);
+            char const * name = *api;
+            __eglMustCastToProperFunctionPointerType f = 
+                (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
             if (f == NULL) {
-                //LOGW("<%s> not found in %s", *api, driver);
-                f = (void*)0;
+                // couldn't find the entry-point, use eglGetProcAddress()
+                f = getProcAddress(name);
+                if (f == NULL) {
+                    f = (__eglMustCastToProperFunctionPointerType)0;
+                }
             }
             *curr++ = f;
             api++;
         }
-
-        // hook this driver up with surfaceflinger if needed
-        register_gpu_t register_gpu = 
-            (register_gpu_t)dlsym(dso, "oem_register_gpu");
-
-        if (register_gpu != NULL) {
-            if (getSurfaceFlinger() != 0) {
-                register_gpu(dso, gpu_acquire, gpu_release);
+        
+        gl_hooks_t::gl_t* gl = &hooks->gl;
+        curr = (__eglMustCastToProperFunctionPointerType*)gl;
+        api = gl_names;
+        while (*api) {
+            char const * name = *api;
+            // if the function starts with '__' it's a special case that
+            // uses a wrapper. skip the '__' when looking into the real lib.
+            if (name[0] == '_' && name[1] == '_') {
+                name += 2;
             }
+            __eglMustCastToProperFunctionPointerType f = 
+                (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
+            if (f == NULL) {
+                // couldn't find the entry-point, use eglGetProcAddress()
+                f = getProcAddress(name);
+                if (f == NULL) {
+                    f = (__eglMustCastToProperFunctionPointerType)gl_unimplemented;
+                }
+            }
+            *curr++ = f;
+            api++;
         }
     }
     return dso;
@@ -365,6 +389,14 @@ struct extention_map_t {
 };
 
 static const extention_map_t gExtentionMap[] = {
+    { "eglLockSurfaceKHR",  
+            (__eglMustCastToProperFunctionPointerType)&eglLockSurfaceKHR }, 
+    { "eglUnlockSurfaceKHR", 
+            (__eglMustCastToProperFunctionPointerType)&eglUnlockSurfaceKHR }, 
+    { "eglCreateImageKHR",  
+            (__eglMustCastToProperFunctionPointerType)&eglCreateImageKHR }, 
+    { "eglDestroyImageKHR", 
+            (__eglMustCastToProperFunctionPointerType)&eglDestroyImageKHR }, 
 };
 
 static extention_map_t gGLExtentionMap[MAX_NUMBER_OF_GL_EXTENSIONS];
@@ -381,6 +413,12 @@ static void(*findProcAddress(const char* name,
 }
 
 // ----------------------------------------------------------------------------
+
+/*
+ * To "loose" the GPU, use something like
+ *    gEGLImpl[IMPL_HARDWARE].hooks = &gHooks[IMPL_CONTEXT_LOST];
+ * 
+ */
 
 static int gl_context_lost() {
     setGlThreadSpecific(&gHooks[IMPL_CONTEXT_LOST]);
@@ -429,18 +467,24 @@ egl_display_t* get_display(EGLDisplay dpy)
     return (index >= NUM_DISPLAYS) ? NULL : &gDisplay[index];
 }
 
-static inline
-egl_surface_t* get_surface(EGLSurface surface)
-{
-    egl_surface_t* s = (egl_surface_t *)surface;
-    return s;
+template<typename NATIVE, typename EGL>
+static inline NATIVE* egl_to_native_cast(EGL arg) {
+    return reinterpret_cast<NATIVE*>(arg);
 }
 
 static inline
-egl_context_t* get_context(EGLContext context)
-{
-    egl_context_t* c = (egl_context_t *)context;
-    return c;
+egl_surface_t* get_surface(EGLSurface surface) {   
+    return egl_to_native_cast<egl_surface_t>(surface);
+}
+
+static inline
+egl_context_t* get_context(EGLContext context) {
+    return egl_to_native_cast<egl_context_t>(context);
+}
+
+static inline
+egl_image_t* get_image(EGLImageKHR image) {
+    return egl_to_native_cast<egl_image_t>(image);
 }
 
 static egl_connection_t* validate_display_config(
@@ -451,7 +495,7 @@ static egl_connection_t* validate_display_config(
     if (!dp) return setError(EGL_BAD_DISPLAY, (egl_connection_t*)NULL);
 
     impl = uintptr_t(config)>>24;
-    if (uint32_t(impl) >= 2) {
+    if (uint32_t(impl) >= IMPL_NUM_DRIVERS_IMPLEMENTATIONS) {
         return setError(EGL_BAD_CONFIG, (egl_connection_t*)NULL);
     } 
     index = uintptr_t(config) & 0xFFFFFF;
@@ -491,13 +535,26 @@ static EGLBoolean validate_display_surface(EGLDisplay dpy, EGLSurface surface)
     return EGL_TRUE;
 }
 
-// ----------------------------------------------------------------------------
-}; // namespace android
-// ----------------------------------------------------------------------------
 
-using namespace android;
+EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image)
+{
+    EGLContext context = getContext();
+    if (context == EGL_NO_CONTEXT || image == EGL_NO_IMAGE_KHR)
+        return EGL_NO_IMAGE_KHR;
+    
+    egl_context_t const * const c = get_context(context);
+    if (!c->isValid())
+        return EGL_NO_IMAGE_KHR;
 
-EGLDisplay eglGetDisplay(NativeDisplayType display)
+    egl_image_t const * const i = get_image(image);
+    if (!i->isValid())
+        return EGL_NO_IMAGE_KHR;
+
+    return i->images[c->impl];
+}
+
+
+EGLDisplay egl_init_displays(NativeDisplayType display)
 {
     if (sEarlyInitState) {
         return EGL_NO_DISPLAY;
@@ -510,7 +567,7 @@ EGLDisplay eglGetDisplay(NativeDisplayType display)
     
     EGLDisplay dpy = EGLDisplay(uintptr_t(display) + 1LU);
     egl_display_t* d = &gDisplay[index];
-        
+
     // dynamically load all our EGL implementations for that display
     // and call into the real eglGetGisplay()
     egl_connection_t* cnx = &gEGLImpl[IMPL_SOFTWARE];
@@ -530,7 +587,7 @@ EGLDisplay eglGetDisplay(NativeDisplayType display)
         property_get("debug.egl.hw", value, "1");
         if (atoi(value) != 0) {
             cnx->hooks = &gHooks[IMPL_HARDWARE];
-            cnx->dso = load_driver("libhgl.so", cnx->hooks);
+            cnx->dso = load_driver("libhgl2.so", cnx->hooks);
         } else {
             LOGD("3D hardware acceleration is disabled");
         }
@@ -573,6 +630,18 @@ EGLDisplay eglGetDisplay(NativeDisplayType display)
     return dpy;
 }
 
+
+// ----------------------------------------------------------------------------
+}; // namespace android
+// ----------------------------------------------------------------------------
+
+using namespace android;
+
+EGLDisplay eglGetDisplay(NativeDisplayType display)
+{
+    return egl_init_displays(display);
+}
+
 // ----------------------------------------------------------------------------
 // Initialization
 // ----------------------------------------------------------------------------
@@ -594,7 +663,7 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     // build our own extension string first, based on the extension we know
     // and the extension supported by our client implementation
     dp->extensionsString = strdup(gExtensionString);
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         cnx->major = -1;
         cnx->minor = -1;
@@ -624,7 +693,7 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     }
 
     EGLBoolean res = EGL_FALSE;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso && cnx->major>=0 && cnx->minor>=0) {
             EGLint n;
@@ -663,7 +732,7 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
         return EGL_TRUE;
         
     EGLBoolean res = EGL_FALSE;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             cnx->hooks->egl.eglTerminate(dp->dpys[i]);
@@ -706,7 +775,7 @@ EGLBoolean eglGetConfigs(   EGLDisplay dpy,
         return EGL_TRUE;
     }
     GLint n = 0;
-    for (int j=0 ; j<2 ; j++) {
+    for (int j=0 ; j<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; j++) {
         for (int i=0 ; i<dp->numConfigs[j] && config_size ; i++) {
             *configs++ = MAKE_CONFIG(j, i);
             config_size--;
@@ -794,7 +863,7 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
         return res;
     }
 
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglChooseConfig(
@@ -854,26 +923,12 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
     int i=0, index=0;
     egl_connection_t* cnx = validate_display_config(dpy, config, dp, i, index);
     if (cnx) {
-        // window must be connected upon calling underlying
-        // eglCreateWindowSurface
-        if (window) {
-            window->incRef(window);
-            if (window->connect)
-                window->connect(window);
-        }
-
         EGLSurface surface = cnx->hooks->egl.eglCreateWindowSurface(
                 dp->dpys[i], dp->configs[i][index], window, attrib_list);       
         if (surface != EGL_NO_SURFACE) {
-            egl_surface_t* s = new egl_surface_t(dpy, surface, window, i, cnx);
+            egl_surface_t* s = new egl_surface_t(dpy, surface, i, cnx);
             return s;
         }
-        
-        // something went wrong, disconnect and free window
-        // (will disconnect() automatically)
-        if (window) {
-            window->decRef(window);
-        }        
     }
     return EGL_NO_SURFACE;
 }
@@ -889,7 +944,7 @@ EGLSurface eglCreatePixmapSurface(  EGLDisplay dpy, EGLConfig config,
         EGLSurface surface = cnx->hooks->egl.eglCreatePixmapSurface(
                 dp->dpys[i], dp->configs[i][index], pixmap, attrib_list);
         if (surface != EGL_NO_SURFACE) {
-            egl_surface_t* s = new egl_surface_t(dpy, surface, NULL, i, cnx);
+            egl_surface_t* s = new egl_surface_t(dpy, surface, i, cnx);
             return s;
         }
     }
@@ -906,7 +961,7 @@ EGLSurface eglCreatePbufferSurface( EGLDisplay dpy, EGLConfig config,
         EGLSurface surface = cnx->hooks->egl.eglCreatePbufferSurface(
                 dp->dpys[i], dp->configs[i][index], attrib_list);
         if (surface != EGL_NO_SURFACE) {
-            egl_surface_t* s = new egl_surface_t(dpy, surface, NULL, i, cnx);
+            egl_surface_t* s = new egl_surface_t(dpy, surface, i, cnx);
             return s;
         }
     }
@@ -1107,7 +1162,7 @@ EGLBoolean eglWaitNative(EGLint engine)
 EGLint eglGetError(void)
 {
     EGLint result = EGL_SUCCESS;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         EGLint err = EGL_SUCCESS;
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso)
@@ -1120,8 +1175,15 @@ EGLint eglGetError(void)
     return result;
 }
 
-void (*eglGetProcAddress(const char *procname))()
+__eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
 {
+    // eglGetProcAddress() could be the very first function called
+    // in which case we must make sure we've initialized ourselves, this
+    // happens the first time egl_get_display() is called.
+    
+    if (egl_init_displays(EGL_DEFAULT_DISPLAY) == EGL_NO_DISPLAY)
+        return NULL;
+
     __eglMustCastToProperFunctionPointerType addr;
     addr = findProcAddress(procname, gExtentionMap, NELEM(gExtentionMap));
     if (addr) return addr;
@@ -1133,7 +1195,7 @@ void (*eglGetProcAddress(const char *procname))()
     
     addr = 0;
     int slot = -1;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglGetProcAddress) {
@@ -1266,7 +1328,7 @@ EGLBoolean eglSwapInterval(EGLDisplay dpy, EGLint interval)
     if (!dp) return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
     EGLBoolean res = EGL_TRUE;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglSwapInterval) {
@@ -1309,7 +1371,7 @@ EGLBoolean eglBindAPI(EGLenum api)
 {
     // bind this API on all EGLs
     EGLBoolean res = EGL_TRUE;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglBindAPI) {
@@ -1324,7 +1386,7 @@ EGLBoolean eglBindAPI(EGLenum api)
 
 EGLenum eglQueryAPI(void)
 {
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglQueryAPI) {
@@ -1340,7 +1402,7 @@ EGLenum eglQueryAPI(void)
 
 EGLBoolean eglReleaseThread(void)
 {
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglReleaseThread) {
@@ -1365,4 +1427,125 @@ EGLSurface eglCreatePbufferFromClientBuffer(
                 dp->dpys[i], buftype, buffer, dp->configs[i][index], attrib_list);
     }
     return setError(EGL_BAD_CONFIG, EGL_NO_SURFACE);
+}
+
+// ----------------------------------------------------------------------------
+// EGL_EGLEXT_VERSION 3
+// ----------------------------------------------------------------------------
+
+EGLBoolean eglLockSurfaceKHR(EGLDisplay dpy, EGLSurface surface,
+        const EGLint *attrib_list)
+{
+    EGLBoolean result = EGL_FALSE;
+    if (!validate_display_surface(dpy, surface))
+        return result;
+
+    egl_display_t const * const dp = get_display(dpy);
+    egl_surface_t const * const s = get_surface(surface);
+
+    if (s->cnx->hooks->egl.eglLockSurfaceKHR) {
+        result = s->cnx->hooks->egl.eglLockSurfaceKHR(
+                dp->dpys[s->impl], s->surface, attrib_list);
+    }
+    return result;
+}
+
+EGLBoolean eglUnlockSurfaceKHR(EGLDisplay dpy, EGLSurface surface)
+{
+    EGLBoolean result = EGL_FALSE;
+    if (!validate_display_surface(dpy, surface))
+        return result;
+
+    egl_display_t const * const dp = get_display(dpy);
+    egl_surface_t const * const s = get_surface(surface);
+
+    if (s->cnx->hooks->egl.eglUnlockSurfaceKHR) {
+        result = s->cnx->hooks->egl.eglUnlockSurfaceKHR(
+                dp->dpys[s->impl], s->surface);
+    }
+    return result;
+}
+
+EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
+        EGLClientBuffer buffer, const EGLint *attrib_list)
+{
+    if (ctx != EGL_NO_CONTEXT) {
+        if (!validate_display_context(dpy, ctx))
+            return EGL_NO_IMAGE_KHR;
+        egl_display_t const * const dp = get_display(dpy);
+        egl_context_t * const c = get_context(ctx);
+        // since we have an EGLContext, we know which implementation to use
+        EGLImageKHR image = c->cnx->hooks->egl.eglCreateImageKHR(
+                dp->dpys[c->impl], c->context, target, buffer, attrib_list);
+        if (image == EGL_NO_IMAGE_KHR)
+            return image;
+            
+        egl_image_t* result = new egl_image_t(dpy, ctx);
+        result->images[c->impl] = image;
+        return (EGLImageKHR)result;
+    } else {
+        // EGL_NO_CONTEXT is a valid parameter
+        egl_display_t const * const dp = get_display(dpy);
+        if (dp == 0) {
+            return setError(EGL_BAD_DISPLAY, EGL_NO_IMAGE_KHR);
+        }
+        // since we don't have a way to know which implementation to call,
+        // we're calling all of them
+
+        EGLImageKHR implImages[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
+        bool success = false;
+        for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
+            egl_connection_t* const cnx = &gEGLImpl[i];
+            implImages[i] = EGL_NO_IMAGE_KHR;
+            if (cnx->dso) {
+                if (cnx->hooks->egl.eglCreateImageKHR) {
+                    implImages[i] = cnx->hooks->egl.eglCreateImageKHR(
+                            dp->dpys[i], ctx, target, buffer, attrib_list);
+                    if (implImages[i] != EGL_NO_IMAGE_KHR) {
+                        success = true;
+                    }
+                }
+            }
+        }
+        if (!success)
+            return EGL_NO_IMAGE_KHR;
+        
+        egl_image_t* result = new egl_image_t(dpy, ctx);
+        memcpy(result->images, implImages, sizeof(implImages));
+        return (EGLImageKHR)result;
+    }
+}
+
+EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
+{
+     egl_display_t const * const dp = get_display(dpy);
+     if (dp == 0) {
+         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+     }
+
+     egl_image_t* image = get_image(img);
+     if (!image->isValid()) {
+         return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+     }
+
+     bool success = false;
+     for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
+         egl_connection_t* const cnx = &gEGLImpl[i];
+         if (image->images[i] != EGL_NO_IMAGE_KHR) {
+             if (cnx->dso) {
+                 if (cnx->hooks->egl.eglCreateImageKHR) {
+                     if (cnx->hooks->egl.eglDestroyImageKHR(
+                             dp->dpys[i], image->images[i])) {
+                         success = true;
+                     }
+                 }
+             }
+         }
+     }
+     if (!success)
+         return EGL_FALSE;
+
+     delete image;
+
+     return EGL_FALSE;
 }

@@ -20,6 +20,7 @@
 #include <ctype.h>
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 // ----------------------------------------------------------------------------
 namespace android {
@@ -35,6 +36,8 @@ struct egl_connection_t
     EGLint              minor;
     int                 unavailable;
 };
+
+EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
 
 // ----------------------------------------------------------------------------
 }; // namespace android

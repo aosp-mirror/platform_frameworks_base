@@ -23,10 +23,6 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
-#include <core/SkBitmap.h>
-
-#include <ui/EGLDisplaySurface.h>
-
 #include "LayerBase.h"
 #include "LayerOrientationAnim.h"
 #include "LayerOrientationAnimRotate.h"
@@ -51,10 +47,10 @@ const float BOUNCES_AMPLITUDE = (5.0f/180.f) * M_PI;
 LayerOrientationAnimRotate::LayerOrientationAnimRotate(
         SurfaceFlinger* flinger, DisplayID display, 
         OrientationAnimation* anim, 
-        const LayerBitmap& bitmap,
-        const LayerBitmap& bitmapIn)
+        const sp<Buffer>& bitmapIn,
+        const sp<Buffer>& bitmapOut)
     : LayerOrientationAnimBase(flinger, display), mAnim(anim), 
-      mBitmap(bitmap), mBitmapIn(bitmapIn), 
+      mBitmapIn(bitmapIn), mBitmapOut(bitmapOut), 
       mTextureName(-1), mTextureNameIn(-1)
 {
     mStartTime = systemTime();
@@ -103,7 +99,6 @@ void LayerOrientationAnimRotate::validateVisibility(const Transform&)
     mTop  = tr.ty();
     transparentRegionScreen.clear();
     mTransformed = true;
-    mCanUseCopyBit = false;
 }
 
 void LayerOrientationAnimRotate::onOrientationCompleted()
@@ -126,7 +121,7 @@ void LayerOrientationAnimRotate::onDraw(const Region& clip) const
         if (mFirstRedraw) {
             // make a copy of what's on screen
             copybit_image_t image;
-            mBitmapIn.getBitmapSurface(&image);
+            mBitmapIn->getBitmapSurface(&image);
             const DisplayHardware& hw(graphicPlane(0).displayHardware());
             hw.copyBackToImage(image);
             
@@ -185,7 +180,7 @@ void LayerOrientationAnimRotate::drawScaled(float f, float s, float alpha) const
     copybit_image_t dst;
     const GraphicPlane& plane(graphicPlane(0));
     const DisplayHardware& hw(plane.displayHardware());
-    hw.getDisplaySurface(&dst);
+    //hw.getDisplaySurface(&dst);
 
     // clear screen
     // TODO: with update on demand, we may be able 
@@ -200,7 +195,7 @@ void LayerOrientationAnimRotate::drawScaled(float f, float s, float alpha) const
     const int h = dst.h; 
 
     copybit_image_t src;
-    mBitmap.getBitmapSurface(&src);
+    mBitmapIn->getBitmapSurface(&src);
     const copybit_rect_t srect = { 0, 0, src.w, src.h };
 
 
@@ -255,7 +250,7 @@ void LayerOrientationAnimRotate::drawScaled(float f, float s, float alpha) const
         tr.transform(self.mVertices[3], src.w, 0);
 
         copybit_image_t src;
-        mBitmapIn.getBitmapSurface(&src);
+        mBitmapIn->getBitmapSurface(&src);
         t.data = (GGLubyte*)(intptr_t(src.base) + src.offset);
         if (UNLIKELY(mTextureNameIn == -1LU)) {
             mTextureNameIn = createTexture();

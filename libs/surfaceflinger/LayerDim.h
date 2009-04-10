@@ -44,10 +44,6 @@ public:
     virtual bool isSecure() const       { return false; }
 
     static void initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h);
-
-private:
-    static sp<MemoryDealer> mDimmerDealer;
-    static LayerBitmap mDimmerBitmap;
 };
 
 // ---------------------------------------------------------------------------

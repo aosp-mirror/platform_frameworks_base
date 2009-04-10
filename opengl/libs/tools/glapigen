@@ -1,0 +1,51 @@
+#! /usr/bin/perl
+
+use strict;
+
+my $lineNum = 0;
+while (my $line = <>) {
+  $lineNum += 1;
+  next if $line =~ /^\//;
+  next if $line =~ /^#/;
+  next if $line =~ /^\s*$/;
+  if ($line !~ /^GL_ENTRY\(([^,]+),\s*([^,]+),\s*([^)]+)\)/) {
+    printf STDERR "Cannot parse line number $lineNum:\n$line";
+    next;
+  }
+  my $type = $1;
+  my $name = $2;
+  my $args = $3;
+
+  printf("%s API_ENTRY(%s)(", $type, $name);
+  my @args = split ',', $args;
+
+  my $len = scalar(@args);
+  for (my $num = 0; $num < $len; $num++) {
+    print ", " if $num > 0;
+    my $arg = $args[$num];
+    if ($arg =~ /([^]]+)(\[[^]]\])/) {
+      my $argtype = $1;
+      my $array = $2;
+      printf("%s arg%d%s", $argtype, $num, $array);
+    } else {
+      if ($arg eq "void") {
+        printf("void");
+      } else {
+        printf("%s arg%d", $arg, $num);
+      }
+    }
+  }
+  printf(") {\n");
+  if ($type eq "void") {
+    printf("    CALL_GL_API(%s", $name);
+  } else {
+    printf("    CALL_GL_API_RETURN(%s", $name);
+  }
+  for (my $num = 0; $num < $len; $num++) {
+    if ($args[$num] ne "void") {
+      print ", ";
+      printf("arg%d", $num);
+    }
+  }
+  printf(");\n}\n\n");
+}

@@ -52,8 +52,8 @@ public:
     
                 LayerOrientationAnim(SurfaceFlinger* flinger, DisplayID display,
                         OrientationAnimation* anim, 
-                        const LayerBitmap& bitmapIn,
-                        const LayerBitmap& bitmapOut);
+                        const sp<Buffer>& bitmapIn,
+                        const sp<Buffer>& bitmapOut);
         virtual ~LayerOrientationAnim();
 
             void onOrientationCompleted();
@@ -90,8 +90,8 @@ private:
     };
     
     OrientationAnimation* mAnim;
-    LayerBitmap mBitmapIn;
-    LayerBitmap mBitmapOut;
+    sp<Buffer> mBitmapIn;
+    sp<Buffer> mBitmapOut;
     nsecs_t mStartTime;
     nsecs_t mFinishTime;
     bool mOrientationCompleted;

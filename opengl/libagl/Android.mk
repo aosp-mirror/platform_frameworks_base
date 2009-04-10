@@ -6,6 +6,9 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
+# Set to 1 to use gralloc and copybits
+LIBAGL_USE_GRALLOC_COPYBITS := 1
+
 LOCAL_SRC_FILES:= \
 	egl.cpp                     \
 	state.cpp		            \
@@ -32,7 +35,15 @@ ifneq ($(TARGET_SIMULATOR),true)
     LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
 
-LOCAL_SHARED_LIBRARIES := libcutils libutils libpixelflinger
+ifeq ($(LIBAGL_USE_GRALLOC_COPYBITS),1)
+    LOCAL_CFLAGS += -DLIBAGL_USE_GRALLOC_COPYBITS -I$(LOCAL_PATH)/../../../../hardware/libhardware/modules/gralloc
+    LOCAL_SRC_FILES += copybit.cpp
+endif
+
+LOCAL_CFLAGS += -DLOG_TAG=\"libagl\"
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
+
+LOCAL_SHARED_LIBRARIES := libcutils libhardware libutils libpixelflinger
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libagl
 

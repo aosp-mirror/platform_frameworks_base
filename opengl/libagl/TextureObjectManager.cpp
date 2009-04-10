@@ -1,16 +1,16 @@
 /*
  ** Copyright 2006, The Android Open Source Project
  **
- ** Licensed under the Apache License, Version 2.0 (the "License"); 
- ** you may not use this file except in compliance with the License. 
- ** You may obtain a copy of the License at 
+ ** Licensed under the Apache License, Version 2.0 (the "License");
+ ** you may not use this file except in compliance with the License.
+ ** You may obtain a copy of the License at
  **
- **     http://www.apache.org/licenses/LICENSE-2.0 
+ **     http://www.apache.org/licenses/LICENSE-2.0
  **
- ** Unless required by applicable law or agreed to in writing, software 
- ** distributed under the License is distributed on an "AS IS" BASIS, 
- ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- ** See the License for the specific language governing permissions and 
+ ** Unless required by applicable law or agreed to in writing, software
+ ** distributed under the License is distributed on an "AS IS" BASIS,
+ ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ** See the License for the specific language governing permissions and
  ** limitations under the License.
  */
 
@@ -53,6 +53,9 @@ void EGLTextureObject::init()
     memset(crop_rect, 0, sizeof(crop_rect));
     generate_mipmap = GL_FALSE;
     direct = GL_FALSE;
+#ifdef LIBAGL_USE_GRALLOC_COPYBITS
+    copybits_fd = -1;
+#endif // LIBAGL_USE_GRALLOC_COPYBITS
 }
 
 void EGLTextureObject::copyParameters(const sp<EGLTextureObject>& old)
@@ -146,7 +149,7 @@ status_t EGLTextureObject::reallocate(
         int format, int compressedFormat, int bpr)
 {
     const size_t size = h * bpr;
-    if (level == 0) 
+    if (level == 0)
     {
         if (size!=mSize || !surface.data) {
             if (mSize && surface.data) {
@@ -177,9 +180,9 @@ status_t EGLTextureObject::reallocate(
                 return NO_MEMORY;
         }
 
-        LOGW_IF(level-1 >= mNumExtraLod, 
+        LOGW_IF(level-1 >= mNumExtraLod,
                 "specifying mipmap level %d, but # of level is %d",
-                level, mNumExtraLod+1);        
+                level, mNumExtraLod+1);
 
         GGLSurface& mipmap = editMip(level);
         if (mipmap.data)

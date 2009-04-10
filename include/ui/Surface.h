@@ -28,24 +28,65 @@
 #include <ui/Region.h>
 #include <ui/ISurfaceFlingerClient.h>
 
+#include <EGL/android_natives.h>
+
 namespace android {
 
 // ---------------------------------------------------------------------------
 
 class Rect;
 class SurfaceComposerClient;
+struct per_client_cblk_t;
+struct layer_cblk_t;
 
-class Surface : public RefBase
+// ---------------------------------------------------------------------------
+
+class SurfaceBuffer 
+    : public EGLNativeBase<
+        android_native_buffer_t, 
+        SurfaceBuffer, 
+        LightRefBase<SurfaceBuffer> >
 {
+public:
+    buffer_handle_t getHandle() const {
+        return handle;
+    }
+    
+protected:
+            SurfaceBuffer();
+            SurfaceBuffer(const Parcel& reply);
+    virtual ~SurfaceBuffer();
+    buffer_handle_t handle;
+    bool mOwner;
 
+private:
+    friend class BpSurface;
+    friend class BnSurface;
+    friend class LightRefBase<SurfaceBuffer>;    
+
+    SurfaceBuffer& operator = (const SurfaceBuffer& rhs);
+    const SurfaceBuffer& operator = (const SurfaceBuffer& rhs) const;
+
+    static status_t writeToParcel(Parcel* reply, 
+            android_native_buffer_t const* buffer);
+    
+    static int getHandle(android_native_buffer_t const * base, 
+            buffer_handle_t* handle);
+};
+
+// ---------------------------------------------------------------------------
+
+class Surface 
+    : public EGLNativeBase<android_native_window_t, Surface, RefBase>
+{
 public:
     struct SurfaceInfo {
         uint32_t    w;
         uint32_t    h;
-        uint32_t    bpr;
+        uint32_t    s;
+        uint32_t    usage;
         PixelFormat format;
         void*       bits;
-        void*       base;
         uint32_t    reserved[2];
     };
 
@@ -55,15 +96,12 @@ public:
     status_t    lock(SurfaceInfo* info, bool blocking = true);
     status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
     status_t    unlockAndPost();
-    status_t    unlock();
-
-    void*       heapBase(int i) const;
+    
     uint32_t    getFlags() const { return mFlags; }
 
     // setSwapRectangle() is mainly used by EGL
     void        setSwapRectangle(const Rect& r);
     const Rect& swapRectangle() const;
-    status_t    nextBuffer(SurfaceInfo* info);
 
     sp<Surface>         dup() const;
     static sp<Surface>  readFromParcel(Parcel* parcel);
@@ -95,6 +133,8 @@ private:
     friend class Test;
     const sp<ISurface>& getISurface() const { return mSurface; }
 
+    status_t getBufferLocked(int index);
+    
     // can't be copied
     Surface& operator = (Surface& rhs);
     Surface(const Surface& rhs);
@@ -108,23 +148,39 @@ private:
     Surface(Surface const* rhs);
 
     ~Surface();
-
+    
     Region dirtyRegion() const;
     void setDirtyRegion(const Region& region) const;
 
-    // this locks protects calls to lockSurface() / unlockSurface()
-    // and is called by SurfaceComposerClient.
-    Mutex& getLock() const { return mSurfaceLock; }
+   
+           status_t validate(per_client_cblk_t const* cblk) const;
+    static void _send_dirty_region(layer_cblk_t* lcblk, const Region& dirty);
 
+    
+    static void connect(android_native_window_t* window);
+    static void disconnect(android_native_window_t* window);
+    static int setSwapInterval(android_native_window_t* window, int interval);
+    static int setSwapRectangle(android_native_window_t* window,
+            int l, int t, int w, int h);
+    static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
+    static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
+    static int queueBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
+
+    int dequeueBuffer(android_native_buffer_t** buffer);
+    int lockBuffer(android_native_buffer_t* buffer);
+    int queueBuffer(android_native_buffer_t* buffer);
+    
+    
+    alloc_device_t*             mAllocDevice;
     sp<SurfaceComposerClient>   mClient;
     sp<ISurface>                mSurface;
-    sp<IMemoryHeap>             mHeap[2];
+    sp<SurfaceBuffer>           mBuffers[2];
+    android_native_buffer_t*    mLockedBuffer;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
     const bool                  mOwner;
-    mutable void*               mSurfaceHeapBase[2];
     mutable Region              mDirtyRegion;
     mutable Rect                mSwapRectangle;
     mutable uint8_t             mBackbufferIndex;

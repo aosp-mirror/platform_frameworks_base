@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "ISurface"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -23,9 +25,12 @@
 
 #include <ui/ISurface.h>
 #include <ui/Overlay.h>
+#include <ui/Surface.h>
 
 
 namespace android {
+
+// ----------------------------------------------------------------------
 
 ISurface::BufferHeap::BufferHeap() 
     : w(0), h(0), hor_stride(0), ver_stride(0), format(0),
@@ -55,12 +60,23 @@ ISurface::BufferHeap::~BufferHeap()
 {     
 }
 
+// ----------------------------------------------------------------------
+
 class BpSurface : public BpInterface<ISurface>
 {
 public:
     BpSurface(const sp<IBinder>& impl)
         : BpInterface<ISurface>(impl)
     {
+    }
+
+    virtual sp<SurfaceBuffer> getBuffer()
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
+        remote()->transact(GET_BUFFER, data, &reply);
+        sp<SurfaceBuffer> buffer = new SurfaceBuffer(reply);
+        return buffer;
     }
 
     virtual status_t registerBuffers(const BufferHeap& buffers)
@@ -122,6 +138,11 @@ status_t BnSurface::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     switch(code) {
+        case GET_BUFFER: {
+            CHECK_INTERFACE(ISurface, data, reply);
+            sp<SurfaceBuffer> buffer(getBuffer());
+            return SurfaceBuffer::writeToParcel(reply, buffer.get());
+        }
         case REGISTER_BUFFERS: {
             CHECK_INTERFACE(ISurface, data, reply);
             BufferHeap buffer;

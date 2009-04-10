@@ -22,6 +22,8 @@
 
 #include <private/ui/LayerState.h>
 
+#include <utils/RefBase.h>
+
 #include <ui/Region.h>
 #include <ui/Overlay.h>
 
@@ -37,10 +39,11 @@ class SurfaceFlinger;
 class DisplayHardware;
 class GraphicPlane;
 class Client;
+class SurfaceBuffer;
 
 // ---------------------------------------------------------------------------
 
-class LayerBase
+class LayerBase : public RefBase
 {
     // poor man's dynamic_cast below
     template<typename T>
@@ -72,7 +75,6 @@ public:
     static Vector<GLuint> deletedTextures; 
 
     LayerBase(SurfaceFlinger* flinger, DisplayID display);
-    virtual ~LayerBase();
     
     DisplayID           dpy;
     mutable bool        contentDirty;
@@ -215,7 +217,9 @@ public:
     inline  const State&    currentState() const    { return mCurrentState; }
     inline  State&          currentState()          { return mCurrentState; }
 
-    static int compareCurrentStateZ(LayerBase*const* layerA, LayerBase*const* layerB) {
+    static int compareCurrentStateZ(
+            sp<LayerBase> const * layerA,
+            sp<LayerBase> const * layerB) {
         return layerA[0]->currentState().z - layerB[0]->currentState().z;
     }
 
@@ -240,8 +244,6 @@ protected:
                   GLint textureName, const GGLSurface& t,
                   GLuint& textureWidth, GLuint& textureHeight) const;
 
-          bool canUseCopybit() const;
-          
                 SurfaceFlinger* mFlinger;
                 uint32_t        mFlags;
 
@@ -250,7 +252,6 @@ protected:
                 int32_t         mOrientation;
                 GLfixed         mVertices[4][2];
                 Rect            mTransformedBounds;
-                bool            mCanUseCopyBit;
                 int             mLeft;
                 int             mTop;
             
@@ -269,9 +270,13 @@ protected:
     volatile    int32_t         mInvalidate;
                 
 
+protected:
+    virtual ~LayerBase();
+
 private:
-                void validateTexture(GLint textureName) const;
-    static      int32_t         sIdentity;
+    LayerBase(const LayerBase& rhs);
+    void validateTexture(GLint textureName) const;
+    static int32_t sIdentity;
 };
 
 
@@ -289,64 +294,55 @@ public:
     LayerBaseClient(SurfaceFlinger* flinger, DisplayID display, 
             Client* client, int32_t i);
     virtual ~LayerBaseClient();
-
+    virtual void onFirstRef();
 
     Client*             const client;
     layer_cblk_t*       const lcblk;
 
+    inline  uint32_t    getIdentity() const { return mIdentity; }
     inline  int32_t     clientIndex() const { return mIndex; }
             int32_t     serverIndex() const;
 
-    virtual sp<Surface> getSurface() const;
    
-            uint32_t    getIdentity() const { return mIdentity; }
+            sp<Surface> getSurface();
+    virtual sp<Surface> createSurface() const;
+    
 
     class Surface : public BnSurface 
     {
     public:
-        Surface(SurfaceID id, int identity) { 
-            mParams.token = id;
-            mParams.identity = identity;
-        }
-        Surface(SurfaceID id, 
-                const sp<IMemoryHeap>& heap0,
-                const sp<IMemoryHeap>& heap1,
-                int identity)
-        {
-            mParams.token = id;
-            mParams.identity = identity;
-            mParams.heap[0] = heap0;
-            mParams.heap[1] = heap1;
-        }
-        virtual ~Surface() {
-            // TODO: We now have a point here were we can clean-up the
-            // client's mess.
-            // This is also where surface id should be recycled.
-            //LOGD("Surface %d, heaps={%p, %p} destroyed",
-            //        mId, mHeap[0].get(), mHeap[1].get());
-        }
-
+        
         virtual void getSurfaceData(
-                ISurfaceFlingerClient::surface_data_t* params) const {
-            *params = mParams;
-        }
+                ISurfaceFlingerClient::surface_data_t* params) const;
 
-        virtual status_t registerBuffers(const ISurface::BufferHeap& buffers) 
-                { return INVALID_OPERATION; }
-        virtual void postBuffer(ssize_t offset) { }
-        virtual void unregisterBuffers() { };
-        virtual sp<OverlayRef> createOverlay(
-                uint32_t w, uint32_t h, int32_t format) {
-            return NULL;
-        };
+    protected:
+        Surface(SurfaceID id, int identity, const sp<LayerBaseClient>& owner);
+        virtual ~Surface();
+        virtual status_t onTransact(uint32_t code, const Parcel& data,
+                Parcel* reply, uint32_t flags);
+        sp<LayerBaseClient> getOwner() const;
 
     private:
-        ISurfaceFlingerClient::surface_data_t mParams;
+        virtual sp<SurfaceBuffer> getBuffer();
+        virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
+        virtual void postBuffer(ssize_t offset);
+        virtual void unregisterBuffers();
+        virtual sp<OverlayRef> createOverlay(uint32_t w, uint32_t h,
+                int32_t format);
+
+    private:
+        friend class LayerBaseClient;
+        int32_t             mToken;
+        int32_t             mIdentity;
+        wp<LayerBaseClient> mOwner;
     };
 
-private:
-    int32_t mIndex;
+    friend class Surface;
 
+private:
+                int32_t         mIndex;
+    mutable     Mutex           mLock;
+    mutable     wp<Surface>     mClientSurface;
 };
 
 // ---------------------------------------------------------------------------

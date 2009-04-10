@@ -20,12 +20,15 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <EGL/android_natives.h>
+
 #include <utils/Errors.h>
 #include <utils/IInterface.h>
 #include <utils/RefBase.h>
 #include <ui/PixelFormat.h>
 
 #include <hardware/hardware.h>
+#include <hardware/gralloc.h>
 
 namespace android {
 
@@ -33,6 +36,7 @@ typedef int32_t    SurfaceID;
 
 class IMemoryHeap;
 class OverlayRef;
+class SurfaceBuffer;
 
 class ISurface : public IInterface
 {
@@ -42,11 +46,13 @@ protected:
         UNREGISTER_BUFFERS,
         POST_BUFFER, // one-way transaction
         CREATE_OVERLAY,
+        GET_BUFFER,
     };
 
 public: 
     DECLARE_META_INTERFACE(Surface);
 
+    virtual sp<SurfaceBuffer> getBuffer() = 0; 
     
     class BufferHeap {
     public:
@@ -78,9 +84,7 @@ public:
     };
     
     virtual status_t registerBuffers(const BufferHeap& buffers) = 0;
-
     virtual void postBuffer(ssize_t offset) = 0; // one-way
-
     virtual void unregisterBuffers() = 0;
     
     virtual sp<OverlayRef> createOverlay(

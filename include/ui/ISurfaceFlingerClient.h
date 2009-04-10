@@ -52,7 +52,6 @@ public:
     struct surface_data_t {
         int32_t             token;
         int32_t             identity;
-        sp<IMemoryHeap>     heap[2];
         status_t readFromParcel(const Parcel& parcel);
         status_t writeToParcel(Parcel* parcel) const;
     };

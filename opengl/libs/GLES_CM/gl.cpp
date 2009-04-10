@@ -14,8 +14,6 @@
  ** limitations under the License.
  */
 
-#define LOG_TAG "GLES_CM"
-
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
@@ -29,6 +27,7 @@
 #include <cutils/properties.h>
 
 #include "hooks.h"
+#include "egl_impl.h"
 
 using namespace android;
 
@@ -56,13 +55,6 @@ void glVertexPointerBounds(GLint size, GLenum type,
 // ----------------------------------------------------------------------------
 // Actual GL entry-points
 // ----------------------------------------------------------------------------
-
-#if GL_LOGGER
-#   include "gl_logger.h"
-#   define GL_LOGGER_IMPL(_x) _x
-#else
-#   define GL_LOGGER_IMPL(_x)
-#endif
 
 #undef API_ENTRY
 #undef CALL_GL_API
@@ -96,15 +88,14 @@ void glVertexPointerBounds(GLint size, GLenum type,
 
     #define CALL_GL_API(_api, ...)                                      \
         gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl; \
-        GL_LOGGER_IMPL( log_##_api(__VA_ARGS__); )                      \
         _c->_api(__VA_ARGS__)
     
     #define CALL_GL_API_RETURN(_api, ...)                               \
         gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl; \
-        GL_LOGGER_IMPL( log_##_api(__VA_ARGS__); )                      \
         return _c->_api(__VA_ARGS__)
 
 #endif
+
 
 extern "C" {
 #include "gl_api.in"
@@ -113,4 +104,28 @@ extern "C" {
 #undef API_ENTRY
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
+
+
+/*
+ * These GL calls are special because they need to EGL to retrieve some
+ * informations before they can execute.
+ */
+
+extern "C" void __glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image);
+extern "C" void __glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image);
+
+
+void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
+{
+    GLeglImageOES implImage = 
+        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
+    __glEGLImageTargetTexture2DOES(target, implImage);
+}
+
+void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
+{
+    GLeglImageOES implImage = 
+        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
+    __glEGLImageTargetRenderbufferStorageOES(target, image);
+}
 

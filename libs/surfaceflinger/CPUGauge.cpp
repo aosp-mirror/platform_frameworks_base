@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "CPUGauge"
-
 #include <stdint.h>
 #include <limits.h>
 #include <sys/types.h>
@@ -113,7 +111,7 @@ bool CPUGauge::threadLoop()
                 fb.version = sizeof(GGLSurface);
                 fb.width   = info.w;
                 fb.height  = info.h;
-                fb.stride  = info.w;
+                fb.stride  = info.s;
                 fb.format  = info.format;
                 fb.data = (GGLubyte*)info.bits;
 

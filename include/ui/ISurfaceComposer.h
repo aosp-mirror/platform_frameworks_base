@@ -32,7 +32,6 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 class DisplayInfo;
-class IGPUCallback;
 
 class ISurfaceComposer : public IInterface
 {
@@ -112,35 +111,10 @@ public:
      */
     virtual void bootFinished() = 0;
 
-    /* get access to the GPU. Access is relinquished when releasing regs */
-    struct gpu_info_t {
-        struct gpu_region_t {
-            sp<IMemory> region;
-            size_t reserved;
-        };
-        sp<IMemory>             regs;
-        size_t                  count;
-        gpu_region_t            regions[2];
-    };
-    virtual status_t requestGPU(
-            const sp<IGPUCallback>& callback,
-            gpu_info_t* gpu) = 0;
-
-    /* take the gpu back from any apps using it. They'll get a
-     * EGL_CONTEXT_LOST error */
-    virtual status_t revokeGPU() = 0;
-
     /* Signal surfaceflinger that there might be some work to do
      * This is an ASYNCHRONOUS call.
      */
     virtual void signal() const = 0;
-};
-
-class IGPUCallback : public IInterface
-{
-public:
-    DECLARE_META_INTERFACE(GPUCallback);
-    virtual void gpuLost() = 0; //one-way
 };
 
 // ----------------------------------------------------------------------------
@@ -159,20 +133,9 @@ public:
         SET_ORIENTATION,
         FREEZE_DISPLAY,
         UNFREEZE_DISPLAY,
-        REQUEST_GPU,
-        REVOKE_GPU,
         SIGNAL
     };
 
-    virtual status_t    onTransact( uint32_t code,
-                                    const Parcel& data,
-                                    Parcel* reply,
-                                    uint32_t flags = 0);
-};
-
-class BnGPUCallback : public BnInterface<IGPUCallback>
-{
-public:
     virtual status_t    onTransact( uint32_t code,
                                     const Parcel& data,
                                     Parcel* reply,

@@ -72,8 +72,7 @@ private:
     bool finished();
 
     sp<SurfaceFlinger> mFlinger;
-    sp<MemoryDealer> mTemporaryDealer;
-    LayerOrientationAnimBase* mLayerOrientationAnim;
+    sp< LayerOrientationAnimBase > mLayerOrientationAnim;
     int mState;
     uint32_t mType;
 };

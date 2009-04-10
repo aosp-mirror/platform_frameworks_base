@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "BootAnimation"
-
 #include <stdint.h>
 #include <sys/types.h>
 #include <math.h>
@@ -147,9 +145,7 @@ status_t BootAnimation::readyToRun() {
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglChooseConfig(display, attribs, &config, 1, &numConfigs);
 
-    mNativeWindowSurface = new EGLNativeWindowSurface(s);
-    surface = eglCreateWindowSurface(display, config, 
-            mNativeWindowSurface.get(), NULL);
+    surface = eglCreateWindowSurface(display, config, s.get(), NULL);
 
     context = eglCreateContext(display, config, NULL, NULL);
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
@@ -180,7 +176,7 @@ bool BootAnimation::threadLoop() {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(mDisplay, mContext);
     eglDestroySurface(mDisplay, mSurface);
-    mNativeWindowSurface.clear();
+    mFlingerSurface.clear();
     return r;
 }
 
@@ -199,8 +195,7 @@ bool BootAnimation::android() {
     const Rect updateRect(xc, yc, xc + mAndroid[0].w, yc + mAndroid[0].h);
 
     // draw and update only what we need
-    mNativeWindowSurface->setSwapRectangle(updateRect.left,
-            updateRect.top, updateRect.width(), updateRect.height());
+    mFlingerSurface->setSwapRectangle(updateRect);
 
     glEnable(GL_SCISSOR_TEST);
     glScissor(updateRect.left, mHeight - updateRect.bottom, updateRect.width(),

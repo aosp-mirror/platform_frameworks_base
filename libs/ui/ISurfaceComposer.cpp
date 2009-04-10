@@ -114,36 +114,6 @@ public:
         remote()->transact(BnSurfaceComposer::BOOT_FINISHED, data, &reply);
     }
 
-    virtual status_t requestGPU(
-            const sp<IGPUCallback>& callback, gpu_info_t* gpu)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        data.writeStrongBinder(callback->asBinder());
-        remote()->transact(BnSurfaceComposer::REQUEST_GPU, data, &reply);
-        gpu->regs = interface_cast<IMemory>(reply.readStrongBinder());
-        gpu->count = reply.readInt32();
-
-        // FIXME: for now, we don't dynamically allocate the regions array
-        size_t maxCount = sizeof(gpu->regions)/sizeof(*gpu->regions);
-        if (gpu->count > maxCount)
-            return BAD_VALUE;
-
-        for (size_t i=0 ; i<gpu->count ; i++) {
-            gpu->regions[i].region = interface_cast<IMemory>(reply.readStrongBinder());
-            gpu->regions[i].reserved = reply.readInt32();
-        }
-        return reply.readInt32();
-    }
-
-    virtual status_t revokeGPU()
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        remote()->transact(BnSurfaceComposer::REVOKE_GPU, data, &reply);
-        return reply.readInt32();
-    }
-
     virtual void signal() const
     {
         Parcel data, reply;
@@ -201,35 +171,12 @@ status_t BnSurfaceComposer::onTransact(
         case BOOT_FINISHED: {
             bootFinished();
         } break;
-        case REVOKE_GPU: {
-            reply->writeInt32( revokeGPU() );
-        } break;
         case SIGNAL: {
             signal();
         } break;
         case GET_CBLK: {
             sp<IBinder> b = getCblk()->asBinder();
             reply->writeStrongBinder(b);
-        } break;
-        case REQUEST_GPU: {
-            // TODO: this should be protected by a permission
-            gpu_info_t info;
-            sp<IGPUCallback> callback
-                = interface_cast<IGPUCallback>(data.readStrongBinder());
-            status_t res = requestGPU(callback, &info);
-
-            // FIXME: for now, we don't dynamically allocate the regions array
-            size_t maxCount = sizeof(info.regions)/sizeof(*info.regions);
-            if (info.count > maxCount)
-                return BAD_VALUE;
-
-            reply->writeStrongBinder(info.regs->asBinder());
-            reply->writeInt32(info.count);
-            for (size_t i=0 ; i<info.count ; i++) {
-                reply->writeStrongBinder(info.regions[i].region->asBinder());
-                reply->writeInt32(info.regions[i].reserved);
-            }
-            reply->writeInt32(res);
         } break;
         default:
             return UNKNOWN_TRANSACTION;
@@ -238,42 +185,5 @@ status_t BnSurfaceComposer::onTransact(
 }
 
 // ----------------------------------------------------------------------------
-
-enum {
-    // Note: BOOT_FINISHED must remain this value, it is called by ActivityManagerService.
-    GPU_LOST = IBinder::FIRST_CALL_TRANSACTION
-};
-
-class BpGPUCallback : public BpInterface<IGPUCallback>
-{
-public:
-    BpGPUCallback(const sp<IBinder>& impl)
-        : BpInterface<IGPUCallback>(impl)
-    {
-    }
-
-    virtual void gpuLost()
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IGPUCallback::getInterfaceDescriptor());
-        remote()->transact(GPU_LOST, data, &reply, IBinder::FLAG_ONEWAY);
-    }
-};
-
-IMPLEMENT_META_INTERFACE(GPUCallback, "android.ui.IGPUCallback");
-
-status_t BnGPUCallback::onTransact(
-    uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
-{
-    switch(code) {
-        case GPU_LOST: {
-            CHECK_INTERFACE(IGPUCallback, data, reply);
-            gpuLost();
-            return NO_ERROR;
-        } break;
-        default:
-            return BBinder::onTransact(code, data, reply, flags);
-    }
-}
 
 };

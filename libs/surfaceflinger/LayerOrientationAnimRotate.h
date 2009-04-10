@@ -40,8 +40,8 @@ public:
     
     LayerOrientationAnimRotate(SurfaceFlinger* flinger, DisplayID display,
                         OrientationAnimation* anim, 
-                        const LayerBitmap& zoomOut,
-                        const LayerBitmap& zoomIn);
+                        const sp<Buffer>& bitmapIn,
+                        const sp<Buffer>& bitmapOut);
         virtual ~LayerOrientationAnimRotate();
 
             void onOrientationCompleted();
@@ -55,8 +55,8 @@ private:
     void drawScaled(float angle, float scale, float alpha) const;
     
     OrientationAnimation* mAnim;
-    LayerBitmap mBitmap;
-    LayerBitmap mBitmapIn;
+    sp<Buffer> mBitmapIn;
+    sp<Buffer> mBitmapOut;
     nsecs_t mStartTime;
     nsecs_t mFinishTime;
     bool mOrientationCompleted;

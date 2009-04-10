@@ -27,6 +27,11 @@
 
 #include <pixelflinger/pixelflinger.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+
 #include "LayerBitmap.h"
 #include "LayerBase.h"
 #include "Transform.h"
@@ -42,6 +47,8 @@ class FreezeLock;
 
 // ---------------------------------------------------------------------------
 
+const int NUM_BUFFERS = 2;
+
 class Layer : public LayerBaseClient
 {
 public:    
@@ -56,7 +63,7 @@ public:
         virtual ~Layer();
 
     inline PixelFormat pixelFormat() const {
-        return frontBuffer().pixelFormat();
+        return frontBuffer().getPixelFormat();
     }
 
     status_t setBuffers(    Client* client,
@@ -73,8 +80,7 @@ public:
     virtual void finishPageFlip();
     virtual bool needsBlending() const      { return mNeedsBlending; }
     virtual bool isSecure() const           { return mSecure; }
-    virtual GLuint getTextureName() const   { return mTextureName; }
-    virtual sp<Surface> getSurface() const;
+    virtual sp<Surface> createSurface() const;
 
     const LayerBitmap& getBuffer(int i) const { return mBuffers[i]; }
           LayerBitmap& getBuffer(int i)       { return mBuffers[i]; }
@@ -96,21 +102,43 @@ private:
 
     status_t resize(int32_t index, uint32_t w, uint32_t h, const char* what);
     Region post(uint32_t* oldState, bool& recomputeVisibleRegions);
-    status_t reallocateBuffer(int32_t index, uint32_t w, uint32_t h);
+    sp<SurfaceBuffer> peekBuffer();
+    
+    
+    class SurfaceLayer : public LayerBaseClient::Surface
+    {
+    public:
+                SurfaceLayer(SurfaceID id, const sp<Layer>& owner);
 
+    private:
+        virtual sp<SurfaceBuffer> getBuffer();
+
+        sp<Layer> getOwner() const {
+            return static_cast<Layer*>(Surface::getOwner().get());
+        }
+    };
+    friend class SurfaceLayer;
+    
+    struct Texture {
+        Texture() : name(-1U), width(0), height(0), image(EGL_NO_IMAGE_KHR),
+            dirty(true) { }
+        GLuint      name;
+        GLuint      width;
+        GLuint      height;
+        EGLImageKHR image;
+        bool        dirty;
+    };
+    
     sp<Surface>             mSurface;
 
             bool            mSecure;
-            LayerBitmap     mBuffers[2];
+            LayerBitmap     mBuffers[NUM_BUFFERS];
+            Texture         mTextures[NUM_BUFFERS];
             int32_t         mFrontBufferIndex;
             bool            mNeedsBlending;
             bool            mResizeTransactionDone;
             Region          mPostedDirtyRegion;
             sp<FreezeLock>  mFreezeLock;
-            
-            GLuint          mTextureName;
-            GLuint          mTextureWidth;
-            GLuint          mTextureHeight;
 };
 
 // ---------------------------------------------------------------------------
