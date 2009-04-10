@@ -1204,7 +1204,7 @@ public class Contacts {
      */
     public interface OrganizationColumns {
         /**
-         * The type of the the phone number.
+         * The type of the organizations.
          * <P>Type: INTEGER (one of the constants below)</P>
          */
         public static final String TYPE = "type";

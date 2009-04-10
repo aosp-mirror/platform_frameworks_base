@@ -25,30 +25,39 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * The class CookieSyncManager is used to synchronize the browser cookies
- * between RAM and FLASH. To get the best performance, browser cookie is saved
- * in RAM. We use a separate thread to sync the cookies between RAM and FLASH on
- * a timer base.
+ * The CookieSyncManager is used to synchronize the browser cookie store
+ * between RAM and permanent storage. To get the best performance, browser cookies are
+ * saved in RAM. A separate thread saves the cookies between, driven by a timer.
  * <p>
+ *
  * To use the CookieSyncManager, the host application has to call the following
- * when the application starts.
+ * when the application starts:
  * <p>
- * CookieSyncManager.createInstance(context)
+ *
+ * <pre class="prettyprint">CookieSyncManager.createInstance(context)</pre><p>
+ *
+ * To set up for sync, the host application has to call<p>
+ * <pre class="prettyprint">CookieSyncManager.getInstance().startSync()</pre><p>
+ *
+ * in Activity.onResume(), and call
  * <p>
- * To set up for sync, the host application has to call
- * <p>
- * CookieSyncManager.getInstance().startSync()
- * <p>
- * in its Activity.onResume(), and call
- * <p>
+ *
+ * <pre class="prettyprint">
  * CookieSyncManager.getInstance().stopSync()
- * <p>
- * in its Activity.onStop().
- * <p>
+ * </pre><p>
+ *
+ * in Activity.onPause().<p>
+ *
  * To get instant sync instead of waiting for the timer to trigger, the host can
  * call
  * <p>
- * CookieSyncManager.getInstance().sync()
+ * <pre class="prettyprint">CookieSyncManager.getInstance().sync()</pre><p>
+ *
+ * The sync interval is 5 minutes, so you will want to force syncs
+ * manually anyway, for instance in {@link
+ * WebViewClient#onPageFinished}. Note that even sync() happens
+ * asynchronously, so don't do it just as your activity is shutting
+ * down.
  */
 public final class CookieSyncManager extends WebSyncManager {
 
@@ -91,7 +100,7 @@ public final class CookieSyncManager extends WebSyncManager {
     }
 
     /**
-     * Package level api, called from CookieManager Get all the cookies which
+     * Package level api, called from CookieManager. Get all the cookies which
      * matches a given base domain.
      * @param domain
      * @return A list of Cookie

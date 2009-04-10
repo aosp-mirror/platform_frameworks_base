@@ -1,6 +1,7 @@
-ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
+
+ifneq ($(BUILD_WITHOUT_PV),true)
 
 LOCAL_SRC_FILES:= \
 	android_media_MediaPlayer.cpp \
@@ -37,6 +38,7 @@ LOCAL_MODULE:= libmedia_jni
 
 include $(BUILD_SHARED_LIBRARY)
 
+endif
+
 # build libsoundpool.so
 include $(LOCAL_PATH)/soundpool/Android.mk
-endif

@@ -2,6 +2,7 @@
 
 #include <stdarg.h>
 #include <set>
+#include <cstdio>
 
 using namespace std;
 

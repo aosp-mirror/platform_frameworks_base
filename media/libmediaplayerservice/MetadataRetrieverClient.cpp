@@ -49,7 +49,11 @@ MetadataRetrieverClient::MetadataRetrieverClient(pid_t pid)
     mThumbnail = NULL;
     mAlbumArt = NULL;
 
+#ifndef NO_OPENCORE
     mRetriever = new PVMetadataRetriever();
+#else
+    mRetriever = NULL;
+#endif
     if (mRetriever == NULL) {
         LOGE("failed to initialize the retriever");
     }

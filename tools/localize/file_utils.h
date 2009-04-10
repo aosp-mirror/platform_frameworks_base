@@ -4,6 +4,7 @@
 #include "ValuesFile.h"
 #include "Configuration.h"
 #include <string>
+#include <cstdio>
 
 using namespace std;
 

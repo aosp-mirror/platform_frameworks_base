@@ -247,6 +247,16 @@ class BatteryService extends Binder {
                 logOutlier = true;
             }
             
+            // Separate broadcast is sent for power connected / not connected
+            // since the standard intent will not wake any applications and some
+            // applications may want to have smart behavior based on this.
+            if (mPlugType != 0 && mLastPlugType == 0) {
+                mContext.sendBroadcast(new Intent(Intent.ACTION_POWER_CONNECTED));
+            }
+            else if (mPlugType == 0 && mLastPlugType != 0) {
+                mContext.sendBroadcast(new Intent(Intent.ACTION_POWER_DISCONNECTED));
+            }
+            
             mLastBatteryStatus = mBatteryStatus;
             mLastBatteryHealth = mBatteryHealth;
             mLastBatteryPresent = mBatteryPresent;
