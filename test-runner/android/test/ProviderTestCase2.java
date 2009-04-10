@@ -8,10 +8,15 @@ import android.test.mock.MockContentResolver;
 import android.database.DatabaseUtils;
 
 /**
- * If you would like to test a single content provider with an
- * {@link android.test.InstrumentationTestCase}, this provides some of the boiler plate in
- * {@link #setUp} and {@link #tearDown}.
- * @hide pending API council approval
+ * This TestCase class provides a framework for isolated testing of a single
+ * ContentProvider.  It uses a {@link android.test.mock.MockContentResolver} to
+ * access the provider, restricts the provider to an isolated area of the
+ * filesystem (for safely creating & modifying databases & files), and injects
+ * {@link android.test.IsolatedContext} to isolate the ContentProvider from the
+ * rest of the running system.
+ *
+ * <p>This environment is created automatically by {@link #setUp} and {@link
+ * #tearDown}.
  */
 public abstract class ProviderTestCase2<T extends ContentProvider> extends AndroidTestCase {
 

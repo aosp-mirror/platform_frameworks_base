@@ -7462,7 +7462,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     /**
-     * Provide haptic feedback to the user for this view.
+     * BZZZTT!!1!
+     * 
+     * <p>Provide haptic feedback to the user for this view.
      *
      * <p>The framework will provide haptic feedback for some built in actions,
      * such as long presses, but you may wish to provide feedback for your
@@ -7479,7 +7481,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     /**
-     * Like {@link #performHapticFeedback(int)}, with additional options.
+     * BZZZTT!!1!
+     * 
+     * <p>Like {@link #performHapticFeedback(int)}, with additional options.
      *
      * @param feedbackConstant One of the constants defined in
      * {@link HapticFeedbackConstants}

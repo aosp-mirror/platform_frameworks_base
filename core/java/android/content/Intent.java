@@ -1427,7 +1427,6 @@ public class Intent implements Parcelable {
 
     /**
      * Broadcast Action: An input method has been changed.
-     * {@hide pending API Council approval}
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_INPUT_METHOD_CHANGED =

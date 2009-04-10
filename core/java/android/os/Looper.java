@@ -175,9 +175,6 @@ public class Looper {
 
     /**
      * Return the Thread associated with this Looper.
-     * 
-     * @since CURRENT
-     * {@hide pending API Council approval}
      */
     public Thread getThread() {
         return mThread;

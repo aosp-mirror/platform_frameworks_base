@@ -131,7 +131,6 @@ public class SQLiteQuery extends SQLiteProgram {
         }
     }
     
-    /** {@hide pending API Council approval} */
     @Override
     public String toString() {
         return "SQLiteQuery: " + mQuery;

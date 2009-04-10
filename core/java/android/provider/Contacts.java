@@ -279,7 +279,9 @@ public class Contacts {
          * at least one E-mail or IM {@link ContactMethods} that match the
          * filter.
          * 
-         * @hide pending API council review
+         * Not exposed because we expect significant changes in the contacts
+         * schema and do not want to have to support this.
+         * @hide
          */
         public static final Uri WITH_EMAIL_OR_IM_FILTER_URI =
             Uri.parse("content://contacts/people/with_email_or_im_filter");
