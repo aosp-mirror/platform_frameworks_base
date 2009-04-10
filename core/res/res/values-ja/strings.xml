@@ -249,7 +249,7 @@
     <string name="permdesc_writeCalendar">"端末に保存したカレンダーの予定の変更をアプリケーションに許可します。悪意のあるアプリケーションが、カレンダーデータを消去/変更する恐れがあります。"</string>
     <string name="permlab_accessMockLocation">"仮の位置情報でテスト"</string>
     <string name="permdesc_accessMockLocation">"テスト用に仮の位置情報源を作成します。これにより悪意のあるアプリケーションが、GPS、ネットワークプロバイダなどから返される本当の位置情報や状況を改ざんする恐れがあります。"</string>
-    <string name="permlab_accessLocationExtraCommands">"位置情報プロバイダのその他のコマンドへのアクセス"</string>
+    <string name="permlab_accessLocationExtraCommands">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands">"位置情報提供元の追加コマンドにアクセスします。悪意のあるアプリケーションがGPSなどの位置提供の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation">"精細な位置情報（GPS）"</string>
     <string name="permdesc_accessFineLocation">"GPSなど携帯電話の位置情報にアクセスします（可能な場合）。今いる場所が悪意のあるアプリケーションに検出されたり、バッテリーの消費が増える恐れがあります。"</string>
@@ -731,7 +731,7 @@
     <string name="volume_alarm">"アラームの音量"</string>
     <string name="volume_notification">"通知音量"</string>
     <string name="volume_unknown">"音量"</string>
-    <string name="ringtone_default">"デフォルトの着信音"</string>
+    <string name="ringtone_default">"プリセット着信音"</string>
     <string name="ringtone_default_with_actual">"端末の基本着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent">"サイレント"</string>
     <string name="ringtone_picker_title">"着信音"</string>

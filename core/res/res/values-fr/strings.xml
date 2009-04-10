@@ -406,7 +406,7 @@
     <string name="lockscreen_network_locked_message">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message">"La carte SIM est verrouillée par code PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions">"Veuillez consulter le guide d\'utilisation ou contacter l\'assistance clientèle."</string>
-    <string name="lockscreen_sim_locked_message">"Téléphone verrouillé"</string>
+    <string name="lockscreen_sim_locked_message">"La carte SIM est verrouillé"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Déblocage de la carte SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Vous avez mal reproduit le motif de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="lockscreen_failed_attempts_almost_glogin">"Vous avez mal saisi le motif de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez débloquer votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
