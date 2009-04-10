@@ -354,7 +354,6 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
      * sub classes.
      * 
      * @see ContentObserver#onChange(boolean)
-     * @hide pending API Council approval
      */
     protected void onContentChanged() {
         if (mAutoRequery && mCursor != null && !mCursor.isClosed()) {

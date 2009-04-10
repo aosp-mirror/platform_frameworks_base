@@ -30,7 +30,9 @@ import java.io.OutputStream;
  * <li> bitsPerSample - usually 16 for PCM, 8 for ALAW, or 8 for ULAW.
  * <li> numBytes - size of audio data after this header, in bytes.
  * </ul>
- * @hide pending API council approval
+ * 
+ * Not yet ready to be supported, so
+ * @hide
  */
 public class WaveHeader {
     
