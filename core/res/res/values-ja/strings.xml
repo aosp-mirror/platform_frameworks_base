@@ -425,7 +425,7 @@
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"通知を消去"</string>
     <string name="status_bar_no_notifications_title">"通知なし"</string>
-    <string name="status_bar_ongoing_events_title">"操作中"</string>
+    <string name="status_bar_ongoing_events_title">"実行中"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
     <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"充電中..."</string>
@@ -788,7 +788,7 @@
     <string name="ext_media_safe_unmount_notification_title">"SDカードを安全に取り外しました"</string>
     <string name="ext_media_safe_unmount_notification_message">"SDカードを安全に取り外せます。"</string>
     <string name="ext_media_nomedia_notification_title">"SDカードが取り外されています"</string>
-    <string name="ext_media_nomedia_notification_message">"SDカードが取り外されました。新しいSDカードを挿入して端末のメモリを増やしてください。"</string>
+    <string name="ext_media_nomedia_notification_message">"SDカードがありません。メモリを使用する際はカードを挿入してください。"</string>
     <string name="activity_list_empty">"一致するアクティビティが見つかりません"</string>
     <string name="permlab_pkgUsageStats">"コンポーネント使用状況に関する統計情報の更新"</string>
     <string name="permdesc_pkgUsageStats">"収集されたコンポーネント使用状況に関する統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>
