@@ -19,8 +19,11 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+
+#include <utils/CallStack.h>
 #include <utils/threads.h>
 #include <utils/Singleton.h>
+#include <utils/KeyedVector.h>
 
 #include <hardware/gralloc.h>
 
@@ -42,11 +45,22 @@ public:
     status_t lock(buffer_handle_t handle, int usage, const Rect& bounds);
     status_t unlock(buffer_handle_t handle);
     
+    // dumps information about the mapping of this handle
+    void dump(buffer_handle_t handle);
+
 private:
     friend class Singleton<BufferMapper>;
     BufferMapper();
     mutable Mutex mLock;
     gralloc_module_t const *mAllocMod;
+    
+    struct map_info_t {
+        int count;
+        KeyedVector<CallStack, int> callstacks;
+    };
+    KeyedVector<buffer_handle_t, map_info_t> mMapInfo;
+    void logMapLocked(buffer_handle_t handle);
+    void logUnmapLocked(buffer_handle_t handle);
 };
 
 // ---------------------------------------------------------------------------

@@ -1699,9 +1699,12 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
         reinterpret_cast<gralloc_module_t const*>(pModule);
     if (native_buffer->getHandle(native_buffer, &bufferHandle) < 0)
         return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
-    if (module->map(module, bufferHandle, &native_buffer->bits) < 0)
+    int err = module->map(module, bufferHandle, &native_buffer->bits);
+    if (err < 0) {
+        LOGW_IF(err, "map(...) failed %d (%s)", err, strerror(-err));
         return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
-
+    }
+    
     native_buffer->common.incRef(&native_buffer->common);
     return (EGLImageKHR)native_buffer;
 }
@@ -1725,8 +1728,10 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
         buffer_handle_t bufferHandle;
         gralloc_module_t const* module =
             reinterpret_cast<gralloc_module_t const*>(pModule);
-        if (native_buffer->getHandle(native_buffer, &bufferHandle) == 0) {
-            module->unmap(module, bufferHandle);
+        int err = native_buffer->getHandle(native_buffer, &bufferHandle);
+        if (err == 0) {
+            int err = module->unmap(module, bufferHandle);
+            LOGW_IF(err, "unmap(...) failed %d (%s)", err, strerror(-err));
         }
     }
 

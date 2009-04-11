@@ -34,6 +34,13 @@
 
 #include <hardware/gralloc.h>
 
+// ---------------------------------------------------------------------------
+// enable mapping debugging
+#define DEBUG_MAPPINGS           1
+// never remove mappings from the list
+#define DEBUG_MAPPINGS_KEEP_ALL  1
+// ---------------------------------------------------------------------------
+
 namespace android {
 // ---------------------------------------------------------------------------
 
@@ -53,6 +60,10 @@ status_t BufferMapper::map(buffer_handle_t handle, void** addr)
     Mutex::Autolock _l(mLock);
     status_t err = mAllocMod->map(mAllocMod, handle, addr);
     LOGW_IF(err, "map(...) failed %d (%s)", err, strerror(-err));
+#if DEBUG_MAPPINGS
+    if (err == NO_ERROR)
+        logMapLocked(handle);
+#endif
     return err;
 }
 
@@ -61,6 +72,10 @@ status_t BufferMapper::unmap(buffer_handle_t handle)
     Mutex::Autolock _l(mLock);
     status_t err = mAllocMod->unmap(mAllocMod, handle);
     LOGW_IF(err, "unmap(...) failed %d (%s)", err, strerror(-err));
+#if DEBUG_MAPPINGS
+    if (err == NO_ERROR)
+        logUnmapLocked(handle);
+#endif
     return err;
 }
 
@@ -77,6 +92,69 @@ status_t BufferMapper::unlock(buffer_handle_t handle)
     status_t err = mAllocMod->unlock(mAllocMod, handle);
     LOGW_IF(err, "unlock(...) failed %d (%s)", err, strerror(-err));
     return err;
+}
+
+void BufferMapper::logMapLocked(buffer_handle_t handle)
+{
+    CallStack stack;
+    stack.update(2);
+    
+    map_info_t info;
+    ssize_t index = mMapInfo.indexOfKey(handle);
+    if (index >= 0) {
+        info = mMapInfo.valueAt(index);
+    }
+    
+    ssize_t stackIndex = info.callstacks.indexOfKey(stack);
+    if (stackIndex >= 0) {
+        info.callstacks.editValueAt(stackIndex) += 1;
+    } else {
+        info.callstacks.add(stack, 1);
+    }
+    
+    if (index < 0) {
+        info.count = 1;
+        mMapInfo.add(handle, info);
+    } else {
+        info.count++;
+        mMapInfo.replaceValueAt(index, info);
+    }
+}
+
+void BufferMapper::logUnmapLocked(buffer_handle_t handle)
+{    
+    ssize_t index = mMapInfo.indexOfKey(handle);
+    if (index < 0) {
+        LOGE("unmapping %p which doesn't exist!", handle);
+        return;
+    }
+    
+    map_info_t& info = mMapInfo.editValueAt(index);
+    info.count--;
+    if (info.count == 0) {
+#if DEBUG_MAPPINGS_KEEP_ALL
+        info.callstacks.clear();
+#else
+        mMapInfo.removeItemsAt(index, 1);
+#endif
+    }
+}
+
+void BufferMapper::dump(buffer_handle_t handle)
+{
+    Mutex::Autolock _l(mLock);
+    ssize_t index = mMapInfo.indexOfKey(handle);
+    if (index < 0) {
+        LOGD("handle %p is not mapped through BufferMapper", handle);
+        return;
+    }
+    
+    const map_info_t& info = mMapInfo.valueAt(index);
+    LOGD("dumping buffer_handle_t %p mappings (count=%d)", handle, info.count);
+    for (size_t i=0 ; i<info.callstacks.size() ; i++) {
+        LOGD("#%d, count=%d", i, info.callstacks.valueAt(i));
+        info.callstacks.keyAt(i).dump();
+    }
 }
 
 // ---------------------------------------------------------------------------

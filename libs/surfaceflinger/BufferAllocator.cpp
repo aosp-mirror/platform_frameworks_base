@@ -104,11 +104,13 @@ status_t BufferAllocator::free(buffer_handle_t handle)
 {
     Mutex::Autolock _l(mLock);
 
-#if ANDROID_GRALLOC_DEBUG    
-    if (handle->data[2]) {
-            CallStack s;
-            s.update();
-            s.dump("");
+#if ANDROID_GRALLOC_DEBUG
+    void* base = (void*)(handle->data[2]);
+    if (base) {
+        CallStack s;
+        s.update();
+        s.dump("");
+        BufferMapper::get().dump(handle);
     }
 #endif
 
@@ -143,9 +145,7 @@ status_t BufferAllocator::unmap(buffer_handle_t handle)
 {
     Mutex::Autolock _l(mLock);
     gralloc_module_t* mod = (gralloc_module_t*)mAllocDev->common.module;
-    status_t err = mod->unmap(mod, handle);
-    LOGW_IF(err, "unmap(...) failed %d (%s)", err, strerror(-err));
-    
+    status_t err = BufferMapper::get().unmap(handle);
     if (err == NO_ERROR) {
         Mutex::Autolock _l(sLock);
         KeyedVector<buffer_handle_t, alloc_rec_t>& list(sAllocList);

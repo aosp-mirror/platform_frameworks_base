@@ -81,7 +81,7 @@ public:
 private:
     friend class LightRefBase<Buffer>;
     Buffer(const Buffer& rhs);
-    ~Buffer();
+    virtual ~Buffer();
     Buffer& operator = (const Buffer& rhs);
     const Buffer& operator = (const Buffer& rhs) const;
 
