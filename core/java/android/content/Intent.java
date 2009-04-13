@@ -2079,6 +2079,12 @@ public class Intent implements Parcelable {
      * android.intent.action.VIEW; an application's custom action would be
      * something like com.google.app.myapp.CUSTOM_ACTION.
      *
+     * <p><em>Note: scheme and host name matching in the Android framework is
+     * case-sensitive, unlike the formal RFC.  As a result,
+     * you should always ensure that you write your Uri with these elements
+     * using lower case letters, and normalize any Uris you receive from
+     * outside of Android to ensure the scheme and host is lower case.</em></p>
+     *
      * @param action The Intent action, such as ACTION_VIEW.
      * @param uri The Intent data URI.
      */
@@ -2112,6 +2118,12 @@ public class Intent implements Parcelable {
      * This is equivalent using {@link #Intent(String, android.net.Uri)} to
      * construct the Intent and then calling {@link #setClass} to set its
      * class.
+     *
+     * <p><em>Note: scheme and host name matching in the Android framework is
+     * case-sensitive, unlike the formal RFC.  As a result,
+     * you should always ensure that you write your Uri with these elements
+     * using lower case letters, and normalize any Uris you receive from
+     * outside of Android to ensure the scheme and host is lower case.</em></p>
      *
      * @param action The Intent action, such as ACTION_VIEW.
      * @param uri The Intent data URI.
@@ -3162,6 +3174,12 @@ public class Intent implements Parcelable {
      * Set the data this intent is operating on.  This method automatically
      * clears any type that was previously set by {@link #setType}.
      *
+     * <p><em>Note: scheme and host name matching in the Android framework is
+     * case-sensitive, unlike the formal RFC.  As a result,
+     * you should always ensure that you write your Uri with these elements
+     * using lower case letters, and normalize any Uris you receive from
+     * outside of Android to ensure the scheme and host is lower case.</em></p>
+     *
      * @param data The URI of the data this intent is now targeting.
      *
      * @return Returns the same Intent object, for chaining multiple calls
@@ -3182,6 +3200,12 @@ public class Intent implements Parcelable {
      * only specify a type and not data, for example to indicate the type of
      * data to return.  This method automatically clears any data that was
      * previously set by {@link #setData}.
+     * 
+     * <p><em>Note: MIME type matching in the Android framework is
+     * case-sensitive, unlike formal RFC MIME types.  As a result,
+     * you should always write your MIME types with lower case letters,
+     * and any MIME types you receive from outside of Android should be
+     * converted to lower case before supplying them here.</em></p>
      *
      * @param type The MIME type of the data being handled by this intent.
      *
@@ -3203,6 +3227,13 @@ public class Intent implements Parcelable {
      * MIME data type.  This method should very rarely be used -- it allows you
      * to override the MIME type that would ordinarily be inferred from the
      * data with your own type given here.
+     *
+     * <p><em>Note: MIME type, Uri scheme, and host name matching in the
+     * Android framework is case-sensitive, unlike the formal RFC definitions.
+     * As a result, you should always write these elements with lower case letters,
+     * and normalize any MIME types or Uris you receive from
+     * outside of Android to ensure these elements are lower case before
+     * supplying them here.</em></p>
      *
      * @param data The URI of the data this intent is now targeting.
      * @param type The MIME type of the data being handled by this intent.
