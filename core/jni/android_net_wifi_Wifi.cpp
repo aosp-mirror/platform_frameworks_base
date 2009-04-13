@@ -291,6 +291,7 @@ static jboolean android_net_wifi_startPacketFiltering(JNIEnv* env, jobject clazz
 {
     return doBooleanCommand("DRIVER RXFILTER-ADD 0", "OK")
 	&& doBooleanCommand("DRIVER RXFILTER-ADD 1", "OK")
+	&& doBooleanCommand("DRIVER RXFILTER-ADD 3", "OK")
 	&& doBooleanCommand("DRIVER RXFILTER-START", "OK");
 }
 
@@ -298,6 +299,7 @@ static jboolean android_net_wifi_stopPacketFiltering(JNIEnv* env, jobject clazz)
 {
     jboolean result = doBooleanCommand("DRIVER RXFILTER-STOP", "OK");
     if (result) {
+	(void)doBooleanCommand("DRIVER RXFILTER-REMOVE 3", "OK");
 	(void)doBooleanCommand("DRIVER RXFILTER-REMOVE 1", "OK");
 	(void)doBooleanCommand("DRIVER RXFILTER-REMOVE 0", "OK");
     }
