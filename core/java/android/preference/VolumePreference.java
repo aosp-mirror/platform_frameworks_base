@@ -22,6 +22,7 @@ import android.database.ContentObserver;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -147,10 +148,16 @@ public class VolumePreference extends SeekBarPreference implements
                     System.getUriFor(System.VOLUME_SETTINGS[mStreamType]),
                     false, mVolumeObserver);
     
-            mRingtone = RingtoneManager.getRingtone(mContext,
-                    mStreamType == AudioManager.STREAM_NOTIFICATION
-                            ? Settings.System.DEFAULT_NOTIFICATION_URI
-                            : Settings.System.DEFAULT_RINGTONE_URI);
+            Uri defaultUri = null;
+            if (mStreamType == AudioManager.STREAM_RING) {
+                defaultUri = Settings.System.DEFAULT_RINGTONE_URI;
+            } else if (mStreamType == AudioManager.STREAM_NOTIFICATION) {
+                defaultUri = Settings.System.DEFAULT_NOTIFICATION_URI;
+            } else {
+                defaultUri = Settings.System.DEFAULT_ALARM_ALERT_URI;
+            }
+
+            mRingtone = RingtoneManager.getRingtone(mContext, defaultUri);
             mRingtone.setStreamType(mStreamType);
         }
         
