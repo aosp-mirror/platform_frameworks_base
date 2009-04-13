@@ -142,7 +142,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
         final int keyCode = event.getKeyCode();
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
-                case KeyEvent.KEYCODE_PLAYPAUSE:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                     /* Suppress PLAYPAUSE toggle when phone is ringing or
                      * in-call to avoid music playback */
                     if (mTelephonyManager == null) {
@@ -154,11 +154,11 @@ public abstract class KeyguardViewBase extends FrameLayout {
                         return true;  // suppress key event
                     }
                 case KeyEvent.KEYCODE_HEADSETHOOK: 
-                case KeyEvent.KEYCODE_STOP: 
-                case KeyEvent.KEYCODE_NEXTSONG: 
-                case KeyEvent.KEYCODE_PREVIOUSSONG: 
-                case KeyEvent.KEYCODE_REWIND: 
-                case KeyEvent.KEYCODE_FORWARD: {
+                case KeyEvent.KEYCODE_MEDIA_STOP: 
+                case KeyEvent.KEYCODE_MEDIA_NEXT: 
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS: 
+                case KeyEvent.KEYCODE_MEDIA_REWIND: 
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
                     Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
                     intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
                     getContext().sendOrderedBroadcast(intent, null);
@@ -190,12 +190,12 @@ public abstract class KeyguardViewBase extends FrameLayout {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_MUTE:
                 case KeyEvent.KEYCODE_HEADSETHOOK: 
-                case KeyEvent.KEYCODE_PLAYPAUSE: 
-                case KeyEvent.KEYCODE_STOP: 
-                case KeyEvent.KEYCODE_NEXTSONG: 
-                case KeyEvent.KEYCODE_PREVIOUSSONG: 
-                case KeyEvent.KEYCODE_REWIND: 
-                case KeyEvent.KEYCODE_FORWARD: {
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE: 
+                case KeyEvent.KEYCODE_MEDIA_STOP: 
+                case KeyEvent.KEYCODE_MEDIA_NEXT: 
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS: 
+                case KeyEvent.KEYCODE_MEDIA_REWIND: 
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
                     Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
                     intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
                     getContext().sendOrderedBroadcast(intent, null);
