@@ -26,8 +26,9 @@ import java.io.InputStream;
 
 /**
  * InputStream which transforms 16 bit pcm data to ulaw data.
- *
- * @hide pending API council approval
+ * 
+ * Not yet ready to be supported, so
+ * @hide
  */
 public final class UlawEncoderInputStream extends InputStream {
     private final static String TAG = "UlawEncoderInputStream";

@@ -275,7 +275,6 @@ public class RingtoneManager {
      * manager is returning.
      * 
      * @return The stream type.
-     * @hide Pending API Council approval
      */
     public int inferStreamType() {
         switch (mType) {

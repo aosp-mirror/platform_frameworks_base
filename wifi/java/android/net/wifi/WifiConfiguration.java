@@ -265,7 +265,6 @@ public class WifiConfiguration implements Parcelable {
             wepKeys[i] = null;
     }
 
-    /** {@hide pending API Council approval} */
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         if (this.status == WifiConfiguration.Status.CURRENT) {
