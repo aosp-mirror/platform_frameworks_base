@@ -269,10 +269,14 @@ public class MediaScanner
     private boolean mDefaultRingtoneSet;
     /** Whether the scanner has set a default sound for the notification ringtone. */
     private boolean mDefaultNotificationSet;
+    /** Whether the scanner has set a default sound for the alarm ringtone. */
+    private boolean mDefaultAlarmSet;
     /** The filename for the default sound for the ringer ringtone. */
     private String mDefaultRingtoneFilename;
     /** The filename for the default sound for the notification ringtone. */
     private String mDefaultNotificationFilename;
+    /** The filename for the default sound for the alarm ringtone. */
+    private String mDefaultAlarmAlertFilename;
     /**
      * The prefix for system properties that define the default sound for
      * ringtones. Concatenate the name of the setting from Settings
@@ -331,6 +335,8 @@ public class MediaScanner
                 + Settings.System.RINGTONE);
         mDefaultNotificationFilename = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
                 + Settings.System.NOTIFICATION_SOUND);
+        mDefaultAlarmAlertFilename = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
+                + Settings.System.ALARM_ALERT);
     }
     
     private MyMediaScannerClient mClient = new MyMediaScannerClient();
@@ -708,6 +714,12 @@ public class MediaScanner
                         doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
                     setSettingIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
                     mDefaultRingtoneSet = true;
+                }
+            } else if (alarms && !mDefaultAlarmSet) {
+                if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
+                    setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
+                    mDefaultAlarmSet = true;
                 }
             }
             

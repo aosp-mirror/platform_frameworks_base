@@ -122,8 +122,9 @@ public class RingtoneManager {
      * current ringtone, which will be used to show a checkmark next to the item
      * for this {@link Uri}. If showing an item for "Default" (@see
      * {@link #EXTRA_RINGTONE_SHOW_DEFAULT}), this can also be one of
-     * {@link System#DEFAULT_RINGTONE_URI} or
-     * {@link System#DEFAULT_NOTIFICATION_URI} to have the "Default" item
+     * {@link System#DEFAULT_RINGTONE_URI},
+     * {@link System#DEFAULT_NOTIFICATION_URI}, or
+     * {@link System#DEFAULT_ALARM_ALERT_URI} to have the "Default" item
      * checked.
      * 
      * @see #ACTION_RINGTONE_PICKER
@@ -134,8 +135,9 @@ public class RingtoneManager {
     /**
      * Given to the ringtone picker as a {@link Uri}. The {@link Uri} of the
      * ringtone to play when the user attempts to preview the "Default"
-     * ringtone. This can be one of {@link System#DEFAULT_RINGTONE_URI} or
-     * {@link System#DEFAULT_NOTIFICATION_URI} to have the "Default" point to
+     * ringtone. This can be one of {@link System#DEFAULT_RINGTONE_URI},
+     * {@link System#DEFAULT_NOTIFICATION_URI}, or
+     * {@link System#DEFAULT_ALARM_ALERT_URI} to have the "Default" point to
      * the current sound for the given default sound type. If you are showing a
      * ringtone picker for some other type of sound, you are free to provide any
      * {@link Uri} here.
@@ -163,8 +165,9 @@ public class RingtoneManager {
      * <p>
      * It will be one of:
      * <li> the picked ringtone,
-     * <li> a {@link Uri} that equals {@link System#DEFAULT_RINGTONE_URI} or
-     * {@link System#DEFAULT_NOTIFICATION_URI} if the default was chosen,
+     * <li> a {@link Uri} that equals {@link System#DEFAULT_RINGTONE_URI},
+     * {@link System#DEFAULT_NOTIFICATION_URI}, or
+     * {@link System#DEFAULT_ALARM_ALERT_URI} if the default was chosen,
      * <li> null if the "Silent" item was picked.
      * 
      * @see #ACTION_RINGTONE_PICKER
@@ -625,7 +628,8 @@ public class RingtoneManager {
      * 
      * @param context A context used for querying.
      * @param type The type whose default sound should be returned. One of
-     *            {@link #TYPE_RINGTONE} or {@link #TYPE_NOTIFICATION}.
+     *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
+     *            {@link #TYPE_ALARM}.
      * @return A {@link Uri} pointing to the default sound for the sound type.
      * @see #setActualDefaultRingtoneUri(Context, int, Uri)
      */
@@ -641,7 +645,8 @@ public class RingtoneManager {
      * 
      * @param context A context used for querying.
      * @param type The type whose default sound should be set. One of
-     *            {@link #TYPE_RINGTONE} or {@link #TYPE_NOTIFICATION}.
+     *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
+     *            {@link #TYPE_ALARM}.
      * @param ringtoneUri A {@link Uri} pointing to the default sound to set.
      * @see #getActualDefaultRingtoneUri(Context, int)
      */
@@ -656,6 +661,8 @@ public class RingtoneManager {
             return Settings.System.RINGTONE;
         } else if ((type & TYPE_NOTIFICATION) != 0) {
             return Settings.System.NOTIFICATION_SOUND;
+        } else if ((type & TYPE_ALARM) != 0) {
+            return Settings.System.ALARM_ALERT;
         } else {
             return null;
         }
@@ -675,8 +682,9 @@ public class RingtoneManager {
      * Returns the type of a default {@link Uri}.
      * 
      * @param defaultRingtoneUri The default {@link Uri}. For example,
-     *            {@link System#DEFAULT_RINGTONE_URI} or
-     *            {@link System#DEFAULT_NOTIFICATION_URI}.
+     *            {@link System#DEFAULT_RINGTONE_URI},
+     *            {@link System#DEFAULT_NOTIFICATION_URI}, or
+     *            {@link System#DEFAULT_ALARM_ALERT_URI}.
      * @return The type of the defaultRingtoneUri, or -1.
      */
     public static int getDefaultType(Uri defaultRingtoneUri) {
@@ -686,6 +694,8 @@ public class RingtoneManager {
             return TYPE_RINGTONE;
         } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_NOTIFICATION_URI)) {
             return TYPE_NOTIFICATION;
+        } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_ALARM_ALERT_URI)) {
+            return TYPE_ALARM;
         } else {
             return -1;
         }
@@ -705,6 +715,8 @@ public class RingtoneManager {
             return Settings.System.DEFAULT_RINGTONE_URI;
         } else if ((type & TYPE_NOTIFICATION) != 0) {
             return Settings.System.DEFAULT_NOTIFICATION_URI;
+        } else if ((type & TYPE_ALARM) != 0) {
+            return Settings.System.DEFAULT_ALARM_ALERT_URI;
         } else {
             return null;
         }
