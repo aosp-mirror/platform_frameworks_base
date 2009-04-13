@@ -679,12 +679,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_MUTE:
             case KeyEvent.KEYCODE_HEADSETHOOK: 
-            case KeyEvent.KEYCODE_PLAYPAUSE: 
-            case KeyEvent.KEYCODE_STOP: 
-            case KeyEvent.KEYCODE_NEXTSONG: 
-            case KeyEvent.KEYCODE_PREVIOUSSONG: 
-            case KeyEvent.KEYCODE_REWIND: 
-            case KeyEvent.KEYCODE_FORWARD:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE: 
+            case KeyEvent.KEYCODE_MEDIA_STOP: 
+            case KeyEvent.KEYCODE_MEDIA_NEXT: 
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS: 
+            case KeyEvent.KEYCODE_MEDIA_REWIND: 
+            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
             case KeyEvent.KEYCODE_CAMERA:
                 return false;
         }
