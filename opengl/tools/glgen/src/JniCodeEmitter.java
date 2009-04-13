@@ -1,6 +1,4 @@
 import java.io.PrintStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,7 +22,7 @@ public class JniCodeEmitter implements CodeEmitter {
     boolean mUseContextPointer = true;
 
     String mClassPathName;
-    
+
     ParameterChecker mChecker;
     PrintStream mJava10InterfaceStream;
     PrintStream mJava10ExtInterfaceStream;
@@ -47,7 +45,7 @@ public class JniCodeEmitter implements CodeEmitter {
     /**
      * @param java10InterfaceStream the PrintStream to which to emit the Java interface for GL 1.0 functions
      * @param java10ExtInterfaceStream the PrintStream to which to emit the Java interface for GL 1.0 extension functions
-     * @param java11InterfaceStream the PrintStream to which to emit the Java interface for GL 1.1 functions 
+     * @param java11InterfaceStream the PrintStream to which to emit the Java interface for GL 1.1 functions
      * @param java11ExtInterfaceStream the PrintStream to which to emit the Java interface for GL 1.1 Extension functions
      * @param java11ExtPackInterfaceStream the PrintStream to which to emit the Java interface for GL 1.1 Extension Pack functions
      * @param javaImplStream the PrintStream to which to emit the Java implementation
@@ -93,7 +91,7 @@ public class JniCodeEmitter implements CodeEmitter {
         JFunc jfunc;
         String signature;
         boolean duplicate;
-        
+
         if (cfunc.hasTypedPointerArg()) {
             jfunc = JFunc.convert(cfunc, true);
 
@@ -152,7 +150,7 @@ public class JniCodeEmitter implements CodeEmitter {
     public void emitJavaCode(JFunc jfunc, PrintStream out) {
         emitFunction(jfunc, out, false, false);
     }
-    
+
     void emitFunctionCall(JFunc jfunc, PrintStream out, String iii, boolean grabArray ) {
         boolean isVoid = jfunc.getType().isVoid();
         boolean isPointerFunc = jfunc.getName().endsWith("Pointer") &&
@@ -167,7 +165,7 @@ public class JniCodeEmitter implements CodeEmitter {
                     jfunc.getName() +
                     (isPointerFunc ? "Bounds" : "" ) +
                     "(");
-	
+
         int numArgs = jfunc.getNumArgs();
         for (int i = 0; i < numArgs; i++) {
             String argName = jfunc.getArgName(i);
@@ -177,7 +175,7 @@ public class JniCodeEmitter implements CodeEmitter {
                 String typeName = argType.getBaseType();
                 typeName = typeName.substring(9, typeName.length() - 6);
                 out.println(iii + indent + "get" + typeName + "Array(" + argName + "),");
-                out.print(iii + indent + "getOffset(" + argName + ")"); 
+                out.print(iii + indent + "getOffset(" + argName + ")");
             } else {
                 out.print(iii + indent + argName);
             }
@@ -192,7 +190,7 @@ public class JniCodeEmitter implements CodeEmitter {
                 out.println(",");
             }
         }
-	
+
         out.println(iii + ");");
     }
 
@@ -220,7 +218,7 @@ public class JniCodeEmitter implements CodeEmitter {
                     (mUseCPlusPlus ? "" : "_env, ") +
                     "IAEClass, " +
                     "\"" +
-                    (isBuffer ? 
+                    (isBuffer ?
                      "remaining()" : "length - " + offset) +
                     " < needed\");");
         out.println(iii + indent + "goto exit;");
@@ -345,21 +343,21 @@ public class JniCodeEmitter implements CodeEmitter {
                     if (emitExceptionCheck) {
                         out.println(iii + indent + "_exception = 1;");
                     }
-		    String exceptionClassName = "IAEClass";
-		    // If the "check" keyword was of the form
-		    // "check_<class name>", use the class name in the
-		    // exception to be thrown
-		    int underscore = checks[index].indexOf('_');
-		    if (underscore >= 0) {
-			exceptionClassName = checks[index].substring(underscore + 1) + "Class";
-		    }
+            String exceptionClassName = "IAEClass";
+            // If the "check" keyword was of the form
+            // "check_<class name>", use the class name in the
+            // exception to be thrown
+            int underscore = checks[index].indexOf('_');
+            if (underscore >= 0) {
+            exceptionClassName = checks[index].substring(underscore + 1) + "Class";
+            }
                     out.println(iii + indent +
                                 (mUseCPlusPlus ? "_env" : "(*_env)") +
                                 "->ThrowNew(" +
                                 (mUseCPlusPlus ? "" : "_env, ") +
-				exceptionClassName + ", " +
+                exceptionClassName + ", " +
                                 "\"" +
-                                (isBuffer ? 
+                                (isBuffer ?
                                  "remaining()" : "length - " + offset) +
                                 " < " + checks[index + 2] +
                                 "\");");
@@ -367,7 +365,7 @@ public class JniCodeEmitter implements CodeEmitter {
                     out.println(iii + indent + "goto exit;");
                     needsExit = true;
                     out.println(iii + "}");
-                
+
                     index += 3;
                 } else if (checks[index].equals("ifcheck")) {
                     String[] matches = checks[index + 4].split(",");
@@ -379,7 +377,7 @@ public class JniCodeEmitter implements CodeEmitter {
                                     checks[index + 3] +
                                     ") {");
                     }
-                    
+
                     for (int i = 0; i < matches.length; i++) {
                         out.println("#if defined(" + matches[i] + ")");
                         out.println(iii +
@@ -394,7 +392,7 @@ public class JniCodeEmitter implements CodeEmitter {
                                 ";");
                     out.println(iii +
                                 "        break;");
-                
+
                     lastWasIfcheck = true;
                     index += 5;
                 } else if (checks[index].equals("return")) {
@@ -439,7 +437,7 @@ public class JniCodeEmitter implements CodeEmitter {
 
         return false;
     }
-    
+
     /**
      * Emit a function in several variants:
      *
@@ -478,12 +476,12 @@ public class JniCodeEmitter implements CodeEmitter {
                         jfunc.getName() +
                         "(");
         }
-	
+
         int numArgs = jfunc.getNumArgs();
         for (int i = 0; i < numArgs; i++) {
             String argName = jfunc.getArgName(i);
             JType argType = jfunc.getArgType(i);
-	    
+
             out.print(indent + indent + argType + " " + argName);
             if (i == numArgs - 1) {
                 if (isPointerFunc && nativeDecl) {
@@ -568,7 +566,7 @@ public class JniCodeEmitter implements CodeEmitter {
         } else if (jType.isArray()) {
             jniName = "[";
         }
-	
+
         String baseType = jType.getBaseType();
         if (baseType.equals("int")) {
             jniName += "I";
@@ -604,7 +602,7 @@ public class JniCodeEmitter implements CodeEmitter {
             return "jobject";
         }
     }
-    
+
     String getJniMangledName(String name) {
         name = name.replaceAll("_", "_1");
         name = name.replaceAll(";", "_2");
@@ -614,7 +612,7 @@ public class JniCodeEmitter implements CodeEmitter {
 
     public void emitJniCode(JFunc jfunc, PrintStream out) {
         CFunc cfunc = jfunc.getCFunc();
-	
+
         // Emit comment identifying original C function
         //
         // Example:
@@ -658,13 +656,13 @@ public class JniCodeEmitter implements CodeEmitter {
         }
 
         // Append signature to function name
-        String sig = getJniMangledName(signature).replace('.', '_');        
+        String sig = getJniMangledName(signature).replace('.', '_');
         out.print("__" + sig);
         outName += "__" + sig;
-	
+
         signature = signature.replace('.', '/');
         rsignature = rsignature.replace('.', '/');
-	
+
         out.println();
         if (rsignature.length() == 0) {
             rsignature = "V";
@@ -718,7 +716,7 @@ public class JniCodeEmitter implements CodeEmitter {
             out.print(", jint remaining");
         }
         out.println(") {");
-	
+
         int numArrays = 0;
         int numBuffers = 0;
         for (int i = 0; i < nonPrimitiveArgs.size(); i++) {
@@ -740,7 +738,7 @@ public class JniCodeEmitter implements CodeEmitter {
         // Example:
         //
         // android::gl::ogles_context_t *ctx;
-        // 
+        //
         // jint _exception;
         // GLenum _returnValue;
         //
@@ -827,7 +825,7 @@ public class JniCodeEmitter implements CodeEmitter {
                 out.println(indent +
                             decl +
                             (decl.endsWith("*") ? "" : " ") +
-                            jfunc.getArgName(idx) + 
+                            jfunc.getArgName(idx) +
                             " = (" + decl + ") 0;");
             }
 
@@ -843,7 +841,7 @@ public class JniCodeEmitter implements CodeEmitter {
             for (int i = 0; i < nonPrimitiveArgs.size(); i++) {
                 int idx = nonPrimitiveArgs.get(i).intValue();
                 int cIndex = jfunc.getArgCIndex(idx);
-		
+
                 String cname = cfunc.getArgName(cIndex);
                 offset = numArrays <= 1 ? "offset" :
                     cname + "Offset";
@@ -852,7 +850,7 @@ public class JniCodeEmitter implements CodeEmitter {
 
                 if (jfunc.getArgType(idx).isArray()) {
                     out.println(indent +
-                                "if (!" + 
+                                "if (!" +
                                 cname +
                                 "_ref) {");
                     if (emitExceptionCheck) {
@@ -884,7 +882,7 @@ public class JniCodeEmitter implements CodeEmitter {
                     out.println(indent + "}");
 
                     out.println(indent + remaining + " = " +
-                                    (mUseCPlusPlus ? "_env" : "(*_env)") + 
+                                    (mUseCPlusPlus ? "_env" : "(*_env)") +
                                     "->GetArrayLength(" +
                                     (mUseCPlusPlus ? "" : "_env, ") +
                                     cname + "_ref) - " + offset + ";");
@@ -901,7 +899,7 @@ public class JniCodeEmitter implements CodeEmitter {
                     out.println(indent + "    " +
                                 (mUseCPlusPlus ? "_env" : "(*_env)") +
                                 "->GetPrimitiveArrayCritical(" +
-                                (mUseCPlusPlus ? "" : "_env, ") + 
+                                (mUseCPlusPlus ? "" : "_env, ") +
                                 jfunc.getArgName(idx) +
                                 "_ref, (jboolean *)0);");
                     out.println(indent +
@@ -917,7 +915,7 @@ public class JniCodeEmitter implements CodeEmitter {
                         out.println(indent + "if (" + cname + "_buf) {");
                         out.print(indent);
                     }
-                    
+
                     out.println(indent +
                                 cname +
                                 " = (" +
@@ -950,10 +948,10 @@ public class JniCodeEmitter implements CodeEmitter {
                 name.substring(1, name.length());
             out.print("ctx->procs.");
         }
-        
+
         out.print(name + (isPointerFunc ? "Bounds" : "") + "(");
 
-        numArgs = cfunc.getNumArgs();    
+        numArgs = cfunc.getNumArgs();
         if (numArgs == 0) {
             if (mUseContextPointer) {
                 out.println("ctx);");
@@ -1006,7 +1004,7 @@ public class JniCodeEmitter implements CodeEmitter {
 
                 int cIndex = jfunc.getArgCIndex(idx);
                 if (jfunc.getArgType(idx).isArray()) {
-		    
+
                     // If the argument is 'const', GL will not write to it.
                     // In this case, we can use the 'JNI_ABORT' flag to avoid
                     // the need to write back to the Java array
@@ -1015,7 +1013,7 @@ public class JniCodeEmitter implements CodeEmitter {
                     out.println(indent + indent +
                                 (mUseCPlusPlus ? "_env" : "(*_env)") +
                                 "->ReleasePrimitiveArrayCritical(" +
-                                (mUseCPlusPlus ? "" : "_env, ") + 
+                                (mUseCPlusPlus ? "" : "_env, ") +
                                 jfunc.getArgName(idx) + "_ref, " +
                                 cfunc.getArgName(cIndex) +
                                 "_base,");
@@ -1070,7 +1068,7 @@ public class JniCodeEmitter implements CodeEmitter {
 
         mCStream.println("};");
         mCStream.println();
-    
+
 
         mCStream.println("int register_com_google_android_gles_jni_GLImpl(JNIEnv *_env)");
         mCStream.println("{");

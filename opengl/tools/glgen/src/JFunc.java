@@ -49,7 +49,7 @@ public class JFunc {
     public String getClassName() {
         return className;
     }
-    
+
     public boolean hasBufferArg() {
         return hasBufferArg;
     }
@@ -107,7 +107,7 @@ public class JFunc {
         JFunc jfunc = new JFunc(cfunc);
         jfunc.setName(cfunc.getName());
         jfunc.setType(JType.convert(cfunc.getType(), false));
-	
+
         int numArgs = cfunc.getNumArgs();
         int numOffsets = 0;
         for (int i = 0; i < numArgs; i++) {
@@ -134,6 +134,7 @@ public class JFunc {
         return jfunc;
     }
 
+    @Override
     public String toString() {
         String s =  "Function " + fname + " returns " + ftype + ": ";
         for (int i = 0; i < argNames.size(); i++) {
