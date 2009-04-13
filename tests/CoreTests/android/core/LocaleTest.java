@@ -52,6 +52,48 @@ public class LocaleTest extends TestCase {
         assertEquals("en_US_POSIX", locale.toString());
     }
 
+    /*
+     * Tests some must-have locales. TODO: Add back "de". See discussion
+     * immediately below this method.
+     */
+    @LargeTest
+    public void testResourceBundles() throws Exception {
+        Locale eng = new Locale("en", "US");
+        DateFormatSymbols engSymbols = new DateFormatSymbols(eng);
+        
+        //Locale deu = new Locale("de", "DE");
+        //DateFormatSymbols deuSymbols = new DateFormatSymbols(deu);
+        
+        TimeZone berlin = TimeZone.getTimeZone("Europe/Berlin");
+        
+        assertEquals("January", engSymbols.getMonths()[0]);
+        //assertEquals("Januar", deuSymbols.getMonths()[0]);
+
+        assertEquals("Sunday", engSymbols.getWeekdays()[Calendar.SUNDAY]);
+        //assertEquals("Sonntag", deuSymbols.getWeekdays()[Calendar.SUNDAY]);
+        
+        assertEquals("Central European Time",
+                berlin.getDisplayName(false, TimeZone.LONG, eng));
+        assertEquals("Central European Summer Time",
+                berlin.getDisplayName(true, TimeZone.LONG, eng));
+
+        //assertEquals("Mitteleurop\u00E4ische Zeit",
+        //        berlin.getDisplayName(false, TimeZone.LONG, deu));
+        //assertEquals("Mitteleurop\u00E4ische Sommerzeit",
+        //        berlin.getDisplayName(true, TimeZone.LONG, deu));
+        
+        assertTrue(engSymbols.getZoneStrings().length > 100);
+    }
+
+    /*
+     * Disabled version of the above test. The version above omits
+     * checks for stuff in the "de" locale, because we stripped that
+     * out as part of the flash reduction effort (so that we could
+     * still ship on Dream). We expect to have a baseline target that
+     * includes a large enough system partition to include "de"
+     * immediately after the last official release for Dream (whenever
+     * that may be).
+     * 
     // Test some must-have locales.
     @LargeTest
     public void testResourceBundles() throws Exception {
@@ -81,7 +123,8 @@ public class LocaleTest extends TestCase {
         
         assertTrue(engSymbols.getZoneStrings().length > 100);
     }
-    
+    */
+
     // Regression test for 1118570: Create test cases for tracking ICU config
     // changes. This one makes sure we have all necessary locales installed.
     @MediumTest
