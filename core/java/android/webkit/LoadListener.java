@@ -29,7 +29,6 @@ import android.net.http.SslCertificate;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Config;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
 
@@ -134,7 +133,7 @@ class LoadListener extends Handler implements EventHandler {
 
     LoadListener(Context context, BrowserFrame frame, String url,
             int nativeLoader, boolean synchronous, boolean isMainPageLoader) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener constructor url=" + url);
         }
         mContext = context;
@@ -285,7 +284,7 @@ class LoadListener extends Handler implements EventHandler {
      * directly
      */
     public void headers(Headers headers) {
-        if (Config.LOGV) Log.v(LOGTAG, "LoadListener.headers");
+        if (WebView.LOGV_ENABLED) Log.v(LOGTAG, "LoadListener.headers");
         sendMessageInternal(obtainMessage(MSG_CONTENT_HEADERS, headers));
     }
 
@@ -432,7 +431,7 @@ class LoadListener extends Handler implements EventHandler {
      */
     public void status(int majorVersion, int minorVersion,
             int code, /* Status-Code value */ String reasonPhrase) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener: from: " + mUrl
                     + " major: " + majorVersion
                     + " minor: " + minorVersion
@@ -489,7 +488,7 @@ class LoadListener extends Handler implements EventHandler {
      * directly
      */
     public void error(int id, String description) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.error url:" +
                     url() + " id:" + id + " description:" + description);
         }
@@ -517,7 +516,7 @@ class LoadListener extends Handler implements EventHandler {
      * mDataBuilder is a thread-safe structure.
      */
     public void data(byte[] data, int length) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.data(): url: " + url());
         }
 
@@ -555,7 +554,7 @@ class LoadListener extends Handler implements EventHandler {
      * directly
      */
     public void endData() {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.endData(): url: " + url());
         }
         sendMessageInternal(obtainMessage(MSG_CONTENT_FINISHED));
@@ -608,7 +607,7 @@ class LoadListener extends Handler implements EventHandler {
                 // before calling it.
                 if (mCacheLoader != null) {
                     mCacheLoader.load();
-                    if (Config.LOGV) {
+                    if (WebView.LOGV_ENABLED) {
                         Log.v(LOGTAG, "LoadListener cache load url=" + url());
                     }
                     return;
@@ -658,7 +657,7 @@ class LoadListener extends Handler implements EventHandler {
                     CacheManager.HEADER_KEY_IFNONEMATCH) &&
                     !headers.containsKey(
                             CacheManager.HEADER_KEY_IFMODIFIEDSINCE)) {
-                if (Config.LOGV) {
+                if (WebView.LOGV_ENABLED) {
                     Log.v(LOGTAG, "FrameLoader: HTTP URL in cache " +
                             "and usable: " + url());
                 }
@@ -677,7 +676,7 @@ class LoadListener extends Handler implements EventHandler {
      * directly
      */
     public void handleSslErrorRequest(SslError error) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG,
                     "LoadListener.handleSslErrorRequest(): url:" + url() +
                     " primary error: " + error.getPrimaryError() +
@@ -743,7 +742,7 @@ class LoadListener extends Handler implements EventHandler {
      * are null, cancel the request.
      */
     void handleAuthResponse(String username, String password) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.handleAuthResponse: url: " + mUrl
                     + " username: " + username
                     + " password: " + password);
@@ -840,7 +839,7 @@ class LoadListener extends Handler implements EventHandler {
     }
 
     void attachRequestHandle(RequestHandle requestHandle) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.attachRequestHandle(): " +
                     "requestHandle: " +  requestHandle);
         }
@@ -848,7 +847,7 @@ class LoadListener extends Handler implements EventHandler {
     }
 
     void detachRequestHandle() {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.detachRequestHandle(): " +
                     "requestHandle: " + mRequestHandle);
         }
@@ -887,7 +886,7 @@ class LoadListener extends Handler implements EventHandler {
      */
     static boolean willLoadFromCache(String url) {
         boolean inCache = CacheManager.getCacheFile(url, null) != null;
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "willLoadFromCache: " + url + " in cache: " + 
                     inCache);
         }
@@ -1057,7 +1056,7 @@ class LoadListener extends Handler implements EventHandler {
      * EventHandler's method call.
      */
     public void cancel() {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             if (mRequestHandle == null) {
                 Log.v(LOGTAG, "LoadListener.cancel(): no requestHandle");
             } else {
@@ -1189,7 +1188,7 @@ class LoadListener extends Handler implements EventHandler {
             tearDown();
         }
 
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.onRedirect(): redirect to: " +
                     redirectTo);
         }
@@ -1203,7 +1202,7 @@ class LoadListener extends Handler implements EventHandler {
             Pattern.compile("^((?:[xX]-)?[a-zA-Z\\*]+/[\\w\\+\\*-]+[\\.[\\w\\+-]+]*)$");
 
     private void parseContentTypeHeader(String contentType) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.parseContentTypeHeader: " +
                     "contentType: " + contentType);
         }
@@ -1390,7 +1389,7 @@ class LoadListener extends Handler implements EventHandler {
      */
     private String guessMimeTypeFromExtension() {
         // PENDING: need to normalize url
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "guessMimeTypeFromExtension: mURL = " + mUrl);
         }
 
@@ -1425,7 +1424,7 @@ class LoadListener extends Handler implements EventHandler {
      * Cycle through our messages for synchronous loads.
      */
     /* package */ void loadSynchronousMessages() {
-        if (Config.DEBUG && !mSynchronous) {
+        if (WebView.DEBUG && !mSynchronous) {
             throw new AssertionError();
         }
         // Note: this can be called twice if it is a synchronous network load,

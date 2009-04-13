@@ -42,7 +42,6 @@ import android.text.IClipboard;
 import android.text.Selection;
 import android.text.Spannable;
 import android.util.AttributeSet;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Gravity;
@@ -110,7 +109,7 @@ public class WebView extends AbsoluteLayout
     // keep debugging parameters near the top of the file
     static final String LOGTAG = "webview";
     static final boolean DEBUG = false;
-    static final boolean LOGV_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean LOGV_ENABLED = DEBUG;
 
     private class ExtendedZoomControls extends FrameLayout {
         public ExtendedZoomControls(Context context, AttributeSet attrs) {

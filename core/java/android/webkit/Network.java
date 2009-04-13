@@ -20,7 +20,6 @@ import android.content.Context;
 import android.net.http.*;
 import android.os.*;
 import android.util.Log;
-import android.util.Config;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -133,7 +132,7 @@ class Network {
      * XXX: Must be created in the same thread as WebCore!!!!!
      */
     private Network(Context context) {
-        if (Config.DEBUG) {
+        if (WebView.DEBUG) {
             Assert.assertTrue(Thread.currentThread().
                     getName().equals(WebViewCore.THREAD_NAME));
         }
@@ -233,7 +232,7 @@ class Network {
      * connecting through the proxy.
      */
     public synchronized void setProxyUsername(String proxyUsername) {
-        if (Config.DEBUG) {
+        if (WebView.DEBUG) {
             Assert.assertTrue(isValidProxySet());
         }
 
@@ -253,7 +252,7 @@ class Network {
      * connecting through the proxy.
      */
     public synchronized void setProxyPassword(String proxyPassword) {
-        if (Config.DEBUG) {
+        if (WebView.DEBUG) {
             Assert.assertTrue(isValidProxySet());
         }
 
@@ -267,7 +266,7 @@ class Network {
      * @return True iff succeeds.
      */
     public boolean saveState(Bundle outState) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "Network.saveState()");
         }
 
@@ -281,7 +280,7 @@ class Network {
      * @return True iff succeeds.
      */
     public boolean restoreState(Bundle inState) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "Network.restoreState()");
         }
 
@@ -301,7 +300,7 @@ class Network {
      * @param loader The loader that resulted in SSL errors.
      */
     public void handleSslErrorRequest(LoadListener loader) {
-        if (Config.DEBUG) Assert.assertNotNull(loader);
+        if (WebView.DEBUG) Assert.assertNotNull(loader);
         if (loader != null) {
             mSslErrorHandler.handleSslErrorRequest(loader);
         }
@@ -314,7 +313,7 @@ class Network {
      * authentication request.
      */
     public void handleAuthRequest(LoadListener loader) {
-        if (Config.DEBUG) Assert.assertNotNull(loader);
+        if (WebView.DEBUG) Assert.assertNotNull(loader);
         if (loader != null) {
             mHttpAuthHandler.handleAuthRequest(loader);
         }
