@@ -527,7 +527,7 @@ final class WebViewCore {
             "DELETE_SELECTION", // = 122;
             "LISTBOX_CHOICES", // = 123;
             "SINGLE_LISTBOX_CHOICE", // = 124;
-            "125",
+            "MESSAGE_RELAY", // = 125;
             "SET_BACKGROUND_COLOR", // = 126;
             "UNBLOCK_FOCUS", // = 127;
             "SAVE_DOCUMENT_STATE", // = 128;
@@ -573,6 +573,7 @@ final class WebViewCore {
         static final int DELETE_SELECTION = 122;
         static final int LISTBOX_CHOICES = 123;
         static final int SINGLE_LISTBOX_CHOICE = 124;
+        static final int MESSAGE_RELAY = 125;
         static final int SET_BACKGROUND_COLOR = 126;
         static final int UNBLOCK_FOCUS = 127;
         static final int SAVE_DOCUMENT_STATE = 128;
@@ -1005,6 +1006,12 @@ final class WebViewCore {
                             // (See public method WebView.clearView)
                             nativeClearContent();
                             break;
+
+                        case MESSAGE_RELAY:
+                            if (msg.obj instanceof Message) {
+                                ((Message) msg.obj).sendToTarget();
+                            }
+                            break;
                     }
                 }
             };
@@ -1422,9 +1429,14 @@ final class WebViewCore {
             return;
         }
         if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_BY_MSG_ID, dx, dy, 
-                    new Boolean(animate)).sendToTarget();
+            Message msg = Message.obtain(mWebView.mPrivateHandler,
+                    WebView.SCROLL_BY_MSG_ID, dx, dy, new Boolean(animate));
+            if (mDrawIsScheduled) {
+                mEventHub.sendMessage(Message.obtain(null,
+                        EventHub.MESSAGE_RELAY, msg));
+            } else {
+                msg.sendToTarget();
+            }
         }
     }
 
@@ -1441,8 +1453,14 @@ final class WebViewCore {
             return;
         }
         if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_TO_MSG_ID, x, y).sendToTarget();
+            Message msg = Message.obtain(mWebView.mPrivateHandler,
+                    WebView.SCROLL_TO_MSG_ID, x, y);
+            if (mDrawIsScheduled) {
+                mEventHub.sendMessage(Message.obtain(null,
+                        EventHub.MESSAGE_RELAY, msg));
+            } else {
+                msg.sendToTarget();
+            }
         }
     }
 
@@ -1459,8 +1477,14 @@ final class WebViewCore {
             return;
         }
         if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SPAWN_SCROLL_TO_MSG_ID, x, y).sendToTarget();
+            Message msg = Message.obtain(mWebView.mPrivateHandler,
+                    WebView.SPAWN_SCROLL_TO_MSG_ID, x, y);
+            if (mDrawIsScheduled) {
+                mEventHub.sendMessage(Message.obtain(null,
+                        EventHub.MESSAGE_RELAY, msg));
+            } else {
+                msg.sendToTarget();
+            }
         }
     }
 
@@ -1592,11 +1616,6 @@ final class WebViewCore {
                         mViewportWidth, scaleLimit).sendToTarget();
             }
 
-            // if no restored offset, move the new page to (0, 0)
-            Message.obtain(mWebView.mPrivateHandler, WebView.SCROLL_TO_MSG_ID,
-                    mRestoredX, mRestoredY).sendToTarget();
-            mRestoredX = mRestoredY = 0;
-
             // force an early draw for quick feedback after the first layout
             if (mCurrentViewWidth != 0) {
                 synchronized (this) {
@@ -1604,10 +1623,19 @@ final class WebViewCore {
                         mEventHub.removeMessages(EventHub.WEBKIT_DRAW);
                     }
                     mDrawIsScheduled = true;
+                    // if no restored offset, move the new page to (0, 0)
+                    mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
+                            EventHub.MESSAGE_RELAY, Message.obtain(
+                                    mWebView.mPrivateHandler,
+                                    WebView.SCROLL_TO_MSG_ID, mRestoredX,
+                                    mRestoredY)));
                     mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
                             EventHub.WEBKIT_DRAW));
                 }
             }
+
+            // reset restored offset
+            mRestoredX = mRestoredY = 0;
         }
     }
 
