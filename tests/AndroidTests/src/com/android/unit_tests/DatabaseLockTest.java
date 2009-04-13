@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,7 +30,11 @@ import junit.framework.TestCase;
 
 /* 
  * This is a series of unit tests for database locks.
+ *
+ * Suppress these tests for now, since they have has inconsistent results.
+ * This should be turned into a performance tracking test.
  */
+@Suppress
 public class DatabaseLockTest extends AndroidTestCase {
 
     private static final int NUM_ITERATIONS = 100;
@@ -66,7 +71,7 @@ public class DatabaseLockTest extends AndroidTestCase {
      * same database at the same time with the same prioritization, neither thread 
      * is locked out and prevented from accessing the database.
      */
-    @LargeTest
+    @Suppress
     public void testLockFairness() {
         startDatabaseFairnessThread();
         int previous = 0;
@@ -116,7 +121,7 @@ public class DatabaseLockTest extends AndroidTestCase {
      * the same database, the locking/unlocking of the database is done within an
      * appropriate amount of time (MAX_ALLOWED_LATENCY_TIME).
      */
-    @LargeTest
+    @Suppress
     public void testLockLatency() {
         startDatabaseLatencyThread();
         int previous = 0;
