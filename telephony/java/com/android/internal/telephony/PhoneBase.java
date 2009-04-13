@@ -360,7 +360,7 @@ public abstract class PhoneBase implements Phone {
             return; // no match possible
         }
         language.toLowerCase();
-        if (null != country) {
+        if (null == country) {
             country = "";
         }
         country = country.toUpperCase();
@@ -374,10 +374,11 @@ public abstract class PhoneBase implements Phone {
                 for(int i = 0; i < N; i++) {
                     if (locales[i]!=null && locales[i].length() >= 2 &&
                             locales[i].substring(0,2).equals(language)) {
-                        if (locales[i].length() >= 5 &&
-                                locales[i].substring(3,5).equals(country)) {
-                            bestMatch = locales[i];
-                            break;
+                        if (locales[i].length() >= 5) {
+                            if (locales[i].substring(3,5).equals(country)) {
+                                bestMatch = locales[i];
+                                break;
+                            }
                         } else if (null == bestMatch) {
                             bestMatch = locales[i];
                         }
@@ -386,7 +387,6 @@ public abstract class PhoneBase implements Phone {
                 if (null != bestMatch) {
                     IActivityManager am = ActivityManagerNative.getDefault();
                     Configuration config = am.getConfiguration();
-
                     if (bestMatch.length() >= 5) {
                         config.locale = new Locale(bestMatch.substring(0,2),
                                                    bestMatch.substring(3,5));
