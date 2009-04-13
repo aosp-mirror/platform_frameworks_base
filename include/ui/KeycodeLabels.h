@@ -107,12 +107,12 @@ static const KeycodeLabel KEYCODES[] = {
     { "MENU", 82 },
     { "NOTIFICATION", 83 },
     { "SEARCH", 84 },
-    { "PLAYPAUSE", 85 },
-    { "STOP", 86 },
-    { "NEXTSONG", 87 },
-    { "PREVIOUSSONG", 88 },
-    { "REWIND", 89 },
-    { "FORWARD", 90 },
+    { "MEDIA_PLAY_PAUSE", 85 },
+    { "MEDIA_STOP", 86 },
+    { "MEDIA_NEXT", 87 },
+    { "MEDIA_PREVIOUS", 88 },
+    { "MEDIA_REWIND", 89 },
+    { "MEDIA_FAST_FORWARD", 90 },
     { "MUTE", 91 },
 
     // NOTE: If you add a new keycode here you must also add it to:

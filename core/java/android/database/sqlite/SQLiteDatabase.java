@@ -1143,7 +1143,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param initialRead set the initial count of items to read from the cursor
      * @param maxRead set the count of items to read on each iteration after the first
      * @return A {@link Cursor} object, which is positioned before the first entry
-     * @hide pending API council approval
+     * 
+     * This work is incomplete and not fully tested or reviewed, so currently
+     * hidden.
+     * @hide
      */
     public Cursor rawQuery(String sql, String[] selectionArgs, 
             int initialRead, int maxRead) {

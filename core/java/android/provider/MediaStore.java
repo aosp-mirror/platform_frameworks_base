@@ -1152,19 +1152,25 @@ public final class MediaStore
              * and indicates the number of songs on the album by the given
              * artist.
              * <P>Type: INTEGER</P>
-             *
-             * @hide pending API Council approval
              */
             public static final String NUMBER_OF_SONGS_FOR_ARTIST = "numsongs_by_artist";
 
             /**
-             * The year in which the earliest and latest songs
-             * on this album were released. These will often
-             * be the same, but for compilation albums they
-             * might differ.
+             * The year in which the earliest songs
+             * on this album were released. This will often
+             * be the same as {@link #LAST_YEAR}, but for compilation albums
+             * they might differ.
              * <P>Type: INTEGER</P>
              */
             public static final String FIRST_YEAR = "minyear";
+            
+            /**
+             * The year in which the latest songs
+             * on this album were released. This will often
+             * be the same as {@link #FIRST_YEAR}, but for compilation albums
+             * they might differ.
+             * <P>Type: INTEGER</P>
+             */
             public static final String LAST_YEAR = "maxyear";
 
             /**

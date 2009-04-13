@@ -61,7 +61,6 @@ public abstract class ResourceCursorAdapter extends CursorAdapter {
      * @param autoRequery If true the adapter will call requery() on the
      *                    cursor whenever it changes so the most recent
      *                    data is always displayed.
-     * @hide Pending API Council approval
      */
     public ResourceCursorAdapter(Context context, int layout, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);

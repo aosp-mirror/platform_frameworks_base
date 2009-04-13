@@ -135,7 +135,6 @@ public class Scroller  {
      * Returns the start X offset in the scroll. 
      * 
      * @return The start X offset as an absolute distance from the origin.
-     * @hide pending API council
      */
     public final int getStartX() {
         return mStartX;
@@ -145,7 +144,6 @@ public class Scroller  {
      * Returns the start Y offset in the scroll. 
      * 
      * @return The start Y offset as an absolute distance from the origin.
-     * @hide pending API council
      */
     public final int getStartY() {
         return mStartY;

@@ -111,14 +111,13 @@ public class KeyEvent implements Parcelable {
     public static final int KEYCODE_MENU            = 82;
     public static final int KEYCODE_NOTIFICATION    = 83;
     public static final int KEYCODE_SEARCH          = 84;
-    public static final int KEYCODE_PLAYPAUSE       = 85;
-    public static final int KEYCODE_STOP            = 86;
-    public static final int KEYCODE_NEXTSONG        = 87;
-    public static final int KEYCODE_PREVIOUSSONG    = 88;
-    public static final int KEYCODE_REWIND          = 89;
-    public static final int KEYCODE_FORWARD         = 90;
+    public static final int KEYCODE_MEDIA_PLAY_PAUSE= 85;
+    public static final int KEYCODE_MEDIA_STOP      = 86;
+    public static final int KEYCODE_MEDIA_NEXT      = 87;
+    public static final int KEYCODE_MEDIA_PREVIOUS  = 88;
+    public static final int KEYCODE_MEDIA_REWIND    = 89;
+    public static final int KEYCODE_MEDIA_FAST_FORWARD = 90;
     public static final int KEYCODE_MUTE            = 91;
-    private static final int LAST_KEYCODE           = KEYCODE_MUTE;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -127,7 +126,15 @@ public class KeyEvent implements Parcelable {
     //  frameworks/base/core/res/res/values/attrs.xml
     //  commands/monkey/Monkey.java
     //  emulator?
+    //
+    //  Also Android currently does not reserve code ranges for vendor-
+    //  specific key codes.  If you have new key codes to have, you
+    //  MUST contribute a patch to the open source project to define
+    //  those new codes.  This is intended to maintain a consistent
+    //  set of key code definitions across all Android devices.
    
+    private static final int LAST_KEYCODE           = KEYCODE_MUTE;
+    
     /**
      * @deprecated There are now more than MAX_KEYCODE keycodes.
      * Use {@link #getMaxKeyCode()} instead.
@@ -582,12 +589,12 @@ public class KeyEvent implements Parcelable {
         case KEYCODE_MUTE:
         case KEYCODE_POWER:
         case KEYCODE_HEADSETHOOK:
-        case KEYCODE_PLAYPAUSE:
-        case KEYCODE_STOP:
-        case KEYCODE_NEXTSONG:
-        case KEYCODE_PREVIOUSSONG:
-        case KEYCODE_REWIND:
-        case KEYCODE_FORWARD:
+        case KEYCODE_MEDIA_PLAY_PAUSE:
+        case KEYCODE_MEDIA_STOP:
+        case KEYCODE_MEDIA_NEXT:
+        case KEYCODE_MEDIA_PREVIOUS:
+        case KEYCODE_MEDIA_REWIND:
+        case KEYCODE_MEDIA_FAST_FORWARD:
         case KEYCODE_CAMERA:
         case KEYCODE_FOCUS:
         case KEYCODE_SEARCH:

@@ -944,7 +944,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Returns the list's text filter, if available. 
      * @return the list's text filter or null if filtering isn't enabled
-     * @hide pending API Council approval
      */
     public CharSequence getTextFilter() {
         if (mTextFilterEnabled && mTextFilter != null) {

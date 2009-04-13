@@ -186,9 +186,7 @@ public class ViewDebug {
     /**
      * This annotation can be used to mark fields and methods to be dumped when
      * the view is captured. Methods with this annotation must have no arguments
-     * and must return <some type of data>.
-     * 
-     * @hide pending API Council approval
+     * and must return a valid type of data.
      */
     @Target({ ElementType.FIELD, ElementType.METHOD })
     @Retention(RetentionPolicy.RUNTIME)
@@ -1345,13 +1343,11 @@ public class ViewDebug {
     }
     
     /**
-     * dump view info for id based instrument test generation 
+     * Dump view info for id based instrument test generation 
      * (and possibly further data analysis). The results are dumped
      * to the log. 
      * @param tag for log
      * @param view for dump
-     * 
-     * @hide pending API Council approval
      */
     public static void dumpCapturedView(String tag, Object view) {        
         Class<?> klass = view.getClass();

@@ -231,7 +231,7 @@ public class Gravity
     }
 
     /**
-     * Apply addition gravity behavior based on the overall "display" that an
+     * Apply additional gravity behavior based on the overall "display" that an
      * object exists in.  This can be used after
      * {@link #apply(int, int, int, Rect, int, int, Rect)} to place the object
      * within a visible display.  By default this moves or clips the object
