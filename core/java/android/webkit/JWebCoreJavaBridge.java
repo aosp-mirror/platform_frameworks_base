@@ -34,8 +34,12 @@ final class JWebCoreJavaBridge extends Handler {
     // Instant timer is used to implement a timer that needs to fire almost
     // immediately.
     private boolean mHasInstantTimer;
+
     // Reference count the pause/resume of timers
     private int mPauseTimerRefCount;
+
+    private boolean mTimerPaused;
+    private boolean mHasDeferredTimers;
 
     /**
      * Construct a new JWebCoreJavaBridge to interface with
@@ -51,6 +55,17 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     /**
+     * Call native timer callbacks.
+     */
+    private void fireSharedTimer() { 
+        PerfChecker checker = new PerfChecker();
+        // clear the flag so that sharedTimerFired() can set a new timer
+        mHasInstantTimer = false;
+        sharedTimerFired();
+        checker.responseAlert("sharedTimer");
+    }
+
+    /**
      * handleMessage
      * @param msg The dispatched message.
      *
@@ -60,11 +75,11 @@ final class JWebCoreJavaBridge extends Handler {
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case TIMER_MESSAGE: {
-                PerfChecker checker = new PerfChecker();
-                // clear the flag so that sharedTimerFired() can set a new timer
-                mHasInstantTimer = false;
-                sharedTimerFired();
-                checker.responseAlert("sharedTimer");
+                if (mTimerPaused) {
+                    mHasDeferredTimers = true;
+                } else {
+                    fireSharedTimer();
+                }
                 break;
             }
             case FUNCPTR_MESSAGE:
@@ -86,7 +101,8 @@ final class JWebCoreJavaBridge extends Handler {
      */
     public void pause() {
         if (--mPauseTimerRefCount == 0) {
-            setDeferringTimers(true);
+            mTimerPaused = true;
+            mHasDeferredTimers = false;
         }
     }
 
@@ -95,7 +111,11 @@ final class JWebCoreJavaBridge extends Handler {
      */
     public void resume() {
         if (++mPauseTimerRefCount == 1) {
-            setDeferringTimers(false);
+           mTimerPaused = false;
+           if (mHasDeferredTimers) {
+               mHasDeferredTimers = false;
+               fireSharedTimer();
+           }
         }
     }
 
@@ -185,11 +205,11 @@ final class JWebCoreJavaBridge extends Handler {
         }
         removeMessages(TIMER_MESSAGE);
         mHasInstantTimer = false;
+        mHasDeferredTimers = false;
     }
 
     private native void nativeConstructor();
     private native void nativeFinalize();
     private native void sharedTimerFired();
-    private native void setDeferringTimers(boolean defer);
     public native void setNetworkOnLine(boolean online);
 }

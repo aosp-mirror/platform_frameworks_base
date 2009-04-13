@@ -1182,6 +1182,22 @@ public final class Settings {
         public static final Uri DEFAULT_NOTIFICATION_URI = getUriFor(NOTIFICATION_SOUND);
 
         /**
+         * Persistent store for the system-wide default alarm alert.
+         *
+         * @see #RINGTONE
+         * @see #DEFAULT_ALARM_ALERT_URI
+         */
+        public static final String ALARM_ALERT = "alarm_alert";
+
+        /**
+         * A {@link Uri} that will point to the current default alarm alert at
+         * any given time.
+         *
+         * @see #DEFAULT_ALARM_ALERT_URI
+         */
+        public static final Uri DEFAULT_ALARM_ALERT_URI = getUriFor(ALARM_ALERT);
+
+        /**
          * Setting to enable Auto Replace (AutoText) in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_AUTO_REPLACE = "auto_replace";
