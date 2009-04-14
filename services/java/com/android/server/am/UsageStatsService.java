@@ -55,9 +55,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private static final String TAG = "UsageStats";
     
     // Current on-disk Parcel version
-    private static final int VERSION = 1003;
+    private static final int VERSION = 1004;
 
-    private static final int CHECKIN_VERSION = 2;
+    private static final int CHECKIN_VERSION = 3;
     
     private static final String FILE_PREFIX = "usage-";
     
@@ -65,7 +65,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
     
     private static final int MAX_NUM_FILES = 5;
     
-    private static final int MAX_LAUNCH_TIME_SAMPLES = 50;
+    private static final int NUM_LAUNCH_TIME_BINS = 10;
+    private static final int[] LAUNCH_TIME_BINS = {
+        250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000
+    };
     
     static IUsageStats sService;
     private Context mContext;
@@ -88,61 +91,33 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private int mLastWriteDay;
     
     static class TimeStats {
-        int count;
+        int[] times = new int[NUM_LAUNCH_TIME_BINS];
         
-        boolean haveStats;
-        
-        int samples;
-        int minimum;
-        int maximum;
-        int average;
-        int median;
-        
-        int size;
-        int[] array;
-        
-        private int avail;
-        
-        void add(int val) {
-            count++;
-            if (size > MAX_LAUNCH_TIME_SAMPLES) {
-                return;
-            }
-            if (size >= avail) {
-                avail = ((avail+2)*3)/2;
-                int[] newarray = new int[avail];
-                if (array != null) {
-                    System.arraycopy(array, 0, newarray, 0, size);
-                }
-                array = newarray;
-            }
-            array[size] = val;
-            size++;
-            haveStats = false;
+        TimeStats() {
         }
         
-        void computeStats() {
-            if (haveStats) {
-                return;
-            }
-            
-            average = 0;
-            int i = samples = size;
-            if (i > 0) {
-                java.util.Arrays.sort(array, 0, i);
-                i--;
-                minimum = maximum = average = array[i];
-                median = array[i/2];
-                while (i > 0) {
-                    i--;
-                    int v = array[i];
-                    if (v < minimum) minimum = v;
-                    if (v > maximum) maximum = v;
-                    average += v;
+        void add(int val) {
+            final int[] bins = LAUNCH_TIME_BINS;
+            for (int i=0; i<NUM_LAUNCH_TIME_BINS-1; i++) {
+                if (val < bins[i]) {
+                    times[i]++;
+                    return;
                 }
-                average = average/size;
-            } else {
-                minimum = maximum = median = 0;
+            }
+            times[NUM_LAUNCH_TIME_BINS-1]++;
+        }
+        
+        TimeStats(Parcel in) {
+            final int[] localTimes = times;
+            for (int i=0; i<NUM_LAUNCH_TIME_BINS; i++) {
+                localTimes[i] = in.readInt();
+            }
+        }
+        
+        void writeToParcel(Parcel out) {
+            final int[] localTimes = times;
+            for (int i=0; i<NUM_LAUNCH_TIME_BINS; i++) {
+                out.writeInt(localTimes[i]);
             }
         }
     }
@@ -170,29 +145,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (localLOGV) Log.v(TAG, "Reading comps: " + N);
             for (int i=0; i<N; i++) {
                 String comp = in.readString();
-                final int M = in.readInt();
-                final int count = in.readInt();
-                if (localLOGV) Log.v(TAG, "Component: " + comp + ", times: " + M);
-                if (M > 0) {
-                    TimeStats times = new TimeStats();
-                    times.count = count;
-                    times.size = times.avail = M;
-                    times.array = new int[M];
-                    for (int j=0; j<M; j++) {
-                        times.array[j] = in.readInt();
-                    }
-                    mLaunchTimes.put(comp, times);
-                } else if (M == -1) {
-                    TimeStats times = new TimeStats();
-                    times.count = count;
-                    times.samples = in.readInt();
-                    times.minimum = in.readInt();
-                    times.maximum = in.readInt();
-                    times.average = in.readInt();
-                    times.median = in.readInt();
-                    times.haveStats = true;
-                    mLaunchTimes.put(comp, times);
-                }
+                if (localLOGV) Log.v(TAG, "Component: " + comp);
+                TimeStats times = new TimeStats(in);
+                mLaunchTimes.put(comp, times);
             }
         }
         
@@ -215,7 +170,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             times.add(millis);
         }
         
-        void writeToParcel(Parcel out, boolean allTimes) {
+        void writeToParcel(Parcel out) {
             out.writeInt(mLaunchCount);
             out.writeLong(mUsageTime);
             final int N = mLaunchTimes.size();
@@ -224,23 +179,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 for (Map.Entry<String, TimeStats> ent : mLaunchTimes.entrySet()) {
                     out.writeString(ent.getKey());
                     TimeStats times = ent.getValue();
-                    if (allTimes) {
-                        final int M = times.size;
-                        out.writeInt(M);
-                        out.writeInt(times.count);
-                        for (int j=0; j<M; j++) {
-                            out.writeInt(times.array[j]);
-                        }
-                    } else {
-                        times.computeStats();
-                        out.writeInt(-1);
-                        out.writeInt(times.count);
-                        out.writeInt(times.samples);
-                        out.writeInt(times.minimum);
-                        out.writeInt(times.maximum);
-                        out.writeInt(times.average);
-                        out.writeInt(times.median);
-                    }
+                    times.writeToParcel(out);
                 }
             }
         }
@@ -423,7 +362,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             mFile.renameTo(backupFile);
             try {
                 // Write mStats to file
-                writeStatsFLOCK(!dayChanged);
+                writeStatsFLOCK();
                 mLastWriteElapsedTime = currElapsedTime;
                 if (dayChanged) {
                     mLastWriteDay = curDay;
@@ -448,11 +387,11 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
     }
 
-    private void writeStatsFLOCK(boolean allTimes) throws IOException {
+    private void writeStatsFLOCK() throws IOException {
         FileOutputStream stream = new FileOutputStream(mFile);
         try {
             Parcel out = Parcel.obtain();
-            writeStatsToParcelFLOCK(out, allTimes);
+            writeStatsToParcelFLOCK(out);
             stream.write(out.marshall());
             out.recycle();
             stream.flush();
@@ -461,7 +400,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
     }
 
-    private void writeStatsToParcelFLOCK(Parcel out, boolean allTimes) {
+    private void writeStatsToParcelFLOCK(Parcel out) {
         synchronized (mStatsLock) {
             out.writeInt(VERSION);
             Set<String> keys = mStats.keySet();
@@ -469,7 +408,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             for (String key : keys) {
                 PkgUsageStatsExtended pus = mStats.get(key);
                 out.writeString(key);
-                pus.writeToParcel(out, allTimes);
+                pus.writeToParcel(out);
             }
         }
     }
@@ -696,20 +635,11 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     for (Map.Entry<String, TimeStats> ent : pus.mLaunchTimes.entrySet()) {
                         sb.append("A:");
                         sb.append(ent.getKey());
-                        sb.append(",");
                         TimeStats times = ent.getValue();
-                        times.computeStats();
-                        sb.append(times.count);
-                        sb.append(",");
-                        sb.append(times.samples);
-                        sb.append(",");
-                        sb.append(times.minimum);
-                        sb.append(",");
-                        sb.append(times.maximum);
-                        sb.append(",");
-                        sb.append(times.average);
-                        sb.append(",");
-                        sb.append(times.median);
+                        for (int i=0; i<NUM_LAUNCH_TIME_BINS; i++) {
+                            sb.append(",");
+                            sb.append(times.times[i]);
+                        }
                         sb.append('\n');
                     }
                 }
@@ -729,19 +659,27 @@ public final class UsageStatsService extends IUsageStats.Stub {
                         sb.append("    ");
                         sb.append(ent.getKey());
                         TimeStats times = ent.getValue();
-                        times.computeStats();
-                        sb.append(": count=");
-                        sb.append(times.count);
-                        sb.append(", samples=");
-                        sb.append(times.samples);
-                        sb.append(", min=");
-                        sb.append(times.minimum);
-                        sb.append(", max=");
-                        sb.append(times.maximum);
-                        sb.append(", avg=");
-                        sb.append(times.average);
-                        sb.append(", med=");
-                        sb.append(times.median);
+                        int lastBin = 0;
+                        boolean first = true;
+                        for (int i=0; i<NUM_LAUNCH_TIME_BINS-1; i++) {
+                            if (times.times[i] != 0) {
+                                sb.append(first ? ": " : ", ");
+                                sb.append(lastBin);
+                                sb.append('-');
+                                sb.append(LAUNCH_TIME_BINS[i]);
+                                sb.append('=');
+                                sb.append(times.times[i]);
+                                first = false;
+                            }
+                            lastBin = LAUNCH_TIME_BINS[i];
+                        }
+                        if (times.times[NUM_LAUNCH_TIME_BINS-1] != 0) {
+                            sb.append(first ? ": " : ", ");
+                            sb.append(">=");
+                            sb.append(lastBin);
+                            sb.append('=');
+                            sb.append(times.times[NUM_LAUNCH_TIME_BINS-1]);
+                        }
                         sb.append('\n');
                     }
                 }

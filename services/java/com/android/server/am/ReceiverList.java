@@ -39,6 +39,8 @@ class ReceiverList extends ArrayList<BroadcastFilter>
     BroadcastRecord curBroadcast = null;
     boolean linkedToDeath = false;
 
+    String stringName;
+    
     ReceiverList(ActivityManagerService _owner, ProcessRecord _app,
             int _pid, int _uid, IIntentReceiver _receiver) {
         owner = _owner;
@@ -82,11 +84,21 @@ class ReceiverList extends ArrayList<BroadcastFilter>
     }
     
     public String toString() {
-        return "ReceiverList{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + pid + " " + (app != null ? app.processName : "(unknown name)")
-            + "/" + uid + " client "
-            + Integer.toHexString(System.identityHashCode(receiver.asBinder()))
-            + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("ReceiverList{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(pid);
+        sb.append(' ');
+        sb.append((app != null ? app.processName : "(unknown name)"));
+        sb.append('/');
+        sb.append(uid);
+        sb.append(" client ");
+        sb.append(Integer.toHexString(System.identityHashCode(receiver.asBinder())));
+        sb.append('}');
+        return stringName = sb.toString();
     }
 }
