@@ -28,7 +28,6 @@ import java.util.TimeZone;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
 
 /**
  * Test some locale-dependent stuff for Android. This test mainly ensures that
@@ -126,9 +125,9 @@ public class LocaleTest extends TestCase {
     }
     */
 
-    // This one makes sure we have all necessary locales installed.
-    // Suppress this flaky test for now.
-    @Suppress
+    // Regression test for 1118570: Create test cases for tracking ICU config
+    // changes. This one makes sure we have all necessary locales installed.
+    @MediumTest
     public void testICULocales() {
         String[] locales = new String[] {
                 // List of locales currently required for Android.
