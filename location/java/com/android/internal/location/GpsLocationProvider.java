@@ -28,6 +28,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.location.LocationProviderImpl;
+import android.net.ConnectivityManager;
 import android.net.SntpClient;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -99,6 +100,14 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private static final int GPS_STATUS_ENGINE_ON = 3;
     private static final int GPS_STATUS_ENGINE_OFF = 4;
 
+    // these need to match GpsSuplStatusValue defines in gps.h
+    /** SUPL status event values. */
+    private static final int GPS_REQUEST_SUPL_DATA_CONN = 1;
+    private static final int GPS_RELEASE_SUPL_DATA_CONN = 2;
+    private static final int GPS_SUPL_DATA_CONNECTED = 3;
+    private static final int GPS_SUPL_DATA_CONN_DONE = 4;
+    private static final int GPS_SUPL_DATA_CONN_FAILED = 5;
+
     // these need to match GpsLocationFlags enum in gps.h
     private static final int LOCATION_INVALID = 0;
     private static final int LOCATION_HAS_LAT_LONG = 1;
@@ -121,6 +130,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private static final int GPS_DELETE_RTI = 0x0400;
     private static final int GPS_DELETE_CELLDB_INFO = 0x8000;
     private static final int GPS_DELETE_ALL = 0xFFFF;
+
+    // for mSuplDataConnectionState
+    private static final int SUPL_DATA_CONNECTION_CLOSED = 0;
+    private static final int SUPL_DATA_CONNECTION_OPENING = 1;
+    private static final int SUPL_DATA_CONNECTION_OPEN = 2;
 
     private static final String PROPERTIES_FILE = "/etc/gps.conf";
 
@@ -176,6 +190,9 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private String mSuplHost;
     private int mSuplPort;
     private boolean mSetSuplServer;
+    private String mSuplApn;
+    private int mSuplDataConnectionState;
+    private ConnectivityManager mConnMgr;
 
     // how often to request NTP time, in milliseconds
     // current setting 4 hours
@@ -199,9 +216,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
                     Log.d(TAG, "state: " + state +  " apnName: " + apnName + " reason: " + reason);
                 }
                 if ("CONNECTED".equals(state)) {
-                    native_set_supl_apn(apnName);
-                } else {
-                    native_set_supl_apn("");
+                    mSuplApn = apnName;
+                    if (mSuplDataConnectionState == SUPL_DATA_CONNECTION_OPENING) {
+                        native_supl_data_conn_open(mSuplApn);
+                        mSuplDataConnectionState = SUPL_DATA_CONNECTION_OPEN;
+                    }
                 }
             }
         }
@@ -219,6 +238,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         context.registerReceiver(receiver, intentFilter);
+
+        mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         mProperties = new Properties();
         try {
@@ -782,7 +803,44 @@ public class GpsLocationProvider extends LocationProviderImpl {
             updateStatus(TEMPORARILY_UNAVAILABLE, mSvCount);
         }
     }
-    
+
+    /**
+     * called from native code to update SUPL status
+     */
+    private void reportSuplStatus(int status) {
+        switch (status) {
+            case GPS_REQUEST_SUPL_DATA_CONN:
+                 int result = mConnMgr.startUsingNetworkFeature(
+                        ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
+                if (result == Phone.APN_ALREADY_ACTIVE) {
+                    native_supl_data_conn_open(mSuplApn);
+                    mSuplDataConnectionState = SUPL_DATA_CONNECTION_OPEN;
+                } else if (result == Phone.APN_REQUEST_STARTED) {
+                    mSuplDataConnectionState = SUPL_DATA_CONNECTION_OPENING;
+                } else {
+                    native_supl_data_conn_failed();
+                }
+                break;
+            case GPS_RELEASE_SUPL_DATA_CONN:
+                if (mSuplDataConnectionState != SUPL_DATA_CONNECTION_CLOSED) {
+                    mConnMgr.stopUsingNetworkFeature(
+                            ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
+                    native_supl_data_conn_closed();
+                    mSuplDataConnectionState = SUPL_DATA_CONNECTION_CLOSED;
+                }
+                break;
+            case GPS_SUPL_DATA_CONNECTED:
+                // Log.d(TAG, "GPS_SUPL_DATA_CONNECTED");
+                break;
+            case GPS_SUPL_DATA_CONN_DONE:
+                // Log.d(TAG, "GPS_SUPL_DATA_CONN_DONE");
+                break;
+            case GPS_SUPL_DATA_CONN_FAILED:
+                // Log.d(TAG, "GPS_SUPL_DATA_CONN_FAILED");
+                break;
+        }
+    }
+
     private void xtraDownloadRequest() {
         if (Config.LOGD) Log.d(TAG, "xtraDownloadRequest");
         if (mNetworkThread != null) {
@@ -1002,6 +1060,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private native void native_inject_xtra_data(byte[] data, int length);
 
     // SUPL Support    
+    private native void native_supl_data_conn_open(String apn);
+    private native void native_supl_data_conn_closed();
+    private native void native_supl_data_conn_failed();
     private native void native_set_supl_server(int addr, int port);
-    private native void native_set_supl_apn(String apn);
 }
