@@ -43,7 +43,7 @@ GLuint texture;
 hw_module_t const* gralloc_module;
 alloc_device_t  *sAllocDev;
 
-#define FIXED_ONE 0x10000
+#define FIXED_ONE 0x10000 /* 1.0 in 16.16 fixed point. */
 
 int init_gl_surface();
 void free_gl_surface();
