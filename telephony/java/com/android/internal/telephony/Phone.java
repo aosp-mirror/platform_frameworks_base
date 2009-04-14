@@ -170,7 +170,7 @@ public interface Phone {
     int NT_MODE_EVDO_NO_CDMA = 6; /* EvDo only */
     int NT_MODE_GLOBAL       = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)
                                      AVAILABLE Application Settings menu*/
-    int PREFERRED_NT_MODE    = NT_MODE_GLOBAL;
+    int PREFERRED_NT_MODE    = NT_MODE_GSM_ONLY;
 
 
     // Used for CDMA roaming mode

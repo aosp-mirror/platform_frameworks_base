@@ -316,6 +316,11 @@ public class GSMPhone extends PhoneBase {
             // we report data connected
 
             ret = DataState.CONNECTED;
+        } else if (mSST == null) {
+            // Radio Technology Change is ongoning, dispose() and removeReferences() have
+            // already been called
+
+            ret = DataState.DISCONNECTED;
         } else if (mSST.getCurrentGprsState()
                 != ServiceState.STATE_IN_SERVICE) {
             // If we're out of service, open TCP sockets may still work

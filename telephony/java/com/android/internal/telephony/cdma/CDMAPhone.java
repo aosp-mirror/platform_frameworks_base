@@ -475,6 +475,11 @@ public class CDMAPhone extends PhoneBase {
             // we report data connected
 
             ret = DataState.CONNECTED;
+        } else if (mSST == null) {
+            // Radio Technology Change is ongoning, dispose() and removeReferences() have
+            // already been called
+
+            ret = DataState.DISCONNECTED;
         } else if (mSST.getCurrentCdmaDataConnectionState()
                 == ServiceState.RADIO_TECHNOLOGY_UNKNOWN) {
             // If we're out of service, open TCP sockets may still work

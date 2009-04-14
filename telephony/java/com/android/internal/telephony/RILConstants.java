@@ -51,7 +51,7 @@ public interface RILConstants {
     int NETWORK_MODE_EVDO_NO_CDMA   = 6; /* EvDo only */
     int NETWORK_MODE_GLOBAL         = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)
                                             AVAILABLE Application Settings menu*/
-    int PREFERRED_NETWORK_MODE      = NETWORK_MODE_GLOBAL;
+    int PREFERRED_NETWORK_MODE      = NETWORK_MODE_GSM_ONLY;
 
     /* CDMA subscription source. See ril.h RIL_REQUEST_CDMA_SET_SUBSCRIPTION */
     int SUBSCRIPTION_FROM_RUIM      = 0; /* CDMA subscription from RUIM when available */
