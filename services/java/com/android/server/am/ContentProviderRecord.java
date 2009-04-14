@@ -32,7 +32,8 @@ class ContentProviderRecord extends ContentProviderHolder {
     int externals;     // number of non-framework processes supported by this provider
     ProcessRecord app; // if non-null, hosting application
     ProcessRecord launchingApp; // if non-null, waiting for this app to be launched.
-
+    String stringName;
+    
     public ContentProviderRecord(ProviderInfo _info, ApplicationInfo ai) {
         super(_info);
         uid = ai.uid;
@@ -69,8 +70,15 @@ class ContentProviderRecord extends ContentProviderHolder {
     }
 
     public String toString() {
-        return "ContentProviderRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + info.name + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("ContentProviderRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(info.name);
+        sb.append('}');
+        return stringName = sb.toString();
     }
 }

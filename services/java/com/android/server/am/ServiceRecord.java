@@ -77,6 +77,8 @@ class ServiceRecord extends Binder {
     long restartTime;       // time of last restart.
     long nextRestartTime;   // time when restartDelay will expire.
 
+    String stringName;      // caching of toString
+    
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + this);
         pw.println(prefix + "intent=" + intent.getIntent());
@@ -159,8 +161,15 @@ class ServiceRecord extends Binder {
     }
     
     public String toString() {
-        return "ServiceRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + shortName + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("ServiceRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(shortName);
+        sb.append('}');
+        return stringName = sb.toString();
     }
 }
