@@ -17,24 +17,25 @@
 package com.android.internal.telephony.cdma.sms;
 
 import com.android.internal.telephony.SmsHeader;
+import com.android.internal.util.HexDump;
 
 public class UserData{
 
     /**
-     * Supported user data encoding types
+     * User data encoding types
      * (See 3GPP2 C.R1001-F, v1.0, table 9.1-1)
      */
-    public static final int UD_ENCODING_OCTET                      = 0x00;
-    //public static final int UD_ENCODING_EXTENDED_PROTOCOL          = 0x01;
-    public static final int UD_ENCODING_7BIT_ASCII                 = 0x02;
-    public static final int UD_ENCODING_IA5                        = 0x03;
-    public static final int UD_ENCODING_UNICODE_16                 = 0x04;
-    //public static final int UD_ENCODING_SHIFT_JIS                  = 0x05;
-    //public static final int UD_ENCODING_KOREAN                     = 0x06;
-    //public static final int UD_ENCODING_LATIN_HEBREW               = 0x07;
-    //public static final int UD_ENCODING_LATIN                      = 0x08;
-    public static final int UD_ENCODING_GSM_7BIT_ALPHABET          = 0x09;
-    //public static final int UD_ENCODING_GSM_DCS                    = 0x0A;
+    public static final int ENCODING_OCTET                      = 0x00;
+    public static final int ENCODING_IS91_EXTENDED_PROTOCOL     = 0x01;
+    public static final int ENCODING_7BIT_ASCII                 = 0x02;
+    //public static final int ENCODING_IA5                        = 0x03;
+    public static final int ENCODING_UNICODE_16                 = 0x04;
+    //public static final int ENCODING_SHIFT_JIS                  = 0x05;
+    //public static final int ENCODING_KOREAN                     = 0x06;
+    //public static final int ENCODING_LATIN_HEBREW               = 0x07;
+    //public static final int ENCODING_LATIN                      = 0x08;
+    public static final int ENCODING_GSM_7BIT_ALPHABET          = 0x09;
+    public static final int ENCODING_GSM_DCS                    = 0x0A;
 
     /**
      * Contains the data header of the user data
@@ -44,20 +45,37 @@ public class UserData{
     /**
      * Contains the data encoding type for the SMS message
      */
-    public int userDataEncoding;
+    public int msgEncoding;
 
-    // needed when encoding is IS91 or DCS (not supported yet):
-    //public int messageType;
+    // XXX needed when encoding is IS91 or DCS (not supported yet):
+    public int msgType;
 
     /**
      * Number of invalid bits in the last byte of data.
      */
     public int paddingBits;
 
+    public int numFields;
+
     /**
      * Contains the user data of a SMS message
      * (See 3GPP2 C.S0015-B, v2, 4.5.2)
      */
-    public byte[] userData;
+    public byte[] payload;
+    public String payloadStr;
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("UserData:\n");
+        builder.append("  msgEncoding: " + msgEncoding + "\n");
+        builder.append("  msgType: " + msgType + "\n");
+        builder.append("  paddingBits: " + paddingBits + "\n");
+        builder.append("  numFields: " + (int)numFields + "\n");
+        builder.append("  userDataHeader: " + userDataHeader + "\n");
+        builder.append("  payload: " + HexDump.toHexString(payload));
+        builder.append("  payloadStr: " + payloadStr);
+        return builder.toString();
+    }
 
 }
