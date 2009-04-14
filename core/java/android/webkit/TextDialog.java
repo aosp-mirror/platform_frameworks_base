@@ -17,19 +17,11 @@
 package android.webkit;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Selection;
 import android.text.Spannable;
-import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.method.MovementMethod;
 import android.view.inputmethod.EditorInfo;
@@ -86,32 +78,10 @@ import java.util.ArrayList;
     /* package */ TextDialog(Context context, WebView webView) {
         super(context);
         mWebView = webView;
-        ShapeDrawable background = new ShapeDrawable(new RectShape());
-        Paint shapePaint = background.getPaint();
-        shapePaint.setStyle(Paint.Style.STROKE);
-        ColorDrawable color = new ColorDrawable(Color.WHITE);
-        Drawable[] array = new Drawable[2];
-        array[0] = color;
-        array[1] = background;
-        LayerDrawable layers = new LayerDrawable(array);
-        // Hide WebCore's text behind this and allow the WebView
-        // to draw its own focusring.
-        setBackgroundDrawable(layers);
-        // Align the text better with the text behind it, so moving
-        // off of the textfield will not appear to move the text.
-        setPadding(3, 2, 0, 0);
         mMaxLength = -1;
-        // Turn on subpixel text, and turn off kerning, so it better matches
-        // the text in webkit.
-        TextPaint paint = getPaint();
-        int flags = paint.getFlags() | Paint.SUBPIXEL_TEXT_FLAG |
-                Paint.ANTI_ALIAS_FLAG & ~Paint.DEV_KERN_TEXT_FLAG;
-        paint.setFlags(flags);
-        // Set the text color to black, regardless of the theme.  This ensures
-        // that other applications that use embedded WebViews will properly
-        // display the text in textfields.
-        setTextColor(Color.BLACK);
         setImeOptions(EditorInfo.IME_ACTION_NONE);
+        // Allow webkit's drawing to show through
+        setWillNotDraw(true);
     }
 
     @Override
@@ -225,19 +195,21 @@ import java.util.ArrayList;
                     return true;
                 }
             }
+            /* FIXME:
+             * In theory, we would like to send the events for the arrow keys.
+             * However, the TextView can arbitrarily change the selection (i.e.
+             * long press followed by using the trackball).  Therefore, we keep
+             * in sync with the TextView via onSelectionChanged.  If we also
+             * send the DOM event, we lose the correct selection.
             if (isArrowKey) {
                 // Arrow key does not change the text, but we still want to send
                 // the DOM events.
                 sendDomEvent(event);
             }
+             */
             mScrollToAccommodateCursor = true;
             return true;
         }
-        // FIXME: TextViews return false for up and down key events even though
-        // they change the selection. Since we don't want the get out of sync
-        // with WebCore's notion of the current selection, reset the selection
-        // to what it was before the key event.
-        Selection.setSelection(text, oldStart, oldEnd);
         // Ignore the key up event for newlines. This prevents
         // multiple newlines in the native textarea.
         if (mGotEnterDown && !down) {
@@ -290,13 +262,12 @@ import java.util.ArrayList;
     }
 
     @Override
-    public boolean onPreDraw() {
-        if (getLayout() == null) {
-            measure(mWidthSpec, mHeightSpec);
+    protected void onSelectionChanged(int selStart, int selEnd) {
+        if (mWebView != null) {
+            mWebView.setSelection(selStart, selEnd);
         }
-        return super.onPreDraw();
     }
-    
+
     @Override
     protected void onTextChanged(CharSequence s,int start,int before,int count){
         super.onTextChanged(s, start, before, count);
@@ -366,12 +337,7 @@ import java.util.ArrayList;
         MovementMethod move = getMovementMethod();
         if (move != null && getLayout() != null &&
             move.onTrackballEvent(this, text, event)) {
-            // Need to pass down the selection, which has changed.
-            // FIXME: This should work, but does not, so we set the selection
-            // in onTextChanged.
-            //int start = Selection.getSelectionStart(text);
-            //int end = Selection.getSelectionEnd(text);
-            //mWebView.setSelection(start, end);
+            // Selection is changed in onSelectionChanged
             return true;
         }
         // If the user is in a textfield, and the movement method is not
