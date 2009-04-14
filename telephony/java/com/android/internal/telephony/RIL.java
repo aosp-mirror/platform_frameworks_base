@@ -565,22 +565,18 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         mNetworkMode = networkMode;
         //At startup mPhoneType is first set from networkMode
         switch(networkMode) {
+            case RILConstants.NETWORK_MODE_CDMA:
+            case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
+            case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
+            case RILConstants.NETWORK_MODE_GLOBAL:
+                mPhoneType = RILConstants.CDMA_PHONE;
+                break;
             case RILConstants.NETWORK_MODE_WCDMA_PREF:
             case RILConstants.NETWORK_MODE_GSM_ONLY:
             case RILConstants.NETWORK_MODE_WCDMA_ONLY:
             case RILConstants.NETWORK_MODE_GSM_UMTS:
-                mPhoneType = RILConstants.GSM_PHONE;
-                break;
-            case RILConstants.NETWORK_MODE_CDMA:
-            case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
-            case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
-                mPhoneType = RILConstants.CDMA_PHONE;
-                break;
-            case RILConstants.NETWORK_MODE_GLOBAL:
-                mPhoneType = RILConstants.CDMA_PHONE;
-                break;
             default:
-                mPhoneType = RILConstants.CDMA_PHONE;
+                mPhoneType = RILConstants.GSM_PHONE;
         }
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
