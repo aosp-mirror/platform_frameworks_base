@@ -392,7 +392,7 @@
     <string name="emergency_call_dialog_number_for_display">"緊急通報番号"</string>
     <string name="lockscreen_carrier_default">"(通信サービスなし)"</string>
     <string name="lockscreen_screen_locked">"画面ロック中"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除（または緊急通報）"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"MENUキーでロック解除"</string>
     <string name="lockscreen_pattern_instructions">"ロックを解除するパターンを入力"</string>
     <string name="lockscreen_emergency_call">"緊急通報"</string>
