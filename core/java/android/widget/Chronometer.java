@@ -199,6 +199,7 @@ public class Chronometer extends TextView {
 
     /**
      * The same as calling {@link #start} or {@link #stop}.
+     * @hide pending API council approval
      */
     @android.view.RemotableViewMethod
     public void setStarted(boolean started) {

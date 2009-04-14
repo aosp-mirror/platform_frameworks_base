@@ -388,12 +388,12 @@ public class MediaController extends FrameLayout {
         int keyCode = event.getKeyCode();
         if (event.getRepeatCount() == 0 && event.isDown() && (
                 keyCode ==  KeyEvent.KEYCODE_HEADSETHOOK ||
-                keyCode ==  KeyEvent.KEYCODE_PLAYPAUSE ||
+                keyCode ==  KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ||
                 keyCode ==  KeyEvent.KEYCODE_SPACE)) {
             doPauseResume();
             show(sDefaultTimeout);
             return true;
-        } else if (keyCode ==  KeyEvent.KEYCODE_STOP) {
+        } else if (keyCode ==  KeyEvent.KEYCODE_MEDIA_STOP) {
             if (mPlayer.isPlaying()) {
                 mPlayer.pause();
                 updatePausePlay();

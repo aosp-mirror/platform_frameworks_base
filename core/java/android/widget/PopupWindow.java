@@ -1062,8 +1062,6 @@ public class PopupWindow {
      * @param height the new height, can be -1 to ignore
      * @param force reposition the window even if the specified position
      *              already seems to correspond to the LayoutParams
-     * 
-     * @hide pending API council approval
      */
     public void update(int x, int y, int width, int height, boolean force) {
         if (width != -1) {

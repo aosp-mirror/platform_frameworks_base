@@ -203,12 +203,14 @@
     <!-- Allows an application to create mock location providers for testing -->
     <permission android:name="android.permission.ACCESS_MOCK_LOCATION"
         android:permissionGroup="android.permission-group.LOCATION"
+        android:protectionLevel="dangerous"
         android:label="@string/permlab_accessMockLocation"
         android:description="@string/permdesc_accessMockLocation" />
 
     <!-- Allows an application to access extra location provider commands -->
     <permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"
         android:permissionGroup="android.permission-group.LOCATION"
+        android:protectionLevel="normal"
         android:label="@string/permlab_accessLocationExtraCommands"
         android:description="@string/permdesc_accessLocationExtraCommands" />
 

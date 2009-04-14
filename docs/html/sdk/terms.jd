@@ -8,7 +8,8 @@ hide_license_footer=true
 	1. Introduction
 </h2>
 <p>
-	1.1 The Android Software Development Kit (referred to in this License Agreement as the "SDK" and specifically including the Android system files and packaged APIs) is licensed to you subject to the terms of this License Agreement. This License Agreement forms a legally binding contract between you and Google in relation to your use of the SDK.
+	1.1 The Android Software Development Kit (referred to in this License Agreement as the "SDK" and specifically including the Android system files, packaged APIs, and Google Services add-ons) is licensed to you subject to the terms of this License Agreement. This License Agreement forms a legally binding contract between you and Google in relation to your use of the SDK.
+
 </p>
 <p>
 	1.2 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
@@ -41,10 +42,11 @@ hide_license_footer=true
 	3.1 Subject to the terms of this License Agreement, Google grants you a limited, worldwide, royalty-free, non- assignable and non-exclusive license to use the SDK solely to develop applications to run on the Android platform.
 </p>
 <p>
-	3.2 You agree that Google or third parties own all legal right, title and interest in and to the SDK, including any Intellectual Property Rights that subsist in the SDK. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. The Android Open Source Project
+	3.2 You agree that Google or third parties own all legal right, title and interest in and to the SDK, including any Intellectual Property Rights that subsist in the SDK. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. Google reserves all rights not expressly granted to you. 
+
 </p>
 <p>
-	3.3 Except to the extent required by applicable third party licenses, you may not copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the SDK or any part of the SDK. Except to the extent required by applicable third party licenses, you may not load any part of the SDK onto a mobile handset or any other hardware device except a personal computer, combine any part of the SDK with other software, or distribute any software or device incorporating a part of the SDK.
+	3.3. Except to the extent required by applicable third party licenses, you may not copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the SDK or any part of the SDK. Except to the extent required by applicable third party licenses, you may not load any part of the SDK onto a mobile handset or any other hardware device except a personal computer, combine any part of the SDK with other software, or distribute any software or device incorporating a part of the SDK. 
 </p>
 <p>
 	3.4 Use, reproduction and distribution of components of the SDK licensed under an open source software license are governed solely by the terms of that open source software license and not this License Agreement.
@@ -62,7 +64,7 @@ hide_license_footer=true
 	4. Use of the SDK by You
 </h2>
 <p>
-	4.1 Google agrees that it obtains no right, title or interest from you (or your licensors) under this License Agreement in or to any software applications that you develop using the SDK, including any intellectual property rights which subsist in those applications.
+	4.1 Google agrees that it obtains no right, title or interest from you (or your licensors) under this License Agreement in or to any software applications that you develop using the SDK, including any intellectual property rights that subsist in those applications. 
 </p>
 <p>
 	4.2 You agree to use the SDK and write applications only for purposes that are permitted by (a) this License Agreement and (b) any applicable law, regulation or generally accepted practices or guidelines in the relevant jurisdictions (including any laws regarding the export of data or software to and from the United States or other relevant countries).
@@ -110,25 +112,14 @@ hide_license_footer=true
 	8. Using Android APIs
 </h2>
 <p>
-	8.1 Android Maps API
+	8.1 Google Data APIs
 </p>
 <p>
-	8.1.1 If you use the Android Maps API (described in the SDK by the Package names "com.google.android.maps" and "com.android.location.Geocoder"), the terms of your binding legal agreement with Google include this License Agreement, the <a href="http://www.google.com/apis/maps/terms.html">Google Maps API Terms of Service</a> and the <a href="http://www.google.com/intl/en_ALL/help/terms_local.html">Google Maps Terms of Service</a>. You must read and agree to those Terms of Service before you use the Android Maps API.
+	8.1.1 If you use any API to retrieve data from Google, you acknowledge that the data may be protected by intellectual property rights which are owned by Google or those parties that provide the data (or by other persons or companies on their behalf). Your use of any such API may be subject to additional Terms of Service. You may not modify, rent, lease, loan, sell, distribute or create derivative works based on this data (either in whole or in part) unless allowed by the relevant Terms of Service.
 </p>
 <p>
-	8.1.2 If you use the Android Maps API to retrieve map or satellite image data from Google, you must include the following copyright notice in your application or service in a manner that is reasonably available to users:
-</p>
-<p>
-	"Copyright Notice: Data: (c)2007 TeleAtlas, AND, Europa Technologies, Kingway, Map Data Sciences Pty Ltd, PSMA, ZENRIN, Geocentre, MapLink/TeleAtlas; Imagery: (c)2007 DigitalGlobe, EarthSat, Sanborn, NYGIS, Scankort, TerraMetrics, MassGIS Commonwealth of Massachusetts, Digital Earth Technology."
-</p>
-<p>
-	8.2 Google Data APIs
-</p>
-<p>
-	8.2.1 If you use any API to retrieve data from Google, you acknowledge that the data may be protected by intellectual property rights which are owned by those who provide that data (or by other persons or companies on their behalf). You may not modify, rent, lease, loan, sell, distribute or create derivative works based on this data (either in whole or in part) unless you have been specifically given permission to do so by the owners of that data.
-</p>
-<p>
-	8.2.2 If you use any API to retrieve a user's data from Google, you acknowledge and agree that you shall retrieve data only with the user's explicit consent and only when, and for the limited purposes for which, the user has given you permission to do so.
+	8.1.2 If you use any API to retrieve a user's data from Google, you acknowledge and agree that you shall retrieve data only with the user's explicit consent and only when, and for the limited purposes for which, the user has given you permission to do so. 
+
 </p>
 <h2>
 	9. Terminating this License Agreement
@@ -185,10 +176,7 @@ hide_license_footer=true
 	13. Changes to the License Agreement
 </h2>
 <p>
-	13.1 Google may make changes to the License Agreement as it distributes new versions of the SDK. When these changes are made, Google will make a new version of the License Agreement available on the website where the SDK is made available and with the SDK downloadable.
-</p>
-<p>
-	13.2 You agree that your use of a specific version of the SDK is governed by the License Agreement included with that version of the SDK.
+	13.1 Google may make changes to the License Agreement as it distributes new versions of the SDK. When these changes are made, Google will make a new version of the License Agreement available on the website where the SDK is made available.
 </p>
 <h2>
 	14. General Legal Terms
@@ -215,5 +203,5 @@ hide_license_footer=true
 	14.7 This License Agreement, and your relationship with Google under this License Agreement, shall be governed by the laws of the State of California without regard to its conflict of laws provisions. You and Google agree to submit to the exclusive jurisdiction of the courts located within the county of Santa Clara, California to resolve any legal matter arising from this License Agreement. Notwithstanding this, you agree that Google shall still be allowed to apply for injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
 </p>
 <p>
-	<em>August 18, 2008</em>
+	<em>April 10, 2009</em>
 </p>

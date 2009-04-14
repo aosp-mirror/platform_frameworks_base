@@ -101,8 +101,6 @@ public class WebHistoryItem implements Cloneable {
      * url, the final url may be different as there might have been 
      * redirects while loading the site.
      * @return The original url of this history item.
-     * 
-     * @hide pending API Council approval
      */
     public String getOriginalUrl() {
         return mOriginalUrl;

@@ -35,8 +35,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public Locale locale;
 
     /**
-     * Locale should persist on setting
-     * @hide pending API council approval
+     * Locale should persist on setting.  This is hidden because it is really
+     * questionable whether this is the right way to expose the functionality.
+     * @hide
      */
     public boolean userSetLocale;
 

@@ -1,21 +1,20 @@
-page.title=Android 1.5 SDK, Release 1
-
-sdk.version=1.5_r1
+sdk.version=1.5
+sdk.rel.id=1
 sdk.date=April 2009
 
-sdk.win_download=android-sdk-windows-1.5_r1.zip
+sdk.win_download=
 sdk.win_bytes=
 sdk.win_checksum=
 
-sdk.mac_download=android-sdk-mac_x86-1.5_r1.zip
+sdk.mac_download=
 sdk.mac_bytes=
 sdk.mac_checksum=
 
-sdk.linux_download=android-sdk-linux_x86-1.5_r1.zip
+sdk.linux_download=
 sdk.linux_bytes=
 sdk.linux_checksum=
 
-
+page.title=Download Android SDK
 @jd:body
 
 <h2>SDK Contents</h2>
@@ -25,7 +24,7 @@ sdk.linux_checksum=
 <p>The SDK includes a variety of tools for developing and debugging application code and designing an application UI. You can read about the tools in the  
 <a href="{@docRoot}guide/developing/tools/index.html">Dev Guide</a> and access them in the <code>&lt;sdk&gt;/tools/</code> directory. 
 
-<p>The tools package included in this SDK is the same as that included in the Android 1.0, Release 2 SDK. </p>
+<p>The tools package included in this SDK includes many updates from that provided in the previous SDK and requires you to migrate your applications to the new development environment. For details, see the <a href="upgrading">Upgrading the SDK</a> document.</p>
 
 <h4 id="system_images">System Images</h4>
 
@@ -40,17 +39,23 @@ sdk.linux_checksum=
 <td width="5%"><nobr>Android 1.5</nobr></td>
 <td  width="5%">3</td>
 <td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.5.html">Version Notes</a></nobr></td>
-<td>Includes com.google.android.maps external library and a set of standard development applications. </td>
+<td>Includes a set of standard development applications. </td>
+</tr>
+<tr>
+<td width="5%"><nobr>Android 1.1</nobr></td>
+<td  width="5%">2</td>
+<td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.1.html">Version Notes</a></nobr></td>
+<td>Includes a set of standard development applications. </td>
 
 </tr>
-
 </table>
 
 <h4>Sample Code and Applications</h4>
 
 <p>You can look at a variety of tutorials and samples in the <a href="{@docRoot}guide/samples/index.html">Dev Guide</a> and access the sample code itself
-in the <code>&lt;sdk&gt;/samples/</code> directory of the SDK package.</p>
+in the <code>&lt;sdk&gt;/platforms/android-1.5/samples/</code> directory of the SDK package. Note the new location &mdash; the SDK now includes multiple platform versions that you can develop against and each has its own sample code directory. </p>
 
+<!-- 
 <h4>Documentation</h4>
 
 <p>The SDK package includes a full set of local documentation. To view it, open the <code>&lt;sdk&gt;/documentation.html</code> file in a web browser. If you are developing in an IDE such as Eclipse, you can also view the reference documentation directly in the IDE. </p>
@@ -58,5 +63,5 @@ in the <code>&lt;sdk&gt;/samples/</code> directory of the SDK package.</p>
 <p>The most current documentation is always available on the Android Developers site:</p>
 
 <p style="margin-left:2em;"><a href="http://developer.android.com/index.html">http://developer.android.com/</a></p>
-
+-->
 
