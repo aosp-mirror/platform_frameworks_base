@@ -204,7 +204,7 @@ public final class MccTable
 		table.add(new MccEntry(266,"gi",2));	//Gibraltar
 		table.add(new MccEntry(268,"pt",2));	//Portugal
 		table.add(new MccEntry(270,"lu",2));	//Luxembourg
-		table.add(new MccEntry(272,"ie",2,"Europe/Belfast","en"));	//Ireland
+		table.add(new MccEntry(272,"ie",2,"Europe/Dublin","en"));	//Ireland
 		table.add(new MccEntry(274,"is",2));	//Iceland
 		table.add(new MccEntry(276,"al",2));	//Albania (Republic of)
 		table.add(new MccEntry(278,"mt",2));	//Malta
