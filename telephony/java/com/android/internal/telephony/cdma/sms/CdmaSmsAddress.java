@@ -17,6 +17,7 @@
 package com.android.internal.telephony.cdma.sms;
 
 import com.android.internal.telephony.SmsAddress;
+import com.android.internal.util.HexDump;
 
 public class CdmaSmsAddress extends SmsAddress {
     /**
@@ -93,6 +94,20 @@ public class CdmaSmsAddress extends SmsAddress {
 
     // Constructor
     public CdmaSmsAddress(){
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CdmaSmsAddress:\n");
+        builder.append("  digitMode: " + digitMode + "\n");
+        builder.append("  numberMode: " + numberMode + "\n");
+        builder.append("  numberPlan: " + numberPlan + "\n");
+        builder.append("  numberOfDigits: " + numberOfDigits + "\n");
+        builder.append("  ton: " + ton + "\n");
+        builder.append("  address: " + address + "\n");
+        builder.append("  origBytes: " + HexDump.toHexString(origBytes) + "\n");
+        return builder.toString();
     }
 
 }
