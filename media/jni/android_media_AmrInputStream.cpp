@@ -74,7 +74,7 @@ static void android_media_AmrInputStream_GsmAmrEncoderInitialize
     encodeProps.iInNumChannels = 1;
     encodeProps.iInInterleaveMode = TEncodeProperties::EINTERLEAVE_LR;
     encodeProps.iMode = CPvGsmAmrEncoder::GSM_AMR_12_2;
-    encodeProps.iBitStreamFormatIf2 = false;
+    encodeProps.iBitStreamFormat = false;
     encodeProps.iAudioObjectType = 0;
     encodeProps.iOutSamplingRate = encodeProps.iInSamplingRate;
     encodeProps.iOutNumChannels = encodeProps.iInNumChannels;

@@ -267,7 +267,6 @@ public class ViewConfiguration {
      * @return the duration in milliseconds between the first tap's up event and
      * the second tap's down event for an interaction to be considered a
      * double-tap.
-     * @hide pending API council
      */
     public static int getDoubleTapTimeout() {
         return DOUBLE_TAP_TIMEOUT;
@@ -324,7 +323,6 @@ public class ViewConfiguration {
     /**
      * @return Distance between the first touch and second touch to still be
      *         considered a double tap
-     * @hide pending API council
      */
     public int getScaledDoubleTapSlop() {
         return mDoubleTapSlop;
