@@ -30,7 +30,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Browser;
-import android.util.Config;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -822,7 +821,7 @@ class CallbackProxy extends Handler {
             String password, Message resumeMsg) {
         // resumeMsg should be null at this point because we want to create it
         // within the CallbackProxy.
-        if (Config.DEBUG) {
+        if (WebView.DEBUG) {
             junit.framework.Assert.assertNull(resumeMsg);
         }
         resumeMsg = obtainMessage(NOTIFY);
