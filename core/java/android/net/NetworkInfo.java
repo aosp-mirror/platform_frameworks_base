@@ -114,8 +114,10 @@ public class NetworkInfo implements Parcelable {
     private boolean mIsAvailable;
 
     /**
-     * TODO This is going away as soon as API council review happens.
      * @param type network type
+     * @deprecated
+     * @hide because this constructor was only meant for internal use (and
+     * has now been superseded by the package-private constructor below).
      */
     public NetworkInfo(int type) {}
 
@@ -146,8 +148,6 @@ public class NetworkInfo implements Parcelable {
      * Return a network-type-specific integer describing the subtype
      * of the network.
      * @return the network subtype
-     *
-     * @hide pending API council review
      */
     public int getSubtype() {
         return mSubtype;
@@ -170,8 +170,6 @@ public class NetworkInfo implements Parcelable {
     /**
      * Return a human-readable name describing the subtype of the network.
      * @return the name of the network subtype
-     * 
-     * @hide pending API council review
      */
     public String getSubtypeName() {
         return mSubtypeName;
@@ -251,8 +249,6 @@ public class NetworkInfo implements Parcelable {
      * When {@code true}, it suggests that use of data on this network
      * may incur extra costs.
      * @return {@code true} if roaming is in effect, {@code false} otherwise.
-     *
-     * @hide pending API council
      */
     public boolean isRoaming() {
         return mIsRoaming;
