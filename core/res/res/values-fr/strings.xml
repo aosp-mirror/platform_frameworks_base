@@ -41,7 +41,7 @@
     <string name="invalidPin">"Le code PIN doit compter de 4 à 8 chiffres."</string>
     <string name="needPuk">"Votre carte SIM est verrouillée par clé PUK. Saisissez la clé PUK pour la déverrouiller."</string>
     <string name="needPuk2">"Saisissez la clé PUK2 pour débloquer la carte SIM."</string>
-    <string name="ClipMmi">"Numéro de l\'appelant"</string>
+    <string name="ClipMmi">"Numéro de l\'appelant (entrant)"</string>
     <string name="ClirMmi">"Numéro de l\'appelant (sortant)"</string>
     <string name="CfMmi">"Transfert d\'appel"</string>
     <string name="CwMmi">"Appel en attente"</string>
@@ -394,7 +394,7 @@
     <string name="lockscreen_screen_locked">"Écran verrouillé"</string>
     <string name="lockscreen_instructions_when_pattern_enabled">"Appuyez sur \"Menu\" pour débloquer le téléphone ou appeler un numéro d\'urgence"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"Appuyez sur \"Menu\" pour déverrouiller le téléphone."</string>
-    <string name="lockscreen_pattern_instructions">"Dessinez un motif pour déverrouiller le téléphone"</string>
+    <string name="lockscreen_pattern_instructions">"Dessinez un schéma pour déverrouiller le téléphone"</string>
     <string name="lockscreen_emergency_call">"Appel d\'urgence"</string>
     <string name="lockscreen_pattern_correct">"Combinaison correcte !"</string>
     <string name="lockscreen_pattern_wrong">"Désolé. Merci de réessayer."</string>
@@ -411,8 +411,8 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Vous avez mal reproduit le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="lockscreen_failed_attempts_almost_glogin">"Vous avez mal saisi le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez débloquer votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown">"Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
-    <string name="lockscreen_forgot_pattern_button_text">"Motif oublié ?"</string>
-    <string name="lockscreen_glogin_too_many_attempts">"Trop de tentatives de motif !"</string>
+    <string name="lockscreen_forgot_pattern_button_text">"Schéma oublié ?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"Trop de tentatives !"</string>
     <string name="lockscreen_glogin_instructions">"Pour déverrouiller le téléphone, connectez-vous à l\'aide de votre compte Google."</string>
     <string name="lockscreen_glogin_username_hint">"Nom d\'utilisateur (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint">"Mot de passe"</string>
@@ -528,8 +528,8 @@
     <string name="days">"jours"</string>
     <string name="hour">"heure"</string>
     <string name="hours">"heures"</string>
-    <string name="minute">"min"</string>
-    <string name="minutes">"min"</string>
+    <string name="minute">"mn"</string>
+    <string name="minutes">"mn"</string>
     <string name="second">"s"</string>
     <string name="seconds">"s"</string>
     <string name="week">"semaine"</string>

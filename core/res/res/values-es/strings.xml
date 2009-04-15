@@ -762,8 +762,8 @@
     <string name="usb_storage_button_unmount">"No activar"</string>
     <string name="usb_storage_error_message">"Se ha producido un problema al intentar utilizar la tarjeta SD para el almacenamiento USB."</string>
     <string name="usb_storage_notification_title">"Conectado por USB"</string>
-    <string name="usb_storage_notification_message">"Seleccionar para copiar archivos al/desde el equipo"</string>
-    <string name="usb_storage_stop_notification_title">"Desactivar almacenar en USB"</string>
+    <string name="usb_storage_notification_message">"Para copiar archivos al/desde el equipo"</string>
+    <string name="usb_storage_stop_notification_title">"Desactivar almacenamiento USB"</string>
     <string name="usb_storage_stop_notification_message">"Seleccionar para desactivar USB."</string>
     <string name="usb_storage_stop_title">"Desactivar almacenamiento USB"</string>
     <string name="usb_storage_stop_message">"Antes de desactivar el almacenamiento USB, asegúrate de haber desactivado el host USB. Selecciona \"Desactivar\" para desactivar el almacenamiento USB."</string>

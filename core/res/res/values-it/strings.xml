@@ -108,7 +108,7 @@
     <string name="global_action_toggle_silent_mode">"Modalità silenziosa"</string>
     <string name="global_action_silent_mode_on_status">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status">"Audio attivo"</string>
-    <string name="global_actions_toggle_airplane_mode">"Modalità aereo"</string>
+    <string name="global_actions_toggle_airplane_mode">"Modalità aereo attiva"</string>
     <string name="global_actions_airplane_mode_on_status">"Modalità aereo attiva"</string>
     <string name="global_actions_airplane_mode_off_status">"Modalità aereo non attiva"</string>
     <string name="safeMode">"Modalità provvisoria"</string>
@@ -722,7 +722,7 @@
     <string name="force_close">"Termina"</string>
     <string name="wait">"Attendi"</string>
     <string name="debug">"Debug"</string>
-    <string name="sendText">"Seleziona un\'azione per il testo"</string>
+    <string name="sendText">"Selezione un\'opzione di invio"</string>
     <string name="volume_ringtone">"Volume suoneria"</string>
     <string name="volume_music">"Volume app. multimediali"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Riproduzione tramite Bluetooth"</string>
