@@ -176,61 +176,60 @@ Surface::Surface(const sp<SurfaceComposerClient>& client,
     const_cast<uint32_t&>(android_native_window_t::flags) = 0;
 }
 
-Surface::Surface(Surface const* rhs)
-    : mOwner(false)
-{
-    // FIXME: we really should get rid of this ctor. the memcpy below
-    //should be safe for now, but android_native_window_t is not supposed
-    // to be clonable.
-    memcpy( static_cast<android_native_window_t*>(this),
-            static_cast<android_native_window_t const *>(rhs),
-            sizeof(android_native_window_t));
-
-    mToken      = rhs->mToken;
-    mIdentity   = rhs->mIdentity;
-    mClient     = rhs->mClient;
-    mSurface    = rhs->mSurface;
-    mBuffers[0] = rhs->mBuffers[0];
-    mBuffers[1] = rhs->mBuffers[1];
-    mFormat     = rhs->mFormat;
-    mFlags      = rhs->mFlags;
-    mSwapRectangle.makeInvalid();
-}
-
 Surface::~Surface()
 {
-    if (mOwner && mToken>=0 && mClient!=0) {
-        mClient->destroySurface(mToken);
-        if (mBuffers[0] != 0) {
-            BufferMapper::get().unmap(mBuffers[0]->getHandle(), this);
-        }
-        if (mBuffers[1] != 0) {
-            BufferMapper::get().unmap(mBuffers[1]->getHandle(), this);
+    // this is a client-side operation, the surface is destroyed, unmap
+    // its buffers in this process.
+    for (int i=0 ; i<2 ; i++) {
+        if (mBuffers[i] != 0) {
+            BufferMapper::get().unmap(mBuffers[i]->getHandle(), this);
         }
     }
+
+    destroy();
+}
+
+void Surface::destroy()
+{
+    // Destroy the surface in SurfaceFlinger if we were the owner
+    // (in any case, a client won't be able to, because it won't have the
+    // right permission).
+    if (mOwner && mToken>=0 && mClient!=0) {
+        mClient->destroySurface(mToken);
+    }
+
+    // clear all references and trigger an IPC now, to make sure things
+    // happen without delay, since these resources are quite heavy.
     mClient.clear();
     mSurface.clear();
     IPCThreadState::self()->flushCommands();
 }
 
-sp<Surface> Surface::dup() const
+void Surface::clear() 
 {
-    // FIXME: we should get rid of Surface::dup()
-    Surface const * r = this;
-    if (this && mOwner) {
-        // the only reason we need to do this is because of Java's garbage
-        // collector: because we're creating a copy of the Surface
-        // instead of a reference, we can guarantee that when our last
-        // reference goes away, the real surface will be deleted.
-        // Without this hack (the code is correct too), we'd have to
-        // wait for a GC for the surface to go away.
-        r = new Surface(this);        
-    }
-    return const_cast<Surface*>(r);
+    // here, the window manager tells us explicitly that we should destroy
+    // the surface's resource. Soon after this call, it will also release
+    // its last reference (which will call the dtor); however, it is possible
+    // that a client living in the same process still holds references which
+    // would delay the call to the dtor -- that is why we need this explicit
+    // "clear()" call.
+
+    // FIXME: we should probably unmap the buffers here. The problem is that
+    // the app could be in the middle of using them, and if we don't unmap now
+    // and we're in the system process, the mapping will be lost (because
+    // the buffer will be freed, and the handles destroyed)
+    
+    Mutex::Autolock _l(mSurfaceLock);
+    destroy();
 }
 
 status_t Surface::validate(per_client_cblk_t const* cblk) const
 {
+    if (mToken<0 || mClient==0) {
+        LOGE("invalid token (%d, identity=%u) or client (%p)", 
+                mToken, mIdentity, mClient.get());
+        return NO_INIT;
+    }
     if (cblk == 0) {
         LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
         return NO_INIT;
@@ -330,6 +329,13 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
 int Surface::lockBuffer(android_native_buffer_t* buffer)
 {
+    Mutex::Autolock _l(mSurfaceLock);
+
+    per_client_cblk_t* const cblk = mClient->mControl;
+    status_t err = validate(cblk);
+    if (err != NO_ERROR)
+        return err;
+
     // FIXME: lockBuffer() needs proper implementation
     return 0;
 }
@@ -543,7 +549,7 @@ status_t Surface::writeToParcel(const sp<Surface>& surface, Parcel* parcel)
     uint32_t identity = 0;
     sp<SurfaceComposerClient> client;
     sp<ISurface> sur;
-    if (surface->isValid()) {
+    if (Surface::isValid(surface)) {
         token = surface->mToken;
         identity = surface->mIdentity;
         client = surface->mClient;

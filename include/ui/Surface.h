@@ -90,8 +90,14 @@ public:
         uint32_t    reserved[2];
     };
 
-    bool        isValid() const { return this && mToken>=0 && mClient!=0; }
+    static bool isValid(const sp<Surface>& surface) {
+        return (surface != 0) && surface->mToken>=0 && surface->mClient!=0;
+    }
+        
     SurfaceID   ID() const      { return mToken; }
+
+    // release surface data from java
+    void        clear();
 
     status_t    lock(SurfaceInfo* info, bool blocking = true);
     status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
@@ -103,7 +109,6 @@ public:
     void        setSwapRectangle(const Rect& r);
     const Rect& swapRectangle() const;
 
-    sp<Surface>         dup() const;
     static sp<Surface>  readFromParcel(Parcel* parcel);
     static status_t     writeToParcel(const sp<Surface>& surface, Parcel* parcel);
     static bool         isSameSurface(const sp<Surface>& lhs, const sp<Surface>& rhs);
@@ -149,6 +154,8 @@ private:
 
     ~Surface();
     
+    void destroy();
+
     Region dirtyRegion() const;
     void setDirtyRegion(const Region& region) const;
 

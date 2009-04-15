@@ -283,7 +283,7 @@ public class Surface implements Parcelable {
 
     public native   void readFromParcel(Parcel source);
     public native   void writeToParcel(Parcel dest, int flags);
-
+    
     public static final Parcelable.Creator<Surface> CREATOR
             = new Parcelable.Creator<Surface>()
     {
@@ -304,7 +304,7 @@ public class Surface implements Parcelable {
     /* no user serviceable parts here ... */
     @Override
     protected void finalize() throws Throwable {
-        clear();
+        release();
     }
     
     private native void init(SurfaceSession s,
@@ -312,4 +312,6 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
 
     private native void init(Parcel source);
+    
+    private native void release();
 }
