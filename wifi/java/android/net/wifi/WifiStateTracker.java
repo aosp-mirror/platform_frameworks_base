@@ -245,6 +245,13 @@ public class WifiStateTracker extends NetworkStateTracker {
     private static final int RUN_STATE_RUNNING  = 2;
     private static final int RUN_STATE_STOPPING = 3;
     private static final int RUN_STATE_STOPPED  = 4;
+
+    private static final String mRunStateNames[] = {
+            "Starting",
+            "Running",
+            "Stopping",
+            "Stopped"
+    };
     private int mRunState;
 
     private final IBatteryStats mBatteryStats;
@@ -836,7 +843,14 @@ public class WifiStateTracker extends NetworkStateTracker {
                             newDetailedState = DetailedState.FAILED;
                         }
                         handleDisconnectedState(newDetailedState);
-                        if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly) {
+                        /**
+                         * If we were associated with a network (networkId != -1),
+                         * assume we reached this state because of a failed attempt
+                         * to acquire an IP address, and attempt another connection
+                         * and IP address acquisition in RECONNECT_DELAY_MSECS
+                         * milliseconds.
+                         */
+                        if (mRunState == RUN_STATE_RUNNING && !mIsScanOnly && networkId != -1) {
                             sendEmptyMessageDelayed(EVENT_DEFERRED_RECONNECT, RECONNECT_DELAY_MSECS);
                         } else if (mRunState == RUN_STATE_STOPPING) {
                             synchronized (this) {
@@ -1376,13 +1390,24 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
     }
 
+    /**
+     * We want to stop the driver, but if we're connected to a network,
+     * we first want to disconnect, so that the supplicant is always in
+     * a known state (DISCONNECTED) when the driver is stopped.
+     * @return {@code true} if the operation succeeds, which means that the
+     * disconnect or stop command was initiated.
+     */
     public synchronized boolean disconnectAndStop() {
         if (mRunState != RUN_STATE_STOPPING && mRunState != RUN_STATE_STOPPED) {
             // Take down any open network notifications
             setNotificationVisible(false, 0, false, 0);
 
             mRunState = RUN_STATE_STOPPING;
-            return WifiNative.disconnectCommand();
+            if (mWifiInfo.getSupplicantState() == SupplicantState.DORMANT) {
+                return WifiNative.stopDriverCommand();
+            } else {
+                return WifiNative.disconnectCommand();
+            }
         } else {
             /*
              * The "driver-stop" wake lock normally is released from the
@@ -1574,9 +1599,14 @@ public class WifiStateTracker extends NetworkStateTracker {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("interface ").append(mInterfaceName).
-                append(" runState=").append(mRunState).append(LS);
-        sb.append(mWifiInfo).append(LS);
+        sb.append("interface ").append(mInterfaceName);
+        sb.append(" runState=");
+        if (mRunState >= 1 && mRunState <= mRunStateNames.length) {
+            sb.append(mRunStateNames[mRunState-1]);
+        } else {
+            sb.append(mRunState);
+        }
+        sb.append(LS).append(mWifiInfo).append(LS);
         sb.append(mDhcpInfo).append(LS);
         sb.append("haveIpAddress=").append(mHaveIPAddress).
                 append(", obtainingIpAddress=").append(mObtainingIPAddress).

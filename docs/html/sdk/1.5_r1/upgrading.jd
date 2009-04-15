@@ -30,17 +30,42 @@ sdk.version=1.5_r1
 </div>
 -->
 
-<p>This document describes how to move your development environment and existing
-Android applications from an Android 1.0 SDK to the Android 1.5, Release 1 SDK.
+
+    <div id="qv-wrapper">
+    <div id="qv">
+
+<h2>Upgrading quickview</h2>
+<ul>
+<li>The Android 1.5 SDK uses a new project structure and a new ADT plugin (ADT 0.9). </li>
+<li>To move existing projects into the SDK, you must make some minor changes in your development environment.</li>
+<li>The new ADT plugin (ADT 0.9) <em>is not compatible</em> with projects created in previous SDKs.</li>
+<li>You need to uninstall your existing ADT plugin, before installing ADT 0.9.</li>
+
+</ul>
+
+<!--<h2>Related Information</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/3/changes.html">Android 1.5 API Differences</a></li>
+</ol>
+-->
+</div>
+</div>
+
+<p>See the <a href="{@docRoot}sdk/preview/index.html">Download page</a> for more information.</p>
+
+<!-- <p>This document describes how to move your development environment and existing
+Android applications from an Android 1.1 or 1.0 SDK to the Android 1.5 SDK.
 If you are migrating applications from an earlier SDK, please read the upgrading
 document available in the Android 1.0 SDK package.
 </p>
 
-<p>To ensure that your applications are compliant with the Android 1.5 system available 
+<p>To ensure that your existing applications run properly with the Android 1.5 system available 
 on mobile devices, you need to install the Android 1.5 SDK and port your existing Android 
 applications to it. The sections below will guide you through the process.</p>
 
-<h2 id="install-new">Installing the Latest SDK</h2>
+</ul>
+
+<h2 id="install-new">Installing the SDK</h2>
 
 <p><a href="{@docRoot}sdk/1.5_r1/index.html">Download the SDK</a> and unpack it into a safe location.</p>
 
@@ -131,11 +156,12 @@ framework and API changes. You'll need to update your code to match the
 latest APIs.</p>
 
 <p>One way to start is to open your project in Eclipse and see where the ADT
-identifies errors in your application. From there, you can lookup
-specific API changes in the Android 1.0 APIs in the 
-<a href="http://code.google.com/android/migrating/changes-overview.html">
-Overview of Changes</a> and <a href="http://code.google.com/android/migrating/changes.html">
-API Diffs Report</a>.</p>
+identifies errors in your application. You can also look up
+specific changes in the Android APIs in the 
+android-1.5.html#api-changes 
+Android 1.5 Version Notes
+
+document.</p>
 
 <p>If you have additional trouble updating your code, visit the 
 <a href="http://groups.google.com/group/android-developers">Android Developers Group</a>
@@ -147,4 +173,4 @@ preinstalled in the emulator. For more information, or if you encounter an "rein
 error when running or installing ApiDemos, see the troubleshooting topic 
 <a href="{@docRoot}guide/appendix/faq/troubleshooting.html#apidemosreinstall">I can't install ApiDemos 
 apps in my IDE because of a signing error</a> for information about how to solve the problem.</p>
-
+-->

@@ -1109,7 +1109,8 @@ status_t compileResourceFile(Bundle* bundle,
 
                 if (!localHasErrors) {
                     err = outTable->startBag(SourcePos(in->getPrintableSource(), block.getLineNumber()),
-                                             myPackage, curType, ident, parentIdent, &curParams);
+                                             myPackage, curType, ident, parentIdent, &curParams, 
+                                             overwrite);
                     if (err != NO_ERROR) {
                         hasErrors = localHasErrors = true;
                     }
@@ -1409,6 +1410,8 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                                  const ResTable_config* params,
                                  bool replace, bool isId)
 {
+    status_t result = NO_ERROR;
+
     // Check for adding entries in other packages...  for now we do
     // nothing.  We need to do the right thing here to support skinning.
     uint32_t rid = mAssets->getIncludedResources()
@@ -1442,8 +1445,15 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
         }
         e->setParent(bagParent);
     }
-    
-    return e->makeItABag(sourcePos);
+
+    if ((result = e->makeItABag(sourcePos)) != NO_ERROR) {
+        return result;
+    }
+
+    if (replace) { 
+        return e->emptyBag(sourcePos);
+    }
+    return result;
 }
 
 status_t ResourceTable::addBag(const SourcePos& sourcePos,
@@ -2795,6 +2805,17 @@ status_t ResourceTable::Entry::addToBag(const SourcePos& sourcePos,
     }
 
     mBag.add(key, item);
+    return NO_ERROR;
+}
+
+status_t ResourceTable::Entry::emptyBag(const SourcePos& sourcePos)
+{
+    status_t err = makeItABag(sourcePos);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    mBag.clear();
     return NO_ERROR;
 }
 

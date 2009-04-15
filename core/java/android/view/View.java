@@ -5531,7 +5531,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                 (mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE);
 
             if (width <= 0 || height <= 0 ||
-                    (width * height * (opaque ? 2 : 4) >= // Projected bitmap size in bytes
+                    (width * height * (opaque ? 2 : 4) > // Projected bitmap size in bytes
                             ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize())) {
                 destroyDrawingCache();
                 return;
@@ -5625,6 +5625,62 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             }
             mPrivateFlags |= DRAWING_CACHE_VALID;
         }
+    }
+
+    /**
+     * Create a snapshot of the view into a bitmap.  We should probably make
+     * some form of this public, but should think about the API.
+     */
+    /*package*/ Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor) {
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, quality);
+        if (bitmap == null) {
+            throw new OutOfMemoryError();
+        }
+
+        Canvas canvas;
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            canvas = attachInfo.mCanvas;
+            if (canvas == null) {
+                canvas = new Canvas();
+            }
+            canvas.setBitmap(bitmap);
+            // Temporarily clobber the cached Canvas in case one of our children
+            // is also using a drawing cache. Without this, the children would
+            // steal the canvas by attaching their own bitmap to it and bad, bad
+            // things would happen (invisible views, corrupted drawings, etc.)
+            attachInfo.mCanvas = null;
+        } else {
+            // This case should hopefully never or seldom happen
+            canvas = new Canvas(bitmap);
+        }
+
+        if ((backgroundColor&0xff000000) != 0) {
+            bitmap.eraseColor(backgroundColor);
+        }
+
+        computeScroll();
+        final int restoreCount = canvas.save();
+        canvas.translate(-mScrollX, -mScrollY);
+
+        // Fast path for layouts with no backgrounds
+        if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+            dispatchDraw(canvas);
+        } else {
+            draw(canvas);
+        }
+
+        canvas.restoreToCount(restoreCount);
+
+        if (attachInfo != null) {
+            // Restore the cached Canvas for our siblings
+            attachInfo.mCanvas = canvas;
+        }
+        
+        return bitmap;
     }
 
     /**
@@ -7402,7 +7458,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     /**
-     * Provide haptic feedback to the user for this view.
+     * BZZZTT!!1!
+     * 
+     * <p>Provide haptic feedback to the user for this view.
      *
      * <p>The framework will provide haptic feedback for some built in actions,
      * such as long presses, but you may wish to provide feedback for your
@@ -7419,7 +7477,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     /**
-     * Like {@link #performHapticFeedback(int)}, with additional options.
+     * BZZZTT!!1!
+     * 
+     * <p>Like {@link #performHapticFeedback(int)}, with additional options.
      *
      * @param feedbackConstant One of the constants defined in
      * {@link HapticFeedbackConstants}

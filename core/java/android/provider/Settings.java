@@ -885,8 +885,6 @@ public final class Settings {
          * Set to one of {@link #WIFI_SLEEP_POLICY_DEFAULT},
          * {@link #WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED}, or
          * {@link #WIFI_SLEEP_POLICY_NEVER}.
-         * 
-         * @hide pending API council
          */
         public static final String WIFI_SLEEP_POLICY = "wifi_sleep_policy";
 
@@ -894,8 +892,6 @@ public final class Settings {
          * Value for {@link #WIFI_SLEEP_POLICY} to use the default Wi-Fi sleep
          * policy, which is to sleep shortly after the turning off
          * according to the {@link #STAY_ON_WHILE_PLUGGED_IN} setting.
-         * 
-         * @hide pending API council
          */
         public static final int WIFI_SLEEP_POLICY_DEFAULT = 0;
 
@@ -903,15 +899,11 @@ public final class Settings {
          * Value for {@link #WIFI_SLEEP_POLICY} to use the default policy when
          * the device is on battery, and never go to sleep when the device is
          * plugged in.
-         * 
-         * @hide pending API council
          */
         public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1;
         
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to never go to sleep.
-         * 
-         * @hide pending API council
          */
         public static final int WIFI_SLEEP_POLICY_NEVER = 2;
         
@@ -2005,7 +1997,6 @@ public final class Settings {
 
         /**
          * A comma-separated list of SSIDs for which the Wi-Fi watchdog should be enabled.
-         * @hide pending API council
          */
         public static final String WIFI_WATCHDOG_WATCH_LIST = "wifi_watchdog_watch_list";
 
@@ -2028,16 +2019,12 @@ public final class Settings {
          * The maximum number of times we will retry a connection to an access
          * point for which we have failed in acquiring an IP address from DHCP.
          * A value of N means that we will make N+1 connection attempts in all.
-         * 
-         * @hide pending API Council approval
          */
         public static final String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
     
         /**
          * Maximum amount of time in milliseconds to hold a wakelock while waiting for mobile
          * data connectivity to be established after a disconnect from Wi-Fi.
-         * 
-         * @hide pending API Council approval
          */
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
             "wifi_mobile_data_transition_wakelock_timeout_ms";
@@ -2045,8 +2032,6 @@ public final class Settings {
         /**
          * Whether background data usage is allowed by the user. See
          * ConnectivityManager for more info.
-         * 
-         * @hide pending API council
          */
         public static final String BACKGROUND_DATA = "background_data";
     }

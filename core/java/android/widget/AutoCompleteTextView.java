@@ -809,6 +809,22 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
     
     /**
+     * Set the horizontal offset with respect to {@link #setDropDownAnchor(int)}
+     * @hide pending API council review
+     */
+    public void setDropDownHorizontalOffset(int horizontalOffset) {
+        mDropDownHorizontalOffset = horizontalOffset;
+    }
+    
+    /**
+     * Set the vertical offset with respect to {@link #setDropDownAnchor(int)}
+     * @hide pending API council review
+     */
+    public void setDropDownVerticalOffset(int verticalOffset) {
+        mDropDownVerticalOffset = verticalOffset;
+    }
+
+    /**
      * <p>Used for lazy instantiation of the anchor view from the id we have. If the value of
      * the id is NO_ID or we can't find a view for the given id, we return this TextView as
      * the default anchoring point.</p>

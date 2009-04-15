@@ -44,6 +44,8 @@
 
 namespace android {
 
+#define BLUETOOTH_CLASS_ERROR 0xFF000000
+
 #ifdef HAVE_BLUETOOTH
 // We initialize these variables when we load class
 // android.server.BluetoothDeviceService
@@ -724,11 +726,11 @@ static jstring lastUsedNative(JNIEnv *env, jobject obj, jstring address) {
 }
 
 static jint getRemoteClassNative(JNIEnv *env, jobject object, jstring address) {
+    jint result = BLUETOOTH_CLASS_ERROR;
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
     native_data_t *nat = get_native_data(env, object);
     if (nat) {
-        jint ret = 0;
         const char *c_address = env->GetStringUTFChars(address, NULL);
 
         LOGV("... address = %s", c_address);
@@ -744,17 +746,15 @@ static jint getRemoteClassNative(JNIEnv *env, jobject object, jstring address) {
             DBusError err;
             dbus_error_init(&err);
             if (!dbus_message_get_args(reply, &err,
-                                      DBUS_TYPE_UINT32, &ret,
+                                      DBUS_TYPE_UINT32, &result,
                                       DBUS_TYPE_INVALID)) {
                 LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, reply);
             }
             dbus_message_unref(reply);
         }
-
-        return ret;
     }
 #endif
-    return 0;
+    return result;
 }
 
 static jbyteArray getRemoteFeaturesNative(JNIEnv *env, jobject object,

@@ -486,19 +486,17 @@ public class KeyboardView extends View implements View.OnClickListener {
     }
 
     /**
-     * Enables or disables proximity correction. When enabled, {@link OnKeyboardActionListener#onKey}
-     * gets called with key codes for adjacent keys. Otherwise only the primary code is returned.
+     * When enabled, calls to {@link OnKeyboardActionListener#onKey} will include key
+     * codes for adjacent keys.  When disabled, only the primary key code will be
+     * reported.
      * @param enabled whether or not the proximity correction is enabled
-     * @hide Pending API Council approval
      */
     public void setProximityCorrectionEnabled(boolean enabled) {
         mProximityCorrectOn = enabled;
     }
 
     /**
-     * Returns the enabled state of the proximity correction.
-     * @return true if proximity correction is enabled, false otherwise
-     * @hide Pending API Council approval
+     * Returns true if proximity correction is enabled.
      */
     public boolean isProximityCorrectionEnabled() {
         return mProximityCorrectOn;

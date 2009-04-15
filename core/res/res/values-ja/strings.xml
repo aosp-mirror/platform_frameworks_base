@@ -42,8 +42,8 @@
     <string name="needPuk">"SIMカードはPUKでロックされています。ロックを解除するにはPUKコードを入力してください。"</string>
     <string name="needPuk2">"SIMカードのロック解除のためPUK2を入力します。"</string>
     <string name="ClipMmi">"着信時の発信者番号"</string>
-    <string name="ClirMmi">"発信時の発信者番号"</string>
-    <string name="CfMmi">"電話の転送"</string>
+    <string name="ClirMmi">"発信者番号"</string>
+    <string name="CfMmi">"着信転送"</string>
     <string name="CwMmi">"通話中着信"</string>
     <string name="BaMmi">"発信制限"</string>
     <string name="PwdMmi">"パスワードの変更"</string>
@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"既定: 発信者番号通知、次の発信: 通知"</string>
     <string name="serviceNotProvisioned">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent">"発信者番号の設定は変更できません。"</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"アクセス制限が変更されました"</string>
+    <string name="RestrictedOnData">"データサービスがブロックされています。"</string>
+    <string name="RestrictedOnEmergency">"緊急サービスがブロックされています。"</string>
+    <string name="RestrictedOnNormal">"音声/SMSサービスがブロックされています。"</string>
+    <string name="RestrictedOnAll">"すべての音声/SMSサービスがブロックされています。"</string>
     <string name="serviceClassVoice">"音声"</string>
     <string name="serviceClassData">"データ"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -143,7 +138,7 @@
     <string name="permlab_expandStatusBar">"ステータスバーの拡大/縮小"</string>
     <string name="permdesc_expandStatusBar">"ステータスバーの拡大や縮小をアプリケーションに許可します。"</string>
     <string name="permlab_processOutgoingCalls">"発信の傍受"</string>
-    <string name="permdesc_processOutgoingCalls">"通話の発信とダイヤルする番号の変更とをアプリケーションに許可します。悪意のあるアプリケーションが発信を監視、転送、阻止する恐れがあります。"</string>
+    <string name="permdesc_processOutgoingCalls">"通話発信とダイヤルする番号の変更をアプリケーションに許可します。悪意のあるアプリケーションが発信を監視、転送、阻止する恐れがあります。"</string>
     <string name="permlab_receiveSms">"SMSの受信"</string>
     <string name="permdesc_receiveSms">"SMSメッセージの受信と処理をアプリケーションに許可します。悪意のあるアプリケーションがメッセージを監視したり、表示せずに削除する恐れがあります。"</string>
     <string name="permlab_receiveMms">"MMSの受信"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"SIMカードを挿入してください。"</string>
     <string name="lockscreen_network_locked_message">"ネットワークがロックされました"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIMカードはPUKでロックされています。"</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"ユーザーガイドを参照するか、お客様サポートにお問い合わせください。"</string>
     <string name="lockscreen_sim_locked_message">"SIMカードはロックされています。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIMカードのロック解除中..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"ロック解除のパターンは<xliff:g id="NUMBER_0">%d</xliff:g>回とも正しく指定されていません。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度指定してください。"</string>
@@ -572,11 +566,11 @@
     <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>、<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="full_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'/'<xliff:g id="MONTH">MMMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g><xliff:g id="DAY">d</xliff:g>'日 '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>'年'<xliff:g id="MONTH">MMMM</xliff:g>'月'<xliff:g id="DAY">d</xliff:g>'日'"</string>
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>'年'"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>'/'<xliff:g id="MONTH">MMM</xliff:g>'/'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
+    <string name="twelve_hour_time_format" format="date">"<xliff:g id="AMPM">a</xliff:g><xliff:g id="HOUR">h</xliff:g>'時'<xliff:g id="MINUTE">mm</xliff:g>'分'"</string>
     <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"正午"</string>
     <string name="Noon">"正午"</string>
@@ -586,16 +580,16 @@
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>日"</string>
-    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g>月"</string>
+    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g>年<xliff:g id="MONTH">%B</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g>/<xliff:g id="MONTH">%B</xliff:g>/<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
     <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日<xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日 <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH2">%7$s</xliff:g>月<xliff:g id="DAY2">%8$s</xliff:g>日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
     <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
@@ -607,7 +601,7 @@
     <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
     <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g>年<xliff:g id="MONTH1">%2$s</xliff:g>月<xliff:g id="DAY1">%3$s</xliff:g>日～<xliff:g id="DAY2">%8$s</xliff:g>日"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> - <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>～<xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
     <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g><xliff:g id="TIME1">%5$s</xliff:g>～<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g><xliff:g id="WEEKDAY2">%6$s</xliff:g><xliff:g id="TIME2">%10$s</xliff:g>"</string>
@@ -625,13 +619,13 @@
     <string name="day_of_week_long_thursday">"木曜日"</string>
     <string name="day_of_week_long_friday">"金曜日"</string>
     <string name="day_of_week_long_saturday">"土曜日"</string>
-    <string name="day_of_week_medium_sunday">"（日）"</string>
-    <string name="day_of_week_medium_monday">"（月）"</string>
-    <string name="day_of_week_medium_tuesday">"（火）"</string>
-    <string name="day_of_week_medium_wednesday">"（水）"</string>
-    <string name="day_of_week_medium_thursday">"（木）"</string>
-    <string name="day_of_week_medium_friday">"（金）"</string>
-    <string name="day_of_week_medium_saturday">"（土）"</string>
+    <string name="day_of_week_medium_sunday">"(日)"</string>
+    <string name="day_of_week_medium_monday">"(月)"</string>
+    <string name="day_of_week_medium_tuesday">"(火)"</string>
+    <string name="day_of_week_medium_wednesday">"(水)"</string>
+    <string name="day_of_week_medium_thursday">"(木)"</string>
+    <string name="day_of_week_medium_friday">"(金)"</string>
+    <string name="day_of_week_medium_saturday">"(土)"</string>
     <string name="day_of_week_short_sunday">"日"</string>
     <string name="day_of_week_short_monday">"月"</string>
     <string name="day_of_week_short_tuesday">"火"</string>
@@ -665,18 +659,18 @@
     <string name="month_long_october">"10月"</string>
     <string name="month_long_november">"11月"</string>
     <string name="month_long_december">"12月"</string>
-    <string name="month_medium_january">"1月"</string>
-    <string name="month_medium_february">"2月"</string>
-    <string name="month_medium_march">"3月"</string>
-    <string name="month_medium_april">"4月"</string>
-    <string name="month_medium_may">"5月"</string>
-    <string name="month_medium_june">"6月"</string>
-    <string name="month_medium_july">"7月"</string>
-    <string name="month_medium_august">"8月"</string>
-    <string name="month_medium_september">"9月"</string>
-    <string name="month_medium_october">"10月"</string>
-    <string name="month_medium_november">"11月"</string>
-    <string name="month_medium_december">"12月"</string>
+    <string name="month_medium_january">"1"</string>
+    <string name="month_medium_february">"2"</string>
+    <string name="month_medium_march">"3"</string>
+    <string name="month_medium_april">"4"</string>
+    <string name="month_medium_may">"5"</string>
+    <string name="month_medium_june">"6"</string>
+    <string name="month_medium_july">"7"</string>
+    <string name="month_medium_august">"8"</string>
+    <string name="month_medium_september">"9"</string>
+    <string name="month_medium_october">"10"</string>
+    <string name="month_medium_november">"11"</string>
+    <string name="month_medium_december">"12"</string>
     <string name="month_shortest_january">"1"</string>
     <string name="month_shortest_february">"2"</string>
     <string name="month_shortest_march">"3"</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"次へ"</string>
     <string name="ime_action_done">"完了"</string>
     <string name="ime_action_default">"実行"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"発信"</string>
+    <string name="create_contact_using">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"連絡先を新規登録"</string>
 </resources>

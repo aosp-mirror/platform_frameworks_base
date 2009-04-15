@@ -92,16 +92,15 @@ status_t A2dpAudioInterface::getMicMute(bool* state)
 status_t A2dpAudioInterface::setParameter(const char *key, const char *value)
 {
     LOGD("setParameter %s,%s\n", key, value);
-    
+
     if (!key || !value)
         return -EINVAL;
-    
-    if (strcmp(key, "a2dp_sink_address") == 0) {        
+
+    if (strcmp(key, "a2dp_sink_address") == 0) {
         return mOutput->setAddress(value);
     }
-    if (strcmp(key, "bluetooth_enabled") == 0 &&
-        strcmp(value, "false") == 0) {
-        return mOutput->close();
+    if (strcmp(key, "bluetooth_enabled") == 0) {
+        mOutput->setBluetoothEnabled(strcmp(value, "true") == 0);
     }
 
     return 0;
@@ -130,7 +129,10 @@ status_t A2dpAudioInterface::dump(int fd, const Vector<String16>& args)
 // ----------------------------------------------------------------------------
 
 A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
-    mFd(-1), mStandby(true), mStartCount(0), mRetryCount(0), mData(NULL)
+    mFd(-1), mStandby(true), mStartCount(0), mRetryCount(0), mData(NULL),
+    // assume BT enabled to start, this is safe because its only the
+    // enabled->disabled transition we are worried about
+    mBluetoothEnabled(true)
 {
     // use any address by default
     strcpy(mA2dpAddress, "00:00:00:00:00:00");
@@ -162,14 +164,21 @@ A2dpAudioInterface::A2dpAudioStreamOut::~A2dpAudioStreamOut()
 }
 
 ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t bytes)
-{    
+{
     Mutex::Autolock lock(mLock);
 
     size_t remaining = bytes;
-    status_t status = init();
+    status_t status = -1;
+
+    if (!mBluetoothEnabled) {
+        LOGW("A2dpAudioStreamOut::write(), but bluetooth disabled");
+        goto Error;
+    }
+
+    status = init();
     if (status < 0)
         goto Error;
-    
+
     while (remaining > 0) {
         status = a2dp_write(mData, buffer, remaining);
         if (status <= 0) {
@@ -181,7 +190,7 @@ ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t
     }
 
     mStandby = false;
-    
+
     return bytes;
 
 Error:
@@ -235,7 +244,26 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::setAddress(const char* address)
     return NO_ERROR;
 }
 
+status_t A2dpAudioInterface::A2dpAudioStreamOut::setBluetoothEnabled(bool enabled)
+{
+    LOGD("setBluetoothEnabled %d", enabled);
+
+    Mutex::Autolock lock(mLock);
+
+    mBluetoothEnabled = enabled;
+    if (!enabled) {
+        return close_l();
+    }
+    return NO_ERROR;
+}
+
 status_t A2dpAudioInterface::A2dpAudioStreamOut::close()
+{
+    Mutex::Autolock lock(mLock);
+    return close_l();
+}
+
+status_t A2dpAudioInterface::A2dpAudioStreamOut::close_l()
 {
     if (mData) {
         a2dp_cleanup(mData);

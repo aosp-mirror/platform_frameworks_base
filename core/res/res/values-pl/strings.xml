@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"Identyfikator dzwoniącego ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="serviceNotProvisioned">"Usługa nie jest świadczona."</string>
     <string name="CLIRPermanent">"Nie można zmienić ustawienia identyfikatora dzwoniącego."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"Zmieniono ograniczenie dostępu"</string>
+    <string name="RestrictedOnData">"Usługa transmisji danych jest zablokowana."</string>
+    <string name="RestrictedOnEmergency">"Usługa połączeń alarmowych jest zablokowana."</string>
+    <string name="RestrictedOnNormal">"Usługa głosowa/SMS jest zablokowana."</string>
+    <string name="RestrictedOnAll">"Wszystkie usługi głosowe/SMS są zablokowane."</string>
     <string name="serviceClassVoice">"Głos"</string>
     <string name="serviceClassData">"Dane"</string>
     <string name="serviceClassFAX">"FAKS"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"Włóż kartę SIM."</string>
     <string name="lockscreen_network_locked_message">"Sieć zablokowana"</string>
     <string name="lockscreen_sim_puk_locked_message">"Karta SIM jest zablokowana kodem PUK."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"Zapoznaj się z instrukcją obsługi lub skontaktuj się z działem obsługi klienta."</string>
     <string name="lockscreen_sim_locked_message">"Karta SIM jest zablokowana."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Odblokowywanie karty SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Wzór odblokowania został nieprawidłowo narysowany <xliff:g id="NUMBER_0">%d</xliff:g> razy. "\n\n"Spróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> sekund."</string>
@@ -431,7 +425,7 @@
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"Wyczyść powiadomienia"</string>
     <string name="status_bar_no_notifications_title">"Brak powiadomień"</string>
-    <string name="status_bar_ongoing_events_title">"Trwające"</string>
+    <string name="status_bar_ongoing_events_title">"Bieżące"</string>
     <string name="status_bar_latest_events_title">"Powiadomienia"</string>
     <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"Ładowanie..."</string>
@@ -582,10 +576,10 @@
     <string name="Noon">"Południe"</string>
     <string name="midnight">"północ"</string>
     <string name="Midnight">"Północ"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -613,7 +607,7 @@
     <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="abbrev_month_day_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
@@ -721,8 +715,8 @@
     <string name="aerr_application">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) została niespodziewanie zatrzymana. Spróbuj ponownie."</string>
     <string name="aerr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> został niespodziewanie zatrzymany. Spróbuj ponownie."</string>
     <string name="anr_title">"Przepraszamy!"</string>
-    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>) nie odpowiada."</string>
-    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (w procesie <xliff:g id="PROCESS">%2$s</xliff:g>) nie odpowiada."</string>
+    <string name="anr_activity_application">"Działanie <xliff:g id="ACTIVITY">%1$s</xliff:g> (w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>) nie odpowiada."</string>
+    <string name="anr_activity_process">"Działanie <xliff:g id="ACTIVITY">%1$s</xliff:g> (w procesie <xliff:g id="PROCESS">%2$s</xliff:g>) nie odpowiada."</string>
     <string name="anr_application_process">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> (w procesie <xliff:g id="PROCESS">%2$s</xliff:g>) nie odpowiada."</string>
     <string name="anr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> nie odpowiada."</string>
     <string name="force_close">"Wymuś zamknięcie"</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"Dalej"</string>
     <string name="ime_action_done">"Gotowe"</string>
     <string name="ime_action_default">"Wykonaj"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"Połącz"\n"z numerem <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"Utwórz kontakt"\n"dla numeru <xliff:g id="NUMBER">%s</xliff:g>"</string>
 </resources>

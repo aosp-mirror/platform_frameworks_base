@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="serviceNotProvisioned">"서비스가 준비되지 않았습니다."</string>
     <string name="CLIRPermanent">"발신자 번호 설정을 변경할 수 없습니다."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"제한된 액세스가 변경되었습니다."</string>
+    <string name="RestrictedOnData">"데이터 서비스가 차단되었습니다."</string>
+    <string name="RestrictedOnEmergency">"응급 서비스가 차단되었습니다."</string>
+    <string name="RestrictedOnNormal">"음성/SMS 서비스가 차단되었습니다."</string>
+    <string name="RestrictedOnAll">"모든 음성/SMS 서비스가 차단되었습니다."</string>
     <string name="serviceClassVoice">"음성"</string>
     <string name="serviceClassData">"데이터"</string>
     <string name="serviceClassFAX">"팩스"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"SIM 카드를 삽입하세요."</string>
     <string name="lockscreen_network_locked_message">"네트워크 잠김"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM 카드의 PUK가 잠겨 있습니다."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"사용자 가이드를 참조하거나 고객지원팀에 문의하세요."</string>
     <string name="lockscreen_sim_locked_message">"SIM 카드가 잠겨 있습니다."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM 카드 잠금해제 중..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 가져왔습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"다음"</string>
     <string name="ime_action_done">"완료"</string>
     <string name="ime_action_default">"실행"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"다음 번호로 전화걸기"\n": <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"다음 번호로 주소록 만들기"\n": <xliff:g id="NUMBER">%s</xliff:g>"</string>
 </resources>

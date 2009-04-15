@@ -1006,11 +1006,10 @@ public class WebView extends AbsoluteLayout
      * the javascript property window.navigator.isOnline and
      * generates the online/offline event as specified in HTML5, sec. 5.7.7
      * @param networkUp boolean indicating if network is available
-     * 
-     * @hide pending API Council approval
      */
     public void setNetworkAvailable(boolean networkUp) {
-        BrowserFrame.sJavaBridge.setNetworkOnLine(networkUp);
+        mWebViewCore.sendMessage(EventHub.SET_NETWORK_STATE,
+                networkUp ? 1 : 0, 0);
     }
 
     /**
@@ -1872,8 +1871,6 @@ public class WebView extends AbsoluteLayout
      * Also, there may have been redirects resulting in a different url to that
      * originally requested.
      * @return The url that was originally requested for the current page.
-     * 
-     * @hide pending API Council approval
      */
     public String getOriginalUrl() {
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();

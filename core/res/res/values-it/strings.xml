@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"ID chiamante generalmente non limitato. Prossima chiamata: non limitato"</string>
     <string name="serviceNotProvisioned">"Servizio non fornito."</string>
     <string name="CLIRPermanent">"Impossibile modificare l\'impostazione dell\'ID del chiamante."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"Accesso limitato modificato"</string>
+    <string name="RestrictedOnData">"Il servizio dati è bloccato."</string>
+    <string name="RestrictedOnEmergency">"Il servizio di emergenza è bloccato."</string>
+    <string name="RestrictedOnNormal">"Il servizio vocale/SMS è bloccato."</string>
+    <string name="RestrictedOnAll">"Tutti i servizi vocali/SMS sono bloccati."</string>
     <string name="serviceClassVoice">"Voce"</string>
     <string name="serviceClassData">"Dati"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"Inserisci una SIM."</string>
     <string name="lockscreen_network_locked_message">"Rete bloccata"</string>
     <string name="lockscreen_sim_puk_locked_message">"La SIM è bloccata tramite PUK."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"Consulta il Manuale utente o contatta il servizio clienti."</string>
     <string name="lockscreen_sim_locked_message">"La SIM è bloccata."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Sblocco SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi di inserimento della sequenza di sblocco. "\n\n"Riprova fra <xliff:g id="NUMBER_1">%d</xliff:g> secondi."</string>
@@ -582,7 +576,7 @@
     <string name="Noon">"Mezzogiorno"</string>
     <string name="midnight">"mezzanotte"</string>
     <string name="Midnight">"Mezzanotte"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"Avanti"</string>
     <string name="ime_action_done">"Fine"</string>
     <string name="ime_action_default">"Esegui"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"Componi numero"\n"utilizzando <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"Crea contatto"\n"utilizzando <xliff:g id="NUMBER">%s</xliff:g>"</string>
 </resources>

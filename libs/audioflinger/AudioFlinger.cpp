@@ -958,13 +958,10 @@ status_t AudioFlinger::MixerThread::dumpTracks(int fd, const Vector<String16>& a
     result.append(buffer);
     result.append("   Name Clien Typ Fmt Chn Buf S M F SRate LeftV RighV Serv User\n");
     for (size_t i = 0; i < mTracks.size(); ++i) {
-        wp<Track> wTrack = mTracks[i];
-        if (wTrack != 0) {
-            sp<Track> track = wTrack.promote();
-            if (track != 0) {
-                track->dump(buffer, SIZE);
-                result.append(buffer);
-            }
+        sp<Track> track = mTracks[i];
+        if (track != 0) {
+            track->dump(buffer, SIZE);
+            result.append(buffer);
         }
     }
 
@@ -972,7 +969,7 @@ status_t AudioFlinger::MixerThread::dumpTracks(int fd, const Vector<String16>& a
     result.append(buffer);
     result.append("   Name Clien Typ Fmt Chn Buf S M F SRate LeftV RighV Serv User\n");
     for (size_t i = 0; i < mActiveTracks.size(); ++i) {
-        wp<Track> wTrack = mTracks[i];
+        wp<Track> wTrack = mActiveTracks[i];
         if (wTrack != 0) {
             sp<Track> track = wTrack.promote();
             if (track != 0) {

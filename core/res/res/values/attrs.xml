@@ -850,12 +850,12 @@
         <enum name="KEYCODE_MENU" value="82" />
         <enum name="KEYCODE_NOTIFICATION" value="83" />
         <enum name="KEYCODE_SEARCH" value="84" />
-        <enum name="KEYCODE_PLAYPAUSE" value="85" />
-        <enum name="KEYCODE_STOP" value="86" />
-        <enum name="KEYCODE_NEXTSONG" value="87" />
-        <enum name="KEYCODE_PREVIOUSSONG" value="88" />
-        <enum name="KEYCODE_REWIND" value="89" />
-        <enum name="KEYCODE_FORWARD" value="90" />
+        <enum name="KEYCODE_MEDIA_PLAY_PAUSE" value="85" />
+        <enum name="KEYCODE_MEDIA_STOP" value="86" />
+        <enum name="KEYCODE_MEDIA_NEXT" value="87" />
+        <enum name="KEYCODE_MEDIA_PREVIOUS" value="88" />
+        <enum name="KEYCODE_MEDIA_REWIND" value="89" />
+        <enum name="KEYCODE_MEDIA_FAST_FORWARD" value="90" />
         <enum name="KEYCODE_MUTE" value="91" />
     </attr>
 

@@ -86,18 +86,27 @@ import com.android.internal.util.XmlUtils;
  * type is determined by calling {@link Intent#resolveType}.  A wildcard can be
  * used for the MIME sub-type, in both the Intent and IntentFilter, so that the
  * type "audio/*" will match "audio/mpeg", "audio/aiff", "audio/*", etc.
+ * <em>Note that MIME type matching here is <b>case sensitive</b>, unlike
+ * formal RFC MIME types!</em>  You should thus always use lower case letters
+ * for your MIME types.
  *
  * <p><strong>Data Scheme</strong> matches if any of the given values match the
  * Intent data's scheme.
  * The Intent scheme is determined by calling {@link Intent#getData}
  * and {@link android.net.Uri#getScheme} on that URI.
+ * <em>Note that scheme matching here is <b>case sensitive</b>, unlike
+ * formal RFC schemes!</em>  You should thus always use lower case letters
+ * for your schemes.
  *
  * <p><strong>Data Authority</strong> matches if any of the given values match
  * the Intent's data authority <em>and</em> one of the data scheme's in the filter
  * has matched the Intent, <em>or</em> no authories were supplied in the filter.
  * The Intent authority is determined by calling
  * {@link Intent#getData} and {@link android.net.Uri#getAuthority} on that URI.
- *
+ * <em>Note that authority matching here is <b>case sensitive</b>, unlike
+ * formal RFC host names!</em>  You should thus always use lower case letters
+ * for your authority.
+ * 
  * <p><strong>Data Path</strong> matches if any of the given values match the
  * Intent's data path <em>and</em> both a scheme and authority in the filter
  * has matched against the Intent, <em>or</em> no paths were supplied in the
@@ -340,6 +349,12 @@ public class IntentFilter implements Parcelable {
     /**
      * New IntentFilter that matches a single action and data type.
      *
+     * <p><em>Note: MIME type matching in the Android framework is
+     * case-sensitive, unlike formal RFC MIME types.  As a result,
+     * you should always write your MIME types with lower case letters,
+     * and any MIME types you receive from outside of Android should be
+     * converted to lower case before supplying them here.</em></p>
+     *
      * <p>Throws {@link MalformedMimeTypeException} if the given MIME type is
      * not syntactically correct.
      *
@@ -478,6 +493,12 @@ public class IntentFilter implements Parcelable {
      * one of these types <em>or</em> a matching scheme.  If no data types
      * are included, then an Intent will only match if it specifies no data.
      *
+     * <p><em>Note: MIME type matching in the Android framework is
+     * case-sensitive, unlike formal RFC MIME types.  As a result,
+     * you should always write your MIME types with lower case letters,
+     * and any MIME types you receive from outside of Android should be
+     * converted to lower case before supplying them here.</em></p>
+     *
      * <p>Throws {@link MalformedMimeTypeException} if the given MIME type is
      * not syntactically correct.
      *
@@ -546,6 +567,12 @@ public class IntentFilter implements Parcelable {
      * included in the filter, then an Intent's data must be <em>either</em>
      * one of these schemes <em>or</em> a matching data type.  If no schemes
      * are included, then an Intent will match only if it includes no data.
+     *
+     * <p><em>Note: scheme matching in the Android framework is
+     * case-sensitive, unlike formal RFC schemes.  As a result,
+     * you should always write your schemes with lower case letters,
+     * and any schemes you receive from outside of Android should be
+     * converted to lower case before supplying them here.</em></p>
      *
      * @param scheme Name of the scheme to match, i.e. "http".
      *
@@ -631,6 +658,16 @@ public class IntentFilter implements Parcelable {
             return mPort;
         }
 
+        /**
+         * Determine whether this AuthorityEntry matches the given data Uri.
+         * <em>Note that this comparison is case-sensitive, unlike formal
+         * RFC host names.  You thus should always normalize to lower-case.</em>
+         * 
+         * @param data The Uri to match.
+         * @return Returns either {@link IntentFilter#NO_MATCH_DATA},
+         * {@link IntentFilter#MATCH_CATEGORY_PORT}, or
+         * {@link IntentFilter#MATCH_CATEGORY_HOST}.
+         */
         public int match(Uri data) {
             String host = data.getHost();
             if (host == null) {
@@ -663,6 +700,12 @@ public class IntentFilter implements Parcelable {
      * authority to be considered.  If any authorities are
      * included in the filter, then an Intent's data must match one of
      * them.  If no authorities are included, then only the scheme must match.
+     *
+     * <p><em>Note: host name in the Android framework is
+     * case-sensitive, unlike formal RFC host names.  As a result,
+     * you should always write your host names with lower case letters,
+     * and any host names you receive from outside of Android should be
+     * converted to lower case before supplying them here.</em></p>
      *
      * @param host The host part of the authority to match.  May start with a
      *             single '*' to wildcard the front of the host name.
@@ -822,12 +865,19 @@ public class IntentFilter implements Parcelable {
      * schemes/paths, the match will only succeed if the intent does not
      * also specify a type or data.
      *
-     * <p>Note that to match against an authority, you must also specify a base
+     * <p>Be aware that to match against an authority, you must also specify a base
      * scheme the authority is in.  To match against a data path, both a scheme
      * and authority must be specified.  If the filter does not specify any
      * types or schemes that it matches against, it is considered to be empty
      * (any authority or data path given is ignored, as if it were empty as
      * well).
+     *
+     * <p><em>Note: MIME type, Uri scheme, and host name matching in the
+     * Android framework is case-sensitive, unlike the formal RFC definitions.
+     * As a result, you should always write these elements with lower case letters,
+     * and normalize any MIME types or Uris you receive from
+     * outside of Android to ensure these elements are lower case before
+     * supplying them here.</em></p>
      *
      * @param type The desired data type to look for, as returned by
      *             Intent.resolveType().

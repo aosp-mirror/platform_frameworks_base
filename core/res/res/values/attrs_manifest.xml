@@ -1062,15 +1062,24 @@
     <declare-styleable name="AndroidManifestData" parent="AndroidManifestIntentFilter">
         <!-- Specify a MIME type that is handled, as per
              {@link android.content.IntentFilter#addDataType
-             IntentFilter.addDataType()}. -->
+             IntentFilter.addDataType()}.
+             <p><em>Note: MIME type matching in the Android framework is
+             case-sensitive, unlike formal RFC MIME types.  As a result,
+             MIME types here should always use lower case letters.</em></p> -->
         <attr name="mimeType" format="string" />
         <!-- Specify a URI scheme that is handled, as per
              {@link android.content.IntentFilter#addDataScheme
-             IntentFilter.addDataScheme()}. -->
+             IntentFilter.addDataScheme()}.
+             <p><em>Note: scheme matching in the Android framework is
+             case-sensitive, unlike the formal RFC.  As a result,
+             schemes here should always use lower case letters.</em></p> -->
         <attr name="scheme" format="string" />
         <!-- Specify a URI authority host that is handled, as per
              {@link android.content.IntentFilter#addDataAuthority
-             IntentFilter.addDataAuthority()}. -->
+             IntentFilter.addDataAuthority()}.
+             <p><em>Note: host name matching in the Android framework is
+             case-sensitive, unlike the formal RFC.  As a result,
+             host names here should always use lower case letters.</em></p> -->
         <attr name="host" format="string" />
         <!-- Specify a URI authority port that is handled, as per
              {@link android.content.IntentFilter#addDataAuthority
@@ -1140,10 +1149,17 @@
             {@link android.content.Intent#setAction Intent.setAction()}. -->
         <attr name="action" format="string" />
         <!-- The data URI to assign to the Intent, as per
-            {@link android.content.Intent#setData Intent.setData()}. -->
+            {@link android.content.Intent#setData Intent.setData()}.
+            <p><em>Note: scheme and host name matching in the Android framework is
+            case-sensitive, unlike the formal RFC.  As a result,
+            Uris here should always be normalized to use lower case letters
+            for these elements (as well as other proper Uri normalization).</em></p> -->
         <attr name="data" format="string" />
         <!-- The MIME type name to assign to the Intent, as per
-            {@link android.content.Intent#setType Intent.setType()}. -->
+            {@link android.content.Intent#setType Intent.setType()}.
+            <p><em>Note: MIME type matching in the Android framework is
+            case-sensitive, unlike formal RFC MIME types.  As a result,
+            MIME types here should always use lower case letters.</em></p> -->
         <attr name="mimeType" />
         <!-- The package part of the ComponentName to assign to the Intent, as per
             {@link android.content.Intent#setComponent Intent.setComponent()}. -->

@@ -53,17 +53,12 @@
     <string name="CLIRDefaultOffNextCallOn">"El ID de emisor presenta el valor predeterminado de no restringido. Siguiente llamada: Restringido"</string>
     <string name="CLIRDefaultOffNextCallOff">"El ID de emisor presenta el valor predeterminado de no restringido. Siguiente llamada: No restringido"</string>
     <string name="serviceNotProvisioned">"El servicio no se suministra."</string>
-    <string name="CLIRPermanent">"El ID del emisor no se puede modificar."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="CLIRPermanent">"El ID de emisor no se puede modificar."</string>
+    <string name="RestrictedChangedTitle">"El acceso restringido se ha modificado."</string>
+    <string name="RestrictedOnData">"El servicio de datos está bloqueado."</string>
+    <string name="RestrictedOnEmergency">"El servicio de emergencia está bloqueado."</string>
+    <string name="RestrictedOnNormal">"El servicio de voz y SMS está bloqueado."</string>
+    <string name="RestrictedOnAll">"Todos los servicios de voz y SMS están bloqueados."</string>
     <string name="serviceClassVoice">"Voz"</string>
     <string name="serviceClassData">"Datos"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -393,12 +388,12 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"Introduce el código PIN"</string>
     <string name="keyguard_password_wrong_pin_code">"El código PIN es incorrecto."</string>
-    <string name="keyguard_label_text">"Para desbloquear el teléfono, pulsa la tecla de menú y, a continuación, pulsa 0."</string>
+    <string name="keyguard_label_text">"Para desbloquear el teléfono, pulsa la tecla Menu y, a continuación, pulsa 0."</string>
     <string name="emergency_call_dialog_number_for_display">"Número de emergencia"</string>
     <string name="lockscreen_carrier_default">"(Sin cobertura)"</string>
     <string name="lockscreen_screen_locked">"Pantalla bloqueada"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Pulsa la tecla de menú para desbloquear el teléfono o realizar una llamada de emergencia."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"Pulsa la tecla de menú para desbloquear la pantalla."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Pulsa la tecla Menu para desbloquear el teléfono o realizar una llamada de emergencia."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Pulsa la tecla Menu para desbloquear la pantalla."</string>
     <string name="lockscreen_pattern_instructions">"Dibujar patrón de desbloqueo"</string>
     <string name="lockscreen_emergency_call">"Llamada de emergencia"</string>
     <string name="lockscreen_pattern_correct">"Correcto"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"Inserta una tarjeta SIM."</string>
     <string name="lockscreen_network_locked_message">"Bloqueada para la red"</string>
     <string name="lockscreen_sim_puk_locked_message">"La tarjeta SIM está bloqueada con el código PUK."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"Consulta la guía del usuario o ponte en contacto con el servicio de atención al cliente."</string>
     <string name="lockscreen_sim_locked_message">"La tarjeta SIM está bloqueada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Desbloqueando tarjeta SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Has realizado <xliff:g id="NUMBER_0">%d</xliff:g> intentos fallidos de creación de un patrón de desbloqueo. "\n\n"Inténtalo de nuevo dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
@@ -582,7 +576,7 @@
     <string name="Noon">"Mediodía"</string>
     <string name="midnight">"medianoche"</string>
     <string name="Midnight">"Medianoche"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -798,7 +792,7 @@
     <string name="activity_list_empty">"No se ha encontrado ninguna actividad coincidente."</string>
     <string name="permlab_pkgUsageStats">"actualizar estadísticas de uso de componentes"</string>
     <string name="permdesc_pkgUsageStats">"Permite la modificación de estadísticas recopiladas sobre el uso de componentes. No está destinado al uso por parte de aplicaciones normales."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short">"Pulsa dos veces para acceder al control de zoom."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short">"Da dos toques para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating">"Error al aumentar el widget"</string>
     <string name="ime_action_go">"Ir"</string>
     <string name="ime_action_search">"Buscar"</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"Siguiente"</string>
     <string name="ime_action_done">"Hecho"</string>
     <string name="ime_action_default">"Ejecutar"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"Marcar número"\n"con <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"Crear un contacto"\n"a partir de <xliff:g id="NUMBER">%s</xliff:g>"</string>
 </resources>

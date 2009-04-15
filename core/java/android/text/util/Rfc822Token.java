@@ -114,7 +114,7 @@ public class Rfc822Token {
         for (int i = 0; i < len; i++) {
             char c = name.charAt(i);
 
-            if (! ((c >= 'A' && i <= 'Z') ||
+            if (! ((c >= 'A' && c <= 'Z') ||
                    (c >= 'a' && c <= 'z') ||
                    (c == ' ') ||
                    (c >= '0' && c <= '9'))) {

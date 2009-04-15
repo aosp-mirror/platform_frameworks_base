@@ -738,7 +738,10 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @return This Builder object to allow for chaining of calls to set
          *         methods
          *         
-         * @hide pending API review
+         * 
+         * This is currently hidden because it seems like people should just
+         * be able to put padding around the view.
+         * @hide
          */
         public Builder setView(View view, int viewSpacingLeft, int viewSpacingTop,
                 int viewSpacingRight, int viewSpacingBottom) {

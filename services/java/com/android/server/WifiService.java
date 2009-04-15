@@ -47,6 +47,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
@@ -89,6 +90,11 @@ public class WifiService extends IWifiManager.Stub {
     private int mPluggedType;
 
     private final LockList mLocks = new LockList();
+    // some wifi lock statistics
+    private int mFullLocksAcquired;
+    private int mFullLocksReleased;
+    private int mScanLocksAcquired;
+    private int mScanLocksReleased;
 
     private final IBatteryStats mBatteryStats;
     
@@ -162,6 +168,11 @@ public class WifiService extends IWifiManager.Stub {
     private char[] mScanResultBuffer;
     private boolean mNeedReconfig;
 
+    /*
+     * Last UID that asked to enable WIFI.
+     */
+    private int mLastEnableUid = Process.myUid();
+    
     /**
      * Number of allowed radio frequency channels in various regulatory domains.
      * This list is sufficient for 802.11b/g networks (2.4GHz range).
@@ -234,7 +245,7 @@ public class WifiService extends IWifiManager.Stub {
                 },
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
 
-        setWifiEnabledBlocking(wifiEnabled, false);
+        setWifiEnabledBlocking(wifiEnabled, false, Process.myUid());
     }
 
     /**
@@ -450,7 +461,8 @@ public class WifiService extends IWifiManager.Stub {
 
         synchronized (mWifiHandler) {
             sWakeLock.acquire();
-            sendEnableMessage(enable, true);
+            mLastEnableUid = Binder.getCallingUid();
+            sendEnableMessage(enable, true, Binder.getCallingUid());
         }
 
         return true;
@@ -460,10 +472,11 @@ public class WifiService extends IWifiManager.Stub {
      * Enables/disables Wi-Fi synchronously.
      * @param enable {@code true} to turn Wi-Fi on, {@code false} to turn it off.
      * @param persist {@code true} if the setting should be persisted.
+     * @param uid The UID of the process making the request.
      * @return {@code true} if the operation succeeds (or if the existing state
      *         is the same as the requested state)
      */
-    private boolean setWifiEnabledBlocking(boolean enable, boolean persist) {
+    private boolean setWifiEnabledBlocking(boolean enable, boolean persist, int uid) {
         final int eventualWifiState = enable ? WIFI_STATE_ENABLED : WIFI_STATE_DISABLED;
 
         if (mWifiState == eventualWifiState) {
@@ -473,18 +486,18 @@ public class WifiService extends IWifiManager.Stub {
             return false;
         }
 
-        setWifiEnabledState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING);
+        setWifiEnabledState(enable ? WIFI_STATE_ENABLING : WIFI_STATE_DISABLING, uid);
 
         if (enable) {
             if (!WifiNative.loadDriver()) {
                 Log.e(TAG, "Failed to load Wi-Fi driver.");
-                setWifiEnabledState(WIFI_STATE_UNKNOWN);
+                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                 return false;
             }
             if (!WifiNative.startSupplicant()) {
                 WifiNative.unloadDriver();
                 Log.e(TAG, "Failed to start supplicant daemon.");
-                setWifiEnabledState(WIFI_STATE_UNKNOWN);
+                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                 return false;
             }
             registerForBroadcasts();
@@ -498,7 +511,7 @@ public class WifiService extends IWifiManager.Stub {
             boolean failedToStopSupplicantOrUnloadDriver = false;
             if (!WifiNative.stopSupplicant()) {
                 Log.e(TAG, "Failed to stop supplicant daemon.");
-                setWifiEnabledState(WIFI_STATE_UNKNOWN);
+                setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                 failedToStopSupplicantOrUnloadDriver = true;
             }
 
@@ -508,7 +521,7 @@ public class WifiService extends IWifiManager.Stub {
             if (!WifiNative.unloadDriver()) {
                 Log.e(TAG, "Failed to unload Wi-Fi driver.");
                 if (!failedToStopSupplicantOrUnloadDriver) {
-                    setWifiEnabledState(WIFI_STATE_UNKNOWN);
+                    setWifiEnabledState(WIFI_STATE_UNKNOWN, uid);
                     failedToStopSupplicantOrUnloadDriver = true;
                 }
             }
@@ -522,7 +535,7 @@ public class WifiService extends IWifiManager.Stub {
         if (persist) {
             persistWifiEnabled(enable);
         }
-        setWifiEnabledState(eventualWifiState);
+        setWifiEnabledState(eventualWifiState, uid);
 
         /*
          * Initialize the hidden networks state and the number of allowed
@@ -536,15 +549,15 @@ public class WifiService extends IWifiManager.Stub {
         return true;
     }
 
-    private void setWifiEnabledState(int wifiState) {
+    private void setWifiEnabledState(int wifiState, int uid) {
         final int previousWifiState = mWifiState;
 
         long ident = Binder.clearCallingIdentity();
         try {
             if (wifiState == WIFI_STATE_ENABLED) {
-                mBatteryStats.noteWifiOn();
+                mBatteryStats.noteWifiOn(uid);
             } else if (wifiState == WIFI_STATE_DISABLED) {
-                mBatteryStats.noteWifiOff();
+                mBatteryStats.noteWifiOff(uid);
             }
         } catch (RemoteException e) {
         } finally {
@@ -1566,10 +1579,10 @@ public class WifiService extends IWifiManager.Stub {
         }
     };
 
-    private void sendEnableMessage(boolean enable, boolean persist) {
+    private void sendEnableMessage(boolean enable, boolean persist, int uid) {
         Message msg = Message.obtain(mWifiHandler,
                                      (enable ? MESSAGE_ENABLE_WIFI : MESSAGE_DISABLE_WIFI),
-                                     (persist ? 1 : 0), 0);
+                                     (persist ? 1 : 0), uid);
         msg.sendToTarget();
     }
 
@@ -1597,7 +1610,7 @@ public class WifiService extends IWifiManager.Stub {
             if (wifiShouldBeEnabled) {
                 if (wifiShouldBeStarted) {
                     sWakeLock.acquire();
-                    sendEnableMessage(true, false);
+                    sendEnableMessage(true, false, mLastEnableUid);
                     sWakeLock.acquire();
                     sendStartMessage(strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
                 } else {
@@ -1621,7 +1634,7 @@ public class WifiService extends IWifiManager.Stub {
                 }
             } else {
                 sWakeLock.acquire();
-                sendEnableMessage(false, false);
+                sendEnableMessage(false, false, mLastEnableUid);
             }
         }
     }
@@ -1666,7 +1679,7 @@ public class WifiService extends IWifiManager.Stub {
             switch (msg.what) {
 
                 case MESSAGE_ENABLE_WIFI:
-                    setWifiEnabledBlocking(true, msg.arg1 == 1);
+                    setWifiEnabledBlocking(true, msg.arg1 == 1, msg.arg2);
                     sWakeLock.release();
                     break;
 
@@ -1679,7 +1692,7 @@ public class WifiService extends IWifiManager.Stub {
                 case MESSAGE_DISABLE_WIFI:
                     // a non-zero msg.arg1 value means the "enabled" setting
                     // should be persisted
-                    setWifiEnabledBlocking(false, msg.arg1 == 1);
+                    setWifiEnabledBlocking(false, msg.arg1 == 1, msg.arg2);
                     sWakeLock.release();
                     break;
 
@@ -1730,6 +1743,11 @@ public class WifiService extends IWifiManager.Stub {
                                          r.SSID == null ? "" : r.SSID);
             }
         }
+        pw.println();
+        pw.println("Locks acquired: " + mFullLocksAcquired + " full, " +
+                mScanLocksAcquired + " scan");
+        pw.println("Locks released: " + mFullLocksReleased + " full, " +
+                mScanLocksReleased + " scan");
         pw.println();
         pw.println("Locks held:");
         mLocks.dump(pw);
@@ -1852,8 +1870,14 @@ public class WifiService extends IWifiManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             switch(wifiLock.mLockMode) {
-            case (WifiManager.WIFI_MODE_FULL): mBatteryStats.noteFullWifiLockAcquired(uid);
-            case (WifiManager.WIFI_MODE_SCAN_ONLY): mBatteryStats.noteScanWifiLockAcquired(uid);
+            case WifiManager.WIFI_MODE_FULL:
+                ++mFullLocksAcquired;
+                mBatteryStats.noteFullWifiLockAcquired(uid);
+                break;
+            case WifiManager.WIFI_MODE_SCAN_ONLY:
+                ++mScanLocksAcquired;
+                mBatteryStats.noteScanWifiLockAcquired(uid);
+                break;
             }
         } catch (RemoteException e) {
         } finally {
@@ -1882,8 +1906,14 @@ public class WifiService extends IWifiManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 switch(wifiLock.mLockMode) {
-                    case (WifiManager.WIFI_MODE_FULL): mBatteryStats.noteFullWifiLockReleased(uid);
-                    case (WifiManager.WIFI_MODE_SCAN_ONLY): mBatteryStats.noteScanWifiLockReleased(uid);
+                    case WifiManager.WIFI_MODE_FULL:
+                        ++mFullLocksReleased;
+                        mBatteryStats.noteFullWifiLockReleased(uid);
+                        break;
+                    case WifiManager.WIFI_MODE_SCAN_ONLY:
+                        ++mScanLocksReleased;
+                        mBatteryStats.noteScanWifiLockReleased(uid);
+                        break;
                 }
             } catch (RemoteException e) {
             } finally {

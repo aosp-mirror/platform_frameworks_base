@@ -228,8 +228,8 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
      */
     @LargeTest
     public void testTakePicture() throws Exception {  
-        initializeMessageLooper();
         synchronized (lock) {
+            initializeMessageLooper();
             try {
                 lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
             } catch(Exception e) {
@@ -250,8 +250,8 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
      */
     @LargeTest
     public void testCheckPreview() throws Exception {  
-        initializeMessageLooper();
         synchronized (lock) {
+            initializeMessageLooper();
             try {
                 lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
             } catch(Exception e) {

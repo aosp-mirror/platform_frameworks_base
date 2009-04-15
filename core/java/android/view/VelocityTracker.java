@@ -58,6 +58,7 @@ public final class VelocityTracker {
             VelocityTracker vt = mPool[0];
             if (vt != null) {
                 vt.clear();
+                mPool[0] = null;
                 return vt;
             }
             return new VelocityTracker();

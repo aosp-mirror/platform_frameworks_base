@@ -1211,5 +1211,43 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         track.release();
     }
     
+    //-----------------------------------------------------------------
+    //      Getters
+    //----------------------------------
+    
+    //Test case 1: getMinBufferSize() return ERROR_BAD_VALUE if SR < 4000
+    @LargeTest
+    public void testGetMinBufferSizeTooLowSR() throws Exception {
+      // constant for test
+      final String TEST_NAME = "testGetMinBufferSizeTooLowSR";
+      final int TEST_SR = 3999;
+      final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+      final int TEST_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
+      final int TEST_MODE = AudioTrack.MODE_STREAM;
+      final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+      
+      //-------- initialization & test  --------------
+      assertTrue(TEST_NAME, 
+          AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT) 
+              == AudioTrack.ERROR_BAD_VALUE);
+    }    
+    
+    //Test case 2: getMinBufferSize() return ERROR_BAD_VALUE if SR > 48000
+    @LargeTest
+    public void testGetMinBufferSizeTooHighSR() throws Exception {
+      // constant for testg
+      final String TEST_NAME = "testGetMinBufferSizeTooHighSR";
+      final int TEST_SR = 48001;
+      final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+      final int TEST_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
+      final int TEST_MODE = AudioTrack.MODE_STREAM;
+      final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
+      
+      //-------- initialization & test --------------
+      assertTrue(TEST_NAME, 
+          AudioTrack.getMinBufferSize(TEST_SR, TEST_CONF, TEST_FORMAT) 
+              == AudioTrack.ERROR_BAD_VALUE);
+    }    
+   
 }
 

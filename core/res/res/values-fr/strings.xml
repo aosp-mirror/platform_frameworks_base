@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"Par défaut, les identifiants d\'appelant ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="serviceNotProvisioned">"Ce service n\'est pas pris en charge."</string>
     <string name="CLIRPermanent">"Le paramètre Identifiant d\'appelant ne peut pas être modifié."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"L\'accès limité a été modifié."</string>
+    <string name="RestrictedOnData">"Le service de données est bloqué."</string>
+    <string name="RestrictedOnEmergency">"Le service d\'appel d\'urgence est bloqué."</string>
+    <string name="RestrictedOnNormal">"Le service vocal/SMS est bloqué."</string>
+    <string name="RestrictedOnAll">"Tous les services vocaux/SMS sont bloqués."</string>
     <string name="serviceClassVoice">"Voix"</string>
     <string name="serviceClassData">"Données"</string>
     <string name="serviceClassFAX">"Télécopie"</string>
@@ -350,7 +345,7 @@
     <string name="permdesc_writeDictionary">"Permet à une application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
   <string-array name="phoneTypes">
     <item>"Domicile"</item>
-    <item>"Mobile"</item>
+    <item>"Portable"</item>
     <item>"Bureau"</item>
     <item>"Télécopie bureau"</item>
     <item>"Télécopie domicile"</item>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"Insérez une carte SIM."</string>
     <string name="lockscreen_network_locked_message">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message">"La carte SIM est verrouillée par code PUK."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"Veuillez consulter le guide d\'utilisation ou contacter l\'assistance clientèle."</string>
     <string name="lockscreen_sim_locked_message">"Téléphone verrouillé"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Déblocage de la carte SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Vous avez mal reproduit le motif de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
@@ -534,8 +528,8 @@
     <string name="days">"jours"</string>
     <string name="hour">"heure"</string>
     <string name="hours">"heures"</string>
-    <string name="minute">"mn"</string>
-    <string name="minutes">"mn"</string>
+    <string name="minute">"min"</string>
+    <string name="minutes">"min"</string>
     <string name="second">"s"</string>
     <string name="seconds">"s"</string>
     <string name="week">"semaine"</string>
@@ -582,7 +576,7 @@
     <string name="Noon">"Midi"</string>
     <string name="midnight">"minuit"</string>
     <string name="Midnight">"Minuit"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -794,7 +788,7 @@
     <string name="ext_media_safe_unmount_notification_title">"La carte SD peut être retirée en toute sécurité"</string>
     <string name="ext_media_safe_unmount_notification_message">"Vous pouvez désormais retirer la carte SD en toute sécurité."</string>
     <string name="ext_media_nomedia_notification_title">"Carte SD manquante"</string>
-    <string name="ext_media_nomedia_notification_message">"La carte SD a été retirée. Insérez une autre carte pour augmenter la capacité de stockage de votre appareil."</string>
+    <string name="ext_media_nomedia_notification_message">"Carte SD manquante. Insérez une autre carte pour augmenter la capacité de stockage."</string>
     <string name="activity_list_empty">"Aucune activité correspondante trouvée"</string>
     <string name="permlab_pkgUsageStats">"mettre à jour les données statistiques du composant"</string>
     <string name="permdesc_pkgUsageStats">"Permet de modifier les données statistiques collectées du composant. Cette option n\'est pas utilisée par les applications standard."</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"Suivant"</string>
     <string name="ime_action_done">"Terminé"</string>
     <string name="ime_action_default">"Exécuter"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"Composer le numéro"\n"en utilisant <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"Ajouter un contact"\n"en utilisant <xliff:g id="NUMBER">%s</xliff:g>"</string>
 </resources>
