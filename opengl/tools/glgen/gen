@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -u
 rm -rf out generated
 
 mkdir out
@@ -12,12 +13,18 @@ echo "public interface Canvas {}" >> out/android/graphics/Canvas.java
 GLFILE=out/javax/microedition/khronos/opengles/GL.java
 cp stubs/GLHeader.java-if $GLFILE
 
-GLGEN_FILES="CFunc.java CType.java CodeEmitter.java GenerateGL.java JFunc.java JType.java JniCodeEmitter.java ParameterChecker.java"
+GLGEN_FILES="CFunc.java CType.java CodeEmitter.java GenerateGL.java JFunc.java JniCodeEmitter.java JType.java Jsr239CodeEmitter.java ParameterChecker.java"
 
 pushd src > /dev/null
 javac ${GLGEN_FILES}
+JAVAC_RESULT=$?
+if [ $JAVAC_RESULT -ne 0 ]; then
+    echo "Could not compile glgen."
+    exit $JAVAC_RESULT
+fi
 popd > /dev/null
 java -classpath src GenerateGL -c glspec-1.0 glspec-1.0ext glspec-1.1 glspec-1.1ext glspec-1.1extpack glspec-checks
+rm src/*.class
 
 pushd out > /dev/null
 mkdir classes

@@ -23,7 +23,6 @@ public class GenerateGL {
                              PrintStream glImplStream,
                              PrintStream cStream) throws Exception {
         String s = null;
-        int counter = 0;
         while ((s = specReader.readLine()) != null) {
             if (s.trim().startsWith("//")) {
                 continue;
@@ -120,7 +119,7 @@ public class GenerateGL {
         ParameterChecker checker = new ParameterChecker(checksReader);
 
         CodeEmitter emitter =
-            new JniCodeEmitter(classPathName,
+            new Jsr239CodeEmitter(classPathName,
                                checker,
                                gl10Stream, gl10ExtStream,
                                gl11Stream, gl11ExtStream, gl11ExtPackStream,
