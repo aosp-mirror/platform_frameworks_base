@@ -16,7 +16,6 @@
 
 package android.location;
 
-import android.location.Address;
 import android.os.Bundle;
 
 /**
@@ -52,10 +51,4 @@ interface ILocationProvider {
     void updateCellLockStatus(boolean acquired);
     void addListener(in String[] applications);
     void removeListener(in String[] applications);
-    String getFromLocation(double latitude, double longitude, int maxResults,
-        String language, String country, String variant, String appName, out List<Address> addrs);
-    String getFromLocationName(String locationName,
-        double lowerLeftLatitude, double lowerLeftLongitude,
-        double upperRightLatitude, double upperRightLongitude, int maxResults,
-        String language, String country, String variant, String appName, out List<Address> addrs);
 }

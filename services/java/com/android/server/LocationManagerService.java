@@ -44,6 +44,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Address;
+import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.ILocationCollector;
 import android.location.ILocationListener;
@@ -128,6 +129,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private GpsLocationProvider mGpsLocationProvider;
     private boolean mGpsNavigating;
     private LocationProviderProxy mNetworkLocationProvider;
+    private IGeocodeProvider mGeocodeProvider;
     private LocationWorkerHandler mLocationHandler;
 
     // Handler messages
@@ -630,6 +632,15 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mGpsLocationProvider.setLocationCollector(mCollector);
             }
         }
+    }
+
+    public void setGeocodeProvider(IGeocodeProvider provider) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                "Installing location providers outside of the system is not supported");
+        }
+
+        mGeocodeProvider = provider;
     }
 
     private WifiManager.WifiLock getWifiWakelockLocked() {
@@ -2074,30 +2085,34 @@ public class LocationManagerService extends ILocationManager.Stub {
     // Geocoder
 
     public String getFromLocation(double latitude, double longitude, int maxResults,
-        String language, String country, String variant, String appName, List<Address> addrs) {
-        synchronized (mLocationListeners) {
-            if (mNetworkLocationProvider != null) {
-                return mNetworkLocationProvider.getFromLocation(latitude, longitude, maxResults,
-                        language, country, variant, appName, addrs);
-            } else {
-                return null;
+            String language, String country, String variant, String appName, List<Address> addrs) {
+        if (mGeocodeProvider != null) {
+            try {
+                return mGeocodeProvider.getFromLocation(latitude, longitude, maxResults, language, country,
+                        variant, appName,  addrs);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getFromLocation failed", e);
             }
         }
+        return null;
     }
 
+
     public String getFromLocationName(String locationName,
-        double lowerLeftLatitude, double lowerLeftLongitude,
-        double upperRightLatitude, double upperRightLongitude, int maxResults,
-        String language, String country, String variant, String appName, List<Address> addrs) {
-        synchronized (mLocationListeners) {
-            if (mNetworkLocationProvider != null) {
-                return mNetworkLocationProvider.getFromLocationName(locationName, lowerLeftLatitude, 
-                        lowerLeftLongitude, upperRightLatitude, upperRightLongitude, maxResults,
-                        language, country, variant, appName, addrs);
-            } else {
-                return null;
+            double lowerLeftLatitude, double lowerLeftLongitude,
+            double upperRightLatitude, double upperRightLongitude, int maxResults,
+            String language, String country, String variant, String appName, List<Address> addrs) {
+
+        if (mGeocodeProvider != null) {
+            try {
+                return mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
+                        lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
+                        maxResults, language, country, variant, appName, addrs);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getFromLocationName failed", e);
             }
         }
+        return null;
     }
 
     // Mock Providers
