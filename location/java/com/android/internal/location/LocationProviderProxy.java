@@ -245,29 +245,4 @@ public class LocationProviderProxy extends LocationProviderImpl {
             Log.e(TAG, "removeListener failed", e);
         }
     }
-
-    public String getFromLocation(double latitude, double longitude, int maxResults,
-        String language, String country, String variant, String appName, List<Address> addrs) {
-        try {
-            return mProvider.getFromLocation(latitude, longitude, maxResults, language, country, 
-                    variant, appName,  addrs);
-        } catch (RemoteException e) {
-            Log.e(TAG, "getFromLocation failed", e);
-            return null;
-        }
-    }
-
-    public String getFromLocationName(String locationName,
-        double lowerLeftLatitude, double lowerLeftLongitude,
-        double upperRightLatitude, double upperRightLongitude, int maxResults,
-        String language, String country, String variant, String appName, List<Address> addrs) {
-        try {
-            return mProvider.getFromLocationName(locationName, lowerLeftLatitude, 
-                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                    maxResults, language, country, variant, appName, addrs);
-        } catch (RemoteException e) {
-            Log.e(TAG, "getFromLocationName failed", e);
-            return null;
-        }
-    }
 }
