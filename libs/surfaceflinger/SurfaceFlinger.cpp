@@ -562,7 +562,7 @@ void SurfaceFlinger::handleConsoleEvents()
     }
 
     if (mDeferReleaseConsole && hw.canDraw()) {
-        // We got the release signal before the aquire signal
+        // We got the release signal before the acquire signal
         mDeferReleaseConsole = false;
         hw.releaseScreen();
     }
@@ -739,7 +739,7 @@ void SurfaceFlinger::computeVisibleRegions(
         // accumulate to the screen dirty region
         dirtyRegion.orSelf(dirty);
 
-        // updade aboveOpaqueLayers/aboveCoveredLayers for next (lower) layer
+        // Update aboveOpaqueLayers/aboveCoveredLayers for next (lower) layer
         aboveOpaqueLayers.orSelf(opaqueRegion);
         aboveCoveredLayers.orSelf(bounds);
         
@@ -747,7 +747,7 @@ void SurfaceFlinger::computeVisibleRegions(
         layer->setVisibleRegion(visibleRegion);
         layer->setCoveredRegion(coveredRegion);
 
-        // If a secure layer is partially visible, lockdown the screen!
+        // If a secure layer is partially visible, lock down the screen!
         if (layer->isSecure() && !visibleRegion.isEmpty()) {
             secureFrameBuffer = true;
         }
@@ -1131,7 +1131,7 @@ status_t SurfaceFlinger::freezeDisplay(DisplayID dpy, uint32_t flags)
     setTransactionFlags(eTransactionNeeded);
 
     // flags is intended to communicate some sort of animation behavior
-    // (for instance fadding)
+    // (for instance fading)
     return NO_ERROR;
 }
 
@@ -1145,7 +1145,7 @@ status_t SurfaceFlinger::unfreezeDisplay(DisplayID dpy, uint32_t flags)
     setTransactionFlags(eTransactionNeeded);
 
     // flags is intended to communicate some sort of animation behavior
-    // (for instance fadding)
+    // (for instance fading)
     return NO_ERROR;
 }
 
