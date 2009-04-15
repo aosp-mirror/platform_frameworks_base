@@ -23,6 +23,8 @@ import com.android.internal.util.HexDump;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import android.util.Log;
+
 public class BitwiseStreamsTest extends AndroidTestCase {
     private final static String LOG_TAG = "BitwiseStreamsTest";
 
@@ -84,5 +86,28 @@ public class BitwiseStreamsTest extends AndroidTestCase {
         byte[] inBufDup = new byte[inBuf.length];
         for (int i = 0; i < inBufDup.length; i++) inBufDup[i] = inStream.read(8);
         assertEquals(HexDump.toHexString(inBuf), HexDump.toHexString(inBufDup));
+    }
+
+    @SmallTest
+    public void testFive() throws Exception {
+        int num_runs = 10;
+        long start = android.os.SystemClock.elapsedRealtime();
+        for (int run = 0; run < num_runs; run++) {
+            int offset = run % 8;
+            byte[] inBuf = HexDump.hexStringToByteArray("00031040900112488ea794e0");
+            BitwiseOutputStream outStream = new BitwiseOutputStream(30);
+            outStream.skip(offset);
+            for (int i = 0; i < inBuf.length; i++) {
+                outStream.write(5, inBuf[i] >>> 3);
+                outStream.write(3, inBuf[i] & 0x07);
+            }
+            BitwiseInputStream inStream = new BitwiseInputStream(outStream.toByteArray());
+            inStream.skip(offset);
+            byte[] inBufDup = new byte[inBuf.length];
+            for (int i = 0; i < inBufDup.length; i++) inBufDup[i] = inStream.read(8);
+            assertEquals(HexDump.toHexString(inBuf), HexDump.toHexString(inBufDup));
+        }
+        long end = android.os.SystemClock.elapsedRealtime();
+        Log.d(LOG_TAG, "repeated encode-decode took " + (end - start) + " ms");
     }
 }
