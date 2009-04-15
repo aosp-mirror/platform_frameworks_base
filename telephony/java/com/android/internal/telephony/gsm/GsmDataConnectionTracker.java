@@ -369,13 +369,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * The APN of the specified type is no longer needed. Ensure that if
      * use of the default APN has not been explicitly disabled, we are connected
      * to the default APN.
-     * @param type the APN type. The only valid value currently is {@link Phone#APN_TYPE_MMS}.
+     * @param type the APN type. The only valid values are currently 
+     * {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL}.
      * @return
      */
     protected int disableApnType(String type) {
         Log.d(LOG_TAG, "disableApnType("+type+")");
-        if (TextUtils.equals(type, Phone.APN_TYPE_MMS) ||
-                TextUtils.equals(type, Phone.APN_TYPE_SUPL)) {
+        if ((TextUtils.equals(type, Phone.APN_TYPE_MMS) ||
+                TextUtils.equals(type, Phone.APN_TYPE_SUPL))
+                && isEnabled(type)) {
             removeMessages(EVENT_RESTORE_DEFAULT_APN);
             setEnabled(type, false);
             if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
