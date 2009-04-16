@@ -50,6 +50,9 @@ namespace android {
 //  SurfaceBuffer
 // ============================================================================
 
+template<class SurfaceBuffer> Mutex Singleton<SurfaceBuffer>::sLock; 
+template<> SurfaceBuffer* Singleton<SurfaceBuffer>::sInstance(0); 
+
 SurfaceBuffer::SurfaceBuffer() 
     : BASE(), handle(0), mOwner(false)
 {
@@ -199,10 +202,10 @@ Surface::~Surface()
     if (mOwner && mToken>=0 && mClient!=0) {
         mClient->destroySurface(mToken);
         if (mBuffers[0] != 0) {
-            BufferMapper::get().unmap(mBuffers[0]->getHandle());
+            BufferMapper::get().unmap(mBuffers[0]->getHandle(), this);
         }
         if (mBuffers[1] != 0) {
-            BufferMapper::get().unmap(mBuffers[1]->getHandle());
+            BufferMapper::get().unmap(mBuffers[1]->getHandle(), this);
         }
     }
     mClient.clear();
@@ -572,10 +575,10 @@ status_t Surface::getBufferLocked(int index)
     if (buffer != 0) {
         sp<SurfaceBuffer>& currentBuffer(mBuffers[index]);
         if (currentBuffer != 0) {
-            BufferMapper::get().unmap(currentBuffer->getHandle());
+            BufferMapper::get().unmap(currentBuffer->getHandle(), this);
             currentBuffer.clear();
         }
-        err = BufferMapper::get().map(buffer->getHandle(), &buffer->bits);
+        err = BufferMapper::get().map(buffer->getHandle(), &buffer->bits, this);
         LOGW_IF(err, "map(...) failed %d (%s)", err, strerror(-err));
         if (err == NO_ERROR) {
             currentBuffer = buffer;

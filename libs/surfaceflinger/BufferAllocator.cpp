@@ -19,6 +19,8 @@
 #include <utils/CallStack.h>
 #include <cutils/ashmem.h>
 #include <cutils/log.h>
+
+#include <utils/Singleton.h>
 #include <utils/String8.h>
 
 #include <ui/BufferMapper.h>
@@ -31,6 +33,9 @@
 
 namespace android {
 // ---------------------------------------------------------------------------
+
+template<class BufferAllocator> Mutex Singleton<BufferAllocator>::sLock; 
+template<> BufferAllocator* Singleton<BufferAllocator>::sInstance(0); 
 
 Mutex BufferAllocator::sLock;
 KeyedVector<buffer_handle_t, BufferAllocator::alloc_rec_t> BufferAllocator::sAllocList;
@@ -106,16 +111,20 @@ status_t BufferAllocator::free(buffer_handle_t handle)
 
 #if ANDROID_GRALLOC_DEBUG
     void* base = (void*)(handle->data[2]);
+#endif
+
+    status_t err = mAllocDev->free(mAllocDev, handle);
+    LOGW_IF(err, "free(...) failed %d (%s)", err, strerror(-err));
+    
+#if ANDROID_GRALLOC_DEBUG
     if (base) {
+        LOGD("freeing mapped handle %p from:", handle);
         CallStack s;
         s.update();
         s.dump("");
         BufferMapper::get().dump(handle);
     }
 #endif
-
-    status_t err = mAllocDev->free(mAllocDev, handle);
-    LOGW_IF(err, "free(...) failed %d (%s)", err, strerror(-err));
 
     if (err == NO_ERROR) {
         Mutex::Autolock _l(sLock);
@@ -129,7 +138,7 @@ status_t BufferAllocator::free(buffer_handle_t handle)
 status_t BufferAllocator::map(buffer_handle_t handle, void** addr)
 {
     Mutex::Autolock _l(mLock);
-    status_t err = BufferMapper::get().map(handle, addr);
+    status_t err = BufferMapper::get().map(handle, addr, this);
     if (err == NO_ERROR) {
         Mutex::Autolock _l(sLock);
         KeyedVector<buffer_handle_t, alloc_rec_t>& list(sAllocList);
@@ -145,7 +154,7 @@ status_t BufferAllocator::unmap(buffer_handle_t handle)
 {
     Mutex::Autolock _l(mLock);
     gralloc_module_t* mod = (gralloc_module_t*)mAllocDev->common.module;
-    status_t err = BufferMapper::get().unmap(handle);
+    status_t err = BufferMapper::get().unmap(handle, this);
     if (err == NO_ERROR) {
         Mutex::Autolock _l(sLock);
         KeyedVector<buffer_handle_t, alloc_rec_t>& list(sAllocList);

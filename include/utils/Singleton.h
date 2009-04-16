@@ -49,9 +49,6 @@ private:
     static TYPE* sInstance;
 };
 
-template<class TYPE> Mutex Singleton<TYPE>::sLock; 
-template<class TYPE> TYPE* Singleton<TYPE>::sInstance(0); 
-
 // ---------------------------------------------------------------------------
 }; // namespace android
 

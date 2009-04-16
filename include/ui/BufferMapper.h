@@ -40,8 +40,8 @@ class BufferMapper : public Singleton<BufferMapper>
 {
 public:
     static inline BufferMapper& get() { return getInstance(); }
-    status_t map(buffer_handle_t handle, void** addr);
-    status_t unmap(buffer_handle_t handle);
+    status_t map(buffer_handle_t handle, void** addr, const void* id);
+    status_t unmap(buffer_handle_t handle, const void* id);
     status_t lock(buffer_handle_t handle, int usage, const Rect& bounds);
     status_t unlock(buffer_handle_t handle);
     
@@ -54,13 +54,13 @@ private:
     mutable Mutex mLock;
     gralloc_module_t const *mAllocMod;
     
+    void logMapLocked(buffer_handle_t handle, const void* id);
+    void logUnmapLocked(buffer_handle_t handle, const void* id);
     struct map_info_t {
-        int count;
-        KeyedVector<CallStack, int> callstacks;
+        const void* id;
+        CallStack stack;
     };
-    KeyedVector<buffer_handle_t, map_info_t> mMapInfo;
-    void logMapLocked(buffer_handle_t handle);
-    void logUnmapLocked(buffer_handle_t handle);
+    KeyedVector<buffer_handle_t, Vector<map_info_t> > mMapInfo;
 };
 
 // ---------------------------------------------------------------------------
