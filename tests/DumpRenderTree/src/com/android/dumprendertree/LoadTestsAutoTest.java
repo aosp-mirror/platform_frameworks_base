@@ -29,40 +29,15 @@ import android.test.ActivityInstrumentationTestCase2;
 import com.android.dumprendertree.TestShellActivity;
 import com.android.dumprendertree.TestShellCallback;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-
-class StreamPipe extends Thread {
-    InputStream in;
-    OutputStream out;
-    
-    StreamPipe(InputStream in, OutputStream out) {
-        this.in = in;
-        this.out = out;
-    }
-    
-    public void run() {
-        try {
-            byte[] buf = new byte[1024];
-            int nofb = this.in.read(buf);
-            while (nofb != -1) {
-                this.out.write(buf, 0, nofb);
-                nofb = this.in.read(buf);
-            }          
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-}
 
 public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShellActivity> {
 
     private final static String LOGTAG = "LoadTest";
     private final static String LOAD_TEST_RESULT = "/sdcard/load_test_result.txt";
-    
+
     public LoadTestsAutoTest() {
         super("com.android.dumprendertree", TestShellActivity.class);
     }
@@ -75,7 +50,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         bundle.putBoolean(file, result);
         inst.sendStatus(0, bundle);
     }
-    
+
     // Invokes running of layout tests
     // and waits till it has finished running.
     public void runTest() {
@@ -85,7 +60,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
             Log.e(LOGTAG, "No test specified");
             return;
         }
-        
+
         TestShellActivity activity = (TestShellActivity) getActivity();
 
         // Run tests
@@ -94,7 +69,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         // TODO(fqian): let am instrumentation pass in the command line, currently
         // am instrument does not allow spaces in the command.
         dumpMemoryInfo();
-        
+
         // Kill activity
         activity.finish();
     }
@@ -102,13 +77,13 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
     private void dumpMemoryInfo() {
         try {
             Log.v(LOGTAG, "Dumping memory information.");
-            
+
             FileOutputStream out = new FileOutputStream(LOAD_TEST_RESULT, true);
             PrintStream ps = new PrintStream(out);
-            
+
             MemoryInfo mi = new MemoryInfo();
             Debug.getMemoryInfo(mi);
-            
+
             //try to fake the dumpsys format
             //this will eventually be changed to XML
             String format = "%15s:%9d%9d%9d%9d";
@@ -124,7 +99,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
               String.format(format, "(priv dirty)",
                   mi.nativePrivateDirty, mi.dalvikPrivateDirty, mi.otherPrivateDirty,
                   mi.nativePrivateDirty + mi.dalvikPrivateDirty + mi.otherPrivateDirty);
-            
+
             ps.print("\n\n\n");
             ps.println("** MEMINFO in pid 0 [com.android.dumprendertree] **");
             ps.println("                   native   dalvik    other    total");
@@ -141,9 +116,9 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
             out.close();
         } catch (IOException e) {
             Log.e(LOGTAG, e.getMessage());
-        }      
+        }
     }
-    
+
     // A convenient method to be called by another activity.
     private void runTestAndWaitUntilDone(TestShellActivity activity, String url, int timeout) {
         activity.setCallback(new TestShellCallback() {
@@ -151,9 +126,9 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
                 synchronized (LoadTestsAutoTest.this) {
                     LoadTestsAutoTest.this.notifyAll();
                 }
-            }         
+            }
         });
-        
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setClass(activity, TestShellActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -161,12 +136,12 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
         intent.putExtra(TestShellActivity.RESULT_FILE, LOAD_TEST_RESULT);
         activity.startActivity(intent);
-        
+
         // Wait until done.
         synchronized (this) {
             try {
                 this.wait();
             } catch (InterruptedException e) { }
         }
-    }   
+    }
 }
