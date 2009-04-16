@@ -3430,6 +3430,7 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
                 }
+                setFocusControllerActive(true);
             } else {
                 // If our window gained focus, but we do not have it, do not
                 // draw the focus ring.
@@ -3455,9 +3456,20 @@ public class WebView extends AbsoluteLayout
             if (mNativeClass != 0) {
                 nativeRecordButtons(false, false, true);
             }
+            setFocusControllerActive(false);
         }
         invalidate();
         super.onWindowFocusChanged(hasWindowFocus);
+    }
+
+    /*
+     * Pass a message to WebCore Thread, determining whether the WebCore::Page's
+     * FocusController is "active" so that it will draw the blinking cursor.
+     */
+    private void setFocusControllerActive(boolean active) {
+        if (mWebViewCore != null) {
+            mWebViewCore.sendMessage(EventHub.SET_ACTIVE, active ? 1 : 0, 0);
+        }
     }
 
     @Override
@@ -3478,6 +3490,10 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
                 }
+                // FIXME: This is unnecessary if we are gaining focus from the
+                // TextDialog.  How can we tell if it was the last thing in
+                // focus?
+                setFocusControllerActive(true);
             //} else {
                 // The WebView has gained focus while we do not have
                 // windowfocus.  When our window lost focus, we should have
@@ -3491,6 +3507,7 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(false, false, true);
                 }
+                setFocusControllerActive(false);
             }
             mGotKeyDown = false;
         }
