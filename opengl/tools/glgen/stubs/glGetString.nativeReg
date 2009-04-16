@@ -1,1 +1,0 @@
-{"_glGetString", "(I)Ljava/lang/String;", (void *) android_glGetString },

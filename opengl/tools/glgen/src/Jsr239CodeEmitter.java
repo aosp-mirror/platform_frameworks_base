@@ -69,6 +69,6 @@ public class Jsr239CodeEmitter extends JniCodeEmitter implements CodeEmitter {
     }
 
     public void emitNativeRegistration() {
-        emitNativeRegistration(mCStream);
+        emitNativeRegistration("register_com_google_android_gles_jni_GLImpl", mCStream);
     }
 }

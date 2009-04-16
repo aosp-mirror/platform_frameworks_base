@@ -8,6 +8,7 @@ public class JniCodeEmitter {
 
     static final boolean mUseCPlusPlus = true;
     protected boolean mUseContextPointer = true;
+    protected boolean mUseStaticMethods = false;
     protected String mClassPathName;
     protected ParameterChecker mChecker;
     protected List<String> nativeRegistrations = new ArrayList<String>();
@@ -67,7 +68,9 @@ public class JniCodeEmitter {
                 emitNativeDeclaration(jfunc, javaImplStream);
                 emitJavaCode(jfunc, javaImplStream);
             }
-            emitJavaInterfaceCode(jfunc, javaInterfaceStream);
+            if (javaInterfaceStream != null) {
+                emitJavaInterfaceCode(jfunc, javaInterfaceStream);
+            }
             if (!duplicate) {
                 emitJniCode(jfunc, cStream);
             }
@@ -86,7 +89,9 @@ public class JniCodeEmitter {
         if (!duplicate) {
             emitNativeDeclaration(jfunc, javaImplStream);
         }
-        emitJavaInterfaceCode(jfunc, javaInterfaceStream);
+        if (javaInterfaceStream != null) {
+            emitJavaInterfaceCode(jfunc, javaInterfaceStream);
+        }
         if (!duplicate) {
             emitJavaCode(jfunc, javaImplStream);
             emitJniCode(jfunc, cStream);
@@ -405,18 +410,20 @@ public class JniCodeEmitter {
             return;
         }
 
+        String maybeStatic = mUseStaticMethods ? "static " : "";
+
         if (isPointerFunc) {
             out.println(indent +
-                        (nativeDecl ? "private native " :
-                         (interfaceDecl ? "" : "public ")) +
+                        (nativeDecl ? "private " + maybeStatic +"native " :
+                         (interfaceDecl ? "" : "public ") + maybeStatic) +
                         jfunc.getType() + " " +
                         jfunc.getName() +
                         (nativeDecl ? "Bounds" : "") +
                         "(");
         } else {
             out.println(indent +
-                        (nativeDecl ? "public native " :
-                         (interfaceDecl ? "" : "public ")) +
+                        (nativeDecl ? "public " + maybeStatic +"native " :
+                         (interfaceDecl ? "" : "public ") + maybeStatic) +
                         jfunc.getType() + " " +
                         jfunc.getName() +
                         "(");
@@ -508,7 +515,8 @@ public class JniCodeEmitter {
         nativeRegistrations.add(s);
     }
 
-    public void emitNativeRegistration(PrintStream cStream) {
+    public void emitNativeRegistration(String registrationFunctionName,
+            PrintStream cStream) {
         cStream.println("static const char *classPathName = \"" +
                         mClassPathName +
                         "\";");
@@ -527,7 +535,7 @@ public class JniCodeEmitter {
         cStream.println();
 
 
-        cStream.println("int register_com_google_android_gles_jni_GLImpl(JNIEnv *_env)");
+        cStream.println("int " + registrationFunctionName + "(JNIEnv *_env)");
         cStream.println("{");
         cStream.println(indent +
                         "int err;");

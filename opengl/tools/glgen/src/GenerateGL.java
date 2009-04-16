@@ -31,18 +31,18 @@ public class GenerateGL {
             CFunc cfunc = CFunc.parseCFunc(s);
 
             String fname = cfunc.getName();
-            File f = new File("stubs/" + fname +
+            File f = new File("stubs/jsr239/" + fname +
                               ".java-1" + version + "-if");
             if (f.exists()) {
                 System.out.println("Special-casing function " + fname);
-                copy("stubs/" + fname +
+                copy("stubs/jsr239/" + fname +
                      ".java-1" + version + "-if", glStream);
-                copy("stubs/" + fname + ".java-impl", glImplStream);
-                copy("stubs/" + fname + ".cpp", cStream);
+                copy("stubs/jsr239/" + fname + ".java-impl", glImplStream);
+                copy("stubs/jsr239/" + fname + ".cpp", cStream);
 
                 // Register native function names
                 // This should be improved to require fewer discrete files
-                String filename = "stubs/" + fname + ".nativeReg";
+                String filename = "stubs/jsr239/" + fname + ".nativeReg";
                 BufferedReader br =
                     new BufferedReader(new FileReader(filename));
                 String nfunc;
@@ -135,13 +135,13 @@ public class GenerateGL {
         glImplStream.println("/* //device/java/android/" + glImplFilename);
         cStream.println("/* //device/libs/android_runtime/" + cFilename);
 
-        copy("stubs/GL10Header.java-if", gl10Stream);
-        copy("stubs/GL10ExtHeader.java-if", gl10ExtStream);
-        copy("stubs/GL11Header.java-if", gl11Stream);
-        copy("stubs/GL11ExtHeader.java-if", gl11ExtStream);
-        copy("stubs/GL11ExtensionPackHeader.java-if", gl11ExtPackStream);
-        copy("stubs/GLImplHeader.java-impl", glImplStream);
-        copy("stubs/GLCHeader.cpp", cStream);
+        copy("stubs/jsr239/GL10Header.java-if", gl10Stream);
+        copy("stubs/jsr239/GL10ExtHeader.java-if", gl10ExtStream);
+        copy("stubs/jsr239/GL11Header.java-if", gl11Stream);
+        copy("stubs/jsr239/GL11ExtHeader.java-if", gl11ExtStream);
+        copy("stubs/jsr239/GL11ExtensionPackHeader.java-if", gl11ExtPackStream);
+        copy("stubs/jsr239/GLImplHeader.java-impl", glImplStream);
+        copy("stubs/jsr239/GLCHeader.cpp", cStream);
 
         emit(0, false, false,
              emitter, spec10Reader, gl10Stream, glImplStream, cStream);
