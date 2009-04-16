@@ -406,7 +406,7 @@
     <string name="lockscreen_network_locked_message">"Netzwerk gesperrt"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-Karte ist gesperrt. PUK-Eingabe erforderlich."</string>
     <string name="lockscreen_sim_puk_locked_instructions">"Weitere Informationen finden Sie in der Bedienungsanleitung oder wenden Sie sich an den Kundendienst."</string>
-    <string name="lockscreen_sim_locked_message">"Bitte PIN-code eingeben"</string>
+    <string name="lockscreen_sim_locked_message">"Bitte PIN-Code eingeben"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM-Karte wird entsperrt..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="lockscreen_failed_attempts_almost_glogin">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe Ihrer Google-Anmeldeinformationen zu entsperren. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>

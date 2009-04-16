@@ -109,8 +109,8 @@
     <string name="global_action_silent_mode_on_status">"El sonido está desactivado. Activar."</string>
     <string name="global_action_silent_mode_off_status">"El sonido está activado. Desactivar."</string>
     <string name="global_actions_toggle_airplane_mode">"Modo avión"</string>
-    <string name="global_actions_airplane_mode_on_status">"Modo avión ACTIVADO"</string>
-    <string name="global_actions_airplane_mode_off_status">"Modo avión DESACTIVADO"</string>
+    <string name="global_actions_airplane_mode_on_status">"Modo avión desactivado. Activar."</string>
+    <string name="global_actions_airplane_mode_off_status">"Modo avión desactivado. Activar."</string>
     <string name="safeMode">"Modo seguro"</string>
     <string name="android_system_label">"Sistema Android"</string>
     <string name="permgrouplab_costMoney">"Servicios por los que tienes que pagar"</string>
