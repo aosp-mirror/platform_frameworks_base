@@ -51,7 +51,7 @@ public class BitwiseOutputStream {
      */
     public BitwiseOutputStream(int startingLength) {
         mBuf = new byte[startingLength];
-        mEnd = startingLength * 8;
+        mEnd = startingLength << 3;
         mPos = 0;
     }
 
@@ -61,7 +61,7 @@ public class BitwiseOutputStream {
      * @return newly allocated byte array
      */
     public byte[] toByteArray() {
-        int len = (mPos / 8) + ((mPos % 8) > 0 ? 1 : 0);
+        int len = (mPos >>> 3) + ((mPos & 0x07) > 0 ? 1 : 0);  // &7==%8
         byte[] newBuf = new byte[len];
         System.arraycopy(mBuf, 0, newBuf, 0, len);
         return newBuf;
@@ -74,8 +74,8 @@ public class BitwiseOutputStream {
      */
     private void possExpand(int bits) {
         if ((mPos + bits) < mEnd) return;
-        byte[] newBuf = new byte[((mPos + bits) * 2) / 8];
-        System.arraycopy(mBuf, 0, newBuf, 0, mEnd / 8);
+        byte[] newBuf = new byte[(mPos + bits) >>> 2];
+        System.arraycopy(mBuf, 0, newBuf, 0, mEnd >>> 3);
         mBuf = newBuf;
     }
 
@@ -91,12 +91,12 @@ public class BitwiseOutputStream {
         }
         possExpand(bits);
         data &= (-1 >>> (32 - bits));
-        int index = mPos / 8;
-        int offset = 16 - (mPos % 8) - bits;
+        int index = mPos >>> 3;
+        int offset = 16 - (mPos & 0x07) - bits;  // &7==%8
         data <<= offset;
         mPos += bits;
         mBuf[index] |= (data >>> 8);
-        if (offset < 8) mBuf[index + 1] |= (data & 0xFF);
+        if (offset < 8) mBuf[index + 1] |= (data & 0x00FF);
     }
 
     /**
@@ -107,7 +107,7 @@ public class BitwiseOutputStream {
      */
     public void writeByteArray(int bits, byte[] arr) throws AccessException {
         for (int i = 0; i < arr.length; i++) {
-            int increment = Math.min(8, bits - (i * 8));
+            int increment = Math.min(8, bits - (i << 3));
             if (increment > 0) {
                 write(increment, (byte)(arr[i] >>> (8 - increment)));
             }
