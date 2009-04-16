@@ -72,12 +72,21 @@ section in the introduction.
 <dd>The host part of a URI authority.  This attribute is meaningless
 unless a <code><a href="{@docRoot}guide/topics/manifest/data-element.html#scheme">scheme</a></code> attribute is also 
 specified for the filter.
+
+<p class="note">Note: host name matching in the Android framework is
+case-sensitive, unlike the formal RFC.  As a result, you should always specify
+host names using lowercase letters.</p>
 </dd>
 
 <dt><a name="mime"></a>{@code android:mimeType}</dt>
 <dd>A MIME media type, such as {@code image/jpeg} or {@code audio/mpeg4-generic}.  
 The subtype can be the asterisk wildcard ({@code *}) to indicate that any 
-subtype matches.</dd>
+subtype matches.
+
+<p class="note">Note: MIME type matching in the Android framework is
+case-sensitive, unlike formal RFC MIME types.  As a result, you should always
+specify MIME types using lowercase letters.</p>
+</dd>
 
 <dt><a name="path"></a>{@code android:path}
 <br/>{@code android:pathPrefix}
@@ -138,8 +147,17 @@ A scheme is specified without the trailing colon (for example,
 If the filter has a data type set (the <code><a href="{@docRoot}guide/topics/manifest/data-element.html#mime">mimeType</a></code> 
 attribute) but no scheme, the {@code content:} and {@code file:} schemes are
 assumed.
-</p></dd>
+</p>
+
+<p class="note">Note: scheme matching in the Android framework is
+case-sensitive, unlike the RFC.  As a result, you should always specify schemes
+using lowercase letters.</p>
+</dd>
 </dl></dd>  
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
 
 <dt>see also:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>

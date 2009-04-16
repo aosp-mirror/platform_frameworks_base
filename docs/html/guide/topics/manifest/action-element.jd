@@ -40,6 +40,10 @@ as follows:
 </dd>
 </dl></dd>
 
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
+
 <dt>see also:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code></dd>
 

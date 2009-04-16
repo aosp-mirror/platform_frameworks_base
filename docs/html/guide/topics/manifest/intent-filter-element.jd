@@ -122,6 +122,10 @@ higher priority.
 
 </dl></dd>
 
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
+
 <dt>see also:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>
