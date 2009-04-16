@@ -96,6 +96,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IWindow.aidl \
 	core/java/android/view/IWindowManager.aidl \
 	core/java/android/view/IWindowSession.aidl \
+	core/java/android/speech/IRecognitionListener.aidl \
+	core/java/android/speech/IRecognitionService.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IUsageStats.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
