@@ -1,8 +1,8 @@
 page.title=Android Supported Media Formats
 @jd:body
 
-<p>The <a href="#core">Core Media Formats</a> table below describes the media format support built into the Android platform. Note that any given mobile device may provide support for additional formats or file types not listed here. </p>
-<p>For your convenience, the table <a href="#g1">T-Mobile G1 Media Formats</a> describes the additional media formats supported by the T-Mobile G1 device. </p>
+<p>The <a href="#core">Core Media Formats</a> table below describes the media format support built into the Android platform. Note that any given mobile device may provide support for additional formats or file types not listed in the table. </p>
+<p>For your convenience, the table <a href="#g1">T-Mobile G1 Media Formats</a> describes additional media format details for the T-Mobile G1 device. </p>
 
 
 <h2 id="core">Core Media Formats</h2>
@@ -127,7 +127,7 @@ page.title=Android Supported Media Formats
 <tr>
 <td rowspan="3">Video</td>
 <td>H.263</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;">X</td>
 <td style="text-align: center;">X</td>
 <td>&nbsp;</td>
 <td>3GPP (.3gp)</td>
@@ -184,7 +184,7 @@ Mono and stereo profiles with 16-bits per sample. Decoder does not support WMA P
 </tr>
 
 <tr>
-<td rowspan="2">Video</td>
+<td rowspan="3">Video</td>
 <td>WMV</td>
 <td>&nbsp;</td>
 <td style="text-align: center;">X</td>
@@ -193,7 +193,15 @@ Mono and stereo profiles with 16-bits per sample. Decoder does not support WMA P
 </tr>
 
 <tr>
-<td>H.264 AVC</td>
+<td>H.263</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;">X</td>
+<td>&nbsp;</td>
+<td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
+</tr>
+
+<tr>
+<td>H.264&nbsp;AVC</td>
 <td>&nbsp;</td>
 <td style="text-align: center;">X</td>
 <td>Limited to baseline profile up to 480x320, and 600 kbps average bitrate for the video stream.</td>
