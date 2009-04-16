@@ -16,14 +16,14 @@
 
 package com.android.dumprendertree;
 
-import android.app.Activity;
 import android.app.Instrumentation;
-import android.app.Instrumentation.ActivityMonitor;
 import android.content.Intent;
 
 import android.util.Log;
 
 import android.os.Bundle;
+import android.os.Debug;
+import android.os.Debug.MemoryInfo;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.android.dumprendertree.TestShellActivity;
@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
 class StreamPipe extends Thread {
     InputStream in;
@@ -92,34 +93,53 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
         // TODO(fqian): let am instrumentation pass in the command line, currently
         // am instrument does not allow spaces in the command.
-        runPostShellCommand("/system/bin/dumpsys meminfo");
+        dumpMemoryInfo();
         
         // Kill activity
         activity.finish();
     }
 
-    private void runPostShellCommand(String cmd) {
-        if (cmd == null || cmd.length() == 0)
-            return;
-        
+    private void dumpMemoryInfo() {
         try {
-            // Call dumpsys meminfo
-            Process proc = Runtime.getRuntime().exec(cmd);
-            // Append output to LOAD_TEST_RESULT
-            InputStream input = proc.getInputStream();
-            InputStream error = proc.getErrorStream();
+            Log.v(LOGTAG, "Dumping memory information.");
+            
             FileOutputStream out = new FileOutputStream(LOAD_TEST_RESULT, true);
-
-            StreamPipe p_in = new StreamPipe(input, out);
-            StreamPipe p_err = new StreamPipe(error, System.err);
+            PrintStream ps = new PrintStream(out);
             
-            p_in.start();
-            p_err.start();
+            MemoryInfo mi = new MemoryInfo();
+            Debug.getMemoryInfo(mi);
             
-            proc.waitFor();
+            //try to fake the dumpsys format
+            //this will eventually be changed to XML
+            String format = "%15s:%9d%9d%9d%9d";
+            String pss =
+              String.format(format, "(Pss)",
+                  mi.nativePss, mi.dalvikPss, mi.otherPss,
+                  mi.nativePss + mi.dalvikPss + mi.otherPss);
+            String sd =
+              String.format(format, "(shared dirty)",
+                  mi.nativeSharedDirty, mi.dalvikSharedDirty, mi.otherSharedDirty,
+                  mi.nativeSharedDirty + mi.dalvikSharedDirty + mi.otherSharedDirty);
+            String pd =
+              String.format(format, "(priv dirty)",
+                  mi.nativePrivateDirty, mi.dalvikPrivateDirty, mi.otherPrivateDirty,
+                  mi.nativePrivateDirty + mi.dalvikPrivateDirty + mi.otherPrivateDirty);
+            
+            ps.print("\n\n\n");
+            ps.println("** MEMINFO in pid 0 [com.android.dumprendertree] **");
+            ps.println("                   native   dalvik    other    total");
+            ps.println("           size:    12060     5255      N/A    17315");
+            ps.println("      allocated:    12060     5255      N/A    17315");
+            ps.println("           free:    12060     5255      N/A    17315");
+            ps.println(pss);
+            ps.println(sd);
+            ps.println(pd);
+            ps.print("\n\n\n");
+            ps.flush();
+            ps.close();
+            out.flush();
+            out.close();
         } catch (IOException e) {
-            Log.e(LOGTAG, e.getMessage());
-        } catch (InterruptedException e) {
             Log.e(LOGTAG, e.getMessage());
         }      
     }
