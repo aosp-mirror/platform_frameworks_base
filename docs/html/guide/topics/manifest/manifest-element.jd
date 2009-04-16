@@ -6,6 +6,7 @@ page.title=&lt;manifest&gt;
 <dd><pre class="stx">&lt;manifest xmlns:<a href="#nspace">android</a>="http://schemas.android.com/apk/res/android"
           <a href="#package">package</a>="<i>string</i>"
           android:<a href="#uid">sharedUserId</a>="<i>string</i>"
+          android:<a href="#uidlabel">sharedUserLabel</a>="<i>string resource</i>" <!-- ##api level 3## -->
           android:<a href="#vcode">versionCode</a>="<i>integer</i>"
           android:<a href="#vname">versionName</a>="<i>string</i>" &gt;
     . . .
@@ -25,7 +26,8 @@ page.title=&lt;manifest&gt;
 <br/><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
-<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>  <!-- ##api level 3## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code></dd>
 <br/><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code></dd>
 
 <p>
@@ -64,7 +66,17 @@ By default, Android assigns each application its own unique user ID.
 However, if this attribute is set to the same value for two or more applications, 
 they will all share the same ID &mdash; provided that they are also signed 
 by the same certificate.  Application with the same user ID can access each 
-other's data and, if desired, run in the same  process.</dd>  
+other's data and, if desired, run in the same process.</dd>
+
+<dt><a name="uidlabel"></a>{@code android:sharedUserLabel}</dt>
+<dd>A user-readable label for the shared user ID.  The label must be set as
+a reference to a string resource; it cannot be a raw string.
+
+<p>
+<!-- ##api level indication## -->
+This attribute was introduced in API Level 3.  It is meaningful only if the 
+<code><a href="#uid">sharedUserId</a></code> attribute is also set.
+</p></dd>      
 
 <dt><a name="vcode"></a>{@code android:versionCode}</dt>
 <dd>An internal version number.  This number is used only to determine whether 
@@ -87,6 +99,12 @@ string or as a reference to a string resource.  The string has no other purpose
 than to be displayed to users.  The {@code versionCode} attribute holds 
 the significant version number used internally.
 </dl></dd>
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1 for all attributes except for 
+<code><a href="#uidlabel">sharedUserLabel</a></code>, which was added in 
+level 3.</dd>
 
 <p>
 <dt>see also:</dt>

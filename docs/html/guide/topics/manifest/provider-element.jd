@@ -260,7 +260,10 @@ See also the <code><a href="#prmsn">permission</a></code> and
 
 </dl></dd>
 
-<p>
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
+
 <dt>see also:</dt>
 <dd><a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></dd>
 
