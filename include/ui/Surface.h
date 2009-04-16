@@ -76,6 +76,76 @@ private:
 
 // ---------------------------------------------------------------------------
 
+class SurfaceControl : public RefBase
+{
+public:
+    static bool isValid(const sp<SurfaceControl>& surface) {
+        return (surface != 0) && surface->mToken>=0 && surface->mClient!=0;
+    }
+        
+    SurfaceID   ID() const      { return mToken; }
+    uint32_t    getFlags() const { return mFlags; }
+    uint32_t    getIdentity() const { return mIdentity; }
+
+    // release surface data from java
+    void        clear();
+    
+    static sp<SurfaceControl>  readFromParcel(Parcel* parcel);
+    static status_t writeToParcel(const sp<SurfaceControl>& surface, Parcel* parcel);
+    static bool isSameSurface(const sp<SurfaceControl>& lhs, const sp<SurfaceControl>& rhs);
+
+    status_t    setLayer(int32_t layer);
+    status_t    setPosition(int32_t x, int32_t y);
+    status_t    setSize(uint32_t w, uint32_t h);
+    status_t    hide();
+    status_t    show(int32_t layer = -1);
+    status_t    freeze();
+    status_t    unfreeze();
+    status_t    setFlags(uint32_t flags, uint32_t mask);
+    status_t    setTransparentRegionHint(const Region& transparent);
+    status_t    setAlpha(float alpha=1.0f);
+    status_t    setMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
+    status_t    setFreezeTint(uint32_t tint);
+
+private:
+    friend class SurfaceComposerClient;
+
+    // camera and camcorder need access to the ISurface binder interface for preview
+    friend class Camera;
+    friend class MediaRecorder;
+    // mediaplayer needs access to ISurface for display
+    friend class MediaPlayer;
+    friend class Test;
+    const sp<ISurface>& getISurface() const { return mSurface; }
+    
+    // can't be copied
+    SurfaceControl& operator = (SurfaceControl& rhs);
+    SurfaceControl(const SurfaceControl& rhs);
+
+    friend class Surface;
+    SurfaceControl(const sp<SurfaceComposerClient>& client,
+            const sp<ISurface>& surface,
+            const ISurfaceFlingerClient::surface_data_t& data,
+            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
+            bool owner = true);
+
+    ~SurfaceControl();
+    
+    status_t validate(per_client_cblk_t const* cblk) const;
+    void destroy();
+    
+    sp<SurfaceComposerClient>   mClient;
+    sp<ISurface>                mSurface;
+    SurfaceID                   mToken;
+    uint32_t                    mIdentity;
+    PixelFormat                 mFormat;
+    uint32_t                    mFlags;
+    const bool                  mOwner;
+    mutable Mutex               mLock;
+};
+    
+// ---------------------------------------------------------------------------
+
 class Surface 
     : public EGLNativeBase<android_native_window_t, Surface, RefBase>
 {
@@ -192,6 +262,8 @@ private:
     mutable Rect                mSwapRectangle;
     mutable uint8_t             mBackbufferIndex;
     mutable Mutex               mSurfaceLock;
+    
+    sp<SurfaceControl>          mSurfaceControl;
 };
 
 }; // namespace android

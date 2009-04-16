@@ -111,22 +111,23 @@ public:
 
 private:
     friend class Surface;
+    friend class SurfaceControl;
     
     SurfaceComposerClient(const sp<ISurfaceComposer>& sm, 
             const sp<IBinder>& conn);
 
-    status_t    hide(Surface* surface);
-    status_t    show(Surface* surface, int32_t layer = -1);
-    status_t    freeze(Surface* surface);
-    status_t    unfreeze(Surface* surface);
-    status_t    setFlags(Surface* surface, uint32_t flags, uint32_t mask);
-    status_t    setTransparentRegionHint(Surface* surface, const Region& transparent);
-    status_t    setLayer(Surface* surface, int32_t layer);
-    status_t    setAlpha(Surface* surface, float alpha=1.0f);
-    status_t    setFreezeTint(Surface* surface, uint32_t tint);
-    status_t    setMatrix(Surface* surface, float dsdx, float dtdx, float dsdy, float dtdy);
-    status_t    setPosition(Surface* surface, int32_t x, int32_t y);
-    status_t    setSize(Surface* surface, uint32_t w, uint32_t h);
+    status_t    hide(SurfaceID id);
+    status_t    show(SurfaceID id, int32_t layer = -1);
+    status_t    freeze(SurfaceID id);
+    status_t    unfreeze(SurfaceID id);
+    status_t    setFlags(SurfaceID id, uint32_t flags, uint32_t mask);
+    status_t    setTransparentRegionHint(SurfaceID id, const Region& transparent);
+    status_t    setLayer(SurfaceID id, int32_t layer);
+    status_t    setAlpha(SurfaceID id, float alpha=1.0f);
+    status_t    setFreezeTint(SurfaceID id, uint32_t tint);
+    status_t    setMatrix(SurfaceID id, float dsdx, float dtdx, float dsdy, float dtdy);
+    status_t    setPosition(SurfaceID id, int32_t x, int32_t y);
+    status_t    setSize(SurfaceID id, uint32_t w, uint32_t h);
     
     void        signalServer();
 
@@ -135,8 +136,8 @@ private:
     void        _init(const sp<ISurfaceComposer>& sm,
                     const sp<ISurfaceFlingerClient>& conn);
 
-    inline layer_state_t*   _get_state_l(const sp<Surface>& surface);
-    layer_state_t*          _lockLayerState(const sp<Surface>& surface);
+    inline layer_state_t*   _get_state_l(SurfaceID id);
+    layer_state_t*          _lockLayerState(SurfaceID id);
     inline void             _unlockLayerState();
 
     mutable     Mutex                               mLock;
