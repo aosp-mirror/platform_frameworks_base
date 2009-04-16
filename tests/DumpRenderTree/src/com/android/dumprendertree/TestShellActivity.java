@@ -165,7 +165,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             if (mDialogStrings != null)
                 os.write(mDialogStrings.toString().getBytes());
             mDialogStrings = null;
-            os.write(webkitData.getBytes());
+            if (webkitData != null)
+                os.write(webkitData.getBytes());
             os.flush();
             os.close();
         } catch (IOException ex) {
