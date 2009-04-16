@@ -1,0 +1,176 @@
+page.title=&lt;uses-configuration&gt;
+@jd:body
+
+<!-- ##api level 3##  see comment below -->
+
+<!-- the "no___" values are nonsensical if they mean "doesn't work on devices with a
+keyboard / navigation control / touch screen."  Dianne says that that's what they mean and 
+that they therefore should be eliminated.  Suchi says that they mean "doesn't require a 
+keyboard / navigation control / touch screen to work."  But then what does "undefined" mean?
+Seems like some API change is in the works, either eliminating the "no___" values or
+"undefined".  Since it's unclear what the change will be, I've chosen to document the "no___" 
+and "undefined" attributes using the same language, which is surely wrong but may make it
+easier to update the doc when the change is made. -->
+
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;uses-configuration android:<a href="#five">reqFiveWayNav</a>=["true" | "false"] 
+                    android:<a href="#hard">reqHardKeyboard</a>=["true" | "false"]
+                    android:<a href="#kbd">reqKeyboardType</a>=["undefined" | "nokeys" | "qwerty" |  
+                                             "twelvekey"]
+                    android:<a href="#nav">reqNavigation</a>=["undefined" | "nonav" | "dpad" | 
+                                           "trackball" | "wheel"]
+                    android:<a href="#touch">reqTouchScreen</a>=["undefined" | "notouch" | "stylus" | 
+                                            "finger"] /&gt;</pre></dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Indicates what hardware and software features the application requires.  
+For example, an application might specify that it requires a physical keyboard 
+or a particular navigation device, like a trackball.  The specification is
+used to avoid installing the application on devices where it will not work.
+
+<p>
+If an application can work with different device configurations, it 
+should include separate {@code &lt;uses-configuration&gt;} declarations for 
+each one.  Each declaration must be complete.  For example, if an application 
+requires a five-way navigation control, a touch screen that can be operated 
+with a finger, and either a standard QWERTY keyboard or a numeric 12-key
+keypad like those found on most phones, it would specify these requirements
+with two {@code &lt;uses-configuration&gt;} elements as follows:
+</p>
+
+<pre>&lt;uses-configuration android:reqFiveWayNav="true" android:reqTouchScreen="finger"
+                    android:reqKeyboardType="qwerty" /&gt;
+&lt;uses-configuration android:reqFiveWayNav="true" android:reqTouchScreen="finger"
+                    android:reqKeyboardType="twelvekey" /&gt;</pre></dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt><a name="five"></a>{@code android:reqFiveWayNav}</dt>
+<dd>Whether or not the application requires a five-way navigation control 
+&mdash; "{@code true}" if it does, and "{@code false}" if not.  A five-way
+control is one that can move the selection up, down, right, or left, and 
+also provides a way of invoking the current selection.  It could be a 
+D-pad (directional pad), trackball, or other device.  
+
+<p>
+If an application requires a directional control, but not a control of a
+particular type, it can set this attribute to "{@code true}" and ignore 
+the <code><a href="#nav">reqNavigation</a></code> attribute.  However,
+if it requires a particular type of directional control, it can ignore
+this attribute and set {@code reqNavigation} instead.
+</p></dd>
+
+<dt><a name="hard"></a>{@code android:reqHardKeyboard}</dt>
+<dd>Whether or not the application requires a hardware keyboard &mdash;
+"{@code true}" if it does, and "{@code false}" if not.</dd>
+
+<dt><a name="kbd"></a>{@code android:reqKeyboardType}</dt>
+<dd>The type of keyboard the application requires, if any at all. 
+This attribute does not distinguish between hardware and software 
+keyboards.  If a hardware keyboard of a certain type is required,
+specify the type here and also set the {@code reqHardKeyboard} attribute 
+to "{@code true}".
+
+<p>
+The value must be one of the following strings:
+</p>
+
+<table>
+<tr>
+   <th>Value</th>
+   <th>Description</th>
+</tr><tr>
+   <td>"{@code undefined}"</td>
+   <td>The application does not require a keyboard. 
+       (A keyboard requirement is not defined.)  
+       This is the default value.</td>
+</tr><tr>
+   <td>"{@code nokeys}"</td>
+   <td>The application does not require a keyboard.</td>
+</tr><tr>
+   <td>"{@code qwerty}"</td>
+   <td>The application requires a standard QWERTY keyboard.</td>
+</tr><tr>
+   <td>"{@code twelvekey}"</td>
+   <td>The application requires a twelve-key keypad, like those on most 
+       phones &mdash; with keys for the digits from {@code 0} through 
+       {@code 9} plus star ({@code *}) and pound ({@code #}) keys.</td>
+</tr>
+</table></dd>
+
+<dt><a name="nav"></a>{@code android:reqNavigation}</dt>
+<dd>The navigation device required by the application, if any.  The value 
+must be one of the following strings:
+
+<table>
+<tr>
+   <th>Value</th>
+   <th>Description</th>
+</tr><tr>
+   <td>"{@code undefined}"</td>
+   <td>The application does not require any type of navigation control. 
+       (The navigation requirement is not defined.)  
+       This is the default value.</td>
+</tr><tr>
+   <td>"{@code nonav}"</td>
+   <td>The application does not require a navigation control.</td>
+</tr><tr>
+   <td>"{@code dpad}"</td>
+   <td>The application requires a D-pad (directional pad) for navigation.</td>
+</tr><tr>
+   <td>"{@code trackball}"</td>
+   <td>The application requires a trackball for navigation.</td>
+</tr><tr>
+   <td>"{@code wheel}"</td>
+   <td>The application requires a navigation wheel.</td>
+</tr>
+</table>
+
+<p>
+If an application requires a navigational control, but the exact type of
+control doesn't matter, it can set the 
+<code><a href="#five">reqFiveWayNav</a></code> attribute to "{@code true}"
+rather than set this one.
+</p></dd>
+
+<dt><a name="touch"></a>{@code android:reqTouchScreen}</dt>
+<dd>The type of touch screen the application requires, if any at all.
+The value must be one of the following strings: 
+
+<table>
+<tr>
+   <th>Value</th>
+   <th>Description</th>
+</tr><tr>
+   <td>"{@code undefined}"</td>
+   <td>The application doesn't require a touch screen.  
+       (The touch screen requirement is undefined.)
+       This is the default value.</td>
+</tr><tr>
+   <td>"{@code notouch}"</td>
+   <td>The application doesn't require a touch screen.</td>
+</tr><tr>
+   <td>"{@code stylus}"</td>
+   <td>The application requires a touch screen that's operated with a stylus.</td>
+</tr><tr>
+   <td>"{@code finger}"</td>
+   <td>The application requires a touch screen that can be operated with a finger.</td>
+</tr>
+</table></dd>
+</dl></dd>
+
+<!-- ##api level 3## -->
+<dt>introduced in:</dt>
+<dd>API Level 3</dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/activity-element.html#config">configChanges</a></code>
+attribute of the
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+element</dd>
+
+</dl>

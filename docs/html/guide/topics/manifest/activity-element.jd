@@ -19,6 +19,7 @@ page.title=&lt;activity&gt;
                               "singleTask" | "singleInstance"]
           android:<a href="#multi">multiprocess</a>=["true" | "false"]
           android:<a href="#nm">name</a>="<i>string</i>"
+          android:<a href="#nohist">noHistory</a>=["true" | "false"]  <!-- ##api level 3## -->
           android:<a href="#prmsn">permission</a>="<i>string</i>"
           android:<a href="#proc">process</a>="<i>string</i>"
           android:<a href="#screen">screenOrientation</a>=["unspecified" | "user" | "behind" |
@@ -26,7 +27,12 @@ page.title=&lt;activity&gt;
                                      "sensor" | "nonsensor"]
           android:<a href="#state">stateNotNeeded</a>=["true" | "false"]
           android:<a href="#aff">taskAffinity</a>="<i>string</i>"
-          android:<a href="#theme">theme</a>="<i>resource or theme</i>" &gt;
+          android:<a href="#theme">theme</a>="<i>resource or theme</i>" 
+          android:<a href="#wsoft">windowSoftInputMode</a>=[<i>one or more of</i>: "stateUnspecified" 
+                                       "stateUnchanged" "stateHidden" 
+                                       "stateAlwaysHidden" "stateVisible" 
+                                       "stateAlwaysVisible" "adjustUnspecified" 
+                                       "adjustResize" "adjustPan"] &gt;   <!-- ##api level 3## -->
     . . .
 &lt;/activity&gt;</pre></dd>
 
@@ -158,8 +164,8 @@ separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientat
 
 <table>
 <tr>
-   <td><b>Value</b></td>
-   <td><b>Description</b></td>
+   <th>Value</th>
+   <th>Description</th>
 </tr><tr>
    <td>"{@code mcc}"</td>
    <td>The IMSI mobile country code (MCC) has changed &mdash; 
@@ -212,12 +218,12 @@ is "{@code true}".
 
 <p>
 The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
-application components, including activities.  The 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code &lt;activity&gt;} 
-attributes must both be "{@code true}" (as they both are by default) for 
-the system to be able to instantiate the activity.  If either is 
-"{@code false}", it cannot be instantiated.
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> 
+attribute that applies to all application components, including activities.  The 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+and {@code &lt;activity&gt;} attributes must both be "{@code true}" (as they both 
+are by default) for the system to be able to instantiate the activity.  If either 
+is "{@code false}", it cannot be instantiated.
 </p></dd>
 
 <dt><a name="exclude"></a>{@code android:excludeFromRecents}</dt>
@@ -246,7 +252,8 @@ is intended for external use, so the default value is "{@code true}".
 <p>
 This attribute is not the only way to limit an activity's exposure to other
 applications.  You can also use a permission to limit the external entities that 
-can invoke the activity  (see the <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#prmsn">permission</a></code> 
+can invoke the activity  (see the 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#prmsn">permission</a></code> 
 attribute).
 </p></dd>
 
@@ -257,7 +264,8 @@ home screen) &mdash; "{@code true}" if it should be shut down, and "{@code false
 if not.  The default value is "{@code false}". 
 
 <p>
-If this attribute and <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">allowTaskReparenting</a></code> 
+If this attribute and 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">allowTaskReparenting</a></code> 
 are both "{@code true}", this attribute trumps the other.  The affinity of the 
 activity is ignored.  The activity is not re-parented, but destroyed.
 </p>
@@ -272,14 +280,15 @@ The icon is often accompanied by a label (see the {@code label} attribute).
 <p>
 This attribute must be set as a reference to a drawable resource containing 
 the image definition.  If it is not set, the icon specified for the application 
-as a whole is used instead (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+as a whole is used instead (see the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
 element's <code><a href="{@docRoot}guide/topics/manifest/application-element.html#icon">icon</a></code> attribute).
 </p>
 
 <p>
 The activity's icon &mdash; whether set here or by the 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element &mdash; is also the 
-default icon for all the activity's intent filters (see the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element &mdash; is also the default icon for all the activity's intent filters (see the 
 <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> element's 
 <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html#icon">icon</a></code> attribute). 
 </p></dd>
@@ -413,6 +422,24 @@ element.
 There is no default.  The name must be specified.
 </p></dd>
 
+<!-- ##api level 3## -->
+<dt><a name="nohist"></a>{@code android:noHistory}</dt>
+<dd>Whether or not the activity should be removed from the activity stack and
+finished (its <code>{@link android.app.Activity#finish finish()}</code> 
+method called) when the user navigates away from it and it's no longer 
+visible on screen &mdash; "{@code true}" if it should be finished, and 
+"{@code false}" if not.  The default value is "{@code false}".
+
+<p>
+A value of "{@code true}" means that the activity will not leave a
+historical trace.  It will not remain in the activity stack for the task,
+so the user will not be able to return to it.
+</p>
+
+<p>
+This attribute was introduced in API Level 3.
+</p>
+
 <dt><a name="prmsn"></a>{@code android:permission}</dt>
 <dd>The name of a permission that clients must have to launch the activity 
 or otherwise get it to respond to an intent.  If a caller of 
@@ -423,9 +450,10 @@ delivered to the activity.
 
 <p>
 If this attribute is not set, the permission set by the 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html#prmsn">permission</a></code> attribute applies 
-to the activity.  If neither attribute is set, the activity is
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element's
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#prmsn">permission</a></code> 
+attribute applies to the activity.  If neither attribute is set, the activity is
 not protected by a permission.
 </p>
 
@@ -441,9 +469,10 @@ Permissions</a>.
 <dd>The name of the process in which the activity should run.  Normally, 
 all components of an application run in the default process created for the 
 application.  It has the same name as the application package.  The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html#proc">process</a></code> attribute can set a different 
-default for all components.  But each component can override the default,
-allowing you to spread your application across multiple processes.
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#proc">process</a></code> 
+attribute can set a different default for all components.  But each component 
+can override the default, allowing you to spread your application across 
+multiple processes.
 
 <p>
 If the name assigned to this attribute begins with a colon (':'), a new 
@@ -540,10 +569,14 @@ it to an empty string.
 
 <p>
 If this attribute is not set, the activity inherits the affinity set 
-for the application (see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
-element's <code><a href="{@docRoot}guide/topics/manifest/application-element.html#aff">taskAffinity</a></code> attribute).  
-The name of the default affinity for an application is the package name set 
-by the <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.
+for the application (see the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#aff">taskAffinity</a></code>
+attribute).  The name of the default affinity for an application is 
+the package name set by the 
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
+element.
 </p>
 
 <dt><a name="theme"></a>{@code android:theme}</dt>
@@ -555,11 +588,123 @@ match what the activity actually looks like).
 
 <p>
 If this attribute is not set, the activity inherits the theme set for the 
-application as a whole &mdash; see the <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
-element's <code><a href="{@docRoot}guide/topics/manifest/application-element.html#theme">theme</a></code> attribute.  If that attribute is 
-also not set, the default system theme is used.
+application as a whole &mdash; see the 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+element's 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html#theme">theme</a></code> 
+attribute.  If that attribute is also not set, the default system theme is used.
 </p>
-<dd> 
+<dd>
+
+<!-- ##api level 3## -->
+<dt><a name="wsoft"></a>{@code android:windowSoftInputMode}</dt>
+<dd>How the main window of the activity interacts with the window containing 
+the on-screen soft keyboard.  The setting for this attribute affects two 
+things: 
+
+<ul> 
+<li>The state of the soft keyboard &mdash; whether it is hidden or visible 
+&mdash; when the activity becomes the focus of user attention.</li>
+
+<li>The adjustment made to the activity's main window &mdash; whether it is 
+resized smaller to make room for the soft keyboard or whether its contents 
+pan to make the current focus visible when part of the window is covered by 
+the soft keyboard.</li>
+</ul>
+
+<p>
+The setting must be one of the values listed in the following table, or a 
+combination of one "{@code state...}" value plus one "{@code adjust...}" 
+value.  Setting multiple values in either group &mdash; multiple 
+"{@code state...}" values, for example &mdash has undefined results.  
+Individual values are separated by a vertical bar ({@code |}).  For example:
+</p>
+
+<pre>&lt;activity android:windowSoftInputMode="stateVisible|adjustResize" . . . &gt;</pre>
+
+<p>
+Values set here (other than "{@code stateUnspecified}" and 
+"{@code adjustUnspecified}") override values set in the theme.
+</p>
+
+<table>
+<tr>
+   <th>Value</th>
+   <th>Description</th>
+</tr><tr>
+   <td>"{@code stateUnspecified}"</td>
+   <td>The state of the soft keyboard (whether it is hidden or visible) 
+       is not specified.  The system will choose an appropriate state or
+       rely on the setting in the theme.  
+
+       <p>
+       This is the default setting for the behavior of the soft keyboard.
+       </p></td>
+</tr></tr>
+   <td>"{@code stateUnchanged}"</td>
+   <td>The soft keyboard is kept in whatever state it was last in,
+       whether visible or hidden, when the activity comes to the fore.</td>
+</tr></tr>
+   <td>"{@code stateHidden}"</td>
+   <td>The soft keyboard is hidden when the user chooses the activity 
+       &mdash; that is, when the user affirmatively navigates forward to the 
+       activity, rather than backs into it because of leaving another activity.</td>
+</tr></tr>
+   <td>"{@code stateAlwaysHidden}"</td>
+   <td>The soft keyboard is always hidden when the activity's main window 
+       has input focus.</td>
+</tr></tr>
+   <td>"{@code stateVisible}"</td>
+   <td>The soft keyboard is visible when that's normally appropriate 
+       (when the user is navigating forward to the activity's main window).</td>
+</tr></tr>
+   <td>"{@code stateAlwaysVisible}"</td>
+   <td>The soft keyboard is made visible when the user chooses the 
+       activity &mdash; that is, when the user affirmatively navigates forward 
+       to the activity, rather than backs into it because of leaving another 
+       activity.</td>
+</tr></tr>
+   <td>"{@code adjustUnspecified}"</td>
+   <td>It is unspecified whether the activity's main window resizes 
+       to make room for the soft keyboard, or whether the contents 
+       of the window pan to make the currentfocus visible on-screen. 
+       The system will automatically select one of these modes depending
+       on whether the content of the window has any layout views that 
+       can scroll their contents.  If there is such a view, the window 
+       will be resized, on the assumption that scrolling can make all 
+       of the window's contents visible within a smaller area.
+
+       <p>
+       This is the default setting for the behavior of the main window.
+       </p></td>
+</tr></tr>
+   <td>"{@code adjustResize}"</td>
+   <td>The activity's main window is always resized to make room for 
+       the soft keyboard on screen.</td>
+</tr></tr>
+   <td>"{@code adjustPan}"</td>
+   <td>The activity's main window is not resized to make room for the soft
+       keyboard.  Rather, the contents of the window are automatically 
+       panned so that the current focus is never obscured by the keyboard
+       and users can always see what they are typing.  This is generally less 
+       desireable than resizing, because the user may need to close the soft
+       keyboard to get at and interact with obscured parts of the window.</td>
+</tr>
+</table>
+
+<p>
+This attribute was introduced in API Level 3.
+</p></dd>
 </dl></dd>
 
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1 for all attributes except for 
+<code><a href="#nohist">noHistory</a></code> and
+<code><a href="#wsoft">windowSoftInputMode</a></code>, which were added in API 
+Level 3.</dd>
+
+<dt>see also:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code></dd>
 </dl>
