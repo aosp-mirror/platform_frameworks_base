@@ -100,6 +100,7 @@ class CallbackProxy extends Handler {
     private static final int SWITCH_OUT_HISTORY        = 125;
     private static final int EXCEEDED_DATABASE_QUOTA   = 126;
     private static final int JS_TIMEOUT                = 127;
+    private static final int ADD_MESSAGE_TO_CONSOLE    = 128;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                    = 200;
@@ -580,6 +581,13 @@ class CallbackProxy extends Handler {
 
             case SWITCH_OUT_HISTORY:
                 mWebView.switchOutDrawHistory();
+                break;
+
+            case ADD_MESSAGE_TO_CONSOLE:
+                String message = msg.getData().getString("message");
+                String sourceID = msg.getData().getString("sourceID");
+                int lineNumber = msg.getData().getInt("lineNumber");
+                mWebChromeClient.addMessageToConsole(message, lineNumber, sourceID);
                 break;
         }
     }
@@ -1084,6 +1092,28 @@ class CallbackProxy extends Handler {
         map.put("quotaUpdater", quotaUpdater);
         exceededQuota.obj = map;
         sendMessage(exceededQuota);
+    }
+
+    /**
+     * Called by WebViewCore when we have a message to be added to the JavaScript
+     * error console. Sends a message to the Java side with the details.
+     * @param message The message to add to the console.
+     * @param lineNumber The lineNumber of the source file on which the error
+     *     occurred.
+     * @param sourceID The filename of the source file in which the error
+     *     occurred.
+     * @hide pending API counsel.
+     */
+    public void addMessageToConsole(String message, int lineNumber, String sourceID) {
+        if (mWebChromeClient == null) {
+            return;
+        }
+
+        Message msg = obtainMessage(ADD_MESSAGE_TO_CONSOLE);
+        msg.getData().putString("message", message);
+        msg.getData().putString("sourceID", sourceID);
+        msg.getData().putInt("lineNumber", lineNumber);
+        sendMessage(msg);
     }
 
     /**

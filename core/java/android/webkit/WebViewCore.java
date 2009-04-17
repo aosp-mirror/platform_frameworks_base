@@ -227,6 +227,16 @@ final class WebViewCore {
     }
 
     /**
+     * Add an error message to the client's console.
+     * @param message The message to add
+     * @param lineNumber the line on which the error occurred
+     * @param sourceID the filename of the source that caused the error.
+     */
+    protected void addMessageToConsole(String message, int lineNumber, String sourceID) {
+        mCallbackProxy.addMessageToConsole(message, lineNumber, sourceID);
+    }
+
+    /**
      * Invoke a javascript alert.
      * @param message The message displayed in the alert.
      */
