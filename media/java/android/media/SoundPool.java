@@ -26,8 +26,57 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import java.io.IOException;
 
-/*
+/**
  * The SoundPool class manages and plays audio resources for applications.
+ *
+ * <p>A SoundPool is a collection of samples that can be loaded into memory
+ * from a resource inside the APK or from a file in the file system. The
+ * SoundPool library uses the MediaPlayer service to decode the audio
+ * into a raw 16-bit PCM mono or stereo stream. This allows applications
+ * to ship with compressed streams without having to suffer the CPU load
+ * and latency of decompressing during playback.</p>
+ *
+ * <p>In addition to low-latency playback, SoundPool can also manage the number
+ * of audio streams being rendered at once. When the SoundPool object is
+ * constructed, the maxStreams parameter sets the maximum number of streams
+ * that can be played at a time from this single SoundPool. SoundPool tracks
+ * the number of active streams. If the maximum number of streams is exceeded,
+ * SoundPool will automatically stop a previously playing stream based first
+ * on priority and then by age within that priority. Limiting the maximum
+ * number of streams helps to cap CPU loading and reducing the likelihood that
+ * audio mixing will impact visuals or UI performance.</p> 
+ *
+ * <p>Priority runs low to high, i.e. higher numbers are higher priority.
+ * Priority is used when a call to play() would cause the number of active
+ * streams to exceed the value established by the maxStreams parameter when
+ * the SoundPool was created. In this case, the stream allocator will stop
+ * the lowest priority stream. If there are multiple streams with the same
+ * low priority, it will choose the oldest stream to stop. In the case
+ * where the priority of the new stream is lower than all the active
+ * streams, the new sound will not play and the play() function will return
+ * a streamID of zero.</p>
+ *
+ * <p>Let's examine a typical use case: A game consists of several levels of
+ * play. For each level, there is a set of unique sounds that are used only
+ * by that level. In this case, the game logic should create a new SoundPool
+ * object when the first level is loaded. The level data itself might contain
+ * the list of sounds to be used by this level. The loading logic iterates
+ * through the list of sounds calling the appropriate SoundPool.load()
+ * function. This should typically be done early in the process to allow time
+ * for decompressing the audio to raw PCM format before they are needed for
+ * playback.</p>
+ *
+ * <p>Once the sounds are loaded and play has started, the application can
+ * trigger sounds by calling SoundPool.play(). Playing streams can be
+ * paused or resumed, and the application can also alter the pitch by
+ * adjusting the playback rate in real-time for doppler or synthesis
+ * effects.</p>
+ *
+ * <p>In our example, when the player has completed the level, the game
+ * logic should call SoundPool.release() to release all the native resources
+ * in use and then set the SoundPool reference to null. If the player starts
+ * another level, a new SoundPool is created, sounds are loaded, and play
+ * resumes.</p>
  */
 public class SoundPool
 {
@@ -37,10 +86,30 @@ public class SoundPool
 
     private int mNativeContext; // accessed by native methods
 
+    /**
+     * Constructor. Constructs a SoundPool object with the following
+     * characteristics:
+     *
+     * @param maxStreams the maximum number of simultaneous streams for this
+     *                   SoundPool object
+     * @param streamType the audio stream type as described in AudioManager 
+     *                   For example, game applications will normally use
+     *                   {@link AudioManager#STREAM_MUSIC}.
+     * @param srcQuality the sample-rate converter quality. Currently has no
+     *                   effect. Use 0 for the default.
+     * @return a SoundPool object, or null if creation failed
+     */
     public SoundPool(int maxStreams, int streamType, int srcQuality) {
         native_setup(new WeakReference<SoundPool>(this), maxStreams, streamType, srcQuality);
     }
 
+    /**
+     * Load the sound from the specified path
+     * 
+     * @param path the path to the audio file
+     * @param priority the priority of the sound. Currently has no effect.
+     * @return a sound ID. This value can be used to play or unload the sound.
+     */
     public int load(String path, int priority)
     {
         // pass network streams to player
@@ -63,6 +132,20 @@ public class SoundPool
         return id;
     }
 
+    /**
+     * Load the sound from the specified APK resource
+     *
+     * <p>Note that the extension is dropped. For example, if you want to load
+     * a sound from the raw resource file "explosion.mp3", you would specify
+     * "R.raw.explosion" as the resource ID. Note that this means you cannot
+     * have both an "explosion.wav" and an "explosion.mp3" in the res/raw
+     * directory.</p>
+     * 
+     * @param context the application context
+     * @param resId the resource ID
+     * @param priority the priority of the sound. Currently has no effect.
+     * @return a sound ID. This value can be used to play or unload the sound.
+     */
     public int load(Context context, int resId, int priority) {
         AssetFileDescriptor afd = context.getResources().openRawResourceFd(resId);
         int id = 0;
@@ -78,6 +161,13 @@ public class SoundPool
         return id;
     }
 
+    /**
+     * Load the sound from an asset file descriptor
+     *
+     * @param afd an asset file descriptor
+     * @param priority the priority of the sound. Currently has no effect.
+     * @return a sound ID. This value can be used to play or unload the sound.
+     */
     public int load(AssetFileDescriptor afd, int priority) {
         if (afd != null) {
             long len = afd.getLength();
@@ -90,6 +180,19 @@ public class SoundPool
         }
     }
 
+    /**
+     * Load the sound from a FileDescriptor
+     *
+     * <p>This version is useful if you store multiple sounds in a single
+     * binary. The offset specifies the offset from the start of the file
+     * and the length specifies the length of the sound within the file.</p>
+     *
+     * @param fd a FileDescriptor object
+     * @param offset offset to the start of the sound
+     * @param length length of the sound
+     * @param priority the priority of the sound. Currently has no effect.
+     * @return a sound ID. This value can be used to play or unload the sound.
+     */
     public int load(FileDescriptor fd, long offset, long length, int priority) {
         return _load(fd, offset, length, priority);
     }
@@ -98,22 +201,107 @@ public class SoundPool
 
     private native final int _load(FileDescriptor fd, long offset, long length, int priority);
 
+    /**
+     * Unload a sound from a sound ID
+     *
+     * <p>Unloads the sound specified by the soundID. This is the value
+     * returned by the load() function. Returns true if the sound is
+     * successfully unloaded, false if the sound was already unloaded.</p>
+     *
+     * @param soundID a soundID returned by the load() function
+     * @return true if just unloaded, false if previously unloaded
+     */
     public native final boolean unload(int soundID);
 
+    /**
+     * Play a sound from a sound ID
+     *
+     * <p>Play the sound specified by the soundID. This is the value 
+     * returned by the load() function. Returns a non-zero streamID
+     * if successful, zero if it fails. The streamID can be used to
+     * further control playback. Note that calling play() may cause
+     * another sound to stop playing if the maximum number of active
+     * streams is exceeded.</p>
+     *
+     * @param soundID a soundID returned by the load() function
+     * @return non-zero streamID if successful, zero if failed
+     */
     public native final int play(int soundID, float leftVolume, float rightVolume,
             int priority, int loop, float rate);
 
+    /**
+     * Pause a playback stream
+     *
+     * <p>Pause the stream specified by the streamID. This is the
+     * value returned by the play() function. If the stream is
+     * playing, it will be paused. If the stream is not playing
+     * (e.g. is stopped or was previously paused), calling this
+     * function will have no effect.</p>
+     *
+     * @param streamID a streamID returned by the play() function
+     */
     public native final void pause(int streamID);
 
+    /**
+     * Resume a playback stream
+     *
+     * <p>Resume the stream specified by the streamID. This
+     * is the value returned by the play() function. If the stream
+     * is paused, this will resume playback. If the stream was not
+     * previously paused, calling this function will have no effect.</p>
+     *
+     * @param streamID a streamID returned by the play() function
+     */
     public native final void resume(int streamID);
 
+    /**
+     * Stop a playback stream
+     *
+     * <p>Stop the stream specified by the streamID. This
+     * is the value returned by the play() function. If the stream
+     * is playing, it will be stopped. It also releases any native
+     * resources associated with this stream. If the stream is not
+     * playing, it will have no effect.</p>
+     *
+     * @param streamID a streamID returned by the play() function
+     */
     public native final void stop(int streamID);
 
+    /**
+     * Set stream volume
+     *
+     * <p>Sets the volume on the stream specified by the streamID.
+     * This is the value returned by the play() function. The
+     * value must be in the range of 0.0 to 1.0. If the stream does
+     * not exist, it will have no effect.</p>
+     *
+     * @param streamID a streamID returned by the play() function
+     * @param leftVolume left volume value (range = 0.0 to 1.0)
+     * @param rightVolume right volume value (range = 0.0 to 1.0)
+     */
     public native final void setVolume(int streamID,
             float leftVolume, float rightVolume);
 
+    /**
+     * Change stream priority
+     *
+     * <p>Change the priority of the stream specified by the streamID.
+     * This is the value returned by the play() function. Affects the
+     * order in which streams are re-used to play new sounds.
+     *
+     * @param streamID a streamID returned by the play() function
+     */
     public native final void setPriority(int streamID, int priority);
 
+    /**
+     * Change stream priority
+     *
+     * <p>Change the priority of the stream specified by the streamID.
+     * This is the value returned by the play() function. Affects the
+     * order in which streams are re-used to play new sounds.
+     *
+     * @param streamID a streamID returned by the play() function
+     */
     public native final void setLoop(int streamID, int loop);
 
     public native final void setRate(int streamID, float rate);
