@@ -138,8 +138,7 @@ private:
             const sp<SurfaceComposerClient>& client,
             const sp<ISurface>& surface,
             const ISurfaceFlingerClient::surface_data_t& data,
-            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
-            bool owner = true);
+            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags);
 
     ~SurfaceControl();
 
@@ -152,7 +151,6 @@ private:
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
-    const bool                  mOwner;
     mutable Mutex               mLock;
     
     mutable sp<Surface>         mSurfaceData;
@@ -252,7 +250,6 @@ private:
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
-    const bool                  mOwner;
     mutable Region              mDirtyRegion;
     mutable Rect                mSwapRectangle;
     mutable uint8_t             mBackbufferIndex;

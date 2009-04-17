@@ -152,13 +152,13 @@ SurfaceControl::SurfaceControl(
         const sp<SurfaceComposerClient>& client, 
         const sp<ISurface>& surface,
         const ISurfaceFlingerClient::surface_data_t& data,
-        uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
-        bool owner)
+        uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
     : mClient(client), mSurface(surface),
       mToken(data.token), mIdentity(data.identity),
-      mFormat(format), mFlags(flags), mOwner(owner)
+      mFormat(format), mFlags(flags)
 {
 }
+        
 SurfaceControl::~SurfaceControl()
 {
     destroy();
@@ -166,10 +166,7 @@ SurfaceControl::~SurfaceControl()
 
 void SurfaceControl::destroy()
 {
-    // Destroy the surface in SurfaceFlinger if we were the owner
-    // (in any case, a client won't be able to, because it won't have the
-    // right permission).
-    if (mOwner && mToken>=0 && mClient!=0) {
+    if (isValid()) {
         mClient->destroySurface(mToken);
     }
 
@@ -351,14 +348,12 @@ sp<Surface> SurfaceControl::getSurface() const
 Surface::Surface(const sp<SurfaceControl>& surface)
     : mClient(surface->mClient), mSurface(surface->mSurface),
       mToken(surface->mToken), mIdentity(surface->mIdentity),
-      mFormat(surface->mFormat), mFlags(surface->mFlags),
-      mOwner(surface->mOwner)
+      mFormat(surface->mFormat), mFlags(surface->mFlags)
 {
     init();
 }
 
 Surface::Surface(const Parcel& parcel)
-    : mOwner(false)
 {
     sp<IBinder> clientBinder = parcel.readStrongBinder();
     mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());

@@ -145,8 +145,27 @@ static void setSurfaceControl(JNIEnv* env, jobject clazz,
 
 static sp<Surface> getSurface(JNIEnv* env, jobject clazz)
 {
-    Surface* const p = (Surface*)env->GetIntField(clazz, so.surface);
-    return sp<Surface>(p);
+    sp<Surface> result((Surface*)env->GetIntField(clazz, so.surface));
+    if (result == 0) {
+        /*
+         * if this method is called from the WindowManager's process, it means
+         * the client is is not remote, and therefore is allowed to have
+         * a Surface (data), so we create it here. 
+         * If we don't have a SurfaceControl, it means we're in a different
+         * process.
+         */
+        
+        SurfaceControl* const control = 
+            (SurfaceControl*)env->GetIntField(clazz, so.surfaceControl);
+        if (control) {
+            result = control->getSurface();
+            if (result != 0) {
+                result->incStrong(clazz);
+                env->SetIntField(clazz, so.surface, (int)result.get());
+            }
+        }
+    }
+    return result;
 }
 
 static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
@@ -510,7 +529,6 @@ static void Surface_copyFrom(
      * This is used by the WindowManagerService just after constructing
      * a Surface and is necessary for returning the Surface reference to
      * the caller. At this point, we should only have a SurfaceControl.
-     * 
      */
     
     const sp<SurfaceControl>& surface = getSurfaceControl(env, clazz);
@@ -519,7 +537,6 @@ static void Surface_copyFrom(
         // we reassign the surface only if it's a different one
         // otherwise we would loose our client-side state.
         setSurfaceControl(env, clazz, rhs);
-        setSurface(env, clazz, rhs->getSurface());
     }
 }
 
