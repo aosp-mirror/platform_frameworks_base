@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.IGpsStatusListener;
-import android.location.ILocationCollector;
 import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -207,8 +206,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
     // current setting - 5 minutes
     private static final long RETRY_INTERVAL = 5*60*1000; 
 
-    private ILocationCollector mCollector;
-
     private class TelephonyBroadcastReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -270,10 +267,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
         } catch (IOException e) {
             Log.w(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
         }
-    }
-
-    public void setLocationCollector(ILocationCollector collector) {
-        mCollector = collector;
     }
 
     /**
@@ -729,16 +722,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
             }
 
             reportLocationChanged(mLocation);
-
-            // Send to collector
-            if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG
-                    && mCollector != null) {
-                try {
-                    mCollector.updateLocation(mLocation);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "mCollector.updateLocation failed");
-                }
-            }
         }
 
         if (mStarted && mStatus != AVAILABLE) {

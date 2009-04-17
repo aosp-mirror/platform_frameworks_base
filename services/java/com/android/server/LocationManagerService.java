@@ -126,7 +126,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private final Context mContext;
     private GpsLocationProvider mGpsLocationProvider;
-    private boolean mGpsNavigating;
     private LocationProviderProxy mNetworkLocationProvider;
     private IGeocodeProvider mGeocodeProvider;
     private LocationWorkerHandler mLocationHandler;
@@ -600,12 +599,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 "Installing location collectors outside of the system is not supported");
         }
 
-        synchronized (mLock) {
-            mCollector = collector;
-            if (mGpsLocationProvider != null) {
-                mGpsLocationProvider.setLocationCollector(mCollector);
-            }
-        }
+        mCollector = collector;
     }
 
     public void setGeocodeProvider(IGeocodeProvider provider) {
@@ -805,9 +799,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         } else {
             p.enableLocationTracking(false);
-            if (p == mGpsLocationProvider) {
-                mGpsNavigating = false;
-            }
             p.disable();
             updateWakelockStatusLocked(mScreenOn);
         }
@@ -1612,6 +1603,16 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                     synchronized (mLock) {
                         Location location = (Location) msg.obj;
+
+                        if (mCollector != null && 
+                                LocationManager.GPS_PROVIDER.equals(location.getProvider())) {
+                            try {
+                                mCollector.updateLocation(location);
+                            } catch (RemoteException e) {
+                                Log.w(TAG, "mCollector.updateLocation failed");
+                            }
+                        }
+
                         String provider = location.getProvider();
                         if (!isAllowedBySettingsLocked(provider)) {
                             return;
@@ -1767,10 +1768,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     false);
 
                 synchronized (mLock) {
-                    if (enabled) {
-                        mGpsNavigating = true;
-                    } else {
-                        mGpsNavigating = false;
+                    if (!enabled) {
                         // When GPS is disabled, we are OK to release wake-lock
                         mWakeLockGpsReceived = true;
                     }
@@ -1798,12 +1796,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mGpsLocationProvider != null && mGpsLocationProvider.isLocationTracking()) {
             needsLock = true;
             minTime = Math.min(mGpsLocationProvider.getMinTime(), minTime);
-            if (screenOn) {
-                startGpsLocked();
-            } else if (mScreenOn && !screenOn) {
-                // We just turned the screen off so stop navigating
-                stopGpsLocked();
-            }
         }
 
         mScreenOn = screenOn;
@@ -1869,9 +1861,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         mWakeLockAcquireTime = SystemClock.elapsedRealtime();
         log("Acquired wakelock");
 
-        // Start the gps provider
-        startGpsLocked();
-
         // Acquire cell lock
         if (mCellWakeLockAcquired) {
             // Lock is already acquired
@@ -1902,22 +1891,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    private void startGpsLocked() {
-        boolean gpsActive = (mGpsLocationProvider != null)
-                    && mGpsLocationProvider.isLocationTracking();
-        if (gpsActive) {
-            mGpsLocationProvider.startNavigating();
-        }
-    }
-
-    private void stopGpsLocked() {
-        boolean gpsActive = mGpsLocationProvider != null
-                    && mGpsLocationProvider.isLocationTracking();
-        if (gpsActive) {
-            mGpsLocationProvider.stopNavigating();
-        }
-    }
-
     private void releaseWakeLockLocked() {
         try {
             releaseWakeLockXLocked();
@@ -1936,11 +1909,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 wifiLock.release();
                 mWifiWakeLockAcquired = false;
             }
-        }
-
-        if (!mScreenOn) {
-            // Stop the gps
-            stopGpsLocked();
         }
 
         // Release cell lock
@@ -2140,7 +2108,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             pw.println("Current Location Manager state:");
             pw.println("  sProvidersLoaded=" + sProvidersLoaded);
             pw.println("  mGpsLocationProvider=" + mGpsLocationProvider);
-            pw.println("  mGpsNavigating=" + mGpsNavigating);
             pw.println("  mNetworkLocationProvider=" + mNetworkLocationProvider);
             pw.println("  mCollector=" + mCollector);
             pw.println("  mAlarmInterval=" + mAlarmInterval
