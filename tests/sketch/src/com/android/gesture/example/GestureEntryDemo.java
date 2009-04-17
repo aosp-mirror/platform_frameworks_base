@@ -71,7 +71,6 @@ public class GestureEntryDemo extends Activity {
         mResult = (Spinner) findViewById(R.id.spinner);
         mResult.setOnItemSelectedListener(new OnItemSelectedListener() {
 
-            @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // TODO Auto-generated method stub
                 // correct the recognition result by adding the new example
@@ -83,7 +82,6 @@ public class GestureEntryDemo extends Activity {
                 }
             }
   
-            @Override
             public void onNothingSelected(AdapterView<?> parent) {
               // TODO Auto-generated method stub
               
@@ -96,17 +94,14 @@ public class GestureEntryDemo extends Activity {
         mView.cacheGesture(false);
         mView.setFadingOut(false);
         mView.addGestureListener(new GestureListener() {
-            @Override
             public void onFinishGesture(GesturePad patch, MotionEvent event) {
                 // TODO Auto-generated method stub
                 recognize(patch.getCurrentGesture());
             }
-            @Override
             public void onGesture(GesturePad patch, MotionEvent event) {
               // TODO Auto-generated method stub
               
             }
-            @Override
             public void onStartGesture(GesturePad patch, MotionEvent event) {
               // TODO Auto-generated method stub
               

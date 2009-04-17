@@ -87,7 +87,6 @@ public class GestureLibViewer  extends Activity {
         }
         
         mResult.setOnItemSelectedListener(new OnItemSelectedListener() {
-            @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // TODO Auto-generated method stub
                 mSamples = mRecognizer.getGestures(
@@ -103,7 +102,6 @@ public class GestureLibViewer  extends Activity {
                 mView.invalidate();
             }
   
-            @Override
             public void onNothingSelected(AdapterView<?> parent) {
               // TODO Auto-generated method stub
               
@@ -113,7 +111,6 @@ public class GestureLibViewer  extends Activity {
         
         Button remove = (Button)this.findViewById(R.id.remove);
         remove.setOnClickListener(new OnClickListener() {
-            @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 if (mSamples.isEmpty())
@@ -154,7 +151,6 @@ public class GestureLibViewer  extends Activity {
         
         Button next = (Button)this.findViewById(R.id.next);
         next.setOnClickListener(new OnClickListener() {
-            @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 if (mCurrentGestureIndex >= mSamples.size()-1)
@@ -172,7 +168,6 @@ public class GestureLibViewer  extends Activity {
 
         Button previous = (Button)this.findViewById(R.id.previous);
         previous.setOnClickListener(new OnClickListener() {
-            @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 if (mCurrentGestureIndex >= 1 &&

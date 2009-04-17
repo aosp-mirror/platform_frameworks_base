@@ -66,7 +66,6 @@ public class NearestNeighbor extends Classifier {
     
         
         Collections.sort(list, new Comparator<Prediction>() {
-            @Override
             public int compare(Prediction object1, Prediction object2) {
                 // TODO Auto-generated method stub
                 double score1 = object1.score;
