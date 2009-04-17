@@ -34,8 +34,7 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-template<class BufferAllocator> Mutex Singleton<BufferAllocator>::sLock; 
-template<> BufferAllocator* Singleton<BufferAllocator>::sInstance(0); 
+ANDROID_SINGLETON_STATIC_INSTANCE( BufferAllocator )
 
 Mutex BufferAllocator::sLock;
 KeyedVector<buffer_handle_t, BufferAllocator::alloc_rec_t> BufferAllocator::sAllocList;

@@ -50,8 +50,7 @@ namespace android {
 //  SurfaceBuffer
 // ============================================================================
 
-template<class SurfaceBuffer> Mutex Singleton<SurfaceBuffer>::sLock; 
-template<> SurfaceBuffer* Singleton<SurfaceBuffer>::sInstance(0); 
+ANDROID_SINGLETON_STATIC_INSTANCE( SurfaceBuffer )
 
 SurfaceBuffer::SurfaceBuffer() 
     : BASE(), handle(0), mOwner(false)

@@ -49,6 +49,18 @@ private:
     static TYPE* sInstance;
 };
 
+/*
+ * use ANDROID_SINGLETON_STATIC_INSTANCE(TYPE) in your implementation file
+ * (eg: <TYPE>.cpp) to create the static instance of Singleton<>'s attributes,
+ * and avoid to have a copy of them in each compilation units Singleton<TYPE>
+ * is used.
+ */
+
+#define ANDROID_SINGLETON_STATIC_INSTANCE(TYPE)             \
+    template< class TYPE > Mutex Singleton< TYPE >::sLock;  \
+    template<> TYPE* Singleton< TYPE >::sInstance(0);
+
+
 // ---------------------------------------------------------------------------
 }; // namespace android
 

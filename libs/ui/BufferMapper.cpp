@@ -44,8 +44,7 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-template<class BufferMapper> Mutex Singleton<BufferMapper>::sLock; 
-template<> BufferMapper* Singleton<BufferMapper>::sInstance(0); 
+ANDROID_SINGLETON_STATIC_INSTANCE( BufferMapper )
 
 BufferMapper::BufferMapper()
     : mAllocMod(0)
