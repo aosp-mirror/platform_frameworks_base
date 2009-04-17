@@ -1,5 +1,5 @@
 **
-** Copyright 2006, The Android Open Source Project
+** Copyright 2009, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -44,7 +44,7 @@ static jfieldID elementSizeShiftID;
 
 /* Cache method IDs each time the class is loaded. */
 
-void
+static void
 nativeClassInitBuffer(JNIEnv *_env)
 {
     jclass nioAccessClassLocal = _env->FindClass("java/nio/NIOAccess");

@@ -330,6 +330,8 @@ final class WebViewCore {
             String currentText, int keyCode, int keyValue, boolean down,
             boolean cap, boolean fn, boolean sym);
 
+    private native void nativeSetFocusControllerActive(boolean active);
+
     private native void nativeSaveDocumentState(int frame);
 
     private native void nativeSetFinalFocus(int framePtr, int nodePtr, int x,
@@ -596,6 +598,10 @@ final class WebViewCore {
         // message used to pass UI touch events to WebCore
         static final int TOUCH_EVENT = 141;
 
+        // Used to tell the focus controller whether to draw the blinking cursor
+        // or not, based on whether the WebView has focus.
+        static final int SET_ACTIVE = 142;
+
         // Network-based messaging
         static final int CLEAR_SSL_PREF_TABLE = 150;
 
@@ -644,7 +650,7 @@ final class WebViewCore {
                 public void handleMessage(Message msg) {
                     if (LOGV_ENABLED) {
                         Log.v(LOGTAG, msg.what < LOAD_URL || msg.what 
-                                > TOUCH_EVENT ? Integer.toString(msg.what)
+                                > SET_ACTIVE ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what - LOAD_URL]);
                     }
                     switch (msg.what) {
@@ -865,6 +871,10 @@ final class WebViewCore {
                                             ted.mY) ? 1 : 0).sendToTarget();
                             break;
                         }
+
+                        case SET_ACTIVE:
+                            nativeSetFocusControllerActive(msg.arg1 == 1);
+                            break;
 
                         case ADD_JS_INTERFACE:
                             HashMap map = (HashMap) msg.obj;

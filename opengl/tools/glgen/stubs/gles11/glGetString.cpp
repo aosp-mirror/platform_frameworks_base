@@ -1,6 +1,7 @@
 #include <string.h>
 
 /* const GLubyte * glGetString ( GLenum name ) */
+static
 jstring
 android_glGetString
   (JNIEnv *_env, jobject _this, jint name) {

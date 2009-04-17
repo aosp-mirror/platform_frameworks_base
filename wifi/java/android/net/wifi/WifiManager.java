@@ -226,23 +226,21 @@ public class WifiManager {
     public static final String ACTION_PICK_WIFI_NETWORK = "android.net.wifi.PICK_WIFI_NETWORK";
 
     /**
-     * In this mode, Wi-Fi will be kept active,
+     * In this Wi-Fi lock mode, Wi-Fi will be kept active,
      * and will behave normally, i.e., it will attempt to automatically
      * establish a connection to a remembered access point that is
      * within range, and will do periodic scans if there are remembered
      * access points but none are in range.
-     * @hide pending API council review
      */
     public static final int WIFI_MODE_FULL = 1;
     /**
-     * In this mode, Wi-Fi will be kept active,
+     * In this Wi-Fi lock mode, Wi-Fi will be kept active,
      * but the only operation that will be supported is initiation of
      * scans, and the subsequent reporting of scan results. No attempts
      * will be made to automatically connect to remembered access points,
      * nor will periodic scans be automatically performed looking for
      * remembered access points. Scans must be explicitly requested by
      * an application in this mode.
-     * @hide pending API council review
      */
     public static final int WIFI_MODE_SCAN_ONLY = 2;
 
@@ -805,8 +803,6 @@ public class WifiManager {
      * @return a new, unacquired WifiLock with the given tag.
      *
      * @see WifiLock
-     *
-     * @hide pending API council review
      */
     public WifiLock createWifiLock(int lockType, String tag) {
         return new WifiLock(lockType, tag);

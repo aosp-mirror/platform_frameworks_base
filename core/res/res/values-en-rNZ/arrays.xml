@@ -21,12 +21,12 @@
 
     <!-- Do not translate. -->
     <integer-array name="maps_starting_lat_lng">
-        <item>-41286480</item>
-        <item>174776217</item>
+        <item>-41283333</item>
+        <item>174766667</item>
     </integer-array>
     <!-- Do not translate. -->
     <integer-array name="maps_starting_zoom">
-        <item>4</item>
+        <item>5</item>
     </integer-array>
 
 </resources>

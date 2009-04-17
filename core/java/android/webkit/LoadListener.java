@@ -314,14 +314,14 @@ class LoadListener extends Handler implements EventHandler {
 
             // If we have one of "generic" MIME types, try to deduce
             // the right MIME type from the file extension (if any):
-            if (mMimeType.equalsIgnoreCase("text/plain") ||
-                    mMimeType.equalsIgnoreCase("application/octet-stream")) {
+            if (mMimeType.equals("text/plain") ||
+                    mMimeType.equals("application/octet-stream")) {
 
                 String newMimeType = guessMimeTypeFromExtension();
                 if (newMimeType != null) {
                     mMimeType = newMimeType;
                 }
-            } else if (mMimeType.equalsIgnoreCase("text/vnd.wap.wml")) {
+            } else if (mMimeType.equals("text/vnd.wap.wml")) {
                 // As we don't support wml, render it as plain text
                 mMimeType = "text/plain";
             } else {
@@ -329,7 +329,7 @@ class LoadListener extends Handler implements EventHandler {
                 // text/html, treat application/xhtml+xml as text/html.
                 // It seems that xhtml+xml and vnd.wap.xhtml+xml mime
                 // subtypes are used interchangeably. So treat them the same.
-                if (mMimeType.equalsIgnoreCase("application/xhtml+xml") ||
+                if (mMimeType.equals("application/xhtml+xml") ||
                         mMimeType.equals("application/vnd.wap.xhtml+xml")) {
                     mMimeType = "text/html";
                 }
@@ -525,7 +525,7 @@ class LoadListener extends Handler implements EventHandler {
         // Note: It's fine that we only decode base64 here and not in the other
         // data call because the only caller of the stream version is not
         // base64 encoded.
-        if ("base64".equalsIgnoreCase(mTransferEncoding)) {
+        if ("base64".equals(mTransferEncoding)) {
             if (length < data.length) {
                 byte[] trimmedData = new byte[length];
                 System.arraycopy(data, 0, trimmedData, 0, length);
@@ -1224,13 +1224,14 @@ class LoadListener extends Handler implements EventHandler {
                     mEncoding = contentType.substring(i + 1);
                 }
                 // Trim excess whitespace.
-                mEncoding = mEncoding.trim();
+                mEncoding = mEncoding.trim().toLowerCase();
 
                 if (i < contentType.length() - 1) {
                     // for data: uri the mimeType and encoding have
                     // the form image/jpeg;base64 or text/plain;charset=utf-8
                     // or text/html;charset=utf-8;base64
-                    mTransferEncoding = contentType.substring(i + 1).trim();
+                    mTransferEncoding =
+                            contentType.substring(i + 1).trim().toLowerCase();
                 }
             } else {
                 mMimeType = contentType;
@@ -1250,6 +1251,8 @@ class LoadListener extends Handler implements EventHandler {
                 guessMimeType();
             }
         }
+        // Ensure mMimeType is lower case.
+        mMimeType = mMimeType.toLowerCase();
     }
 
     /**
@@ -1380,7 +1383,7 @@ class LoadListener extends Handler implements EventHandler {
             mMimeType = "text/html";
             String newMimeType = guessMimeTypeFromExtension();
             if (newMimeType != null) {
-                mMimeType =  newMimeType;
+                mMimeType = newMimeType;
             }
         }
     }
