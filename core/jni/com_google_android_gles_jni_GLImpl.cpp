@@ -45,7 +45,7 @@ static jfieldID elementSizeShiftID;
 
 /* Cache method IDs each time the class is loaded. */
 
-void
+static void
 nativeClassInitBuffer(JNIEnv *_env)
 {
     jclass nioAccessClassLocal = _env->FindClass("java/nio/NIOAccess");
@@ -1654,6 +1654,7 @@ exit:
 #include <string.h>
 
 /* const GLubyte * glGetString ( GLenum name ) */
+static
 jstring
 android_glGetString
   (JNIEnv *_env, jobject _this, jint name) {

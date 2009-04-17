@@ -1,19 +1,21 @@
 #!/bin/bash
 set -u
+set -e
 rm -rf out generated
 
 mkdir out
 mkdir -p out/javax/microedition/khronos/opengles
 mkdir -p out/com/google/android/gles_jni
 mkdir -p out/android/graphics
+mkdir -p out/android/opengl
 
 echo "package android.graphics;" > out/android/graphics/Canvas.java
 echo "public interface Canvas {}" >> out/android/graphics/Canvas.java
 
 GLFILE=out/javax/microedition/khronos/opengles/GL.java
-cp stubs/GLHeader.java-if $GLFILE
+cp stubs/jsr239/GLHeader.java-if $GLFILE
 
-GLGEN_FILES="CFunc.java CType.java CodeEmitter.java GenerateGL.java JFunc.java JniCodeEmitter.java JType.java Jsr239CodeEmitter.java ParameterChecker.java"
+GLGEN_FILES="CFunc.java CType.java CodeEmitter.java GenerateGL.java GenerateGLES.java GLESCodeEmitter.java JFunc.java JniCodeEmitter.java JType.java Jsr239CodeEmitter.java ParameterChecker.java"
 
 pushd src > /dev/null
 javac ${GLGEN_FILES}
@@ -23,13 +25,34 @@ if [ $JAVAC_RESULT -ne 0 ]; then
     exit $JAVAC_RESULT
 fi
 popd > /dev/null
-java -classpath src GenerateGL -c glspec-1.0 glspec-1.0ext glspec-1.1 glspec-1.1ext glspec-1.1extpack glspec-checks
+
+echo "Generating JSR239-like APIs"
+java -classpath src GenerateGL -c specs/jsr239/glspec-1.0 specs/jsr239/glspec-1.0ext specs/jsr239/glspec-1.1 specs/jsr239/glspec-1.1ext specs/jsr239/glspec-1.1extpack specs/jsr239/glspec-checks
+JAVA_RESULT=$?
+if [ $JAVA_RESULT -ne 0 ]; then
+    echo "Could not run GenerateGL."
+    exit $JAVA_RESULT
+fi
+
+echo "Generating static OpenGLES 1.1 bindings"
+java -classpath src GenerateGLES
+JAVA_RESULT=$?
+if [ $JAVA_RESULT -ne 0 ]; then
+    echo "Could not run GenerateGLES."
+    exit $JAVA_RESULT
+fi
+
 rm src/*.class
 
 pushd out > /dev/null
 mkdir classes
-javac -d classes com/google/android/gles_jni/GLImpl.java javax/microedition/khronos/opengles/GL10.java javax/microedition/khronos/opengles/GL10Ext.java javax/microedition/khronos/opengles/GL11.java javax/microedition/khronos/opengles/GL11Ext.java javax/microedition/khronos/opengles/GL11ExtensionPack.java
+javac -d classes com/google/android/gles_jni/GLImpl.java javax/microedition/khronos/opengles/GL10.java javax/microedition/khronos/opengles/GL10Ext.java javax/microedition/khronos/opengles/GL11.java javax/microedition/khronos/opengles/GL11Ext.java javax/microedition/khronos/opengles/GL11ExtensionPack.java android/opengl/GLES10.java android/opengl/GLES10Ext.java android/opengl/GLES11.java android/opengl/GLES11Ext.java
 popd > /dev/null
+JAVA_RESULT=$?
+if [ $JAVA_RESULT -ne 0 ]; then
+    echo "Could not compile generated classes."
+    exit $JAVA_RESULT
+fi
 
 rm -rf generated
 mkdir -p generated/C
@@ -37,81 +60,44 @@ cp out/com_google_android_gles_jni_GLImpl.cpp generated/C
 cp -r out/com generated
 cp -r out/javax generated
 
+cp out/android_opengl_*.cpp generated/C
+mkdir -p generated/android/opengl
+cp -r out/android/opengl generated/android
+
 rm -rf out
 KEEP_GENERATED=0
+SAID_PLEASE=0
 
-# com_google_android_gles_jni_GLImpl.cpp
-if cmp ../../../../../frameworks/base/core/jni/com_google_android_gles_jni_GLImpl.cpp generated/C/com_google_android_gles_jni_GLImpl.cpp ; then
-echo com_google_android_gles_jni_GLImpl.cpp unchanged
-else
-echo Please p4 edit ../../../../../frameworks/base/core/jni/com_google_android_gles_jni_GLImpl.cpp
-echo Please cp generated/C/com_google_android_gles_jni_GLImpl.cpp ../../../../../frameworks/base/core/jni
-KEEP_GENERATED=1
-fi
+# compareGenerated destDir generatedDir file
+compareGenerated() {
+    if cmp -s $1/$3 $2/$3 ; then
+        echo "#    " $3 unchanged
+    else
+        if [ $SAID_PLEASE == "0" ] ; then
+            echo Please evaluate the following commands:
+            echo
+            SAID_PLEASE=1
+        fi
+        echo "    " cp $2/$3 $1
+        echo "    " git add $1/$3
+        KEEP_GENERATED=1
+    fi
+}
 
-# GLImpl.java
-if cmp ../../java/com/google/android/gles_jni/GLImpl.java generated/com/google/android/gles_jni/GLImpl.java ; then
-echo GLImpl.java unchanged
-else
-echo Please edit ../../java/com/google/android/gles_jni/GLImpl.java
-echo Please cp generated/com/google/android/gles_jni/GLImpl.java ../../java/com/google/android/gles_jni
-KEEP_GENERATED=1
-fi
+compareGenerated ../../../core/jni generated/C com_google_android_gles_jni_GLImpl.cpp
+compareGenerated ../../java/com/google/android/gles_jni generated/com/google/android/gles_jni GLImpl.java
 
-# GL.java
-if cmp ../../java/javax/microedition/khronos/opengles/GL.java generated/javax/microedition/khronos/opengles/GL.java ; then
-echo GL.java unchanged
-else
-echo Please edit ../../java/javax/microedition/khronos/opengles/GL.java
-echo Please cp generated/javax/microedition/khronos/opengles/GL.java ../../java/javax/microedition/khronos/opengles/GL.java
-KEEP_GENERATED=1
-fi
+for x in GL.java GL10.java GL10Ext.java GL11.java GL11Ext.java GL11ExtensionPack.java
+do
+    compareGenerated ../../java/javax/microedition/khronos/opengles generated/javax/microedition/khronos/opengles $x
+done
 
-# GL10.java
-if cmp ../../java/javax/microedition/khronos/opengles/GL10.java generated/javax/microedition/khronos/opengles/GL10.java ; then
-echo GL10.java unchanged
-else
-echo Please edit ../../java/javax/microedition/khronos/opengles/GL10.java
-echo Please cp generated/javax/microedition/khronos/opengles/GL10.java ../../java/javax/microedition/khronos/opengles/GL10.java
-KEEP_GENERATED=1
-fi
-
-# GL10Ext.java
-if cmp ../../java/javax/microedition/khronos/opengles/GL10Ext.java generated/javax/microedition/khronos/opengles/GL10Ext.java ; then
-echo GL10Ext.java unchanged
-else
-echo Please edit ../../java/javax/microedition/khronos/opengles/GL10Ext.java
-echo Please cp generated/javax/microedition/khronos/opengles/GL10Ext.java ../../java/javax/microedition/khronos/opengles/GL10Ext.java
-KEEP_GENERATED=1
-fi
-
-# GL11.java
-if cmp ../../java/javax/microedition/khronos/opengles/GL11.java generated/javax/microedition/khronos/opengles/GL11.java ; then
-echo GL11.java unchanged
-else
-echo Please edit ../../java/javax/microedition/khronos/opengles/GL11.java
-echo Please cp generated/javax/microedition/khronos/opengles/GL11.java ../../java/javax/microedition/khronos/opengles/GL11.java
-KEEP_GENERATED=1
-fi
-
-# GL11Ext.java
-if cmp ../../java/javax/microedition/khronos/opengles/GL11Ext.java generated/javax/microedition/khronos/opengles/GL11Ext.java ; then
-echo GL11Ext.java unchanged
-else
-echo Please edit ../../java/javax/microedition/khronos/opengles/GL11Ext.java
-echo Please cp generated/javax/microedition/khronos/opengles/GL11Ext.java ../../java/javax/microedition/khronos/opengles/GL11Ext.java
-KEEP_GENERATED=1
-fi
-
-# GL11ExtensionPack.java
-if cmp ../../java/javax/microedition/khronos/opengles/GL11ExtensionPack.java generated/javax/microedition/khronos/opengles/GL11ExtensionPack.java ; then
-echo GL11ExtensionPack.java unchanged
-else
-echo Please edit ../../java/javax/microedition/khronos/opengles/GL11ExtensionPack.java
-echo Please cp generated/javax/microedition/khronos/opengles/GL11ExtensionPack.java ../../java/javax/microedition/khronos/opengles/GL11ExtensionPack.java
-KEEP_GENERATED=1
-fi
+for x in GLES10 GLES10Ext GLES11 GLES11Ext
+do
+    compareGenerated ../../java/android/opengl generated/android/opengl ${x}.java
+    compareGenerated ../../../core/jni generated/C android_opengl_${x}.cpp
+done
 
 if [ $KEEP_GENERATED == "0" ] ; then
-rm -rf generated
+    rm -rf generated
 fi

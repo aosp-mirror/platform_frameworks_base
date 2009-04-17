@@ -21,6 +21,10 @@ LOCAL_SRC_FILES:= \
 	CursorWindow.cpp \
 	com_google_android_gles_jni_EGLImpl.cpp \
 	com_google_android_gles_jni_GLImpl.cpp.arm \
+	android_opengl_GLES10.cpp \
+	android_opengl_GLES10Ext.cpp \
+	android_opengl_GLES11.cpp \
+	android_opengl_GLES11Ext.cpp \
 	android_database_CursorWindow.cpp \
 	android_database_SQLiteDebug.cpp \
 	android_database_SQLiteDatabase.cpp \

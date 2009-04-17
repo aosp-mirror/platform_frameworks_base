@@ -36,6 +36,8 @@ public class JType {
             new JType("java.nio.Buffer", true, false));
     typeMapping.put(new CType("void", false, true),
             new JType("java.nio.Buffer", true, false));
+    typeMapping.put(new CType("GLeglImageOES", false, false),
+            new JType("java.nio.Buffer", true, false));
 
     // Typed pointers map to typed Buffers
     typeMapping.put(new CType("GLboolean", false, true),

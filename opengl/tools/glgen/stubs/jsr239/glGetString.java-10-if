@@ -1,0 +1,4 @@
+    public String glGetString(
+        int name
+    );
+

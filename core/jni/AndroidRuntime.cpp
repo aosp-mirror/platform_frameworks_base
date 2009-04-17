@@ -66,6 +66,10 @@ extern int register_android_graphics_Typeface(JNIEnv* env);
 
 extern int register_com_google_android_gles_jni_EGLImpl(JNIEnv* env);
 extern int register_com_google_android_gles_jni_GLImpl(JNIEnv* env);
+extern int register_android_opengl_jni_GLES10(JNIEnv* env);
+extern int register_android_opengl_jni_GLES10Ext(JNIEnv* env);
+extern int register_android_opengl_jni_GLES11(JNIEnv* env);
+extern int register_android_opengl_jni_GLES11Ext(JNIEnv* env);
 
 extern int register_android_hardware_Camera(JNIEnv *env);
 
@@ -1042,6 +1046,10 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_ViewRoot),
     REG_JNI(register_com_google_android_gles_jni_EGLImpl),
     REG_JNI(register_com_google_android_gles_jni_GLImpl),
+    REG_JNI(register_android_opengl_jni_GLES10),
+    REG_JNI(register_android_opengl_jni_GLES10Ext),
+    REG_JNI(register_android_opengl_jni_GLES11),
+    REG_JNI(register_android_opengl_jni_GLES11Ext),
 
     REG_JNI(register_android_graphics_Bitmap),
     REG_JNI(register_android_graphics_BitmapFactory),
