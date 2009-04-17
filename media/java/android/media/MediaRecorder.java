@@ -219,6 +219,10 @@ public class MediaRecorder
      * Sets the format of the output file produced during recording. Call this
      * after setAudioSource()/setVideoSource() but before prepare().
      *
+     * <p>It is recommended to always use 3GP format when using the H.263
+     * video encoder and AMR audio encoder. Using an MPEG-4 container format
+     * may confuse some desktop players.</p>
+     *
      * @param output_format the output format to use. The output format
      * needs to be specified before setting recording-parameters or encoders.
      * @throws IllegalStateException if it is called after prepare() or before
