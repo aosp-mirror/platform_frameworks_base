@@ -8,7 +8,6 @@ LOCAL_SRC_FILES:= \
     BootAnimation.cpp \
     BlurFilter.cpp.arm \
     BufferAllocator.cpp \
-    CPUGauge.cpp \
     Layer.cpp \
     LayerBase.cpp \
     LayerBuffer.cpp \

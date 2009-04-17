@@ -75,13 +75,19 @@ private:
 };
 
 // ---------------------------------------------------------------------------
+class Surface;
 
 class SurfaceControl : public RefBase
 {
 public:
     static bool isValid(const sp<SurfaceControl>& surface) {
-        return (surface != 0) && surface->mToken>=0 && surface->mClient!=0;
+        return (surface != 0) && surface->isValid();
     }
+    bool isValid() {
+        return mToken>=0 && mClient!=0;
+    }
+    static bool isSameSurface(
+            const sp<SurfaceControl>& lhs, const sp<SurfaceControl>& rhs);
         
     SurfaceID   ID() const      { return mToken; }
     uint32_t    getFlags() const { return mFlags; }
@@ -90,10 +96,6 @@ public:
     // release surface data from java
     void        clear();
     
-    static sp<SurfaceControl>  readFromParcel(Parcel* parcel);
-    static status_t writeToParcel(const sp<SurfaceControl>& surface, Parcel* parcel);
-    static bool isSameSurface(const sp<SurfaceControl>& lhs, const sp<SurfaceControl>& rhs);
-
     status_t    setLayer(int32_t layer);
     status_t    setPosition(int32_t x, int32_t y);
     status_t    setSize(uint32_t w, uint32_t h);
@@ -107,7 +109,17 @@ public:
     status_t    setMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
     status_t    setFreezeTint(uint32_t tint);
 
+    static status_t writeSurfaceToParcel(
+            const sp<SurfaceControl>& control, Parcel* parcel);
+
+    sp<Surface> getSurface() const;
+
 private:
+    // can't be copied
+    SurfaceControl& operator = (SurfaceControl& rhs);
+    SurfaceControl(const SurfaceControl& rhs);
+
+    
     friend class SurfaceComposerClient;
 
     // camera and camcorder need access to the ISurface binder interface for preview
@@ -115,22 +127,22 @@ private:
     friend class MediaRecorder;
     // mediaplayer needs access to ISurface for display
     friend class MediaPlayer;
+    // for testing
     friend class Test;
     const sp<ISurface>& getISurface() const { return mSurface; }
     
-    // can't be copied
-    SurfaceControl& operator = (SurfaceControl& rhs);
-    SurfaceControl(const SurfaceControl& rhs);
 
     friend class Surface;
-    SurfaceControl(const sp<SurfaceComposerClient>& client,
+
+    SurfaceControl(
+            const sp<SurfaceComposerClient>& client,
             const sp<ISurface>& surface,
             const ISurfaceFlingerClient::surface_data_t& data,
             uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
             bool owner = true);
 
     ~SurfaceControl();
-    
+
     status_t validate(per_client_cblk_t const* cblk) const;
     void destroy();
     
@@ -142,6 +154,8 @@ private:
     uint32_t                    mFlags;
     const bool                  mOwner;
     mutable Mutex               mLock;
+    
+    mutable sp<Surface>         mSurfaceData;
 };
     
 // ---------------------------------------------------------------------------
@@ -160,45 +174,40 @@ public:
         uint32_t    reserved[2];
     };
 
-    static bool isValid(const sp<Surface>& surface) {
-        return (surface != 0) && surface->mToken>=0 && surface->mClient!=0;
-    }
-        
-    SurfaceID   ID() const      { return mToken; }
+    Surface(const Parcel& data);
 
-    // release surface data from java
-    void        clear();
+    static bool isValid(const sp<Surface>& surface) {
+        return (surface != 0) && surface->isValid();
+    }
+    bool isValid() {
+        return mToken>=0 && mClient!=0;
+    }
+    static bool isSameSurface(
+            const sp<Surface>& lhs, const sp<Surface>& rhs);
+    SurfaceID   ID() const      { return mToken; }
+    uint32_t    getFlags() const { return mFlags; }
+    uint32_t    getIdentity() const { return mIdentity; }
+
 
     status_t    lock(SurfaceInfo* info, bool blocking = true);
     status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
     status_t    unlockAndPost();
-    
-    uint32_t    getFlags() const { return mFlags; }
 
     // setSwapRectangle() is mainly used by EGL
     void        setSwapRectangle(const Rect& r);
     const Rect& swapRectangle() const;
 
-    static sp<Surface>  readFromParcel(Parcel* parcel);
-    static status_t     writeToParcel(const sp<Surface>& surface, Parcel* parcel);
-    static bool         isSameSurface(const sp<Surface>& lhs, const sp<Surface>& rhs);
-
-    status_t    setLayer(int32_t layer);
-    status_t    setPosition(int32_t x, int32_t y);
-    status_t    setSize(uint32_t w, uint32_t h);
-    status_t    hide();
-    status_t    show(int32_t layer = -1);
-    status_t    freeze();
-    status_t    unfreeze();
-    status_t    setFlags(uint32_t flags, uint32_t mask);
-    status_t    setTransparentRegionHint(const Region& transparent);
-    status_t    setAlpha(float alpha=1.0f);
-    status_t    setMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
-    status_t    setFreezeTint(uint32_t tint);
-
-    uint32_t    getIdentity() const { return mIdentity; }
 private:
+    // can't be copied
+    Surface& operator = (Surface& rhs);
+    Surface(const Surface& rhs);
+
+    Surface(const sp<SurfaceControl>& control);
+    void init();
+     ~Surface();
+  
     friend class SurfaceComposerClient;
+    friend class SurfaceControl;
 
     // camera and camcorder need access to the ISurface binder interface for preview
     friend class Camera;
@@ -210,22 +219,8 @@ private:
 
     status_t getBufferLocked(int index);
     
-    // can't be copied
-    Surface& operator = (Surface& rhs);
-    Surface(const Surface& rhs);
-
-    Surface(const sp<SurfaceComposerClient>& client,
-            const sp<ISurface>& surface,
-            const ISurfaceFlingerClient::surface_data_t& data,
-            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
-            bool owner = true);
-
-    Surface(Surface const* rhs);
-
-    ~Surface();
     
-    void destroy();
-
+    
     Region dirtyRegion() const;
     void setDirtyRegion(const Region& region) const;
 
@@ -262,8 +257,6 @@ private:
     mutable Rect                mSwapRectangle;
     mutable uint8_t             mBackbufferIndex;
     mutable Mutex               mSurfaceLock;
-    
-    sp<SurfaceControl>          mSurfaceControl;
 };
 
 }; // namespace android

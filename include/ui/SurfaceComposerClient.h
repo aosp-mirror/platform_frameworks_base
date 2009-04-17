@@ -62,7 +62,7 @@ public:
     // surface creation / destruction
 
     //! Create a surface
-    sp<Surface>   createSurface(
+    sp<SurfaceControl> createSurface(
             int pid,            //!< pid of the process the surfacec is for
             DisplayID display,  //!< Display to create this surface on
             uint32_t w,         //!< width in pixel

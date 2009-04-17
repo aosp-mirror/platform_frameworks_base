@@ -148,8 +148,8 @@ static void copyBlt(const android_native_buffer_t* dst,
 //  SurfaceControl
 // ============================================================================
 
-
-SurfaceControl::SurfaceControl(const sp<SurfaceComposerClient>& client, 
+SurfaceControl::SurfaceControl(
+        const sp<SurfaceComposerClient>& client, 
         const sp<ISurface>& surface,
         const ISurfaceFlingerClient::surface_data_t& data,
         uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
@@ -159,7 +159,6 @@ SurfaceControl::SurfaceControl(const sp<SurfaceComposerClient>& client,
       mFormat(format), mFlags(flags), mOwner(owner)
 {
 }
-
 SurfaceControl::~SurfaceControl()
 {
     destroy();
@@ -192,133 +191,6 @@ void SurfaceControl::clear()
     destroy();
 }
 
-status_t SurfaceControl::setLayer(int32_t layer) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->setLayer(mToken, layer);
-}
-status_t SurfaceControl::setPosition(int32_t x, int32_t y) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->setPosition(mToken, x, y);
-}
-status_t SurfaceControl::setSize(uint32_t w, uint32_t h) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->setSize(mToken, w, h);
-}
-status_t SurfaceControl::hide() {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->hide(mToken);
-}
-status_t SurfaceControl::show(int32_t layer) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->show(mToken, layer);
-}
-status_t SurfaceControl::freeze() {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->freeze(mToken);
-}
-status_t SurfaceControl::unfreeze() {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->unfreeze(mToken);
-}
-status_t SurfaceControl::setFlags(uint32_t flags, uint32_t mask) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->setFlags(mToken, flags, mask);
-}
-status_t SurfaceControl::setTransparentRegionHint(const Region& transparent) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->setTransparentRegionHint(mToken, transparent);
-}
-status_t SurfaceControl::setAlpha(float alpha) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->setAlpha(mToken, alpha);
-}
-status_t SurfaceControl::setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->setMatrix(mToken, dsdx, dtdx, dsdy, dtdy);
-}
-status_t SurfaceControl::setFreezeTint(uint32_t tint) {
-    const sp<SurfaceComposerClient>& client(mClient);
-    if (client == 0) return INVALID_OPERATION;
-    status_t err = validate(client->mControl);
-    if (err < 0) return err;
-    return client->setFreezeTint(mToken, tint);
-}
-
-sp<SurfaceControl> SurfaceControl::readFromParcel(Parcel* parcel)
-{
-    sp<SurfaceComposerClient> client;
-    ISurfaceFlingerClient::surface_data_t data;
-    sp<IBinder> clientBinder= parcel->readStrongBinder();
-    sp<ISurface> surface    = interface_cast<ISurface>(parcel->readStrongBinder());
-    data.token              = parcel->readInt32();
-    data.identity           = parcel->readInt32();
-    PixelFormat format      = parcel->readInt32();
-    uint32_t flags          = parcel->readInt32();
-
-    if (clientBinder != NULL)
-        client = SurfaceComposerClient::clientForConnection(clientBinder);
-
-    return new SurfaceControl(client, surface, data, 0, 0, format, flags, false);
-}
-
-status_t SurfaceControl::writeToParcel(const sp<SurfaceControl>& surface, Parcel* parcel)
-{
-    uint32_t flags=0;
-    uint32_t format=0;
-    SurfaceID token = -1;
-    uint32_t identity = 0;
-    sp<SurfaceComposerClient> client;
-    sp<ISurface> sur;
-    if (SurfaceControl::isValid(surface)) {
-        token = surface->mToken;
-        identity = surface->mIdentity;
-        client = surface->mClient;
-        sur = surface->mSurface;
-        format = surface->mFormat;
-        flags = surface->mFlags;
-    }
-    parcel->writeStrongBinder(client!=0  ? client->connection() : NULL);
-    parcel->writeStrongBinder(sur!=0     ? sur->asBinder()      : NULL);
-    parcel->writeInt32(token);
-    parcel->writeInt32(identity);
-    parcel->writeInt32(format);
-    parcel->writeInt32(flags);
-    return NO_ERROR;
-}
-
 bool SurfaceControl::isSameSurface(
         const sp<SurfaceControl>& lhs, const sp<SurfaceControl>& rhs) 
 {
@@ -327,6 +199,90 @@ bool SurfaceControl::isSameSurface(
     return lhs->mSurface->asBinder() == rhs->mSurface->asBinder();
 }
 
+status_t SurfaceControl::setLayer(int32_t layer) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setLayer(mToken, layer);
+}
+status_t SurfaceControl::setPosition(int32_t x, int32_t y) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setPosition(mToken, x, y);
+}
+status_t SurfaceControl::setSize(uint32_t w, uint32_t h) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setSize(mToken, w, h);
+}
+status_t SurfaceControl::hide() {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->hide(mToken);
+}
+status_t SurfaceControl::show(int32_t layer) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->show(mToken, layer);
+}
+status_t SurfaceControl::freeze() {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->freeze(mToken);
+}
+status_t SurfaceControl::unfreeze() {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->unfreeze(mToken);
+}
+status_t SurfaceControl::setFlags(uint32_t flags, uint32_t mask) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setFlags(mToken, flags, mask);
+}
+status_t SurfaceControl::setTransparentRegionHint(const Region& transparent) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setTransparentRegionHint(mToken, transparent);
+}
+status_t SurfaceControl::setAlpha(float alpha) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setAlpha(mToken, alpha);
+}
+status_t SurfaceControl::setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setMatrix(mToken, dsdx, dtdx, dsdy, dtdy);
+}
+status_t SurfaceControl::setFreezeTint(uint32_t tint) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setFreezeTint(mToken, tint);
+}
 
 status_t SurfaceControl::validate(per_client_cblk_t const* cblk) const
 {
@@ -353,22 +309,72 @@ status_t SurfaceControl::validate(per_client_cblk_t const* cblk) const
     return NO_ERROR;
 }
 
+status_t SurfaceControl::writeSurfaceToParcel(
+        const sp<SurfaceControl>& control, Parcel* parcel)
+{
+    uint32_t flags = 0;
+    uint32_t format = 0;
+    SurfaceID token = -1;
+    uint32_t identity = 0;
+    sp<SurfaceComposerClient> client;
+    sp<ISurface> sur;
+    if (SurfaceControl::isValid(control)) {
+        token    = control->mToken;
+        identity = control->mIdentity;
+        client   = control->mClient;
+        sur      = control->mSurface;
+        format   = control->mFormat;
+        flags    = control->mFlags;
+    }
+    parcel->writeStrongBinder(client!=0  ? client->connection() : NULL);
+    parcel->writeStrongBinder(sur!=0     ? sur->asBinder()      : NULL);
+    parcel->writeInt32(token);
+    parcel->writeInt32(identity);
+    parcel->writeInt32(format);
+    parcel->writeInt32(flags);
+    return NO_ERROR;
+}
+
+sp<Surface> SurfaceControl::getSurface() const
+{
+    Mutex::Autolock _l(mLock);
+    if (mSurfaceData == 0) {
+        mSurfaceData = new Surface(const_cast<SurfaceControl*>(this));
+    }
+    return mSurfaceData;
+}
+
 // ============================================================================
 //  Surface
 // ============================================================================
 
-Surface::Surface(const sp<SurfaceComposerClient>& client, 
-        const sp<ISurface>& surface,
-        const ISurfaceFlingerClient::surface_data_t& data,
-        uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
-        bool owner)
-    : mClient(client), mSurface(surface),
-      mToken(data.token), mIdentity(data.identity),
-      mFormat(format), mFlags(flags), mOwner(owner)
+Surface::Surface(const sp<SurfaceControl>& surface)
+    : mClient(surface->mClient), mSurface(surface->mSurface),
+      mToken(surface->mToken), mIdentity(surface->mIdentity),
+      mFormat(surface->mFormat), mFlags(surface->mFlags),
+      mOwner(surface->mOwner)
 {
-    mSurfaceControl = new SurfaceControl(
-            client, surface, data, w, h, format, flags, owner);
+    init();
+}
 
+Surface::Surface(const Parcel& parcel)
+    : mOwner(false)
+{
+    sp<IBinder> clientBinder = parcel.readStrongBinder();
+    mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
+    mToken      = parcel.readInt32();
+    mIdentity   = parcel.readInt32();
+    mFormat     = parcel.readInt32();
+    mFlags      = parcel.readInt32();
+
+    if (clientBinder != NULL)
+        mClient = SurfaceComposerClient::clientForConnection(clientBinder);
+
+    init();
+}
+
+void Surface::init()
+{
     android_native_window_t::connect          = connect;
     android_native_window_t::disconnect       = disconnect;
     android_native_window_t::setSwapInterval  = setSwapInterval;
@@ -389,6 +395,7 @@ Surface::Surface(const sp<SurfaceComposerClient>& client,
     const_cast<uint32_t&>(android_native_window_t::flags) = 0;
 }
 
+
 Surface::~Surface()
 {
     // this is a client-side operation, the surface is destroyed, unmap
@@ -399,23 +406,11 @@ Surface::~Surface()
         }
     }
 
-    destroy();
-}
-
-void Surface::destroy()
-{
-    mSurfaceControl->destroy();
-
     // clear all references and trigger an IPC now, to make sure things
     // happen without delay, since these resources are quite heavy.
     mClient.clear();
     mSurface.clear();
     IPCThreadState::self()->flushCommands();
-}
-
-void Surface::clear() 
-{
-    mSurfaceControl->clear();
 }
 
 status_t Surface::validate(per_client_cblk_t const* cblk) const
@@ -441,6 +436,15 @@ status_t Surface::validate(per_client_cblk_t const* cblk) const
         return NO_INIT;
     }
     return NO_ERROR;
+}
+
+
+bool Surface::isSameSurface(
+        const sp<Surface>& lhs, const sp<Surface>& rhs) 
+{
+    if (lhs == 0 || rhs == 0)
+        return false;
+    return lhs->mSurface->asBinder() == rhs->mSurface->asBinder();
 }
 
 // ----------------------------------------------------------------------------
@@ -681,55 +685,6 @@ void Surface::setSwapRectangle(const Rect& r) {
     mSwapRectangle = r;
 }
 
-sp<Surface> Surface::readFromParcel(Parcel* parcel)
-{
-    sp<SurfaceComposerClient> client;
-    ISurfaceFlingerClient::surface_data_t data;
-    sp<IBinder> clientBinder= parcel->readStrongBinder();
-    sp<ISurface> surface    = interface_cast<ISurface>(parcel->readStrongBinder());
-    data.token              = parcel->readInt32();
-    data.identity           = parcel->readInt32();
-    PixelFormat format      = parcel->readInt32();
-    uint32_t flags          = parcel->readInt32();
-
-    if (clientBinder != NULL)
-        client = SurfaceComposerClient::clientForConnection(clientBinder);
-
-    return new Surface(client, surface, data, 0, 0, format, flags, false);
-}
-
-status_t Surface::writeToParcel(const sp<Surface>& surface, Parcel* parcel)
-{
-    uint32_t flags=0;
-    uint32_t format=0;
-    SurfaceID token = -1;
-    uint32_t identity = 0;
-    sp<SurfaceComposerClient> client;
-    sp<ISurface> sur;
-    if (Surface::isValid(surface)) {
-        token = surface->mToken;
-        identity = surface->mIdentity;
-        client = surface->mClient;
-        sur = surface->mSurface;
-        format = surface->mFormat;
-        flags = surface->mFlags;
-    }
-    parcel->writeStrongBinder(client!=0  ? client->connection() : NULL);
-    parcel->writeStrongBinder(sur!=0     ? sur->asBinder()      : NULL);
-    parcel->writeInt32(token);
-    parcel->writeInt32(identity);
-    parcel->writeInt32(format);
-    parcel->writeInt32(flags);
-    return NO_ERROR;
-}
-
-bool Surface::isSameSurface(const sp<Surface>& lhs, const sp<Surface>& rhs) 
-{
-    if (lhs == 0 || rhs == 0)
-        return false;
-    return lhs->mSurface->asBinder() == rhs->mSurface->asBinder();
-}
-
 status_t Surface::getBufferLocked(int index)
 {
     status_t err = NO_MEMORY;
@@ -749,46 +704,6 @@ status_t Surface::getBufferLocked(int index)
     }
     return err; 
 }
-
-
-
-status_t Surface::setLayer(int32_t layer) {
-    return mSurfaceControl->setLayer(layer);
-}
-status_t Surface::setPosition(int32_t x, int32_t y) {
-    return mSurfaceControl->setPosition(x, y);
-}
-status_t Surface::setSize(uint32_t w, uint32_t h) {
-    return mSurfaceControl->setSize(w, h);
-}
-status_t Surface::hide() {
-    return mSurfaceControl->hide();
-}
-status_t Surface::show(int32_t layer) {
-    return mSurfaceControl->show(layer);
-}
-status_t Surface::freeze() {
-    return mSurfaceControl->freeze();
-}
-status_t Surface::unfreeze() {
-    return mSurfaceControl->unfreeze();
-}
-status_t Surface::setFlags(uint32_t flags, uint32_t mask) {
-    return mSurfaceControl->setFlags(flags, mask);
-}
-status_t Surface::setTransparentRegionHint(const Region& transparent) {
-    return mSurfaceControl->setTransparentRegionHint(transparent);
-}
-status_t Surface::setAlpha(float alpha) {
-    return mSurfaceControl->setAlpha(alpha);
-}
-status_t Surface::setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
-    return mSurfaceControl->setMatrix(dsdx, dtdx, dsdy, dtdy);
-}
-status_t Surface::setFreezeTint(uint32_t tint) {
-    return mSurfaceControl->setFreezeTint(tint);
-}
-
 
 }; // namespace android
 

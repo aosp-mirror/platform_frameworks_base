@@ -458,7 +458,7 @@ void SurfaceComposerClient::signalServer()
     mSignalServer->signal();
 }
 
-sp<Surface> SurfaceComposerClient::createSurface(
+sp<SurfaceControl> SurfaceComposerClient::createSurface(
         int pid,
         DisplayID display,
         uint32_t w,
@@ -466,14 +466,14 @@ sp<Surface> SurfaceComposerClient::createSurface(
         PixelFormat format,
         uint32_t flags)
 {
-    sp<Surface> result;
+    sp<SurfaceControl> result;
     if (mStatus == NO_ERROR) {
         ISurfaceFlingerClient::surface_data_t data;
         sp<ISurface> surface = mClient->createSurface(&data, pid,
                 display, w, h, format, flags);
         if (surface != 0) {
             if (uint32_t(data.token) < NUM_LAYERS_MAX) {
-                result = new Surface(this, surface, data, w, h, format, flags);
+                result = new SurfaceControl(this, surface, data, w, h, format, flags);
             }
         }
     }

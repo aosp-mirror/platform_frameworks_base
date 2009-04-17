@@ -45,7 +45,6 @@
 
 #include "clz.h"
 #include "BufferAllocator.h"
-#include "CPUGauge.h"
 #include "Layer.h"
 #include "LayerBlur.h"
 #include "LayerBuffer.h"
@@ -179,7 +178,6 @@ SurfaceFlinger::SurfaceFlinger()
         mFreezeCount(0),
         mFreezeDisplayTime(0),
         mDebugRegion(0),
-        mDebugCpu(0),
         mDebugFps(0),
         mDebugBackground(0),
         mDebugNoBootAnimation(0),
@@ -199,8 +197,6 @@ void SurfaceFlinger::init()
     char value[PROPERTY_VALUE_MAX];
     property_get("debug.sf.showupdates", value, "0");
     mDebugRegion = atoi(value);
-    property_get("debug.sf.showcpu", value, "0");
-    mDebugCpu = atoi(value);
     property_get("debug.sf.showbackground", value, "0");
     mDebugBackground = atoi(value);
     property_get("debug.sf.showfps", value, "0");
@@ -209,7 +205,6 @@ void SurfaceFlinger::init()
     mDebugNoBootAnimation = atoi(value);
 
     LOGI_IF(mDebugRegion,           "showupdates enabled");
-    LOGI_IF(mDebugCpu,              "showcpu enabled");
     LOGI_IF(mDebugBackground,       "showbackground enabled");
     LOGI_IF(mDebugFps,              "showfps enabled");
     LOGI_IF(mDebugNoBootAnimation,  "boot animation disabled");
@@ -413,10 +408,6 @@ status_t SurfaceFlinger::readyToRun()
 
     mOrientationAnimation = new OrientationAnimation(this);
     
-    // start CPU gauge display
-    if (mDebugCpu)
-        mCpuGauge = new CPUGauge(this, ms2ns(500));
-
     // the boot animation!
     if (mDebugNoBootAnimation == false)
         mBootAnimation = new BootAnimation(this);
@@ -508,11 +499,6 @@ bool SurfaceFlinger::threadLoop()
         // release the clients before we flip ('cause flip might block)
         unlockClients();
         executeScheduledBroadcasts();
-
-        // sample the cpu gauge
-        if (UNLIKELY(mDebugCpu)) {
-            handleDebugCpu();
-        }
 
         postFramebuffer();
     } else {
@@ -903,13 +889,6 @@ void SurfaceFlinger::executeScheduledBroadcasts()
         }
     }
     mLastScheduledBroadcast = 0;
-}
-
-void SurfaceFlinger::handleDebugCpu()
-{
-    Mutex::Autolock _l(mDebugLock);
-    if (mCpuGauge != 0)
-        mCpuGauge->sample();
 }
 
 void SurfaceFlinger::debugFlashRegions()
@@ -1502,20 +1481,7 @@ status_t SurfaceFlinger::onTransact(
         }
         int n;
         switch (code) {
-            case 1000: // SHOW_CPU
-                n = data.readInt32();
-                mDebugCpu = n ? 1 : 0;
-                if (mDebugCpu) {
-                    if (mCpuGauge == 0) {
-                        mCpuGauge = new CPUGauge(this, ms2ns(500));
-                    }
-                } else {
-                    if (mCpuGauge != 0) {
-                        mCpuGauge->requestExitAndWait();
-                        Mutex::Autolock _l(mDebugLock);
-                        mCpuGauge.clear();
-                    }
-                }
+            case 1000: // SHOW_CPU, NOT SUPPORTED ANYMORE
                 return NO_ERROR;
             case 1001:  // SHOW_FPS
                 n = data.readInt32();
@@ -1540,7 +1506,7 @@ status_t SurfaceFlinger::onTransact(
                 mFreezeCount = data.readInt32();
                 return NO_ERROR;
             case 1010:  // interrogate.
-                reply->writeInt32(mDebugCpu);
+                reply->writeInt32(0);
                 reply->writeInt32(0);
                 reply->writeInt32(mDebugRegion);
                 reply->writeInt32(mDebugBackground);

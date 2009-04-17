@@ -38,7 +38,6 @@
 
 #include "Barrier.h"
 #include "BootAnimation.h"
-#include "CPUGauge.h"
 #include "Layer.h"
 #include "Tokenizer.h"
 
@@ -277,7 +276,6 @@ private:
             bool        lockPageFlip(const LayerVector& currentLayers);
             void        unlockPageFlip(const LayerVector& currentLayers);
             void        handleRepaint();
-            void        handleDebugCpu();
             void        scheduleBroadcast(Client* client);
             void        executeScheduledBroadcasts();
             void        postFramebuffer();
@@ -349,13 +347,8 @@ private:
                 friend class OrientationAnimation;
                 OrientationAnimation*       mOrientationAnimation;
 
-                // access protected by mDebugLock
-    mutable     Mutex                       mDebugLock;
-                sp<CPUGauge>                mCpuGauge;
-
                 // don't use a lock for these, we don't care
                 int                         mDebugRegion;
-                int                         mDebugCpu;
                 int                         mDebugFps;
                 int                         mDebugBackground;
                 int                         mDebugNoBootAnimation;

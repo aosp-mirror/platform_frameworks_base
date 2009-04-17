@@ -128,11 +128,13 @@ status_t BootAnimation::readyToRun() {
         return -1;
 
     // create the native surface
-    sp<Surface> s = session()->createSurface(getpid(), 0, dinfo.w, dinfo.h,
-            PIXEL_FORMAT_RGB_565);
+    sp<SurfaceControl> control = session()->createSurface(
+            getpid(), 0, dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565);
     session()->openTransaction();
-    s->setLayer(0x40000000);
+    control->setLayer(0x40000000);
     session()->closeTransaction();
+
+    sp<Surface> s = control->getSurface();
 
     // initialize opengl and egl
     const EGLint attribs[] = { EGL_RED_SIZE, 5, EGL_GREEN_SIZE, 6,
@@ -156,6 +158,7 @@ status_t BootAnimation::readyToRun() {
     mSurface = surface;
     mWidth = w;
     mHeight = h;
+    mFlingerSurfaceControl = control;
     mFlingerSurface = s;
 
     // initialize GL
@@ -176,7 +179,7 @@ bool BootAnimation::threadLoop() {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(mDisplay, mContext);
     eglDestroySurface(mDisplay, mSurface);
-    mFlingerSurface.clear();
+    mFlingerSurfaceControl.clear();
     return r;
 }
 

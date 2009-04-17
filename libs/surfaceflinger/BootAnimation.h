@@ -71,6 +71,7 @@ private:
     EGLDisplay  mDisplay;
     EGLDisplay  mContext;
     EGLDisplay  mSurface;
+    sp<SurfaceControl> mFlingerSurfaceControl;
     sp<Surface> mFlingerSurface;
     Barrier mBarrier;
 };
