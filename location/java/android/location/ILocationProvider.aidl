@@ -46,9 +46,9 @@ interface ILocationProvider {
     void setMinTime(long minTime);
     void updateNetworkState(int state);
     boolean sendExtraCommand(String command, inout Bundle extras);
+    void addListener(int uid);
+    void removeListener(int uid);
 
-    /* the following are only used for NetworkLocationProvider */
+    /* the following is used only for NetworkLocationProvider */
     void updateCellLockStatus(boolean acquired);
-    void addListener(in String[] applications);
-    void removeListener(in String[] applications);
 }
