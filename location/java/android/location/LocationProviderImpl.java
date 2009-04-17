@@ -249,4 +249,20 @@ public abstract class LocationProviderImpl extends LocationProvider {
     public boolean sendExtraCommand(String command, Bundle extras) {
         return false;
     }
+
+    /**
+     * Informs the location provider when a new client is listening for location information
+     *
+     * @param uid the uid of the client proces
+     */
+    public void addListener(int uid) {
+    }
+
+    /**
+     * Informs the location provider when a client is no longerlistening for location information
+     *
+     * @param uid the uid of the client proces
+     */
+    public void removeListener(int uid) {
+    }
 }

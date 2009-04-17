@@ -33,10 +33,13 @@ import android.net.SntpClient;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Config;
 import android.util.Log;
+import android.util.SparseIntArray;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
 
@@ -192,7 +195,10 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private boolean mSetSuplServer;
     private String mSuplApn;
     private int mSuplDataConnectionState;
-    private ConnectivityManager mConnMgr;
+    private final ConnectivityManager mConnMgr;
+
+    private final IBatteryStats mBatteryStats;
+    private final SparseIntArray mClientUids = new SparseIntArray();
 
     // how often to request NTP time, in milliseconds
     // current setting 4 hours
@@ -240,6 +246,9 @@ public class GpsLocationProvider extends LocationProviderImpl {
         context.registerReceiver(receiver, intentFilter);
 
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        // Battery statistics service to be notified when GPS turns on or off
+        mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
 
         mProperties = new Properties();
         try {
@@ -568,6 +577,30 @@ public class GpsLocationProvider extends LocationProviderImpl {
     }
 
     @Override
+    public void addListener(int uid) {
+        mClientUids.put(uid, 0);
+        if (mNavigating) {
+            try {
+                mBatteryStats.noteStartGps(uid);
+            } catch (RemoteException e) {
+                Log.w(TAG, "RemoteException in addListener");
+            }
+        }
+    }
+
+    @Override
+    public void removeListener(int uid) {
+        mClientUids.delete(uid);
+        if (mNavigating) {
+            try {
+                mBatteryStats.noteStopGps(uid);
+            } catch (RemoteException e) {
+                Log.w(TAG, "RemoteException in removeListener");
+            }
+        }
+    }
+
+    @Override
     public boolean sendExtraCommand(String command, Bundle extras) {
         
         if ("delete_aiding_data".equals(command)) {
@@ -744,6 +777,20 @@ public class GpsLocationProvider extends LocationProviderImpl {
                         size--;
                     }
                 }
+            }
+
+            try {
+                // update battery stats
+                for (int i=mClientUids.size() - 1; i >= 0; i--) {
+                    int uid = mClientUids.keyAt(i);
+                    if (mNavigating) {
+                        mBatteryStats.noteStartGps(uid);
+                    } else {
+                        mBatteryStats.noteStopGps(uid);
+                    }
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "RemoteException in reportStatus");
             }
 
             // send an intent to notify that the GPS has been enabled or disabled.

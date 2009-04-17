@@ -230,17 +230,17 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    public void addListener(String[] applications) {
+    public void addListener(int uid) {
         try {
-            mProvider.addListener(applications);
+            mProvider.addListener(uid);
         } catch (RemoteException e) {
             Log.e(TAG, "addListener failed", e);
         }
     }
 
-    public void removeListener(String[] applications) {
+    public void removeListener(int uid) {
         try {
-            mProvider.removeListener(applications);
+            mProvider.removeListener(uid);
         } catch (RemoteException e) {
             Log.e(TAG, "removeListener failed", e);
         }
