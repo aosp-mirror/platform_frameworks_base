@@ -124,7 +124,7 @@ documentation.</p>
 com.example.helloandroid</em>). It should look like this:</p>
 
 <pre>
-package com.example.hello;
+package com.example.helloandroid;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -157,7 +157,7 @@ have a user interface, but usually will.</p>
 The bold items are lines that have been added.</p>
 
 <pre>
-package com.android.hello;
+package com.android.helloandroid;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -377,7 +377,7 @@ The entire file should now look like this:
 <li>Now open and modify your <code>HelloAndroid</code> class use the
 XML layout. Edit the file to look like this:
 <pre>
-package com.example.hello;
+package com.example.helloandroid;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -469,7 +469,7 @@ debugger. To demonstrate this, introduce a bug into
 your code. Change your HelloAndroid source code to look like this:</p>
 
 <pre>
-package com.android.hello;
+package com.android.helloandroid;
 
 import android.app.Activity;
 import android.os.Bundle;
