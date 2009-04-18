@@ -203,7 +203,8 @@ private:
             Client* client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
-    status_t destroySurface(SurfaceID surface_id);
+    status_t removeSurface(SurfaceID surface_id);
+    status_t destroySurface(const sp<LayerBaseClient>& layer);
     status_t setClientState(ClientID cid, int32_t count, const layer_state_t* states);
 
 
@@ -287,6 +288,7 @@ private:
             sp<LayerBaseClient> getLayerUser_l(SurfaceID index) const;
             status_t    addLayer_l(const sp<LayerBase>& layer);
             status_t    removeLayer_l(const sp<LayerBase>& layer);
+            status_t    purgatorizeLayer_l(const sp<LayerBase>& layer);
             void        free_resources_l();
 
             uint32_t    getTransactionFlags(uint32_t flags);
@@ -315,7 +317,9 @@ private:
     volatile    int32_t                 mTransactionFlags;
     volatile    int32_t                 mTransactionCount;
                 Condition               mTransactionCV;
+                SortedVector< sp<LayerBase> > mLayerPurgatory;
 
+                
                 // protected by mStateLock (but we could use another lock)
                 Tokenizer                               mTokens;
                 DefaultKeyedVector<ClientID, Client*>   mClientsMap;

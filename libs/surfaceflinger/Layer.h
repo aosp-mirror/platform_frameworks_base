@@ -81,6 +81,7 @@ public:
     virtual bool needsBlending() const      { return mNeedsBlending; }
     virtual bool isSecure() const           { return mSecure; }
     virtual sp<Surface> createSurface() const;
+    virtual status_t ditch();
 
     const LayerBitmap& getBuffer(int i) const { return mBuffers[i]; }
           LayerBitmap& getBuffer(int i)       { return mBuffers[i]; }
@@ -108,7 +109,9 @@ private:
     class SurfaceLayer : public LayerBaseClient::Surface
     {
     public:
-                SurfaceLayer(SurfaceID id, const sp<Layer>& owner);
+                SurfaceLayer(const sp<SurfaceFlinger>& flinger,
+                        SurfaceID id, const sp<Layer>& owner);
+                ~SurfaceLayer();
 
     private:
         virtual sp<SurfaceBuffer> getBuffer();

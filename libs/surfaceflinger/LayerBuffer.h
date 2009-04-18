@@ -50,7 +50,6 @@ class LayerBuffer : public LayerBaseClient
         LayerBuffer& mLayer;
     };
 
-
 public:
     static const uint32_t typeInfo;
     static const char* const typeID;
@@ -61,9 +60,11 @@ public:
                         Client* client, int32_t i);
         virtual ~LayerBuffer();
 
+    virtual void onFirstRef();
     virtual bool needsBlending() const;
 
     virtual sp<LayerBaseClient::Surface> createSurface() const;
+    virtual status_t ditch();
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
@@ -177,7 +178,8 @@ private:
     class SurfaceBuffer : public LayerBaseClient::Surface
     {
     public:
-                SurfaceBuffer(SurfaceID id, const sp<LayerBuffer>& owner);
+                SurfaceBuffer(const sp<SurfaceFlinger>& flinger,
+                        SurfaceID id, const sp<LayerBuffer>& owner);
         virtual ~SurfaceBuffer();
 
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers);
@@ -191,12 +193,10 @@ private:
             return static_cast<LayerBuffer*>(Surface::getOwner().get());
         }
     };
-
-    friend class SurfaceFlinger;
-    sp<SurfaceBuffer>   getClientSurface() const;
-
+    
     mutable Mutex   mLock;
     sp<Source>      mSource;
+    sp<Surface>     mSurface;
     bool            mInvalidate;
     bool            mNeedsBlending;
 };

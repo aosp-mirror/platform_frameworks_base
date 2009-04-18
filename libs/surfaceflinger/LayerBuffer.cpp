@@ -50,10 +50,21 @@ LayerBuffer::~LayerBuffer()
 {
 }
 
+void LayerBuffer::onFirstRef()
+{
+    mSurface = new SurfaceBuffer(mFlinger, clientIndex(),
+            const_cast<LayerBuffer *>(this));
+}
+
 sp<LayerBaseClient::Surface> LayerBuffer::createSurface() const
 {
-    return new SurfaceBuffer(clientIndex(),
-                const_cast<LayerBuffer *>(this));
+    return mSurface;
+}
+
+status_t LayerBuffer::ditch()
+{
+    mSurface.clear();
+    return NO_ERROR;
 }
 
 bool LayerBuffer::needsBlending() const {
@@ -167,9 +178,9 @@ sp<LayerBuffer::Source> LayerBuffer::clearSource() {
 // LayerBuffer::SurfaceBuffer
 // ============================================================================
 
-LayerBuffer::SurfaceBuffer::SurfaceBuffer(SurfaceID id, 
-        const sp<LayerBuffer>& owner)
-    : LayerBaseClient::Surface(id, owner->getIdentity(), owner)
+LayerBuffer::SurfaceBuffer::SurfaceBuffer(const sp<SurfaceFlinger>& flinger,
+        SurfaceID id, const sp<LayerBuffer>& owner)
+    : LayerBaseClient::Surface(flinger, id, owner->getIdentity(), owner)
 {
 }
 

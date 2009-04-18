@@ -87,6 +87,12 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
     return mSurface;
 }
 
+status_t Layer::ditch()
+{
+    mSurface.clear();
+    return NO_ERROR;
+}
+
 status_t Layer::setBuffers( Client* client,
                             uint32_t w, uint32_t h,
                             PixelFormat format, uint32_t flags)
@@ -119,7 +125,7 @@ status_t Layer::setBuffers( Client* client,
             return err;
         }
     }
-    mSurface = new SurfaceLayer(clientIndex(), this);
+    mSurface = new SurfaceLayer(mFlinger, clientIndex(), this);
     return NO_ERROR;
 }
 
@@ -626,8 +632,13 @@ void Layer::finishPageFlip()
 
 // ---------------------------------------------------------------------------
 
-Layer::SurfaceLayer::SurfaceLayer(SurfaceID id, const sp<Layer>& owner)
-    : Surface(id, owner->getIdentity(), owner)
+Layer::SurfaceLayer::SurfaceLayer(const sp<SurfaceFlinger>& flinger,
+        SurfaceID id, const sp<Layer>& owner)
+    : Surface(flinger, id, owner->getIdentity(), owner)
+{
+}
+
+Layer::SurfaceLayer::~SurfaceLayer()
 {
 }
 

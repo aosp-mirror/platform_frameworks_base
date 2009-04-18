@@ -203,14 +203,19 @@ public:
 
     /**
      * isSecure - true if this surface is secure, that is if it prevents
-     * screenshots or vns servers.
+     * screenshots or VNC servers.
      */
     virtual bool isSecure() const       { return false; }
 
-            enum { // flags for doTransaction()
-                eVisibleRegion      = 0x00000002,
-                eRestartTransaction = 0x00000008
-            };
+    /** signal this layer that it's not needed any longer */
+    virtual status_t ditch() { return NO_ERROR; }
+
+    
+    
+    enum { // flags for doTransaction()
+        eVisibleRegion      = 0x00000002,
+        eRestartTransaction = 0x00000008
+    };
 
 
     inline  const State&    drawingState() const    { return mDrawingState; }
@@ -244,7 +249,7 @@ protected:
                   GLint textureName, const GGLSurface& t,
                   GLuint& textureWidth, GLuint& textureHeight) const;
 
-                SurfaceFlinger* mFlinger;
+                sp<SurfaceFlinger> mFlinger;
                 uint32_t        mFlags;
 
                 // cached during validateVisibility()
@@ -316,7 +321,9 @@ public:
                 ISurfaceFlingerClient::surface_data_t* params) const;
 
     protected:
-        Surface(SurfaceID id, int identity, const sp<LayerBaseClient>& owner);
+        Surface(const sp<SurfaceFlinger>& flinger, 
+                SurfaceID id, int identity, 
+                const sp<LayerBaseClient>& owner);
         virtual ~Surface();
         virtual status_t onTransact(uint32_t code, const Parcel& data,
                 Parcel* reply, uint32_t flags);
@@ -330,8 +337,9 @@ public:
         virtual sp<OverlayRef> createOverlay(uint32_t w, uint32_t h,
                 int32_t format);
 
-    private:
+    protected:
         friend class LayerBaseClient;
+        sp<SurfaceFlinger>  mFlinger;
         int32_t             mToken;
         int32_t             mIdentity;
         wp<LayerBaseClient> mOwner;

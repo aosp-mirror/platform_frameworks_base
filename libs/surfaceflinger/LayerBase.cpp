@@ -681,25 +681,32 @@ sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
 
 sp<LayerBaseClient::Surface> LayerBaseClient::createSurface() const
 {
-    return new Surface(clientIndex(), mIdentity,
+    return new Surface(mFlinger, clientIndex(), mIdentity,
             const_cast<LayerBaseClient *>(this));
 }
 
 // ---------------------------------------------------------------------------
 
-LayerBaseClient::Surface::Surface(SurfaceID id, int identity, 
+LayerBaseClient::Surface::Surface(
+        const sp<SurfaceFlinger>& flinger,
+        SurfaceID id, int identity, 
         const sp<LayerBaseClient>& owner) 
-    : mToken(id), mIdentity(identity), mOwner(owner)
-{ 
+    : mFlinger(flinger), mToken(id), mIdentity(identity), mOwner(owner)
+{
 }
 
 
-LayerBaseClient::Surface::~Surface() {
-    // TODO: We now have a point here were we can clean-up the
-    // client's mess.
-    // This is also where surface id should be recycled.
-    //LOGD("Surface %d, heaps={%p, %p} destroyed",
-    //        mId, mHeap[0].get(), mHeap[1].get());
+LayerBaseClient::Surface::~Surface() 
+{
+    /*
+     * This is a good place to clean-up all client resources 
+     */
+
+    // destroy client resources
+    sp<LayerBaseClient> layer = getOwner();
+    if (layer != 0) {
+        mFlinger->destroySurface(layer);
+    }
 }
 
 sp<LayerBaseClient> LayerBaseClient::Surface::getOwner() const {

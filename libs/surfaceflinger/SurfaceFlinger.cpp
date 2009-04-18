@@ -1033,7 +1033,8 @@ status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
     ssize_t index = mCurrentState.layersSortedByZ.remove(layerBase);
     if (index >= 0) {
         mLayersRemoved = true;
-        sp<LayerBaseClient> layer = LayerBase::dynamicCast< LayerBaseClient* >(layerBase.get());
+        sp<LayerBaseClient> layer =
+            LayerBase::dynamicCast< LayerBaseClient* >(layerBase.get());
         if (layer != 0) {
             mLayerMap.removeItem(layer->serverIndex());
         }
@@ -1041,10 +1042,22 @@ status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
     }
     // it's possible that we don't find a layer, because it might
     // have been destroyed already -- this is not technically an error
-    // from the user because there is a race between destroySurface,
-    // destroyclient and destroySurface-from-a-transaction.
+    // from the user because there is a race between BClient::destroySurface(),
+    // ~BClient() and destroySurface-from-a-transaction.
     return (index == NAME_NOT_FOUND) ? status_t(NO_ERROR) : index;
 }
+
+status_t SurfaceFlinger::purgatorizeLayer_l(const sp<LayerBase>& layerBase)
+{
+    // First add the layer to the purgatory list, which makes sure it won't 
+    // go away, then remove it from the main list (through a transaction).
+    ssize_t err = removeLayer_l(layerBase);
+    if (err >= 0) {
+        mLayerPurgatory.add(layerBase);
+    }
+    return (err == NAME_NOT_FOUND) ? status_t(NO_ERROR) : err;
+}
+
 
 void SurfaceFlinger::free_resources_l()
 {
@@ -1252,14 +1265,53 @@ sp<LayerBaseClient> SurfaceFlinger::createPushBuffersSurfaceLocked(
     return layer;
 }
 
-status_t SurfaceFlinger::destroySurface(SurfaceID index)
+status_t SurfaceFlinger::removeSurface(SurfaceID index)
 {
+    /*
+     * called by the window manager, when a surface should be marked for
+     * destruction.
+     */
+    
+    // TODO: here we should make the surface disappear from the screen
+    // and mark it for removal. however, we can't free anything until all
+    // client are done. All operations on this surface should return errors.
+    
+    status_t err = NAME_NOT_FOUND;
+    sp<LayerBaseClient> layer;
+    
+    { // scope for the lock
+        Mutex::Autolock _l(mStateLock);
+        layer = getLayerUser_l(index);
+        err = purgatorizeLayer_l(layer);
+        if (err == NO_ERROR) {
+            setTransactionFlags(eTransactionNeeded);
+        }
+    }
+
+    if (layer != 0) {
+        // do this outside of mStateLock
+        layer->ditch();
+    }
+    return err;
+}
+
+status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
+{
+    /*
+     * called by ~ISurface() when all references are gone
+     */
+
+    /* FIXME: 
+     * - this can calls ~Layer(), which is wrong because we're not in the
+     * GL thread, and ~Layer() currently calls OpenGL.
+     * - ideally we want to release as much GL state as possible after
+     * purgatorizeLayer_l() has been called and the surface is not in any
+     * active list.
+     * - ideally we'd call ~Layer() without mStateLock held
+     */
+    
     Mutex::Autolock _l(mStateLock);
-    const sp<LayerBaseClient>& layer = getLayerUser_l(index);
-    status_t err = removeLayer_l(layer);
-    if (err < 0)
-        return err;
-    setTransactionFlags(eTransactionNeeded);
+    mLayerPurgatory.remove(layer);
     return NO_ERROR;
 }
 
@@ -1626,7 +1678,7 @@ sp<ISurface> BClient::createSurface(
 status_t BClient::destroySurface(SurfaceID sid)
 {
     sid |= (mId << 16); // add the client-part to id
-    return mFlinger->destroySurface(sid);
+    return mFlinger->removeSurface(sid);
 }
 
 status_t BClient::setState(int32_t count, const layer_state_t* states)
