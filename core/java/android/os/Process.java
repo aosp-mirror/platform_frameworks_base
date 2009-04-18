@@ -680,6 +680,8 @@ public class Process {
     /** @hide */
     public static final int PROC_SPACE_TERM = (int)' ';
     /** @hide */
+    public static final int PROC_TAB_TERM = (int)'\t';
+    /** @hide */
     public static final int PROC_COMBINE = 0x100;
     /** @hide */
     public static final int PROC_PARENS = 0x200;
@@ -693,6 +695,10 @@ public class Process {
     /** @hide */
     public static final native boolean readProcFile(String file, int[] format,
             String[] outStrings, long[] outLongs, float[] outFloats);
+    
+    /** @hide */
+    public static final native boolean parseProcLine(byte[] buffer, int startIndex, 
+            int endIndex, int[] format, String[] outStrings, long[] outLongs, float[] outFloats);
 
     /**
      * Gets the total Pss value for a given process, in bytes.
