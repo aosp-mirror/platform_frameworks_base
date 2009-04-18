@@ -32,24 +32,21 @@ API. As with the Android 1.0 API, the Android 1.1 API
 is assigned an integer identifier &mdash; <strong>2</strong> &mdash; that is
 stored in the system itself. This identifier, called the "API Level", allows the
 system to correctly determine whether an application is compatible with
-the system, prior to installing the application.</p>
+the system, prior to installing the application. </p>
 
-<p>Applications can reference a specific API Level value in their
-manifest files, to indicate the minimum version of the Android system
-required to run the app. To reference a minimum API Level, applications 
-can add a <code>minSdkVersion</code> attribute in their manifest files.
+<p>Applications indicate the lowest system API Level that they are compatible with by adding
+a value to the <code>minSdkVersion</code> attribute.
 The value of the attribute is an integer corresponding to an API Level 
-identifier. Prior to installing an application, the system then checks the value of 
+identifier. Prior to installing an application, the system checks the value of 
 <code>minSdkVersion</code> and allows the install only
 if the referenced integer is less than or equal to the API Level integer stored
 in the system itself. </p>
 
 <p>If you use the Android 1.1 system image to build an application
 compatible with Android-powered devices running the Android 1.1
-platform, please note that you <strong><span
-style="color:red;">must</span></strong> set the the
-<code>android:minSdkVersion</code> attribute in the application's
-manifest to "2", which is the API strictly associated with Android 1.1.
+platform, you <strong style="color:red">must</strong> set the
+<code>minSdkVersion</code> attribute to "2" in order to specify that your application
+is compatible only with devices using the Android 1.1 (or greater) system image.
 </p>
 
 <p>Specifically, you specify the <code>android:minSdkVersion</code>
@@ -59,7 +56,7 @@ attribute looks like this: </p>
 
 <pre><code>&lt;manifest&gt;
   ...
-  &lt;uses-sdk minSdkVersion="2" /&gt;
+  &lt;uses-sdk android:minSdkVersion="2" /&gt;
   ...
 &lt;/manifest&gt;</code>
 </pre>
