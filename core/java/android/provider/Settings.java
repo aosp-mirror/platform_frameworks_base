@@ -2588,6 +2588,11 @@ public final class Settings {
                 "gtalk_ssl_handshake_timeout_ms";
 
         /**
+         * Compress the gtalk stream.
+         */
+        public static final String GTALK_COMPRESS = "gtalk_compress";
+
+        /**
          * Enable use of ssl session caching.
          * 'db' - save each session in a (per process) database
          * 'file' - save each session in a (per process) file
