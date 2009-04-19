@@ -650,12 +650,12 @@ public class BridgeCanvas extends Canvas {
         int arcHeight = (int)(ry * 2);
         
         if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
-            g.fillRoundRect((int)rect.left, (int)rect.right, (int)rect.width(), (int)rect.height(),
+            g.fillRoundRect((int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
                     arcWidth, arcHeight);
         }
 
         if (style == Style.STROKE || style == Style.FILL_AND_STROKE) {
-            g.drawRoundRect((int)rect.left, (int)rect.right, (int)rect.width(), (int)rect.height(),
+            g.drawRoundRect((int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
                     arcWidth, arcHeight);
         }
 
