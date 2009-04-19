@@ -95,7 +95,7 @@ page.title=Android Supported Media Formats
 <td>JPEG</td>
 <td style="text-align: center;">X</td>
 <td style="text-align: center;">X</td>
-<td>base+progressive</td>
+<td>Base+progressive</td>
 <td>JPEG (.jpg)</td>
 </tr>
 
@@ -127,24 +127,24 @@ page.title=Android Supported Media Formats
 <tr>
 <td rowspan="3">Video</td>
 <td>H.263</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"></td>
 <td style="text-align: center;">X</td>
 <td>&nbsp;</td>
 <td>3GPP (.3gp)</td>
 </tr>
 
 <tr>
-<td>H.264</td>
-<td style="text-align: center;">X</td>
+<td>H.264 AVC</td>
+<td style="text-align: center;"></td>
 <td style="text-align: center;">X</td>
 <td>&nbsp;</td>
 <td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
 </tr>
 
 <tr>
-<td>MPEG4 SP</td>
+<td>MPEG-4 SP</td>
 <td>&nbsp;</td>
-<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
 <td>&nbsp;</td>
 <td>3GPP (.3gp)</td>
 </tr>
@@ -171,7 +171,7 @@ page.title=Android Supported Media Formats
 <td>Audio</td>
 <td>WMA</td>
 <td>&nbsp;</td>
-<td>X</td>
+<td style="text-align: center;">X</td>
 <td>Supports WMA standard L1-L3:
 <ul>
 <li>L1: 64 kbps - 161 kbps @ 44.1kHz</li>
@@ -184,13 +184,22 @@ Mono and stereo profiles with 16-bits per sample. Decoder does not support WMA P
 </tr>
 
 <tr>
-<td>Video</td>
+<td rowspan="2">Video</td>
 <td>WMV</td>
 <td>&nbsp;</td>
-<td>X</td>
+<td style="text-align: center;">X</td>
 <td>Versions 7, 8 and 9. Simple profile only</td>
 <td>Windows Media Video (.wmv)</td>
 </tr>
+
+<tr>
+<td>H.264 AVC</td>
+<td>&nbsp;</td>
+<td style="text-align: center;">X</td>
+<td>Limited to baseline profile up to 480x320, and 600 kbps average bitrate for the video stream.</td>
+<td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
+</tr>
+
 </tbody></table>
 
 
