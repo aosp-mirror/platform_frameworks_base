@@ -33,6 +33,10 @@ a permission name typically includes the package name as a prefix.</dd>
 
 </dl></dd>
 
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
+
 <dt>see also:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code></dd>
 
