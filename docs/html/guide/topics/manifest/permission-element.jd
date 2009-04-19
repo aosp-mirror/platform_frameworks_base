@@ -122,6 +122,10 @@ The value can be set to one of the following strings:
 </dd>
 </dl></dd>
 
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
+
 <dt>see also:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
 <br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>

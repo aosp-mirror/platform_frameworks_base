@@ -74,6 +74,10 @@ For more information on these types of patterns, see the descriptions of
 </p></dd>
 </dl></dd>
 
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
+
 <dt>see also:</dt>
 <dd>the 
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmns">grantUriPermissions</a></code>

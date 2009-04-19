@@ -29,7 +29,11 @@ the string value for {@code CATEGORY_LAUNCHER} is
 Custom categories should use the package name as a prefix, to ensure
 that they are unique.
 </p></dd>
-</dl></dd>
+</dl></dd> 
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 1</dd>
 
 <dt>see also:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
