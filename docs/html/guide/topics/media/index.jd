@@ -44,14 +44,13 @@ can play audio or video from media files stored in the application's resources
 arriving over a network connection. To play audio or video from your
 application, use the {@link android.media.MediaPlayer} class.</p>
 
-<p>The platform also lets you record audio, where supported by the mobile device
-hardware. Recording of video is not currently supported, but is planned for a
-future release. To record audio, use the 
-{@link android.media.MediaRecorder} class. Note that the emulator doesn't have
-hardware to capture audio, but actual mobile devices are likely to provide these
-capabilities that you can access through MediaRecorder. </p>
+<p>The platform also lets you record audio and video, where supported by the
+mobile device hardware. To record audio or video, use the {@link
+android.media.MediaRecorder} class. Note that the emulator doesn't have hardware
+to capture audio or video, but actual mobile devices are likely to provide these
+capabilities, accessible through the MediaRecorder class. </p>
 
-<p>For a list of the media formats for which Android offers built-in support,
+<p>For a list of media formats for which Android offers built-in support,
 see the <a href="{@docRoot}guide/appendix/media-formats.html">Android Media
 Formats</a> appendix. </p>
 
