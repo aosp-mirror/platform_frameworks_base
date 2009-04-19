@@ -516,39 +516,10 @@ enum {
     PROC_OUT_FLOAT = 0x4000,
 };
 
-jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
-        jstring file, jintArray format, jobjectArray outStrings,
-        jlongArray outLongs, jfloatArray outFloats)
+jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
+        char* buffer, jint startIndex, jint endIndex, jintArray format, 
+        jobjectArray outStrings, jlongArray outLongs, jfloatArray outFloats)
 {
-    if (file == NULL || format == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        return JNI_FALSE;
-    }
-    
-    const char* file8 = env->GetStringUTFChars(file, NULL);
-    if (file8 == NULL) {
-        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
-        return JNI_FALSE;
-    }
-    int fd = open(file8, O_RDONLY);
-    env->ReleaseStringUTFChars(file, file8);
-    
-    if (fd < 0) {
-        //LOGW("Unable to open process file: %s\n", file8);
-        return JNI_FALSE;
-    }
-    
-    char buffer[256];
-    const int len = read(fd, buffer, sizeof(buffer)-1);
-    close(fd);
-    
-    if (len < 0) {
-        //LOGW("Unable to open process file: %s fd=%d\n", file8, fd);
-        return JNI_FALSE;
-    }
-    buffer[len] = 0;
-    
-    //LOGI("Process file %s: %s\n", file8, buffer);
     
     const jsize NF = env->GetArrayLength(format);
     const jsize NS = outStrings ? env->GetArrayLength(outStrings) : 0;
@@ -575,7 +546,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         return JNI_FALSE;
     }
 
-    jsize i = 0;
+    jsize i = startIndex;
     jsize di = 0;
     
     jboolean res = JNI_TRUE;
@@ -587,30 +558,30 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         }
         const char term = (char)(mode&PROC_TERM_MASK);
         const jsize start = i;
-        if (i >= len) {
+        if (i >= endIndex) {
             res = JNI_FALSE;
             break;
         }
         
         jsize end = -1;
         if ((mode&PROC_PARENS) != 0) {
-            while (buffer[i] != ')' && i < len) {
+            while (buffer[i] != ')' && i < endIndex) {
                 i++;
             }
             end = i;
             i++;
         }
-        while (buffer[i] != term && i < len) {
+        while (buffer[i] != term && i < endIndex) {
             i++;
         }
         if (end < 0) {
             end = i;
         }
         
-        if (i < len) {
+        if (i < endIndex) {
             i++;
             if ((mode&PROC_COMBINE) != 0) {
-                while (buffer[i] == term && i < len) {
+                while (buffer[i] == term && i < endIndex) {
                     i++;
                 }
             }
@@ -647,6 +618,58 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     }
     
     return res;
+}
+
+jboolean android_os_Process_parseProcLine(JNIEnv* env, jobject clazz,
+        jbyteArray buffer, jint startIndex, jint endIndex, jintArray format, 
+        jobjectArray outStrings, jlongArray outLongs, jfloatArray outFloats)
+{
+        jbyte* bufferArray = env->GetByteArrayElements(buffer, NULL);
+
+        jboolean result = android_os_Process_parseProcLineArray(env, clazz, 
+                (char*) bufferArray, startIndex, endIndex, format, outStrings, 
+                outLongs, outFloats);
+                
+        env->ReleaseByteArrayElements(buffer, bufferArray, 0);
+        
+        return result;
+}
+
+jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
+        jstring file, jintArray format, jobjectArray outStrings,
+        jlongArray outLongs, jfloatArray outFloats)
+{
+    if (file == NULL || format == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        return JNI_FALSE;
+    }
+
+    const char* file8 = env->GetStringUTFChars(file, NULL);
+    if (file8 == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return JNI_FALSE;
+    }
+    int fd = open(file8, O_RDONLY);
+    env->ReleaseStringUTFChars(file, file8);
+    
+    if (fd < 0) {
+        //LOGW("Unable to open process file: %s\n", file8);
+        return JNI_FALSE;
+    }
+    
+    char buffer[256];
+    const int len = read(fd, buffer, sizeof(buffer)-1);
+    close(fd);
+    
+    if (len < 0) {
+        //LOGW("Unable to open process file: %s fd=%d\n", file8, fd);
+        return JNI_FALSE;
+    }
+    buffer[len] = 0;
+    
+    return android_os_Process_parseProcLineArray(env, clazz, buffer, 0, len, 
+            format, outStrings, outLongs, outFloats);
+    
 }
 
 void android_os_Process_setApplicationObject(JNIEnv* env, jobject clazz,
@@ -728,6 +751,7 @@ static const JNINativeMethod methods[] = {
     {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
     {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
     {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_readProcFile},
+    {"parseProcLine", "([BII[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_parseProcLine},
     {"getElapsedCpuTime", "()J", (void*)android_os_Process_getElapsedCpuTime},
     {"getPss", "(I)J", (void*)android_os_Process_getPss},
     //{"setApplicationObject", "(Landroid/os/IBinder;)V", (void*)android_os_Process_setApplicationObject},
@@ -746,4 +770,3 @@ int register_android_os_Process(JNIEnv* env)
         env, kProcessPathName,
         methods, NELEM(methods));
 }
-
