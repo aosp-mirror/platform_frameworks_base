@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.Parcelable;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A class that helps with interactions with the {@link IAccountManager} interface. It provides
+ * A class that helps with interactions with the AccountManagerService. It provides
  * methods to allow for account, password, and authtoken management for all accounts on the
  * device. Some of these calls are implemented with the help of the corresponding
  * {@link IAccountAuthenticator} services. One accesses the {@link AccountManager} by calling:
@@ -48,6 +49,9 @@ public class AccountManager {
     private final Context mContext;
     private final IAccountManager mService;
 
+    /**
+     * @hide
+     */
     public AccountManager(Context context, IAccountManager service) {
         mContext = context;
         mService = service;
@@ -337,7 +341,7 @@ public class AccountManager {
                         false /* notifyOnAuthFailure */, true /* expectActivityLaunch */,
                         loginOptions);
             }
-        };
+        }.start();
     }
 
     public Future2 getAuthToken(
@@ -350,18 +354,19 @@ public class AccountManager {
                 mService.getAuthToken(mResponse, account, authTokenType,
                         notifyAuthFailure, false /* expectActivityLaunch */, null /* options */);
             }
-        };
+        }.start();
     }
 
     public Future2 addAccount(final String accountType,
-            final String authTokenType, final Bundle addAccountOptions,
+            final String authTokenType, final String[] requiredFeatures,
+            final Bundle addAccountOptions,
             final Activity activity, Future2Callback callback, Handler handler) {
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.addAcount(mResponse, accountType, authTokenType,
-                        activity != null, addAccountOptions);
+                        requiredFeatures, activity != null, addAccountOptions);
             }
-        };
+        }.start();
     }
 
     /** @deprecated use {@link #confirmCredentials} instead */
@@ -374,6 +379,33 @@ public class AccountManager {
         };
     }
 
+    public Account[] blockingGetAccountsWithTypeAndFeatures(String type, String[] features)
+            throws AuthenticatorException, IOException, OperationCanceledException {
+        Future2 future = getAccountsWithTypeAndFeatures(type, features,
+                null /* callback */, null /* handler */);
+        Bundle result = future.getResult();
+        Parcelable[] accountsTemp = result.getParcelableArray(Constants.ACCOUNTS_KEY);
+        if (accountsTemp == null) {
+            throw new AuthenticatorException("accounts should not be null");
+        }
+        Account[] accounts = new Account[accountsTemp.length];
+        for (int i = 0; i < accountsTemp.length; i++) {
+            accounts[i] = (Account) accountsTemp[i];
+        }
+        return accounts;
+    }
+
+    public Future2 getAccountsWithTypeAndFeatures(
+            final String type, final String[] features,
+            Future2Callback callback, Handler handler) {
+        if (type == null) throw new IllegalArgumentException("type is null");
+        return new AmsTask(null /* activity */, handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.getAccountsByTypeAndFeatures(mResponse, type, features);
+            }
+        }.start();
+    }
+
     public Future2 confirmCredentials(final Account account, final Activity activity,
             final Future2Callback callback,
             final Handler handler) {
@@ -381,7 +413,7 @@ public class AccountManager {
             public void doWork() throws RemoteException {
                 mService.confirmCredentials(mResponse, account, activity != null);
             }
-        };
+        }.start();
     }
 
     public Future2 updateCredentials(final Account account, final String authTokenType,
@@ -393,7 +425,7 @@ public class AccountManager {
                 mService.updateCredentials(mResponse, account, authTokenType, activity != null,
                         loginOptions);
             }
-        };
+        }.start();
     }
 
     public Future2 editProperties(final String accountType, final Activity activity,
@@ -403,7 +435,7 @@ public class AccountManager {
             public void doWork() throws RemoteException {
                 mService.editProperties(mResponse, accountType, activity != null);
             }
-        };
+        }.start();
     }
 
     private void ensureNotOnMainThread() {
@@ -502,11 +534,12 @@ public class AccountManager {
         }
     }
 
-    public abstract class AmsTask extends FutureTask<Bundle> implements Future2 {
+    private abstract class AmsTask extends FutureTask<Bundle> implements Future2 {
         final IAccountManagerResponse mResponse;
         final Handler mHandler;
         final Future2Callback mCallback;
         final Activity mActivity;
+        final Thread mThread;
         public AmsTask(Activity activity, Handler handler, Future2Callback callback) {
             super(new Callable<Bundle>() {
                 public Bundle call() throws Exception {
@@ -518,8 +551,7 @@ public class AccountManager {
             mCallback = callback;
             mActivity = activity;
             mResponse = new Response();
-
-            new Thread(new Runnable() {
+            mThread = new Thread(new Runnable() {
                 public void run() {
                     try {
                         doWork();
@@ -527,7 +559,12 @@ public class AccountManager {
                         // never happens
                     }
                 }
-            }).start();
+            }, "AmsTask");
+        }
+
+        public final Future2 start() {
+            mThread.start();
+            return this;
         }
 
         public abstract void doWork() throws RemoteException;
@@ -609,7 +646,7 @@ public class AccountManager {
 
     }
 
-    public abstract class AMSTaskBoolean extends FutureTask<Boolean> implements Future1<Boolean> {
+    private abstract class AMSTaskBoolean extends FutureTask<Boolean> implements Future1<Boolean> {
         final IAccountManagerResponse response;
         final Handler mHandler;
         final Future1Callback<Boolean> mCallback;
@@ -716,13 +753,159 @@ public class AccountManager {
         }
 
         if (code == Constants.ERROR_CODE_UNSUPPORTED_OPERATION) {
-            return new UnsupportedOperationException();
+            return new UnsupportedOperationException(message);
         }
 
         if (code == Constants.ERROR_CODE_INVALID_RESPONSE) {
-            return new AuthenticatorException("invalid response");
+            return new AuthenticatorException(message);
         }
 
-        return new AuthenticatorException("unknown error code");
+        if (code == Constants.ERROR_CODE_BAD_ARGUMENTS) {
+            return new IllegalArgumentException(message);
+        }
+
+        return new AuthenticatorException(message);
+    }
+
+    private class GetAuthTokenByTypeAndFeaturesTask extends AmsTask implements Future2Callback {
+        GetAuthTokenByTypeAndFeaturesTask(final String accountType, final String authTokenType,
+                final String[] features, Activity activityForPrompting,
+                final Bundle addAccountOptions, final Bundle loginOptions,
+                Future2Callback callback, Handler handler) {
+            super(activityForPrompting, handler, callback);
+            if (accountType == null) throw new IllegalArgumentException("account type is null");
+            mAccountType = accountType;
+            mAuthTokenType = authTokenType;
+            mFeatures = features;
+            mAddAccountOptions = addAccountOptions;
+            mLoginOptions = loginOptions;
+            mMyCallback = this;
+        }
+        volatile Future2 mFuture = null;
+        final String mAccountType;
+        final String mAuthTokenType;
+        final String[] mFeatures;
+        final Bundle mAddAccountOptions;
+        final Bundle mLoginOptions;
+        final Future2Callback mMyCallback;
+
+        public void doWork() throws RemoteException {
+            getAccountsWithTypeAndFeatures(mAccountType, mFeatures, new Future2Callback() {
+                public void run(Future2 future) {
+                    Bundle getAccountsResult;
+                    try {
+                        getAccountsResult = future.getResult();
+                    } catch (OperationCanceledException e) {
+                        setException(e);
+                        return;
+                    } catch (IOException e) {
+                        setException(e);
+                        return;
+                    } catch (AuthenticatorException e) {
+                        setException(e);
+                        return;
+                    }
+
+                    Parcelable[] accounts =
+                            getAccountsResult.getParcelableArray(Constants.ACCOUNTS_KEY);
+                    if (accounts.length == 0) {
+                        if (mActivity != null) {
+                            // no accounts, add one now. pretend that the user directly
+                            // made this request
+                            mFuture = addAccount(mAccountType, mAuthTokenType, mFeatures,
+                                    mAddAccountOptions, mActivity, mMyCallback, mHandler);
+                        } else {
+                            // send result since we can't prompt to add an account
+                            Bundle result = new Bundle();
+                            result.putString(Constants.ACCOUNT_NAME_KEY, null);
+                            result.putString(Constants.ACCOUNT_TYPE_KEY, null);
+                            result.putString(Constants.AUTHTOKEN_KEY, null);
+                            try {
+                                mResponse.onResult(result);
+                            } catch (RemoteException e) {
+                                // this will never happen
+                            }
+                            // we are done
+                        }
+                    } else if (accounts.length == 1) {
+                        // have a single account, return an authtoken for it
+                        if (mActivity == null) {
+                            mFuture = getAuthToken((Account) accounts[0], mAuthTokenType,
+                                    false /* notifyAuthFailure */, mMyCallback, mHandler);
+                        } else {
+                            mFuture = getAuthToken((Account) accounts[0],
+                                    mAuthTokenType, mLoginOptions,
+                                    mActivity, mMyCallback, mHandler);
+                        }
+                    } else {
+                        if (mActivity != null) {
+                            IAccountManagerResponse chooseResponse =
+                                    new IAccountManagerResponse.Stub() {
+                                public void onResult(Bundle value) throws RemoteException {
+                                    Account account = new Account(
+                                            value.getString(Constants.ACCOUNT_NAME_KEY),
+                                            value.getString(Constants.ACCOUNT_TYPE_KEY));
+                                    mFuture = getAuthToken(account, mAuthTokenType, mLoginOptions,
+                                            mActivity, mMyCallback, mHandler);
+                                }
+
+                                public void onError(int errorCode, String errorMessage)
+                                        throws RemoteException {
+                                    mResponse.onError(errorCode, errorMessage);
+                                }
+                            };
+                            // have many accounts, launch the chooser
+                            Intent intent = new Intent();
+                            intent.setClassName("android",
+                                    "android.accounts.ChooseAccountActivity");
+                            intent.putExtra(Constants.ACCOUNTS_KEY, accounts);
+                            intent.putExtra(Constants.ACCOUNT_MANAGER_RESPONSE_KEY,
+                                    new AccountManagerResponse(chooseResponse));
+                            mActivity.startActivity(intent);
+                            // the result will arrive via the IAccountManagerResponse
+                        } else {
+                            // send result since we can't prompt to select an account
+                            Bundle result = new Bundle();
+                            result.putString(Constants.ACCOUNTS_KEY, null);
+                            try {
+                                mResponse.onResult(result);
+                            } catch (RemoteException e) {
+                                // this will never happen
+                            }
+                            // we are done
+                        }
+                    }
+                }}, mHandler);
+        }
+
+
+
+        // TODO(fredq) pass through the calls to our implemention of Future2 to the underlying
+        // future that we create. We need to do things like have cancel cancel the mFuture, if set
+        // or to cause this to be canceled if mFuture isn't set.
+        // Once this is done then getAuthTokenByFeatures can be changed to return a Future2.
+
+        public void run(Future2 future) {
+            try {
+                set(future.get());
+            } catch (InterruptedException e) {
+                cancel(true);
+            } catch (CancellationException e) {
+                cancel(true);
+            } catch (ExecutionException e) {
+                setException(e.getCause());
+            }
+        }
+    }
+
+    public void getAuthTokenByFeatures(
+            final String accountType, final String authTokenType, final String[] features,
+            final Activity activityForPrompting, final Bundle addAccountOptions,
+            final Bundle loginOptions,
+            final Future2Callback callback, final Handler handler) {
+        if (accountType == null) throw new IllegalArgumentException("account type is null");
+        if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
+        new GetAuthTokenByTypeAndFeaturesTask(accountType, authTokenType,  features,
+                activityForPrompting, addAccountOptions, loginOptions, callback, handler).start();
     }
 }
