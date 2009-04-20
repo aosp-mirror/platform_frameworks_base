@@ -159,6 +159,8 @@ public class WebSettings {
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
+    private String          mAppCachePath = "";
+    private boolean         mAppCacheEnabled = false;
 
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
@@ -894,6 +896,33 @@ public class WebSettings {
     public synchronized void setPluginsPath(String pluginsPath) {
         if (pluginsPath != null && !pluginsPath.equals(mPluginsPath)) {
             mPluginsPath = pluginsPath;
+            postSync();
+        }
+    }
+
+    /**
+     * Tell the WebView to enable Application Caches API.
+     * @param flag True if the WebView should enable Application Caches.
+     * @hide pending api council approval
+     */
+    public synchronized void setAppCacheEnabled(boolean flag) {
+        if (mAppCacheEnabled != flag) {
+            mAppCacheEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * Set a custom path to the Application Caches files. The client
+     * must ensure it exists before this call.
+     * @param appCachePath String path to the directory containing Application
+     * Caches files. The appCache path can be the empty string but should not
+     * be null. Passing null for this parameter will result in a no-op.
+     * @hide pending api council approval
+     */
+    public synchronized void setAppCachePath(String appCachePath) {
+        if (appCachePath != null && !appCachePath.equals(mAppCachePath)) {
+            mAppCachePath = appCachePath;
             postSync();
         }
     }
