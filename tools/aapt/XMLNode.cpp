@@ -486,6 +486,7 @@ XMLNode::XMLNode(const String8& filename, const String16& s1, const String16& s2
 XMLNode::XMLNode(const String8& filename)
     : mFilename(filename)
 {
+    memset(&mCharsValue, 0, sizeof(mCharsValue));
 }
 
 XMLNode::type XMLNode::getType() const

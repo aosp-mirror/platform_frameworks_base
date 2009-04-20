@@ -45,13 +45,6 @@ static String8 parseResourceName(const String8& leaf)
     }
 }
 
-class ResourceTypeSet : public RefBase,
-                        public KeyedVector<String8,sp<AaptGroup> >
-{
-public:
-    ResourceTypeSet();
-};
-
 ResourceTypeSet::ResourceTypeSet()
     :RefBase(),
      KeyedVector<String8,sp<AaptGroup> >()
@@ -1055,6 +1048,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
                 printf("  Writing public definitions to %s.\n", bundle->getPublicOutputFile());
             }
             table.writePublicDefinitions(String16(assets->getPackage()), fp);
+            fclose(fp);
         }
 
         NOISY(
@@ -1072,7 +1066,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             return err;
         }
     }
-
     return err;
 }
 
