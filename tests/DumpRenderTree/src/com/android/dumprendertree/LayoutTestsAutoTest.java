@@ -16,24 +16,11 @@
 
 package com.android.dumprendertree;
 
-import android.app.Activity;
 import android.app.Instrumentation;
-import android.app.Instrumentation.ActivityMonitor;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
-
-import android.util.Log;
-import android.view.KeyEvent;
-import android.webkit.WebSettings;
-
 import android.os.Bundle;
-import android.os.Message;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-
-import com.android.dumprendertree.TestShellActivity;
+import android.util.Log;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -141,6 +128,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     private Vector<String> mTestList;
     private boolean mRebaselineResults;
     private String mTestPathPrefix;
+    private boolean mFinished;
     
     public LayoutTestsAutoTest() {
       super("com.android.dumprendertree", TestShellActivity.class);
@@ -290,6 +278,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         activity.setCallback(new TestShellCallback() {
             public void finished() {
                 synchronized (LayoutTestsAutoTest.this) {
+                    mFinished = true;
                     LayoutTestsAutoTest.this.notifyAll();
                 }
             }         
@@ -306,6 +295,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             resultFile = getAndroidExpectedResultFile(expectedResultFile);
         }
         
+        mFinished = false;
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setClass(activity, TestShellActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -316,9 +306,11 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
       
         // Wait until done.
         synchronized (this) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) { }
+            while(!mFinished){
+                try {
+                    this.wait();
+                } catch (InterruptedException e) { }
+            }
         }
         
         if (!mRebaselineResults) {

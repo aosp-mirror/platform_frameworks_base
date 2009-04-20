@@ -37,6 +37,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
     private final static String LOGTAG = "LoadTest";
     private final static String LOAD_TEST_RESULT = "/sdcard/load_test_result.txt";
+    private boolean mFinished;
 
     public LoadTestsAutoTest() {
         super("com.android.dumprendertree", TestShellActivity.class);
@@ -124,11 +125,13 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         activity.setCallback(new TestShellCallback() {
             public void finished() {
                 synchronized (LoadTestsAutoTest.this) {
+                    mFinished = true;
                     LoadTestsAutoTest.this.notifyAll();
                 }
             }
         });
 
+        mFinished = false;
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setClass(activity, TestShellActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -139,9 +142,11 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
         // Wait until done.
         synchronized (this) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) { }
+            while(!mFinished) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) { }
+            }
         }
     }
 }
