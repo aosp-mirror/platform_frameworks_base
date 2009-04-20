@@ -94,10 +94,10 @@ status_t ZipFile::open(const char* zipFileName, int flags)
     }
     mZipFp = fopen(zipFileName, openflags);
     if (mZipFp == NULL) {
-		int err = errno;
-		LOGD("fopen failed: %d\n", err);
+        int err = errno;
+        LOGD("fopen failed: %d\n", err);
         return errnoToStatus(err);
-	}
+    }
 
     status_t result;
     if (!newArchive) {
@@ -221,8 +221,8 @@ status_t ZipFile::readCentralDir(void)
 
     buf = new unsigned char[EndOfCentralDir::kMaxEOCDSearch];
     if (buf == NULL) {
-		LOGD("Failure allocating %d bytes for EOCD search",
-			 EndOfCentralDir::kMaxEOCDSearch);
+        LOGD("Failure allocating %d bytes for EOCD search",
+             EndOfCentralDir::kMaxEOCDSearch);
         result = NO_MEMORY;
         goto bail;
     }
@@ -235,7 +235,7 @@ status_t ZipFile::readCentralDir(void)
         readAmount = (long) fileLength;
     }
     if (fseek(mZipFp, seekStart, SEEK_SET) != 0) {
-		LOGD("Failure seeking to end of zip at %ld", (long) seekStart);
+        LOGD("Failure seeking to end of zip at %ld", (long) seekStart);
         result = UNKNOWN_ERROR;
         goto bail;
     }
@@ -265,9 +265,9 @@ status_t ZipFile::readCentralDir(void)
     /* extract eocd values */
     result = mEOCD.readBuf(buf + i, readAmount - i);
     if (result != NO_ERROR) {
-		LOGD("Failure reading %ld bytes of EOCD values", readAmount - i);
+        LOGD("Failure reading %ld bytes of EOCD values", readAmount - i);
         goto bail;
-	}
+    }
     //mEOCD.dump();
 
     if (mEOCD.mDiskNumber != 0 || mEOCD.mDiskWithCentralDir != 0 ||
@@ -293,8 +293,8 @@ status_t ZipFile::readCentralDir(void)
      * we're hoping to preserve.
      */
     if (fseek(mZipFp, mEOCD.mCentralDirOffset, SEEK_SET) != 0) {
-		LOGD("Failure seeking to central dir offset %ld\n",
-			 mEOCD.mCentralDirOffset);
+        LOGD("Failure seeking to central dir offset %ld\n",
+             mEOCD.mCentralDirOffset);
         result = UNKNOWN_ERROR;
         goto bail;
     }
@@ -743,61 +743,61 @@ status_t ZipFile::compressFpToFp(FILE* dstFp, FILE* srcFp,
     const void* data, size_t size, unsigned long* pCRC32)
 {
     status_t result = NO_ERROR;
-	const size_t kBufSize = 32768;
-	unsigned char* inBuf = NULL;
-	unsigned char* outBuf = NULL;
-	z_stream zstream;
+    const size_t kBufSize = 32768;
+    unsigned char* inBuf = NULL;
+    unsigned char* outBuf = NULL;
+    z_stream zstream;
     bool atEof = false;     // no feof() aviailable yet
-	unsigned long crc;
-	int zerr;
+    unsigned long crc;
+    int zerr;
 
-	/*
-	 * Create an input buffer and an output buffer.
-	 */
-	inBuf = new unsigned char[kBufSize];
-	outBuf = new unsigned char[kBufSize];
-	if (inBuf == NULL || outBuf == NULL) {
-		result = NO_MEMORY;
-		goto bail;
-	}
+    /*
+     * Create an input buffer and an output buffer.
+     */
+    inBuf = new unsigned char[kBufSize];
+    outBuf = new unsigned char[kBufSize];
+    if (inBuf == NULL || outBuf == NULL) {
+        result = NO_MEMORY;
+        goto bail;
+    }
 
-	/*
-	 * Initialize the zlib stream.
-	 */
-	memset(&zstream, 0, sizeof(zstream));
-	zstream.zalloc = Z_NULL;
-	zstream.zfree = Z_NULL;
-	zstream.opaque = Z_NULL;
-	zstream.next_in = NULL;
-	zstream.avail_in = 0;
-	zstream.next_out = outBuf;
-	zstream.avail_out = kBufSize;
-	zstream.data_type = Z_UNKNOWN;
+    /*
+     * Initialize the zlib stream.
+     */
+    memset(&zstream, 0, sizeof(zstream));
+    zstream.zalloc = Z_NULL;
+    zstream.zfree = Z_NULL;
+    zstream.opaque = Z_NULL;
+    zstream.next_in = NULL;
+    zstream.avail_in = 0;
+    zstream.next_out = outBuf;
+    zstream.avail_out = kBufSize;
+    zstream.data_type = Z_UNKNOWN;
 
-	zerr = deflateInit2(&zstream, Z_BEST_COMPRESSION,
-		Z_DEFLATED, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY);
-	if (zerr != Z_OK) {
-		result = UNKNOWN_ERROR;
-		if (zerr == Z_VERSION_ERROR) {
-			LOGE("Installed zlib is not compatible with linked version (%s)\n",
-				ZLIB_VERSION);
-		} else {
-			LOGD("Call to deflateInit2 failed (zerr=%d)\n", zerr);
-		}
-		goto bail;
-	}
+    zerr = deflateInit2(&zstream, Z_BEST_COMPRESSION,
+        Z_DEFLATED, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY);
+    if (zerr != Z_OK) {
+        result = UNKNOWN_ERROR;
+        if (zerr == Z_VERSION_ERROR) {
+            LOGE("Installed zlib is not compatible with linked version (%s)\n",
+                ZLIB_VERSION);
+        } else {
+            LOGD("Call to deflateInit2 failed (zerr=%d)\n", zerr);
+        }
+        goto bail;
+    }
 
- 	crc = crc32(0L, Z_NULL, 0);
+    crc = crc32(0L, Z_NULL, 0);
 
-	/*
-	 * Loop while we have data.
-	 */
-	do {
-		size_t getSize;
-		int flush;
+    /*
+     * Loop while we have data.
+     */
+    do {
+        size_t getSize;
+        int flush;
 
-		/* only read if the input buffer is empty */
-		if (zstream.avail_in == 0 && !atEof) {
+        /* only read if the input buffer is empty */
+        if (zstream.avail_in == 0 && !atEof) {
             LOGV("+++ reading %d bytes\n", (int)kBufSize);
             if (data) {
                 getSize = size > kBufSize ? kBufSize : size;
@@ -817,54 +817,54 @@ status_t ZipFile::compressFpToFp(FILE* dstFp, FILE* srcFp,
                 atEof = true;
             }
 
-			crc = crc32(crc, inBuf, getSize);
+            crc = crc32(crc, inBuf, getSize);
 
-			zstream.next_in = inBuf;
-			zstream.avail_in = getSize;
-		}
+            zstream.next_in = inBuf;
+            zstream.avail_in = getSize;
+        }
 
-		if (atEof)
-			flush = Z_FINISH;       /* tell zlib that we're done */
-		else
-			flush = Z_NO_FLUSH;     /* more to come! */
+        if (atEof)
+            flush = Z_FINISH;       /* tell zlib that we're done */
+        else
+            flush = Z_NO_FLUSH;     /* more to come! */
 
-		zerr = deflate(&zstream, flush);
-		if (zerr != Z_OK && zerr != Z_STREAM_END) {
-			LOGD("zlib deflate call failed (zerr=%d)\n", zerr);
-			result = UNKNOWN_ERROR;
-			goto z_bail;
-		}
+        zerr = deflate(&zstream, flush);
+        if (zerr != Z_OK && zerr != Z_STREAM_END) {
+            LOGD("zlib deflate call failed (zerr=%d)\n", zerr);
+            result = UNKNOWN_ERROR;
+            goto z_bail;
+        }
 
-		/* write when we're full or when we're done */
-		if (zstream.avail_out == 0 ||
-			(zerr == Z_STREAM_END && zstream.avail_out != (uInt) kBufSize))
-		{
-			LOGV("+++ writing %d bytes\n", (int) (zstream.next_out - outBuf));
+        /* write when we're full or when we're done */
+        if (zstream.avail_out == 0 ||
+            (zerr == Z_STREAM_END && zstream.avail_out != (uInt) kBufSize))
+        {
+            LOGV("+++ writing %d bytes\n", (int) (zstream.next_out - outBuf));
             if (fwrite(outBuf, 1, zstream.next_out - outBuf, dstFp) !=
                 (size_t)(zstream.next_out - outBuf))
             {
-				LOGD("write %d failed in deflate\n",
+                LOGD("write %d failed in deflate\n",
                     (int) (zstream.next_out - outBuf));
-				goto z_bail;
-			}
+                goto z_bail;
+            }
 
-			zstream.next_out = outBuf;
-			zstream.avail_out = kBufSize;
-		}
-	} while (zerr == Z_OK);
+            zstream.next_out = outBuf;
+            zstream.avail_out = kBufSize;
+        }
+    } while (zerr == Z_OK);
 
-	assert(zerr == Z_STREAM_END);       /* other errors should've been caught */
+    assert(zerr == Z_STREAM_END);       /* other errors should've been caught */
 
-	*pCRC32 = crc;
+    *pCRC32 = crc;
 
 z_bail:
-	deflateEnd(&zstream);        /* free up any allocated structures */
+    deflateEnd(&zstream);        /* free up any allocated structures */
 
 bail:
-	delete[] inBuf;
-	delete[] outBuf;
+    delete[] inBuf;
+    delete[] outBuf;
 
-	return result;
+    return result;
 }
 
 /*
@@ -1206,7 +1206,7 @@ bail:
 
 /*
  * ===========================================================================
- *		ZipFile::EndOfCentralDir
+ *      ZipFile::EndOfCentralDir
  * ===========================================================================
  */
 
