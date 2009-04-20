@@ -545,6 +545,7 @@ final class WebViewCore {
             "LOAD_DATA", // = 139;
             "TOUCH_UP", // = 140;
             "TOUCH_EVENT", // = 141;
+            "SET_ACTIVE", // = 142;
         };
 
     class EventHub {

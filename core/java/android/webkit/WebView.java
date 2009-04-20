@@ -3180,6 +3180,15 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
+        if (keyCode != KeyEvent.KEYCODE_SHIFT_LEFT
+                && keyCode != KeyEvent.KEYCODE_SHIFT_RIGHT) {
+            // turn off copy select if a shift-key combo is pressed
+            mExtendSelection = mShiftIsPressed = false;
+            if (mTouchMode == TOUCH_SELECT_MODE) {
+                mTouchMode = TOUCH_INIT_MODE;
+            }
+        }
+
         if (getSettings().getNavDump()) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_4:
