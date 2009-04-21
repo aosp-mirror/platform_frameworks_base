@@ -59,6 +59,7 @@ import com.google.android.collect.Maps;
  * instead one uses an instance of {@link AccountManager}, which can be accessed as follows:
  *    AccountManager accountManager =
  *      (AccountManager)context.getSystemService(Context.ACCOUNT_SERVICE)
+ * @hide
  */
 public class AccountManagerService extends IAccountManager.Stub {
     private static final String TAG = "AccountManagerService";
@@ -79,7 +80,6 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     private final AccountAuthenticatorCache mAuthenticatorCache;
     private final AuthenticatorBindHelper mBindHelper;
-    public final HashMap<AuthTokenKey, String> mAuthTokenCache = Maps.newHashMap();
     private final DatabaseHelper mOpenHelper;
     private final SimWatcher mSimWatcher;
 
@@ -300,7 +300,7 @@ public class AccountManagerService extends IAccountManager.Stub {
                     }
                 }
                 db.setTransactionSuccessful();
-                mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
+                sendAccountsChangedBroadcast();
                 return true;
             } finally {
                 db.endTransaction();
@@ -321,22 +321,10 @@ public class AccountManagerService extends IAccountManager.Stub {
     public void removeAccount(Account account) {
         long identityToken = clearCallingIdentity();
         try {
-            synchronized (mAuthTokenCache) {
-                ArrayList<AuthTokenKey> keysToRemove = Lists.newArrayList();
-                for (AuthTokenKey key : mAuthTokenCache.keySet()) {
-                    if (key.mAccount.equals(account)) {
-                        keysToRemove.add(key);
-                    }
-                }
-                for (AuthTokenKey key : keysToRemove) {
-                    mAuthTokenCache.remove(key);
-                }
-
-                final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-                db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                        new String[]{account.mName, account.mType});
-                mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
-            }
+            final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+            db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                    new String[]{account.mName, account.mType});
+            sendAccountsChangedBroadcast();
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -359,31 +347,26 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     private void invalidateAuthToken(SQLiteDatabase db, String accountType, String authToken) {
-        synchronized (mAuthTokenCache) {
-            Cursor cursor = db.rawQuery(
-                    "SELECT " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_ID
-                            + ", " + TABLE_ACCOUNTS + "." + ACCOUNTS_NAME
-                            + ", " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_TYPE
-                            + " FROM " + TABLE_ACCOUNTS
-                            + " JOIN " + TABLE_AUTHTOKENS
-                            + " ON " + TABLE_ACCOUNTS + "." + ACCOUNTS_ID
-                            + " = " + AUTHTOKENS_ACCOUNTS_ID
-                            + " WHERE " + AUTHTOKENS_AUTHTOKEN + " = ? AND "
-                            + TABLE_ACCOUNTS + "." + ACCOUNTS_TYPE + " = ?",
-                    new String[]{authToken, accountType});
-            try {
-                while (cursor.moveToNext()) {
-                    long authTokenId = cursor.getLong(0);
-                    String accountName = cursor.getString(1);
-                    String authTokenType = cursor.getString(2);
-                    AuthTokenKey key = new AuthTokenKey(new Account(accountName, accountType),
-                            authTokenType);
-                    mAuthTokenCache.remove(key);
-                    db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ID + "=" + authTokenId, null);
-                }
-            } finally {
-                cursor.close();
+        Cursor cursor = db.rawQuery(
+                "SELECT " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_ID
+                        + ", " + TABLE_ACCOUNTS + "." + ACCOUNTS_NAME
+                        + ", " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_TYPE
+                        + " FROM " + TABLE_ACCOUNTS
+                        + " JOIN " + TABLE_AUTHTOKENS
+                        + " ON " + TABLE_ACCOUNTS + "." + ACCOUNTS_ID
+                        + " = " + AUTHTOKENS_ACCOUNTS_ID
+                        + " WHERE " + AUTHTOKENS_AUTHTOKEN + " = ? AND "
+                        + TABLE_ACCOUNTS + "." + ACCOUNTS_TYPE + " = ?",
+                new String[]{authToken, accountType});
+        try {
+            while (cursor.moveToNext()) {
+                long authTokenId = cursor.getLong(0);
+                String accountName = cursor.getString(1);
+                String authTokenType = cursor.getString(2);
+                db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ID + "=" + authTokenId, null);
             }
+        } finally {
+            cursor.close();
         }
     }
 
@@ -391,8 +374,18 @@ public class AccountManagerService extends IAccountManager.Stub {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            if (saveAuthTokenToDatabase(db, account, type, authToken)) {
-                mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
+            long accountId = getAccountId(db, account);
+            if (accountId < 0) {
+                return false;
+            }
+            db.delete(TABLE_AUTHTOKENS,
+                    AUTHTOKENS_ACCOUNTS_ID + "=" + accountId + " AND " + AUTHTOKENS_TYPE + "=?",
+                    new String[]{type});
+            ContentValues values = new ContentValues();
+            values.put(AUTHTOKENS_ACCOUNTS_ID, accountId);
+            values.put(AUTHTOKENS_TYPE, type);
+            values.put(AUTHTOKENS_AUTHTOKEN, authToken);
+            if (db.insert(TABLE_AUTHTOKENS, AUTHTOKENS_AUTHTOKEN, values) >= 0) {
                 db.setTransactionSuccessful();
                 return true;
             }
@@ -400,22 +393,6 @@ public class AccountManagerService extends IAccountManager.Stub {
         } finally {
             db.endTransaction();
         }
-    }
-
-    private boolean saveAuthTokenToDatabase(SQLiteDatabase db, Account account, 
-            String type, String authToken) {
-        long accountId = getAccountId(db, account);
-        if (accountId < 0) {
-            return false;
-        }
-        db.delete(TABLE_AUTHTOKENS,
-                AUTHTOKENS_ACCOUNTS_ID + "=" + accountId + " AND " + AUTHTOKENS_TYPE + "=?",
-                new String[]{type});
-        ContentValues values = new ContentValues();
-        values.put(AUTHTOKENS_ACCOUNTS_ID, accountId);
-        values.put(AUTHTOKENS_TYPE, type);
-        values.put(AUTHTOKENS_AUTHTOKEN, authToken);
-        return db.insert(TABLE_AUTHTOKENS, AUTHTOKENS_AUTHTOKEN, values) >= 0;
     }
 
     public String readAuthTokenFromDatabase(Account account, String authTokenType) {
@@ -436,13 +413,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     public String peekAuthToken(Account account, String authTokenType) {
         long identityToken = clearCallingIdentity();
         try {
-            synchronized (mAuthTokenCache) {
-                AuthTokenKey key = new AuthTokenKey(account, authTokenType);
-                if (mAuthTokenCache.containsKey(key)) {
-                    return mAuthTokenCache.get(key);
-                }
-                return readAuthTokenFromDatabase(account, authTokenType);
-            }
+            return readAuthTokenFromDatabase(account, authTokenType);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -465,10 +436,14 @@ public class AccountManagerService extends IAccountManager.Stub {
             mOpenHelper.getWritableDatabase().update(TABLE_ACCOUNTS, values,
                     ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
                     new String[]{account.mName, account.mType});
-            mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
+            sendAccountsChangedBroadcast();
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private void sendAccountsChangedBroadcast() {
+        mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
     }
 
     public void clearPassword(Account account) {
@@ -518,7 +493,7 @@ public class AccountManagerService extends IAccountManager.Stub {
             final boolean expectActivityLaunch, final Bundle loginOptions) {
         long identityToken = clearCallingIdentity();
         try {
-            String authToken = getCachedAuthToken(account, authTokenType);
+            String authToken = readAuthTokenFromDatabase(account, authTokenType);
             if (authToken != null) {
                 try {
                     Bundle result = new Bundle();
@@ -578,19 +553,24 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
 
-    public void addAcount(final IAccountManagerResponse response,
-            final String accountType, final String authTokenType,
+    public void addAcount(final IAccountManagerResponse response, final String accountType,
+            final String authTokenType, final String[] requiredFeatures,
             final boolean expectActivityLaunch, final Bundle options) {
         long identityToken = clearCallingIdentity();
         try {
             new Session(response, accountType, expectActivityLaunch) {
                 public void run() throws RemoteException {
-                    mAuthenticator.addAccount(this, mAccountType, authTokenType, options);
+                    mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures, 
+                            options);
                 }
 
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", addAccount"
-                            + ", accountType " + accountType;
+                            + ", accountType " + accountType
+                            + ", requiredFeatures "
+                            + (requiredFeatures != null
+                              ? TextUtils.join(",", requiredFeatures)
+                              : null);
                 }
             }.bind();
         } finally {
@@ -674,24 +654,101 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    private boolean cacheAuthToken(Account account, String authTokenType, String authToken) {
-        synchronized (mAuthTokenCache) {
-            if (saveAuthTokenToDatabase(account, authTokenType, authToken)) {
-                final AuthTokenKey key = new AuthTokenKey(account, authTokenType);
-                mAuthTokenCache.put(key, authToken);
-                return true;
-            } else {
-                return false;
+    private class GetAccountsByTypeAndFeatureSession extends Session {
+        private final String[] mFeatures;
+        private volatile Account[] mAccountsOfType = null;
+        private volatile ArrayList<Account> mAccountsWithFeatures = null;
+        private volatile int mCurrentAccount = 0;
+
+        public GetAccountsByTypeAndFeatureSession(IAccountManagerResponse response,
+            String type, String[] features) {
+            super(response, type, false /* expectActivityLaunch */);
+            mFeatures = features;
+        }
+
+        public void run() throws RemoteException {
+            mAccountsOfType = getAccountsByType(mAccountType);
+            // check whether each account matches the requested features
+            mAccountsWithFeatures = new ArrayList<Account>(mAccountsOfType.length);
+            mCurrentAccount = 0;
+
+            checkAccount();
+        }
+
+        public void checkAccount() {
+            if (mCurrentAccount >= mAccountsOfType.length) {
+                sendResult();
+                return;
             }
+
+            try {
+                mAuthenticator.hasFeatures(this, mAccountsOfType[mCurrentAccount], mFeatures);
+            } catch (RemoteException e) {
+                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION, "remote exception");
+            }
+        }
+
+        public void onResult(Bundle result) {
+            mNumResults++;
+            if (result == null) {
+                onError(Constants.ERROR_CODE_INVALID_RESPONSE, "null bundle");
+                return;
+            }
+            if (result.getBoolean(Constants.BOOLEAN_RESULT_KEY, false)) {
+                mAccountsWithFeatures.add(mAccountsOfType[mCurrentAccount]);
+            }
+            mCurrentAccount++;
+            checkAccount();
+        }
+
+        public void sendResult() {
+            IAccountManagerResponse response = getResponseAndClose();
+            if (response != null) {
+                try {
+                    Account[] accounts = new Account[mAccountsWithFeatures.size()];
+                    for (int i = 0; i < accounts.length; i++) {
+                        accounts[i] = mAccountsWithFeatures.get(i);
+                    }
+                    Bundle result = new Bundle();
+                    result.putParcelableArray(Constants.ACCOUNTS_KEY, accounts);
+                    response.onResult(result);
+                } catch (RemoteException e) {
+                    // if the caller is dead then there is no one to care about remote exceptions
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "failure while notifying response", e);
+                    }
+                }
+            }
+        }
+
+
+        protected String toDebugString(long now) {
+            return super.toDebugString(now) + ", getAccountsByTypeAndFeatures"
+                    + ", " + (mFeatures != null ? TextUtils.join(",", mFeatures) : null);
+        }
+    }
+    public void getAccountsByTypeAndFeatures(IAccountManagerResponse response,
+            String type, String[] features) {
+        if (type == null) {
+            if (response != null) {
+                try {
+                    response.onError(Constants.ERROR_CODE_BAD_ARGUMENTS, "type is null");
+                } catch (RemoteException e) {
+                    // ignore this
+                }
+            }
+            return;
+        }
+        long identityToken = clearCallingIdentity();
+        try {
+            new GetAccountsByTypeAndFeatureSession(response, type, features).bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
         }
     }
 
-    private String getCachedAuthToken(Account account, String authTokenType) {
-        synchronized (mAuthTokenCache) {
-            final AuthTokenKey key = new AuthTokenKey(account, authTokenType);
-            if (!mAuthTokenCache.containsKey(key)) return null;
-            return mAuthTokenCache.get(key);
-        }
+    private boolean cacheAuthToken(Account account, String authTokenType, String authToken) {
+        return saveAuthTokenToDatabase(account, authTokenType, authToken);
     }
 
     private long getAccountId(SQLiteDatabase db, Account account) {
@@ -743,7 +800,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         final boolean mExpectActivityLaunch;
         final long mCreationTime;
 
-        private int mNumResults = 0;
+        public int mNumResults = 0;
         private int mNumRequestContinued = 0;
         private int mNumErrors = 0;
 
@@ -754,6 +811,7 @@ public class AccountManagerService extends IAccountManager.Stub {
                 boolean expectActivityLaunch) {
             super();
             if (response == null) throw new IllegalArgumentException("response is null");
+            if (accountType == null) throw new IllegalArgumentException("accountType is null");
             mResponse = response;
             mAccountType = accountType;
             mExpectActivityLaunch = expectActivityLaunch;
@@ -1071,7 +1129,7 @@ public class AccountManagerService extends IAccountManager.Stub {
                 try {
                     db.execSQL("DELETE from " + TABLE_AUTHTOKENS);
                     db.execSQL("UPDATE " + TABLE_ACCOUNTS + " SET " + ACCOUNTS_PASSWORD + " = ''");
-                    mContext.sendBroadcast(ACCOUNTS_CHANGED_INTENT);
+                    sendAccountsChangedBroadcast();
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();

@@ -81,7 +81,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals(a22, accounts[4]);
         assertEquals(a32, accounts[5]);
 
-        accounts = ams.getAccountsByType("type1");
+        accounts = ams.getAccountsByType("type1" );
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(3, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -90,7 +90,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         ams.removeAccount(a21);
 
-        accounts = ams.getAccountsByType("type1");
+        accounts = ams.getAccountsByType("type1" );
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(2, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -176,13 +176,6 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertNull(ams.peekAuthToken(a12, "att2"));
         assertEquals("a12_att3", ams.peekAuthToken(a12, "att3"));
 
-        // check that the authtoken cache is consistent with the database
-        assertEquals(5, ams.mAuthTokenCache.size());
-        for (Map.Entry<AccountManagerService.AuthTokenKey, String> entry
-                : ams.mAuthTokenCache.entrySet()) {
-            assertEquals(entry.getValue(), ams.readAuthTokenFromDatabase(
-                    entry.getKey().mAccount, entry.getKey().mAuthTokenType));
-        }
         assertNull(ams.readAuthTokenFromDatabase(a12, "att2"));
     }
 }
