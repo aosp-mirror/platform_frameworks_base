@@ -807,7 +807,7 @@ import android.view.KeyEvent;
  * this way would be if you wish to partition it into separate sections with different search 
  * behaviors;  Otherwise this configuration is not recommended.
  * 
- * <p><b>Additional Metadata for search suggestions.</b>  If you have defined a content provider
+ * <p><b>Additional metadata for search suggestions.</b>  If you have defined a content provider
  * to generate search suggestions, you'll need to publish it to the system, and you'll need to 
  * provide a bit of additional XML metadata in order to configure communications with it.
  * 
@@ -880,7 +880,7 @@ import android.view.KeyEvent;
  *     </tbody>
  * </table>
  * 
- * <p><b>Additional Metadata for search action keys.</b>  For each action key that you would like to
+ * <p><b>Additional metadata for search action keys.</b>  For each action key that you would like to
  * define, you'll need to add an additional element defining that key, and using the attributes
  * discussed in <a href="#ActionKeys">Action Keys</a>.  A simple example is shown here:
  * 
@@ -950,6 +950,84 @@ import android.view.KeyEvent;
  *             {@link android.content.Intent#getStringExtra 
  *             getStringExtra(SearchManager.ACTION_MSG)}.  <i>If the data does not exist for the
  *             selection suggestion, the action key will be ignored.</i></td>
+ *         <td align="center">No</td>
+ *     </tr>
+ * 
+ *     </tbody>
+ * </table>
+ * 
+ * <p><b>Additional metadata for enabling voice search.</b>  To enable voice search for your
+ * activity, you can add fields to the metadata that enable and configure voice search.  When
+ * enabled (and available on the device), a voice search button will be displayed in the
+ * Search UI.  Clicking this button will launch a voice search activity.  When the user has
+ * finished speaking, the voice search phrase will be transcribed into text and presented to the
+ * searchable activity as if it were a typed query.
+ * 
+ * <p>Elements of search metadata that support voice search:
+ * <table border="2" width="85%" align="center" frame="hsides" rules="rows">
+ *
+ *     <thead>
+ *     <tr><th>Attribute</th> <th>Description</th> <th>Required?</th></tr>
+ *     </thead>
+ *     
+ *     <tr><th>android:voiceSearchMode</th>
+ *         <td>If provided and non-zero, enables voice search.  (Voice search may not be
+ *             provided by the device, in which case these flags will have no effect.)  The
+ *             following mode bits are defined:
+ *             <table border="2" align="center" frame="hsides" rules="rows">
+ *                 <tbody>
+ *                 <tr><th>showVoiceSearchButton</th>
+ *                     <td>If set, display a voice search button.  This only takes effect if voice
+ *                         search is available on the device.  If set, then launchWebSearch or
+ *                         launchRecognizer must also be set.</td>
+ *                 </tr>
+ *                 <tr><th>launchWebSearch</th>
+ *                     <td>If set, the voice search button will take the user directly to a 
+ *                         built-in voice web search activity.  Most applications will not use this
+ *                         flag, as it will take the user away from the activity in which search
+ *                         was invoked.</td>
+ *                 </tr>
+ *                 <tr><th>launchRecognizer</th>
+ *                     <td>If set, the voice search button will take the user directly to a
+ *                         built-in voice recording activity.  This activity will prompt the user
+ *                         to speak, transcribe the spoken text, and forward the resulting query
+ *                         text to the searchable activity, just as if the user had typed it into
+ *                         the search UI and clicked the search button.</td>
+ *                 </tr>
+ *                 </tbody>
+ *            </table></td>
+ *         <td align="center">No</td>
+ *     </tr>
+ *     
+ *     <tr><th>android:voiceLanguageModel</th>
+ *         <td>If provided, this specifies the language model that should be used by the voice
+ *             recognition system.  
+ *             See {@link android.speech.RecognizerIntent#EXTRA_LANGUAGE_MODEL}
+ *             for more information.  If not provided, the default value
+ *             {@link android.speech.RecognizerIntent#LANGUAGE_MODEL_FREE_FORM} will be used.</td>
+ *         <td align="center">No</td>
+ *     </tr>
+ *     
+ *     <tr><th>android:voicePromptText</th>
+ *         <td>If provided, this specifies a prompt that will be displayed during voice input.
+ *             (If not provided, a default prompt will be displayed.)</td>
+ *         <td align="center">No</td>
+ *     </tr>
+ *     
+ *     <tr><th>android:voiceLanguage</th>
+ *         <td>If provided, this specifies the spoken language to be expected.  This is only
+ *             needed if it is different from the current value of
+ *             {@link java.util.Locale#getDefault()}.
+ *             </td>
+ *         <td align="center">No</td>
+ *     </tr>
+ *     
+ *     <tr><th>android:voiceMaxResults</th>
+ *         <td>If provided, enforces the maximum number of results to return, including the "best"
+ *             result which will always be provided as the SEARCH intent's primary query.  Must be
+ *             one or greater.  Use {@link android.speech.RecognizerIntent#EXTRA_RESULTS} 
+ *             to get the results from the intent.  If not provided, the recognizer will choose
+ *             how many results to return.</td>
  *         <td align="center">No</td>
  *     </tr>
  * 
