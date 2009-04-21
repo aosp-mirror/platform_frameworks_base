@@ -165,7 +165,6 @@ public class WifiService extends IWifiManager.Stub {
      * Character buffer used to parse scan results (optimization)
      */
     private static final int SCAN_RESULT_BUFFER_SIZE = 512;
-    private char[] mScanResultBuffer;
     private boolean mNeedReconfig;
 
     /*
@@ -203,8 +202,6 @@ public class WifiService extends IWifiManager.Stub {
                     return SCAN_RESULT_CACHE_SIZE < this.size();
                 }
             };
-
-        mScanResultBuffer = new char [SCAN_RESULT_BUFFER_SIZE];
 
         HandlerThread wifiThread = new HandlerThread("WifiService");
         wifiThread.start();
@@ -1217,61 +1214,13 @@ public class WifiService extends IWifiManager.Stub {
                     lineBeg = lineEnd + 1;
                     continue;
                 }
-                int lineLen = lineEnd - lineBeg;
-                if (0 < lineLen && lineLen <= SCAN_RESULT_BUFFER_SIZE) {
-                    int scanResultLevel = 0;
-                    /*
-                     * At most one thread should have access to the buffer at a time!
-                     */
-                    synchronized(mScanResultBuffer) {
-                        boolean parsingScanResultLevel = false;
-                        for (int i = lineBeg; i < lineEnd; ++i) {
-                            char ch = reply.charAt(i);
-                            /*
-                             * Assume that the signal level starts with a '-'
-                             */
-                            if (ch == '-') {
-                                /*
-                                 * Skip whatever instances of '-' we may have
-                                 * after we parse the signal level
-                                 */
-                                parsingScanResultLevel = (scanResultLevel == 0);
-                            } else if (parsingScanResultLevel) {
-                                int digit = Character.digit(ch, 10);
-                                if (0 <= digit) {
-                                    scanResultLevel =
-                                        10 * scanResultLevel + digit;
-                                    /*
-                                     * Replace the signal level number in
-                                     * the string with 0's for caching
-                                     */
-                                    ch = '0';
-                                } else {
-                                    /*
-                                     * Reset the flag if we meet a non-digit
-                                     * character
-                                     */
-                                    parsingScanResultLevel = false;
-                                }
-                            }
-                            mScanResultBuffer[i - lineBeg] = ch;
-                        }
-                        if (scanResultLevel != 0) {
-                            ScanResult scanResult = parseScanResult(
-                                new String(mScanResultBuffer, 0, lineLen));
-                            if (scanResult != null) {
-                              scanResult.level = -scanResultLevel;
-                              scanList.add(scanResult);
-                            }
-                        } else if (DBG) {
-                            Log.w(TAG,
-                                  "ScanResult.level=0: misformatted scan result?");
-                        }
-                    }
-                } else if (0 < lineLen) {
-                    if (DBG) {
-                        Log.w(TAG, "Scan result line is too long: " +
-                              (lineEnd - lineBeg) + ", skipping the line!");
+                if (lineEnd > lineBeg) {
+                    String line = reply.substring(lineBeg, lineEnd);
+                    ScanResult scanResult = parseScanResult(line);
+                    if (scanResult != null) {
+                        scanList.add(scanResult);
+                    } else if (DBG) {
+                        Log.w(TAG, "misformatted scan result for: " + line);
                     }
                 }
                 lineBeg = lineEnd + 1;
@@ -1294,21 +1243,29 @@ public class WifiService extends IWifiManager.Stub {
              * must synchronized here!
              */
             synchronized (mScanResultCache) {
-                scanResult = mScanResultCache.get(line);
-                if (scanResult == null) {
-                    String[] result = scanResultPattern.split(line);
-                    if (3 <= result.length && result.length <= 5) {
-                        // bssid | frequency | level | flags | ssid
-                        int frequency;
-                        int level;
-                        try {
-                            frequency = Integer.parseInt(result[1]);
-                            level = Integer.parseInt(result[2]);
-                        } catch (NumberFormatException e) {
-                            frequency = 0;
-                            level = 0;
-                        }
+                String[] result = scanResultPattern.split(line);
+                if (3 <= result.length && result.length <= 5) {
+                    String bssid = result[0];
+                    // bssid | frequency | level | flags | ssid
+                    int frequency;
+                    int level;
+                    try {
+                        frequency = Integer.parseInt(result[1]);
+                        level = Integer.parseInt(result[2]);
+                        /* some implementations avoid negative values by adding 256
+                         * so we need to adjust for that here.
+                         */
+                        if (level > 0) level -= 256;
+                    } catch (NumberFormatException e) {
+                        frequency = 0;
+                        level = 0;
+                    }
 
+                    // bssid is the hash key
+                    scanResult = mScanResultCache.get(bssid);
+                    if (scanResult != null) {
+                        scanResult.level = level;
+                    } else {
                         /*
                          * The formatting of the results returned by
                          * wpa_supplicant is intended to make the fields
@@ -1341,13 +1298,13 @@ public class WifiService extends IWifiManager.Stub {
                         if (0 < ssid.trim().length()) {
                             scanResult =
                                 new ScanResult(
-                                    ssid, result[0], flags, level, frequency);
-                            mScanResultCache.put(line, scanResult);
+                                    ssid, bssid, flags, level, frequency);
+                            mScanResultCache.put(bssid, scanResult);
                         }
-                    } else {
-                        Log.w(TAG, "Misformatted scan result text with " +
-                              result.length + " fields: " + line);
                     }
+                } else {
+                    Log.w(TAG, "Misformatted scan result text with " +
+                          result.length + " fields: " + line);
                 }
             }
         }
