@@ -541,7 +541,7 @@ public abstract class ContentResolver {
                      A null value will remove an existing field value.
      * @param where A filter to apply to rows before deleting, formatted as an SQL WHERE clause
                     (excluding the WHERE itself).
-     * @return the URL of the newly created row
+     * @return The number of rows updated.
      * @throws NullPointerException if uri or values are null
      */
     public final int update(Uri uri, ContentValues values, String where,
