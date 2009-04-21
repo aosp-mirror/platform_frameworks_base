@@ -388,7 +388,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 EventLog.List val = new EventLog.List(
                         dcTracker.getStateInString(),
                         (dcTracker.getAnyDataEnabled() ? 1 : 0) );
-                EventLog.writeEvent(TelephonyEventLog.EVENT_DATA_STATE_RADIO_OFF, val);
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF, val);
             }
             dcTracker.cleanConnectionBeforeRadioOff();
             
