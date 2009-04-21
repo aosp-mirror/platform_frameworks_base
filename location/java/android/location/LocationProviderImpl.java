@@ -259,10 +259,22 @@ public abstract class LocationProviderImpl extends LocationProvider {
     }
 
     /**
-     * Informs the location provider when a client is no longerlistening for location information
+     * Informs the location provider when a client is no longer listening for location information
      *
      * @param uid the uid of the client proces
      */
     public void removeListener(int uid) {
+    }
+
+    /**
+     * Informs the location provider when the location manager service has acquired its wake lock
+     */
+    public void wakeLockAcquired() {
+    }
+
+    /**
+     * Informs the location provider when the location manager service has released its wake lock
+     */
+    public void wakeLockReleased() {
     }
 }
