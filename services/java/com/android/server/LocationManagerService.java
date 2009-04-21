@@ -1831,8 +1831,12 @@ public class LocationManagerService extends ILocationManager.Stub {
         mWakeLockAcquireTime = SystemClock.elapsedRealtime();
         log("Acquired wakelock");
 
-        mNetworkLocationProvider.wakeLockAcquired();
-        mGpsLocationProvider.wakeLockAcquired();
+        if (mNetworkLocationProvider != null) {
+            mNetworkLocationProvider.wakeLockAcquired();
+        }
+        if (mGpsLocationProvider != null) {
+            mGpsLocationProvider.wakeLockAcquired();
+        }
     }
 
     private void releaseWakeLockLocked() {
@@ -1846,8 +1850,12 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private void releaseWakeLockXLocked() {
-        mNetworkLocationProvider.wakeLockReleased();
-        mGpsLocationProvider.wakeLockReleased();
+        if (mNetworkLocationProvider != null) {
+            mNetworkLocationProvider.wakeLockReleased();
+        }
+        if (mGpsLocationProvider != null) {
+            mGpsLocationProvider.wakeLockReleased();
+        }
 
         // Release wake lock
         mWakeLockAcquireTime = 0;
