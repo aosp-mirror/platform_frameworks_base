@@ -9,10 +9,10 @@ page.title=Welcome
 <img src="{@docRoot}images/android_icon_125.png" style="float:right; margin:1em 6em 6em;" />
 
 <p>If you've just downloaded the SDK, then continue with  
-<a href="{@docRoot}sdk/1.1_r1/installing.html">Installing the Android SDK</a>.</p>
+<a href="{@docRoot}sdk/{@sdkCurrent}/installing.html">Installing the Android SDK</a>.</p>
 
 <p>If you're upgrading from a previously installed version, then refer to the 
-<a href="{@docRoot}sdk/1.1_r1/upgrading.html">Upgrading</a> guide.</p>
+<a href="{@docRoot}sdk/{@sdkCurrent}/upgrading.html">Upgrading</a> guide.</p>
 
 <p>Once you've completed the SDK installation, you can start learning about
 development on the Android framework by reading the <a

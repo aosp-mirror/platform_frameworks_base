@@ -292,12 +292,6 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBRARIES,framework)
 
-web_docs_sample_code_flags := \
-		-hdf android.hasSamples 1 \
-		-samplecode samples/ApiDemos guide/samples/ApiDemos "API Demos" \
-		-samplecode samples/LunarLander guide/samples/LunarLander "Lunar Lander" \
-		-samplecode samples/NotePad guide/samples/NotePad "Note Pad"
-
 sample_dir := development/samples
 
 web_docs_sample_code_flags := \
@@ -309,6 +303,19 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/NotePad \
 		            guide/samples/NotePad "Note Pad"
 
+# SDK version identifiers used in the published docs. 
+
+# major[.minor] version for SDK. Typically identical to the 
+# most current Android platform version included in the SDK package. 
+framework_docs_SDK_VERSION :=  1.5
+# release version for SDK (ie "Release x")
+framework_docs_SDK_REL_ID :=   1
+framework_docs_SDK_CURRENT_DIR := $(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
+
+framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+		-hdf sdk.version $(framework_docs_SDK_VERSION) \
+		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
+		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR)
 
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
@@ -341,7 +348,7 @@ include $(BUILD_DROIDDOC)
 
 static_doc_index_redirect := $(out_dir)/index.html
 $(static_doc_index_redirect): \
-		$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
+	$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
 	$(hide) mkdir -p $(dir $@)
 	$(hide) $(ACP) $< $@
 
@@ -366,10 +373,10 @@ LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
 LOCAL_MODULE := online-sdk
 
 LOCAL_DROIDDOC_OPTIONS:= \
-	$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-	$(web_docs_sample_code_flags) \
-	-toroot / \
-    -hdf android.whichdoc online
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		$(web_docs_sample_code_flags) \
+		-toroot / \
+		-hdf android.whichdoc online
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
