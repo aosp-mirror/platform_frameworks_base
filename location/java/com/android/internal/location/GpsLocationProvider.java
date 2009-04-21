@@ -218,7 +218,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
                 if (Config.LOGD) {
                     Log.d(TAG, "state: " + state +  " apnName: " + apnName + " reason: " + reason);
                 }
-                if ("CONNECTED".equals(state)) {
+                if ("CONNECTED".equals(state) && apnName != null && apnName.length() > 0) {
                     mSuplApn = apnName;
                     if (mSuplDataConnectionState == SUPL_DATA_CONNECTION_OPENING) {
                         native_supl_data_conn_open(mSuplApn);
