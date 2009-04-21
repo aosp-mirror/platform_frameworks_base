@@ -701,8 +701,8 @@ If the latitudeSpan, longitudeSpan, and zoomLevel attributes are not consistent,
 
 <a name="filelist" id="filelist"></a><h2>List of Files for an Android Application</h2>
 <p>The following list describes the structure and files of an Android application.
-    Many of these files can be built for you (or stubbed out) by the activitycreator
-    application shipped in the tools/ menu of the SDK. </p>
+    Many of these files can be built for you (or stubbed out) by the android tool
+    shipped in the tools/ menu of the SDK. </p>
 <table width="100%" border="0">
     <tr>
         <td width="28%" valign="top">MyApp/<br /></td>
