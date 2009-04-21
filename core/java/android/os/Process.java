@@ -176,6 +176,26 @@ public class Process {
      */
     public static final int THREAD_PRIORITY_LESS_FAVORABLE = +1;
 
+    /**
+     * Default thread group - gets a 'normal' share of the CPU
+     * @hide
+     */
+    public static final int THREAD_GROUP_DEFAULT = 0;
+
+    /**
+     * Background non-interactive thread group - All threads in
+     * this group are scheduled with a reduced share of the CPU.
+     * @hide
+     */
+    public static final int THREAD_GROUP_BG_NONINTERACTIVE = 1;
+
+    /**
+     * Foreground 'boost' thread group - All threads in
+     * this group are scheduled with an increased share of the CPU
+     * @hide
+     **/
+    public static final int THREAD_GROUP_FG_BOOST = 2;
+
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
@@ -568,6 +588,21 @@ public class Process {
      * priority.
      */
     public static final native void setThreadPriority(int tid, int priority)
+            throws IllegalArgumentException, SecurityException;
+
+    /**
+     * Sets the scheduling group for a thread.
+     * @hide
+     * @param tid The indentifier of the thread/process to change.
+     * @param group The target group for this thread/process.
+     * 
+     * @throws IllegalArgumentException Throws IllegalArgumentException if
+     * <var>tid</var> does not exist.
+     * @throws SecurityException Throws SecurityException if your process does
+     * not have permission to modify the given thread, or to use the given
+     * priority.
+     */
+    public static final native void setThreadGroup(int tid, int group)
             throws IllegalArgumentException, SecurityException;
     
     /**

@@ -50,6 +50,16 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
+#define ENABLE_CGROUP_ERR_LOGGING 0
+
+/*
+ * List of cgroup names which map to ANDROID_TGROUP_ values in Thread.h
+ * and Process.java
+ * These names are used to construct the path to the cgroup control dir
+ */
+
+static const char *cgroup_names[] = { NULL, "bg_non_interactive", "fg_boost" };
+
 using namespace android;
 
 static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
@@ -72,6 +82,28 @@ static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
             break;
     }
 }
+
+static void signalExceptionForGroupError(JNIEnv* env, jobject obj, int err)
+{
+    switch (err) {
+        case EINVAL:
+            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+            break;
+        case ESRCH:
+            jniThrowException(env, "java/lang/IllegalArgumentException", "Given thread does not exist");
+            break;
+        case EPERM:
+            jniThrowException(env, "java/lang/SecurityException", "No permission to modify given thread");
+            break;
+        case EACCES:
+            jniThrowException(env, "java/lang/SecurityException", "No permission to set to given group");
+            break;
+        default:
+            jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
+            break;
+    }
+}
+
 
 static void fakeProcessEntry(void* arg)
 {
@@ -164,9 +196,55 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
     return -1;
 }
 
+static int add_pid_to_cgroup(int pid, int grp)
+{
+    FILE *fp;
+    char path[255];
+    int rc;
+
+    sprintf(path, "/dev/cpuctl/%s/tasks", (cgroup_names[grp] ? cgroup_names[grp] : ""));
+
+    if (!(fp = fopen(path, "w"))) {
+#if ENABLE_CGROUP_ERR_LOGGING
+        LOGW("Unable to open %s (%s)\n", path, strerror(errno));
+#endif
+        return -errno;
+    }
+
+    rc = fprintf(fp, "%d", pid);
+    fclose(fp);
+
+    if (rc < 0) {
+#if ENABLE_CGROUP_ERR_LOGGING
+        LOGW("Unable to move pid %d to cgroup %s (%s)\n", pid,
+             (cgroup_names[grp] ? cgroup_names[grp] : "<default>"),
+             strerror(errno));
+#endif
+    }
+
+    return (rc < 0) ? errno : 0;
+}
+
+void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
+{
+    if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
+        signalExceptionForGroupError(env, clazz, EINVAL);
+        return;
+    }
+
+    if (add_pid_to_cgroup(pid, grp))
+        signalExceptionForGroupError(env, clazz, errno);
+}
+
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
+    if (pri == ANDROID_PRIORITY_BACKGROUND) {
+        add_pid_to_cgroup(pid, ANDROID_TGROUP_BG_NONINTERACT);
+    } else if (getpriority(PRIO_PROCESS, pid) == ANDROID_PRIORITY_BACKGROUND) {
+        add_pid_to_cgroup(pid, ANDROID_TGROUP_DEFAULT);
+    }
+
     if (setpriority(PRIO_PROCESS, pid, pri) < 0) {
         signalExceptionForPriorityError(env, clazz, errno);
     }
@@ -741,6 +819,7 @@ static const JNINativeMethod methods[] = {
     {"setThreadPriority",   "(II)V", (void*)android_os_Process_setThreadPriority},
     {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
+    {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
     {"setOomAdj",   "(II)Z", (void*)android_os_Process_setOomAdj},
     {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
     {"setUid", "(I)I", (void*)android_os_Process_setUid},
