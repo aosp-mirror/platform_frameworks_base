@@ -2703,12 +2703,13 @@
           <flag name="showVoiceSearchButton" value="0x01" />
           <!-- If set, the voice search button will take the user directly to a built-in
                voice web search activity.  Most applications will not use this flag, as it
-               will take the user away from your searchable activity. -->
+               will take the user away from the activity in which search was invoked. -->
           <flag name="launchWebSearch" value="0x02" />
           <!-- If set, the voice search button will take the user directly to a built-in
                voice recording activity.  This activity will prompt the user to speak,
-               transcribe the spoke text, and forward the resulting query text to your
-               searchable activity, just as if the user had typed it into the search UI. -->
+               transcribe the spoken text, and forward the resulting query
+               text to the searchable activity, just as if the user had typed it into
+               the search UI and clicked the search button. -->
           <flag name="launchRecognizer" value="0x04" />
         </attr>
 
