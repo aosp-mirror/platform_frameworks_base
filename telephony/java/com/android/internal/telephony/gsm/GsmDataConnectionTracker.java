@@ -154,13 +154,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private static final String INTENT_RECONNECT_ALARM = "com.android.internal.telephony.gprs-reconnect";
     private static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
 
-    //***** Tag IDs for EventLog
-    private static final int EVENT_LOG_RADIO_RESET_COUNTDOWN_TRIGGERED = 50101;
-    private static final int EVENT_LOG_RADIO_RESET = 50102;
-    private static final int EVENT_LOG_PDP_RESET = 50103;
-    private static final int EVENT_LOG_REREGISTER_NETWORK = 50104;
-    private static final int EVENT_LOG_RADIO_PDP_SETUP_FAIL = 50105;
-
     static final Uri PREFERAPN_URI = Uri.parse("content://telephony/carriers/preferapn");
     static final String APN_ID = "apn_id";
     private boolean canSetPreferApn = false;
