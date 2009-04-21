@@ -383,7 +383,6 @@ private:
 
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
 
-    sp<IAudioFlinger>       mAudioFlinger;
     sp<IAudioTrack>         mAudioTrack;
     sp<IMemory>             mCblkMemory;
     sp<AudioTrackThread>    mAudioTrackThread;

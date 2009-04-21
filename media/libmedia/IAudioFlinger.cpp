@@ -336,7 +336,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        remote()->transact(WAKE_UP, data, &reply);
+        remote()->transact(WAKE_UP, data, &reply, IBinder::FLAG_ONEWAY);
         return;
     }
 
