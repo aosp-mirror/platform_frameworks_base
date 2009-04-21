@@ -16,6 +16,7 @@ LOCAL_SRC_FILES:= \
     LayerDim.cpp \
     LayerOrientationAnim.cpp \
     LayerOrientationAnimRotate.cpp \
+    MessageQueue.cpp \
     OrientationAnimation.cpp \
     SurfaceFlinger.cpp \
     Tokenizer.cpp \

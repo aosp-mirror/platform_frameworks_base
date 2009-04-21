@@ -56,7 +56,6 @@
 
 #include "DisplayHardware/DisplayHardware.h"
 
-
 #define DISPLAY_COUNT       1
 
 namespace android {
@@ -181,8 +180,6 @@ SurfaceFlinger::SurfaceFlinger()
         mDebugFps(0),
         mDebugBackground(0),
         mDebugNoBootAnimation(0),
-        mSyncObject(),
-        mDeplayedTransactionPending(0),
         mConsoleSignals(0),
         mSecureFrameBuffer(0)
 {
@@ -423,45 +420,53 @@ status_t SurfaceFlinger::readyToRun()
 
 void SurfaceFlinger::waitForEvent()
 {
-    // wait for something to do
-    if (UNLIKELY(isFrozen())) {
-        // wait 5 seconds
-        const nsecs_t freezeDisplayTimeout = ms2ns(5000);
-        const nsecs_t now = systemTime();
-        if (mFreezeDisplayTime == 0) {
-            mFreezeDisplayTime = now;
+    while (true) {
+        nsecs_t timeout = -1;
+        if (UNLIKELY(isFrozen())) {
+            // wait 5 seconds
+            const nsecs_t freezeDisplayTimeout = ms2ns(5000);
+            const nsecs_t now = systemTime();
+            if (mFreezeDisplayTime == 0) {
+                mFreezeDisplayTime = now;
+            }
+            nsecs_t waitTime = freezeDisplayTimeout - (now - mFreezeDisplayTime);
+            timeout = waitTime>0 ? waitTime : 0;
         }
-        nsecs_t waitTime = freezeDisplayTimeout - (now - mFreezeDisplayTime);
-        int err = (waitTime > 0) ? mSyncObject.wait(waitTime) : TIMED_OUT;
-        if (err != NO_ERROR) {
+
+        MessageList::NODE_PTR msg = mEventQueue.waitMessage(timeout);
+        if (msg != 0) {
+            mFreezeDisplayTime = 0;
+            switch (msg->what) {
+                case MessageQueue::INVALIDATE:
+                    // invalidate message, just return to the main loop
+                    return;
+            }
+        } else {
+            // we timed out
             if (isFrozen()) {
                 // we timed out and are still frozen
                 LOGW("timeout expired mFreezeDisplay=%d, mFreezeCount=%d",
                         mFreezeDisplay, mFreezeCount);
                 mFreezeCount = 0;
                 mFreezeDisplay = false;
+                return;
             }
         }
-    } else {
-        mFreezeDisplayTime = 0;
-        mSyncObject.wait();
     }
 }
 
 void SurfaceFlinger::signalEvent() {
-    mSyncObject.open();
+    mEventQueue.invalidate();
 }
 
 void SurfaceFlinger::signal() const {
-    mSyncObject.open();
+    // this is the IPC call
+    const_cast<SurfaceFlinger*>(this)->signalEvent();
 }
 
 void SurfaceFlinger::signalDelayedEvent(nsecs_t delay)
 {
-    if (android_atomic_or(1, &mDeplayedTransactionPending) == 0) {
-        sp<DelayedTransaction> delayedEvent(new DelayedTransaction(this, delay));
-        delayedEvent->run("DelayedeEvent", PRIORITY_URGENT_DISPLAY);
-    }
+    mEventQueue.postMessage( new MessageBase(MessageQueue::INVALIDATE), delay);
 }
 
 // ----------------------------------------------------------------------------
@@ -1302,16 +1307,32 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
      */
 
     /* FIXME: 
-     * - this can calls ~Layer(), which is wrong because we're not in the
-     * GL thread, and ~Layer() currently calls OpenGL.
      * - ideally we want to release as much GL state as possible after
      * purgatorizeLayer_l() has been called and the surface is not in any
      * active list.
-     * - ideally we'd call ~Layer() without mStateLock held
      */
     
-    Mutex::Autolock _l(mStateLock);
-    mLayerPurgatory.remove(layer);
+    class MessageDestroySurface : public MessageBase {
+        sp<SurfaceFlinger> flinger;
+        sp<LayerBaseClient> layer;
+    public:
+        MessageDestroySurface(const sp<SurfaceFlinger>& flinger,
+                const sp<LayerBaseClient>& layer)
+            : MessageBase(0), flinger(flinger), layer(layer) {
+        }
+        ~MessageDestroySurface() {
+            //LOGD("~MessageDestroySurface, layer=%p", layer.get());
+        }
+        virtual bool handler() {
+            //LOGD("MessageDestroySurface handler, layer=%p", layer.get());
+            Mutex::Autolock _l(flinger->mStateLock);
+            flinger->mLayerPurgatory.remove(layer);
+            return true;
+        }
+    };
+
+    mEventQueue.postMessage( new MessageDestroySurface(this, layer) );
+    
     return NO_ERROR;
 }
 

@@ -117,13 +117,22 @@ public:
             mFirst = mLast = newNode;
             newNode->prev = newNode->next = 0;
         } else {
-            insertBefore(mFirst, newNode);
+            newNode->prev = 0;
+            newNode->next = mFirst;
+            mFirst->prev = newNode;
+            mFirst = newNode;
         }
     }
     
     void insertTail(NODE* newNode) {
-        if (mLast == 0) insertBeginning(newNode);
-        else            insertAfter(mLast, newNode);
+        if (mLast == 0) {
+            insertHead(newNode);
+        } else {
+            newNode->prev = mLast;
+            newNode->next = 0;
+            mLast->next = newNode;
+            mLast = newNode;
+        }
     }
 
     NODE* remove(NODE* node) {

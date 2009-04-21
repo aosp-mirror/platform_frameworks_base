@@ -34,12 +34,13 @@
 
 #include <private/ui/SharedState.h>
 #include <private/ui/LayerState.h>
-#include <private/ui/SurfaceFlingerSynchro.h>
 
 #include "Barrier.h"
 #include "BootAnimation.h"
 #include "Layer.h"
 #include "Tokenizer.h"
+
+#include "MessageQueue.h"
 
 struct copybit_device_t;
 struct overlay_device_t;
@@ -235,25 +236,6 @@ private:
         uint8_t         freezeDisplay;
     };
 
-    class DelayedTransaction : public Thread
-    {
-        friend class SurfaceFlinger;
-        sp<SurfaceFlinger>  mFlinger;
-        nsecs_t             mDelay;
-    public:
-        DelayedTransaction(const sp<SurfaceFlinger>& flinger, nsecs_t delay)
-            : Thread(false), mFlinger(flinger), mDelay(delay) {
-        }
-        virtual bool threadLoop() {
-            usleep(mDelay / 1000);
-            if (android_atomic_and(~1,
-                    &mFlinger->mDeplayedTransactionPending) == 1) {
-                mFlinger->signalEvent();
-            }
-            return false;
-        }
-    };
-
     virtual bool        threadLoop();
     virtual status_t    readyToRun();
     virtual void        onFirstRef();
@@ -310,6 +292,11 @@ private:
             void        debugShowFPS() const;
             void        drawWormhole() const;
            
+
+    mutable     MessageQueue    mEventQueue;
+    
+                
+                
                 // access must be protected by mStateLock
     mutable     Mutex                   mStateLock;
                 State                   mCurrentState;
@@ -359,8 +346,6 @@ private:
 
                 // these are thread safe
     mutable     Barrier                     mReadyToRunBarrier;
-    mutable     SurfaceFlingerSynchro       mSyncObject;
-    volatile    int32_t                     mDeplayedTransactionPending;
 
                 // atomic variables
                 enum {

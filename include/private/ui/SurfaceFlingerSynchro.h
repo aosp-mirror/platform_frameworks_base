@@ -21,7 +21,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <utils/Errors.h>
-#include <utils/threads.h>
 #include <ui/ISurfaceComposer.h>
 
 namespace android {
@@ -31,7 +30,6 @@ class SurfaceFlinger;
 class SurfaceFlingerSynchro
 {
 public:
-
                 // client constructor
                 SurfaceFlingerSynchro(const sp<ISurfaceComposer>& flinger);
                 ~SurfaceFlingerSynchro();
@@ -40,34 +38,8 @@ public:
     status_t    signal();
     
 private:
-    class Barrier {
-    public:
-        Barrier();
-        ~Barrier();
-        void open();
-        void close();
-        void waitAndClose();
-        status_t waitAndClose(nsecs_t timeout);
-    private:
-        enum { OPENED, CLOSED };
-        mutable     Mutex       lock;
-        mutable     Condition   cv;
-        volatile    int         state;
-    };
-
     friend class SurfaceFlinger;
-
-                // server constructor
-                SurfaceFlingerSynchro();
-                
-    void        open();
-    
-                // wait until there is some work to do
-    status_t    wait();
-    status_t    wait(nsecs_t timeout);
-    
     sp<ISurfaceComposer> mSurfaceComposer;
-    Barrier              mBarrier;
 };
 
 }; // namespace android
