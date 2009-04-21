@@ -217,7 +217,13 @@ status_t CameraService::Client::unlock()
     // allow anyone to use camera
     LOGV("unlock (%p)", getCameraClient()->asBinder().get());
     status_t result = checkPid();
-    if (result == NO_ERROR) mClientPid = 0;
+    if (result == NO_ERROR) {
+        mClientPid = 0;
+
+        // we need to remove the reference so that when app goes
+        // away, the reference count goes to 0.
+        mCameraClient.clear();
+    }
     return result;
 }
 
