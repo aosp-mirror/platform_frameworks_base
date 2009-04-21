@@ -56,7 +56,6 @@ import android.location.LocationProvider;
 import android.location.LocationProviderImpl;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -67,7 +66,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Config;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -138,17 +136,13 @@ public class LocationManagerService extends ILocationManager.Stub {
     // Alarm manager and wakelock variables
     private final static String ALARM_INTENT = "com.android.location.ALARM_INTENT";
     private final static String WAKELOCK_KEY = "LocationManagerService";
-    private final static String WIFILOCK_KEY = "LocationManagerService";
     private AlarmManager mAlarmManager;
     private long mAlarmInterval = 0;
     private boolean mScreenOn = true;
     private PowerManager.WakeLock mWakeLock = null;
-    private WifiManager.WifiLock mWifiLock = null;
     private long mWakeLockAcquireTime = 0;
     private boolean mWakeLockGpsReceived = true;
     private boolean mWakeLockNetworkReceived = true;
-    private boolean mWifiWakeLockAcquired = false;
-    private boolean mCellWakeLockAcquired = false;
     
     /**
      * List of all receivers.
@@ -177,14 +171,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     private HashMap<String,Location> mLastKnownLocation =
         new HashMap<String,Location>();
 
-    // Last known cell service state
-    private TelephonyManager mTelephonyManager;
-
     // Location collector
     private ILocationCollector mCollector;
-
-    // Wifi Manager
-    private WifiManager mWifiManager;
 
     private int mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
 
@@ -538,9 +526,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Load providers
         loadProviders();
 
-        // Listen for Radio changes
-        mTelephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-
         // Register for Network (Wifi or Mobile) updates
         NetworkStateBroadcastReceiver networkReceiver = new NetworkStateBroadcastReceiver();
         IntentFilter networkIntentFilter = new IntentFilter();
@@ -567,12 +552,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mLocationHandler);
         SettingsObserver settingsObserver = new SettingsObserver();
         mSettings.addObserver(settingsObserver);
-
-        // Get the wifi manager
-        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-
-        // Create a wifi lock for future use
-        mWifiLock = getWifiWakelockLocked();
     }
 
     public void setNetworkLocationProvider(ILocationProvider provider) {
@@ -589,7 +568,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             
             // notify NetworkLocationProvider of any events it might have missed
             mNetworkLocationProvider.updateNetworkState(mNetworkState);
-            mNetworkLocationProvider.updateCellLockStatus(mCellWakeLockAcquired);
         }
     }
 
@@ -609,14 +587,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         mGeocodeProvider = provider;
-    }
-
-    private WifiManager.WifiLock getWifiWakelockLocked() {
-        if (mWifiLock == null && mWifiManager != null) {
-            mWifiLock = mWifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, WIFILOCK_KEY);
-            mWifiLock.setReferenceCounted(false);
-        }
-        return mWifiLock;
     }
 
     private boolean isAllowedBySettingsLocked(String provider) {
@@ -1861,34 +1831,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         mWakeLockAcquireTime = SystemClock.elapsedRealtime();
         log("Acquired wakelock");
 
-        // Acquire cell lock
-        if (mCellWakeLockAcquired) {
-            // Lock is already acquired
-        } else if (!mWakeLockNetworkReceived) {
-            mTelephonyManager.enableLocationUpdates();
-            mCellWakeLockAcquired = true;
-        } else {
-            mCellWakeLockAcquired = false;
-        }
-
-        // Notify NetworkLocationProvider
-        if (mNetworkLocationProvider != null) {
-            mNetworkLocationProvider.updateCellLockStatus(mCellWakeLockAcquired);
-        }
-
-        // Acquire wifi lock
-        WifiManager.WifiLock wifiLock = getWifiWakelockLocked();
-        if (wifiLock != null) {
-            if (mWifiWakeLockAcquired) {
-                // Lock is already acquired
-            } else if (mWifiManager.isWifiEnabled() && !mWakeLockNetworkReceived) {
-                wifiLock.acquire();
-                mWifiWakeLockAcquired = true;
-            } else {
-                mWifiWakeLockAcquired = false;
-                Log.w(TAG, "acquireWakeLock(): Unable to get WiFi lock");
-            }
-        }
+        mNetworkLocationProvider.wakeLockAcquired();
+        mGpsLocationProvider.wakeLockAcquired();
     }
 
     private void releaseWakeLockLocked() {
@@ -1902,25 +1846,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private void releaseWakeLockXLocked() {
-        // Release wifi lock
-        WifiManager.WifiLock wifiLock = getWifiWakelockLocked();
-        if (wifiLock != null) {
-            if (mWifiWakeLockAcquired) {
-                wifiLock.release();
-                mWifiWakeLockAcquired = false;
-            }
-        }
-
-        // Release cell lock
-        if (mCellWakeLockAcquired) {
-            mTelephonyManager.disableLocationUpdates();
-            mCellWakeLockAcquired = false;
-        }
-
-        // Notify NetworkLocationProvider
-        if (mNetworkLocationProvider != null) {
-            mNetworkLocationProvider.updateCellLockStatus(mCellWakeLockAcquired);
-        }
+        mNetworkLocationProvider.wakeLockReleased();
+        mGpsLocationProvider.wakeLockReleased();
 
         // Release wake lock
         mWakeLockAcquireTime = 0;
@@ -2115,8 +2042,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                     + " mWakeLockAcquireTime=" + mWakeLockAcquireTime);
             pw.println("  mWakeLockGpsReceived=" + mWakeLockGpsReceived
                     + " mWakeLockNetworkReceived=" + mWakeLockNetworkReceived);
-            pw.println("  mWifiWakeLockAcquired=" + mWifiWakeLockAcquired
-                    + " mCellWakeLockAcquired=" + mCellWakeLockAcquired);
             pw.println("  Listeners:");
             int N = mReceivers.size();
             for (int i=0; i<N; i++) {

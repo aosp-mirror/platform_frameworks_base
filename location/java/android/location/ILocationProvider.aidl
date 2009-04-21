@@ -48,7 +48,6 @@ interface ILocationProvider {
     boolean sendExtraCommand(String command, inout Bundle extras);
     void addListener(int uid);
     void removeListener(int uid);
-
-    /* the following is used only for NetworkLocationProvider */
-    void updateCellLockStatus(boolean acquired);
+    void wakeLockAcquired();
+    void wakeLockReleased();
 }
