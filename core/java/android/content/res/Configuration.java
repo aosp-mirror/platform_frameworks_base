@@ -144,11 +144,29 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     public String toString() {
-        return "{ scale=" + fontScale + " imsi=" + mcc + "/" + mnc
-                + " locale=" + locale
-                + " touch=" + touchscreen + " key=" + keyboard + "/"
-                + keyboardHidden + "/" + hardKeyboardHidden
-                + " nav=" + navigation + " orien=" + orientation + " }";
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("{ scale=");
+        sb.append(fontScale);
+        sb.append(" imsi=");
+        sb.append(mcc);
+        sb.append("/");
+        sb.append(mnc);
+        sb.append(" loc=");
+        sb.append(locale);
+        sb.append(" touch=");
+        sb.append(touchscreen);
+        sb.append(" keys=");
+        sb.append(keyboard);
+        sb.append("/");
+        sb.append(keyboardHidden);
+        sb.append("/");
+        sb.append(hardKeyboardHidden);
+        sb.append(" nav=");
+        sb.append(navigation);
+        sb.append(" orien=");
+        sb.append(orientation);
+        sb.append('}');
+        return sb.toString();
     }
 
     /**

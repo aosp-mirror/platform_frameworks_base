@@ -106,7 +106,6 @@ class ProcessRecord implements Watchdog.PssRequestor {
     ActivityManager.ProcessErrorStateInfo notRespondingReport;
 
     void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.println(this);
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
         }
