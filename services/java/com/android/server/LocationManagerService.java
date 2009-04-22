@@ -130,8 +130,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     // Handler messages
     private static final int MESSAGE_LOCATION_CHANGED = 1;
-    private static final int MESSAGE_ACQUIRE_WAKE_LOCK = 2;
-    private static final int MESSAGE_RELEASE_WAKE_LOCK = 3;
+    private static final int MESSAGE_RELEASE_WAKE_LOCK = 2;
 
     // Alarm manager and wakelock variables
     private final static String ALARM_INTENT = "com.android.location.ALARM_INTENT";
@@ -1594,7 +1593,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                             (SystemClock.elapsedRealtime() - mWakeLockAcquireTime
                                 > MAX_TIME_FOR_WAKE_LOCK)) {
     
-                            removeMessages(MESSAGE_ACQUIRE_WAKE_LOCK);
                             removeMessages(MESSAGE_RELEASE_WAKE_LOCK);
     
                             log("LocationWorkerHandler: Exceeded max time for wake lock");
@@ -1604,7 +1602,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                         } else if (mWakeLockAcquireTime != 0 &&
                             mWakeLockGpsReceived && mWakeLockNetworkReceived) {
     
-                            removeMessages(MESSAGE_ACQUIRE_WAKE_LOCK);
                             removeMessages(MESSAGE_RELEASE_WAKE_LOCK);
     
                             log("LocationWorkerHandler: Locations received.");
@@ -1612,12 +1609,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                             Message m = Message.obtain(this, MESSAGE_RELEASE_WAKE_LOCK);
                             sendMessageDelayed(m, TIME_AFTER_WAKE_LOCK);
                         }
-                    }
-
-                } else if (msg.what == MESSAGE_ACQUIRE_WAKE_LOCK) {
-                    log("LocationWorkerHandler: Acquire");
-                    synchronized (mLock) {
-                        acquireWakeLockLocked();
                     }
                 } else if (msg.what == MESSAGE_RELEASE_WAKE_LOCK) {
                     log("LocationWorkerHandler: Release");
@@ -1642,7 +1633,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (action.equals(ALARM_INTENT)) {
                 synchronized (mLock) {
                     log("PowerStateBroadcastReceiver: Alarm received");
-                    mLocationHandler.removeMessages(MESSAGE_ACQUIRE_WAKE_LOCK);
                     // Have to do this immediately, rather than posting a
                     // message, so we execute our code while the system
                     // is holding a wake lock until the alarm broadcast
@@ -1771,7 +1761,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             mAlarmInterval = -1;
 
             // Clear out existing wakelocks
-            mLocationHandler.removeMessages(MESSAGE_ACQUIRE_WAKE_LOCK);
             mLocationHandler.removeMessages(MESSAGE_RELEASE_WAKE_LOCK);
             releaseWakeLockLocked();
         }
