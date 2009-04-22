@@ -128,7 +128,7 @@ home=true
       'name':"Maps API Key",
       'img':"maps-large.png",
       'title':"Maps API Key",
-      'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='{@docRoot}guide/topics/location/geo/mapkey.html'>Learn how to get a Maps API Key</a></p>"
+      'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='{@docRoot}guide/topics/location/index.html'>Learn more...</a></p>"
     },
 
     'market': {
