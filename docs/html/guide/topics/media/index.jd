@@ -9,7 +9,7 @@ page.title=Audio and Video
 <li>Audio playback and record</li>
 <li>Video playback</li>
 <li>Handles data from raw resources, files, streams</li>
-<li>Built-in codecs for a variety of media. See <a href="{@docRoot}guide/appendix/media-formats.html">Android 1.0 Media Formats</a></li>
+<li>Built-in codecs for a variety of media. See <a href="{@docRoot}guide/appendix/media-formats.html">Android Supported Media Formats</a></li>
 </ul>
 
 <h2>Key classes</h2>
