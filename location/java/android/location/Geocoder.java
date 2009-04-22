@@ -36,7 +36,11 @@ import java.util.List;
  * coordinate into a (partial) address.  The amount of detail in a
  * reverse geocoded location description may vary, for example one
  * might contain the full street address of the closest building, while
- * another might contain only a city name and postal code.
+ * another might contain only a city name and postal code. 
+ *
+ * The Geocoder class requires a backend service that is not included in
+ * the core android framework. The Geocoder query methods will return an
+ * empty list if there no backend service in the platform. 
  */
 public final class Geocoder {
     private static final String TAG = "Geocoder";
@@ -94,8 +98,8 @@ public final class Geocoder {
      * @param longitude the longitude a point for the search
      * @param maxResults max number of addresses to return. Smaller numbers (1 to 5) are recommended
      *
-     * @return a list of Address objects or null if no matches were
-     * found.
+     * @return a list of Address objects. Returns null or empty list if no matches were
+     * found or there is no backend service available.
      *
      * @throws IllegalArgumentException if latitude is
      * less than -90 or greater than 90
@@ -143,7 +147,8 @@ public final class Geocoder {
      * @param locationName a user-supplied description of a location
      * @param maxResults max number of results to return. Smaller numbers (1 to 5) are recommended
      *
-     * @return a list of Address objects or null if no matches were found.
+     * @return a list of Address objects. Returns null or empty list if no matches were
+     * found or there is no backend service available.
      *
      * @throws IllegalArgumentException if locationName is null
      * @throws IOException if the network is unavailable or any other
@@ -192,7 +197,8 @@ public final class Geocoder {
      * @param upperRightLatitude the latitude of the upper right corner of the bounding box
      * @param upperRightLongitude the longitude of the upper right corner of the bounding box
      *
-     * @return a list of Address objects or null if no matches were found.
+     * @return a list of Address objects. Returns null or empty list if no matches were
+     * found or there is no backend service available.
      *
      * @throws IllegalArgumentException if locationName is null
      * @throws IllegalArgumentException if any latitude is
