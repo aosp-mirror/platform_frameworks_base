@@ -233,6 +233,27 @@ final class WebViewCore {
     }
 
     /**
+     * Notify the user that the origin has exceeded it's database quota.
+     * @param url The URL that caused the overflow.
+     * @param databaseIdentifier The identifier of the database.
+     * @param currentQuota The current quota for the origin.
+     */
+    protected void exceededDatabaseQuota(String url,
+                                         String databaseIdentifier,
+                                         long currentQuota) {
+        // Inform the callback proxy of the quota overflow. Send an object
+        // that encapsulates a call to the nativeSetDatabaseQuota method to
+        // awaken the sleeping webcore thread when a decision from the
+        // client to allow or deny quota is available.
+        mCallbackProxy.onExceededDatabaseQuota(url, databaseIdentifier,
+                currentQuota, new WebStorage.QuotaUpdater() {
+                                  public void updateQuota(long quota) {
+                                      nativeSetDatabaseQuota(quota);
+                                  }
+                              });
+    }
+
+    /**
      * Invoke a javascript confirm dialog.
      * @param message The message displayed in the dialog.
      * @return True if the user confirmed or false if the user cancelled.
@@ -395,6 +416,14 @@ final class WebViewCore {
     // Register a scheme to be treated as local scheme so that it can access
     // local asset files for resources
     private native void nativeRegisterURLSchemeAsLocal(String scheme);
+
+    /*
+     * Inform webcore that the user has decided whether to allow or deny new
+     * quota for the current origin and that the main thread should wake up
+     * now.
+     * @param quota The new quota.
+     */
+    private native void nativeSetDatabaseQuota(long quota);
 
     // EventHub for processing messages
     private final EventHub mEventHub;
