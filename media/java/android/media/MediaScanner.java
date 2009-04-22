@@ -453,11 +453,12 @@ public class MediaScanner
                 FileCacheEntry entry = beginFile(path, mimeType, lastModified, fileSize);
                 // rescan for metadata if file was modified since last scan
                 if (entry != null && (entry.mLastModifiedChanged || scanAlways)) {
-                    boolean ringtones = (path.indexOf(RINGTONES_DIR) > 0);
-                    boolean notifications = (path.indexOf(NOTIFICATIONS_DIR) > 0);
-                    boolean alarms = (path.indexOf(ALARMS_DIR) > 0);
-                    boolean podcasts = (path.indexOf(PODCAST_DIR) > 0);
-                    boolean music = (path.indexOf(MUSIC_DIR) > 0) ||
+                    String lowpath = path.toLowerCase();
+                    boolean ringtones = (lowpath.indexOf(RINGTONES_DIR) > 0);
+                    boolean notifications = (lowpath.indexOf(NOTIFICATIONS_DIR) > 0);
+                    boolean alarms = (lowpath.indexOf(ALARMS_DIR) > 0);
+                    boolean podcasts = (lowpath.indexOf(PODCAST_DIR) > 0);
+                    boolean music = (lowpath.indexOf(MUSIC_DIR) > 0) ||
                         (!ringtones && !notifications && !alarms && !podcasts);
 
                     if (mFileType == MediaFile.FILE_TYPE_MP3 ||
