@@ -832,22 +832,30 @@ public final class SimulatedCommands extends BaseCommands
     }
 
     /**
-     * response.obj.result is an String[3]
-     * response.obj.result[0] is registration state 0-5 from TS 27.007 7.2
-     * response.obj.result[1] is LAC if registered or NULL if not
-     * response.obj.result[2] is CID if registered or NULL if not
-     * valid LAC are 0x0000 - 0xffff
-     * valid CID are 0x00000000 - 0xffffffff
+     * response.obj.result is an String[14]
+     * See ril.h for details
      *
      * Please note that registration state 4 ("unknown") is treated
      * as "out of service" above
      */
     public void getRegistrationState (Message result) {
-        String ret[] = new String[3];
+        String ret[] = new String[14];
 
         ret[0] = "5"; // registered roam
         ret[1] = null;
         ret[2] = null;
+        ret[3] = null;
+        ret[4] = null;
+        ret[5] = null;
+        ret[6] = null;
+        ret[7] = null;
+        ret[8] = null;
+        ret[9] = null;
+        ret[10] = null;
+        ret[11] = null;
+        ret[12] = null;
+        ret[13] = null;
+        ret[14] = null;
 
         resultSuccess(result, ret);
     }
