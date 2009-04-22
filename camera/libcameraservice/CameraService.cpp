@@ -900,8 +900,6 @@ status_t CameraService::Client::setParameters(const String8& params)
 // get preview/capture parameters - key/value pairs
 String8 CameraService::Client::getParameters() const
 {
-    LOGD("getParameters");
-
     Mutex::Autolock lock(mLock);
 
     if (mHardware == 0) {
@@ -909,7 +907,9 @@ String8 CameraService::Client::getParameters() const
         return String8();
     }
 
-    return mHardware->getParameters().flatten();
+    String8 params(mHardware->getParameters().flatten());
+    LOGD("getParameters(%s)", params.string());
+    return params;
 }
 
 void CameraService::Client::postAutoFocus(bool focused)

@@ -405,8 +405,6 @@ public class Camera {
      * @param params the Parameters to use for this Camera service
      */
     public void setParameters(Parameters params) {
-        Log.e(TAG, "setParameters()");
-        //params.dump();
         native_setParameters(params.flatten());
     }
 
@@ -416,7 +414,6 @@ public class Camera {
     public Parameters getParameters() {
         Parameters p = new Parameters();
         String s = native_getParameters();
-        Log.e(TAG, "_getParameters: " + s);
         p.unflatten(s);
         return p;
     }
