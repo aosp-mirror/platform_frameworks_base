@@ -60,6 +60,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
@@ -83,7 +84,7 @@ import com.android.server.am.BatteryStatsService;
  *
  * {@hide}
  */
-public class LocationManagerService extends ILocationManager.Stub {
+public class LocationManagerService extends ILocationManager.Stub implements Runnable {
     private static final String TAG = "LocationManagerService";
     private static final boolean LOCAL_LOGV = false;
 
@@ -613,14 +614,18 @@ public class LocationManagerService extends ILocationManager.Stub {
     public LocationManagerService(Context context) {
         super();
         mContext = context;
-        mLocationHandler = new LocationWorkerHandler();
+
+        Thread thread = new Thread(null, this, "LocationManagerService");
+        thread.start();
 
         if (LOCAL_LOGV) {
             Log.v(TAG, "Constructed LocationManager Service");
         }
+    }
 
+    private void initialize() {
         // Alarm manager, needs to be done before calling loadProviders() below
-        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
         // Create a wake lock, needs to be done before calling loadProviders() below
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -634,7 +639,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         IntentFilter networkIntentFilter = new IntentFilter();
         networkIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         networkIntentFilter.addAction(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION);
-        context.registerReceiver(networkReceiver, networkIntentFilter);
+        mContext.registerReceiver(networkReceiver, networkIntentFilter);
 
         // Register for power updates
         PowerStateBroadcastReceiver powerStateReceiver = new PowerStateBroadcastReceiver();
@@ -642,7 +647,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         intentFilter.addAction(ALARM_INTENT);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        context.registerReceiver(powerStateReceiver, intentFilter);
+        mContext.registerReceiver(powerStateReceiver, intentFilter);
 
         // listen for settings changes
         ContentResolver resolver = mContext.getContentResolver();
@@ -653,6 +658,15 @@ public class LocationManagerService extends ILocationManager.Stub {
         mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mLocationHandler);
         SettingsObserver settingsObserver = new SettingsObserver();
         mSettings.addObserver(settingsObserver);
+    }
+
+    public void run()
+    {
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        Looper.prepare();
+        mLocationHandler = new LocationWorkerHandler();
+        initialize();
+        Looper.loop();
     }
 
     public void setNetworkLocationProvider(ILocationProvider provider) {
