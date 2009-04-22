@@ -31,6 +31,7 @@ import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
@@ -38,6 +39,8 @@ import android.widget.LinearLayout;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Vector;
 
 public class TestShellActivity extends Activity implements LayoutTestController {
@@ -90,52 +93,13 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         setContentView(contentView);
 
         mWebView = new WebView(this);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.setWebChromeClient(mChromeClient);
-        mWebView.setWebViewClient(new WebViewClient(){
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                Log.v(LOGTAG, "onPageFinished, url=" + url);
-                super.onPageFinished(view, url);
-            }
-
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                Log.v(LOGTAG, "onPageStarted, url=" + url);
-                super.onPageStarted(view, url, favicon);
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description,
-                    String failingUrl) {
-                Log.v(LOGTAG, "onReceivedError, errorCode=" + errorCode
-                        + ", desc=" + description + ", url=" + failingUrl);
-                super.onReceivedError(view, errorCode, description, failingUrl);
-            }
-
-            @Override
-            public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler,
-                    String host, String realm) {
-                handler.cancel();
-            }
-
-            @Override
-            public void onReceivedSslError(WebView view, SslErrorHandler handler,
-                    SslError error) {
-                handler.proceed();
-            }
-
-        });
         mEventSender = new WebViewEventSender(mWebView);
         mCallbackProxy = new CallbackProxy(mEventSender, this);
 
-        mWebView.addJavascriptInterface(mCallbackProxy, "layoutTestController");
-        mWebView.addJavascriptInterface(mCallbackProxy, "eventSender");
+        setupWebViewForLayoutTests(mWebView, mCallbackProxy);
+
         contentView.addView(mWebView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT, 0.0f));
  
-        mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
-            
         mHandler = new AsyncHandler();
         
         Intent intent = getIntent();
@@ -217,6 +181,12 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             if (mDialogStrings != null)
                 os.write(mDialogStrings.toString().getBytes());
             mDialogStrings = null;
+            if (mDatabaseCallbackStrings != null)
+                os.write(mDatabaseCallbackStrings.toString().getBytes());
+            mDatabaseCallbackStrings = null;
+            if (mConsoleMessages != null)
+                os.write(mConsoleMessages.toString().getBytes());
+            mConsoleMessages = null;
             if (webkitData != null)
                 os.write(webkitData.getBytes());
             os.flush();
@@ -359,7 +329,52 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     public void testRepaint() {
         mWebView.invalidate();
     }
-    
+
+    public void dumpDatabaseCallbacks() {
+        Log.v(LOGTAG, "dumpDatabaseCallbacks called.");
+        mDumpDatabaseCallbacks = true;
+    }
+
+    public void setCanOpenWindows() {
+        Log.v(LOGTAG, "setCanOpenWindows called.");
+        mCanOpenWindows = true;
+    }
+
+    private final WebViewClient mViewClient = new WebViewClient(){
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            Log.v(LOGTAG, "onPageFinished, url=" + url);
+            super.onPageFinished(view, url);
+        }
+
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            Log.v(LOGTAG, "onPageStarted, url=" + url);
+            super.onPageStarted(view, url, favicon);
+        }
+
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description,
+                String failingUrl) {
+            Log.v(LOGTAG, "onReceivedError, errorCode=" + errorCode
+                    + ", desc=" + description + ", url=" + failingUrl);
+            super.onReceivedError(view, errorCode, description, failingUrl);
+        }
+
+        @Override
+        public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler,
+                String host, String realm) {
+            handler.cancel();
+        }
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler,
+                SslError error) {
+            handler.proceed();
+        }
+    };
+
+
     private final WebChromeClient mChromeClient = new WebChromeClient() {
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
@@ -434,6 +449,72 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             result.confirm();
             return true;
         }
+
+        @Override
+        public void onExceededDatabaseQuota(String url_str,
+                String databaseIdentifier, long currentQuota,
+                WebStorage.QuotaUpdater callback) {
+            if (mDumpDatabaseCallbacks) {
+                if (mDatabaseCallbackStrings == null) {
+                    mDatabaseCallbackStrings = new StringBuffer();
+                }
+
+                String protocol = "";
+                String host = "";
+                int port = 0;
+
+                try {
+                    URL url = new URL(url_str);
+                    protocol = url.getProtocol();
+                    host = url.getHost();
+                    if (url.getPort() > -1) {
+                        port = url.getPort();
+                    }
+                } catch (MalformedURLException e) {}
+
+                String databaseCallbackString =
+                        "UI DELEGATE DATABASE CALLBACK: " +
+                        "exceededDatabaseQuotaForSecurityOrigin:{" + protocol +
+                        ", " + host + ", " + port + "} database:" +
+                        databaseIdentifier + "\n";
+                Log.v(LOGTAG, "LOG: "+databaseCallbackString);
+                mDatabaseCallbackStrings.append(databaseCallbackString);
+            }
+            // Give 5MB more quota.
+            callback.updateQuota(currentQuota + 1024 * 1024 * 5);
+        }
+
+        @Override
+        public void addMessageToConsole(String message, int lineNumber,
+                String sourceID) {
+            if (mConsoleMessages == null) {
+                mConsoleMessages = new StringBuffer();
+            }
+            String consoleMessage = "CONSOLE MESSAGE: line "
+                    + lineNumber +": "+ message +"\n";
+            mConsoleMessages.append(consoleMessage);
+            Log.v(LOGTAG, "LOG: "+consoleMessage);
+        }
+
+        @Override
+        public boolean onCreateWindow(WebView view, boolean dialog,
+                boolean userGesture, Message resultMsg) {
+            if (!mCanOpenWindows) {
+                return false;
+            }
+
+            // We never display the new window, just create the view and
+            // allow it's content to execute and be recorded by the test
+            // runner.
+
+            WebView newWindowView = new WebView(TestShellActivity.this);
+            setupWebViewForLayoutTests(newWindowView, mCallbackProxy);
+            WebView.WebViewTransport transport =
+                    (WebView.WebViewTransport) resultMsg.obj;
+            transport.setWebView(newWindowView);
+            resultMsg.sendToTarget();
+            return true;
+        }
     };
     
     private void resetTestStatus() {
@@ -442,9 +523,32 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mTimedOut = false;
         mDumpTitleChanges = false;
         mRequestedWebKitData = false;
+        mDumpDatabaseCallbacks = false;
+        mCanOpenWindows = false;
         mEventSender.resetMouse();
     }
-    
+
+    private void setupWebViewForLayoutTests(WebView webview, CallbackProxy callbackProxy) {
+        if (webview == null) {
+            return;
+        }
+
+        WebSettings settings = webview.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setSupportMultipleWindows(true);
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+        settings.setDatabaseEnabled(true);
+        settings.setDatabasePath(getDir("databases",0).getAbsolutePath());
+        settings.setDomStorageEnabled(true);
+
+        webview.addJavascriptInterface(callbackProxy, "layoutTestController");
+        webview.addJavascriptInterface(callbackProxy, "eventSender");
+
+        webview.setWebChromeClient(mChromeClient);
+        webview.setWebViewClient(mViewClient);
+    }
+
     private WebView mWebView;
     private WebViewEventSender mEventSender;
     private AsyncHandler mHandler;
@@ -470,6 +574,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private StringBuffer mDialogStrings;
     private boolean mKeepWebHistory;
     private Vector mWebHistory;
+    private boolean mDumpDatabaseCallbacks;
+    private StringBuffer mDatabaseCallbackStrings;
+    private StringBuffer mConsoleMessages;
+    private boolean mCanOpenWindows;
 
     static final String TIMEOUT_STR = "**Test timeout";
     
