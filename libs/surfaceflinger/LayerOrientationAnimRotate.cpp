@@ -68,10 +68,10 @@ LayerOrientationAnimRotate::LayerOrientationAnimRotate(
 LayerOrientationAnimRotate::~LayerOrientationAnimRotate()
 {
     if (mTextureName != -1U) {
-        LayerBase::deletedTextures.add(mTextureName);
+        glDeleteTextures(1, &mTextureName);
     }
     if (mTextureNameIn != -1U) {
-        LayerBase::deletedTextures.add(mTextureNameIn);
+        glDeleteTextures(1, &mTextureNameIn);
     }
 }
 

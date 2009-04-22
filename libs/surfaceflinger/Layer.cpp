@@ -71,7 +71,7 @@ void Layer::destroy()
         if (mTextures[i].name != -1U) {
             // FIXME: this was originally to work-around a bug in the
             // adreno driver. this should be fixed now.
-            deletedTextures.add(mTextures[i].name);
+            glDeleteTextures(1, &mTextures[i].name);
             mTextures[i].name = -1U;
         }
         if (mTextures[i].image != EGL_NO_IMAGE_KHR) {

@@ -72,8 +72,6 @@ public:
     }
 
     
-    static Vector<GLuint> deletedTextures; 
-
     LayerBase(SurfaceFlinger* flinger, DisplayID display);
     
     DisplayID           dpy;

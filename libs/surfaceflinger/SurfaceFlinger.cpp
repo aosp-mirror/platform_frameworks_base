@@ -524,13 +524,6 @@ void SurfaceFlinger::postFramebuffer()
         hw.flip(mInvalidRegion);
 
         mInvalidRegion.clear();
-
-        if (Layer::deletedTextures.size()) {
-            glDeleteTextures(
-                    Layer::deletedTextures.size(),
-                    Layer::deletedTextures.array());
-            Layer::deletedTextures.clear();
-        }
     }
 }
 

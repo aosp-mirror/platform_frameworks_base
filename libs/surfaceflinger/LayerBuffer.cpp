@@ -322,7 +322,7 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
 LayerBuffer::BufferSource::~BufferSource()
 {    
     if (mTextureName != -1U) {
-        LayerBase::deletedTextures.add(mTextureName);
+        glDeleteTextures(1, &mTextureName);
     }
 }
 

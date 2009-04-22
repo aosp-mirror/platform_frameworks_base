@@ -53,8 +53,6 @@ const char* const LayerBaseClient::typeID = "LayerBaseClient";
 
 // ---------------------------------------------------------------------------
 
-Vector<GLuint> LayerBase::deletedTextures; 
-
 int32_t LayerBase::sIdentity = 0;
 
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)

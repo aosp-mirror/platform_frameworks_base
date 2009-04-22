@@ -47,8 +47,7 @@ LayerBlur::LayerBlur(SurfaceFlinger* flinger, DisplayID display,
 LayerBlur::~LayerBlur()
 {
     if (mTextureName != -1U) {
-        //glDeleteTextures(1, &mTextureName);
-        deletedTextures.add(mTextureName);
+        glDeleteTextures(1, &mTextureName);
     }
 }
 
