@@ -406,7 +406,7 @@
     <string name="lockscreen_network_locked_message">"Bloqueada para la red"</string>
     <string name="lockscreen_sim_puk_locked_message">"La tarjeta SIM está bloqueada con el código PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions">"Consulta la guía del usuario o ponte en contacto con el servicio de atención al cliente."</string>
-    <string name="lockscreen_sim_locked_message">"Introduzca código PIN."</string>
+    <string name="lockscreen_sim_locked_message">"Introduce el código PIN."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Desbloqueando tarjeta SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Has realizado <xliff:g id="NUMBER_0">%d</xliff:g> intentos fallidos de creación de un patrón de desbloqueo. "\n\n"Inténtalo de nuevo dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin">"Has realizado <xliff:g id="NUMBER_0">%d</xliff:g> intentos fallidos de creación del patrón de desbloqueo. Si realizas <xliff:g id="NUMBER_1">%d</xliff:g> intentos fallidos más, se te pedirá que desbloquees el teléfono con tus credenciales de acceso de Google."\n\n" Espera <xliff:g id="NUMBER_2">%d</xliff:g> segundos e inténtalo de nuevo."</string>
