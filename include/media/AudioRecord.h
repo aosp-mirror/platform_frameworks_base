@@ -312,7 +312,6 @@ private:
 
             bool processAudioBuffer(const sp<ClientRecordThread>& thread);
 
-    sp<IAudioFlinger>       mAudioFlinger;
     sp<IAudioRecord>        mAudioRecord;
     sp<IMemory>             mCblkMemory;
     sp<ClientRecordThread>  mClientRecordThread;

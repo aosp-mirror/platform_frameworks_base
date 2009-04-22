@@ -651,26 +651,29 @@ status_t AudioFlinger::setStreamVolume(int stream, float value)
         return BAD_VALUE;
     }
 
-    mHardwareMixerThread->setStreamVolume(stream, value);
-#ifdef WITH_A2DP
-    mA2dpMixerThread->setStreamVolume(stream, value);
-#endif
-
     status_t ret = NO_ERROR;
     if (stream == AudioSystem::VOICE_CALL ||
         stream == AudioSystem::BLUETOOTH_SCO) {
-        
+        float hwValue;
         if (stream == AudioSystem::VOICE_CALL) {
-            value = (float)AudioSystem::logToLinear(value)/100.0f;
+            hwValue = (float)AudioSystem::logToLinear(value)/100.0f;
+            // offset value to reflect actual hardware volume that never reaches 0
+            // 1% corresponds roughly to first step in VOICE_CALL stream volume setting (see AudioService.java)
+            value = 0.01 + 0.99 * value;
         } else { // (type == AudioSystem::BLUETOOTH_SCO)
-            value = 1.0f;
+            hwValue = 1.0f;
         }
 
         AutoMutex lock(mHardwareLock);
         mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
-        ret = mAudioHardware->setVoiceVolume(value);
+        ret = mAudioHardware->setVoiceVolume(hwValue);
         mHardwareStatus = AUDIO_HW_IDLE;
     }
+
+    mHardwareMixerThread->setStreamVolume(stream, value);
+#ifdef WITH_A2DP
+    mA2dpMixerThread->setStreamVolume(stream, value);
+#endif
 
     return ret;
 }
@@ -709,7 +712,14 @@ float AudioFlinger::streamVolume(int stream) const
     if (uint32_t(stream) >= AudioSystem::NUM_STREAM_TYPES) {
         return 0.0f;
     }
-    return mHardwareMixerThread->streamVolume(stream);
+    
+    float volume = mHardwareMixerThread->streamVolume(stream); 
+    // remove correction applied by setStreamVolume()
+    if (stream == AudioSystem::VOICE_CALL) {
+        volume = (volume - 0.01) / 0.99 ;
+    }
+    
+    return volume;
 }
 
 bool AudioFlinger::streamMute(int stream) const
@@ -812,17 +822,12 @@ void AudioFlinger::handleForcedSpeakerRoute(int command)
                 if (mForcedRoute == 0 && !(mSavedRoute & AudioSystem::ROUTE_SPEAKER)) {
                     LOGV("Route forced to Speaker ON %08x", mSavedRoute | AudioSystem::ROUTE_SPEAKER);
                     mHardwareMixerThread->setStreamMute(AudioSystem::MUSIC, true);
-                    mHardwareStatus = AUDIO_HW_SET_MASTER_VOLUME;
-                    mAudioHardware->setMasterVolume(0);
                     usleep(mHardwareMixerThread->latency()*1000);
                     mHardwareStatus = AUDIO_HW_SET_ROUTING;
                     mAudioHardware->setRouting(AudioSystem::MODE_NORMAL, mSavedRoute | AudioSystem::ROUTE_SPEAKER);
                     mHardwareStatus = AUDIO_HW_IDLE;
                     // delay track start so that audio hardware has time to siwtch routes
                     usleep(kStartSleepTime);
-                    mHardwareStatus = AUDIO_HW_SET_MASTER_VOLUME;
-                    mAudioHardware->setMasterVolume(mHardwareMixerThread->masterVolume());
-                    mHardwareStatus = AUDIO_HW_IDLE;
                 }
                 mForcedRoute = AudioSystem::ROUTE_SPEAKER;
             }
@@ -1480,18 +1485,6 @@ status_t AudioFlinger::MixerThread::addTrack_l(const sp<Track>& track)
     return status;
 }
 
-// removeTrack_l() must be called with AudioFlinger::mLock held
-void AudioFlinger::MixerThread::removeTrack_l(wp<Track> track, int name)
-{
-    sp<Track> t = track.promote();
-    if (t!=NULL && (t->mState <= TrackBase::STOPPED)) {
-        t->reset();
-        deleteTrackName_l(name);
-        removeActiveTrack_l(track);
-        mAudioFlinger->mWaitWorkCV.broadcast();
-    }
-}
-
 // destroyTrack_l() must be called with AudioFlinger::mLock held
 void AudioFlinger::MixerThread::destroyTrack_l(const sp<Track>& track)
 {
@@ -1697,7 +1690,7 @@ void* AudioFlinger::MixerThread::TrackBase::getBuffer(uint32_t offset, uint32_t 
 
     // Check validity of returned pointer in case the track control block would have been corrupted.
     if (bufferStart < mBuffer || bufferStart > bufferEnd || bufferEnd > mBufferEnd || 
-            cblk->channels == 2 && ((unsigned long)bufferStart & 3) ) {
+        (cblk->channels == 2 && ((unsigned long)bufferStart & 3))) {
         LOGE("TrackBase::getBuffer buffer out of range:\n    start: %p, end %p , mBuffer %p mBufferEnd %p\n    \
                 server %d, serverBase %d, user %d, userBase %d, channels %d",
                 bufferStart, bufferEnd, mBuffer, mBufferEnd,
@@ -1733,7 +1726,6 @@ AudioFlinger::MixerThread::Track::~Track()
     wp<Track> weak(this); // never create a strong ref from the dtor
     Mutex::Autolock _l(mMixerThread->mAudioFlinger->mLock);
     mState = TERMINATED;
-    mMixerThread->removeTrack_l(weak, mName);
 }
 
 void AudioFlinger::MixerThread::Track::destroy()
