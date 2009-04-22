@@ -26,11 +26,18 @@ page</a>.
   </tr>
 
   <tr>
-     <td style="background-color:#ffcccc;">0.8.0</td>
-     <td style="background-color:#ffcccc;"><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">ADT-0.8.0.zip</a></td>
-     <td style="background-color:#ffcccc;">23&nbsp;September&nbsp;2008</td>
-     <td style="background-color:#ffcccc;">Android&nbsp;1.1&nbsp;SDK,&nbsp;Release&nbsp;1<br />Android&nbsp;1.0&nbsp;SDK,&nbsp;Release&nbsp;1<br /></td>
-     <td style="background-color:#ffcccc;">Required for users of Android 1.1 SDK, Release&nbsp;1 and Android&nbsp;1.0&nbsp;SDK,&nbsp;Release&nbsp;1<br /> </td>
+     <td style="background-color:#ffcccc;">0.9.0</td>
+     <td style="background-color:#ffcccc;"><a href="http://dl-ssl.google.com/android/ADT-0.9.0.zip">ADT-0.9.0.zip</a></td>
+     <td style="background-color:#ffcccc;"><nobr>27 April 2009</nobr></td>
+     <td style="background-color:#ffcccc;"><nobr>Android 1.5 SDK</td>
+     <td style="background-color:#ffcccc;"><nobr>Required for users of Android 1.5 SDK (and later releases)<br /> </td>
+  </tr>
+  <tr>
+     <td>0.8.0</td>
+     <td><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">ADT-0.8.0.zip</a></td>
+     <td style="background-color:#ffcccc;"><nobr>23 September 2008</nobr></td>
+     <td style="background-color:#ffcccc;"><nobr>Android 1.1 SDK<br/>Android 1.0 SDK<br/></td>
+     <td style="background-color:#ffcccc;"><nobr>Required for users of Android 1.1 SDK and Android 1.0 SDK<br /> </td>
   </tr>
   <tr>
      <td>0.7.1</td>
