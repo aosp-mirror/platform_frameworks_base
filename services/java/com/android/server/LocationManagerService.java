@@ -138,7 +138,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     private final static String WAKELOCK_KEY = "LocationManagerService";
     private AlarmManager mAlarmManager;
     private long mAlarmInterval = 0;
-    private boolean mScreenOn = true;
     private PowerManager.WakeLock mWakeLock = null;
     private long mWakeLockAcquireTime = 0;
     private boolean mWakeLockGpsReceived = true;
@@ -537,8 +536,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         PowerStateBroadcastReceiver powerStateReceiver = new PowerStateBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ALARM_INTENT);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         context.registerReceiver(powerStateReceiver, intentFilter);
@@ -765,12 +762,12 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (listeners > 0) {
                 p.setMinTime(getMinTimeLocked(provider));
                 p.enableLocationTracking(true);
-                updateWakelockStatusLocked(mScreenOn);
+                updateWakelockStatusLocked();
             }
         } else {
             p.enableLocationTracking(false);
             p.disable();
-            updateWakelockStatusLocked(mScreenOn);
+            updateWakelockStatusLocked();
         }
     }
 
@@ -960,7 +957,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 long minTimeForProvider = getMinTimeLocked(provider);
                 impl.setMinTime(minTimeForProvider);
                 impl.enableLocationTracking(true);
-                updateWakelockStatusLocked(mScreenOn);
+                updateWakelockStatusLocked();
             } else {
                 try {
                     // Notify the listener that updates are currently disabled
@@ -1058,7 +1055,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             }
 
-            updateWakelockStatusLocked(mScreenOn);
+            updateWakelockStatusLocked();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1588,8 +1585,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                             return;
                         }
 
-                        // Process the location fix if the screen is on or we're holding a wakelock
-                        if (mScreenOn || (mWakeLockAcquireTime != 0)) {
+                        // Process the location fix if we're holding a wakelock
+                        if (mWakeLockAcquireTime != 0) {
                             handleLocationChangedLocked(location);
                         }
 
@@ -1627,7 +1624,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                     // Update wakelock status so the next alarm is set before releasing wakelock
                     synchronized (mLock) {
-                        updateWakelockStatusLocked(mScreenOn);
+                        updateWakelockStatusLocked();
                         releaseWakeLockLocked();
                     }
                 }
@@ -1651,18 +1648,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                     // is holding a wake lock until the alarm broadcast
                     // is finished.
                     acquireWakeLockLocked();
-                }
-
-            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                log("PowerStateBroadcastReceiver: Screen off");
-                synchronized (mLock) {
-                    updateWakelockStatusLocked(false);
-                }
-
-            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
-                log("PowerStateBroadcastReceiver: Screen on");
-                synchronized (mLock) {
-                    updateWakelockStatusLocked(true);
                 }
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)) {
@@ -1750,8 +1735,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     // Wake locks
 
-    private void updateWakelockStatusLocked(boolean screenOn) {
-        log("updateWakelockStatus(): " + screenOn);
+    private void updateWakelockStatusLocked() {
+        log("updateWakelockStatus()");
 
         long callerId = Binder.clearCallingIdentity();
         
@@ -1768,8 +1753,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             minTime = Math.min(mGpsLocationProvider.getMinTime(), minTime);
         }
 
-        mScreenOn = screenOn;
-
         PendingIntent sender =
             PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_INTENT), 0);
 
@@ -1777,7 +1760,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         log("Cancelling existing alarm");
         mAlarmManager.cancel(sender);
 
-        if (needsLock && !mScreenOn) {
+        if (needsLock) {
             long now = SystemClock.elapsedRealtime();
             mAlarmManager.set(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP, now + minTime, sender);
@@ -2046,7 +2029,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             pw.println("  mNetworkLocationProvider=" + mNetworkLocationProvider);
             pw.println("  mCollector=" + mCollector);
             pw.println("  mAlarmInterval=" + mAlarmInterval
-                    + " mScreenOn=" + mScreenOn
                     + " mWakeLockAcquireTime=" + mWakeLockAcquireTime);
             pw.println("  mWakeLockGpsReceived=" + mWakeLockGpsReceived
                     + " mWakeLockNetworkReceived=" + mWakeLockNetworkReceived);
