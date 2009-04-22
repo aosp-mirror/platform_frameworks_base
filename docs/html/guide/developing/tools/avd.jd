@@ -21,13 +21,12 @@ page.title=Android Virtual Devices
         <li><a href="#createavd">Creating the AVD</a></li>
         <li><a href="#hardwareopts">Setting hardware emulation options</a></li>
         <li><a href="#location">Default location of the AVD files</a></li>
-        <li><a href="#createavdopts">Command-line options, create avd</a></li>
       </ol>
     </li>
     <li><a href="#managing">Managing AVDs</a>
       <ol>
         <li><a href="#moving">Moving an AVD</a></li>
-        <li><a href="#updating">Deleting an AVD</a></li>
+        <li><a href="#updating">Updating an AVD</a></li>
         <li><a href="#deleting">Deleting an AVD</a></li>
       </ol>
     </li>
@@ -35,7 +34,8 @@ page.title=Android Virtual Devices
   </ol>
   <h2>See Also</h2>
   <ol>
-    <li>Android <a href="{@docRoot}guide/developing/tools/emulator.html">Emulator</a></li>
+    <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android 
+        Emulator</a></li>
   </ol>
 </div>
 </div>
@@ -366,6 +366,10 @@ the <code>-p</code> option to place the AVD directory in another location.
 The  AVD's .ini file remains in the .android directory on the network
 drive, regardless of the location of the AVD directory. </p>
 
+<h2 id="managing">Managing AVDs</h2>
+
+<p>The sections below provide more information about how to manage AVDs once you've created them. </p>
+
 <h3 id="moving">Moving an AVD</h3>
 
 <p>If you want to move or rename an AVD, you can do so using this command:</p>
@@ -455,7 +459,7 @@ files.</td>
 </tr>
 <tr>
   <td><code>-s &lt;name&gt;</code> or <br>
-      <code>-s &lt;dimensions&gt;</code> </td>
+      <code>-s &lt;width&gt;-&lt;height&gt;</code> </td>
   <td>The skin to use for this AVD, identified by name or dimensions.</td>
   <td>The android tool scans for a matching skin by name or dimension in the
 <code>skins/</code> directory of the target referenced in the <code>-t
