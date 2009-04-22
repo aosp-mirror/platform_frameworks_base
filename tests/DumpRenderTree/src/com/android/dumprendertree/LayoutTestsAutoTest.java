@@ -470,7 +470,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                 byte[] buf = new byte[2048];
                 int len;
 
-                while ((len = in.read(buf)) > 0 ) {
+                while ((len = in.read(buf)) >= 0 ) {
                     out.write(buf, 0, len);
                 }
                 out.close();
