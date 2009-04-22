@@ -1584,10 +1584,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                             return;
                         }
 
-                        // Process the location fix if we're holding a wakelock
-                        if (mWakeLockAcquireTime != 0) {
-                            handleLocationChangedLocked(location);
-                        }
+                        handleLocationChangedLocked(location);
 
                         if ((mWakeLockAcquireTime != 0) &&
                             (SystemClock.elapsedRealtime() - mWakeLockAcquireTime
