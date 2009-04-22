@@ -53,6 +53,7 @@ public final class RuimRecords extends IccRecords {
     String mdn = null;  // My mobile number
     String h_sid;
     String h_nid;
+    String min2_min1;   // 10 digit MIN value MIN2+MIN1 NEWRIL:TODO currently unused
 
     // is not initialized
 
@@ -214,6 +215,9 @@ public final class RuimRecords extends IccRecords {
                 mdn    = localTemp[0];
                 h_sid  = localTemp[1];
                 h_nid  = localTemp[2];
+                if (localTemp.length >= 3) { // NEWRIL:TODO remove when new ril always returns min2_min1
+                    min2_min1 = localTemp[3];
+                }
 
                 Log.d(LOG_TAG, "MDN: " + mdn);
 

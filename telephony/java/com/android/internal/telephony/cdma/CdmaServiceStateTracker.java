@@ -485,13 +485,17 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                         -1, //[3] baseStationLongitude
                          0, //[4] cssIndicator; init with 0, because it is treated as a boolean
                         -1, //[5] systemId
-                        -1  //[6] networkId
+                        -1, //[6] networkId
+                        -1, //[7] TSB-58 Roaming indicator // NEWRIL:TODO UNUSED
+                        -1, //[8] Indicates if current system is in PRL  // NEWRIL:TODO UNUSED
+                        -1, //[9] Is default roaming indicator from PRL // NEWRIL:TODO UNUSED
+                        -1, //[10] If registration state is 3 this is reason for denial // NEWRIL:TODO UNUSED
                 };
 
                 if (states.length > 0) {
                     try {
                         this.mRegistrationState = Integer.parseInt(states[0]);
-                        if (states.length == 10) {
+                        if (states.length >= 10) {
                             for(int i = 0; i < states.length - offset; i++) {
                                 if (states[i + offset] != null
                                   && states[i + offset].length() > 0) {
@@ -536,7 +540,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             case EVENT_POLL_STATE_OPERATOR_CDMA:
                 String opNames[] = (String[])ar.result;
 
-                if (opNames != null && opNames.length >= 4) {
+                if (opNames != null && opNames.length >= 3) {
                     newSS.setOperatorName (opNames[0], opNames[1], opNames[2]);
                 }
                 break;

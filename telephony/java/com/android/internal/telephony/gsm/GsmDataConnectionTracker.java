@@ -790,7 +790,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private boolean
     pdpStatesHasActiveCID (ArrayList<PDPContextState> states, int cid) {
         for (int i = 0, s = states.size() ; i < s ; i++) {
-            if (states.get(i).cid == cid) return states.get(i).active;
+            if (states.get(i).cid == cid) return (states.get(i).active != 0);
         }
 
         return false;
