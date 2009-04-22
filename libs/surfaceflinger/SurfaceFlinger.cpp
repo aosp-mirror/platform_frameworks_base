@@ -177,7 +177,6 @@ SurfaceFlinger::SurfaceFlinger()
         mFreezeCount(0),
         mFreezeDisplayTime(0),
         mDebugRegion(0),
-        mDebugFps(0),
         mDebugBackground(0),
         mDebugNoBootAnimation(0),
         mConsoleSignals(0),
@@ -196,14 +195,11 @@ void SurfaceFlinger::init()
     mDebugRegion = atoi(value);
     property_get("debug.sf.showbackground", value, "0");
     mDebugBackground = atoi(value);
-    property_get("debug.sf.showfps", value, "0");
-    mDebugFps = atoi(value);
     property_get("debug.sf.nobootanimation", value, "0");
     mDebugNoBootAnimation = atoi(value);
 
     LOGI_IF(mDebugRegion,           "showupdates enabled");
     LOGI_IF(mDebugBackground,       "showbackground enabled");
-    LOGI_IF(mDebugFps,              "showfps enabled");
     LOGI_IF(mDebugNoBootAnimation,  "boot animation disabled");
 }
 
@@ -524,10 +520,6 @@ void SurfaceFlinger::postFramebuffer()
 
     if (!mInvalidRegion.isEmpty()) {
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
-
-        if (UNLIKELY(mDebugFps)) {
-            debugShowFPS();
-        }
 
         hw.flip(mInvalidRegion);
 
@@ -1547,9 +1539,7 @@ status_t SurfaceFlinger::onTransact(
         switch (code) {
             case 1000: // SHOW_CPU, NOT SUPPORTED ANYMORE
                 return NO_ERROR;
-            case 1001:  // SHOW_FPS
-                n = data.readInt32();
-                mDebugFps = n ? 1 : 0;
+            case 1001:  // SHOW_FPS, NOT SUPPORTED ANYMORE
                 return NO_ERROR;
             case 1002:  // SHOW_UPDATES
                 n = data.readInt32();
