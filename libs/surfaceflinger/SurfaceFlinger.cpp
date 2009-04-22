@@ -639,16 +639,26 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
             mFreezeDisplay = mCurrentState.freezeDisplay;
         }
 
+        if (currentLayers.size() > mDrawingState.layersSortedByZ.size()) {
+            // layers have been added
+            mVisibleRegionsDirty = true;
+        }
+
         // some layers might have been removed, so
         // we need to update the regions they're exposing.
         if (mLayersRemoved) {
             mVisibleRegionsDirty = true;
-        }
-
-        const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
-        if (currentLayers.size() > mDrawingState.layersSortedByZ.size()) {
-            // layers have been added
-            mVisibleRegionsDirty = true;
+            const LayerVector& previousLayers(mDrawingState.layersSortedByZ);
+            const ssize_t count = previousLayers.size();
+            for (ssize_t i=0 ; i<count ; i++) {
+                const sp<LayerBase>& layer(previousLayers[i]);
+                if (currentLayers.indexOf( layer ) < 0) {
+                    // this layer is not visible anymore
+                    // FIXME: would be better to call without the lock held
+                    //LOGD("ditching layer %p", layer.get());
+                    layer->ditch();
+                }
+            }
         }
 
         // get rid of all resources we don't need anymore
@@ -1275,27 +1285,17 @@ status_t SurfaceFlinger::removeSurface(SurfaceID index)
     /*
      * called by the window manager, when a surface should be marked for
      * destruction.
+     * 
+     * The surface is removed from the current and drawing lists, but placed
+     * in the purgatory queue, so it's not destroyed right-away (we need
+     * to wait for all client's references to go away first).
      */
-    
-    // TODO: here we should make the surface disappear from the screen
-    // and mark it for removal. however, we can't free anything until all
-    // client are done. All operations on this surface should return errors.
-    
-    status_t err = NAME_NOT_FOUND;
-    sp<LayerBaseClient> layer;
-    
-    { // scope for the lock
-        Mutex::Autolock _l(mStateLock);
-        layer = getLayerUser_l(index);
-        err = purgatorizeLayer_l(layer);
-        if (err == NO_ERROR) {
-            setTransactionFlags(eTransactionNeeded);
-        }
-    }
 
-    if (layer != 0) {
-        // do this outside of mStateLock
-        layer->ditch();
+    Mutex::Autolock _l(mStateLock);
+    sp<LayerBaseClient> layer = getLayerUser_l(index);
+    status_t err = purgatorizeLayer_l(layer);
+    if (err == NO_ERROR) {
+        setTransactionFlags(eTransactionNeeded);
     }
     return err;
 }
@@ -1304,35 +1304,26 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
 {
     /*
      * called by ~ISurface() when all references are gone
-     */
-
-    /* FIXME: 
-     * - ideally we want to release as much GL state as possible after
-     * purgatorizeLayer_l() has been called and the surface is not in any
-     * active list.
+     * 
+     * the surface must be removed from purgatory from the main thread
+     * since its dtor must run from there (b/c of OpenGL ES).
      */
     
     class MessageDestroySurface : public MessageBase {
-        sp<SurfaceFlinger> flinger;
+        SurfaceFlinger* flinger;
         sp<LayerBaseClient> layer;
     public:
-        MessageDestroySurface(const sp<SurfaceFlinger>& flinger,
-                const sp<LayerBaseClient>& layer)
-            : MessageBase(0), flinger(flinger), layer(layer) {
-        }
-        ~MessageDestroySurface() {
-            //LOGD("~MessageDestroySurface, layer=%p", layer.get());
-        }
+        MessageDestroySurface(
+                SurfaceFlinger* flinger, const sp<LayerBaseClient>& layer)
+            : flinger(flinger), layer(layer) { }
         virtual bool handler() {
-            //LOGD("MessageDestroySurface handler, layer=%p", layer.get());
             Mutex::Autolock _l(flinger->mStateLock);
-            flinger->mLayerPurgatory.remove(layer);
+            ssize_t idx = flinger->mLayerPurgatory.remove(layer);
+            LOGE_IF(idx<0, "layer=%p is not in the purgatory list", layer.get());
             return true;
         }
     };
-
     mEventQueue.postMessage( new MessageDestroySurface(this, layer) );
-    
     return NO_ERROR;
 }
 

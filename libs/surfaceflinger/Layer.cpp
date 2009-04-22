@@ -61,15 +61,23 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display, Client* c, int32_t i)
 
 Layer::~Layer()
 {
+    destroy();
+    // the actual buffers will be destroyed here
+}
+
+void Layer::destroy()
+{
     for (int i=0 ; i<NUM_BUFFERS ; i++) {
         if (mTextures[i].name != -1U) {
             // FIXME: this was originally to work-around a bug in the
             // adreno driver. this should be fixed now.
             deletedTextures.add(mTextures[i].name);
+            mTextures[i].name = -1U;
         }
         if (mTextures[i].image != EGL_NO_IMAGE_KHR) {
             EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
             eglDestroyImageKHR(dpy, mTextures[i].image);
+            mTextures[i].image = EGL_NO_IMAGE_KHR;
         }
     }
 }
@@ -89,7 +97,9 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
 
 status_t Layer::ditch()
 {
+    // the layer is not on screen anymore. free as much resources as possible
     mSurface.clear();
+    destroy();
     return NO_ERROR;
 }
 

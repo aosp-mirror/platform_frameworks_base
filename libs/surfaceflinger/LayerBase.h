@@ -207,7 +207,8 @@ public:
      */
     virtual bool isSecure() const       { return false; }
 
-    /** signal this layer that it's not needed any longer */
+    /** signal this layer that it's not needed any longer. called from the 
+     * main thread */
     virtual status_t ditch() { return NO_ERROR; }
 
     

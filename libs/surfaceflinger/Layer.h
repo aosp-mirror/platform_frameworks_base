@@ -104,7 +104,8 @@ private:
     status_t resize(int32_t index, uint32_t w, uint32_t h, const char* what);
     Region post(uint32_t* oldState, bool& recomputeVisibleRegions);
     sp<SurfaceBuffer> peekBuffer();
-    
+    void destroy();
+
     
     class SurfaceLayer : public LayerBaseClient::Surface
     {

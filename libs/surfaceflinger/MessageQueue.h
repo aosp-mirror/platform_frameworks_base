@@ -148,8 +148,9 @@ public:
     uint32_t    what;
     int32_t     arg0;    
 
-    MessageBase(uint32_t what=0, int32_t arg0=0)
-    : when(0), what(what), arg0(arg0) { }
+    MessageBase() : when(0), what(0), arg0(0) { }
+    MessageBase(uint32_t what, int32_t arg0=0)
+        : when(0), what(what), arg0(arg0) { }
     
     // return true if message has a handler
     virtual bool handler() { return false; }
