@@ -1820,7 +1820,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
             }
         }
         
-        if (bestPackage != NULL && bestItem.isBetterThan(thisConfig)) {
+        if (bestPackage != NULL && bestItem.isMoreSpecificThan(thisConfig)) {
             continue;
         }
         
