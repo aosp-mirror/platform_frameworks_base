@@ -825,7 +825,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private void destroyAllDataConnectionList() {
         if(dataConnectionList != null) {
-            CdmaDataConnection pdp;
             dataConnectionList.removeAll(dataConnectionList);
         }
     }
