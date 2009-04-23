@@ -14,7 +14,7 @@
  ** limitations under the License.
  */
 
-#define LOG_TAG "GLLogger"
+#define LOG_TAG "libEGL"
 
 #include <ctype.h>
 #include <string.h>
@@ -69,9 +69,9 @@ private:
 
 struct egl_display_t : public egl_object_t<'_dpy'>
 {
-    EGLDisplay  dpys[2];
-    EGLConfig*  configs[2];
-    EGLint      numConfigs[2];
+    EGLDisplay  dpys[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
+    EGLConfig*  configs[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
+    EGLint      numConfigs[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
     EGLint      numTotalConfigs;
     char const* extensionsString;
     volatile int32_t refs;
@@ -81,7 +81,7 @@ struct egl_display_t : public egl_object_t<'_dpy'>
         char const * clientApi;
         char const * extensions;
     };
-    strings_t   queryString[2];
+    strings_t   queryString[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
 };
 
 struct egl_surface_t : public egl_object_t<'_srf'>
@@ -156,7 +156,7 @@ static char const * const egl_names[] = {
 
 // ----------------------------------------------------------------------------
 
-egl_connection_t gEGLImpl[2];
+egl_connection_t gEGLImpl[IMPL_NUM_DRIVERS_IMPLEMENTATIONS];
 static egl_display_t gDisplay[NUM_DISPLAYS];
 static pthread_mutex_t gThreadLocalStorageKeyMutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t gEGLThreadLocalStorageKey = -1;
@@ -278,29 +278,56 @@ void *load_driver(const char* driver, gl_hooks_t* hooks)
             driver, dlerror());
 
     if (dso) {
-        void** curr;
+        // first find the symbol for eglGetProcAddress
+        
+        typedef __eglMustCastToProperFunctionPointerType (*getProcAddressType)(
+                const char*);
+        
+        getProcAddressType getProcAddress = 
+            (getProcAddressType)dlsym(dso, "eglGetProcAddress");
+        
+        LOGE_IF(!getProcAddress, 
+                "can't find eglGetProcAddress() in %s", driver);        
+        
+        __eglMustCastToProperFunctionPointerType* curr;
         char const * const * api;
-        gl_hooks_t::gl_t* gl = &hooks->gl;
-        curr = (void**)gl;
-        api = gl_names;
+
+        gl_hooks_t::egl_t* egl = &hooks->egl;
+        curr = (__eglMustCastToProperFunctionPointerType*)egl;
+        api = egl_names;
         while (*api) {
-            void* f = dlsym(dso, *api);
-            //LOGD("<%s> @ 0x%p", *api, f);
+            char const * name = *api;
+            __eglMustCastToProperFunctionPointerType f = 
+                (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
             if (f == NULL) {
-                //LOGW("<%s> not found in %s", *api, driver);
-                f = (void*)gl_unimplemented;
+                // couldn't find the entry-point, use eglGetProcAddress()
+                f = getProcAddress(name);
+                if (f == NULL) {
+                    f = (__eglMustCastToProperFunctionPointerType)0;
+                }
             }
             *curr++ = f;
             api++;
         }
-        gl_hooks_t::egl_t* egl = &hooks->egl;
-        curr = (void**)egl;
-        api = egl_names;
+        
+        gl_hooks_t::gl_t* gl = &hooks->gl;
+        curr = (__eglMustCastToProperFunctionPointerType*)gl;
+        api = gl_names;
         while (*api) {
-            void* f = dlsym(dso, *api);
+            char const * name = *api;
+            // if the function starts with '__' it's a special case that
+            // uses a wrapper. skip the '__' when looking into the real lib.
+            if (name[0] == '_' && name[1] == '_') {
+                name += 2;
+            }
+            __eglMustCastToProperFunctionPointerType f = 
+                (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
             if (f == NULL) {
-                //LOGW("<%s> not found in %s", *api, driver);
-                f = (void*)0;
+                // couldn't find the entry-point, use eglGetProcAddress()
+                f = getProcAddress(name);
+                if (f == NULL) {
+                    f = (__eglMustCastToProperFunctionPointerType)gl_unimplemented;
+                }
             }
             *curr++ = f;
             api++;
@@ -429,18 +456,19 @@ egl_display_t* get_display(EGLDisplay dpy)
     return (index >= NUM_DISPLAYS) ? NULL : &gDisplay[index];
 }
 
-static inline
-egl_surface_t* get_surface(EGLSurface surface)
-{
-    egl_surface_t* s = (egl_surface_t *)surface;
-    return s;
+template<typename NATIVE, typename EGL>
+static inline NATIVE* egl_to_native_cast(EGL arg) {
+    return reinterpret_cast<NATIVE*>(arg);
 }
 
 static inline
-egl_context_t* get_context(EGLContext context)
-{
-    egl_context_t* c = (egl_context_t *)context;
-    return c;
+egl_surface_t* get_surface(EGLSurface surface) {   
+    return egl_to_native_cast<egl_surface_t>(surface);
+}
+
+static inline
+egl_context_t* get_context(EGLContext context) {
+    return egl_to_native_cast<egl_context_t>(context);
 }
 
 static egl_connection_t* validate_display_config(
@@ -451,7 +479,7 @@ static egl_connection_t* validate_display_config(
     if (!dp) return setError(EGL_BAD_DISPLAY, (egl_connection_t*)NULL);
 
     impl = uintptr_t(config)>>24;
-    if (uint32_t(impl) >= 2) {
+    if (uint32_t(impl) >= IMPL_NUM_DRIVERS_IMPLEMENTATIONS) {
         return setError(EGL_BAD_CONFIG, (egl_connection_t*)NULL);
     } 
     index = uintptr_t(config) & 0xFFFFFF;
@@ -491,13 +519,8 @@ static EGLBoolean validate_display_surface(EGLDisplay dpy, EGLSurface surface)
     return EGL_TRUE;
 }
 
-// ----------------------------------------------------------------------------
-}; // namespace android
-// ----------------------------------------------------------------------------
 
-using namespace android;
-
-EGLDisplay eglGetDisplay(NativeDisplayType display)
+EGLDisplay egl_init_displays(NativeDisplayType display)
 {
     if (sEarlyInitState) {
         return EGL_NO_DISPLAY;
@@ -510,7 +533,7 @@ EGLDisplay eglGetDisplay(NativeDisplayType display)
     
     EGLDisplay dpy = EGLDisplay(uintptr_t(display) + 1LU);
     egl_display_t* d = &gDisplay[index];
-        
+
     // dynamically load all our EGL implementations for that display
     // and call into the real eglGetGisplay()
     egl_connection_t* cnx = &gEGLImpl[IMPL_SOFTWARE];
@@ -573,6 +596,18 @@ EGLDisplay eglGetDisplay(NativeDisplayType display)
     return dpy;
 }
 
+
+// ----------------------------------------------------------------------------
+}; // namespace android
+// ----------------------------------------------------------------------------
+
+using namespace android;
+
+EGLDisplay eglGetDisplay(NativeDisplayType display)
+{
+    return egl_init_displays(display);
+}
+
 // ----------------------------------------------------------------------------
 // Initialization
 // ----------------------------------------------------------------------------
@@ -594,7 +629,7 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     // build our own extension string first, based on the extension we know
     // and the extension supported by our client implementation
     dp->extensionsString = strdup(gExtensionString);
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         cnx->major = -1;
         cnx->minor = -1;
@@ -624,7 +659,7 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
     }
 
     EGLBoolean res = EGL_FALSE;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso && cnx->major>=0 && cnx->minor>=0) {
             EGLint n;
@@ -663,7 +698,7 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
         return EGL_TRUE;
         
     EGLBoolean res = EGL_FALSE;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             cnx->hooks->egl.eglTerminate(dp->dpys[i]);
@@ -706,7 +741,7 @@ EGLBoolean eglGetConfigs(   EGLDisplay dpy,
         return EGL_TRUE;
     }
     GLint n = 0;
-    for (int j=0 ; j<2 ; j++) {
+    for (int j=0 ; j<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; j++) {
         for (int i=0 ; i<dp->numConfigs[j] && config_size ; i++) {
             *configs++ = MAKE_CONFIG(j, i);
             config_size--;
@@ -794,7 +829,7 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
         return res;
     }
 
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglChooseConfig(
@@ -1107,7 +1142,7 @@ EGLBoolean eglWaitNative(EGLint engine)
 EGLint eglGetError(void)
 {
     EGLint result = EGL_SUCCESS;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         EGLint err = EGL_SUCCESS;
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso)
@@ -1120,8 +1155,15 @@ EGLint eglGetError(void)
     return result;
 }
 
-void (*eglGetProcAddress(const char *procname))()
+__eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
 {
+    // eglGetProcAddress() could be the very first function called
+    // in which case we must make sure we've initialized ourselves, this
+    // happens the first time egl_get_display() is called.
+    
+    if (egl_init_displays(EGL_DEFAULT_DISPLAY) == EGL_NO_DISPLAY)
+        return NULL;
+
     __eglMustCastToProperFunctionPointerType addr;
     addr = findProcAddress(procname, gExtentionMap, NELEM(gExtentionMap));
     if (addr) return addr;
@@ -1133,7 +1175,7 @@ void (*eglGetProcAddress(const char *procname))()
     
     addr = 0;
     int slot = -1;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglGetProcAddress) {
@@ -1266,7 +1308,7 @@ EGLBoolean eglSwapInterval(EGLDisplay dpy, EGLint interval)
     if (!dp) return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
     EGLBoolean res = EGL_TRUE;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglSwapInterval) {
@@ -1309,7 +1351,7 @@ EGLBoolean eglBindAPI(EGLenum api)
 {
     // bind this API on all EGLs
     EGLBoolean res = EGL_TRUE;
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglBindAPI) {
@@ -1324,7 +1366,7 @@ EGLBoolean eglBindAPI(EGLenum api)
 
 EGLenum eglQueryAPI(void)
 {
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglQueryAPI) {
@@ -1340,7 +1382,7 @@ EGLenum eglQueryAPI(void)
 
 EGLBoolean eglReleaseThread(void)
 {
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             if (cnx->hooks->egl.eglReleaseThread) {

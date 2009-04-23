@@ -43,3 +43,10 @@ EGL_ENTRY(EGLSurface, eglCreatePbufferFromClientBuffer, EGLDisplay, EGLenum, EGL
 /* EGL 1.3 */
 
 /* EGL 1.4 */
+
+/* EGL_EGLEXT_VERSION 3 */
+
+EGL_ENTRY(EGLBoolean,  eglLockSurfaceKHR,   EGLDisplay, EGLSurface, const EGLint *)
+EGL_ENTRY(EGLBoolean,  eglUnlockSurfaceKHR, EGLDisplay, EGLSurface)
+EGL_ENTRY(EGLImageKHR, eglCreateImageKHR,   EGLDisplay, EGLContext, EGLenum, EGLClientBuffer, const EGLint *)
+EGL_ENTRY(EGLBoolean,  eglDestroyImageKHR,  EGLDisplay, EGLImageKHR)
