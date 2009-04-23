@@ -78,8 +78,8 @@ class Camera : public BnCameraClient, public IBinder::DeathRecipient
 {
 public:
             // construct a camera client from an existing remote
-            Camera(const sp<ICamera>& camera);
-
+            Camera(const sp<ICamera>& camera);  // to be removed
+    static  sp<Camera>  create(const sp<ICamera>& camera);
     static  sp<Camera>  connect();
                         ~Camera();
             void        init();
