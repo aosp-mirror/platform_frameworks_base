@@ -131,7 +131,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private static int APN_DEFAULT_ID = 0;
     private static int APN_MMS_ID = 1;
-    private static int APN_NUM_TYPES = 2;
+    private static int APN_SUPL_ID = 2;
+    private static int APN_NUM_TYPES = 3;
 
     private boolean[] dataEnabled = new boolean[APN_NUM_TYPES];
 
@@ -152,13 +153,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     //WINK:TODO: Teleca, is this really gsm specific, what about CDMA?
     private static final String INTENT_RECONNECT_ALARM = "com.android.internal.telephony.gprs-reconnect";
     private static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
-
-    //***** Tag IDs for EventLog
-    private static final int EVENT_LOG_RADIO_RESET_COUNTDOWN_TRIGGERED = 50101;
-    private static final int EVENT_LOG_RADIO_RESET = 50102;
-    private static final int EVENT_LOG_PDP_RESET = 50103;
-    private static final int EVENT_LOG_REREGISTER_NETWORK = 50104;
-    private static final int EVENT_LOG_RADIO_PDP_SETUP_FAIL = 50105;
 
     static final Uri PREFERAPN_URI = Uri.parse("content://telephony/carriers/preferapn");
     static final String APN_ID = "apn_id";
@@ -322,8 +316,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     /**
      * Ensure that we are connected to an APN of the specified type.
-     * @param type the APN type (currently the only valid value
-     * is {@link Phone#APN_TYPE_MMS})
+     * @param type the APN type (currently the only valid values
+     * are {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL})
      * @return the result of the operation. Success is indicated by
      * a return value of either {@code Phone.APN_ALREADY_ACTIVE} or
      * {@code Phone.APN_REQUEST_STARTED}. In the latter case, a broadcast
@@ -331,9 +325,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * the APN has been established.
      */
     protected int enableApnType(String type) {
-        if (!TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
+        if (!TextUtils.equals(type, Phone.APN_TYPE_MMS) &&
+                !TextUtils.equals(type, Phone.APN_TYPE_SUPL)) {
             return Phone.APN_REQUEST_FAILED;
         }
+
         // If already active, return
         Log.d(LOG_TAG, "enableApnType("+type+")");
         if (isApnTypeActive(type)) {
@@ -366,12 +362,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * The APN of the specified type is no longer needed. Ensure that if
      * use of the default APN has not been explicitly disabled, we are connected
      * to the default APN.
-     * @param type the APN type. The only valid value currently is {@link Phone#APN_TYPE_MMS}.
+     * @param type the APN type. The only valid values are currently 
+     * {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL}.
      * @return
      */
     protected int disableApnType(String type) {
         Log.d(LOG_TAG, "disableApnType("+type+")");
-        if (TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
+        if ((TextUtils.equals(type, Phone.APN_TYPE_MMS) ||
+                TextUtils.equals(type, Phone.APN_TYPE_SUPL))
+                && isEnabled(type)) {
             removeMessages(EVENT_RESTORE_DEFAULT_APN);
             setEnabled(type, false);
             if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
@@ -439,6 +438,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return dataEnabled[APN_DEFAULT_ID];
         } else if (TextUtils.equals(apnType, Phone.APN_TYPE_MMS)) {
             return dataEnabled[APN_MMS_ID];
+        } else if (TextUtils.equals(apnType, Phone.APN_TYPE_SUPL)) {
+            return dataEnabled[APN_SUPL_ID];
         } else {
             return false;
         }
@@ -450,9 +451,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             dataEnabled[APN_DEFAULT_ID] = enable;
         } else if (TextUtils.equals(apnType, Phone.APN_TYPE_MMS)) {
             dataEnabled[APN_MMS_ID] = enable;
+        } else if (TextUtils.equals(apnType, Phone.APN_TYPE_SUPL)) {
+            dataEnabled[APN_SUPL_ID] = enable;
         }
         Log.d(LOG_TAG, "dataEnabled[DEFAULT_APN]=" + dataEnabled[APN_DEFAULT_ID] +
-                " dataEnabled[MMS_APN]=" + dataEnabled[APN_MMS_ID]);
+                " dataEnabled[MMS_APN]=" + dataEnabled[APN_MMS_ID] +
+                " dataEnabled[SUPL_APN]=" + dataEnabled[APN_SUPL_ID]);
     }
 
     /**
@@ -476,13 +480,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return trySetupData(Phone.REASON_DATA_ENABLED);
         } else if (!enable) {
             setEnabled(Phone.APN_TYPE_DEFAULT, false);
-            // Don't tear down if there is an active APN and it handles MMS.
+            // Don't tear down if there is an active APN and it handles MMS or SUPL.
             // TODO: This isn't very general.
-            if (!isApnTypeActive(Phone.APN_TYPE_MMS) || !isEnabled(Phone.APN_TYPE_MMS)) {
-                cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
-                return true;
+            if ((isApnTypeActive(Phone.APN_TYPE_MMS) && isEnabled(Phone.APN_TYPE_MMS)) ||
+                (isApnTypeActive(Phone.APN_TYPE_SUPL) && isEnabled(Phone.APN_TYPE_SUPL))) {
+                return false;
             }
-            return false;
+            cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+            return true;
         } else {
             // isEnabled && enable
             return true;
@@ -513,7 +518,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * {@code true} otherwise.
      */
     public boolean getAnyDataEnabled() {
-        return dataEnabled[APN_DEFAULT_ID] || dataEnabled[APN_MMS_ID];
+        return dataEnabled[APN_DEFAULT_ID] || dataEnabled[APN_MMS_ID] || dataEnabled[APN_SUPL_ID];
     }
 
     /**
@@ -1316,7 +1321,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
              * rather an app that inadvertantly fails to reset to the
              * default APN, or that dies before doing so.
              */
-            if (dataEnabled[APN_MMS_ID]) {
+            if (dataEnabled[APN_MMS_ID] || dataEnabled[APN_SUPL_ID]) {
                 removeMessages(EVENT_RESTORE_DEFAULT_APN);
                 sendMessageDelayed(obtainMessage(EVENT_RESTORE_DEFAULT_APN),
                         getRestoreDefaultApnDelay());

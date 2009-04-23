@@ -1130,7 +1130,7 @@ public class WebSettings {
     /*package*/
     synchronized void syncSettingsAndCreateHandler(BrowserFrame frame) {
         mBrowserFrame = frame;
-        if (android.util.Config.DEBUG) {
+        if (WebView.DEBUG) {
             junit.framework.Assert.assertTrue(frame.mNativeFrame != 0);
         }
         nativeSync(frame.mNativeFrame);

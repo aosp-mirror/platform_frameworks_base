@@ -217,7 +217,13 @@ status_t CameraService::Client::unlock()
     // allow anyone to use camera
     LOGV("unlock (%p)", getCameraClient()->asBinder().get());
     status_t result = checkPid();
-    if (result == NO_ERROR) mClientPid = 0;
+    if (result == NO_ERROR) {
+        mClientPid = 0;
+
+        // we need to remove the reference so that when app goes
+        // away, the reference count goes to 0.
+        mCameraClient.clear();
+    }
     return result;
 }
 
@@ -894,8 +900,6 @@ status_t CameraService::Client::setParameters(const String8& params)
 // get preview/capture parameters - key/value pairs
 String8 CameraService::Client::getParameters() const
 {
-    LOGD("getParameters");
-
     Mutex::Autolock lock(mLock);
 
     if (mHardware == 0) {
@@ -903,7 +907,9 @@ String8 CameraService::Client::getParameters() const
         return String8();
     }
 
-    return mHardware->getParameters().flatten();
+    String8 params(mHardware->getParameters().flatten());
+    LOGD("getParameters(%s)", params.string());
+    return params;
 }
 
 void CameraService::Client::postAutoFocus(bool focused)

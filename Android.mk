@@ -114,6 +114,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodManager.aidl \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
 	im/java/android/im/IImPlugin.aidl \
+	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/ILocationCollector.aidl \
 	location/java/android/location/ILocationListener.aidl \

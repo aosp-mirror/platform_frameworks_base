@@ -16,7 +16,6 @@
 
 package android.location;
 
-import android.location.Address;
 import android.os.Bundle;
 
 /**
@@ -47,15 +46,8 @@ interface ILocationProvider {
     void setMinTime(long minTime);
     void updateNetworkState(int state);
     boolean sendExtraCommand(String command, inout Bundle extras);
-
-    /* the following are only used for NetworkLocationProvider */
-    void updateCellLockStatus(boolean acquired);
-    void addListener(in String[] applications);
-    void removeListener(in String[] applications);
-    String getFromLocation(double latitude, double longitude, int maxResults,
-        String language, String country, String variant, String appName, out List<Address> addrs);
-    String getFromLocationName(String locationName,
-        double lowerLeftLatitude, double lowerLeftLongitude,
-        double upperRightLatitude, double upperRightLongitude, int maxResults,
-        String language, String country, String variant, String appName, out List<Address> addrs);
+    void addListener(int uid);
+    void removeListener(int uid);
+    void wakeLockAcquired();
+    void wakeLockReleased();
 }

@@ -38,7 +38,6 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.text.style.CharacterStyle;
 import android.text.util.Regex;
-import android.util.Config;
 import android.util.Log;
 
 import java.io.UnsupportedEncodingException;
@@ -61,6 +60,9 @@ import java.util.regex.Pattern;
  * @hide
  */
 public final class Gmail {
+    // Set to true to enable extra debugging.
+    private static final boolean DEBUG = false;
+
     public static final String GMAIL_AUTH_SERVICE = "mail";
     // These constants come from google3/java/com/google/caribou/backend/MailLabel.java.
     public static final String LABEL_SENT = "^f";
@@ -1195,7 +1197,7 @@ public final class Gmail {
 
         @Override
         public void onChange(boolean selfChange) {
-            if (Config.DEBUG) {
+            if (DEBUG) {
                 Log.d(TAG, "MailCursor is notifying " + mObservers.size() + " observers");
             }
             for (MailCursorObserver o: mObservers) {

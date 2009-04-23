@@ -501,7 +501,6 @@ private:
         MixerThread& operator = (const MixerThread&);
   
         status_t    addTrack_l(const sp<Track>& track);
-        void        removeTrack_l(wp<Track> track, int name);
         void        destroyTrack_l(const sp<Track>& track);
         int         getTrackName_l();
         void        deleteTrackName_l(int name);

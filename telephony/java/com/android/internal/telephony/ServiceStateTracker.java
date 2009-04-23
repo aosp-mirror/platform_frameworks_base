@@ -114,7 +114,6 @@ public abstract class ServiceStateTracker extends Handler {
 
     // Event Log Tags
     protected static final int EVENT_LOG_CGREG_FAIL = 50107;
-    protected static final int EVENT_DATA_STATE_RADIO_OFF = 50108;
 
     //***** Time Zones
     protected static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
@@ -241,4 +240,3 @@ public abstract class ServiceStateTracker extends Handler {
         pollingContext = new int[1];
     }
 }
-

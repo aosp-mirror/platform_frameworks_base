@@ -1099,14 +1099,9 @@ public final class SIMRecords extends IccRecords {
 
             // Note: Data may include trailing FF's.  That's OK; message
             // should still parse correctly.
-            byte[] nba = new byte[n - 1];
-            System.arraycopy(ba, 1, nba, 0, n - 1);
-
-            String pdu = IccUtils.bytesToHexString(nba);
-            // XXX first line is bogus
-            SmsMessage message = SmsMessage.newFromCMT(
-                                new String[] { "", pdu });
-
+            byte[] pdu = new byte[n - 1];
+            System.arraycopy(ba, 1, pdu, 0, n - 1);
+            SmsMessage message = SmsMessage.createFromPdu(pdu);
 
             ((GSMPhone) phone).mSMS.dispatchMessage(message);
         }
@@ -1130,14 +1125,9 @@ public final class SIMRecords extends IccRecords {
 
                 // Note: Data may include trailing FF's.  That's OK; message
                 // should still parse correctly.
-                byte[] nba = new byte[n - 1];
-                System.arraycopy(ba, 1, nba, 0, n - 1);
-
-                String pdu = IccUtils.bytesToHexString(nba);
-                // XXX first line is bogus
-                SmsMessage message = SmsMessage.newFromCMT(
-                        new String[] { "", pdu });
-
+                byte[] pdu = new byte[n - 1];
+                System.arraycopy(ba, 1, pdu, 0, n - 1);
+                SmsMessage message = SmsMessage.createFromPdu(pdu);
 
                 ((GSMPhone) phone).mSMS.dispatchMessage(message);
 
@@ -1499,6 +1489,3 @@ public final class SIMRecords extends IccRecords {
     }
 
 }
-
-
-

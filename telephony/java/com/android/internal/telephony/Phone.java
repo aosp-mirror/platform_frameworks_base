@@ -113,9 +113,12 @@ public interface Phone {
     static final String APN_TYPE_DEFAULT = "default";
     /** APN type for MMS traffic */
     static final String APN_TYPE_MMS = "mms";
+    /** APN type for SUPL assisted GPS */
+    static final String APN_TYPE_SUPL = "supl";
 
     // "Features" accessible through the connectivity manager
     static final String FEATURE_ENABLE_MMS = "enableMMS";
+    static final String FEATURE_ENABLE_SUPL = "enableSUPL";
 
     /**
      * Return codes for <code>enableApnType()</code>
@@ -170,7 +173,7 @@ public interface Phone {
     int NT_MODE_EVDO_NO_CDMA = 6; /* EvDo only */
     int NT_MODE_GLOBAL       = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)
                                      AVAILABLE Application Settings menu*/
-    int PREFERRED_NT_MODE    = NT_MODE_GLOBAL;
+    int PREFERRED_NT_MODE    = NT_MODE_GSM_ONLY;
 
 
     // Used for CDMA roaming mode

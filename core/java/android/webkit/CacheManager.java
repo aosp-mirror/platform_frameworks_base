@@ -19,7 +19,6 @@ package android.webkit;
 import android.content.Context;
 import android.net.http.Headers;
 import android.os.FileUtils;
-import android.util.Config;
 import android.util.Log;
 import java.io.File;
 import java.io.FileInputStream;
@@ -321,7 +320,7 @@ public final class CacheManager {
             }
         }
 
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "getCacheFile for url " + url);
         }
 
@@ -423,7 +422,7 @@ public final class CacheManager {
 
         mDataBase.addCache(url, cacheRet);
 
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "saveCacheFile for url " + url);
         }
     }

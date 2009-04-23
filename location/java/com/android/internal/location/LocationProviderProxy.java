@@ -222,52 +222,35 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    public void updateCellLockStatus(boolean acquired) {
+    public void addListener(int uid) {
         try {
-            mProvider.updateCellLockStatus(acquired);
-        } catch (RemoteException e) {
-            Log.e(TAG, "updateCellLockStatus failed", e);
-        }
-    }
-
-    public void addListener(String[] applications) {
-        try {
-            mProvider.addListener(applications);
+            mProvider.addListener(uid);
         } catch (RemoteException e) {
             Log.e(TAG, "addListener failed", e);
         }
     }
 
-    public void removeListener(String[] applications) {
+    public void removeListener(int uid) {
         try {
-            mProvider.removeListener(applications);
+            mProvider.removeListener(uid);
         } catch (RemoteException e) {
             Log.e(TAG, "removeListener failed", e);
         }
     }
 
-    public String getFromLocation(double latitude, double longitude, int maxResults,
-        String language, String country, String variant, String appName, List<Address> addrs) {
+    public void wakeLockAcquired() {
         try {
-            return mProvider.getFromLocation(latitude, longitude, maxResults, language, country, 
-                    variant, appName,  addrs);
+            mProvider.wakeLockAcquired();
         } catch (RemoteException e) {
-            Log.e(TAG, "getFromLocation failed", e);
-            return null;
+            Log.e(TAG, "wakeLockAcquired failed", e);
         }
     }
 
-    public String getFromLocationName(String locationName,
-        double lowerLeftLatitude, double lowerLeftLongitude,
-        double upperRightLatitude, double upperRightLongitude, int maxResults,
-        String language, String country, String variant, String appName, List<Address> addrs) {
+    public void wakeLockReleased() {
         try {
-            return mProvider.getFromLocationName(locationName, lowerLeftLatitude, 
-                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                    maxResults, language, country, variant, appName, addrs);
+            mProvider.wakeLockReleased();
         } catch (RemoteException e) {
-            Log.e(TAG, "getFromLocationName failed", e);
-            return null;
+            Log.e(TAG, "wakeLockReleased failed", e);
         }
     }
 }
