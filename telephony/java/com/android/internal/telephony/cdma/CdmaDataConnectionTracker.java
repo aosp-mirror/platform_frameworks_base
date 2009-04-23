@@ -64,7 +64,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private static final String LOG_TAG = "CDMA";
     private static final boolean DBG = true;
 
-    //***** Instance Variables
+    private CDMAPhone mCdmaPhone;
 
     // Indicates baseband will not auto-attach
     private boolean noAutoAttach = false;
@@ -83,12 +83,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private CdmaDataConnection mActiveDataConnection;
 
     /** Defined cdma connection profiles */
-    private static int EXTERNAL_NETWORK_DEFAULT_ID = 0;
-    private static int EXTERNAL_NETWORK_NUM_TYPES  = 1;
+    private static final int EXTERNAL_NETWORK_DEFAULT_ID = 0;
+    private static final int EXTERNAL_NETWORK_NUM_TYPES  = 1;
 
     private boolean[] dataEnabled = new boolean[EXTERNAL_NETWORK_NUM_TYPES];
-
-    //***** Constants
 
     /**
      * Pool size of CdmaDataConnection objects.
@@ -96,7 +94,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private static final int DATA_CONNECTION_POOL_SIZE = 1;
 
     private static final int POLL_CONNECTION_MILLIS = 5 * 1000;
-    private static final String INTENT_RECONNECT_ALARM = "com.android.internal.telephony.cdma-reconnect";
+    private static final String INTENT_RECONNECT_ALARM =
+            "com.android.internal.telephony.cdma-reconnect";
     private static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
 
     // Possibly promoate to base class, the only difference is
@@ -146,6 +145,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     CdmaDataConnectionTracker(CDMAPhone p) {
         super(p);
+        mCdmaPhone = p;
 
         p.mCM.registerForAvailable (this, EVENT_RADIO_AVAILABLE, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
@@ -187,15 +187,15 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         //Unregister from all events
         phone.mCM.unregisterForAvailable(this);
         phone.mCM.unregisterForOffOrNotAvailable(this);
-        ((CDMAPhone) phone).mRuimRecords.unregisterForRecordsLoaded(this);
+        mCdmaPhone.mRuimRecords.unregisterForRecordsLoaded(this);
         phone.mCM.unregisterForNVReady(this);
         phone.mCM.unregisterForDataStateChanged(this);
-        ((CDMAPhone) phone).mCT.unregisterForVoiceCallEnded(this);
-        ((CDMAPhone) phone).mCT.unregisterForVoiceCallStarted(this);
-        ((CDMAPhone) phone).mSST.unregisterForCdmaDataConnectionAttached(this);
-        ((CDMAPhone) phone).mSST.unregisterForCdmaDataConnectionDetached(this);
-        ((CDMAPhone) phone).mSST.unregisterForRoamingOn(this);
-        ((CDMAPhone) phone).mSST.unregisterForRoamingOff(this);
+        mCdmaPhone.mCT.unregisterForVoiceCallEnded(this);
+        mCdmaPhone.mCT.unregisterForVoiceCallStarted(this);
+        mCdmaPhone.mSST.unregisterForCdmaDataConnectionAttached(this);
+        mCdmaPhone.mSST.unregisterForCdmaDataConnectionDetached(this);
+        mCdmaPhone.mSST.unregisterForRoamingOn(this);
+        mCdmaPhone.mSST.unregisterForRoamingOff(this);
 
         phone.getContext().unregisterReceiver(this.mIntentReceiver);
         destroyAllDataConnectionList();
@@ -277,10 +277,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     public boolean isDataConnectionAsDesired() {
         boolean roaming = phone.getServiceState().getRoaming();
 
-        if ( ((phone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY) || 
-		        ((CDMAPhone) phone).mRuimRecords.getRecordsLoaded()) &&
-                ((CDMAPhone) phone).mSST.getCurrentCdmaDataConnectionState() == 
-				ServiceState.STATE_IN_SERVICE &&
+        if (((phone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY) ||
+                 mCdmaPhone.mRuimRecords.getRecordsLoaded()) &&
+                (mCdmaPhone.mSST.getCurrentCdmaDataConnectionState() ==
+                 ServiceState.STATE_IN_SERVICE) &&
                 (!roaming || getDataOnRoamingEnabled()) &&
                 !mIsWifiConnected ) {
             return (state == State.CONNECTED);
@@ -353,7 +353,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             return true;
         }
 
-        int psState = ((CDMAPhone) phone).mSST.getCurrentCdmaDataConnectionState();
+        int psState = mCdmaPhone.mSST.getCurrentCdmaDataConnectionState();
         boolean roaming = phone.getServiceState().getRoaming();
 
         if ((state == State.IDLE || state == State.SCANNING)
@@ -361,9 +361,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     psState == ServiceState.RADIO_TECHNOLOGY_EVDO_0 ||
                     psState == ServiceState.RADIO_TECHNOLOGY_EVDO_A)
                 && ((phone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY) ||
-                        ((CDMAPhone) phone).mRuimRecords.getRecordsLoaded())
-                && (((CDMAPhone) phone).mSST.isConcurrentVoiceAndData() ||
-                     phone.getState() == Phone.State.IDLE )
+                        mCdmaPhone.mRuimRecords.getRecordsLoaded())
+                && (mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
+                        phone.getState() == Phone.State.IDLE )
                 && isDataAllowed()) {
 
             return setupData(reason);
@@ -374,8 +374,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     " dataState=" + state +
                     " PS state=" + psState +
                     " radio state=" + phone.mCM.getRadioState() +
-                    " ruim=" + ((CDMAPhone) phone).mRuimRecords.getRecordsLoaded() +
-                    " concurrentVoice&Data=" + ((CDMAPhone) phone).mSST.isConcurrentVoiceAndData() +
+                    " ruim=" + mCdmaPhone.mRuimRecords.getRecordsLoaded() +
+                    " concurrentVoice&Data=" + mCdmaPhone.mSST.isConcurrentVoiceAndData() +
                     " phoneState=" + phone.getState() +
                     " dataEnabled=" + getAnyDataEnabled() +
                     " roaming=" + roaming +
@@ -781,7 +781,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      * @override com.android.internal.telephony.DataConnectionTracker
      */
     protected void onVoiceCallStarted() {
-        if (state == State.CONNECTED && !((CDMAPhone) phone).mSST.isConcurrentVoiceAndData()) {
+        if (state == State.CONNECTED && !mCdmaPhone.mSST.isConcurrentVoiceAndData()) {
             stopNetStatPoll();
             phone.notifyDataConnection(Phone.REASON_VOICE_CALL_STARTED);
         }
@@ -792,7 +792,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      */
     protected void onVoiceCallEnded() {
         if (state == State.CONNECTED) {
-            if (!((CDMAPhone) phone).mSST.isConcurrentVoiceAndData()) {
+            if (!mCdmaPhone.mSST.isConcurrentVoiceAndData()) {
                 startNetStatPoll();
                 phone.notifyDataConnection(Phone.REASON_VOICE_CALL_ENDED);
             } else {
@@ -818,7 +818,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         CdmaDataConnection dataConn;
 
        for (int i = 0; i < DATA_CONNECTION_POOL_SIZE; i++) {
-            dataConn = new CdmaDataConnection(((CDMAPhone) phone));
+            dataConn = new CdmaDataConnection(mCdmaPhone);
             dataConnectionList.add(dataConn);
        }
     }
