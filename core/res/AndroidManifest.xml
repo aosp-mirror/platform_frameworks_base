@@ -366,6 +366,23 @@
         android:label="@string/permlab_readPhoneState"
         android:description="@string/permdesc_readPhoneState" />
 
+    <!-- ================================== -->
+    <!-- Permissions for sdcard interaction -->
+    <!-- ================================== -->
+    <eat-comment />
+
+    <!-- Group of permissions that are related to SD card access. -->
+    <permission-group android:name="android.permission-group.STORAGE"
+        android:label="@string/permgrouplab_storage"
+        android:description="@string/permgroupdesc_storage" />
+
+    <!-- Allows an application to write to the SD card -->
+    <permission android:name="android.permission.SDCARD_WRITE"
+        android:permissionGroup="android.permission-group.STORAGE"
+        android:label="@string/permlab_sdcardWrite"
+        android:description="@string/permdesc_sdcardWrite"
+        android:protectionLevel="normal" />
+
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->
     <!-- ============================================ -->
