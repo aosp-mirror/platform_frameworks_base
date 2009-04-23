@@ -31,6 +31,8 @@ import com.android.dumprendertree.TestShellCallback;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 
 public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShellActivity> {
@@ -38,6 +40,9 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
     private final static String LOGTAG = "LoadTest";
     private final static String LOAD_TEST_RESULT = "/sdcard/load_test_result.txt";
     private boolean mFinished;
+    static final String LOAD_TEST_RUNNER_FILES[] = {
+        "run_page_cycler.py"
+  };
 
     public LoadTestsAutoTest() {
         super("com.android.dumprendertree", TestShellActivity.class);
@@ -54,7 +59,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
     // Invokes running of layout tests
     // and waits till it has finished running.
-    public void runTest() {
+    public void runPageCyclerTest() {
         LayoutTestsAutoRunner runner = (LayoutTestsAutoRunner) getInstrumentation();
 
         if (runner.mTestPath == null) {
@@ -149,4 +154,31 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
             }
         }
     }
+
+    public void copyRunnerAssetsToCache() {
+        try {
+            String out_dir = getActivity().getApplicationContext()
+                .getCacheDir().getPath() + "/";
+
+            for( int i=0; i< LOAD_TEST_RUNNER_FILES.length; i++) {
+                InputStream in = getActivity().getAssets().open(
+                        LOAD_TEST_RUNNER_FILES[i]);
+                OutputStream out = new FileOutputStream(
+                        out_dir + LOAD_TEST_RUNNER_FILES[i]);
+
+                byte[] buf = new byte[2048];
+                int len;
+
+                while ((len = in.read(buf)) >= 0 ) {
+                    out.write(buf, 0, len);
+                }
+                out.close();
+                in.close();
+            }
+        }catch (IOException e) {
+          e.printStackTrace();
+        }
+
+    }
+
 }
