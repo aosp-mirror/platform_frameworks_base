@@ -151,34 +151,57 @@ class AppWidgetService extends IAppWidgetService.Stub
 
         synchronized (mAppWidgetIds) {
             int N = mInstalledProviders.size();
-            pw.println("Providers: (size=" + N + ")");
+            pw.println("Providers:");
             for (int i=0; i<N; i++) {
                 Provider p = mInstalledProviders.get(i);
                 AppWidgetProviderInfo info = p.info;
-                pw.println("  [" + i + "] provder=" + info.provider
-                        + " min=(" + info.minWidth + "x" + info.minHeight + ")"
-                        + " updatePeriodMillis=" + info.updatePeriodMillis
-                        + " initialLayout=" + info.initialLayout + " zombie=" + p.zombie);
+                pw.print("  ["); pw.print(i); pw.print("] provider ");
+                        pw.print(info.provider.flattenToShortString());
+                        pw.println(':');
+                pw.print("    min=("); pw.print(info.minWidth);
+                        pw.print("x"); pw.print(info.minHeight);
+                        pw.print(") updatePeriodMillis=");
+                        pw.print(info.updatePeriodMillis);
+                        pw.print(" initialLayout=#");
+                        pw.print(Integer.toHexString(info.initialLayout));
+                        pw.print(" zombie="); pw.println(p.zombie);
             }
 
             N = mAppWidgetIds.size();
-            pw.println("AppWidgetIds: (size=" + N + ")");
+            pw.println(" ");
+            pw.println("AppWidgetIds:");
             for (int i=0; i<N; i++) {
                 AppWidgetId id = mAppWidgetIds.get(i);
-                pw.println("  [" + i + "] appWidgetId=" + id.appWidgetId
-                        + " host=" + id.host.hostId + "/" + id.host.packageName + " provider="
-                        + (id.provider == null ? "null" : id.provider.info.provider)
-                        + " host.callbacks=" + (id.host != null ? id.host.callbacks : "(no host)")
-                        + " views=" + id.views);
+                pw.print("  ["); pw.print(i); pw.print("] id=");
+                        pw.println(id.appWidgetId);;
+                pw.print("    hostId=");
+                        pw.print(id.host.hostId); pw.print(' ');
+                        pw.print(id.host.packageName); pw.print('/');
+                        pw.println(id.host.uid);
+                if (id.provider != null) {
+                    pw.print("    provider=");
+                            pw.println(id.provider.info.provider.flattenToShortString());
+                }
+                if (id.host != null) {
+                    pw.print("    host.callbacks="); pw.println(id.host.callbacks);
+                }
+                if (id.views != null) {
+                    pw.print("    views="); pw.println(id.views);
+                }
             }
 
             N = mHosts.size();
-            pw.println("Hosts: (size=" + N + ")");
+            pw.println(" ");
+            pw.println("Hosts:");
             for (int i=0; i<N; i++) {
                 Host host = mHosts.get(i);
-                pw.println("  [" + i + "] packageName=" + host.packageName + " uid=" + host.uid
-                        + " hostId=" + host.hostId + " callbacks=" + host.callbacks
-                        + " instances.size=" + host.instances.size() + " zombie=" + host.zombie);
+                pw.print("  ["); pw.print(i); pw.print("] hostId=");
+                        pw.print(host.hostId); pw.print(' ');
+                        pw.print(host.packageName); pw.print('/');
+                        pw.print(host.uid); pw.println(':');
+                pw.print("    callbacks="); pw.println(host.callbacks);
+                pw.print("    instances.size="); pw.print(host.instances.size());
+                        pw.print(" zombie="); pw.println(host.zombie);
             }
         }
     }

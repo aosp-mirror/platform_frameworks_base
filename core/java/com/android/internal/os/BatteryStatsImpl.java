@@ -25,6 +25,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
 
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3096,32 +3098,33 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     };
     
-    public void dumpLocked(Printer pw) {
+    public void dumpLocked(PrintWriter pw) {
         if (DEBUG) {
-            pw.println("*** Screen timer:");
-            mScreenOnTimer.logState(pw, "  ");
+            Printer pr = new PrintWriterPrinter(pw);
+            pr.println("*** Screen timer:");
+            mScreenOnTimer.logState(pr, "  ");
             for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-                pw.println("*** Screen brightness #" + i + ":");
-                mScreenBrightnessTimer[i].logState(pw, "  ");
+                pr.println("*** Screen brightness #" + i + ":");
+                mScreenBrightnessTimer[i].logState(pr, "  ");
             }
-            pw.println("*** Input event counter:");
-            mInputEventCounter.logState(pw, "  ");
-            pw.println("*** Phone timer:");
-            mPhoneOnTimer.logState(pw, "  ");
+            pr.println("*** Input event counter:");
+            mInputEventCounter.logState(pr, "  ");
+            pr.println("*** Phone timer:");
+            mPhoneOnTimer.logState(pr, "  ");
             for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
-                pw.println("*** Signal strength #" + i + ":");
-                mPhoneSignalStrengthsTimer[i].logState(pw, "  ");
+                pr.println("*** Signal strength #" + i + ":");
+                mPhoneSignalStrengthsTimer[i].logState(pr, "  ");
             }
             for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
-                pw.println("*** Data connection type #" + i + ":");
-                mPhoneDataConnectionsTimer[i].logState(pw, "  ");
+                pr.println("*** Data connection type #" + i + ":");
+                mPhoneDataConnectionsTimer[i].logState(pr, "  ");
             }
-            pw.println("*** Wifi timer:");
-            mWifiOnTimer.logState(pw, "  ");
-            pw.println("*** WifiRunning timer:");
-            mWifiRunningTimer.logState(pw, "  ");
-            pw.println("*** Bluetooth timer:");
-            mBluetoothOnTimer.logState(pw, "  ");
+            pr.println("*** Wifi timer:");
+            mWifiOnTimer.logState(pr, "  ");
+            pr.println("*** WifiRunning timer:");
+            mWifiRunningTimer.logState(pr, "  ");
+            pr.println("*** Bluetooth timer:");
+            mBluetoothOnTimer.logState(pr, "  ");
         }
         super.dumpLocked(pw);
     }

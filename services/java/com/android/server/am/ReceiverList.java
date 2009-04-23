@@ -18,9 +18,12 @@ package com.android.server.am;
 
 import android.app.IIntentReceiver;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.PrintWriterPrinter;
+import android.util.Printer;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -64,22 +67,26 @@ class ReceiverList extends ArrayList<BroadcastFilter>
     }
     
     void dumpLocal(PrintWriter pw, String prefix) {
-        pw.println(prefix + "receiver=IBinder "
-                + Integer.toHexString(System.identityHashCode(receiver.asBinder())));
-        pw.println(prefix + "app=" + app + " pid=" + pid + " uid=" + uid);
-        pw.println(prefix + "curBroadcast=" + curBroadcast
-                + " linkedToDeath=" + linkedToDeath);
+        pw.print(prefix); pw.print("app="); pw.print(app);
+            pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.println(uid);
+        if (curBroadcast != null || linkedToDeath) {
+            pw.print(prefix); pw.print("curBroadcast="); pw.print(curBroadcast);
+                pw.print(" linkedToDeath="); pw.println(linkedToDeath);
+        }
     }
     
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
+        Printer pr = new PrintWriterPrinter(pw);
         dumpLocal(pw, prefix);
         String p2 = prefix + "  ";
         final int N = size();
         for (int i=0; i<N; i++) {
             BroadcastFilter bf = get(i);
-            pw.println(prefix + "Filter #" + i + ": " + bf);
-            bf.dump(pw, p2);
+            pw.print(prefix); pw.print("Filter #"); pw.print(i);
+                    pw.print(": BroadcastFilter{");
+                    pw.print(Integer.toHexString(System.identityHashCode(bf)));
+                    pw.println('}');
+            bf.dumpInReceiverList(pw, pr, p2);
         }
     }
     
@@ -96,7 +103,7 @@ class ReceiverList extends ArrayList<BroadcastFilter>
         sb.append((app != null ? app.processName : "(unknown name)"));
         sb.append('/');
         sb.append(uid);
-        sb.append(" client ");
+        sb.append((receiver.asBinder() instanceof Binder) ? " local:" : " remote:");
         sb.append(Integer.toHexString(System.identityHashCode(receiver.asBinder())));
         sb.append('}');
         return stringName = sb.toString();

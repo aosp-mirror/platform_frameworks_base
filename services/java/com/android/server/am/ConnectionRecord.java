@@ -31,9 +31,10 @@ class ConnectionRecord {
     String stringName;              // Caching of toString.
     
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
         pw.println(prefix + "binding=" + binding);
-        pw.println(prefix + "activity=" + activity);
+        if (activity != null) {
+            pw.println(prefix + "activity=" + activity);
+        }
         pw.println(prefix + "conn=" + conn.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
     }
