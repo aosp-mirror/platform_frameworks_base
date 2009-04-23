@@ -75,6 +75,19 @@ Camera::Camera(const sp<ICamera>& camera)
     }
 }
 
+
+sp<Camera> Camera::create(const sp<ICamera>& camera)
+{
+    sp<Camera> c = new Camera();
+    // connect this client to existing camera remote
+    if (camera->connect(c) == NO_ERROR) {
+        c->mStatus = NO_ERROR;
+        c->mCamera = camera;
+        camera->asBinder()->linkToDeath(c);
+    }
+    return c;
+}
+
 void Camera::init()
 {
     mStatus = UNKNOWN_ERROR;
