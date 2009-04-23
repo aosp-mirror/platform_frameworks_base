@@ -988,119 +988,225 @@ struct ResTable_config
         return diffs;
     }
     
-    // Return true if 'this' is more specific than 'o'.  Optionally, if
-    // 'requested' is null, then they will also be compared against the
-    // requested configuration and true will only be returned if 'this'
-    // is a better candidate than 'o' for the configuration.  This assumes that
-    // match() has already been used to remove any configurations that don't
-    // match the requested configuration at all; if they are not first filtered,
-    // non-matching results can be considered better than matching ones.
+    // Return true if 'this' is more specific than 'o'.
     inline bool
-    isBetterThan(const ResTable_config& o, const ResTable_config* requested = NULL) const {
+    isMoreSpecificThan(const ResTable_config& o) const {
         // The order of the following tests defines the importance of one
         // configuration parameter over another.  Those tests first are more
         // important, trumping any values in those following them.
-        if (imsi != 0 && (!requested || requested->imsi != 0)) {
-            if (mcc != 0 && (!requested || requested->mcc != 0)) {
-                if (o.mcc == 0) {
-                    return true;
-                }
+        if (imsi || o.imsi) {
+            if (mcc != o.mcc) {
+                if (!mcc) return false;
+                if (!o.mcc) return true;
             }
-            if (mnc != 0 && (!requested || requested->mnc != 0)) {
-                if (o.mnc == 0) {
-                    return true;
-                }
-            }
-        }
-        if (locale != 0 && (!requested || requested->locale != 0)) {
-            if (language[0] != 0 && (!requested || requested->language[0] != 0)) {
-                if (o.language[0] == 0) {
-                    return true;
-                }
-            }
-            if (country[0] != 0 && (!requested || requested->country[0] != 0)) {
-                if (o.country[0] == 0) {
-                    return true;
-                }
+
+            if (mnc != o.mnc) {
+                if (!mnc) return false;
+                if (!o.mnc) return true;
             }
         }
-        if (screenType != 0 && (!requested || requested->screenType != 0)) {
-            if (orientation != 0 && (!requested || requested->orientation != 0)) {
-                if (o.orientation == 0) {
-                    return true;
-                }
+
+        if (locale || o.locale) {
+            if (language[0] != o.language[0]) {
+                if (!language[0]) return false;
+                if (!o.language[0]) return true;
             }
-            if (density != 0 && (!requested || requested->density != 0)) {
-                if (o.density == 0) {
-                    return true;
-                }
-            }
-            if (touchscreen != 0 && (!requested || requested->touchscreen != 0)) {
-                if (o.touchscreen == 0) {
-                    return true;
-                }
+
+            if (country[0] != o.country[0]) {
+                if (!country[0]) return false;
+                if (!o.country[0]) return true;
             }
         }
-        if (input != 0 && (!requested || requested->input != 0)) {
-            const int keysHidden = inputFlags&MASK_KEYSHIDDEN;
-            const int reqKeysHidden = requested
-                    ? requested->inputFlags&MASK_KEYSHIDDEN : 0;
-            if (keysHidden != 0 && reqKeysHidden != 0) {
-                const int oKeysHidden = o.inputFlags&MASK_KEYSHIDDEN;
-                //LOGI("isBetterThan keysHidden: cur=%d, given=%d, config=%d\n",
-                //        keysHidden, oKeysHidden, reqKeysHidden);
-                if (oKeysHidden == 0) {
-                    //LOGI("Better because 0!");
-                    return true;
-                }
-                // For compatibility, we count KEYSHIDDEN_NO as being
-                // the same as KEYSHIDDEN_SOFT.  Here we disambiguate these
-                // may making an exact match more specific.
-                if (keysHidden == reqKeysHidden && oKeysHidden != reqKeysHidden) {
-                    // The current configuration is an exact match, and
-                    // the given one is not, so the current one is better.
-                    //LOGI("Better because other not same!");
-                    return true;
-                }
+
+        if (screenType || o.screenType) {
+            if (orientation != o.orientation) {
+                if (!orientation) return false;
+                if (!o.orientation) return true;
             }
-            if (keyboard != 0 && (!requested || requested->keyboard != 0)) {
-                if (o.keyboard == 0) {
-                    return true;
-                }
-            }
-            if (navigation != 0 && (!requested || requested->navigation != 0)) {
-                if (o.navigation == 0) {
-                    return true;
-                }
+
+            // density is never 'more specific'
+            // as the default just equals 160
+
+            if (touchscreen != o.touchscreen) {
+                if (!touchscreen) return false;
+                if (!o.touchscreen) return true;
             }
         }
-        if (screenSize != 0 && (!requested || requested->screenSize != 0)) {
-            if (screenWidth != 0 && (!requested || requested->screenWidth != 0)) {
-                if (o.screenWidth == 0) {
-                    return true;
-                }
+
+        if (input || o.input) {
+            if (inputFlags != o.inputFlags) {
+                if (!(inputFlags & MASK_KEYSHIDDEN)) return false;
+                if (!(o.inputFlags & MASK_KEYSHIDDEN)) return true;
             }
-            if (screenHeight != 0 && (!requested || requested->screenHeight != 0)) {
-                if (o.screenHeight == 0) {
-                    return true;
-                }
+
+            if (keyboard != o.keyboard) {
+                if (!keyboard) return false;
+                if (!o.keyboard) return true;
+            }
+
+            if (navigation != o.navigation) {
+                if (!navigation) return false;
+                if (!o.navigation) return true;
             }
         }
-        if (version != 0 && (!requested || requested->version != 0)) {
-            if (sdkVersion != 0 && (!requested || requested->sdkVersion != 0)) {
-                if (o.sdkVersion == 0) {
-                    return true;
-                }
+
+        if (screenSize || o.screenSize) {
+            if (screenWidth != o.screenWidth) {
+                if (!screenWidth) return false;
+                if (!o.screenWidth) return true;
             }
-            if (minorVersion != 0 && (!requested || requested->minorVersion != 0)) {
-                if (o.minorVersion == 0) {
-                    return true;
-                }
+
+            if (screenHeight != o.screenHeight) {
+                if (!screenHeight) return false;
+                if (!o.screenHeight) return true;
+            }
+        }
+
+        if (version || o.version) {
+            if (sdkVersion != o.sdkVersion) {
+                if (!sdkVersion) return false;
+                if (!o.sdkVersion) return true;
+            }
+
+            if (minorVersion != o.minorVersion) {
+                if (!minorVersion) return false;
+                if (!o.minorVersion) return true;
             }
         }
         return false;
     }
-    
+
+    // Return true if 'this' is a better match than 'o' for the 'requested'
+    // configuration.  This assumes that match() has already been used to
+    // remove any configurations that don't match the requested configuration
+    // at all; if they are not first filtered, non-matching results can be
+    // considered better than matching ones.
+    // The general rule per attribute: if the request cares about an attribute
+    // (it normally does), if the two (this and o) are equal it's a tie.  If
+    // they are not equal then one must be generic because only generic and
+    // '==requested' will pass the match() call.  So if this is not generic,
+    // it wins.  If this IS generic, o wins (return false).
+    inline bool
+    isBetterThan(const ResTable_config& o,
+            const ResTable_config* requested) const {
+        if (requested) {
+            if (imsi || o.imsi) {
+                if ((mcc != o.mcc) && requested->mcc) {
+                    return (mcc);
+                }
+
+                if ((mnc != o.mnc) && requested->mnc) {
+                    return (mnc);
+                }
+            }
+
+            if (locale || o.locale) {
+                if ((language[0] != o.language[0]) && requested->language[0]) {
+                    return (language[0]);
+                }
+
+                if ((country[0] != o.country[0]) && requested->country[0]) {
+                    return (country[0]);
+                }
+            }
+
+            if (screenType || o.screenType) {
+                if ((orientation != o.orientation) && requested->orientation) {
+                    return (orientation);
+                }
+
+                if (density != o.density) {
+                    // density is tough.  Any density is potentially useful
+                    // because the system will scale it.  Scaling down
+                    // is generally better than scaling up.
+                    // Default density counts as 160dpi (the system default)
+                    // TODO - remove 160 constants
+                    int h = (density?density:160);
+                    int l = (o.density?o.density:160);
+                    bool bImBigger = true;
+                    if (l > h) {
+                        int t = h;
+                        h = l;
+                        l = t;
+                        bImBigger = false;
+                    }
+ 
+                    int reqValue = (requested->density?requested->density:160);
+                    if (reqValue >= h) {
+                        // requested value higher than both l and h, give h
+                        return bImBigger;
+                    }
+                    if (l >= reqValue) {
+                        // requested value lower than both l and h, give l
+                        return !bImBigger;
+                    }
+                    // saying that scaling down is 2x better than up
+                    if (((2 * l) - reqValue) * h > reqValue * reqValue) {
+                        return !bImBigger;
+                    } else { 
+                        return bImBigger;
+                    }
+                }
+
+                if ((touchscreen != o.touchscreen) && requested->touchscreen) {
+                    return (touchscreen);
+                }
+            }
+
+            if (input || o.input) {
+                const int keysHidden = inputFlags & MASK_KEYSHIDDEN;
+                const int oKeysHidden = o.inputFlags & MASK_KEYSHIDDEN;
+                if (keysHidden != oKeysHidden) {
+                    const int reqKeysHidden =
+                            requested->inputFlags & MASK_KEYSHIDDEN;
+                    if (reqKeysHidden) {
+
+                        if (!keysHidden) return false;
+                        if (!oKeysHidden) return true;
+                        // For compatibility, we count KEYSHIDDEN_NO as being
+                        // the same as KEYSHIDDEN_SOFT.  Here we disambiguate
+                        // these by making an exact match more specific.
+                        if (reqKeysHidden == keysHidden) return true;
+                        if (reqKeysHidden == oKeysHidden) return false;
+                    }
+                }
+
+                if ((keyboard != o.keyboard) && requested->keyboard) {
+                    return (keyboard);
+                }
+
+                if ((navigation != o.navigation) && requested->navigation) {
+                    return (navigation);
+                }
+            }
+
+            if (screenSize || o.screenSize) {
+                if ((screenWidth != o.screenWidth) && requested->screenWidth) {
+                    return (screenWidth);
+                }
+
+                if ((screenHeight != o.screenHeight) &&
+                        requested->screenHeight) {
+                    return (screenHeight);
+                }
+            }
+
+            if (version || o.version) {
+                if ((sdkVersion != o.sdkVersion) && requested->sdkVersion) {
+                    return (sdkVersion);
+                }
+
+                if ((minorVersion != o.minorVersion) &&
+                        requested->minorVersion) {
+                    return (minorVersion);
+                }
+            }
+
+            return false;
+        }
+        return isMoreSpecificThan(o);
+    }
+
     // Return true if 'this' can be considered a match for the parameters in 
     // 'settings'.
     // Note this is asymetric.  A default piece of data will match every request
@@ -1137,8 +1243,7 @@ struct ResTable_config
                 && orientation != settings.orientation) {
                 return false;
             }
-            // Density not taken into account, always match, no matter what
-            // density is specified for the resource
+            // density always matches - we can scale it.  See isBetterThan
             if (settings.touchscreen != 0 && touchscreen != 0
                 && touchscreen != settings.touchscreen) {
                 return false;

@@ -15,8 +15,8 @@
 -->
 
 <resources>
-    <item type="configVarying" name="simple">simple finger</item>
+    <item type="configVarying" name="simple">simple fr FR</item>
     <bag type="configVarying" name="bag">
-        <item name="testString">bag finger</item>
+        <item name="testString">bag fr FR</item>
     </bag>
 </resources>
