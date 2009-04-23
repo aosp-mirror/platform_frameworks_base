@@ -92,6 +92,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private Bundle mCellLocation = new Bundle();
 
+    static final int PHONE_STATE_PERMISSION_MASK =
+                PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
+                PhoneStateListener.LISTEN_CALL_STATE |
+                PhoneStateListener.LISTEN_DATA_ACTIVITY |
+                PhoneStateListener.LISTEN_DATA_CONNECTION_STATE |
+                PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR;
+
     // we keep a copy of all of the state so we can send it out when folks
     // register for it
     //
@@ -110,16 +117,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // Log.d(TAG, "listen pkg=" + pkgForDebug + " events=0x" +
         // Integer.toHexString(events));
         if (events != 0) {
-            // check permissions
-            if ((events & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
-                // ACCESS_FINE_LOCATION implies ACCESS_COARSE_LOCATION
-                if (mContext.checkCallingPermission(
-                        android.Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    mContext.enforceCallingOrSelfPermission(
-                            android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
-                }
-            }
+            /* Checks permission and throws Security exception */
+            checkListenerPermission(events);
 
             synchronized (mRecords) {
                 // register
@@ -219,7 +218,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCallState(int state, String incomingNumber) {
-        if (!checkPhoneStatePermission("notifyCallState()")) {
+        if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
         synchronized (mRecords) {
@@ -240,7 +239,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyServiceState(ServiceState state) {
-        if (!checkPhoneStatePermission("notifyServiceState()")) {
+        if (!checkNotifyPermission("notifyServiceState()")){
             return;
         }
         synchronized (mRecords) {
@@ -256,7 +255,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifySignalStrength(SignalStrength signalStrength) {
-        if (!checkPhoneStatePermission("notifySignalStrength()")) {
+        if (!checkNotifyPermission("notifySignalStrength()")) {
             return;
         }
         synchronized (mRecords) {
@@ -281,7 +280,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyMessageWaitingChanged(boolean mwi) {
-        if (!checkPhoneStatePermission("notifyMessageWaitingChanged()")) {
+        if (!checkNotifyPermission("notifyMessageWaitingChanged()")) {
             return;
         }
         synchronized (mRecords) {
@@ -300,7 +299,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCallForwardingChanged(boolean cfi) {
-        if (!checkPhoneStatePermission("notifyCallForwardingChanged()")) {
+        if (!checkNotifyPermission("notifyCallForwardingChanged()")) {
             return;
         }
         synchronized (mRecords) {
@@ -319,7 +318,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataActivity(int state) {
-        if (!checkPhoneStatePermission("notifyDataActivity()")) {
+        if (!checkNotifyPermission("notifyDataActivity()" )) {
             return;
         }
         synchronized (mRecords) {
@@ -337,9 +336,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyDataConnection(int state, boolean isDataConnectivityPossible, String reason,
-            String apn, String interfaceName) {
-        if (!checkPhoneStatePermission("notifyDataConnection()")) {
+    public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
+            String reason, String apn, String interfaceName) {
+        if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
         synchronized (mRecords) {
@@ -364,7 +363,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataConnectionFailed(String reason) {
-        if (!checkPhoneStatePermission("notifyDataConnectionFailed()")) {
+        if (!checkNotifyPermission("notifyDataConnectionFailed()")) {
             return;
         }
         /*
@@ -385,7 +384,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCellLocation(Bundle cellLocation) {
-        if (!checkPhoneStatePermission("notifyCellLocation()")) {
+        if (!checkNotifyPermission("notifyCellLocation()")) {
             return;
         }
         synchronized (mRecords) {
@@ -402,7 +401,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     /**
      * Copy the service state object so they can't mess it up in the local calls
      */
-    private void sendServiceState(Record r, ServiceState state) {
+    public void sendServiceState(Record r, ServiceState state) {
         try {
             r.callback.onServiceStateChanged(new ServiceState(state));
         } catch (RemoteException ex) {
@@ -533,7 +532,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext.sendStickyBroadcast(intent);
     }
 
-    private boolean checkPhoneStatePermission(String method) {
+    private boolean checkNotifyPermission(String method) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
                 == PackageManager.PERMISSION_GRANTED) {
             return true;
@@ -542,5 +541,18 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
         Log.w(TAG, msg);
         return false;
+    }
+
+    private void checkListenerPermission(int events) {
+        if ((events & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
+
+        }
+
+        if ((events & PHONE_STATE_PERMISSION_MASK) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PHONE_STATE, null);
+        }
     }
 }
