@@ -25,6 +25,7 @@ import android.provider.BaseColumns;
 import static android.provider.SyncConstValue.*;
 import android.text.TextUtils;
 import android.util.Log;
+import android.accounts.Account;
 
 /**
  * @hide
@@ -55,14 +56,16 @@ public abstract class AbstractTableMerger
 
     private volatile boolean mIsMergeCancelled;
 
-    private static final String SELECT_MARKED = _SYNC_MARK + "> 0 and " + _SYNC_ACCOUNT + "=?";
+    private static final String SELECT_MARKED = _SYNC_MARK + "> 0 and "
+            + _SYNC_ACCOUNT + "=? and " + _SYNC_ACCOUNT_TYPE + "=?";
 
     private static final String SELECT_BY_SYNC_ID_AND_ACCOUNT =
-            _SYNC_ID +"=? and " + _SYNC_ACCOUNT + "=?";
+            _SYNC_ID +"=? and " + _SYNC_ACCOUNT + "=? and " + _SYNC_ACCOUNT_TYPE + "=?";
     private static final String SELECT_BY_ID = BaseColumns._ID +"=?";
 
     private static final String SELECT_UNSYNCED = ""
-            + _SYNC_DIRTY + " > 0 and (" + _SYNC_ACCOUNT + "=? or " + _SYNC_ACCOUNT + " is null)";
+            + _SYNC_DIRTY + " > 0 and ((" + _SYNC_ACCOUNT + "=? AND " + _SYNC_ACCOUNT_TYPE + "=?) "
+            + "or " + _SYNC_ACCOUNT + " is null)";
 
     public AbstractTableMerger(SQLiteDatabase database,
             String table, Uri tableURL, String deletedTable,
@@ -132,7 +135,7 @@ public abstract class AbstractTableMerger
      * construct a temporary instance to hold them.
      */
     public void merge(final SyncContext context,
-            final String account,
+            final Account account,
             final SyncableContentProvider serverDiffs,
             TempProviderSyncResult result,
             SyncResult syncResult, SyncableContentProvider temporaryInstanceFactory) {
@@ -155,7 +158,7 @@ public abstract class AbstractTableMerger
      * @hide this is public for testing purposes only
      */
     public void mergeServerDiffs(SyncContext context,
-            String account, SyncableContentProvider serverDiffs, SyncResult syncResult) {
+            Account account, SyncableContentProvider serverDiffs, SyncResult syncResult) {
         boolean diffsArePartial = serverDiffs.getContainsDiffs();
         // mark the current rows so that we can distinguish these from new
         // inserts that occur during the merge
@@ -169,7 +172,7 @@ public abstract class AbstractTableMerger
         Cursor diffsCursor = null;
         try {
             // load the local database entries, so we can merge them with the server
-            final String[] accountSelectionArgs = new String[]{account};
+            final String[] accountSelectionArgs = new String[]{account.mName, account.mType};
             localCursor = mDb.query(mTable, syncDirtyProjection,
                     SELECT_MARKED, accountSelectionArgs, null, null,
                     mTable + "." + _SYNC_ID);
@@ -462,7 +465,7 @@ public abstract class AbstractTableMerger
         }
     }
 
-    private void fullyDeleteMatchingRows(Cursor diffsCursor, String account,
+    private void fullyDeleteMatchingRows(Cursor diffsCursor, Account account,
             SyncResult syncResult) {
         int serverSyncIdColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_ID);
         final boolean deleteBySyncId = !diffsCursor.isNull(serverSyncIdColumn);
@@ -472,7 +475,8 @@ public abstract class AbstractTableMerger
         Cursor c = null;
         try {
             if (deleteBySyncId) {
-                selectionArgs = new String[]{diffsCursor.getString(serverSyncIdColumn), account};
+                selectionArgs = new String[]{diffsCursor.getString(serverSyncIdColumn),
+                        account.mName, account.mType};
                 c = mDb.query(mTable, new String[]{BaseColumns._ID}, SELECT_BY_SYNC_ID_AND_ACCOUNT,
                         selectionArgs, null, null, null);
             } else {
@@ -505,21 +509,21 @@ public abstract class AbstractTableMerger
      * Finds local changes, placing the results in the given result object.
      * @param temporaryInstanceFactory As an optimization for the case
      * where there are no client-side diffs, mergeResult may initially
-     * have no {@link android.content.TempProviderSyncResult#tempContentProvider}.  If this is
+     * have no {@link TempProviderSyncResult#tempContentProvider}.  If this is
      * the first in the sequence of AbstractTableMergers to find
      * client-side diffs, it will use the given ContentProvider to
      * create a temporary instance and store its {@link
-     * ContentProvider} in the mergeResult.
+     * android.content.ContentProvider} in the mergeResult.
      * @param account
      * @param syncResult
      */
     private void findLocalChanges(TempProviderSyncResult mergeResult,
-            SyncableContentProvider temporaryInstanceFactory, String account,
+            SyncableContentProvider temporaryInstanceFactory, Account account,
             SyncResult syncResult) {
         SyncableContentProvider clientDiffs = mergeResult.tempContentProvider;
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "generating client updates");
 
-        final String[] accountSelectionArgs = new String[]{account};
+        final String[] accountSelectionArgs = new String[]{account.mName, account.mType};
 
         // Generate the client updates and insertions
         // Create a cursor for dirty records
@@ -553,7 +557,8 @@ public abstract class AbstractTableMerger
         if (mDeletedTable != null) {
             Cursor deletedCursor = mDb.query(mDeletedTable,
                     syncIdAndVersionProjection,
-                    _SYNC_ACCOUNT + "=? AND " + _SYNC_ID + " IS NOT NULL", accountSelectionArgs,
+                    _SYNC_ACCOUNT + "=? AND " + _SYNC_ACCOUNT_TYPE + "=? AND "
+                            + _SYNC_ID + " IS NOT NULL", accountSelectionArgs,
                     null, null, mDeletedTable + "." + _SYNC_ID);
             try {
                 numDeletedEntries = deletedCursor.getCount();

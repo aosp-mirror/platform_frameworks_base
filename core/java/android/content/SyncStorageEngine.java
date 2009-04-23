@@ -1,6 +1,7 @@
 package android.content;
 
 import android.Manifest;
+import android.accounts.Account;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import com.google.android.collect.Sets;
+
 /**
  * ContentProvider that tracks the sync data and overall sync
  * history on the device.
@@ -26,7 +29,7 @@ public class SyncStorageEngine {
     private static final String TAG = "SyncManager";
 
     private static final String DATABASE_NAME = "syncmanager.db";
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 11;
 
     private static final int STATS = 1;
     private static final int STATS_ID = 2;
@@ -63,17 +66,20 @@ public class SyncStorageEngine {
         PENDING_PROJECTION_MAP = map = new HashMap<String,String>();
         map.put(Sync.History._ID, Sync.History._ID);
         map.put(Sync.History.ACCOUNT, Sync.History.ACCOUNT);
+        map.put(Sync.History.ACCOUNT_TYPE, Sync.History.ACCOUNT_TYPE);
         map.put(Sync.History.AUTHORITY, Sync.History.AUTHORITY);
 
         ACTIVE_PROJECTION_MAP = map = new HashMap<String,String>();
         map.put(Sync.History._ID, Sync.History._ID);
         map.put(Sync.History.ACCOUNT, Sync.History.ACCOUNT);
+        map.put(Sync.History.ACCOUNT_TYPE, Sync.History.ACCOUNT_TYPE);
         map.put(Sync.History.AUTHORITY, Sync.History.AUTHORITY);
         map.put("startTime", "startTime");
 
         HISTORY_PROJECTION_MAP = map = new HashMap<String,String>();
         map.put(Sync.History._ID, "history._id as _id");
         map.put(Sync.History.ACCOUNT, "stats.account as account");
+        map.put(Sync.History.ACCOUNT_TYPE, "stats.account_type as account_type");
         map.put(Sync.History.AUTHORITY, "stats.authority as authority");
         map.put(Sync.History.EVENT, Sync.History.EVENT);
         map.put(Sync.History.EVENT_TIME, Sync.History.EVENT_TIME);
@@ -86,6 +92,7 @@ public class SyncStorageEngine {
         STATUS_PROJECTION_MAP = map = new HashMap<String,String>();
         map.put(Sync.Status._ID, "status._id as _id");
         map.put(Sync.Status.ACCOUNT, "stats.account as account");
+        map.put(Sync.Status.ACCOUNT_TYPE, "stats.account_type as account_type");
         map.put(Sync.Status.AUTHORITY, "stats.authority as authority");
         map.put(Sync.Status.TOTAL_ELAPSED_TIME, Sync.Status.TOTAL_ELAPSED_TIME);
         map.put(Sync.Status.NUM_SYNCS, Sync.Status.NUM_SYNCS);
@@ -102,7 +109,7 @@ public class SyncStorageEngine {
     }
 
     private static final String[] STATS_ACCOUNT_PROJECTION =
-            new String[] { Sync.Stats.ACCOUNT };
+            new String[] { Sync.Stats.ACCOUNT, Sync.Stats.ACCOUNT_TYPE };
 
     private static final int MAX_HISTORY_EVENTS_TO_KEEP = 5000;
 
@@ -151,6 +158,7 @@ public class SyncStorageEngine {
                     + "_id INTEGER PRIMARY KEY,"
                     + "authority TEXT NOT NULL,"
                     + "account TEXT NOT NULL,"
+                    + "account_type TEXT NOT NULL,"
                     + "extras BLOB NOT NULL,"
                     + "source INTEGER NOT NULL"
                     + ");");
@@ -158,6 +166,7 @@ public class SyncStorageEngine {
             db.execSQL("CREATE TABLE stats (" +
                        "_id INTEGER PRIMARY KEY," +
                        "account TEXT, " +
+                       "account_type TEXT, " +
                        "authority TEXT, " +
                        "syncdata TEXT, " +
                        "UNIQUE (account, authority)" +
@@ -195,6 +204,7 @@ public class SyncStorageEngine {
                     + "_id INTEGER PRIMARY KEY,"
                     + "authority TEXT,"
                     + "account TEXT,"
+                    + "account_type TEXT,"
                     + "startTime INTEGER);");
 
             db.execSQL("CREATE INDEX historyEventTime ON history (eventTime)");
@@ -206,10 +216,27 @@ public class SyncStorageEngine {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            if (oldVersion == 9 && newVersion == 10) {
+            if (oldVersion == 9) {
                 Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will preserve old data");
                 db.execSQL("ALTER TABLE status ADD COLUMN initialFailureTime INTEGER");
+                oldVersion++;
+            }
+
+            if (oldVersion == 10) {
+                Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
+                        + newVersion + ", which will preserve old data");
+                db.execSQL("ALTER TABLE pending ADD COLUMN account_type TEXT");
+                db.execSQL("ALTER TABLE stats ADD COLUMN account_type TEXT");
+                db.execSQL("ALTER TABLE active ADD COLUMN account_type TEXT");
+
+                db.execSQL("UPDATE pending SET account_type='com.google.GAIA'");
+                db.execSQL("UPDATE stats SET account_type='com.google.GAIA'");
+                db.execSQL("UPDATE active SET account_type='com.google.GAIA'");
+                oldVersion++;
+            }
+
+            if (oldVersion == newVersion) {
                 return;
             }
 
@@ -233,23 +260,23 @@ public class SyncStorageEngine {
         }
     }
 
-    protected void doDatabaseCleanup(String[] accounts) {
-        HashSet<String> currentAccounts = new HashSet<String>();
-        for (String account : accounts) currentAccounts.add(account);
+    protected void doDatabaseCleanup(Account[] accounts) {
+        HashSet<Account> currentAccounts = Sets.newHashSet(accounts);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor cursor = db.query("stats", STATS_ACCOUNT_PROJECTION,
-                null /* where */, null /* where args */, Sync.Stats.ACCOUNT,
+                null /* where */, null /* where args */,
+                Sync.Stats.ACCOUNT + "," + Sync.Stats.ACCOUNT_TYPE,
                 null /* having */, null /* order by */);
         try {
             while (cursor.moveToNext()) {
-                String account = cursor.getString(0);
-                if (TextUtils.isEmpty(account)) {
-                    continue;
-                }
+                String accountName = cursor.getString(0);
+                String accountType = cursor.getString(1);
+                final Account account = new Account(accountName, accountType);
                 if (!currentAccounts.contains(account)) {
-                    String where = Sync.Stats.ACCOUNT + "=?";
+                    String where = Sync.Stats.ACCOUNT + "=? AND " + Sync.Stats.ACCOUNT_TYPE + "=?";
                     int numDeleted;
-                    numDeleted = db.delete("stats", where, new String[]{account});
+                    numDeleted = db.delete("stats", where,
+                            new String[]{account.mName, account.mType});
                     if (Config.LOGD) {
                         Log.d(TAG, "deleted " + numDeleted
                                 + " records from stats table"
@@ -272,10 +299,11 @@ public class SyncStorageEngine {
         }
     }
 
-    private int updateActiveSync(String account, String authority, Long startTime) {
+    private int updateActiveSync(Account account, String authority, Long startTime) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("account", account);
+        values.put("account", account == null ? null : account.mName);
+        values.put("account_type", account == null ? null : account.mType);
         values.put("authority", authority);
         values.put("startTime", startTime);
         int numChanges = db.update("active", values, null, null);
@@ -463,7 +491,9 @@ public class SyncStorageEngine {
             db.beginTransaction();
             long rowId = db.insert("pending", Sync.Pending.ACCOUNT, values);
             if (rowId < 0) return null;
-            String account = values.getAsString(Sync.Pending.ACCOUNT);
+            String accountName = values.getAsString(Sync.Pending.ACCOUNT);
+            String accountType = values.getAsString(Sync.Pending.ACCOUNT_TYPE);
+            final Account account = new Account(accountName, accountType);
             String authority = values.getAsString(Sync.Pending.AUTHORITY);
 
             long statsId = createStatsRowIfNecessary(account, authority);
@@ -491,25 +521,31 @@ public class SyncStorageEngine {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            String account;
+            Account account;
             String authority;
             Cursor c = db.query("pending",
-                    new String[]{Sync.Pending.ACCOUNT, Sync.Pending.AUTHORITY},
+                    new String[]{Sync.Pending.ACCOUNT, Sync.Pending.ACCOUNT_TYPE,
+                            Sync.Pending.AUTHORITY},
                     "_id=" + rowId, null, null, null, null);
             try {
                 if (c.getCount() != 1) {
                     return 0;
                 }
                 c.moveToNext();
-                account = c.getString(0);
-                authority = c.getString(1);
+                String accountName = c.getString(0);
+                String accountType = c.getString(1);
+                account = new Account(accountName, accountType);
+                authority = c.getString(2);
             } finally {
                 c.close();
             }
             db.delete("pending", "_id=" + rowId, null /* no where args */);
-            final String[] accountAuthorityWhereArgs = new String[]{account, authority};
+            final String[] accountAuthorityWhereArgs =
+                    new String[]{account.mName, account.mType, authority};
             boolean isPending = 0 < DatabaseUtils.longForQuery(db,
-                    "SELECT COUNT(*) FROM PENDING WHERE account=? AND authority=?",
+                    "SELECT COUNT(*)"
+                            + " FROM PENDING"
+                            + " WHERE account=? AND account_type=? AND authority=?",
                     accountAuthorityWhereArgs);
             if (!isPending) {
                 long statsId = createStatsRowIfNecessary(account, authority);
@@ -581,7 +617,7 @@ public class SyncStorageEngine {
         return numDeletes > 0;
     }
 
-    public long insertStartSyncEvent(String account, String authority, long now, int source) {
+    public long insertStartSyncEvent(Account account, String authority, long now, int source) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         long statsId = createStatsRowIfNecessary(account, authority);
 
@@ -731,14 +767,15 @@ public class SyncStorageEngine {
         }
     }
 
-    private long createStatsRowIfNecessary(String account, String authority) {
+    private long createStatsRowIfNecessary(Account account, String authority) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         StringBuilder where = new StringBuilder();
         where.append(Sync.Stats.ACCOUNT + "= ?");
+        where.append(" and " + Sync.Stats.ACCOUNT_TYPE + "= ?");
         where.append(" and " + Sync.Stats.AUTHORITY + "= ?");
         Cursor cursor = query(Sync.Stats.CONTENT_URI,
                 Sync.Stats.SYNC_STATS_PROJECTION,
-                where.toString(), new String[] { account, authority },
+                where.toString(), new String[] { account.mName, account.mType, authority },
                 null /* order */);
         try {
             long id;
@@ -746,7 +783,8 @@ public class SyncStorageEngine {
                 id = cursor.getLong(cursor.getColumnIndexOrThrow(Sync.Stats._ID));
             } else {
                 ContentValues values = new ContentValues();
-                values.put(Sync.Stats.ACCOUNT, account);
+                values.put(Sync.Stats.ACCOUNT, account.mName);
+                values.put(Sync.Stats.ACCOUNT_TYPE, account.mType);
                 values.put(Sync.Stats.AUTHORITY, authority);
                 id = db.insert("stats", null, values);
             }

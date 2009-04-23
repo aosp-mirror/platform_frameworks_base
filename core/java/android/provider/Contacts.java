@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
+import android.accounts.Account;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -73,6 +74,12 @@ public class Contacts {
          * <P>Type: TEXT</P>
          */
         public static final String _SYNC_ACCOUNT = "_sync_account";
+
+        /**
+         * The _SYNC_ACCOUNT_TYPE to which this setting corresponds. This may be null.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
 
         /**
          * The key of this setting.
@@ -134,6 +141,7 @@ public class Contacts {
                 selectString = (account == null)
                         ? "_sync_account is null AND key=?"
                         : "_sync_account=? AND key=?";
+//                : "_sync_account=? AND _sync_account_type=? AND key=?";
                 selectArgs = (account == null)
                 ? new String[]{key}
                 : new String[]{account, key};
@@ -158,7 +166,8 @@ public class Contacts {
             // the account name is, so we're using a global setting for SYNC_EVERYTHING.
             // Some day when we add multiple accounts to the UI this should honor the account
             // that was asked for.
-            //values.put(_SYNC_ACCOUNT, account);
+            //values.put(_SYNC_ACCOUNT, account.mName);
+            //values.put(_SYNC_ACCOUNT_TYPE, account.mType);
             values.put(KEY, key);
             values.put(VALUE, value);
             cr.update(Settings.CONTENT_URI, values, null, null);
@@ -838,6 +847,12 @@ public class Contacts {
          * <P>Type: TEXT</P>
          */
         public static final String GROUP_SYNC_ACCOUNT = "group_sync_account";
+
+        /**
+         * The account type of the group.
+         * <P>Type: TEXT</P>
+         */
+        public static final String GROUP_SYNC_ACCOUNT_TYPE = "group_sync_account_type";
 
         /**
          * The row id of the person.

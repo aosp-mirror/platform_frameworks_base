@@ -23,6 +23,8 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Sync;
 import android.net.Uri;
+import android.accounts.Account;
+
 import java.util.Map;
 
 /**
@@ -49,7 +51,8 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
     protected void syncProvider(Uri uri, String account, String authority) throws Exception {
         Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_FORCE, true);
-        extras.putString(ContentResolver.SYNC_EXTRAS_ACCOUNT, account);
+        Account account1 = new Account(account, "com.google.GAIA");
+        extras.putParcelable(ContentResolver.SYNC_EXTRAS_ACCOUNT, account1);
 
         mContentResolver.startSync(uri, extras);
         long startTimeInMillis = SystemClock.elapsedRealtime();
@@ -66,7 +69,7 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
                 break;
             }
 
-            if (isSyncActive(account, authority)) {
+            if (isSyncActive(account1, authority)) {
                 counter = 0;
                 continue;
             }
@@ -87,7 +90,7 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
      * entry is in either the Pending or Active tables.
      * @return
      */
-    private boolean isSyncActive(String account, String authority) {
+    private boolean isSyncActive(Account account, String authority) {
         Sync.Pending.QueryMap pendingQueryMap = null;
         Sync.Active.QueryMap activeQueryMap = null;
         try {
@@ -107,11 +110,12 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
         }
     }
 
-    private boolean isActiveInActiveQueryMap(Sync.Active.QueryMap activemap, String account,
+    private boolean isActiveInActiveQueryMap(Sync.Active.QueryMap activemap, Account account,
                                              String authority) {
         Map<String, ContentValues> rows = activemap.getRows();
         for (ContentValues values : rows.values()) {
-            if (values.getAsString("account").equals(account)
+            if (values.getAsString("account").equals(account.mName)
+                    && values.getAsString("account_type").equals(account.mType)
                     && values.getAsString("authority").equals(authority)) {
                 return true;
             }

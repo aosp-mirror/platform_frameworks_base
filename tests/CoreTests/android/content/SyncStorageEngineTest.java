@@ -21,6 +21,7 @@ import android.test.RenamingDelegatingContext;
 import android.test.mock.MockContext;
 import android.test.mock.MockContentResolver;
 import android.provider.Sync;
+import android.accounts.Account;
 
 public class SyncStorageEngineTest extends AndroidTestCase {
 
@@ -29,7 +30,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
      * correcponding sync is finished. This can happen if the clock changes while we are syncing.
      */
     public void testPurgeActiveSync() throws Exception {
-        final String account = "a@example.com";
+        final Account account = new Account("a@example.com", "example.type");
         final String authority = "testprovider";
 
         MockContentResolver mockResolver = new MockContentResolver();

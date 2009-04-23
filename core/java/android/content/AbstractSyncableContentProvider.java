@@ -4,8 +4,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.Cursor;
 import android.net.Uri;
-import android.accounts.AccountMonitor;
-import android.accounts.AccountMonitorListener;
+import android.accounts.OnAccountsUpdatedListener;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.provider.SyncConstValue;
 import android.util.Config;
 import android.util.Log;
@@ -14,9 +15,10 @@ import android.text.TextUtils;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Vector;
 import java.util.ArrayList;
+
+import com.google.android.collect.Maps;
 
 /**
  * A specialization of the ContentProvider that centralizes functionality
@@ -32,21 +34,22 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     private final String mDatabaseName;
     private final int mDatabaseVersion;
     private final Uri mContentUri;
-    private AccountMonitor mAccountMonitor;
 
     /** the account set in the last call to onSyncStart() */
-    private String mSyncingAccount;
+    private Account mSyncingAccount;
 
     private SyncStateContentProviderHelper mSyncState = null;
 
-    private static final String[] sAccountProjection = new String[] {SyncConstValue._SYNC_ACCOUNT};
+    private static final String[] sAccountProjection =
+            new String[] {SyncConstValue._SYNC_ACCOUNT, SyncConstValue._SYNC_ACCOUNT_TYPE};
 
     private boolean mIsTemporary;
 
     private AbstractTableMerger mCurrentMerger = null;
     private boolean mIsMergeCancelled = false;
 
-    private static final String SYNC_ACCOUNT_WHERE_CLAUSE = SyncConstValue._SYNC_ACCOUNT + "=?";
+    private static final String SYNC_ACCOUNT_WHERE_CLAUSE =
+            SyncConstValue._SYNC_ACCOUNT + "=? AND " + SyncConstValue._SYNC_ACCOUNT_TYPE + "=?";
 
     protected boolean isTemporary() {
         return mIsTemporary;
@@ -147,21 +150,23 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     @Override
     public boolean onCreate() {
         if (isTemporary()) throw new IllegalStateException("onCreate() called for temp provider");
-        mOpenHelper = new AbstractSyncableContentProvider.DatabaseHelper(getContext(), mDatabaseName);
+        mOpenHelper = new AbstractSyncableContentProvider.DatabaseHelper(getContext(),
+                mDatabaseName);
         mSyncState = new SyncStateContentProviderHelper(mOpenHelper);
-
-        AccountMonitorListener listener = new AccountMonitorListener() {
-            public void onAccountsUpdated(String[] accounts) {
-                // Some providers override onAccountsChanged(); give them a database to work with.
-                mDb = mOpenHelper.getWritableDatabase();
-                onAccountsChanged(accounts);
-                TempProviderSyncAdapter syncAdapter = (TempProviderSyncAdapter)getSyncAdapter();
-                if (syncAdapter != null) {
-                    syncAdapter.onAccountsChanged(accounts);
-                }
-            }
-        };
-        mAccountMonitor = new AccountMonitor(getContext(), listener);
+        AccountManager.get(getContext()).addOnAccountsUpdatedListener(
+                new OnAccountsUpdatedListener() {
+                    public void onAccountsUpdated(Account[] accounts) {
+                        // Some providers override onAccountsChanged(); give them a database to
+                        // work with.
+                        mDb = mOpenHelper.getWritableDatabase();
+                        onAccountsChanged(accounts);
+                        TempProviderSyncAdapter syncAdapter =
+                                (TempProviderSyncAdapter)getSyncAdapter();
+                        if (syncAdapter != null) {
+                            syncAdapter.onAccountsChanged(accounts);
+                        }
+                    }
+                }, null /* handler */, true /* updateImmediately */);
 
         return true;
     }
@@ -365,8 +370,8 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * @param context the sync context for the operation
      * @param account
      */
-    public void onSyncStart(SyncContext context, String account) {
-        if (TextUtils.isEmpty(account)) {
+    public void onSyncStart(SyncContext context, Account account) {
+        if (account == null) {
             throw new IllegalArgumentException("you passed in an empty account");
         }
         mSyncingAccount = account;
@@ -385,7 +390,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * The account of the most recent call to onSyncStart()
      * @return the account
      */
-    public String getSyncingAccount() {
+    public Account getSyncingAccount() {
         return mSyncingAccount;
     }
 
@@ -496,12 +501,11 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * Make sure that there are no entries for accounts that no longer exist
      * @param accountsArray the array of currently-existing accounts
      */
-    protected void onAccountsChanged(String[] accountsArray) {
-        Map<String, Boolean> accounts = new HashMap<String, Boolean>();
-        for (String account : accountsArray) {
+    protected void onAccountsChanged(Account[] accountsArray) {
+        Map<Account, Boolean> accounts = Maps.newHashMap();
+        for (Account account : accountsArray) {
             accounts.put(account, false);
         }
-        accounts.put(SyncConstValue.NON_SYNCABLE_ACCOUNT, false);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Map<String, String> tableMap = db.getSyncedTables();
@@ -513,8 +517,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         try {
             mSyncState.onAccountsChanged(accountsArray);
             for (String table : tables) {
-                deleteRowsForRemovedAccounts(accounts, table,
-                        SyncConstValue._SYNC_ACCOUNT);
+                deleteRowsForRemovedAccounts(accounts, table);
             }
             db.setTransactionSuccessful();
         } finally {
@@ -529,23 +532,23 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      *
      * @param accounts a map of existing accounts
      * @param table the table to delete from
-     * @param accountColumnName the name of the column that is expected
-     * to hold the account.
      */
-    protected void deleteRowsForRemovedAccounts(Map<String, Boolean> accounts,
-            String table, String accountColumnName) {
+    protected void deleteRowsForRemovedAccounts(Map<Account, Boolean> accounts, String table) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor c = db.query(table, sAccountProjection, null, null,
-                accountColumnName, null, null);
+                "_sync_account, _sync_account_type", null, null);
         try {
             while (c.moveToNext()) {
-                String account = c.getString(0);
-                if (TextUtils.isEmpty(account)) {
+                String accountName = c.getString(0);
+                String accountType = c.getString(1);
+                if (TextUtils.isEmpty(accountName)) {
                     continue;
                 }
+                Account account = new Account(accountName, accountType);
                 if (!accounts.containsKey(account)) {
                     int numDeleted;
-                    numDeleted = db.delete(table, accountColumnName + "=?", new String[]{account});
+                    numDeleted = db.delete(table, "_sync_account=? AND _sync_account_type=?",
+                            new String[]{account.mName, account.mType});
                     if (Config.LOGV) {
                         Log.v(TAG, "deleted " + numDeleted
                                 + " records from table " + table
@@ -562,7 +565,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * Called when the sync system determines that this provider should no longer
      * contain records for the specified account.
      */
-    public void wipeAccount(String account) {
+    public void wipeAccount(Account account) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Map<String, String> tableMap = db.getSyncedTables();
         ArrayList<String> tables = new ArrayList<String>();
@@ -577,7 +580,8 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
 
             // remove the data in the synced tables
             for (String table : tables) {
-                db.delete(table, SYNC_ACCOUNT_WHERE_CLAUSE, new String[]{account});
+                db.delete(table, SYNC_ACCOUNT_WHERE_CLAUSE,
+                        new String[]{account.mName, account.mType});
             }
             db.setTransactionSuccessful();
         } finally {
@@ -588,14 +592,14 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     /**
      * Retrieves the SyncData bytes for the given account. The byte array returned may be null.
      */
-    public byte[] readSyncDataBytes(String account) {
+    public byte[] readSyncDataBytes(Account account) {
         return mSyncState.readSyncDataBytes(mOpenHelper.getReadableDatabase(), account);
     }
 
     /**
      * Sets the SyncData bytes for the given account. The byte array may be null.
      */
-    public void writeSyncDataBytes(String account, byte[] data) {
+    public void writeSyncDataBytes(Account account, byte[] data) {
         mSyncState.writeSyncDataBytes(mOpenHelper.getWritableDatabase(), account, data);
     }
 }

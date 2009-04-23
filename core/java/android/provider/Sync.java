@@ -22,6 +22,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
+import android.accounts.Account;
+import android.text.TextUtils;
 
 import java.util.Map;
 
@@ -49,6 +51,12 @@ public final class Sync {
          * <P>Type: TEXT</P>
          */
         public static final String ACCOUNT = "account";
+
+        /**
+         * The sync account type.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
 
         /**
          * The content authority (contacts, calendar, etc.).
@@ -280,7 +288,8 @@ public final class Sync {
         public static final String MESG_CANCELED = "canceled";
 
         private static final String FINISHED_SINCE_WHERE_CLAUSE = EVENT + "=" + EVENT_STOP
-                + " AND " + EVENT_TIME + ">? AND " + ACCOUNT + "=? AND " + AUTHORITY + "=?";
+                + " AND " + EVENT_TIME + ">? AND " + ACCOUNT + "=? AND " + ACCOUNT_TYPE + "=?"
+                + " AND " + AUTHORITY + "=?";
 
         public static String mesgToString(String mesg) {
             if (MESG_SUCCESS.equals(mesg)) return mesg;
@@ -311,10 +320,11 @@ public final class Sync {
         }
 
         public static boolean hasNewerSyncFinished(ContentResolver contentResolver,
-                String account, String authority, long when) {
+                Account account, String authority, long when) {
             Cursor c = contentResolver.query(CONTENT_URI, new String[]{_ID},
                     FINISHED_SINCE_WHERE_CLAUSE,
-                    new String[]{Long.toString(when), account, authority}, null);
+                    new String[]{Long.toString(when), account.mName, account.mType, authority},
+                    null);
             try {
               return c.getCount() > 0;
             } finally {
@@ -345,7 +355,8 @@ public final class Sync {
          * @return the cursor on the AuthorityHistory table
          */
         public static Cursor query(ContentResolver contentResolver) {
-            return contentResolver.query(CONTENT_URI, null, null, null, ACCOUNT + ", " + AUTHORITY);
+            return contentResolver.query(CONTENT_URI, null, null, null,
+                    ACCOUNT_TYPE + "," + ACCOUNT + "," + AUTHORITY);
         }
 
         public static class QueryMap extends ContentQueryMap {
@@ -356,10 +367,11 @@ public final class Sync {
                         _ID, keepUpdated, handlerForUpdateNotifications);
             }
 
-            public ContentValues get(String account, String authority) {
+            public ContentValues get(Account account, String authority) {
                 Map<String, ContentValues> rows = getRows();
                 for (ContentValues values : rows.values()) {
-                    if (values.getAsString(ACCOUNT).equals(account)
+                    if (values.getAsString(ACCOUNT).equals(account.mName)
+                            && values.getAsString(ACCOUNT_TYPE).equals(account.mType)
                             && values.getAsString(AUTHORITY).equals(authority)) {
                         return values;
                     }
@@ -390,10 +402,11 @@ public final class Sync {
                         handlerForUpdateNotifications);
             }
 
-            public boolean isPending(String account, String authority) {
+            public boolean isPending(Account account, String authority) {
                 Map<String, ContentValues> rows = getRows();
                 for (ContentValues values : rows.values()) {
-                    if (values.getAsString(ACCOUNT).equals(account)
+                    if (values.getAsString(ACCOUNT).equals(account.mName)
+                            && values.getAsString(ACCOUNT_TYPE).equals(account.mType)
                             && values.getAsString(AUTHORITY).equals(authority)) {
                         return true;
                     }
@@ -444,9 +457,12 @@ public final class Sync {
                 return null;
             }
 
-            public String getSyncingAccount() {
+            public Account getSyncingAccount() {
                 ContentValues values = getActiveSyncInfo();
-                return (values == null) ? null : values.getAsString(ACCOUNT);
+                if (values == null || TextUtils.isEmpty(values.getAsString(ACCOUNT))) {
+                    return null;
+                }
+                return new Account(values.getAsString(ACCOUNT), values.getAsString(ACCOUNT_TYPE));
             }
 
             public String getSyncingAuthority() {

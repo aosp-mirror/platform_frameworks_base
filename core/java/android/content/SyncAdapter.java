@@ -18,6 +18,7 @@ package android.content;
 
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.accounts.Account;
 
 /**
  * @hide
@@ -29,7 +30,7 @@ public abstract class SyncAdapter {
     public static final int LOG_SYNC_DETAILS = 2743;
 
     class Transport extends ISyncAdapter.Stub {
-        public void startSync(ISyncContext syncContext, String account,
+        public void startSync(ISyncContext syncContext, Account account,
                 Bundle extras) throws RemoteException {
             SyncAdapter.this.startSync(new SyncContext(syncContext), account, extras);
         }
@@ -59,7 +60,7 @@ public abstract class SyncAdapter {
      * @param account the account that should be synced
      * @param extras SyncAdapter-specific parameters
      */
-    public abstract void startSync(SyncContext syncContext, String account, Bundle extras);
+    public abstract void startSync(SyncContext syncContext, Account account, Bundle extras);
 
     /**
      * Cancel the most recently initiated sync. Due to race conditions, this may arrive
