@@ -98,7 +98,7 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int EVENT_RESET_PREFERRED_NETWORK_TYPE      = 21;
     protected static final int EVENT_CHECK_REPORT_GPRS                 = 22;
     protected static final int EVENT_RESTRICTED_STATE_CHANGED          = 23;
-    
+
     //*****CDMA events:
     protected static final int EVENT_POLL_STATE_REGISTRATION_CDMA      = 24;
     protected static final int EVENT_POLL_STATE_OPERATOR_CDMA          = 25;
@@ -111,9 +111,6 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int EVENT_GET_LOC_DONE_CDMA                 = 32;
     protected static final int EVENT_SIGNAL_STRENGTH_UPDATE_CDMA       = 33;
     protected static final int EVENT_NV_LOADED                         = 34;
-
-    // Event Log Tags
-    protected static final int EVENT_LOG_CGREG_FAIL = 50107;
 
     //***** Time Zones
     protected static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
