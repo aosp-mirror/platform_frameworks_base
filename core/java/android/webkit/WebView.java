@@ -2844,7 +2844,7 @@ public class WebView extends AbsoluteLayout
     // Should only be called in UI thread
     void switchOutDrawHistory() {
         if (null == mWebViewCore) return; // CallbackProxy may trigger this
-        if (mDrawHistory) {
+        if (mDrawHistory && mWebViewCore.pictureReady()) {
             mDrawHistory = false;
             invalidate();
             int oldScrollX = mScrollX;

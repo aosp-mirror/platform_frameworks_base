@@ -285,6 +285,11 @@ final class WebViewCore {
      * split into parts. Called from the UI thread.
      */
     private native boolean nativeDrawContent(Canvas canvas, int color);
+
+    /**
+     * check to see if picture is blank and in progress
+     */
+    private native boolean nativePictureReady();
     
     /**
      * Redraw a portion of the picture set. The Point wh returns the
@@ -1345,6 +1350,10 @@ final class WebViewCore {
             mSplitPictureIsScheduled = true;
             sendMessage(EventHub.SPLIT_PICTURE_SET);
         }
+    }
+
+    /* package */ boolean pictureReady() {
+        return nativePictureReady();
     }
 
     /*package*/ Picture copyContentPicture() {
