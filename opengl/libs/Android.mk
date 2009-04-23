@@ -35,7 +35,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= 	\
 	GLES_CM/gl.cpp.arm 		\
-	GLES_CM/gl_logger.cpp 	\
 #
 
 LOCAL_SHARED_LIBRARIES += libcutils libutils libui libEGL

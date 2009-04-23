@@ -1,17 +1,17 @@
-/* 
+/*
 **
 ** Copyright 2007 The Android Open Source Project
 **
-** Licensed under the Apache License Version 2.0(the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License Version 2.0(the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing software 
-** distributed under the License is distributed on an "AS IS" BASIS 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing software
+** distributed under the License is distributed on an "AS IS" BASIS
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -478,22 +478,38 @@ struct extention_map_t {
 };
 
 static const extention_map_t gExtentionMap[] = {
-    { "glDrawTexsOES",              (void(*)())&glDrawTexsOES },
-    { "glDrawTexiOES",              (void(*)())&glDrawTexiOES },
-    { "glDrawTexfOES",              (void(*)())&glDrawTexfOES },
-    { "glDrawTexxOES",              (void(*)())&glDrawTexxOES },
-    { "glDrawTexsvOES",             (void(*)())&glDrawTexsvOES },
-    { "glDrawTexivOES",             (void(*)())&glDrawTexivOES },
-    { "glDrawTexfvOES",             (void(*)())&glDrawTexfvOES },
-    { "glDrawTexxvOES",             (void(*)())&glDrawTexxvOES },
-    { "glQueryMatrixxOES",          (void(*)())&glQueryMatrixxOES },
-    { "glClipPlanef",               (void(*)())&glClipPlanef },
-    { "glClipPlanex",               (void(*)())&glClipPlanex },
-    { "glBindBuffer",               (void(*)())&glBindBuffer },
-    { "glBufferData",               (void(*)())&glBufferData },
-    { "glBufferSubData",            (void(*)())&glBufferSubData },
-    { "glDeleteBuffers",            (void(*)())&glDeleteBuffers },
-    { "glGenBuffers",               (void(*)())&glGenBuffers },
+    { "glDrawTexsOES",
+            (__eglMustCastToProperFunctionPointerType)&glDrawTexsOES },
+    { "glDrawTexiOES",
+            (__eglMustCastToProperFunctionPointerType)&glDrawTexiOES },
+    { "glDrawTexfOES",
+            (__eglMustCastToProperFunctionPointerType)&glDrawTexfOES },
+    { "glDrawTexxOES",
+            (__eglMustCastToProperFunctionPointerType)&glDrawTexxOES },
+    { "glDrawTexsvOES",
+            (__eglMustCastToProperFunctionPointerType)&glDrawTexsvOES },
+    { "glDrawTexivOES",
+            (__eglMustCastToProperFunctionPointerType)&glDrawTexivOES },
+    { "glDrawTexfvOES",
+            (__eglMustCastToProperFunctionPointerType)&glDrawTexfvOES },
+    { "glDrawTexxvOES",
+            (__eglMustCastToProperFunctionPointerType)&glDrawTexxvOES },
+    { "glQueryMatrixxOES",
+            (__eglMustCastToProperFunctionPointerType)&glQueryMatrixxOES },
+    { "glClipPlanef",
+            (__eglMustCastToProperFunctionPointerType)&glClipPlanef },
+    { "glClipPlanex",
+            (__eglMustCastToProperFunctionPointerType)&glClipPlanex },
+    { "glBindBuffer",
+            (__eglMustCastToProperFunctionPointerType)&glBindBuffer },
+    { "glBufferData",
+            (__eglMustCastToProperFunctionPointerType)&glBufferData },
+    { "glBufferSubData",
+            (__eglMustCastToProperFunctionPointerType)&glBufferSubData },
+    { "glDeleteBuffers",
+            (__eglMustCastToProperFunctionPointerType)&glDeleteBuffers },
+    { "glGenBuffers",
+            (__eglMustCastToProperFunctionPointerType)&glGenBuffers },
 };
 
 /* 
@@ -1298,6 +1314,8 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
             return setError(EGL_BAD_ACCESS, EGL_FALSE);
         }
     }
+
+    // TODO: call connect / disconnect on the surface
 
     ogles_context_t* gl = (ogles_context_t*)ctx;
     if (makeCurrent(gl) == 0) {
