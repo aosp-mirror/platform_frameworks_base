@@ -17,8 +17,10 @@ page.title=Welcome
 <p>Once you've completed the SDK installation, you can start learning about
 development on the Android framework by reading the <a
 href="{@docRoot}guide/index.html">Developer's Guide</a>. The SDK package
-also includes a wide variety of very helpful <a
-href="{@docRoot}samples/index.html">code samples</a>.</p>
+also includes a wide variety of code samples specific to each Android
+platform. You can find the samples at this location: </p>
+
+<p style="margin-left:2em"><code>&lt;sdk&gt;/platforms/android-&lt;version&gt;/samples/</code></p>
 
 <p>Please note that you are currently viewing a local, offline version of the
 Android developer documentation. The offline documentation offers the same
