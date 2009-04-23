@@ -19,11 +19,13 @@
           <ul>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">Creating Menus</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/ui/layout-objects.html">Common Layout Objects</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/ui/binding.html">Binding to Data with AdapterView</a></li>
+     <!--       <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">Creating Dialogs</a></li>  -->
             <li><a href="<?cs var:toroot ?>guide/topics/ui/ui-events.html">Handling UI Events</a></li>
+     <!--       <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">Notifying the User</a></li> -->
             <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">Applying Styles and Themes</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/custom-components.html">Building Custom Components</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/ui/binding.html">Binding to Data with AdapterView</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/ui/layout-objects.html">Common Layout Objects</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/how-android-draws.html">How Android Draws Views</a></li>
           </ul>
       </li>
@@ -37,7 +39,6 @@
       <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">Intents and Intent Filters</a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/data/data-storage.html">Data Storage</a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">Content Providers</a></li>
-<!--  <li><a style="color:gray;">Notifications</a></li> -->
       <li><a href="<?cs var:toroot ?>guide/topics/security/security.html">Security and Permissions</a></li>
 <!--  <li><a style="color:gray;">Processes and Threads</a></li> -->
 <!--  <li><a style="color:gray;">Interprocess Communication</a></li> -->
@@ -94,6 +95,7 @@
           </ul>
       </li> -->
 <!--  <li><a style="color:gray;">Localization</a></li>  -->
+      <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">AppWidgets</a></li>
     </ul>
 </li>
 
