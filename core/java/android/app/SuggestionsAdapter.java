@@ -150,9 +150,12 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        ChildViewCache views = (ChildViewCache) view.getTag();            
-        String format = cursor.getString(mFormatCol);
-        boolean isHtml = "html".equals(format); 
+        ChildViewCache views = (ChildViewCache) view.getTag();
+        boolean isHtml = false;
+        if (mFormatCol >= 0) {
+            String format = cursor.getString(mFormatCol);
+            isHtml = "html".equals(format);    
+        }
         setViewText(cursor, views.mText1, mText1Col, isHtml);
         setViewText(cursor, views.mText2, mText2Col, isHtml);
         setViewIcon(cursor, views.mIcon1, mIconBitmap1Col, mIconName1Col);
