@@ -23,7 +23,7 @@ import java.util.ArrayList;
 /**
  * {@hide}
  */
-public abstract class IccFileHandler extends Handler {
+public abstract class IccFileHandler extends Handler implements IccConstants {
 
     //from TS 11.11 9.1 or elsewhere
     static protected final int COMMAND_READ_BINARY = 0xb0;
@@ -145,7 +145,7 @@ public abstract class IccFileHandler extends Handler {
             = obtainMessage(EVENT_GET_RECORD_SIZE_DONE,
                         new LoadLinearFixedContext(fileid, recordNum, onLoaded));
 
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, null,
+        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
                         0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, response);
     }
 
@@ -163,6 +163,7 @@ public abstract class IccFileHandler extends Handler {
                 new LoadLinearFixedContext(IccConstants.EF_IMG, recordNum,
                         onLoaded));
 
+        // TODO(): Verify when path changes are done.
         phone.mCM.iccIO(COMMAND_GET_RESPONSE, IccConstants.EF_IMG, "img",
                 recordNum, READ_RECORD_MODE_ABSOLUTE,
                 GET_RESPONSE_EF_IMG_SIZE_BYTES, null, null, response);
@@ -181,7 +182,7 @@ public abstract class IccFileHandler extends Handler {
         Message response
                 = obtainMessage(EVENT_GET_EF_LINEAR_RECORD_SIZE_DONE,
                         new LoadLinearFixedContext(fileid, onLoaded));
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, null,
+        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
                     0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, response);
     }
 
@@ -198,7 +199,7 @@ public abstract class IccFileHandler extends Handler {
         Message response = obtainMessage(EVENT_GET_RECORD_SIZE_DONE,
                         new LoadLinearFixedContext(fileid,onLoaded));
 
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, null,
+        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
                         0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, response);
     }
 
@@ -216,7 +217,7 @@ public abstract class IccFileHandler extends Handler {
         Message response = obtainMessage(EVENT_GET_BINARY_SIZE_DONE,
                         fileid, 0, onLoaded);
 
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, null,
+        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
                         0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, response);
     }
 
@@ -250,7 +251,7 @@ public abstract class IccFileHandler extends Handler {
      */
     public void updateEFLinearFixed(int fileid, int recordNum, byte[] data,
             String pin2, Message onComplete) {
-        phone.mCM.iccIO(COMMAND_UPDATE_RECORD, fileid, null,
+        phone.mCM.iccIO(COMMAND_UPDATE_RECORD, fileid, getEFPath(fileid),
                         recordNum, READ_RECORD_MODE_ABSOLUTE, data.length,
                         IccUtils.bytesToHexString(data), pin2, onComplete);
     }
@@ -261,7 +262,7 @@ public abstract class IccFileHandler extends Handler {
      * @param data must be exactly as long as the EF
      */
     public void updateEFTransparent(int fileid, byte[] data, Message onComplete) {
-        phone.mCM.iccIO(COMMAND_UPDATE_BINARY, fileid, null,
+        phone.mCM.iccIO(COMMAND_UPDATE_BINARY, fileid, getEFPath(fileid),
                         0, 0, data.length,
                         IccUtils.bytesToHexString(data), null, onComplete);
     }
@@ -394,7 +395,7 @@ public abstract class IccFileHandler extends Handler {
                      lc.results = new ArrayList<byte[]>(lc.countRecords);
                  }
 
-                 phone.mCM.iccIO(COMMAND_READ_RECORD, lc.efid, null,
+                 phone.mCM.iccIO(COMMAND_READ_RECORD, lc.efid, getEFPath(lc.efid),
                          lc.recordNum,
                          READ_RECORD_MODE_ABSOLUTE,
                          lc.recordSize, null, null,
@@ -432,7 +433,7 @@ public abstract class IccFileHandler extends Handler {
                 size = ((data[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
                        + (data[RESPONSE_DATA_FILE_SIZE_2] & 0xff);
 
-                phone.mCM.iccIO(COMMAND_READ_BINARY, fileid, null,
+                phone.mCM.iccIO(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
                                 0, 0, size, null, null,
                                 obtainMessage(EVENT_READ_BINARY_DONE,
                                               fileid, 0, response));
@@ -467,7 +468,7 @@ public abstract class IccFileHandler extends Handler {
                     if (lc.recordNum > lc.countRecords) {
                         sendResult(response, lc.results, null);
                     } else {
-                        phone.mCM.iccIO(COMMAND_READ_RECORD, lc.efid, null,
+                        phone.mCM.iccIO(COMMAND_READ_RECORD, lc.efid, getEFPath(lc.efid),
                                     lc.recordNum,
                                     READ_RECORD_MODE_ABSOLUTE,
                                     lc.recordSize, null, null,
@@ -506,6 +507,36 @@ public abstract class IccFileHandler extends Handler {
         }
     }
 
+    /**
+     * Returns the root path of the EF file.
+     * i.e returns MasterFile + DFfile as a string.
+     * Ex: For EF_ADN on a SIM, it will return "3F007F10"
+     * This function handles only EFids that are common to
+     * RUIM, SIM, USIM and other types of Icc cards.
+     *
+     * @param efId
+     * @return root path of the file.
+     */
+    protected String getCommonIccEFPath(int efid) {
+        switch(efid) {
+        case EF_ADN:
+        case EF_FDN:
+        case EF_MSISDN:
+        case EF_SDN:
+        case EF_EXT1:
+        case EF_EXT2:
+        case EF_EXT3:
+            return MF_SIM + DF_TELECOM;
+
+        case EF_ICCID:
+            return MF_SIM;
+        case EF_IMG:
+            return MF_SIM + DF_TELECOM + DF_GRAPHICS;
+        }
+        return null;
+    }
+
+    protected abstract String getEFPath(int efid);
     protected abstract void logd(String s);
 
     protected abstract void loge(String s);
