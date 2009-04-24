@@ -3,16 +3,16 @@ sdk.rel.id=1
 sdk.date=April 2009
 
 sdk.win_download=android-sdk-windows-1.5_r1.zip
-sdk.win_bytes=
-sdk.win_checksum=
+sdk.win_bytes=176263368
+sdk.win_checksum=42be980eb2d3efaced01ea6c32c0045f
 
 sdk.mac_download=android-sdk-mac_x86-1.5_r1.zip
-sdk.mac_bytes=
-sdk.mac_checksum=
+sdk.mac_bytes=167848675
+sdk.mac_checksum=5b2a8d9f096032db4a75bfa0d689a51b
 
 sdk.linux_download=android-sdk-linux_x86-1.5_r1.zip
-sdk.linux_bytes=
-sdk.linux_checksum=
+sdk.linux_bytes=162938845
+sdk.linux_checksum=2addfd315da0ad8b5bde6b09d5ff3b06
 
 page.title=Android 1.5 SDK, Release 1
 @jd:body
