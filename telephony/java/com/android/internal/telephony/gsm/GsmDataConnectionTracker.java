@@ -836,57 +836,38 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return;
         }
 
+        if (state == State.CONNECTED) {
+            // The way things are supposed to work, the PDP list
+            // should not contain the CID after it disconnects.
+            // However, the way things really work, sometimes the PDP
+            // context is still listed with active = false, which
+            // makes it hard to distinguish an activating context from
+            // an activated-and-then deactivated one.
+            if (!pdpStatesHasCID(pdpStates, cidActive)) {
+                // It looks like the PDP context has deactivated.
+                // Tear everything down and try to reconnect.
 
-        // This is how things are supposed to work:
-        // The PDP list is supposed to be empty of the CID
-        // when it disconnects
+                Log.i(LOG_TAG, "PDP connection has dropped. Reconnecting");
 
-        if (state == State.CONNECTED
-                && !pdpStatesHasCID(pdpStates, cidActive)) {
+                // Add an event log when the network drops PDP
+                int cid = -1;
+                GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
+                if (loc != null) cid = loc.getCid();
+                EventLog.List val = new EventLog.List(cid,
+                        TelephonyManager.getDefault().getNetworkType());
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP, val);
 
-            // It looks like the PDP context has deactivated
-            // Tear everything down and try to reconnect
-
-            Log.i(LOG_TAG, "PDP connection has dropped. Reconnecting");
-
-            // Add an event log when the network drops PDP
-            int cid = -1;
-            GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
-            if (loc != null) cid = loc.getCid();
-
-            EventLog.List val = new EventLog.List(cid,
-                    TelephonyManager.getDefault().getNetworkType());
-
-            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP, val);
-
-            cleanUpConnection(true, null);
-
-            return;
-        }
-
-        if (true) {
-            //
-            // Workaround for issue #655426
-            //
-
-            // --------------------------
-
-            // This is how some things work now: the PDP context is still
-            // listed with active = false, which makes it hard to
-            // distinguish an activating context from an activated-and-then
-            // deactivated one.
-            //
-            // Here, we only consider this authoritative if we asked for the
-            // PDP list. If it was an unsolicited response, we poll again
-            // to make sure everyone agrees on the initial state
-
-            if (state == State.CONNECTED
-                    && !pdpStatesHasActiveCID(pdpStates, cidActive)) {
+                cleanUpConnection(true, null);
+                return;
+            } else if (!pdpStatesHasActiveCID(pdpStates, cidActive)) {
+                // Here, we only consider this authoritative if we asked for the
+                // PDP list. If it was an unsolicited response, we poll again
+                // to make sure everyone agrees on the initial state.
 
                 if (!explicitPoll) {
                     // We think it disconnected but aren't sure...poll from our side
                     phone.mCM.getPDPContextList(
-                        this.obtainMessage(EVENT_GET_PDP_LIST_COMPLETE));
+                            this.obtainMessage(EVENT_GET_PDP_LIST_COMPLETE));
                 } else {
                     Log.i(LOG_TAG, "PDP connection has dropped (active=false case). "
                                     + " Reconnecting");
@@ -895,10 +876,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     int cid = -1;
                     GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
                     if (loc != null) cid = loc.getCid();
-
                     EventLog.List val = new EventLog.List(cid,
                             TelephonyManager.getDefault().getNetworkType());
-
                     EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP, val);
 
                     cleanUpConnection(true, null);
