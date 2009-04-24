@@ -77,6 +77,7 @@ enum {
 struct gl_hooks_t {
     struct gl_t {
         #include "gl_entries.in"
+        #include "glext_entries.in"
     } gl;
     struct egl_t {
         #include "egl_entries.in"

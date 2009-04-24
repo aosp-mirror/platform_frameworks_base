@@ -143,6 +143,7 @@ static void gl_unimplemented() {
 
 static char const * const gl_names[] = {
     #include "gl_entries.in"
+    #include "glext_entries.in"
     NULL
 };
 
@@ -315,11 +316,6 @@ void *load_driver(const char* driver, gl_hooks_t* hooks)
         api = gl_names;
         while (*api) {
             char const * name = *api;
-            // if the function starts with '__' it's a special case that
-            // uses a wrapper. skip the '__' when looking into the real lib.
-            if (name[0] == '_' && name[1] == '_') {
-                name += 2;
-            }
             __eglMustCastToProperFunctionPointerType f = 
                 (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
             if (f == NULL) {

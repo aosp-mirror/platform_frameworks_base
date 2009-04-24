@@ -101,6 +101,7 @@ void glVertexPointerBounds(GLint size, GLenum type,
 
 extern "C" {
 #include "gl_api.in"
+#include "glext_api.in"
 }
 
 #undef API_ENTRY
@@ -109,8 +110,8 @@ extern "C" {
 
 
 /*
- * These GL calls are special because they need to EGL to retrieve some
- * informations before they can execute.
+ * These GL calls are special because they need to call into EGL to retrieve
+ * some informations before they can execute.
  */
 
 
