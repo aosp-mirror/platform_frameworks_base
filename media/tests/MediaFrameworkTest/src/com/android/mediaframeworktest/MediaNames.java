@@ -464,6 +464,7 @@ public class MediaNames {
   public static final String RECORDED_SQVGA_H263 = "/sdcard/SQVGA_H263.3gp";
   public static final String RECORDED_CIF_H263 = "/sdcard/CIF_H263.3gp";
   public static final String RECORDED_QCIF_H263 = "/sdcard/QCIF_H263.3gp";
+  public static final String RECORDED_PORTRAIT_H263 = "/sdcard/QCIF_mp4.3gp";
   
   public static final String RECORDED_HVGA_MP4 = "/sdcard/HVGA_mp4.mp4";
   public static final String RECORDED_QVGA_MP4 = "/sdcard/QVGA_mp4.mp4";
