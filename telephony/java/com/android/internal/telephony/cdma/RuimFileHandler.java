@@ -17,7 +17,6 @@
 package com.android.internal.telephony.cdma;
 
 import android.os.*;
-import android.os.AsyncResult;
 import android.util.Log;
 
 import com.android.internal.telephony.IccConstants;
@@ -66,6 +65,11 @@ public final class RuimFileHandler extends IccFileHandler {
     public void handleMessage(Message msg) {
 
         super.handleMessage(msg);
+    }
+
+    protected String getEFPath(int efid) {
+        // TODO(): Implement for CDMA EFs.
+        return getCommonIccEFPath(efid);
     }
 
     protected void logd(String msg) {
