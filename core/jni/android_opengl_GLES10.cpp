@@ -3434,7 +3434,7 @@ static JNINativeMethod methods[] = {
 {"glGetError", "()I", (void *) android_glGetError__ },
 {"glGetIntegerv", "(I[II)V", (void *) android_glGetIntegerv__I_3II },
 {"glGetIntegerv", "(ILjava/nio/IntBuffer;)V", (void *) android_glGetIntegerv__ILjava_nio_IntBuffer_2 },
-{"_glGetString", "(I)Ljava/lang/String;", (void *) android_glGetString },
+{"glGetString", "(I)Ljava/lang/String;", (void *) android_glGetString },
 {"glHint", "(II)V", (void *) android_glHint__II },
 {"glLightModelf", "(IF)V", (void *) android_glLightModelf__IF },
 {"glLightModelfv", "(I[FI)V", (void *) android_glLightModelfv__I_3FI },
