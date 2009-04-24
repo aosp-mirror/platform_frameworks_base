@@ -17,12 +17,14 @@ import android.database.sqlite.SQLiteFullException;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.os.Bundle;
-import android.os.Debug;
 import android.text.TextUtils;
 import android.net.Uri;
+import android.accounts.Account;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import com.google.android.collect.Lists;
 
 /**
  * A service to handle various intents asynchronously.
@@ -31,7 +33,8 @@ public class SubscribedFeedsIntentService extends IntentService {
     private static final String TAG = "Sync";
 
     private static final String[] sAccountProjection =
-            new String[] {SubscribedFeeds.Accounts._SYNC_ACCOUNT};
+            new String[] {SubscribedFeeds.Accounts._SYNC_ACCOUNT,
+                    SubscribedFeeds.Accounts._SYNC_ACCOUNT_TYPE};
 
     /** How often to refresh the subscriptions, in milliseconds */
     private static final long SUBSCRIPTION_REFRESH_INTERVAL = 1000L * 60 * 60 * 24; // one day
@@ -56,10 +59,10 @@ public class SubscribedFeedsIntentService extends IntentService {
         if (GTALK_DATA_MESSAGE_RECEIVED.equals(intent.getAction())) {
             boolean fromTrustedServer = intent.getBooleanExtra("from_trusted_server", false);
             if (fromTrustedServer) {
-                String account = intent.getStringExtra("account");
+                String accountName = intent.getStringExtra("account");
                 String token = intent.getStringExtra("message_token");
 
-                if (TextUtils.isEmpty(account) || TextUtils.isEmpty(token)) {
+                if (TextUtils.isEmpty(accountName) || TextUtils.isEmpty(token)) {
                     if (Config.LOGD) {
                         Log.d(TAG, "Ignoring malformed tickle -- missing account or token.");
                     }
@@ -68,10 +71,10 @@ public class SubscribedFeedsIntentService extends IntentService {
 
                 if (Config.LOGD) {
                     Log.d(TAG, "Received network tickle for "
-                            + account + " - " + token);
+                            + accountName + " - " + token);
                 }
 
-                handleTickle(this, account, token);
+                handleTickle(this, accountName, token);
             } else {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "Ignoring tickle -- not from trusted server.");
@@ -103,20 +106,22 @@ public class SubscribedFeedsIntentService extends IntentService {
         alarmManager.set(AlarmManager.RTC, when, pendingIntent);
     }
 
-    private void handleTickle(Context context, String account, String feed) {
+    private void handleTickle(Context context, String accountName, String feed) {
         Cursor c = null;
         Sync.Settings.QueryMap syncSettings =
                 new Sync.Settings.QueryMap(context.getContentResolver(),
                         false /* don't keep updated */,
                         null /* not needed since keep updated is false */);
         final String where = SubscribedFeeds.Feeds._SYNC_ACCOUNT + "= ? "
+                + "and " + SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE + "= ? "
                 + "and " + SubscribedFeeds.Feeds.FEED + "= ?";
         try {
+            // TODO(fredq) fix the hardcoded type
             c = context.getContentResolver().query(SubscribedFeeds.Feeds.CONTENT_URI,
-                    null, where, new String[]{account, feed}, null);
+                    null, where, new String[]{accountName, "com.google.GAIA", feed}, null);
             if (c.getCount() == 0) {
                 Log.w(TAG, "received tickle for non-existent feed: "
-                        + "account " + account + ", feed " + feed);
+                        + "account " + accountName + ", feed " + feed);
                 EventLog.writeEvent(LOG_TICKLE, "unknown");
             }
             while (c.moveToNext()) {
@@ -131,7 +136,8 @@ public class SubscribedFeedsIntentService extends IntentService {
                 }
                 Uri uri = Uri.parse("content://" + authority);
                 Bundle extras = new Bundle();
-                extras.putString(ContentResolver.SYNC_EXTRAS_ACCOUNT, account);
+                extras.putParcelable(ContentResolver.SYNC_EXTRAS_ACCOUNT,
+                        new Account(accountName, "com.google.GAIA"));
                 extras.putString("feed", feed);
                 context.getContentResolver().startSync(uri, extras);
             }
@@ -151,17 +157,15 @@ public class SubscribedFeedsIntentService extends IntentService {
      */
     private void handleRefreshAlarm(Context context) {
         // retrieve the list of accounts from the subscribed feeds
-        ArrayList<String> accounts = new ArrayList<String>();
+        ArrayList<Account> accounts = Lists.newArrayList();
         ContentResolver contentResolver = context.getContentResolver();
         Cursor c = contentResolver.query(SubscribedFeeds.Accounts.CONTENT_URI,
                 sAccountProjection, null, null, null);
         try {
             while (c.moveToNext()) {
-                String account = c.getString(0);
-                if (TextUtils.isEmpty(account)) {
-                    continue;
-                }
-                accounts.add(account);
+                String accountName = c.getString(0);
+                String accountType = c.getString(1);
+                accounts.add(new Account(accountName, accountType));
             }
         } finally {
             c.close();
@@ -169,16 +173,19 @@ public class SubscribedFeedsIntentService extends IntentService {
 
         // Clear the auth tokens for all these accounts so that we are sure
         // they will still be valid until the next time we refresh them.
-        // TODO: add this when the google login service is done
+        // TODO(fredq): add this when the google login service is done
 
         // mark the feeds dirty, by setting the accounts to the same value,
         //  which will trigger a sync.
         try {
             ContentValues values = new ContentValues();
-            for (String account : accounts) {
-                values.put(SyncConstValue._SYNC_ACCOUNT, account);
+            for (Account account : accounts) {
+                values.put(SyncConstValue._SYNC_ACCOUNT, account.mName);
+                values.put(SyncConstValue._SYNC_ACCOUNT_TYPE, account.mType);
                 contentResolver.update(SubscribedFeeds.Feeds.CONTENT_URI, values,
-                        SubscribedFeeds.Feeds._SYNC_ACCOUNT + "=?", new String[] {account});
+                        SubscribedFeeds.Feeds._SYNC_ACCOUNT + "=? AND "
+                                + SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE + "=?",
+                        new String[] {account.mName, account.mType});
             }
         } catch (SQLiteFullException e) {
             Log.w(TAG, "disk full while trying to mark the feeds as dirty, skipping");

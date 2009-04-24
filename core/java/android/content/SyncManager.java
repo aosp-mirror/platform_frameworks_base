@@ -21,8 +21,9 @@ import com.google.android.collect.Maps;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 
-import android.accounts.AccountMonitor;
-import android.accounts.AccountMonitorListener;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.OnAccountsUpdatedListener;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -50,8 +51,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.preference.Preference;
-import android.preference.PreferenceGroup;
 import android.provider.Sync;
 import android.provider.Settings;
 import android.provider.Sync.History;
@@ -84,7 +83,7 @@ import java.util.Observable;
 /**
  * @hide
  */
-class SyncManager {
+class SyncManager implements OnAccountsUpdatedListener {
     private static final String TAG = "SyncManager";
 
     // used during dumping of the Sync history
@@ -130,9 +129,7 @@ class SyncManager {
     private String mStatusText = "";
     private long mHeartbeatTime = 0;
 
-    private AccountMonitor mAccountMonitor;
-
-    private volatile String[] mAccounts = null;
+    private volatile Account[] mAccounts = null;
 
     volatile private PowerManager.WakeLock mSyncWakeLock;
     volatile private PowerManager.WakeLock mHandleAlarmWakeLock;
@@ -184,43 +181,39 @@ class SyncManager {
     private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (!mFactoryTest) {
-                AccountMonitorListener listener = new AccountMonitorListener() {
-                    public void onAccountsUpdated(String[] accounts) {
-                        final boolean hadAccountsAlready = mAccounts != null;
-                        // copy the accounts into a new array and change mAccounts to point to it
-                        String[] newAccounts = new String[accounts.length];
-                        System.arraycopy(accounts, 0, newAccounts, 0, accounts.length);
-                        mAccounts = newAccounts;
-
-                        // if a sync is in progress yet it is no longer in the accounts list,
-                        // cancel it
-                        ActiveSyncContext activeSyncContext = mActiveSyncContext;
-                        if (activeSyncContext != null) {
-                            if (!ArrayUtils.contains(newAccounts,
-                                    activeSyncContext.mSyncOperation.account)) {
-                                Log.d(TAG, "canceling sync since the account has been removed");
-                                sendSyncFinishedOrCanceledMessage(activeSyncContext,
-                                        null /* no result since this is a cancel */);
-                            }
-                        }
-
-                        // we must do this since we don't bother scheduling alarms when
-                        // the accounts are not set yet
-                        sendCheckAlarmsMessage();
-
-                        mSyncStorageEngine.doDatabaseCleanup(accounts);
-
-                        if (hadAccountsAlready && mAccounts.length > 0) {
-                            // request a sync so that if the password was changed we will
-                            // retry any sync that failed when it was wrong
-                            startSync(null /* all providers */, null /* no extras */);
-                        }
-                    }
-                };
-                mAccountMonitor = new AccountMonitor(context, listener);
+                AccountManager.get(mContext).addOnAccountsUpdatedListener(SyncManager.this,
+                        mSyncHandler, true /* updateImmediately */);
             }
         }
     };
+
+    public void onAccountsUpdated(Account[] accounts) {
+        final boolean hadAccountsAlready = mAccounts != null;
+        mAccounts = accounts;
+
+        // if a sync is in progress yet it is no longer in the accounts list,
+        // cancel it
+        ActiveSyncContext activeSyncContext = mActiveSyncContext;
+        if (activeSyncContext != null) {
+            if (!ArrayUtils.contains(accounts, activeSyncContext.mSyncOperation.account)) {
+                Log.d(TAG, "canceling sync since the account has been removed");
+                sendSyncFinishedOrCanceledMessage(activeSyncContext,
+                        null /* no result since this is a cancel */);
+            }
+        }
+
+        // we must do this since we don't bother scheduling alarms when
+        // the accounts are not set yet
+        sendCheckAlarmsMessage();
+
+        mSyncStorageEngine.doDatabaseCleanup(accounts);
+
+        if (hadAccountsAlready && accounts.length > 0) {
+            // request a sync so that if the password was changed we will
+            // retry any sync that failed when it was wrong
+            startSync(null /* all providers */, null /* no extras */);
+        }
+    }
 
     private BroadcastReceiver mConnectivityIntentReceiver =
             new BroadcastReceiver() {
@@ -486,7 +479,7 @@ class SyncManager {
         }
     }
 
-    public String getSyncingAccount() {
+    public Account getSyncingAccount() {
         ActiveSyncContext activeSyncContext = mActiveSyncContext;
         return (activeSyncContext != null) ? activeSyncContext.mSyncOperation.account : null;
     }
@@ -557,10 +550,10 @@ class SyncManager {
             delay = -1; // this means schedule at the front of the queue
         }
 
-        String[] accounts;
-        String accountFromExtras = extras.getString(ContentResolver.SYNC_EXTRAS_ACCOUNT);
-        if (!TextUtils.isEmpty(accountFromExtras)) {
-            accounts = new String[]{accountFromExtras};
+        Account[] accounts;
+        Account accountFromExtras = extras.getParcelable(ContentResolver.SYNC_EXTRAS_ACCOUNT);
+        if (accountFromExtras != null) {
+            accounts = new Account[]{accountFromExtras};
         } else {
             // if the accounts aren't configured yet then we can't support an account-less
             // sync request
@@ -605,7 +598,7 @@ class SyncManager {
         for (int i = 0; i < numProviders; i++) {
             if (!providers.get(i).isSyncable) continue;
             final String name = names.get(i);
-            for (String account : accounts) {
+            for (Account account : accounts) {
                 scheduleSyncOperation(new SyncOperation(account, source, name, extras, delay));
                 // TODO: remove this when Calendar supports multiple accounts. Until then
                 // pretend that only the first account exists when syncing calendar.
@@ -881,7 +874,7 @@ class SyncManager {
      * Value type that represents a sync operation.
      */
     static class SyncOperation implements Comparable {
-        final String account;
+        final Account account;
         int syncSource;
         String authority;
         Bundle extras;
@@ -890,7 +883,7 @@ class SyncManager {
         long delay;
         Long rowId = null;
 
-        SyncOperation(String account, int source, String authority, Bundle extras, long delay) {
+        SyncOperation(Account account, int source, String authority, Bundle extras, long delay) {
             this.account = account;
             this.syncSource = source;
             this.authority = authority;
@@ -1024,7 +1017,7 @@ class SyncManager {
         sb.append("data connected: ").append(mDataConnectionIsConnected).append("\n");
         sb.append("memory low: ").append(mStorageIsLow).append("\n");
 
-        final String[] accounts = mAccounts;
+        final Account[] accounts = mAccounts;
         sb.append("accounts: ");
         if (accounts != null) {
             sb.append(accounts.length);
@@ -1095,17 +1088,18 @@ class SyncManager {
             c.close();
         }
 
-        String currentAccount = null;
+        Account currentAccount = null;
         c = mSyncStorageEngine.query(Sync.Status.CONTENT_URI,
-                STATUS_PROJECTION, null, null, "account, authority");
+                STATUS_PROJECTION, null, null, "account_type, account, authority");
         sb.append("\nSync history by account and authority\n");
         try {
             while (c.moveToNext()) {
-                if (!TextUtils.equals(currentAccount, c.getString(0))) {
+                final Account account = new Account(c.getString(0), c.getString(13));
+                if (!account.equals(currentAccount)) {
                     if (currentAccount != null) {
                         dumpSyncHistoryFooter(sb);
                     }
-                    currentAccount = c.getString(0);
+                    currentAccount = account;
                     dumpSyncHistoryHeader(sb, currentAccount);
                 }
 
@@ -1117,8 +1111,8 @@ class SyncManager {
         }
     }
 
-    private void dumpSyncHistoryHeader(StringBuilder sb, String account) {
-        sb.append(" Account: ").append(account).append("\n");
+    private void dumpSyncHistoryHeader(StringBuilder sb, Account account) {
+        sb.append(" ").append(account).append("\n");
         sb.append("  ___________________________________________________________________________________________________________________________\n");
         sb.append(" |                 |             num times synced           |   total  |         last success          |                     |\n");
         sb.append(" | authority       | local |  poll | server |  user | total | duration |  source |               time  |   result if failing |\n");
@@ -1137,7 +1131,8 @@ class SyncManager {
             Sync.Status.LAST_SUCCESS_TIME, // 9
             Sync.Status.LAST_FAILURE_SOURCE, // 10
             Sync.Status.LAST_FAILURE_TIME, // 11
-            Sync.Status.LAST_FAILURE_MESG // 12
+            Sync.Status.LAST_FAILURE_MESG, // 12
+            Sync.Status.ACCOUNT_TYPE, // 13
     };
 
     private void dumpSyncHistoryRow(StringBuilder sb, Cursor c) {
@@ -1305,7 +1300,7 @@ class SyncManager {
          */
         class SyncNotificationInfo {
             // only valid if isActive is true
-            public String account;
+            public Account account;
 
             // only valid if isActive is true
             public String authority;
@@ -1460,7 +1455,7 @@ class SyncManager {
 
             // If the accounts aren't known yet then we aren't ready to run. We will be kicked
             // when the account lookup request does complete.
-            String[] accounts = mAccounts;
+            Account[] accounts = mAccounts;
             if (accounts == null) {
                 if (isLoggable) {
                     Log.v(TAG, "runStateIdle: accounts not known, skipping");
@@ -1857,7 +1852,7 @@ class SyncManager {
             mContext.sendBroadcast(syncStateIntent);
         }
 
-        private void installHandleTooManyDeletesNotification(String account, String authority,
+        private void installHandleTooManyDeletesNotification(Account account, String authority,
                 long numDeletes) {
             if (mNotificationMgr == null) return;
             Intent clickIntent = new Intent();
@@ -1937,14 +1932,16 @@ class SyncManager {
                 "_id",
                 "authority",
                 "account",
+                "account_type",
                 "extras",
-                "source"
+                "source",
         };
         private static final int COLUMN_ID = 0;
         private static final int COLUMN_AUTHORITY = 1;
         private static final int COLUMN_ACCOUNT = 2;
-        private static final int COLUMN_EXTRAS = 3;
-        private static final int COLUMN_SOURCE = 4;
+        private static final int COLUMN_ACCOUNT_TYPE = 3;
+        private static final int COLUMN_EXTRAS = 4;
+        private static final int COLUMN_SOURCE = 5;
 
         private static final boolean DEBUG_CHECK_DATA_CONSISTENCY = false;
 
@@ -2026,7 +2023,8 @@ class SyncManager {
                     parcel.recycle();
                 }
                 ContentValues values = new ContentValues();
-                values.put("account", operation.account);
+                values.put("account", operation.account.mName);
+                values.put("account_type", operation.account.mType);
                 values.put("authority", operation.authority);
                 values.put("source", operation.syncSource);
                 values.put("extras", extrasData);
@@ -2084,7 +2082,7 @@ class SyncManager {
             if (DEBUG_CHECK_DATA_CONSISTENCY) debugCheckDataStructures(true /* check the DB */);
         }
 
-        public void clear(String account, String authority) {
+        public void clear(Account account, String authority) {
             Iterator<Map.Entry<String, SyncOperation>> entries = mOpsByKey.entrySet().iterator();
             while (entries.hasNext()) {
                 Map.Entry<String, SyncOperation> entry = entries.next();
@@ -2175,7 +2173,8 @@ class SyncManager {
             }
 
             SyncOperation syncOperation = new SyncOperation(
-                    cursor.getString(COLUMN_ACCOUNT),
+                    new Account(cursor.getString(COLUMN_ACCOUNT),
+                            cursor.getString(COLUMN_ACCOUNT_TYPE)),
                     cursor.getInt(COLUMN_SOURCE),
                     cursor.getString(COLUMN_AUTHORITY),
                     extras,

@@ -39,7 +39,7 @@ import java.util.HashMap;
 public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
     private static final String TAG = "SubscribedFeedsProvider";
     private static final String DATABASE_NAME = "subscribedfeeds.db";
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 11;
 
     private static final int FEEDS = 1;
     private static final int FEED_ID = 2;
@@ -88,6 +88,7 @@ public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
         db.execSQL("CREATE TABLE feeds (" +
                     "_id INTEGER PRIMARY KEY," +
                     "_sync_account TEXT," + // From the sync source
+                    "_sync_account_type TEXT," + // From the sync source
                     "_sync_id TEXT," + // From the sync source
                     "_sync_time TEXT," + // From the sync source
                     "_sync_version TEXT," + // From the sync source
@@ -106,8 +107,8 @@ public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
                     "WHEN old._sync_id is not null " +
                     "BEGIN " +
                         "INSERT INTO _deleted_feeds " +
-                            "(_sync_id, _sync_account, _sync_version) " +
-                            "VALUES (old._sync_id, old._sync_account, " +
+                            "(_sync_id, _sync_account, _sync_account_type, _sync_version) " +
+                            "VALUES (old._sync_id, old._sync_account, old._sync_account_type, " +
                             "old._sync_version);" +
                     "END");
 
@@ -116,6 +117,7 @@ public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
                     "_sync_id TEXT," +
                     (isTemporary() ? "_sync_local_id INTEGER," : "") + // Used while syncing,
                     "_sync_account TEXT," +
+                    "_sync_account_type TEXT," +
                     "_sync_mark INTEGER, " + // Used to filter out new rows
                     "UNIQUE(_sync_id))");
     }
@@ -170,7 +172,8 @@ public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
                 qb.setDistinct(true);
                 qb.setProjectionMap(ACCOUNTS_PROJECTION_MAP);
                 return qb.query(getDatabase(), projection, selection, selectionArgs,
-                        SubscribedFeeds.Feeds._SYNC_ACCOUNT, null, sortOrder);
+                        SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE + ","
+                                + SubscribedFeeds.Feeds._SYNC_ACCOUNT, null, sortOrder);
             case FEED_ID:
                 qb.setTables(sFeedsTable);
                 qb.appendWhere(sFeedsTable + "._id=");
@@ -310,6 +313,8 @@ public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
             DatabaseUtils.cursorStringToContentValues(diffsCursor,
                     SubscribedFeeds.Feeds._SYNC_ACCOUNT, mValues);
             DatabaseUtils.cursorStringToContentValues(diffsCursor,
+                    SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE, mValues);
+            DatabaseUtils.cursorStringToContentValues(diffsCursor,
                     SubscribedFeeds.Feeds._SYNC_VERSION, mValues);
             db.replace(mDeletedTable, SubscribedFeeds.Feeds._SYNC_ID, mValues);
         }
@@ -369,5 +374,7 @@ public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
         ACCOUNTS_PROJECTION_MAP = map;
         map.put(SubscribedFeeds.Accounts._COUNT, "COUNT(*) AS _count");
         map.put(SubscribedFeeds.Accounts._SYNC_ACCOUNT, SubscribedFeeds.Accounts._SYNC_ACCOUNT);
+        map.put(SubscribedFeeds.Accounts._SYNC_ACCOUNT_TYPE,
+                SubscribedFeeds.Accounts._SYNC_ACCOUNT_TYPE);
     }
 }

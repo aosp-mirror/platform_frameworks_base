@@ -19,11 +19,15 @@ package android.accounts;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.Context;
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Parcelable;
+import android.util.Config;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -32,6 +36,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.android.collect.Maps;
 
 /**
  * A class that helps with interactions with the AccountManagerService. It provides
@@ -48,6 +56,7 @@ public class AccountManager {
 
     private final Context mContext;
     private final IAccountManager mService;
+    private final Handler mMainHandler;
 
     /**
      * @hide
@@ -55,6 +64,7 @@ public class AccountManager {
     public AccountManager(Context context, IAccountManager service) {
         mContext = context;
         mService = service;
+        mMainHandler = new Handler(mContext.getMainLooper());
     }
 
     public static AccountManager get(Context context) {
@@ -454,24 +464,28 @@ public class AccountManager {
 
     private void postToHandler(Handler handler, final Future2Callback callback,
             final Future2 future) {
-        if (handler == null) {
-            handler = new Handler(mContext.getMainLooper());
-        }
-        final Handler innerHandler = handler;
-        innerHandler.post(new Runnable() {
+        handler = handler == null ? mMainHandler : handler;
+        handler.post(new Runnable() {
             public void run() {
                 callback.run(future);
             }
         });
     }
 
+    private void postToHandler(Handler handler, final OnAccountsUpdatedListener listener,
+            final Account[] accounts) {
+        handler = handler == null ? mMainHandler : handler;
+        handler.post(new Runnable() {
+            public void run() {
+                listener.onAccountsUpdated(accounts);
+            }
+        });
+    }
+
     private <V> void postToHandler(Handler handler, final Future1Callback<V> callback,
             final Future1<V> future) {
-        if (handler == null) {
-            handler = new Handler(mContext.getMainLooper());
-        }
-        final Handler innerHandler = handler;
-        innerHandler.post(new Runnable() {
+        handler = handler == null ? mMainHandler : handler;
+        handler.post(new Runnable() {
             public void run() {
                 callback.run(future);
             }
@@ -907,5 +921,144 @@ public class AccountManager {
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         new GetAuthTokenByTypeAndFeaturesTask(accountType, authTokenType,  features,
                 activityForPrompting, addAccountOptions, loginOptions, callback, handler).start();
+    }
+
+    private final HashMap<OnAccountsUpdatedListener, Handler> mAccountsUpdatedListeners =
+            Maps.newHashMap();
+
+    // These variable are only used from the LOGIN_ACCOUNTS_CHANGED_ACTION BroadcastReceiver
+    // and its getAccounts() callback which are both invoked only on the main thread. As a
+    // result we don't need to protect against concurrent accesses and any changes are guaranteed
+    // to be visible when used. Basically, these two variables are thread-confined.
+    private Future1<Account[]> mAccountsLookupFuture = null;
+    private boolean mAccountLookupPending = false;
+
+    /**
+     * BroadcastReceiver that listens for the LOGIN_ACCOUNTS_CHANGED_ACTION intent
+     * so that it can read the updated list of accounts and send them to the listener
+     * in mAccountsUpdatedListeners.
+     */
+    private final BroadcastReceiver mAccountsChangedBroadcastReceiver = new BroadcastReceiver() {
+        public void onReceive(final Context context, final Intent intent) {
+            if (mAccountsLookupFuture != null) {
+                // an accounts lookup is already in progress,
+                // don't bother starting another request
+                mAccountLookupPending = true;
+                return;
+            }
+            // initiate a read of the accounts
+            mAccountsLookupFuture = getAccounts(new Future1Callback<Account[]>() {
+                public void run(Future1<Account[]> future) {
+                    // clear the future so that future receives will try the lookup again
+                    mAccountsLookupFuture = null;
+
+                    // get the accounts array
+                    Account[] accounts;
+                    try {
+                        accounts = future.getResult();
+                    } catch (OperationCanceledException e) {
+                        // this should never happen, but if it does pretend we got another
+                        // accounts changed broadcast
+                        if (Config.LOGD) {
+                            Log.d(TAG, "the accounts lookup for listener notifications was "
+                                    + "canceled, try again by simulating the receipt of "
+                                    + "a LOGIN_ACCOUNTS_CHANGED_ACTION broadcast");
+                        }
+                        onReceive(context, intent);
+                        return;
+                    }
+
+                    // send the result to the listeners
+                    synchronized (mAccountsUpdatedListeners) {
+                        for (Map.Entry<OnAccountsUpdatedListener, Handler> entry :
+                                mAccountsUpdatedListeners.entrySet()) {
+                            Account[] accountsCopy = new Account[accounts.length];
+                            // send the listeners a copy to make sure that one doesn't
+                            // change what another sees
+                            System.arraycopy(accounts, 0, accountsCopy, 0, accountsCopy.length);
+                            postToHandler(entry.getValue(), entry.getKey(), accountsCopy);
+                        }
+                    }
+
+                    // If mAccountLookupPending was set when the account lookup finished it
+                    // means that we had previously ignored a LOGIN_ACCOUNTS_CHANGED_ACTION
+                    // intent because a lookup was already in progress. Now that we are done
+                    // with this lookup and notification pretend that another intent
+                    // was received by calling onReceive() directly.
+                    if (mAccountLookupPending) {
+                        mAccountLookupPending = false;
+                        onReceive(context, intent);
+                        return;
+                    }
+                }
+            }, mMainHandler);
+        }
+    };
+
+    /**
+     * Add a {@link OnAccountsUpdatedListener} to this instance of the {@link AccountManager}.
+     * The listener is guaranteed to be invoked on the thread of the Handler that is passed
+     * in or the main thread's Handler if handler is null.
+     * @param listener the listener to add
+     * @param handler the Handler whose thread will be used to invoke the listener. If null
+     * the AccountManager context's main thread will be used.
+     * @param updateImmediately if true then the listener will be invoked as a result of this
+     * call.
+     * @throws IllegalArgumentException if listener is null
+     * @throws IllegalStateException if listener was already added
+     */
+    public void addOnAccountsUpdatedListener(final OnAccountsUpdatedListener listener,
+            Handler handler, boolean updateImmediately) {
+        if (listener == null) {
+            throw new IllegalArgumentException("the listener is null");
+        }
+        synchronized (mAccountsUpdatedListeners) {
+            if (mAccountsUpdatedListeners.containsKey(listener)) {
+                throw new IllegalStateException("this listener is already added");
+            }
+            final boolean wasEmpty = mAccountsUpdatedListeners.isEmpty();
+
+            mAccountsUpdatedListeners.put(listener, handler);
+
+            if (wasEmpty) {
+                // Register a broadcast receiver to monitor account changes
+                IntentFilter intentFilter = new IntentFilter();
+                intentFilter.addAction(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+                mContext.registerReceiver(mAccountsChangedBroadcastReceiver, intentFilter);
+            }
+        }
+
+        if (updateImmediately) {
+            getAccounts(new Future1Callback<Account[]>() {
+                public void run(Future1<Account[]> future) {
+                    try {
+                        listener.onAccountsUpdated(future.getResult());
+                    } catch (OperationCanceledException e) {
+                        // ignore
+                    }
+                }
+            }, handler);
+        }
+    }
+
+    /**
+     * Remove an {@link OnAccountsUpdatedListener} that was previously registered with
+     * {@link #addOnAccountsUpdatedListener}.
+     * @param listener the listener to remove
+     * @throws IllegalArgumentException if listener is null
+     * @throws IllegalStateException if listener was not already added
+     */
+    public void removeOnAccountsUpdatedListener(OnAccountsUpdatedListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("the listener is null");
+        }
+        synchronized (mAccountsUpdatedListeners) {
+            if (mAccountsUpdatedListeners.remove(listener) == null) {
+                throw new IllegalStateException("this listener was not previously added");
+            }
+            if (mAccountsUpdatedListeners.isEmpty()) {
+                mContext.unregisterReceiver(mAccountsChangedBroadcastReceiver);
+            }
+        }
     }
 }

@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.accounts.Account;
 import android.os.Bundle;
 import android.content.ISyncContext;
 
@@ -33,7 +34,7 @@ oneway interface ISyncAdapter {
      * @param account the account that should be synced
      * @param extras SyncAdapter-specific parameters
      */
-    void startSync(ISyncContext syncContext, String account, in Bundle extras);
+    void startSync(ISyncContext syncContext, in Account account, in Bundle extras);
 
     /**
      * Cancel the most recently initiated sync. Due to race conditions, this may arrive
