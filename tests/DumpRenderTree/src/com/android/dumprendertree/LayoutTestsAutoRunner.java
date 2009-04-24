@@ -51,7 +51,6 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
 
     @Override
     public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
         this.mTestPath = (String) icicle.get("path");
         String timeout_str = (String) icicle.get("timeout");
         if (timeout_str != null) {
@@ -64,6 +63,7 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
         
         String r = (String)icicle.get("rebaseline");
         this.mRebaseline = (r != null && r.toLowerCase().equals("true"));
+        super.onCreate(icicle);
     }
     
     public String mTestPath = null;

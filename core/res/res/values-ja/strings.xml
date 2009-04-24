@@ -249,7 +249,7 @@
     <string name="permdesc_writeCalendar">"端末に保存したカレンダーの予定の変更をアプリケーションに許可します。悪意のあるアプリケーションが、カレンダーデータを消去/変更する恐れがあります。"</string>
     <string name="permlab_accessMockLocation">"仮の位置情報でテスト"</string>
     <string name="permdesc_accessMockLocation">"テスト用に仮の位置情報源を作成します。これにより悪意のあるアプリケーションが、GPS、ネットワークプロバイダなどから返される本当の位置情報や状況を改ざんする恐れがあります。"</string>
-    <string name="permlab_accessLocationExtraCommands">"位置情報プロバイダのその他のコマンドへのアクセス"</string>
+    <string name="permlab_accessLocationExtraCommands">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands">"位置情報提供元の追加コマンドにアクセスします。悪意のあるアプリケーションがGPSなどの位置提供の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation">"精細な位置情報（GPS）"</string>
     <string name="permdesc_accessFineLocation">"GPSなど携帯電話の位置情報にアクセスします（可能な場合）。今いる場所が悪意のあるアプリケーションに検出されたり、バッテリーの消費が増える恐れがあります。"</string>
@@ -392,7 +392,7 @@
     <string name="emergency_call_dialog_number_for_display">"緊急通報番号"</string>
     <string name="lockscreen_carrier_default">"(通信サービスなし)"</string>
     <string name="lockscreen_screen_locked">"画面ロック中"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除（または緊急通報）"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"MENUキーでロック解除"</string>
     <string name="lockscreen_pattern_instructions">"ロックを解除するパターンを入力"</string>
     <string name="lockscreen_emergency_call">"緊急通報"</string>
@@ -425,7 +425,7 @@
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"通知を消去"</string>
     <string name="status_bar_no_notifications_title">"通知なし"</string>
-    <string name="status_bar_ongoing_events_title">"操作中"</string>
+    <string name="status_bar_ongoing_events_title">"実行中"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
     <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"充電中..."</string>
@@ -731,7 +731,7 @@
     <string name="volume_alarm">"アラームの音量"</string>
     <string name="volume_notification">"通知音量"</string>
     <string name="volume_unknown">"音量"</string>
-    <string name="ringtone_default">"デフォルトの着信音"</string>
+    <string name="ringtone_default">"プリセット着信音"</string>
     <string name="ringtone_default_with_actual">"端末の基本着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent">"サイレント"</string>
     <string name="ringtone_picker_title">"着信音"</string>
@@ -788,7 +788,7 @@
     <string name="ext_media_safe_unmount_notification_title">"SDカードを安全に取り外しました"</string>
     <string name="ext_media_safe_unmount_notification_message">"SDカードを安全に取り外せます。"</string>
     <string name="ext_media_nomedia_notification_title">"SDカードが取り外されています"</string>
-    <string name="ext_media_nomedia_notification_message">"SDカードが取り外されました。新しいSDカードを挿入して端末のメモリを増やしてください。"</string>
+    <string name="ext_media_nomedia_notification_message">"SDカードがありません。メモリを使用する際はカードを挿入してください。"</string>
     <string name="activity_list_empty">"一致するアクティビティが見つかりません"</string>
     <string name="permlab_pkgUsageStats">"コンポーネント使用状況に関する統計情報の更新"</string>
     <string name="permdesc_pkgUsageStats">"収集されたコンポーネント使用状況に関する統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>

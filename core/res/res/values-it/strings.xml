@@ -108,9 +108,9 @@
     <string name="global_action_toggle_silent_mode">"Modalità silenziosa"</string>
     <string name="global_action_silent_mode_on_status">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status">"Audio attivo"</string>
-    <string name="global_actions_toggle_airplane_mode">"Modalità in volo"</string>
-    <string name="global_actions_airplane_mode_on_status">"Modalità in volo attiva"</string>
-    <string name="global_actions_airplane_mode_off_status">"Modalità in volo non attiva"</string>
+    <string name="global_actions_toggle_airplane_mode">"Modalità aereo attiva"</string>
+    <string name="global_actions_airplane_mode_on_status">"Modalità aereo attiva"</string>
+    <string name="global_actions_airplane_mode_off_status">"Modalità aereo non attiva"</string>
     <string name="safeMode">"Modalità provvisoria"</string>
     <string name="android_system_label">"Sistema Android"</string>
     <string name="permgrouplab_costMoney">"Servizi che prevedono un costo"</string>
@@ -566,9 +566,9 @@
     <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
     <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
@@ -579,7 +579,7 @@
     <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -722,7 +722,7 @@
     <string name="force_close">"Termina"</string>
     <string name="wait">"Attendi"</string>
     <string name="debug">"Debug"</string>
-    <string name="sendText">"Seleziona un\'azione per il testo"</string>
+    <string name="sendText">"Selezione un\'opzione di invio"</string>
     <string name="volume_ringtone">"Volume suoneria"</string>
     <string name="volume_music">"Volume app. multimediali"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Riproduzione tramite Bluetooth"</string>
