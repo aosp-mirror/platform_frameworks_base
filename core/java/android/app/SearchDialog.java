@@ -16,24 +16,24 @@
 
 package android.app;
 
+import static android.app.SuggestionsAdapter.getColumnString;
+
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.server.search.SearchableInfo;
 import android.speech.RecognizerIntent;
@@ -45,7 +45,10 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -53,17 +56,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.WrapperListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -75,59 +75,66 @@ import java.util.concurrent.atomic.AtomicLong;
 public class SearchDialog extends Dialog implements OnItemClickListener, OnItemSelectedListener {
 
     // Debugging support
-    final static String LOG_TAG = "SearchDialog";
-    private static final int DBG_LOG_TIMING = 0;
-    final static int DBG_JAM_THREADING = 0;
+    private static final boolean DBG = false;
+    private static final String LOG_TAG = "SearchDialog";
+    private static final boolean DBG_LOG_TIMING = false;
 
-    // interaction with runtime
-    IntentFilter mCloseDialogsFilter;
-    IntentFilter mPackageFilter;
-    
     private static final String INSTANCE_KEY_COMPONENT = "comp";
     private static final String INSTANCE_KEY_APPDATA = "data";
     private static final String INSTANCE_KEY_GLOBALSEARCH = "glob";
     private static final String INSTANCE_KEY_DISPLAY_QUERY = "dQry";
     private static final String INSTANCE_KEY_DISPLAY_SEL_START = "sel1";
     private static final String INSTANCE_KEY_DISPLAY_SEL_END = "sel2";
-    private static final String INSTANCE_KEY_USER_QUERY = "uQry";
-    private static final String INSTANCE_KEY_SUGGESTION_QUERY = "sQry";
     private static final String INSTANCE_KEY_SELECTED_ELEMENT = "slEl";
     private static final int INSTANCE_SELECTED_BUTTON = -2;
     private static final int INSTANCE_SELECTED_QUERY = -1;
-
+    
+    // interaction with runtime
+    private IntentFilter mCloseDialogsFilter;
+    private IntentFilter mPackageFilter;
+    
     // views & widgets
     private TextView mBadgeLabel;
-    private AutoCompleteTextView mSearchTextField;
+    private SearchAutoComplete mSearchAutoComplete;
     private Button mGoButton;
     private ImageButton mVoiceButton;
+    private View mSearchPlate;
 
     // interaction with searchable application
+    private SearchableInfo mSearchable;
     private ComponentName mLaunchComponent;
     private Bundle mAppSearchData;
     private boolean mGlobalSearchMode;
     private Context mActivityContext;
+    
+    // stack of previous searchables, to support the BACK key after
+    // SearchManager.INTENT_ACTION_CHANGE_SEARCH_SOURCE.
+    // The top of the stack (= previous searchable) is the last element of the list,
+    // since adding and removing is efficient at the end of an ArrayList.
+    private ArrayList<ComponentName> mPreviousComponents;
 
-    // interaction with the search manager service
-    private SearchableInfo mSearchable;
-    
-    // support for suggestions 
-    private String mUserQuery = null;
-    private int mUserQuerySelStart;
-    private int mUserQuerySelEnd;
-    private boolean mLeaveJammedQueryOnRefocus = false;
-    private String mPreviousSuggestionQuery = null;
-    private int mPresetSelection = -1;
-    private String mSuggestionAction = null;
-    private Uri mSuggestionData = null;
-    private String mSuggestionQuery = null;
-    
     // For voice searching
     private Intent mVoiceWebSearchIntent;
     private Intent mVoiceAppSearchIntent;
 
     // support for AutoCompleteTextView suggestions display
     private SuggestionsAdapter mSuggestionsAdapter;
-
+    
+    // Whether to rewrite queries when selecting suggestions
+    // TODO: This is disabled because of problems with persistent selections
+    // causing non-user-initiated rewrites.
+    private static final boolean REWRITE_QUERIES = false;
+    
+    // The query entered by the user. This is not changed when selecting a suggestion
+    // that modifies the contents of the text field. But if the user then edits
+    // the suggestion, the resulting string is saved.
+    private String mUserQuery;
+    
+    // A weak map of drawables we've gotten from other packages, so we don't load them
+    // more than once.
+    private final WeakHashMap<String, Drawable> mOutsideDrawablesCache =
+            new WeakHashMap<String, Drawable>();
+    
     /**
      * Constructor - fires it up and makes it look like the search UI.
      * 
@@ -153,25 +160,29 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         theWindow.setLayout(ViewGroup.LayoutParams.FILL_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         WindowManager.LayoutParams lp = theWindow.getAttributes();
-        lp.setTitle("Search Dialog");
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE;
         theWindow.setAttributes(lp);
 
         // get the view elements for local access
         mBadgeLabel = (TextView) findViewById(com.android.internal.R.id.search_badge);
-        mSearchTextField = (AutoCompleteTextView) 
+        mSearchAutoComplete = (SearchAutoComplete)
                 findViewById(com.android.internal.R.id.search_src_text);
         mGoButton = (Button) findViewById(com.android.internal.R.id.search_go_btn);
         mVoiceButton = (ImageButton) findViewById(com.android.internal.R.id.search_voice_btn);
+        mSearchPlate = findViewById(com.android.internal.R.id.search_plate);
         
         // attach listeners
-        mSearchTextField.addTextChangedListener(mTextWatcher);
-        mSearchTextField.setOnKeyListener(mTextKeyListener);
+        mSearchAutoComplete.addTextChangedListener(mTextWatcher);
+        mSearchAutoComplete.setOnKeyListener(mTextKeyListener);
+        mSearchAutoComplete.setOnItemClickListener(this);
+        mSearchAutoComplete.setOnItemSelectedListener(this);
         mGoButton.setOnClickListener(mGoButtonClickListener);
         mGoButton.setOnKeyListener(mButtonsKeyListener);
         mVoiceButton.setOnClickListener(mVoiceButtonClickListener);
         mVoiceButton.setOnKeyListener(mButtonsKeyListener);
 
+        mSearchAutoComplete.setSearchDialog(this);
+        
         // pre-hide all the extraneous elements
         mBadgeLabel.setVisibility(View.GONE);
 
@@ -199,7 +210,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     /**
      * Set up the search dialog
      * 
-     * @param Returns true if search dialog launched, false if not
+     * @return true if search dialog launched, false if not
      */
     public boolean show(String initialQuery, boolean selectInitialQuery,
             ComponentName componentName, Bundle appSearchData, boolean globalSearch) {
@@ -208,75 +219,65 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             // in this case, just discard the "show" request
             return true;
         }
-
-        // Get searchable info from search manager and use to set up other elements of UI
-        // Do this first so we can get out quickly if there's nothing to search
-        ISearchManager sms;
-        sms = ISearchManager.Stub.asInterface(ServiceManager.getService(Context.SEARCH_SERVICE));
-        try {
-            mSearchable = sms.getSearchableInfo(componentName, globalSearch);
-        } catch (RemoteException e) {
-            mSearchable = null;
+        
+        // set up the searchable and show the dialog
+        if (!show(componentName, appSearchData, globalSearch)) {
+            return false;
         }
+        
+        // finally, load the user's initial text (which may trigger suggestions)
+        setUserQuery(initialQuery);
+        if (selectInitialQuery) {
+            mSearchAutoComplete.selectAll();
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Sets up the search dialog and shows it.
+     * 
+     * @return <code>true</code> if search dialog launched
+     */
+    private boolean show(ComponentName componentName, Bundle appSearchData, 
+            boolean globalSearch) {
+        
+        if (DBG) { 
+            Log.d(LOG_TAG, "show(" + componentName + ", " 
+                    + appSearchData + ", " + globalSearch + ")");
+        }
+        
+        mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
         if (mSearchable == null) {
             // unfortunately, we can't log here.  it would be logspam every time the user
             // clicks the "search" key on a non-search app
             return false;
         }
         
-        // OK, we're going to show ourselves
-        super.show();
-
-        setupSearchableInfo();
-        
         mLaunchComponent = componentName;
         mAppSearchData = appSearchData;
-        mGlobalSearchMode = globalSearch;
+        // Using globalSearch here is just an optimization, just calling
+        // isDefaultSearchable() should always give the same result.
+        mGlobalSearchMode = globalSearch || SearchManager.isDefaultSearchable(mSearchable); 
+        mActivityContext = mSearchable.getActivityContext(getContext());
+        
+        // show the dialog. this will call onStart().
+        if (!isShowing()) {
+            show();
+        }
 
+        updateUI();
+        
+        return true;
+    }
+    
+    @Override
+    protected void onStart() {
+        super.onStart();
+        
         // receive broadcasts
         getContext().registerReceiver(mBroadcastReceiver, mCloseDialogsFilter);
         getContext().registerReceiver(mBroadcastReceiver, mPackageFilter);
-        
-        // configure the autocomplete aspects of the input box
-        mSearchTextField.setOnItemClickListener(this);
-        mSearchTextField.setOnItemSelectedListener(this);
-
-        // This conversion is necessary to force a preload of the EditText and thus force
-        // suggestions to be presented (even for an empty query)
-        if (initialQuery == null) {
-            initialQuery = "";     // This forces the preload to happen, triggering suggestions
-        }
-
-        // attach the suggestions adapter, if suggestions are available
-        // The existence of a suggestions authority is the proxy for "suggestions available here"
-        if (mSearchable.getSuggestAuthority() == null) {
-            mSuggestionsAdapter = null;
-            mSearchTextField.setAdapter(mSuggestionsAdapter);
-            mSearchTextField.setText(initialQuery);
-        } else {
-            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable, 
-                    mSearchTextField);
-            mSearchTextField.setAdapter(mSuggestionsAdapter);
-
-            // finally, load the user's initial text (which may trigger suggestions)
-            mSuggestionsAdapter.setNonUserQuery(false);
-            mSearchTextField.setText(initialQuery);
-        }
-        
-        if (selectInitialQuery) {
-            mSearchTextField.selectAll();
-        } else {
-            mSearchTextField.setSelection(initialQuery.length());
-        }
-        return true;
-    }
-
-    /**
-     * The default show() for this Dialog is not supported.
-     */
-    @Override
-    public void show() {
-        return;
     }
 
     /**
@@ -289,6 +290,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     public void onStop() {
         super.onStop();
         
+        // TODO: Removing the listeners means that they never get called, since 
+        // Dialog.dismissDialog() calls onStop() before sendDismissMessage().
         setOnCancelListener(null);
         setOnDismissListener(null);
         
@@ -299,25 +302,35 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             // This is OK - it just means we didn't have any registered
         }
         
-        // close any leftover cursor
-        if (mSuggestionsAdapter != null) {
-            mSuggestionsAdapter.changeCursor(null);
-        }
+        closeSuggestionsAdapter();
         
         // dump extra memory we're hanging on to
         mLaunchComponent = null;
         mAppSearchData = null;
         mSearchable = null;
-        mSuggestionAction = null;
-        mSuggestionData = null;
-        mSuggestionQuery = null;
         mActivityContext = null;
-        mPreviousSuggestionQuery = null;
         mUserQuery = null;
+        mPreviousComponents = null;
+    }
+    
+    /**
+     * Closes and gets rid of the suggestions adapter.
+     */
+    private void closeSuggestionsAdapter() {
+        // remove the adapter from the autocomplete first, to avoid any updates
+        // when we drop the cursor
+        mSearchAutoComplete.setAdapter((SuggestionsAdapter)null);
+        // close any leftover cursor
+        if (mSuggestionsAdapter != null) {
+            mSuggestionsAdapter.changeCursor(null);
+        }
+        mSuggestionsAdapter = null;
     }
     
     /**
      * Save the minimal set of data necessary to recreate the search
+     * 
+     * TODO: go through this and make sure that it saves everything that is needed
      * 
      * @return A bundle with the state of the dialog.
      */
@@ -331,16 +344,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         bundle.putBoolean(INSTANCE_KEY_GLOBALSEARCH, mGlobalSearchMode);
         
         // UI state
-        bundle.putString(INSTANCE_KEY_DISPLAY_QUERY, mSearchTextField.getText().toString());
-        bundle.putInt(INSTANCE_KEY_DISPLAY_SEL_START, mSearchTextField.getSelectionStart());
-        bundle.putInt(INSTANCE_KEY_DISPLAY_SEL_END, mSearchTextField.getSelectionEnd());
-        bundle.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
-        bundle.putString(INSTANCE_KEY_SUGGESTION_QUERY, mPreviousSuggestionQuery);
+        bundle.putString(INSTANCE_KEY_DISPLAY_QUERY, mSearchAutoComplete.getText().toString());
+        bundle.putInt(INSTANCE_KEY_DISPLAY_SEL_START, mSearchAutoComplete.getSelectionStart());
+        bundle.putInt(INSTANCE_KEY_DISPLAY_SEL_END, mSearchAutoComplete.getSelectionEnd());
         
         int selectedElement = INSTANCE_SELECTED_QUERY;
         if (mGoButton.isFocused()) {
             selectedElement = INSTANCE_SELECTED_BUTTON;
-        } else if (mSearchTextField.isPopupShowing()) {
+        } else if (mSearchAutoComplete.isPopupShowing()) {
             selectedElement = 0; // TODO mSearchTextField.getListSelection()    // 0..n
         }
         bundle.putInt(INSTANCE_KEY_SELECTED_ELEMENT, selectedElement);
@@ -350,6 +361,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
     /**
      * Restore the state of the dialog from a previously saved bundle.
+     * 
+     * TODO: go through this and make sure that it saves everything that is saved
      *
      * @param savedInstanceState The state of the dialog previously saved by
      *     {@link #onSaveInstanceState()}.
@@ -365,26 +378,17 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         String displayQuery = savedInstanceState.getString(INSTANCE_KEY_DISPLAY_QUERY);
         int querySelStart = savedInstanceState.getInt(INSTANCE_KEY_DISPLAY_SEL_START, -1);
         int querySelEnd = savedInstanceState.getInt(INSTANCE_KEY_DISPLAY_SEL_END, -1);
-        String userQuery = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
         int selectedElement = savedInstanceState.getInt(INSTANCE_KEY_SELECTED_ELEMENT);
-        String suggestionQuery = savedInstanceState.getString(INSTANCE_KEY_SUGGESTION_QUERY);
         
         // show the dialog.  skip any show/hide animation, we want to go fast.
         // send the text that actually generates the suggestions here;  we'll replace the display
         // text as necessary in a moment.
-        if (!show(suggestionQuery, false, launchComponent, appSearchData, globalSearch)) {
+        if (!show(displayQuery, false, launchComponent, appSearchData, globalSearch)) {
             // for some reason, we couldn't re-instantiate
             return;
         }
         
-        if (mSuggestionsAdapter != null) {
-            mSuggestionsAdapter.setNonUserQuery(true);
-        }
-        mSearchTextField.setText(displayQuery);
-        // TODO because the new query is (not) processed in another thread, we can't just
-        // take away this flag (yet).  The better solution here is going to require a new API
-        // in AutoCompleteTextView which allows us to change the text w/o changing the suggestions.
-//      mSuggestionsAdapter.setNonUserQuery(false);
+        mSearchAutoComplete.setText(displayQuery);
         
         // clean up the selection state
         switch (selectedElement) {
@@ -395,21 +399,19 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             break;
         case INSTANCE_SELECTED_QUERY:
             if (querySelStart >= 0 && querySelEnd >= 0) {
-                mSearchTextField.requestFocus();
-                mSearchTextField.setSelection(querySelStart, querySelEnd);
+                mSearchAutoComplete.requestFocus();
+                mSearchAutoComplete.setSelection(querySelStart, querySelEnd);
             }
             break;
         default:
-            // defer selecting a list element until suggestion list appears
-            mPresetSelection = selectedElement;
-            // TODO mSearchTextField.setListSelection(selectedElement)
+            // TODO: defer selecting a list element until suggestion list appears
+//            mSearchAutoComplete.setListSelection(selectedElement)
             break;
         }
     }
     
     /**
-     * Hook for updating layout on a rotation
-     * 
+     * Called after resources have changed, e.g. after screen rotation or locale change.
      */
     public void onConfigurationChanged(Configuration newConfig) {
         if (isShowing()) {
@@ -419,15 +421,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             updateQueryHint();
         } 
     }
-
+    
     /**
-     * Use SearchableInfo record (from search manager service) to preconfigure the UI in various
-     * ways.
+     * Update the UI according to the info in the current value of {@link #mSearchable}.
      */
-    private void setupSearchableInfo() {
+    private void updateUI() {
         if (mSearchable != null) {
-            mActivityContext = mSearchable.getActivityContext(getContext());
-            
+            updateSearchAutoComplete();
             updateSearchButton();
             updateSearchBadge();
             updateQueryHint();
@@ -449,24 +449,38 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     inputType |= InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE;
                 }
             }
-            mSearchTextField.setInputType(inputType);
-            mSearchTextField.setImeOptions(mSearchable.getImeOptions());
+            mSearchAutoComplete.setInputType(inputType);
+            mSearchAutoComplete.setImeOptions(mSearchable.getImeOptions());
+        }
+    }
+    
+    /**
+     * Updates the auto-complete text view.
+     */
+    private void updateSearchAutoComplete() {
+        // close any existing suggestions adapter
+        closeSuggestionsAdapter();
+        
+        mSearchAutoComplete.setDropDownAnimationStyle(0); // no animation
+        mSearchAutoComplete.setThreshold(0);  // always allow zero-query suggestions
+
+        if (mGlobalSearchMode) {
+            mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in
+            mSearchAutoComplete.setDropDownDismissedOnCompletion(false);
+        } else {
+            mSearchAutoComplete.setDropDownAlwaysVisible(false);
+            mSearchAutoComplete.setDropDownDismissedOnCompletion(true);
+        }
+
+        // attach the suggestions adapter, if suggestions are available
+        // The existence of a suggestions authority is the proxy for "suggestions available here"
+        if (mSearchable.getSuggestAuthority() != null) {
+            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable, 
+                    mOutsideDrawablesCache);
+            mSearchAutoComplete.setAdapter(mSuggestionsAdapter);
         }
     }
 
-    /**
-     * The list of installed packages has just changed.  This means that our current context
-     * may no longer be valid.  This would only happen if a package is installed/removed exactly
-     * when the search bar is open.  So for now we're just going to close the search
-     * bar.  
-     * 
-     * Anything fancier would require some checks to see if the user's context was still valid.
-     * Which would be messier.
-     */
-    public void onPackageListChange() {
-        cancel();
-    }
-    
     /**    
      * Update the text in the search button.  Note: This is deprecated functionality, for 
      * 1.0 compatibility only.
@@ -481,26 +495,40 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             iconLabel = getContext().getResources().
                     getDrawable(com.android.internal.R.drawable.ic_btn_search);
         }
-        mGoButton.setText(textLabel);  
+        mGoButton.setText(textLabel);
         mGoButton.setCompoundDrawablesWithIntrinsicBounds(iconLabel, null, null, null);
     }
     
     /**
-     * Setup the search "Badge" if request by mode flags.
+     * Setup the search "Badge" if requested by mode flags.
      */
     private void updateSearchBadge() {
         // assume both hidden
         int visibility = View.GONE;
         Drawable icon = null;
-        String text = null;
+        CharSequence text = null;
         
         // optionally show one or the other.
         if (mSearchable.mBadgeIcon) {
             icon = mActivityContext.getResources().getDrawable(mSearchable.getIconId());
             visibility = View.VISIBLE;
+            if (DBG) Log.d(LOG_TAG, "Using badge icon: " + mSearchable.getIconId());
         } else if (mSearchable.mBadgeLabel) {
             text = mActivityContext.getResources().getText(mSearchable.getLabelId()).toString();
             visibility = View.VISIBLE;
+            if (DBG) Log.d(LOG_TAG, "Using badge label: " + mSearchable.getLabelId());
+        } else if (!mGlobalSearchMode) {
+            // Get the localized name of the application which we are doing search in.
+            try {
+                PackageManager pm = getContext().getPackageManager();
+                ActivityInfo info = pm.getActivityInfo(mLaunchComponent, 0);
+                text = pm.getApplicationLabel(info.applicationInfo);
+                visibility = View.VISIBLE;
+                if (DBG) Log.d(LOG_TAG, "Using application label: " + text);
+            } catch (NameNotFoundException e) {
+                // app not found, fine, don't use its name for the label
+                Log.w(LOG_TAG, mLaunchComponent + " not found.");
+            }
         }
         
         mBadgeLabel.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
@@ -520,7 +548,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     hint = mActivityContext.getString(hintId);
                 }
             }
-            mSearchTextField.setHint(hint);
+            mSearchAutoComplete.setHint(hint);
         }
     }
 
@@ -548,63 +576,129 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mVoiceButton.setVisibility(visibility);
     }
     
+    /*
+     * Menu.
+     */
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Show search settings menu item if anyone handles the intent for it
+        Intent settingsIntent = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
+        PackageManager pm = getContext().getPackageManager();
+        ActivityInfo activityInfo = settingsIntent.resolveActivityInfo(pm, 0);
+        if (activityInfo != null) {
+            settingsIntent.setClassName(activityInfo.applicationInfo.packageName,
+                    activityInfo.name);
+            String label = getActivityLabel(activityInfo);
+            menu.add(Menu.NONE, Menu.NONE, Menu.NONE, label)
+                    .setIcon(android.R.drawable.ic_menu_preferences)
+                    .setAlphabeticShortcut('P')
+                    .setIntent(settingsIntent);
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+    
+    // TODO: shouldn't this be in PackageManager?
+    private String getActivityLabel(ActivityInfo activityInfo) {
+        PackageManager pm = getContext().getPackageManager();
+        try {
+            int labelRes = activityInfo.labelRes;
+            if (labelRes == 0) {
+                return null;
+            }
+            Resources r = pm.getResourcesForApplication(activityInfo.applicationInfo);
+            return r.getString(labelRes);
+        } catch (NameNotFoundException ex) {
+            return null;
+        }
+    }
+    
     /**
      * Listeners of various types
      */
 
     /**
+     * {@link Dialog#onTouchEvent(MotionEvent)} will cancel the dialog only when the
+     * touch is outside the window. But the window includes space for the drop-down,
+     * so we also cancel on taps outside the search bar when the drop-down is not showing.
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // cancel if the drop-down is not showing and the touch event was outside the search plate
+        if (!mSearchAutoComplete.isPopupShowing() && isOutOfBounds(mSearchPlate, event)) {
+            if (DBG) Log.d(LOG_TAG, "Pop-up not showing and outside of search plate.");
+            cancel();
+            return true;
+        }
+        // Let Dialog handle events outside the window while the pop-up is showing.
+        return super.onTouchEvent(event);
+    }
+    
+    private boolean isOutOfBounds(View v, MotionEvent event) {
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        final int slop = ViewConfiguration.get(mContext).getScaledWindowTouchSlop();
+        return (x < -slop) || (y < -slop)
+                || (x > (v.getWidth()+slop))
+                || (y > (v.getHeight()+slop));
+    }
+    
+    /**
      * Dialog's OnKeyListener implements various search-specific functionality
      *
      * @param keyCode This is the keycode of the typed key, and is the same value as
-     * found in the KeyEvent parameter.
+     *        found in the KeyEvent parameter.
      * @param event The complete event record for the typed key
      *
      * @return Return true if the event was handled here, or false if not.
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-        case KeyEvent.KEYCODE_BACK:
-            cancel();
+        if (DBG) Log.d(LOG_TAG, "onKeyDown(" + keyCode + "," + event + ")");
+        
+        // handle back key to go back to previous searchable, etc.
+        if (handleBackKey(keyCode, event)) {
             return true;
-        case KeyEvent.KEYCODE_SEARCH:
-            if (TextUtils.getTrimmedLength(mSearchTextField.getText()) != 0) {
-                launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);
+        }
+        
+        // search or cancel on search key
+        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+            if (!mSearchAutoComplete.isEmpty()) {
+                launchQuerySearch();
             } else {
                 cancel();
             }
             return true;
-        default:
-            SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
-            if ((actionKey != null) && (actionKey.mQueryActionMsg != null)) {
-                launchQuerySearch(keyCode, actionKey.mQueryActionMsg);
-                return true;
-            }
-            break;
         }
+
+        // if it's an action specified by the searchable activity, launch the
+        // entered query with the action key
+        SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
+        if ((actionKey != null) && (actionKey.mQueryActionMsg != null)) {
+            launchQuerySearch(keyCode, actionKey.mQueryActionMsg);
+            return true;
+        }
+        
         return false;
     }
-
+    
     /**
      * Callback to watch the textedit field for empty/non-empty
      */
     private TextWatcher mTextWatcher = new TextWatcher() {
 
-        public void beforeTextChanged(CharSequence s, int start, int
-                before, int after) { }
+        public void beforeTextChanged(CharSequence s, int start, int before, int after) { }
 
         public void onTextChanged(CharSequence s, int start,
                 int before, int after) {
-            if (DBG_LOG_TIMING == 1) {
+            if (DBG_LOG_TIMING) {
                 dbgLogTiming("onTextChanged()");
             }
             updateWidgetState();
-            // Only do suggestions if actually typed by user
-            if ((mSuggestionsAdapter != null) && !mSuggestionsAdapter.getNonUserQuery()) {
-                mPreviousSuggestionQuery = s.toString();
-                mUserQuery = mSearchTextField.getText().toString();
-                mUserQuerySelStart = mSearchTextField.getSelectionStart();
-                mUserQuerySelEnd = mSearchTextField.getSelectionEnd();
+            if (!mSearchAutoComplete.isPerformingCompletion()) {
+                // The user changed the query, remember it.
+                mUserQuery = s == null ? "" : s.toString();
             }
         }
 
@@ -616,52 +710,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     private void updateWidgetState() {
         // enable the button if we have one or more non-space characters
-        boolean enabled =
-            TextUtils.getTrimmedLength(mSearchTextField.getText()) != 0;
-
+        boolean enabled = !mSearchAutoComplete.isEmpty();
         mGoButton.setEnabled(enabled);
         mGoButton.setFocusable(enabled);
-    }
-
-    private final static String[] ONE_LINE_FROM =       {SearchManager.SUGGEST_COLUMN_TEXT_1 };
-    private final static String[] ONE_LINE_ICONS_FROM = {SearchManager.SUGGEST_COLUMN_TEXT_1,
-                                                         SearchManager.SUGGEST_COLUMN_ICON_1,
-                                                         SearchManager.SUGGEST_COLUMN_ICON_2};
-    private final static String[] TWO_LINE_FROM =       {SearchManager.SUGGEST_COLUMN_TEXT_1,
-                                                         SearchManager.SUGGEST_COLUMN_TEXT_2 };
-    private final static String[] TWO_LINE_ICONS_FROM = {SearchManager.SUGGEST_COLUMN_TEXT_1,
-                                                         SearchManager.SUGGEST_COLUMN_TEXT_2,
-                                                         SearchManager.SUGGEST_COLUMN_ICON_1,
-                                                         SearchManager.SUGGEST_COLUMN_ICON_2 };
-    
-    private final static int[] ONE_LINE_TO =       {com.android.internal.R.id.text1};
-    private final static int[] ONE_LINE_ICONS_TO = {com.android.internal.R.id.text1,
-                                                    com.android.internal.R.id.icon1, 
-                                                    com.android.internal.R.id.icon2};
-    private final static int[] TWO_LINE_TO =       {com.android.internal.R.id.text1, 
-                                                    com.android.internal.R.id.text2};
-    private final static int[] TWO_LINE_ICONS_TO = {com.android.internal.R.id.text1, 
-                                                    com.android.internal.R.id.text2,
-                                                    com.android.internal.R.id.icon1, 
-                                                    com.android.internal.R.id.icon2};
-    
-    /**
-     * Safely retrieve the suggestions cursor adapter from the ListView
-     * 
-     * @param adapterView The ListView containing our adapter
-     * @result The CursorAdapter that we installed, or null if not set
-     */
-    private static CursorAdapter getSuggestionsAdapter(AdapterView<?> adapterView) {
-        CursorAdapter result = null;
-        if (adapterView != null) {
-            Object ad = adapterView.getAdapter();
-            if (ad instanceof CursorAdapter) {
-                result = (CursorAdapter) ad;
-            } else if (ad instanceof WrapperListAdapter) {
-                result = (CursorAdapter) ((WrapperListAdapter)ad).getWrappedAdapter();
-            }
-        }
-        return result;
     }
 
     /**
@@ -670,10 +721,23 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     View.OnKeyListener mButtonsKeyListener = new View.OnKeyListener() {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
-            // also guard against possible race conditions (late arrival after dismiss)
-            if (mSearchable != null) {
-                return refocusingKeyListener(v, keyCode, event);
+            // guard against possible race conditions
+            if (mSearchable == null) {
+                return false;
             }
+            
+            if (!event.isSystem() && 
+                    (keyCode != KeyEvent.KEYCODE_DPAD_UP) &&
+                    (keyCode != KeyEvent.KEYCODE_DPAD_DOWN) &&
+                    (keyCode != KeyEvent.KEYCODE_DPAD_LEFT) &&
+                    (keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) &&
+                    (keyCode != KeyEvent.KEYCODE_DPAD_CENTER)) {
+                // restore focus and give key to EditText ...
+                if (mSearchAutoComplete.requestFocus()) {
+                    return mSearchAutoComplete.dispatchKeyEvent(event);
+                }
+            }
+
             return false;
         }
     };
@@ -683,10 +747,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     View.OnClickListener mGoButtonClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            // also guard against possible race conditions (late arrival after dismiss)
-            if (mSearchable != null) {
-                launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);
+            // guard against possible race conditions
+            if (mSearchable == null) {
+                return;
             }
+            launchQuerySearch();
         }
     };
     
@@ -695,14 +760,16 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     View.OnClickListener mVoiceButtonClickListener = new View.OnClickListener() {
         public void onClick(View v) {
+            // guard against possible race conditions
+            if (mSearchable == null) {
+                return;
+            }
             try {
                 if (mSearchable.getVoiceSearchLaunchWebSearch()) {
                     getContext().startActivity(mVoiceWebSearchIntent);
-                    dismiss();
                 } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
                     Intent appSearchIntent = createVoiceAppSearchIntent(mVoiceAppSearchIntent);
                     getContext().startActivity(appSearchIntent);
-                    dismiss();
                 }
             } catch (ActivityNotFoundException e) {
                 // Should not happen, since we check the availability of
@@ -778,136 +845,56 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     View.OnKeyListener mTextKeyListener = new View.OnKeyListener() {
         public boolean onKey(View v, int keyCode, KeyEvent event) {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                cancel();
-                return true;
+            // guard against possible race conditions
+            if (mSearchable == null) {
+                return false;
             }
-            // also guard against possible race conditions (late arrival after dismiss)
-            if (mSearchable != null && 
-                    TextUtils.getTrimmedLength(mSearchTextField.getText()) > 0) {
-                if (DBG_LOG_TIMING == 1) {
-                    dbgLogTiming("doTextKey()");
+
+            if (DBG_LOG_TIMING) dbgLogTiming("doTextKey()");
+            if (DBG) { 
+                Log.d(LOG_TAG, "mTextListener.onKey(" + keyCode + "," + event 
+                        + "), selection: " + mSearchAutoComplete.getListSelection());
+            }
+            
+            // If a suggestion is selected, handle enter, search key, and action keys 
+            // as presses on the selected suggestion
+            if (mSearchAutoComplete.isPopupShowing() && 
+                    mSearchAutoComplete.getListSelection() != ListView.INVALID_POSITION) {
+                return onSuggestionsKey(v, keyCode, event);
+            }
+
+            // If there is text in the query box, handle enter, and action keys
+            // The search key is handled by the dialog's onKeyDown(). 
+            if (!mSearchAutoComplete.isEmpty()) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER 
+                        && event.getAction() == KeyEvent.ACTION_UP) {
+                    v.cancelLongPress();
+                    launchQuerySearch();                    
+                    return true;
                 }
-                // dispatch "typing in the list" first
-                if (mSearchTextField.isPopupShowing() && 
-                        mSearchTextField.getListSelection() != ListView.INVALID_POSITION) {
-                     return onSuggestionsKey(v, keyCode, event);
-                }
-                // otherwise, dispatch an "edit view" key
-                switch (keyCode) {
-                case KeyEvent.KEYCODE_ENTER:
-                    if (event.getAction() == KeyEvent.ACTION_UP) {
-                        v.cancelLongPress();
-                        launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);                    
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
+                    if ((actionKey != null) && (actionKey.mQueryActionMsg != null)) {
+                        launchQuerySearch(keyCode, actionKey.mQueryActionMsg);
                         return true;
                     }
-                    break;
-                case KeyEvent.KEYCODE_DPAD_DOWN:                    
-                    // capture the EditText state, so we can restore the user entry later
-                    mUserQuery = mSearchTextField.getText().toString();
-                    mUserQuerySelStart = mSearchTextField.getSelectionStart();
-                    mUserQuerySelEnd = mSearchTextField.getSelectionEnd();
-                    // pass through - we're just watching here
-                    break;
-                default:
-                    if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                        SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
-                        if ((actionKey != null) && (actionKey.mQueryActionMsg != null)) {
-                            launchQuerySearch(keyCode, actionKey.mQueryActionMsg);
-                            return true;
-                        }
-                    }
-                    break;
                 }
             }
             return false;
         }
     };
-
+        
     /**
-     * React to the user typing while the suggestions are focused.  First, check for action
-     * keys.  If not handled, try refocusing regular characters into the EditText.  In this case,
-     * replace the query text (start typing fresh text).
-     */
-    private boolean onSuggestionsKey(View v, int keyCode, KeyEvent event) {
-        boolean handled = false;
-        // also guard against possible race conditions (late arrival after dismiss)
-        if (mSearchable != null) {
-            handled = doSuggestionsKey(v, keyCode, event);
-        }
-        return handled;
-    }
-    
-    /**
-     * Per UI design, we're going to "steer" any typed keystrokes back into the EditText
-     * box, even if the user has navigated the focus to the dropdown or to the GO button.
-     * 
-     * @param v The view into which the keystroke was typed
-     * @param keyCode keyCode of entered key
-     * @param event Full KeyEvent record of entered key
-     */
-    private boolean refocusingKeyListener(View v, int keyCode, KeyEvent event) {
-        boolean handled = false;
-
-        if (!event.isSystem() && 
-                (keyCode != KeyEvent.KEYCODE_DPAD_UP) &&
-                (keyCode != KeyEvent.KEYCODE_DPAD_DOWN) &&
-                (keyCode != KeyEvent.KEYCODE_DPAD_LEFT) &&
-                (keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) &&
-                (keyCode != KeyEvent.KEYCODE_DPAD_CENTER)) {
-            // restore focus and give key to EditText ...
-            // but don't replace the user's query
-            mLeaveJammedQueryOnRefocus = true;
-            if (mSearchTextField.requestFocus()) {
-                handled = mSearchTextField.dispatchKeyEvent(event);
-            }
-            mLeaveJammedQueryOnRefocus = false;
-        }
-        return handled;
-    }
-    
-    /**
-     * Update query text based on transitions in and out of suggestions list.
-     */
-    /*
-     * TODO - figure out if this logic is required for the autocomplete text view version
-
-    OnFocusChangeListener mSuggestFocusListener = new OnFocusChangeListener() {
-        public void onFocusChange(View v, boolean hasFocus) {
-            // also guard against possible race conditions (late arrival after dismiss)
-            if (mSearchable == null) {
-                return;
-            }
-            // Update query text based on navigation in to/out of the suggestions list
-            if (hasFocus) {
-                // Entering the list view - record selection point from user's query
-                mUserQuery = mSearchTextField.getText().toString();
-                mUserQuerySelStart = mSearchTextField.getSelectionStart();
-                mUserQuerySelEnd = mSearchTextField.getSelectionEnd();
-                // then update the query to match the entered selection
-                jamSuggestionQuery(true, mSuggestionsList, 
-                                    mSuggestionsList.getSelectedItemPosition());
-            } else {
-                // Exiting the list view
-                
-                if (mSuggestionsList.getSelectedItemPosition() < 0) {
-                    // Direct exit - Leave new suggestion in place (do nothing)
-                } else {
-                    // Navigation exit - restore user's query text
-                    if (!mLeaveJammedQueryOnRefocus) {
-                        jamSuggestionQuery(false, null, -1);
-                    }
-                }
-            }
-
-        }
-    };
-    */
-    
-    /**
-     * This is the listener for the ACTION_CLOSE_SYSTEM_DIALOGS intent.  It's an indication that
-     * we should close ourselves immediately, in order to allow a higher-priority UI to take over
+     * When the ACTION_CLOSE_SYSTEM_DIALOGS intent is received, we should close ourselves 
+     * immediately, in order to allow a higher-priority UI to take over
      * (e.g. phone call received).
+     * 
+     * When a package is added, removed or changed, our current context
+     * may no longer be valid.  This would only happen if a package is installed/removed exactly
+     * when the search bar is open.  So for now we're just going to close the search
+     * bar.  
+     * Anything fancier would require some checks to see if the user's context was still valid.
+     * Which would be messier.
      */
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -918,7 +905,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             } else if (Intent.ACTION_PACKAGE_ADDED.equals(action)
                     || Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
-                onPackageListChange();
+                cancel();
             }
         }
     };
@@ -938,58 +925,45 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
     
     /**
-     * Various ways to launch searches
+     * React to the user typing while in the suggestions list. First, check for action
+     * keys. If not handled, try refocusing regular characters into the EditText. 
      */
-
-    /**
-     * React to the user clicking the "GO" button.  Hide the UI and launch a search.
-     *
-     * @param actionKey Pass a keycode if the launch was triggered by an action key.  Pass
-     * KeyEvent.KEYCODE_UNKNOWN for no actionKey code.
-     * @param actionMsg Pass the suggestion-provided message if the launch was triggered by an
-     * action key.  Pass null for no actionKey message.
-     */
-    private void launchQuerySearch(int actionKey, final String actionMsg)  {
-        final String query = mSearchTextField.getText().toString();
-        final Bundle appData = mAppSearchData;
-        final SearchableInfo si = mSearchable;      // cache briefly (dismiss() nulls it)
-        dismiss();
-        sendLaunchIntent(Intent.ACTION_SEARCH, null, query, appData, actionKey, actionMsg, si);
-    }
-
-    /**
-     * React to the user typing an action key while in the suggestions list
-     */
-    private boolean doSuggestionsKey(View v, int keyCode, KeyEvent event) {
-        // Exit early in case of race condition
+    private boolean onSuggestionsKey(View v, int keyCode, KeyEvent event) {
+        // guard against possible race conditions (late arrival after dismiss)
+        if (mSearchable == null) {
+            return false;
+        }
         if (mSuggestionsAdapter == null) {
             return false;
         }
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (DBG_LOG_TIMING == 1) {
-                dbgLogTiming("doSuggestionsKey()");
+            if (DBG_LOG_TIMING) {
+                dbgLogTiming("onSuggestionsKey()");
             }
             
             // First, check for enter or search (both of which we'll treat as a "click")
             if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_SEARCH) {
-                int position = mSearchTextField.getListSelection();
-                return launchSuggestion(mSuggestionsAdapter, position);
+                int position = mSearchAutoComplete.getListSelection();
+                return launchSuggestion(position);
             }
             
             // Next, check for left/right moves, which we use to "return" the user to the edit view
             if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                // give "focus" to text editor, but don't restore the user's original query
+                // give "focus" to text editor, with cursor at the beginning if
+                // left key, at end if right key
+                // TODO: Reverse left/right for right-to-left languages, e.g. Arabic
                 int selPoint = (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) ? 
-                        0 : mSearchTextField.length();
-                mSearchTextField.setSelection(selPoint);
-                mSearchTextField.setListSelection(0);
-                mSearchTextField.clearListSelection();
+                        0 : mSearchAutoComplete.length();
+                mSearchAutoComplete.setSelection(selPoint);
+                mSearchAutoComplete.setListSelection(0);
+                mSearchAutoComplete.clearListSelection();
                 return true;
             }
             
             // Next, check for an "up and out" move
-            if (keyCode == KeyEvent.KEYCODE_DPAD_UP && 0 == mSearchTextField.getListSelection()) {
-                jamSuggestionQuery(false, null, -1);
+            if (keyCode == KeyEvent.KEYCODE_DPAD_UP 
+                    && 0 == mSearchAutoComplete.getListSelection()) {
+                restoreUserQuery();
                 // let ACTV complete the move
                 return false;
             }
@@ -999,158 +973,194 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             if ((actionKey != null) && 
                     ((actionKey.mSuggestActionMsg != null) || 
                      (actionKey.mSuggestActionMsgColumn != null))) {
-                //   launch suggestion using action key column
-                int position = mSearchTextField.getListSelection();
-                if (position >= 0) {
+                // launch suggestion using action key column
+                int position = mSearchAutoComplete.getListSelection();
+                if (position != ListView.INVALID_POSITION) {
                     Cursor c = mSuggestionsAdapter.getCursor();
                     if (c.moveToPosition(position)) {
                         final String actionMsg = getActionKeyMessage(c, actionKey);
                         if (actionMsg != null && (actionMsg.length() > 0)) {
-                            // shut down search bar and launch the activity
-                            // cache everything we need because dismiss releases mems
-                            setupSuggestionIntent(c, mSearchable);
-                            final String query = mSearchTextField.getText().toString();
-                            final Bundle appData =  mAppSearchData;
-                            SearchableInfo si = mSearchable;
-                            String suggestionAction = mSuggestionAction;
-                            Uri suggestionData = mSuggestionData;
-                            String suggestionQuery = mSuggestionQuery;
-                            dismiss();
-                            sendLaunchIntent(suggestionAction, suggestionData,
-                                    suggestionQuery, appData,
-                                             keyCode, actionMsg, si);
-                            return true;
+                            return launchSuggestion(position, keyCode, actionMsg);
                         }
                     }
                 }
             }
         }
         return false;
-    }    
-
+    }
+    
     /**
-     * Set or reset the user query to follow the selections in the suggestions
-     * 
-     * @param jamQuery True means to set the query, false means to reset it to the user's choice
+     * Launch a search for the text in the query text field.
      */
-    private void jamSuggestionQuery(boolean jamQuery, AdapterView<?> parent, int position) {
-        // quick check against race conditions
-        if (mSearchable == null) {
-            return;
-        }
-        
-        mSuggestionsAdapter.setNonUserQuery(true);       // disables any suggestions processing
-        if (jamQuery) {
-            CursorAdapter ca = getSuggestionsAdapter(parent);
-            Cursor c = ca.getCursor();
-            if (c.moveToPosition(position)) {
-                setupSuggestionIntent(c, mSearchable);
-                String jamText = null;
-
-                // Simple heuristic for selecting text with which to rewrite the query.
-                if (mSuggestionQuery != null) {
-                    jamText = mSuggestionQuery;
-                } else if (mSearchable.mQueryRewriteFromData && (mSuggestionData != null)) {
-                    jamText = mSuggestionData.toString();
-                } else if (mSearchable.mQueryRewriteFromText) {
-                    try {
-                        int column = c.getColumnIndexOrThrow(SearchManager.SUGGEST_COLUMN_TEXT_1);
-                        jamText = c.getString(column);
-                    } catch (RuntimeException e) {
-                        // no work here, jamText is null
-                    }
-                }
-                if (jamText != null) {
-                    mSearchTextField.setText(jamText);
-                    /* mSearchTextField.selectAll(); */ // this didn't work anyway in the old UI
-                    // TODO this is only needed in the model where we have a selection in the ACTV
-                    // and in the dropdown at the same time.
-                    mSearchTextField.setSelection(jamText.length());
-                }
-            }
-        } else {
-            // reset user query
-            mSearchTextField.setText(mUserQuery);
-            try {
-                mSearchTextField.setSelection(mUserQuerySelStart, mUserQuerySelEnd);
-            } catch (IndexOutOfBoundsException e) {
-                // In case of error, just select all
-                Log.e(LOG_TAG, "Caught IndexOutOfBoundsException while setting selection.  " +
-                        "start=" + mUserQuerySelStart + " end=" + mUserQuerySelEnd +
-                        " text=\"" + mUserQuery + "\"");
-                mSearchTextField.selectAll();
-            }
-        }
-        // TODO because the new query is (not) processed in another thread, we can't just
-        // take away this flag (yet).  The better solution here is going to require a new API
-        // in AutoCompleteTextView which allows us to change the text w/o changing the suggestions.
-//      mSuggestionsAdapter.setNonUserQuery(false);
+    protected void launchQuerySearch()  {
+        launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);
     }
 
     /**
-     * Assemble a search intent and send it.
+     * Launch a search for the text in the query text field.
      *
-     * @param action The intent to send, typically Intent.ACTION_SEARCH
-     * @param data The data for the intent
-     * @param query The user text entered (so far)
-     * @param appData The app data bundle (if supplied)
-     * @param actionKey If the intent was triggered by an action key, e.g. KEYCODE_CALL, it will
-     * be sent here.  Pass KeyEvent.KEYCODE_UNKNOWN for no actionKey code.
-     * @param actionMsg If the intent was triggered by an action key, e.g. KEYCODE_CALL, the
-     * corresponding tag message will be sent here.  Pass null for no actionKey message.
-     * @param si Reference to the current SearchableInfo.  Passed here so it can be used even after
-     * we've called dismiss(), which attempts to null mSearchable.
+     * @param actionKey The key code of the action key that was pressed,
+     *        or {@link KeyEvent#KEYCODE_UNKNOWN} if none.
+     * @param actionMsg The message for the action key that was pressed,
+     *        or <code>null</code> if none.
      */
-    private void sendLaunchIntent(final String action, final Uri data, final String query,
-            final Bundle appData, int actionKey, final String actionMsg, final SearchableInfo si) {
-        Intent launcher = new Intent(action);
-
-        if (query != null) {
-            launcher.putExtra(SearchManager.QUERY, query);
-        }
-
-        if (data != null) {
-            launcher.setData(data);
-        }
-
-        if (appData != null) {
-            launcher.putExtra(SearchManager.APP_DATA, appData);
-        }
-
-        // add launch info (action key, etc.)
-        if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
-            launcher.putExtra(SearchManager.ACTION_KEY, actionKey);
-            launcher.putExtra(SearchManager.ACTION_MSG, actionMsg);
-        }
-
-        // attempt to enforce security requirement (no 3rd-party intents)
-        launcher.setComponent(si.mSearchActivity);
-
-        getContext().startActivity(launcher);
+    protected void launchQuerySearch(int actionKey, String actionMsg)  {
+        String query = mSearchAutoComplete.getText().toString();
+        Intent intent = createIntent(Intent.ACTION_SEARCH, null, query, null, 
+                actionKey, actionMsg);
+        launchIntent(intent);
     }
-
+    
     /**
-     * Shared code for launching a query from a suggestion.
-     * @param ca The cursor adapter containing the suggestions
-     * @param position The suggestion we'll be launching from
-     * @return true if a successful launch, false if could not (e.g. bad position)
+     * Launches an intent based on a suggestion.
+     * 
+     * @param position The index of the suggestion to create the intent from.
+     * @return true if a successful launch, false if could not (e.g. bad position).
      */
-    private boolean launchSuggestion(CursorAdapter ca, int position) {
-        Cursor c = ca.getCursor();
+    protected boolean launchSuggestion(int position) {
+        return launchSuggestion(position, KeyEvent.KEYCODE_UNKNOWN, null);
+    }
+    
+    /**
+     * Launches an intent based on a suggestion.
+     * 
+     * @param position The index of the suggestion to create the intent from.
+     * @param actionKey The key code of the action key that was pressed,
+     *        or {@link KeyEvent#KEYCODE_UNKNOWN} if none.
+     * @param actionMsg The message for the action key that was pressed,
+     *        or <code>null</code> if none.
+     * @return true if a successful launch, false if could not (e.g. bad position).
+     */
+    protected boolean launchSuggestion(int position, int actionKey, String actionMsg) {
+        Cursor c = mSuggestionsAdapter.getCursor();
         if ((c != null) && c.moveToPosition(position)) {
-            setupSuggestionIntent(c, mSearchable);
-            
-            final Bundle appData =  mAppSearchData;
-            SearchableInfo si = mSearchable;
-            String suggestionAction = mSuggestionAction;
-            Uri suggestionData = mSuggestionData;
-            String suggestionQuery = mSuggestionQuery;
-            dismiss();
-            sendLaunchIntent(suggestionAction, suggestionData, suggestionQuery, appData,
-                                KeyEvent.KEYCODE_UNKNOWN, null, si);
+            Intent intent = createIntentFromSuggestion(c, actionKey, actionMsg);
+            launchIntent(intent);
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Launches an intent. Also dismisses the search dialog if not in global search mode.
+     */
+    private void launchIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+        if (handleSpecialIntent(intent)){
+            return;
+        }
+        if (!mGlobalSearchMode) {
+            dismiss();
+        }
+        getContext().startActivity(intent);
+    }
+    
+    /**
+     * Handles the special intent actions declared in {@link SearchManager}.
+     * 
+     * @return <code>true</code> if the intent was handled.
+     */
+    private boolean handleSpecialIntent(Intent intent) {
+        String action = intent.getAction();
+        if (SearchManager.INTENT_ACTION_CHANGE_SEARCH_SOURCE.equals(action)) {
+            handleChangeSourceIntent(intent);
+            return true;
+        } else if (SearchManager.INTENT_ACTION_CURSOR_RESPOND.equals(action)) {
+            handleCursorRespondIntent(intent);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Handles SearchManager#INTENT_ACTION_CHANGE_SOURCE.
+     */
+    private void handleChangeSourceIntent(Intent intent) {
+        Uri dataUri = intent.getData();
+        if (dataUri == null) {
+            Log.w(LOG_TAG, "SearchManager.INTENT_ACTION_CHANGE_SOURCE without intent data.");
+            return;
+        }
+        ComponentName componentName = ComponentName.unflattenFromString(dataUri.toString());
+        if (componentName == null) {
+            Log.w(LOG_TAG, "Invalid ComponentName: " + dataUri);
+            return;
+        }
+        if (DBG) Log.d(LOG_TAG, "Switching to " + componentName);
+        
+        ComponentName previous = mLaunchComponent;
+        if (!show(componentName, mAppSearchData, false)) {
+            Log.w(LOG_TAG, "Failed to switch to source " + componentName);
+            return;
+        }
+        pushPreviousComponent(previous);
+
+        String query = intent.getStringExtra(SearchManager.QUERY);
+        setUserQuery(query);
+    }
+    
+    /**
+     * Handles {@link SearchManager#INTENT_ACTION_CURSOR_RESPOND}.
+     */
+    private void handleCursorRespondIntent(Intent intent) {
+        Cursor c = mSuggestionsAdapter.getCursor();
+        if (c != null) {
+            c.respond(intent.getExtras());
+        }
+    }
+    
+    /**
+     * Saves the previous component that was searched, so that we can go
+     * back to it.
+     */
+    private void pushPreviousComponent(ComponentName componentName) {
+        if (mPreviousComponents == null) {
+            mPreviousComponents = new ArrayList<ComponentName>();
+        }
+        mPreviousComponents.add(componentName);
+    }
+    
+    /**
+     * Pops the previous component off the stack and returns it.
+     * 
+     * @return The component name, or <code>null</code> if there was
+     *         no previous component.
+     */
+    private ComponentName popPreviousComponent() {
+        if (mPreviousComponents == null) {
+            return null;
+        }
+        int size = mPreviousComponents.size();
+        if (size == 0) {
+            return null;
+        }
+        return mPreviousComponents.remove(size - 1);
+    }
+    
+    /**
+     * Goes back to the previous component that was searched, if any.
+     * 
+     * @return <code>true</code> if there was a previous component that we could go back to.
+     */
+    private boolean backToPreviousComponent() {
+        ComponentName previous = popPreviousComponent();
+        if (previous == null) {
+            return false;
+        }
+        if (!show(previous, mAppSearchData, false)) {
+            Log.w(LOG_TAG, "Failed to switch to source " + previous);
+            return false;
+        }
+        
+        // must touch text to trigger suggestions
+        // TODO: should this be the text as it was when the user left
+        // the source that we are now going back to?
+        String query = mSearchAutoComplete.getText().toString();
+        setUserQuery(query);
+        
+        return true;
     }
     
     /**
@@ -1159,62 +1169,43 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * and/or falling back to the XML for defaults;  It also creates REST style Uri data when
      * the suggestion includes a data id.
      * 
-     * NOTE:  Return values are in member variables mSuggestionAction & mSuggestionData.
-     * 
      * @param c The suggestions cursor, moved to the row of the user's selection
-     * @param si The searchable activity's info record
+     * @param actionKey The key code of the action key that was pressed,
+     *        or {@link KeyEvent#KEYCODE_UNKNOWN} if none.
+     * @param actionMsg The message for the action key that was pressed,
+     *        or <code>null</code> if none.
+     * @return An intent for the suggestion at the cursor's position.
      */
-    void setupSuggestionIntent(Cursor c, SearchableInfo si) {
+    private Intent createIntentFromSuggestion(Cursor c, int actionKey, String actionMsg) {
         try {
             // use specific action if supplied, or default action if supplied, or fixed default
-            mSuggestionAction = null;
-            int mColumn = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
-            if (mColumn >= 0) {
-                final String action = c.getString(mColumn);
-                if (action != null) {
-                    mSuggestionAction = action;
-                }
+            String action = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
+            if (action == null) {
+                action = mSearchable.getSuggestIntentAction();
             }
-            if (mSuggestionAction == null) {
-                mSuggestionAction = si.getSuggestIntentAction();
-            }
-            if (mSuggestionAction == null) {
-                mSuggestionAction = Intent.ACTION_SEARCH;
+            if (action == null) {
+                action = Intent.ACTION_SEARCH;
             }
             
             // use specific data if supplied, or default data if supplied
-            String data = null;
-            mColumn = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_DATA);
-            if (mColumn >= 0) {
-                final String rowData = c.getString(mColumn);
-                if (rowData != null) {
-                    data = rowData;
-                }
-            }
+            String data = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_DATA);
             if (data == null) {
-                data = si.getSuggestIntentData();
+                data = mSearchable.getSuggestIntentData();
             }
-            
             // then, if an ID was provided, append it.
             if (data != null) {
-                mColumn = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID);
-                if (mColumn >= 0) {
-                    final String id = c.getString(mColumn);
-                    if (id != null) {
-                        data = data + "/" + Uri.encode(id);
-                    }
+                String id = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID);
+                if (id != null) {
+                    data = data + "/" + Uri.encode(id);
                 }
             }
-            mSuggestionData = (data == null) ? null : Uri.parse(data);
+            Uri dataUri = (data == null) ? null : Uri.parse(data);
+
+            String extraData = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
             
-            mSuggestionQuery = null;
-            mColumn = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_QUERY);
-            if (mColumn >= 0) {
-                final String query = c.getString(mColumn);
-                if (query != null) {
-                    mSuggestionQuery = query;
-                }
-            }
+            String query = getColumnString(c, SearchManager.SUGGEST_COLUMN_QUERY);
+
+            return createIntent(action, dataUri, query, extraData, actionKey, actionMsg);
         } catch (RuntimeException e ) {
             int rowNum;
             try {                       // be really paranoid now
@@ -1224,7 +1215,46 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             }
             Log.w(LOG_TAG, "Search Suggestions cursor at row " + rowNum + 
                             " returned exception" + e.toString());
+            return null;
         }
+    }
+    
+    /**
+     * Constructs an intent from the given information and the search dialog state.
+     * 
+     * @param action Intent action.
+     * @param data Intent data, or <code>null</code>.
+     * @param query Intent query, or <code>null</code>.
+     * @param extraData Data for {@link SearchManager#EXTRA_DATA_KEY} or <code>null</code>.
+     * @param actionKey The key code of the action key that was pressed,
+     *        or {@link KeyEvent#KEYCODE_UNKNOWN} if none.
+     * @param actionMsg The message for the action key that was pressed,
+     *        or <code>null</code> if none.
+     * @return The intent.
+     */
+    private Intent createIntent(String action, Uri data, String query, String extraData,
+            int actionKey, String actionMsg) {
+        // Now build the Intent
+        Intent intent = new Intent(action);
+        if (data != null) {
+            intent.setData(data);
+        }
+        if (query != null) {
+            intent.putExtra(SearchManager.QUERY, query);
+        }
+        if (extraData != null) {
+            intent.putExtra(SearchManager.EXTRA_DATA_KEY, extraData);
+        }
+        if (mAppSearchData != null) {
+            intent.putExtra(SearchManager.APP_DATA, mAppSearchData);
+        }
+        if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
+            intent.putExtra(SearchManager.ACTION_KEY, actionKey);
+            intent.putExtra(SearchManager.ACTION_MSG, actionMsg);
+        }
+        // attempt to enforce security requirement (no 3rd-party intents)
+        intent.setComponent(mSearchable.mSearchActivity);
+        return intent;
     }
     
     /**
@@ -1236,17 +1266,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * 
      * @return Returns a string, or null if no action key message for this suggestion
      */
-    private String getActionKeyMessage(Cursor c, final SearchableInfo.ActionKeyInfo actionKey) {
+    private static String getActionKeyMessage(Cursor c, SearchableInfo.ActionKeyInfo actionKey) {
         String result = null;
         // check first in the cursor data, for a suggestion-specific message
         final String column = actionKey.mSuggestActionMsgColumn;
         if (column != null) {
-            try {
-                int colId = c.getColumnIndexOrThrow(column);
-                result = c.getString(colId);
-            } catch (RuntimeException e) {
-                // OK - result is already null
-            }
+            result = SuggestionsAdapter.getColumnString(c, column);
         }
         // If the cursor didn't give us a message, see if there's a single message defined
         // for the actionkey (for all suggestions)
@@ -1257,343 +1282,178 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
         
     /**
-     * Local subclass for AutoCompleteTextView
-     * 
-     * This exists entirely to override the threshold method.  Otherwise we just use the class
-     * as-is.
+     * Local subclass for AutoCompleteTextView.
      */
     public static class SearchAutoComplete extends AutoCompleteTextView {
 
+        private int mThreshold;
+        private SearchDialog mSearchDialog;
+        
         public SearchAutoComplete(Context context) {
             super(null);
+            mThreshold = getThreshold();
         }
         
         public SearchAutoComplete(Context context, AttributeSet attrs) {
             super(context, attrs);
+            mThreshold = getThreshold();
         }
 
         public SearchAutoComplete(Context context, AttributeSet attrs, int defStyle) {
             super(context, attrs, defStyle);
+            mThreshold = getThreshold();
+        }
+
+        private void setSearchDialog(SearchDialog searchDialog) {
+            mSearchDialog = searchDialog;
+        }
+        
+        @Override
+        public void setThreshold(int threshold) {
+            super.setThreshold(threshold);
+            mThreshold = threshold;
+        }
+
+        /**
+         * Returns true if the text field is empty, or contains only whitespace.
+         */
+        private boolean isEmpty() {
+            return TextUtils.getTrimmedLength(getText()) == 0;
         }
         
         /**
-         * We never allow ACTV to automatically replace the text, since we use "jamSuggestionQuery"
-         * to do that.  There's no point in letting ACTV do this here, because in the search UI,
-         * as soon as we click a suggestion, we're going to start shutting things down.
+         * Clears the entered text.
+         */
+        private void clear() {
+            setText("");
+        }
+        
+        /**
+         * We override this method to avoid replacing the query box text
+         * when a suggestion is clicked.
          */
         @Override
-        public void replaceText(CharSequence text) {
+        protected void replaceText(CharSequence text) {
         }
         
         /**
-         * We always return true, so that the effective threshold is "zero".  This allows us
-         * to provide "null" suggestions such as "just show me some recent entries".
+         * We override this method so that we can allow a threshold of zero, which ACTV does not.
          */
         @Override
         public boolean enoughToFilter() {
-            return true;
+            return mThreshold <= 0 || super.enoughToFilter();
+        }
+        
+        /**
+         * {@link AutoCompleteTextView#onKeyPreIme(int, KeyEvent)}) dismisses the drop-down on BACK,
+         * so we must override this method to modify the BACK behavior.
+         */
+        @Override
+        public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+            return mSearchDialog.handleBackKey(keyCode, event);
         }
     }
     
-    /**
-     * Support for AutoCompleteTextView-based suggestions
-     */
-    /**
-     * This class provides the filtering-based interface to suggestions providers.
-     * It is hardwired in a couple of places to support GoogleSearch - for example, it supports
-     * two-line suggestions, but it does not support icons.
-     */
-    private static class SuggestionsAdapter extends SimpleCursorAdapter {
-        private final String TAG = "SuggestionsAdapter";
-        
-        SearchableInfo mSearchable;
-        private Resources mProviderResources;
-        
-        // These private variables are shared by the filter thread and must be protected
-        private WeakReference<Cursor> mRecentCursor = new WeakReference<Cursor>(null);
-        private boolean mNonUserQuery = false;
-        private AutoCompleteTextView mParentView;
-
-        public SuggestionsAdapter(Context context, SearchableInfo searchable,
-                AutoCompleteTextView actv) {
-            super(context, -1, null, null, null);
-            mSearchable = searchable;
-            mParentView = actv;
-            
-            // set up provider resources (gives us icons, etc.)
-            Context activityContext = mSearchable.getActivityContext(mContext);
-            Context providerContext = mSearchable.getProviderContext(mContext, activityContext);
-            mProviderResources = providerContext.getResources();
+    protected boolean handleBackKey(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            mSearchAutoComplete.dismissDropDown();
+            if (backToPreviousComponent()) {
+                return true;
+            }
+            if (!mSearchAutoComplete.isEmpty()) {
+                mSearchAutoComplete.clear();
+                return true;
+            }
+            cancel();
+            return true;
         }
-        
-        /**
-         * Set this field (temporarily!) to disable suggestions updating.  This allows us
-         * to change the string in the text view without changing the suggestions list.
-         */
-        public void setNonUserQuery(boolean nonUserQuery) {
-            synchronized (this) {
-                mNonUserQuery = nonUserQuery;
-            }
-        }
-        
-        public boolean getNonUserQuery() {
-            synchronized (this) {
-                return mNonUserQuery;
-            }
-        }
-
-        /**
-         * Use the search suggestions provider to obtain a live cursor.  This will be called
-         * in a worker thread, so it's OK if the query is slow (e.g. round trip for suggestions).
-         * The results will be processed in the UI thread and changeCursor() will be called.
-         * 
-         * In order to provide the Search Mgr functionality of seeing your query change as you
-         * scroll through the list, we have to be able to jam new text into the string without
-         * retriggering the suggestions.  We do that here via the "nonUserQuery" flag.  In that
-         * case we simply return the existing cursor.
-         * 
-         * TODO: Dianne suggests that this should simply be promoted into an AutoCompleteTextView
-         * behavior (perhaps optionally).
-         * 
-         * TODO: The "nonuserquery" logic has a race condition because it happens in another thread.
-         * This also needs to be fixed.
-         */
-        @Override
-        public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-            String query = (constraint == null) ? "" : constraint.toString();
-            Cursor c = null;
-            synchronized (this) {
-                if (mNonUserQuery) {
-                    c = mRecentCursor.get();
-                    mNonUserQuery = false;
-                }
-            }
-            if (c == null) {
-                c = getSuggestions(mSearchable, query);
-                synchronized (this) {
-                    mRecentCursor = new WeakReference<Cursor>(c);
-                }
-            }
-            return c;
-        }
-        
-        /**
-         * Overriding changeCursor() allows us to change not only the cursor, but by sampling
-         * the cursor's columns, the actual display characteristics of the list.
-         */
-        @Override
-        public void changeCursor(Cursor c) {
-            
-            // first, check for various conditions that disqualify this cursor
-            if ((c == null) || (c.getCount() == 0)) {
-                // no cursor, or cursor with no data
-                changeCursorAndColumns(null, null, null);
-                if (c != null) {
-                    c.close();
-                }
-                return;
-            }
-
-            // check cursor before trying to create list views from it
-            int colId = c.getColumnIndex("_id");
-            int col1 = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
-            int col2 = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
-            int colIc1 = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
-            int colIc2 = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
-
-            boolean minimal = (colId >= 0) && (col1 >= 0);
-            boolean hasIcons = (colIc1 >= 0) && (colIc2 >= 0);
-            boolean has2Lines = col2 >= 0;
-
-            if (minimal) {
-                int layout;
-                String[] from;
-                int[] to;
-
-                if (hasIcons) {
-                    if (has2Lines) {
-                        layout = com.android.internal.R.layout.search_dropdown_item_icons_2line;
-                        from = TWO_LINE_ICONS_FROM;
-                        to = TWO_LINE_ICONS_TO;
-                    } else {
-                        layout = com.android.internal.R.layout.search_dropdown_item_icons_1line;
-                        from = ONE_LINE_ICONS_FROM;
-                        to = ONE_LINE_ICONS_TO;
-                    }
-                } else {
-                    if (has2Lines) {
-                        layout = com.android.internal.R.layout.search_dropdown_item_2line;
-                        from = TWO_LINE_FROM;
-                        to = TWO_LINE_TO;
-                    } else {
-                        layout = com.android.internal.R.layout.search_dropdown_item_1line;
-                        from = ONE_LINE_FROM;
-                        to = ONE_LINE_TO;
-                    }
-                }
-                // Force the underlying ListView to discard and reload all layouts
-                // (Note, this should be optimized for cases where layout/cursor remain same)
-                mParentView.resetListAndClearViews();
-                // Now actually set up the cursor, columns, and the list view
-                changeCursorAndColumns(c, from, to);
-                setViewResource(layout);          
-            } else {
-                // Provide some help for developers instead of just silently discarding
-                Log.w(LOG_TAG, "Suggestions cursor discarded due to missing required columns.");
-                changeCursorAndColumns(null, null, null);
-                c.close();
-            }
-            if ((colIc1 >= 0) != (colIc2 >= 0)) {
-                Log.w(LOG_TAG, "Suggestion icon column(s) discarded, must be 0 or 2 columns.");
-            }    
-        }
-        
-        /**
-         * Overriding this allows us to write the selected query back into the box.
-         * NOTE:  This is a vastly simplified version of SearchDialog.jamQuery() and does
-         * not universally support the search API.  But it is sufficient for Google Search.
-         */
-        @Override
-        public CharSequence convertToString(Cursor cursor) {
-            CharSequence result = null;
-            if (cursor != null) {
-                int column = cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_QUERY);
-                if (column >= 0) {
-                    final String query = cursor.getString(column);
-                    if (query != null) {
-                        result = query;
-                    }
-                }
-            }
-            return result;
-        }
-
-        /**
-         * Get the query cursor for the search suggestions.
-         * 
-         * TODO this is functionally identical to the version in SearchDialog.java.  Perhaps it 
-         * could be hoisted into SearchableInfo or some other shared spot.
-         * 
-         * @param query The search text entered (so far)
-         * @return Returns a cursor with suggestions, or null if no suggestions 
-         */
-        private Cursor getSuggestions(final SearchableInfo searchable, final String query) {
-            Cursor cursor = null;
-            if (searchable.getSuggestAuthority() != null) {
-                try {
-                    StringBuilder uriStr = new StringBuilder("content://");
-                    uriStr.append(searchable.getSuggestAuthority());
-
-                    // if content path provided, insert it now
-                    final String contentPath = searchable.getSuggestPath();
-                    if (contentPath != null) {
-                        uriStr.append('/');
-                        uriStr.append(contentPath);
-                    }
-
-                    // append standard suggestion query path 
-                    uriStr.append('/' + SearchManager.SUGGEST_URI_PATH_QUERY);
-
-                    // inject query, either as selection args or inline
-                    String[] selArgs = null;
-                    if (searchable.getSuggestSelection() != null) {    // use selection if provided
-                        selArgs = new String[] {query};
-                    } else {
-                        uriStr.append('/');                             // no sel, use REST pattern
-                        uriStr.append(Uri.encode(query));
-                    }
-
-                    // finally, make the query
-                    cursor = mContext.getContentResolver().query(
-                                                        Uri.parse(uriStr.toString()), null, 
-                                                        searchable.getSuggestSelection(), selArgs,
-                                                        null);
-                } catch (RuntimeException e) {
-                    Log.w(TAG, "Search Suggestions query returned exception " + e.toString());
-                    cursor = null;
-                }
-            }
-            
-            return cursor;
-        }
-
-        /**
-         * Overriding this allows us to affect the way that an icon is loaded.  Specifically,
-         * we can be more controlling about the resource path (and allow icons to come from other
-         * packages).
-         * 
-         * TODO: This is 100% identical to the version in SearchDialog.java
-         *
-         * @param v ImageView to receive an image
-         * @param value the value retrieved from the cursor
-         */
-        @Override
-        public void setViewImage(ImageView v, String value) {
-            int resID;
-            Drawable img = null;
-
-            try {
-                resID = Integer.parseInt(value);
-                if (resID != 0) {
-                    img = mProviderResources.getDrawable(resID);
-                }
-            } catch (NumberFormatException nfe) {
-                // img = null;
-            } catch (NotFoundException e2) {
-                // img = null;
-            }
-            
-            // finally, set the image to whatever we've gotten
-            v.setImageDrawable(img);
-        }
-        
-        /**
-         * This method is overridden purely to provide a bit of protection against
-         * flaky content providers.
-         * 
-         * TODO: This is 100% identical to the version in SearchDialog.java
-         * 
-         * @see android.widget.ListAdapter#getView(int, View, ViewGroup)
-         */
-        @Override 
-        public View getView(int position, View convertView, ViewGroup parent) {
-            try {
-                return super.getView(position, convertView, parent);
-            } catch (RuntimeException e) {
-                Log.w(TAG, "Search Suggestions cursor returned exception " + e.toString());
-                // what can I return here?
-                View v = newView(mContext, mCursor, parent);
-                if (v != null) {
-                    TextView tv = (TextView) v.findViewById(com.android.internal.R.id.text1);
-                    tv.setText(e.toString());
-                }
-                return v;
-            }
-        }
-
+        return false;
     }
     
     /**
      * Implements OnItemClickListener
      */
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // Log.d(LOG_TAG, "onItemClick() position " + position);
-        launchSuggestion(mSuggestionsAdapter, position);
+        if (DBG) Log.d(LOG_TAG, "onItemClick() position " + position);
+        launchSuggestion(position);
     }
-    
+
     /** 
      * Implements OnItemSelectedListener
      */
      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-         // Log.d(LOG_TAG, "onItemSelected() position " + position);
-         jamSuggestionQuery(true, parent, position);
+         if (DBG) Log.d(LOG_TAG, "onItemSelected() position " + position);
+         // A suggestion has been selected, rewrite the query if possible,
+         // otherwise the restore the original query.
+         if (REWRITE_QUERIES) {
+             rewriteQueryFromSuggestion(position);
+         }
      }
 
      /** 
       * Implements OnItemSelectedListener
       */
      public void onNothingSelected(AdapterView<?> parent) {
-         // Log.d(LOG_TAG, "onNothingSelected()");
+         if (DBG) Log.d(LOG_TAG, "onNothingSelected()");
+     }
+     
+     /**
+      * Query rewriting.
+      */
+
+     private void rewriteQueryFromSuggestion(int position) {
+         Cursor c = mSuggestionsAdapter.getCursor();
+         if (c == null) {
+             return;
+         }
+         if (c.moveToPosition(position)) {
+             // Get the new query from the suggestion.
+             CharSequence newQuery = mSuggestionsAdapter.convertToString(c);
+             if (newQuery != null) {
+                 // The suggestion rewrites the query.
+                 if (DBG) Log.d(LOG_TAG, "Rewriting query to '" + newQuery + "'");
+                 // Update the text field, without getting new suggestions.
+                 setQuery(newQuery);
+             } else {
+                 // The suggestion does not rewrite the query, restore the user's query.
+                 if (DBG) Log.d(LOG_TAG, "Suggestion gives no rewrite, restoring user query.");
+                 restoreUserQuery();
+             }
+         } else {
+             // We got a bad position, restore the user's query.
+             Log.w(LOG_TAG, "Bad suggestion position: " + position);
+             restoreUserQuery();
+         }
+     }
+     
+     /** 
+      * Restores the query entered by the user if needed.
+      */
+     private void restoreUserQuery() {
+         if (DBG) Log.d(LOG_TAG, "Restoring query to '" + mUserQuery + "'");
+         setQuery(mUserQuery);
+     }
+     
+     /**
+      * Sets the text in the query box, without updating the suggestions.
+      */
+     private void setQuery(CharSequence query) {
+         mSearchAutoComplete.setText(query, false);
+         if (query != null) {
+             mSearchAutoComplete.setSelection(query.length());
+         }
+     }
+     
+     /**
+      * Sets the text in the query box, updating the suggestions.
+      */
+     private void setUserQuery(String query) {
+         if (query == null) {
+             query = "";
+         }
+         mUserQuery = query;
+         mSearchAutoComplete.setText(query);
+         mSearchAutoComplete.setSelection(query.length());
      }
 
     /**

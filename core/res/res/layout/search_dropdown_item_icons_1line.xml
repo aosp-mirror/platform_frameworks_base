@@ -22,31 +22,33 @@
     <!-- of the text element in apps/common/res/layout/simple_dropdown_item_1line.xml -->
     
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:paddingLeft="4dip"
+    android:paddingRight="2dip"
     android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:layout_height="?android:attr/searchResultListItemHeight"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:baselineAligned="false"
     >
     
     <ImageView android:id="@android:id/icon1"
-        android:layout_width="32dip"
-        android:layout_height="32dip"
+        android:layout_width="48dip"
+        android:layout_height="48dip"
         android:layout_gravity="center_vertical"
-        android:scaleType="fitCenter" />
+        android:scaleType="centerInside" />
 
     <TextView android:id="@android:id/text1"
         style="?android:attr/dropDownItemStyle"
-        android:textAppearance="?android:attr/textAppearanceMediumInverse"
+        android:textAppearance="?android:attr/textAppearanceSearchResultTitle"
         android:singleLine="true"
         android:layout_height="wrap_content"
         android:layout_width="0dip"
         android:layout_weight="1"  />
 
     <ImageView android:id="@android:id/icon2"
-        android:layout_width="32dip"
-        android:layout_height="32dip"
+        android:layout_width="48dip"
+        android:layout_height="48dip"
         android:layout_gravity="center_vertical"
-        android:scaleType="fitCenter" />
+        android:scaleType="centerInside" />
 
 </LinearLayout>
