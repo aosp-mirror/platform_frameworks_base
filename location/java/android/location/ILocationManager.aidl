@@ -45,7 +45,10 @@ interface ILocationManager
 
     boolean addGpsStatusListener(IGpsStatusListener listener);
     void removeGpsStatusListener(IGpsStatusListener listener);
-    
+
+    // for reporting callback completion
+    void locationCallbackFinished(ILocationListener listener);
+
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 
     void addProximityAlert(double latitude, double longitude, float distance,
