@@ -84,7 +84,7 @@ class BatteryService extends Binder {
     private static final int CRITICAL_BATTERY_LEVEL = 4; 
 
     private static final int DUMP_MAX_LENGTH = 24 * 1024;
-    private static final String[] DUMPSYS_ARGS = new String[] { "-c", "-u" };
+    private static final String[] DUMPSYS_ARGS = new String[] { "--checkin", "-u" };
     private static final String BATTERY_STATS_SERVICE_NAME = "batteryinfo";
     
     private static final String DUMPSYS_DATA_PATH = "/data/system/";
@@ -251,10 +251,14 @@ class BatteryService extends Binder {
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
             if (mPlugType != 0 && mLastPlugType == 0) {
-                mContext.sendBroadcast(new Intent(Intent.ACTION_POWER_CONNECTED));
+                Intent intent = new Intent(Intent.ACTION_POWER_CONNECTED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                mContext.sendBroadcast(intent);
             }
             else if (mPlugType == 0 && mLastPlugType != 0) {
-                mContext.sendBroadcast(new Intent(Intent.ACTION_POWER_DISCONNECTED));
+                Intent intent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                mContext.sendBroadcast(intent);
             }
             
             mLastBatteryStatus = mBatteryStatus;

@@ -24,6 +24,7 @@ public class Constants {
     public static final int ERROR_CODE_CANCELED = 4;
     public static final int ERROR_CODE_INVALID_RESPONSE = 5;
     public static final int ERROR_CODE_UNSUPPORTED_OPERATION = 6;
+    public static final int ERROR_CODE_BAD_ARGUMENTS = 7;
 
     public static final String ACCOUNTS_KEY = "accounts";
     public static final String AUTHENTICATOR_TYPES_KEY = "authenticator_types";
@@ -37,6 +38,7 @@ public class Constants {
     public static final String INTENT_KEY = "intent";
     public static final String BOOLEAN_RESULT_KEY = "booleanResult";
     public static final String ACCOUNT_AUTHENTICATOR_RESPONSE_KEY = "accountAuthenticatorResponse";
+    public static final String ACCOUNT_MANAGER_RESPONSE_KEY = "accountManagerResponse";
     public static final String AUTH_FAILED_MESSAGE_KEY = "authFailedMessage";
     /**
      * Action sent as a broadcast Intent by the AccountsService

@@ -20,20 +20,7 @@ import android.util.Log;
 import com.android.internal.telephony.SmsHeader;
 import java.util.Arrays;
 
-import static android.telephony.SmsMessage.ENCODING_7BIT;
-import static android.telephony.SmsMessage.ENCODING_16BIT;
-import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
-import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
-import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS;
-import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS_WITH_HEADER;
 import static android.telephony.SmsMessage.MessageClass;
-import static com.android.internal.telephony.SmsAddress.TON_ABBREVIATED;
-import static com.android.internal.telephony.SmsAddress.TON_ALPHANUMERIC;
-import static com.android.internal.telephony.SmsAddress.TON_INTERNATIONAL;
-import static com.android.internal.telephony.SmsAddress.TON_NATIONAL;
-import static com.android.internal.telephony.SmsAddress.TON_NETWORK;
-import static com.android.internal.telephony.SmsAddress.TON_SUBSCRIBER;
-import static com.android.internal.telephony.SmsAddress.TON_UNKNOWN;
 
 /**
  * Base class declaring the specific methods and members for SmsMessage.
@@ -385,4 +372,3 @@ public abstract class SmsMessageBase {
     }
 
 }
-

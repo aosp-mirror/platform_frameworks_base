@@ -12,6 +12,7 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.TimingLogger;
+import android.accounts.Account;
 
 /**
  * @hide
@@ -67,7 +68,7 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
      * @return true, if the sync was successfully started. One reason it can
      *   fail to start is if there is no user configured on the device.
      */
-    public abstract void onSyncStarting(SyncContext context, String account, boolean forced,
+    public abstract void onSyncStarting(SyncContext context, Account account, boolean forced,
             SyncResult result);
 
     /**
@@ -168,12 +169,12 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
      * exist.
      * @param accounts the list of accounts
      */
-    public abstract void onAccountsChanged(String[] accounts);
+    public abstract void onAccountsChanged(Account[] accounts);
 
     private Context mContext;
 
     private class SyncThread extends Thread {
-        private final String mAccount;
+        private final Account mAccount;
         private final Bundle mExtras;
         private final SyncContext mSyncContext;
         private volatile boolean mIsCanceled = false;
@@ -181,7 +182,7 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
         private long mInitialRxBytes;
         private final SyncResult mResult;
 
-        SyncThread(SyncContext syncContext, String account, Bundle extras) {
+        SyncThread(SyncContext syncContext, Account account, Bundle extras) {
             super("SyncThread");
             mAccount = account;
             mExtras = extras;
@@ -221,7 +222,7 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             }
         }
 
-        private void sync(SyncContext syncContext, String account, Bundle extras) {
+        private void sync(SyncContext syncContext, Account account, Bundle extras) {
             mIsCanceled = false;
 
             mProviderSyncStarted = false;
@@ -273,7 +274,7 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             }
         }
 
-        private void runSyncLoop(SyncContext syncContext, String account, Bundle extras) {
+        private void runSyncLoop(SyncContext syncContext, Account account, Bundle extras) {
             TimingLogger syncTimer = new TimingLogger(TAG + "Profiling", "sync");
             syncTimer.addSplit("start");
             int loopCount = 0;
@@ -518,7 +519,7 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
         EventLog.writeEvent(SyncAdapter.LOG_SYNC_DETAILS, TAG, bytesSent, bytesReceived, "");
     }
 
-    public void startSync(SyncContext syncContext, String account, Bundle extras) {
+    public void startSync(SyncContext syncContext, Account account, Bundle extras) {
         if (mSyncThread != null) {
             syncContext.onFinished(SyncResult.ALREADY_IN_PROGRESS);
             return;

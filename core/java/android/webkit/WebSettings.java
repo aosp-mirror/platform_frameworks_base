@@ -159,6 +159,8 @@ public class WebSettings {
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
+    private String          mAppCachePath = "";
+    private boolean         mAppCacheEnabled = false;
 
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
@@ -899,6 +901,33 @@ public class WebSettings {
     }
 
     /**
+     * Tell the WebView to enable Application Caches API.
+     * @param flag True if the WebView should enable Application Caches.
+     * @hide pending api council approval
+     */
+    public synchronized void setAppCacheEnabled(boolean flag) {
+        if (mAppCacheEnabled != flag) {
+            mAppCacheEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * Set a custom path to the Application Caches files. The client
+     * must ensure it exists before this call.
+     * @param appCachePath String path to the directory containing Application
+     * Caches files. The appCache path can be the empty string but should not
+     * be null. Passing null for this parameter will result in a no-op.
+     * @hide pending api council approval
+     */
+    public synchronized void setAppCachePath(String appCachePath) {
+        if (appCachePath != null && !appCachePath.equals(mAppCachePath)) {
+            mAppCachePath = appCachePath;
+            postSync();
+        }
+    }
+
+    /**
      * Return true if javascript is enabled. <b>Note: The default is false.</b>
      * @return True if javascript is enabled.
      */
@@ -1101,7 +1130,7 @@ public class WebSettings {
     /*package*/
     synchronized void syncSettingsAndCreateHandler(BrowserFrame frame) {
         mBrowserFrame = frame;
-        if (android.util.Config.DEBUG) {
+        if (WebView.DEBUG) {
             junit.framework.Assert.assertTrue(frame.mNativeFrame != 0);
         }
         nativeSync(frame.mNativeFrame);

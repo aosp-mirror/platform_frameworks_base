@@ -61,6 +61,7 @@
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/service-element.html">&lt;service&gt;</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></li>
@@ -84,7 +85,7 @@
             <li><a style="color:gray;">Accelerometer</a></li>
           </ul>
       </li> -->
-      <li><a href="<?cs var:toroot ?>guide/topics/location/index.html">Location</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/location/index.html">Location and Maps</a></li>
 <!--    <li class="toggle-list">
         <div><a style="color:gray;">Wireless Controls</a></div>
           <ul>
@@ -100,7 +101,6 @@
     <ul>
       <!--       <li><a style="color:gray;">Developing for Android</a></li>
       signing, upgrading, selecting a package name, select device profile, touch, trackball, dpad available, etc. -->
-
       <li><a href="<?cs var:toroot ?>guide/developing/eclipse-adt.html">In Eclipse, with ADT</a></li>
       <li><a href="<?cs var:toroot ?>guide/developing/other-ide.html">In Other IDEs</a></li>
       <li><a href="<?cs var:toroot ?>guide/developing/device.html">On a Device</a></li>
@@ -110,9 +110,10 @@
           <ul>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/aapt.html">aapt</a></li>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
-			<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#activitycreator">activitycreator</a></li>
+			<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#android">android</a></li>
 <!--			<li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT Plugin</a></li>-->
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html" >aidl</a></li>
+			<li><a href="<?cs var:toroot ?>guide/developing/tools/avd.html" >AVDs</a></li>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/ddms.html" >ddms</a></li>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#dx">dx</a></li>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>

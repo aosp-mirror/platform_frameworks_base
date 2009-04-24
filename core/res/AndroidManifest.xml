@@ -983,6 +983,11 @@
                 android:excludeFromRecents="true">
         </activity>
 
+        <activity android:name="android.accounts.ChooseAccountActivity"
+                android:excludeFromRecents="true"
+                android:exported="true">
+        </activity>
+
         <provider android:name=".content.SyncProvider"
                 android:authorities="sync" android:multiprocess="false" />
 

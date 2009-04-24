@@ -32,6 +32,7 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
+import android.accounts.Account;
 import com.android.internal.database.ArrayListCursor;
 import com.google.android.gdata.client.AndroidGDataClient;
 import com.google.android.gdata.client.AndroidXmlParserFactory;
@@ -157,11 +158,12 @@ public final class Calendar {
          * @param account the account whose rows should be deleted
          * @return the count of rows that were deleted
          */
-        public static int deleteCalendarsForAccount(ContentResolver cr,
-                String account) {
+        public static int deleteCalendarsForAccount(ContentResolver cr, Account account) {
             // delete all calendars that match this account
-            return Calendar.Calendars.delete(cr, Calendar.Calendars._SYNC_ACCOUNT + "=?",
-                    new String[] {account});
+            return Calendar.Calendars.delete(cr,
+                    Calendar.Calendars._SYNC_ACCOUNT + "=? AND "
+                            + Calendar.Calendars._SYNC_ACCOUNT_TYPE + "=?",
+                    new String[] {account.mName, account.mType});
         }
 
         /**

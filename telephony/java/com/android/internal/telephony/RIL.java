@@ -565,22 +565,18 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         mNetworkMode = networkMode;
         //At startup mPhoneType is first set from networkMode
         switch(networkMode) {
+            case RILConstants.NETWORK_MODE_CDMA:
+            case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
+            case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
+            case RILConstants.NETWORK_MODE_GLOBAL:
+                mPhoneType = RILConstants.CDMA_PHONE;
+                break;
             case RILConstants.NETWORK_MODE_WCDMA_PREF:
             case RILConstants.NETWORK_MODE_GSM_ONLY:
             case RILConstants.NETWORK_MODE_WCDMA_ONLY:
             case RILConstants.NETWORK_MODE_GSM_UMTS:
-                mPhoneType = RILConstants.GSM_PHONE;
-                break;
-            case RILConstants.NETWORK_MODE_CDMA:
-            case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
-            case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
-                mPhoneType = RILConstants.CDMA_PHONE;
-                break;
-            case RILConstants.NETWORK_MODE_GLOBAL:
-                mPhoneType = RILConstants.CDMA_PHONE;
-                break;
             default:
-                mPhoneType = RILConstants.CDMA_PHONE;
+                mPhoneType = RILConstants.GSM_PHONE;
         }
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -2629,8 +2625,16 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             dc.als = p.readInt();
             voiceSettings = p.readInt();
             dc.isVoice = (0 == voiceSettings) ? false : true;
+
+            //dc.isVoicePrivacy = (0 != p.readInt());
+            int voicePrivacy = p.readInt();
+            dc.isVoicePrivacy = (0 != voicePrivacy);
+
             dc.number = p.readString();
-            dc.numberPresentation = DriverCall.presentationFromCLIP(p.readInt());
+            int np = p.readInt();
+            dc.numberPresentation = DriverCall.presentationFromCLIP(np);
+            dc.name = p.readString();
+            dc.namePresentation = p.readInt();
 
             // Make sure there's a leading + on addresses with a TOA
             // of 145
@@ -2668,7 +2672,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             PDPContextState pdp = new PDPContextState();
 
             pdp.cid = p.readInt();
-            pdp.active = p.readInt() == 0 ? false : true;
+            pdp.active = p.readInt();
             pdp.type = p.readString();
             pdp.apn = p.readString();
             pdp.address = p.readString();

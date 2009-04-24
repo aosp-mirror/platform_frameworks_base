@@ -44,8 +44,11 @@ public class DriverCall implements Comparable {
     public String number;
     public int TOA;
     public boolean isVoice;
+    public boolean isVoicePrivacy;
     public int als;
     public int numberPresentation;
+    public String name;
+    public int namePresentation;
 
     /** returns null on error */
     static DriverCall
@@ -101,11 +104,15 @@ public class DriverCall implements Comparable {
     public String
     toString() {
         return "id=" + index + ","
-                + (isMT ? "mt" : "mo") + ","
                 + state + ","
-                + (isVoice ? "voice" : "no_voc") + ","
+                + "toa=" + TOA + ","
                 + (isMpty ? "conf" : "norm") + ","
-                + TOA + "," + als + ",cli " + numberPresentation;
+                + (isMT ? "mt" : "mo") + ","
+                + als + ","
+                + (isVoice ? "voc" : "nonvoc") + ","
+                + (isVoicePrivacy ? "evp" : "noevp") + ","
+                /*+ "number=" + number */ + ",cli=" + numberPresentation + ","
+                /*+ "name="+ name */ + "," + namePresentation;
     }
 
     public static State

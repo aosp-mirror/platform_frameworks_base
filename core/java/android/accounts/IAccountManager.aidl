@@ -22,6 +22,7 @@ import android.os.Bundle;
 
 /**
  * Central application service that provides account management.
+ * @hide
  */
 interface IAccountManager {
     String getPassword(in Account account);
@@ -42,16 +43,19 @@ interface IAccountManager {
         String authTokenType, boolean notifyOnAuthFailure, boolean expectActivityLaunch,
         in Bundle options);
     void addAcount(in IAccountManagerResponse response, String accountType,
-        String authTokenType, boolean expectActivityLaunch, in Bundle options);
+        String authTokenType, in String[] requiredFeatures, boolean expectActivityLaunch, 
+        in Bundle options);
     void updateCredentials(in IAccountManagerResponse response, in Account account,
         String authTokenType, boolean expectActivityLaunch, in Bundle options);
     void editProperties(in IAccountManagerResponse response, String accountType,
         boolean expectActivityLaunch);
     void confirmCredentials(in IAccountManagerResponse response, in Account account,
         boolean expectActivityLaunch);
+    void getAccountsByTypeAndFeatures(in IAccountManagerResponse response, String accountType,
+        in String[] features);
 
     /*
-     * @Deprecated
+     * @deprecated
      */
     void confirmPassword(in IAccountManagerResponse response, in Account account,
         String password);

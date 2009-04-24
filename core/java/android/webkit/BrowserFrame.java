@@ -24,7 +24,6 @@ import android.net.WebAddress;
 import android.net.http.SslCertificate;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Config;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -120,7 +119,7 @@ class BrowserFrame extends Handler {
         mDatabase = WebViewDatabase.getInstance(context);
         mWebViewCore = w;
 
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
         }
     }
@@ -331,7 +330,7 @@ class BrowserFrame extends Handler {
         switch (msg.what) {
             case FRAME_COMPLETED: {
                 if (mSettings.getSavePassword() && hasPasswordField()) {
-                    if (Config.DEBUG) {
+                    if (WebView.DEBUG) {
                         Assert.assertNotNull(mCallbackProxy.getBackForwardList()
                                 .getCurrentItem());
                     }
@@ -480,7 +479,7 @@ class BrowserFrame extends Handler {
             }
             if (mSettings.getSavePassword() && hasPasswordField()) {
                 try {
-                    if (Config.DEBUG) {
+                    if (WebView.DEBUG) {
                         Assert.assertNotNull(mCallbackProxy.getBackForwardList()
                                 .getCurrentItem());
                     }
@@ -528,7 +527,7 @@ class BrowserFrame extends Handler {
         // is this resource the main-frame top-level page?
         boolean isMainFramePage = mIsMainFrame;
 
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "startLoadingResource: url=" + url + ", method="
                     + method + ", postData=" + postData + ", isHighPriority="
                     + isHighPriority + ", isMainFramePage=" + isMainFramePage);

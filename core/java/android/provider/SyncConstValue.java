@@ -29,6 +29,12 @@ public interface SyncConstValue
     public static final String _SYNC_ACCOUNT = "_sync_account";
 
     /**
+     * The type of the account that was used to sync the entry to the device.
+     * <P>Type: TEXT</P>
+     */
+    public static final String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
+
+    /**
      * The unique ID for a row assigned by the sync source. NULL if the row has never been synced.
      * <P>Type: TEXT</P>
      */
@@ -68,4 +74,9 @@ public interface SyncConstValue
      * Used to indicate that this account is not synced
      */
     public static final String NON_SYNCABLE_ACCOUNT = "non_syncable";
+
+    /**
+     * Used to indicate that this account is not synced
+     */
+    public static final String NON_SYNCABLE_ACCOUNT_TYPE = "android.local";
 }

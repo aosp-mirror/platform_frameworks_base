@@ -42,7 +42,6 @@ import android.text.IClipboard;
 import android.text.Selection;
 import android.text.Spannable;
 import android.util.AttributeSet;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Gravity;
@@ -207,7 +206,7 @@ public class WebView extends AbsoluteLayout
     // keep debugging parameters near the top of the file
     static final String LOGTAG = "webview";
     static final boolean DEBUG = false;
-    static final boolean LOGV_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean LOGV_ENABLED = DEBUG;
 
     private class ExtendedZoomControls extends FrameLayout {
         public ExtendedZoomControls(Context context, AttributeSet attrs) {
@@ -2845,7 +2844,7 @@ public class WebView extends AbsoluteLayout
     // Should only be called in UI thread
     void switchOutDrawHistory() {
         if (null == mWebViewCore) return; // CallbackProxy may trigger this
-        if (mDrawHistory) {
+        if (mDrawHistory && mWebViewCore.pictureReady()) {
             mDrawHistory = false;
             invalidate();
             int oldScrollX = mScrollX;
@@ -3179,6 +3178,15 @@ public class WebView extends AbsoluteLayout
             }
             // Bubble up the key event as WebView doesn't handle it
             return false;
+        }
+
+        if (keyCode != KeyEvent.KEYCODE_SHIFT_LEFT
+                && keyCode != KeyEvent.KEYCODE_SHIFT_RIGHT) {
+            // turn off copy select if a shift-key combo is pressed
+            mExtendSelection = mShiftIsPressed = false;
+            if (mTouchMode == TOUCH_SELECT_MODE) {
+                mTouchMode = TOUCH_INIT_MODE;
+            }
         }
 
         if (getSettings().getNavDump()) {

@@ -27,7 +27,6 @@ import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.cdma.sms.BearerData;
 import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
-import com.android.internal.telephony.cdma.sms.SmsDataCoding;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.telephony.cdma.sms.UserData;
 
@@ -50,23 +49,6 @@ import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
 import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS;
 import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS_WITH_HEADER;
 import static android.telephony.SmsMessage.MessageClass;
-import static com.android.internal.telephony.cdma.sms.BearerData.ERROR_NONE;
-import static com.android.internal.telephony.cdma.sms.BearerData.ERROR_TEMPORARY;
-import static com.android.internal.telephony.cdma.sms.BearerData.ERROR_PERMANENT;
-import static com.android.internal.telephony.cdma.sms.BearerData.MESSAGE_TYPE_DELIVER;
-import static com.android.internal.telephony.cdma.sms.BearerData.MESSAGE_TYPE_SUBMIT;
-import static com.android.internal.telephony.cdma.sms.BearerData.MESSAGE_TYPE_CANCELLATION;
-import static com.android.internal.telephony.cdma.sms.BearerData.MESSAGE_TYPE_DELIVERY_ACK;
-import static com.android.internal.telephony.cdma.sms.BearerData.MESSAGE_TYPE_USER_ACK;
-import static com.android.internal.telephony.cdma.sms.BearerData.MESSAGE_TYPE_READ_ACK;
-import static com.android.internal.telephony.cdma.sms.CdmaSmsAddress.SMS_ADDRESS_MAX;
-import static com.android.internal.telephony.cdma.sms.CdmaSmsAddress.SMS_SUBADDRESS_MAX;
-import static com.android.internal.telephony.cdma.sms.SmsEnvelope.SMS_BEARER_DATA_MAX;
-import static com.android.internal.telephony.cdma.sms.UserData.UD_ENCODING_7BIT_ASCII;
-import static com.android.internal.telephony.cdma.sms.UserData.UD_ENCODING_GSM_7BIT_ALPHABET;
-import static com.android.internal.telephony.cdma.sms.UserData.UD_ENCODING_IA5;
-import static com.android.internal.telephony.cdma.sms.UserData.UD_ENCODING_OCTET;
-import static com.android.internal.telephony.cdma.sms.UserData.UD_ENCODING_UNICODE_16;
 
 /**
  * A Short Message Service message.
@@ -186,7 +168,7 @@ public class SmsMessage extends SmsMessageBase {
 
         // ignore subaddress
         p.readInt(); //p_cur->sSubAddress.subaddressType
-        p.readByte(); //p_cur->sSubAddress.odd
+        p.readInt(); //p_cur->sSubAddress.odd
         count = p.readByte(); //p_cur->sSubAddress.number_of_digits
         //p_cur->sSubAddress.digits[digitCount] :
         for (int index=0; index < count; index++) {
@@ -309,15 +291,15 @@ public class SmsMessage extends SmsMessageBase {
             int septetCount = GsmAlphabet.countGsmSeptets(message, true);
             // User Data (and length)
 
-            uData.userData = message.getBytes();
+            uData.payload = message.getBytes();
 
-            if (uData.userData.length > MAX_USER_DATA_SEPTETS) {
+            if (uData.payload.length > MAX_USER_DATA_SEPTETS) {
                 // Message too long
                 return null;
             }
 
             // desired TP-Data-Coding-Scheme
-            uData.userDataEncoding = UserData.UD_ENCODING_GSM_7BIT_ALPHABET;
+            uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
 
             // paddingBits not needed for UD_ENCODING_GSM_7BIT_ALPHABET
 
@@ -341,15 +323,15 @@ public class SmsMessage extends SmsMessageBase {
                 return null;
             }
 
-            uData.userData = textPart;
+            uData.payload = textPart;
 
-            if (uData.userData.length > MAX_USER_DATA_BYTES) {
+            if (uData.payload.length > MAX_USER_DATA_BYTES) {
                 // Message too long
                 return null;
             }
 
             // TP-Data-Coding-Scheme
-            uData.userDataEncoding = UserData.UD_ENCODING_UNICODE_16;
+            uData.msgEncoding = UserData.ENCODING_UNICODE_16;
 
             // sms header
             if(headerData != null) {
@@ -425,8 +407,8 @@ public class SmsMessage extends SmsMessageBase {
 
         // TP-Data-Coding-Scheme
         // No class, 8 bit data
-        uData.userDataEncoding = UserData.UD_ENCODING_OCTET;
-        uData.userData = data;
+        uData.msgEncoding = UserData.ENCODING_OCTET;
+        uData.payload = data;
 
         byte[] msgData = sms.getEnvelope(destinationAddress, statusReportRequested, uData,
                 true, true);
@@ -619,21 +601,21 @@ public class SmsMessage extends SmsMessageBase {
      * Parses a SMS message from its BearerData stream. (mobile-terminated only)
      */
     protected void parseSms() {
-        mBearerData = SmsDataCoding.decodeCdmaSms(mEnvelope.bearerData);
-        messageRef = mBearerData.messageID;
+        mBearerData = BearerData.decode(mEnvelope.bearerData);
+        messageRef = mBearerData.messageId;
 
         // TP-Message-Type-Indicator
         // (See 3GPP2 C.S0015-B, v2, 4.5.1)
         int messageType = mBearerData.messageType;
 
         switch (messageType) {
-        case MESSAGE_TYPE_USER_ACK:
-        case MESSAGE_TYPE_READ_ACK:
-        case MESSAGE_TYPE_DELIVER:
+        case BearerData.MESSAGE_TYPE_USER_ACK:
+        case BearerData.MESSAGE_TYPE_READ_ACK:
+        case BearerData.MESSAGE_TYPE_DELIVER:
             // Deliver (mobile-terminated only)
             parseSmsDeliver();
             break;
-        case MESSAGE_TYPE_DELIVERY_ACK:
+        case BearerData.MESSAGE_TYPE_DELIVERY_ACK:
             parseSmsDeliveryAck();
             break;
 
@@ -699,22 +681,22 @@ public class SmsMessage extends SmsMessageBase {
             return;
         }
 
-        encodingType = uData.userDataEncoding;
+        encodingType = uData.msgEncoding;
 
         // insert DCS-decoding here when type is supported by ril-library
 
-        userData = uData.userData;
+        userData = uData.payload;
         userDataHeader = uData.userDataHeader;
 
         switch (encodingType) {
-        case UD_ENCODING_GSM_7BIT_ALPHABET:
-        case UD_ENCODING_UNICODE_16:
+        case UserData.ENCODING_GSM_7BIT_ALPHABET:
+        case UserData.ENCODING_UNICODE_16:
             // user data was already decoded by wmsts-library
             messageBody = new String(userData);
             break;
 
         // data and unsupported encodings:
-        case UD_ENCODING_OCTET:
+        case UserData.ENCODING_OCTET:
         default:
             messageBody = null;
             break;
@@ -771,7 +753,7 @@ public class SmsMessage extends SmsMessageBase {
         if (useNewId) {
             setNextMessageId();
         }
-        mBearerData.messageID = nextMessageId;
+        mBearerData.messageId = nextMessageId;
 
         // Set the reply options (See C.S0015-B, v2.0, 4.5.11)
         if(statusReportRequested) {
@@ -795,7 +777,7 @@ public class SmsMessage extends SmsMessageBase {
         // ** encode BearerData **
         byte[] encodedBearerData = null;
         try {
-            encodedBearerData = SmsDataCoding.encodeCdmaSms(mBearerData);
+            encodedBearerData = BearerData.encode(mBearerData);
         } catch (Exception e) {
             Log.e(LOG_TAG, "doGetSubmitPdu: EncodeCdmaSMS function in JNI interface failed: "
                     + e.getMessage());

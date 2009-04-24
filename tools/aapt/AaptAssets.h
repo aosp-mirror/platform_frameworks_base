@@ -125,7 +125,9 @@ public:
         {
             //printf("new AaptFile created %s\n", (const char*)sourceFile);
         }
-    virtual ~AaptFile() { }
+    virtual ~AaptFile() {
+        free(mData);
+    }
 
     const String8& getPath() const { return mPath; }
     const AaptGroupEntry& getGroupEntry() const { return mGroupEntry; }
@@ -441,7 +443,13 @@ private:
     AaptSymbolEntry                                 mDefSymbol;
 };
 
-class ResourceTypeSet;
+class ResourceTypeSet : public RefBase,
+                        public KeyedVector<String8,sp<AaptGroup> >
+{
+public:
+    ResourceTypeSet();
+};
+
 
 /**
  * Asset hierarchy being operated on.
@@ -449,8 +457,8 @@ class ResourceTypeSet;
 class AaptAssets : public AaptDir
 {
 public:
-    AaptAssets() : AaptDir(String8(), String8()), mHaveIncludedAssets(false) { }
-    virtual ~AaptAssets() { }
+    AaptAssets() : AaptDir(String8(), String8()), mHaveIncludedAssets(false), mRes(NULL) { }
+    virtual ~AaptAssets() { delete mRes; }
 
     const String8& getPackage() const { return mPackage; }
     void setPackage(const String8& package) { mPackage = package; mSymbolsPrivatePackage = package; }
@@ -498,7 +506,7 @@ public:
     
     inline KeyedVector<String8, sp<ResourceTypeSet> >* getResources() { return mRes; }
     inline void 
-        setResources(KeyedVector<String8, sp<ResourceTypeSet> >* res) { mRes = res; }
+        setResources(KeyedVector<String8, sp<ResourceTypeSet> >* res) { delete mRes; mRes = res; }
 
 private:
     String8 mPackage;

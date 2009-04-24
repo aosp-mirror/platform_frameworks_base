@@ -228,6 +228,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         Log.d(LOG_TAG, "Request to enableApnType("+type+")");
         if (TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
             return Phone.APN_ALREADY_ACTIVE;
+        } else if (TextUtils.equals(type, Phone.APN_TYPE_SUPL)) {
+            Log.w(LOG_TAG, "Phone.APN_TYPE_SUPL not enabled for CDMA");
+            return Phone.APN_REQUEST_FAILED;
         } else {
             return Phone.APN_REQUEST_FAILED;
         }
@@ -822,7 +825,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private void destroyAllDataConnectionList() {
         if(dataConnectionList != null) {
-            CdmaDataConnection pdp;
             dataConnectionList.removeAll(dataConnectionList);
         }
     }

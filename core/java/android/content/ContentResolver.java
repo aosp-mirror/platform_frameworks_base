@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.accounts.Account;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -541,7 +542,7 @@ public abstract class ContentResolver {
                      A null value will remove an existing field value.
      * @param where A filter to apply to rows before deleting, formatted as an SQL WHERE clause
                     (excluding the WHERE itself).
-     * @return the URL of the newly created row
+     * @return The number of rows updated.
      * @throws NullPointerException if uri or values are null
      */
     public final int update(Uri uri, ContentValues values, String where,
@@ -691,6 +692,7 @@ public abstract class ContentResolver {
      * <li>Float</li>
      * <li>Double</li>
      * <li>String</li>
+     * <li>Account</li>
      * <li>null</li>
      * </ul>
      * @param extras the Bundle to check
@@ -706,6 +708,7 @@ public abstract class ContentResolver {
                 if (value instanceof Float) continue;
                 if (value instanceof Double) continue;
                 if (value instanceof String) continue;
+                if (value instanceof Account) continue;
                 throw new IllegalArgumentException("unexpected value type: "
                         + value.getClass().getName());
             }

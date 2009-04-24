@@ -75,14 +75,6 @@ public class WifiWatchdogService {
     private static final boolean V = false || Config.LOGV;
     private static final boolean D = true || Config.LOGD;
     
-    /*
-     * When this was "net.dns1", sometimes the mobile data's DNS was seen
-     * instead due to a race condition. All we really care about is the
-     * DHCP-replied DNS server anyway.
-     */
-    /** The system property whose value provides the current DNS address. */
-    private static final String SYSTEMPROPERTY_KEY_DNS = "dhcp.tiwlan0.dns1";
-
     private Context mContext;
     private ContentResolver mContentResolver;
     private WifiStateTracker mWifiStateTracker;

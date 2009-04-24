@@ -20,7 +20,6 @@ import android.net.http.EventHandler;
 import android.net.http.Headers;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Config;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -114,7 +113,7 @@ abstract class StreamLoader extends Handler {
      * @see android.os.Handler#handleMessage(android.os.Message)
      */
     public void handleMessage(Message msg) {
-        if (Config.DEBUG && mHandler.isSynchronous()) {
+        if (WebView.DEBUG && mHandler.isSynchronous()) {
             throw new AssertionError();
         }
         switch(msg.what) {

@@ -27,13 +27,13 @@ import android.os.RemoteException;
 public abstract class AbstractAccountAuthenticator {
     class Transport extends IAccountAuthenticator.Stub {
         public void addAccount(IAccountAuthenticatorResponse response, String accountType,
-                String authTokenType, Bundle options)
+                String authTokenType, String[] requiredFeatures, Bundle options)
                 throws RemoteException {
             final Bundle result;
             try {
                 result = AbstractAccountAuthenticator.this.addAccount(
                     new AccountAuthenticatorResponse(response),
-                        accountType, authTokenType, options);
+                        accountType, authTokenType, requiredFeatures, options);
             } catch (NetworkErrorException e) {
                 response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
                 return;
@@ -133,6 +133,25 @@ public abstract class AbstractAccountAuthenticator {
                 response.onResult(result);
             }
         }
+
+        public void hasFeatures(IAccountAuthenticatorResponse response,
+                Account account, String[] features) throws RemoteException {
+            final Bundle result;
+            try {
+                result = AbstractAccountAuthenticator.this.hasFeatures(
+                    new AccountAuthenticatorResponse(response), account, features);
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "hasFeatures not supported");
+                return;
+            } catch (NetworkErrorException e) {
+                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+                return;
+            }
+            if (result != null) {
+                response.onResult(result);
+            }
+        }
     }
 
     Transport mTransport = new Transport();
@@ -160,7 +179,8 @@ public abstract class AbstractAccountAuthenticator {
     public abstract Bundle editProperties(AccountAuthenticatorResponse response,
             String accountType);
     public abstract Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
-            String authTokenType, Bundle options) throws NetworkErrorException;
+            String authTokenType, String[] requiredFeatures, Bundle options)
+            throws NetworkErrorException;
     /* @deprecated */
     public abstract boolean confirmPassword(AccountAuthenticatorResponse response,
             Account account, String password) throws NetworkErrorException;
@@ -171,4 +191,6 @@ public abstract class AbstractAccountAuthenticator {
             throws NetworkErrorException;
     public abstract Bundle updateCredentials(AccountAuthenticatorResponse response,
             Account account, String authTokenType, Bundle loginOptions);
+    public abstract Bundle hasFeatures(AccountAuthenticatorResponse response,
+            Account account, String[] features) throws NetworkErrorException;
 }

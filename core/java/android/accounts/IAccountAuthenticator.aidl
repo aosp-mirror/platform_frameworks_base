@@ -28,7 +28,7 @@ oneway interface IAccountAuthenticator {
      * prompts the user for account information and adds the result to the IAccountManager
      */
     void addAccount(in IAccountAuthenticatorResponse response, String accountType,
-        String authTokenType, in Bundle options);
+        String authTokenType, in String[] requiredFeatures, in Bundle options);
 
     /**
      * Checks that the account/password combination is valid.
@@ -58,4 +58,11 @@ oneway interface IAccountAuthenticator {
      * launches an activity that lets the user edit and set the properties for an authenticator
      */
     void editProperties(in IAccountAuthenticatorResponse response, String accountType);
+
+    /**
+     * returns a Bundle where the boolean value BOOLEAN_RESULT_KEY is set if the account has the
+     * specified features
+     */
+    void hasFeatures(in IAccountAuthenticatorResponse response, in Account account, 
+        in String[] features);
 }

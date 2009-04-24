@@ -1,6 +1,5 @@
 # Classes which are preloaded by com.android.internal.os.ZygoteInit.
 android.R$styleable
-android.accounts.AccountMonitor
 android.app.Activity
 android.app.ActivityGroup
 android.app.ActivityManager$MemoryInfo$1

@@ -29,7 +29,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.util.Config;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -43,7 +42,7 @@ final class WebViewCore {
 
     private static final String LOGTAG = "webcore";
     static final boolean DEBUG = false;
-    static final boolean LOGV_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean LOGV_ENABLED = DEBUG;
 
     static {
         // Load libwebcore during static initialization. This happens in the
@@ -286,6 +285,11 @@ final class WebViewCore {
      * split into parts. Called from the UI thread.
      */
     private native boolean nativeDrawContent(Canvas canvas, int color);
+
+    /**
+     * check to see if picture is blank and in progress
+     */
+    private native boolean nativePictureReady();
     
     /**
      * Redraw a portion of the picture set. The Point wh returns the
@@ -546,6 +550,7 @@ final class WebViewCore {
             "LOAD_DATA", // = 139;
             "TOUCH_UP", // = 140;
             "TOUCH_EVENT", // = 141;
+            "SET_ACTIVE", // = 142;
         };
 
     class EventHub {
@@ -1345,6 +1350,10 @@ final class WebViewCore {
             mSplitPictureIsScheduled = true;
             sendMessage(EventHub.SPLIT_PICTURE_SET);
         }
+    }
+
+    /* package */ boolean pictureReady() {
+        return nativePictureReady();
     }
 
     /*package*/ Picture copyContentPicture() {

@@ -77,7 +77,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
 import android.provider.Settings;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -137,7 +136,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean BLUR = true;
-    static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean localLOGV = DEBUG;
     
     static final int LOG_WM_NO_SURFACE_MEMORY = 31000;
     
@@ -2023,7 +2022,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             wtoken.appFullscreen = fullscreen;
             wtoken.requestedOrientation = requestedOrientation;
             mAppTokens.add(addPos, wtoken);
-            if (Config.LOGV) Log.v(TAG, "Adding new app token: " + wtoken);
+            if (localLOGV) Log.v(TAG, "Adding new app token: " + wtoken);
             mTokenMap.put(token.asBinder(), wtoken);
             mTokenList.add(wtoken);
             
@@ -4801,14 +4800,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     mPaused = true;
                 } else {
                     if (mLastWin == null) {
-                        if (Config.LOGI) Log.i(
-                            TAG, "Key dispatching not paused: no last window.");
+                        Log.i(TAG, "Key dispatching not paused: no last window.");
                     } else if (mFinished) {
-                        if (Config.LOGI) Log.i(
-                            TAG, "Key dispatching not paused: finished last key.");
+                        Log.i(TAG, "Key dispatching not paused: finished last key.");
                     } else {
-                        if (Config.LOGI) Log.i(
-                            TAG, "Key dispatching not paused: window in higher layer.");
+                        Log.i(TAG, "Key dispatching not paused: window in higher layer.");
                     }
                 }
                 */
@@ -7423,7 +7419,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     private boolean mInLayout = false;
     private final void performLayoutAndPlaceSurfacesLocked() {
         if (mInLayout) {
-            if (Config.DEBUG) {
+            if (DEBUG) {
                 throw new RuntimeException("Recursive call!");
             }
             Log.w(TAG, "performLayoutAndPlaceSurfacesLocked called while in layout");

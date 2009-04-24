@@ -43,6 +43,8 @@ import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -315,6 +317,8 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         } else {
             parseTestClasses(testClassesArg, testSuiteBuilder);
         }
+        
+        testSuiteBuilder.addRequirements(getBuilderRequirements());
 
         mTestRunner = getAndroidTestRunner();
         mTestRunner.setContext(getTargetContext());
@@ -329,6 +333,10 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             mTestRunner.addTestListener(new WatcherResultPrinter(mTestCount));
         }
         start();
+    }
+
+    List<Predicate<TestMethod>> getBuilderRequirements() {
+        return new ArrayList<Predicate<TestMethod>>();
     }
 
     /**
