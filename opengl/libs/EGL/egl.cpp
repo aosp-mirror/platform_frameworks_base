@@ -346,7 +346,7 @@ void *load_driver(const char* driver, gl_hooks_t* hooks)
                 }
             }
             if (f == NULL) {
-                LOGD("%s", name);
+                //LOGD("%s", name);
                 f = (__eglMustCastToProperFunctionPointerType)gl_unimplemented;
             }
             *curr++ = f;
