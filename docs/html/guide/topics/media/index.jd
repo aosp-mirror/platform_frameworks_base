@@ -14,19 +14,28 @@ page.title=Audio and Video
 
 <h2>Key classes</h2>
 <ol>
-<li><a href="{@docRoot}reference/android/media/MediaPlayer.html">MediaPlayer</a> (all audio and video formats)</li>
-<li><a href="{@docRoot}reference/android/media/MediaRecorder.html">MediaRecorder</a> (record, all audio formats)</li>
+<li>{@link android.media.MediaPlayer MediaPlayer} (all available formats)</li>
+<li>{@link android.media.MediaRecorder MediaRecorder} (all available formats)</li>
+<li>{@link android.media.JetPlayer JetPlayer} (playback, JET content)</li>
+<li>{@link android.media.SoundPool SoundPool} (sound management)</li>
 </ol>
 
 <h2>In this document</h2>
 <ol>
-<li><a href="#playback.html">Audio and Video Playback</a></li>
+<li><a href="#playback.html">Audio and Video Playback</a>
+    <ol>
+      <li><a href="#playraw">Playing from a Raw Resource</li>
+      <li><a href="#playfile">Playing from a File or Stream</li>
+      <li><a href="#jet">Playing JET Content</li>
+    </ol>
+</li>
 <li><a href="#capture">Audio Capture</a></li>
 </ol>
 
 <h2>See also</h2>
 <ol>
 <li><a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a></li>
+<li><a href="{@docRoot}guide/topics/media/jet/jetcreator_manual.html">JetCreator User Manual</a></li>
 </ol>
 
 </div>
@@ -114,6 +123,28 @@ above.</p>
 <p class="note"><strong>Note:</strong>
 If you're passing a URL to an online media file, the file must be capable of 
 progressive download.</p>
+
+<h3 id="jet">Playing JET content</h3>
+<p>The Android platform includes a JET engine that lets you add interactive playback of JET audio content in your applications. You can create JET content for interactive playback using the JetCreator authoring application that ships with the SDK. To play and manage JET content from your application, use the {@link android.media.JetPlayer JetPlayer} class.</p>
+
+<p>For a description of JET concepts and instructions on how to use the JetCreator authoring tool, see the <a href="{@docRoot}guide/topics/media/jet/jetcreator_manual.html">JetCreator User Manual</a>. The tool is available fully-featured on the OS X and Windows platforms and the Linux version supports all the content creation features, but not the auditioning of the imported assets. </p>
+
+<p>Here's an example of how to set up JET playback from a .jet file stored on the SD card:</p>
+
+<pre>
+JetPlayer myJet = JetPlayer.getJetPlayer();
+myJet.loadJetFile("/sdcard/level1.jet");
+byte segmentId = 0;
+
+// queue segment 5, repeat once, use General MIDI, transpose by -1 octave
+myJet.queueJetSegment(5, -1, 1, -1, 0, segmentId++);
+// queue segment 2
+myJet.queueJetSegment(2, -1, 0, 0, 0, segmentId++);
+
+myJet.play();
+</pre>
+
+<p>The SDK includes an example application &mdash; JetBoy &mdash; that shows how to use {@link android.media.JetPlayer JetPlayer} to create an interactive music soundtrack in your game. It also illustrates how to use JET events to synchronize music and game logic. The application is located at <code>&lt;sdk&gt;/platforms/android-1.5/samples/JetBoy</code>.
 
 <h2 id="capture">Audio Capture</h2>
 <p>Audio capture from the device is a bit more complicated than audio/video playback, but still fairly simple:</p>
