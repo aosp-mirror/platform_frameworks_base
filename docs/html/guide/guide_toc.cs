@@ -19,9 +19,9 @@
           <ul>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">Creating Menus</a></li>
-     <!--       <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">Creating Dialogs</a></li>  -->
+            <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">Creating Dialogs</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/ui-events.html">Handling UI Events</a></li>
-     <!--       <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">Notifying the User</a></li> -->
+            <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">Notifying the User</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">Applying Styles and Themes</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/custom-components.html">Building Custom Components</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/binding.html">Binding to Data with AdapterView</a></li>
