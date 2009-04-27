@@ -97,10 +97,12 @@ import android.util.TypedValue;
  */
 public abstract class Drawable {
 
+    private static final Rect ZERO_BOUNDS_RECT = new Rect();
+
     private int[] mStateSet = StateSet.WILD_CARD;
     private int mLevel = 0;
     private int mChangingConfigurations = 0;
-    private Rect mBounds = new Rect();
+    private Rect mBounds = ZERO_BOUNDS_RECT;  // lazily becomes a new Rect()
     /*package*/ Callback mCallback = null;
     private boolean mVisible = true;
 
@@ -118,7 +120,11 @@ public abstract class Drawable {
      */
     public void setBounds(int left, int top, int right, int bottom) {
         Rect oldBounds = mBounds;
-        
+
+        if (oldBounds == ZERO_BOUNDS_RECT) {
+            oldBounds = mBounds = new Rect();
+        }
+
         if (oldBounds.left != left || oldBounds.top != top ||
                 oldBounds.right != right || oldBounds.bottom != bottom) {
             mBounds.set(left, top, right, bottom);
