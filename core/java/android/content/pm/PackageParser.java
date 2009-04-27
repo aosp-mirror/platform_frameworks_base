@@ -45,6 +45,7 @@ import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -771,6 +772,14 @@ public class PackageParser {
             pkg.usesLibraries.toArray(pkg.usesLibraryFiles);
         }
 
+        int size = pkg.supportsDensityList.size();
+        if (size > 0) {
+            int densities[] = pkg.supportsDensities = new int[size];
+            List<Integer> densityList = pkg.supportsDensityList;
+            for (int i = 0; i < size; i++) {
+                densities[i] = densityList.get(i);
+            }
+        }
         return pkg;
     }
 
@@ -1218,6 +1227,21 @@ public class PackageParser {
 
                 if (lname != null && !owner.usesLibraries.contains(lname)) {
                     owner.usesLibraries.add(lname);
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+
+            } else if (tagName.equals("supports-density")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestSupportsDensity);
+
+                int density = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsDensity_density, -1);
+
+                sa.recycle();
+
+                if (density != -1 && !owner.supportsDensityList.contains(density)) {
+                    owner.supportsDensityList.add(density);
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -2103,6 +2127,9 @@ public class PackageParser {
         // We store the application meta-data independently to avoid multiple unwanted references
         public Bundle mAppMetaData = null;
 
+        public final ArrayList<Integer> supportsDensityList = new ArrayList<Integer>();
+        public int[] supportsDensities = null;
+
         // If this is a 3rd party app, this is the path of the zip file.
         public String mPath;
 
@@ -2276,6 +2303,10 @@ public class PackageParser {
                 && p.usesLibraryFiles != null) {
             return true;
         }
+        if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0
+            && p.supportsDensities != null) {
+            return true;
+        }
         return false;
     }
 
@@ -2292,6 +2323,9 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0) {
             ai.sharedLibraryFiles = p.usesLibraryFiles;
+        }
+        if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0) {
+            ai.supportsDensities = p.supportsDensities;
         }
         return ai;
     }
