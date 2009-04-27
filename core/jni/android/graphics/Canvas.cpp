@@ -21,6 +21,8 @@
 #include "SkCanvas.h"
 #include "SkDevice.h"
 #include "SkGLCanvas.h"
+#include "SkGraphics.h"
+#include "SkImageRef_GlobalPool.h"
 #include "SkShader.h"
 #include "SkTemplates.h"
 
@@ -58,8 +60,11 @@ public:
         return new SkGLCanvas;
     }
     
-    static void freeGlCaches(JNIEnv* env, jobject) {
+    static void freeCaches(JNIEnv* env, jobject) {
+        // these are called in no particular order
         SkGLCanvas::DeleteAllTextures();
+        SkImageRef_GlobalPool::SetRAMUsed(0);
+        SkGraphics::SetFontCacheUsed(0);
     }
     
     static jboolean isOpaque(JNIEnv* env, jobject jcanvas) {
@@ -933,7 +938,7 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawTextOnPath__StringPathFFPaint},
     {"native_drawPicture", "(II)V", (void*) SkCanvasGlue::drawPicture},
 
-    {"freeGlCaches", "()V", (void*) SkCanvasGlue::freeGlCaches}
+    {"freeCaches", "()V", (void*) SkCanvasGlue::freeCaches}
 };
 
 #include <android_runtime/AndroidRuntime.h>
