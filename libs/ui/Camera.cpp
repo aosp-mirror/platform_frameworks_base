@@ -64,22 +64,16 @@ Camera::Camera()
     init();
 }
 
-Camera::Camera(const sp<ICamera>& camera)
-{
-    init();
-    // connect this client to existing camera remote
-    if (camera->connect(this) == NO_ERROR) {
-        mStatus = NO_ERROR;
-        mCamera = camera;
-        camera->asBinder()->linkToDeath(this);
-    }
-}
-
-
+// construct a camera client from an existing camera remote
 sp<Camera> Camera::create(const sp<ICamera>& camera)
 {
+     LOGV("create");
+     if (camera == 0) {
+         LOGE("camera remote is a NULL pointer");
+         return 0;
+     }
+
     sp<Camera> c = new Camera();
-    // connect this client to existing camera remote
     if (camera->connect(c) == NO_ERROR) {
         c->mStatus = NO_ERROR;
         c->mCamera = camera;
