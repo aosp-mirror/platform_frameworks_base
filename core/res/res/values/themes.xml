@@ -236,7 +236,7 @@
     <!-- Special variation on the default theme that ensures the background is
          completely black.  This is useful for things like image viewers and
          media players.   If you want the normal (dark background) theme
-         do <em>not<em> use this, use {@link #Theme}. -->
+         do <em>not</em> use this, use {@link #Theme}. -->
     <style name="Theme.Black">
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:colorBackground">@android:color/black</item>
