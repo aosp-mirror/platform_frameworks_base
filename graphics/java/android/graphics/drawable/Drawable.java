@@ -101,7 +101,7 @@ public abstract class Drawable {
     private int[] mStateSet = StateSet.WILD_CARD;
     private int mLevel = 0;
     private int mChangingConfigurations = 0;
-    private Rect mBounds = ZERO_BOUNDS_RECT;
+    private Rect mBounds = ZERO_BOUNDS_RECT;  // lazily becomes a new Rect()
     /*package*/ Callback mCallback = null;
     private boolean mVisible = true;
 
