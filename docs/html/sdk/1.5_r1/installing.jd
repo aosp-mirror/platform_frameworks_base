@@ -131,8 +131,8 @@ and click <strong>Next</strong>. </li>
     <li>You should now see the new site added to the search list (and checked).
         Click <strong>Finish</strong>. </li>
     <li>In the subsequent Search Results dialog box, select the checkbox for the
-    <strong>Android Plugin</strong>.
-    This will select the nested tools: "Android DDMS" and "Android Developer Tools". 
+    "Android Plugin".
+    This will select the nested tools: "Android DDMS" and "Android Development Tools". 
     Click <strong>Next</strong>.</li>
     <li>Read and accept the license agreement, then click <strong>Next</strong>. </li>
     <li>On the following Installation window, click <strong>Finish</strong>. </li>
@@ -157,7 +157,7 @@ and click <strong>Next</strong>. </li>
     <li>Back in the Available Software view, you should see the plugin listed by the URL,
     with "Developer Tools" nested within it. Select the checkbox next to 
       Developer Tools and click <strong>Install...</strong></li>
-    <li>On the subsequent Install window, "Android DDMS" and "Android Developer Tools"
+    <li>On the subsequent Install window, "Android DDMS" and "Android Development Tools"
     should both be checked. Click <strong>Next</strong>. </li>
     <li>Read and accept the license agreement, then click <strong>Finish</strong>.</li>
     <li>Restart Eclipse. </li>
