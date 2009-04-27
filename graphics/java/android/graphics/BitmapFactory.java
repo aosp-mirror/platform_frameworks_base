@@ -103,6 +103,36 @@ public class BitmapFactory {
         public boolean inScaled;
 
         /**
+         * If this is set to true, then the resulting bitmap will allocate its
+         * pixels such that they can be purged if the system needs to reclaim
+         * memory. In that instance, when the pixels need to be accessed again
+         * (e.g. the bitmap is drawn, getPixels() is called), they will be
+         * automatically re-decoded.
+         *
+         * For the re-decode to happen, the bitmap must have access to the
+         * encoded data, either by sharing a reference to the input
+         * or by making a copy of it. This distinction is controlled by
+         * inInputShareable. If this is true, then the bitmap may keep a shallow
+         * reference to the input. If this is false, then the bitmap will
+         * explicitly make a copy of the input data, and keep that. Even if
+         * sharing is allowed, the implementation may still decide to make a
+         * deep copy of the input data.
+         *
+         * @hide pending API council approval
+         */
+        public boolean inPurgeable;
+
+        /**
+         * This field works in conjuction with inPurgeable. If inPurgeable is
+         * false, then this field is ignored. If inPurgeable is true, then this
+         * field determines whether the bitmap can share a reference to the
+         * input data (inputstream, array, etc.) or if it must make a deep copy.
+         *
+         * @hide pending API council approval
+         */
+        public boolean inInputShareable;
+
+        /**
          * The resulting width of the bitmap, set independent of the state of
          * inJustDecodeBounds. However, if there is an error trying to decode,
          * outWidth will be set to -1.
