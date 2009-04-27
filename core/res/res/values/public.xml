@@ -1093,6 +1093,7 @@
 
    <public type="attr" name="tension" id="0x0101026a" />
    <public type="attr" name="extraTension" id="0x0101026b" />
+   <public type="attr" name="density" id="0x0101026c" />
 
    <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
    <public type="anim" name="overshoot_interpolator" id="0x010a0008" />
@@ -1103,8 +1104,3 @@
   <public type="drawable" name="stat_sys_vp_phone_call_on_hold" id="0x0108022e" />
 
 </resources>
-
-
-
-
-

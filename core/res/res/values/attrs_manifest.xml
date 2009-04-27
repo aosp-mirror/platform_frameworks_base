@@ -769,6 +769,15 @@
         <attr name="name" />
     </declare-styleable>
     
+    <!-- The <code>supports-density</code> specifies a screen density that this
+         package supports. Application can specify multiple densities it supports.
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestSupportsDensity" parent="AndroidManifestApplication">
+        <!-- Required value of the density in dip (device independent pixel). -->
+        <attr name="density" format="integer" />
+    </declare-styleable>
+
     <!-- The <code>provider</code> tag declares a
          {@link android.content.ContentProvider} class that is available
          as part of the package's application components, supplying structured

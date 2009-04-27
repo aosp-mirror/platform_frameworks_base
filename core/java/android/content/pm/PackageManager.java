@@ -166,6 +166,12 @@ public abstract class PackageManager {
     public static final int GET_CONFIGURATIONS = 0x00004000;
 
     /**
+     * {@link ApplicationInfo} flag: return the
+     * {@link ApplicationInfo#supportsDensities} that the package supports.
+     */
+    public static final int GET_SUPPORTS_DENSITIES    = 0x00008000;
+
+    /**
      * Permission check result: this is returned by {@link #checkPermission}
      * if the permission has been granted to the given package.
      */
