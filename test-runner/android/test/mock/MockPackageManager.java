@@ -286,7 +286,12 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public void installPackage(Uri packageURI, IPackageInstallObserver observer,
-            int flags) {
+            int flags, String installerPackageName) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public String getInstallerPackageName(String packageName) {
         throw new UnsupportedOperationException();
     }
 

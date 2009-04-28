@@ -3234,20 +3234,27 @@ class PackageManagerService extends IPackageManager.Stub {
         private final String mRootDir;
         private final boolean mIsRom;
     }
-    
+
     /* Called when a downloaded package installation has been confirmed by the user */
     public void installPackage(
             final Uri packageURI, final IPackageInstallObserver observer, final int flags) {
+        installPackage(packageURI, observer, flags, null);
+    }
+    
+    /* Called when a downloaded package installation has been confirmed by the user */
+    public void installPackage(
+            final Uri packageURI, final IPackageInstallObserver observer, final int flags,
+            final String installerPackageName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.INSTALL_PACKAGES, null);
-
+        
         // Queue up an async operation since the package installation may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);
                 PackageInstalledInfo res;
                 synchronized (mInstallLock) {
-                    res = installPackageLI(packageURI, flags, true);
+                    res = installPackageLI(packageURI, flags, true, installerPackageName);
                 }
                 if (observer != null) {
                     try {
@@ -3295,7 +3302,7 @@ class PackageManagerService extends IPackageManager.Stub {
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
             PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
-            PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res) {
         // Remember this for later, in case we need to rollback this install
         boolean dataDirExists = (new File(mAppDataDir, pkgName)).exists();
         res.name = pkgName;
@@ -3331,7 +3338,8 @@ class PackageManagerService extends IPackageManager.Stub {
                     destResourceFile, pkg, 
                     newPackage,
                     true,
-                    forwardLocked,  
+                    forwardLocked,
+                    installerPackageName,
                     res);
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
@@ -3352,7 +3360,8 @@ class PackageManagerService extends IPackageManager.Stub {
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
             PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
-            PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res) {
+
         PackageParser.Package oldPackage;
         // First find the old package info and check signatures
         synchronized(mPackages) {
@@ -3367,11 +3376,11 @@ class PackageManagerService extends IPackageManager.Stub {
             replaceSystemPackageLI(oldPackage,
                     tmpPackageFile, destFilePath, 
                     destPackageFile, destResourceFile, pkg, forwardLocked,
-                    newInstall, res);
+                    newInstall, installerPackageName, res);
         } else {
             replaceNonSystemPackageLI(oldPackage, tmpPackageFile, destFilePath,
                     destPackageFile, destResourceFile, pkg, forwardLocked,
-                    newInstall, res);
+                    newInstall, installerPackageName, res);
         }
     }
     
@@ -3379,11 +3388,17 @@ class PackageManagerService extends IPackageManager.Stub {
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
             PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
-            PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         String pkgName = deletedPackage.packageName;
         boolean deletedPkg = true;
         boolean updatedSettings = false;
+        
+        String oldInstallerPackageName = null;
+        synchronized (mPackages) {
+            oldInstallerPackageName = mSettings.getInstallerPackageName(pkgName);
+        }
+        
         int parseFlags = PackageManager.REPLACE_EXISTING_PACKAGE;
         // First delete the existing package while retaining the data directory
         if (!deletePackageLI(pkgName, false, PackageManager.DONT_DELETE_DATA,
@@ -3412,6 +3427,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         newPackage,
                         true,
                         forwardLocked,  
+                        installerPackageName,
                         res);
                 updatedSettings = true;
             }
@@ -3456,7 +3472,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         Uri.fromFile(new File(deletedPackage.mPath)),
                         isForwardLocked(deletedPackage)
                         ? PackageManager.FORWARD_LOCK_PACKAGE
-                                : 0, false);
+                                : 0, false, oldInstallerPackageName);
             }
         }
     }
@@ -3465,7 +3481,7 @@ class PackageManagerService extends IPackageManager.Stub {
             File tmpPackageFile, 
             String destFilePath, File destPackageFile, File destResourceFile,
             PackageParser.Package pkg, boolean forwardLocked, boolean newInstall,
-            PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         boolean updatedSettings = false;
         int parseFlags = PackageManager.REPLACE_EXISTING_PACKAGE |
@@ -3515,7 +3531,8 @@ class PackageManagerService extends IPackageManager.Stub {
                     destResourceFile, pkg, 
                     newPackage,
                     true,
-                    forwardLocked,  
+                    forwardLocked,
+                    installerPackageName,
                     res);
             updatedSettings = true;
         }
@@ -3542,6 +3559,8 @@ class PackageManagerService extends IPackageManager.Stub {
             synchronized(mPackages) {
                 if(updatedSettings) {
                     mSettings.enableSystemPackageLP(packageName);
+                    mSettings.setInstallerPackageName(packageName,
+                            oldPkgSetting.installerPackageName);
                 }
                 mSettings.writeLP();
             }
@@ -3555,7 +3574,7 @@ class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Package newPackage,
             boolean replacingExistingPackage,
             boolean forwardLocked,  
-            PackageInstalledInfo res) {
+            String installerPackageName, PackageInstalledInfo res) {
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
             //note that the new package setting would have already been
@@ -3602,6 +3621,7 @@ class PackageManagerService extends IPackageManager.Stub {
             res.uid = newPackage.applicationInfo.uid;
             res.pkg = newPackage;
             mSettings.setInstallStatus(pkgName, PKG_INSTALL_COMPLETE);
+            mSettings.setInstallerPackageName(pkgName, installerPackageName);
             res.returnCode = PackageManager.INSTALL_SUCCEEDED;
             //to update install status
             mSettings.writeLP();
@@ -3609,7 +3629,7 @@ class PackageManagerService extends IPackageManager.Stub {
     }
     
     private PackageInstalledInfo installPackageLI(Uri pPackageURI,
-            int pFlags, boolean newInstall) {
+            int pFlags, boolean newInstall, String installerPackageName) {
         File tmpPackageFile = null;
         String pkgName = null;
         boolean forwardLocked = false;
@@ -3722,13 +3742,13 @@ class PackageManagerService extends IPackageManager.Stub {
                 replacePackageLI(pkgName,
                         tmpPackageFile, 
                         destFilePath, destPackageFile, destResourceFile,
-                        pkg, forwardLocked, newInstall,
+                        pkg, forwardLocked, newInstall, installerPackageName,
                         res);
             } else {
                 installNewPackageLI(pkgName,
                         tmpPackageFile, 
                         destFilePath, destPackageFile, destResourceFile,
-                        pkg, forwardLocked, newInstall,
+                        pkg, forwardLocked, newInstall, installerPackageName,
                         res);
             }
         } finally {
@@ -4546,6 +4566,16 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    public String getInstallerPackageName(String packageName) {
+        synchronized (mPackages) {
+            PackageSetting pkg = mSettings.mPackages.get(packageName);
+            if (pkg == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            return pkg.installerPackageName;
+        }
+    }
+    
     public int getApplicationEnabledSetting(String appPackageName) {
         synchronized (mPackages) {
             PackageSetting pkg = mSettings.mPackages.get(appPackageName);
@@ -5195,6 +5225,9 @@ class PackageManagerService extends IPackageManager.Stub {
         HashSet<String> enabledComponents = new HashSet<String>(0);
         int enabled = COMPONENT_ENABLED_STATE_DEFAULT;
         int installStatus = PKG_INSTALL_COMPLETE;
+        
+        /* package name of the app that installed this package */
+        String installerPackageName;
 
         PackageSettingBase(String name, File codePath, File resourcePath,
                 int pVersionCode, int pkgFlags) {
@@ -5207,6 +5240,14 @@ class PackageManagerService extends IPackageManager.Stub {
             this.versionCode = pVersionCode;
         }
 
+        public void setInstallerPackageName(String packageName) {
+            installerPackageName = packageName;
+        }
+        
+        String getInstallerPackageName() {
+            return installerPackageName;
+        }
+        
         public void setInstallStatus(int newStatus) {
             installStatus = newStatus;
         }
@@ -5437,6 +5478,19 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
         
+        void setInstallerPackageName(String pkgName,
+                String installerPkgName) {
+            PackageSetting p = mPackages.get(pkgName);
+            if(p != null) {
+                p.setInstallerPackageName(installerPkgName);
+            }
+        }
+        
+        String getInstallerPackageName(String pkgName) {
+            PackageSetting p = mPackages.get(pkgName);
+            return (p == null) ? null : p.getInstallerPackageName(); 
+        }
+
         int getInstallStatus(String pkgName) {
             PackageSetting p = mPackages.get(pkgName);
             if(p != null) {
@@ -5912,6 +5966,9 @@ class PackageManagerService extends IPackageManager.Stub {
             if(pkg.installStatus == PKG_INSTALL_INCOMPLETE) {
                 serializer.attribute(null, "installStatus", "false");
             }
+            if (pkg.installerPackageName != null) {
+                serializer.attribute(null, "installer", pkg.installerPackageName);
+            }
             pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
             if ((pkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
                 serializer.startTag(null, "perms");
@@ -5946,6 +6003,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 serializer.endTag(null, "enabled-components");
             }
+            
             serializer.endTag(null, "package");
         }
         
@@ -6267,6 +6325,7 @@ class PackageManagerService extends IPackageManager.Stub {
             String codePathStr = null;
             String resourcePathStr = null;
             String systemStr = null;
+            String installerPackageName = null;
             int pkgFlags = 0;
             String timeStampStr;
             long timeStamp = 0;
@@ -6287,6 +6346,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
                 systemStr = parser.getAttributeValue(null, "system");
+                installerPackageName = parser.getAttributeValue(null, "installer");
                 if (systemStr != null) {
                     if ("true".equals(systemStr)) {
                         pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
@@ -6360,6 +6420,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         + parser.getPositionDescription());
             }
             if (packageSetting != null) {
+                packageSetting.installerPackageName = installerPackageName;
                 final String enabledStr = parser.getAttributeValue(null, "enabled");
                 if (enabledStr != null) {
                     if (enabledStr.equalsIgnoreCase("true")) {
