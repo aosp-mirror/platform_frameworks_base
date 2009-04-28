@@ -54,16 +54,11 @@
     <string name="CLIRDefaultOffNextCallOff">"預設顯示本機號碼，下一通也顯示。"</string>
     <string name="serviceNotProvisioned">"服務未設定完成。"</string>
     <string name="CLIRPermanent">"本機號碼設定無法變更。"</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"受限存取已變更"</string>
+    <string name="RestrictedOnData">"已封鎖資料服務。"</string>
+    <string name="RestrictedOnEmergency">"已封鎖緊急服務。"</string>
+    <string name="RestrictedOnNormal">"已封鎖語音/SMS 服務。"</string>
+    <string name="RestrictedOnAll">"已封鎖所有語音/SMS 服務。"</string>
     <string name="serviceClassVoice">"語音"</string>
     <string name="serviceClassData">"資料"</string>
     <string name="serviceClassFAX">"傳真"</string>
@@ -269,7 +264,7 @@
     <string name="permlab_recordAudio">"錄製音訊"</string>
     <string name="permdesc_recordAudio">"允許應用程式存取音訊錄製路徑。"</string>
     <string name="permlab_camera">"照相"</string>
-    <string name="permdesc_camera">"允許應用程式使用相機照相。此功能可讓應用程式隨時透過相機拍攝照片。"</string>
+    <string name="permdesc_camera">"允許應用程式使用相機拍照。此功能可讓應用程式隨時透過相機拍攝照片。"</string>
     <string name="permlab_brick">"永久停用電話"</string>
     <string name="permdesc_brick">"允許應用程式永久停用手機。此項操作非常危險。"</string>
     <string name="permlab_reboot">"強制重開機"</string>
@@ -278,8 +273,8 @@
     <string name="permdesc_mount_unmount_filesystems">"允許應用程式掛載/卸載抽取式儲存設備的檔案系統。"</string>
     <string name="permlab_mount_format_filesystems">"將外接式儲存裝置格式化"</string>
     <string name="permdesc_mount_format_filesystems">"允許應用程式將可移除式儲存裝置格式化。"</string>
-    <string name="permlab_vibrate">"控制震動器"</string>
-    <string name="permdesc_vibrate">"允許應用程式控制震動器。"</string>
+    <string name="permlab_vibrate">"控制振動器"</string>
+    <string name="permdesc_vibrate">"允許應用程式控制振動器。"</string>
     <string name="permlab_flashlight">"控制閃光燈"</string>
     <string name="permdesc_flashlight">"允許應用程式控制閃光燈。"</string>
     <string name="permlab_hardware_test">"測試硬體"</string>
@@ -299,7 +294,7 @@
     <string name="permlab_readPhoneState">"讀取手機狀態"</string>
     <string name="permdesc_readPhoneState">"允許應用程式存取裝置的電話功能。通話時，有此權限的應用程式可設定手機是否通話、撥出的號碼等等。"</string>
     <string name="permlab_wakeLock">"防止手機進入待命狀態"</string>
-    <string name="permdesc_wakeLock">"允許應用程式阻止手機進入待命。"</string>
+    <string name="permdesc_wakeLock">"允許應用程式防止手機進入待命。"</string>
     <string name="permlab_devicePower">"開啟或關閉電源"</string>
     <string name="permdesc_devicePower">"允許應用程式開啟或關閉電話。"</string>
     <string name="permlab_factoryTest">"在出廠測試模式下執行"</string>
@@ -308,7 +303,7 @@
     <string name="permdesc_setWallpaper">"允許應用程式設定系統桌布。"</string>
     <string name="permlab_setWallpaperHints">"設定桌布大小提示"</string>
     <string name="permdesc_setWallpaperHints">"允許應用程式設定系統桌布大小提示。"</string>
-    <string name="permlab_masterClear">"將系統回復出廠預設值"</string>
+    <string name="permlab_masterClear">"將系統還原至出廠預設值"</string>
     <string name="permdesc_masterClear">"允許應用程式將手機完全重設至出廠設定，清除所有資料、設定與已安裝程式。"</string>
     <string name="permlab_setTimeZone">"設定時區"</string>
     <string name="permdesc_setTimeZone">"允許應用程式變更時區。"</string>
@@ -349,29 +344,29 @@
     <string name="permlab_writeDictionary">"寫入使用者定義的字典"</string>
     <string name="permdesc_writeDictionary">"允許應用程式將新字詞寫入使用者的字典。"</string>
   <string-array name="phoneTypes">
-    <item>"首頁"</item>
-    <item>"行動"</item>
-    <item>"工作"</item>
-    <item>"辦公傳真"</item>
-    <item>"家用傳真"</item>
+    <item>"住家電話"</item>
+    <item>"行動電話"</item>
+    <item>"公司電話"</item>
+    <item>"公司傳真"</item>
+    <item>"住家傳真"</item>
     <item>"呼叫器"</item>
     <item>"其他"</item>
     <item>"自訂"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item>"首頁"</item>
-    <item>"工作"</item>
-    <item>"其他"</item>
+    <item>"主要信箱"</item>
+    <item>"公司信箱"</item>
+    <item>"其他信箱"</item>
     <item>"自訂"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item>"首頁"</item>
-    <item>"工作"</item>
+    <item>"住家"</item>
+    <item>"公司"</item>
     <item>"其他"</item>
     <item>"自訂"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item>"首頁"</item>
+    <item>"自用 or 主要"</item>
     <item>"工作"</item>
     <item>"其他"</item>
     <item>"自訂"</item>
@@ -402,7 +397,7 @@
     <string name="lockscreen_pattern_instructions">"畫出解鎖圖形"</string>
     <string name="lockscreen_emergency_call">"緊急電話"</string>
     <string name="lockscreen_pattern_correct">"正確！"</string>
-    <string name="lockscreen_pattern_wrong">"抱歉，請再試一次"</string>
+    <string name="lockscreen_pattern_wrong">"很抱歉，請再試一次"</string>
     <string name="lockscreen_plugged_in">"正在充電 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"請連接充電器。"</string>
     <string name="lockscreen_missing_sim_message_short">"沒有 SIM  卡。"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"請插入 SIM 卡。"</string>
     <string name="lockscreen_network_locked_message">"網路已鎖定"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM 的 PUK 已鎖定。"</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"請參閱《使用者指南》或聯絡客戶服務中心。"</string>
     <string name="lockscreen_sim_locked_message">"SIM 卡已鎖定。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"解鎖 SIM 卡中..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"畫出解鎖圖形已錯誤 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n" 請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再嘗試。"</string>
@@ -451,7 +445,7 @@
     <string name="save_password_remember">"記住"</string>
     <string name="save_password_never">"從不"</string>
     <string name="open_permission_deny">"您沒有開啟此頁的權限。"</string>
-    <string name="text_copied">"已複製到剪貼簿的文字。"</string>
+    <string name="text_copied">"文字已複製到剪貼簿。"</string>
     <string name="more_item_label">"更多"</string>
     <string name="prepend_shortcut_label">"[選單]+"</string>
     <string name="menu_space_shortcut_label">"空白鍵"</string>
@@ -556,66 +550,66 @@
     <string name="yearly">"每年"</string>
     <string name="VideoView_error_title">"無法播放影片"</string>
     <string name="VideoView_error_text_invalid_progressive_playback">"很抱歉，影片格式無效，裝置無法進行串流處理。"</string>
-    <string name="VideoView_error_text_unknown">"抱歉，無法撥放此影片。"</string>
+    <string name="VideoView_error_text_unknown">"很抱歉，此影片無法播放。"</string>
     <string name="VideoView_error_button">"確定"</string>
     <string name="am">"上午"</string>
     <string name="pm">"下午"</string>
     <string name="numeric_date">"<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="DATE1">%2$s</xliff:g>，<xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>，<xliff:g id="DATE2">%5$s</xliff:g>，<xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>，<xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>，<xliff:g id="WEEKDAY2">%4$s</xliff:g>，<xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>，<xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
     <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>，<xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>，<xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
-    <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>，<xliff:g id="WEEKDAY">%2$s</xliff:g>，<xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>，<xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>，<xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g>，<xliff:g id="WEEKDAY">%2$s</xliff:g>，<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g>，<xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
+    <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>，<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>，<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>，<xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>，<xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
+    <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>，<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
     <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"中午"</string>
     <string name="Noon">"中午"</string>
     <string name="midnight">"午夜"</string>
     <string name="Midnight">"午夜"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>，<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g><xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日"</string>
+    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g> 年<xliff:g id="MONTH">%B</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>，<xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日，<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日 – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>， <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
     <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>， <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="abbrev_month_day_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>，<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g><xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g><xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日 – <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
+    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日 – <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
+    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日"</string>
+    <string name="abbrev_month_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g>"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"星期日"</string>
@@ -717,14 +711,14 @@
     <string name="clearDefaultHintMsg">"清除首頁設定 (應用程式) 管理應用程式的預設值。"</string>
     <string name="chooseActivity">"選取一項操作"</string>
     <string name="noApplications">"沒有應用程式可進行此操作。"</string>
-    <string name="aerr_title">"抱歉！"</string>
-    <string name="aerr_application">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 未正常終止。請再試一次。"</string>
-    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 未正常終止。請再試一次。"</string>
-    <string name="anr_title">"抱歉！"</string>
-    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (應用程式：<xliff:g id="APPLICATION">%2$s</xliff:g>) 無回應。"</string>
-    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 無回應。"</string>
-    <string name="anr_application_process">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 無回應。"</string>
-    <string name="anr_process">"程序 <xliff:g id="PROCESS">%1$s</xliff:g> 沒有回應。"</string>
+    <string name="aerr_title">"很抱歉！"</string>
+    <string name="aerr_application">"<xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式 (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 異常終止。請再試一次。"</string>
+    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 異常終止。請再試一次。"</string>
+    <string name="anr_title">"很抱歉！"</string>
+    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (應用程式：<xliff:g id="APPLICATION">%2$s</xliff:g>) 沒有回應。"</string>
+    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 沒有回應。"</string>
+    <string name="anr_application_process">"<xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式 (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 沒有回應。"</string>
+    <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 程序沒有回應。"</string>
     <string name="force_close">"強制關閉"</string>
     <string name="wait">"等待"</string>
     <string name="debug">"除錯"</string>
@@ -789,7 +783,7 @@
     <string name="ext_media_nofs_notification_message">"SD 卡為空白或使用不支援的檔案系統。"</string>
     <string name="ext_media_unmountable_notification_title">"SD 卡已損壞"</string>
     <string name="ext_media_unmountable_notification_message">"SD 卡已損壞。您可能需要將 SD 卡重新格式化。"</string>
-    <string name="ext_media_badremoval_notification_title">"SD 卡未預期移除"</string>
+    <string name="ext_media_badremoval_notification_title">"SD 卡未正常移除"</string>
     <string name="ext_media_badremoval_notification_message">"請先卸載 SD 卡，再將其移除，以免資料遺失。"</string>
     <string name="ext_media_safe_unmount_notification_title">"可安全移除 SD 卡"</string>
     <string name="ext_media_safe_unmount_notification_message">"現在可以安全移除 SD 卡。"</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"下一步"</string>
     <string name="ime_action_done">"完成"</string>
     <string name="ime_action_default">"執行"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"使用 <xliff:g id="NUMBER">%s</xliff:g>"\n"撥號"</string>
+    <string name="create_contact_using">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>"\n"的聯絡人"</string>
 </resources>
