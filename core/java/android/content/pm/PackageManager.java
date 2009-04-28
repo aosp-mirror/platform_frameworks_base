@@ -1354,8 +1354,35 @@ public abstract class PackageManager {
      *
      * @see #installPackage(android.net.Uri)
      */
+    public void installPackage(
+            Uri packageURI, IPackageInstallObserver observer, int flags) {
+        installPackage(packageURI, observer, flags, null);
+    }
+
+    /**
+     * Install a package. Since this may take a little while, the result will
+     * be posted back to the given observer.  An installation will fail if the calling context
+     * lacks the {@link android.Manifest.permission#INSTALL_PACKAGES} permission, if the
+     * package named in the package file's manifest is already installed, or if there's no space
+     * available on the device.
+     *
+     * @param packageURI The location of the package file to install.  This can be a 'file:' or a
+     * 'content:' URI.
+     * @param observer An observer callback to get notified when the package installation is
+     * complete. {@link IPackageInstallObserver#packageInstalled(String, int)} will be
+     * called when that happens.  observer may be null to indicate that no callback is desired.
+     * @param flags - possible values: {@link #FORWARD_LOCK_PACKAGE},
+     * {@link #REPLACE_EXISTING_PACKAGE}
+     * @param installerPackageName Optional package name of the application that is performing the
+     * installation. This identifies which market the package came from.
+     *
+     * @see #installPackage(android.net.Uri)
+     * 
+     * @hide
+     */
     public abstract void installPackage(
-            Uri packageURI, IPackageInstallObserver observer, int flags);
+            Uri packageURI, IPackageInstallObserver observer, int flags,
+            String installerPackageName);
 
     /**
      * Attempts to delete a package.  Since this may take a little while, the result will
@@ -1374,6 +1401,17 @@ public abstract class PackageManager {
      */
     public abstract void deletePackage(
             String packageName, IPackageDeleteObserver observer, int flags);
+
+    /**
+     * Retrieve the package name of the application that installed a package. This identifies
+     * which market the package came from.
+     * 
+     * @param packageName The name of the package to query
+     *
+     * @hide
+     */
+    public abstract String getInstallerPackageName(String packageName);
+    
     /**
      * Attempts to clear the user data directory of an application.
      * Since this may take a little while, the result will
@@ -1483,7 +1521,7 @@ public abstract class PackageManager {
      *
      * @param packageURI The location of the package file to install
      *
-     * @see #installPackage(android.net.Uri, IPackageInstallObserver, int)
+     * @see #installPackage(android.net.Uri, IPackageInstallObserver, int, String)
      */
     public void installPackage(Uri packageURI) {
         installPackage(packageURI, null, 0);

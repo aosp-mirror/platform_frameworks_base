@@ -579,6 +579,7 @@ public final class Pm {
     
     private void runInstall() {
         int installFlags = 0;
+        String installerPackageName = null;
 
         String opt;
         while ((opt=nextOption()) != null) {
@@ -586,6 +587,13 @@ public final class Pm {
                 installFlags |= PackageManager.FORWARD_LOCK_PACKAGE;
             } else if (opt.equals("-r")) {
                 installFlags |= PackageManager.REPLACE_EXISTING_PACKAGE;
+            } else if (opt.equals("-i")) {
+                installerPackageName = nextOptionData();
+                if (installerPackageName == null) {
+                    System.err.println("Error: no value specified for -i");
+                    showUsage();
+                    return;
+                }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -603,7 +611,8 @@ public final class Pm {
 
         PackageInstallObserver obs = new PackageInstallObserver();
         try {
-            mPm.installPackage(Uri.fromFile(new File(apkFilePath)), obs, installFlags);
+            mPm.installPackage(Uri.fromFile(new File(apkFilePath)), obs, installFlags,
+                    installerPackageName);
             
             synchronized (obs) {
                 while (!obs.finished) {
@@ -812,7 +821,7 @@ public final class Pm {
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");        
         System.err.println("       pm path PACKAGE");
-        System.err.println("       pm install [-l] [-r] PATH");
+        System.err.println("       pm install [-l] [-r] [-i INSTALLER_PACKAGE_NAME] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
@@ -840,6 +849,7 @@ public final class Pm {
         System.err.println("The install command installs a package to the system.  Use");
         System.err.println("the -l option to install the package with FORWARD_LOCK. Use");
         System.err.println("the -r option to reinstall an exisiting app, keeping its data.");
+        System.err.println("the -i option to specify the installer package name.");
         System.err.println("");
         System.err.println("The uninstall command removes a package from the system. Use");
         System.err.println("the -k option to keep the data and cache directories around");

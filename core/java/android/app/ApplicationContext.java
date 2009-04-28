@@ -2310,12 +2310,23 @@ class ApplicationContext extends Context {
         }
 
         @Override
-        public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags) {
+        public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
+                String installerPackageName) {
             try {
-                mPM.installPackage(packageURI, observer, flags);
+                mPM.installPackage(packageURI, observer, flags, installerPackageName);
             } catch (RemoteException e) {
                 // Should never happen!
             }
+        }
+
+        @Override
+        public String getInstallerPackageName(String packageName) {
+            try {
+                return mPM.getInstallerPackageName(packageName);
+            } catch (RemoteException e) {
+                // Should never happen!
+            }
+            return null;
         }
 
         @Override
