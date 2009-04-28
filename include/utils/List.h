@@ -84,7 +84,7 @@ public:
         mpNode = mpNode->getNext();
         return *this;
     }
-    _Iter operator++(int) {          // post-increment
+    const _Iter operator++(int) {    // post-increment
         _Iter tmp = *this;
         ++*this;
         return tmp;
@@ -93,7 +93,7 @@ public:
         mpNode = mpNode->getPrev();
         return *this;
     }
-    _Iter operator--(int) {          // post-increment
+    const _Iter operator--(int) {   // post-increment
         _Iter tmp = *this;
         --*this;
         return tmp;
