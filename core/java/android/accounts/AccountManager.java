@@ -67,6 +67,15 @@ public class AccountManager {
         mMainHandler = new Handler(mContext.getMainLooper());
     }
 
+    /**
+     * @hide used for testing only
+     */
+    public AccountManager(Context context, IAccountManager service, Handler handler) {
+        mContext = context;
+        mService = service;
+        mMainHandler = handler;
+    }
+
     public static AccountManager get(Context context) {
         return (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
     }
