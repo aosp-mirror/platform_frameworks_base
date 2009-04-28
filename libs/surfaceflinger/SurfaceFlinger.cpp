@@ -429,7 +429,7 @@ void SurfaceFlinger::waitForEvent()
             timeout = waitTime>0 ? waitTime : 0;
         }
 
-        MessageList::NODE_PTR msg = mEventQueue.waitMessage(timeout);
+        MessageList::value_type msg = mEventQueue.waitMessage(timeout);
         if (msg != 0) {
             mFreezeDisplayTime = 0;
             switch (msg->what) {

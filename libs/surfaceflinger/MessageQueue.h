@@ -23,125 +23,34 @@
 
 #include <utils/threads.h>
 #include <utils/Timers.h>
+#include <utils/List.h>
 
 
 namespace android {
 
 // ---------------------------------------------------------------------------
 
-template<typename NODE_PTR_TYPE>
-class DoublyLinkedList
+class MessageBase;
+
+class MessageList 
 {
-protected:
-    typedef NODE_PTR_TYPE NODE_PTR;
-    
-    NODE_PTR  mFirst;
-    NODE_PTR  mLast;
-
+    List< sp<MessageBase> > mList;
+    typedef List< sp<MessageBase> > LIST;
 public:
-    class Node {
-        friend class DoublyLinkedList;
-        mutable NODE_PTR next;
-        mutable NODE_PTR prev;
-    public:
-        typedef NODE_PTR PTR;
-        inline NODE_PTR getNext() const { return next; }
-        inline NODE_PTR getPrev() const { return prev; }
-        void detach() { 
-            prev = 0;
-            next = 0;
-        }
-    };
-
-    DoublyLinkedList() : mFirst(0), mLast(0) { }
-    ~DoublyLinkedList() { }
-    
-    bool        isEmpty() const { return mFirst == 0; }
-    const NODE_PTR& head() const { return mFirst; }
-    const NODE_PTR& tail() const { return mLast; }
-    const NODE_PTR& head() { return mFirst; }
-    const NODE_PTR& tail() { return mLast; }
-
-    void insertAfter(const NODE_PTR& node, const NODE_PTR& newNode) {
-        newNode->prev = node;
-        newNode->next = node->next;
-        if (node->next == 0) mLast = newNode;
-        else                 node->next->prev = newNode;
-        node->next = newNode;
-    }
-
-    void insertBefore(const NODE_PTR& node, const NODE_PTR& newNode) {
-        newNode->prev = node->prev;
-        newNode->next = node;
-        if (node->prev == 0)   mFirst = newNode;
-        else                   node->prev->next = newNode;
-        node->prev = newNode;
-    }
-
-    void insertHead(const NODE_PTR& newNode) {
-        if (mFirst == 0) {
-            mFirst = mLast = newNode;
-            newNode->prev = newNode->next = 0;
-        } else {
-            newNode->prev = 0;
-            newNode->next = mFirst;
-            mFirst->prev = newNode;
-            mFirst = newNode;
-        }
-    }
-
-    void insertTail(const NODE_PTR& newNode) {
-        if (mLast == 0) {
-            insertHead(newNode);
-        } else {
-            newNode->prev = mLast;
-            newNode->next = 0;
-            mLast->next = newNode;
-            mLast = newNode;
-        }
-    }
-
-    NODE_PTR remove(const NODE_PTR& node) {
-        if (node->prev == 0)    mFirst = node->next;
-        else                    node->prev->next = node->next;
-        if (node->next == 0)    mLast = node->prev;
-        else                    node->next->prev = node->prev;
-        return node;
-    }
-};
-
-// ---------------------------------------------------------------------------
-
-template<typename NODE_PTR_TYPE>
-class SortedList : protected DoublyLinkedList< NODE_PTR_TYPE > 
-{
-    typedef DoublyLinkedList< NODE_PTR_TYPE > forward;
-public:
-    typedef NODE_PTR_TYPE NODE_PTR;
-    inline bool isEmpty() const { return forward::isEmpty(); }
-    inline const NODE_PTR& head() const { return forward::head(); }
-    inline const NODE_PTR& tail() const { return forward::tail(); }
-    inline const NODE_PTR& head() { return forward::head(); }
-    inline const NODE_PTR& tail() { return forward::tail(); }
-    inline NODE_PTR remove(const NODE_PTR& node) { return forward::remove(node); }
-    void insert(const NODE_PTR& node) {
-        NODE_PTR l(head());
-        while (l != 0) {
-            if (*node < *l) {
-                insertBefore(l, node);
-                return;
-            }
-            l = l->getNext();
-        }
-        insertTail(node);
-    }
+    typedef sp<MessageBase> value_type;
+    inline LIST::iterator begin()                { return mList.begin(); }
+    inline LIST::const_iterator begin() const    { return mList.begin(); }
+    inline LIST::iterator end()                  { return mList.end(); }
+    inline LIST::const_iterator end() const      { return mList.end(); }
+    inline bool isEmpty() const { return mList.empty(); }
+    void insert(const sp<MessageBase>& node);
+    void remove(LIST::iterator pos);
 };
 
 // ============================================================================
 
 class MessageBase : 
-    public LightRefBase<MessageBase>, 
-    public DoublyLinkedList< sp<MessageBase> >::Node
+    public LightRefBase<MessageBase>
 {
 public:
     nsecs_t     when;
@@ -168,16 +77,9 @@ inline bool operator < (const MessageBase& lhs, const MessageBase& rhs) {
 
 // ---------------------------------------------------------------------------
 
-/*
- * MessageList is a sorted list of sp<MessageBase>
- */
-    
-typedef SortedList< MessageBase::Node::PTR > MessageList; 
-
-// ---------------------------------------------------------------------------
-
 class MessageQueue
 {
+    typedef List< sp<MessageBase> > LIST;
 public:
 
     // this is a work-around the multichar constant warning. A macro would
@@ -197,25 +99,25 @@ public:
         INVALIDATE = WHAT<'_','p','d','t'>::Value
     };
 
-    MessageList::NODE_PTR waitMessage(nsecs_t timeout = -1);
+    MessageList::value_type waitMessage(nsecs_t timeout = -1);
     
-    status_t postMessage(const MessageList::NODE_PTR& message, 
+    status_t postMessage(const MessageList::value_type& message, 
             nsecs_t reltime=0, uint32_t flags = 0);
         
     status_t invalidate();
     
-    void dump(const MessageList::NODE_PTR& message);
+    void dump(const MessageList::value_type& message);
 
 private:
-    status_t queueMessage(const MessageList::NODE_PTR& message,
+    status_t queueMessage(const MessageList::value_type& message,
             nsecs_t reltime, uint32_t flags);
-    void dumpLocked(const MessageList::NODE_PTR& message);
+    void dumpLocked(const MessageList::value_type& message);
     
     Mutex           mLock;
     Condition       mCondition;
     MessageList     mMessages;
     bool            mInvalidate;
-    MessageList::NODE_PTR mInvalidateMessage;
+    MessageList::value_type mInvalidateMessage;
 };
 
 // ---------------------------------------------------------------------------

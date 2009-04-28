@@ -29,6 +29,27 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+void MessageList::insert(const sp<MessageBase>& node) 
+{
+    LIST::iterator cur(mList.begin());
+    LIST::iterator end(mList.end());
+    while (cur != end) {
+        if (*node < **cur) {
+            mList.insert(cur, node);
+            return;
+        }
+        ++cur;
+    }
+    mList.insert(++end, node);
+}
+
+void MessageList::remove(MessageList::LIST::iterator pos) 
+{
+    mList.erase(pos);
+}
+
+// ---------------------------------------------------------------------------
+
 MessageQueue::MessageQueue()
 {
     mInvalidateMessage = new MessageBase(INVALIDATE);
@@ -38,9 +59,10 @@ MessageQueue::~MessageQueue()
 {
 }
 
-MessageList::NODE_PTR MessageQueue::waitMessage(nsecs_t timeout)
+MessageList::value_type MessageQueue::waitMessage(nsecs_t timeout)
 {
-    MessageList::NODE_PTR result;
+    MessageList::value_type result;
+
     bool again;
     do {
         const nsecs_t timeoutTime = systemTime() + timeout;
@@ -57,13 +79,15 @@ MessageList::NODE_PTR MessageQueue::waitMessage(nsecs_t timeout)
                 break;
             }
 
-            result = mMessages.head();
-
+            LIST::iterator cur(mMessages.begin());
+            if (cur != mMessages.end()) {
+                result = *cur;
+            }
+            
             if (result != 0) {
                 if (result->when <= now) {
                     // there is a message to deliver
-                    mMessages.remove(result);
-                    result->detach();
+                    mMessages.remove(cur);
                     break;
                 }
                 if (timeout>=0 && timeoutTime < now) {
@@ -108,11 +132,12 @@ MessageList::NODE_PTR MessageQueue::waitMessage(nsecs_t timeout)
         }
         
     } while (again);
+
     return result;
 }
 
 status_t MessageQueue::postMessage(
-        const MessageList::NODE_PTR& message, nsecs_t relTime, uint32_t flags)
+        const MessageList::value_type& message, nsecs_t relTime, uint32_t flags)
 {
     return queueMessage(message, relTime, flags);
 }
@@ -125,7 +150,7 @@ status_t MessageQueue::invalidate() {
 }
 
 status_t MessageQueue::queueMessage(
-        const MessageList::NODE_PTR& message, nsecs_t relTime, uint32_t flags)
+        const MessageList::value_type& message, nsecs_t relTime, uint32_t flags)
 {
     Mutex::Autolock _l(mLock);
     message->when = systemTime() + relTime;
@@ -138,20 +163,22 @@ status_t MessageQueue::queueMessage(
     return NO_ERROR;
 }
 
-void MessageQueue::dump(const MessageList::NODE_PTR& message)
+void MessageQueue::dump(const MessageList::value_type& message)
 {
     Mutex::Autolock _l(mLock);
     dumpLocked(message);
 }
 
-void MessageQueue::dumpLocked(const MessageList::NODE_PTR& message)
+void MessageQueue::dumpLocked(const MessageList::value_type& message)
 {
-    MessageList::NODE_PTR l(mMessages.head());
+    LIST::const_iterator cur(mMessages.begin());
+    LIST::const_iterator end(mMessages.end());
     int c = 0;
-    while (l != 0) {
-        const char tick = (l == message) ? '>' : ' ';
-        LOGD("%c %d: msg{.what=%08x, when=%lld}", tick, c, l->what, l->when);
-        l = l->getNext();
+    while (cur != end) {
+        const char tick = (*cur == message) ? '>' : ' ';
+        LOGD("%c %d: msg{.what=%08x, when=%lld}",
+                tick, c, (*cur)->what, (*cur)->when);
+        ++cur;
         c++;
     }
 }
