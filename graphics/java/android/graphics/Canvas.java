@@ -112,7 +112,9 @@ public class Canvas {
      * on behalf of the Canvas. Any subsequent drawing with a GL-backed Canvas
      * will have to recreate those resources.
      */
-    public static native void freeGlCaches();
+    public static void freeGlCaches() {
+        freeCaches();
+    }
         
     /**
      * Specify a bitmap for the canvas to draw into.
@@ -1404,6 +1406,14 @@ public class Canvas {
         super.finalize();
         finalizer(mNativeCanvas);
     }
+
+    /**
+     * Free up as much memory as possible from private caches (e.g. fonts,
+     * images)
+     *
+     * @hide - for now
+     */
+    public static native void freeCaches();
 
     private static native int initRaster(int nativeBitmapOrZero);
     private static native int initGL();

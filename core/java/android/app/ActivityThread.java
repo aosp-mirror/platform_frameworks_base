@@ -3496,6 +3496,9 @@ public final class ActivityThread {
             int sqliteReleased = SQLiteDatabase.releaseMemory();
             EventLog.writeEvent(SQLITE_MEM_RELEASED_EVENT_LOG_TAG, sqliteReleased);
         }
+        
+        // Ask graphics to free up as much as possible (font/image caches)
+        Canvas.freeCaches();
 
         BinderInternal.forceGc("mem");
     }
