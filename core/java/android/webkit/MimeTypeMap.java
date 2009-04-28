@@ -358,6 +358,7 @@ public /* package */ class MimeTypeMap {
             sMimeTypeMap.loadEntry("application/x-x509-ca-cert", "crt", false);
             sMimeTypeMap.loadEntry("application/x-xcf", "xcf", false);
             sMimeTypeMap.loadEntry("application/x-xfig", "fig", false);
+            sMimeTypeMap.loadEntry("application/xhtml+xml", "xhtml", false);
             sMimeTypeMap.loadEntry("audio/basic", "snd", false);
             sMimeTypeMap.loadEntry("audio/midi", "mid", false);
             sMimeTypeMap.loadEntry("audio/midi", "midi", false);

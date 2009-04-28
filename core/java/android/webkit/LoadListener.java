@@ -324,13 +324,10 @@ class LoadListener extends Handler implements EventHandler {
                 // As we don't support wml, render it as plain text
                 mMimeType = "text/plain";
             } else {
-                // XXX: Until the servers send us either correct xhtml or
-                // text/html, treat application/xhtml+xml as text/html.
                 // It seems that xhtml+xml and vnd.wap.xhtml+xml mime
                 // subtypes are used interchangeably. So treat them the same.
-                if (mMimeType.equals("application/xhtml+xml") ||
-                        mMimeType.equals("application/vnd.wap.xhtml+xml")) {
-                    mMimeType = "text/html";
+                if (mMimeType.equals("application/vnd.wap.xhtml+xml")) {
+                    mMimeType = "application/xhtml+xml";
                 }
             }
         } else {
@@ -1396,19 +1393,8 @@ class LoadListener extends Handler implements EventHandler {
             Log.v(LOGTAG, "guessMimeTypeFromExtension: mURL = " + mUrl);
         }
 
-        String mimeType =
-                MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                        MimeTypeMap.getFileExtensionFromUrl(mUrl));
-
-        if (mimeType != null) {
-            // XXX: Until the servers send us either correct xhtml or
-            // text/html, treat application/xhtml+xml as text/html.
-            if (mimeType.equals("application/xhtml+xml")) {
-                mimeType = "text/html";
-            }
-        }
-
-        return mimeType;
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                MimeTypeMap.getFileExtensionFromUrl(mUrl));
     }
 
     /**
