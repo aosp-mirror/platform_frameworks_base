@@ -22,89 +22,15 @@
 // construction, so if the compiler's auto-generated versions won't work for
 // you, define your own.
 //
-// The only class you want to use from here is "List".  Do not use classes
-// starting with "_" directly.
+// The only class you want to use from here is "List".
 //
 #ifndef _LIBS_UTILS_LIST_H
 #define _LIBS_UTILS_LIST_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 namespace android {
-
-/*
- * One element in the list.
- */
-template<class T> class _ListNode {
-public:
-    typedef _ListNode<T> _Node;
-
-    _ListNode(const T& val) : mVal(val) {}
-    ~_ListNode(void) {}
-
-    T& getRef(void) { return mVal; }
-    void setVal(const T& val) { mVal = val; }
-
-    _Node* getPrev(void) const { return mpPrev; }
-    void setPrev(_Node* ptr) { mpPrev = ptr; }
-    _Node* getNext(void) const { return mpNext; }
-    void setNext(_Node* ptr) { mpNext = ptr; }
-
-private:
-    T           mVal;
-    _Node*      mpPrev;
-    _Node*      mpNext;
-};
-
-/*
- * Iterator for walking through the list.
- */
-template<class T, class Tref> class _ListIterator {
-public:
-    typedef _ListIterator<T,Tref> _Iter;
-    typedef _ListNode<T> _Node;
-
-    _ListIterator(void) {}
-    _ListIterator(_Node* ptr) : mpNode(ptr) {}
-    ~_ListIterator(void) {}
-
-    /*
-     * Dereference operator.  Used to get at the juicy insides.
-     */
-    Tref operator*() const { return mpNode->getRef(); }
-
-    /*
-     * Iterator comparison.
-     */
-    bool operator==(const _Iter& right) const { return mpNode == right.mpNode; }
-    bool operator!=(const _Iter& right) const { return mpNode != right.mpNode; }
-
-    /*
-     * Incr/decr, used to move through the list.
-     */
-    _Iter& operator++(void) {        // pre-increment
-        mpNode = mpNode->getNext();
-        return *this;
-    }
-    const _Iter operator++(int) {    // post-increment
-        _Iter tmp = *this;
-        ++*this;
-        return tmp;
-    }
-    _Iter& operator--(void) {        // pre-increment
-        mpNode = mpNode->getPrev();
-        return *this;
-    }
-    const _Iter operator--(int) {   // post-increment
-        _Iter tmp = *this;
-        --*this;
-        return tmp;
-    }
-
-    _Node* getNode(void) const { return mpNode; }
-
-private:
-    _Node*      mpNode;
-};
-
 
 /*
  * Doubly-linked list.  Instantiate with "List<MyClass> myList".
@@ -112,57 +38,184 @@ private:
  * Objects added to the list are copied using the assignment operator,
  * so this must be defined.
  */
-template<class T> class List {
-public:
-    typedef _ListNode<T> _Node;
+template<typename T> 
+class List 
+{
+protected:
+    /*
+     * One element in the list.
+     */
+    class _Node {
+    public:
+        explicit _Node(const T& val) : mVal(val) {}
+        ~_Node() {}
+        inline T& getRef() { return mVal; }
+        inline const T& getRef() const { return mVal; }
+        inline _Node* getPrev() const { return mpPrev; }
+        inline _Node* getNext() const { return mpNext; }
+        inline void setVal(const T& val) { mVal = val; }
+        inline void setPrev(_Node* ptr) { mpPrev = ptr; }
+        inline void setNext(_Node* ptr) { mpNext = ptr; }
+    private:
+        friend class List;
+        friend class _ListIterator;
+        T           mVal;
+        _Node*      mpPrev;
+        _Node*      mpNext;
+    };
 
-    List(void) {
+    /*
+     * Iterator for walking through the list.
+     */
+    
+    template <typename TYPE>
+    struct CONST_ITERATOR {
+        typedef _Node const * NodePtr;
+        typedef const TYPE Type;
+    };
+    
+    template <typename TYPE>
+    struct NON_CONST_ITERATOR {
+        typedef _Node* NodePtr;
+        typedef TYPE Type;
+    };
+    
+    template<
+        typename U,
+        template <class> class Constness
+    > 
+    class _ListIterator {
+        typedef _ListIterator<U, Constness>     _Iter;
+        typedef typename Constness<U>::NodePtr  _NodePtr;
+        typedef typename Constness<U>::Type     _Type;
+
+        explicit _ListIterator(_NodePtr ptr) : mpNode(ptr) {}
+
+    public:
+        _ListIterator() {}
+        _ListIterator(const _Iter& rhs) : mpNode(rhs.mpNode) {}
+        ~_ListIterator() {}
+        
+        // this will handle conversions from iterator to const_iterator
+        // (and also all convertible iterators)
+        // Here, in this implementation, the iterators can be converted
+        // if the nodes can be converted
+        template<typename V> explicit 
+        _ListIterator(const V& rhs) : mpNode(rhs.mpNode) {}
+        
+
+        /*
+         * Dereference operator.  Used to get at the juicy insides.
+         */
+        _Type& operator*() const { return mpNode->getRef(); }
+        _Type* operator->() const { return &(mpNode->getRef()); }
+
+        /*
+         * Iterator comparison.
+         */
+        inline bool operator==(const _Iter& right) const { 
+            return mpNode == right.mpNode; }
+        
+        inline bool operator!=(const _Iter& right) const { 
+            return mpNode != right.mpNode; }
+
+        /*
+         * handle comparisons between iterator and const_iterator
+         */
+        template<typename OTHER>
+        inline bool operator==(const OTHER& right) const { 
+            return mpNode == right.mpNode; }
+        
+        template<typename OTHER>
+        inline bool operator!=(const OTHER& right) const { 
+            return mpNode != right.mpNode; }
+
+        /*
+         * Incr/decr, used to move through the list.
+         */
+        inline _Iter& operator++() {     // pre-increment
+            mpNode = mpNode->getNext();
+            return *this;
+        }
+        const _Iter operator++(int) {    // post-increment
+            _Iter tmp(*this);
+            mpNode = mpNode->getNext();
+            return tmp;
+        }
+        inline _Iter& operator--() {     // pre-increment
+            mpNode = mpNode->getPrev();
+            return *this;
+        }
+        const _Iter operator--(int) {   // post-increment
+            _Iter tmp(*this);
+            mpNode = mpNode->getPrev();
+            return tmp;
+        }
+
+        inline _NodePtr getNode() const { return mpNode; }
+
+    private:
+        friend class List;
+        _NodePtr mpNode;
+    };
+
+public:
+    List() {
         prep();
     }
     List(const List<T>& src) {      // copy-constructor
         prep();
         insert(begin(), src.begin(), src.end());
     }
-    virtual ~List(void) {
+    virtual ~List() {
         clear();
         delete[] (unsigned char*) mpMiddle;
     }
 
-    typedef _ListIterator<T,T&> iterator;
-    typedef _ListIterator<T, const T&> const_iterator;
+    typedef _ListIterator<T, NON_CONST_ITERATOR> iterator;
+    typedef _ListIterator<T, CONST_ITERATOR> const_iterator;
 
     List<T>& operator=(const List<T>& right);
 
     /* returns true if the list is empty */
-    bool empty(void) const { return mpMiddle->getNext() == mpMiddle; }
+    inline bool empty() const { return mpMiddle->getNext() == mpMiddle; }
 
     /* return #of elements in list */
-    unsigned int size(void) const {
-        return distance(begin(), end());
+    size_t size() const {
+        return size_t(distance(begin(), end()));
     }
 
     /*
      * Return the first element or one past the last element.  The
-     * _ListNode* we're returning is converted to an "iterator" by a
+     * _Node* we're returning is converted to an "iterator" by a
      * constructor in _ListIterator.
      */
-    iterator begin()                { return mpMiddle->getNext(); }
-    const_iterator begin() const    { return mpMiddle->getNext(); }
-    iterator end()                  { return mpMiddle; }
-    const_iterator end() const      { return mpMiddle; }
+    inline iterator begin() { 
+        return iterator(mpMiddle->getNext()); 
+    }
+    inline const_iterator begin() const { 
+        return const_iterator(const_cast<_Node const*>(mpMiddle->getNext())); 
+    }
+    inline iterator end() { 
+        return iterator(mpMiddle); 
+    }
+    inline const_iterator end() const { 
+        return const_iterator(const_cast<_Node const*>(mpMiddle)); 
+    }
 
     /* add the object to the head or tail of the list */
     void push_front(const T& val) { insert(begin(), val); }
     void push_back(const T& val) { insert(end(), val); }
 
     /* insert before the current node; returns iterator at new node */
-    iterator insert(iterator posn, const T& val) {
+    iterator insert(iterator posn, const T& val) 
+    {
         _Node* newNode = new _Node(val);        // alloc & copy-construct
         newNode->setNext(posn.getNode());
         newNode->setPrev(posn.getNode()->getPrev());
         posn.getNode()->getPrev()->setNext(newNode);
         posn.getNode()->setPrev(newNode);
-        return newNode;
+        return iterator(newNode);
     }
 
     /* insert a range of elements before the current node */
@@ -178,18 +231,18 @@ public:
         pPrev->setNext(pNext);
         pNext->setPrev(pPrev);
         delete posn.getNode();
-        return pNext;
+        return iterator(pNext);
     }
 
     /* remove a range of elements */
     iterator erase(iterator first, iterator last) {
         while (first != last)
             erase(first++);     // don't erase than incr later!
-        return last;
+        return iterator(last);
     }
 
     /* remove all contents of the list */
-    void clear(void) {
+    void clear() {
         _Node* pCurrent = mpMiddle->getNext();
         _Node* pNext;
 
@@ -207,21 +260,20 @@ public:
      * will be equal to "last".  The iterators must refer to the same
      * list.
      *
-     * (This is actually a generic iterator function.  It should be part
-     * of some other class, possibly an iterator base class.  It needs to
-     * know the difference between a list, which has to march through,
-     * and a vector, which can just do pointer math.)
+     * FIXME: This is actually a generic iterator function. It should be a 
+     * template function at the top-level with specializations for things like
+     * vector<>, which can just do pointer math). Here we limit it to
+     * _ListIterator of the same type but different constness.
      */
-    unsigned int distance(iterator first, iterator last) {
-        unsigned int count = 0;
-        while (first != last) {
-            ++first;
-            ++count;
-        }
-        return count;
-    }
-    unsigned int distance(const_iterator first, const_iterator last) const {
-        unsigned int count = 0;
+    template<
+        typename U,
+        template <class> class CL,
+        template <class> class CR
+    > 
+    ptrdiff_t distance(
+            _ListIterator<U, CL> first, _ListIterator<U, CR> last) const 
+    {
+        ptrdiff_t count = 0;
         while (first != last) {
             ++first;
             ++count;
@@ -231,12 +283,12 @@ public:
 
 private:
     /*
-     * I want a _ListNode but don't need it to hold valid data.  More
+     * I want a _Node but don't need it to hold valid data.  More
      * to the point, I don't want T's constructor to fire, since it
      * might have side-effects or require arguments.  So, we do this
      * slightly uncouth storage alloc.
      */
-    void prep(void) {
+    void prep() {
         mpMiddle = (_Node*) new unsigned char[sizeof(_Node)];
         mpMiddle->setPrev(mpMiddle);
         mpMiddle->setNext(mpMiddle);
