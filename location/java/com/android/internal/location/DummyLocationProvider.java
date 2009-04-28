@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package android.location;
+package com.android.internal.location;
+
+import android.location.LocationProvider;
 
 /**
  * A stub implementation of LocationProvider used by LocationManager.
@@ -24,7 +26,7 @@ package android.location;
  * 
  * {@hide}
  */
-class DummyLocationProvider extends LocationProvider {
+public class DummyLocationProvider extends LocationProvider {
 
     private static final String TAG = "DummyLocationProvider";
 
@@ -39,7 +41,7 @@ class DummyLocationProvider extends LocationProvider {
     int mPowerRequirement;
     int mAccuracy;
 
-    /* package */ DummyLocationProvider(String name) {
+    public DummyLocationProvider(String name) {
         super(name);
     }
 

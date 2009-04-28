@@ -26,7 +26,6 @@ import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.location.LocationProviderImpl;
 import android.net.ConnectivityManager;
 import android.net.SntpClient;
 import android.os.Bundle;

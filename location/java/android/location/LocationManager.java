@@ -26,6 +26,8 @@ import android.os.Message;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.location.DummyLocationProvider;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
