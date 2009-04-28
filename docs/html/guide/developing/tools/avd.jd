@@ -69,7 +69,7 @@ your application on. </p>
 specify emulator command-line options at launch or by using the emulator
 console to change behaviors or characteristics at run time. For a complete
 reference of emulator options, please see the <a
-href="{@docRoot}/guide/developing/tools/emulator.html">Emulator</a>
+href="{@docRoot}guide/developing/tools/emulator.html">Emulator</a>
 documentation. </p>
 
 <p>To create and manage AVDs, you use the android tool provided in the Android
@@ -81,9 +81,13 @@ Other IDEs</a>, as appropriate for your environment.</p>
 
 <h2 id="creating">Creating an AVD</h2>
 
-<div class="sidebox">The Android SDK does not include any preconfigured AVDs, so
+<div class="sidebox-wrapper">
+<div class="sidebox-inner">
+<p>The Android SDK does not include any preconfigured AVDs, so
 you need to create an AVD before you can run any application in the emulator
-(even the Hello World application). </div>
+(even the Hello World application).</p>
+</div>
+</div>
 
 <p>To create an AVD, you use the android tool, a command-line utility
 available in the <code>&lt;sdk&gt;/tools/</code> directory. Managing AVDs is one
@@ -91,7 +95,7 @@ of the two main function of the android tool (the other is creating and updating
 Android projects). Open a terminal window and change to the 
 <code>&lt;sdk&gt;/tools/</code> directory, if needed</p>
 
-<p>To create each AVD, you issue the command <code>android avd create</code>,
+<p>To create each AVD, you issue the command <code>android create avd</code>,
 with options that specify a name for the new AVD and the system image you want
 to run on the emulator when the AVD is invoked. You can specify other options on
 the command line also, such as to create an emulated SD card for the new AVD, set
@@ -99,7 +103,7 @@ the emulator skin to use, or set a custom location for the AVD's files.</p>
 
 <p>Here's the command-line usage for creating an AVD: </p>
 
-<pre>android -n &lt;name&gt; -t &lt;targetID&gt; [-&lt;option&gt; &lt;value&gt;] ... </pre>
+<pre>android create avd -n &lt;name&gt; -t &lt;targetID&gt; [-&lt;option&gt; &lt;value&gt;] ... </pre>
 
 <p>You can use any name you want for the AVD, but since you are likely to be
 creating multiple AVDs, you should choose a name that lets you recognize the
