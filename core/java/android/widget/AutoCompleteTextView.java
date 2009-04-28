@@ -127,6 +127,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     // The widget is attached to a window when mAttachCount > 0
     private int mAttachCount;
 
+    private AutoCompleteTextView.PassThroughClickListener mPassThroughClickListener;
+
     public AutoCompleteTextView(Context context) {
         this(context, null);
     }
@@ -186,6 +188,28 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         setFocusable(true);
 
         addTextChangedListener(new MyWatcher());
+
+        mPassThroughClickListener = new PassThroughClickListener();
+        super.setOnClickListener(mPassThroughClickListener);
+    }
+
+    @Override
+    public void setOnClickListener(OnClickListener listener) {
+        mPassThroughClickListener.mWrapped = listener;
+    }
+
+    /**
+     * Private hook into the on click event, dispatched from {@link PassThroughClickListener}
+     */
+    private void onClickImpl() {
+        // if drop down should always visible, bring it back in front of the soft
+        // keyboard when the user touches the text field
+        if (mDropDownAlwaysVisible
+                && mPopup.isShowing()
+                && mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
+            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+            mPopup.update();
+        }
     }
 
     /**
@@ -1050,7 +1074,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
             mPopup.setHeight(height);
             mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-            mPopup.setOutsideTouchable(true);
+            
+            // use outside touchable to dismiss drop down when touching outside of it, so
+            // only set this if the dropdown is not always visible
+            mPopup.setOutsideTouchable(!mDropDownAlwaysVisible);
             mPopup.setTouchInterceptor(new PopupTouchIntercepter());
             mPopup.showAsDropDown(getDropDownAnchorView(),
                     mDropDownHorizontalOffset, mDropDownVerticalOffset);
@@ -1367,4 +1394,21 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
          */
         CharSequence fixText(CharSequence invalidText);
     }
+
+    /**
+     * Allows us a private hook into the on click event without preventing users from setting
+     * their own click listener.
+     */
+    private class PassThroughClickListener implements OnClickListener {
+
+        private View.OnClickListener mWrapped;
+
+        /** {@inheritDoc} */
+        public void onClick(View v) {
+            onClickImpl();
+
+            if (mWrapped != null) mWrapped.onClick(v);
+        }
+    }
+
 }

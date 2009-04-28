@@ -17,7 +17,6 @@
 package android.app;
 
 import static android.app.SuggestionsAdapter.getColumnString;
-
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,8 +25,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -54,14 +53,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 
 import java.util.ArrayList;
 import java.util.WeakHashMap;
@@ -163,7 +162,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         setContentView(com.android.internal.R.layout.search_bar);
 
         theWindow.setLayout(ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+                // taking up the whole window (even when transparent) is less than ideal,
+                // but necessary to show the popup window until the window manager supports
+                // having windows anchored by their parent but not clipped by them.
+                ViewGroup.LayoutParams.FILL_PARENT);
         WindowManager.LayoutParams lp = theWindow.getAttributes();
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE;
         theWindow.setAttributes(lp);
@@ -1367,25 +1369,26 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         public boolean enoughToFilter() {
             return mThreshold <= 0 || super.enoughToFilter();
         }
-        
+
         /**
          * {@link AutoCompleteTextView#onKeyPreIme(int, KeyEvent)}) dismisses the drop-down on BACK,
          * so we must override this method to modify the BACK behavior.
          */
         @Override
         public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-            return mSearchDialog.handleBackKey(keyCode, event);
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+                if (mSearchDialog.backToPreviousComponent()) {
+                    return true;
+                }
+                return false; // will dismiss soft keyboard if necessary
+            }
+            return false;
         }
     }
     
     protected boolean handleBackKey(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-            mSearchAutoComplete.dismissDropDown();
             if (backToPreviousComponent()) {
-                return true;
-            }
-            if (!mSearchAutoComplete.isEmpty()) {
-                mSearchAutoComplete.clear();
                 return true;
             }
             cancel();
