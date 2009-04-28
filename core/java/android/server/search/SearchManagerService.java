@@ -22,7 +22,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 
 /**
@@ -116,23 +115,6 @@ public class SearchManagerService extends ISearchManager.Stub
     private void updateSearchables() {
         mSearchables.buildSearchableList();
         mSearchablesDirty = false;
-        
-        // TODO SearchableInfo should be the source of truth about whether a searchable exists.
-        // As it stands, if the package exists but is misconfigured in some way, then this
-        // would fail, and needs to be fixed.
-        ComponentName defaultSearch = new ComponentName(
-                "com.android.globalsearch", 
-                "com.android.globalsearch.GlobalSearch");
-        
-        try {
-            mContext.getPackageManager().getActivityInfo(defaultSearch, 0);
-        } catch (NameNotFoundException e) {
-            defaultSearch = new ComponentName(
-                    "com.android.googlesearch",
-                    "com.android.googlesearch.GoogleSearch");
-        }
-        
-        mSearchables.setDefaultSearchable(defaultSearch);
     }
 
     /**
