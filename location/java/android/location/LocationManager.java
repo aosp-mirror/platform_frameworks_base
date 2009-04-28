@@ -103,9 +103,6 @@ public class LocationManager {
      */
     public static final String KEY_LOCATION_CHANGED = "location";
 
-    /** @hide -- does this belong here? */
-    public static final String PROVIDER_DIR = "/data/location";
-
     /** @hide */
     public static final String SYSTEM_DIR = "/data/system/location";
 

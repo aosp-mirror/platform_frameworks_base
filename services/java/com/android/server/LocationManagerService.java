@@ -75,7 +75,6 @@ import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.LocationProviderImpl;
 import com.android.internal.location.LocationProviderProxy;
 import com.android.internal.location.MockProvider;
-import com.android.internal.location.TrackProvider;
 import com.android.server.am.BatteryStatsService;
 
 /**
@@ -538,71 +537,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             // Create a gps location provider
             mGpsLocationProvider = new GpsLocationProvider(mContext, this);
             LocationProviderImpl.addProvider(mGpsLocationProvider);
-        }
-
-        // Load fake providers if real providers are not available
-        File f = new File(LocationManager.PROVIDER_DIR);
-        if (f.isDirectory()) {
-            File[] subdirs = f.listFiles();
-            for (int i = 0; i < subdirs.length; i++) {
-                if (!subdirs[i].isDirectory()) {
-                    continue;
-                }
-
-                String name = subdirs[i].getName();
-
-                if (LOCAL_LOGV) {
-                    Log.v(TAG, "Found dir " + subdirs[i].getAbsolutePath());
-                    Log.v(TAG, "name = " + name);
-                }
-
-                // Don't create a fake provider if a real provider exists
-                if (LocationProviderImpl.getProvider(name) == null) {
-                    LocationProviderImpl provider = null;
-                    try {
-                        File classFile = new File(subdirs[i], "class");
-                        // Look for a 'class' file
-                        provider = LocationProviderImpl.loadFromClass(classFile);
-
-                        // Look for an 'kml', 'nmea', or 'track' file
-                        if (provider == null) {
-                            // Load properties from 'properties' file, if present
-                            File propertiesFile = new File(subdirs[i], "properties");
-
-                            if (propertiesFile.exists()) {
-                                provider = new TrackProvider(name, this);
-                                ((TrackProvider)provider).readProperties(propertiesFile);
-
-                                File kmlFile = new File(subdirs[i], "kml");
-                                if (kmlFile.exists()) {
-                                    ((TrackProvider) provider).readKml(kmlFile);
-                                } else {
-                                    File nmeaFile = new File(subdirs[i], "nmea");
-                                    if (nmeaFile.exists()) {
-                                        ((TrackProvider) provider).readNmea(name, nmeaFile);
-                                    } else {
-                                        File trackFile = new File(subdirs[i], "track");
-                                        if (trackFile.exists()) {
-                                            ((TrackProvider) provider).readTrack(trackFile);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (provider != null) {
-                            LocationProviderImpl.addProvider(provider);
-                        }
-                        // Grab the initial location of a TrackProvider and
-                        // store it as the last known location for that provider
-                        if (provider instanceof TrackProvider) {
-                            TrackProvider tp = (TrackProvider) provider;
-                            mLastKnownLocation.put(tp.getName(), tp.getInitialLocation());
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Exception loading provder " + name, e);
-                    }
-                }
-            }
         }
 
         updateProvidersLocked();
