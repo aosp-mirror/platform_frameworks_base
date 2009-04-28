@@ -43,7 +43,7 @@ import java.util.List;
  * class by calling {@link android.content.Context#getSystemService(java.lang.String)
  * Context.getSystemService()} with an argument of {@link android.content.Context#SENSOR_SERVICE}.
  */
-public class SensorManager extends IRotationWatcher.Stub
+public class SensorManager
 {
     private static final String TAG = "SensorManager";
     private static final float[] mTempMatrix = new float[16];
@@ -475,7 +475,13 @@ public class SensorManager extends IRotationWatcher.Stub
                     // if it's null we're running in the system process
                     // which won't get the rotated values
                     try {
-                        sRotation = sWindowManager.watchRotation(this);
+                        sRotation = sWindowManager.watchRotation(
+                            new IRotationWatcher.Stub() {
+                                public void onRotationChanged(int rotation) {
+                                    SensorManager.this.onRotationChanged(rotation);
+                                }
+                            }
+                        );
                     } catch (RemoteException e) {
                     }
                 }
@@ -1386,7 +1392,7 @@ public class SensorManager extends IRotationWatcher.Stub
             }
         }
     }
-
+    
     class LmsFilter {
         private static final int SENSORS_RATE_MS = 20;
         private static final int COUNT = 12;
@@ -1454,7 +1460,7 @@ public class SensorManager extends IRotationWatcher.Stub
         }
     }
 
-
+    
     private static native void nativeClassInit();
 
     private static native int sensors_module_init();
