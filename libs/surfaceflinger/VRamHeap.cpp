@@ -98,7 +98,7 @@ sp<MemoryDealer> SurfaceHeapManager::createHeap(
         }
     }
 
-    if (flags & ISurfaceComposer::eGPU) {
+    if ((flags & ISurfaceComposer::eGPU) && (mFlinger->getGPU() != 0)) {
         // FIXME: this is msm7201A specific, where gpu surfaces may not be secure
         if (!(flags & ISurfaceComposer::eSecure)) {
             // if GPU doesn't work, we try eHardware
