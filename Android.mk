@@ -85,8 +85,10 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
+    core/java/android/content/IContentService.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
+    core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver.aidl \

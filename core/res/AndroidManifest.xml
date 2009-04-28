@@ -1012,9 +1012,6 @@
                 android:excludeFromRecents="true">
         </activity>
 
-        <provider android:name=".content.SyncProvider"
-                android:authorities="sync" android:multiprocess="false" />
-
         <service android:name="com.android.server.LoadAverageService"
             android:exported="true" />
 

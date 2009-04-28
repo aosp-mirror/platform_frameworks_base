@@ -76,8 +76,6 @@ android.content.ContentQueryMap
 android.content.ContentQueryMap$1
 android.content.ContentResolver
 android.content.ContentResolver$CursorWrapperInner
-android.content.ContentServiceNative
-android.content.ContentServiceProxy
 android.content.ContentValues
 android.content.Context
 android.content.ContextWrapper
@@ -85,6 +83,8 @@ android.content.DialogInterface
 android.content.DialogInterface$OnCancelListener
 android.content.DialogInterface$OnDismissListener
 android.content.IContentProvider
+android.content.IContentService
+android.content.IContentService$Stub
 android.content.Intent
 android.content.Intent$1
 android.content.IntentFilter
