@@ -2959,19 +2959,16 @@ public class WebView extends AbsoluteLayout
     }
 
     private void updateTextEntry() {
-        if (mTextEntry == null) {
-            mTextEntry = new TextDialog(mContext, WebView.this);
-            // Initialize our generation number.
-            mTextGeneration = 0;
-        }
         // If we do not have focus, do nothing until we gain focus.
-        if (!hasFocus() && !mTextEntry.hasFocus()
+        if (!hasFocus() && (null == mTextEntry || !mTextEntry.hasFocus())
                 || (mTouchMode >= FIRST_SCROLL_ZOOM 
                 && mTouchMode <= LAST_SCROLL_ZOOM)) {
             mNeedsUpdateTextEntry = true;
             return;
         }
         boolean alreadyThere = inEditingMode();
+        // inEditingMode can only return true if mTextEntry is non-null,
+        // so we can safely call remove() if (alreadyThere)
         if (0 == mNativeClass || !nativeUpdateFocusNode()) {
             if (alreadyThere) {
                 mTextEntry.remove();
@@ -2984,6 +2981,13 @@ public class WebView extends AbsoluteLayout
                 mTextEntry.remove();
             }
             return;
+        }
+        // At this point, we know we have found an input field, so go ahead
+        // and create the TextDialog if necessary.
+        if (mTextEntry == null) {
+            mTextEntry = new TextDialog(mContext, WebView.this);
+            // Initialize our generation number.
+            mTextGeneration = 0;
         }
         mTextEntry.setTextSize(contentToView(node.mTextSize));
         Rect visibleRect = sendOurVisibleRect();
