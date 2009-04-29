@@ -460,8 +460,28 @@ public class ListView extends AbsListView {
      */
     @Override
     void resetList() {
+        // The parent's resetList() will remove all views from the layout so we need to
+        // cleanup the state of our footers and headers
+        clearRecycledState(mHeaderViewInfos);
+        clearRecycledState(mFooterViewInfos);
+
         super.resetList();
+
         mLayoutMode = LAYOUT_NORMAL;
+    }
+
+    private void clearRecycledState(ArrayList<FixedViewInfo> infos) {
+        if (infos != null) {
+            final int count = infos.size();
+
+            for (int i = 0; i < count; i++) {
+                final View child = infos.get(i).view;
+                final LayoutParams p = (LayoutParams) child.getLayoutParams();
+                if (p != null) {
+                    p.recycledHeaderFooter = false;
+                }
+            }
+        }
     }
 
     /**
