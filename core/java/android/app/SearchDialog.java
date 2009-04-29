@@ -57,6 +57,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -89,12 +90,16 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private static final int INSTANCE_SELECTED_BUTTON = -2;
     private static final int INSTANCE_SELECTED_QUERY = -1;
     
+    private static final int SEARCH_PLATE_LEFT_PADDING_GLOBAL = 12;
+    private static final int SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL = 7;
+    
     // interaction with runtime
     private IntentFilter mCloseDialogsFilter;
     private IntentFilter mPackageFilter;
     
     // views & widgets
     private TextView mBadgeLabel;
+    private ImageView mAppIcon;
     private SearchAutoComplete mSearchAutoComplete;
     private Button mGoButton;
     private ImageButton mVoiceButton;
@@ -167,6 +172,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mBadgeLabel = (TextView) findViewById(com.android.internal.R.id.search_badge);
         mSearchAutoComplete = (SearchAutoComplete)
                 findViewById(com.android.internal.R.id.search_src_text);
+        mAppIcon = (ImageView) findViewById(com.android.internal.R.id.search_app_icon);
         mGoButton = (Button) findViewById(com.android.internal.R.id.search_go_btn);
         mVoiceButton = (ImageButton) findViewById(com.android.internal.R.id.search_voice_btn);
         mSearchPlate = findViewById(com.android.internal.R.id.search_plate);
@@ -417,6 +423,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (isShowing()) {
             // Redraw (resources may have changed)
             updateSearchButton();
+            updateSearchAppIcon();
             updateSearchBadge();
             updateQueryHint();
         } 
@@ -429,6 +436,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (mSearchable != null) {
             updateSearchAutoComplete();
             updateSearchButton();
+            updateSearchAppIcon();
             updateSearchBadge();
             updateQueryHint();
             updateVoiceButton();
@@ -499,6 +507,34 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mGoButton.setCompoundDrawablesWithIntrinsicBounds(iconLabel, null, null, null);
     }
     
+    private void updateSearchAppIcon() {
+        if (mGlobalSearchMode) {
+            mAppIcon.setImageResource(0);
+            mAppIcon.setVisibility(View.GONE);
+            mSearchPlate.setPadding(SEARCH_PLATE_LEFT_PADDING_GLOBAL,
+                    mSearchPlate.getPaddingTop(),
+                    mSearchPlate.getPaddingRight(),
+                    mSearchPlate.getPaddingBottom());
+        } else {
+            PackageManager pm = getContext().getPackageManager();
+            Drawable icon = null;
+            try {
+                ActivityInfo info = pm.getActivityInfo(mLaunchComponent, 0);
+                icon = pm.getApplicationIcon(info.applicationInfo);
+                if (DBG) Log.d(LOG_TAG, "Using app-specific icon");
+            } catch (NameNotFoundException e) {
+                icon = pm.getDefaultActivityIcon();
+                Log.w(LOG_TAG, mLaunchComponent + " not found, using generic app icon");
+            }
+            mAppIcon.setImageDrawable(icon);
+            mAppIcon.setVisibility(View.VISIBLE);
+            mSearchPlate.setPadding(SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL,
+                    mSearchPlate.getPaddingTop(),
+                    mSearchPlate.getPaddingRight(),
+                    mSearchPlate.getPaddingBottom());
+        }
+    }
+
     /**
      * Setup the search "Badge" if requested by mode flags.
      */
@@ -517,18 +553,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             text = mActivityContext.getResources().getText(mSearchable.getLabelId()).toString();
             visibility = View.VISIBLE;
             if (DBG) Log.d(LOG_TAG, "Using badge label: " + mSearchable.getLabelId());
-        } else if (!mGlobalSearchMode) {
-            // Get the localized name of the application which we are doing search in.
-            try {
-                PackageManager pm = getContext().getPackageManager();
-                ActivityInfo info = pm.getActivityInfo(mLaunchComponent, 0);
-                text = pm.getApplicationLabel(info.applicationInfo);
-                visibility = View.VISIBLE;
-                if (DBG) Log.d(LOG_TAG, "Using application label: " + text);
-            } catch (NameNotFoundException e) {
-                // app not found, fine, don't use its name for the label
-                Log.w(LOG_TAG, mLaunchComponent + " not found.");
-            }
         }
         
         mBadgeLabel.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
