@@ -13,7 +13,7 @@ page.title=SONiVOX JETCreator User Manual
 <p>This document contains the user guidelines
 for the SONiVOX JET Creator, an authoring application for creating and
 auditioning JET files. JET is an interactive music player for small embedded
-devices, including the Google Android platform. It allows applications to
+devices, including the those running the Android platform. It allows applications to
 include interactive music soundtracks, in MIDI
 format, that respond in real-time to game play events and user interaction.</p>
 
