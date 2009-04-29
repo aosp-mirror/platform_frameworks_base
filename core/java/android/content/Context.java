@@ -1279,6 +1279,15 @@ public abstract class Context {
     public static final String APPWIDGET_SERVICE = "appwidget";
     
     /**
+     * Use with {@link #getSystemService} to retrieve an
+     * {@blink android.backup.IBackupManager IBackupManager} for communicating
+     * with the backup mechanism.
+     *
+     * @see #getSystemService
+     */
+    public static final String BACKUP_SERVICE = "backup";
+    
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

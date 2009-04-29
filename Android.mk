@@ -70,6 +70,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/ITransientNotification.aidl \
 	core/java/android/app/IWallpaperService.aidl \
 	core/java/android/app/IWallpaperServiceCallback.aidl \
+	core/java/android/backup/IBackupManager.aidl \
+	core/java/android/backup/IBackupService.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
@@ -105,6 +107,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IUsageStats.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
+	core/java/com/android/internal/backup/IBackupTransport.aidl \
 	core/java/com/android/internal/os/IResultReceiver.aidl \
 	core/java/com/android/internal/view/IInputContext.aidl \
 	core/java/com/android/internal/view/IInputContextCallback.aidl \
