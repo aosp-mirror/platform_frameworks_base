@@ -27,46 +27,5 @@ while (my $line = <>) {
   my $name = $2;
   my $args = $3;
 
-  #printf("%s", $line);
-  
-  my $prefix = "";
-  if ($name eq "glEGLImageTargetTexture2DOES") {
-    $prefix = "__";
-  }
-  if ($name eq "glEGLImageTargetRenderbufferStorageOES") {
-    $prefix = "__";
-  }
-  
-  printf("%s API_ENTRY(%s%s)(%s)", $type, $prefix, $name, $args);
-  
-  printf(" {\n");
-  if ($type eq "void") {
-    printf("    CALL_GL_API(%s", $name);
-  } else {
-    printf("    CALL_GL_API_RETURN(%s", $name);
-  }
-  my @args = split ',', $args;
-  my $len = scalar(@args);
-  for (my $num = 0; $num < $len; $num++) {
-    if ($args[$num] ne "void") {
-      print ", ";
-      #
-      # extract the name from the parameter
-      # type name
-      # const type *name
-      # type *name
-      # type name[4]
-      #
-      if ($args[$num] =~ /(\S+\s)+\**\s*([\w]+)/) {
-        printf("%s", $2);
-      }
-    }
-  }
-  printf(");\n");
-  printf("}\n");
+  printf("GL_ENTRY(%s, %s, %s)\n", $type, $name, $args);
 }
-
-
-
-
-

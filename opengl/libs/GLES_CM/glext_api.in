@@ -1,0 +1,270 @@
+void API_ENTRY(glBlendEquationSeparateOES)(GLenum modeRGB, GLenum modeAlpha) {
+    CALL_GL_API(glBlendEquationSeparateOES, modeRGB, modeAlpha);
+}
+void API_ENTRY(glBlendFuncSeparateOES)(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) {
+    CALL_GL_API(glBlendFuncSeparateOES, srcRGB, dstRGB, srcAlpha, dstAlpha);
+}
+void API_ENTRY(glBlendEquationOES)(GLenum mode) {
+    CALL_GL_API(glBlendEquationOES, mode);
+}
+void API_ENTRY(glDrawTexsOES)(GLshort x, GLshort y, GLshort z, GLshort width, GLshort height) {
+    CALL_GL_API(glDrawTexsOES, x, y, z, width, height);
+}
+void API_ENTRY(glDrawTexiOES)(GLint x, GLint y, GLint z, GLint width, GLint height) {
+    CALL_GL_API(glDrawTexiOES, x, y, z, width, height);
+}
+void API_ENTRY(glDrawTexxOES)(GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfixed height) {
+    CALL_GL_API(glDrawTexxOES, x, y, z, width, height);
+}
+void API_ENTRY(glDrawTexsvOES)(const GLshort *coords) {
+    CALL_GL_API(glDrawTexsvOES, coords);
+}
+void API_ENTRY(glDrawTexivOES)(const GLint *coords) {
+    CALL_GL_API(glDrawTexivOES, coords);
+}
+void API_ENTRY(glDrawTexxvOES)(const GLfixed *coords) {
+    CALL_GL_API(glDrawTexxvOES, coords);
+}
+void API_ENTRY(glDrawTexfOES)(GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLfloat height) {
+    CALL_GL_API(glDrawTexfOES, x, y, z, width, height);
+}
+void API_ENTRY(glDrawTexfvOES)(const GLfloat *coords) {
+    CALL_GL_API(glDrawTexfvOES, coords);
+}
+void API_ENTRY(__glEGLImageTargetTexture2DOES)(GLenum target, GLeglImageOES image) {
+    CALL_GL_API(glEGLImageTargetTexture2DOES, target, image);
+}
+void API_ENTRY(__glEGLImageTargetRenderbufferStorageOES)(GLenum target, GLeglImageOES image) {
+    CALL_GL_API(glEGLImageTargetRenderbufferStorageOES, target, image);
+}
+void API_ENTRY(glAlphaFuncxOES)(GLenum func, GLclampx ref) {
+    CALL_GL_API(glAlphaFuncxOES, func, ref);
+}
+void API_ENTRY(glClearColorxOES)(GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha) {
+    CALL_GL_API(glClearColorxOES, red, green, blue, alpha);
+}
+void API_ENTRY(glClearDepthxOES)(GLclampx depth) {
+    CALL_GL_API(glClearDepthxOES, depth);
+}
+void API_ENTRY(glClipPlanexOES)(GLenum plane, const GLfixed *equation) {
+    CALL_GL_API(glClipPlanexOES, plane, equation);
+}
+void API_ENTRY(glColor4xOES)(GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha) {
+    CALL_GL_API(glColor4xOES, red, green, blue, alpha);
+}
+void API_ENTRY(glDepthRangexOES)(GLclampx zNear, GLclampx zFar) {
+    CALL_GL_API(glDepthRangexOES, zNear, zFar);
+}
+void API_ENTRY(glFogxOES)(GLenum pname, GLfixed param) {
+    CALL_GL_API(glFogxOES, pname, param);
+}
+void API_ENTRY(glFogxvOES)(GLenum pname, const GLfixed *params) {
+    CALL_GL_API(glFogxvOES, pname, params);
+}
+void API_ENTRY(glFrustumxOES)(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
+    CALL_GL_API(glFrustumxOES, left, right, bottom, top, zNear, zFar);
+}
+void API_ENTRY(glGetClipPlanexOES)(GLenum pname, GLfixed eqn[4]) {
+    CALL_GL_API(glGetClipPlanexOES, pname, eqn);
+}
+void API_ENTRY(glGetFixedvOES)(GLenum pname, GLfixed *params) {
+    CALL_GL_API(glGetFixedvOES, pname, params);
+}
+void API_ENTRY(glGetLightxvOES)(GLenum light, GLenum pname, GLfixed *params) {
+    CALL_GL_API(glGetLightxvOES, light, pname, params);
+}
+void API_ENTRY(glGetMaterialxvOES)(GLenum face, GLenum pname, GLfixed *params) {
+    CALL_GL_API(glGetMaterialxvOES, face, pname, params);
+}
+void API_ENTRY(glGetTexEnvxvOES)(GLenum env, GLenum pname, GLfixed *params) {
+    CALL_GL_API(glGetTexEnvxvOES, env, pname, params);
+}
+void API_ENTRY(glGetTexParameterxvOES)(GLenum target, GLenum pname, GLfixed *params) {
+    CALL_GL_API(glGetTexParameterxvOES, target, pname, params);
+}
+void API_ENTRY(glLightModelxOES)(GLenum pname, GLfixed param) {
+    CALL_GL_API(glLightModelxOES, pname, param);
+}
+void API_ENTRY(glLightModelxvOES)(GLenum pname, const GLfixed *params) {
+    CALL_GL_API(glLightModelxvOES, pname, params);
+}
+void API_ENTRY(glLightxOES)(GLenum light, GLenum pname, GLfixed param) {
+    CALL_GL_API(glLightxOES, light, pname, param);
+}
+void API_ENTRY(glLightxvOES)(GLenum light, GLenum pname, const GLfixed *params) {
+    CALL_GL_API(glLightxvOES, light, pname, params);
+}
+void API_ENTRY(glLineWidthxOES)(GLfixed width) {
+    CALL_GL_API(glLineWidthxOES, width);
+}
+void API_ENTRY(glLoadMatrixxOES)(const GLfixed *m) {
+    CALL_GL_API(glLoadMatrixxOES, m);
+}
+void API_ENTRY(glMaterialxOES)(GLenum face, GLenum pname, GLfixed param) {
+    CALL_GL_API(glMaterialxOES, face, pname, param);
+}
+void API_ENTRY(glMaterialxvOES)(GLenum face, GLenum pname, const GLfixed *params) {
+    CALL_GL_API(glMaterialxvOES, face, pname, params);
+}
+void API_ENTRY(glMultMatrixxOES)(const GLfixed *m) {
+    CALL_GL_API(glMultMatrixxOES, m);
+}
+void API_ENTRY(glMultiTexCoord4xOES)(GLenum target, GLfixed s, GLfixed t, GLfixed r, GLfixed q) {
+    CALL_GL_API(glMultiTexCoord4xOES, target, s, t, r, q);
+}
+void API_ENTRY(glNormal3xOES)(GLfixed nx, GLfixed ny, GLfixed nz) {
+    CALL_GL_API(glNormal3xOES, nx, ny, nz);
+}
+void API_ENTRY(glOrthoxOES)(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
+    CALL_GL_API(glOrthoxOES, left, right, bottom, top, zNear, zFar);
+}
+void API_ENTRY(glPointParameterxOES)(GLenum pname, GLfixed param) {
+    CALL_GL_API(glPointParameterxOES, pname, param);
+}
+void API_ENTRY(glPointParameterxvOES)(GLenum pname, const GLfixed *params) {
+    CALL_GL_API(glPointParameterxvOES, pname, params);
+}
+void API_ENTRY(glPointSizexOES)(GLfixed size) {
+    CALL_GL_API(glPointSizexOES, size);
+}
+void API_ENTRY(glPolygonOffsetxOES)(GLfixed factor, GLfixed units) {
+    CALL_GL_API(glPolygonOffsetxOES, factor, units);
+}
+void API_ENTRY(glRotatexOES)(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
+    CALL_GL_API(glRotatexOES, angle, x, y, z);
+}
+void API_ENTRY(glSampleCoveragexOES)(GLclampx value, GLboolean invert) {
+    CALL_GL_API(glSampleCoveragexOES, value, invert);
+}
+void API_ENTRY(glScalexOES)(GLfixed x, GLfixed y, GLfixed z) {
+    CALL_GL_API(glScalexOES, x, y, z);
+}
+void API_ENTRY(glTexEnvxOES)(GLenum target, GLenum pname, GLfixed param) {
+    CALL_GL_API(glTexEnvxOES, target, pname, param);
+}
+void API_ENTRY(glTexEnvxvOES)(GLenum target, GLenum pname, const GLfixed *params) {
+    CALL_GL_API(glTexEnvxvOES, target, pname, params);
+}
+void API_ENTRY(glTexParameterxOES)(GLenum target, GLenum pname, GLfixed param) {
+    CALL_GL_API(glTexParameterxOES, target, pname, param);
+}
+void API_ENTRY(glTexParameterxvOES)(GLenum target, GLenum pname, const GLfixed *params) {
+    CALL_GL_API(glTexParameterxvOES, target, pname, params);
+}
+void API_ENTRY(glTranslatexOES)(GLfixed x, GLfixed y, GLfixed z) {
+    CALL_GL_API(glTranslatexOES, x, y, z);
+}
+GLboolean API_ENTRY(glIsRenderbufferOES)(GLuint renderbuffer) {
+    CALL_GL_API_RETURN(glIsRenderbufferOES, renderbuffer);
+}
+void API_ENTRY(glBindRenderbufferOES)(GLenum target, GLuint renderbuffer) {
+    CALL_GL_API(glBindRenderbufferOES, target, renderbuffer);
+}
+void API_ENTRY(glDeleteRenderbuffersOES)(GLsizei n, const GLuint* renderbuffers) {
+    CALL_GL_API(glDeleteRenderbuffersOES, n, renderbuffers);
+}
+void API_ENTRY(glGenRenderbuffersOES)(GLsizei n, GLuint* renderbuffers) {
+    CALL_GL_API(glGenRenderbuffersOES, n, renderbuffers);
+}
+void API_ENTRY(glRenderbufferStorageOES)(GLenum target, GLenum internalformat, GLsizei width, GLsizei height) {
+    CALL_GL_API(glRenderbufferStorageOES, target, internalformat, width, height);
+}
+void API_ENTRY(glGetRenderbufferParameterivOES)(GLenum target, GLenum pname, GLint* params) {
+    CALL_GL_API(glGetRenderbufferParameterivOES, target, pname, params);
+}
+GLboolean API_ENTRY(glIsFramebufferOES)(GLuint framebuffer) {
+    CALL_GL_API_RETURN(glIsFramebufferOES, framebuffer);
+}
+void API_ENTRY(glBindFramebufferOES)(GLenum target, GLuint framebuffer) {
+    CALL_GL_API(glBindFramebufferOES, target, framebuffer);
+}
+void API_ENTRY(glDeleteFramebuffersOES)(GLsizei n, const GLuint* framebuffers) {
+    CALL_GL_API(glDeleteFramebuffersOES, n, framebuffers);
+}
+void API_ENTRY(glGenFramebuffersOES)(GLsizei n, GLuint* framebuffers) {
+    CALL_GL_API(glGenFramebuffersOES, n, framebuffers);
+}
+GLenum API_ENTRY(glCheckFramebufferStatusOES)(GLenum target) {
+    CALL_GL_API_RETURN(glCheckFramebufferStatusOES, target);
+}
+void API_ENTRY(glFramebufferRenderbufferOES)(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) {
+    CALL_GL_API(glFramebufferRenderbufferOES, target, attachment, renderbuffertarget, renderbuffer);
+}
+void API_ENTRY(glFramebufferTexture2DOES)(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) {
+    CALL_GL_API(glFramebufferTexture2DOES, target, attachment, textarget, texture, level);
+}
+void API_ENTRY(glGetFramebufferAttachmentParameterivOES)(GLenum target, GLenum attachment, GLenum pname, GLint* params) {
+    CALL_GL_API(glGetFramebufferAttachmentParameterivOES, target, attachment, pname, params);
+}
+void API_ENTRY(glGenerateMipmapOES)(GLenum target) {
+    CALL_GL_API(glGenerateMipmapOES, target);
+}
+void* API_ENTRY(glMapBufferOES)(GLenum target, GLenum access) {
+    CALL_GL_API_RETURN(glMapBufferOES, target, access);
+}
+GLboolean API_ENTRY(glUnmapBufferOES)(GLenum target) {
+    CALL_GL_API_RETURN(glUnmapBufferOES, target);
+}
+void API_ENTRY(glGetBufferPointervOES)(GLenum target, GLenum pname, void** params) {
+    CALL_GL_API(glGetBufferPointervOES, target, pname, params);
+}
+void API_ENTRY(glCurrentPaletteMatrixOES)(GLuint matrixpaletteindex) {
+    CALL_GL_API(glCurrentPaletteMatrixOES, matrixpaletteindex);
+}
+void API_ENTRY(glLoadPaletteFromModelViewMatrixOES)(void) {
+    CALL_GL_API(glLoadPaletteFromModelViewMatrixOES);
+}
+void API_ENTRY(glMatrixIndexPointerOES)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) {
+    CALL_GL_API(glMatrixIndexPointerOES, size, type, stride, pointer);
+}
+void API_ENTRY(glWeightPointerOES)(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) {
+    CALL_GL_API(glWeightPointerOES, size, type, stride, pointer);
+}
+GLbitfield API_ENTRY(glQueryMatrixxOES)(GLfixed mantissa[16], GLint exponent[16]) {
+    CALL_GL_API_RETURN(glQueryMatrixxOES, mantissa, exponent);
+}
+void API_ENTRY(glDepthRangefOES)(GLclampf zNear, GLclampf zFar) {
+    CALL_GL_API(glDepthRangefOES, zNear, zFar);
+}
+void API_ENTRY(glFrustumfOES)(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
+    CALL_GL_API(glFrustumfOES, left, right, bottom, top, zNear, zFar);
+}
+void API_ENTRY(glOrthofOES)(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
+    CALL_GL_API(glOrthofOES, left, right, bottom, top, zNear, zFar);
+}
+void API_ENTRY(glClipPlanefOES)(GLenum plane, const GLfloat *equation) {
+    CALL_GL_API(glClipPlanefOES, plane, equation);
+}
+void API_ENTRY(glGetClipPlanefOES)(GLenum pname, GLfloat eqn[4]) {
+    CALL_GL_API(glGetClipPlanefOES, pname, eqn);
+}
+void API_ENTRY(glClearDepthfOES)(GLclampf depth) {
+    CALL_GL_API(glClearDepthfOES, depth);
+}
+void API_ENTRY(glTexGenfOES)(GLenum coord, GLenum pname, GLfloat param) {
+    CALL_GL_API(glTexGenfOES, coord, pname, param);
+}
+void API_ENTRY(glTexGenfvOES)(GLenum coord, GLenum pname, const GLfloat *params) {
+    CALL_GL_API(glTexGenfvOES, coord, pname, params);
+}
+void API_ENTRY(glTexGeniOES)(GLenum coord, GLenum pname, GLint param) {
+    CALL_GL_API(glTexGeniOES, coord, pname, param);
+}
+void API_ENTRY(glTexGenivOES)(GLenum coord, GLenum pname, const GLint *params) {
+    CALL_GL_API(glTexGenivOES, coord, pname, params);
+}
+void API_ENTRY(glTexGenxOES)(GLenum coord, GLenum pname, GLfixed param) {
+    CALL_GL_API(glTexGenxOES, coord, pname, param);
+}
+void API_ENTRY(glTexGenxvOES)(GLenum coord, GLenum pname, const GLfixed *params) {
+    CALL_GL_API(glTexGenxvOES, coord, pname, params);
+}
+void API_ENTRY(glGetTexGenfvOES)(GLenum coord, GLenum pname, GLfloat *params) {
+    CALL_GL_API(glGetTexGenfvOES, coord, pname, params);
+}
+void API_ENTRY(glGetTexGenivOES)(GLenum coord, GLenum pname, GLint *params) {
+    CALL_GL_API(glGetTexGenivOES, coord, pname, params);
+}
+void API_ENTRY(glGetTexGenxvOES)(GLenum coord, GLenum pname, GLfixed *params) {
+    CALL_GL_API(glGetTexGenxvOES, coord, pname, params);
+}
