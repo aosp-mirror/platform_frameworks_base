@@ -67,7 +67,7 @@ void VorbisPlayer::onFirstRef()
     LOGV("onFirstRef");
     // create playback thread
     Mutex::Autolock l(mMutex);
-    createThreadEtc(renderThread, this, "vorbis decoder");
+    createThreadEtc(renderThread, this, "vorbis decoder", ANDROID_PRIORITY_AUDIO);
     mCondition.wait(mMutex);
     if (mRenderTid > 0) {
         LOGV("render thread(%d) started", mRenderTid);
