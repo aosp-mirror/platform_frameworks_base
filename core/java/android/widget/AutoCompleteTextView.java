@@ -110,6 +110,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private final DropDownItemClickListener mDropDownItemClickListener =
             new DropDownItemClickListener();
 
+    private boolean mDropDownAlwaysVisible = false;
+
+    private boolean mDropDownDismissedOnCompletion = true;
+
     private int mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
     private boolean mOpenBefore;
 
@@ -255,6 +259,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         mDropDownAnchorId = id;
         mDropDownAnchorView = null;
     }
+<<<<<<< HEAD:core/java/android/widget/AutoCompleteTextView.java
     
     /**
      * <p>Gets the background of the auto-complete drop-down list.</p>
@@ -325,6 +330,169 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         return mDropDownHorizontalOffset;
     }
 	
+|||||||
+
+=======
+    
+    /**
+     * <p>Gets the background of the auto-complete drop-down list.</p>
+     * 
+     * @return the background drawable
+     * 
+     * @attr ref android.R.styleable#PopupWindow_popupBackground
+     *
+     * @hide Pending API council approval
+     */
+    public Drawable getDropDownBackground() {
+        return mPopup.getBackground();
+    }
+    
+    /**
+     * <p>Sets the background of the auto-complete drop-down list.</p>
+     * 
+     * @param d the drawable to set as the background
+     * 
+     * @attr ref android.R.styleable#PopupWindow_popupBackground
+     *
+     * @hide Pending API council approval
+     */
+    public void setDropDownBackgroundDrawable(Drawable d) {
+        mPopup.setBackgroundDrawable(d);
+    }
+    
+    /**
+     * <p>Sets the background of the auto-complete drop-down list.</p>
+     * 
+     * @param id the id of the drawable to set as the background
+     * 
+     * @attr ref android.R.styleable#PopupWindow_popupBackground
+     *
+     * @hide Pending API council approval
+     */
+    public void setDropDownBackgroundResource(int id) {
+        mPopup.setBackgroundDrawable(getResources().getDrawable(id));
+    }
+
+    /**
+     * <p>Sets the animation style of the auto-complete drop-down list.</p>
+     *
+     * <p>If the drop-down is showing, calling this method will take effect only
+     * the next time the drop-down is shown.</p>
+     *
+     * @param animationStyle animation style to use when the drop-down appears
+     *      and disappears.  Set to -1 for the default animation, 0 for no
+     *      animation, or a resource identifier for an explicit animation.
+     *
+     * @hide Pending API council approval
+     */
+    public void setDropDownAnimationStyle(int animationStyle) {
+        mPopup.setAnimationStyle(animationStyle);
+    }
+
+>>>>>>> f3ccf8a5a5a3f6e46781538358bddca992a70e3d:core/java/android/widget/AutoCompleteTextView.java
+    /**
+     * <p>Returns the animation style that is used when the drop-down list appears and disappears
+     * </p>
+     *
+     * @return the animation style that is used when the drop-down list appears and disappears
+     *
+     * @hide Pending API council approval
+     */
+    public int getDropDownAnimationStyle() {
+        return mPopup.getAnimationStyle();
+    }
+    
+    /**
+     * <p>Sets the vertical offset used for the auto-complete drop-down list.</p>
+     * 
+     * @param offset the vertical offset
+     *
+     * @hide Pending API council approval
+     */
+    public void setDropDownVerticalOffset(int offset) {
+        mDropDownVerticalOffset = offset;
+    }
+    
+    /**
+     * <p>Gets the vertical offset used for the auto-complete drop-down list.</p>
+     * 
+     * @return the vertical offset
+     *
+     * @hide Pending API council approval
+     */
+    public int getDropDownVerticalOffset() {
+        return mDropDownVerticalOffset;
+    }
+    
+    /**
+     * <p>Sets the horizontal offset used for the auto-complete drop-down list.</p>
+     * 
+     * @param offset the horizontal offset
+     *
+     * @hide Pending API council approval
+     */
+    public void setDropDownHorizontalOffset(int offset) {
+        mDropDownHorizontalOffset = offset;
+    }
+    
+    /**
+     * <p>Gets the horizontal offset used for the auto-complete drop-down list.</p>
+     * 
+     * @return the horizontal offset
+     *
+     * @hide Pending API council approval
+     */
+    public int getDropDownHorizontalOffset() {
+        return mDropDownHorizontalOffset;
+    }
+
+    /**
+     * @return Whether the drop-down is visible as long as there is {@link #enoughToFilter()}
+     *
+     * @hide Pending API council approval
+     */
+    public boolean isDropDownAlwaysVisible() {
+        return mDropDownAlwaysVisible;
+    }
+
+    /**
+     * Sets whether the drop-down should remain visible as long as there is there is
+     * {@link #enoughToFilter()}.  This is useful if an unknown number of results are expected
+     * to show up in the adapter sometime in the future.
+     *
+     * The drop-down will occupy the entire screen below {@link #getDropDownAnchor} regardless
+     * of the size or content of the list.  {@link #getDropDownBackground()} will fill any space
+     * that is not used by the list.
+     *
+     * @param dropDownAlwaysVisible Whether to keep the drop-down visible.
+     *
+     * @hide Pending API council approval
+     */
+    public void setDropDownAlwaysVisible(boolean dropDownAlwaysVisible) {
+        mDropDownAlwaysVisible = dropDownAlwaysVisible;
+    }
+   
+    /**
+     * Checks whether the drop-down is dismissed when a suggestion is clicked.
+     * 
+     * @hide Pending API council approval
+     */
+    public boolean isDropDownDismissedOnCompletion() {
+        return mDropDownDismissedOnCompletion;
+    }
+    
+    /**
+     * Sets whether the drop-down is dismissed when a suggestion is clicked. This is 
+     * true by default.
+     * 
+     * @param dropDownDismissedOnCompletion Whether to dismiss the drop-down.
+     * 
+     * @hide Pending API council approval
+     */
+    public void setDropDownDismissedOnCompletion(boolean dropDownDismissedOnCompletion) {
+        mDropDownDismissedOnCompletion = dropDownDismissedOnCompletion;
+    }
+ 
     /**
      * <p>Returns the number of characters the user must type before the drop
      * down list is shown.</p>
@@ -705,16 +873,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
         return ListView.INVALID_POSITION;
     }
-    
-    /**
-     * We're changing the adapter and its views so really, really clear everything out
-     * @hide - for SearchDialog only
-     */
-    public void resetListAndClearViews() {
-        if (mDropDownList != null) {
-            mDropDownList.resetListAndClearViews();
-        }
-    }
 
     /**
      * <p>Starts filtering the content of the drop down list. The filtering
@@ -786,7 +944,9 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
         }
 
-        dismissDropDown();
+        if (mDropDownDismissedOnCompletion) {
+            dismissDropDown();
+        }
     }
     
     /**
@@ -797,6 +957,42 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         return mBlockCompletion;
     }
 
+    /**
+     * Like {@link #setText(CharSequence)}, except that it can disable filtering.
+     *
+     * @param filter If <code>false</code>, no filtering will be performed
+     *        as a result of this call.
+     * 
+     * @hide Pending API council approval.
+     */
+    public void setText(CharSequence text, boolean filter) {
+        if (filter) {
+            setText(text);
+        } else {
+            mBlockCompletion = true;
+            setText(text);
+            mBlockCompletion = false;
+        }
+    }
+    
+    /**
+     * Like {@link #setTextKeepState(CharSequence)}, except that it can disable filtering.
+     *
+     * @param filter If <code>false</code>, no filtering will be performed
+     *        as a result of this call.
+     * 
+     * @hide Pending API council approval.
+     */
+    public void setTextKeepState(CharSequence text, boolean filter) {
+        if (filter) {
+            setTextKeepState(text);
+        } else {
+            mBlockCompletion = true;
+            setTextKeepState(text);
+            mBlockCompletion = false;
+        }
+    }
+    
     /**
      * <p>Performs the text completion by replacing the current text by the
      * selected item. Subclasses should override this method to avoid replacing
@@ -811,6 +1007,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         Selection.setSelection(spannable, spannable.length());
     }
 
+    /** {@inheritDoc} */
     public void onFilterComplete(int count) {
         if (mAttachCount <= 0) return;
 
@@ -821,7 +1018,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
          * to filter.
          */
 
-        if (count > 0 && enoughToFilter()) {
+        if ((count > 0 || mDropDownAlwaysVisible) && enoughToFilter()) {
             if (hasFocus() && hasWindowFocus()) {
                 showDropDown();
             }
@@ -917,10 +1114,9 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                     mDropDownVerticalOffset, widthSpec, height);
         } else {
             if (mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT) {
-                mPopup.setWindowLayoutMode(ViewGroup.LayoutParams.FILL_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                mPopup.setWindowLayoutMode(ViewGroup.LayoutParams.FILL_PARENT, 0);
             } else {
-                mPopup.setWindowLayoutMode(0, ViewGroup.LayoutParams.WRAP_CONTENT);
+                mPopup.setWindowLayoutMode(0, 0);
                 if (mDropDownWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     mPopup.setWidth(getDropDownAnchorView().getWidth());
                 } else {
@@ -1027,8 +1223,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         final int maxHeight = mPopup.getMaxAvailableHeight(this, mDropDownVerticalOffset);
         //otherHeights += dropDownView.getPaddingTop() + dropDownView.getPaddingBottom();
 
-        return mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
+        final int measuredHeight = mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
                 0, ListView.NO_POSITION, maxHeight - otherHeights, 2) + otherHeights;
+
+        return mDropDownAlwaysVisible ? maxHeight : measuredHeight;
     }
 
     private View getHintView(Context context) {

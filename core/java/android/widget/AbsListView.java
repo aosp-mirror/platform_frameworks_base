@@ -983,18 +983,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mSelectorRect.setEmpty();
         invalidate();
     }
-    
-    /**
-     * The list is empty and we need to change the layout, so *really* clear everything out.
-     * @hide - for AutoCompleteTextView & SearchDialog only
-     */
-    /* package */ void resetListAndClearViews() {
-        rememberSyncState();
-        removeAllViewsInLayout();
-        mRecycler.clear();
-        mRecycler.setViewTypeCount(mAdapter.getViewTypeCount());
-        requestLayout();
-    }
 
     @Override
     protected int computeVerticalScrollExtent() {
