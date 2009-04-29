@@ -17,6 +17,9 @@ sdk.linux_checksum=2addfd315da0ad8b5bde6b09d5ff3b06
 page.title=Android 1.5 SDK, Release 1
 @jd:body
 
+<p>For more information on this SDK release, read the
+<a href="{@docRoot}sdk/RELEASENOTES.html#1.5_r1">Release Notes</a>.</p>
+
 <h2>SDK Contents</h2>
 
 <h4>Development tools</h4>
