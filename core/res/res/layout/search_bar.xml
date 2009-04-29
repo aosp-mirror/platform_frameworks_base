@@ -22,11 +22,9 @@
     android:id="@+id/search_bar"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:paddingBottom="200dip"
-    android:orientation="vertical" 
+    android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants">
-    <!-- android:paddingBottom="200dip"  TODO MUST FIX - it's a hack to get the popup to show -->
 
     <!-- Outer layout defines the entire search bar at the top of the screen -->
     <LinearLayout
