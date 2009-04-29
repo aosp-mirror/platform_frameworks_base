@@ -140,33 +140,34 @@ public class SearchablesTest extends AndroidTestCase {
      *  getIcon works
 
      */
-    public void testSearchableMocked() {
+    public void testSearchablesListReal() {
         MyMockPackageManager mockPM = new MyMockPackageManager(mContext.getPackageManager());
         MyMockContext mockContext = new MyMockContext(mContext, mockPM);
-        Searchables searchables;
-        ArrayList<SearchableInfo> searchablesList;
-        int count;
 
-            
         // build item list with real-world source data
         mockPM.setSearchablesMode(MyMockPackageManager.SEARCHABLES_PASSTHROUGH);
-        searchables = new Searchables(mockContext);
+        Searchables searchables = new Searchables(mockContext);
         searchables.buildSearchableList();
         // tests with "real" searchables (deprecate, this should be a unit test)
-        searchablesList = searchables.getSearchablesList();
-        count = searchablesList.size();
+        ArrayList<SearchableInfo> searchablesList = searchables.getSearchablesList();
+        int count = searchablesList.size();
         assertTrue(count >= 1);         // this isn't really a unit test
         checkSearchables(searchablesList);
+    }
 
-        // build item list with mocked search data
-        // this round of tests confirms good operations with "zero" searchables found
-        // This should return either a null pointer or an empty list
+    /**
+     * This round of tests confirms good operations with "zero" searchables found
+     */
+    public void testSearchablesListEmpty() {
+        MyMockPackageManager mockPM = new MyMockPackageManager(mContext.getPackageManager());
+        MyMockContext mockContext = new MyMockContext(mContext, mockPM);
+
         mockPM.setSearchablesMode(MyMockPackageManager.SEARCHABLES_MOCK_ZERO);
-        searchables = new Searchables(mockContext);
+        Searchables searchables = new Searchables(mockContext);
         searchables.buildSearchableList();
-        searchablesList = searchables.getSearchablesList();
+        ArrayList<SearchableInfo> searchablesList = searchables.getSearchablesList();
         if (searchablesList != null) {
-            count = searchablesList.size();
+            int count = searchablesList.size();
             assertTrue(count == 0);
         }
     }
