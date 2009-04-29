@@ -234,6 +234,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     static final int SOCKET_OPEN_RETRY_MILLIS = 4 * 1000;
 
+    // The number of the required config values for broadcast SMS stored in the C struct
+    // RIL_CDMA_BroadcastServiceInfo
+    private static final int CDMA_BSI_NO_OF_INTS_STRUCT = 3;
+
+    private static final int CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES = 31;
 
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -2017,7 +2022,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE: ret =  responseInts(p); break;
             case RIL_REQUEST_CDMA_FLASH: ret =  responseVoid(p); break;
             case RIL_REQUEST_CDMA_BURST_DTMF: ret =  responseVoid(p); break;
-            case RIL_REQUEST_CDMA_SEND_SMS: ret =  responseVoid(p); break;
+            case RIL_REQUEST_CDMA_SEND_SMS: ret =  responseSMS(p); break;
             case RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE: ret =  responseVoid(p); break;
             case RIL_REQUEST_GET_BROADCAST_CONFIG: ret =  responseBR_SMS_CNF(p); break;
             case RIL_REQUEST_SET_BROADCAST_CONFIG: ret =  responseVoid(p); break;
@@ -2738,16 +2743,37 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     private Object
     responseCDMA_BR_CNF(Parcel p) {
-        int numInts;
+        int numServiceCategories;
         int response[];
 
-        numInts = p.readInt();
+        numServiceCategories = p.readInt();
 
-        response = new int[numInts];
+        if (numServiceCategories == 0) {
+            int numInts;
+            numInts = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES * CDMA_BSI_NO_OF_INTS_STRUCT + 1;
+            response = new int[numInts];
 
-        response[0] = numInts;
-        for (int i = 1 ; i < numInts; i++) {
-            response[i] = p.readInt();
+            // indicate that a zero length table was received
+            response[0] = 0;
+            //for all supported service categories set 'english' as default language
+            //and selection status to false
+            for (int i = 1, j = 1
+                    ; i <= (CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES
+                                * CDMA_BSI_NO_OF_INTS_STRUCT)
+                                        ; i += CDMA_BSI_NO_OF_INTS_STRUCT, j++ ) {
+                response[i] = j;
+                response[i+1] = 1;
+                response[i+2] = 0;
+            }
+        } else {
+            int numInts;
+            numInts = numServiceCategories * CDMA_BSI_NO_OF_INTS_STRUCT + 1;
+            response = new int[numInts];
+
+            response[0] = numServiceCategories;
+            for (int i = 1 ; i < numInts; i++) {
+                 response[i] = p.readInt();
+             }
         }
 
         return response;
@@ -3036,9 +3062,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message response) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG, response);
 
-        for(int i = 0; i < configValuesArray.length; i++) {
+        rr.mp.writeInt(configValuesArray[0]);
+        for(int i = 1; i <= (configValuesArray[0] * 3); i++) {
             rr.mp.writeInt(configValuesArray[i]);
         }
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 
         send(rr);
     }
@@ -3048,6 +3077,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         rr.mp.writeInt(1);
         rr.mp.writeInt(activate);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 
         send(rr);
     }
