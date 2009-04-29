@@ -440,9 +440,13 @@ public final class PendingIntent implements Parcelable {
 
     @Override
     public String toString() {
-        return "PendingIntent{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " target " + (mTarget != null ? mTarget.asBinder() : null) + "}";
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("PendingIntent{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(": ");
+        sb.append(mTarget != null ? mTarget.asBinder() : null);
+        sb.append('}');
+        return sb.toString();
     }
     
     public int describeContents() {

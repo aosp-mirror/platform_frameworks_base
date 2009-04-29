@@ -7890,24 +7890,24 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
             pw.println("Activities in Current Activity Manager State:");
-            dumpHistoryList(pw, mHistory, "  ", "History", true);
+            dumpHistoryList(pw, mHistory, "  ", "Hist", true);
             pw.println(" ");
             pw.println("  Running activities (most recent first):");
-            dumpHistoryList(pw, mLRUActivities, "  ", "Running", false);
+            dumpHistoryList(pw, mLRUActivities, "  ", "Run", false);
             if (mWaitingVisibleActivities.size() > 0) {
                 pw.println(" ");
                 pw.println("  Activities waiting for another to become visible:");
-                dumpHistoryList(pw, mWaitingVisibleActivities, "  ", "Waiting", false);
+                dumpHistoryList(pw, mWaitingVisibleActivities, "  ", "Wait", false);
             }
             if (mStoppingActivities.size() > 0) {
                 pw.println(" ");
                 pw.println("  Activities waiting to stop:");
-                dumpHistoryList(pw, mStoppingActivities, "  ", "Stopping", false);
+                dumpHistoryList(pw, mStoppingActivities, "  ", "Stop", false);
             }
             if (mFinishingActivities.size() > 0) {
                 pw.println(" ");
                 pw.println("  Activities waiting to finish:");
-                dumpHistoryList(pw, mFinishingActivities, "  ", "Finishing", false);
+                dumpHistoryList(pw, mFinishingActivities, "  ", "Fin", false);
             }
 
             pw.println(" ");
@@ -7922,7 +7922,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
                 final int N = mRecentTasks.size();
                 for (int i=0; i<N; i++) {
-                    pw.println("  Recent Task #" + i);
+                    TaskRecord tr = mRecentTasks.get(i);
+                    pw.print("  * Recent #"); pw.print(i); pw.print(": ");
+                            pw.println(tr);
                     mRecentTasks.get(i).dump(pw, "    ");
                 }
             }
@@ -7944,8 +7946,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         needSep = true;
                     }
                     ProcessRecord r = procs.valueAt(ia);
-                    pw.print(r.persistent ? "  *PERSISTENT* Process [" : "  Process [");
-                    pw.print(r.processName); pw.print("] UID "); pw.println(procs.keyAt(ia));
+                    pw.print(r.persistent ? "  *PERS*" : "  *APP*");
+                        pw.print(" UID "); pw.print(procs.keyAt(ia));
+                        pw.print(" "); pw.println(r);
                     r.dump(pw, "    ");
                     if (r.persistent) {
                         numPers++;
@@ -7958,7 +7961,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 needSep = true;
                 pw.println("  Running processes (most recent first):");
                 dumpProcessList(pw, mLRUProcesses, "    ",
-                        "Running Norm Proc", "Running PERS Proc", true);
+                        "App ", "PERS", true);
                 needSep = true;
             }
 
@@ -7968,8 +7971,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     needSep = true;
                     pw.println("  PID mappings:");
                     for (int i=0; i<mPidsSelfLocked.size(); i++) {
-                        pw.println("    PID #" + mPidsSelfLocked.keyAt(i)
-                                + ": " + mPidsSelfLocked.valueAt(i));
+                        pw.print("    PID #"); pw.print(mPidsSelfLocked.keyAt(i));
+                            pw.print(": "); pw.println(mPidsSelfLocked.valueAt(i));
                     }
                 }
             }
@@ -7979,8 +7982,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 needSep = true;
                 pw.println("  Foreground Processes:");
                 for (int i=0; i<mForegroundProcesses.size(); i++) {
-                    pw.println("    PID #" + mForegroundProcesses.keyAt(i)
-                            + ": " + mForegroundProcesses.valueAt(i));
+                    pw.print("    PID #"); pw.print(mForegroundProcesses.keyAt(i));
+                            pw.print(": "); pw.println(mForegroundProcesses.valueAt(i));
                 }
             }
             
@@ -7989,7 +7992,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 needSep = true;
                 pw.println("  Persisent processes that are starting:");
                 dumpProcessList(pw, mPersistentStartingProcesses, "    ",
-                        "Starting Initial Proc", "Restarting PERS Proc", false);
+                        "Starting Norm", "Restarting PERS", false);
             }
 
             if (mStartingProcesses.size() > 0) {
@@ -7997,7 +8000,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 needSep = true;
                 pw.println("  Processes that are starting:");
                 dumpProcessList(pw, mStartingProcesses, "    ",
-                        "Starting Norm Proc", "Starting PERS Proc", false);
+                        "Starting Norm", "Starting PERS", false);
             }
 
             if (mRemovedProcesses.size() > 0) {
@@ -8005,7 +8008,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 needSep = true;
                 pw.println("  Processes that are being removed:");
                 dumpProcessList(pw, mRemovedProcesses, "    ",
-                        "Removed Norm Proc", "Removed PERS Proc", false);
+                        "Removed Norm", "Removed PERS", false);
             }
             
             if (mProcessesOnHold.size() > 0) {
@@ -8013,7 +8016,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 needSep = true;
                 pw.println("  Processes that are on old until the system is ready:");
                 dumpProcessList(pw, mProcessesOnHold, "    ",
-                        "OnHold Norm Proc", "OnHold PERS Proc", false);
+                        "OnHold Norm", "OnHold PERS", false);
             }
 
             if (mProcessCrashTimes.getMap().size() > 0) {
@@ -8026,10 +8029,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     SparseArray<Long> uids = procs.getValue();
                     final int N = uids.size();
                     for (int i=0; i<N; i++) {
-                        pw.println("    Process " + procs.getKey()
-                                + " uid " + uids.keyAt(i)
-                                + ": last crashed "
-                                + (now-uids.valueAt(i)) + " ms ago");
+                        pw.print("    Process "); pw.print(procs.getKey());
+                                pw.print(" uid "); pw.print(uids.keyAt(i));
+                                pw.print(": last crashed ");
+                                pw.print((now-uids.valueAt(i)));
+                                pw.println(" ms ago");
                     }
                 }
             }
@@ -8043,9 +8047,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     SparseArray<Long> uids = procs.getValue();
                     final int N = uids.size();
                     for (int i=0; i<N; i++) {
-                        pw.println("    Bad process " + procs.getKey()
-                                + " uid " + uids.keyAt(i)
-                                + ": crashed at time " + uids.valueAt(i));
+                        pw.print("    Bad process "); pw.print(procs.getKey());
+                                pw.print(" uid "); pw.print(uids.keyAt(i));
+                                pw.print(": crashed at time ");
+                                pw.println(uids.valueAt(i));
                     }
                 }
             }
@@ -8144,14 +8149,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Iterator it = mRegisteredReceivers.values().iterator();
                 while (it.hasNext()) {
                     ReceiverList r = (ReceiverList)it.next();
-                    pw.println("  Receiver " + r.receiver);
+                    pw.print("  * "); pw.println(r);
                     r.dump(pw, "    ");
                 }
             }
 
             pw.println(" ");
             pw.println("Receiver Resolver Table:");
-            mReceiverResolver.dump(new PrintWriterPrinter(pw), "  ");
+            mReceiverResolver.dump(pw, "  ");
             
             if (mParallelBroadcasts.size() > 0 || mOrderedBroadcasts.size() > 0
                     || mPendingBroadcast != null) {
@@ -8185,13 +8190,23 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mStickyBroadcasts != null) {
                 pw.println(" ");
                 pw.println("  Sticky broadcasts:");
+                StringBuilder sb = new StringBuilder(128);
                 for (Map.Entry<String, ArrayList<Intent>> ent
                         : mStickyBroadcasts.entrySet()) {
-                    pw.println("  Sticky action " + ent.getKey() + ":");
+                    pw.print("  * Sticky action "); pw.print(ent.getKey());
+                            pw.println(":");
                     ArrayList<Intent> intents = ent.getValue();
                     final int N = intents.size();
                     for (int i=0; i<N; i++) {
-                        pw.println("    " + intents.get(i));
+                        sb.setLength(0);
+                        sb.append("    Intent: ");
+                        intents.get(i).toShortString(sb, true, false);
+                        pw.println(sb.toString());
+                        Bundle bundle = intents.get(i).getExtras();
+                        if (bundle != null) {
+                            pw.print("      ");
+                            pw.println(bundle.toString());
+                        }
                     }
                 }
             }
@@ -8222,7 +8237,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Iterator<ServiceRecord> it = mServices.values().iterator();
                 while (it.hasNext()) {
                     ServiceRecord r = it.next();
-                    pw.println("  Service " + r.shortName);
+                    pw.print("  * "); pw.println(r);
                     r.dump(pw, "    ");
                 }
                 needSep = true;
@@ -8233,7 +8248,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 pw.println("  Pending services:");
                 for (int i=0; i<mPendingServices.size(); i++) {
                     ServiceRecord r = mPendingServices.get(i);
-                    pw.println("  Pending Service " + r.shortName);
+                    pw.print("  * Pending "); pw.println(r);
                     r.dump(pw, "    ");
                 }
                 needSep = true;
@@ -8244,7 +8259,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 pw.println("  Restarting services:");
                 for (int i=0; i<mRestartingServices.size(); i++) {
                     ServiceRecord r = mRestartingServices.get(i);
-                    pw.println("  Restarting Service " + r.shortName);
+                    pw.print("  * Restarting "); pw.println(r);
                     r.dump(pw, "    ");
                 }
                 needSep = true;
@@ -8255,7 +8270,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 pw.println("  Stopping services:");
                 for (int i=0; i<mStoppingServices.size(); i++) {
                     ServiceRecord r = mStoppingServices.get(i);
-                    pw.println("  Stopping Service " + r.shortName);
+                    pw.print("  * Stopping "); pw.println(r);
                     r.dump(pw, "    ");
                 }
                 needSep = true;
@@ -8268,8 +8283,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         = mServiceConnections.values().iterator();
                 while (it.hasNext()) {
                     ConnectionRecord r = it.next();
-                    pw.println("  " + r.binding.service.shortName
-                          + " -> " + r.conn.asBinder());
+                    pw.print("  * "); pw.println(r);
                     r.dump(pw, "    ");
                 }
             }
@@ -8292,18 +8306,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             boolean needSep = false;
 
-            if (mProvidersByName.size() > 0) {
-                pw.println("  Published content providers (by name):");
-                Iterator it = mProvidersByName.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry e = (Map.Entry)it.next();
-                    ContentProviderRecord r = (ContentProviderRecord)e.getValue();
-                    pw.println("  Provider " + (String)e.getKey());
-                    r.dump(pw, "    ");
-                }
-                needSep = true;
-            }
-
             if (mProvidersByClass.size() > 0) {
                 if (needSep) pw.println(" ");
                 pw.println("  Published content providers (by class):");
@@ -8311,8 +8313,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 while (it.hasNext()) {
                     Map.Entry e = (Map.Entry)it.next();
                     ContentProviderRecord r = (ContentProviderRecord)e.getValue();
-                    pw.println("  Provider " + (String)e.getKey());
+                    pw.print("  * "); pw.println(r);
                     r.dump(pw, "    ");
+                }
+                needSep = true;
+            }
+
+            if (mProvidersByName.size() > 0) {
+                pw.println(" ");
+                pw.println("  Authority to provider mappings:");
+                Iterator it = mProvidersByName.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry e = (Map.Entry)it.next();
+                    ContentProviderRecord r = (ContentProviderRecord)e.getValue();
+                    pw.print("  "); pw.print(e.getKey()); pw.print(": ");
+                            pw.println(r);
                 }
                 needSep = true;
             }
@@ -8321,21 +8336,25 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (needSep) pw.println(" ");
                 pw.println("  Launching content providers:");
                 for (int i=mLaunchingProviders.size()-1; i>=0; i--) {
-                    pw.println("  Provider #" + i + ":");
-                    ((ContentProviderRecord)mLaunchingProviders.get(i)).dump(pw, "    ");
+                    pw.print("  Launching #"); pw.print(i); pw.print(": ");
+                            pw.println(mLaunchingProviders.get(i));
                 }
                 needSep = true;
             }
 
-            pw.println();
-            pw.println("Granted Uri Permissions:");
-            for (int i=0; i<mGrantedUriPermissions.size(); i++) {
-                int uid = mGrantedUriPermissions.keyAt(i);
-                HashMap<Uri, UriPermission> perms
-                        = mGrantedUriPermissions.valueAt(i);
-                pw.println("  Uris granted to uid " + uid + ":");
-                for (UriPermission perm : perms.values()) {
-                    perm.dump(pw, "    ");
+            if (mGrantedUriPermissions.size() > 0) {
+                pw.println();
+                pw.println("Granted Uri Permissions:");
+                for (int i=0; i<mGrantedUriPermissions.size(); i++) {
+                    int uid = mGrantedUriPermissions.keyAt(i);
+                    HashMap<Uri, UriPermission> perms
+                            = mGrantedUriPermissions.valueAt(i);
+                    pw.print("  * UID "); pw.print(uid);
+                            pw.println(" holds:");
+                    for (UriPermission perm : perms.values()) {
+                        pw.print("    "); pw.println(perm);
+                        perm.dump(pw, "      ");
+                    }
                 }
             }
         }
@@ -8353,7 +8372,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
 
-            pw.println("Intent Senders in Current Activity Manager State:");
+            pw.println("Pending Intents in Current Activity Manager State:");
 
             if (this.mIntentSenderRecords.size() > 0) {
                 Iterator<WeakReference<PendingIntentRecord>> it
@@ -8362,10 +8381,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     WeakReference<PendingIntentRecord> ref = it.next();
                     PendingIntentRecord rec = ref != null ? ref.get(): null;
                     if (rec != null) {
-                        pw.println("  IntentSender " + rec);
+                        pw.print("  * "); pw.println(rec);
                         rec.dump(pw, "    ");
                     } else {
-                        pw.println("  IntentSender " + ref);
+                        pw.print("  * "); pw.print(ref);
                     }
                 }
             }
@@ -8377,24 +8396,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         TaskRecord lastTask = null;
         for (int i=list.size()-1; i>=0; i--) {
             HistoryRecord r = (HistoryRecord)list.get(i);
+            final boolean full = complete || !r.inHistory;
             if (lastTask != r.task) {
                 lastTask = r.task;
-                if (complete || !r.inHistory) {
+                pw.print(prefix);
+                pw.print(full ? "* " : "  ");
+                pw.println(lastTask);
+                if (full) {
                     lastTask.dump(pw, prefix + "  ");
-                } else {
-                    pw.print(prefix);
-                    pw.print("  ");
-                    pw.println(lastTask);
                 }
             }
-            if (complete || !r.inHistory) {
-                pw.print(prefix); pw.print("    "); pw.print(label);
-                        pw.print(" #"); pw.print(i); pw.println(":");
+            pw.print(prefix); pw.print(full ? "  * " : "    "); pw.print(label);
+            pw.print(" #"); pw.print(i); pw.print(": ");
+            pw.println(r);
+            if (full) {
                 r.dump(pw, prefix + "      ");
-            } else {
-                pw.print(prefix); pw.print("    "); pw.print(label);
-                        pw.print(" #"); pw.print(i); pw.print(": ");
-                        pw.println(r);
             }
         }
     }

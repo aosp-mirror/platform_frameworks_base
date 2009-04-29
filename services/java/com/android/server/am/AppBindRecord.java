@@ -32,9 +32,12 @@ class AppBindRecord {
                                     // All ConnectionRecord for this client.
 
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
         pw.println(prefix + "service=" + service);
         pw.println(prefix + "client=" + client);
+        dumpInIntentBind(pw, prefix);
+    }
+
+    void dumpInIntentBind(PrintWriter pw, String prefix) {
         if (connections.size() > 0) {
             pw.println(prefix + "Per-process Connections:");
             Iterator<ConnectionRecord> it = connections.iterator();

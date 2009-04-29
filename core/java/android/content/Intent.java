@@ -4391,12 +4391,35 @@ public class Intent implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder   b = new StringBuilder();
+        StringBuilder   b = new StringBuilder(128);
 
-        b.append("Intent {");
-        if (mAction != null) b.append(" action=").append(mAction);
+        b.append("Intent { ");
+        toShortString(b, true, true);
+        b.append(" }");
+
+        return b.toString();
+    }
+
+    /** @hide */
+    public String toShortString(boolean comp, boolean extras) {
+        StringBuilder   b = new StringBuilder(128);
+        toShortString(b, comp, extras);
+        return b.toString();
+    }
+    
+    /** @hide */
+    public void toShortString(StringBuilder b, boolean comp, boolean extras) {
+        boolean first = true;
+        if (mAction != null) {
+            b.append("act=").append(mAction);
+            first = false;
+        }
         if (mCategories != null) {
-            b.append(" categories={");
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("cat=[");
             Iterator<String> i = mCategories.iterator();
             boolean didone = false;
             while (i.hasNext()) {
@@ -4404,20 +4427,48 @@ public class Intent implements Parcelable {
                 didone = true;
                 b.append(i.next());
             }
-            b.append("}");
+            b.append("]");
         }
-        if (mData != null) b.append(" data=").append(mData);
-        if (mType != null) b.append(" type=").append(mType);
-        if (mFlags != 0) b.append(" flags=0x").append(Integer.toHexString(mFlags));
-        if (mComponent != null) b.append(" comp=").append(mComponent.toShortString());
-        if (mExtras != null) b.append(" (has extras)");
-        b.append(" }");
-
-        return b.toString();
+        if (mData != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("dat=").append(mData);
+        }
+        if (mType != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("typ=").append(mType);
+        }
+        if (mFlags != 0) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("flg=0x").append(Integer.toHexString(mFlags));
+        }
+        if (comp && mComponent != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("cmp=").append(mComponent.flattenToShortString());
+        }
+        if (extras && mExtras != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("(has extras)");
+        }
     }
 
     public String toURI() {
-        StringBuilder uri = new StringBuilder(mData != null ? mData.toString() : "");
+        StringBuilder uri = new StringBuilder(128);
+        if (mData != null) uri.append(mData.toString());
 
         uri.append("#Intent;");
 

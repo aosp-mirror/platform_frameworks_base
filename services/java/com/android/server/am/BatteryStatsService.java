@@ -302,7 +302,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                 }
             }
             if (isCheckin) mStats.dumpCheckinLocked(pw, args);
-            else mStats.dumpLocked(new PrintWriterPrinter(pw));
+            else mStats.dumpLocked(pw);
         }
     }
 }
