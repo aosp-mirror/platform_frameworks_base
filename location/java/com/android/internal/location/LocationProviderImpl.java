@@ -25,7 +25,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * An abstract superclass for location provider implementations.
@@ -62,8 +61,8 @@ public abstract class LocationProviderImpl extends LocationProvider {
         sProvidersByName.remove(provider.getName());
     }
 
-    public static List<LocationProviderImpl> getProviders() {
-        return new ArrayList<LocationProviderImpl>(sProviders);
+    public static ArrayList<LocationProviderImpl> getProviders() {
+        return sProviders;
     }
 
     public static LocationProviderImpl getProvider(String name) {

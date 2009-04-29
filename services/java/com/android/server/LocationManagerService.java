@@ -703,10 +703,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (LOCAL_LOGV) {
             Log.v(TAG, "getAllProviders");
         }
-        List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
+        ArrayList<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
         ArrayList<String> out = new ArrayList<String>(providers.size());
-
-        for (LocationProviderImpl p : providers) {
+        for (int i = providers.size() - 1; i >= 0; i--) {
+            LocationProviderImpl p = providers.get(i);
             out.add(p.getName());
         }
         return out;
@@ -729,10 +729,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (LOCAL_LOGV) {
             Log.v(TAG, "getProviders");
         }
-        List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
-        ArrayList<String> out = new ArrayList<String>();
-
-        for (LocationProviderImpl p : providers) {
+        ArrayList<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
+        ArrayList<String> out = new ArrayList<String>(providers.size());
+        for (int i = providers.size() - 1; i >= 0; i--) {
+            LocationProviderImpl p = providers.get(i);
             String name = p.getName();
             if (isAllowedProviderSafe(name)) {
                 if (enabledOnly && !isAllowedBySettingsLocked(name)) {
@@ -745,7 +745,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private void updateProvidersLocked() {
-        for (LocationProviderImpl p : LocationProviderImpl.getProviders()) {
+        ArrayList<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
+        for (int i = providers.size() - 1; i >= 0; i--) {
+            LocationProviderImpl p = providers.get(i);
             boolean isEnabled = p.isEnabled();
             String name = p.getName();
             boolean shouldBeEnabled = isAllowedBySettingsLocked(name);
@@ -1718,8 +1720,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
                 // Notify location providers of current network state
                 synchronized (mLock) {
-                    List<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
-                    for (LocationProviderImpl provider : providers) {
+                    ArrayList<LocationProviderImpl> providers = LocationProviderImpl.getProviders();
+                    for (int i = providers.size() - 1; i >= 0; i--) {
+                        LocationProviderImpl provider = providers.get(i);
                         if (provider.requiresNetwork()) {
                             provider.updateNetworkState(mNetworkState);
                         }
