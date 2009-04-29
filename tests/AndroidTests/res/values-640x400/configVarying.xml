@@ -15,8 +15,8 @@
 -->
 
 <resources>
-    <item type="configVarying" name="simple">simple portrait</item>
+    <item type="configVarying" name="simple">simple 640x400</item>
     <bag type="configVarying" name="bag">
-        <item name="testString">bag portrait</item>
+        <item name="testString">bag 640x400</item>
     </bag>
 </resources>

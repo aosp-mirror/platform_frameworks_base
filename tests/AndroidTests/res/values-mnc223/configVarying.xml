@@ -15,8 +15,8 @@
 -->
 
 <resources>
-    <item type="configVarying" name="simple">simple keyshidden</item>
+    <item type="configVarying" name="simple">simple mnc223</item>
     <bag type="configVarying" name="bag">
-        <item name="testString">bag keyshidden</item>
+        <item name="testString">bag mnc223</item>
     </bag>
 </resources>

@@ -15,8 +15,8 @@
 -->
 
 <resources>
-    <item type="configVarying" name="simple">simple trackball</item>
+    <item type="configVarying" name="simple">simple mnc222 32dpi</item>
     <bag type="configVarying" name="bag">
-        <item name="testString">bag trackball</item>
+        <item name="testString">bag mnc222 32dpi</item>
     </bag>
 </resources>
