@@ -194,6 +194,11 @@ public class LocationManager {
                     mListener.onProviderDisabled((String) msg.obj);
                     break;
             }
+            try {
+                mService.locationCallbackFinished(this);
+            } catch (RemoteException e) {
+                Log.e(TAG, "locationCallbackFinished: RemoteException", e);
+            }
         }
     }
     /**
