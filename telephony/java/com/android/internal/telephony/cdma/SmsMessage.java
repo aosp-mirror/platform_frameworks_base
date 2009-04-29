@@ -40,10 +40,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
-import static android.telephony.SmsMessage.ENCODING_7BIT;
-import static android.telephony.SmsMessage.ENCODING_8BIT;
-import static android.telephony.SmsMessage.ENCODING_16BIT;
-import static android.telephony.SmsMessage.ENCODING_UNKNOWN;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
 import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS;
@@ -685,41 +681,22 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Parses the User Data of an SMS.
+     * Copy parsed user data out from internal datastructures.
      */
     private void parseUserData(UserData uData) {
-        int encodingType;
-
-        if (null == uData) {
+        if (uData == null) {
             return;
         }
 
-        encodingType = uData.msgEncoding;
-
-        // insert DCS-decoding here when type is supported by ril-library
-
         userData = uData.payload;
         userDataHeader = uData.userDataHeader;
-
-        switch (encodingType) {
-        case UserData.ENCODING_GSM_7BIT_ALPHABET:
-        case UserData.ENCODING_7BIT_ASCII:
-        case UserData.ENCODING_UNICODE_16:
-            // user data was already decoded by wmsts-library
-            messageBody = new String(userData);
-            break;
-
-        // data and unsupported encodings:
-        case UserData.ENCODING_OCTET:
-        default:
-            messageBody = null;
-            break;
-        }
-
-        if (Config.LOGV) Log.v(LOG_TAG, "SMS message body (raw): '" + messageBody + "'");
+        messageBody = uData.payloadStr;
 
         if (messageBody != null) {
+            if (Config.LOGV) Log.v(LOG_TAG, "SMS message body: '" + messageBody + "'");
             parseMessageBody();
+        } else if ((userData != null) && (Config.LOGV)) {
+            Log.v(LOG_TAG, "SMS payload: '" + IccUtils.bytesToHexString(userData) + "'");
         }
     }
 
@@ -727,7 +704,7 @@ public class SmsMessage extends SmsMessageBase {
      * {@inheritDoc}
      */
     public MessageClass getMessageClass() {
-        if (BearerData.DISPLAY_IMMEDIATE == mBearerData.displayMode ) {
+        if (BearerData.DISPLAY_MODE_IMMEDIATE == mBearerData.displayMode ) {
             return MessageClass.CLASS_0;
         } else {
             return MessageClass.UNKNOWN;
@@ -779,9 +756,6 @@ public class SmsMessage extends SmsMessageBase {
         mBearerData.userAckReq = false;
         mBearerData.readAckReq = false;
         mBearerData.reportReq = false;
-
-        // Set the display mode (See C.S0015-B, v2.0, 4.5.16)
-        mBearerData.displayMode = BearerData.DISPLAY_DEFAULT;
 
         // number of messages: not needed for encoding!
 

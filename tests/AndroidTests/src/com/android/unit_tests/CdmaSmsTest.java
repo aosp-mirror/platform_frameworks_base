@@ -264,10 +264,152 @@ public class CdmaSmsTest extends AndroidTestCase {
                      HexDump.toHexString(revBearerData.timeStamp));
     }
 
-    // XXX test messageId
+    @SmallTest
+    public void testPrivacyIndicator() throws Exception {
+        String pdu1 = "0003104090010c485f4194dfea34becf61b840090140";
+        BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
+        assertEquals(bd1.privacy, BearerData.PRIVACY_RESTRICTED);
+        String pdu2 = "0003104090010c485f4194dfea34becf61b840090180";
+        BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
+        assertEquals(bd2.privacy, BearerData.PRIVACY_CONFIDENTIAL);
+        String pdu3 = "0003104090010c485f4194dfea34becf61b8400901c0";
+        BearerData bd3 = BearerData.decode(HexDump.hexStringToByteArray(pdu3));
+        assertEquals(bd3.privacy, BearerData.PRIVACY_SECRET);
+    }
 
-    // String pdu1 = "0003104090010d4866a794e07055965b91d040300c0100"; sid 12
-    // String pdu1 = "0003104090011748bea794e0731436ef3bd7c2e0352eef27a1c263fe58080d0101"; sid 13
-    // Log.d(LOG_TAG, "revBearerData -- " + revBearerData);
+    @SmallTest
+    public void testPrivacyIndicatorFeedback() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 0;
+        bearerData.hasUserDataHeader = false;
+        String payloadStr = "test privacy indicator";
+        bearerData.userData = makeUserData(payloadStr);
+        bearerData.privacy = BearerData.PRIVACY_SECRET;
+        bearerData.privacyIndicatorSet = true;
+        byte []encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.privacyIndicatorSet, true);
+        assertEquals(revBearerData.privacy, BearerData.PRIVACY_SECRET);
+        bearerData.privacy = BearerData.PRIVACY_RESTRICTED;
+        encodedSms = BearerData.encode(bearerData);
+        revBearerData = BearerData.decode(encodedSms);
+        assertEquals(revBearerData.privacy, BearerData.PRIVACY_RESTRICTED);
+    }
 
+    @SmallTest
+    public void testMsgDeliveryAlert() throws Exception {
+        String pdu1 = "0003104090010d4866a794e07055965b91d040300c0100";
+        BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
+        assertEquals(bd1.alert, 0);
+        assertEquals(bd1.userData.payloadStr, "Test Alert 0");
+        String pdu2 = "0003104090010d4866a794e07055965b91d140300c0140";
+        BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
+        assertEquals(bd2.alert, 1);
+        assertEquals(bd2.userData.payloadStr, "Test Alert 1");
+        String pdu3 = "0003104090010d4866a794e07055965b91d240300c0180";
+        BearerData bd3 = BearerData.decode(HexDump.hexStringToByteArray(pdu3));
+        assertEquals(bd3.alert, 2);
+        assertEquals(bd3.userData.payloadStr, "Test Alert 2");
+        String pdu4 = "0003104090010d4866a794e07055965b91d340300c01c0";
+        BearerData bd4 = BearerData.decode(HexDump.hexStringToByteArray(pdu4));
+        assertEquals(bd4.alert, 3);
+        assertEquals(bd4.userData.payloadStr, "Test Alert 3");
+    }
+
+    @SmallTest
+    public void testMsgDeliveryAlertFeedback() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 0;
+        bearerData.hasUserDataHeader = false;
+        String payloadStr = "test message delivery alert";
+        bearerData.userData = makeUserData(payloadStr);
+        bearerData.alert = BearerData.ALERT_MEDIUM_PRIO;
+        bearerData.alertIndicatorSet = true;
+        byte []encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.alertIndicatorSet, true);
+        assertEquals(revBearerData.alert, bearerData.alert);
+        bearerData.alert = BearerData.ALERT_HIGH_PRIO;
+        encodedSms = BearerData.encode(bearerData);
+        revBearerData = BearerData.decode(encodedSms);
+        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.alertIndicatorSet, true);
+        assertEquals(revBearerData.alert, bearerData.alert);
+    }
+
+    @SmallTest
+    public void testLanguageIndicator() throws Exception {
+        String pdu1 = "0003104090011748bea794e0731436ef3bd7c2e0352eef27a1c263fe58080d0101";
+        BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
+        assertEquals(bd1.userData.payloadStr, "Test Language indicator");
+        assertEquals(bd1.language, BearerData.LANGUAGE_ENGLISH);
+        String pdu2 = "0003104090011748bea794e0731436ef3bd7c2e0352eef27a1c263fe58080d0106";
+        BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
+        assertEquals(bd2.userData.payloadStr, "Test Language indicator");
+        assertEquals(bd2.language, BearerData.LANGUAGE_CHINESE);
+    }
+
+    @SmallTest
+    public void testLanguageIndicatorFeedback() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 0;
+        bearerData.hasUserDataHeader = false;
+        String payloadStr = "test language indicator";
+        bearerData.userData = makeUserData(payloadStr);
+        bearerData.language = BearerData.LANGUAGE_ENGLISH;
+        bearerData.languageIndicatorSet = true;
+        byte []encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.languageIndicatorSet, true);
+        assertEquals(revBearerData.language, bearerData.language);
+        bearerData.language = BearerData.LANGUAGE_KOREAN;
+        encodedSms = BearerData.encode(bearerData);
+        revBearerData = BearerData.decode(encodedSms);
+        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.languageIndicatorSet, true);
+        assertEquals(revBearerData.language, bearerData.language);
+    }
+
+    @SmallTest
+    public void testDisplayMode() throws Exception {
+        String pdu1 = "0003104090010c485f4194dfea34becf61b8400f0100";
+        BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
+        //Log.d(LOG_TAG, "bd1 = " + bd1);
+        assertEquals(bd1.displayMode, BearerData.DISPLAY_MODE_IMMEDIATE);
+        String pdu2 = "0003104090010c485f4194dfea34becf61b8400f0140";
+        BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
+        assertEquals(bd2.displayMode, BearerData.DISPLAY_MODE_DEFAULT);
+        String pdu3 = "0003104090010c485f4194dfea34becf61b8400f0180";
+        BearerData bd3 = BearerData.decode(HexDump.hexStringToByteArray(pdu3));
+        assertEquals(bd3.displayMode, BearerData.DISPLAY_MODE_USER);
+    }
+
+    @SmallTest
+    public void testDisplayModeFeedback() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 0;
+        bearerData.hasUserDataHeader = false;
+        String payloadStr = "test display mode";
+        bearerData.userData = makeUserData(payloadStr);
+        bearerData.displayMode = BearerData.DISPLAY_MODE_IMMEDIATE;
+        bearerData.displayModeSet = true;
+        byte []encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.displayModeSet, true);
+        assertEquals(revBearerData.displayMode, bearerData.displayMode);
+        bearerData.displayMode = BearerData.DISPLAY_MODE_USER;
+        encodedSms = BearerData.encode(bearerData);
+        revBearerData = BearerData.decode(encodedSms);
+        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.displayModeSet, true);
+        assertEquals(revBearerData.displayMode, bearerData.displayMode);
+    }
 }
