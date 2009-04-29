@@ -143,6 +143,12 @@
 
 <li><h2>Best Practices</h2>
     <ul>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">UI Guidelines</a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">Widget Design</a></li>
+          </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">Designing for Performance</a></li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/responsiveness.html">Designing for Responsiveness</a></li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/seamlessness.html">Designing for Seamlessness</a></li>
