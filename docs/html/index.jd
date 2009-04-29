@@ -43,7 +43,7 @@ home=true
                                       <td>
                                               <h2 class="green">Download</h2>
                                               <p>The Android SDK has the tools, sample code, and docs you need to create great apps.  </p>
-                                              <p><a href="{@docRoot}sdk/1.1_r1/index.html">Learn more &raquo;</a></p>
+                                              <p><a href="{@docRoot}sdk/{@sdkCurrent}/index.html">Learn more &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
@@ -119,7 +119,7 @@ home=true
       'name':"SDK 1.5 r1",
       'img':"sdk-large.png",
       'title':"Android 1.5 SDK r1",
-      'desc': "<p>The final version of the Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs Add-on.</p><p><a href='{@docRoot}sdk/1.5_r1/index.html'>Download Android 1.5 SDK</a></p>"
+      'desc': "<p>The final version of the Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r1/index.html'>Download Android 1.5 SDK</a></p>"
     },
 
     'mapskey': {
@@ -128,7 +128,7 @@ home=true
       'name':"Maps API Key",
       'img':"maps-large.png",
       'title':"Maps API Key",
-      'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='{@docRoot}guide/topics/location/index.html'>Learn more...</a></p>"
+      'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='http://code.google.com/android/add-ons/google-apis/maps-overview.html'>Learn more &raquo;</a></p>"
     },
 
     'market': {
