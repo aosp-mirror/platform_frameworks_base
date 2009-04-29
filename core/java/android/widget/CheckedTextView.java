@@ -33,7 +33,7 @@ import com.android.internal.R;
  * something other than {@link android.widget.ListView#CHOICE_MODE_NONE CHOICE_MODE_NONE}.
  *
  */
-public abstract class CheckedTextView extends TextView implements Checkable {
+public class CheckedTextView extends TextView implements Checkable {
     private boolean mChecked;
     private int mCheckMarkResource;
     private Drawable mCheckMarkDrawable;
