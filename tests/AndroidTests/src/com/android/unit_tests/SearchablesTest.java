@@ -16,6 +16,7 @@
 
 package com.android.unit_tests;
 
+import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.RemoteException;
 import android.server.search.SearchableInfo;
 import android.server.search.Searchables;
 import android.server.search.SearchableInfo.ActionKeyInfo;
@@ -113,6 +115,17 @@ public class SearchablesTest extends AndroidTestCase {
     }
     
     /**
+     * Test that there is a default searchable (aka global search provider).
+     */
+    public void testDefaultSearchable() {
+        Searchables searchables = new Searchables(mContext);
+        searchables.buildSearchableList();
+        SearchableInfo si = searchables.getDefaultSearchable();
+        checkSearchable(si);
+        assertTrue(searchables.isDefaultSearchable(si));
+    }
+    
+    /**
      * This is an attempt to run the searchable info list with a mocked context.  Here are some
      * things I'd like to test.
      *
@@ -172,60 +185,64 @@ public class SearchablesTest extends AndroidTestCase {
         int count = searchablesList.size();
         for (int ii = 0; ii < count; ii++) {
             SearchableInfo si = searchablesList.get(ii);
-            assertNotNull(si);
-            assertTrue(si.mSearchable);
-            assertTrue(si.getLabelId() != 0);        // This must be a useable string
-            assertNotEmpty(si.mSearchActivity.getClassName());
-            assertNotEmpty(si.mSearchActivity.getPackageName());
-            if (si.getSuggestAuthority() != null) {
-                // The suggestion fields are largely optional, so we'll just confirm basic health
-                assertNotEmpty(si.getSuggestAuthority());
-                assertNullOrNotEmpty(si.getSuggestPath());
-                assertNullOrNotEmpty(si.getSuggestSelection());
-                assertNullOrNotEmpty(si.getSuggestIntentAction());
-                assertNullOrNotEmpty(si.getSuggestIntentData());
-            }
-            /* Add a way to get the entire action key list, then explicitly test its elements */
-            /* For now, test the most common action key (CALL) */
-            ActionKeyInfo ai = si.findActionKey(KeyEvent.KEYCODE_CALL);
-            if (ai != null) {
-                assertEquals(ai.mKeyCode, KeyEvent.KEYCODE_CALL);
-                // one of these three fields must be non-null & non-empty
-                boolean m1 = (ai.mQueryActionMsg != null) && (ai.mQueryActionMsg.length() > 0);
-                boolean m2 = (ai.mSuggestActionMsg != null) && (ai.mSuggestActionMsg.length() > 0);
-                boolean m3 = (ai.mSuggestActionMsgColumn != null) && 
-                                (ai.mSuggestActionMsgColumn.length() > 0);
-                assertTrue(m1 || m2 || m3);
-            }
-            
-            /* 
-             * Find ways to test these:
-             * 
-             * private int mSearchMode
-             * private Drawable mIcon
-             */
-            
-            /*
-             * Explicitly not tested here:
-             * 
-             * Can be null, so not much to see:
-             * public String mSearchHint
-             * private String mZeroQueryBanner
-             * 
-             * To be deprecated/removed, so don't bother:
-             * public boolean mFilterMode
-             * public boolean mQuickStart
-             * private boolean mIconResized
-             * private int mIconResizeWidth
-             * private int mIconResizeHeight
-             * 
-             * All of these are "internal" working variables, not part of any contract
-             * private ActivityInfo mActivityInfo
-             * private Rect mTempRect
-             * private String mSuggestProviderPackage
-             * private String mCacheActivityContext
-             */
+            checkSearchable(si);
         }
+    }
+    
+    private void checkSearchable(SearchableInfo si) {
+        assertNotNull(si);
+        assertTrue(si.mSearchable);
+        assertTrue(si.getLabelId() != 0);        // This must be a useable string
+        assertNotEmpty(si.mSearchActivity.getClassName());
+        assertNotEmpty(si.mSearchActivity.getPackageName());
+        if (si.getSuggestAuthority() != null) {
+            // The suggestion fields are largely optional, so we'll just confirm basic health
+            assertNotEmpty(si.getSuggestAuthority());
+            assertNullOrNotEmpty(si.getSuggestPath());
+            assertNullOrNotEmpty(si.getSuggestSelection());
+            assertNullOrNotEmpty(si.getSuggestIntentAction());
+            assertNullOrNotEmpty(si.getSuggestIntentData());
+        }
+        /* Add a way to get the entire action key list, then explicitly test its elements */
+        /* For now, test the most common action key (CALL) */
+        ActionKeyInfo ai = si.findActionKey(KeyEvent.KEYCODE_CALL);
+        if (ai != null) {
+            assertEquals(ai.mKeyCode, KeyEvent.KEYCODE_CALL);
+            // one of these three fields must be non-null & non-empty
+            boolean m1 = (ai.mQueryActionMsg != null) && (ai.mQueryActionMsg.length() > 0);
+            boolean m2 = (ai.mSuggestActionMsg != null) && (ai.mSuggestActionMsg.length() > 0);
+            boolean m3 = (ai.mSuggestActionMsgColumn != null) && 
+                            (ai.mSuggestActionMsgColumn.length() > 0);
+            assertTrue(m1 || m2 || m3);
+        }
+        
+        /* 
+         * Find ways to test these:
+         * 
+         * private int mSearchMode
+         * private Drawable mIcon
+         */
+        
+        /*
+         * Explicitly not tested here:
+         * 
+         * Can be null, so not much to see:
+         * public String mSearchHint
+         * private String mZeroQueryBanner
+         * 
+         * To be deprecated/removed, so don't bother:
+         * public boolean mFilterMode
+         * public boolean mQuickStart
+         * private boolean mIconResized
+         * private int mIconResizeWidth
+         * private int mIconResizeHeight
+         * 
+         * All of these are "internal" working variables, not part of any contract
+         * private ActivityInfo mActivityInfo
+         * private Rect mTempRect
+         * private String mSuggestProviderPackage
+         * private String mCacheActivityContext
+         */
     }
     
     /**
@@ -354,6 +371,20 @@ public class SearchablesTest extends AndroidTestCase {
             }
         }
         
+        @Override
+        public ResolveInfo resolveActivity(Intent intent, int flags) {
+            assertNotNull(intent);
+            assertEquals(intent.getAction(), SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+            switch (mSearchablesMode) {
+            case SEARCHABLES_PASSTHROUGH:
+                return mRealPackageManager.resolveActivity(intent, flags);
+            case SEARCHABLES_MOCK_ZERO:
+                return null;
+            default:
+                throw new UnsupportedOperationException();
+            }
+        }
+
         /**
          * Retrieve an XML file from a package.  This is a low-level API used to
          * retrieve XML meta data.
