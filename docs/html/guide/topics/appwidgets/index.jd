@@ -67,7 +67,7 @@ The <code>&lt;receiver&gt;</code> element has the following attributes:
 </ul>
 
 <p>
-The <code>&lt;intent-filter&gt; element tells the {@link android.content.pm.PackageManager}
+The <code>&lt;intent-filter&gt;</code> element tells the {@link android.content.pm.PackageManager}
 that this {@link android.content.BroadcastReceiver} receives the {@link
 android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE AppWidgetManager.ACTION_APPWIDGET_UPDATE} broadcast.
 The widget manager will send other broadcasts directly to your widget provider as required.
