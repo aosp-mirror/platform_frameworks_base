@@ -16,8 +16,7 @@ sys.date=April 2009
 <li><a href="#comp">Device Compatibility</a>
 <li><a href="#apps">Built-in Applications</a>
 <li><a href="#locs">UI Localizations</a>
-<!-- <li><a href="#resolved-issues">Resolved Issues</a> -->
-<li><a href="#features">Android 1.5 Platform Highlights</a>
+<li><a href="#features">New Features</a>
 <li><a href="#api-changes">API Changes</a>
 </ul>
 
@@ -140,7 +139,9 @@ a default version of the language is used. The languages that will be
 available in the Android 1.5 system image are listed below (with 
 <em>language</em>_<em>country/region</em> locale descriptor).</p>
 
-<div class="g-unit g-first" style="whitespace:nowrap;width:35%;">
+<table style="border:0;">
+<tr>
+<td style="border:0">
 <ul>
 <li>Chinese, PRC (zh_CN)</li>
 <li>Chinese, Taiwan (zh_TW)</li>
@@ -154,9 +155,10 @@ available in the Android 1.5 system image are listed below (with
 <li>English, New Zealand (en_NZ)</li>
 <li>English, Singapore(en_SG)</li>
 <li>French, France (fr_FR)</li>
-</div>
-<div class="g-unit" style="whitespace:nowrap;">
 <li>French, Belgium (fr_BE)</li>
+</ul>
+</td>
+<td style="border:0;padding-left:5em;">
 <li>French, Canada (fr_CA)</li>
 <li>French, Switzerland (fr_CH)</li>
 <li>German, Germany (de_DE)</li>
@@ -170,18 +172,12 @@ available in the Android 1.5 system image are listed below (with
 <li>Polish (pl_PL)</li>
 <li>Russian (ru_RU)</li>
 <li>Spanish (es_ES)</li>
-</ul> 
-</div>
+</td>
+</tr>
+</table>
 
 <p>Localized UI strings match the locales that are displayable in 
 the emulator, accessible through the device Settings application.</p>
-
-<!-- 
-<h2 id="resolved-issues">Resolved Issues</h2>
-<ul>
-<li><font color="red"><strong></strong></font></li>
-</ul>
--->
 
 <h2 id="features">New Features</h2>
 
@@ -194,20 +190,29 @@ Highlights</a> document.</p>
 <h3>Overview</strong></h3>
 
 <ul>
-  <li>UI framework</li>
+<li>UI framework</li>
   <ul>
     <li>Framework for easier background/UI thread interaction</li>
-    <li>New SlidingDrawer widget</li>
-    <li>Horizontal ScrollView widget</li>
+    <li>New {@link android.widget.SlidingDrawer SlidingDrawer} widget</li>
+    <li>New {@link android.widget.HorizontalScrollView HorizontalScrollview} widget</li>
   </ul>
+</li>
 
-  <li>Home Screen framework</li>
+<li>AppWidget framework
   <ul>
-    <li>APIs for creating secure home screen widgets</li>
-    <li>APIs for populating live folders with custom content</li>
+    <li>APIs for creating secure home screen {@link android.appwidget
+AppWidgets}. For information about how to use AppWidgets, see the Developer's
+Guide <a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a>
+documentation. Also see <a
+href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">
+Introducing home screen widgets and the AppWidget
+framework</a> on the Android Developer's Blog.</li>
+    <li>APIs for populating {@link android.provider.LiveFolders Live Folders}
+        with custom content.</li>
   </ul>
+</li>
 
-  <li>Media framework</li>
+<li>Media framework</li>
   <ul>
     <li>Raw audio recording and playback APIs</li>
     <li>Interactive MIDI playback engine</li>
@@ -215,40 +220,53 @@ Highlights</a> document.</p>
     <li>Video and photo sharing Intents</li>
     <li>Media search Intent</li>
   </ul>
-  <li>Input Method framework </li>
+</li>
+
+<li>Input Method framework 
    <ul>
-    <li>Text prediction engine</li>
+    <li>{@link android.inputmethodservice.InputMethodService Input Method
+        Service} framework</li>
+    <li>Text-prediction engine</li>
     <li>Ability to provide downloadable IMEs to users</li>
   </ul>
+</li>
+
 <li>Application-defined hardware requirements
-<p>Applications can now use a new element in their manifest files, <a
-href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">
-&lt;uses-configuration&gt;</a> to indicate to the Android system what hardware 
-features they require in order to function properly. For example, an application
-might use the element to specify that it requires a physical keyboard or a
-particular navigation device, such as a trackball. Prior to installing the
-application, the Android system checks the attributes defined for the
+   <p>Applications can now use a new element in their manifest files, <a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-
+configuration&gt;</a> to indicate to the Android system what hardware features
+they require in order to function properly. For example, an application might
+use the element to specify that it requires a physical keyboard or a particular
+navigation device, such as a trackball. Prior to installing the application, the
+Android system checks the attributes defined for the
 <code>&lt;uses-configuration&gt;</code> element and allows the installation to
-continue only if the required hardware is present.</p></li>
-  <li>Speech recognition framework</li>
+continue only if the required hardware is present.</p>
+</li>
+
+<li>Speech recognition framework
     <ul>
-    <li>Support for using speech recognition libraries via Intent</li>
+    <li>Support for using speech recognition libraries via Intent. See {@link
+android.speech.RecognizerIntent RecognizerIntent}.</li>
   </ul>
-  <li>Misc API additions</li>
+</li>
+
+<li>Miscellaneous API additions
   <ul>
-    <li> LocationManager - Applications can get location change updates via
-Intent</li>
+    <li>LocationManager - Applications can get location change updates via
+        Intent</li>
     <li>WebView - Touch start/end/move/cancel DOM event support</li>
-    <li>SensorManager - redesigned sensor APIs</li>
+    <li>Redesigned {@link android.hardware.SensorManager Sensor Manager
+        APIs}</li>
     <li>GLSurfaceView - convenience framework for creating OpenGL
-applications</li>
+        applications</li>
     <li>Broadcast Intent for app update install succeeded - for smoother app
-upgrade experience</li>
+        upgrade experience</li>
   </ul>
+</li>
 
 </ul>
 
-<h3>API Change Details</h3>
+<h3 id="api-diff">API Change Details</h3>
 
 <p>For a detailed view of API changes in this platform (API Level 3), see the <a
 href="{@docRoot}sdk/api_diff/3/changes.html">API Differences Report</a>.</p>
