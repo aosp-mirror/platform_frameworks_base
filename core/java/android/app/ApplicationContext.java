@@ -550,6 +550,19 @@ class ApplicationContext extends Context {
         }
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public float getApplicationScale() {
+        if (mPackageInfo != null) {
+            return mPackageInfo.getApplicationScale();
+        } else {
+            // same as system density
+            return 1.0f;
+        }
+    }
+
     @Override
     public void setWallpaper(Bitmap bitmap) throws IOException  {
         try {
@@ -2008,9 +2021,11 @@ class ApplicationContext extends Context {
             if (app.packageName.equals("system")) {
                 return mContext.mMainThread.getSystemContext().getResources();
             }
+            ActivityThread.PackageInfo pi = mContext.mMainThread.getPackageInfoNoCheck(app);
             Resources r = mContext.mMainThread.getTopLevelResources(
                     app.uid == Process.myUid() ? app.sourceDir
-                    : app.publicSourceDir);
+                    : app.publicSourceDir,
+                    pi.getApplicationScale());
             if (r != null) {
                 return r;
             }

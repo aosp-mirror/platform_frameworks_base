@@ -954,7 +954,7 @@ public interface WindowManager extends ViewManager {
             return sb.toString();
         }
 
-        void scaleUp(float scale) {
+        void scale(float scale) {
             if (scale != 1.0f) {
                 x *= scale;
                 y *= scale;
