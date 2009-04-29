@@ -55,19 +55,19 @@ class to aid in handling the broadcasts.
 {@sample frameworks/base/tests/appwidgets/AppWidgetHostTest/AndroidManifest.xml AppWidgetProvider}
 
 <p>
-The <b><code>&lt;receiver&gt;</b> element has the following attributes:
+The <code>&lt;receiver&gt;</code> element has the following attributes:
 <ul>
-  <li><b><code>android:name</code> -</b> which specifies the
+  <li><code>android:name</code> - specifies the
         {@link android.content.BroadcastReceiver} or {@link android.appwidget.AppWidgetProvider}
         class.</li>
-  <li><b><code>android:label</code> -</b> which specifies the string resource that
+  <li><code>android:label</code> - specifies the string resource that
         will be shown by the widget picker as the label.</li>
-  <li><b><code>android:icon</code> -</b> which specifies the drawable resource that
+  <li><code>android:icon</code> - specifies the drawable resource that
         will be shown by the widget picker as the icon.</li>
 </ul>
 
 <p>
-The <b><code>&lt;intent-filter&gt;</b> element tells the {@link android.content.pm.PackageManager}
+The <code>&lt;intent-filter&gt; element tells the {@link android.content.pm.PackageManager}
 that this {@link android.content.BroadcastReceiver} receives the {@link
 android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE AppWidgetManager.ACTION_APPWIDGET_UPDATE} broadcast.
 The widget manager will send other broadcasts directly to your widget provider as required.
@@ -75,13 +75,13 @@ It is only necessary to explicitly declare that you accept the {@link
 android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE AppWidgetManager.ACTION_APPWIDGET_UPDATE} broadcast.
 
 <p>
-The <b><code>&lt;meta-data&gt;</code></b> element tells the widget manager which xml resource to
+The <code>&lt;meta-data&gt;</code> element tells the widget manager which xml resource to
 read to find the {@link android.appwidget.AppWidgetProviderInfo} for your widget provider.  It has the following
 attributes:
 <ul>
-  <li><b><code>android:name="android.appwidget.provider"</code> -</b> identifies this meta-data
+  <li><code>android:name="android.appwidget.provider"</code> - identifies this meta-data
         as the {@link android.appwidget.AppWidgetProviderInfo} descriptor.</li>
-  <li><b><code>android:resource</code> -</b> is the xml resource to use as that descriptor.</li>
+  <li><code>android:resource</code> - is the xml resource to use as that descriptor.</li>
 </ul>
 
 
