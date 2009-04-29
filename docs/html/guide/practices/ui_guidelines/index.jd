@@ -1,0 +1,28 @@
+page.title=User Interface Guidelines
+@jd:body
+
+
+<img src="{@docRoot}assets/images/uiguidelines1.png" alt="" align="right">
+
+
+<p>The Android UI team has begun developing guidelines for the interaction and
+design of Android applications. Look here for articles that describe these
+visual guidelines as we release them.</p>
+
+    
+ <dl>
+  <dt><a href="widget_design.html">Widget Design Guidelines</a> </dt>
+  <dd>Widgets are a new feature introduced in Cupcake. A widget displays
+an application's most important or timely information at a glance, on a user's
+Home screen. These design guidelines describe how to design widgets that fit
+with others on the Home screen. They include links to graphics files and
+templates that will make your designer's life easier.</dd>
+
+</dl>
+
+
+
+
+
+
+
