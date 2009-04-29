@@ -127,8 +127,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     // The widget is attached to a window when mAttachCount > 0
     private int mAttachCount;
 
-    private AutoCompleteTextView.PassThroughClickListener mPassThroughClickListener;
-
     public AutoCompleteTextView(Context context) {
         this(context, null);
     }
@@ -188,28 +186,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         setFocusable(true);
 
         addTextChangedListener(new MyWatcher());
-
-        mPassThroughClickListener = new PassThroughClickListener();
-        super.setOnClickListener(mPassThroughClickListener);
-    }
-
-    @Override
-    public void setOnClickListener(OnClickListener listener) {
-        mPassThroughClickListener.mWrapped = listener;
-    }
-
-    /**
-     * Private hook into the on click event, dispatched from {@link PassThroughClickListener}
-     */
-    private void onClickImpl() {
-        // if drop down should always visible, bring it back in front of the soft
-        // keyboard when the user touches the text field
-        if (mDropDownAlwaysVisible
-                && mPopup.isShowing()
-                && mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
-            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-            mPopup.update();
-        }
     }
 
     /**
@@ -353,51 +329,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public int getDropDownHorizontalOffset() {
         return mDropDownHorizontalOffset;
     }
-	
-|||||||
 
-=======
-    
-    /**
-     * <p>Gets the background of the auto-complete drop-down list.</p>
-     * 
-     * @return the background drawable
-     * 
-     * @attr ref android.R.styleable#PopupWindow_popupBackground
-     *
-     * @hide Pending API council approval
-     */
-    public Drawable getDropDownBackground() {
-        return mPopup.getBackground();
-    }
-    
-    /**
-     * <p>Sets the background of the auto-complete drop-down list.</p>
-     * 
-     * @param d the drawable to set as the background
-     * 
-     * @attr ref android.R.styleable#PopupWindow_popupBackground
-     *
-     * @hide Pending API council approval
-     */
-    public void setDropDownBackgroundDrawable(Drawable d) {
-        mPopup.setBackgroundDrawable(d);
-    }
-    
-    /**
-     * <p>Sets the background of the auto-complete drop-down list.</p>
-     * 
-     * @param id the id of the drawable to set as the background
-     * 
-     * @attr ref android.R.styleable#PopupWindow_popupBackground
-     *
-     * @hide Pending API council approval
-     */
-    public void setDropDownBackgroundResource(int id) {
-        mPopup.setBackgroundDrawable(getResources().getDrawable(id));
-    }
-
-    /**
+     /**
      * <p>Sets the animation style of the auto-complete drop-down list.</p>
      *
      * <p>If the drop-down is showing, calling this method will take effect only
@@ -413,7 +346,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         mPopup.setAnimationStyle(animationStyle);
     }
 
->>>>>>> f3ccf8a5a5a3f6e46781538358bddca992a70e3d:core/java/android/widget/AutoCompleteTextView.java
     /**
      * <p>Returns the animation style that is used when the drop-down list appears and disappears
      * </p>
@@ -424,50 +356,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public int getDropDownAnimationStyle() {
         return mPopup.getAnimationStyle();
-    }
-    
-    /**
-     * <p>Sets the vertical offset used for the auto-complete drop-down list.</p>
-     * 
-     * @param offset the vertical offset
-     *
-     * @hide Pending API council approval
-     */
-    public void setDropDownVerticalOffset(int offset) {
-        mDropDownVerticalOffset = offset;
-    }
-    
-    /**
-     * <p>Gets the vertical offset used for the auto-complete drop-down list.</p>
-     * 
-     * @return the vertical offset
-     *
-     * @hide Pending API council approval
-     */
-    public int getDropDownVerticalOffset() {
-        return mDropDownVerticalOffset;
-    }
-    
-    /**
-     * <p>Sets the horizontal offset used for the auto-complete drop-down list.</p>
-     * 
-     * @param offset the horizontal offset
-     *
-     * @hide Pending API council approval
-     */
-    public void setDropDownHorizontalOffset(int offset) {
-        mDropDownHorizontalOffset = offset;
-    }
-    
-    /**
-     * <p>Gets the horizontal offset used for the auto-complete drop-down list.</p>
-     * 
-     * @return the horizontal offset
-     *
-     * @hide Pending API council approval
-     */
-    public int getDropDownHorizontalOffset() {
-        return mDropDownHorizontalOffset;
     }
 
     /**
@@ -1149,10 +1037,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
             mPopup.setHeight(height);
             mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-            
-            // use outside touchable to dismiss drop down when touching outside of it, so
-            // only set this if the dropdown is not always visible
-            mPopup.setOutsideTouchable(!mDropDownAlwaysVisible);
+            mPopup.setOutsideTouchable(true);
             mPopup.setTouchInterceptor(new PopupTouchIntercepter());
             mPopup.showAsDropDown(getDropDownAnchorView(),
                     mDropDownHorizontalOffset, mDropDownVerticalOffset);
@@ -1469,21 +1354,4 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
          */
         CharSequence fixText(CharSequence invalidText);
     }
-
-    /**
-     * Allows us a private hook into the on click event without preventing users from setting
-     * their own click listener.
-     */
-    private class PassThroughClickListener implements OnClickListener {
-
-        private View.OnClickListener mWrapped;
-
-        /** {@inheritDoc} */
-        public void onClick(View v) {
-            onClickImpl();
-
-            if (mWrapped != null) mWrapped.onClick(v);
-        }
-    }
-
 }
