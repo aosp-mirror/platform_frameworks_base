@@ -2781,7 +2781,7 @@
             when the user clicks a suggestion.  <i>Optional attribute.</i> -->
         <attr name="searchSuggestIntentData" format="string" />
         
-        <!-- If provided, this is the minimun number of characters needed to trigger
+        <!-- If provided, this is the minimum number of characters needed to trigger
              search suggestions. The default value is 0. <i>Optional attribute.</i> -->
         <attr name="searchSuggestThreshold" format="integer" />
         
