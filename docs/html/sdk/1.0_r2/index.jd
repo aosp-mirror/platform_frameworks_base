@@ -20,6 +20,9 @@ sdk.linux_checksum=a1f3b6d854596f850f5008856d0f380e
 
 @jd:body
 
+<p>For more information on this SDK release, read the
+<a href="{@docRoot}sdk/RELEASENOTES.html#1.0_r2">Release Notes</a>.</p>
+
 <h2>Included in this SDK</h2>
 
 <h4>Development tools</h4>
