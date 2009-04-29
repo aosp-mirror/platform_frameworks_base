@@ -43,8 +43,6 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import org.apache.commons.codec.binary.Base64;
-
 class LoadListener extends Handler implements EventHandler {
 
     private static final String LOGTAG = "webkit";
@@ -140,8 +138,6 @@ class LoadListener extends Handler implements EventHandler {
         mBrowserFrame = frame;
         setUrl(url);
         mNativeLoader = nativeLoader;
-        mMimeType = "";
-        mEncoding = "";
         mSynchronous = synchronous;
         if (synchronous) {
             mMessageQueue = new Vector<Message>();
@@ -292,8 +288,6 @@ class LoadListener extends Handler implements EventHandler {
     private void handleHeaders(Headers headers) {
         if (mCancelled) return;
         mHeaders = headers;
-        mMimeType = "";
-        mEncoding = "";
 
         ArrayList<String> cookies = headers.getSetCookie();
         for (int i = 0; i < cookies.size(); ++i) {
@@ -442,6 +436,9 @@ class LoadListener extends Handler implements EventHandler {
         status.put("reason", reasonPhrase);
         // New status means new data. Clear the old.
         mDataBuilder.clear();
+        mMimeType = "";
+        mEncoding = "";
+        mTransferEncoding = "";
         sendMessageInternal(obtainMessage(MSG_STATUS, status));
     }
 
@@ -517,19 +514,6 @@ class LoadListener extends Handler implements EventHandler {
             Log.v(LOGTAG, "LoadListener.data(): url: " + url());
         }
 
-        // Decode base64 data
-        // Note: It's fine that we only decode base64 here and not in the other
-        // data call because the only caller of the stream version is not
-        // base64 encoded.
-        if ("base64".equals(mTransferEncoding)) {
-            if (length < data.length) {
-                byte[] trimmedData = new byte[length];
-                System.arraycopy(data, 0, trimmedData, 0, length);
-                data = trimmedData;
-            }
-            data = Base64.decodeBase64(data);
-            length = data.length;
-        }
         // Synchronize on mData because commitLoad may write mData to WebCore
         // and we don't want to replace mData or mDataLength at the same time
         // as a write.
@@ -904,6 +888,10 @@ class LoadListener extends Handler implements EventHandler {
         return mMimeType;
     }
 
+    String transferEncoding() {
+        return mTransferEncoding;
+    }
+
     /*
      * Return the size of the content being downloaded. This represents the
      * full content size, even under the situation where the download has been
@@ -1198,7 +1186,7 @@ class LoadListener extends Handler implements EventHandler {
     private static final Pattern CONTENT_TYPE_PATTERN =
             Pattern.compile("^((?:[xX]-)?[a-zA-Z\\*]+/[\\w\\+\\*-]+[\\.[\\w\\+-]+]*)$");
 
-    private void parseContentTypeHeader(String contentType) {
+    /* package */ void parseContentTypeHeader(String contentType) {
         if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "LoadListener.parseContentTypeHeader: " +
                     "contentType: " + contentType);
