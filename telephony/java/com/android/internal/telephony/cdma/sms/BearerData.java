@@ -46,14 +46,14 @@ public final class BearerData{
     //private final static byte SUBPARAM_VALIDITY_PERIOD_RELATIVE         = 0x05;
     //private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE  = 0x06;
     //private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE  = 0x07;
-    //private final static byte SUBPARAM_PRIORITY_INDICATOR               = 0x08;
-    //private final static byte SUBPARAM_PRIVACY_INDICATOR                = 0x09;
+    private final static byte SUBPARAM_PRIORITY_INDICATOR               = 0x08;
+    private final static byte SUBPARAM_PRIVACY_INDICATOR                = 0x09;
     private final static byte SUBPARAM_REPLY_OPTION                     = 0x0A;
     private final static byte SUBPARAM_NUMBER_OF_MESSAGES               = 0x0B;
-    //private final static byte SUBPARAM_ALERT_ON_MESSAGE_DELIVERY        = 0x0C;
-    //private final static byte SUBPARAM_LANGUAGE_INDICATOR               = 0x0D;
+    private final static byte SUBPARAM_ALERT_ON_MESSAGE_DELIVERY        = 0x0C;
+    private final static byte SUBPARAM_LANGUAGE_INDICATOR               = 0x0D;
     private final static byte SUBPARAM_CALLBACK_NUMBER                  = 0x0E;
-    //private final static byte SUBPARAM_MESSAGE_DISPLAY_MODE             = 0x0F;
+    private final static byte SUBPARAM_MESSAGE_DISPLAY_MODE             = 0x0F;
     //private final static byte SUBPARAM_MULTIPLE_ENCODING_USER_DATA      = 0x10;
     //private final static byte SUBPARAM_MESSAGE_DEPOSIT_INDEX            = 0x11;
     //private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_DATA    = 0x12;
@@ -62,42 +62,6 @@ public final class BearerData{
     //private final static byte SUBPARAM_TP_FAILURE_CAUSE                 = 0x15;
     //private final static byte SUBPARAM_ENHANCED_VMN                     = 0x16;
     //private final static byte SUBPARAM_ENHANCED_VMN_ACK                 = 0x17;
-
-    // For completeness the following fields are listed, though not used yet.
-    /**
-     * Supported priority modes for CDMA SMS messages
-     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1)
-     */
-    //public static final int PRIORITY_NORMAL        = 0x0;
-    //public static final int PRIORITY_INTERACTIVE   = 0x1;
-    //public static final int PRIORITY_URGENT        = 0x2;
-    //public static final int PRIORITY_EMERGENCY     = 0x3;
-
-    /**
-     * Supported privacy modes for CDMA SMS messages
-     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.10-1)
-     */
-    //public static final int PRIVACY_NOT_RESTRICTED = 0x0;
-    //public static final int PRIVACY_RESTRICTED     = 0x1;
-    //public static final int PRIVACY_CONFIDENTIAL   = 0x2;
-    //public static final int PRIVACY_SECRET         = 0x3;
-
-    /**
-     * Supported alert modes for CDMA SMS messages
-     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.13-1)
-     */
-    //public static final int ALERT_DEFAULT          = 0x0;
-    //public static final int ALERT_LOW_PRIO         = 0x1;
-    //public static final int ALERT_MEDIUM_PRIO      = 0x2;
-    //public static final int ALERT_HIGH_PRIO        = 0x3;
-
-    /**
-     * Supported display modes for CDMA SMS messages
-     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.16-1)
-     */
-    public static final int DISPLAY_IMMEDIATE      = 0x0;
-    public static final int DISPLAY_DEFAULT        = 0x1;
-    public static final int DISPLAY_USER           = 0x2;
 
     /**
      * Supported message types for CDMA SMS messages
@@ -112,9 +76,89 @@ public final class BearerData{
     public static final int MESSAGE_TYPE_DELIVER_REPORT = 0x07;
     public static final int MESSAGE_TYPE_SUBMIT_REPORT  = 0x08;
 
+    public byte messageType;
+
     /**
-     * SMS Message Status Codes
-     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.21-1)
+     * 16-bit value indicating the message ID, which increments modulo 65536.
+     * (Special rules apply for WAP-messages.)
+     * (See 3GPP2 C.S0015-B, v2, 4.5.1)
+     */
+    public int messageId;
+
+    /**
+     * Supported priority modes for CDMA SMS messages
+     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1)
+     */
+    public static final int PRIORITY_NORMAL        = 0x0;
+    public static final int PRIORITY_INTERACTIVE   = 0x1;
+    public static final int PRIORITY_URGENT        = 0x2;
+    public static final int PRIORITY_EMERGENCY     = 0x3;
+
+    public boolean priorityIndicatorSet = false;
+    public byte priority = PRIORITY_NORMAL;
+
+    /**
+     * Supported privacy modes for CDMA SMS messages
+     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.10-1)
+     */
+    public static final int PRIVACY_NOT_RESTRICTED = 0x0;
+    public static final int PRIVACY_RESTRICTED     = 0x1;
+    public static final int PRIVACY_CONFIDENTIAL   = 0x2;
+    public static final int PRIVACY_SECRET         = 0x3;
+
+    public boolean privacyIndicatorSet = false;
+    public byte privacy = PRIVACY_NOT_RESTRICTED;
+
+    /**
+     * Supported alert priority modes for CDMA SMS messages
+     * (See 3GPP2 C.S0015-B, v2.0, table 4.5.13-1)
+     */
+    public static final int ALERT_DEFAULT          = 0x0;
+    public static final int ALERT_LOW_PRIO         = 0x1;
+    public static final int ALERT_MEDIUM_PRIO      = 0x2;
+    public static final int ALERT_HIGH_PRIO        = 0x3;
+
+    public boolean alertIndicatorSet = false;
+    public int alert = ALERT_DEFAULT;
+
+    /**
+     * Supported display modes for CDMA SMS messages.  Display mode is
+     * a 2-bit value used to indicate to the mobile station when to
+     * display the received message.  (See 3GPP2 C.S0015-B, v2,
+     * 4.5.16)
+     */
+    public static final int DISPLAY_MODE_IMMEDIATE      = 0x0;
+    public static final int DISPLAY_MODE_DEFAULT        = 0x1;
+    public static final int DISPLAY_MODE_USER           = 0x2;
+
+    public boolean displayModeSet = false;
+    public byte displayMode = DISPLAY_MODE_DEFAULT;
+
+    /**
+     * Language Indicator values.  NOTE: the spec (3GPP2 C.S0015-B,
+     * v2, 4.5.14) is ambiguous as to the meaning of this field, as it
+     * refers to C.R1001-D but that reference has been crossed out.
+     * It would seem reasonable to assume the values from C.R1001-F
+     * (table 9.2-1) are to be used instead.
+     */
+    public static final int LANGUAGE_UNKNOWN  = 0x00;
+    public static final int LANGUAGE_ENGLISH  = 0x01;
+    public static final int LANGUAGE_FRENCH   = 0x02;
+    public static final int LANGUAGE_SPANISH  = 0x03;
+    public static final int LANGUAGE_JAPANESE = 0x04;
+    public static final int LANGUAGE_KOREAN   = 0x05;
+    public static final int LANGUAGE_CHINESE  = 0x06;
+    public static final int LANGUAGE_HEBREW   = 0x07;
+
+    public boolean languageIndicatorSet = false;
+    public int language = LANGUAGE_UNKNOWN;
+
+    /**
+     * SMS Message Status Codes.  The first component of the Message
+     * status indicates if an error has occurred and whether the error
+     * is considered permanent or temporary.  The second component of
+     * the Message status indicates the cause of the error (if any).
+     * (See 3GPP2 C.S0015-B, v2.0, 4.5.21)
      */
     /* no-error codes */
     public static final int ERROR_NONE                   = 0x00;
@@ -139,19 +183,9 @@ public final class BearerData{
     public static final int ERROR_UNDEFINED              = 0xFF;
     public static final int STATUS_UNDEFINED             = 0xFF;
 
-    /**
-     * 4-bit value indicating the message type in accordance to
-     *      table 4.5.1-1
-     * (See 3GPP2 C.S0015-B, v2, 4.5.1)
-     */
-    public byte messageType;
-
-    /**
-     * 16-bit value indicating the message ID, which increments modulo 65536.
-     * (Special rules apply for WAP-messages.)
-     * (See 3GPP2 C.S0015-B, v2, 4.5.1)
-     */
-    public int messageId;
+    public boolean messageStatusSet = false;
+    public int errorClass = ERROR_UNDEFINED;
+    public int messageStatus = STATUS_UNDEFINED;
 
     /**
      * 1-bit value that indicates whether a User Data Header is present.
@@ -178,8 +212,6 @@ public final class BearerData{
     //public SmsRelTime validityPeriodRelative;
     //public SmsTime deferredDeliveryTimeAbsolute;
     //public SmsRelTime deferredDeliveryTimeRelative;
-    //public byte priority;
-    //public byte privacy;
 
     /**
      * Reply Option
@@ -199,36 +231,12 @@ public final class BearerData{
      */
     public int numberOfMessages;
 
-    //public int alert;
-    //public int language;
-
     /**
      * 4-bit or 8-bit value that indicates the number to be dialed in reply to a
      * received SMS message.
      * (See 3GPP2 C.S0015-B, v2, 4.5.15)
      */
     public CdmaSmsAddress callbackNumber;
-
-    /**
-     * 2-bit value that is used to indicate to the mobile station when to display
-     * the received message.
-     * (See 3GPP2 C.S0015-B, v2, 4.5.16)
-     */
-    public byte displayMode = DISPLAY_DEFAULT;
-
-    /**
-     * First component of the Message status, that indicates if an error has occurred
-     * and whether the error is considered permanent or temporary.
-     * (See 3GPP2 C.S0015-B, v2, 4.5.21)
-     */
-    public int errorClass = ERROR_UNDEFINED;
-
-    /**
-     * Second component of the Message status, that indicates if an error has occurred
-     * and the cause of the error.
-     * (See 3GPP2 C.S0015-B, v2, 4.5.21)
-     */
-    public int messageStatus = STATUS_UNDEFINED;
 
     private static class CodingException extends Exception {
         public CodingException(String s) {
@@ -242,6 +250,13 @@ public final class BearerData{
         builder.append("BearerData:\n");
         builder.append("  messageType: " + messageType + "\n");
         builder.append("  messageId: " + (int)messageId + "\n");
+        builder.append("  priority: " + (priorityIndicatorSet ? priority : "not set") + "\n");
+        builder.append("  privacy: " + (privacyIndicatorSet ? privacy : "not set") + "\n");
+        builder.append("  alert: " + (alertIndicatorSet ? alert : "not set") + "\n");
+        builder.append("  displayMode: " + (displayModeSet ? displayMode : "not set") + "\n");
+        builder.append("  language: " + (languageIndicatorSet ? language : "not set") + "\n");
+        builder.append("  errorClass: " + (messageStatusSet ? errorClass : "not set") + "\n");
+        builder.append("  messageStatus: " + (messageStatusSet ? messageStatus : "not set") + "\n");
         builder.append("  hasUserDataHeader: " + hasUserDataHeader + "\n");
         builder.append("  timeStamp: " + timeStamp + "\n");
         builder.append("  userAckReq: " + userAckReq + "\n");
@@ -250,9 +265,6 @@ public final class BearerData{
         builder.append("  reportReq: " + reportReq + "\n");
         builder.append("  numberOfMessages: " + numberOfMessages + "\n");
         builder.append("  callbackNumber: " + callbackNumber + "\n");
-        builder.append("  displayMode: " + displayMode + "\n");
-        builder.append("  errorClass: " + errorClass + "\n");
-        builder.append("  messageStatus: " + messageStatus + "\n");
         builder.append("  userData: " + userData + "\n");
         return builder.toString();
     }
@@ -387,6 +399,45 @@ public final class BearerData{
         outStream.writeByteArray(6 * 8, bData.timeStamp);
     }
 
+    private static void encodePrivacyIndicator(BearerData bData, BitwiseOutputStream outStream)
+        throws BitwiseOutputStream.AccessException
+    {
+        outStream.write(8, 1);
+        outStream.write(2, bData.privacy);
+        outStream.skip(6);
+    }
+
+    private static void encodeLanguageIndicator(BearerData bData, BitwiseOutputStream outStream)
+        throws BitwiseOutputStream.AccessException
+    {
+        outStream.write(8, 1);
+        outStream.write(8, bData.language);
+    }
+
+    private static void encodeDisplayMode(BearerData bData, BitwiseOutputStream outStream)
+        throws BitwiseOutputStream.AccessException
+    {
+        outStream.write(8, 1);
+        outStream.write(2, bData.displayMode);
+        outStream.skip(6);
+    }
+
+    private static void encodePriorityIndicator(BearerData bData, BitwiseOutputStream outStream)
+        throws BitwiseOutputStream.AccessException
+    {
+        outStream.write(8, 1);
+        outStream.write(2, bData.priority);
+        outStream.skip(6);
+    }
+
+    private static void encodeMsgDeliveryAlert(BearerData bData, BitwiseOutputStream outStream)
+        throws BitwiseOutputStream.AccessException
+    {
+        outStream.write(8, 1);
+        outStream.write(2, bData.alert);
+        outStream.skip(6);
+    }
+
     /**
      * Create serialized representation for BearerData object.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
@@ -419,6 +470,30 @@ public final class BearerData{
             if (bData.timeStamp != null) {
                 outStream.write(8, SUBPARAM_MESSAGE_CENTER_TIME_STAMP);
                 encodeMsgCenterTimeStamp(bData, outStream);
+            }
+            if (bData.privacyIndicatorSet) {
+                outStream.write(8, SUBPARAM_PRIVACY_INDICATOR);
+                encodePrivacyIndicator(bData, outStream);
+            }
+            if (bData.languageIndicatorSet) {
+                outStream.write(8, SUBPARAM_LANGUAGE_INDICATOR);
+                encodeLanguageIndicator(bData, outStream);
+            }
+            if (bData.displayModeSet) {
+                outStream.write(8, SUBPARAM_MESSAGE_DISPLAY_MODE);
+                encodeDisplayMode(bData, outStream);
+            }
+            if (bData.priorityIndicatorSet) {
+                outStream.write(8, SUBPARAM_PRIORITY_INDICATOR);
+                encodePriorityIndicator(bData, outStream);
+            }
+            if (bData.alertIndicatorSet) {
+                outStream.write(8, SUBPARAM_ALERT_ON_MESSAGE_DELIVERY);
+                encodeMsgDeliveryAlert(bData, outStream);
+            }
+            if (bData.messageStatusSet) {
+                outStream.write(8, SUBPARAM_MESSAGE_STATUS);
+                encodeMsgStatus(bData, outStream);
             }
             return outStream.toByteArray();
         } catch (BitwiseOutputStream.AccessException ex) {
@@ -471,6 +546,33 @@ public final class BearerData{
         }
     }
 
+    private static String decodeIa5(byte[] data, int offset, int numFields) {
+        try {
+            StringBuffer strBuf = new StringBuffer(numFields);
+            BitwiseInputStream inStream = new BitwiseInputStream(data);
+            inStream.skip(offset);
+            int wantedBits = numFields * 7;
+            if (inStream.available() < wantedBits) {
+                throw new CodingException("insufficient data (wanted " + wantedBits +
+                                          " bits, but only have " + inStream.available() + ")");
+            }
+            for (int i = 0; i < numFields; i++) {
+                int charCode = inStream.read(7);
+                if ((charCode < UserData.IA5_MAP_BASE_INDEX) ||
+                        (charCode > UserData.IA5_MAP_MAX_INDEX)) {
+                    throw new CodingException("unsupported AI5 character code (" + charCode + ")");
+                }
+                strBuf.append(UserData.IA5_MAP[charCode - UserData.IA5_MAP_BASE_INDEX]);
+            }
+            return strBuf.toString();
+        } catch (BitwiseInputStream.AccessException ex) {
+            Log.e(LOG_TAG, "UserData AI5 decode failed: " + ex);
+        } catch (CodingException ex) {
+            Log.e(LOG_TAG, "UserData AI5 decode failed: " + ex);
+        }
+        return null;
+    }
+
     private static void decodeUserDataPayload(UserData userData, boolean hasUserDataHeader)
         throws CodingException
     {
@@ -482,17 +584,22 @@ public final class BearerData{
             userData.userDataHeader = SmsHeader.parse(headerData);
         }
         switch (userData.msgEncoding) {
-        case UserData.ENCODING_GSM_7BIT_ALPHABET:
-            userData.payloadStr = GsmAlphabet.gsm7BitPackedToString(userData.payload,
-                                                                    offset, userData.numFields);
+        case UserData.ENCODING_OCTET:
             break;
         case UserData.ENCODING_7BIT_ASCII:
             userData.payloadStr = decodePayloadStr(userData.payload, offset,
                                                    userData.numFields, "US-ASCII");
             break;
+        case UserData.ENCODING_IA5:
+            userData.payloadStr = decodeIa5(userData.payload, offset, userData.numFields);
+            break;
         case UserData.ENCODING_UNICODE_16:
             userData.payloadStr = decodePayloadStr(userData.payload, offset,
                                                    userData.numFields * 2, "UTF-16");
+            break;
+        case UserData.ENCODING_GSM_7BIT_ALPHABET:
+            userData.payloadStr = GsmAlphabet.gsm7BitPackedToString(userData.payload,
+                                                                    offset, userData.numFields);
             break;
         default:
             throw new CodingException("unsupported user data encoding ("
@@ -592,6 +699,7 @@ public final class BearerData{
         }
         bData.errorClass = inStream.read(2);
         bData.messageStatus = inStream.read(6);
+        bData.messageStatusSet = true;
     }
 
     private static void decodeMsgCenterTimeStamp(BearerData bData,
@@ -602,6 +710,60 @@ public final class BearerData{
             throw new CodingException("MESSAGE_CENTER_TIME_STAMP subparam size incorrect");
         }
         bData.timeStamp = inStream.readByteArray(6 * 8);
+    }
+
+    private static void decodePrivacyIndicator(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("PRIVACY_INDICATOR subparam size incorrect");
+        }
+        bData.privacy = inStream.read(2);
+        inStream.skip(6);
+        bData.privacyIndicatorSet = true;
+    }
+
+    private static void decodeLanguageIndicator(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("LANGUAGE_INDICATOR subparam size incorrect");
+        }
+        bData.language = inStream.read(8);
+        bData.languageIndicatorSet = true;
+    }
+
+    private static void decodeDisplayMode(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("DISPLAY_MODE subparam size incorrect");
+        }
+        bData.displayMode = inStream.read(2);
+        inStream.skip(6);
+        bData.displayModeSet = true;
+    }
+
+    private static void decodePriorityIndicator(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("PRIORITY_INDICATOR subparam size incorrect");
+        }
+        bData.priority = inStream.read(2);
+        inStream.skip(6);
+        bData.priorityIndicatorSet = true;
+    }
+
+    private static void decodeMsgDeliveryAlert(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("ALERT_ON_MESSAGE_DELIVERY subparam size incorrect");
+        }
+        bData.alert = inStream.read(2);
+        inStream.skip(6);
+        bData.alertIndicatorSet = true;
     }
 
     /**
@@ -646,6 +808,21 @@ public final class BearerData{
                     break;
                 case SUBPARAM_MESSAGE_CENTER_TIME_STAMP:
                     decodeMsgCenterTimeStamp(bData, inStream);
+                    break;
+                case SUBPARAM_PRIVACY_INDICATOR:
+                    decodePrivacyIndicator(bData, inStream);
+                    break;
+                case SUBPARAM_LANGUAGE_INDICATOR:
+                    decodeLanguageIndicator(bData, inStream);
+                    break;
+                case SUBPARAM_MESSAGE_DISPLAY_MODE:
+                    decodeDisplayMode(bData, inStream);
+                    break;
+                case SUBPARAM_PRIORITY_INDICATOR:
+                    decodePriorityIndicator(bData, inStream);
+                    break;
+                case SUBPARAM_ALERT_ON_MESSAGE_DELIVERY:
+                    decodeMsgDeliveryAlert(bData, inStream);
                     break;
                 default:
                     throw new CodingException("unsupported bearer data subparameter ("
