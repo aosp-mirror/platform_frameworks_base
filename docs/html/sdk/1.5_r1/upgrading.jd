@@ -157,7 +157,9 @@ uninstall procedure and continue to <a href="#installAdt">Install the 0.9 ADT pl
       <p>(Your original entry for the plugin should still be here. If not, see the guide
       to <a href="{@docRoot}sdk/1.5_r1/installing.html#installingplugin">Installing the ADT Plugin</a>.)
       </p></li>
-    <li>In the results, be sure that "Developer Tools" is checked, then click <strong>Next</strong>.</li>
+    <li>In the results, expand the entry for the Android plugin and
+      be sure that "Developer Tools" is checked, then click <strong>Next</strong>.
+      (This will install "Android DDMS" and "Android Development Tools".)</li>
     <li>Read and accept the license agreement, then click <strong>Next</strong>.
     <li>In the next window, click <strong>Finish</strong> to start installation.</li>
     <li>The ADT plugin is not digitally signed. Accept the installation anyway by clicking 
@@ -171,10 +173,10 @@ uninstall procedure and continue to <a href="#installAdt">Install the 0.9 ADT pl
     <li>Select <strong>Help</strong> &gt; <strong>Software Updates</strong>.</li>
     <li>Select the <strong>Available Software</strong> tab.</li>
     <li>Expand the entry for the Andriod plugin (may be listed as the location URL)
-      and select "Developer Tools" by checking the box next to it, then click <strong>Install</strong>.
-    </li>On the next window, "Android DDMS" and "Android Developer Tools" 
-    should both be checked. Click <strong>Next</strong>.</li>
-    <li>Read and accept the license agreement, then click <strong>Finish</strong>.</li>
+      and select "Developer Tools" by checking the box next to it, then click 
+      <strong>Install</strong>.</li>
+    <li>On the next window, "Android DDMS" and "Android Development Tools" 
+    should both be checked. Click <strong>Finish</strong>.</li>
     <li>Restart Eclipse.</li>
 </ol>
 </td>
