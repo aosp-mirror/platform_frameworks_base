@@ -78,10 +78,7 @@ public class StatusBarPolicy {
     private static final int EVENT_DATA_ACTIVITY = 3;
     private static final int EVENT_BATTERY_CLOSE = 4;
 
-    // indices into mBatteryThresholds
-    private static final int BATTERY_THRESHOLD_CLOSE_WARNING = 0;
-    private static final int BATTERY_THRESHOLD_WARNING = 1;
-    private static final int BATTERY_THRESHOLD_EMPTY = 2;
+    private static final int BATTERY_LEVEL_CLOSE_WARNING = 20;
 
     private final Context mContext;
     private final StatusBarService mService;
@@ -99,8 +96,6 @@ public class StatusBarPolicy {
     private boolean mBatteryFirst = true;
     private boolean mBatteryPlugged;
     private int mBatteryLevel;
-    private int mBatteryThreshold = 0; // index into mBatteryThresholds
-    private int[] mBatteryThresholds = new int[] { 20, 15, -1 };
     private AlertDialog mLowBatteryDialog;
     private TextView mBatteryLevelTextView;
     private View mBatteryView;
@@ -276,6 +271,9 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 updateBattery(intent);
             }
+            else if (action.equals(Intent.ACTION_BATTERY_LOW)) {
+                onBatteryLow(intent);
+            }
             else if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
@@ -403,6 +401,7 @@ public class StatusBarPolicy {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Intent.ACTION_BATTERY_LOW);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_ALARM_CHANGED);
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
@@ -446,19 +445,6 @@ public class StatusBarPolicy {
         //mService.setIconVisibility(mSyncFailingIcon, isFailing && !isActive);
     }
 
-    private void pickNextBatteryLevel(int level) {
-        final int N = mBatteryThresholds.length;
-        for (int i=0; i<N; i++) {
-            if (level >= mBatteryThresholds[i]) {
-                mBatteryThreshold = i;
-                break;
-            }
-        }
-        if (mBatteryThreshold >= N) {
-            mBatteryThreshold = N-1;
-        }
-    }
-
     private final void updateBattery(Intent intent) {
         mBatteryData.iconId = intent.getIntExtra("icon-small", 0);
         mBatteryData.iconLevel = intent.getIntExtra("level", 0);
@@ -471,13 +457,10 @@ public class StatusBarPolicy {
                     + " plugged=" + plugged
                     + " mBatteryPlugged=" + mBatteryPlugged
                     + " mBatteryLevel=" + mBatteryLevel
-                    + " mBatteryThreshold=" + mBatteryThreshold
                     + " mBatteryFirst=" + mBatteryFirst);
         }
 
         boolean oldPlugged = mBatteryPlugged;
-        int oldThreshold = mBatteryThreshold;
-        pickNextBatteryLevel(level);
 
         mBatteryPlugged = plugged;
         mBatteryLevel = level;
@@ -499,35 +482,29 @@ public class StatusBarPolicy {
         }
         */
         if (false) {
-            Log.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level
-                    + " mBatteryThreshold=" + mBatteryThreshold + " oldThreshold=" + oldThreshold);
+            Log.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level);
         }
-        if (!plugged
-                && ((oldPlugged && level < mBatteryThresholds[BATTERY_THRESHOLD_WARNING])
-                    || (mBatteryThreshold > oldThreshold
-                        && mBatteryThreshold > BATTERY_THRESHOLD_WARNING))) {
-            // Broadcast the low battery warning
-            mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_LOW));
 
-            if (SHOW_LOW_BATTERY_WARNING) {
-                if (false) {
-                    Log.d(TAG, "mPhoneState=" + mPhoneState
-                            + " mLowBatteryDialog=" + mLowBatteryDialog
-                            + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
-                }
+        if (mLowBatteryDialog != null
+            && mBatteryLevel >= BATTERY_LEVEL_CLOSE_WARNING
+            && SHOW_LOW_BATTERY_WARNING) {
+            mLowBatteryDialog.dismiss();
+            mBatteryShowLowOnEndCall = false;
+        }
+    }
 
-                if (mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
-                    showLowBatteryWarning();
-                } else {
-                    mBatteryShowLowOnEndCall = true;
-                }
+    private void onBatteryLow(Intent intent) {
+        if (SHOW_LOW_BATTERY_WARNING) {
+            if (false) {
+                Log.d(TAG, "mPhoneState=" + mPhoneState
+                      + " mLowBatteryDialog=" + mLowBatteryDialog
+                      + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
             }
-        } else if (mBatteryThreshold == BATTERY_THRESHOLD_CLOSE_WARNING) {
-            if (SHOW_LOW_BATTERY_WARNING) {
-                if (mLowBatteryDialog != null) {
-                    mLowBatteryDialog.dismiss();
-                    mBatteryShowLowOnEndCall = false;
-                }
+
+            if (mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
+                showLowBatteryWarning();
+            } else {
+                mBatteryShowLowOnEndCall = true;
             }
         }
     }
@@ -593,9 +570,11 @@ public class StatusBarPolicy {
     private void showLowBatteryWarning() {
         closeLastBatteryView();
 
-        int level = mBatteryThresholds[mBatteryThreshold > 1 ? mBatteryThreshold - 1 : 0];
+        /* Show exact battery level.
+         * Add 1 because the text says "less than X%".
+         */
         CharSequence levelText = mContext.getString(
-                    com.android.internal.R.string.battery_low_percent_format, level);
+                    com.android.internal.R.string.battery_low_percent_format, mBatteryLevel + 1);
 
         if (mBatteryLevelTextView != null) {
             mBatteryLevelTextView.setText(levelText);
