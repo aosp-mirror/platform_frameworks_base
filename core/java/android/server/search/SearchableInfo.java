@@ -66,6 +66,7 @@ public final class SearchableInfo implements Parcelable {
     private int mSearchButtonText = 0;
     private int mSearchInputType = 0;
     private int mSearchImeOptions = 0;
+    private boolean mIncludeInGlobalSearch = false;
     private String mSuggestAuthority = null;
     private String mSuggestPath = null;
     private String mSuggestSelection = null;
@@ -236,6 +237,8 @@ public final class SearchableInfo implements Parcelable {
                 InputType.TYPE_TEXT_VARIATION_NORMAL);
         mSearchImeOptions = a.getInt(com.android.internal.R.styleable.Searchable_imeOptions, 
                 EditorInfo.IME_ACTION_SEARCH);
+        mIncludeInGlobalSearch = a.getBoolean(
+                com.android.internal.R.styleable.Searchable_includeInGlobalSearch, false);
 
         setSearchModeFlags();
         if (DBG_INHIBIT_SUGGESTIONS == 0) {
@@ -576,6 +579,16 @@ public final class SearchableInfo implements Parcelable {
     }
     
     /**
+     * Checks whether the searchable is exported.
+     *
+     * @return The value of the <code>exported</code> attribute,
+     *         or <code>false</code> if the attribute is not set.
+     */
+    public boolean shouldIncludeInGlobalSearch() {
+        return mIncludeInGlobalSearch;
+    }
+
+    /**
      * Support for parcelable and aidl operations.
      */
     public static final Parcelable.Creator<SearchableInfo> CREATOR
@@ -606,6 +619,7 @@ public final class SearchableInfo implements Parcelable {
         mSearchButtonText = in.readInt();
         mSearchInputType = in.readInt();
         mSearchImeOptions = in.readInt();
+        mIncludeInGlobalSearch = in.readInt() != 0;
         setSearchModeFlags();
 
         mSuggestAuthority = in.readString();
@@ -644,6 +658,7 @@ public final class SearchableInfo implements Parcelable {
         dest.writeInt(mSearchButtonText);
         dest.writeInt(mSearchInputType);
         dest.writeInt(mSearchImeOptions);
+        dest.writeInt(mIncludeInGlobalSearch ? 1 : 0);
         
         dest.writeString(mSuggestAuthority);
         dest.writeString(mSuggestPath);
