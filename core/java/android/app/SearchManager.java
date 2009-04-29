@@ -1336,6 +1336,15 @@ public class SearchManager
             = "android.search.action.CURSOR_RESPOND";
     
     /**
+     * Intent action for finding the global search activity.
+     * The global search provider should handle this intent.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_GLOBAL_SEARCH 
+            = "android.search.action.GLOBAL_SEARCH";
+    
+    /**
      * Intent action for starting the global search settings activity.
      * The global search provider should handle this intent.
      * 

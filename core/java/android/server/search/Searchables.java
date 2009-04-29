@@ -16,6 +16,7 @@
 
 package android.server.search;
 
+import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -148,22 +149,6 @@ public class Searchables {
     }
     
     /**
-     * Set the default searchable activity (when none is specified).
-     */
-    public synchronized void setDefaultSearchable(ComponentName activity) {
-        SearchableInfo si = null;
-        if (activity != null) {
-            si = getSearchableInfo(activity);
-            if (si != null) {
-                // move to front of list
-                mSearchablesList.remove(si);
-                mSearchablesList.add(0, si);
-            }
-        }
-        mDefaultSearchable = si;
-    }
-    
-    /**
      * Provides the system-default search activity, which you can use
      * whenever getSearchableInfo() returns null;
      * 
@@ -199,14 +184,15 @@ public class Searchables {
      */
     public void buildSearchableList() {
         
-        // create empty hash & list
+        // These will become the new values at the end of the method
         HashMap<ComponentName, SearchableInfo> newSearchablesMap 
                                 = new HashMap<ComponentName, SearchableInfo>();
         ArrayList<SearchableInfo> newSearchablesList
                                 = new ArrayList<SearchableInfo>();
 
-        // use intent resolver to generate list of ACTION_SEARCH receivers
         final PackageManager pm = mContext.getPackageManager();
+        
+        // use intent resolver to generate list of ACTION_SEARCH receivers
         List<ResolveInfo> infoList;
         final Intent intent = new Intent(Intent.ACTION_SEARCH);
         infoList = pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
@@ -226,10 +212,16 @@ public class Searchables {
             }
         }
         
-        // record the final values as a coherent pair
+        // Find the global search provider
+        Intent globalSearchIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+        ComponentName globalSearchActivity = globalSearchIntent.resolveActivity(pm);
+        SearchableInfo newDefaultSearchable = newSearchablesMap.get(globalSearchActivity);
+
+        // Store a consistent set of new values
         synchronized (this) {
             mSearchablesList = newSearchablesList;
             mSearchablesMap = newSearchablesMap;
+            mDefaultSearchable = newDefaultSearchable;
         }
     }
     
