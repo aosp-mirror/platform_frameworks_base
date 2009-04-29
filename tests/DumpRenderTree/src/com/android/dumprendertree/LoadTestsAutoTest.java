@@ -42,7 +42,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
     private boolean mFinished;
     static final String LOAD_TEST_RUNNER_FILES[] = {
         "run_page_cycler.py"
-  };
+    };
 
     public LoadTestsAutoTest() {
         super("com.android.dumprendertree", TestShellActivity.class);
@@ -133,6 +133,9 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
                     mFinished = true;
                     LoadTestsAutoTest.this.notifyAll();
                 }
+            }
+            
+            public void timedOut(String url) {
             }
         });
 
