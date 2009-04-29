@@ -871,14 +871,22 @@ public class Im {
     }
 
     /**
-     * The common columns for both one-to-one chat messages or group chat messages.
+     * The common columns for messages table
      */
-    public interface BaseMessageColumns {
+    public interface MessageColumns {
         /**
-         * The user this message belongs to
-         * <P>Type: TEXT</P>
+         * The thread_id column stores the contact id of the contact the message belongs to.
+         * For groupchat messages, the thread_id stores the group id, which is the contact id
+         * of the temporary group contact created for the groupchat. So there should be no
+         * collision between groupchat message thread id and regular message thread id. 
          */
-        String CONTACT = "contact";
+        String THREAD_ID = "thread_id";
+
+        /**
+         * The nickname. This is used for groupchat messages to indicate the participant's
+         * nickname. For non groupchat messages, this field should be left empty.
+         */
+        String NICKNAME = "nickname";
 
         /**
          * The body
@@ -917,63 +925,120 @@ public class Im {
          * <P>Type: STRING</P>
          */
         String PACKET_ID = "packet_id";
-    }
-
-    /**
-     * Columns from the Messages table.
-     */
-    public interface MessagesColumns extends BaseMessageColumns{
-        /**
-         * The provider id
-         * <P> Type: INTEGER </P>
-         */
-        String PROVIDER = "provider";
 
         /**
-         * The account id
-         * <P> Type: INTEGER </P>
+         * Is groupchat message or not
+         * <P>Type: INTEGER</P>
          */
-        String ACCOUNT = "account";
+        String IS_GROUP_CHAT = "is_muc";
     }
 
     /**
      * This table contains messages.
      */
-    public static final class Messages implements BaseColumns, MessagesColumns {
+    public static final class Messages implements BaseColumns, MessageColumns {
         /**
          * no public constructor since this is a utility class
          */
         private Messages() {}
 
         /**
-         * Gets the Uri to query messages by contact.
+         * Gets the Uri to query messages by thread id.
          *
-         * @param providerId the provider id of the contact.
+         * @param threadId the thread id of the message.
+         * @return the Uri
+         */
+        public static final Uri getContentUriByThreadId(long threadId) {
+            Uri.Builder builder = CONTENT_URI_MESSAGES_BY_THREAD_ID.buildUpon();
+            ContentUris.appendId(builder, threadId);
+            return builder.build();
+        }
+
+        /**
+         * @deprecated
+         *
+         * Gets the Uri to query messages by account and contact.
+         *
          * @param accountId the account id of the contact.
          * @param username the user name of the contact.
          * @return the Uri
          */
-        public static final Uri getContentUriByContact(long providerId,
-                long accountId, String username) {
-            Uri.Builder builder = CONTENT_URI_MESSAGES_BY.buildUpon();
-            ContentUris.appendId(builder, providerId);
+        public static final Uri getContentUriByContact(long accountId, String username) {
+            Uri.Builder builder = CONTENT_URI_MESSAGES_BY_ACCOUNT_AND_CONTACT.buildUpon();
             ContentUris.appendId(builder, accountId);
             builder.appendPath(username);
             return builder.build();
         }
 
         /**
-         * The content:// style URL for this table
+         * Gets the Uri to query messages by provider.
+         *
+         * @param providerId the server provider id.
+         * @return the Uri
          */
-        public static final Uri CONTENT_URI =
-            Uri.parse("content://im/messages");
+        public static final Uri getContentUriByProvider(long providerId) {
+            Uri.Builder builder = CONTENT_URI_MESSAGES_BY_PROVIDER.buildUpon();
+            ContentUris.appendId(builder, providerId);
+            return builder.build();
+        }
 
         /**
-         * The content:// style URL for messages by provider and account
+         * Gets the Uri to query groupchat messages by thread id.
+         *
+         * @param threadId the thread id of the groupchat message.
+         * @return the Uri
          */
-        public static final Uri CONTENT_URI_MESSAGES_BY =
-            Uri.parse("content://im/messagesBy");
+        public static final Uri getGroupChatContentUriByThreadId(long threadId) {
+            Uri.Builder builder = GROUP_CHAT_CONTENT_URI_MESSAGES_BY_THREAD_ID.buildUpon();
+            ContentUris.appendId(builder, threadId);
+            return builder.build();
+        }
 
+        /**
+         * The content:// style URL for this table
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://im/messages");
+
+        /**
+         * The content:// style URL for messages by thread id
+         */
+        public static final Uri CONTENT_URI_MESSAGES_BY_THREAD_ID =
+                Uri.parse("content://im/messagesByThreadId");
+
+        /**
+         * The content:// style URL for messages by account and contact
+         */
+        public static final Uri CONTENT_URI_MESSAGES_BY_ACCOUNT_AND_CONTACT =
+                Uri.parse("content://im/messagesByAcctAndContact");
+
+        /**
+         * The content:// style URL for messages by provider
+         */
+        public static final Uri CONTENT_URI_MESSAGES_BY_PROVIDER =
+                Uri.parse("content://im/messagesByProvider");
+
+        /**
+         * The content:// style URL for groupchat messages.
+         */
+        public static final Uri GROUP_CHAT_CONTENT_URI = Uri.parse("content://im/groupMessages");
+
+        /**
+         * The content:// style URL for groupchat messages by thread id
+         */
+        public static final Uri GROUP_CHAT_CONTENT_URI_MESSAGES_BY_THREAD_ID =
+                Uri.parse("content://im/groupMessagesByThreadId");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of groupchat messages.
+         */
+        public static final String GROUP_CHAT_CONTENT_TYPE =
+                "vnd.android.cursor.dir/im-groupMessages";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single groupchat message.
+         */
+        public static final String GROUP_CHAT_CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/im-groupMessages";
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
@@ -992,6 +1057,11 @@ public class Im {
          */
         public static final String DEFAULT_SORT_ORDER = "date ASC";
 
+        /**
+         * The "contact" column. This is not a real column in the messages table, but a
+         * temoprary column created when querying for messages (joined with the contacts table)
+         */
+        public static final String CONTACT = "contact";
     }
 
     /**
@@ -1116,67 +1186,6 @@ public class Im {
          */
         public static final String CONTENT_ITEM_TYPE =
                 "vnd.android.cursor.item/im-invitations";
-    }
-
-    /**
-     * Columns from the GroupMessages table
-     */
-    public interface GroupMessageColumns extends BaseMessageColumns {
-        /**
-         * The group this message belongs to
-         * <p>Type: TEXT</p>
-         */
-        String GROUP = "groupId";
-    }
-
-    /**
-     * This table contains group messages.
-     */
-    public final static class GroupMessages implements BaseColumns,
-            GroupMessageColumns {
-        private GroupMessages() {}
-
-        /**
-         * Gets the Uri to query group messages by group.
-         *
-         * @param groupId the group id.
-         * @return the Uri
-         */
-        public static final Uri getContentUriByGroup(long groupId) {
-            Uri.Builder builder = CONTENT_URI_GROUP_MESSAGES_BY.buildUpon();
-            ContentUris.appendId(builder, groupId);
-            return builder.build();
-        }
-
-        /**
-         * The content:// style URL for this table
-         */
-        public static final Uri CONTENT_URI =
-            Uri.parse("content://im/groupMessages");
-
-        /**
-         * The content:// style URL for group messages by provider and account
-         */
-        public static final Uri CONTENT_URI_GROUP_MESSAGES_BY =
-            Uri.parse("content://im/groupMessagesBy");
-
-        /**
-         * The MIME type of {@link #CONTENT_URI} providing a directory of
-         * group messages.
-         */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-groupMessages";
-
-        /**
-         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
-         * group message.
-         */
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-groupMessages";
-
-        /**
-         * The default sort order for this table
-         */
-        public static final String DEFAULT_SORT_ORDER = "date ASC";
     }
 
     /**
