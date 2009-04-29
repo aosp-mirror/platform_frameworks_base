@@ -472,7 +472,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         closeSuggestionsAdapter();
         
         mSearchAutoComplete.setDropDownAnimationStyle(0); // no animation
-        mSearchAutoComplete.setThreshold(0);  // always allow zero-query suggestions
+        mSearchAutoComplete.setThreshold(mSearchable.getSuggestThreshold());
 
         if (mGlobalSearchMode) {
             mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in

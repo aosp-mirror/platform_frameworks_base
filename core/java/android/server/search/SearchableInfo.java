@@ -71,6 +71,7 @@ public final class SearchableInfo implements Parcelable {
     private String mSuggestSelection = null;
     private String mSuggestIntentAction = null;
     private String mSuggestIntentData = null;
+    private int mSuggestThreshold = 0;
     private ActionKeyInfo mActionKeyList = null;
     private String mSuggestProviderPackage = null;
     
@@ -137,6 +138,16 @@ public final class SearchableInfo implements Parcelable {
      */
     public String getSuggestIntentData() {
         return mSuggestIntentData;
+    }
+    
+    /**
+     * Gets the suggestion threshold for use with these suggestions. 
+     * 
+     * @return The value of the <code>searchSuggestThreshold</code> attribute, 
+     *         or 0 if the attribute is not set.
+     */
+    public int getSuggestThreshold() {
+        return mSuggestThreshold;
     }
     
     /**
@@ -238,6 +249,8 @@ public final class SearchableInfo implements Parcelable {
                     com.android.internal.R.styleable.Searchable_searchSuggestIntentAction);
             mSuggestIntentData = a.getString(
                     com.android.internal.R.styleable.Searchable_searchSuggestIntentData);
+            mSuggestThreshold = a.getInt(
+                    com.android.internal.R.styleable.Searchable_searchSuggestThreshold, 0);
         }
         mVoiceSearchMode = 
             a.getInt(com.android.internal.R.styleable.Searchable_voiceSearchMode, 0);
@@ -600,6 +613,7 @@ public final class SearchableInfo implements Parcelable {
         mSuggestSelection = in.readString();
         mSuggestIntentAction = in.readString();
         mSuggestIntentData = in.readString();
+        mSuggestThreshold = in.readInt();
 
         mActionKeyList = null;
         int count = in.readInt();
@@ -636,6 +650,7 @@ public final class SearchableInfo implements Parcelable {
         dest.writeString(mSuggestSelection);
         dest.writeString(mSuggestIntentAction);
         dest.writeString(mSuggestIntentData);
+        dest.writeInt(mSuggestThreshold);
 
         // This is usually a very short linked list so we'll just pre-count it
         ActionKeyInfo nextKeyInfo = mActionKeyList;
