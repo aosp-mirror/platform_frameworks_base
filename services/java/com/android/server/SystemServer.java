@@ -306,6 +306,13 @@ class ServerThread extends Thread {
             }
 
             try {
+                Log.i(TAG, "Starting Backup Service");
+                ServiceManager.addService(Context.BACKUP_SERVICE, new BackupManagerService(context));
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting Backup Service", e);
+            }
+
+            try {
                 Log.i(TAG, "Starting AppWidget Service");
                 appWidget = new AppWidgetService(context);
                 ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
