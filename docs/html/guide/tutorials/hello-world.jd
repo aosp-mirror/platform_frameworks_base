@@ -34,9 +34,14 @@ here when you've completed the installation.</p>
 
 <h2 id="avd">Create an AVD</h2>
 
-<p class="note"><strong>Note:</strong> If you're developing with an Android SDK older
-than the one provided for Android 1.5, you can skip this step and continue with
-<a href="#create">Create the Project</a>.</p>
+<div class="sidebox-wrapper">
+  <div class="sidebox-inner">
+    <p>To learn more about how to use AVDs and the options 
+       available to you, refer to the 
+       <a href="{@docRoot}guide/developing/tools/avd.html">Android 
+       Virtual Devices</a> document.</p>
+  </div>
+</div>
 
 <p>In this tutorial, you will run your application in the Android Emulator.
 Before you can launch the emulator, you must create an 
@@ -54,13 +59,6 @@ android create avd --target 2 --name my_avd
 For the time being, press Return to skip it ("no" is the default response). 
 That's it. This configures an AVD named "my_avd" that uses the Android 1.5
 platform. The AVD is now ready for use in the emulator.</p>
-
-<div class="sidebox-wrapper">
-  <div class="sidebox-inner">
-    <p>To learn more about Android Virtual Devices (and targets), refer to the 
-    <a href="{@docRoot}guide/developing/tools/avd.html">AVD</a> document.</p>
-  </div>
-</div>
 
 <p>In the above command, the <code>--target</code> option is required 
 and specifies the deployment target to run on the emulator.
@@ -247,7 +245,7 @@ to see it running.</p>
 <div class="sidebox-wrapper">
   <div class="sidebox-inner">
     <p>To learn more about creating and editing run configurations in Eclipse, refer to
-    <a href="{@docRoot}guide/developing/tools/eclipse-adt.html#RunConfig">Developing In Eclipse, 
+    <a href="{@docRoot}guide/developing/eclipse-adt.html#RunConfig">Developing In Eclipse, 
     with ADT</a>.</p>
   </div>
 </div>
