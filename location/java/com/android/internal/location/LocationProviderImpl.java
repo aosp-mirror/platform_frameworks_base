@@ -21,13 +21,8 @@ import android.location.Location;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.util.Config;
 import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,49 +68,6 @@ public abstract class LocationProviderImpl extends LocationProvider {
 
     public static LocationProviderImpl getProvider(String name) {
         return sProvidersByName.get(name);
-    }
-
-    public static LocationProviderImpl loadFromClass(File classFile) {
-        if (!classFile.exists()) {
-            return null;
-        }
-        if (Config.LOGD) {
-            Log.d(TAG, "Loading class specifier file " + classFile.getPath());
-        }
-        String className = null;
-        try {
-            BufferedReader br =
-                new BufferedReader(new FileReader(classFile), 8192);
-            className = br.readLine();
-            br.close();
-            Class providerClass = Class.forName(className);
-            if (Config.LOGD) {
-                Log.d(TAG, "Loading provider class " + providerClass.getName());
-            }
-            LocationProviderImpl provider =
-                (LocationProviderImpl) providerClass.newInstance();
-            if (Config.LOGD) {
-                Log.d(TAG, "Got provider instance " + provider);
-            }
-
-            return provider;
-        } catch (IOException ioe) {
-            Log.e(TAG, "IOException loading config file " +
-                  classFile.getPath(), ioe);
-        } catch (IllegalAccessException iae) {
-            Log.e(TAG, "IllegalAccessException loading class " +
-                  className, iae);
-        } catch (InstantiationException ie) {
-            Log.e(TAG, "InstantiationException loading class " +
-                  className, ie);
-        } catch (ClassNotFoundException cnfe) {
-            Log.e(TAG, "ClassNotFoundException loading class " +
-                  className, cnfe);
-        } catch (ClassCastException cce) {
-            Log.e(TAG, "ClassCastException loading class " +
-                  className, cce);
-        }
-        return null;
     }
 
     public void reportLocationChanged(Location location) {
