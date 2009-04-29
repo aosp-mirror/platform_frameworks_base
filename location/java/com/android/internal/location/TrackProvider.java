@@ -18,7 +18,6 @@ import java.util.StringTokenizer;
 import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.Location;
-import android.location.LocationProviderImpl;
 import android.os.Bundle;
 import android.util.Config;
 import android.util.Log;

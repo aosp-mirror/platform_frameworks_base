@@ -53,7 +53,6 @@ import android.location.ILocationProvider;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.location.LocationProviderImpl;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -73,6 +72,7 @@ import android.util.PrintWriterPrinter;
 import android.util.SparseIntArray;
 
 import com.android.internal.location.GpsLocationProvider;
+import com.android.internal.location.LocationProviderImpl;
 import com.android.internal.location.LocationProviderProxy;
 import com.android.internal.location.MockProvider;
 import com.android.internal.location.TrackProvider;

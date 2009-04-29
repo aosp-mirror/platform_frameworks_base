@@ -18,7 +18,6 @@ package com.android.internal.location;
 
 import android.location.ILocationManager;
 import android.location.Location;
-import android.location.LocationProviderImpl;
 import android.os.Bundle;
 import android.util.PrintWriterPrinter;
 
