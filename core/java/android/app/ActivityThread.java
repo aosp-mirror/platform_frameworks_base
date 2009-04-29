@@ -161,7 +161,7 @@ public final class ActivityThread {
         return metrics;
     }
 
-    Resources getTopLevelResources(String appDir) {
+    Resources getTopLevelResources(String appDir, float applicationScale) {
         synchronized (mPackages) {
             //Log.w(TAG, "getTopLevelResources: " + appDir);
             WeakReference<Resources> wr = mActiveResources.get(appDir);
@@ -181,7 +181,27 @@ public final class ActivityThread {
                 return null;
             }
             DisplayMetrics metrics = getDisplayMetricsLocked(false);
-            r = new Resources(assets, metrics, getConfiguration());
+            // density used to load resources
+            // scaledDensity is calculated in Resources constructor
+            //
+            boolean usePreloaded = true;
+
+            // TODO: use explicit flag to indicate the compatibility mode.
+            if (applicationScale != 1.0f) {
+                usePreloaded = false;
+                DisplayMetrics newMetrics = new DisplayMetrics();
+                newMetrics.setTo(metrics);
+                float invertedScale = 1.0f / applicationScale;
+                newMetrics.density *= invertedScale;
+                newMetrics.xdpi *= invertedScale;
+                newMetrics.ydpi *= invertedScale;
+                newMetrics.widthPixels *= invertedScale;
+                newMetrics.heightPixels *= invertedScale;
+                metrics = newMetrics;
+            }
+            //Log.i(TAG, "Resource:" + appDir + ", density " + newMetrics.density + ", orig density:" +
+            //      metrics.density);
+            r = new Resources(assets, metrics, getConfiguration(), usePreloaded);
             //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
             // XXX need to remove entries when weak references go away
             mActiveResources.put(appDir, new WeakReference<Resources>(r));
@@ -209,6 +229,8 @@ public final class ActivityThread {
         private Resources mResources;
         private ClassLoader mClassLoader;
         private Application mApplication;
+        private float mApplicationScale;
+
         private final HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
             = new HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>>();
         private final HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>> mUnregisteredReceivers
@@ -241,8 +263,8 @@ public final class ActivityThread {
                     mSystemContext =
                         ApplicationContext.createSystemContext(mainThread);
                     mSystemContext.getResources().updateConfiguration(
-                            mainThread.getConfiguration(),
-                            mainThread.getDisplayMetricsLocked(false));
+                             mainThread.getConfiguration(),
+                             mainThread.getDisplayMetricsLocked(false));
                     //Log.i(TAG, "Created system resources "
                     //        + mSystemContext.getResources() + ": "
                     //        + mSystemContext.getResources().getConfiguration());
@@ -250,6 +272,8 @@ public final class ActivityThread {
                 mClassLoader = mSystemContext.getClassLoader();
                 mResources = mSystemContext.getResources();
             }
+
+            mApplicationScale = -1.0f;
         }
 
         public PackageInfo(ActivityThread activityThread, String name,
@@ -268,6 +292,7 @@ public final class ActivityThread {
             mIncludeCode = true;
             mClassLoader = systemContext.getClassLoader();
             mResources = systemContext.getResources();
+            mApplicationScale = systemContext.getApplicationScale();
         }
 
         public String getPackageName() {
@@ -276,6 +301,47 @@ public final class ActivityThread {
 
         public boolean isSecurityViolation() {
             return mSecurityViolation;
+        }
+
+        public float getApplicationScale() {
+            if (mApplicationScale > 0.0f) {
+                return mApplicationScale;
+            }
+            DisplayMetrics metrics = mActivityThread.getDisplayMetricsLocked(false);
+            // Find out the density scale (relative to 160) of the supported density  that
+            // is closest to the system's density.
+            try {
+                ApplicationInfo ai = getPackageManager().getApplicationInfo(
+                        mPackageName, PackageManager.GET_SUPPORTS_DENSITIES);
+
+                float appScale = -1.0f;
+                if (ai.supportsDensities != null) {
+                    // TODO: precompute this in DisplayMetrics
+                    float systemDensityDpi = metrics.density * DisplayMetrics.DEFAULT_DENSITY;
+                    int minDiff = Integer.MAX_VALUE;
+                    for (int density : ai.supportsDensities) {
+                        int tmpDiff = (int) Math.abs(systemDensityDpi - density);
+                        if (tmpDiff == 0) {
+                            appScale = 1.0f;
+                            break;
+                        }
+                        // prefer higher density (appScale>1.0), unless that's only option.
+                        if (tmpDiff < minDiff && appScale < 1.0f) {
+                            appScale = systemDensityDpi / density;
+                            minDiff = tmpDiff;
+                        }
+                    }
+                }
+                if (appScale < 0.0f) {
+                    mApplicationScale = metrics.density;
+                } else {
+                    mApplicationScale = appScale;
+                }
+            } catch (RemoteException e) {
+                throw new AssertionError(e);
+            }
+            if (localLOGV) Log.v(TAG, "appScale=" + mApplicationScale + ", pkg=" + mPackageName);
+            return mApplicationScale;
         }
 
         /**
@@ -435,7 +501,7 @@ public final class ActivityThread {
 
         public Resources getResources(ActivityThread mainThread) {
             if (mResources == null) {
-                mResources = mainThread.getTopLevelResources(mResDir);
+                mResources = mainThread.getTopLevelResources(mResDir, getApplicationScale());
             }
             return mResources;
         }

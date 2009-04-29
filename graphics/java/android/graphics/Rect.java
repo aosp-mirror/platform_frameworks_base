@@ -517,4 +517,17 @@ public final class Rect implements Parcelable {
         right = in.readInt();
         bottom = in.readInt();
     }
+
+    /**
+     * Scales up the rect by the given scale.
+     * @hide
+     */
+    public void scale(float scale) {
+        if (scale != 1.0f) {
+            left *= scale;
+            top *= scale;
+            right *= scale;
+            bottom*= scale;
+        }
+    }
 }
