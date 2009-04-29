@@ -953,7 +953,20 @@ public interface WindowManager extends ViewManager {
             sb.append('}');
             return sb.toString();
         }
-    
+
+        void scaleUp(float scale) {
+            if (scale != 1.0f) {
+                x *= scale;
+                y *= scale;
+                if (width > 0) {
+                    width *= scale;
+                }
+                if (height > 0) {
+                    height *= scale;
+                }
+            }
+        }
+
         private CharSequence mTitle = "";
     }
 }
