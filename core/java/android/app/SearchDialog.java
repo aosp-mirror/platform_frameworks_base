@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.SuggestionsAdapter.getColumnString;
+
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -25,8 +26,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -44,7 +45,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -53,14 +53,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import java.util.ArrayList;
 import java.util.WeakHashMap;
@@ -600,44 +600,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             }
         }
         mVoiceButton.setVisibility(visibility);
-    }
-    
-    /*
-     * Menu.
-     */
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Show search settings menu item if anyone handles the intent for it
-        Intent settingsIntent = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
-        PackageManager pm = getContext().getPackageManager();
-        ActivityInfo activityInfo = settingsIntent.resolveActivityInfo(pm, 0);
-        if (activityInfo != null) {
-            settingsIntent.setClassName(activityInfo.applicationInfo.packageName,
-                    activityInfo.name);
-            String label = getActivityLabel(activityInfo);
-            menu.add(Menu.NONE, Menu.NONE, Menu.NONE, label)
-                    .setIcon(android.R.drawable.ic_menu_preferences)
-                    .setAlphabeticShortcut('P')
-                    .setIntent(settingsIntent);
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-    
-    // TODO: shouldn't this be in PackageManager?
-    private String getActivityLabel(ActivityInfo activityInfo) {
-        PackageManager pm = getContext().getPackageManager();
-        try {
-            int labelRes = activityInfo.labelRes;
-            if (labelRes == 0) {
-                return null;
-            }
-            Resources r = pm.getResourcesForApplication(activityInfo.applicationInfo);
-            return r.getString(labelRes);
-        } catch (NameNotFoundException ex) {
-            return null;
-        }
     }
     
     /**
