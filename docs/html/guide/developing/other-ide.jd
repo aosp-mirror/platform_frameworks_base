@@ -19,7 +19,7 @@ page.title=Developing In Other IDEs
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/tools/android.html">android Tool</a></li>
+    <li><a href="{@docRoot}guide/developing/tools/othertools.html#android">android Tool</a></li>
     <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
     <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a></li>
   </ol>
@@ -43,7 +43,7 @@ package it for distribution. This document is your guide to using these tools.</
 familiarity with the following Android SDK tools:</p>
 
 <dl>
-  <dt><a href="{@docRoot}guide/developing/tools/android.html">android</a></dt>
+  <dt><a href="{@docRoot}guide/developing/tools/othertools.html#android">android</a></dt>
     <dd>To create/update Android projects and to create/move/delete AVDs.</dd>
   <dt><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></dt>
     <dd>To run your Android applications on an emulated Android platform.</dd>
@@ -377,7 +377,7 @@ multiple emulators.</p>
 
 <p>For more information on the tools used above, please see the following documents:</p>
 <ul>
-  <li><a href="{@docRoot}guide/developing/tools/android.html">android Tool</a></li>
+  <li><a href="{@docRoot}guide/developing/tools/othertools.html#android">android Tool</a></li>
   <li><a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a></li>
   <li><a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (ADB)</li>
 </ul>
