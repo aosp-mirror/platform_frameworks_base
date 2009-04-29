@@ -24,6 +24,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 
+import java.util.List;
+
 /**
  * This is a simplified version of the Search Manager service.  It no longer handles
  * presentation (UI).  Its function is to maintain the map & list of "searchable" 
@@ -142,6 +144,13 @@ public class SearchManagerService extends ISearchManager.Stub
         }
 
         return si;
+    }
+    
+    /**
+     * Returns a list of the searchable activities that can be included in global search.
+     */
+    public List<SearchableInfo> getSearchablesInGlobalSearch() {
+        return mSearchables.getSearchablesInGlobalSearchList();
     }
 
 }

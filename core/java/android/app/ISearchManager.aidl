@@ -22,4 +22,5 @@ import android.server.search.SearchableInfo;
 /** @hide */
 interface ISearchManager {
    SearchableInfo getSearchableInfo(in ComponentName launchActivity, boolean globalSearch);
+   List<SearchableInfo> getSearchablesInGlobalSearch();
 }

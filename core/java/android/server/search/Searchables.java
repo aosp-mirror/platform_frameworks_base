@@ -44,6 +44,7 @@ public class Searchables {
     
     private HashMap<ComponentName, SearchableInfo> mSearchablesMap = null;
     private ArrayList<SearchableInfo> mSearchablesList = null;
+    private ArrayList<SearchableInfo> mSearchablesInGlobalSearchList = null;
     private SearchableInfo mDefaultSearchable = null;
     
     /**
@@ -189,6 +190,8 @@ public class Searchables {
                                 = new HashMap<ComponentName, SearchableInfo>();
         ArrayList<SearchableInfo> newSearchablesList
                                 = new ArrayList<SearchableInfo>();
+        ArrayList<SearchableInfo> newSearchablesInGlobalSearchList
+                                = new ArrayList<SearchableInfo>();
 
         final PackageManager pm = mContext.getPackageManager();
         
@@ -208,6 +211,9 @@ public class Searchables {
                 if (searchable != null) {
                     newSearchablesList.add(searchable);
                     newSearchablesMap.put(searchable.mSearchActivity, searchable);
+                    if (searchable.shouldIncludeInGlobalSearch()) {
+                        newSearchablesInGlobalSearchList.add(searchable);
+                    }
                 }
             }
         }
@@ -219,8 +225,9 @@ public class Searchables {
 
         // Store a consistent set of new values
         synchronized (this) {
-            mSearchablesList = newSearchablesList;
             mSearchablesMap = newSearchablesMap;
+            mSearchablesList = newSearchablesList;
+            mSearchablesInGlobalSearchList = newSearchablesInGlobalSearchList;
             mDefaultSearchable = newDefaultSearchable;
         }
     }
@@ -231,5 +238,12 @@ public class Searchables {
     public synchronized ArrayList<SearchableInfo> getSearchablesList() {
         ArrayList<SearchableInfo> result = new ArrayList<SearchableInfo>(mSearchablesList);
         return result;
+    }
+    
+    /**
+     * Returns a list of the searchable activities that can be included in global search.
+     */
+    public synchronized ArrayList<SearchableInfo> getSearchablesInGlobalSearchList() {
+        return new ArrayList<SearchableInfo>(mSearchablesInGlobalSearchList);
     }
 }

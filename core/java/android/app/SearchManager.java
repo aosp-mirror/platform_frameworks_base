@@ -30,6 +30,8 @@ import android.os.ServiceManager;
 import android.server.search.SearchableInfo;
 import android.view.KeyEvent;
 
+import java.util.List;
+
 /**
  * This class provides access to the system search services.
  * 
@@ -1655,4 +1657,20 @@ public class SearchManager
         return context.getContentResolver().query(uri, null, selection, selArgs, null);
     }
      
+    /**
+     * Returns a list of the searchable activities that can be included in global search.
+     * 
+     * @return a list containing searchable information for all searchable activities
+     *         that have the <code>exported</code> attribute set in their searchable
+     *         meta-data.
+     * 
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static List<SearchableInfo> getSearchablesInGlobalSearch() {
+        try {
+            return sService.getSearchablesInGlobalSearch();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
 }

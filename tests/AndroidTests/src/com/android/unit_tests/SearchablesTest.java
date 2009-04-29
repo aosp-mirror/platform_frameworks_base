@@ -153,6 +153,8 @@ public class SearchablesTest extends AndroidTestCase {
         int count = searchablesList.size();
         assertTrue(count >= 1);         // this isn't really a unit test
         checkSearchables(searchablesList);
+        ArrayList<SearchableInfo> global = searchables.getSearchablesInGlobalSearchList();
+        checkSearchables(global);
     }
 
     /**
@@ -166,10 +168,10 @@ public class SearchablesTest extends AndroidTestCase {
         Searchables searchables = new Searchables(mockContext);
         searchables.buildSearchableList();
         ArrayList<SearchableInfo> searchablesList = searchables.getSearchablesList();
-        if (searchablesList != null) {
-            int count = searchablesList.size();
-            assertTrue(count == 0);
-        }
+        assertNotNull(searchablesList);
+        MoreAsserts.assertEmpty(searchablesList);
+        ArrayList<SearchableInfo> global = searchables.getSearchablesInGlobalSearchList();
+        MoreAsserts.assertEmpty(global);
     }
     
     /**
