@@ -2785,6 +2785,11 @@
              search suggestions. The default value is 0. <i>Optional attribute.</i> -->
         <attr name="searchSuggestThreshold" format="integer" />
         
+        <!-- If provided and <code>true</code>, this searchable activity will be
+             included in any global lists of search targets.
+             The default value is <code>false</code>. <i>Optional attribute.</i>. -->
+        <attr name="includeInGlobalSearch" format="boolean" />
+        
     </declare-styleable>
 
     <!-- In order to process special action keys during search, you must define them using
