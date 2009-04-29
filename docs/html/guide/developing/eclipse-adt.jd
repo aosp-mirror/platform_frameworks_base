@@ -188,8 +188,8 @@ id:2
 when launching your application on an emulator.</p>
 
 <p>To learn more about creating and managing AVDs, please read the 
-<a href="{@docRoot}guide/developing/index.html#avd">Developing Overview</a> 
-and <a href="{@docRoot}guide/tools/android.html">android Tool</a> documentation.</p>
+<a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>
+documentation.</p>
 
 
 <h3 id="RunningYourApplication">Running your application</h3>

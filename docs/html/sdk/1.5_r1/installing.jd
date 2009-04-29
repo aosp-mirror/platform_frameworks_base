@@ -250,13 +250,13 @@ begin developing applications. Here are a few ways you can get started: </p>
   <a href="{@docRoot}guide/topics/fundamentals.html">Application
   Fundamentals</a></li>
   <li>Take a look at the Android framework API specification in the <a
-  href="{@docRoot}reference/index.html">Reference</a> tab</li>
+  href="{@docRoot}reference/packages.html">Reference</a> tab</li>
 </ul>
 
 <p><strong>Explore the SDK</strong></p>
 <ul>
   <li>Get an overview of the <a
-  href="{@docRoot}guide/developming/tools/index.html">development
+  href="{@docRoot}guide/developing/tools/index.html">development
   tools</a> that are available to you</li>
   <li>Read how to develop <a
   href="{@docRoot}guide/developing/eclipse-adt.html">in Eclipse/ADT</a> or
