@@ -18,55 +18,50 @@ page</a>.
 <p>
 <table>
   <tr>
-    <th>Version</th>
-    <th>File</th>
-    <th>Date</th>
-    <th>Compatible SDK Versions</th>
+    <th><nobr>ADT Version</nobr></th>
+    <th>Package</th>
+    <th>Size</th>
+    <th>Md5 Checksum</th>
     <th>Notes</th>
   </tr>
 
   <tr>
      <td style="background-color:#ffcccc;">0.9.0</td>
      <td style="background-color:#ffcccc;"><a href="http://dl-ssl.google.com/android/ADT-0.9.0.zip">ADT-0.9.0.zip</a></td>
-     <td style="background-color:#ffcccc;"><nobr>27 April 2009</nobr></td>
-     <td style="background-color:#ffcccc;"><nobr>Android 1.5 SDK</td>
-     <td style="background-color:#ffcccc;"><nobr>Required for users of Android 1.5 SDK (and later releases)<br /> </td>
+     <td style="background-color:#ffcccc;"><nobr>2889330 bytes</nobr></td>
+     <td style="background-color:#ffcccc;"><nobr>4f4c4ece3071cf65bbd4e5da7bbde8af</nobr></td>
+     <td style="background-color:#ffcccc;"><nobr>Required for users of Android 1.5 SDK (and later releases). <em><nobr>27 Apr 2009</nobr></em></td>
   </tr>
   <tr>
      <td>0.8.0</td>
      <td><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">ADT-0.8.0.zip</a></td>
-     <td style="background-color:#ffcccc;"><nobr>23 September 2008</nobr></td>
-     <td style="background-color:#ffcccc;"><nobr>Android 1.1 SDK<br/>Android 1.0 SDK<br/></td>
-     <td style="background-color:#ffcccc;"><nobr>Required for users of Android 1.1 SDK and Android 1.0 SDK<br /> </td>
+     <td colspan="2"><nobr>&nbsp;</nobr></td>
+     <td><nobr>Required for users of Android 1.1 SDK and Android 1.0 SDK. <em><nobr>23 Sep 2008</nobr></em></td>
   </tr>
   <tr>
      <td>0.7.1</td>
      <td><a href="http://dl-ssl.google.com/android/ADT-0.7.1.zip">ADT-0.7.1.zip</a></td>
-     <td>18 Aug 2008</td>
-     <td>Android 0.9 SDK beta</td>
+     <td colspan="2"><nobr>&nbsp;</nobr></td>
      <td>Required for users of Android 0.9 SDK beta. As of this version, <b>Eclipse 3.2 is no longer supported.</b>
-     Please upgrade to Eclipse Ganymede (3.4) or Europa (3.3) if you are still using 3.2. </td>
+     Please upgrade to Eclipse Ganymede (3.4) or Europa (3.3) if you are still using 3.2. <em><nobr>18 Aug 2008</nobr></em></td>
   </tr>
   <tr>
      <td>0.4.0</td>
      <td><a href="http://dl-ssl.google.com/android/ADT-0.4.0.zip">ADT-0.4.0.zip</a></td>
-     <td>12 Feb 2008</td>
-     <td>m5-rc14</td>
-     <td>Required if you are using the M5 SDK. See the SDK Release Notes for details on changes and enhancements in this version.</td>
+     <td colspan="2"><nobr>&nbsp;</nobr></td>
+     <td>Required if you are using the M5 SDK. See the SDK Release Notes for details on changes and enhancements in this version. <em><nobr>12 Feb 2008</nobr></em></td>
   </tr>
   <tr>
      <td>0.3.3</td>
      <td><a href="http://dl-ssl.google.com/android/ADT-0.3.3.zip">ADT-0.3.3.zip</a></td>
-     <td>14 Dec 2007</td>
-     <td>m3-rc37</td>
-     <td>Some significant enhancements (see SDK Release Notes).</td>
+     <td colspan="2"><nobr>&nbsp;</nobr></td>
+     <td>Some significant enhancements (see m3-rc37 SDK Release Notes). <em><nobr>14 Dec 2007</nobr></em></td>
   </tr>
   <tr>
      <td>0.3.1</td>
      <td><a href="http://dl-ssl.google.com/android/ADT-0.3.1.zip">ADT-0.3.1.zip</a></td>
-     <td>21 Nov 2007</td>
-     <td>m3-rc20, m3-rc22</td>
-     <td>Initial Release.</td>
+     <td colspan="2"><nobr>&nbsp;</nobr></td>
+     <td>Initial Release. Required for Android m3-rc20 SDK and Android m3-rc22 SDK.<em><nobr>21 Nov 2007</nobr></em></td>
   </tr>
 </table>
 </p>
