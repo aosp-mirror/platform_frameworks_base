@@ -42,7 +42,7 @@ import android.util.Log;
  *          &lt;/intent-filter&gt;
  *      &lt;/service&gt;</pre>
  * 
- * <p><em>Not hidden but API subject to change and should not be published</em>
+ * @hide pending API solidification
  */
 
 public abstract class BackupService extends Service {
@@ -53,7 +53,7 @@ public abstract class BackupService extends Service {
      * IntentFilter} that accepts this action. 
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String SERVICE_ACTION = "android.service.action.BACKUP";
+    public static final String SERVICE_ACTION = "android.backup.BackupService";
 
     /**
      * The application is being asked to write any data changed since the
@@ -63,7 +63,7 @@ public abstract class BackupService extends Service {
      * should perform a full backup.  In both cases, a representation of the
      * final backup state after this pass should be written to the file pointed
      * to by the newStateFd file descriptor.
-     * 
+     *
      * @param oldStateFd An open, read-only file descriptor pointing to the last
      *                   backup state provided by the application.  May be negative,
      *                   in which case no prior state is being provided and the
@@ -83,7 +83,7 @@ public abstract class BackupService extends Service {
      * provided in the file pointed to by the dataFd file descriptor.  Once
      * the restore is finished, the application should write a representation
      * of the final state to the newStateFd file descriptor, 
-     * 
+     *
      * @param dataFd An open, read-only file descriptor pointing to a full snapshot
      *               of the application's data.
      * @param newStateFd An open, read/write file descriptor pointing to an empty
@@ -95,8 +95,15 @@ public abstract class BackupService extends Service {
 
     // ----- Core implementation -----
     
+    /**
+     * Returns the private interface called by the backup system.  Applications will
+     * not typically override this.
+     */
     public IBinder onBind(Intent intent) {
-        return mBinder;
+        if (intent.getAction().equals(SERVICE_ACTION)) {
+            return mBinder;
+        }
+        return null;
     }
 
     private final IBinder mBinder = new BackupServiceBinder().asBinder();

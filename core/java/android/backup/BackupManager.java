@@ -30,10 +30,12 @@ import android.os.ServiceManager;
  * The system will then schedule a backup operation to occur in the near
  * future.  Repeated calls to {@link #dataChanged()} have no further effect
  * until the backup operation actually occurs.
- * 
+ *
  * <p>The backup operation itself begins with the system launching the
  * {@link BackupService} subclass declared in your manifest.  See the documentation
  * for {@link BackupService} for a detailed description of how the backup then proceeds.
+ *
+ * @hide pending API solidification
  */
 public class BackupManager {
     private Context mContext;
@@ -42,12 +44,12 @@ public class BackupManager {
     /**
      * Constructs a BackupManager object through which the application can
      * communicate with the Android backup system.
-     * 
+     *
      * @param context The {@link android.content.Context} that was provided when
      *                one of your application's {@link android.app.Activity Activities}
      *                was created.
      */
-    public BackupManager (Context context) {
+    public BackupManager(Context context) {
         mContext = context;
         mService = IBackupManager.Stub.asInterface(
                 ServiceManager.getService(Context.BACKUP_SERVICE));
