@@ -683,4 +683,32 @@ public class TypedProperties extends HashMap<String, Object> {
     public String getString(String property) {
         return getString(property, "");
     }
+
+    // Values returned by getStringInfo()
+    public static final int STRING_TYPE_MISMATCH = -2;
+    public static final int STRING_NOT_SET = -1;
+    public static final int STRING_NULL = 0;
+    public static final int STRING_SET = 1;
+
+    /**
+     * Provides string type information about a property.
+     *
+     * @param property the property to check
+     * @return STRING_SET if the property is a string and is non-null.
+     *         STRING_NULL if the property is a string and is null.
+     *         STRING_NOT_SET if the property is not set (no type or value).
+     *         STRING_TYPE_MISMATCH if the property is set but is not a string.
+     */
+    public int getStringInfo(String property) {
+        Object value = super.get(property);
+        if (value == null) {
+            return STRING_NOT_SET;
+        }
+        if (value == NULL_STRING) {
+            return STRING_NULL;
+        } else if (value instanceof String) {
+            return STRING_SET;
+        }
+        return STRING_TYPE_MISMATCH;
+    }
 }
