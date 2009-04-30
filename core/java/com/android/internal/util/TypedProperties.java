@@ -43,7 +43,7 @@ public class TypedProperties extends HashMap<String, Object> {
 
         /* The only non-quoted-string words we'll be reading are:
          * - property names: [._$a-zA-Z0-9]
-         * - type names (case insensitive): [a-zA-Z]
+         * - type names: [a-zS]
          * - number literals: [-0-9.eExXA-Za-z]  ('x' for 0xNNN hex literals. "NaN", "Infinity")
          * - "true" or "false" (case insensitive): [a-zA-Z]
          */
@@ -62,12 +62,13 @@ public class TypedProperties extends HashMap<String, Object> {
         // Other special characters
         st.whitespaceChars(' ', ' ');
         st.whitespaceChars('\t', '\t');
-
+        st.whitespaceChars('\n', '\n');
+        st.whitespaceChars('\r', '\r');
         st.quoteChar('"');
 
-        st.commentChar('#');
-
-        st.eolIsSignificant(true);
+        // Java-style comments
+        st.slashStarComments(true);
+        st.slashSlashComments(true);
 
         return st;
     }
@@ -100,56 +101,33 @@ public class TypedProperties extends HashMap<String, Object> {
     static final int TYPE_ERROR = -1;
 
     /**
-     * Converts a case-insensitive string to an internal type constant.
+     * Converts a string to an internal type constant.
      *
      * @param typeName the type name to convert
      * @return the type constant that corresponds to {@code typeName},
      *         or {@code TYPE_ERROR} if the type is unknown
      */
     static int interpretType(String typeName) {
-        if ("unset".equalsIgnoreCase(typeName)) {
+        if ("unset".equals(typeName)) {
             return TYPE_UNSET;
-        } else if ("boolean".equalsIgnoreCase(typeName)) {
+        } else if ("boolean".equals(typeName)) {
             return TYPE_BOOLEAN;
-        } else if ("byte".equalsIgnoreCase(typeName)) {
+        } else if ("byte".equals(typeName)) {
             return TYPE_BYTE;
-        } else if ("short".equalsIgnoreCase(typeName)) {
+        } else if ("short".equals(typeName)) {
             return TYPE_SHORT;
-        } else if ("int".equalsIgnoreCase(typeName)) {
+        } else if ("int".equals(typeName)) {
             return TYPE_INT;
-        } else if ("long".equalsIgnoreCase(typeName)) {
+        } else if ("long".equals(typeName)) {
             return TYPE_LONG;
-        } else if ("float".equalsIgnoreCase(typeName)) {
+        } else if ("float".equals(typeName)) {
             return TYPE_FLOAT;
-        } else if ("double".equalsIgnoreCase(typeName)) {
+        } else if ("double".equals(typeName)) {
             return TYPE_DOUBLE;
-        } else if ("string".equalsIgnoreCase(typeName)) {
+        } else if ("String".equals(typeName)) {
             return TYPE_STRING;
         }
         return TYPE_ERROR;
-    }
-
-    /**
-     * Consumes EOL tokens.
-     * Returns when a non-EOL token is found.
-     *
-     * @param st The {@code StreamTokenizer} to read tokens from
-     * @return &gt; 0 if an EOL token was seen, &lt; 0 if EOF was seen,
-     *         0 if no tokens were consumed
-     */
-    static int eatEols(StreamTokenizer st) throws IOException {
-        int token;
-        boolean eolSeen = false;
-        do {
-            token = st.nextToken();
-            if (token == StreamTokenizer.TT_EOF) {
-                return -1;
-            } else if (token == StreamTokenizer.TT_EOL) {
-                eolSeen = true;
-            }
-        } while (token == StreamTokenizer.TT_EOL);
-        st.pushBack();
-        return eolSeen ? 1 : 0;
     }
 
     /**
@@ -171,17 +149,29 @@ public class TypedProperties extends HashMap<String, Object> {
             Pattern.compile("(" + identifierPattern + "\\.)*" + identifierPattern);
 
 
-        boolean eolNeeded = false;
         while (true) {
             int token;
 
-            // Eat one or more EOL, or quit on EOF.
-            int eolStatus = eatEols(st);
-            if (eolStatus < 0) {
-                // EOF occurred.
+            // Read the next token, which is either the type or EOF.
+            token = st.nextToken();
+            if (token == StreamTokenizer.TT_EOF) {
                 break;
-            } else if (eolNeeded && eolStatus == 0) {
-                throw new ParseException(st, "end of line or end of file");
+            }
+            if (token != StreamTokenizer.TT_WORD) {
+                throw new ParseException(st, "type name");
+            }
+            final int type = interpretType(st.sval);
+            if (type == TYPE_ERROR) {
+                throw new ParseException(st, "valid type name");
+            }
+            st.sval = null;
+
+            if (type == TYPE_UNSET) {
+                // Expect '('.
+                token = st.nextToken();
+                if (token != '(') {
+                    throw new ParseException(st, "'('");
+                }
             }
 
             // Read the property name.
@@ -195,18 +185,12 @@ public class TypedProperties extends HashMap<String, Object> {
             }
             st.sval = null;
 
-            // Read the type.
-            token = st.nextToken();
-            if (token != StreamTokenizer.TT_WORD) {
-                throw new ParseException(st, "type name");
-            }
-            final int type = interpretType(st.sval);
-            if (type == TYPE_ERROR) {
-                throw new ParseException(st, "valid type name");
-            }
-            st.sval = null;
-
             if (type == TYPE_UNSET) {
+                // Expect ')'.
+                token = st.nextToken();
+                if (token != ')') {
+                    throw new ParseException(st, "')'");
+                }
                 map.remove(propertyName);
             } else {
                 // Expect '='.
@@ -229,8 +213,11 @@ public class TypedProperties extends HashMap<String, Object> {
                 map.put(propertyName, value);
             }
 
-            // Require that we see at least one EOL before the next token.
-            eolNeeded = true;
+            // Expect ';'.
+            token = st.nextToken();
+            if (token != ';') {
+                throw new ParseException(st, "';'");
+            }
         }
     }
 
@@ -251,9 +238,9 @@ public class TypedProperties extends HashMap<String, Object> {
                 throw new ParseException(st, "boolean constant");
             }
 
-            if ("true".equalsIgnoreCase(st.sval)) {
+            if ("true".equals(st.sval)) {
                 return Boolean.TRUE;
-            } else if ("false".equalsIgnoreCase(st.sval)) {
+            } else if ("false".equals(st.sval)) {
                 return Boolean.FALSE;
             }
 
@@ -339,7 +326,7 @@ public class TypedProperties extends HashMap<String, Object> {
             // Expect a quoted string or the word "null".
             if (token == '"') {
                 return st.sval;
-            } else if (token == StreamTokenizer.TT_WORD && "null".equalsIgnoreCase(st.sval)) {
+            } else if (token == StreamTokenizer.TT_WORD && "null".equals(st.sval)) {
                 return NULL_STRING;
             }
             throw new ParseException(st, "double-quoted string or 'null'");
@@ -361,40 +348,47 @@ public class TypedProperties extends HashMap<String, Object> {
      * Properties that have already been loaded are preserved unless
      * the new Reader overrides or unsets earlier values for the
      * same properties.
-     *
+     * <p>
      * File syntax:
-     *
-     *     &lt;property-name&gt; &lt;type&gt; = &lt;value&gt;
-     *     &lt;property-name&gt; unset
-     *
-     *     '#' is a comment character; it and anything appearing after it
-     *     on the line is ignored.
-     *
+     * <blockquote>
+     *     <tt>
+     *     &lt;type&gt; &lt;property-name&gt; = &lt;value&gt; ;
+     *     <br />
+     *     unset ( &lt;property-name&gt; ) ;
+     *     </tt>
+     *     <p>
+     *     "//" comments everything until the end of the line.
+     *     "/&#2a;" comments everything until the next appearance of "&#2a;/".
+     *     <p>
      *     Blank lines are ignored.
-     *
-     *     The only required whitespace is between the property name
-     *     and the type.
-     *
-     *     Property assignments may not be split across multiple lines.
-     *
+     *     <p>
+     *     The only required whitespace is between the type and
+     *     the property name.
+     *     <p>
+     *     &lt;type&gt; is one of {boolean, byte, short, int, long,
+     *     float, double, String}, and is case-sensitive.
+     *     <p>
      *     &lt;property-name&gt; is a valid fully-qualified class name
      *     (one or more valid identifiers separated by dot characters).
-     *
-     *     &lt;type&gt; is one of {boolean, byte, short, int, long,
-     *     float, double, string}, and is case-insensitive.
-     *
+     *     <p>
      *     &lt;value&gt; depends on the type:
-     *     - boolean: one of {true, false} (case-insensitive)
-     *     - byte, short, int, long: a valid Java integer constant
-     *       (including non-base-10 constants like 0xabc and 074)
-     *       whose value does not overflow the type.  NOTE: these are
-     *       interpreted as Java integer values, so they are all signed.
-     *     - float, double: a valid Java floating-point constant.
-     *       If the type is float, the value must fit in 32 bits.
-     *     - string: a double-quoted string value, or the word {@code null}.
-     *       NOTE: the contents of the string must be 7-bit clean ASCII;
-     *       C-style octal escapes are recognized, but Unicode escapes are not.
-     *
+     *     <ul>
+     *     <li> boolean: one of {true, false} (case-sensitive)
+     *     <li> byte, short, int, long: a valid Java integer constant
+     *          (including non-base-10 constants like 0xabc and 074)
+     *          whose value does not overflow the type.  NOTE: these are
+     *          interpreted as Java integer values, so they are all signed.
+     *     <li> float, double: a valid Java floating-point constant.
+     *          If the type is float, the value must fit in 32 bits.
+     *     <li> String: a double-quoted string value, or the word {@code null}.
+     *          NOTE: the contents of the string must be 7-bit clean ASCII;
+     *          C-style octal escapes are recognized, but Unicode escapes are not.
+     *     </ul>
+     *     <p>
+     *     Passing a property-name to {@code unset()} will unset the property,
+     *     removing its value and type information, as if it had never been
+     *     defined.
+     * </blockquote>
      *
      * @param r The Reader to load properties from
      * @throws IOException if an error occurs when reading the data
