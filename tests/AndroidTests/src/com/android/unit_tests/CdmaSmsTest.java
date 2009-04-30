@@ -35,23 +35,6 @@ import android.util.Log;
 public class CdmaSmsTest extends AndroidTestCase {
     private final static String LOG_TAG = "Cdma_Sms_Test";
 
-    private static UserData makeUserData(String msg) {
-        UserData userData = new UserData();
-        byte[] payload;
-        try {
-            payload = GsmAlphabet.stringToGsm7BitPacked(msg);
-            userData.payload = new byte[payload.length - 1];
-            for (int i = 0; i < userData.payload.length; i++) userData.payload[i] = payload[i + 1];
-            userData.numFields = payload[0];
-            userData.paddingBits = (userData.payload.length * 8) - (userData.numFields * 7);
-            userData.paddingBits = 0; // XXX this is better, wtf?
-            userData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
-        } catch (com.android.internal.telephony.EncodeException ex) {
-            assertEquals(1, 0);
-        }
-        return userData;
-    }
-
     @SmallTest
     public void testStandardSms() throws Exception {
         String pdu = "00031040900112488ea794e074d69e1b7392c270326cde9e98";
@@ -60,50 +43,82 @@ public class CdmaSmsTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testStandardSmsFeedback() throws Exception {
+    public void testUserData7bitAscii() throws Exception {
+        String pdu = "0003100160010610262d5ab500";
+        BearerData bearerData = BearerData.decode(HexDump.hexStringToByteArray(pdu));
+        assertEquals("bjjj", bearerData.userData.payloadStr);
+    }
+
+    @SmallTest
+    public void testUserData7bitAsciiFeedback() throws Exception {
         BearerData bearerData = new BearerData();
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        String payloadStr = "Test standard SMS";
-        bearerData.userData = makeUserData(payloadStr);
+        UserData userData = new UserData();
+        userData.payloadStr = "Test standard SMS";
+        userData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
+        userData.msgEncodingSet = true;
+        bearerData.userData = userData;
         byte []encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
         assertEquals(BearerData.MESSAGE_TYPE_DELIVER, revBearerData.messageType);
         assertEquals(0, revBearerData.messageId);
         assertEquals(false, revBearerData.hasUserDataHeader);
-        assertEquals(UserData.ENCODING_GSM_7BIT_ALPHABET, revBearerData.userData.msgEncoding);
-        assertEquals(payloadStr.length(), revBearerData.userData.numFields);
-        assertEquals(payloadStr, revBearerData.userData.payloadStr);
+        assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
+        assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
     }
 
     @SmallTest
-    public void testAltUserDataFeedback() throws Exception {
-        try {
-            BearerData bearerData = new BearerData();
-            bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
-            bearerData.messageId = 0;
-            bearerData.hasUserDataHeader = false;
-            UserData userData = new UserData();
-            String str1 = "test ascii user data encoding";
-            userData.payload = str1.getBytes("US-ASCII");
-            userData.numFields = str1.length();
-            userData.paddingBits = 0;
-            userData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
-            bearerData.userData = userData;
-            byte []encodedSms = BearerData.encode(bearerData);
-            BearerData revBearerData = BearerData.decode(encodedSms);
-            assertEquals(str1, revBearerData.userData.payloadStr);
-            String str2 = "\u0160u\u1E5B\u0301r\u1ECFg\uD835\uDC1At\u00E9\u4E002\u3042";
-            userData.payload = str2.getBytes("UTF-16");
-            userData.numFields = str2.length() + 1;
-            userData.msgEncoding = UserData.ENCODING_UNICODE_16;
-            encodedSms = BearerData.encode(bearerData);
-            revBearerData = BearerData.decode(encodedSms);
-            assertEquals(str2, revBearerData.userData.payloadStr);
-        } catch (java.io.UnsupportedEncodingException ex) {
-            throw new RuntimeException("user data encoding error");
-        }
+    public void testUserData7bitGsmFeedback() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 0;
+        bearerData.hasUserDataHeader = false;
+        UserData userData = new UserData();
+        userData.payloadStr = "Test standard SMS";
+        userData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
+        userData.msgEncodingSet = true;
+        bearerData.userData = userData;
+        byte []encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        assertEquals(BearerData.MESSAGE_TYPE_DELIVER, revBearerData.messageType);
+        assertEquals(0, revBearerData.messageId);
+        assertEquals(false, revBearerData.hasUserDataHeader);
+        assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
+        assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+    }
+
+    @SmallTest
+    public void testUserDataUtf16Feedback() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 0;
+        bearerData.hasUserDataHeader = false;
+        UserData userData = new UserData();
+        userData.payloadStr = "\u0160u\u1E5B\u0301r\u1ECFg\uD835\uDC1At\u00E9\u4E002\u3042";
+        userData.msgEncoding = UserData.ENCODING_UNICODE_16;
+        userData.msgEncodingSet = true;
+        bearerData.userData = userData;
+        byte []encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        assertEquals(BearerData.MESSAGE_TYPE_DELIVER, revBearerData.messageType);
+        assertEquals(0, revBearerData.messageId);
+        assertEquals(false, revBearerData.hasUserDataHeader);
+        assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
+        assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.msgEncoding = UserData.ENCODING_OCTET;
+        userData.msgEncodingSet = false;
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(BearerData.MESSAGE_TYPE_DELIVER, revBearerData.messageType);
+        assertEquals(0, revBearerData.messageId);
+        assertEquals(false, revBearerData.hasUserDataHeader);
+        assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
+        assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
     }
 
     @SmallTest
@@ -144,7 +159,9 @@ public class CdmaSmsTest extends AndroidTestCase {
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        bearerData.userData = makeUserData("test reply option");
+        UserData userData = new UserData();
+        userData.payloadStr = "test reply option";
+        bearerData.userData = userData;
         bearerData.userAckReq = true;
         byte []encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
@@ -196,7 +213,9 @@ public class CdmaSmsTest extends AndroidTestCase {
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        bearerData.userData = makeUserData("test message count");
+        UserData userData = new UserData();
+        userData.payloadStr = "test message count";
+        bearerData.userData = userData;
         bearerData.numberOfMessages = 27;
         byte []encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
@@ -221,7 +240,9 @@ public class CdmaSmsTest extends AndroidTestCase {
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        bearerData.userData = makeUserData("test callback number");
+        UserData userData = new UserData();
+        userData.payloadStr = "test callback number";
+        bearerData.userData = userData;
         CdmaSmsAddress addr = new CdmaSmsAddress();
         addr.digitMode = CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR;
         addr.ton = CdmaSmsAddress.TON_NATIONAL_OR_EMAIL;
@@ -256,7 +277,9 @@ public class CdmaSmsTest extends AndroidTestCase {
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        bearerData.userData = makeUserData("test message center timestamp");
+        UserData userData = new UserData();
+        userData.payloadStr = "test message center timestamp";
+        bearerData.userData = userData;
         bearerData.timeStamp = HexDump.hexStringToByteArray("112233445566");
         byte []encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
@@ -283,13 +306,14 @@ public class CdmaSmsTest extends AndroidTestCase {
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        String payloadStr = "test privacy indicator";
-        bearerData.userData = makeUserData(payloadStr);
+        UserData userData = new UserData();
+        userData.payloadStr = "test privacy indicator";
+        bearerData.userData = userData;
         bearerData.privacy = BearerData.PRIVACY_SECRET;
         bearerData.privacyIndicatorSet = true;
         byte []encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
-        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.userData.payloadStr, userData.payloadStr);
         assertEquals(revBearerData.privacyIndicatorSet, true);
         assertEquals(revBearerData.privacy, BearerData.PRIVACY_SECRET);
         bearerData.privacy = BearerData.PRIVACY_RESTRICTED;
@@ -324,19 +348,20 @@ public class CdmaSmsTest extends AndroidTestCase {
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        String payloadStr = "test message delivery alert";
-        bearerData.userData = makeUserData(payloadStr);
+        UserData userData = new UserData();
+        userData.payloadStr = "test message delivery alert";
+        bearerData.userData = userData;
         bearerData.alert = BearerData.ALERT_MEDIUM_PRIO;
         bearerData.alertIndicatorSet = true;
         byte []encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
-        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.userData.payloadStr, userData.payloadStr);
         assertEquals(revBearerData.alertIndicatorSet, true);
         assertEquals(revBearerData.alert, bearerData.alert);
         bearerData.alert = BearerData.ALERT_HIGH_PRIO;
         encodedSms = BearerData.encode(bearerData);
         revBearerData = BearerData.decode(encodedSms);
-        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.userData.payloadStr, userData.payloadStr);
         assertEquals(revBearerData.alertIndicatorSet, true);
         assertEquals(revBearerData.alert, bearerData.alert);
     }
@@ -359,19 +384,20 @@ public class CdmaSmsTest extends AndroidTestCase {
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        String payloadStr = "test language indicator";
-        bearerData.userData = makeUserData(payloadStr);
+        UserData userData = new UserData();
+        userData.payloadStr = "test language indicator";
+        bearerData.userData = userData;
         bearerData.language = BearerData.LANGUAGE_ENGLISH;
         bearerData.languageIndicatorSet = true;
         byte []encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
-        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.userData.payloadStr, userData.payloadStr);
         assertEquals(revBearerData.languageIndicatorSet, true);
         assertEquals(revBearerData.language, bearerData.language);
         bearerData.language = BearerData.LANGUAGE_KOREAN;
         encodedSms = BearerData.encode(bearerData);
         revBearerData = BearerData.decode(encodedSms);
-        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.userData.payloadStr, userData.payloadStr);
         assertEquals(revBearerData.languageIndicatorSet, true);
         assertEquals(revBearerData.language, bearerData.language);
     }
@@ -396,19 +422,20 @@ public class CdmaSmsTest extends AndroidTestCase {
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
         bearerData.messageId = 0;
         bearerData.hasUserDataHeader = false;
-        String payloadStr = "test display mode";
-        bearerData.userData = makeUserData(payloadStr);
+        UserData userData = new UserData();
+        userData.payloadStr = "test display mode";
+        bearerData.userData = userData;
         bearerData.displayMode = BearerData.DISPLAY_MODE_IMMEDIATE;
         bearerData.displayModeSet = true;
         byte []encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
-        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.userData.payloadStr, userData.payloadStr);
         assertEquals(revBearerData.displayModeSet, true);
         assertEquals(revBearerData.displayMode, bearerData.displayMode);
         bearerData.displayMode = BearerData.DISPLAY_MODE_USER;
         encodedSms = BearerData.encode(bearerData);
         revBearerData = BearerData.decode(encodedSms);
-        assertEquals(revBearerData.userData.payloadStr, payloadStr);
+        assertEquals(revBearerData.userData.payloadStr, userData.payloadStr);
         assertEquals(revBearerData.displayModeSet, true);
         assertEquals(revBearerData.displayMode, bearerData.displayMode);
     }
