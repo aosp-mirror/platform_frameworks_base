@@ -40,10 +40,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
-import static android.telephony.SmsMessage.ENCODING_7BIT;
-import static android.telephony.SmsMessage.ENCODING_8BIT;
-import static android.telephony.SmsMessage.ENCODING_16BIT;
-import static android.telephony.SmsMessage.ENCODING_UNKNOWN;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
 import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS;
@@ -135,6 +131,7 @@ public class SmsMessage extends SmsMessageBase {
         byte[] data;
         byte count;
         int countInt;
+        int addressDigitMode;
 
         //currently not supported by the modem-lib: env.mMessageType
         env.teleService = p.readInt(); //p_cur->uTeleserviceID
@@ -153,7 +150,8 @@ public class SmsMessage extends SmsMessageBase {
         env.serviceCategory = p.readInt(); //p_cur->uServicecategory
 
         // address
-        addr.digitMode = (byte) (0xFF & p.readInt()); //p_cur->sAddress.digit_mode
+        addressDigitMode = p.readInt();
+        addr.digitMode = (byte) (0xFF & addressDigitMode); //p_cur->sAddress.digit_mode
         addr.numberMode = (byte) (0xFF & p.readInt()); //p_cur->sAddress.number_mode
         addr.ton = p.readInt(); //p_cur->sAddress.number_type
         addr.numberPlan = (byte) (0xFF & p.readInt()); //p_cur->sAddress.number_plan
@@ -163,7 +161,13 @@ public class SmsMessage extends SmsMessageBase {
         //p_cur->sAddress.digits[digitCount]
         for (int index=0; index < count; index++) {
             data[index] = p.readByte();
+
+            // convert the value if it is 4-bit DTMF to 8 bit
+            if (addressDigitMode == CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF) {
+                data[index] = msg.convertDtmfToAscii(data[index]);
+            }
         }
+
         addr.origBytes = data;
 
         // ignore subaddress
@@ -279,6 +283,7 @@ public class SmsMessage extends SmsMessageBase {
         SubmitPdu ret = new SubmitPdu();
         UserData uData = new UserData();
         SmsHeader smsHeader;
+        byte[] data;
 
         // Perform null parameter checks.
         if (message == null || destinationAddress == null) {
@@ -287,8 +292,7 @@ public class SmsMessage extends SmsMessageBase {
 
         // ** Set UserData + SmsHeader **
         try {
-            // First, try encoding it with the GSM alphabet
-            int septetCount = GsmAlphabet.countGsmSeptets(message, true);
+            // First, try encoding it as 7-bit ASCII
             // User Data (and length)
 
             uData.payload = message.getBytes();
@@ -299,9 +303,7 @@ public class SmsMessage extends SmsMessageBase {
             }
 
             // desired TP-Data-Coding-Scheme
-            uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
-
-            // paddingBits not needed for UD_ENCODING_GSM_7BIT_ALPHABET
+            uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
 
             // sms header
             if(headerData != null) {
@@ -311,7 +313,13 @@ public class SmsMessage extends SmsMessageBase {
                 // no user data header available!
             }
 
-        } catch (EncodeException ex) {
+            data  = sms.getEnvelope(destinationAddress, statusReportRequested, uData,
+                    (headerData != null), (null == headerData));
+
+        } catch (Exception ex) {
+            Log.e(LOG_TAG, "getSubmitPdu: 7 bit ASCII encoding in cdma.SMSMesage failed: "
+                    + ex.getMessage());
+            Log.w(LOG_TAG, "getSubmitPdu: The message will be sent as UCS-2 encoded message.");
             byte[] textPart;
             // Encoding to the 7-bit alphabet failed. Let's see if we can
             // send it as a UCS-2 encoded message
@@ -340,10 +348,10 @@ public class SmsMessage extends SmsMessageBase {
             } else {
                 // no user data header available!
             }
-        }
 
-        byte[] data = sms.getEnvelope(destinationAddress, statusReportRequested, uData,
+            data = sms.getEnvelope(destinationAddress, statusReportRequested, uData,
                 (headerData != null), (null == headerData));
+        }
 
         if (null == data) return null;
 
@@ -556,6 +564,7 @@ public class SmsMessage extends SmsMessageBase {
         ByteArrayInputStream bais = new ByteArrayInputStream(pdu);
         DataInputStream dis = new DataInputStream(new BufferedInputStream(bais));
         byte length;
+        int bearerDataLength;
         SmsEnvelope env = new SmsEnvelope();
         CdmaSmsAddress addr = new CdmaSmsAddress();
 
@@ -581,9 +590,9 @@ public class SmsMessage extends SmsMessageBase {
             env.causeCode = dis.readByte();
 
             //encoded BearerData:
-            length = dis.readByte();
-            env.bearerData = new byte[length];
-            dis.read(env.bearerData, 0, length);
+            bearerDataLength = dis.readInt();
+            env.bearerData = new byte[bearerDataLength];
+            dis.read(env.bearerData, 0, bearerDataLength);
             dis.close();
         } catch (Exception ex) {
             Log.e(LOG_TAG, "createFromPdu: conversion from byte array to object failed: " + ex);
@@ -672,40 +681,22 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Parses the User Data of an SMS.
+     * Copy parsed user data out from internal datastructures.
      */
     private void parseUserData(UserData uData) {
-        int encodingType;
-
-        if (null == uData) {
+        if (uData == null) {
             return;
         }
 
-        encodingType = uData.msgEncoding;
-
-        // insert DCS-decoding here when type is supported by ril-library
-
         userData = uData.payload;
         userDataHeader = uData.userDataHeader;
-
-        switch (encodingType) {
-        case UserData.ENCODING_GSM_7BIT_ALPHABET:
-        case UserData.ENCODING_UNICODE_16:
-            // user data was already decoded by wmsts-library
-            messageBody = new String(userData);
-            break;
-
-        // data and unsupported encodings:
-        case UserData.ENCODING_OCTET:
-        default:
-            messageBody = null;
-            break;
-        }
-
-        if (Config.LOGV) Log.v(LOG_TAG, "SMS message body (raw): '" + messageBody + "'");
+        messageBody = uData.payloadStr;
 
         if (messageBody != null) {
+            if (Config.LOGV) Log.v(LOG_TAG, "SMS message body: '" + messageBody + "'");
             parseMessageBody();
+        } else if ((userData != null) && (Config.LOGV)) {
+            Log.v(LOG_TAG, "SMS payload: '" + IccUtils.bytesToHexString(userData) + "'");
         }
     }
 
@@ -713,7 +704,7 @@ public class SmsMessage extends SmsMessageBase {
      * {@inheritDoc}
      */
     public MessageClass getMessageClass() {
-        if (BearerData.DISPLAY_IMMEDIATE == mBearerData.displayMode ) {
+        if (BearerData.DISPLAY_MODE_IMMEDIATE == mBearerData.displayMode ) {
             return MessageClass.CLASS_0;
         } else {
             return MessageClass.UNKNOWN;
@@ -766,9 +757,6 @@ public class SmsMessage extends SmsMessageBase {
         mBearerData.readAckReq = false;
         mBearerData.reportReq = false;
 
-        // Set the display mode (See C.S0015-B, v2.0, 4.5.16)
-        mBearerData.displayMode = BearerData.DISPLAY_DEFAULT;
-
         // number of messages: not needed for encoding!
 
         // indicate whether a user data header is available
@@ -786,7 +774,7 @@ public class SmsMessage extends SmsMessageBase {
 
         // ** SmsEnvelope **
         env.messageType = SmsEnvelope.MESSAGE_TYPE_POINT_TO_POINT;
-        env.teleService = SmsEnvelope.TELESERVICE_WEMT;
+        env.teleService = SmsEnvelope.TELESERVICE_WMT;
         env.destAddress = mSmsAddress;
         env.bearerReply = RETURN_ACK;
         env.bearerData = encodedBearerData;
@@ -874,7 +862,7 @@ public class SmsMessage extends SmsMessageBase {
             dos.writeByte(env.errorClass);
             dos.writeByte(env.causeCode);
             //encoded BearerData:
-            dos.writeByte(env.bearerData.length);
+            dos.writeInt(env.bearerData.length);
             dos.write(env.bearerData, 0, env.bearerData.length);
             dos.close();
 
@@ -883,5 +871,38 @@ public class SmsMessage extends SmsMessageBase {
             Log.e(LOG_TAG, "createPdu: conversion from object to byte array failed: " + ex);
         }
     }
+
+    /**
+     * Converts a 4-Bit DTMF encoded symbol from the calling address number to ASCII character
+     */
+    private byte convertDtmfToAscii(byte dtmfDigit) {
+        byte asciiDigit;
+
+        switch (dtmfDigit) {
+        case  0: asciiDigit = 68; break; // 'D'
+        case  1: asciiDigit = 49; break; // '1'
+        case  2: asciiDigit = 50; break; // '2'
+        case  3: asciiDigit = 51; break; // '3'
+        case  4: asciiDigit = 52; break; // '4'
+        case  5: asciiDigit = 53; break; // '5'
+        case  6: asciiDigit = 54; break; // '6'
+        case  7: asciiDigit = 55; break; // '7'
+        case  8: asciiDigit = 56; break; // '8'
+        case  9: asciiDigit = 57; break; // '9'
+        case 10: asciiDigit = 48; break; // '0'
+        case 11: asciiDigit = 42; break; // '*'
+        case 12: asciiDigit = 35; break; // '#'
+        case 13: asciiDigit = 65; break; // 'A'
+        case 14: asciiDigit = 66; break; // 'B'
+        case 15: asciiDigit = 67; break; // 'C'
+        default:
+            asciiDigit = 32; // Invalid DTMF code
+            break;
+        }
+
+        return asciiDigit;
+    }
+
+
 
 }

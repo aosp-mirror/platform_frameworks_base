@@ -99,6 +99,7 @@ void glVertexPointerBounds(GLint size, GLenum type,
 
 extern "C" {
 #include "gl_api.in"
+#include "glext_api.in"
 }
 
 #undef API_ENTRY

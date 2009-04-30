@@ -21,7 +21,6 @@ import android.location.ILocationManager;
 import android.location.ILocationProvider;
 import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationProviderImpl;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;

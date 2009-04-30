@@ -161,6 +161,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public int uid;
     
+
+    /**
+     * The list of densities in DPI that application supprots. This
+     * field is only set if the {@link PackageManager#GET_SUPPORTS_DENSITIES} flag was
+     * used when retrieving the structure.
+     */
+    public int[] supportsDensities;
+
     /**
      * When false, indicates that all components within this application are
      * considered disabled, regardless of their individually set enabled status.
@@ -181,8 +189,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);
         pw.println(prefix + "dataDir=" + dataDir);
         pw.println(prefix + "enabled=" + enabled);
-        pw.println(prefix+"manageSpaceActivityName="+manageSpaceActivityName);
-        pw.println(prefix+"description=0x"+Integer.toHexString(descriptionRes));
+        pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
+        pw.println(prefix + "description=0x"+Integer.toHexString(descriptionRes));
+        pw.println(prefix + "supportsDensities=" + supportsDensities);
         super.dumpBack(pw, prefix);
     }
     
@@ -228,6 +237,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         enabled = orig.enabled;
         manageSpaceActivityName = orig.manageSpaceActivityName;
         descriptionRes = orig.descriptionRes;
+        supportsDensities = orig.supportsDensities;
     }
 
 
@@ -257,6 +267,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(enabled ? 1 : 0);
         dest.writeString(manageSpaceActivityName);
         dest.writeInt(descriptionRes);
+        dest.writeIntArray(supportsDensities);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -285,8 +296,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         enabled = source.readInt() != 0;
         manageSpaceActivityName = source.readString();
         descriptionRes = source.readInt();
+        supportsDensities = source.createIntArray();
     }
-    
+
     /**
      * Retrieve the textual description of the application.  This
      * will call back on the given PackageManager to load the description from

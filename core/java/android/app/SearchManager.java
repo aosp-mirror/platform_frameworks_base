@@ -17,13 +17,20 @@
 package android.app;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.server.search.SearchableInfo;
 import android.view.KeyEvent;
+
+import java.util.List;
 
 /**
  * This class provides access to the system search services.
@@ -439,20 +446,18 @@ import android.view.KeyEvent;
  *     
  *     <tr><th>{@link #SUGGEST_COLUMN_ICON_1}</th>
  *         <td>If your cursor includes this column, then all suggestions will be provided in an
- *             icons+text format.  This value should be a reference (resource ID) of the icon to
+ *             icons+text format.  This value should be a reference to the icon to
  *             draw on the left side, or it can be null or zero to indicate no icon in this row.
- *             You must provide both cursor columns, or neither.
  *             </td>
- *         <td align="center">No, but required if you also have {@link #SUGGEST_COLUMN_ICON_2}</td>
+ *         <td align="center">No.</td>
  *     </tr>
  *     
  *     <tr><th>{@link #SUGGEST_COLUMN_ICON_2}</th>
  *         <td>If your cursor includes this column, then all suggestions will be provided in an
- *             icons+text format.  This value should be a reference (resource ID) of the icon to
+ *             icons+text format.  This value should be a reference to the icon to
  *             draw on the right side, or it can be null or zero to indicate no icon in this row.
- *             You must provide both cursor columns, or neither.
  *             </td>
- *         <td align="center">No, but required if you also have {@link #SUGGEST_COLUMN_ICON_1}</td>
+ *         <td align="center">No.</td>
  *     </tr>
  *     
  *     <tr><th>{@link #SUGGEST_COLUMN_INTENT_ACTION}</th>
@@ -1155,6 +1160,13 @@ public class SearchManager
     public final static String ACTION_KEY = "action_key";
     
     /**
+     * Intent extra data key: This key will be used for the extra populated by the
+     * {@link #SUGGEST_COLUMN_INTENT_EXTRA_DATA} column.
+     * {@hide}
+     */
+    public final static String EXTRA_DATA_KEY = "intent_extra_data_key";
+    
+    /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getStringExtra content.Intent.getStringExtra()}
      * to obtain the action message that was defined for a particular search action key and/or
@@ -1195,20 +1207,58 @@ public class SearchManager
     public final static String SUGGEST_COLUMN_TEXT_2 = "suggest_text_2";
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
-     *  then all suggestions will be provided in format that includes space for two small icons,
+     *  then all suggestions will be provided in a format that includes space for two small icons,
      *  one at the left and one at the right of each suggestion.  The data in the column must
-     *  be a a resource ID for the icon you wish to have displayed.  If you include this column,
-     *  you must also include {@link #SUGGEST_COLUMN_ICON_2}.
+     *  be a resource ID of a drawable, or a URI in one of the following formats:
+     *
+     * <ul>
+     * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})</li>
+     * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
+     * </ul>
+     *
+     * See {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)} 
+     * for more information on these schemes. 
      */
     public final static String SUGGEST_COLUMN_ICON_1 = "suggest_icon_1";
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
-     *  then all suggestions will be provided in format that includes space for two small icons,
+     *  then all suggestions will be provided in a format that includes space for two small icons,
      *  one at the left and one at the right of each suggestion.  The data in the column must
-     *  be a a resource ID for the icon you wish to have displayed.  If you include this column,
-     *  you must also include {@link #SUGGEST_COLUMN_ICON_1}.
+     *  be a resource ID of a drawable, or a URI in one of the following formats:
+     *
+     * <ul>
+     * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})</li>
+     * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
+     * </ul>
+     *
+     * See {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)} 
+     * for more information on these schemes. 
      */
     public final static String SUGGEST_COLUMN_ICON_2 = "suggest_icon_2";
+    /**
+     * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
+     *  then all suggestions will be provided in a format that includes space for two small icons,
+     *  one at the left and one at the right of each suggestion.  The data in the column must
+     *  be a blob that contains a bitmap.
+     * 
+     * This column overrides any icon provided in the {@link #SUGGEST_COLUMN_ICON_1} column.
+     *
+     * @hide
+     */
+    public final static String SUGGEST_COLUMN_ICON_1_BITMAP = "suggest_icon_1_bitmap";
+    /**
+     * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
+     *  then all suggestions will be provided in a format that includes space for two small icons,
+     *  one at the left and one at the right of each suggestion.  The data in the column must
+     *  be a blob that contains a bitmap.
+     * 
+     * This column overrides any icon provided in the {@link #SUGGEST_COLUMN_ICON_2} column.
+     *
+     * @hide
+     */
+    public final static String SUGGEST_COLUMN_ICON_2_BITMAP = "suggest_icon_2_bitmap";
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, this is the action that will be used when
@@ -1230,6 +1280,14 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_INTENT_DATA = "suggest_intent_data";
     /**
+     * Column name for suggestions cursor.  <i>Optional.</i>  This column allows suggestions
+     *  to provide additional arbitrary data which will be included as an extra under the key
+     *  {@link #EXTRA_DATA_KEY}.
+     * 
+     * @hide pending API council approval
+     */
+    public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
+    /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, then "/" and this value will be appended to the data
      * field in the Intent.  This should only be used if the data field has already been set to an
@@ -1244,6 +1302,63 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_QUERY = "suggest_intent_query";
 
+    /**
+     * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
+     * the search dialog will switch to a different suggestion source when the
+     * suggestion is clicked. 
+     * 
+     * {@link #SUGGEST_COLUMN_INTENT_DATA} must contain
+     * the flattened {@link ComponentName} of the activity which is to be searched.
+     * 
+     * TODO: Should {@link #SUGGEST_COLUMN_INTENT_DATA} instead contain a URI in the format
+     * used by {@link android.provider.Applications}?
+     * 
+     * TODO: This intent should be protected by the same permission that we use
+     * for replacing the global search provider.
+     * 
+     * The query text field will be set to the value of {@link #SUGGEST_COLUMN_QUERY}.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_CHANGE_SEARCH_SOURCE 
+            = "android.search.action.CHANGE_SEARCH_SOURCE";
+    
+    /**
+     * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
+     * the search dialog will call {@link Cursor#respond(Bundle)} when the
+     * suggestion is clicked. 
+     * 
+     * The {@link Bundle} argument will be constructed
+     * in the same way as the "extra" bundle included in an Intent constructed 
+     * from the suggestion.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_CURSOR_RESPOND
+            = "android.search.action.CURSOR_RESPOND";
+    
+    /**
+     * Intent action for finding the global search activity.
+     * The global search provider should handle this intent.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_GLOBAL_SEARCH 
+            = "android.search.action.GLOBAL_SEARCH";
+    
+    /**
+     * Intent action for starting the global search settings activity.
+     * The global search provider should handle this intent.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_SEARCH_SETTINGS 
+            = "android.search.action.SEARCH_SETTINGS";
+    
+    /**
+     * Reference to the shared system search service.
+     */
+    private static ISearchManager sService = getSearchManagerService();
 
     private final Context mContext;
     private final Handler mHandler;
@@ -1256,12 +1371,6 @@ public class SearchManager
     /*package*/ SearchManager(Context context, Handler handler)  {
         mContext = context;
         mHandler = handler;
-    }
-    private static ISearchManager mService;
-
-    static {
-        mService = ISearchManager.Stub.asInterface(
-                    ServiceManager.getService(Context.SEARCH_SERVICE));
     }
     
     /**
@@ -1459,5 +1568,109 @@ public class SearchManager
             mSearchDialog.onConfigurationChanged(newConfig);
         }
     }
-      
+    
+    private static ISearchManager getSearchManagerService() {
+        return ISearchManager.Stub.asInterface(
+            ServiceManager.getService(Context.SEARCH_SERVICE));
+    }
+    
+    /**
+     * Gets information about a searchable activity. This method is static so that it can
+     * be used from non-Activity contexts.
+     *
+     * @param componentName The activity to get searchable information for.
+     * @param globalSearch If <code>false</code>, return information about the given activity.
+     *        If <code>true</code>, return information about the global search activity. 
+     * @return Searchable information, or <code>null</code> if the activity is not searchable.
+     * 
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static SearchableInfo getSearchableInfo(ComponentName componentName, 
+            boolean globalSearch) {
+        try {
+            return sService.getSearchableInfo(componentName, globalSearch);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Checks whether the given searchable is the default searchable.
+     * 
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static boolean isDefaultSearchable(SearchableInfo searchable) {
+        SearchableInfo defaultSearchable = SearchManager.getSearchableInfo(null, true);
+        return defaultSearchable != null 
+                && defaultSearchable.mSearchActivity.equals(searchable.mSearchActivity);
+    }
+    
+    /**
+     * Gets a cursor with search suggestions. This method is static so that it can
+     * be used from non-Activity context.
+     *
+     * @param searchable Information about how to get the suggestions.
+     * @param query The search text entered (so far).
+     * @return a cursor with suggestions, or <code>null</null> the suggestion query failed. 
+     * 
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static Cursor getSuggestions(Context context, SearchableInfo searchable, String query) {
+        if (searchable == null) {
+            return null;
+        }
+
+        String authority = searchable.getSuggestAuthority();
+        if (authority == null) {
+            return null;
+        }
+
+        Uri.Builder uriBuilder = new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority);
+
+        // if content path provided, insert it now
+        final String contentPath = searchable.getSuggestPath();
+        if (contentPath != null) {
+            uriBuilder.appendEncodedPath(contentPath);
+        }
+
+        // append standard suggestion query path 
+        uriBuilder.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY);
+
+        // get the query selection, may be null
+        String selection = searchable.getSuggestSelection();
+        // inject query, either as selection args or inline
+        String[] selArgs = null;
+        if (selection != null) {    // use selection if provided
+            selArgs = new String[] { query };
+        } else {                    // no selection, use REST pattern
+            uriBuilder.appendPath(query);
+        }
+
+        Uri uri = uriBuilder
+                .query("")     // TODO: Remove, workaround for a bug in Uri.writeToParcel()
+                .fragment("")  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
+                .build();
+
+        // finally, make the query
+        return context.getContentResolver().query(uri, null, selection, selArgs, null);
+    }
+     
+    /**
+     * Returns a list of the searchable activities that can be included in global search.
+     * 
+     * @return a list containing searchable information for all searchable activities
+     *         that have the <code>exported</code> attribute set in their searchable
+     *         meta-data.
+     * 
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static List<SearchableInfo> getSearchablesInGlobalSearch() {
+        try {
+            return sService.getSearchablesInGlobalSearch();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
 }

@@ -16,25 +16,18 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.os.*;
-import android.os.AsyncResult;
+import android.os.Message;
 import android.util.Log;
 
 import com.android.internal.telephony.IccConstants;
-import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccFileHandler;
-import com.android.internal.telephony.IccFileTypeMismatch;
-import com.android.internal.telephony.IccIoResult;
-import com.android.internal.telephony.IccUtils;
-import com.android.internal.telephony.PhoneProxy;
-
-import java.util.ArrayList;
 
 /**
  * {@hide}
  */
-public final class SIMFileHandler extends IccFileHandler {
+public final class SIMFileHandler extends IccFileHandler implements IccConstants {
     static final String LOG_TAG = "GSM";
+
 
     //***** Instance Variables
 
@@ -57,6 +50,37 @@ public final class SIMFileHandler extends IccFileHandler {
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
+    }
+
+    protected String getEFPath(int efid) {
+        // TODO(): Make changes when USIM is supported
+        // TODO(): DF_GSM can be 7F20 or 7F21 to handle backward compatibility.
+        // Implement this after discussion with OEMs.
+        switch(efid) {
+        case EF_SMS:
+            return MF_SIM + DF_TELECOM;
+
+        case EF_EXT6:
+        case EF_MWIS:
+        case EF_MBI:
+        case EF_SPN:
+        case EF_AD:
+        case EF_MBDN:
+        case EF_PNN:
+        case EF_SPDI:
+        case EF_SST:
+        case EF_CFIS:
+            return MF_SIM + DF_GSM;
+
+        case EF_MAILBOX_CPHS:
+        case EF_VOICE_MAIL_INDICATOR_CPHS:
+        case EF_CFF_CPHS:
+        case EF_SPN_CPHS:
+        case EF_SPN_SHORT_CPHS:
+        case EF_INFO_CPHS:
+            return MF_SIM + DF_GSM;
+        }
+        return getCommonIccEFPath(efid);
     }
 
     protected void logd(String msg) {

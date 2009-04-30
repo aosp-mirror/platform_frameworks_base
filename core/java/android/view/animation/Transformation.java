@@ -18,6 +18,8 @@ package android.view.animation;
 
 import android.graphics.Matrix;
 
+import java.io.PrintWriter;
+
 /**
  * Defines the transformation to be applied at
  * one point in time of an Animation.
@@ -134,14 +136,38 @@ public class Transformation {
     
     @Override
     public String toString() {
-        return "Transformation{alpha=" + mAlpha + " matrix="
-                + mMatrix.toShortString() + "}";
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("Transformation");
+        toShortString(sb);
+        return sb.toString();
     }
     
     /**
      * Return a string representation of the transformation in a compact form.
      */
     public String toShortString() {
-        return "{alpha=" + mAlpha + " matrix=" + mMatrix.toShortString() + "}";
+        StringBuilder sb = new StringBuilder(64);
+        toShortString(sb);
+        return sb.toString();
+    }
+    
+    /**
+     * @hide
+     */
+    public void toShortString(StringBuilder sb) {
+        sb.append("{alpha="); sb.append(mAlpha);
+        sb.append(" matrix="); mMatrix.toShortString(sb);
+        sb.append('}');
+    }
+    
+    /**
+     * Print short string, to optimize dumping.
+     * @hide
+     */
+    public void printShortString(PrintWriter pw) {
+        pw.print("{alpha="); pw.print(mAlpha);
+        pw.print(" matrix=");
+        mMatrix.printShortString(pw);
+        pw.print('}');
     }
 }

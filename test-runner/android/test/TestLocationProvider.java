@@ -20,9 +20,10 @@ package android.test;
 import android.location.Criteria;
 import android.location.ILocationManager;
 import android.location.Location;
-import android.location.LocationProviderImpl;
 import android.os.Bundle;
 import android.os.SystemClock;
+
+import com.android.internal.location.LocationProviderImpl;
 
 /**
  * @hide - This is part of a framework that is under development and should not be used for

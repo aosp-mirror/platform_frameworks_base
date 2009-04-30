@@ -1,51 +1,72 @@
 #! /usr/bin/perl
+#
+# Copyright (C) 2008 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 use strict;
 
-my $lineNum = 0;
 while (my $line = <>) {
-  $lineNum += 1;
   next if $line =~ /^\//;
   next if $line =~ /^#/;
   next if $line =~ /^\s*$/;
-  if ($line !~ /^GL_ENTRY\(([^,]+),\s*([^,]+),\s*([^)]+)\)/) {
-    printf STDERR "Cannot parse line number $lineNum:\n$line";
+  if ($line !~ /^GL_API\s+(.+)\s+GL_APIENTRY\s+([\w]+)\s*\(([^\)]+)\);/) {
     next;
   }
   my $type = $1;
   my $name = $2;
   my $args = $3;
 
-  printf("%s API_ENTRY(%s)(", $type, $name);
-  my @args = split ',', $args;
-
-  my $len = scalar(@args);
-  for (my $num = 0; $num < $len; $num++) {
-    print ", " if $num > 0;
-    my $arg = $args[$num];
-    if ($arg =~ /([^]]+)(\[[^]]\])/) {
-      my $argtype = $1;
-      my $array = $2;
-      printf("%s arg%d%s", $argtype, $num, $array);
-    } else {
-      if ($arg eq "void") {
-        printf("void");
-      } else {
-        printf("%s arg%d", $arg, $num);
-      }
-    }
+  #printf("%s", $line);
+  
+  my $prefix = "";
+  if ($name eq "glEGLImageTargetTexture2DOES") {
+    $prefix = "__";
   }
-  printf(") {\n");
+  if ($name eq "glEGLImageTargetRenderbufferStorageOES") {
+    $prefix = "__";
+  }
+  
+  printf("%s API_ENTRY(%s%s)(%s)", $type, $prefix, $name, $args);
+  
+  printf(" {\n");
   if ($type eq "void") {
     printf("    CALL_GL_API(%s", $name);
   } else {
     printf("    CALL_GL_API_RETURN(%s", $name);
   }
+  my @args = split ',', $args;
+  my $len = scalar(@args);
   for (my $num = 0; $num < $len; $num++) {
     if ($args[$num] ne "void") {
       print ", ";
-      printf("arg%d", $num);
+      #
+      # extract the name from the parameter
+      # type name
+      # const type *name
+      # type *name
+      # type name[4]
+      #
+      if ($args[$num] =~ /(\S+\s)+\**\s*([\w]+)/) {
+        printf("%s", $2);
+      }
     }
   }
-  printf(");\n}\n\n");
+  printf(");\n");
+  printf("}\n");
 }
+
+
+
+
+

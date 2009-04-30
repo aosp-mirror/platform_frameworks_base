@@ -1,5 +1,6 @@
 page.title=Android 1.1 SDK, Release 1
 
+sdk.not_latest_version=true
 sdk.version=1.1_r1
 sdk.date=February 2009
 
@@ -17,6 +18,9 @@ sdk.linux_checksum=ebcb16b0cd4aef198b4dd9a1418efbf1
 
 
 @jd:body
+
+<p>For more information on this SDK release, read the
+<a href="{@docRoot}sdk/RELEASENOTES.html#1.1_r1">Release Notes</a>.</p>
 
 <h2>SDK Contents</h2>
 

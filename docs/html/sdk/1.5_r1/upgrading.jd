@@ -25,13 +25,17 @@ sdk.version=1.5_r1
         <li><a href="#AntUsers">Ant Users</a></li>
       </ol>
     </li>
-    <li><a href="#MigrateYourApplications">Migrate Your Applications</a></li>
+    <li><a href="#MigrateYourApplications">Migrate Your Applications</a>
+      <ol><li><a href="#FutureProofYourApps">Future-proof your apps</a></li></ol>
+    </li>
   </ol>
   
   <h2>Migrating references</h2>
   <ol>
     <li><a href="{@docRoot}sdk/api_diff/3/changes.html">Android 1.5 API Differences</a></li>
- <!--   <li><a href="">TODO: LINK TO DAN'S POST &raquo;</a></li> -->
+    <li><a 
+href="http://android-developers.blogspot.com/2009/04/future-proofing-your-apps.html">Future-Proofing
+Your Apps &raquo;</a></li>
     <li><a 
 href="http://android-developers.blogspot.com/2009/04/ui-framework-changes-in-android-15.html">UI 
 framework changes in Android 1.5 &raquo;</a></li>
@@ -151,9 +155,11 @@ uninstall procedure and continue to <a href="#installAdt">Install the 0.9 ADT pl
     <li>Select the Android plugin entry by checking the box next to it, 
       then click <strong>Finish</strong>.
       <p>(Your original entry for the plugin should still be here. If not, see the guide
-      to <a href="{docRoot}sdk/1.5_r1/installing.html#installingplugin">Installing the ADT Plugin</a>.)
+      to <a href="{@docRoot}sdk/1.5_r1/installing.html#installingplugin">Installing the ADT Plugin</a>.)
       </p></li>
-    <li>In the results, be sure that "Developer Tools" is checked, then click <strong>Next</strong>.</li>
+    <li>In the results, expand the entry for the Android plugin and
+      be sure that "Developer Tools" is checked, then click <strong>Next</strong>.
+      (This will install "Android DDMS" and "Android Development Tools".)</li>
     <li>Read and accept the license agreement, then click <strong>Next</strong>.
     <li>In the next window, click <strong>Finish</strong> to start installation.</li>
     <li>The ADT plugin is not digitally signed. Accept the installation anyway by clicking 
@@ -167,10 +173,10 @@ uninstall procedure and continue to <a href="#installAdt">Install the 0.9 ADT pl
     <li>Select <strong>Help</strong> &gt; <strong>Software Updates</strong>.</li>
     <li>Select the <strong>Available Software</strong> tab.</li>
     <li>Expand the entry for the Andriod plugin (may be listed as the location URL)
-      and select "Developer Tools" by checking the box next to it, then click <strong>Install</strong>.
-    </li>On the next window, "Android DDMS" and "Android Developer Tools" 
-    should both be checked. Click <strong>Next</strong>.</li>
-    <li>Read and accept the license agreement, then click <strong>Finish</strong>.</li>
+      and select "Developer Tools" by checking the box next to it, then click 
+      <strong>Install</strong>.</li>
+    <li>On the next window, "Android DDMS" and "Android Development Tools" 
+    should both be checked. Click <strong>Finish</strong>.</li>
     <li>Restart Eclipse.</li>
 </ol>
 </td>
@@ -330,18 +336,55 @@ your project and make any necessary changes to your code.</p>
 in Eclipse, changing the "build target" to one using the Android 1.5 platform,
 and see where the ADT identifies errors in your code.</p>
 
+
+<h3 id="FutureProofYourApps">Future-proof your apps</h3>
+
 <p>There have been several API additions made for this release, but there have been
 very few actual API <em>changes</em>. Only a couple (relatively unused) elements 
 have been removed and a few have been deprecated, so your applications written with the 
-Android 1.1 system library should work just fine.
-Your application will be at highest risk of breakage if it uses Android APIs 
-that are not available in the public API documentation
-or if it explicitly depends on system bugs. For information
-about changes made to Android 1.5, refer to the following documents:</p>
+Android 1.1 system library should work just fine. However, 
+your application is more likely to encounter problems on Android 1.5
+if it performs any of the following:</p>
+
+<ul>
+  <li>Uses internal APIs. That is, APIs that are not officially supported
+  and not available in the reference documentation. Any un-official APIs are always subject
+  to change (which is why they're un-official) and some have indeed changed.
+  </li>
+  <li>Directly manipulates system settings. There are some settings (such as
+  GPS, data roaming, bluetooth and others) that used to be writable by 
+  applications but have been changed so that they can only be explicitly modified by the user
+  through the system settings. Refer to {@link android.provider.Settings.Secure}
+  to see which settings are now secured and cannot be directly changed by your application.
+  </li>
+  <li>Uses View hierarchies that are unreasonably deep (more than 10 or so levels) or 
+  broad (more than 30 total). View hierarchies this big have always been troublesome, but 
+  Android 1.5 is much more efficient at exposing this and your application may crash.
+  </li>
+  <li>Makes assumptions about the available hardware. With new support for soft keyboards,
+  not all devices will have full QWERTY keyboards on the hardware. So if your application
+  listens for special keypress events that only occur on a keypad, then your application
+  should degrade gracefully when there is no keyboard available.
+  </li>
+  <li>Performs its own layout orientation changes based on the acceletometer (or via other
+  sensors). Some devices running Android 1.5 will automatically rotate the orientation
+  (and all devices have the option to turn on auto-rotation), so if your application also
+  attempts to rotate the orientation, it can result in strange behavior. In addition, if your
+  application uses the accelerometer to detect shaking and you do not want to rotate the 
+  orientation, then you should lock the current orientation with 
+  <a href="{@docRoot}guide/topics/manifest/activity-element.html#screen">android:screenOrientation</a>.
+  </li>
+</ul>
+
+<p>Please read our blog post on <a 
+href="http://android-developers.blogspot.com/2009/04/future-proofing-your-apps.html">Future-Proofing
+Your Apps</a> for more information on the issues mentioned above.</p>
+
+<p>For information
+about other changes made to Android 1.5, refer to the following documents:</p>
 <ul>
   <li><a href="{@docRoot}sdk/api_diff/3/changes.html">Android 1.5 API Differences</a></li>
-  <li><a href="{@docRoot}sdk/android-1.5.html#api-changes">Android 1.5 Version Notes</a></li>
- <!-- <li><a href="">TODO: LINK TO DAN'S POST ON FORWARD COMPATIBILITY &raquo;</a></li>  -->
+  <li><a href="{@docRoot}sdk/android-1.5.html#api-changes">Android 1.5 Version Notes</a></li> 
   <li><a 
 href="http://android-developers.blogspot.com/2009/04/ui-framework-changes-in-android-15.html">UI 
 framework changes in Android 1.5 &raquo;</a></li>

@@ -45,6 +45,7 @@ import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -64,6 +65,48 @@ public class PackageParser {
     private static final Object mSync = new Object();
     private static WeakReference<byte[]> mReadBuffer;
 
+    static class ParsePackageItemArgs {
+        final Package owner;
+        final String[] outError;
+        final int nameRes;
+        final int labelRes;
+        final int iconRes;
+        
+        String tag;
+        TypedArray sa;
+        
+        ParsePackageItemArgs(Package _owner, String[] _outError,
+                int _nameRes, int _labelRes, int _iconRes) {
+            owner = _owner;
+            outError = _outError;
+            nameRes = _nameRes;
+            labelRes = _labelRes;
+            iconRes = _iconRes;
+        }
+    }
+    
+    static class ParseComponentArgs extends ParsePackageItemArgs {
+        final String[] sepProcesses;
+        final int processRes;
+        final int enabledRes;
+        int flags;
+        
+        ParseComponentArgs(Package _owner, String[] _outError,
+                int _nameRes, int _labelRes, int _iconRes,
+                String[] _sepProcesses, int _processRes,int _enabledRes) {
+            super(_owner, _outError, _nameRes, _labelRes, _iconRes);
+            sepProcesses = _sepProcesses;
+            processRes = _processRes;
+            enabledRes = _enabledRes;
+        }
+    }
+    
+    private ParsePackageItemArgs mParseInstrumentationArgs;
+    private ParseComponentArgs mParseActivityArgs;
+    private ParseComponentArgs mParseActivityAliasArgs;
+    private ParseComponentArgs mParseServiceArgs;
+    private ParseComponentArgs mParseProviderArgs;
+    
     /** If set to true, we will only allow package files that exactly match
      *  the DTD.  Otherwise, we try to get as much from the package as we
      *  can without failing.  This should normally be set to false, to
@@ -557,6 +600,11 @@ public class PackageParser {
         throws XmlPullParserException, IOException {
         AttributeSet attrs = parser;
 
+        mParseInstrumentationArgs = null;
+        mParseActivityArgs = null;
+        mParseServiceArgs = null;
+        mParseProviderArgs = null;
+        
         String pkgName = parsePackageName(parser, attrs, flags, outError);
         if (pkgName == null) {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
@@ -592,8 +640,6 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
         }
         sa.recycle();
-
-        final int innerDepth = parser.getDepth();
 
         int outerDepth = parser.getDepth();
         while ((type=parser.next()) != parser.END_DOCUMENT
@@ -726,6 +772,14 @@ public class PackageParser {
             pkg.usesLibraries.toArray(pkg.usesLibraryFiles);
         }
 
+        int size = pkg.supportsDensityList.size();
+        if (size > 0) {
+            int densities[] = pkg.supportsDensities = new int[size];
+            List<Integer> densityList = pkg.supportsDensityList;
+            for (int i = 0; i < size; i++) {
+                densities[i] = densityList.get(i);
+            }
+        }
         return pkg;
     }
 
@@ -950,19 +1004,23 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestInstrumentation);
 
-        Instrumentation a = new Instrumentation(owner);
-
-        if (!parsePackageItemInfo(owner, a.info, outError, "<instrumentation>", sa,
-                com.android.internal.R.styleable.AndroidManifestInstrumentation_name,
-                com.android.internal.R.styleable.AndroidManifestInstrumentation_label,
-                com.android.internal.R.styleable.AndroidManifestInstrumentation_icon)) {
+        if (mParseInstrumentationArgs == null) {
+            mParseInstrumentationArgs = new ParsePackageItemArgs(owner, outError,
+                    com.android.internal.R.styleable.AndroidManifestInstrumentation_name,
+                    com.android.internal.R.styleable.AndroidManifestInstrumentation_label,
+                    com.android.internal.R.styleable.AndroidManifestInstrumentation_icon);
+            mParseInstrumentationArgs.tag = "<instrumentation>";
+        }
+        
+        mParseInstrumentationArgs.sa = sa;
+        
+        Instrumentation a = new Instrumentation(mParseInstrumentationArgs,
+                new InstrumentationInfo());
+        if (outError[0] != null) {
             sa.recycle();
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return null;
         }
-
-        a.component = new ComponentName(owner.applicationInfo.packageName,
-                a.info.name);
 
         String str;
         str = sa.getNonResourceString(
@@ -1140,7 +1198,7 @@ public class PackageParser {
                 owner.providers.add(p);
 
             } else if (tagName.equals("activity-alias")) {
-                Activity a = parseActivityAlias(owner, res, parser, attrs, flags, outError, false);
+                Activity a = parseActivityAlias(owner, res, parser, attrs, flags, outError);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -1169,6 +1227,21 @@ public class PackageParser {
 
                 if (lname != null && !owner.usesLibraries.contains(lname)) {
                     owner.usesLibraries.add(lname);
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+
+            } else if (tagName.equals("supports-density")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestSupportsDensity);
+
+                int density = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsDensity_density, -1);
+
+                sa.recycle();
+
+                if (density != -1 && !owner.supportsDensityList.contains(density)) {
+                    owner.supportsDensityList.add(density);
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -1239,22 +1312,29 @@ public class PackageParser {
 
         return outError[0] == null;
     }
-
+    
     private Activity parseActivity(Package owner, Resources res,
             XmlPullParser parser, AttributeSet attrs, int flags, String[] outError,
             boolean receiver) throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestActivity);
 
-        Activity a = new Activity(owner);
-
-        if (!parseComponentInfo(owner, flags, a.info, outError,
-                receiver ? "<receiver>" : "<activity>", sa,
-                com.android.internal.R.styleable.AndroidManifestActivity_name,
-                com.android.internal.R.styleable.AndroidManifestActivity_label,
-                com.android.internal.R.styleable.AndroidManifestActivity_icon,
-                com.android.internal.R.styleable.AndroidManifestActivity_process,
-                com.android.internal.R.styleable.AndroidManifestActivity_enabled)) {
+        if (mParseActivityArgs == null) {
+            mParseActivityArgs = new ParseComponentArgs(owner, outError,
+                    com.android.internal.R.styleable.AndroidManifestActivity_name,
+                    com.android.internal.R.styleable.AndroidManifestActivity_label,
+                    com.android.internal.R.styleable.AndroidManifestActivity_icon,
+                    mSeparateProcesses,
+                    com.android.internal.R.styleable.AndroidManifestActivity_process,
+                    com.android.internal.R.styleable.AndroidManifestActivity_enabled);
+        }
+        
+        mParseActivityArgs.tag = receiver ? "<receiver>" : "<activity>";
+        mParseActivityArgs.sa = sa;
+        mParseActivityArgs.flags = flags;
+        
+        Activity a = new Activity(mParseActivityArgs, new ActivityInfo());
+        if (outError[0] != null) {
             sa.recycle();
             return null;
         }
@@ -1265,9 +1345,6 @@ public class PackageParser {
             a.info.exported = sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivity_exported, false);
         }
-
-        a.component = new ComponentName(owner.applicationInfo.packageName,
-                a.info.name);
 
         a.info.theme = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestActivity_theme, 0);
@@ -1412,8 +1489,8 @@ public class PackageParser {
     }
 
     private Activity parseActivityAlias(Package owner, Resources res,
-            XmlPullParser parser, AttributeSet attrs, int flags, String[] outError,
-            boolean receiver) throws XmlPullParserException, IOException {
+            XmlPullParser parser, AttributeSet attrs, int flags, String[] outError)
+            throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestActivityAlias);
 
@@ -1432,7 +1509,20 @@ public class PackageParser {
             return null;
         }
 
-        Activity a = new Activity(owner);
+        if (mParseActivityAliasArgs == null) {
+            mParseActivityAliasArgs = new ParseComponentArgs(owner, outError,
+                    com.android.internal.R.styleable.AndroidManifestActivityAlias_name,
+                    com.android.internal.R.styleable.AndroidManifestActivityAlias_label,
+                    com.android.internal.R.styleable.AndroidManifestActivityAlias_icon,
+                    mSeparateProcesses,
+                    0,
+                    com.android.internal.R.styleable.AndroidManifestActivityAlias_enabled);
+            mParseActivityAliasArgs.tag = "<activity-alias>";
+        }
+        
+        mParseActivityAliasArgs.sa = sa;
+        mParseActivityAliasArgs.flags = flags;
+        
         Activity target = null;
 
         final int NA = owner.activities.size();
@@ -1451,26 +1541,21 @@ public class PackageParser {
             return null;
         }
 
-        a.info.targetActivity = targetActivity;
-
-        a.info.configChanges = target.info.configChanges;
-        a.info.flags = target.info.flags;
-        a.info.icon = target.info.icon;
-        a.info.labelRes = target.info.labelRes;
-        a.info.launchMode = target.info.launchMode;
-        a.info.nonLocalizedLabel = target.info.nonLocalizedLabel;
-        a.info.processName = target.info.processName;
-        a.info.screenOrientation = target.info.screenOrientation;
-        a.info.taskAffinity = target.info.taskAffinity;
-        a.info.theme = target.info.theme;
-
-        if (!parseComponentInfo(owner, flags, a.info, outError,
-                receiver ? "<receiver>" : "<activity>", sa,
-                com.android.internal.R.styleable.AndroidManifestActivityAlias_name,
-                com.android.internal.R.styleable.AndroidManifestActivityAlias_label,
-                com.android.internal.R.styleable.AndroidManifestActivityAlias_icon,
-                0,
-                com.android.internal.R.styleable.AndroidManifestActivityAlias_enabled)) {
+        ActivityInfo info = new ActivityInfo();
+        info.targetActivity = targetActivity;
+        info.configChanges = target.info.configChanges;
+        info.flags = target.info.flags;
+        info.icon = target.info.icon;
+        info.labelRes = target.info.labelRes;
+        info.nonLocalizedLabel = target.info.nonLocalizedLabel;
+        info.launchMode = target.info.launchMode;
+        info.processName = target.info.processName;
+        info.screenOrientation = target.info.screenOrientation;
+        info.taskAffinity = target.info.taskAffinity;
+        info.theme = target.info.theme;
+        
+        Activity a = new Activity(mParseActivityAliasArgs, info);
+        if (outError[0] != null) {
             sa.recycle();
             return null;
         }
@@ -1481,9 +1566,6 @@ public class PackageParser {
             a.info.exported = sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_exported, false);
         }
-
-        a.component = new ComponentName(owner.applicationInfo.packageName,
-                a.info.name);
 
         String str;
         str = sa.getNonResourceString(
@@ -1548,23 +1630,28 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestProvider);
 
-        Provider p = new Provider(owner);
-
-        if (!parseComponentInfo(owner, flags, p.info, outError, "<provider>", sa,
-                com.android.internal.R.styleable.AndroidManifestProvider_name,
-                com.android.internal.R.styleable.AndroidManifestProvider_label,
-                com.android.internal.R.styleable.AndroidManifestProvider_icon,
-                com.android.internal.R.styleable.AndroidManifestProvider_process,
-                com.android.internal.R.styleable.AndroidManifestProvider_enabled)) {
+        if (mParseProviderArgs == null) {
+            mParseProviderArgs = new ParseComponentArgs(owner, outError,
+                    com.android.internal.R.styleable.AndroidManifestProvider_name,
+                    com.android.internal.R.styleable.AndroidManifestProvider_label,
+                    com.android.internal.R.styleable.AndroidManifestProvider_icon,
+                    mSeparateProcesses,
+                    com.android.internal.R.styleable.AndroidManifestProvider_process,
+                    com.android.internal.R.styleable.AndroidManifestProvider_enabled);
+            mParseProviderArgs.tag = "<provider>";
+        }
+        
+        mParseProviderArgs.sa = sa;
+        mParseProviderArgs.flags = flags;
+        
+        Provider p = new Provider(mParseProviderArgs, new ProviderInfo());
+        if (outError[0] != null) {
             sa.recycle();
             return null;
         }
 
         p.info.exported = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestProvider_exported, true);
-
-        p.component = new ComponentName(owner.applicationInfo.packageName,
-                p.info.name);
 
         String cpname = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestProvider_authorities);
@@ -1706,14 +1793,22 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestService);
 
-        Service s = new Service(owner);
-
-        if (!parseComponentInfo(owner, flags, s.info, outError, "<service>", sa,
-                com.android.internal.R.styleable.AndroidManifestService_name,
-                com.android.internal.R.styleable.AndroidManifestService_label,
-                com.android.internal.R.styleable.AndroidManifestService_icon,
-                com.android.internal.R.styleable.AndroidManifestService_process,
-                com.android.internal.R.styleable.AndroidManifestService_enabled)) {
+        if (mParseServiceArgs == null) {
+            mParseServiceArgs = new ParseComponentArgs(owner, outError,
+                    com.android.internal.R.styleable.AndroidManifestService_name,
+                    com.android.internal.R.styleable.AndroidManifestService_label,
+                    com.android.internal.R.styleable.AndroidManifestService_icon,
+                    mSeparateProcesses,
+                    com.android.internal.R.styleable.AndroidManifestService_process,
+                    com.android.internal.R.styleable.AndroidManifestService_enabled);
+            mParseServiceArgs.tag = "<service>";
+        }
+        
+        mParseServiceArgs.sa = sa;
+        mParseServiceArgs.flags = flags;
+        
+        Service s = new Service(mParseServiceArgs, new ServiceInfo());
+        if (outError[0] != null) {
             sa.recycle();
             return null;
         }
@@ -1724,9 +1819,6 @@ public class PackageParser {
             s.info.exported = sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestService_exported, false);
         }
-
-        s.component = new ComponentName(owner.applicationInfo.packageName,
-                s.info.name);
 
         String str = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestService_permission);
@@ -2035,6 +2127,9 @@ public class PackageParser {
         // We store the application meta-data independently to avoid multiple unwanted references
         public Bundle mAppMetaData = null;
 
+        public final ArrayList<Integer> supportsDensityList = new ArrayList<Integer>();
+        public int[] supportsDensities = null;
+
         // If this is a 3rd party app, this is the path of the zip file.
         public String mPath;
 
@@ -2084,16 +2179,75 @@ public class PackageParser {
 
     public static class Component<II extends IntentInfo> {
         public final Package owner;
-        public final ArrayList<II> intents = new ArrayList<II>(0);
-        public ComponentName component;
+        public final ArrayList<II> intents;
+        public final ComponentName component;
+        public final String componentShortName;
         public Bundle metaData;
 
         public Component(Package _owner) {
             owner = _owner;
+            intents = null;
+            component = null;
+            componentShortName = null;
+        }
+
+        public Component(final ParsePackageItemArgs args, final PackageItemInfo outInfo) {
+            owner = args.owner;
+            intents = new ArrayList<II>(0);
+            String name = args.sa.getNonResourceString(args.nameRes);
+            if (name == null) {
+                component = null;
+                componentShortName = null;
+                args.outError[0] = args.tag + " does not specify android:name";
+                return;
+            }
+
+            outInfo.name
+                = buildClassName(owner.applicationInfo.packageName, name, args.outError);
+            if (outInfo.name == null) {
+                component = null;
+                componentShortName = null;
+                args.outError[0] = args.tag + " does not have valid android:name";
+                return;
+            }
+
+            component = new ComponentName(owner.applicationInfo.packageName,
+                    outInfo.name);
+            componentShortName = component.flattenToShortString();
+
+            int iconVal = args.sa.getResourceId(args.iconRes, 0);
+            if (iconVal != 0) {
+                outInfo.icon = iconVal;
+                outInfo.nonLocalizedLabel = null;
+            }
+
+            TypedValue v = args.sa.peekValue(args.labelRes);
+            if (v != null && (outInfo.labelRes=v.resourceId) == 0) {
+                outInfo.nonLocalizedLabel = v.coerceToString();
+            }
+
+            outInfo.packageName = owner.packageName;
+        }
+
+        public Component(final ParseComponentArgs args, final ComponentInfo outInfo) {
+            this(args, (PackageItemInfo)outInfo);
+            if (args.outError[0] != null) {
+                return;
+            }
+
+            if (args.processRes != 0) {
+                outInfo.processName = buildProcessName(owner.applicationInfo.packageName,
+                        owner.applicationInfo.processName, args.sa.getNonResourceString(args.processRes),
+                        args.flags, args.sepProcesses, args.outError);
+            }
+            outInfo.enabled = args.sa.getBoolean(args.enabledRes, true);
         }
 
         public Component(Component<II> clone) {
             owner = clone.owner;
+            intents = clone.intents;
+            component = clone.component;
+            componentShortName = clone.componentShortName;
             metaData = clone.metaData;
         }
     }
@@ -2149,6 +2303,10 @@ public class PackageParser {
                 && p.usesLibraryFiles != null) {
             return true;
         }
+        if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0
+            && p.supportsDensities != null) {
+            return true;
+        }
         return false;
     }
 
@@ -2165,6 +2323,9 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0) {
             ai.sharedLibraryFiles = p.usesLibraryFiles;
+        }
+        if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0) {
+            ai.supportsDensities = p.supportsDensities;
         }
         return ai;
     }
@@ -2192,14 +2353,14 @@ public class PackageParser {
     }
 
     public final static class Activity extends Component<ActivityIntentInfo> {
-        public final ActivityInfo info =
-                new ActivityInfo();
+        public final ActivityInfo info;
 
-        public Activity(Package _owner) {
-            super(_owner);
-            info.applicationInfo = owner.applicationInfo;
+        public Activity(final ParseComponentArgs args, final ActivityInfo _info) {
+            super(args, _info);
+            info = _info;
+            info.applicationInfo = args.owner.applicationInfo;
         }
-
+        
         public String toString() {
             return "Activity{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -2221,14 +2382,14 @@ public class PackageParser {
     }
 
     public final static class Service extends Component<ServiceIntentInfo> {
-        public final ServiceInfo info =
-                new ServiceInfo();
+        public final ServiceInfo info;
 
-        public Service(Package _owner) {
-            super(_owner);
-            info.applicationInfo = owner.applicationInfo;
+        public Service(final ParseComponentArgs args, final ServiceInfo _info) {
+            super(args, _info);
+            info = _info;
+            info.applicationInfo = args.owner.applicationInfo;
         }
-
+        
         public String toString() {
             return "Service{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -2252,13 +2413,13 @@ public class PackageParser {
         public final ProviderInfo info;
         public boolean syncable;
 
-        public Provider(Package _owner) {
-            super(_owner);
-            info = new ProviderInfo();
-            info.applicationInfo = owner.applicationInfo;
+        public Provider(final ParseComponentArgs args, final ProviderInfo _info) {
+            super(args, _info);
+            info = _info;
+            info.applicationInfo = args.owner.applicationInfo;
             syncable = false;
         }
-
+        
         public Provider(Provider existingProvider) {
             super(existingProvider);
             this.info = existingProvider.info;
@@ -2291,13 +2452,13 @@ public class PackageParser {
     }
 
     public final static class Instrumentation extends Component {
-        public final InstrumentationInfo info =
-                new InstrumentationInfo();
+        public final InstrumentationInfo info;
 
-        public Instrumentation(Package _owner) {
-            super(_owner);
+        public Instrumentation(final ParsePackageItemArgs args, final InstrumentationInfo _info) {
+            super(args, _info);
+            info = _info;
         }
-
+        
         public String toString() {
             return "Instrumentation{"
                 + Integer.toHexString(System.identityHashCode(this))

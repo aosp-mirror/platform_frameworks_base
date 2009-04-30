@@ -2932,11 +2932,12 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
-        protected void dumpFilter(Printer out, String prefix,
+        protected void dumpFilter(PrintWriter out, String prefix,
                 PackageParser.ActivityIntentInfo filter) {
-            out.println(prefix
-                    + Integer.toHexString(System.identityHashCode(filter.activity))
-                    + " " + filter.activity.component.flattenToShortString());
+            out.print(prefix); out.print(
+                    Integer.toHexString(System.identityHashCode(filter.activity)));
+                    out.print(' ');
+                    out.println(filter.activity.componentShortName);
         }
 
 //        List<ResolveInfo> filterEnabled(List<ResolveInfo> resolveInfoList) {
@@ -3064,11 +3065,12 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         @Override
-        protected void dumpFilter(Printer out, String prefix,
+        protected void dumpFilter(PrintWriter out, String prefix,
                 PackageParser.ServiceIntentInfo filter) {
-            out.println(prefix
-                    + Integer.toHexString(System.identityHashCode(filter.service))
-                    + " " + filter.service.component.flattenToShortString());
+            out.print(prefix); out.print(
+                    Integer.toHexString(System.identityHashCode(filter.service)));
+                    out.print(' ');
+                    out.println(filter.service.componentShortName);
         }
 
 //        List<ResolveInfo> filterEnabled(List<ResolveInfo> resolveInfoList) {
@@ -4578,80 +4580,83 @@ class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        Printer printer = new PrintWriterPrinter(pw);
         synchronized (mPackages) {
             pw.println("Activity Resolver Table:");
-            mActivities.dump(printer, "  ");
+            mActivities.dump(pw, "  ");
             pw.println(" ");
             pw.println("Receiver Resolver Table:");
-            mReceivers.dump(printer, "  ");
+            mReceivers.dump(pw, "  ");
             pw.println(" ");
             pw.println("Service Resolver Table:");
-            mServices.dump(printer, "  ");
+            mServices.dump(pw, "  ");
             pw.println(" ");
             pw.println("Preferred Activities:");
-            mSettings.mPreferredActivities.dump(printer, "  ");
+            mSettings.mPreferredActivities.dump(pw, "  ");
             pw.println(" ");
             pw.println("Preferred Packages:");
             {
                 for (PackageSetting ps : mSettings.mPreferredPackages) {
-                    pw.println("  " + ps.name);
+                    pw.print("  "); pw.println(ps.name);
                 }
             }
             pw.println(" ");
             pw.println("Permissions:");
             {
                 for (BasePermission p : mSettings.mPermissions.values()) {
-                    pw.println("  Permission [" + p.name + "] ("
-                            + Integer.toHexString(System.identityHashCode(p))
-                            + "):");
-                    pw.println("    sourcePackage=" + p.sourcePackage);
-                    pw.println("    uid=" + p.uid
-                            + " gids=" + arrayToString(p.gids)
-                            + " type=" + p.type);
+                    pw.print("  Permission ["); pw.print(p.name); pw.print("] (");
+                            pw.print(Integer.toHexString(System.identityHashCode(p)));
+                            pw.println("):");
+                    pw.print("    sourcePackage="); pw.println(p.sourcePackage);
+                    pw.print("    uid="); pw.print(p.uid);
+                            pw.print(" gids="); pw.print(arrayToString(p.gids));
+                            pw.print(" type="); pw.println(p.type);
                 }
             }
             pw.println(" ");
             pw.println("Packages:");
             {
                 for (PackageSetting ps : mSettings.mPackages.values()) {
-                    pw.println("  Package [" + ps.name + "] ("
-                            + Integer.toHexString(System.identityHashCode(ps))
-                            + "):");
-                    pw.println("    userId=" + ps.userId
-                            + " gids=" + arrayToString(ps.gids));
-                    pw.println("    sharedUser=" + ps.sharedUser);
-                    pw.println("    pkg=" + ps.pkg);
-                    pw.println("    codePath=" + ps.codePathString);
-                    pw.println("    resourcePath=" + ps.resourcePathString);
+                    pw.print("  Package ["); pw.print(ps.name); pw.print("] (");
+                            pw.print(Integer.toHexString(System.identityHashCode(ps)));
+                            pw.println("):");
+                    pw.print("    userId="); pw.print(ps.userId);
+                            pw.print(" gids="); pw.println(arrayToString(ps.gids));
+                    pw.print("    sharedUser="); pw.println(ps.sharedUser);
+                    pw.print("    pkg="); pw.println(ps.pkg);
+                    pw.print("    codePath="); pw.println(ps.codePathString);
+                    pw.print("    resourcePath="); pw.println(ps.resourcePathString);
                     if (ps.pkg != null) {
-                        pw.println("    dataDir=" + ps.pkg.applicationInfo.dataDir);
+                        pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
                     }
-                    pw.println("    timeStamp=" + ps.getTimeStampStr());
-                    pw.println("    signatures=" + ps.signatures);
-                    pw.println("    permissionsFixed=" + ps.permissionsFixed
-                            + " pkgFlags=0x" + Integer.toHexString(ps.pkgFlags)
-                            + " installStatus=" + ps.installStatus
-                            + " enabled=" + ps.enabled);
+                    pw.print("    timeStamp="); pw.println(ps.getTimeStampStr());
+                    pw.print("    signatures="); pw.println(ps.signatures);
+                    pw.print("    permissionsFixed="); pw.print(ps.permissionsFixed);
+                            pw.print(" pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
+                            pw.print(" installStatus="); pw.print(ps.installStatus);
+                            pw.print(" enabled="); pw.println(ps.enabled);
                     if (ps.disabledComponents.size() > 0) {
                         pw.println("    disabledComponents:");
                         for (String s : ps.disabledComponents) {
-                            pw.println("      " + s);
+                            pw.print("      "); pw.println(s);
                         }
                     }
                     if (ps.enabledComponents.size() > 0) {
                         pw.println("    enabledComponents:");
                         for (String s : ps.enabledComponents) {
-                            pw.println("      " + s);
+                            pw.print("      "); pw.println(s);
                         }
                     }
-                    pw.println("    grantedPermissions:");
-                    for (String s : ps.grantedPermissions) {
-                        pw.println("      " + s);
+                    if (ps.grantedPermissions.size() > 0) {
+                        pw.println("    grantedPermissions:");
+                        for (String s : ps.grantedPermissions) {
+                            pw.print("      "); pw.println(s);
+                        }
                     }
-                    pw.println("    loadedPermissions:");
-                    for (String s : ps.loadedPermissions) {
-                        pw.println("      " + s);
+                    if (ps.loadedPermissions.size() > 0) {
+                        pw.println("    loadedPermissions:");
+                        for (String s : ps.loadedPermissions) {
+                            pw.print("      "); pw.println(s);
+                        }
                     }
                 }
             }
@@ -4659,18 +4664,18 @@ class PackageManagerService extends IPackageManager.Stub {
             pw.println("Shared Users:");
             {
                 for (SharedUserSetting su : mSettings.mSharedUsers.values()) {
-                    pw.println("  SharedUser [" + su.name + "] ("
-                            + Integer.toHexString(System.identityHashCode(su))
-                            + "):");
-                    pw.println("    userId=" + su.userId
-                            + " gids=" + arrayToString(su.gids));
+                    pw.print("  SharedUser ["); pw.print(su.name); pw.print("] (");
+                            pw.print(Integer.toHexString(System.identityHashCode(su)));
+                            pw.println("):");
+                    pw.print("    userId="); pw.print(su.userId);
+                            pw.print(" gids="); pw.println(arrayToString(su.gids));
                     pw.println("    grantedPermissions:");
                     for (String s : su.grantedPermissions) {
-                        pw.println("      " + s);
+                        pw.print("      "); pw.println(s);
                     }
                     pw.println("    loadedPermissions:");
                     for (String s : su.loadedPermissions) {
-                        pw.println("      " + s);
+                        pw.print("      "); pw.println(s);
                     }
                 }
             }
@@ -5302,16 +5307,19 @@ class PackageManagerService extends IPackageManager.Stub {
         private final IntentResolver<PreferredActivity, PreferredActivity> mPreferredActivities =
                     new IntentResolver<PreferredActivity, PreferredActivity>() {
             @Override
-            protected void dumpFilter(Printer out, String prefix,
+            protected void dumpFilter(PrintWriter out, String prefix,
                     PreferredActivity filter) {
-                out.println(prefix
-                        + Integer.toHexString(System.identityHashCode(filter))
-                        + " " + filter.mActivity.flattenToShortString()
-                        + " match=0x" + Integer.toHexString(filter.mMatch));
+                out.print(prefix); out.print(
+                        Integer.toHexString(System.identityHashCode(filter)));
+                        out.print(' ');
+                        out.print(filter.mActivity.flattenToShortString());
+                        out.print(" match=0x");
+                        out.println( Integer.toHexString(filter.mMatch));
                 if (filter.mSetComponents != null) {
-                    out.println(prefix + "  Selected from:");
+                    out.print(prefix); out.println("  Selected from:");
                     for (int i=0; i<filter.mSetComponents.length; i++) {
-                        out.println(prefix + "    " + filter.mSetComponents[i]);
+                        out.print(prefix); out.print("    ");
+                                out.println(filter.mSetComponents[i]);
                     }
                 }
             }

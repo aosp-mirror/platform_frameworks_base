@@ -94,6 +94,11 @@
         <!-- Text color, typeface, size, and style for "small" inverse text. Defaults to secondary inverse text color. -->
         <attr name="textAppearanceSmallInverse" format="reference" />
 
+        <!-- Text color, typeface, size, and style for system search result title. Defaults to primary inverse text color. @hide -->	
+        <attr name="textAppearanceSearchResultTitle" format="reference" />	
+        <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. @hide -->	
+        <attr name="textAppearanceSearchResultSubtitle" format="reference" />
+
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
 
@@ -147,6 +152,8 @@
         <!-- The preferred list item height -->
         <attr name="listPreferredItemHeight" format="dimension" />
         <!-- The drawable for the list divider -->
+	<!-- The list item height for search results. @hide -->
+	<attr name="searchResultListItemHeight" format="dimension" />
         <attr name="listDivider" format="reference" />
         <!-- TextView style for list separators. -->
         <attr name="listSeparatorTextViewStyle" format="reference" />
@@ -2773,7 +2780,16 @@
             string will be placed in the data field of the {@link android.content.Intent Intent}
             when the user clicks a suggestion.  <i>Optional attribute.</i> -->
         <attr name="searchSuggestIntentData" format="string" />
-
+        
+        <!-- If provided, this is the minimum number of characters needed to trigger
+             search suggestions. The default value is 0. <i>Optional attribute.</i> -->
+        <attr name="searchSuggestThreshold" format="integer" />
+        
+        <!-- If provided and <code>true</code>, this searchable activity will be
+             included in any global lists of search targets.
+             The default value is <code>false</code>. <i>Optional attribute.</i>. -->
+        <attr name="includeInGlobalSearch" format="boolean" />
+        
     </declare-styleable>
 
     <!-- In order to process special action keys during search, you must define them using

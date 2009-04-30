@@ -72,35 +72,36 @@ class CallbackProxy extends Handler {
     private final Context mContext;
 
     // Message Ids
-    private static final int PAGE_STARTED         = 100;
-    private static final int RECEIVED_ICON        = 101;
-    private static final int RECEIVED_TITLE       = 102;
-    private static final int OVERRIDE_URL         = 103;
-    private static final int AUTH_REQUEST         = 104;
-    private static final int SSL_ERROR            = 105;
-    private static final int PROGRESS             = 106;
-    private static final int UPDATE_VISITED       = 107;
-    private static final int LOAD_RESOURCE        = 108;
-    private static final int CREATE_WINDOW        = 109;
-    private static final int CLOSE_WINDOW         = 110;
-    private static final int SAVE_PASSWORD        = 111;
-    private static final int JS_ALERT             = 112;
-    private static final int JS_CONFIRM           = 113;
-    private static final int JS_PROMPT            = 114;
-    private static final int JS_UNLOAD            = 115;
-    private static final int ASYNC_KEYEVENTS      = 116;
-    private static final int TOO_MANY_REDIRECTS   = 117;
-    private static final int DOWNLOAD_FILE        = 118;
-    private static final int REPORT_ERROR         = 119;
-    private static final int RESEND_POST_DATA     = 120;
-    private static final int PAGE_FINISHED        = 121;
-    private static final int REQUEST_FOCUS        = 122;
-    private static final int SCALE_CHANGED        = 123;
-    private static final int RECEIVED_CERTIFICATE = 124;
-    private static final int SWITCH_OUT_HISTORY   = 125;
+    private static final int PAGE_STARTED              = 100;
+    private static final int RECEIVED_ICON             = 101;
+    private static final int RECEIVED_TITLE            = 102;
+    private static final int OVERRIDE_URL              = 103;
+    private static final int AUTH_REQUEST              = 104;
+    private static final int SSL_ERROR                 = 105;
+    private static final int PROGRESS                  = 106;
+    private static final int UPDATE_VISITED            = 107;
+    private static final int LOAD_RESOURCE             = 108;
+    private static final int CREATE_WINDOW             = 109;
+    private static final int CLOSE_WINDOW              = 110;
+    private static final int SAVE_PASSWORD             = 111;
+    private static final int JS_ALERT                  = 112;
+    private static final int JS_CONFIRM                = 113;
+    private static final int JS_PROMPT                 = 114;
+    private static final int JS_UNLOAD                 = 115;
+    private static final int ASYNC_KEYEVENTS           = 116;
+    private static final int TOO_MANY_REDIRECTS        = 117;
+    private static final int DOWNLOAD_FILE             = 118;
+    private static final int REPORT_ERROR              = 119;
+    private static final int RESEND_POST_DATA          = 120;
+    private static final int PAGE_FINISHED             = 121;
+    private static final int REQUEST_FOCUS             = 122;
+    private static final int SCALE_CHANGED             = 123;
+    private static final int RECEIVED_CERTIFICATE      = 124;
+    private static final int SWITCH_OUT_HISTORY        = 125;
+    private static final int EXCEEDED_DATABASE_QUOTA   = 126;
 
     // Message triggered by the client to resume execution
-    private static final int NOTIFY               = 200;
+    private static final int NOTIFY                    = 200;
 
     // Result transportation object for returning results across thread
     // boundaries.
@@ -385,6 +386,23 @@ class CallbackProxy extends Handler {
                 if (mWebViewClient != null) {
                     mWebViewClient.onUnhandledKeyEvent(mWebView,
                             (KeyEvent) msg.obj);
+                }
+                break;
+
+            case EXCEEDED_DATABASE_QUOTA:
+                if (mWebChromeClient != null) {
+                    HashMap<String, Object> map =
+                            (HashMap<String, Object>) msg.obj;
+                    String databaseIdentifier =
+                            (String) map.get("databaseIdentifier");
+                    String url = (String) map.get("url");
+                    long currentQuota =
+                            ((Long) map.get("currentQuota")).longValue();
+                    WebStorage.QuotaUpdater quotaUpdater =
+                        (WebStorage.QuotaUpdater) map.get("quotaUpdater");
+
+                    mWebChromeClient.onExceededDatabaseQuota(url,
+                            databaseIdentifier, currentQuota, quotaUpdater);
                 }
                 break;
 
@@ -1022,4 +1040,37 @@ class CallbackProxy extends Handler {
         }
         return result.getResult();
     }
+
+    /**
+     * Called by WebViewCore to inform the Java side that the current origin
+     * has overflowed it's database quota. Called in the WebCore thread so
+     * posts a message to the UI thread that will prompt the WebChromeClient
+     * for what to do. On return back to C++ side, the WebCore thread will
+     * sleep pending a new quota value.
+     * @param url The URL that caused the quota overflow.
+     * @param databaseIdentifier The identifier of the database that the
+     *     transaction that caused the overflow was running on.
+     * @param currentQuota The current quota the origin is allowed.
+     * @param quotaUpdater An instance of a class encapsulating a callback
+     *     to WebViewCore to run when the decision to allow or deny more
+     *     quota has been made.
+     */
+    public void onExceededDatabaseQuota(
+            String url, String databaseIdentifier, long currentQuota,
+            WebStorage.QuotaUpdater quotaUpdater) {
+        if (mWebChromeClient == null) {
+            quotaUpdater.updateQuota(currentQuota);
+            return;
+        }
+
+        Message exceededQuota = obtainMessage(EXCEEDED_DATABASE_QUOTA);
+        HashMap<String, Object> map = new HashMap();
+        map.put("databaseIdentifier", databaseIdentifier);
+        map.put("url", url);
+        map.put("currentQuota", currentQuota);
+        map.put("quotaUpdater", quotaUpdater);
+        exceededQuota.obj = map;
+        sendMessage(exceededQuota);
+    }
+
 }

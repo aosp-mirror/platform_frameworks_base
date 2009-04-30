@@ -131,8 +131,8 @@ and click <strong>Next</strong>. </li>
     <li>You should now see the new site added to the search list (and checked).
         Click <strong>Finish</strong>. </li>
     <li>In the subsequent Search Results dialog box, select the checkbox for the
-    <strong>Android Plugin</strong>.
-    This will select the nested tools: "Android DDMS" and "Android Developer Tools". 
+    "Android Plugin".
+    This will select the nested tools: "Android DDMS" and "Android Development Tools". 
     Click <strong>Next</strong>.</li>
     <li>Read and accept the license agreement, then click <strong>Next</strong>. </li>
     <li>On the following Installation window, click <strong>Finish</strong>. </li>
@@ -157,7 +157,7 @@ and click <strong>Next</strong>. </li>
     <li>Back in the Available Software view, you should see the plugin listed by the URL,
     with "Developer Tools" nested within it. Select the checkbox next to 
       Developer Tools and click <strong>Install...</strong></li>
-    <li>On the subsequent Install window, "Android DDMS" and "Android Developer Tools"
+    <li>On the subsequent Install window, "Android DDMS" and "Android Development Tools"
     should both be checked. Click <strong>Next</strong>. </li>
     <li>Read and accept the license agreement, then click <strong>Finish</strong>.</li>
     <li>Restart Eclipse. </li>
@@ -250,13 +250,13 @@ begin developing applications. Here are a few ways you can get started: </p>
   <a href="{@docRoot}guide/topics/fundamentals.html">Application
   Fundamentals</a></li>
   <li>Take a look at the Android framework API specification in the <a
-  href="{@docRoot}reference/index.html">Reference</a> tab</li>
+  href="{@docRoot}reference/packages.html">Reference</a> tab</li>
 </ul>
 
 <p><strong>Explore the SDK</strong></p>
 <ul>
   <li>Get an overview of the <a
-  href="{@docRoot}guide/developming/tools/index.html">development
+  href="{@docRoot}guide/developing/tools/index.html">development
   tools</a> that are available to you</li>
   <li>Read how to develop <a
   href="{@docRoot}guide/developing/eclipse-adt.html">in Eclipse/ADT</a> or

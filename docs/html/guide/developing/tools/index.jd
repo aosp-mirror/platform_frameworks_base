@@ -19,7 +19,7 @@ applications on the emulator. </p>
     <dd>A QEMU-based device-emulation tool that you can use to design, 
     debug, and test your applications in an actual Android run-time environment. </dd>
 
-  <dt><a href="emulator.html">Android Virtual Devices (AVDs)</a></dt>
+  <dt><a href="avd.html">Android Virtual Devices (AVDs)</a></dt>
     <dd>Virtual device configurations that you create, to model device
         characteristics in the Android Emulator. In each configuration, you can
         specify the Android platform to run, the hardware options, and the

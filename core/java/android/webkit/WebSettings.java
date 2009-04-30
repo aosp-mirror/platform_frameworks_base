@@ -159,6 +159,8 @@ public class WebSettings {
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
+    private String          mDatabasePath = "";
+    private boolean         mDatabaseEnabled = false;
     private String          mAppCachePath = "";
     private boolean         mAppCacheEnabled = false;
 
@@ -901,6 +903,19 @@ public class WebSettings {
     }
 
     /**
+     * Set the path to where database storage API databases should be saved.
+     * This will update WebCore when the Sync runs in the C++ side.
+     * @param databasePath String path to the directory where databases should
+     *     be saved. May be the empty string but should never be null.
+     */
+    public synchronized void setDatabasePath(String databasePath) {
+        if (databasePath != null && !databasePath.equals(mDatabasePath)) {
+            mDatabasePath = databasePath;
+            postSync();
+        }
+    }
+
+    /**
      * Tell the WebView to enable Application Caches API.
      * @param flag True if the WebView should enable Application Caches.
      * @hide pending api council approval
@@ -925,6 +940,35 @@ public class WebSettings {
             mAppCachePath = appCachePath;
             postSync();
         }
+    }
+
+    /**
+     * Set whether the database storage API is enabled.
+     * @param flag boolean True if the WebView should use the database storage
+     *     API.
+     */
+    public synchronized void setDatabaseEnabled(boolean flag) {
+       if (mDatabaseEnabled != flag) {
+           mDatabaseEnabled = flag;
+           postSync();
+       }
+    }
+
+    /**
+     * Return the path to where database storage API databases are saved for
+     * the current WebView.
+     * @return the String path to the database storage API databases.
+     */
+    public synchronized String getDatabasePath() {
+        return mDatabasePath;
+    }
+
+    /**
+     * Returns true if database storage API is enabled.
+     * @return True if the database storage API is enabled.
+     */
+    public synchronized boolean getDatabaseEnabled() {
+        return mDatabaseEnabled;
     }
 
     /**

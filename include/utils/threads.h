@@ -79,6 +79,13 @@ enum {
     ANDROID_PRIORITY_LESS_FAVORABLE = +1,
 };
 
+enum {
+    ANDROID_TGROUP_DEFAULT          = 0,
+    ANDROID_TGROUP_BG_NONINTERACT   = 1,
+    ANDROID_TGROUP_FG_BOOST         = 2,
+    ANDROID_TGROUP_MAX              = ANDROID_TGROUP_FG_BOOST,
+};
+
 // Create and run a new thread.
 extern int androidCreateThread(android_thread_func_t, void *);
 

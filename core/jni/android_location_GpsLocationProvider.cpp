@@ -155,6 +155,7 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
         sGpsSuplInterface = (const GpsSuplInterface*)sGpsInterface->get_extension(GPS_SUPL_INTERFACE);
     if (sGpsSuplInterface)
         sGpsSuplInterface->init(&sGpsSuplCallbacks);
+    return true;
 }
 
 static void android_location_GpsLocationProvider_disable(JNIEnv* env, jobject obj)

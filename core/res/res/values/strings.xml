@@ -342,6 +342,11 @@
     <string name="permgroupdesc_developmentTools">Features only needed for
         application developers.</string>
 
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_storage">Storage</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_storage">Access the SD card.</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1051,6 +1056,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeDictionary">Allows an application to write new words into the
       user dictionary.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_sdcardWrite">write to SD card</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_sdcardWrite">Allows an application to write to the SD card.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->

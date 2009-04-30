@@ -118,7 +118,7 @@ status_t Layer::setBuffers( Client* client,
     if (flags & ISurfaceComposer::eSecure)
         bufferFlags |= Buffer::SECURE;
 
-    
+    /* FIXME we need this code for msm7201A
     if (bufferFlags & Buffer::GPU) {
         // FIXME: this is msm7201A specific, as its GPU only supports
         // BGRA_8888.
@@ -126,6 +126,7 @@ status_t Layer::setBuffers( Client* client,
             format = PIXEL_FORMAT_BGRA_8888;
         }
     }
+    */
 
     mSecure = (bufferFlags & Buffer::SECURE) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;

@@ -54,19 +54,27 @@ class ContentProviderRecord extends ContentProviderHolder {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + "package=" + info.applicationInfo.packageName
-              + " process=" + info.processName);
-        pw.println(prefix + "app=" + app);
-        pw.println(prefix + "launchingApp=" + launchingApp);
-        pw.println(prefix + "provider=" + provider);
-        pw.println(prefix + "name=" + info.authority);
-        pw.println(prefix + "isSyncable=" + info.isSyncable);
-        pw.println(prefix + "multiprocess=" + info.multiprocess
-              + " initOrder=" + info.initOrder
-              + " uid=" + uid);
-        pw.println(prefix + "clients=" + clients);
-        pw.println(prefix + "externals=" + externals);
+        pw.print(prefix); pw.print("package=");
+                pw.print(info.applicationInfo.packageName);
+                pw.print("process="); pw.println(info.processName);
+        pw.print(prefix); pw.print("app="); pw.println(app);
+        if (launchingApp != null) {
+            pw.print(prefix); pw.print("launchingApp="); pw.println(launchingApp);
+        }
+        pw.print(prefix); pw.print("uid="); pw.print(uid);
+                pw.print(" provider="); pw.println(provider);
+        pw.print(prefix); pw.print("name="); pw.println(info.authority);
+        if (info.isSyncable || info.multiprocess || info.initOrder != 0) {
+            pw.print(prefix); pw.print("isSyncable="); pw.print(info.isSyncable);
+                    pw.print("multiprocess="); pw.print(info.multiprocess);
+                    pw.print(" initOrder="); pw.println(info.initOrder);
+        }
+        if (clients.size() > 0) {
+            pw.print(prefix); pw.print("clients="); pw.println(clients);
+        }
+        if (externals != 0) {
+            pw.print(prefix); pw.print("externals="); pw.println(externals);
+        }
     }
 
     public String toString() {

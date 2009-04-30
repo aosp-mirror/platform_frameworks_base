@@ -103,7 +103,6 @@ class HistoryRecord extends IApplicationToken.Stub {
     String stringName;      // for caching of toString().
     
     void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.println(this);
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
                 pw.print(" processName="); pw.println(processName);
         pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
@@ -112,9 +111,10 @@ class HistoryRecord extends IApplicationToken.Stub {
         pw.print(prefix); pw.print("frontOfTask="); pw.print(frontOfTask);
                 pw.print(" task="); pw.println(task);
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
-        pw.print(prefix); pw.print("realActivity="); pw.println(realActivity);
-        pw.print(prefix); pw.print("dir="); pw.print(baseDir);
-                pw.print(" res="); pw.print(resDir);
+        pw.print(prefix); pw.print("realActivity=");
+                pw.println(realActivity.flattenToShortString());
+        pw.print(prefix); pw.print("base="); pw.print(baseDir);
+                if (!resDir.equals(baseDir)) pw.print(" res="); pw.print(resDir);
                 pw.print(" data="); pw.println(dataDir);
         pw.print(prefix); pw.print("labelRes=0x");
                 pw.print(Integer.toHexString(labelRes));
@@ -504,7 +504,7 @@ class HistoryRecord extends IApplicationToken.Stub {
         sb.append("HistoryRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(' ');
-        sb.append(intent.getComponent().toShortString());
+        sb.append(intent.getComponent().flattenToShortString());
         sb.append('}');
         return stringName = sb.toString();
     }

@@ -54,6 +54,10 @@
         <group gid="log" />
     </permission>
 
+    <permission name="android.permission.SDCARD_WRITE" >
+        <group gid="sdcard_rw" />
+    </permission>
+
     <!-- The group that /cache belongs to, linked to the permission
          set on the applications that can access /cache -->
     <permission name="android.permission.ACCESS_CACHE_FILESYSTEM" >

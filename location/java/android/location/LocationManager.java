@@ -26,6 +26,8 @@ import android.os.Message;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.location.DummyLocationProvider;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -100,9 +102,6 @@ public class LocationManager {
      * when a location change is broadcast using a PendingIntent.
      */
     public static final String KEY_LOCATION_CHANGED = "location";
-
-    /** @hide -- does this belong here? */
-    public static final String PROVIDER_DIR = "/data/location";
 
     /** @hide */
     public static final String SYSTEM_DIR = "/data/system/location";
@@ -193,6 +192,11 @@ public class LocationManager {
                 case TYPE_PROVIDER_DISABLED:
                     mListener.onProviderDisabled((String) msg.obj);
                     break;
+            }
+            try {
+                mService.locationCallbackFinished(this);
+            } catch (RemoteException e) {
+                Log.e(TAG, "locationCallbackFinished: RemoteException", e);
             }
         }
     }

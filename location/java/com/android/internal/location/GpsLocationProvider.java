@@ -26,7 +26,6 @@ import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.location.LocationProviderImpl;
 import android.net.ConnectivityManager;
 import android.net.SntpClient;
 import android.os.Bundle;
@@ -153,8 +152,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
     // true if we are enabled
     private boolean mEnabled;
-    // true if we are enabled for location updates
-    private boolean mLocationTracking;
     
     // true if we have network connectivity
     private boolean mNetworkAvailable;
@@ -475,10 +472,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
     @Override
     public void enableLocationTracking(boolean enable) {
-        if (mLocationTracking == enable) {
-            return;
-        }
-
+        super.enableLocationTracking(enable);
         if (enable) {
             mFixRequestTime = System.currentTimeMillis();
             mTTFF = 0;
@@ -487,12 +481,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
         } else {
             stopNavigating();
         }
-        mLocationTracking = enable;
-    }
-
-    @Override
-    public boolean isLocationTracking() {
-        return mLocationTracking;
     }
 
     @Override

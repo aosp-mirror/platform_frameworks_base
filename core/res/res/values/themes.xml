@@ -57,6 +57,12 @@
         <item name="textAppearanceLargeInverse">@android:style/TextAppearance.Large.Inverse</item>
         <item name="textAppearanceMediumInverse">@android:style/TextAppearance.Medium.Inverse</item>
         <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
+
+        <!-- @hide -->
+        <item name="textAppearanceSearchResultTitle">@android:style/TextAppearance.SearchResult.Title</item>
+        
+        <!-- @hide -->
+        <item name="textAppearanceSearchResultSubtitle">@android:style/TextAppearance.SearchResult.Subtitle</item>
         
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
         
@@ -75,6 +81,8 @@
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
+        <!-- @hide -->
+        <item name="searchResultListItemHeight">58dip</item>
         <item name="listDivider">@drawable/divider_horizontal_dark</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator</item>   
         
@@ -236,7 +244,7 @@
     <!-- Special variation on the default theme that ensures the background is
          completely black.  This is useful for things like image viewers and
          media players.   If you want the normal (dark background) theme
-         do <em>not<em> use this, use {@link #Theme}. -->
+         do <em>not</em> use this, use {@link #Theme}. -->
     <style name="Theme.Black">
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:colorBackground">@android:color/black</item>
@@ -355,7 +363,6 @@
     <!-- Theme for the search input bar. -->
     <style name="Theme.SearchBar" parent="Theme.Panel">
         <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation.SearchBar</item>
         <item name="windowContentOverlay">@null</item>        
     </style>
 

@@ -11,13 +11,13 @@ sdk.version=1.5_r1
 The list below provides an overview of the changes. </p>
 
 <ul>
-<li><a href="#ui">UI Localizations</a>
-<li><a href="#perf">Resolved Issues</a>
-<li><a href="#features">Android 1.5 Platform Highlights</a>
-<li><a href="#apis">New APIs and manifest elements</a>
+<li><a href="#ui">User Interface Refinements</a>
+<li><a href="#perf">Performance Improvements</a>
+<li><a href="#features">New Features</a>
+<li><a href="#apis">New APIs and Manifest Elements</a>
 </ul>
 
-<h2 id="ui">User interface refinements</h4>
+<h2 id="ui">User Interface Refinements</h2>
 <ul>
     <li>System-wide:
       <ul>
@@ -41,7 +41,7 @@ The list below provides an overview of the changes. </p>
    </li>
 </ul>
 
-<h2 id="perf">Performance improvements</h2>
+<h2 id="perf">Performance Improvements</h2>
 
 <ul>
 <li>Faster Camera start-up and image capture</li>
@@ -50,7 +50,7 @@ The list below provides an overview of the changes. </p>
 <li>Speedier GMail conversation list scrolling</li>
 </ul>
 
-<h4 id="features">New features</h4>
+<h2 id="features">New Features</h2>
 
 <ul>
   <li>On-screen soft keyboard
@@ -130,7 +130,7 @@ included in the Android SDK)
 </li>
 </ul>
 
-<h4 id="apis">New APIs and manifest elements</h4>
+<h2 id="apis">New APIs and Manifest Elements</h2>
 
 <ul>
 <li>UI framework
@@ -143,11 +143,15 @@ included in the Android SDK)
 
 <li>AppWidget framework
   <ul>
-    <li>APIs for creating secure home screen {@link android.appwidget app
-        widgets}. Also see the <a href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">Introducing home screen widgets and the AppWidget
-        framework.</li>
+    <li>APIs for creating secure home screen {@link android.appwidget
+AppWidgets}. For information about how to use AppWidgets, see the Developer's
+Guide <a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a>
+documentation. Also see <a
+href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">
+Introducing home screen widgets and the AppWidget
+framework</a> on the Android Developer's Blog.</li>
     <li>APIs for populating {@link android.provider.LiveFolders Live Folders}
-with custom content.</li>
+        with custom content.</li>
   </ul>
 </li>
 
@@ -185,11 +189,11 @@ continue only if the required hardware is present.</p>
 <li>Speech recognition framework
     <ul>
     <li>Support for using speech recognition libraries via Intent. See {@link
-android.speech.RecognizerIntent Speech Recognition}.</li>
+android.speech.RecognizerIntent RecognizerIntent}.</li>
   </ul>
 </li>
 
-<li>Misc API additions
+<li>Miscellaneous API additions
   <ul>
     <li>LocationManager - Applications can get location change updates via
         Intent</li>

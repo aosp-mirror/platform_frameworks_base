@@ -156,6 +156,7 @@ static void gl_unimplemented() {
 
 static char const * const gl_names[] = {
     #include "gl_entries.in"
+    #include "glext_entries.in"
     NULL
 };
 
@@ -279,6 +280,8 @@ EGLContext getContext() {
 static __attribute__((noinline))
 void *load_driver(const char* driver, gl_hooks_t* hooks)
 {
+    //LOGD("%s", driver);
+    char scrap[256];
     void* dso = dlopen(driver, RTLD_NOW | RTLD_LOCAL);
     LOGE_IF(!dso,
             "couldn't load <%s> library (%s)",
@@ -316,25 +319,41 @@ void *load_driver(const char* driver, gl_hooks_t* hooks)
             *curr++ = f;
             api++;
         }
-        
         gl_hooks_t::gl_t* gl = &hooks->gl;
         curr = (__eglMustCastToProperFunctionPointerType*)gl;
         api = gl_names;
         while (*api) {
             char const * name = *api;
-            // if the function starts with '__' it's a special case that
-            // uses a wrapper. skip the '__' when looking into the real lib.
-            if (name[0] == '_' && name[1] == '_') {
-                name += 2;
-            }
             __eglMustCastToProperFunctionPointerType f = 
                 (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
             if (f == NULL) {
                 // couldn't find the entry-point, use eglGetProcAddress()
                 f = getProcAddress(name);
-                if (f == NULL) {
-                    f = (__eglMustCastToProperFunctionPointerType)gl_unimplemented;
+            }
+            if (f == NULL) {
+                // Try without the OES postfix
+                ssize_t index = ssize_t(strlen(name)) - 3;
+                if ((index>0 && (index<255)) && (!strcmp(name+index, "OES"))) {
+                    strncpy(scrap, name, index);
+                    scrap[index] = 0;
+                    f = (__eglMustCastToProperFunctionPointerType)dlsym(dso, scrap);
+                    //LOGD_IF(f, "found <%s> instead", scrap);
                 }
+            }
+            if (f == NULL) {
+                // Try with the OES postfix
+                ssize_t index = ssize_t(strlen(name)) - 3;
+                if ((index>0 && (index<252)) && (strcmp(name+index, "OES"))) {
+                    strncpy(scrap, name, index);
+                    scrap[index] = 0;
+                    strcat(scrap, "OES");
+                    f = (__eglMustCastToProperFunctionPointerType)dlsym(dso, scrap);
+                    //LOGD_IF(f, "found <%s> instead", scrap);
+                }
+            }
+            if (f == NULL) {
+                //LOGD("%s", name);
+                f = (__eglMustCastToProperFunctionPointerType)gl_unimplemented;
             }
             *curr++ = f;
             api++;

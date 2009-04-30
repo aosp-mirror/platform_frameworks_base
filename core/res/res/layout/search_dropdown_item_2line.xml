@@ -20,15 +20,16 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
     android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:layout_height="?android:attr/searchResultListItemHeight"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:baselineAligned="false"
     >
     
     <TwoLineListItem
-        android:paddingTop="2dip"
-        android:paddingBottom="2dip"
+        android:paddingTop="1dip"
+        android:paddingBottom="1dip"
+        android:gravity="center_vertical"
         android:layout_width="0dip"
         android:layout_weight="1"
         android:layout_height="wrap_content"
@@ -37,7 +38,7 @@
         <TextView
             android:id="@android:id/text1"
             style="?android:attr/dropDownItemStyle"
-            android:textAppearance="?android:attr/textAppearanceMediumInverse"
+            android:textAppearance="?android:attr/textAppearanceSearchResultTitle"
             android:singleLine="true"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
@@ -45,7 +46,7 @@
         <TextView
             android:id="@android:id/text2"
             style="?android:attr/dropDownItemStyle"
-            android:textAppearance="?android:attr/textAppearanceSmallInverse"
+            android:textAppearance="?android:attr/textAppearanceSearchResultSubtitle"
             android:textColor="?android:attr/textColorSecondaryInverse"
             android:singleLine="true"
             android:layout_width="fill_parent"

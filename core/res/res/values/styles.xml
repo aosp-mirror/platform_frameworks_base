@@ -138,6 +138,7 @@
     </style>
 
     <!-- Window animations that are applied to the search bar overlay window.
+	Previously used, but currently unused.
          {@hide Pending API council approval} -->
     <style name="Animation.SearchBar">
         <item name="windowEnterAnimation">@anim/search_bar_enter</item>
@@ -573,6 +574,24 @@
     <style name="TextAppearance.Widget.TextView.SpinnerItem">
         <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
     </style>
+
+    <!-- @hide -->	
+     <style name="TextAppearance.SearchResult">	
+         <item name="android:textStyle">normal</item>	
+         <item name="android:textColor">?textColorPrimaryInverse</item>	
+         <item name="android:textColorHint">?textColorHintInverse</item>	
+     </style>	
+     	
+     <!-- @hide -->	
+     <style name="TextAppearance.SearchResult.Title">	
+         <item name="android:textSize">16sp</item>	
+     </style>	
+     	
+     <!-- @hide -->	
+     <style name="TextAppearance.SearchResult.Subtitle">	
+         <item name="android:textSize">13sp</item>	
+         <item name="android:textColor">?textColorSecondaryInverse</item>	
+     </style>	
 
     <style name="TextAppearance.WindowTitle">
         <item name="android:textColor">#fff</item>
