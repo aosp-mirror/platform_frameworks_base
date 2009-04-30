@@ -225,10 +225,12 @@ public final class MotionEvent implements Parcelable {
             mSize *= scale;
             mXPrecision *= scale;
             mYPrecision *= scale;
-            float[] history = mHistory;
-            int length = history.length;
-            for (int i = 0; i < length; i++) {
-                history[i] *= scale;
+            if (mHistory != null) {
+                float[] history = mHistory;
+                int length = history.length;
+                for (int i = 0; i < length; i++) {
+                    history[i] *= scale;
+                }
             }
         }
     }
