@@ -164,7 +164,7 @@ class BackupManagerService extends IBackupManager.Stub {
     
     // ----- IBackupManager binder interface -----
     
-    public void dataChanged() throws RemoteException {
+    public void dataChanged(String packageName) throws RemoteException {
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
@@ -173,10 +173,14 @@ class BackupManagerService extends IBackupManager.Stub {
         if (targets != null) {
             synchronized (mQueueLock) {
                 // Note that this client has made data changes that need to be backed up
-                // !!! add them to the set of pending packages
                 for (ServiceInfo service : targets) {
-                    if (mPendingBackups.add(service)) {
-                        // !!! TODO: write to the pending-backup journal file in case of crash
+                    // validate the caller-supplied package name against the known set of
+                    // packages associated with this uid
+                    if (service.packageName.equals(packageName)) {
+                        // add the caller to the set of pending backups
+                        if (mPendingBackups.add(service)) {
+                            // !!! TODO: write to the pending-backup journal file in case of crash
+                        }
                     }
                 }
 

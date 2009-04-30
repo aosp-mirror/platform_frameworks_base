@@ -29,6 +29,19 @@ import android.util.Log;
  * This is the central interface between an application and Android's
  * settings backup mechanism.
  * 
+ * In order to use the backup service, your application must implement a
+ * subclass of BackupService, and declare an intent filter
+ * in the application manifest specifying that your BackupService subclass
+ * handles the {link #SERVICE_ACTION} intent action.  For example:
+ * 
+ * <pre class="prettyprint">
+ *      &lt;!-- Use the class "MyBackupService" to perform backups for my app --&gt;
+ *      &lt;service android:name=".MyBackupService"&gt;
+ *          &lt;intent-filter&gt;
+ *              &lt;action android:name="android.service.action.BACKUP"&gt;
+ *          &lt;/intent-filter&gt;
+ *      &lt;/service&gt;</pre>
+ * 
  * <p><em>Not hidden but API subject to change and should not be published</em>
  */
 
