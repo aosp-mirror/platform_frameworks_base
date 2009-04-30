@@ -3235,6 +3235,19 @@
         <attr name="accountType" format="string"/>
     </declare-styleable>
 
+    <!-- =============================== -->
+    <!-- Accounts package class attributes -->
+    <!-- =============================== -->
+
+    <!-- Use <code>account-authenticator</code> as the root tag of the XML resource that
+         describes an account authenticator.
+     -->
+    <declare-styleable name="SyncAdapter">
+        <!-- the authority of a content provider. -->
+        <attr name="contentAuthority" format="string"/>
+        <attr name="accountType"/>
+    </declare-styleable>
+
 
 </resources>
 

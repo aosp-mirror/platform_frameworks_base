@@ -31,8 +31,8 @@ import android.app.PendingIntent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
+import android.content.pm.RegisteredServicesCache;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.ConnectivityManager;
@@ -54,7 +54,6 @@ import android.os.SystemProperties;
 import android.provider.Sync;
 import android.provider.Settings;
 import android.provider.Sync.History;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Config;
@@ -70,7 +69,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,6 +77,8 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Observer;
 import java.util.Observable;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * @hide
@@ -124,7 +124,6 @@ class SyncManager implements OnAccountsUpdatedListener {
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarmWakeLock";
 
     private Context mContext;
-    private ContentResolver mContentResolver;
 
     private String mStatusText = "";
     private long mHeartbeatTime = 0;
@@ -157,10 +156,11 @@ class SyncManager implements OnAccountsUpdatedListener {
     private final PendingIntent mSyncAlarmIntent;
     private final PendingIntent mSyncPollAlarmIntent;
 
+    private final SyncAdaptersCache mSyncAdapters;
+
     private BroadcastReceiver mStorageIntentReceiver =
             new BroadcastReceiver() {
                 public void onReceive(Context context, Intent intent) {
-                    ensureContentResolver();
                     String action = intent.getAction();
                     if (Intent.ACTION_DEVICE_STORAGE_LOW.equals(action)) {
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -293,6 +293,8 @@ class SyncManager implements OnAccountsUpdatedListener {
         mSyncHandler = new SyncHandler(mSyncThread.getLooper());
 
         mPackageManager = null;
+
+        mSyncAdapters = new SyncAdaptersCache(mContext);
 
         mSyncAlarmIntent = PendingIntent.getBroadcast(
                 mContext, 0 /* ignored */, new Intent(ACTION_SYNC_ALARM), 0);
@@ -467,12 +469,6 @@ class SyncManager implements OnAccountsUpdatedListener {
         return mSyncSettings;
     }
 
-    private void ensureContentResolver() {
-        if (mContentResolver == null) {
-            mContentResolver = mContext.getContentResolver();
-        }
-    }
-
     private void ensureAlarmService() {
         if (mAlarmService == null) {
             mAlarmService = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
@@ -590,20 +586,33 @@ class SyncManager implements OnAccountsUpdatedListener {
             source = Sync.History.SOURCE_SERVER;
         }
 
-        List<String> names = new ArrayList<String>();
-        List<ProviderInfo> providers = new ArrayList<ProviderInfo>();
-        populateProvidersList(url, names, providers);
+        // compile a list of authorities that have sync adapters
+        // for each authority sync each account that matches a sync adapter
+        Set<String> syncableAuthorities = new HashSet<String>();
+        for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapter :
+                mSyncAdapters.getAllServices()) {
+            syncableAuthorities.add(syncAdapter.type.authority);
+        }
 
-        final int numProviders = providers.size();
-        for (int i = 0; i < numProviders; i++) {
-            if (!providers.get(i).isSyncable) continue;
-            final String name = names.get(i);
+        // if the url was specified then replace the list of authorities with just this authority
+        // or clear it if this authority isn't syncable
+        if (url != null) {
+            boolean isSyncable = syncableAuthorities.contains(url.getAuthority());
+            syncableAuthorities.clear();
+            if (isSyncable) syncableAuthorities.add(url.getAuthority());
+        }
+
+        for (String authority : syncableAuthorities) {
             for (Account account : accounts) {
-                scheduleSyncOperation(new SyncOperation(account, source, name, extras, delay));
-                // TODO: remove this when Calendar supports multiple accounts. Until then
-                // pretend that only the first account exists when syncing calendar.
-                if ("calendar".equals(name)) {
-                    break;
+                if (mSyncAdapters.getServiceInfo(new SyncAdapterType(authority, account.mType))
+                        != null) {
+                    scheduleSyncOperation(
+                            new SyncOperation(account, source, authority, extras, delay));
+                    // TODO: remove this when Calendar supports multiple accounts. Until then
+                    // pretend that only the first account exists when syncing calendar.
+                    if ("calendar".equals(authority)) {
+                        break;
+                    }
                 }
             }
         }
@@ -611,32 +620,6 @@ class SyncManager implements OnAccountsUpdatedListener {
 
     private void setStatusText(String message) {
         mStatusText = message;
-    }
-
-    private void populateProvidersList(Uri url, List<String> names, List<ProviderInfo> providers) {
-        try {
-            final IPackageManager packageManager = getPackageManager();
-            if (url == null) {
-                packageManager.querySyncProviders(names, providers);
-            } else {
-                final String authority = url.getAuthority();
-                ProviderInfo info = packageManager.resolveContentProvider(url.getAuthority(), 0);
-                if (info != null) {
-                    // only set this provider if the requested authority is the primary authority
-                    String[] providerNames = info.authority.split(";");
-                    if (url.getAuthority().equals(providerNames[0])) {
-                        names.add(authority);
-                        providers.add(info);
-                    }
-                }
-            }
-        } catch (RemoteException ex) {
-            // we should really never get this, but if we do then clear the lists, which
-            // will result in the dropping of the sync request
-            Log.e(TAG, "error trying to get the ProviderInfo for " + url, ex);
-            names.clear();
-            providers.clear();
-        }
     }
 
     public void scheduleLocalSync(Uri url) {
@@ -672,8 +655,7 @@ class SyncManager implements OnAccountsUpdatedListener {
 
     public void updateHeartbeatTime() {
         mHeartbeatTime = SystemClock.elapsedRealtime();
-        ensureContentResolver();
-        mContentResolver.notifyChange(Sync.Active.CONTENT_URI,
+        mContext.getContentResolver().notifyChange(Sync.Active.CONTENT_URI,
                 null /* this change wasn't made through an observer */);
     }
 
@@ -738,8 +720,7 @@ class SyncManager implements OnAccountsUpdatedListener {
         }
 
         // Cap the delay
-        ensureContentResolver();
-        long maxSyncRetryTimeInSeconds = Settings.Gservices.getLong(mContentResolver,
+        long maxSyncRetryTimeInSeconds = Settings.Gservices.getLong(mContext.getContentResolver(),
                 Settings.Gservices.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                 DEFAULT_MAX_SYNC_RETRY_TIME_IN_SECONDS);
         if (newDelayInMs > maxSyncRetryTimeInSeconds * 1000) {
@@ -954,21 +935,19 @@ class SyncManager implements OnAccountsUpdatedListener {
     /**
      * @hide
      */
-    class ActiveSyncContext extends ISyncContext.Stub {
+    class ActiveSyncContext extends ISyncContext.Stub implements ServiceConnection {
         final SyncOperation mSyncOperation;
         final long mHistoryRowId;
-        final IContentProvider mContentProvider;
-        final ISyncAdapter mSyncAdapter;
+        ISyncAdapter mSyncAdapter;
         final long mStartTime;
         long mTimeoutStartTime;
 
-        public ActiveSyncContext(SyncOperation syncOperation, IContentProvider contentProvider,
-                ISyncAdapter syncAdapter, long historyRowId) {
+        public ActiveSyncContext(SyncOperation syncOperation,
+                long historyRowId) {
             super();
             mSyncOperation = syncOperation;
             mHistoryRowId = historyRowId;
-            mContentProvider = contentProvider;
-            mSyncAdapter = syncAdapter;
+            mSyncAdapter = null;
             mStartTime = SystemClock.elapsedRealtime();
             mTimeoutStartTime = mStartTime;
         }
@@ -994,6 +973,37 @@ class SyncManager implements OnAccountsUpdatedListener {
                     .append(", syncOperation ").append(mSyncOperation);
         }
 
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Message msg = mSyncHandler.obtainMessage();
+            msg.what = SyncHandler.MESSAGE_SERVICE_CONNECTED;
+            msg.obj = new ServiceConnectionData(this, ISyncAdapter.Stub.asInterface(service));
+            mSyncHandler.sendMessage(msg);
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            Message msg = mSyncHandler.obtainMessage();
+            msg.what = SyncHandler.MESSAGE_SERVICE_DISCONNECTED;
+            msg.obj = new ServiceConnectionData(this, null);
+            mSyncHandler.sendMessage(msg);
+        }
+
+        boolean bindToSyncAdapter(RegisteredServicesCache.ServiceInfo info) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.d(TAG, "bindToSyncAdapter: " + info.componentName + ", connection " + this);
+            }
+            Intent intent = new Intent();
+            intent.setAction("android.content.SyncAdapter");
+            intent.setComponent(info.componentName);
+            return mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
+        }
+
+        void unBindFromSyncAdapter() {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.d(TAG, "unBindFromSyncAdapter: connection " + this);
+            }
+            mContext.unbindService(this);
+        }
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
@@ -1010,6 +1020,11 @@ class SyncManager implements OnAccountsUpdatedListener {
             dumpSyncHistory(sb);
         }
         pw.println(sb.toString());
+
+        pw.println("SyncAdapters:");
+        for (RegisteredServicesCache.ServiceInfo info : mSyncAdapters.getAllServices()) {
+            pw.println("  " + info);
+        }
     }
 
     protected void dumpSyncState(StringBuilder sb) {
@@ -1277,6 +1292,15 @@ class SyncManager implements OnAccountsUpdatedListener {
         }
     }
 
+    class ServiceConnectionData {
+        public final ActiveSyncContext activeSyncContext;
+        public final ISyncAdapter syncAdapter;
+        ServiceConnectionData(ActiveSyncContext activeSyncContext, ISyncAdapter syncAdapter) {
+            this.activeSyncContext = activeSyncContext;
+            this.syncAdapter = syncAdapter;
+        }
+    }
+
     /**
      * Handles SyncOperation Messages that are posted to the associated
      * HandlerThread.
@@ -1286,6 +1310,8 @@ class SyncManager implements OnAccountsUpdatedListener {
         private static final int MESSAGE_SYNC_FINISHED = 1;
         private static final int MESSAGE_SYNC_ALARM = 2;
         private static final int MESSAGE_CHECK_ALARMS = 3;
+        private static final int MESSAGE_SERVICE_CONNECTED = 4;
+        private static final int MESSAGE_SERVICE_DISCONNECTED = 5;
 
         public final SyncNotificationInfo mSyncNotificationInfo = new SyncNotificationInfo();
         private Long mAlarmScheduleTime = null;
@@ -1356,6 +1382,53 @@ class SyncManager implements OnAccountsUpdatedListener {
                         // since we are no longer syncing, check if it is time to start a new sync
                         runStateIdle();
                         break;
+
+                    case SyncHandler.MESSAGE_SERVICE_CONNECTED: {
+                        ServiceConnectionData msgData = (ServiceConnectionData)msg.obj;
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_SERVICE_CONNECTED: "
+                                    + msgData.activeSyncContext
+                                    + " active is " + mActiveSyncContext);
+                        }
+                        // check that this isn't an old message
+                        if (mActiveSyncContext == msgData.activeSyncContext) {
+                            runBoundToSyncAdapter(msgData.syncAdapter);
+                        }
+                        break;
+                    }
+
+                    case SyncHandler.MESSAGE_SERVICE_DISCONNECTED: {
+                        ServiceConnectionData msgData = (ServiceConnectionData)msg.obj;
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_SERVICE_DISCONNECTED: "
+                                    + msgData.activeSyncContext
+                                    + " active is " + mActiveSyncContext);
+                        }
+                        // check that this isn't an old message
+                        if (mActiveSyncContext == msgData.activeSyncContext) {
+                            // cancel the sync if we have a syncadapter, which means one is
+                            // outstanding
+                            if (mActiveSyncContext.mSyncAdapter != null) {
+                                try {
+                                    mActiveSyncContext.mSyncAdapter.cancelSync();
+                                } catch (RemoteException e) {
+                                    // we don't need to retry this in this case
+                                }
+                            }
+
+                            // pretend that the sync failed with an IOException,
+                            // which is a soft error
+                            SyncResult syncResult = new SyncResult();
+                            syncResult.stats.numIoExceptions++;
+                            runSyncFinishedOrCanceled(syncResult);
+
+                            // since we are no longer syncing, check if it is time to start a new
+                            // sync
+                            runStateIdle();
+                        }
+
+                        break;
+                    }
 
                     case SyncHandler.MESSAGE_SYNC_ALARM: {
                         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
@@ -1542,67 +1615,68 @@ class SyncManager implements OnAccountsUpdatedListener {
                 mSyncQueue.popHead();
             }
 
-            String providerName = syncOperation.authority;
-            ensureContentResolver();
-            IContentProvider contentProvider;
-
-            // acquire the provider and update the sync history
-            try {
-                contentProvider = mContentResolver.acquireProvider(providerName);
-                if (contentProvider == null) {
-                    Log.e(TAG, "Provider " + providerName + " doesn't exist");
-                    return;
+            // connect to the sync adapter
+            SyncAdapterType syncAdapterType = new SyncAdapterType(syncOperation.authority,
+                    syncOperation.account.mType);
+            RegisteredServicesCache.ServiceInfo syncAdapterInfo =
+                    mSyncAdapters.getServiceInfo(syncAdapterType);
+            if (syncAdapterInfo == null) {
+                if (Config.LOGD) {
+                    Log.d(TAG, "can't find a sync adapter for " + syncAdapterType);
                 }
-                if (contentProvider.getSyncAdapter() == null) {
-                    Log.e(TAG, "Provider " + providerName + " isn't syncable, " + contentProvider);
-                    return;
-                }
-            } catch (RemoteException remoteExc) {
-                Log.e(TAG, "Caught a RemoteException while preparing for sync, rescheduling "
-                        + syncOperation, remoteExc);
-                rescheduleWithDelay(syncOperation);
-                return;
-            } catch (RuntimeException exc) {
-                Log.e(TAG, "Caught a RuntimeException while validating sync of " + providerName,
-                        exc);
+                runStateIdle();
                 return;
             }
 
-            final long historyRowId = insertStartSyncEvent(syncOperation);
-
-            try {
-                ISyncAdapter syncAdapter = contentProvider.getSyncAdapter();
-                ActiveSyncContext activeSyncContext = new ActiveSyncContext(syncOperation,
-                        contentProvider, syncAdapter, historyRowId);
-                mSyncWakeLock.acquire();
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "starting sync of " + syncOperation);
-                }
-                syncAdapter.startSync(activeSyncContext, syncOperation.account,
-                        syncOperation.extras);
-                mActiveSyncContext = activeSyncContext;
+            ActiveSyncContext activeSyncContext =
+                    new ActiveSyncContext(syncOperation, insertStartSyncEvent(syncOperation));
+            mActiveSyncContext = activeSyncContext;
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "runStateIdle: setting mActiveSyncContext to " + mActiveSyncContext);
+            }
+            mSyncStorageEngine.setActiveSync(mActiveSyncContext);
+            if (!activeSyncContext.bindToSyncAdapter(syncAdapterInfo)) {
+                Log.e(TAG, "Bind attempt failed to " + syncAdapterInfo);
+                mActiveSyncContext = null;
                 mSyncStorageEngine.setActiveSync(mActiveSyncContext);
+                runStateIdle();
+                return;
+            }
+
+            mSyncWakeLock.acquire();
+            // no need to schedule an alarm, as that will be done by our caller.
+
+            // the next step will occur when we get either a timeout or a
+            // MESSAGE_SERVICE_CONNECTED or MESSAGE_SERVICE_DISCONNECTED message
+        }
+
+        private void runBoundToSyncAdapter(ISyncAdapter syncAdapter) {
+            mActiveSyncContext.mSyncAdapter = syncAdapter;
+            final SyncOperation syncOperation = mActiveSyncContext.mSyncOperation;
+            try {
+                syncAdapter.startSync(mActiveSyncContext, syncOperation.account,
+                        syncOperation.extras);
             } catch (RemoteException remoteExc) {
                 if (Config.LOGD) {
                     Log.d(TAG, "runStateIdle: caught a RemoteException, rescheduling", remoteExc);
                 }
+                mActiveSyncContext.unBindFromSyncAdapter();
                 mActiveSyncContext = null;
                 mSyncStorageEngine.setActiveSync(mActiveSyncContext);
                 rescheduleWithDelay(syncOperation);
             } catch (RuntimeException exc) {
+                mActiveSyncContext.unBindFromSyncAdapter();
                 mActiveSyncContext = null;
                 mSyncStorageEngine.setActiveSync(mActiveSyncContext);
                 Log.e(TAG, "Caught a RuntimeException while starting the sync " + syncOperation,
                         exc);
             }
-
-            // no need to schedule an alarm, as that will be done by our caller.
         }
 
         private void runSyncFinishedOrCanceled(SyncResult syncResult) {
             boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
             if (isLoggable) Log.v(TAG, "runSyncFinishedOrCanceled");
-            ActiveSyncContext activeSyncContext = mActiveSyncContext;
+            final ActiveSyncContext activeSyncContext = mActiveSyncContext;
             mActiveSyncContext = null;
             mSyncStorageEngine.setActiveSync(mActiveSyncContext);
 
@@ -1642,10 +1716,12 @@ class SyncManager implements OnAccountsUpdatedListener {
                     Log.v(TAG, "runSyncFinishedOrCanceled: is a cancel: operation "
                             + syncOperation);
                 }
-                try {
-                    activeSyncContext.mSyncAdapter.cancelSync();
-                } catch (RemoteException e) {
-                    // we don't need to retry this in this case
+                if (activeSyncContext.mSyncAdapter != null) {
+                    try {
+                        activeSyncContext.mSyncAdapter.cancelSync();
+                    } catch (RemoteException e) {
+                        // we don't need to retry this in this case
+                    }
                 }
                 historyMessage = History.MESG_CANCELED;
                 downstreamActivity = 0;
@@ -1655,7 +1731,7 @@ class SyncManager implements OnAccountsUpdatedListener {
             stopSyncEvent(activeSyncContext.mHistoryRowId, syncOperation, historyMessage,
                     upstreamActivity, downstreamActivity, elapsedTime);
 
-            mContentResolver.releaseProvider(activeSyncContext.mContentProvider);
+            activeSyncContext.unBindFromSyncAdapter();
 
             if (syncResult != null && syncResult.tooManyDeletions) {
                 installHandleTooManyDeletesNotification(syncOperation.account,
