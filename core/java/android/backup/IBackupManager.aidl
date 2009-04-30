@@ -21,12 +21,15 @@ package android.backup;
  * operation currently needed is a simple notification that the app has made changes to
  * data it wishes to back up, so the system should run a backup pass.
  *
- * {@hide pending API solidification}
+ * Apps will use the {@link android.backup.BackupManager} class rather than going through
+ * this Binder interface directly.
+ * 
+ * {@hide}
  */
 interface IBackupManager {
     /**
      * Tell the system service that the caller has made changes to its
      * data, and therefore needs to undergo a backup pass.
      */
-    oneway void dataChanged();
+    oneway void dataChanged(String packageName);
 }
