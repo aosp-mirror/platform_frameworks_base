@@ -111,6 +111,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private boolean mGlobalSearchMode;
     private Context mActivityContext;
     
+    // Values we store to allow user to toggle between in-app search and global search.
+    private ComponentName mStoredComponentName;
+    private Bundle mStoredAppSearchData;
+    
     // stack of previous searchables, to support the BACK key after
     // SearchManager.INTENT_ACTION_CHANGE_SEARCH_SOURCE.
     // The top of the stack (= previous searchable) is the last element of the list,
@@ -228,20 +232,70 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return true;
         }
         
+        // Reset any stored values from last time dialog was shown.
+        mStoredComponentName = null;
+        mStoredAppSearchData = null;
+        
+        return doShow(initialQuery, selectInitialQuery, componentName, appSearchData, globalSearch);
+    }
+    
+    
+    /**
+     * Called in response to a press of the hard search button in
+     * {@link #onKeyDown(int, KeyEvent)}, this method toggles between in-app
+     * search and global search when relevant.
+     * 
+     * If pressed within an in-app search context, this switches the search dialog out to
+     * global search. If pressed within a global search context that was originally an in-app
+     * search context, this switches back to the in-app search context. If pressed within a
+     * global search context that has no original in-app search context (e.g., global search
+     * from Home), this does nothing.
+     * 
+     * @return false if we wanted to toggle context but could not do so successfully, true
+     * in all other cases
+     */
+    private boolean toggleGlobalSearch() {
+        String currentSearchText = mSearchAutoComplete.getText().toString();
+        if (!mGlobalSearchMode) {
+            mStoredComponentName = mLaunchComponent;
+            mStoredAppSearchData = mAppSearchData;
+            return doShow(currentSearchText, false, null, mAppSearchData, true);
+        } else {
+            if (mStoredComponentName != null) {
+                // This means we should toggle *back* to an in-app search context from
+                // global search.
+                return doShow(currentSearchText, false, mStoredComponentName,
+                        mStoredAppSearchData, false);
+            } else {
+                return true;
+            }
+        }
+    }
+    
+    /**
+     * Does the rest of the work required to show the search dialog. Called by both
+     * {@link #show(String, boolean, ComponentName, Bundle, boolean)} and
+     * {@link #toggleGlobalSearch()}.
+     * 
+     * @return true if search dialog showed, false if not
+     */
+    private boolean doShow(String initialQuery, boolean selectInitialQuery,
+            ComponentName componentName, Bundle appSearchData,
+            boolean globalSearch) {
         // set up the searchable and show the dialog
         if (!show(componentName, appSearchData, globalSearch)) {
             return false;
         }
-        
+
         // finally, load the user's initial text (which may trigger suggestions)
         setUserQuery(initialQuery);
         if (selectInitialQuery) {
             mSearchAutoComplete.selectAll();
         }
-        
+
         return true;
     }
-    
+
     /**
      * Sets up the search dialog and shows it.
      * 
@@ -650,14 +704,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return true;
         }
         
-        // search or cancel on search key
         if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-            if (!mSearchAutoComplete.isEmpty()) {
-                launchQuerySearch();
-            } else {
-                cancel();
-            }
-            return true;
+            // If the search key is pressed, toggle between global and in-app search. If we are
+            // currently doing global search and there is no in-app search context to toggle to,
+            // just don't do anything.
+            return toggleGlobalSearch();
         }
 
         // if it's an action specified by the searchable activity, launch the
