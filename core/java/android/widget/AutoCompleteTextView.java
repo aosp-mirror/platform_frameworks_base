@@ -259,7 +259,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         mDropDownAnchorId = id;
         mDropDownAnchorView = null;
     }
-<<<<<<< HEAD:core/java/android/widget/AutoCompleteTextView.java
     
     /**
      * <p>Gets the background of the auto-complete drop-down list.</p>
