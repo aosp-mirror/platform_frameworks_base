@@ -1095,6 +1095,7 @@
    <public type="attr" name="extraTension" id="0x0101026b" />
    <public type="attr" name="density" id="0x0101026c" />
    <public type="attr" name="searchSuggestThreshold" id="0x0101026d" />
+   <public type="attr" name="includeInGlobalSearch" id="0x0101026e" />
 
    <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
    <public type="anim" name="overshoot_interpolator" id="0x010a0008" />
