@@ -2424,6 +2424,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                     && mAttachInfo.mHasWindowFocus) {
                 imm.focusOut(this);
             }
+            onFocusLost();
         } else if (imm != null && mAttachInfo != null
                 && mAttachInfo.mHasWindowFocus) {
             imm.focusIn(this);
@@ -2432,6 +2433,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         invalidate();
         if (mOnFocusChangeListener != null) {
             mOnFocusChangeListener.onFocusChange(this, gainFocus);
+        }
+    }
+
+    /**
+     * Invoked whenever this view loses focus, either by losing window focus or by losing
+     * focus within its window. This method can be used to clear any state tied to the
+     * focus. For instance, if a button is held pressed with the trackball and the window
+     * loses focus, this method can be used to cancel the press.
+     *
+     * Subclasses of View overriding this method should always call super.onFocusLost().
+     *
+     * @see #onFocusChanged(boolean, int, android.graphics.Rect)
+     * @see #onWindowFocusChanged(boolean) 
+     *
+     * @hide pending API council approval
+     */
+    protected void onFocusLost() {
+        resetPressedState();
+    }
+
+    private void resetPressedState() {
+        if ((mViewFlags & ENABLED_MASK) == DISABLED) {
+            return;
+        }
+
+        if (isPressed()) {
+            setPressed(false);
+
+            if (!mHasPerformedLongPress) {
+                if (mPendingCheckForLongPress != null) {
+                    removeCallbacks(mPendingCheckForLongPress);
+                }
+            }
         }
     }
 
@@ -3416,6 +3450,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             if (mPendingCheckForLongPress != null) {
                 removeCallbacks(mPendingCheckForLongPress);
             }
+            onFocusLost();
         } else if (imm != null && (mPrivateFlags & FOCUSED) != 0) {
             imm.focusIn(this);
         }
@@ -5635,7 +5670,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * Create a snapshot of the view into a bitmap.  We should probably make
      * some form of this public, but should think about the API.
      */
-    /*package*/ Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor) {
+    Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor) {
         final int width = mRight - mLeft;
         final int height = mBottom - mTop;
 
@@ -6705,6 +6740,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     public void setSelected(boolean selected) {
         if (((mPrivateFlags & SELECTED) != 0) != selected) {
             mPrivateFlags = (mPrivateFlags & ~SELECTED) | (selected ? SELECTED : 0);
+            if (!selected) resetPressedState();
             invalidate();
             refreshDrawableState();
             dispatchSetSelected(selected);
