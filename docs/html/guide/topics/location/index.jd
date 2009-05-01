@@ -116,12 +116,11 @@ that lets your application manipulate Google Maps data through class methods,
 and it lets you work with Maps data as you would other types of Views.</p>
 
 <p>The Maps external library is not part of the standard Android library, so it
-may not be present on some compliant Android-powered devices (although it is
-likely to be present on most devices). Similarly, the Maps external library is
-not included in the standard Android library provided in the SDK. So that you
-can develop using the classes of the com.google.android.maps package, the Maps
-external library is made available to you as part of the Google APIs add-on for
-the Android SDK. </p>
+may not be present on some compliant Android-powered devices. Similarly, the
+Maps external library is not included in the standard Android library provided
+in the SDK. So that you can develop using the classes of the
+com.google.android.maps package, the Maps external library is made available to
+you as part of the Google APIs add-on for the Android SDK. </p>
 
 <p>To learn more about the Maps external library and how to download and use the
 Google APIs add-on, visit</p>

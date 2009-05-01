@@ -75,7 +75,7 @@ First, we'll create a simple Activity that can view and navigate a map. Then we 
       certificate has been registered with the Google Maps service. Because MapView uses Google Maps data, this key is required
       in order to receive the map data, even while you are developing. Registration is free and it only takes a couple
       minutes to register your certificate and receive a Maps API Key. For instructions on getting a key, read
-      <a href="{@docRoot}guide/topics/location/geo/mapkey.html">Obtaining a Maps API Key</a>.
+      <a href="http://code.google.com/android/add-ons/google-apis/mapkey.html">Obtaining a Maps API Key</a>.
       (For the purpose of this tutorial, you should register with the fingerprint of the SDK debug certificate.)
       Once you've acquired the Maps API Key, insert it for the <code>apiKey</code> value.</p></li>
 
