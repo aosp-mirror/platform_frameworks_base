@@ -1171,9 +1171,9 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
         }
 
-        // Max height available on the screen for a popup anchored to us
-        final int maxHeight = mPopup.getMaxAvailableHeight(this, mDropDownVerticalOffset);
-        //otherHeights += dropDownView.getPaddingTop() + dropDownView.getPaddingBottom();
+        // Max height available on the screen for a popup
+        final int maxHeight =
+                mPopup.getMaxAvailableHeight(getDropDownAnchorView(), mDropDownVerticalOffset);
 
         final int measuredHeight = mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
                 0, ListView.NO_POSITION, maxHeight - otherHeights, 2) + otherHeights;
