@@ -708,7 +708,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             }
 
             try {
-                mLocationManager.setLocation(mLocation);
+                mLocationManager.reportLocation(mLocation);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException calling reportLocation");
             }

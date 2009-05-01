@@ -59,9 +59,9 @@ interface ILocationManager
     boolean isProviderEnabled(String provider);
 
     Location getLastKnownLocation(String provider);
-    
+
     /* used by location providers to tell the location manager when it has a new location */
-    void setLocation(in Location location);
+    void reportLocation(in Location location);
 
     String getFromLocation(double latitude, double longitude, int maxResults,
         String language, String country, String variant, String appName, out List<Address> addrs);
@@ -82,7 +82,7 @@ interface ILocationManager
     void clearTestProviderStatus(String provider);
 
     /* for installing external Location Providers */
-    void setNetworkLocationProvider(ILocationProvider provider);
-    void setLocationCollector(ILocationCollector collector);
-    void setGeocodeProvider(IGeocodeProvider provider);
+    void installLocationProvider(String name, ILocationProvider provider);
+    void installLocationCollector(ILocationCollector collector);
+    void installGeocodeProvider(IGeocodeProvider provider);
 }

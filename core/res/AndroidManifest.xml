@@ -214,6 +214,18 @@
         android:label="@string/permlab_accessLocationExtraCommands"
         android:description="@string/permdesc_accessLocationExtraCommands" />
 
+    <!-- Allows an application to install a location provider into the Location Manager -->
+    <permission android:name="android.permission.INSTALL_LOCATION_PROVIDER"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_installLocationProvider"
+        android:description="@string/permdesc_installLocationProvider" />
+
+    <!-- Allows an application to install a location collector into the Location Manager -->
+    <permission android:name="android.permission.INSTALL_LOCATION_COLLECTOR"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_installLocationCollector"
+        android:description="@string/permdesc_installLocationCollector" />
+
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->
@@ -921,7 +933,7 @@
     <permission android:name="android.permission.CONTROL_LOCATION_UPDATES"
         android:label="@string/permlab_locationUpdates"
         android:description="@string/permdesc_locationUpdates"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows read/write access to the "properties" table in the checkin
          database, to change values that get uploaded. -->
