@@ -17,7 +17,6 @@
 package com.android.internal.location;
 
 import android.location.Address;
-import android.location.ILocationManager;
 import android.location.ILocationProvider;
 import android.location.Location;
 import android.location.LocationManager;
@@ -32,19 +31,24 @@ import java.util.List;
  *
  * {@hide}
  */
-public class LocationProviderProxy extends LocationProviderImpl {
+public class LocationProviderProxy {
 
     private static final String TAG = "LocationProviderProxy";
 
+    private final String mName;
     private final ILocationProvider mProvider;
+    private boolean mLocationTracking = false;
+    private long mMinTime = 0;
 
-    public LocationProviderProxy(String name, ILocationManager locationManager,
-            ILocationProvider provider) {
-        super(name, locationManager);
+    public LocationProviderProxy(String name, ILocationProvider provider) {
+        mName = name;
         mProvider = provider;
     }
 
-    @Override
+    public String getName() {
+        return mName;
+    }
+
     public boolean requiresNetwork() {
         try {
             return mProvider.requiresNetwork();
@@ -54,7 +58,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public boolean requiresSatellite() {
         try {
             return mProvider.requiresSatellite();
@@ -64,7 +67,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public boolean requiresCell() {
         try {
             return mProvider.requiresCell();
@@ -74,7 +76,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public boolean hasMonetaryCost() {
         try {
             return mProvider.hasMonetaryCost();
@@ -84,7 +85,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public boolean supportsAltitude() {
         try {
             return mProvider.supportsAltitude();
@@ -94,7 +94,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public boolean supportsSpeed() {
         try {
             return mProvider.supportsSpeed();
@@ -104,8 +103,7 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-     @Override
-    public boolean supportsBearing() {
+     public boolean supportsBearing() {
         try {
             return mProvider.supportsBearing();
         } catch (RemoteException e) {
@@ -114,7 +112,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public int getPowerRequirement() {
         try {
             return mProvider.getPowerRequirement();
@@ -124,7 +121,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public int getAccuracy() {
         try {
             return mProvider.getAccuracy();
@@ -134,7 +130,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public void enable() {
         try {
             mProvider.enable();
@@ -143,7 +138,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public void disable() {
         try {
             mProvider.disable();
@@ -152,7 +146,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public boolean isEnabled() {
         try {
             return mProvider.isEnabled();
@@ -162,7 +155,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public int getStatus(Bundle extras) {
         try {
             return mProvider.getStatus(extras);
@@ -172,7 +164,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public long getStatusUpdateTime() {
         try {
             return mProvider.getStatusUpdateTime();
@@ -182,27 +173,32 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
+    public boolean isLocationTracking() {
+        return mLocationTracking;
+    }
+
     public void enableLocationTracking(boolean enable) {
+        mLocationTracking = enable;
         try {
-            super.enableLocationTracking(enable);
             mProvider.enableLocationTracking(enable);
         } catch (RemoteException e) {
             Log.e(TAG, "enableLocationTracking failed", e);
         }
     }
 
-    @Override
+    public long getMinTime() {
+        return mMinTime;
+    }
+
     public void setMinTime(long minTime) {
+        mMinTime = minTime;
         try {
-            super.setMinTime(minTime);
             mProvider.setMinTime(minTime);
         } catch (RemoteException e) {
             Log.e(TAG, "setMinTime failed", e);
         }
     }
 
-    @Override
     public void updateNetworkState(int state) {
         try {
             mProvider.updateNetworkState(state);
@@ -211,7 +207,6 @@ public class LocationProviderProxy extends LocationProviderImpl {
         }
     }
 
-    @Override
     public boolean sendExtraCommand(String command, Bundle extras) {
         try {
             return mProvider.sendExtraCommand(command, extras);
