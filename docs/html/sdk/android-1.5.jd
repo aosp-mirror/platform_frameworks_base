@@ -38,10 +38,10 @@ the system, prior to installing the application.</p>
 <p>Applications can reference a specific API Level value in their
 manifest files, to indicate the minimum version of the Android system
 required to run the application. To reference a minimum API Level, applications 
-can add a <code>minSdkVersion</code> attribute in their manifest files.
+can add an <code>android:minSdkVersion</code> attribute in their manifest files.
 The value of the attribute is an integer corresponding to an API Level 
 identifier. Prior to installing an application, the system then checks the value of 
-<code>minSdkVersion</code> and allows the install only
+<code>android:minSdkVersion</code> and allows the install only
 if the referenced integer is less than or equal to the API Level integer stored
 in the system itself. </p>
 
@@ -51,10 +51,10 @@ general, you should compile your application against the lowest possible
 version of the platform that your application can support. After you determine 
 the lowest version, you should ensure that your application's manifest file 
 defines the API Level of the lowest compatible platform version in the 
-<code>minSdkVersion</code> attribute.
+<code>android:minSdkVersion</code> attribute.
 
 <p>After compiling your application, you should make sure to test it on the
-platform specified in the application's <code>minSdkVersion</code> attribute. To
+platform specified in the application's <code>android:minSdkVersion</code> attribute. To
 ensure forward-compatibility, you should also run the application on platforms
 using a higher API Level than that used by your application. To run your
 application against different platform versions in the emulator, you create an
@@ -76,7 +76,7 @@ attribute looks like this: </p>
 
 <pre>&lt;manifest&gt;
   ...
-  &lt;uses-sdk minSdkVersion="3" /&gt;
+  &lt;uses-sdk android:minSdkVersion="3" /&gt;
   ...
 &lt;/manifest&gt;</pre>
 
@@ -88,7 +88,7 @@ important if your application uses <a href="#apichange">APIs or system features
 introduced in Android 1.5</a>. </p>
 
 <p>If your application uses APIs introduced in Android 1.5 but does not
-declare <code>&lt;uses-sdk minSdkVersion="3" /&gt;</code>, then it will
+declare <code>&lt;uses-sdk android:minSdkVersion="3" /&gt;</code>, then it will
 run properly on Android 1.5 devices but <em>not</em> on Android 1.0
 devices. In the latter case, the application will crash at runtime when
 it tries to use the Android 1.5 APIs.</p>
@@ -108,7 +108,7 @@ new APIs introduced since Android 1.0, you can remove the attribute or
 set it to "1". However,
 before publishing your application, you must make sure to compile your
 application against the Android library that corresponds to the application's
-<code>minSdkVeresion</code> value.</p>
+<code>android:minSdkVeresion</code> value.</p>
 
 <h2 id="apps">Built-in Applications</h2>
 
