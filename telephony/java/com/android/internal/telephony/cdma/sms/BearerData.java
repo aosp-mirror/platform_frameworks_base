@@ -18,6 +18,8 @@ package com.android.internal.telephony.cdma.sms;
 
 import android.util.Log;
 
+import android.telephony.SmsMessage;
+
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.cdma.sms.UserData;
@@ -26,10 +28,9 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
 
+
 /**
- * XXX
- *
- *
+ * An object to encode and decode CDMA SMS bearer data.
  */
 public final class BearerData{
     private final static String LOG_TAG = "SMS";
@@ -256,7 +257,7 @@ public final class BearerData{
         builder.append("  displayMode: " + (displayModeSet ? displayMode : "not set") + "\n");
         builder.append("  language: " + (languageIndicatorSet ? language : "not set") + "\n");
         builder.append("  errorClass: " + (messageStatusSet ? errorClass : "not set") + "\n");
-        builder.append("  messageStatus: " + (messageStatusSet ? messageStatus : "not set") + "\n");
+        builder.append("  msgStatus: " + (messageStatusSet ? messageStatus : "not set") + "\n");
         builder.append("  hasUserDataHeader: " + hasUserDataHeader + "\n");
         builder.append("  timeStamp: " + timeStamp + "\n");
         builder.append("  userAckReq: " + userAckReq + "\n");
@@ -280,9 +281,118 @@ public final class BearerData{
         outStream.skip(3);
     }
 
-    private static void encodeUserData(BearerData bData, BitwiseOutputStream outStream)
-        throws BitwiseOutputStream.AccessException
+    private static byte[] encode7bitAscii(String msg)
+        throws CodingException
     {
+        try {
+            BitwiseOutputStream outStream = new BitwiseOutputStream(msg.length());
+            byte[] expandedData = msg.getBytes("US-ASCII");
+            for (int i = 0; i < expandedData.length; i++) {
+                int charCode = expandedData[i];
+                // Test ourselves for ASCII membership, since Java seems not to care.
+                if ((charCode < UserData.PRINTABLE_ASCII_MIN_INDEX) ||
+                        (charCode > UserData.PRINTABLE_ASCII_MAX_INDEX)) {
+                    throw new CodingException("illegal ASCII code (" + charCode + ")");
+                }
+                outStream.write(7, expandedData[i]);
+            }
+            return outStream.toByteArray();
+        } catch  (java.io.UnsupportedEncodingException ex) {
+            throw new CodingException("7bit ASCII encode failed: " + ex);
+        } catch  (BitwiseOutputStream.AccessException ex) {
+            throw new CodingException("7bit ASCII encode failed: " + ex);
+        }
+    }
+
+    private static byte[] encodeUtf16(String msg)
+        throws CodingException
+    {
+        try {
+            return msg.getBytes("utf-16be"); // XXX(do not submit) -- make sure decode matches
+        } catch (java.io.UnsupportedEncodingException ex) {
+            throw new CodingException("UTF-16 encode failed: " + ex);
+        }
+    }
+
+    private static byte[] encode7bitGsm(String msg)
+        throws CodingException
+    {
+        try {
+            /**
+             * TODO(cleanup): find some way to do this without the copy.
+             */
+            byte []fullData = GsmAlphabet.stringToGsm7BitPacked(msg);
+            byte []data = new byte[fullData.length - 1];
+            for (int i = 0; i < data.length; i++) {
+                data[i] = fullData[i + 1];
+            }
+            return data;
+        } catch (com.android.internal.telephony.EncodeException ex) {
+            throw new CodingException("7bit GSM encode failed: " + ex);
+        }
+    }
+
+    private static void encodeUserDataPayload(UserData uData)
+        throws CodingException
+    {
+        if (uData.msgEncodingSet) {
+            if (uData.msgEncoding == UserData.ENCODING_OCTET) {
+                if (uData.payload == null) {
+                    Log.e(LOG_TAG, "user data with octet encoding but null payload");
+                    // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
+                    uData.payload = new byte[0];
+                }
+            } else {
+                if (uData.payloadStr == null) {
+                    Log.e(LOG_TAG, "non-octet user data with null payloadStr");
+                    // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
+                    uData.payloadStr = "";
+                }
+                if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
+                    uData.payload = encode7bitGsm(uData.payloadStr);
+                } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
+                    uData.payload = encode7bitAscii(uData.payloadStr);
+                } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
+                    uData.payload = encodeUtf16(uData.payloadStr);
+                } else {
+                    throw new CodingException("unsupported user data encoding (" +
+                                              uData.msgEncoding + ")");
+                }
+                uData.numFields = uData.payloadStr.length();
+            }
+        } else {
+            if (uData.payloadStr == null) {
+                Log.e(LOG_TAG, "user data with null payloadStr");
+                // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
+                uData.payloadStr = "";
+            }
+            try {
+                uData.payload = encode7bitAscii(uData.payloadStr);
+                uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
+            } catch (CodingException ex) {
+                uData.payload = encodeUtf16(uData.payloadStr);
+                uData.msgEncoding = UserData.ENCODING_UNICODE_16;
+            }
+            uData.msgEncodingSet = true;
+            uData.numFields = uData.payloadStr.length();
+        }
+        if (uData.payload.length > SmsMessage.MAX_USER_DATA_BYTES) {
+            throw new CodingException("encoded user data too large (" + uData.payload.length +
+                                      " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
+        }
+    }
+
+    private static void encodeUserData(BearerData bData, BitwiseOutputStream outStream)
+        throws BitwiseOutputStream.AccessException, CodingException
+    {
+        encodeUserDataPayload(bData.userData);
+        /**
+         * XXX/TODO: figure out what the right answer is WRT padding bits
+         *
+         *   userData.paddingBits = (userData.payload.length * 8) - (userData.numFields * 7);
+         *   userData.paddingBits = 0; // XXX this seems better, but why?
+         *
+         */
         int dataBits = (bData.userData.payload.length * 8) - bData.userData.paddingBits;
         byte[] headerData = null;
         if (bData.hasUserDataHeader) {
@@ -523,6 +633,7 @@ public final class BearerData{
         byte paramBytes = inStream.read(8);
         bData.userData = new UserData();
         bData.userData.msgEncoding = inStream.read(5);
+        bData.userData.msgEncodingSet = true;
         bData.userData.msgType = 0;
         int consumedBits = 5;
         if ((bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) ||
@@ -536,26 +647,29 @@ public final class BearerData{
         bData.userData.payload = inStream.readByteArray(dataBits);
     }
 
-    private static String decodePayloadStr(byte[] data, int offset, int numFields, String format)
+    private static String decodeUtf16(byte[] data, int offset, int numFields)
         throws CodingException
     {
         try {
-            return new String(data, offset, numFields, format);
+            return new String(data, offset, numFields * 2, "utf-16be");
         } catch (java.io.UnsupportedEncodingException ex) {
-            throw new CodingException("invalid ASCII user data code");
+            throw new CodingException("UTF-16 decode failed: " + ex);
         }
     }
 
-    private static String decodeIa5(byte[] data, int offset, int numFields) {
+    private static String decodeIa5(byte[] data, int offset, int numFields)
+        throws CodingException
+    {
         try {
+            offset *= 8;
             StringBuffer strBuf = new StringBuffer(numFields);
             BitwiseInputStream inStream = new BitwiseInputStream(data);
-            inStream.skip(offset);
-            int wantedBits = numFields * 7;
+            int wantedBits = (offset * 8) + (numFields * 7);
             if (inStream.available() < wantedBits) {
                 throw new CodingException("insufficient data (wanted " + wantedBits +
                                           " bits, but only have " + inStream.available() + ")");
             }
+            inStream.skip(offset);
             for (int i = 0; i < numFields; i++) {
                 int charCode = inStream.read(7);
                 if ((charCode < UserData.IA5_MAP_BASE_INDEX) ||
@@ -566,11 +680,42 @@ public final class BearerData{
             }
             return strBuf.toString();
         } catch (BitwiseInputStream.AccessException ex) {
-            Log.e(LOG_TAG, "UserData AI5 decode failed: " + ex);
-        } catch (CodingException ex) {
-            Log.e(LOG_TAG, "UserData AI5 decode failed: " + ex);
+            throw new CodingException("AI5 decode failed: " + ex);
         }
-        return null;
+    }
+
+    private static String decode7bitAscii(byte[] data, int offset, int numFields)
+        throws CodingException
+    {
+        try {
+            offset *= 8;
+            BitwiseInputStream inStream = new BitwiseInputStream(data);
+            int wantedBits = offset + (numFields * 7);
+            if (inStream.available() < wantedBits) {
+                throw new CodingException("insufficient data (wanted " + wantedBits +
+                                          " bits, but only have " + inStream.available() + ")");
+            }
+            inStream.skip(offset);
+            byte[] expandedData = new byte[numFields];
+            for (int i = 0; i < numFields; i++) {
+                expandedData[i] = inStream.read(7);
+            }
+            return new String(expandedData, 0, numFields, "US-ASCII");
+        } catch (java.io.UnsupportedEncodingException ex) {
+            throw new CodingException("7bit ASCII decode failed: " + ex);
+        } catch (BitwiseInputStream.AccessException ex) {
+            throw new CodingException("7bit ASCII decode failed: " + ex);
+        }
+    }
+
+    private static String decode7bitGsm(byte[] data, int offset, int numFields)
+        throws CodingException
+    {
+        String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields);
+        if (result == null) {
+            throw new CodingException("7bit GSM decoding failed");
+        }
+        return result;
     }
 
     private static void decodeUserDataPayload(UserData userData, boolean hasUserDataHeader)
@@ -578,28 +723,26 @@ public final class BearerData{
     {
         int offset = 0;
         if (hasUserDataHeader) {
-            int UdhLen = userData.payload[0];
-            byte[] headerData = new byte[UdhLen];
-            System.arraycopy(userData.payload, 1, headerData, 0, UdhLen);
+            int udhLen = userData.payload[0];
+            offset += udhLen;
+            byte[] headerData = new byte[udhLen];
+            System.arraycopy(userData.payload, 1, headerData, 0, udhLen);
             userData.userDataHeader = SmsHeader.parse(headerData);
         }
         switch (userData.msgEncoding) {
         case UserData.ENCODING_OCTET:
             break;
         case UserData.ENCODING_7BIT_ASCII:
-            userData.payloadStr = decodePayloadStr(userData.payload, offset,
-                                                   userData.numFields, "US-ASCII");
+            userData.payloadStr = decode7bitAscii(userData.payload, offset, userData.numFields);
             break;
         case UserData.ENCODING_IA5:
             userData.payloadStr = decodeIa5(userData.payload, offset, userData.numFields);
             break;
         case UserData.ENCODING_UNICODE_16:
-            userData.payloadStr = decodePayloadStr(userData.payload, offset,
-                                                   userData.numFields * 2, "UTF-16");
+            userData.payloadStr = decodeUtf16(userData.payload, offset, userData.numFields);
             break;
         case UserData.ENCODING_GSM_7BIT_ALPHABET:
-            userData.payloadStr = GsmAlphabet.gsm7BitPackedToString(userData.payload,
-                                                                    offset, userData.numFields);
+            userData.payloadStr = decode7bitGsm(userData.payload, offset, userData.numFields);
             break;
         default:
             throw new CodingException("unsupported user data encoding ("
