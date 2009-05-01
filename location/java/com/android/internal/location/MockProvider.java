@@ -138,7 +138,7 @@ public class MockProvider extends ILocationProvider.Stub {
         mLocation.set(l);
         mHasLocation = true;
         try {
-            mLocationManager.setLocation(mLocation);
+            mLocationManager.reportLocation(mLocation);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling reportLocation");
         }

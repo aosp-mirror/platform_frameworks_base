@@ -106,6 +106,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         android.Manifest.permission.ACCESS_MOCK_LOCATION;
     private static final String ACCESS_LOCATION_EXTRA_COMMANDS =
         android.Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS;
+    private static final String INSTALL_LOCATION_PROVIDER =
+        android.Manifest.permission.INSTALL_LOCATION_PROVIDER;
+    private static final String INSTALL_LOCATION_COLLECTOR =
+        android.Manifest.permission.INSTALL_LOCATION_COLLECTOR;
 
     // Set of providers that are explicitly enabled
     private final Set<String> mEnabledProviders = new HashSet<String>();
@@ -626,36 +630,39 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         Looper.loop();
     }
 
-    public void setNetworkLocationProvider(ILocationProvider provider) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                "Installing location providers outside of the system is not supported");
+    public void installLocationProvider(String name, ILocationProvider provider) {
+        if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires INSTALL_LOCATION_PROVIDER permission");
         }
 
         synchronized (mLock) {
-            mNetworkLocationProvider =
-                    new LocationProviderProxy(LocationManager.NETWORK_PROVIDER, provider);
-            addProvider(mNetworkLocationProvider);
-            updateProvidersLocked();
-            
-            // notify NetworkLocationProvider of any events it might have missed
-            mNetworkLocationProvider.updateNetworkState(mNetworkState);
+            // FIXME - only network location provider supported for now
+            if (LocationManager.NETWORK_PROVIDER.equals(name)) {
+                mNetworkLocationProvider = new LocationProviderProxy(name, provider);
+                addProvider(mNetworkLocationProvider);
+                updateProvidersLocked();
+
+                // notify NetworkLocationProvider of any events it might have missed
+                mNetworkLocationProvider.updateNetworkState(mNetworkState);
+            }
         }
     }
 
-    public void setLocationCollector(ILocationCollector collector) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                "Installing location collectors outside of the system is not supported");
+    public void installLocationCollector(ILocationCollector collector) {
+        if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_COLLECTOR)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires INSTALL_LOCATION_COLLECTOR permission");
         }
 
+        // FIXME - only support one collector
         mCollector = collector;
     }
 
-    public void setGeocodeProvider(IGeocodeProvider provider) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                "Installing location providers outside of the system is not supported");
+    public void installGeocodeProvider(IGeocodeProvider provider) {
+        if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires INSTALL_LOCATION_PROVIDER permission");
         }
 
         mGeocodeProvider = provider;
@@ -1472,7 +1479,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
-    public void setLocation(Location location) {
+    public void reportLocation(Location location) {
+        if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires INSTALL_LOCATION_PROVIDER permission");
+        }
+
         mLocationHandler.removeMessages(MESSAGE_LOCATION_CHANGED, location);
         Message m = Message.obtain(mLocationHandler, MESSAGE_LOCATION_CHANGED, location);
         mLocationHandler.sendMessageAtFrontOfQueue(m);

@@ -189,7 +189,7 @@ public class TestLocationProvider extends ILocationProvider.Stub {
         mLocation.setExtras(extras);
         mLocation.setTime(time);
         try {
-            mLocationManager.setLocation(mLocation);
+            mLocationManager.reportLocation(mLocation);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling updateLocation");
         }

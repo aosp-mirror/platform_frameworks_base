@@ -1255,4 +1255,85 @@ public class LocationManager {
             return false;
         }
     }
+
+    /**
+     * Installs a network location provider.
+     *
+     * @param name of the location provider
+     * @param provider Binder interface for the location provider
+     *
+     * @return true if the command succeeds.
+     *
+     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
+     *
+     * {@hide}
+     */
+    public boolean installLocationProvider(String name, ILocationProvider provider) {
+        try {
+            mService.installLocationProvider(name, provider);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in installLocationProvider: ", e);
+            return false;
+        }
+    }
+
+    /**
+     * Installs a location collector.
+     *
+     * @param provider Binder interface for the location collector
+     *
+     * @return true if the command succeeds.
+     *
+     * Requires the android.permission.INSTALL_LOCATION_COLLECTOR permission.
+     *
+     * {@hide}
+     */
+    public boolean installLocationCollector(ILocationCollector collector) {
+        try {
+            mService.installLocationCollector(collector);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setLocationCollector: ", e);
+            return false;
+        }
+    }
+
+    /**
+     * Installs a geocoder server.
+     *
+     * @param provider Binder interface for the geocoder provider
+     *
+     * @return true if the command succeeds.
+     *
+     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
+     *
+     * {@hide}
+     */
+    public boolean installGeocodeProvider(IGeocodeProvider provider) {
+        try {
+            mService.installGeocodeProvider(provider);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setGeocodeProvider: ", e);
+            return false;
+        }
+    }
+
+    /**
+     * Used by location providers to report new locations.
+     *
+     * @param location new Location to report
+     *
+     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
+     *
+     * {@hide}
+     */
+    public void reportLocation(Location location) {
+        try {
+            mService.reportLocation(location);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in reportLocation: ", e);
+        }
+    }
 }
