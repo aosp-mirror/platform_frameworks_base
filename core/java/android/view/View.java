@@ -62,6 +62,8 @@ import com.android.internal.view.menu.MenuBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.lang.ref.SoftReference;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * <p>
@@ -1873,6 +1875,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                     break;
                 case R.styleable.View_minHeight:
                     mMinHeight = a.getDimensionPixelSize(attr, 0);
+                    break;
+                case R.styleable.View_onClick:
+                    final String handlerName = a.getString(attr);
+                    if (handlerName != null) {
+                        setOnClickListener(new OnClickListener() {
+                            private Method mHandler;
+
+                            public void onClick(View v) {
+                                if (mHandler == null) {
+                                    try {
+                                        mHandler = getContext().getClass().getMethod(handlerName,
+                                                View.class);
+                                    } catch (NoSuchMethodException e) {
+                                        throw new IllegalStateException("Could not find a method " +
+                                                handlerName + "(View) in the activity", e);
+                                    }
+                                }
+
+                                try {
+                                    mHandler.invoke(getContext(), View.this);
+                                } catch (IllegalAccessException e) {
+                                    throw new IllegalStateException("Could not execute non "
+                                            + "public method of the activity", e);
+                                } catch (InvocationTargetException e) {
+                                    throw new IllegalStateException("Could not execute "
+                                            + "method of the activity", e);
+                                }
+                            }
+                        });
+                    }
                     break;
             }
         }

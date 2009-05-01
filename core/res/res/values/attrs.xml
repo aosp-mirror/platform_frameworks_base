@@ -1165,6 +1165,13 @@
              enabled for events such as long presses. -->
         <attr name="hapticFeedbackEnabled" format="boolean" />
 
+        <!-- Name of the method in this View's context to invoke when the view is
+             clicked. This name must correspond to a public method that takes
+             exactly one parameter of type View. For instance, if you specify
+             <code>android:onClick="sayHello"</code>, you must declare a
+             <code>public void sayHello(View v)</code> method of your context
+             (typically, your Activity.)-->
+        <attr name="onClick" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
