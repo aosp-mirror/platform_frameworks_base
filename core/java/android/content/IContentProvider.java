@@ -55,7 +55,6 @@ public interface IContentProvider extends IInterface {
             throws RemoteException, FileNotFoundException;
     public AssetFileDescriptor openAssetFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException;
-    public ISyncAdapter getSyncAdapter() throws RemoteException;
 
     /* IPC constants */
     static final String descriptor = "android.content.IContentProvider";
@@ -65,7 +64,6 @@ public interface IContentProvider extends IInterface {
     static final int INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 2;
     static final int DELETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 3;
     static final int UPDATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 9;
-    static final int GET_SYNC_ADAPTER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 10;
     static final int BULK_INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 12;
     static final int OPEN_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 13;
     static final int OPEN_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 14;

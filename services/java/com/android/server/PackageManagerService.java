@@ -1616,6 +1616,9 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /**
+     * @deprecated
+     */
     public void querySyncProviders(List outNames, List outInfo) {
         synchronized (mPackages) {
             Iterator<Map.Entry<String, PackageParser.Provider>> i

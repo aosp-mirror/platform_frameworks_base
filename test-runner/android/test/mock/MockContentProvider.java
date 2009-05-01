@@ -62,11 +62,6 @@ public class MockContentProvider implements IContentProvider {
     }
 
     @SuppressWarnings("unused")
-    public ISyncAdapter getSyncAdapter() throws RemoteException {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("unused")
     public String getType(Uri url) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }

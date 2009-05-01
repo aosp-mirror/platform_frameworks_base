@@ -160,8 +160,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
                         // work with.
                         mDb = mOpenHelper.getWritableDatabase();
                         onAccountsChanged(accounts);
-                        TempProviderSyncAdapter syncAdapter =
-                                (TempProviderSyncAdapter)getSyncAdapter();
+                        TempProviderSyncAdapter syncAdapter = getTempProviderSyncAdapter();
                         if (syncAdapter != null) {
                             syncAdapter.onAccountsChanged(accounts);
                         }

@@ -33,6 +33,16 @@ import java.util.Map;
 public abstract class SyncableContentProvider extends ContentProvider {
     protected abstract boolean isTemporary();
 
+    private volatile TempProviderSyncAdapter mTempProviderSyncAdapter;
+
+    public void setTempProviderSyncAdapter(TempProviderSyncAdapter syncAdapter) {
+        mTempProviderSyncAdapter = syncAdapter;
+    }
+
+    public TempProviderSyncAdapter getTempProviderSyncAdapter() {
+        return mTempProviderSyncAdapter;
+    }
+
     /**
      * Close resources that must be closed. You must call this to properly release
      * the resources used by the SyncableContentProvider.

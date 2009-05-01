@@ -38,6 +38,7 @@ import com.google.android.collect.Maps;
  * to the same authenticator, with each bind call guaranteed to return either
  * {@link Callback#onConnected} or {@link Callback#onDisconnected} if the bind() call
  * itself succeeds, even if the authenticator is already bound internally.
+ * @hide
  */
 public class AuthenticatorBindHelper {
     private static final String TAG = "Accounts";
@@ -94,8 +95,8 @@ public class AuthenticatorBindHelper {
 
             // otherwise find the component name for the authenticator and initiate a bind
             // if no authenticator or the bind fails then return false, otherwise return true
-            AccountAuthenticatorCache.AuthenticatorInfo authenticatorInfo =
-                    mAuthenticatorCache.getAuthenticatorInfo(authenticatorType);
+            AccountAuthenticatorCache.ServiceInfo authenticatorInfo =
+                    mAuthenticatorCache.getServiceInfo(authenticatorType);
             if (authenticatorInfo == null) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "there is no authenticator for " + authenticatorType
@@ -108,13 +109,13 @@ public class AuthenticatorBindHelper {
 
             Intent intent = new Intent();
             intent.setAction("android.accounts.AccountAuthenticator");
-            intent.setComponent(authenticatorInfo.mComponentName);
+            intent.setComponent(authenticatorInfo.componentName);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "performing bindService to " + authenticatorInfo.mComponentName);
+                Log.v(TAG, "performing bindService to " + authenticatorInfo.componentName);
             }
             if (!mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "bindService to " + authenticatorInfo.mComponentName + " failed");
+                    Log.v(TAG, "bindService to " + authenticatorInfo.componentName + " failed");
                 }
                 return false;
             }
