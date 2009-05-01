@@ -2360,6 +2360,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void updateKernelWakelocksLocked() {
         Map<String, KernelWakelockStats> m = readKernelWakelockStats();
         
+        if (m == null) {
+            // Not crashing might make board bringup easier.
+            Log.w(TAG, "Couldn't get kernel wake lock stats");
+            return;
+        }
+
         for (Map.Entry<String, KernelWakelockStats> ent : m.entrySet()) {
             String name = ent.getKey();
             KernelWakelockStats kws = ent.getValue();
