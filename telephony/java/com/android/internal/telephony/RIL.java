@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import static com.android.internal.telephony.RILConstants.*;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,30 +31,21 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.telephony.PhoneNumberUtils;
 import android.telephony.NeighboringCellInfo;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
-import android.util.Log;
 import android.util.Config;
+import android.util.Log;
 
-import static com.android.internal.telephony.RILConstants.*;
-
-import com.android.internal.telephony.CallForwardInfo;
-import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.gsm.NetworkInfo;
 import com.android.internal.telephony.gsm.PDPContextState;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
-import com.android.internal.telephony.IccCardApplication;
-import com.android.internal.telephony.IccCardStatus;
-import com.android.internal.telephony.IccUtils;
-import com.android.internal.telephony.RILConstants;
-import com.android.internal.telephony.SmsResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -522,7 +514,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                     Log.i(LOG_TAG, "'" + SOCKET_NAME_RIL + "' socket closed",
                           ex);
                 } catch (Throwable tr) {
-                    Log.e(LOG_TAG, "Uncaught exception read length=" + length + 
+                    Log.e(LOG_TAG, "Uncaught exception read length=" + length +
                         "Exception:" + tr.toString());
                 }
 
@@ -593,10 +585,10 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         mSenderThread = new HandlerThread("RILSender");
         mSenderThread.start();
-        
+
         Looper looper = mSenderThread.getLooper();
         mSender = new RILSender(looper);
-                
+
         mReceiver = new RILReceiver();
         mReceiverThread = new Thread(mReceiver, "RILReceiver");
         mReceiverThread.start();
@@ -2162,11 +2154,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_RESPONSE_CDMA_NEW_SMS:  ret =  responseCdmaSms(p); break;
             case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS:  ret =  responseString(p); break;
             case RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL:  ret =  responseVoid(p); break;
+            case RIL_UNSOL_OEM_HOOK_RAW: ret = responseRaw(p); break;
             default:
                 throw new RuntimeException("Unrecognized unsol response: " + response);
             //break; (implied)
         }} catch (Throwable tr) {
-            Log.e(LOG_TAG, "Exception processing unsol response: " + response + 
+            Log.e(LOG_TAG, "Exception processing unsol response: " + response +
                 "Exception:" + tr.toString());
             return;
         }
@@ -2346,19 +2339,19 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
             case RIL_UNSOL_CALL_RING:
                 if (RILJ_LOGD) unsljLog(response);
-                
+
                 if (mRingRegistrant != null) {
                     mRingRegistrant.notifyRegistrant();
                 }
                 break;
-                
+
             case RIL_UNSOL_RESTRICTED_STATE_CHANGED:
                 if (RILJ_LOGD) unsljLogvRet(response, ret);
                 if (mRestrictedStateRegistrant != null) {
                     mRestrictedStateRegistrant.notifyRegistrant(
                                         new AsyncResult (null, ret, null));
                 }
-                
+
             case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:
                 if (mIccStatusChangedRegistrants != null) {
                     mIccStatusChangedRegistrants.notifyRegistrants();
@@ -2385,6 +2378,13 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
                 if (mIccSmsFullRegistrant != null) {
                     mIccSmsFullRegistrant.notifyRegistrant();
+                }
+                break;
+
+            case RIL_UNSOL_OEM_HOOK_RAW:
+                if (RILJ_LOGD) unsljLogvRet(response, IccUtils.bytesToHexString((byte[])ret));
+                if (mUnsolOemHookRawRegistrant != null) {
+                    mUnsolOemHookRawRegistrant.notifyRegistrant(new AsyncResult(null, ret, null));
                 }
                 break;
         }
@@ -2731,7 +2731,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
            } catch ( Exception e) {
            }
        }
-       
+
     return response;
     }
 
@@ -2917,7 +2917,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_SIM_SMS_STORAGE_FULL: return "UNSOL_SIM_SMS_STORAGE_FULL";
             case RIL_UNSOL_SIM_REFRESH: return "UNSOL_SIM_REFRESH";
             case RIL_UNSOL_CALL_RING: return "UNSOL_CALL_RING";
-            case RIL_UNSOL_RESTRICTED_STATE_CHANGED: return "RIL_UNSOL_RESTRICTED_STATE_CHANGED";            
+            case RIL_UNSOL_RESTRICTED_STATE_CHANGED: return "RIL_UNSOL_RESTRICTED_STATE_CHANGED";
+            case RIL_UNSOL_OEM_HOOK_RAW: return "RIL_UNSOL_OEM_HOOK_RAW";
             default: return "<unknown reponse>";
         }
     }
@@ -2946,7 +2947,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         riljLogv("[UNSL]< " + responseToString(response) + " " + retToString(response, ret));
     }
 
-    
+
     // ***** Methods for CDMA support
     public void
     getDeviceIdentity(Message response) {
