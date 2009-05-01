@@ -722,8 +722,7 @@ public:
         jsize textCount = env->GetArrayLength(text);
         SkScalar x_ = SkFloatToScalar(x);
         SkScalar y_ = SkFloatToScalar(y);
-        textArray += index;
-        canvas->drawText(textArray, count << 1, x_, y_, *paint);
+        canvas->drawText(textArray + index, count << 1, x_, y_, *paint);
         env->ReleaseCharArrayElements(text, textArray, 0);
     }
  
@@ -767,8 +766,7 @@ public:
             posPtr[indx].fX = SkFloatToScalar(posArray[indx << 1]);
             posPtr[indx].fY = SkFloatToScalar(posArray[(indx << 1) + 1]);
         }
-        textArray += index;
-        canvas->drawPosText(textArray, count << 1, posPtr, *paint);
+        canvas->drawPosText(textArray + index, count << 1, posPtr, *paint);
         if (text) {
             env->ReleaseCharArrayElements(text, textArray, 0);
         }
