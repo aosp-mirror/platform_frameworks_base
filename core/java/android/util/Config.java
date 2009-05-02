@@ -1,51 +1,59 @@
-/* device/vmlibs-config/release/android/util/Config.java
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+/*
+ * Copyright (C) 2006 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package android.util;
 
 /**
  * Build configuration.  The constants in this class vary depending
- * on release vs. debug build.  This is the configuration for release builds.
+ * on release vs. debug build.
  * {@more}
  */
 public final class Config
 {
     /**
-     * Is this a release build?
+     * If this is a debug build, this field will be true.
      */
-    public static final boolean RELEASE = true;
+    public static final boolean DEBUG = ConfigBuildFlags.DEBUG;
+
+    /*
+     * Deprecated fields
+     * TODO: Remove platform references to these and @hide them.
+     */
 
     /**
-     * Is this a debug build?
+     * Always the inverse of DEBUG.
      */
-    public static final boolean DEBUG = false;
+    @Deprecated
+    public static final boolean RELEASE = !DEBUG;
 
     /**
-     * Is profiling enabled?
+     * Always false.
      */
+    @Deprecated
     public static final boolean PROFILE = false;
-    
+
     /**
-     * Are VERBOSE log messages enabled?
+     * Always false.
      */
+    @Deprecated
     public static final boolean LOGV = false;
 
     /**
-     * Are DEBUG log messages enabled?
+     * Always true.
      */
+    @Deprecated
     public static final boolean LOGD = true;
 }
