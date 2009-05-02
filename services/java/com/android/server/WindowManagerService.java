@@ -2078,13 +2078,16 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             int pos = mAppTokens.size() - 1;
             int curGroup = 0;
             int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+            boolean findingBehind = false;
             boolean haveGroup = false;
             boolean lastFullscreen = false;
             while (pos >= 0) {
                 AppWindowToken wtoken = mAppTokens.get(pos);
                 pos--;
-                // if we're about to tear down this window, don't use it for orientation
-                if (!wtoken.hidden && wtoken.hiddenRequested) {
+                // if we're about to tear down this window and not seek for
+                // the behind activity, don't use it for orientation
+                if (!findingBehind
+                        && (!wtoken.hidden && wtoken.hiddenRequested)) {
                     continue;
                 }
 
@@ -2108,10 +2111,12 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     }
                 }
                 int or = wtoken.requestedOrientation;
-                // If this application is fullscreen, then just take whatever
+                // If this application is fullscreen, and didn't explicitly say
+                // to use the orientation behind it, then just take whatever
                 // orientation it has and ignores whatever is under it.
                 lastFullscreen = wtoken.appFullscreen;
-                if (lastFullscreen) {
+                if (lastFullscreen 
+                        && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
                     return or;
                 }
                 // If this application has requested an explicit orientation,
@@ -2123,6 +2128,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         or == ActivityInfo.SCREEN_ORIENTATION_USER) {
                     return or;
                 }
+                findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
             }
             return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
