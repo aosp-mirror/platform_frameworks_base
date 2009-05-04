@@ -15,7 +15,7 @@
 ** limitations under the License.
 */
 
-#define LOG_TAG "EGLNativeWindowSurface"
+#define LOG_TAG "FramebufferNativeWindow"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,7 +28,7 @@
 
 #include <ui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
-#include <ui/EGLNativeWindowSurface.h>
+#include <ui/FramebufferNativeWindow.h>
 
 #include <EGL/egl.h>
 
@@ -87,13 +87,6 @@ FramebufferNativeWindow::FramebufferNativeWindow()
 
         LOGE_IF(err, "fb buffer 1 allocation failed w=%d, h=%d, err=%s",
                 fbDev->width, fbDev->height, strerror(-err));
-
-        gralloc_module_t* m = 
-            reinterpret_cast<gralloc_module_t*>(grDev->common.module);
-
-        // FIXME: do we actually need to map the framebuffer?
-        m->map(m, buffers[0]->handle, &buffers[0]->bits);
-        m->map(m, buffers[1]->handle, &buffers[1]->bits);
     }
 
     uint32_t flags = fbDev->flags & SURFACE_FLAG_MAPPED;
@@ -125,10 +118,7 @@ FramebufferNativeWindow::FramebufferNativeWindow()
     const_cast<int&>(android_native_window_t::maxSwapInterval) = 
         fbDev->maxSwapInterval;
 
-    android_native_window_t::connect = connect;
-    android_native_window_t::disconnect = disconnect;
     android_native_window_t::setSwapInterval = setSwapInterval;
-    android_native_window_t::setSwapRectangle = setSwapRectangle;
     android_native_window_t::dequeueBuffer = dequeueBuffer;
     android_native_window_t::lockBuffer = lockBuffer;
     android_native_window_t::queueBuffer = queueBuffer;
@@ -137,10 +127,6 @@ FramebufferNativeWindow::FramebufferNativeWindow()
 FramebufferNativeWindow::~FramebufferNativeWindow() {
     grDev->free(grDev, buffers[0]->handle);
     grDev->free(grDev, buffers[1]->handle);
-    gralloc_module_t* m = 
-        reinterpret_cast<gralloc_module_t*>(grDev->common.module);
-    m->unmap(m, buffers[0]->handle);
-    m->unmap(m, buffers[1]->handle);
     gralloc_close(grDev);
     framebuffer_close(fbDev);
 }
@@ -160,13 +146,10 @@ int FramebufferNativeWindow::setSwapInterval(
     return fb->setSwapInterval(fb, interval);
 }
 
-int FramebufferNativeWindow::setSwapRectangle(android_native_window_t* window,
-        int l, int t, int w, int h)
+void FramebufferNativeWindow::setSwapRectangle(const Rect& dirty)
 {
-    FramebufferNativeWindow* self = getSelf(window);
-    Mutex::Autolock _l(self->mutex);
-    self->mDirty = Rect(l, t, l+w, t+h); 
-    return 0;
+    Mutex::Autolock _l(mutex);
+    mDirty = dirty; 
 }
 
 int FramebufferNativeWindow::dequeueBuffer(android_native_window_t* window, 
@@ -201,16 +184,8 @@ int FramebufferNativeWindow::lockBuffer(android_native_window_t* window,
     while (self->front == buffer) {
         self->mCondition.wait(self->mutex);
     }
-        
-    gralloc_module_t* m = 
-        reinterpret_cast<gralloc_module_t*>(self->grDev->common.module);
-    const Rect& dirty(self->mDirty);
 
-    buffer_handle_t handle = static_cast<NativeBuffer*>(buffer)->handle;
-    int res = m->lock(m, handle, GRALLOC_USAGE_HW_FB,
-            dirty.left, dirty.right, dirty.width(), dirty.height());
-    
-    return res;
+    return NO_ERROR;
 }
 
 int FramebufferNativeWindow::queueBuffer(android_native_window_t* window, 
@@ -219,13 +194,8 @@ int FramebufferNativeWindow::queueBuffer(android_native_window_t* window,
     FramebufferNativeWindow* self = getSelf(window);
     Mutex::Autolock _l(self->mutex);
     framebuffer_device_t* fb = self->fbDev;
-    gralloc_module_t* m = 
-        reinterpret_cast<gralloc_module_t*>(self->grDev->common.module);
-
     buffer_handle_t handle = static_cast<NativeBuffer*>(buffer)->handle;
-    m->unlock(m, handle);
     int res = fb->post(fb, handle);
-
     self->front = static_cast<NativeBuffer*>(buffer);
     self->mNumFreeBuffers++;
     self->mCondition.broadcast();

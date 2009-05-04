@@ -5,9 +5,9 @@ LOCAL_SRC_FILES:= \
 	BufferMapper.cpp \
 	Camera.cpp \
 	CameraParameters.cpp \
-	EGLNativeWindowSurface.cpp \
 	EventHub.cpp \
 	EventRecurrence.cpp \
+	FramebufferNativeWindow.cpp \
 	KeyLayoutMap.cpp \
 	KeyCharacterMap.cpp \
 	ICamera.cpp \

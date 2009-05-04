@@ -50,8 +50,6 @@
 #include "LayerBuffer.h"
 #include "LayerDim.h"
 #include "LayerBitmap.h"
-#include "LayerOrientationAnim.h"
-#include "OrientationAnimation.h"
 #include "SurfaceFlinger.h"
 
 #include "DisplayHardware/DisplayHardware.h"
@@ -206,7 +204,6 @@ void SurfaceFlinger::init()
 SurfaceFlinger::~SurfaceFlinger()
 {
     glDeleteTextures(1, &mWormholeTexName);
-    delete mOrientationAnimation;
 }
 
 overlay_control_device_t* SurfaceFlinger::getOverlayEngine() const
@@ -399,8 +396,6 @@ status_t SurfaceFlinger::readyToRun()
      *  We're now ready to accept clients...
      */
 
-    mOrientationAnimation = new OrientationAnimation(this);
-    
     // the boot animation!
     if (mDebugNoBootAnimation == false)
         mBootAnimation = new BootAnimation(this);
@@ -513,16 +508,17 @@ bool SurfaceFlinger::threadLoop()
 
 void SurfaceFlinger::postFramebuffer()
 {
-    const bool skip = mOrientationAnimation->run();
-    if (UNLIKELY(skip)) {
+    if (isFrozen()) {
+        // we are not allowed to draw, but pause a bit to make sure
+        // apps don't end up using the whole CPU, if they depend on
+        // surfaceflinger for synchronization.
+        usleep(8333); // 8.3ms ~ 120fps
         return;
     }
 
     if (!mInvalidRegion.isEmpty()) {
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
-
         hw.flip(mInvalidRegion);
-
         mInvalidRegion.clear();
     }
 }
@@ -616,7 +612,6 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
             mVisibleRegionsDirty = true;
             mDirtyRegion.set(hw.bounds());
             mFreezeDisplayTime = 0;
-            mOrientationAnimation->onOrientationChanged(type);
         }
 
         if (mCurrentState.freezeDisplay != mDrawingState.freezeDisplay) {
@@ -893,19 +888,26 @@ void SurfaceFlinger::executeScheduledBroadcasts()
 
 void SurfaceFlinger::debugFlashRegions()
 {
-    if (UNLIKELY(!mDirtyRegion.isRect())) {
-        // TODO: do this only if we don't have preserving
-        // swapBuffer. If we don't have update-on-demand,
-        // redraw everything.
-        composeSurfaces(Region(mDirtyRegion.bounds()));
-    }
-
+     const DisplayHardware& hw(graphicPlane(0).displayHardware());
+     const uint32_t flags = hw.getFlags();
+     if (!(flags & DisplayHardware::BUFFER_PRESERVED)) {
+         const Region repaint((flags & DisplayHardware::UPDATE_ON_DEMAND) ?
+                 mDirtyRegion.bounds() : hw.bounds());
+         composeSurfaces(repaint);
+     }
+    
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
 
-    glColor4x(0x10000, 0, 0x10000, 0x10000);
+    static int toggle = 0;
+    toggle = 1 - toggle;
+    if (toggle) {
+        glColor4x(0x10000, 0, 0x10000, 0x10000);
+    } else {
+        glColor4x(0x10000, 0x10000, 0, 0x10000);
+    }
 
     Rect r;
     Region::iterator iterator(mDirtyRegion);
@@ -919,8 +921,7 @@ void SurfaceFlinger::debugFlashRegions()
         glVertexPointer(2, GL_FLOAT, 0, vertices);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
-
-    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    
     hw.flip(mDirtyRegion.merge(mInvalidRegion));
     mInvalidRegion.clear();
 

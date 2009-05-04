@@ -69,8 +69,6 @@ void Layer::destroy()
 {
     for (int i=0 ; i<NUM_BUFFERS ; i++) {
         if (mTextures[i].name != -1U) {
-            // FIXME: this was originally to work-around a bug in the
-            // adreno driver. this should be fixed now.
             glDeleteTextures(1, &mTextures[i].name);
             mTextures[i].name = -1U;
         }
@@ -142,8 +140,8 @@ status_t Layer::setBuffers( Client* client,
 
 void Layer::reloadTexture(const Region& dirty)
 {
-    const sp<const Buffer>& buffer(frontBuffer().getBuffer());
-     if (LIKELY(mFlags & DisplayHardware::DIRECT_TEXTURE)) {
+    const sp<Buffer>& buffer(frontBuffer().getBuffer());
+    if (LIKELY(mFlags & DisplayHardware::DIRECT_TEXTURE)) {
         int index = mFrontBufferIndex;
         if (LIKELY(!mTextures[index].dirty)) {
             glBindTexture(GL_TEXTURE_2D, mTextures[index].name);
@@ -197,12 +195,16 @@ void Layer::reloadTexture(const Region& dirty)
         }
     } else {
         GGLSurface t;
-        if (LIKELY(buffer->getBitmapSurface(&t) == NO_ERROR)) {
+        status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_RARELY);
+        LOGE_IF(res, "error %d (%s) locking buffer %p",
+                res, strerror(res), buffer.get());
+        if (res == NO_ERROR) {
             if (UNLIKELY(mTextures[0].name == -1U)) {
                 mTextures[0].name = createTexture();
             }
             loadTexture(dirty, mTextures[0].name, t, 
                     mTextures[0].width, mTextures[0].height);
+            buffer->unlock();
         }
     }
 }
@@ -225,8 +227,7 @@ void Layer::onDraw(const Region& clip) const
 
     GGLSurface t;
     sp<const Buffer> buffer(frontBuffer().getBuffer());
-    buffer->getBitmapSurface(&t);
-    drawWithOpenGL(clip, textureName, t);
+    drawWithOpenGL(clip, textureName, buffer);
 }
 
 sp<SurfaceBuffer> Layer::peekBuffer()

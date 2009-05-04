@@ -55,8 +55,6 @@ class DisplayHardware;
 class FreezeLock;
 class Layer;
 class LayerBuffer;
-class LayerOrientationAnim;
-class OrientationAnimation;
 
 typedef int32_t ClientID;
 
@@ -335,8 +333,6 @@ private:
                 bool                        mFreezeDisplay;
                 int32_t                     mFreezeCount;
                 nsecs_t                     mFreezeDisplayTime;
-                friend class OrientationAnimation;
-                OrientationAnimation*       mOrientationAnimation;
 
                 // don't use a lock for these, we don't care
                 int                         mDebugRegion;

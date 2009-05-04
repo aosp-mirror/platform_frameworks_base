@@ -96,18 +96,6 @@ struct android_native_window_t
     /* Some storage reserved for the OEM's driver. */
     intptr_t    oem[4];
         
-    /*
-     * hook called by EGL when the native surface is made current 
-     * (eglMakeCurrent()). This hook can be NULL.
-     */
-    void    (*connect)(struct android_native_window_t* window);
-
-    /*
-     * hook called by EGL when the native surface in not current any-longer.
-     * This hook can be NULL.
-     */
-    void    (*disconnect)(struct android_native_window_t* window);
-
 
     /*
      * Set the swap interval for this surface.
@@ -117,20 +105,10 @@ struct android_native_window_t
     int     (*setSwapInterval)(struct android_native_window_t* window,
                 int interval);
     
-
-    /*
-     * FIXME: needs documentation for setSwapRectangle
-     * tentative: rect used during queueBuffer to indicate which part of
-     * the screen needs updating.
-     */
-    int     (*setSwapRectangle)(struct android_native_window_t* window,
-            int left, int top, int width, int height);
-    
-    
     /*
      * hook called by EGL to acquire a buffer. After this call, the buffer
      * is not locked, so its content cannot be modified.
-     * this call may block if no buffers are availlable.
+     * this call may block if no buffers are available.
      * 
      * Returns 0 on success or -errno on error.
      */
@@ -179,7 +157,7 @@ struct android_native_buffer_t
     int stride;
     int format;
     int usage;
-    void* bits;     // non-zero if buffer is mmaped
+    void* bits;     // non-zero if buffer is locked for sw usage
 
     void* reserved[2];
 

@@ -23,7 +23,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 EGLTextureObject::EGLTextureObject()
-    : mCount(0), mSize(0)
+    : mSize(0)
 {
     init();
 }
@@ -56,6 +56,7 @@ void EGLTextureObject::init()
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
     copybits_fd = -1;
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
+    buffer = 0;
 }
 
 void EGLTextureObject::copyParameters(const sp<EGLTextureObject>& old)
@@ -126,6 +127,7 @@ status_t EGLTextureObject::setSurface(GGLSurface const* s)
     }
     surface = *s;
     internalformat = 0;
+    buffer = 0;
 
     // we should keep the crop_rect, but it's delicate because
     // the new size of the surface could make it invalid.
@@ -141,6 +143,20 @@ status_t EGLTextureObject::setSurface(GGLSurface const* s)
     if (mMipmaps)
         freeMipmaps();
     mIsComplete = true;
+    return NO_ERROR;
+}
+
+status_t EGLTextureObject::setImage(android_native_buffer_t* native_buffer)
+{
+    GGLSurface sur;
+    sur.version = sizeof(GGLSurface);
+    sur.width = native_buffer->width;
+    sur.height= native_buffer->height;
+    sur.stride= native_buffer->stride;
+    sur.format= native_buffer->format;
+    sur.data  = 0;
+    setSurface(&sur);
+    buffer = native_buffer;
     return NO_ERROR;
 }
 
@@ -227,7 +243,7 @@ status_t EGLTextureObject::reallocate(
 // ----------------------------------------------------------------------------
 
 EGLSurfaceManager::EGLSurfaceManager()
-    : TokenManager(), mCount(0)
+    : TokenManager()
 {
 }
 

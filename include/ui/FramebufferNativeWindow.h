@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_EGL_NATIVE_WINDOW_SURFACE_H
-#define ANDROID_EGL_NATIVE_WINDOW_SURFACE_H
+#ifndef ANDROID_FRAMEBUFFER_NATIVE_WINDOW_H
+#define ANDROID_FRAMEBUFFER_NATIVE_WINDOW_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -76,31 +76,17 @@ public:
 
     framebuffer_device_t const * getDevice() const { return fbDev; } 
 
+    void setSwapRectangle(const Rect& dirty);
+
 private:
     friend class LightRefBase<FramebufferNativeWindow>;    
     ~FramebufferNativeWindow(); // this class cannot be overloaded
     static void connect(android_native_window_t* window);
     static void disconnect(android_native_window_t* window);
     static int setSwapInterval(android_native_window_t* window, int interval);
-    static int setSwapRectangle(android_native_window_t* window,
-            int l, int t, int w, int h);
     static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
     static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
     static int queueBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
-    
-
-    static inline FramebufferNativeWindow* getSelf(
-            android_native_window_t* window) {
-        FramebufferNativeWindow* self = 
-            static_cast<FramebufferNativeWindow*>(window);
-            return self;
-    }
-
-    static inline FramebufferNativeWindow* getSelf(
-            android_native_base_t* window) {
-        return getSelf(reinterpret_cast<android_native_window_t*>(window));
-    }
-
     
     framebuffer_device_t* fbDev;
     alloc_device_t* grDev;
@@ -121,5 +107,5 @@ private:
 }; // namespace android
 // ---------------------------------------------------------------------------
 
-#endif // ANDROID_EGL_NATIVE_WINDOW_SURFACE_H
+#endif // ANDROID_FRAMEBUFFER_NATIVE_WINDOW_H
 

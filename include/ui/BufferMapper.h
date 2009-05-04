@@ -20,10 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/CallStack.h>
-#include <utils/threads.h>
 #include <utils/Singleton.h>
-#include <utils/KeyedVector.h>
 
 #include <hardware/gralloc.h>
 
@@ -40,9 +37,14 @@ class BufferMapper : public Singleton<BufferMapper>
 {
 public:
     static inline BufferMapper& get() { return getInstance(); }
-    status_t map(buffer_handle_t handle, void** addr, const void* id);
-    status_t unmap(buffer_handle_t handle, const void* id);
-    status_t lock(buffer_handle_t handle, int usage, const Rect& bounds);
+
+    status_t registerBuffer(buffer_handle_t handle);
+
+    status_t unregisterBuffer(buffer_handle_t handle);
+    
+    status_t lock(buffer_handle_t handle,
+            int usage, const Rect& bounds, void** vaddr);
+
     status_t unlock(buffer_handle_t handle);
     
     // dumps information about the mapping of this handle
@@ -51,16 +53,7 @@ public:
 private:
     friend class Singleton<BufferMapper>;
     BufferMapper();
-    mutable Mutex mLock;
     gralloc_module_t const *mAllocMod;
-    
-    void logMapLocked(buffer_handle_t handle, const void* id);
-    void logUnmapLocked(buffer_handle_t handle, const void* id);
-    struct map_info_t {
-        const void* id;
-        CallStack stack;
-    };
-    KeyedVector<buffer_handle_t, Vector<map_info_t> > mMapInfo;
 };
 
 // ---------------------------------------------------------------------------

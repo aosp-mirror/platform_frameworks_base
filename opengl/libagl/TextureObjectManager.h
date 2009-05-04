@@ -30,6 +30,7 @@
 #include <private/pixelflinger/ggl_context.h>
 
 #include <GLES/gl.h>
+#include <EGL/android_natives.h>
 
 #include "Tokenizer.h"
 #include "TokenManager.h"
@@ -39,22 +40,20 @@ namespace android {
 
 // ----------------------------------------------------------------------------
 
-class EGLTextureObject
+class EGLTextureObject : public LightRefBase<EGLTextureObject>
 {
 public:
                     EGLTextureObject();
                    ~EGLTextureObject();
 
-    // protocol for sp<>
-    inline  void        incStrong(const void* id) const;
-    inline  void        decStrong(const void* id) const;
-    inline  uint32_t    getStrongCount() const;
+    status_t    setSurface(GGLSurface const* s);
+    status_t    setImage(android_native_buffer_t* buffer);
+    void        setImageBits(void* vaddr) { surface.data = (GGLubyte*)vaddr; }
 
-    status_t            setSurface(GGLSurface const* s);
     status_t            reallocate(GLint level,
                             int w, int h, int s,
                             int format, int compressedFormat, int bpr);
-    inline  size_t      size() const;
+    inline  size_t      size() const { return mSize; }
     const GGLSurface&   mip(int lod) const;
     GGLSurface&         editMip(int lod);
     bool                hasMipmaps() const { return mMipmaps!=0; }
@@ -65,7 +64,6 @@ private:
         status_t        allocateMipmaps();
             void        freeMipmaps();
             void        init();
-    mutable int32_t     mCount;
     size_t              mSize;
     GGLSurface          *mMipmaps;
     int                 mNumExtraLod;
@@ -84,35 +82,18 @@ public:
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
     int                 copybits_fd;
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
+    android_native_buffer_t* buffer;
 };
-
-void EGLTextureObject::incStrong(const void* id) const {
-    android_atomic_inc(&mCount);
-}
-void EGLTextureObject::decStrong(const void* id) const {
-    if (android_atomic_dec(&mCount) == 1) {
-        delete this;
-    }
-}
-uint32_t EGLTextureObject::getStrongCount() const {
-    return mCount;
-}
-size_t EGLTextureObject::size() const {
-    return mSize;
-}
 
 // ----------------------------------------------------------------------------
 
-class EGLSurfaceManager : public TokenManager
+class EGLSurfaceManager :
+    public LightRefBase<EGLSurfaceManager>,
+    public TokenManager
 {
 public:
                 EGLSurfaceManager();
                 ~EGLSurfaceManager();
-
-    // protocol for sp<>
-    inline  void    incStrong(const void* id) const;
-    inline  void    decStrong(const void* id) const;
-    typedef void    weakref_type;
 
     sp<EGLTextureObject>    createTexture(GLuint name);
     sp<EGLTextureObject>    removeTexture(GLuint name);
@@ -121,20 +102,9 @@ public:
     sp<EGLTextureObject>    texture(GLuint name);
 
 private:
-    mutable int32_t                             mCount;
     mutable Mutex                               mLock;
     KeyedVector< GLuint, sp<EGLTextureObject> > mTextures;
 };
-
-void EGLSurfaceManager::incStrong(const void* id) const {
-    android_atomic_inc(&mCount);
-}
-void EGLSurfaceManager::decStrong(const void* id) const {
-    if (android_atomic_dec(&mCount) == 1) {
-        delete this;
-    }
-}
-
 
 // ----------------------------------------------------------------------------
 }; // namespace android

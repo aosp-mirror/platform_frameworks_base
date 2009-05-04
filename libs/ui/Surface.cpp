@@ -31,7 +31,6 @@
 
 #include <ui/DisplayInfo.h>
 #include <ui/BufferMapper.h>
-#include <ui/EGLNativeWindowSurface.h>
 #include <ui/ISurface.h>
 #include <ui/Surface.h>
 #include <ui/SurfaceComposerClient.h>
@@ -53,7 +52,7 @@ namespace android {
 ANDROID_SINGLETON_STATIC_INSTANCE( SurfaceBuffer )
 
 SurfaceBuffer::SurfaceBuffer() 
-    : BASE(), handle(0), mOwner(false)
+    : BASE(), handle(0), mOwner(false), mBufferMapper(BufferMapper::get())
 {
     width  = 
     height = 
@@ -64,7 +63,7 @@ SurfaceBuffer::SurfaceBuffer()
 }
 
 SurfaceBuffer::SurfaceBuffer(const Parcel& data) 
-    : BASE(), handle(0), mOwner(true)
+    : BASE(), handle(0), mOwner(true), mBufferMapper(BufferMapper::get())
 {
     // we own the handle in this case
     width  = data.readInt32();
@@ -91,6 +90,26 @@ int SurfaceBuffer::getHandle(android_native_buffer_t const * base,
     return 0;
 }
 
+status_t SurfaceBuffer::lock(uint32_t usage)
+{
+    const Rect lockBounds(width, height);
+    status_t res = lock(usage, lockBounds);
+    return res;
+}
+
+status_t SurfaceBuffer::lock(uint32_t usage, const Rect& rect)
+{
+    status_t res = getBufferMapper().lock(handle, usage, rect, &bits);
+    return res;
+}
+
+status_t SurfaceBuffer::unlock()
+{
+    status_t res = getBufferMapper().unlock(handle);
+    bits = NULL;
+    return res;
+}
+
 status_t SurfaceBuffer::writeToParcel(Parcel* reply, 
         android_native_buffer_t const* buffer)
 {
@@ -110,9 +129,17 @@ status_t SurfaceBuffer::writeToParcel(Parcel* reply,
 
 // ----------------------------------------------------------------------
 
-static void copyBlt(const android_native_buffer_t* dst,
-        const android_native_buffer_t* src, const Region& reg)
+static void copyBlt(
+        const sp<SurfaceBuffer>& dst, 
+        const sp<SurfaceBuffer>& src, 
+        const Region& reg)
 {
+    src->lock(GRALLOC_USAGE_SW_READ_OFTEN, reg.bounds());
+    uint8_t const * const src_bits = (uint8_t const *)src->bits;
+
+    dst->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, reg.bounds());
+    uint8_t* const dst_bits = (uint8_t*)dst->bits;
+    
     Region::iterator iterator(reg);
     if (iterator) {
         // NOTE: dst and src must be the same format
@@ -120,28 +147,28 @@ static void copyBlt(const android_native_buffer_t* dst,
         const size_t bpp = bytesPerPixel(src->format);
         const size_t dbpr = dst->stride * bpp;
         const size_t sbpr = src->stride * bpp;
+
         while (iterator.iterate(&r)) {
-            ssize_t h = r.bottom - r.top;
-            if (h) {
-                size_t size = (r.right - r.left) * bpp;
-                uint8_t* s = (GGLubyte*)src->bits + 
-                        (r.left + src->stride * r.top) * bpp;
-                uint8_t* d = (GGLubyte*)dst->bits +
-                        (r.left + dst->stride * r.top) * bpp;
-                if (dbpr==sbpr && size==sbpr) {
-                    size *= h;
-                    h = 1;
-                }
-                do {
-                    memcpy(d, s, size);
-                    d += dbpr;
-                    s += sbpr;
-                } while (--h > 0);
+            ssize_t h = r.height();
+            if (h <= 0) continue;
+            size_t size = r.width() * bpp;
+            uint8_t const * s = src_bits + (r.left + src->stride * r.top) * bpp;
+            uint8_t       * d = dst_bits + (r.left + dst->stride * r.top) * bpp;
+            if (dbpr==sbpr && size==sbpr) {
+                size *= h;
+                h = 1;
             }
+            do {
+                memcpy(d, s, size);
+                d += dbpr;
+                s += sbpr;
+            } while (--h > 0);
         }
     }
+    
+    src->unlock();
+    dst->unlock();
 }
-
 
 // ============================================================================
 //  SurfaceControl
@@ -347,12 +374,14 @@ sp<Surface> SurfaceControl::getSurface() const
 Surface::Surface(const sp<SurfaceControl>& surface)
     : mClient(surface->mClient), mSurface(surface->mSurface),
       mToken(surface->mToken), mIdentity(surface->mIdentity),
-      mFormat(surface->mFormat), mFlags(surface->mFlags)
+      mFormat(surface->mFormat), mFlags(surface->mFlags),
+      mBufferMapper(BufferMapper::get())
 {
     init();
 }
 
 Surface::Surface(const Parcel& parcel)
+    :  mBufferMapper(BufferMapper::get())
 {
     sp<IBinder> clientBinder = parcel.readStrongBinder();
     mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
@@ -369,16 +398,11 @@ Surface::Surface(const Parcel& parcel)
 
 void Surface::init()
 {
-    android_native_window_t::connect          = connect;
-    android_native_window_t::disconnect       = disconnect;
     android_native_window_t::setSwapInterval  = setSwapInterval;
-    android_native_window_t::setSwapRectangle = setSwapRectangle;
     android_native_window_t::dequeueBuffer    = dequeueBuffer;
     android_native_window_t::lockBuffer       = lockBuffer;
     android_native_window_t::queueBuffer      = queueBuffer;
-
     mSwapRectangle.makeInvalid();
-
     DisplayInfo dinfo;
     SurfaceComposerClient::getDisplayInfo(0, &dinfo);
     const_cast<float&>(android_native_window_t::xdpi) = dinfo.xdpi;
@@ -396,7 +420,7 @@ Surface::~Surface()
     // its buffers in this process.
     for (int i=0 ; i<2 ; i++) {
         if (mBuffers[i] != 0) {
-            BufferMapper::get().unmap(mBuffers[i]->getHandle(), this);
+            getBufferMapper().unregisterBuffer(mBuffers[i]->getHandle());
         }
     }
 
@@ -443,22 +467,6 @@ bool Surface::isSameSurface(
 
 // ----------------------------------------------------------------------------
 
-int Surface::setSwapRectangle(android_native_window_t* window,
-        int l, int t, int w, int h)
-{
-    Surface* self = getSelf(window);
-    self->setSwapRectangle(Rect(l, t, l+w, t+h));
-    return 0;
-}
-
-void Surface::connect(android_native_window_t* window)
-{
-}
-
-void Surface::disconnect(android_native_window_t* window)
-{
-}
-
 int Surface::setSwapInterval(android_native_window_t* window, int interval)
 {
     return 0;
@@ -483,6 +491,26 @@ int Surface::queueBuffer(android_native_window_t* window,
 {
     Surface* self = getSelf(window);
     return self->queueBuffer(buffer);
+}
+
+// ----------------------------------------------------------------------------
+
+status_t Surface::dequeueBuffer(sp<SurfaceBuffer>* buffer)
+{
+    android_native_buffer_t* out;
+    status_t err = dequeueBuffer(&out);
+    *buffer = SurfaceBuffer::getSelf(out);
+    return err;
+}
+
+status_t Surface::lockBuffer(const sp<SurfaceBuffer>& buffer)
+{
+    return lockBuffer(buffer.get());
+}
+
+status_t Surface::queueBuffer(const sp<SurfaceBuffer>& buffer)
+{
+    return queueBuffer(buffer.get());
 }
 
 // ----------------------------------------------------------------------------
@@ -515,8 +543,9 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
     }
 
     const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
+    mDirtyRegion.set(backBuffer->width, backBuffer->height);
     *buffer = backBuffer.get();
-
+  
     return NO_ERROR;
 }
 
@@ -542,11 +571,14 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
     if (err != NO_ERROR)
         return err;
 
+    if (mSwapRectangle.isValid()) {
+        mDirtyRegion.set(mSwapRectangle);
+    }
+    
     // transmit the dirty region
-    const Region dirty(swapRectangle());
     SurfaceID index(mToken); 
     layer_cblk_t* const lcblk = &(cblk->layers[index]);
-    _send_dirty_region(lcblk, dirty);
+    _send_dirty_region(lcblk, mDirtyRegion);
 
     uint32_t newstate = cblk->unlock_layer_and_post(size_t(index));
     if (!(newstate & eNextFlipPending))
@@ -561,27 +593,20 @@ status_t Surface::lock(SurfaceInfo* info, bool blocking) {
     return Surface::lock(info, NULL, blocking);
 }
 
-status_t Surface::lock(SurfaceInfo* other, Region* dirty, bool blocking) 
+status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking) 
 {
     // FIXME: needs some locking here
-    android_native_buffer_t* backBuffer;
+    
+    sp<SurfaceBuffer> backBuffer;
     status_t err = dequeueBuffer(&backBuffer);
     if (err == NO_ERROR) {
         err = lockBuffer(backBuffer);
         if (err == NO_ERROR) {
-            backBuffer->common.incRef(&backBuffer->common);
-            mLockedBuffer = backBuffer;
-            other->w      = backBuffer->width;
-            other->h      = backBuffer->height;
-            other->s      = backBuffer->stride;
-            other->usage  = backBuffer->usage;
-            other->format = backBuffer->format;
-            other->bits   = backBuffer->bits;
-
             // we handle copy-back here...
             
             const Rect bounds(backBuffer->width, backBuffer->height);
-            Region newDirtyRegion;
+            Region scratch(bounds);
+            Region& newDirtyRegion(dirtyIn ? *dirtyIn : scratch);
 
             per_client_cblk_t* const cblk = mClient->mControl;
             layer_cblk_t* const lcblk = &(cblk->layers[SurfaceID(mToken)]);
@@ -590,43 +615,34 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirty, bool blocking)
                 // content is meaningless in this case and the whole surface
                 // needs to be redrawn.
                 newDirtyRegion.set(bounds);
-                if (dirty) {
-                    *dirty = newDirtyRegion;
-                }
-            } else 
-            {
-                if (dirty) {
-                    dirty->andSelf(Region(bounds));
-                    newDirtyRegion = *dirty;
-                } else {
-                    newDirtyRegion.set(bounds);
-                }
-                Region copyback;
+            } else {
+                newDirtyRegion.andSelf(bounds);
                 if (!(lcblk->flags & eNoCopyBack)) {
-                    const Region previousDirtyRegion(dirtyRegion());
-                    copyback = previousDirtyRegion.subtract(newDirtyRegion);
-                }
-                const sp<SurfaceBuffer>& frontBuffer(mBuffers[1-mBackbufferIndex]);
-                if (!copyback.isEmpty() && frontBuffer!=0) {
-                    // copy front to back
-                    copyBlt(backBuffer, frontBuffer.get(), copyback);
+                    const sp<SurfaceBuffer>& frontBuffer(mBuffers[1-mBackbufferIndex]);
+                    const Region copyback(mOldDirtyRegion.subtract(newDirtyRegion));
+                    if (!copyback.isEmpty() && frontBuffer!=0) {
+                        // copy front to back
+                        copyBlt(backBuffer, frontBuffer, copyback);
+                    }
                 }
             }
-            setDirtyRegion(newDirtyRegion);
+            mDirtyRegion = newDirtyRegion;
+            mOldDirtyRegion = newDirtyRegion;
 
-
-            Rect lockBounds(backBuffer->width, backBuffer->height);
-            if (dirty) {
-                lockBounds = dirty->bounds();
-            }
-            buffer_handle_t handle;
-            backBuffer->getHandle(backBuffer, &handle);
-            status_t res = BufferMapper::get().lock(handle,
-                    GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN, 
-                    lockBounds);
+            status_t res = backBuffer->lock(
+                    GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN,
+                    newDirtyRegion.bounds());
+            
             LOGW_IF(res, "failed locking buffer %d (%p)", 
-                    mBackbufferIndex, handle);
-            setSwapRectangle(lockBounds);
+                    mBackbufferIndex, backBuffer->handle);
+
+            mLockedBuffer = backBuffer;
+            other->w      = backBuffer->width;
+            other->h      = backBuffer->height;
+            other->s      = backBuffer->stride;
+            other->usage  = backBuffer->usage;
+            other->format = backBuffer->format;
+            other->bits   = backBuffer->bits;
         }
     }
     return err;
@@ -639,16 +655,12 @@ status_t Surface::unlockAndPost()
     if (mLockedBuffer == 0)
         return BAD_VALUE;
 
-    buffer_handle_t handle;
-    mLockedBuffer->getHandle(mLockedBuffer, &handle);
-    status_t res = BufferMapper::get().unlock(handle);
+    status_t res = mLockedBuffer->unlock();
     LOGW_IF(res, "failed unlocking buffer %d (%p)",
-            mBackbufferIndex, handle);
-
-    const Rect dirty(dirtyRegion().bounds());
-    setSwapRectangle(dirty);
+            mBackbufferIndex, mLockedBuffer->handle);
+    
     status_t err = queueBuffer(mLockedBuffer);
-    mLockedBuffer->common.decRef(&mLockedBuffer->common);
+    mLockedBuffer->bits = NULL;
     mLockedBuffer = 0;
     return err;
 }
@@ -666,15 +678,6 @@ void Surface::_send_dirty_region(
     }
 }
 
-Region Surface::dirtyRegion() const  {
-    return mDirtyRegion; 
-}
-void Surface::setDirtyRegion(const Region& region) const {
-    mDirtyRegion = region;
-}
-const Rect& Surface::swapRectangle() const {
-    return mSwapRectangle;
-}
 void Surface::setSwapRectangle(const Rect& r) {
     mSwapRectangle = r;
 }
@@ -687,10 +690,10 @@ status_t Surface::getBufferLocked(int index)
     if (buffer != 0) {
         sp<SurfaceBuffer>& currentBuffer(mBuffers[index]);
         if (currentBuffer != 0) {
-            BufferMapper::get().unmap(currentBuffer->getHandle(), this);
+            getBufferMapper().unregisterBuffer(currentBuffer->getHandle());
             currentBuffer.clear();
         }
-        err = BufferMapper::get().map(buffer->getHandle(), &buffer->bits, this);
+        err = getBufferMapper().registerBuffer(buffer->getHandle());
         LOGW_IF(err, "map(...) failed %d (%s)", err, strerror(-err));
         if (err == NO_ERROR) {
             currentBuffer = buffer;

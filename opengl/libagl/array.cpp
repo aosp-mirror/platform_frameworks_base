@@ -1371,8 +1371,17 @@ void glDrawArrays(GLenum mode, GLint first, GLsizei count)
     if ((c->cull.enable) && (c->cull.cullFace == GL_FRONT_AND_BACK))
         return; // all triangles are culled
 
+
     validate_arrays(c, mode);
+
+    const uint32_t enables = c->rasterizer.state.enables;
+    if (enables & GGL_ENABLE_TMUS)
+        ogles_lock_textures(c);
+
     drawArraysPrims[mode](c, first, count);
+
+    if (enables & GGL_ENABLE_TMUS)
+        ogles_unlock_textures(c);
 
 #if VC_CACHE_STATISTICS
     c->vc.total = count;
@@ -1425,8 +1434,16 @@ void glDrawElements(
         indices = c->arrays.element_array_buffer->data + uintptr_t(indices);
     }
 
-    drawElementsPrims[mode](c, count, indices);
+    const uint32_t enables = c->rasterizer.state.enables;
+    if (enables & GGL_ENABLE_TMUS)
+        ogles_lock_textures(c);
 
+    drawElementsPrims[mode](c, count, indices);
+    
+    if (enables & GGL_ENABLE_TMUS)
+        ogles_unlock_textures(c);
+
+    
 #if VC_CACHE_STATISTICS
     c->vc.total = count;
     c->vc.dump_stats(mode);

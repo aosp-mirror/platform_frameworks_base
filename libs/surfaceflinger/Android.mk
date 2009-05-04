@@ -14,10 +14,7 @@ LOCAL_SRC_FILES:= \
     LayerBlur.cpp \
     LayerBitmap.cpp \
     LayerDim.cpp \
-    LayerOrientationAnim.cpp \
-    LayerOrientationAnimRotate.cpp \
     MessageQueue.cpp \
-    OrientationAnimation.cpp \
     SurfaceFlinger.cpp \
     Tokenizer.cpp \
     Transform.cpp

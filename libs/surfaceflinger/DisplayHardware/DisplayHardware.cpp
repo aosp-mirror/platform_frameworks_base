@@ -25,7 +25,7 @@
 #include <utils/Log.h>
 
 #include <ui/PixelFormat.h>
-#include <ui/EGLNativeWindowSurface.h>
+#include <ui/FramebufferNativeWindow.h>
 
 #include <GLES/gl.h>
 #include <EGL/egl.h>
@@ -313,8 +313,7 @@ void DisplayHardware::flip(const Region& dirty) const
     } 
 
     const Rect& b(newDirty.bounds());
-    mNativeWindow->android_native_window_t::setSwapRectangle(
-            mNativeWindow.get(), b.left, b.top, b.width(), b.height());
+    mNativeWindow->setSwapRectangle(b);
 
     mPageFlipCount++;
     eglSwapBuffers(dpy, surface);

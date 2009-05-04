@@ -57,6 +57,7 @@ public:
 
             void        clear();
             void        set(const Rect& r);
+            void        set(uint32_t w, uint32_t h);
         
             Region&     orSelf(const Rect& rhs);
             Region&     andSelf(const Rect& rhs);

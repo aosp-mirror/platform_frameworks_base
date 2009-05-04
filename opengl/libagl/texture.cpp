@@ -103,7 +103,7 @@ void validate_tmu(ogles_context_t* c, int i)
     }
 }
 
-void ogles_validate_texture_impl(ogles_context_t* c)
+void ogles_validate_texture(ogles_context_t* c)
 {
     for (int i=0 ; i<GGL_TEXTURE_UNIT_COUNT ; i++) {
         if (c->rasterizer.state.texture[i].enable)
@@ -115,6 +115,67 @@ void ogles_validate_texture_impl(ogles_context_t* c)
 static
 void invalidate_texture(ogles_context_t* c, int tmu, uint8_t flags = 0xFF) {
     c->textures.tmu[tmu].dirty = flags;
+}
+
+/*
+ * If the active textures are EGLImage, they need to be locked before
+ * they can be used. 
+ * 
+ * FIXME: code below is far from being optimal
+ * 
+ */
+
+void ogles_lock_textures(ogles_context_t* c)
+{
+    for (int i=0 ; i<GGL_TEXTURE_UNIT_COUNT ; i++) {
+        if (c->rasterizer.state.texture[i].enable) {
+            texture_unit_t& u(c->textures.tmu[i]);
+            android_native_buffer_t* native_buffer = u.texture->buffer;
+            if (native_buffer) {
+                c->rasterizer.procs.activeTexture(c, i);
+                hw_module_t const* pModule;
+                if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule))
+                    continue;
+
+                gralloc_module_t const* module =
+                    reinterpret_cast<gralloc_module_t const*>(pModule);
+                buffer_handle_t bufferHandle;
+                native_buffer->getHandle(native_buffer, &bufferHandle);
+                int err = module->lock(module, bufferHandle,
+                        GRALLOC_USAGE_SW_READ_OFTEN,
+                        0, 0, native_buffer->width, native_buffer->height,
+                        &native_buffer->bits);
+
+                u.texture->setImageBits(native_buffer->bits);
+                c->rasterizer.procs.bindTexture(c, &(u.texture->surface));
+            }
+        }
+    }
+}
+
+void ogles_unlock_textures(ogles_context_t* c)
+{
+    for (int i=0 ; i<GGL_TEXTURE_UNIT_COUNT ; i++) {
+        if (c->rasterizer.state.texture[i].enable) {
+            texture_unit_t& u(c->textures.tmu[i]);
+            android_native_buffer_t* native_buffer = u.texture->buffer;
+            if (native_buffer) {
+                c->rasterizer.procs.activeTexture(c, i);
+                hw_module_t const* pModule;
+                if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule))
+                    continue;
+
+                gralloc_module_t const* module =
+                    reinterpret_cast<gralloc_module_t const*>(pModule);
+                buffer_handle_t bufferHandle;
+                native_buffer->getHandle(native_buffer, &bufferHandle);
+                module->unlock(module, bufferHandle);
+                u.texture->setImageBits(NULL);
+                c->rasterizer.procs.bindTexture(c, &(u.texture->surface));
+            }
+        }
+    }
+    c->rasterizer.procs.activeTexture(c, c->textures.active);
 }
 
 // ----------------------------------------------------------------------------
@@ -592,6 +653,8 @@ invalid_enum:
 static void drawTexxOESImp(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h,
         ogles_context_t* c)
 {
+    ogles_lock_textures(c);
+    
     const GGLSurface& cbSurface = c->rasterizer.state.buffers.color.s;
     y = gglIntToFixed(cbSurface.height) - (y + h);
     w >>= FIXED_BITS;
@@ -650,6 +713,8 @@ static void drawTexxOESImp(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h
             gglFixedToIntRound(y),
             gglFixedToIntRound(x)+w,
             gglFixedToIntRound(y)+h);
+
+    ogles_unlock_textures(c);
 }
 
 static void drawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h,
@@ -724,6 +789,8 @@ static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_conte
                 goto slow_case;
             }
 
+            ogles_lock_textures(c);
+
             c->rasterizer.procs.texCoord2i(c, s0, t0);
             const uint32_t enables = c->rasterizer.state.enables;
             if (ggl_unlikely(enables & (GGL_ENABLE_DEPTH_TEST|GGL_ENABLE_FOG)))
@@ -734,6 +801,9 @@ static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_conte
             c->rasterizer.procs.disable(c, GGL_AA);
             c->rasterizer.procs.shadeModel(c, GL_FLAT);
             c->rasterizer.procs.recti(c, x, y, x+w, y+h);
+            
+            ogles_unlock_textures(c);
+
             return;
         }
     }
@@ -1460,23 +1530,9 @@ void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
         return;
     }
 
-    if (native_buffer->bits == NULL) {
-        // this buffer cannot be used with this implementation
-        ogles_error(c, GL_INVALID_VALUE);
-        return;
-    }
-
-    GGLSurface sur;
-    sur.version = sizeof(GGLSurface);
-    sur.width = native_buffer->width;
-    sur.height= native_buffer->height;
-    sur.stride= native_buffer->stride;
-    sur.format= native_buffer->format;
-    sur.data  = (GGLubyte*)native_buffer->bits;
-
     // bind it to the texture unit
     sp<EGLTextureObject> tex = getAndBindActiveTextureObject(c);
-    tex->setSurface(&sur);
+    tex->setImage(native_buffer);
 
     /*
      * Here an implementation can retrieve the buffer_handle_t of this buffer

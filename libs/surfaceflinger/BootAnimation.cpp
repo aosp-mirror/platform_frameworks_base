@@ -32,7 +32,7 @@
 #include <ui/DisplayInfo.h>
 #include <ui/ISurfaceComposer.h>
 #include <ui/ISurfaceFlingerClient.h>
-#include <ui/EGLNativeWindowSurface.h>
+#include <ui/FramebufferNativeWindow.h>
 
 #include <core/SkBitmap.h>
 #include <images/SkImageDecoder.h>

@@ -88,6 +88,13 @@ void Region::set(const Rect& r)
     mRegion.setRect(ir);
 }
 
+void Region::set(uint32_t w, uint32_t h)
+{
+    SkIRect ir;
+    ir.set(0, 0, w, h);
+    mRegion.setRect(ir);
+}
+
 // ----------------------------------------------------------------------------
 
 Region& Region::orSelf(const Rect& r)

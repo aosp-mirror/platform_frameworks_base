@@ -212,8 +212,11 @@ struct egl_window_surface_v2_t : public egl_surface_t
     virtual     EGLint      getRefreshRate() const;
     virtual     EGLint      getSwapBehavior() const;
 private:
+    status_t lock(android_native_buffer_t* buf, int usage);
+    status_t unlock(android_native_buffer_t* buf);
     android_native_window_t*   nativeWindow;
     android_native_buffer_t*   buffer;
+    gralloc_module_t const*    module;
     int width;
     int height;
 };
@@ -222,8 +225,13 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
         EGLConfig config,
         int32_t depthFormat,
         android_native_window_t* window)
-    : egl_surface_t(dpy, config, depthFormat), nativeWindow(window), buffer(0)
+    : egl_surface_t(dpy, config, depthFormat), 
+    nativeWindow(window), buffer(0), module(0)
 {
+    hw_module_t const* pModule;
+    hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule);
+    module = reinterpret_cast<gralloc_module_t const*>(pModule);
+
     nativeWindow->common.incRef(&nativeWindow->common);
 
     nativeWindow->dequeueBuffer(nativeWindow, &buffer);
@@ -246,13 +254,44 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
     buffer->common.incRef(&buffer->common);
     nativeWindow->lockBuffer(nativeWindow, buffer);
 
-    // FIXME: we need to gralloc lock the buffer
+    // Lock the buffer
+    lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
+    
     // FIXME: we need to handle the copy-back if needed, but
     // for now we're a "non preserving" implementation.
 }
 
+status_t egl_window_surface_v2_t::lock(
+        android_native_buffer_t* buf, int usage)
+{
+    int err;
+    buffer_handle_t bufferHandle;
+    err = buf->getHandle(buf, &bufferHandle);
+    if (err < 0)
+        return err;
+
+    err = module->lock(module, bufferHandle, 
+            usage, 0, 0, buf->width, buf->height, &buf->bits);
+    return err;
+}
+
+status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
+{
+    int err;
+    buffer_handle_t bufferHandle;
+    err = buf->getHandle(buf, &bufferHandle);
+    if (err < 0)
+        return err;
+
+    err = module->unlock(module, bufferHandle);
+    buf->bits = NULL;
+    return err;
+}
+
+
 egl_window_surface_v2_t::~egl_window_surface_v2_t() {
     if (buffer) {
+        unlock(buffer);
         buffer->common.decRef(&buffer->common);
     }
     nativeWindow->common.decRef(&nativeWindow->common);
@@ -269,6 +308,7 @@ EGLBoolean egl_window_surface_v2_t::swapBuffers()
     //mDisplaySurface->copyFrontToBack(copyback);
 
     
+    unlock(buffer);
     nativeWindow->queueBuffer(nativeWindow, buffer);
     buffer->common.decRef(&buffer->common); buffer = 0;
 
@@ -278,6 +318,7 @@ EGLBoolean egl_window_surface_v2_t::swapBuffers()
     // TODO: lockBuffer should rather be executed when the very first
     // direct rendering occurs.
     nativeWindow->lockBuffer(nativeWindow, buffer);
+    lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
 
     
     if ((width != buffer->width) || (height != buffer->height)) {
@@ -1690,20 +1731,6 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
 
     if (native_buffer->common.version != sizeof(android_native_buffer_t))
         return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
-
-    hw_module_t const* pModule;
-    if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule))
-        return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
-    buffer_handle_t bufferHandle;
-    gralloc_module_t const* module =
-        reinterpret_cast<gralloc_module_t const*>(pModule);
-    if (native_buffer->getHandle(native_buffer, &bufferHandle) < 0)
-        return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
-    int err = module->map(module, bufferHandle, &native_buffer->bits);
-    if (err < 0) {
-        LOGW_IF(err, "map(...) failed %d (%s)", err, strerror(-err));
-        return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
-    }
     
     native_buffer->common.incRef(&native_buffer->common);
     return (EGLImageKHR)native_buffer;
@@ -1722,18 +1749,6 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
 
     if (native_buffer->common.version != sizeof(android_native_buffer_t))
         return setError(EGL_BAD_PARAMETER, EGL_FALSE);
-
-    hw_module_t const* pModule;
-    if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule) == 0) {
-        buffer_handle_t bufferHandle;
-        gralloc_module_t const* module =
-            reinterpret_cast<gralloc_module_t const*>(pModule);
-        int err = native_buffer->getHandle(native_buffer, &bufferHandle);
-        if (err == 0) {
-            int err = module->unmap(module, bufferHandle);
-            LOGW_IF(err, "unmap(...) failed %d (%s)", err, strerror(-err));
-        }
-    }
 
     native_buffer->common.decRef(&native_buffer->common);
 

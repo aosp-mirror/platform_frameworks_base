@@ -52,10 +52,7 @@ Buffer::Buffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
 Buffer::~Buffer()
 {
     if (handle) {
-        BufferAllocator& allocator = BufferAllocator::get();
-        if (usage & BufferAllocator::USAGE_SW_READ_MASK) {
-            allocator.unmap(handle);
-        }
+        BufferAllocator& allocator(BufferAllocator::get());
         allocator.free(handle);
     }
 }
@@ -107,9 +104,6 @@ status_t Buffer::initSize(uint32_t w, uint32_t h)
     err = allocator.alloc(w, h, format, usage, &handle, &stride);
     
     if (err == NO_ERROR) {
-        if (usage & BufferAllocator::USAGE_SW_READ_MASK) {
-            err = allocator.map(handle, &bits);
-        }
         if (err == NO_ERROR) {
             width  = w;
             height = h;
@@ -120,31 +114,22 @@ status_t Buffer::initSize(uint32_t w, uint32_t h)
     return err;
 }
 
-status_t Buffer::getBitmapSurface(copybit_image_t* img) const
+status_t Buffer::lock(GGLSurface* sur, uint32_t usage) 
 {
-    img->w = stride  ?: width;
-    img->h = mVStride ?: height;
-    img->format = format;
-    
-    // FIXME: this should use a native_handle
-    img->offset = 0;    
-    img->base = bits;
-    img->fd = getHandle()->data[0];
-    
-    return NO_ERROR;
+    status_t res = SurfaceBuffer::lock(usage);
+    if (res == NO_ERROR && sur) {
+        sur->version = sizeof(GGLSurface);
+        sur->width = width;
+        sur->height = height;
+        sur->stride = stride;
+        sur->format = format;
+        sur->vstride = mVStride;
+        sur->data = static_cast<GGLubyte*>(bits);
+    }
+    return res;
 }
 
-status_t Buffer::getBitmapSurface(GGLSurface* sur) const
-{
-    sur->version = sizeof(GGLSurface);
-    sur->width = width;
-    sur->height = height;
-    sur->stride = stride;
-    sur->format = format;
-    sur->vstride = mVStride;
-    sur->data = static_cast<GGLubyte*>(bits);
-    return NO_ERROR;
-}
+
 
 // ===========================================================================
 // LayerBitmap

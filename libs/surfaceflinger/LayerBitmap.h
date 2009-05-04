@@ -73,9 +73,8 @@ public:
     PixelFormat getPixelFormat() const  { return format; }
     Rect getBounds() const              { return Rect(width, height); }
     
-    status_t getBitmapSurface(copybit_image_t* img) const;
-    status_t getBitmapSurface(GGLSurface* surface) const;
-
+    status_t lock(GGLSurface* surface, uint32_t usage);
+    
     android_native_buffer_t* getNativeBuffer() const;
     
 private:

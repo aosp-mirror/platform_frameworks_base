@@ -377,12 +377,14 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
 }
 
 void LayerBase::drawWithOpenGL(const Region& clip,
-        GLint textureName, const GGLSurface& t, int transform) const
+        GLint textureName, const sp<const Buffer>& buffer, int transform) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
     const State& s(drawingState());
-
+    const uint32_t width = buffer->width;
+    const uint32_t height = buffer->height;
+    
     // bind our texture
     validateTexture(textureName);
     glEnable(GL_TEXTURE_2D);
@@ -457,14 +459,14 @@ void LayerBase::drawWithOpenGL(const Region& clip,
 
             if (!(mFlags & DisplayHardware::NPOT_EXTENSION)) {
                 // find the smallest power-of-two that will accommodate our surface
-                GLuint tw = 1 << (31 - clz(t.width));
-                GLuint th = 1 << (31 - clz(t.height));
-                if (tw < t.width)  tw <<= 1;
-                if (th < t.height) th <<= 1;
+                GLuint tw = 1 << (31 - clz(width));
+                GLuint th = 1 << (31 - clz(height));
+                if (tw < width)  tw <<= 1;
+                if (th < height) th <<= 1;
                 // this divide should be relatively fast because it's
                 // a power-of-two (optimized path in libgcc)
-                GLfloat ws = GLfloat(t.width) /tw;
-                GLfloat hs = GLfloat(t.height)/th;
+                GLfloat ws = GLfloat(width) /tw;
+                GLfloat hs = GLfloat(height)/th;
                 glScalef(ws, hs, 1.0f);
             }
 
@@ -489,15 +491,15 @@ void LayerBase::drawWithOpenGL(const Region& clip,
         Region::iterator iterator(clip);
         if (iterator) {
             Rect r;
-            GLint crop[4] = { 0, t.height, t.width, -t.height };
+            GLint crop[4] = { 0, height, width, -height };
             glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
             int x = tx();
             int y = ty();
-            y = fbHeight - (y + t.height);
+            y = fbHeight - (y + height);
             while (iterator.iterate(&r)) {
                 const GLint sy = fbHeight - (r.top + r.height());
                 glScissor(r.left, sy, r.width(), r.height());
-                glDrawTexiOES(x, y, 0, t.width, t.height);
+                glDrawTexiOES(x, y, 0, width, height);
             }
         }
     }

@@ -34,7 +34,9 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+class BufferMapper;
 class Rect;
+class Surface;
 class SurfaceComposerClient;
 struct per_client_cblk_t;
 struct layer_cblk_t;
@@ -52,6 +54,10 @@ public:
         return handle;
     }
     
+    status_t lock(uint32_t usage);
+    status_t lock(uint32_t usage, const Rect& rect);
+    status_t unlock();
+
 protected:
             SurfaceBuffer();
             SurfaceBuffer(const Parcel& reply);
@@ -59,7 +65,11 @@ protected:
     buffer_handle_t handle;
     bool mOwner;
 
+    inline const BufferMapper& getBufferMapper() const { return mBufferMapper; }
+    inline BufferMapper& getBufferMapper() { return mBufferMapper; }
+    
 private:
+    friend class Surface;
     friend class BpSurface;
     friend class BnSurface;
     friend class LightRefBase<SurfaceBuffer>;    
@@ -72,6 +82,8 @@ private:
     
     static int getHandle(android_native_buffer_t const * base, 
             buffer_handle_t* handle);
+    
+    BufferMapper& mBufferMapper;
 };
 
 // ---------------------------------------------------------------------------
@@ -191,9 +203,8 @@ public:
     status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
     status_t    unlockAndPost();
 
-    // setSwapRectangle() is mainly used by EGL
+    // setSwapRectangle() is intended to be used by GL ES clients
     void        setSwapRectangle(const Rect& r);
-    const Rect& swapRectangle() const;
 
 private:
     // can't be copied
@@ -216,22 +227,14 @@ private:
     const sp<ISurface>& getISurface() const { return mSurface; }
 
     status_t getBufferLocked(int index);
-    
-    
-    
-    Region dirtyRegion() const;
-    void setDirtyRegion(const Region& region) const;
-
    
            status_t validate(per_client_cblk_t const* cblk) const;
     static void _send_dirty_region(layer_cblk_t* lcblk, const Region& dirty);
 
+    inline const BufferMapper& getBufferMapper() const { return mBufferMapper; }
+    inline BufferMapper& getBufferMapper() { return mBufferMapper; }
     
-    static void connect(android_native_window_t* window);
-    static void disconnect(android_native_window_t* window);
     static int setSwapInterval(android_native_window_t* window, int interval);
-    static int setSwapRectangle(android_native_window_t* window,
-            int l, int t, int w, int h);
     static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
     static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
     static int queueBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
@@ -239,21 +242,27 @@ private:
     int dequeueBuffer(android_native_buffer_t** buffer);
     int lockBuffer(android_native_buffer_t* buffer);
     int queueBuffer(android_native_buffer_t* buffer);
-    
+
+    status_t dequeueBuffer(sp<SurfaceBuffer>* buffer);
+    status_t lockBuffer(const sp<SurfaceBuffer>& buffer);
+    status_t queueBuffer(const sp<SurfaceBuffer>& buffer);
+
     
     alloc_device_t*             mAllocDevice;
     sp<SurfaceComposerClient>   mClient;
     sp<ISurface>                mSurface;
     sp<SurfaceBuffer>           mBuffers[2];
-    android_native_buffer_t*    mLockedBuffer;
+    sp<SurfaceBuffer>           mLockedBuffer;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
     mutable Region              mDirtyRegion;
-    mutable Rect                mSwapRectangle;
+    mutable Region              mOldDirtyRegion;
     mutable uint8_t             mBackbufferIndex;
     mutable Mutex               mSurfaceLock;
+    Rect                        mSwapRectangle;
+    BufferMapper&               mBufferMapper;
 };
 
 }; // namespace android

@@ -67,10 +67,6 @@ public:
 
     status_t free(buffer_handle_t handle);
 
-    status_t map(buffer_handle_t handle, void** addr);
-    
-    status_t unmap(buffer_handle_t handle);
-    
     void dump(String8& res) const;
 
 private:

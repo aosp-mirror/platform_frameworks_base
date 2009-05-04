@@ -40,6 +40,7 @@ class DisplayHardware;
 class GraphicPlane;
 class Client;
 class SurfaceBuffer;
+class Buffer;
 
 // ---------------------------------------------------------------------------
 
@@ -239,7 +240,7 @@ protected:
     
           void drawWithOpenGL(const Region& clip,
                   GLint textureName,
-                  const GGLSurface& surface,
+                  const sp<const Buffer>& buffer,
                   int transform = 0) const;
 
           void clearWithOpenGL(const Region& clip) const;

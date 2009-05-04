@@ -380,37 +380,37 @@ bool LayerBuffer::BufferSource::transformed() const
 
 void LayerBuffer::BufferSource::onDraw(const Region& clip) const 
 {
-    sp<Buffer> buffer(getBuffer());
+    // FIXME: we should get a native buffer here 
+    /*
+    sp<Buffer> ourBbuffer(getBuffer());
     if (UNLIKELY(buffer == 0))  {
         // nothing to do, we don't have a buffer
         mLayer.clearWithOpenGL(clip);
         return;
     }
 
-    status_t err = NO_ERROR;
-    NativeBuffer src(buffer->getBuffer());
-    const Rect& transformedBounds = mLayer.getTransformedBounds();
-
     // FIXME: We should model this after the overlay stuff
-    
     if (UNLIKELY(mTextureName == -1LU)) {
         mTextureName = mLayer.createTexture();
     }
-    GLuint w = 0;
-    GLuint h = 0;
-    GGLSurface t;
-    t.version = sizeof(GGLSurface);
-    t.width  = src.crop.r;
-    t.height = src.crop.b;
-    t.stride = src.img.w;
-    t.vstride= src.img.h;
-    t.format = src.img.format;
-    t.data = (GGLubyte*)(intptr_t(src.img.base) + src.img.offset);
-    const Region dirty(Rect(t.width, t.height));
 
     // FIXME: Use EGLImage extension for this
-    mLayer.loadTexture(dirty, mTextureName, t, w, h);
-    mLayer.drawWithOpenGL(clip, mTextureName, t, mBufferHeap.transform);
+    
+    
+    
+    GGLSurface t;
+    status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_RARELY);
+    if (res == NO_ERROR) {
+        GLuint w = 0;
+        GLuint h = 0;
+        const Region dirty(Rect(buffer->width, buffer->height));
+        mLayer.loadTexture(dirty, mTextureName, t, w, h);
+        buffer->unlock();
+    }
+    if (res == NO_ERROR) {
+        mLayer.drawWithOpenGL(clip, mTextureName, buffer, mBufferHeap.transform);
+    }
+    */
 }
 
 
