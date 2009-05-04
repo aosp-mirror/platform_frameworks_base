@@ -749,7 +749,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
             final TypedProperties tp = new TypedProperties();
 
             // Read the properties from each of the files, if present.
-            for (String file: files) {
+            for (String file : files) {
                 Reader r;
                 try {
                     r = new FileReader(file);
@@ -758,16 +758,16 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
                     continue;
                 }
 
-                Exception failure = null;
                 try {
                     tp.load(r);
-                } catch (IOException ex) {
-                    failure = ex;
-                } catch (TypedProperties.ParseException ex) {
-                    failure = ex;
-                }
-                if (failure != null) {
-                    throw new RuntimeException("Problem loading " + file, failure);
+                } catch (Exception ex) {
+                    throw new RuntimeException("Problem loading " + file, ex);
+                } finally {
+                    try {
+                        r.close();
+                    } catch (IOException ex) {
+                        // Ignore this error.
+                    }
                 }
             }
 
@@ -800,7 +800,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
             return false;
         }
         try {
-            return fieldClass == (Class<?>)primitiveTypeField.get(null);
+            return fieldClass == (Class<?>) primitiveTypeField.get(null);
         } catch (IllegalAccessException ex) {
             return false;
         }
@@ -811,34 +811,35 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Looks up the property that corresponds to the field, and sets the field's value
      * if the types match.
      */
-    private static void modifyFieldIfSet(final Field field, final String propertyName) {
+    private static void modifyFieldIfSet(final Field field, final TypedProperties properties,
+                                         final String propertyName) {
         if (field.getType() == java.lang.String.class) {
-            int stringInfo = debugProperties.getStringInfo(propertyName);
+            int stringInfo = properties.getStringInfo(propertyName);
             switch (stringInfo) {
-            case TypedProperties.STRING_SET:
-                // Handle as usual below.
-                break;
-            case TypedProperties.STRING_NULL:
-                try {
-                    field.set(null, null);  // null object for static fields; null string
-                } catch (IllegalAccessException ex) {
+                case TypedProperties.STRING_SET:
+                    // Handle as usual below.
+                    break;
+                case TypedProperties.STRING_NULL:
+                    try {
+                        field.set(null, null);  // null object for static fields; null string
+                    } catch (IllegalAccessException ex) {
+                        throw new IllegalArgumentException(
+                            "Cannot set field for " + propertyName, ex);
+                    }
+                    return;
+                case TypedProperties.STRING_NOT_SET:
+                    return;
+                case TypedProperties.STRING_TYPE_MISMATCH:
                     throw new IllegalArgumentException(
-                        "Cannot set field for " + propertyName, ex);
-                }
-                return;
-            case TypedProperties.STRING_NOT_SET:
-                return;
-            case TypedProperties.STRING_TYPE_MISMATCH:
-                throw new IllegalArgumentException(
-                    "Type of " + propertyName + " " +
-                    " does not match field type (" + field.getType() + ")");
-            default:
-                throw new IllegalStateException(
-                    "Unexpected getStringInfo(" + propertyName + ") return value " +
-                    stringInfo);
+                        "Type of " + propertyName + " " +
+                        " does not match field type (" + field.getType() + ")");
+                default:
+                    throw new IllegalStateException(
+                        "Unexpected getStringInfo(" + propertyName + ") return value " +
+                        stringInfo);
             }
         }
-        Object value = debugProperties.get(propertyName);
+        Object value = properties.get(propertyName);
         if (value != null) {
             if (!fieldTypeMatches(field, value.getClass())) {
                 throw new IllegalArgumentException(
@@ -867,7 +868,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Class setup: define a class whose only fields are non-final, static
      * primitive types (except for "char") or Strings.  In a static block
      * after the field definitions/initializations, pass the class to
-     * this method, Debug.setPropertiesOn().  Example:
+     * this method, Debug.setFieldsOn().  Example:
      * <pre>
      * package com.example;
      *
@@ -884,11 +885,11 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *
      *    // This MUST appear AFTER all fields are defined and initialized!
      *    static {
-     *        Debug.setPropertiesOn(MyDebugVars.class);
+     *        Debug.setFieldsOn(MyDebugVars.class);
      *    }
      * }
      * </pre>
-     * setPropertiesOn() may override the value of any field in the class based
+     * setFieldsOn() may override the value of any field in the class based
      * on internal properties that are fixed at boot time.
      * <p>
      * These properties are only set during platform debugging, and are not
@@ -901,7 +902,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *         or if the type of the field does not match the type of
      *         the internal debugging property value.
      */
-    public static void setPropertiesOn(Class<?> cl) {
+    public static void setFieldsOn(Class<?> cl) {
         if (Config.DEBUG) {
             if (debugProperties != null) {
                 /* Only look for fields declared directly by the class,
@@ -915,12 +916,12 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
                         throw new IllegalArgumentException(propertyName +
                             " must be static and non-final");
                     }
-                    modifyFieldIfSet(field, propertyName);
+                    modifyFieldIfSet(field, debugProperties, propertyName);
                 }
             }
         } else {
             Log.w("android.os.Debug",
-                  "setPropertiesOn(" + (cl == null ? "null" : cl.getName()) +
+                  "setFieldsOn(" + (cl == null ? "null" : cl.getName()) +
                   ") called in non-DEBUG build");
         }
     }
