@@ -283,7 +283,7 @@ public class HorizontalScrollView extends FrameLayout {
 
         final View child = getChildAt(0);
         int width = getMeasuredWidth();
-        if (child.getMeasuredHeight() < width) {
+        if (child.getMeasuredWidth() < width) {
             final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
             int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec, mPaddingTop
