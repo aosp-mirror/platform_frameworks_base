@@ -4837,10 +4837,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean compressText(float width) {
-        if (width > 0.0f && mLayout != null && getLineCount() == 1 && !mUserSetTextScaleX) {
+        // Only compress the text if it hasn't been compressed by the previous pass
+        if (width > 0.0f && mLayout != null && getLineCount() == 1 && !mUserSetTextScaleX &&
+                mTextPaint.getTextScaleX() == 1.0f) {
             final float textWidth = mLayout.getLineWidth(0);
-            final float overflow = (textWidth - width) / width;
-
+            final float overflow = (textWidth + 1.0f - width) / width;
             if (overflow > 0.0f && overflow <= Marquee.MARQUEE_DELTA_MAX) {
                 mTextPaint.setTextScaleX(1.0f - overflow - 0.005f);
                 post(new Runnable() {
@@ -5843,9 +5844,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int textWidth = textView.getWidth() - textView.getCompoundPaddingLeft() -
                         textView.getCompoundPaddingRight();
                 final float lineWidth = textView.mLayout.getLineWidth(0);
-                mGhostStart = lineWidth - textWidth + textWidth / 3.0f;
+                final float gap = textWidth / 3.0f;
+                mGhostStart = lineWidth - textWidth + gap;
                 mMaxScroll = mGhostStart + textWidth;
-                mGhostOffset = lineWidth + textWidth / 3.0f;
+                mGhostOffset = lineWidth + gap;
                 mFadeStop = lineWidth + textWidth / 6.0f;
                 mMaxFadeScroll = mGhostStart + lineWidth + lineWidth;
 
