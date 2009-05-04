@@ -629,4 +629,26 @@ public abstract class ContentProvider implements ComponentCallbacks {
             ContentProvider.this.onCreate();
         }
     }
+
+    /**
+     * Applies each of the {@link ContentProviderOperation} objects and returns an array
+     * of their results. Passes through OperationApplicationException, which may be thrown
+     * by the call to {@link ContentProviderOperation#apply}.
+     * If all the applications succeed then a {@link ContentProviderResult} array with the
+     * same number of elements as the operations will be returned. It is implementation-specific
+     * how many, if any, operations will have been successfully applied if a call to
+     * apply results in a {@link OperationApplicationException}.
+     * @param operations the operations to apply
+     * @return the results of the applications
+     * @throws OperationApplicationException thrown if an application fails.
+     * See {@link ContentProviderOperation#apply} for more information.
+     */
+    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+            throws OperationApplicationException {
+        ContentProviderResult[] results = new ContentProviderResult[operations.length];
+        for (int i = 0; i < operations.length; i++) {
+            results[i] = operations[i].apply(this, results, i);
+        }
+        return results;
+    }
 }

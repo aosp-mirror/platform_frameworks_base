@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Vector;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 import com.google.android.collect.Maps;
 
@@ -54,6 +56,9 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     protected boolean isTemporary() {
         return mIsTemporary;
     }
+
+    private final ThreadLocal<Boolean> mApplyingBatch = new ThreadLocal<Boolean>();
+    private final ThreadLocal<Set<Uri>> mPendingBatchNotifications = new ThreadLocal<Set<Uri>>();
 
     /**
      * Indicates whether or not this ContentProvider contains a full
@@ -243,26 +248,37 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     public final int update(final Uri url, final ContentValues values,
             final String selection, final String[] selectionArgs) {
         mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
+        final boolean notApplyingBatch = !applyingBatch();
+        if (notApplyingBatch) {
+            mDb.beginTransaction();
+        }
         try {
             if (isTemporary() && mSyncState.matches(url)) {
                 int numRows = mSyncState.asContentProvider().update(
                         url, values, selection, selectionArgs);
-                mDb.setTransactionSuccessful();
+                if (notApplyingBatch) {
+                    mDb.setTransactionSuccessful();
+                }
                 return numRows;
             }
 
             int result = updateInternal(url, values, selection, selectionArgs);
-            mDb.setTransactionSuccessful();
-
-            if (!isTemporary() && result > 0) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
+            if (notApplyingBatch) {
+                mDb.setTransactionSuccessful();
             }
-
+            if (!isTemporary() && result > 0) {
+                if (notApplyingBatch) {
+                    getContext().getContentResolver().notifyChange(url, null /* observer */,
+                            changeRequiresLocalSync(url));
+                } else {
+                    mPendingBatchNotifications.get().add(url);
+                }
+            }
             return result;
         } finally {
-            mDb.endTransaction();
+            if (notApplyingBatch) {
+                mDb.endTransaction();
+            }
         }
     }
 
@@ -270,44 +286,74 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     public final int delete(final Uri url, final String selection,
             final String[] selectionArgs) {
         mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
+        final boolean notApplyingBatch = !applyingBatch();
+        if (notApplyingBatch) {
+            mDb.beginTransaction();
+        }
         try {
             if (isTemporary() && mSyncState.matches(url)) {
                 int numRows = mSyncState.asContentProvider().delete(url, selection, selectionArgs);
-                mDb.setTransactionSuccessful();
+                if (notApplyingBatch) {
+                    mDb.setTransactionSuccessful();
+                }
                 return numRows;
             }
             int result = deleteInternal(url, selection, selectionArgs);
-            mDb.setTransactionSuccessful();
+            if (notApplyingBatch) {
+                mDb.setTransactionSuccessful();
+            }
             if (!isTemporary() && result > 0) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
+                if (notApplyingBatch) {
+                    getContext().getContentResolver().notifyChange(url, null /* observer */,
+                            changeRequiresLocalSync(url));
+                } else {
+                    mPendingBatchNotifications.get().add(url);
+                }
             }
             return result;
         } finally {
-            mDb.endTransaction();
+            if (notApplyingBatch) {
+                mDb.endTransaction();
+            }
         }
+    }
+
+    private boolean applyingBatch() {
+        return mApplyingBatch.get() != null && mApplyingBatch.get();
     }
 
     @Override
     public final Uri insert(final Uri url, final ContentValues values) {
         mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
+        final boolean notApplyingBatch = !applyingBatch();
+        if (notApplyingBatch) {
+            mDb.beginTransaction();
+        }
         try {
             if (isTemporary() && mSyncState.matches(url)) {
                 Uri result = mSyncState.asContentProvider().insert(url, values);
-                mDb.setTransactionSuccessful();
+                if (notApplyingBatch) {
+                    mDb.setTransactionSuccessful();
+                }
                 return result;
             }
             Uri result = insertInternal(url, values);
-            mDb.setTransactionSuccessful();
+            if (notApplyingBatch) {
+                mDb.setTransactionSuccessful();
+            }
             if (!isTemporary() && result != null) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
+                if (notApplyingBatch) {
+                    getContext().getContentResolver().notifyChange(url, null /* observer */,
+                            changeRequiresLocalSync(url));
+                } else {
+                    mPendingBatchNotifications.get().add(url);
+                }
             }
             return result;
         } finally {
-            mDb.endTransaction();
+            if (notApplyingBatch) {
+                mDb.endTransaction();
+            }
         }
     }
 
@@ -342,6 +388,34 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         return completed;
     }
 
+    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+            throws OperationApplicationException {
+        // initialize if this is the first time this thread has applied a batch
+        if (mApplyingBatch.get() == null) {
+            mApplyingBatch.set(false);
+            mPendingBatchNotifications.set(new HashSet<Uri>());
+        }
+
+        if (applyingBatch()) {
+            throw new IllegalStateException(
+                    "applyBatch is not reentrant but mApplyingBatch is already set");
+        }
+        getDatabase().beginTransaction();
+        try {
+            mApplyingBatch.set(true);
+            ContentProviderResult[] results = super.applyBatch(operations);
+            getDatabase().setTransactionSuccessful();
+            return results;
+        } finally {
+            mApplyingBatch.set(false);
+            getDatabase().endTransaction();
+            for (Uri url : mPendingBatchNotifications.get()) {
+                getContext().getContentResolver().notifyChange(url, null /* observer */,
+                        changeRequiresLocalSync(url));
+            }
+        }
+    }
+    
     /**
      * Check if changes to this URI can be syncable changes.
      * @param uri the URI of the resource that was changed
