@@ -588,7 +588,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 waitingApns = buildWaitingApns();
                 if (waitingApns.isEmpty()) {
                     if (DBG) log("No APN found");
-                    notifyNoData(PdpConnection.FailCause.BAD_APN);
+                    notifyNoData(PdpConnection.FailCause.MISSING_UKNOWN_APN);
                     return false;
                 } else {
                     log ("Create from allApns : " + apnListToString(allApns));
@@ -1315,13 +1315,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             cause = (PdpConnection.FailCause) (ar.result);
             if(DBG) log("PDP setup failed " + cause);
                     // Log this failure to the Event Logs.
-            if (cause == PdpConnection.FailCause.BAD_APN ||
-                    cause == PdpConnection.FailCause.BAD_PAP_SECRET ||
-                    cause == PdpConnection.FailCause.BARRED ||
-                    cause == PdpConnection.FailCause.RADIO_ERROR_RETRY ||
-                    cause == PdpConnection.FailCause.SUSPENED_TEMPORARY ||
-                    cause == PdpConnection.FailCause.UNKNOWN ||
-                    cause == PdpConnection.FailCause.USER_AUTHENTICATION) {
+            if (cause.isEventLoggable()) {
                 int cid = -1;
                 GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
                 if (loc != null) cid = loc.getCid();
@@ -1335,23 +1329,20 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // No try for permanent failure
             if (cause.isPermanentFail()) {
                 notifyNoData(cause);
+                return;
             }
 
-            if (tryNextApn(cause)) {
-                waitingApns.remove(0);
-                if (waitingApns.isEmpty()) {
-                    // No more to try, start delayed retry
-                    startDelayedRetry(cause, reason);
-                } else {
-                    // we still have more apns to try
-                    setState(State.SCANNING);
-                    // Wait a bit before trying the next APN, so that
-                    // we're not tying up the RIL command channel
-                    sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
-                            RECONNECT_DELAY_INITIAL_MILLIS);
-                }
-            } else {
+            waitingApns.remove(0);
+            if (waitingApns.isEmpty()) {
+                // No more to try, start delayed retry
                 startDelayedRetry(cause, reason);
+            } else {
+                // we still have more apns to try
+                setState(State.SCANNING);
+                // Wait a bit before trying the next APN, so that
+                // we're not tying up the RIL command channel
+                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
+                        RECONNECT_DELAY_INITIAL_MILLIS);
             }
         }
     }
@@ -1406,14 +1397,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         cleanUpConnection(tearDown, reason);
     }
 
-    private boolean tryNextApn(FailCause cause) {
-        return (cause != FailCause.RADIO_NOT_AVAILABLE)
-                && (cause != FailCause.RADIO_OFF)
-                && (cause != FailCause.RADIO_ERROR_RETRY)
-                && (cause != FailCause.NO_SIGNAL)
-                && (cause != FailCause.SIM_LOCKED);
-    }
-
     private int getRestoreDefaultApnDelay() {
         String restoreApnDelayStr = SystemProperties.get(APN_RESTORE_DELAY_PROP_NAME);
 
@@ -1460,7 +1443,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (allApns.isEmpty()) {
             if (DBG) log("No APN found for carrier: " + operator);
             preferredApn = null;
-            notifyNoData(PdpConnection.FailCause.BAD_APN);
+            notifyNoData(PdpConnection.FailCause.MISSING_UKNOWN_APN);
         } else {
             preferredApn = getPreferredApn();
             Log.d(LOG_TAG, "Get PreferredAPN");

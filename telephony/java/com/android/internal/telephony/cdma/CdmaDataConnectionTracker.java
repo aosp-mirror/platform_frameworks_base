@@ -746,16 +746,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             // No try for permanent failure
             if (cause.isPermanentFail()) {
                 notifyNoData(cause);
+                return;
             }
-
-            if (tryAgain(cause)) {
-                // Wait a bit before trying again, so that
-                // we're not tying up the RIL command channel
-                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
-                        RECONNECT_DELAY_INITIAL_MILLIS);
-            } else {
-                startDelayedRetry(cause, reason);
-            }
+            startDelayedRetry(cause, reason);
         }
     }
 
@@ -810,14 +803,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      */
     protected void onCleanUpConnection(boolean tearDown, String reason) {
         cleanUpConnection(tearDown, reason);
-    }
-
-    private boolean tryAgain(FailCause cause) {
-        return (cause != FailCause.RADIO_NOT_AVAILABLE)
-            && (cause != FailCause.RADIO_OFF)
-            && (cause != FailCause.RADIO_ERROR_RETRY)
-            && (cause != FailCause.NO_SIGNAL)
-            && (cause != FailCause.SIM_LOCKED);
     }
 
     private void createAllDataConnectionList() {
