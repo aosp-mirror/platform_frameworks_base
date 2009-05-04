@@ -22,6 +22,7 @@ import android.app.Service;
 import android.backup.IBackupService;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -59,23 +60,25 @@ public abstract class BackupService extends Service {
      * The application is being asked to write any data changed since the
      * last time it performed a backup operation.  The state data recorded
      * during the last backup pass is provided in the oldStateFd file descriptor.
-     * If oldStateFd is negative, no old state is available and the application
-     * should perform a full backup.  In both cases, a representation of the
-     * final backup state after this pass should be written to the file pointed
+     * If oldState.getStatSize() is zero or negative, no old state is available
+     * and the application should perform a full backup.  In both cases, a representation
+     * of the final backup state after this pass should be written to the file pointed
      * to by the newStateFd file descriptor.
      *
-     * @param oldStateFd An open, read-only file descriptor pointing to the last
-     *                   backup state provided by the application.  May be negative,
-     *                   in which case no prior state is being provided and the
-     *                   application should perform a full backup.
-     * @param dataFd An open, read/write file descriptor pointing to the backup data
-     *               destination.  Typically the application will use backup helper
-     *               classes to write to this file.
-     * @param newStateFd An open, read/write file descriptor pointing to an empty
-     *                   file.  The application should record the final backup state
-     *                   here after writing the requested data to dataFd.
+     * @param oldState An open, read-only ParcelFileDescriptor pointing to the last backup
+     *                 state provided by the application.  May be empty or invalid, in which
+     *                 case no prior state is being provided and the application should
+     *                 perform a full backup.
+     * @param data An open, read/write ParcelFileDescriptor pointing to the backup data
+     *             destination.  Typically the application will use backup helper
+     *             classes to write to this file.
+     * @param newState An open, read/write ParcelFileDescriptor pointing to an empty
+     *                 file.  The application should record the final backup state
+     *                 here after writing the requested data to dataFd.
      */
-    public abstract void onBackup(int oldStateFd, int dataFd, int newStateFd);
+    public abstract void onBackup(ParcelFileDescriptor oldState,
+            ParcelFileDescriptor data,
+            ParcelFileDescriptor newState);
     
     /**
      * The application is being restored from backup, and should replace any
@@ -84,13 +87,13 @@ public abstract class BackupService extends Service {
      * the restore is finished, the application should write a representation
      * of the final state to the newStateFd file descriptor, 
      *
-     * @param dataFd An open, read-only file descriptor pointing to a full snapshot
-     *               of the application's data.
-     * @param newStateFd An open, read/write file descriptor pointing to an empty
-     *                   file.  The application should record the final backup state
-     *                   here after restoring its data from dataFd.
+     * @param data An open, read-only ParcelFileDescriptor pointing to a full snapshot
+     *             of the application's data.
+     * @param newState An open, read/write ParcelFileDescriptor pointing to an empty
+     *                 file.  The application should record the final backup state
+     *                 here after restoring its data from dataFd.
      */
-    public abstract void onRestore(int dataFd, int newStateFd);
+    public abstract void onRestore(ParcelFileDescriptor data, ParcelFileDescriptor newState);
 
 
     // ----- Core implementation -----
@@ -110,17 +113,19 @@ public abstract class BackupService extends Service {
 
     // ----- IBackupService binder interface -----
     private class BackupServiceBinder extends IBackupService.Stub {
-        public void doBackup(int oldStateFd, int dataFd, int newStateFd)
-                throws RemoteException {
+        public void doBackup(ParcelFileDescriptor oldState,
+                ParcelFileDescriptor data,
+                ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
             Log.v("BackupServiceBinder", "doBackup() invoked");
-            BackupService.this.onBackup(oldStateFd, dataFd, newStateFd);
+            BackupService.this.onBackup(oldState, data, newState);
         }
 
-        public void doRestore(int dataFd, int newStateFd) throws RemoteException {
+        public void doRestore(ParcelFileDescriptor data,
+                ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
             Log.v("BackupServiceBinder", "doRestore() invoked");
-            BackupService.this.onRestore(dataFd, newStateFd);
+            BackupService.this.onRestore(data, newState);
         }
     }
 }
