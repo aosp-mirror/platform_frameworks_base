@@ -85,7 +85,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>Not all types are always used by am asynchronous task. To mark a type as unused,
  * simply use the type {@link Void}:</p>
  * <pre>
- * private class MyTask extends AsyncTask<Void, Void, Void) { ... }
+ * private class MyTask extends AsyncTask&lt;Void, Void, Void&gt; { ... }
  * </pre>
  *
  * <h2>The 4 steps</h2>
