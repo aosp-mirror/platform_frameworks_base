@@ -9,7 +9,6 @@ import android.util.Log;
 import android.util.Config;
 import android.util.EventLog;
 import android.app.IntentService;
-import android.provider.Sync;
 import android.provider.SubscribedFeeds;
 import android.provider.SyncConstValue;
 import android.database.Cursor;
@@ -17,7 +16,7 @@ import android.database.sqlite.SQLiteFullException;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.os.Bundle;
-import android.os.Debug;
+import android.os.RemoteException;
 import android.text.TextUtils;
 import android.net.Uri;
 
@@ -105,10 +104,6 @@ public class SubscribedFeedsIntentService extends IntentService {
 
     private void handleTickle(Context context, String account, String feed) {
         Cursor c = null;
-        Sync.Settings.QueryMap syncSettings =
-                new Sync.Settings.QueryMap(context.getContentResolver(),
-                        false /* don't keep updated */,
-                        null /* not needed since keep updated is false */);
         final String where = SubscribedFeeds.Feeds._SYNC_ACCOUNT + "= ? "
                 + "and " + SubscribedFeeds.Feeds.FEED + "= ?";
         try {
@@ -124,9 +119,14 @@ public class SubscribedFeedsIntentService extends IntentService {
                 String authority = c.getString(c.getColumnIndexOrThrow(
                         SubscribedFeeds.Feeds.AUTHORITY));
                 EventLog.writeEvent(LOG_TICKLE, authority);
-                if (!syncSettings.getSyncProviderAutomatically(authority)) {
-                    Log.d(TAG, "supressing tickle since provider " + authority
-                            + " is configured to not sync automatically");
+                try {
+                    if (!ContentResolver.getContentService()
+                            .getSyncProviderAutomatically(authority)) {
+                        Log.d(TAG, "supressing tickle since provider " + authority
+                                + " is configured to not sync automatically");
+                        continue;
+                    }
+                } catch (RemoteException e) {
                     continue;
                 }
                 Uri uri = Uri.parse("content://" + authority);
@@ -137,7 +137,6 @@ public class SubscribedFeedsIntentService extends IntentService {
             }
         } finally {
             if (c != null) c.deactivate();
-            syncSettings.close();
         }
     }
 

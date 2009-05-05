@@ -17,7 +17,6 @@
 package com.android.layoutlib.bridge;
 
 import android.content.ContentResolver;
-import android.content.ContentServiceNative;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.database.ContentObserver;
@@ -51,9 +50,6 @@ public class BridgeContentResolver extends ContentResolver {
     
     /**
      * Stub for the layoutlib bridge content resolver.
-     * <p/>
-     * The super implementation accesses the {@link ContentServiceNative#getDefault()}
-     * which returns null and would make the call crash. Instead we do nothing.
      */
     @Override
     public void registerContentObserver(Uri uri, boolean notifyForDescendents,
@@ -63,9 +59,6 @@ public class BridgeContentResolver extends ContentResolver {
     
     /**
      * Stub for the layoutlib bridge content resolver.
-     * <p/>
-     * The super implementation accesses the {@link ContentServiceNative#getDefault()}
-     * which returns null and would make the call crash. Instead we do nothing.
      */
     @Override
     public void unregisterContentObserver(ContentObserver observer) {
@@ -74,9 +67,6 @@ public class BridgeContentResolver extends ContentResolver {
     
     /**
      * Stub for the layoutlib bridge content resolver.
-     * <p/>
-     * The super implementation accesses the {@link ContentServiceNative#getDefault()}
-     * which returns null and would make the call crash. Instead we do nothing.
      */
     @Override
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
@@ -85,9 +75,6 @@ public class BridgeContentResolver extends ContentResolver {
     
     /**
      * Stub for the layoutlib bridge content resolver.
-     * <p/>
-     * The super implementation accesses the {@link ContentServiceNative#getDefault()}
-     * which returns null and would make the call crash. Instead we do nothing.
      */
     @Override
     public void startSync(Uri uri, Bundle extras) {
@@ -96,9 +83,6 @@ public class BridgeContentResolver extends ContentResolver {
     
     /**
      * Stub for the layoutlib bridge content resolver.
-     * <p/>
-     * The super implementation accesses the {@link ContentServiceNative#getDefault()}
-     * which returns null and would make the call crash. Instead we do nothing.
      */
     @Override
     public void cancelSync(Uri uri) {
