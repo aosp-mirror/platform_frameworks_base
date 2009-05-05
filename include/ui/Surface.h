@@ -50,10 +50,6 @@ class SurfaceBuffer
         LightRefBase<SurfaceBuffer> >
 {
 public:
-    buffer_handle_t getHandle() const {
-        return handle;
-    }
-    
     status_t lock(uint32_t usage, void** vaddr);
     status_t lock(uint32_t usage, const Rect& rect, void** vaddr);
     status_t unlock();
@@ -62,7 +58,6 @@ protected:
             SurfaceBuffer();
             SurfaceBuffer(const Parcel& reply);
     virtual ~SurfaceBuffer();
-    buffer_handle_t handle;
     bool mOwner;
 
     inline const BufferMapper& getBufferMapper() const { return mBufferMapper; }
@@ -79,9 +74,6 @@ private:
 
     static status_t writeToParcel(Parcel* reply, 
             android_native_buffer_t const* buffer);
-    
-    static int getHandle(android_native_buffer_t const * base, 
-            buffer_handle_t* handle);
     
     BufferMapper& mBufferMapper;
 };

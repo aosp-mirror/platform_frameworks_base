@@ -157,13 +157,12 @@ struct android_native_buffer_t
     int stride;
     int format;
     int usage;
+    
+    void* reserved[2];
 
-    void* reserved[3];
+    buffer_handle_t handle;
 
-    int (*getHandle)(struct android_native_buffer_t const * base,
-            buffer_handle_t* handle);
-
-    void* reserved_proc[7];
+    void* reserved_proc[8];
 };
 
 

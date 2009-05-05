@@ -274,26 +274,14 @@ void egl_window_surface_v2_t::disconnect()
 status_t egl_window_surface_v2_t::lock(
         android_native_buffer_t* buf, int usage, void** vaddr)
 {
-    int err;
-    buffer_handle_t bufferHandle;
-    err = buf->getHandle(buf, &bufferHandle);
-    if (err < 0)
-        return err;
-
-    err = module->lock(module, bufferHandle, 
+    int err = module->lock(module, buf->handle, 
             usage, 0, 0, buf->width, buf->height, vaddr);
     return err;
 }
 
 status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
 {
-    int err;
-    buffer_handle_t bufferHandle;
-    err = buf->getHandle(buf, &bufferHandle);
-    if (err < 0)
-        return err;
-
-    err = module->unlock(module, bufferHandle);
+    int err = module->unlock(module, buf->handle);
     return err;
 }
 
@@ -379,8 +367,7 @@ EGLBoolean egl_window_surface_v2_t::bindDrawSurface(ogles_context_t* gl)
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
     gl->copybits.drawSurfaceFd = -1;
     if (supportedCopybitsDestinationFormat(buffer.format)) {
-        buffer_handle_t handle;
-        this->buffer->getHandle(this->buffer, &handle);
+        buffer_handle_t handle = this->buffer->handle;
         if (handle != NULL) {
             private_handle_t* hand = private_handle_t::dynamicCast(handle);
             if (hand != NULL) {

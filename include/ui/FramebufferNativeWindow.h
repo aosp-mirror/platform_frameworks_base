@@ -50,17 +50,10 @@ public:
         android_native_buffer_t::height = h;
         android_native_buffer_t::format = f;
         android_native_buffer_t::usage  = u;
-        android_native_buffer_t::getHandle = getHandle;
     }
-public:
-    buffer_handle_t handle;
 private:
     friend class LightRefBase<NativeBuffer>;    
     ~NativeBuffer() { }; // this class cannot be overloaded
-    static int getHandle(android_native_buffer_t const * base, buffer_handle_t* handle) {
-        *handle = getSelf(base)->handle;
-        return 0;
-    }
 };
 
 // ---------------------------------------------------------------------------

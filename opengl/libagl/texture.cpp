@@ -139,10 +139,9 @@ void ogles_lock_textures(ogles_context_t* c)
 
                 gralloc_module_t const* module =
                     reinterpret_cast<gralloc_module_t const*>(pModule);
-                buffer_handle_t bufferHandle;
-                native_buffer->getHandle(native_buffer, &bufferHandle);
+
                 void* vaddr;
-                int err = module->lock(module, bufferHandle,
+                int err = module->lock(module, native_buffer->handle,
                         GRALLOC_USAGE_SW_READ_OFTEN,
                         0, 0, native_buffer->width, native_buffer->height,
                         &vaddr);
@@ -168,9 +167,8 @@ void ogles_unlock_textures(ogles_context_t* c)
 
                 gralloc_module_t const* module =
                     reinterpret_cast<gralloc_module_t const*>(pModule);
-                buffer_handle_t bufferHandle;
-                native_buffer->getHandle(native_buffer, &bufferHandle);
-                module->unlock(module, bufferHandle);
+
+                module->unlock(module, native_buffer->handle);
                 u.texture->setImageBits(NULL);
                 c->rasterizer.procs.bindTexture(c, &(u.texture->surface));
             }
@@ -1547,13 +1545,10 @@ void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
      */
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
     tex->copybits_fd = -1;
-    buffer_handle_t handle;
-    if (native_buffer->getHandle(native_buffer, &handle) == 0) {
-        private_handle_t* hand;
-        if ((hand = private_handle_t::dynamicCast(handle)) != NULL) {
-            if (hand->usesPhysicallyContiguousMemory()) {
-                tex->copybits_fd = hand->fd;
-            }
+    private_handle_t* hand;
+    if ((hand = private_handle_t::dynamicCast(native_buffer->handle)) != NULL) {
+        if (hand->usesPhysicallyContiguousMemory()) {
+            tex->copybits_fd = hand->fd;
         }
     }
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
