@@ -62,6 +62,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private final Object mQueueLock = new Object();
 
     private File mStateDir;
+    private File mDataDir;
     
     // ----- Handler that runs the actual backup process asynchronously -----
 
@@ -106,28 +107,41 @@ class BackupManagerService extends IBackupManager.Stub {
                                 Log.d(TAG, "invoking doBackup() on " + backupIntent);
 
                                 File savedStateName = new File(mStateDir, service.packageName);
-                                File backupDataName = new File(mStateDir, service.packageName + ".data");
+                                File backupDataName = new File(mDataDir, service.packageName + ".data");
                                 File newStateName = new File(mStateDir, service.packageName + ".new");
                                 
                                 ParcelFileDescriptor savedState =
                                         ParcelFileDescriptor.open(savedStateName,
                                                 ParcelFileDescriptor.MODE_READ_ONLY |
                                                 ParcelFileDescriptor.MODE_CREATE);
+                                
+                                backupDataName.delete();
                                 ParcelFileDescriptor backupData =
                                         ParcelFileDescriptor.open(backupDataName,
                                                 ParcelFileDescriptor.MODE_READ_WRITE |
                                                 ParcelFileDescriptor.MODE_CREATE);
+
+                                newStateName.delete();
                                 ParcelFileDescriptor newState =
                                         ParcelFileDescriptor.open(newStateName,
                                                 ParcelFileDescriptor.MODE_READ_WRITE |
                                                 ParcelFileDescriptor.MODE_CREATE);
 
-                                mTargetService.doBackup(savedState, backupData, newState);
+                                // Run the target's backup pass
+                                try {
+                                    mTargetService.doBackup(savedState, backupData, newState);
+                                } finally {
+                                    savedState.close();
+                                    backupData.close();
+                                    newState.close();
+                                }
 
                                 // !!! TODO: Now propagate the newly-backed-up data to the transport
                                 
-                                // !!! TODO: After successful transport, juggle the files so that
-                                // next time the new state is used as the old state
+                                // !!! TODO: After successful transport, delete the now-stale data
+                                // and juggle the files so that next time the new state is passed
+                                backupDataName.delete();
+                                newStateName.renameTo(savedStateName);
                                 
                             } catch (FileNotFoundException fnf) {
                                 Log.d(TAG, "File not found on backup: ");
@@ -173,9 +187,9 @@ class BackupManagerService extends IBackupManager.Stub {
         mPackageManager = context.getPackageManager();
 
         // Set up our bookkeeping
-        File dataDir = Environment.getDataDirectory();
-        mStateDir = new File(dataDir, "backup");
+        mStateDir = new File(Environment.getDataDirectory(), "backup");
         mStateDir.mkdirs();
+        mDataDir = Environment.getDownloadCacheDirectory();
         
         // Identify the backup participants
         // !!! TODO: also watch package-install to keep this up to date
