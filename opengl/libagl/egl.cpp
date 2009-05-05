@@ -157,6 +157,7 @@ struct egl_surface_t
     virtual     EGLint      getRefreshRate() const;
     virtual     EGLint      getSwapBehavior() const;
     virtual     EGLBoolean  swapBuffers();
+    virtual     EGLBoolean  setSwapRectangle(EGLint l, EGLint t, EGLint w, EGLint h);
 protected:
     GGLSurface              depth;
 };
@@ -190,6 +191,11 @@ EGLint egl_surface_t::getRefreshRate() const {
 EGLint egl_surface_t::getSwapBehavior() const {
     return EGL_BUFFER_PRESERVED;
 }
+EGLBoolean egl_surface_t::setSwapRectangle(
+        EGLint l, EGLint t, EGLint w, EGLint h)
+{
+    return EGL_FALSE;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -214,16 +220,104 @@ struct egl_window_surface_v2_t : public egl_surface_t
     virtual     EGLint      getVerticalResolution() const;
     virtual     EGLint      getRefreshRate() const;
     virtual     EGLint      getSwapBehavior() const;
+    virtual     EGLBoolean  setSwapRectangle(EGLint l, EGLint t, EGLint w, EGLint h);
 
 private:
     status_t lock(android_native_buffer_t* buf, int usage, void** vaddr);
     status_t unlock(android_native_buffer_t* buf);
     android_native_window_t*   nativeWindow;
     android_native_buffer_t*   buffer;
+    android_native_buffer_t*   previousBuffer;
     gralloc_module_t const*    module;
     int width;
     int height;
     void* bits;
+    GGLFormat const* pixelFormatTable;
+    
+    struct Rect {
+        inline Rect() { };
+        inline Rect(int32_t w, int32_t h)
+            : left(0), top(0), right(w), bottom(h) { }
+        inline Rect(int32_t l, int32_t t, int32_t r, int32_t b)
+            : left(l), top(t), right(r), bottom(b) { }
+        Rect& andSelf(const Rect& r) {
+            left   = max(left, r.left);
+            top    = max(top, r.top);
+            right  = min(right, r.right);
+            bottom = min(bottom, r.bottom);
+            return *this;
+        }
+        bool isEmpty() const {
+            return (left>=right || top>=bottom);
+        }
+        void dump(char const* what) {
+            LOGD("%s { %5d, %5d, w=%5d, h=%5d }", 
+                    what, left, top, right-left, bottom-top);
+        }
+        
+        int32_t left;
+        int32_t top;
+        int32_t right;
+        int32_t bottom;
+    };
+
+    struct Region {
+        inline Region() : count(0) { }
+        static Region subtract(const Rect& lhs, const Rect& rhs) {
+            Region reg;
+            Rect* storage = reg.storage;
+            if (!lhs.isEmpty()) {
+                if (lhs.top < rhs.top) { // top rect
+                    storage->left   = lhs.left;
+                    storage->top    = lhs.top;
+                    storage->right  = lhs.right;
+                    storage->bottom = max(lhs.top, rhs.top);
+                    storage++;
+                }
+                if (lhs.left < rhs.left) { // left-side rect
+                    storage->left   = lhs.left;
+                    storage->top    = max(lhs.top, rhs.top);
+                    storage->right  = max(lhs.left, rhs.left);
+                    storage->bottom = min(lhs.bottom, rhs.bottom);
+                    storage++;
+                }
+                if (lhs.right > rhs.right) { // right-side rect
+                    storage->left   = min(lhs.right, rhs.right);
+                    storage->top    = max(lhs.top, rhs.top);
+                    storage->right  = lhs.right;
+                    storage->bottom = min(lhs.bottom, rhs.bottom);
+                    storage++;
+                }
+                if (lhs.bottom > rhs.bottom) { // bottom rect
+                    storage->left   = lhs.left;
+                    storage->top    = min(lhs.bottom, rhs.bottom);
+                    storage->right  = lhs.right;
+                    storage->bottom = lhs.bottom;
+                    storage++;
+                }
+                reg.count = storage - reg.storage;
+            }
+            return reg;
+        }
+        bool isEmpty() const {
+            return count<=0;
+        }
+        ssize_t getRects(Rect const* * rects) const {
+            *rects = storage;
+            return count;
+        }
+    private:
+        Rect storage[4];
+        ssize_t count;
+    };
+    
+    void copyBlt(
+            android_native_buffer_t* dst, void* dst_vaddr,
+            android_native_buffer_t* src, void const* src_vaddr,
+            const Rect* reg, ssize_t count);
+
+    Rect dirtyRegion;
+    Rect oldDirtyRegion;
 };
 
 egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
@@ -231,16 +325,22 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
         int32_t depthFormat,
         android_native_window_t* window)
     : egl_surface_t(dpy, config, depthFormat), 
-    nativeWindow(window), buffer(0), module(0), bits(NULL)
+    nativeWindow(window), buffer(0), previousBuffer(0), module(0),
+    bits(NULL)
 {
     hw_module_t const* pModule;
     hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule);
     module = reinterpret_cast<gralloc_module_t const*>(pModule);
 
+    pixelFormatTable = gglGetPixelFormatTable();
+    
+    // keep a reference on the window
     nativeWindow->common.incRef(&nativeWindow->common);
 
+    // dequeue a buffer
     nativeWindow->dequeueBuffer(nativeWindow, &buffer);
-    
+
+    // allocate a corresponding depth-buffer
     width = buffer->width;
     height = buffer->height;
     if (depthFormat) {
@@ -254,14 +354,32 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
         }
     }
 
+    // keep a reference on the buffer
     buffer->common.incRef(&buffer->common);
+}
+
+egl_window_surface_v2_t::~egl_window_surface_v2_t() {
+    if (buffer) {
+        buffer->common.decRef(&buffer->common);
+    }
+    if (previousBuffer) {
+        previousBuffer->common.decRef(&previousBuffer->common); 
+    }
+    nativeWindow->common.decRef(&nativeWindow->common);
 }
 
 void egl_window_surface_v2_t::connect() 
 {
     // Lock the buffer
     nativeWindow->lockBuffer(nativeWindow, buffer);
-    lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN, &bits);
+    // pin the buffer down
+    if (lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | 
+            GRALLOC_USAGE_SW_WRITE_OFTEN, &bits) != NO_ERROR) {
+        LOGE("eglSwapBuffers() failed to lock buffer %p (%ux%u)",
+                buffer, buffer->width, buffer->height);
+        setError(EGL_BAD_ACCESS, EGL_NO_SURFACE);
+        // FIXME: we should make sure we're not accessing the buffer anymore
+    }
 }
 
 void egl_window_surface_v2_t::disconnect() 
@@ -286,38 +404,86 @@ status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
     return err;
 }
 
+void egl_window_surface_v2_t::copyBlt(
+        android_native_buffer_t* dst, void* dst_vaddr,
+        android_native_buffer_t* src, void const* src_vaddr,
+        const Rect* reg, ssize_t count)
+{
+    // FIXME: use copybit if possible
+    // NOTE: dst and src must be the same format
+    
+    Rect r;
+    const size_t bpp = pixelFormatTable[src->format].size;
+    const size_t dbpr = dst->stride * bpp;
+    const size_t sbpr = src->stride * bpp;
 
-egl_window_surface_v2_t::~egl_window_surface_v2_t() {
-    if (buffer) {
-        buffer->common.decRef(&buffer->common);
+    uint8_t const * const src_bits = (uint8_t const *)src_vaddr;
+    uint8_t       * const dst_bits = (uint8_t       *)dst_vaddr;
+    
+    for (int i= 0 ; i<count ; i++) {
+        const Rect& r(reg[i]);
+        ssize_t w = r.right - r.left;
+        ssize_t h = r.bottom - r.top;
+        if (w <= 0 || h<=0) continue;
+        size_t size = w * bpp;
+        uint8_t const * s = src_bits + (r.left + src->stride * r.top) * bpp;
+        uint8_t       * d = dst_bits + (r.left + dst->stride * r.top) * bpp;
+        if (dbpr==sbpr && size==sbpr) {
+            size *= h;
+            h = 1;
+        }
+        do {
+            memcpy(d, s, size);
+            d += dbpr;
+            s += sbpr;
+        } while (--h > 0);
     }
-    nativeWindow->common.decRef(&nativeWindow->common);
 }
 
 EGLBoolean egl_window_surface_v2_t::swapBuffers()
 {
-    // TODO: this is roughly the code needed for preserving the back buffer
-    // efficiently. dirty is the area that has been modified.
-    //Region newDirty(dirty);
-    //newDirty.andSelf(Rect(nativeWindow->width, nativeWindow->height));
-    //mDirty = newDirty;
-    //const Region copyback(mDirty.subtract(newDirty));
-    //mDisplaySurface->copyFrontToBack(copyback);
+    /*
+     * Handle eglSetSwapRectangleANDROID()
+     * We copyback from the front buffer 
+     */
+    if (!dirtyRegion.isEmpty()) {
+        dirtyRegion.andSelf(Rect(buffer->width, buffer->height));
+        if (previousBuffer) {
+            const Region copyBack(Region::subtract(oldDirtyRegion, dirtyRegion));
+            if (!copyBack.isEmpty()) {
+                Rect const* list;
+                ssize_t count = copyBack.getRects(&list);
+                // copy from previousBuffer to buffer
+                void* prevBits;
+                if (lock(previousBuffer, 
+                        GRALLOC_USAGE_SW_READ_OFTEN, &prevBits) == NO_ERROR) 
+                {
+                    copyBlt(buffer, bits, previousBuffer, prevBits, list, count);
+                    unlock(previousBuffer);
+                }
+            }
+        }
+        oldDirtyRegion = dirtyRegion;
+    }
 
+    if (previousBuffer) {
+        previousBuffer->common.decRef(&previousBuffer->common); 
+        previousBuffer = 0;
+    }
     
     unlock(buffer);
+    previousBuffer = buffer;
     nativeWindow->queueBuffer(nativeWindow, buffer);
-    buffer->common.decRef(&buffer->common); buffer = 0;
+    buffer = 0;
 
+    // dequeue a new buffer
     nativeWindow->dequeueBuffer(nativeWindow, &buffer);
-    buffer->common.incRef(&buffer->common);
-
+    
     // TODO: lockBuffer should rather be executed when the very first
     // direct rendering occurs.
-    void* vaddr;
     nativeWindow->lockBuffer(nativeWindow, buffer);
-    lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN, &bits);
     
+    // reallocate the depth-buffer if needed
     if ((width != buffer->width) || (height != buffer->height)) {
         // TODO: we probably should reset the swap rect here
         // if the window size has changed
@@ -330,11 +496,31 @@ EGLBoolean egl_window_surface_v2_t::swapBuffers()
             depth.stride  = buffer->stride;
             depth.data    = (GGLubyte*)malloc(depth.stride*depth.height*2);
             if (depth.data == 0) {
-                setError(EGL_BAD_ALLOC, EGL_NO_SURFACE);
+                setError(EGL_BAD_ALLOC, EGL_FALSE);
                 return EGL_FALSE;
             }
         }
     }
+    
+    // keep a reference on the buffer
+    buffer->common.incRef(&buffer->common);
+
+    // finally pin the buffer down
+    if (lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | 
+            GRALLOC_USAGE_SW_WRITE_OFTEN, &bits) != NO_ERROR) {
+        LOGE("eglSwapBuffers() failed to lock buffer %p (%ux%u)",
+                buffer, buffer->width, buffer->height);
+        setError(EGL_BAD_ACCESS, EGL_NO_SURFACE);
+        // FIXME: we should make sure we're not accessing the buffer anymore
+    }
+
+    return EGL_TRUE;
+}
+
+EGLBoolean egl_window_surface_v2_t::setSwapRectangle(
+        EGLint l, EGLint t, EGLint w, EGLint h)
+{
+    dirtyRegion = Rect(l, t, l+w, t+h);
     return EGL_TRUE;
 }
 
@@ -402,12 +588,22 @@ EGLint egl_window_surface_v2_t::getVerticalResolution() const {
 EGLint egl_window_surface_v2_t::getRefreshRate() const {
     return (60 * EGL_DISPLAY_SCALING); // FIXME
 }
-EGLint egl_window_surface_v2_t::getSwapBehavior() const {
-    //uint32_t flags = nativeWindow->flags;
-    //if (flags & SURFACE_FLAG_PRESERVE_CONTENT)
-    //    return EGL_BUFFER_PRESERVED;
-    // This is now a feature of EGL, currently we don't preserve
-    // the content of the buffers.
+EGLint egl_window_surface_v2_t::getSwapBehavior() const 
+{
+    /*
+     * EGL_BUFFER_PRESERVED means that eglSwapBuffers() completely preserves
+     * the content of the swapped buffer.
+     * 
+     * EGL_BUFFER_DESTROYED means that the content of the buffer is lost.
+     * 
+     * However when ANDROID_swap_retcangle is supported, EGL_BUFFER_DESTROYED
+     * only applies to the area specified by eglSetSwapRectangleANDROID(), that
+     * is, everything outside of this area is preserved.
+     * 
+     * This implementation of EGL assumes the later case.
+     * 
+     */
+
     return EGL_BUFFER_DESTROYED;
 }
 
@@ -581,6 +777,7 @@ static char const * const gExtensionsString =
         "KHR_image_base "
         // "KHR_image_pixmap "
         "EGL_ANDROID_image_native_buffer "
+        "EGL_ANDROID_swap_rectangle "
         ;
 
 // ----------------------------------------------------------------------------
@@ -1762,6 +1959,26 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
         return setError(EGL_BAD_PARAMETER, EGL_FALSE);
 
     native_buffer->common.decRef(&native_buffer->common);
+
+    return EGL_TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// ANDROID extensions
+// ----------------------------------------------------------------------------
+
+EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
+        EGLint left, EGLint top, EGLint width, EGLint height)
+{
+    if (egl_display_t::is_valid(dpy) == EGL_FALSE)
+        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+
+    egl_surface_t* d = static_cast<egl_surface_t*>(draw);
+    if (d->dpy != dpy)
+        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+
+    // post the surface
+    d->setSwapRectangle(left, top, width, height);
 
     return EGL_TRUE;
 }

@@ -803,12 +803,14 @@ void SurfaceFlinger::handleRepaint()
     mInvalidRegion.orSelf(mDirtyRegion);
 
     uint32_t flags = hw.getFlags();
-    if (flags & DisplayHardware::BUFFER_PRESERVED) {
-        // here we assume DisplayHardware::flip()'s  implementation
-        // performs the copy-back optimization.
+    if ((flags & DisplayHardware::SWAP_RECTANGLE) || 
+        (flags & DisplayHardware::BUFFER_PRESERVED)) 
+    {
+        // we can redraw only what's dirty
     } else {
         if (flags & DisplayHardware::UPDATE_ON_DEMAND) {
-            // we need to fully redraw the part that will be updated
+            // we need to redraw the rectangle that will be updated
+            // (pushed to the framebuffer).
             mDirtyRegion.set(mInvalidRegion.bounds());
         } else {
             // we need to redraw everything
@@ -890,7 +892,9 @@ void SurfaceFlinger::debugFlashRegions()
 {
      const DisplayHardware& hw(graphicPlane(0).displayHardware());
      const uint32_t flags = hw.getFlags();
-     if (!(flags & DisplayHardware::BUFFER_PRESERVED)) {
+
+     if (!((flags & DisplayHardware::SWAP_RECTANGLE) ||
+             (flags & DisplayHardware::BUFFER_PRESERVED))) {
          const Region repaint((flags & DisplayHardware::UPDATE_ON_DEMAND) ?
                  mDirtyRegion.bounds() : hw.bounds());
          composeSurfaces(repaint);

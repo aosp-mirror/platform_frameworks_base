@@ -195,17 +195,19 @@ void DisplayHardware::init(uint32_t dpy)
      * Create our main surface
      */
 
-    
     surface = eglCreateWindowSurface(display, config, mNativeWindow.get(), NULL);
     checkEGLErrors("eglCreateDisplaySurfaceANDROID");
 
-    
     if (eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &dummy) == EGL_TRUE) {
         if (dummy == EGL_BUFFER_PRESERVED) {
             mFlags |= BUFFER_PRESERVED;
         }
     }
-    
+
+    if (strstr(egl_extensions, "ANDROID_swap_rectangle")) {
+        mFlags |= SWAP_RECTANGLE;
+    }
+
     mDpiX = mNativeWindow->xdpi;
     mDpiX = mNativeWindow->ydpi;
     mRefreshRate = mNativeWindow->getDevice()->fps; 
@@ -304,11 +306,12 @@ void DisplayHardware::flip(const Region& dirty) const
     EGLDisplay dpy = mDisplay;
     EGLSurface surface = mSurface;
 
-    if (mFlags & BUFFER_PRESERVED) {
+    if (mFlags & SWAP_RECTANGLE) {
         Region newDirty(dirty);
         newDirty.andSelf(Rect(mWidth, mHeight));
         const Rect& b(newDirty.bounds());
-        //mNativeWindow->setSwapRectangle(b);
+        eglSetSwapRectangleANDROID(dpy, surface,
+                b.left, b.top, b.width(), b.height());
     } 
 
     mPageFlipCount++;

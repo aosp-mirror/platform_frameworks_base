@@ -60,6 +60,7 @@ static char const * const gExtensionString  =
         "KHR_image_base "
         "KHR_image_pixmap "
         "EGL_ANDROID_image_native_buffer "
+        "EGL_ANDROID_swap_rectangle "
         ;
 
 // ----------------------------------------------------------------------------
@@ -1568,3 +1569,23 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
 
      return EGL_FALSE;
 }
+
+
+// ----------------------------------------------------------------------------
+// ANDROID extensions
+// ----------------------------------------------------------------------------
+
+EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
+        EGLint left, EGLint top, EGLint width, EGLint height)
+{
+    if (!validate_display_surface(dpy, draw))
+        return EGL_FALSE;    
+    egl_display_t const * const dp = get_display(dpy);
+    egl_surface_t const * const s = get_surface(draw);
+    if (s->cnx->hooks->egl.eglSetSwapRectangleANDROID) {
+        return s->cnx->hooks->egl.eglSetSwapRectangleANDROID(dp->dpys[s->impl],
+                s->surface, left, top, width, height);
+    }
+    return EGL_FALSE;
+}
+

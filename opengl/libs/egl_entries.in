@@ -50,3 +50,7 @@ EGL_ENTRY(EGLBoolean,  eglLockSurfaceKHR,   EGLDisplay, EGLSurface, const EGLint
 EGL_ENTRY(EGLBoolean,  eglUnlockSurfaceKHR, EGLDisplay, EGLSurface)
 EGL_ENTRY(EGLImageKHR, eglCreateImageKHR,   EGLDisplay, EGLContext, EGLenum, EGLClientBuffer, const EGLint *)
 EGL_ENTRY(EGLBoolean,  eglDestroyImageKHR,  EGLDisplay, EGLImageKHR)
+
+/* ANDROID extensions */
+
+EGL_ENTRY(EGLBoolean, eglSetSwapRectangleANDROID, EGLDisplay, EGLSurface, EGLint, EGLint, EGLint, EGLint)
