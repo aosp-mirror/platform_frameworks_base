@@ -102,7 +102,6 @@ private:
     int             mHeight;
     PixelFormat     mFormat;
     uint32_t        mFlags;
-    mutable Region  mDirty;
     mutable uint32_t mPageFlipCount;
     
     sp<FramebufferNativeWindow> mNativeWindow;

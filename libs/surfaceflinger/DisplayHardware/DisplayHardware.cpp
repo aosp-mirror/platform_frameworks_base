@@ -305,15 +305,12 @@ void DisplayHardware::flip(const Region& dirty) const
     EGLDisplay dpy = mDisplay;
     EGLSurface surface = mSurface;
 
-    Region newDirty(dirty);
-    newDirty.andSelf(Rect(mWidth, mHeight));
-
     if (mFlags & BUFFER_PRESERVED) {
-        mDirty = newDirty;
+        Region newDirty(dirty);
+        newDirty.andSelf(Rect(mWidth, mHeight));
+        const Rect& b(newDirty.bounds());
+        //mNativeWindow->setSwapRectangle(b);
     } 
-
-    const Rect& b(newDirty.bounds());
-    mNativeWindow->setSwapRectangle(b);
 
     mPageFlipCount++;
     eglSwapBuffers(dpy, surface);

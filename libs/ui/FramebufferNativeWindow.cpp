@@ -131,25 +131,11 @@ FramebufferNativeWindow::~FramebufferNativeWindow() {
     framebuffer_close(fbDev);
 }
 
-void FramebufferNativeWindow::connect(android_native_window_t* window) 
-{
-}
-
-void FramebufferNativeWindow::disconnect(android_native_window_t* window) 
-{
-}
-
 int FramebufferNativeWindow::setSwapInterval(
         android_native_window_t* window, int interval) 
 {
     framebuffer_device_t* fb = getSelf(window)->fbDev;
     return fb->setSwapInterval(fb, interval);
-}
-
-void FramebufferNativeWindow::setSwapRectangle(const Rect& dirty)
-{
-    Mutex::Autolock _l(mutex);
-    mDirty = dirty; 
 }
 
 int FramebufferNativeWindow::dequeueBuffer(android_native_window_t* window, 

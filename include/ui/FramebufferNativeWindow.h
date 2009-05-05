@@ -76,13 +76,9 @@ public:
 
     framebuffer_device_t const * getDevice() const { return fbDev; } 
 
-    void setSwapRectangle(const Rect& dirty);
-
 private:
     friend class LightRefBase<FramebufferNativeWindow>;    
     ~FramebufferNativeWindow(); // this class cannot be overloaded
-    static void connect(android_native_window_t* window);
-    static void disconnect(android_native_window_t* window);
     static int setSwapInterval(android_native_window_t* window, int interval);
     static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
     static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
@@ -94,8 +90,6 @@ private:
     sp<NativeBuffer> buffers[2];
     sp<NativeBuffer> front;
     
-    Rect mDirty;
-
     mutable Mutex mutex;
     Condition mCondition;
     int32_t mNumBuffers;
