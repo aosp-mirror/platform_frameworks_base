@@ -56,10 +56,11 @@ def main(options, args):
   run_load_test_cmd_postfix = " -w com.android.dumprendertree/.LayoutTestsAutoRunner"
 
   # Call LoadTestsAutoTest::runTest.
-  run_load_test_cmd = run_load_test_cmd_prefix + " -e class com.android.dumprendertree.LoadTestsAutoTest#runTest -e path \"" + path + "\" -e timeout " + timeout_ms + run_load_test_cmd_postfix
+  run_load_test_cmd = run_load_test_cmd_prefix + " -e class com.android.dumprendertree.LoadTestsAutoTest#runPageCyclerTest -e path \"" + path + "\" -e timeout " + timeout_ms + run_load_test_cmd_postfix
 
   (adb_output, adb_error) = subprocess.Popen(run_load_test_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-  if adb_output.find('INSTRUMENTATION_FAILED') != -1:
+  if adb_output.find('INSTRUMENTATION_FAILED') != -1 or \
+      adb_output.find('Process crashed.') != -1:
     logging.error("Error happened : " + adb_output)
     sys.exit(1)
 
