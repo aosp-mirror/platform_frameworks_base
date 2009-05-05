@@ -18,7 +18,7 @@
 #define ANDROID_TONEGENERATOR_H_
 
 #include <utils/RefBase.h>
-#include <utils/Vector.h>
+#include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
@@ -49,21 +49,30 @@ public:
         TONE_DTMF_C,  // C key: 1633Hz, 852Hz
         TONE_DTMF_D,  // D key: 1633Hz, 941Hz
         // Call supervisory tones:  3GPP TS 22.001 (CEPT)
-        TONE_SUP_DIAL,  // Dial tone: 425Hz, continuous
-        TONE_SUP_BUSY,  // Busy tone: 425Hz, 500ms ON, 500ms OFF...
-        TONE_SUP_CONGESTION,  // Congestion tone: 425Hz, 200ms ON, 200ms OFF...
-        TONE_SUP_RADIO_ACK,  // Radio path acknowlegment: 425Hz, 200ms ON
+        TONE_SUP_DIAL,  // Dial tone: CEPT: 425Hz, continuous
+        FIRST_SUP_TONE = TONE_SUP_DIAL,
+        TONE_SUP_BUSY,  // Busy tone, CEPT: 425Hz, 500ms ON, 500ms OFF...
+        TONE_SUP_CONGESTION,  // Congestion tone CEPT, JAPAN: 425Hz, 200ms ON, 200ms OFF...
+        TONE_SUP_RADIO_ACK,  // Radio path acknowlegment, CEPT, ANSI: 425Hz, 200ms ON
         TONE_SUP_RADIO_NOTAVAIL,  // Radio path not available: 425Hz, 200ms ON, 200 OFF 3 bursts
         TONE_SUP_ERROR,  // Error/Special info:  950Hz+1400Hz+1800Hz, 330ms ON, 1s OFF...
-        TONE_SUP_CALL_WAITING,  // Call Waiting:  425Hz, 200ms ON, 600ms OFF, 200ms ON, 3s OFF...
-        TONE_SUP_RINGTONE,  // Ring Tone:  425Hz, 1s ON, 4s OFF...
+        TONE_SUP_CALL_WAITING,  // Call Waiting CEPT,JAPAN:  425Hz, 200ms ON, 600ms OFF, 200ms ON, 3s OFF...
+        TONE_SUP_RINGTONE,  // Ring Tone CEPT, JAPAN:  425Hz, 1s ON, 4s OFF...
+        LAST_SUP_TONE = TONE_SUP_RINGTONE,
         // Proprietary tones:  3GPP TS 31.111
         TONE_PROP_BEEP,  // General beep: 400Hz+1200Hz, 35ms ON
         TONE_PROP_ACK,  // Positive Acknowlgement: 1200Hz, 100ms ON, 100ms OFF 2 bursts
-        TONE_PROP_NACK,  // Negative Acknowlgement: 300Hz+400Hz+500Hz, 400ms ON 
+        TONE_PROP_NACK,  // Negative Acknowlgement: 300Hz+400Hz+500Hz, 400ms ON
         TONE_PROP_PROMPT,  // Prompt tone: 400Hz+1200Hz, 200ms ON
         TONE_PROP_BEEP2,  // General double beep: 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms on
-        NUM_TONES
+        // Additional call supervisory tones: specified by IS-95 only
+        TONE_SUP_INTERCEPT, // Intercept tone: alternating 440 Hz and 620 Hz tones, each on for 250 ms.
+        TONE_SUP_INTERCEPT_ABBREV, // Abbreviated intercept: intercept tone limited to 4 seconds
+        TONE_SUP_CONGESTION_ABBREV, // Abbreviated congestion: congestion tone limited to 4 seconds
+        TONE_SUP_CONFIRM, // Confirm tone: a 350 Hz tone added to a 440 Hz tone repeated 3 times in a 100 ms on, 100 ms off cycle.
+        TONE_SUP_PIP, // Pip tone: four bursts of 480 Hz tone (0.1 s on, 0.1 s off).
+        NUM_TONES,
+        NUM_SUP_TONES = LAST_SUP_TONE-FIRST_SUP_TONE+1
     };
 
     ToneGenerator(int streamType, float volume);
@@ -85,13 +94,45 @@ private:
         TONE_RESTARTING  //
     };
 
-    static const unsigned int TONEGEN_MAX_WAVES = 3;
-    static const unsigned int TONEGEN_MAX_SEGMENTS = 4;  // Maximun number of elenemts in
+
+    // Region specific tones.
+    // These supervisory tones are different depending on the region (USA/CANADA, JAPAN, rest of the world).
+    // When a tone in the range [FIRST_SUP_TONE, LAST_SUP_TONE] is requested, the region is determined
+    // from system property gsm.operator.iso-country and the proper tone descriptor is selected with the
+    // help of sToneMappingTable[]
+    enum regional_tone_type {
+        // ANSI supervisory tones
+        TONE_ANSI_DIAL = NUM_TONES, // Dial tone: a continuous 350 Hz + 440 Hz tone.
+        TONE_ANSI_BUSY,             // Busy tone on:  a 480 Hz + 620 Hz tone repeated in a 500 ms on, 500 ms off cycle.
+        TONE_ANSI_CONGESTION,       // Network congestion (reorder) tone on:  a 480 Hz + 620 Hz tone repeated in a 250 ms on, 250 ms off cycle.
+        TONE_ANSI_CALL_WAITING,     // Call waiting tone on: 440 Hz, on for 300 ms, 9,7 s off followed by
+                                    // (440 Hz, on for 100 ms off for 100 ms, on for 100 ms, 9,7s off and repeated as necessary).
+        TONE_ANSI_RINGTONE,         // Ring Tone:  a 440 Hz + 480 Hz tone repeated in a 2 s on, 4 s off pattern.
+        // JAPAN Supervisory tones
+        TONE_JAPAN_DIAL,            // Dial tone: 400Hz, continuous
+        TONE_JAPAN_BUSY,            // Busy tone: 400Hz, 500ms ON, 500ms OFF...
+        TONE_JAPAN_RADIO_ACK,       // Radio path acknowlegment: 400Hz, 1s ON, 2s OFF...
+        NUM_ALTERNATE_TONES
+    };
+
+    enum region {
+        ANSI,
+        JAPAN,
+        CEPT,
+        NUM_REGIONS
+    };
+
+    static const unsigned char sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONES];
+
+    static const unsigned int TONEGEN_MAX_WAVES = 3;     // Maximun number of sine waves in a tone segment
+    static const unsigned int TONEGEN_MAX_SEGMENTS = 5;  // Maximun number of segments in a tone descriptor
     static const unsigned int TONEGEN_INF = 0xFFFFFFFF;  // Represents infinite time duration
     static const float TONEGEN_GAIN = 0.9;  // Default gain passed to  WaveGenerator().
 
     // ToneDescriptor class contains all parameters needed to generate a tone:
-    //    - The array waveFreq[] contains the frequencies of all individual waves making the multi-tone.
+    //    - The array waveFreq[]:
+    //         1 for static tone descriptors: contains the frequencies of all individual waves making the multi-tone.
+    //         2 for active tone descritors: contains the indexes of the WaveGenerator objects in mWaveGens
     //        The number of sine waves varies from 1 to TONEGEN_MAX_WAVES.
     //        The first null value indicates that no more waves are needed.
     //    - The array segments[] is used to generate the tone pulses. A segment is a period of time
@@ -100,17 +141,25 @@ private:
     //        The data stored in segments[] is the duration of the corresponding period in ms.
     //        The first segment encountered with a 0 duration    indicates that no more segment follows.
     //    - repeatCnt indicates the number of times the sequence described by segments[] array must be repeated.
-    //        When the tone generator    encounters the first 0 duration segment, it will compare repeatCnt to mCurCount.
-    //        If mCurCount > repeatCnt, the tone is stopped automatically.
+    //        When the tone generator encounters the first 0 duration segment, it will compare repeatCnt to mCurCount.
+    //        If mCurCount > repeatCnt, the tone is stopped automatically. Otherwise, tone sequence will be
+    //        restarted from segment repeatSegment.
+    //    - repeatSegment number of the first repeated segment when repeatCnt is not null
+
+    class ToneSegment {
+    public:
+        unsigned int duration;
+        unsigned short waveFreq[TONEGEN_MAX_WAVES+1];
+    };
 
     class ToneDescriptor {
     public:
-        unsigned short waveFreq[TONEGEN_MAX_WAVES+1];
-        unsigned long segments[TONEGEN_MAX_SEGMENTS+1];
+        ToneSegment segments[TONEGEN_MAX_SEGMENTS+1];
         unsigned long repeatCnt;
+        unsigned long repeatSegment;
     };
 
-    static const ToneDescriptor toneDescriptors[NUM_TONES];
+    static const ToneDescriptor sToneDescriptors[];
 
     unsigned int mTotalSmp;  // Total number of audio samples played (gives current time)
     unsigned int mNextSegSmp;  // Position of next segment transition expressed in samples
@@ -121,6 +170,7 @@ private:
     unsigned short mCurSegment;  // Current segment index in ToneDescriptor segments[]
     unsigned short mCurCount;  // Current sequence repeat count
     volatile unsigned short mState;  // ToneGenerator state (tone_state)
+    unsigned short mRegion;
     const ToneDescriptor *mpToneDesc;  // pointer to active tone descriptor
     const ToneDescriptor *mpNewToneDesc;  // pointer to next active tone descriptor
 
@@ -136,8 +186,9 @@ private:
     bool initAudioTrack();
     static void audioCallback(int event, void* user, void *info);
     bool prepareWave();
-    unsigned int numWaves();
+    unsigned int numWaves(unsigned int segmentIdx);
     void clearWaveGens();
+    int getToneForRegion(int toneType);
 
     // WaveGenerator generates a single sine wave
     class WaveGenerator {
@@ -167,7 +218,7 @@ private:
         short mAmplitude_Q15;  // Q15 amplitude
     };
 
-    Vector<WaveGenerator *> mWaveGens;  // list of active wave generators.
+    KeyedVector<unsigned short, WaveGenerator *> mWaveGens;  // list of active wave generators.
 };
 
 }
