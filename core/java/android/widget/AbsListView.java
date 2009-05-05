@@ -1908,6 +1908,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // User clicked on whitespace, or stopped a fling. It is a scroll.
                     createScrollingCache();
                     mTouchMode = TOUCH_MODE_SCROLL;
+                    mMotionCorrection = 0;
                     motionPosition = findMotionRow(y);
                     reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                 }
