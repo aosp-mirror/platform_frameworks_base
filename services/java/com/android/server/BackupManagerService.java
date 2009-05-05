@@ -26,15 +26,19 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 
 import android.backup.IBackupManager;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.String;
 import java.util.HashSet;
 import java.util.List;
@@ -57,6 +61,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private HashSet<ServiceInfo> mPendingBackups = new HashSet<ServiceInfo>();
     private final Object mQueueLock = new Object();
 
+    private File mStateDir;
     
     // ----- Handler that runs the actual backup process asynchronously -----
 
@@ -99,11 +104,40 @@ class BackupManagerService extends IBackupManager.Stub {
                         if (mTargetService != null) {
                             try {
                                 Log.d(TAG, "invoking doBackup() on " + backupIntent);
-                                // !!! TODO: set up files
-                                mTargetService.doBackup(-1, -1, -1);
+
+                                File savedStateName = new File(mStateDir, service.packageName);
+                                File backupDataName = new File(mStateDir, service.packageName + ".data");
+                                File newStateName = new File(mStateDir, service.packageName + ".new");
+                                
+                                ParcelFileDescriptor savedState =
+                                        ParcelFileDescriptor.open(savedStateName,
+                                                ParcelFileDescriptor.MODE_READ_ONLY |
+                                                ParcelFileDescriptor.MODE_CREATE);
+                                ParcelFileDescriptor backupData =
+                                        ParcelFileDescriptor.open(backupDataName,
+                                                ParcelFileDescriptor.MODE_READ_WRITE |
+                                                ParcelFileDescriptor.MODE_CREATE);
+                                ParcelFileDescriptor newState =
+                                        ParcelFileDescriptor.open(newStateName,
+                                                ParcelFileDescriptor.MODE_READ_WRITE |
+                                                ParcelFileDescriptor.MODE_CREATE);
+
+                                mTargetService.doBackup(savedState, backupData, newState);
+
+                                // !!! TODO: Now propagate the newly-backed-up data to the transport
+                                
+                                // !!! TODO: After successful transport, juggle the files so that
+                                // next time the new state is used as the old state
+                                
+                            } catch (FileNotFoundException fnf) {
+                                Log.d(TAG, "File not found on backup: ");
+                                fnf.printStackTrace();
                             } catch (RemoteException e) {
                                 Log.d(TAG, "Remote target " + backupIntent
                                         + " threw during backup:");
+                                e.printStackTrace();
+                            } catch (Exception e) {
+                                Log.w(TAG, "Final exception guard in backup: ");
                                 e.printStackTrace();
                             }
                             mContext.unbindService(this);
@@ -138,6 +172,11 @@ class BackupManagerService extends IBackupManager.Stub {
         mContext = context;
         mPackageManager = context.getPackageManager();
 
+        // Set up our bookkeeping
+        File dataDir = Environment.getDataDirectory();
+        mStateDir = new File(dataDir, "backup");
+        mStateDir.mkdirs();
+        
         // Identify the backup participants
         // !!! TODO: also watch package-install to keep this up to date
         List<ResolveInfo> services = mPackageManager.queryIntentServices(
