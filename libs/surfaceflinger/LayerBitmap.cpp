@@ -116,7 +116,8 @@ status_t Buffer::initSize(uint32_t w, uint32_t h)
 
 status_t Buffer::lock(GGLSurface* sur, uint32_t usage) 
 {
-    status_t res = SurfaceBuffer::lock(usage);
+    void* vaddr;
+    status_t res = SurfaceBuffer::lock(usage, &vaddr);
     if (res == NO_ERROR && sur) {
         sur->version = sizeof(GGLSurface);
         sur->width = width;
@@ -124,7 +125,7 @@ status_t Buffer::lock(GGLSurface* sur, uint32_t usage)
         sur->stride = stride;
         sur->format = format;
         sur->vstride = mVStride;
-        sur->data = static_cast<GGLubyte*>(bits);
+        sur->data = static_cast<GGLubyte*>(vaddr);
     }
     return res;
 }

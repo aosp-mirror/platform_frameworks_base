@@ -157,9 +157,8 @@ struct android_native_buffer_t
     int stride;
     int format;
     int usage;
-    void* bits;     // non-zero if buffer is locked for sw usage
 
-    void* reserved[2];
+    void* reserved[3];
 
     int (*getHandle)(struct android_native_buffer_t const * base,
             buffer_handle_t* handle);

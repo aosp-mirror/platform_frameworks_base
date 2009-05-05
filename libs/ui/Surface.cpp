@@ -90,23 +90,22 @@ int SurfaceBuffer::getHandle(android_native_buffer_t const * base,
     return 0;
 }
 
-status_t SurfaceBuffer::lock(uint32_t usage)
+status_t SurfaceBuffer::lock(uint32_t usage, void** vaddr)
 {
     const Rect lockBounds(width, height);
-    status_t res = lock(usage, lockBounds);
+    status_t res = lock(usage, lockBounds, vaddr);
     return res;
 }
 
-status_t SurfaceBuffer::lock(uint32_t usage, const Rect& rect)
+status_t SurfaceBuffer::lock(uint32_t usage, const Rect& rect, void** vaddr)
 {
-    status_t res = getBufferMapper().lock(handle, usage, rect, &bits);
+    status_t res = getBufferMapper().lock(handle, usage, rect, vaddr);
     return res;
 }
 
 status_t SurfaceBuffer::unlock()
 {
     status_t res = getBufferMapper().unlock(handle);
-    bits = NULL;
     return res;
 }
 
@@ -134,11 +133,11 @@ static void copyBlt(
         const sp<SurfaceBuffer>& src, 
         const Region& reg)
 {
-    src->lock(GRALLOC_USAGE_SW_READ_OFTEN, reg.bounds());
-    uint8_t const * const src_bits = (uint8_t const *)src->bits;
+    uint8_t const * src_bits;
+    src->lock(GRALLOC_USAGE_SW_READ_OFTEN, reg.bounds(), (void**)&src_bits);
 
-    dst->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, reg.bounds());
-    uint8_t* const dst_bits = (uint8_t*)dst->bits;
+    uint8_t* dst_bits;
+    dst->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, reg.bounds(), (void**)&dst_bits);
     
     Region::iterator iterator(reg);
     if (iterator) {
@@ -629,9 +628,10 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
             mDirtyRegion = newDirtyRegion;
             mOldDirtyRegion = newDirtyRegion;
 
+            void* vaddr;
             status_t res = backBuffer->lock(
                     GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN,
-                    newDirtyRegion.bounds());
+                    newDirtyRegion.bounds(), &vaddr);
             
             LOGW_IF(res, "failed locking buffer %d (%p)", 
                     mBackbufferIndex, backBuffer->handle);
@@ -642,7 +642,7 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
             other->s      = backBuffer->stride;
             other->usage  = backBuffer->usage;
             other->format = backBuffer->format;
-            other->bits   = backBuffer->bits;
+            other->bits   = vaddr;
         }
     }
     return err;
@@ -660,7 +660,6 @@ status_t Surface::unlockAndPost()
             mBackbufferIndex, mLockedBuffer->handle);
     
     status_t err = queueBuffer(mLockedBuffer);
-    mLockedBuffer->bits = NULL;
     mLockedBuffer = 0;
     return err;
 }

@@ -141,12 +141,13 @@ void ogles_lock_textures(ogles_context_t* c)
                     reinterpret_cast<gralloc_module_t const*>(pModule);
                 buffer_handle_t bufferHandle;
                 native_buffer->getHandle(native_buffer, &bufferHandle);
+                void* vaddr;
                 int err = module->lock(module, bufferHandle,
                         GRALLOC_USAGE_SW_READ_OFTEN,
                         0, 0, native_buffer->width, native_buffer->height,
-                        &native_buffer->bits);
+                        &vaddr);
 
-                u.texture->setImageBits(native_buffer->bits);
+                u.texture->setImageBits(vaddr);
                 c->rasterizer.procs.bindTexture(c, &(u.texture->surface));
             }
         }

@@ -54,8 +54,8 @@ public:
         return handle;
     }
     
-    status_t lock(uint32_t usage);
-    status_t lock(uint32_t usage, const Rect& rect);
+    status_t lock(uint32_t usage, void** vaddr);
+    status_t lock(uint32_t usage, const Rect& rect, void** vaddr);
     status_t unlock();
 
 protected:

@@ -146,9 +146,10 @@ struct egl_surface_t
 
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl) = 0;
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl) = 0;
+    virtual     void        connect() {}
+    virtual     void        disconnect() {}
     virtual     EGLint      getWidth() const = 0;
     virtual     EGLint      getHeight() const = 0;
-    virtual     void*       getBits() const = 0;
 
     virtual     EGLint      getHorizontalResolution() const;
     virtual     EGLint      getVerticalResolution() const;
@@ -204,21 +205,24 @@ struct egl_window_surface_v2_t : public egl_surface_t
     virtual     EGLBoolean  swapBuffers();
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl);
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
+    virtual     void        connect();
+    virtual     void        disconnect();
     virtual     EGLint      getWidth() const    { return buffer->width;  }
     virtual     EGLint      getHeight() const   { return buffer->height; }
-    virtual     void*       getBits() const;
     virtual     EGLint      getHorizontalResolution() const;
     virtual     EGLint      getVerticalResolution() const;
     virtual     EGLint      getRefreshRate() const;
     virtual     EGLint      getSwapBehavior() const;
+
 private:
-    status_t lock(android_native_buffer_t* buf, int usage);
+    status_t lock(android_native_buffer_t* buf, int usage, void** vaddr);
     status_t unlock(android_native_buffer_t* buf);
     android_native_window_t*   nativeWindow;
     android_native_buffer_t*   buffer;
     gralloc_module_t const*    module;
     int width;
     int height;
+    void* bits;
 };
 
 egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
@@ -226,7 +230,7 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
         int32_t depthFormat,
         android_native_window_t* window)
     : egl_surface_t(dpy, config, depthFormat), 
-    nativeWindow(window), buffer(0), module(0)
+    nativeWindow(window), buffer(0), module(0), bits(NULL)
 {
     hw_module_t const* pModule;
     hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule);
@@ -249,20 +253,26 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
         }
     }
 
-    // TODO: lockBuffer should rather be executed when the very first
-    // direct rendering occurs.    
     buffer->common.incRef(&buffer->common);
-    nativeWindow->lockBuffer(nativeWindow, buffer);
+}
 
+void egl_window_surface_v2_t::connect() 
+{
     // Lock the buffer
-    lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
-    
-    // FIXME: we need to handle the copy-back if needed, but
-    // for now we're a "non preserving" implementation.
+    nativeWindow->lockBuffer(nativeWindow, buffer);
+    lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN, &bits);
+}
+
+void egl_window_surface_v2_t::disconnect() 
+{
+    if (buffer) {
+        bits = NULL;
+        unlock(buffer);
+    }
 }
 
 status_t egl_window_surface_v2_t::lock(
-        android_native_buffer_t* buf, int usage)
+        android_native_buffer_t* buf, int usage, void** vaddr)
 {
     int err;
     buffer_handle_t bufferHandle;
@@ -271,7 +281,7 @@ status_t egl_window_surface_v2_t::lock(
         return err;
 
     err = module->lock(module, bufferHandle, 
-            usage, 0, 0, buf->width, buf->height, &buf->bits);
+            usage, 0, 0, buf->width, buf->height, vaddr);
     return err;
 }
 
@@ -284,14 +294,12 @@ status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
         return err;
 
     err = module->unlock(module, bufferHandle);
-    buf->bits = NULL;
     return err;
 }
 
 
 egl_window_surface_v2_t::~egl_window_surface_v2_t() {
     if (buffer) {
-        unlock(buffer);
         buffer->common.decRef(&buffer->common);
     }
     nativeWindow->common.decRef(&nativeWindow->common);
@@ -317,9 +325,9 @@ EGLBoolean egl_window_surface_v2_t::swapBuffers()
 
     // TODO: lockBuffer should rather be executed when the very first
     // direct rendering occurs.
+    void* vaddr;
     nativeWindow->lockBuffer(nativeWindow, buffer);
-    lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
-
+    lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN, &bits);
     
     if ((width != buffer->width) || (height != buffer->height)) {
         // TODO: we probably should reset the swap rect here
@@ -363,7 +371,7 @@ EGLBoolean egl_window_surface_v2_t::bindDrawSurface(ogles_context_t* gl)
     buffer.width   = this->buffer->width;
     buffer.height  = this->buffer->height;
     buffer.stride  = this->buffer->stride;
-    buffer.data    = (GGLubyte*)this->buffer->bits;
+    buffer.data    = (GGLubyte*)bits;
     buffer.format  = this->buffer->format;
     gl->rasterizer.procs.colorBuffer(gl, &buffer);
     if (depth.data != gl->rasterizer.state.buffers.depth.data)
@@ -392,13 +400,10 @@ EGLBoolean egl_window_surface_v2_t::bindReadSurface(ogles_context_t* gl)
     buffer.width   = this->buffer->width;
     buffer.height  = this->buffer->height;
     buffer.stride  = this->buffer->stride;
-    buffer.data    = (GGLubyte*)this->buffer->bits;
+    buffer.data    = (GGLubyte*)bits; // FIXME: hopefully is is LOCKED!!!
     buffer.format  = this->buffer->format;
     gl->rasterizer.procs.readBuffer(gl, &buffer);
     return EGL_TRUE;
-}
-void* egl_window_surface_v2_t::getBits() const {
-    return (GGLubyte*)buffer->bits;
 }
 EGLint egl_window_surface_v2_t::getHorizontalResolution() const {
     return (nativeWindow->xdpi * EGL_DISPLAY_SCALING) * (1.0f / 25.4f);
@@ -434,7 +439,6 @@ struct egl_pixmap_surface_t : public egl_surface_t
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
     virtual     EGLint      getWidth() const    { return nativePixmap.width;  }
     virtual     EGLint      getHeight() const   { return nativePixmap.height; }
-    virtual     void*       getBits() const     { return nativePixmap.data; }
 private:
     egl_native_pixmap_t     nativePixmap;
 };
@@ -499,7 +503,6 @@ struct egl_pbuffer_surface_t : public egl_surface_t
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
     virtual     EGLint      getWidth() const    { return pbuffer.width;  }
     virtual     EGLint      getHeight() const   { return pbuffer.height; }
-    virtual     void*       getBits() const     { return pbuffer.data; }
 private:
     GGLSurface  pbuffer;
 };
@@ -1311,6 +1314,11 @@ EGLBoolean eglDestroySurface(EGLDisplay dpy, EGLSurface eglSurface)
             return setError(EGL_BAD_SURFACE, EGL_FALSE);
         if (surface->dpy != dpy)
             return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+        if (surface->ctx) {
+            // FIXME: this surface is current check what the spec says
+            surface->disconnect();
+            surface->ctx = 0;
+        }
         delete surface;
     }
     return EGL_TRUE;
@@ -1436,12 +1444,10 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
         egl_surface_t* r = (egl_surface_t*)read;
         if ((d && d->ctx && d->ctx != ctx) ||
             (r && r->ctx && r->ctx != ctx)) {
-            // once of the surface is bound to a context in another thread
+            // one of the surface is bound to a context in another thread
             return setError(EGL_BAD_ACCESS, EGL_FALSE);
         }
     }
-
-    // TODO: call connect / disconnect on the surface
 
     ogles_context_t* gl = (ogles_context_t*)ctx;
     if (makeCurrent(gl) == 0) {
@@ -1449,8 +1455,17 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
             egl_context_t* c = egl_context_t::context(ctx);
             egl_surface_t* d = (egl_surface_t*)draw;
             egl_surface_t* r = (egl_surface_t*)read;
-            c->read = read;
+            
+            if (c->draw) {
+                reinterpret_cast<egl_surface_t*>(c->draw)->disconnect();
+            }
+            if (c->read) {
+                // FIXME: unlock/disconnect the read surface too 
+            }
+            
             c->draw = draw;
+            c->read = read;
+
             if (c->flags & egl_context_t::NEVER_CURRENT) {
                 c->flags &= ~egl_context_t::NEVER_CURRENT;
                 GLint w = 0;
@@ -1464,10 +1479,12 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
                 ogles_scissor(gl, 0, 0, w, h);
             }
             if (d) {
+                d->connect();
                 d->ctx = ctx;
                 d->bindDrawSurface(gl);
             }
             if (r) {
+                // FIXME: lock/connect the read surface too 
                 r->ctx = ctx;
                 r->bindReadSurface(gl);
             }
@@ -1478,8 +1495,14 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
                 egl_context_t* c = egl_context_t::context(current_ctx);
                 egl_surface_t* d = (egl_surface_t*)c->draw;
                 egl_surface_t* r = (egl_surface_t*)c->read;
-                if (d) d->ctx = EGL_NO_CONTEXT;
-                if (r) r->ctx = EGL_NO_CONTEXT;
+                if (d) {
+                    d->ctx = EGL_NO_CONTEXT;
+                    d->disconnect();
+                }
+                if (r) {
+                    r->ctx = EGL_NO_CONTEXT;
+                    // FIXME: unlock/disconnect the read surface too 
+                }
             }
         }
         return EGL_TRUE;
