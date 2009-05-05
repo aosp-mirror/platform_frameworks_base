@@ -210,7 +210,7 @@ public class Searchables {
                 SearchableInfo searchable = SearchableInfo.getActivityMetaData(mContext, ai);
                 if (searchable != null) {
                     newSearchablesList.add(searchable);
-                    newSearchablesMap.put(searchable.mSearchActivity, searchable);
+                    newSearchablesMap.put(searchable.getSearchActivity(), searchable);
                     if (searchable.shouldIncludeInGlobalSearch()) {
                         newSearchablesInGlobalSearchList.add(searchable);
                     }

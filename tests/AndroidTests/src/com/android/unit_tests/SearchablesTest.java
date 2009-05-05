@@ -87,8 +87,7 @@ public class SearchablesTest extends AndroidTestCase {
 
         SearchableInfo si = searchables.getSearchableInfo(thisActivity);
         assertNotNull(si);
-        assertTrue(si.mSearchable);
-        assertEquals(thisActivity, si.mSearchActivity);
+        assertEquals(thisActivity, si.getSearchActivity());
         
         Context appContext = si.getActivityContext(mContext);
         assertNotNull(appContext);
@@ -194,10 +193,9 @@ public class SearchablesTest extends AndroidTestCase {
     
     private void checkSearchable(SearchableInfo si) {
         assertNotNull(si);
-        assertTrue(si.mSearchable);
         assertTrue(si.getLabelId() != 0);        // This must be a useable string
-        assertNotEmpty(si.mSearchActivity.getClassName());
-        assertNotEmpty(si.mSearchActivity.getPackageName());
+        assertNotEmpty(si.getSearchActivity().getClassName());
+        assertNotEmpty(si.getSearchActivity().getPackageName());
         if (si.getSuggestAuthority() != null) {
             // The suggestion fields are largely optional, so we'll just confirm basic health
             assertNotEmpty(si.getSuggestAuthority());
@@ -210,12 +208,12 @@ public class SearchablesTest extends AndroidTestCase {
         /* For now, test the most common action key (CALL) */
         ActionKeyInfo ai = si.findActionKey(KeyEvent.KEYCODE_CALL);
         if (ai != null) {
-            assertEquals(ai.mKeyCode, KeyEvent.KEYCODE_CALL);
+            assertEquals(ai.getKeyCode(), KeyEvent.KEYCODE_CALL);
             // one of these three fields must be non-null & non-empty
-            boolean m1 = (ai.mQueryActionMsg != null) && (ai.mQueryActionMsg.length() > 0);
-            boolean m2 = (ai.mSuggestActionMsg != null) && (ai.mSuggestActionMsg.length() > 0);
-            boolean m3 = (ai.mSuggestActionMsgColumn != null) && 
-                            (ai.mSuggestActionMsgColumn.length() > 0);
+            boolean m1 = (ai.getQueryActionMsg() != null) && (ai.getQueryActionMsg().length() > 0);
+            boolean m2 = (ai.getSuggestActionMsg() != null) && (ai.getSuggestActionMsg().length() > 0);
+            boolean m3 = (ai.getSuggestActionMsgColumn() != null) && 
+                            (ai.getSuggestActionMsgColumn().length() > 0);
             assertTrue(m1 || m2 || m3);
         }
         
