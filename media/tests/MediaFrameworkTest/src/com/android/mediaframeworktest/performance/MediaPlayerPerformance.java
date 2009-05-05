@@ -47,7 +47,7 @@ import android.media.MediaMetadataRetriever;
  */
 public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<MediaFrameworkTest> {
 
-    private String TAG = "MediaFrameworkPerformance";
+    private String TAG = "MediaPlayerPerformance";
 
     private SQLiteDatabase mDB;
     private SurfaceHolder mSurfaceHolder = null;
@@ -80,9 +80,11 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
     public void createDB() {
         mDB = SQLiteDatabase.openOrCreateDatabase("/sdcard/perf.db", null);
-        mDB.execSQL("CREATE TABLE perfdata (_id INTEGER PRIMARY KEY," + 
+        mDB.execSQL("CREATE TABLE IF NOT EXISTS perfdata (_id INTEGER PRIMARY KEY," + 
                 "file TEXT," + "setdatatime LONG," + "preparetime LONG," +
                 "playtime LONG" + ");");
+        //clean the table before adding new data
+        mDB.execSQL("DELETE FROM perfdata");
     }
 
     public void audioPlaybackStartupTime(String[] testFile) {
@@ -141,6 +143,10 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         audioPlaybackStartupTime(MediaNames.MP3FILES);
         audioPlaybackStartupTime(MediaNames.AACFILES);
 
+        //close the database after all transactions
+        if (mDB.isOpen()) {
+            mDB.close();
+        }
     }
 
     public void wmametadatautility(String[] testFile) {
