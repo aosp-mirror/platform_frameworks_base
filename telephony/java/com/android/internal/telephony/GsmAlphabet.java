@@ -182,7 +182,7 @@ public class GsmAlphabet {
             return stringToGsm7BitPacked(data);
         }
 
-        int headerBits = header.length * 8;
+        int headerBits = (header.length + 1) * 8;
         int headerSeptets = headerBits / 7;
         headerSeptets += (headerBits % 7) > 0 ? 1 : 0;
 
@@ -194,7 +194,8 @@ public class GsmAlphabet {
                 (headerSeptets*7), true);
 
         // Paste in the header
-        System.arraycopy(header, 0, ret, 1, header.length);
+        ret[1] = (byte)header.length;
+        System.arraycopy(header, 0, ret, 2, header.length);
         return ret;
     }
 

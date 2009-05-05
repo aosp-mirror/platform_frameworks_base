@@ -189,8 +189,12 @@ public final class BearerData{
     public int messageStatus = STATUS_UNDEFINED;
 
     /**
-     * 1-bit value that indicates whether a User Data Header is present.
+     * 1-bit value that indicates whether a User Data Header (UDH) is present.
      * (See 3GPP2 C.S0015-B, v2, 4.5.1)
+     *
+     * NOTE: during encoding, this value will be set based on the
+     * presence of a UDH in the structured data, any existing setting
+     * will be overwritten.
      */
     public boolean hasUserDataHeader;
 
@@ -248,25 +252,27 @@ public final class BearerData{
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("BearerData:\n");
-        builder.append("  messageType: " + messageType + "\n");
-        builder.append("  messageId: " + (int)messageId + "\n");
-        builder.append("  priority: " + (priorityIndicatorSet ? priority : "not set") + "\n");
-        builder.append("  privacy: " + (privacyIndicatorSet ? privacy : "not set") + "\n");
-        builder.append("  alert: " + (alertIndicatorSet ? alert : "not set") + "\n");
-        builder.append("  displayMode: " + (displayModeSet ? displayMode : "not set") + "\n");
-        builder.append("  language: " + (languageIndicatorSet ? language : "not set") + "\n");
-        builder.append("  errorClass: " + (messageStatusSet ? errorClass : "not set") + "\n");
-        builder.append("  msgStatus: " + (messageStatusSet ? messageStatus : "not set") + "\n");
-        builder.append("  hasUserDataHeader: " + hasUserDataHeader + "\n");
-        builder.append("  timeStamp: " + timeStamp + "\n");
-        builder.append("  userAckReq: " + userAckReq + "\n");
-        builder.append("  deliveryAckReq: " + deliveryAckReq + "\n");
-        builder.append("  readAckReq: " + readAckReq + "\n");
-        builder.append("  reportReq: " + reportReq + "\n");
-        builder.append("  numberOfMessages: " + numberOfMessages + "\n");
-        builder.append("  callbackNumber: " + callbackNumber + "\n");
-        builder.append("  userData: " + userData + "\n");
+        builder.append("BearerData ");
+        builder.append("{ messageType=" + messageType);
+        builder.append(", messageId=" + (int)messageId);
+        builder.append(", priority=" + (priorityIndicatorSet ? priority : "unset"));
+        builder.append(", privacy=" + (privacyIndicatorSet ? privacy : "unset"));
+        builder.append(", alert=" + (alertIndicatorSet ? alert : "unset"));
+        builder.append(", displayMode=" + (displayModeSet ? displayMode : "unset"));
+        builder.append(", language=" + (languageIndicatorSet ? language : "unset"));
+        builder.append(", errorClass=" + (messageStatusSet ? errorClass : "unset"));
+        builder.append(", msgStatus=" + (messageStatusSet ? messageStatus : "unset"));
+        builder.append(", timeStamp=" +
+                ((timeStamp != null) ? HexDump.toHexString(timeStamp) : "unset"));
+        builder.append(", userAckReq=" + userAckReq);
+        builder.append(", deliveryAckReq=" + deliveryAckReq);
+        builder.append(", readAckReq=" + readAckReq);
+        builder.append(", reportReq=" + reportReq);
+        builder.append(", numberOfMessages=" + numberOfMessages);
+        builder.append(", callbackNumber=" + callbackNumber);
+        builder.append(", hasUserDataHeader=" + hasUserDataHeader);
+        builder.append(", userData=" + userData);
+        builder.append(" }");
         return builder.toString();
     }
 
@@ -335,12 +341,19 @@ public final class BearerData{
     private static void encodeUserDataPayload(UserData uData)
         throws CodingException
     {
+        byte[] headerData = null;
+        if (uData.userDataHeader != null) headerData = SmsHeader.toByteArray(uData.userDataHeader);
+        int headerDataLen = (headerData == null) ? 0 : headerData.length + 1;  // + length octet
+
+        byte[] payloadData;
         if (uData.msgEncodingSet) {
             if (uData.msgEncoding == UserData.ENCODING_OCTET) {
                 if (uData.payload == null) {
                     Log.e(LOG_TAG, "user data with octet encoding but null payload");
                     // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
-                    uData.payload = new byte[0];
+                    payloadData = new byte[0];
+                } else {
+                    payloadData = uData.payload;
                 }
             } else {
                 if (uData.payloadStr == null) {
@@ -349,11 +362,11 @@ public final class BearerData{
                     uData.payloadStr = "";
                 }
                 if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
-                    uData.payload = encode7bitGsm(uData.payloadStr);
+                    payloadData = encode7bitGsm(uData.payloadStr);
                 } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
-                    uData.payload = encode7bitAscii(uData.payloadStr);
+                    payloadData = encode7bitAscii(uData.payloadStr);
                 } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
-                    uData.payload = encodeUtf16(uData.payloadStr);
+                    payloadData = encodeUtf16(uData.payloadStr);
                 } else {
                     throw new CodingException("unsupported user data encoding (" +
                                               uData.msgEncoding + ")");
@@ -367,19 +380,28 @@ public final class BearerData{
                 uData.payloadStr = "";
             }
             try {
-                uData.payload = encode7bitAscii(uData.payloadStr);
+                payloadData = encode7bitAscii(uData.payloadStr);
                 uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
             } catch (CodingException ex) {
-                uData.payload = encodeUtf16(uData.payloadStr);
+                payloadData = encodeUtf16(uData.payloadStr);
                 uData.msgEncoding = UserData.ENCODING_UNICODE_16;
             }
             uData.msgEncodingSet = true;
             uData.numFields = uData.payloadStr.length();
         }
-        if (uData.payload.length > SmsMessage.MAX_USER_DATA_BYTES) {
-            throw new CodingException("encoded user data too large (" + uData.payload.length +
+
+        int totalLength = payloadData.length + headerDataLen;
+        if (totalLength > SmsMessage.MAX_USER_DATA_BYTES) {
+            throw new CodingException("encoded user data too large (" + totalLength +
                                       " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
         }
+
+        uData.payload = new byte[totalLength];
+        if (headerData != null) {
+            uData.payload[0] = (byte)headerData.length;
+            System.arraycopy(headerData, 0, uData.payload, 1, headerData.length);
+        }
+        System.arraycopy(payloadData, 0, uData.payload, headerDataLen, payloadData.length);
     }
 
     private static void encodeUserData(BearerData bData, BitwiseOutputStream outStream)
@@ -394,11 +416,6 @@ public final class BearerData{
          *
          */
         int dataBits = (bData.userData.payload.length * 8) - bData.userData.paddingBits;
-        byte[] headerData = null;
-        if (bData.hasUserDataHeader) {
-            headerData = bData.userData.userDataHeader.toByteArray();
-            dataBits += headerData.length * 8;
-        }
         int paramBits = dataBits + 13;
         if ((bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) ||
             (bData.userData.msgEncoding == UserData.ENCODING_GSM_DCS)) {
@@ -413,7 +430,6 @@ public final class BearerData{
             outStream.write(8, bData.userData.msgType);
         }
         outStream.write(8, bData.userData.numFields);
-        if (headerData != null) outStream.writeByteArray(headerData.length * 8, headerData);
         outStream.writeByteArray(dataBits, bData.userData.payload);
         if (paddingBits > 0) outStream.write(paddingBits, 0);
     }
@@ -557,6 +573,8 @@ public final class BearerData{
      * @return data byta array of raw encoded SMS bearer data.
      */
     public static byte[] encode(BearerData bData) {
+        bData.hasUserDataHeader = ((bData.userData != null) &&
+                (bData.userData.userDataHeader != null));
         try {
             BitwiseOutputStream outStream = new BitwiseOutputStream(200);
             outStream.write(8, SUBPARAM_MESSAGE_IDENTIFIER);
@@ -723,11 +741,11 @@ public final class BearerData{
     {
         int offset = 0;
         if (hasUserDataHeader) {
-            int udhLen = userData.payload[0];
-            offset += udhLen;
+            int udhLen = userData.payload[0] & 0x00FF;
+            offset += udhLen + 1;
             byte[] headerData = new byte[udhLen];
             System.arraycopy(userData.payload, 1, headerData, 0, udhLen);
-            userData.userDataHeader = SmsHeader.parse(headerData);
+            userData.userDataHeader = SmsHeader.fromByteArray(headerData);
         }
         switch (userData.msgEncoding) {
         case UserData.ENCODING_OCTET:
