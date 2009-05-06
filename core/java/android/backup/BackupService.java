@@ -33,7 +33,7 @@ import android.util.Log;
  * In order to use the backup service, your application must implement a
  * subclass of BackupService, and declare an intent filter
  * in the application manifest specifying that your BackupService subclass
- * handles the {link #SERVICE_ACTION} intent action.  For example:
+ * handles the {@link BackupService#SERVICE_ACTION} intent action.  For example:
  * 
  * <pre class="prettyprint">
  *      &lt;!-- Use the class "MyBackupService" to perform backups for my app --&gt;
