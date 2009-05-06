@@ -1167,6 +1167,8 @@ public class SyncStorageEngine extends Handler {
         }
         
         if (db != null) {
+            final boolean hasType = db.getVersion() >= 11;
+            
             // Copy in all of the status information, as well as accounts.
             if (DEBUG_FILE) Log.v(TAG, "Reading legacy sync accounts db");
             SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
@@ -1174,7 +1176,9 @@ public class SyncStorageEngine extends Handler {
             HashMap<String,String> map = new HashMap<String,String>();
             map.put("_id", "status._id as _id");
             map.put("account", "stats.account as account");
-            map.put("account_type", "stats.account_type as account_type");
+            if (hasType) {
+                map.put("account_type", "stats.account_type as account_type");
+            }
             map.put("authority", "stats.authority as authority");
             map.put("totalElapsedTime", "totalElapsedTime");
             map.put("numSyncs", "numSyncs");
@@ -1193,7 +1197,8 @@ public class SyncStorageEngine extends Handler {
             Cursor c = qb.query(db, null, null, null, null, null, null);
             while (c.moveToNext()) {
                 String accountName = c.getString(c.getColumnIndex("account"));
-                String accountType = c.getString(c.getColumnIndex("account_type"));
+                String accountType = hasType
+                        ? c.getString(c.getColumnIndex("account_type")) : null;
                 if (accountType == null) {
                     accountType = "com.google.GAIA";
                 }
