@@ -30,7 +30,7 @@
 #include <private/pixelflinger/ggl_context.h>
 
 #include <GLES/gl.h>
-#include <EGL/android_natives.h>
+#include <EGL/egl.h>
 
 #include "Tokenizer.h"
 #include "TokenManager.h"

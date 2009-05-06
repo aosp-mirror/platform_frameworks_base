@@ -42,6 +42,25 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
+class NativeBuffer 
+    : public EGLNativeBase<
+        android_native_buffer_t, 
+        NativeBuffer, 
+        LightRefBase<NativeBuffer> >
+{
+public:
+    NativeBuffer(int w, int h, int f, int u) : BASE() {
+        android_native_buffer_t::width  = w;
+        android_native_buffer_t::height = h;
+        android_native_buffer_t::format = f;
+        android_native_buffer_t::usage  = u;
+    }
+private:
+    friend class LightRefBase<NativeBuffer>;    
+    ~NativeBuffer() { }; // this class cannot be overloaded
+};
+
+
 /*
  * This implements the (main) framebuffer management. This class is used
  * mostly by SurfaceFlinger, but also by command line GL application.

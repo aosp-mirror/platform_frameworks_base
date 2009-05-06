@@ -23,7 +23,7 @@
 #include "texture.h"
 #include "TextureObjectManager.h"
 
-#include <EGL/android_natives.h>
+#include <ui/egl/android_natives.h>
 
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
 #include "copybit.h"

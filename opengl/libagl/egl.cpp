@@ -33,12 +33,13 @@
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <EGL/android_natives.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
 #include <pixelflinger/format.h>
 #include <pixelflinger/pixelflinger.h>
+
+#include <ui/egl/android_natives.h>
 
 #include "context.h"
 #include "state.h"

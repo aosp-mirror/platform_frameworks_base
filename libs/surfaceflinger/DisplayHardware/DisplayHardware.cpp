@@ -30,7 +30,6 @@
 #include <GLES/gl.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <EGL/android_natives.h>
 
 #include <pixelflinger/pixelflinger.h>
 

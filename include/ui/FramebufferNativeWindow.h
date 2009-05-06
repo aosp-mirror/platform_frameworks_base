@@ -21,12 +21,13 @@
 #include <sys/types.h>
 
 #include <EGL/egl.h>
-#include <EGL/android_natives.h>
 
 #include <utils/threads.h>
 #include <ui/Rect.h>
 
 #include <pixelflinger/pixelflinger.h>
+
+#include <ui/egl/android_natives.h>
 
 
 extern "C" EGLNativeWindowType android_createDisplaySurface(void);
@@ -36,25 +37,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 class Surface;
-
-
-class NativeBuffer 
-    : public EGLNativeBase<
-        android_native_buffer_t, 
-        NativeBuffer, 
-        LightRefBase<NativeBuffer>  >
-{
-public:
-    NativeBuffer(int w, int h, int f, int u) : BASE() {
-        android_native_buffer_t::width  = w;
-        android_native_buffer_t::height = h;
-        android_native_buffer_t::format = f;
-        android_native_buffer_t::usage  = u;
-    }
-private:
-    friend class LightRefBase<NativeBuffer>;    
-    ~NativeBuffer() { }; // this class cannot be overloaded
-};
+class NativeBuffer;
 
 // ---------------------------------------------------------------------------
 

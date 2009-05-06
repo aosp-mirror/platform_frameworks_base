@@ -27,6 +27,7 @@
 #include <ui/Overlay.h>
 #include <ui/Surface.h>
 
+#include <private/ui/SurfaceBuffer.h>
 
 namespace android {
 

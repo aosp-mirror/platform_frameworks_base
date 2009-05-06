@@ -28,7 +28,7 @@
 #include <ui/Region.h>
 #include <ui/ISurfaceFlingerClient.h>
 
-#include <EGL/android_natives.h>
+#include <ui/egl/android_natives.h>
 
 namespace android {
 
@@ -42,44 +42,6 @@ struct per_client_cblk_t;
 struct layer_cblk_t;
 
 // ---------------------------------------------------------------------------
-
-class SurfaceBuffer 
-    : public EGLNativeBase<
-        android_native_buffer_t, 
-        SurfaceBuffer, 
-        LightRefBase<SurfaceBuffer> >
-{
-public:
-    status_t lock(uint32_t usage, void** vaddr);
-    status_t lock(uint32_t usage, const Rect& rect, void** vaddr);
-    status_t unlock();
-
-protected:
-            SurfaceBuffer();
-            SurfaceBuffer(const Parcel& reply);
-    virtual ~SurfaceBuffer();
-    bool mOwner;
-
-    inline const BufferMapper& getBufferMapper() const { return mBufferMapper; }
-    inline BufferMapper& getBufferMapper() { return mBufferMapper; }
-    
-private:
-    friend class Surface;
-    friend class BpSurface;
-    friend class BnSurface;
-    friend class LightRefBase<SurfaceBuffer>;    
-
-    SurfaceBuffer& operator = (const SurfaceBuffer& rhs);
-    const SurfaceBuffer& operator = (const SurfaceBuffer& rhs) const;
-
-    static status_t writeToParcel(Parcel* reply, 
-            android_native_buffer_t const* buffer);
-    
-    BufferMapper& mBufferMapper;
-};
-
-// ---------------------------------------------------------------------------
-class Surface;
 
 class SurfaceControl : public RefBase
 {

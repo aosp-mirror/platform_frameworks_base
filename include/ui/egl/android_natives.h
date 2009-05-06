@@ -47,7 +47,6 @@ enum {
     SURFACE_FLAG_MAPPED             = FRAMEBUFFER_FLAG_MAPPED,
 };
 
-
 // ---------------------------------------------------------------------------
 
 struct android_native_base_t

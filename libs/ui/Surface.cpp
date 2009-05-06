@@ -36,12 +36,11 @@
 #include <ui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
 
-#include <EGL/android_natives.h>
+#include <pixelflinger/pixelflinger.h>
 
 #include <private/ui/SharedState.h>
 #include <private/ui/LayerState.h>
-
-#include <pixelflinger/pixelflinger.h>
+#include <private/ui/SurfaceBuffer.h>
 
 namespace android {
 

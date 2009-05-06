@@ -28,12 +28,10 @@
 #include <ui/Rect.h>
 #include <ui/Surface.h>
 
-#include <EGL/android_natives.h>
-
 #include <pixelflinger/pixelflinger.h>
 
 #include <private/ui/SharedState.h>
-
+#include <private/ui/SurfaceBuffer.h>
 
 class copybit_image_t;
 struct android_native_buffer_t;

@@ -25,8 +25,6 @@
 #include <ui/BufferMapper.h>
 #include <ui/Rect.h>
 
-#include <EGL/android_natives.h>
-
 #include <hardware/gralloc.h>
 
 

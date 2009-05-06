@@ -20,8 +20,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <EGL/android_natives.h>
-
 #include <utils/Errors.h>
 #include <utils/IInterface.h>
 #include <utils/RefBase.h>
