@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#if !(TEST_BACKUP_HELPERS)
-#error These tests require TEST_BACKUP_HELPERS to be defined.
-#endif
+#if TEST_BACKUP_HELPERS
 
 // ============================================================
 // ============================================================
@@ -95,3 +93,12 @@ main(int argc, const char** argv)
         }
     }
 }
+
+#else
+int
+main(int argc, char** argv)
+{
+    printf ("test_backup_helper built without the tests\n");
+    return 0;
+}
+#endif
