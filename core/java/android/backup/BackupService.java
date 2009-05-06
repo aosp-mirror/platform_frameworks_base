@@ -39,7 +39,7 @@ import android.util.Log;
  *      &lt;!-- Use the class "MyBackupService" to perform backups for my app --&gt;
  *      &lt;service android:name=".MyBackupService"&gt;
  *          &lt;intent-filter&gt;
- *              &lt;action android:name="android.service.action.BACKUP" /&gt;
+ *              &lt;action android:name="android.backup.BackupService.SERVICE" /&gt;
  *          &lt;/intent-filter&gt;
  *      &lt;/service&gt;</pre>
  * 
@@ -54,19 +54,18 @@ public abstract class BackupService extends Service {
      * IntentFilter} that accepts this action. 
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String SERVICE_ACTION = "android.backup.BackupService";
+    public static final String SERVICE_ACTION = "android.backup.BackupService.SERVICE";
 
     /**
      * The application is being asked to write any data changed since the
      * last time it performed a backup operation.  The state data recorded
-     * during the last backup pass is provided in the oldStateFd file descriptor.
-     * If oldState.getStatSize() is zero or negative, no old state is available
-     * and the application should perform a full backup.  In both cases, a representation
-     * of the final backup state after this pass should be written to the file pointed
-     * to by the newStateFd file descriptor.
+     * during the last backup pass is provided in the oldState file descriptor.
+     * If oldState is null, no old state is available and the application should perform
+     * a full backup.  In both cases, a representation of the final backup state after
+     * this pass should be written to the file pointed to by the newStateFd file descriptor.
      *
      * @param oldState An open, read-only ParcelFileDescriptor pointing to the last backup
-     *                 state provided by the application.  May be empty or invalid, in which
+     *                 state provided by the application.  May be null, in which
      *                 case no prior state is being provided and the application should
      *                 perform a full backup.
      * @param data An open, read/write ParcelFileDescriptor pointing to the backup data
