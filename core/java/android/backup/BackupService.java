@@ -39,7 +39,7 @@ import android.util.Log;
  *      &lt;!-- Use the class "MyBackupService" to perform backups for my app --&gt;
  *      &lt;service android:name=".MyBackupService"&gt;
  *          &lt;intent-filter&gt;
- *              &lt;action android:name="android.service.action.BACKUP"&gt;
+ *              &lt;action android:name="android.service.action.BACKUP" /&gt;
  *          &lt;/intent-filter&gt;
  *      &lt;/service&gt;</pre>
  * 
