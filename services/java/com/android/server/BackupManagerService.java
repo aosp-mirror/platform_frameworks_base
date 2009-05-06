@@ -58,7 +58,16 @@ class BackupManagerService extends IBackupManager.Stub {
     private SparseArray<HashSet<ServiceInfo>> mBackupParticipants
         = new SparseArray<HashSet<ServiceInfo>>();
     // set of backup services that have pending changes
-    private HashSet<ServiceInfo> mPendingBackups = new HashSet<ServiceInfo>();
+    private class BackupRequest {
+        public ServiceInfo service;
+        public boolean fullBackup;
+        
+        BackupRequest(ServiceInfo svc, boolean isFull) {
+            service = svc;
+            fullBackup = isFull;
+        }
+    }
+    private HashSet<BackupRequest> mPendingBackups = new HashSet<BackupRequest>();
     private final Object mQueueLock = new Object();
 
     private File mStateDir;
@@ -77,21 +86,21 @@ class BackupManagerService extends IBackupManager.Stub {
             case MSG_RUN_BACKUP:
             {
                 // snapshot the pending-backup set and work on that
-                HashSet<ServiceInfo> queue;
+                HashSet<BackupRequest> queue;
                 synchronized (mQueueLock) {
                     queue = mPendingBackups;
-                    mPendingBackups = new HashSet<ServiceInfo>();
+                    mPendingBackups = new HashSet<BackupRequest>();
                     // !!! TODO: start a new backup-queue journal file too
                 }
                 
                 // Walk the set of pending backups, setting up the relevant files and
                 // invoking the backup service in each participant
                 Intent backupIntent = new Intent(BackupService.SERVICE_ACTION);
-                for (ServiceInfo service : queue) {
+                for (BackupRequest request : queue) {
                     mBinding = true;
                     mTargetService = null;
 
-                    backupIntent.setClassName(service.packageName, service.name);
+                    backupIntent.setClassName(request.service.packageName, request.service.name);
                     Log.d(TAG, "binding to " + backupIntent);
                     if (mContext.bindService(backupIntent, this, 0)) {
                         synchronized (mBindSignaller) {
@@ -106,15 +115,25 @@ class BackupManagerService extends IBackupManager.Stub {
                             try {
                                 Log.d(TAG, "invoking doBackup() on " + backupIntent);
 
-                                File savedStateName = new File(mStateDir, service.packageName);
-                                File backupDataName = new File(mDataDir, service.packageName + ".data");
-                                File newStateName = new File(mStateDir, service.packageName + ".new");
+                                // !!! TODO right now these naming schemes limit applications to
+                                // one backup service per package
+                                File savedStateName = new File(mStateDir,
+                                        request.service.packageName);
+                                File dummyName = new File(mStateDir, "#####");
+                                File backupDataName = new File(mDataDir,
+                                        request.service.packageName + ".data");
+                                File newStateName = new File(mStateDir,
+                                        request.service.packageName + ".new");
                                 
-                                ParcelFileDescriptor savedState =
-                                        ParcelFileDescriptor.open(savedStateName,
-                                                ParcelFileDescriptor.MODE_READ_ONLY |
-                                                ParcelFileDescriptor.MODE_CREATE);
-                                
+                                // In a full backup, we pass a file that is never writeable, hence
+                                // is always zero-sized, as a sentinel to the callee that they must
+                                // write all of their data.
+                                ParcelFileDescriptor savedState = 
+                                    ParcelFileDescriptor.open(
+                                            (request.fullBackup) ? savedStateName : dummyName,
+                                            ParcelFileDescriptor.MODE_READ_ONLY |
+                                            ParcelFileDescriptor.MODE_CREATE);
+
                                 backupDataName.delete();
                                 ParcelFileDescriptor backupData =
                                         ParcelFileDescriptor.open(backupDataName,
@@ -231,7 +250,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // packages associated with this uid
                     if (service.packageName.equals(packageName)) {
                         // add the caller to the set of pending backups
-                        if (mPendingBackups.add(service)) {
+                        if (mPendingBackups.add(new BackupRequest(service, false))) {
                             // !!! TODO: write to the pending-backup journal file in case of crash
                         }
                     }
@@ -240,8 +259,26 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Schedule a backup pass in a few minutes.  As backup-eligible data
                 // keeps changing, continue to defer the backup pass until things
                 // settle down, to avoid extra overhead.
-                mBackupHandler.removeMessages(MSG_RUN_BACKUP);
                 mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, COLLECTION_INTERVAL);
+            }
+        }
+    }
+
+    // Schedule a backup pass for a given package, even if the caller is not part of
+    // that uid or package itself.
+    public void scheduleFullBackup(String packageName) throws RemoteException {
+        // !!! TODO: protect with a signature-or-system permission?
+        HashSet<ServiceInfo> targets = new HashSet<ServiceInfo>();
+        synchronized (mQueueLock) {
+            int numKeys = mBackupParticipants.size();
+            for (int index = 0; index < numKeys; index++) {
+                int uid = mBackupParticipants.keyAt(index);
+                HashSet<ServiceInfo> servicesAtUid = mBackupParticipants.get(uid);
+                for (ServiceInfo service: servicesAtUid) {
+                    if (service.packageName.equals(packageName)) {
+                        mPendingBackups.add(new BackupRequest(service, true));
+                    }
+                }
             }
         }
     }
