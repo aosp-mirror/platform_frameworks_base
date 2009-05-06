@@ -1602,7 +1602,7 @@ public class SearchManager
     public static boolean isDefaultSearchable(SearchableInfo searchable) {
         SearchableInfo defaultSearchable = SearchManager.getSearchableInfo(null, true);
         return defaultSearchable != null 
-                && defaultSearchable.mSearchActivity.equals(searchable.mSearchActivity);
+                && defaultSearchable.getSearchActivity().equals(searchable.getSearchActivity());
     }
     
     /**

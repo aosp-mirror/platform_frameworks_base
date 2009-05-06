@@ -231,14 +231,14 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             return query;
         }
         
-        if (mSearchable.mQueryRewriteFromData) {
+        if (mSearchable.shouldRewriteQueryFromData()) {
             String data = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_INTENT_DATA);
             if (data != null) {
                 return data;
             }
         }
         
-        if (mSearchable.mQueryRewriteFromText) {
+        if (mSearchable.shouldRewriteQueryFromText()) {
             String text1 = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_TEXT_1);
             if (text1 != null) {
                 return text1;

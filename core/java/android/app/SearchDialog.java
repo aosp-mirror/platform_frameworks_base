@@ -601,11 +601,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         CharSequence text = null;
         
         // optionally show one or the other.
-        if (mSearchable.mBadgeIcon) {
+        if (mSearchable.useBadgeIcon()) {
             icon = mActivityContext.getResources().getDrawable(mSearchable.getIconId());
             visibility = View.VISIBLE;
             if (DBG) Log.d(LOG_TAG, "Using badge icon: " + mSearchable.getIconId());
-        } else if (mSearchable.mBadgeLabel) {
+        } else if (mSearchable.useBadgeLabel()) {
             text = mActivityContext.getResources().getText(mSearchable.getLabelId()).toString();
             visibility = View.VISIBLE;
             if (DBG) Log.d(LOG_TAG, "Using badge label: " + mSearchable.getLabelId());
@@ -714,8 +714,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // if it's an action specified by the searchable activity, launch the
         // entered query with the action key
         SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
-        if ((actionKey != null) && (actionKey.mQueryActionMsg != null)) {
-            launchQuerySearch(keyCode, actionKey.mQueryActionMsg);
+        if ((actionKey != null) && (actionKey.getQueryActionMsg() != null)) {
+            launchQuerySearch(keyCode, actionKey.getQueryActionMsg());
             return true;
         }
         
@@ -830,7 +830,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // in the voice search system.   We have to keep the bundle separate,
         // because it becomes immutable once it enters the PendingIntent
         Intent queryIntent = new Intent(Intent.ACTION_SEARCH);
-        queryIntent.setComponent(mSearchable.mSearchActivity);
+        queryIntent.setComponent(mSearchable.getSearchActivity());
         PendingIntent pending = PendingIntent.getActivity(
                 getContext(), 0, queryIntent, PendingIntent.FLAG_ONE_SHOT);
         
@@ -913,8 +913,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 }
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
-                    if ((actionKey != null) && (actionKey.mQueryActionMsg != null)) {
-                        launchQuerySearch(keyCode, actionKey.mQueryActionMsg);
+                    if ((actionKey != null) && (actionKey.getQueryActionMsg() != null)) {
+                        launchQuerySearch(keyCode, actionKey.getQueryActionMsg());
                         return true;
                     }
                 }
@@ -1010,8 +1010,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             // Next, check for an "action key"
             SearchableInfo.ActionKeyInfo actionKey = mSearchable.findActionKey(keyCode);
             if ((actionKey != null) && 
-                    ((actionKey.mSuggestActionMsg != null) || 
-                     (actionKey.mSuggestActionMsgColumn != null))) {
+                    ((actionKey.getSuggestActionMsg() != null) || 
+                     (actionKey.getSuggestActionMsgColumn() != null))) {
                 // launch suggestion using action key column
                 int position = mSearchAutoComplete.getListSelection();
                 if (position != ListView.INVALID_POSITION) {
@@ -1292,7 +1292,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             intent.putExtra(SearchManager.ACTION_MSG, actionMsg);
         }
         // attempt to enforce security requirement (no 3rd-party intents)
-        intent.setComponent(mSearchable.mSearchActivity);
+        intent.setComponent(mSearchable.getSearchActivity());
         return intent;
     }
     
@@ -1308,14 +1308,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private static String getActionKeyMessage(Cursor c, SearchableInfo.ActionKeyInfo actionKey) {
         String result = null;
         // check first in the cursor data, for a suggestion-specific message
-        final String column = actionKey.mSuggestActionMsgColumn;
+        final String column = actionKey.getSuggestActionMsgColumn();
         if (column != null) {
             result = SuggestionsAdapter.getColumnString(c, column);
         }
         // If the cursor didn't give us a message, see if there's a single message defined
         // for the actionkey (for all suggestions)
         if (result == null) {
-            result = actionKey.mSuggestActionMsg;
+            result = actionKey.getSuggestActionMsg();
         }
         return result;
     }
