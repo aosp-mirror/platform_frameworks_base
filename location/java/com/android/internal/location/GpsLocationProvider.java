@@ -16,6 +16,8 @@
 
 package com.android.internal.location;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -59,6 +61,9 @@ import java.util.Properties;
 public class GpsLocationProvider extends ILocationProvider.Stub {
 
     private static final String TAG = "GpsLocationProvider";
+
+    private static final boolean DEBUG = true;
+    private static final boolean VERBOSE = false;
     
     /**
      * Broadcast intent action indicating that the GPS has either been
@@ -151,6 +156,9 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     
     // turn off GPS fix icon if we haven't received a fix in 10 seconds
     private static final long RECENT_FIX_TIMEOUT = 10 * 1000;
+    
+    // number of fixes to receive before disabling GPS
+    private static final int MIN_FIX_COUNT = 10;
 
     // true if we are enabled
     private boolean mEnabled;
@@ -163,6 +171,9 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     
     // requested frequency of fixes, in seconds
     private int mFixInterval = 1;
+
+    // number of fixes we have received since we started navigating
+    private int mFixCount;
 
     private int mPositionMode = GPS_POSITION_MODE_STANDALONE;
 
@@ -195,6 +206,11 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private String mSuplApn;
     private int mSuplDataConnectionState;
     private final ConnectivityManager mConnMgr;
+
+    // Alarms
+    private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
+    private final AlarmManager mAlarmManager;
+    private final PendingIntent mWakeupIntent;
 
     private final IBatteryStats mBatteryStats;
     private final SparseIntArray mClientUids = new SparseIntArray();
@@ -257,11 +273,14 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         return mGpsStatusProvider;
     }
 
-    private class TelephonyBroadcastReceiver extends BroadcastReceiver {
+    private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
+            if (action.equals(ALARM_WAKEUP)) {
+                if (DEBUG) Log.d(TAG, "ALARM_WAKEUP");
+                startNavigating();
+            } else if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
                 String state = intent.getStringExtra(Phone.STATE_KEY);
                 String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
                 String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
@@ -278,7 +297,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 }
             }
         }
-    }
+    };
 
     public static boolean isSupported() {
         return native_is_supported();
@@ -288,10 +307,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         mContext = context;
         mLocationManager = locationManager;
 
-        TelephonyBroadcastReceiver receiver = new TelephonyBroadcastReceiver();
+        mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
+
         IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ALARM_WAKEUP);
         intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
-        context.registerReceiver(receiver, intentFilter);
+        context.registerReceiver(mBroadcastReciever, intentFilter);
 
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -512,11 +534,11 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
     public void enableLocationTracking(boolean enable) {
         if (enable) {
-            mFixRequestTime = System.currentTimeMillis();
             mTTFF = 0;
             mLastFixTime = 0;
             startNavigating();
         } else {
+            mAlarmManager.cancel(mWakeupIntent);
             stopNavigating();
         }
     }
@@ -622,7 +644,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
     public void startNavigating() {
         if (!mStarted) {
-            if (Config.LOGV) Log.v(TAG, "startNavigating");
+            if (DEBUG) Log.d(TAG, "startNavigating");
             mStarted = true;
             if (!native_start(mPositionMode, false, mFixInterval)) {
                 mStarted = false;
@@ -631,11 +653,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
             // reset SV count to zero
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
+            mFixCount = 0;
+            mFixRequestTime = System.currentTimeMillis();
         }
     }
 
     public void stopNavigating() {
-        if (Config.LOGV) Log.v(TAG, "stopNavigating");
+        if (DEBUG) Log.d(TAG, "stopNavigating");
         if (mStarted) {
             mStarted = false;
             native_stop();
@@ -653,7 +677,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
      */
     private void reportLocation(int flags, double latitude, double longitude, double altitude,
             float speed, float bearing, float accuracy, long timestamp) {
-        if (Config.LOGV) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
+        if (VERBOSE) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
                 " timestamp: " + timestamp);
 
         mLastFixTime = System.currentTimeMillis();
@@ -721,13 +745,23 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             mContext.sendBroadcast(intent);
             updateStatus(LocationProvider.AVAILABLE, mSvCount);
         }
+
+        if (mFixCount++ >= MIN_FIX_COUNT && mFixInterval > 1) {
+            if (DEBUG) Log.d(TAG, "exceeded MIN_FIX_COUNT");
+            stopNavigating();
+            mFixCount = 0;
+            mAlarmManager.cancel(mWakeupIntent);
+            long now = SystemClock.elapsedRealtime();
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + mFixInterval * 1000, mWakeupIntent);
+        }
    }
 
     /**
      * called from native code to update our status
      */
     private void reportStatus(int status) {
-        if (Config.LOGV) Log.v(TAG, "reportStatus status: " + status);
+        if (VERBOSE) Log.v(TAG, "reportStatus status: " + status);
 
         boolean wasNavigating = mNavigating;
         mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
@@ -797,12 +831,12 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             }
         }
 
-        if (Config.LOGD) {
-            if (Config.LOGV) Log.v(TAG, "SV count: " + svCount +
+        if (VERBOSE) {
+            Log.v(TAG, "SV count: " + svCount +
                     " ephemerisMask: " + Integer.toHexString(mSvMasks[EPHEMERIS_MASK]) +
                     " almanacMask: " + Integer.toHexString(mSvMasks[ALMANAC_MASK]));
             for (int i = 0; i < svCount; i++) {
-                if (Config.LOGV) Log.v(TAG, "sv: " + mSvs[i] +
+                Log.v(TAG, "sv: " + mSvs[i] +
                         " snr: " + (float)mSnrs[i]/10 +
                         " elev: " + mSvElevations[i] +
                         " azimuth: " + mSvAzimuths[i] +
