@@ -75,7 +75,7 @@ public class BluetoothDevice {
     public static final int UNBOND_REASON_REMOVED = 6;
 
     private static final String TAG = "BluetoothDevice";
-    
+
     private final IBluetoothDevice mService;
     /**
      * @hide - hide this because it takes a parameter of type
@@ -180,31 +180,6 @@ public class BluetoothDevice {
         return false;
     }
 
-    public String getVersion() {
-        try {
-            return mService.getVersion();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getRevision() {
-        try {
-            return mService.getRevision();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getManufacturer() {
-        try {
-            return mService.getManufacturer();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getCompany() {
-        try {
-            return mService.getCompany();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
     /**
      * Get the current scan mode.
      * Used to determine if the local device is connectable and/or discoverable
@@ -241,11 +216,8 @@ public class BluetoothDevice {
     }
 
     public boolean startDiscovery() {
-        return startDiscovery(true);
-    }
-    public boolean startDiscovery(boolean resolveNames) {
         try {
-            return mService.startDiscovery(resolveNames);
+            return mService.startDiscovery();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -263,88 +235,17 @@ public class BluetoothDevice {
         return false;
     }
 
-    public boolean startPeriodicDiscovery() {
-        try {
-            return mService.startPeriodicDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-    public boolean stopPeriodicDiscovery() {
-        try {
-            return mService.stopPeriodicDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-    public boolean isPeriodicDiscovery() {
-        try {
-            return mService.isPeriodicDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public String[] listRemoteDevices() {
-        try {
-            return mService.listRemoteDevices();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
     /**
-     * List remote devices that have a low level (ACL) connection.
-     *
-     * RFCOMM, SDP and L2CAP are all built on ACL connections. Devices can have
-     * an ACL connection even when not paired - this is common for SDP queries
-     * or for in-progress pairing requests.
-     *
-     * In most cases you probably want to test if a higher level protocol is
-     * connected, rather than testing ACL connections.
-     *
-     * @return bluetooth hardware addresses of remote devices with a current
-     *         ACL connection. Array size is 0 if no devices have a
-     *         connection. Null on error.
-     */
-    public String[] listAclConnections() {
-        try {
-            return mService.listAclConnections();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
-    /**
-     * Check if a specified remote device has a low level (ACL) connection.
-     *
-     * RFCOMM, SDP and L2CAP are all built on ACL connections. Devices can have
-     * an ACL connection even when not paired - this is common for SDP queries
-     * or for in-progress pairing requests.
-     *
-     * In most cases you probably want to test if a higher level protocol is
-     * connected, rather than testing ACL connections.
-     *
-     * @param address the Bluetooth hardware address you want to check.
-     * @return true if there is an ACL connection, false otherwise and on
-     *         error.
-     */
-    public boolean isAclConnected(String address) {
-        try {
-            return mService.isAclConnected(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    /**
-     * Perform a low level (ACL) disconnection of a remote device.
-     *
-     * This forcably disconnects the ACL layer connection to a remote device,
-     * which will cause all RFCOMM, SDP and L2CAP connections to this remote
-     * device to close.
+     * Removes the remote device and the pairing information associated
+     * with it.
      *
      * @param address the Bluetooth hardware address you want to disconnect.
      * @return true if the device was disconnected, false otherwise and on
      *         error.
      */
-    public boolean disconnectRemoteDeviceAcl(String address) {
+    public boolean removeBond(String address) {
         try {
-            return mService.disconnectRemoteDeviceAcl(address);
+            return mService.removeBond(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -372,16 +273,6 @@ public class BluetoothDevice {
     public boolean cancelBondProcess(String address) {
         try {
             return mService.cancelBondProcess(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    /**
-     * Remove an already exisiting bonding (delete the link key).
-     */
-    public boolean removeBond(String address) {
-        try {
-            return mService.removeBond(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -440,78 +331,25 @@ public class BluetoothDevice {
         return null;
     }
 
-    public String getRemoteVersion(String address) {
-        try {
-            return mService.getRemoteVersion(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getRemoteRevision(String address) {
-        try {
-            return mService.getRemoteRevision(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getRemoteManufacturer(String address) {
-        try {
-            return mService.getRemoteManufacturer(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getRemoteCompany(String address) {
-        try {
-            return mService.getRemoteCompany(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
-    /**
-     * Returns the RFCOMM channel associated with the 16-byte UUID on
-     * the remote Bluetooth address.
-     *
-     * Performs a SDP ServiceSearchAttributeRequest transaction. The provided
-     * uuid is verified in the returned record. If there was a problem, or the
-     * specified uuid does not exist, -1 is returned.
-     */
-    public boolean getRemoteServiceChannel(String address, short uuid16,
-            IBluetoothDeviceCallback callback) {
-        try {
-            return mService.getRemoteServiceChannel(address, uuid16, callback);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    /**
-     * Get the major, minor and servics classes of a remote device.
-     * These classes are encoded as a 32-bit integer. See BluetoothClass.
-     * @param address remote device
-     * @return 32-bit class suitable for use with BluetoothClass, or
-     *         BluetoothClass.ERROR on error
-     */
     public int getRemoteClass(String address) {
         try {
             return mService.getRemoteClass(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothClass.ERROR;
+        return BluetoothError.ERROR_IPC;
     }
 
-    public byte[] getRemoteFeatures(String address) {
+     public String[] getRemoteUuids(String address) {
         try {
-            return mService.getRemoteFeatures(address);
+            return mService.getRemoteUuids(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
-    public String lastSeen(String address) {
-        try {
-            return mService.lastSeen(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String lastUsed(String address) {
-        try {
-            return mService.lastUsed(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
+
+    public int getRemoteServiceChannel(String address, String uuid) {
+         try {
+             return mService.getRemoteServiceChannel(address, uuid);
+         } catch (RemoteException e) {Log.e(TAG, "", e);}
+         return BluetoothError.ERROR_IPC;
     }
 
     public boolean setPin(String address, byte[] pin) {

@@ -89,7 +89,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/backup/IRestoreSession.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
-	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
         core/java/android/content/IContentService.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
@@ -481,5 +480,3 @@ include $(BUILD_JAVA_LIBRARY)
 ifeq (,$(ONE_SHOT_MAKEFILE))
 include $(call first-makefiles-under,$(LOCAL_PATH))
 endif
-
-
