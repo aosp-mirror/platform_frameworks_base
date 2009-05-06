@@ -36,7 +36,7 @@ public class CdmaSmsTest extends AndroidTestCase {
     private final static String LOG_TAG = "Cdma_Sms_Test";
 
     @SmallTest
-    public void testStandardSms() throws Exception {
+    public void testUserData7bitGsm() throws Exception {
         String pdu = "00031040900112488ea794e074d69e1b7392c270326cde9e98";
         BearerData bearerData = BearerData.decode(HexDump.hexStringToByteArray(pdu));
         assertEquals("Test standard SMS", bearerData.userData.payloadStr);
@@ -47,6 +47,20 @@ public class CdmaSmsTest extends AndroidTestCase {
         String pdu = "0003100160010610262d5ab500";
         BearerData bearerData = BearerData.decode(HexDump.hexStringToByteArray(pdu));
         assertEquals("bjjj", bearerData.userData.payloadStr);
+    }
+
+    @SmallTest
+    public void testUserData7bitAsciiTwo() throws Exception {
+        String pdu = "00031001d00109104539b4d052ebb3d0";
+        BearerData bearerData = BearerData.decode(HexDump.hexStringToByteArray(pdu));
+        assertEquals("SMS Rulz", bearerData.userData.payloadStr);
+    }
+
+    @SmallTest
+    public void testUserDataIa5() throws Exception {
+        String pdu = "00031002100109184539b4d052ebb3d0";
+        BearerData bearerData = BearerData.decode(HexDump.hexStringToByteArray(pdu));
+        assertEquals("SMS Rulz", bearerData.userData.payloadStr);
     }
 
     @SmallTest
@@ -235,6 +249,18 @@ public class CdmaSmsTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testCallbackNumDtmf() throws Exception {
+        String pdu1 = "00031002300109104539b4d052ebb3d00e07052d4c90a55080";
+        BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
+        assertEquals("SMS Rulz", bd1.userData.payloadStr);
+        assertEquals(CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF, bd1.callbackNumber.digitMode);
+        assertEquals(CdmaSmsAddress.TON_UNKNOWN, bd1.callbackNumber.ton);
+        assertEquals(CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK, bd1.callbackNumber.numberMode);
+        assertEquals(CdmaSmsAddress.NUMBERING_PLAN_UNKNOWN, bd1.callbackNumber.numberPlan);
+        assertEquals("5099214001", bd1.callbackNumber.address);
+    }
+
+    @SmallTest
     public void testCallbackNumFeedback() throws Exception {
         BearerData bearerData = new BearerData();
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
@@ -343,6 +369,27 @@ public class CdmaSmsTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testMiscParams() throws Exception {
+        String pdu1 = "00031002400109104539b4d052ebb3d00c0180";
+        BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
+        assertEquals(bd1.alert, BearerData.ALERT_MEDIUM_PRIO);
+        assertEquals(bd1.userData.payloadStr, "SMS Rulz");
+        String pdu2 = "00031002500109104539b4d052ebb3d00801800901c0";
+        BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
+        assertEquals(bd2.priority, BearerData.PRIORITY_URGENT);
+        assertEquals(bd2.privacy, BearerData.PRIVACY_SECRET);
+        assertEquals(bd2.userData.payloadStr, "SMS Rulz");
+        String pdu3 = "00031002600109104539b4d052ebb3d00901400c01c0";
+        BearerData bd3 = BearerData.decode(HexDump.hexStringToByteArray(pdu3));
+        assertEquals(bd3.privacy, BearerData.PRIVACY_RESTRICTED);
+        assertEquals(bd3.alert, BearerData.ALERT_HIGH_PRIO);
+        assertEquals(bd3.userData.payloadStr, "SMS Rulz");
+        String pdu4 = "00031002700109104539b4d052ebb3d00f0105";
+        BearerData bd4 = BearerData.decode(HexDump.hexStringToByteArray(pdu4));
+        assertEquals(bd4.displayMode, BearerData.DISPLAY_MODE_IMMEDIATE);
+        assertEquals(bd4.userData.payloadStr, "SMS Rulz");
+    }
+   @SmallTest
     public void testMsgDeliveryAlertFeedback() throws Exception {
         BearerData bearerData = new BearerData();
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
