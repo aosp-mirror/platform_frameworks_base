@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <utime.h>
 #include <fcntl.h>
 #include <zlib.h>
 
@@ -224,7 +225,8 @@ back_up_files(int oldSnapshotFD, int newSnapshotFD, int oldDataStream,
         }
 
         s.modTime_sec = st.st_mtime;
-        s.modTime_nsec = st.st_mtime_nsec;
+        s.modTime_nsec = 0; // workaround sim breakage
+        //s.modTime_nsec = st.st_mtime_nsec;
         s.size = st.st_size;
         s.crc32 = compute_crc32(realFilename);
 
