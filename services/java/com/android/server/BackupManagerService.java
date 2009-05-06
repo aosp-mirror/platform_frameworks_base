@@ -18,14 +18,18 @@ package com.android.server;
 
 import android.backup.BackupService;
 import android.backup.IBackupService;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -207,30 +211,127 @@ class BackupManagerService extends IBackupManager.Stub {
         mStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
         
-        // Identify the backup participants
-        // !!! TODO: also watch package-install to keep this up to date
-        List<ResolveInfo> services = mPackageManager.queryIntentServices(
-                new Intent(BackupService.SERVICE_ACTION), 0);
-        if (DEBUG) {
-            Log.v(TAG, "Backup participants: " + services.size());
-            for (ResolveInfo ri : services) {
-                Log.v(TAG, "    " + ri + " : " + ri.filter);
-            }
+        // Build our mapping of uid to backup client services
+        synchronized (mBackupParticipants) {
+            addPackageParticipantsLocked(null);
         }
 
-        // Build our mapping of uid to backup client services
-        for (ResolveInfo ri : services) {
-            int uid = ri.serviceInfo.applicationInfo.uid;
-            HashSet<ServiceInfo> set = mBackupParticipants.get(uid);
-            if (set == null) {
-                set = new HashSet<ServiceInfo>();
-                mBackupParticipants.put(uid, set);
+        // Register for broadcasts about package install, etc., so we can
+        // update the provider list.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mContext.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    // ----- Track installation/removal of packages -----
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) Log.d(TAG, "Received broadcast " + intent);
+
+            Uri uri = intent.getData();
+            if (uri == null) {
+                return;
             }
-            set.add(ri.serviceInfo);
+            String pkgName = uri.getSchemeSpecificPart();
+            if (pkgName == null) {
+                return;
+            }
+
+            String action = intent.getAction();
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                synchronized (mBackupParticipants) {
+                    Bundle extras = intent.getExtras();
+                    if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+                        // The package was just upgraded
+                        updatePackageParticipantsLocked(pkgName);
+                    } else {
+                        // The package was just added
+                        addPackageParticipantsLocked(pkgName);
+                    }
+                }
+            }
+            else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                Bundle extras = intent.getExtras();
+                if (extras != null && extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+                    // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
+                } else {
+                    synchronized (mBackupParticipants) {
+                        removePackageParticipantsLocked(pkgName);
+                    }
+                }
+            }
+        }
+    };
+
+    // Add the backup services in the given package to our set of known backup participants.
+    // If 'packageName' is null, adds all backup services in the system.
+    void addPackageParticipantsLocked(String packageName) {
+        List<ResolveInfo> services = mPackageManager.queryIntentServices(
+                new Intent(BackupService.SERVICE_ACTION), 0);
+        addPackageParticipantsLockedInner(packageName, services);
+    }
+
+    private void addPackageParticipantsLockedInner(String packageName, List<ResolveInfo> services) {
+        for (ResolveInfo ri : services) {
+            if (packageName == null || ri.serviceInfo.packageName.equals(packageName)) {
+                int uid = ri.serviceInfo.applicationInfo.uid;
+                HashSet<ServiceInfo> set = mBackupParticipants.get(uid);
+                if (set == null) {
+                    set = new HashSet<ServiceInfo>();
+                    mBackupParticipants.put(uid, set);
+                }
+                if (DEBUG) {
+                    Log.v(TAG, "Adding " + services.size() + " backup participants:");
+                    for (ResolveInfo svc : services) {
+                        Log.v(TAG, "    " + svc + " : " + svc.filter);
+                    }
+                }
+
+                set.add(ri.serviceInfo);
+            }
         }
     }
 
-    
+    // Remove the given package's backup services from our known active set.  If
+    // 'packageName' is null, *all* backup services will be removed.
+    void removePackageParticipantsLocked(String packageName) {
+        List<ResolveInfo> services = mPackageManager.queryIntentServices(
+                new Intent(BackupService.SERVICE_ACTION), 0);
+        removePackageParticipantsLockedInner(packageName, services);
+    }
+
+    private void removePackageParticipantsLockedInner(String packageName, List<ResolveInfo> services) {
+        for (ResolveInfo ri : services) {
+            if (packageName == null || ri.serviceInfo.packageName.equals(packageName)) {
+                int uid = ri.serviceInfo.applicationInfo.uid;
+                HashSet<ServiceInfo> set = mBackupParticipants.get(uid);
+                if (set != null) {
+                    set.remove(ri.serviceInfo);
+                    if (set.size() == 0) {
+                        mBackupParticipants.put(uid, null);
+                    }
+                }
+            }
+        }
+    }
+
+    // Reset the given package's known backup participants.  Unlike add/remove, the update
+    // action cannot be passed a null package name.
+    void updatePackageParticipantsLocked(String packageName) {
+        if (packageName == null) {
+            Log.e(TAG, "updatePackageParticipants called with null package name");
+            return;
+        }
+
+        // brute force but small code size
+        List<ResolveInfo> services = mPackageManager.queryIntentServices(
+                new Intent(BackupService.SERVICE_ACTION), 0);
+        removePackageParticipantsLockedInner(packageName, services);
+        addPackageParticipantsLockedInner(packageName, services);
+    }
+
     // ----- IBackupManager binder interface -----
     
     public void dataChanged(String packageName) throws RemoteException {
