@@ -110,28 +110,7 @@ FramebufferNativeWindow::FramebufferNativeWindow()
                 fbDev->width, fbDev->height, strerror(-err));
     }
 
-    uint32_t flags = fbDev->flags & SURFACE_FLAG_MAPPED;
-    
-    /*
-     * FIXME: SURFACE_FLAG_PRESERVE_CONTENT
-     * how to implement this, there is no concept of preserve content in
-     * the framebuffer, which just "posts" buffer.
-     * 
-     * It looks like what we need is a way to know if the posted buffer can
-     * be reused. But if so, why allocating 2 buffers?...
-     * 
-     * should the lock/unlock calls take care of the copy-back?
-     * 
-     * 
-     * In the end, the client wants to know if the backbuffer is preserved
-     * though... it's complicated.
-     * 
-     */
-    
-    //flags |= SURFACE_FLAG_PRESERVE_CONTENT;
-    
-
-    const_cast<uint32_t&>(android_native_window_t::flags) = flags; 
+    const_cast<uint32_t&>(android_native_window_t::flags) = fbDev->flags; 
     const_cast<float&>(android_native_window_t::xdpi) = fbDev->xdpi;
     const_cast<float&>(android_native_window_t::ydpi) = fbDev->ydpi;
     const_cast<int&>(android_native_window_t::minSwapInterval) = 

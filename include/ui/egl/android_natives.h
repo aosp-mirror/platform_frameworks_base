@@ -41,12 +41,6 @@ extern "C" {
 
 struct android_native_buffer_t;
 
-enum {
-    /* attributes of this surface or its updater */
-    SURFACE_FLAG_PRESERVE_CONTENT   = FRAMEBUFFER_RESERVED0,
-    SURFACE_FLAG_MAPPED             = FRAMEBUFFER_FLAG_MAPPED,
-};
-
 // ---------------------------------------------------------------------------
 
 struct android_native_base_t
@@ -64,6 +58,7 @@ struct android_native_base_t
     void (*decRef)(struct android_native_base_t* base);
 };
 
+// ---------------------------------------------------------------------------
 
 struct android_native_window_t 
 {
@@ -138,6 +133,7 @@ struct android_native_window_t
     void* reserved_proc[5];
 };
 
+// ---------------------------------------------------------------------------
 
 /* FIXME: this is legacy for pixmaps */
 struct egl_native_pixmap_t
