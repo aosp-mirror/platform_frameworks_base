@@ -83,7 +83,12 @@ public class FileFilter {
     };
         
     static final String [] ignoreTestList = {
-        };
+        // RegExp is exponatal
+        "fast/regex/test1.html",
+        "fast/regex/slow.html",
+        // RegExp is too large, causing OOM
+        "fast/js/regexp-charclass-crash.html"
+    };
     
     static void fillIgnoreResultSet() {
         // need test plugin
@@ -195,11 +200,7 @@ public class FileFilter {
         ignoreResultList.add("fast/loader/local-iFrame-source-from-local.html");
         // extra spacing because iFrames rendered next to each other on Apple
         ignoreResultList.add("fast/loader/opaque-base-url.html");
-        // RegExp is too large, causing OOM
-        ignoreResultList.add("fast/js/regexp-charclass-crash.html");
         ignoreResultList.add("fast/text/plain-text-line-breaks.html");
-        
-        
     }
     
     static void fillBugTable() {
