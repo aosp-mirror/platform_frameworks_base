@@ -22,6 +22,8 @@ import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.WeakHashMap;
+
 /**
  * An easy adapter to map columns from a cursor to TextViews or ImageViews
  * defined in an XML file. You can specify which columns you want, which
@@ -64,6 +66,7 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
     private CursorToStringConverter mCursorToStringConverter;
     private ViewBinder mViewBinder;
     private String[] mOriginalFrom;
+    private final WeakHashMap<View, View[]> mHolders = new WeakHashMap<View, View[]>();
 
     /**
      * Constructor.
@@ -106,7 +109,7 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
         for (int i = 0; i < count; i++) {
             holder[i] = v.findViewById(to[i]);
         }
-        v.setTag(holder);
+        mHolders.put(v, holder);
 
         return v;
     }
@@ -137,7 +140,7 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        final View[] holder = (View[]) view.getTag();
+        final View[] holder = mHolders.get(view);
         final ViewBinder binder = mViewBinder;
         final int count = mTo.length;
         final int[] from = mFrom;
