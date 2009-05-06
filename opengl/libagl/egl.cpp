@@ -39,7 +39,7 @@
 #include <pixelflinger/format.h>
 #include <pixelflinger/pixelflinger.h>
 
-#include <ui/egl/android_natives.h>
+#include <private/ui/android_natives_priv.h>
 
 #include "context.h"
 #include "state.h"

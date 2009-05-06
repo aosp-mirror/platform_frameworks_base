@@ -139,32 +139,6 @@ struct android_native_window_t
 };
 
 
-struct android_native_buffer_t
-{
-#ifdef __cplusplus
-    android_native_buffer_t() { 
-        common.magic = ANDROID_NATIVE_BUFFER_MAGIC;
-        common.version = sizeof(android_native_buffer_t);
-        memset(common.reserved, 0, sizeof(common.reserved));
-    }
-#endif
-
-    struct android_native_base_t common;
-
-    int width;
-    int height;
-    int stride;
-    int format;
-    int usage;
-    
-    void* reserved[2];
-
-    buffer_handle_t handle;
-
-    void* reserved_proc[8];
-};
-
-
 /* FIXME: this is legacy for pixmaps */
 struct egl_native_pixmap_t
 {

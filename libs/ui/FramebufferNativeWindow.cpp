@@ -38,6 +38,8 @@
 #include <hardware/hardware.h>
 #include <hardware/gralloc.h>
 
+#include <private/ui/android_natives_priv.h>
+
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------

@@ -19,7 +19,7 @@
 #include "context.h"
 #include "TextureObjectManager.h"
 
-#include <ui/egl/android_natives.h>
+#include <private/ui/android_natives_priv.h>
 
 namespace android {
 // ----------------------------------------------------------------------------
