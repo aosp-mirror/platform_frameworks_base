@@ -13,6 +13,9 @@
 # limitations under the License.
 
 LOCAL_PATH := $(call my-dir)
+
+# native test
+# ========================================
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
@@ -24,3 +27,15 @@ LOCAL_SHARED_LIBRARIES := libutils
 
 include $(BUILD_EXECUTABLE)
 
+# java test
+# ========================================
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_SRC_FILES := $(call all-subdir-java-files)
+
+LOCAL_PACKAGE_NAME := BackupTest
+
+include $(BUILD_PACKAGE)
+    
