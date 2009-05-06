@@ -119,18 +119,15 @@ class BackupManagerService extends IBackupManager.Stub {
                                 // one backup service per package
                                 File savedStateName = new File(mStateDir,
                                         request.service.packageName);
-                                File dummyName = new File(mStateDir, "#####");
                                 File backupDataName = new File(mDataDir,
                                         request.service.packageName + ".data");
                                 File newStateName = new File(mStateDir,
                                         request.service.packageName + ".new");
                                 
-                                // In a full backup, we pass a file that is never writeable, hence
-                                // is always zero-sized, as a sentinel to the callee that they must
-                                // write all of their data.
-                                ParcelFileDescriptor savedState = 
-                                    ParcelFileDescriptor.open(
-                                            (request.fullBackup) ? savedStateName : dummyName,
+                                // In a full backup, we pass a null ParcelFileDescriptor as
+                                // the saved-state "file"
+                                ParcelFileDescriptor savedState = (request.fullBackup) ? null
+                                        : ParcelFileDescriptor.open(savedStateName,
                                             ParcelFileDescriptor.MODE_READ_ONLY |
                                             ParcelFileDescriptor.MODE_CREATE);
 
