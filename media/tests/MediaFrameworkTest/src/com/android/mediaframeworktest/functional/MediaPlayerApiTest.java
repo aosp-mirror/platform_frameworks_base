@@ -432,14 +432,21 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     @LargeTest
     public void testLocalMp3PrepareAsyncCallback() throws Exception {
         boolean onPrepareSuccess = 
-            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR);
+            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR, false);
         assertTrue("LocalMp3prepareAsyncCallback", onPrepareSuccess);
     }
     
     @LargeTest
     public void testStreamPrepareAsyncCallback() throws Exception {
         boolean onPrepareSuccess = 
-            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k);
+            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, false);
+        assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
+    }
+    
+    @LargeTest
+    public void testStreamPrepareAsyncCallbackReset() throws Exception {
+        boolean onPrepareSuccess = 
+            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, true);
         assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
     }
 }

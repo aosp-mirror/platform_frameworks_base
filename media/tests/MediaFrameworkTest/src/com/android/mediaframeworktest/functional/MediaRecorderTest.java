@@ -148,8 +148,8 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             Log.v(TAG, "before getduration");
             mOutputDuration = mediaPlayer.getDuration();
             Log.v(TAG, "get video dimension");
-            mOutputVideoHeight = mediaPlayer.getVideoHeight();
-            mOutputVideoWidth = mediaPlayer.getVideoWidth();
+            mOutputVideoHeight = CodecTest.videoHeight(outputFilePath);
+            mOutputVideoWidth = CodecTest.videoWidth(outputFilePath);
             mediaPlayer.release();    
         } catch (Exception e) {
             Log.v(TAG, e.toString());
