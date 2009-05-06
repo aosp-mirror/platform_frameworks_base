@@ -490,7 +490,7 @@ public abstract class PhoneBase implements Phone {
         if (null == language) {
             return; // no match possible
         }
-        language.toLowerCase();
+        language = language.toLowerCase();
         if (null == country) {
             country = "";
         }
@@ -503,13 +503,12 @@ public abstract class PhoneBase implements Phone {
                 final int N = locales.length;
                 String bestMatch = null;
                 for(int i = 0; i < N; i++) {
-                    if (locales[i]!=null && locales[i].length() >= 2 &&
+                    // only match full (lang + country) locales
+                    if (locales[i]!=null && locales[i].length() >= 5 &&
                             locales[i].substring(0,2).equals(language)) {
-                        if (locales[i].length() >= 5) {
-                            if (locales[i].substring(3,5).equals(country)) {
-                                bestMatch = locales[i];
-                                break;
-                            }
+                        if (locales[i].substring(3,5).equals(country)) {
+                            bestMatch = locales[i];
+                            break;
                         } else if (null == bestMatch) {
                             bestMatch = locales[i];
                         }
@@ -518,12 +517,8 @@ public abstract class PhoneBase implements Phone {
                 if (null != bestMatch) {
                     IActivityManager am = ActivityManagerNative.getDefault();
                     Configuration config = am.getConfiguration();
-                    if (bestMatch.length() >= 5) {
-                        config.locale = new Locale(bestMatch.substring(0,2),
-                                                   bestMatch.substring(3,5));
-                    } else {
-                        config.locale = new Locale(bestMatch.substring(0,2));
-                    }
+                    config.locale = new Locale(bestMatch.substring(0,2),
+                                               bestMatch.substring(3,5));
                     config.userSetLocale = true;
                     am.updateConfiguration(config);
                 }
