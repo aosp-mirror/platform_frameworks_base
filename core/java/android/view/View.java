@@ -61,6 +61,7 @@ import com.android.internal.view.menu.MenuBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.WeakHashMap;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
@@ -1287,7 +1288,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * a Rect. :)
      */
     static final ThreadLocal<Rect> sThreadLocal = new ThreadLocal<Rect>();
-    
+
+    /**
+     * Map used to store views' tags.
+     */
+    private static WeakHashMap<View, SparseArray<Object>> sTags;
+
+    /**
+     * Lock used to access sTags.
+     */
+    private static final Object sTagsLock = new Object();
+
     /**
      * The animation currently associated with this view.
      * @hide
@@ -7000,6 +7011,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * Returns this view's tag.
      *
      * @return the Object stored in this view as a tag
+     *
+     * @see #setTag(Object)
+     * @see #getTag(int)
      */
     @ViewDebug.ExportedProperty
     public Object getTag() {
@@ -7013,9 +7027,99 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * resorting to another data structure.
      *
      * @param tag an Object to tag the view with
+     *
+     * @see #getTag()
+     * @see #setTag(int, Object)
      */
     public void setTag(final Object tag) {
         mTag = tag;
+    }
+
+    /**
+     * Returns the tag associated with this view and the specified key.
+     *
+     * @param key The key identifying the tag
+     *
+     * @return the Object stored in this view as a tag
+     *
+     * @see #setTag(int, Object)
+     * @see #getTag() 
+     */
+    public Object getTag(int key) {
+        SparseArray<Object> tags = null;
+        synchronized (sTagsLock) {
+            if (sTags != null) {
+                tags = sTags.get(this);
+            }
+        }
+
+        if (tags != null) return tags.get(key);
+        return null;
+    }
+
+    /**
+     * Sets a tag associated with this view and a key. A tag can be used
+     * to mark a view in its hierarchy and does not have to be unique within
+     * the hierarchy. Tags can also be used to store data within a view
+     * without resorting to another data structure.
+     *
+     * The specified key should be an id declared in the resources of the
+     * application to ensure it is unique. Keys identified as belonging to
+     * the Android framework or not associated with any package will cause
+     * an {@link IllegalArgumentException} to be thrown.
+     *
+     * @param key The key identifying the tag
+     * @param tag An Object to tag the view with
+     *
+     * @throws IllegalArgumentException If they specified key is not valid
+     *
+     * @see #setTag(Object)
+     * @see #getTag(int)
+     */
+    public void setTag(int key, final Object tag) {
+        // If the package id is 0x00 or 0x01, it's either an undefined package
+        // or a framework id
+        if ((key >>> 24) < 2) {
+            throw new IllegalArgumentException("The key must be an application-specific "
+                    + "resource id.");
+        }
+
+        setTagInternal(this, key, tag);
+    }
+
+    /**
+     * Variation of {@link #setTag(int, Object)} that enforces the key to be a
+     * framework id.
+     *
+     * @hide
+     */
+    public void setTagInternal(int key, Object tag) {
+        if ((key >>> 24) != 0x1) {
+            throw new IllegalArgumentException("The key must be a framework-specific "
+                    + "resource id.");
+        }
+
+        setTagInternal(this, key, tag);        
+    }
+
+    private static void setTagInternal(View view, int key, Object tag) {
+        SparseArray<Object> tags = null;
+        synchronized (sTagsLock) {
+            if (sTags == null) {
+                sTags = new WeakHashMap<View, SparseArray<Object>>();
+            } else {
+                tags = sTags.get(view);
+            }
+        }
+
+        if (tags == null) {
+            tags = new SparseArray<Object>(2);
+            synchronized (sTagsLock) {
+                sTags.put(view, tags);
+            }
+        }
+
+        tags.put(key, tag);
     }
 
     /**
