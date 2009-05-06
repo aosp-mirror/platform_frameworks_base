@@ -1174,7 +1174,7 @@ public class SyncStorageEngine extends Handler {
             HashMap<String,String> map = new HashMap<String,String>();
             map.put("_id", "status._id as _id");
             map.put("account", "stats.account as account");
-            map.put("type", "stats.type as type");
+            map.put("account_type", "stats.account_type as account_type");
             map.put("authority", "stats.authority as authority");
             map.put("totalElapsedTime", "totalElapsedTime");
             map.put("numSyncs", "numSyncs");
@@ -1193,7 +1193,7 @@ public class SyncStorageEngine extends Handler {
             Cursor c = qb.query(db, null, null, null, null, null, null);
             while (c.moveToNext()) {
                 String accountName = c.getString(c.getColumnIndex("account"));
-                String accountType = c.getString(c.getColumnIndex("type"));
+                String accountType = c.getString(c.getColumnIndex("account_type"));
                 if (accountType == null) {
                     accountType = "com.google.GAIA";
                 }
