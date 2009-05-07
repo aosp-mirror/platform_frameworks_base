@@ -122,8 +122,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private static boolean sProvidersLoaded = false;
 
     private final Context mContext;
-    private LocationProviderProxy mGpsLocationProvider;
-    private LocationProviderProxy mNetworkLocationProvider;
     private IGeocodeProvider mGeocodeProvider;
     private IGpsStatusProvider mGpsStatusProvider;
     private LocationWorkerHandler mLocationHandler;
@@ -548,9 +546,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             // Create a gps location provider
             GpsLocationProvider provider = new GpsLocationProvider(mContext, this);
             mGpsStatusProvider = provider.getGpsStatusProvider();
-            mGpsLocationProvider =
-                    new LocationProviderProxy(LocationManager.GPS_PROVIDER, provider);
-            addProvider(mGpsLocationProvider);
+            LocationProviderProxy proxy = new LocationProviderProxy(LocationManager.GPS_PROVIDER, provider);
+            addProvider(proxy);
         }
 
         updateProvidersLocked();
@@ -614,15 +611,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
 
         synchronized (mLock) {
-            // FIXME - only network location provider supported for now
-            if (LocationManager.NETWORK_PROVIDER.equals(name)) {
-                mNetworkLocationProvider = new LocationProviderProxy(name, provider);
-                addProvider(mNetworkLocationProvider);
-                updateProvidersLocked();
+            LocationProviderProxy proxy = new LocationProviderProxy(name, provider);
+            addProvider(proxy);
+            updateProvidersLocked();
 
-                // notify NetworkLocationProvider of any events it might have missed
-                mNetworkLocationProvider.updateNetworkState(mNetworkState);
-            }
+            // notify provider of current network state
+            proxy.updateNetworkState(mNetworkState);
         }
     }
 
@@ -1929,8 +1923,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         synchronized (mLock) {
             pw.println("Current Location Manager state:");
             pw.println("  sProvidersLoaded=" + sProvidersLoaded);
-            pw.println("  mGpsLocationProvider=" + mGpsLocationProvider);
-            pw.println("  mNetworkLocationProvider=" + mNetworkLocationProvider);
             pw.println("  mCollector=" + mCollector);
             pw.println("  Listeners:");
             int N = mReceivers.size();
