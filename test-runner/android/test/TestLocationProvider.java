@@ -169,12 +169,6 @@ public class TestLocationProvider extends ILocationProvider.Stub {
     public void removeListener(int uid) {
     }
 
-    public void wakeLockAcquired() {
-    }
-
-    public void wakeLockReleased() {
-    }
-
     private void updateLocation() {
         long time = SystemClock.uptimeMillis();
         long multiplier = (time/5000)%500000;
