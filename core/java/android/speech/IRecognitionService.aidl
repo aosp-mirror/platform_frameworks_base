@@ -16,7 +16,7 @@
 
 package android.speech;
 
-import android.os.Bundle;
+import android.content.Intent;
 import android.speech.IRecognitionListener;
 
 // A Service interface to speech recognition. Call startListening when
@@ -26,7 +26,8 @@ import android.speech.IRecognitionListener;
 /** {@hide} */
 interface IRecognitionService {
     // Start listening for speech. Can only call this from one thread at once.
-    void startListening(in Bundle recognitionParams,
+    // see RecognizerIntent.java for constants used to specify the intent.
+    void startListening(in Intent recognizerIntent,
         in IRecognitionListener listener);
 
     void cancel();
