@@ -18,7 +18,8 @@
 #define LOG_TAG "SoundPool"
 #include <utils/Log.h>
 
-//#define USE_SHARED_MEM_BUFFER
+//
+#define USE_SHARED_MEM_BUFFER
 
 // XXX needed for timing latency
 #include <utils/Timers.h>
@@ -507,10 +508,12 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         frameCount = sample->size()/numChannels/((sample->format() == AudioSystem::PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
     }
 
+#ifndef USE_SHARED_MEM_BUFFER
     // Ensure minimum audio buffer size in case of short looped sample
     if(frameCount < kDefaultBufferCount * bufferFrames) {
         frameCount = kDefaultBufferCount * bufferFrames;
     }
+#endif
 
     AudioTrack* newTrack;
     
