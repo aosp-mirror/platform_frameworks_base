@@ -10,7 +10,7 @@
         </activity>
         <service android:name="BackupTestService">
            <intent-filter>
-               <action android:name="android.backup.BackupService" />
+               <action android:name="android.backup.BackupService.SERVICE" />
            </intent-filter>
         </service>
     </application>
