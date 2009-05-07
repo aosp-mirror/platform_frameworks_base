@@ -18,8 +18,8 @@ In general, these are external elements that you want to include and reference w
 like images, audio, video, text strings, layouts, themes, etc. Every Android application contains 
 a directory for resources (<code>res/</code>) and a directory for assets (<code>assets/</code>). 
 Assets are used less often, because their applications are far fewer. You only need to save data
-as an asset when you need to read the raw bites. 
-The directories for resources and assets both reside at the top of your project directory, alongside your source code directory 
+as an asset when you need to read the raw bytes. The directories for resources and assets both 
+reside at the top of an Android project tree, at the same level as your source code directory 
 (<code>src/</code>).</p>
 
 <p>The difference between "resources" and "assets" isn't much on the surface, but in general, 
