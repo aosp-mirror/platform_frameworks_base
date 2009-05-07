@@ -29,7 +29,7 @@ that are running concurrently.</li>
     <li>Support for SDK add-ons, which extend the
 Android SDK to give you access to one or more external Android libraries and/or
 a customized (but compliant) system image that can run in the emulator. </li>
-    <li>The new Eclipse ADT plugin (version 0.9.0) offers new Wizards to let you
+    <li>The new Eclipse ADT plugin (version 0.9.x) offers new Wizards to let you
 create projects targetted for specific Android configurations, generate XML
 resources (such as layouts, animations, and menus), generate alternate layouts,
 and export and sign your application for publishing.</li>
