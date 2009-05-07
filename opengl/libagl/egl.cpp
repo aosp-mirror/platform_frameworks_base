@@ -774,7 +774,7 @@ static char const * const gVendorString     = "Google Inc.";
 static char const * const gVersionString    = "1.2 Android Driver";
 static char const * const gClientApiString  = "OpenGL ES";
 static char const * const gExtensionsString =
-        "KHR_image_base "
+        "EGL_KHR_image_base "
         // "KHR_image_pixmap "
         "EGL_ANDROID_image_native_buffer "
         "EGL_ANDROID_swap_rectangle "

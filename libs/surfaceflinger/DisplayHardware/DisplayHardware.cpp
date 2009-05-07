@@ -204,7 +204,7 @@ void DisplayHardware::init(uint32_t dpy)
         }
     }
 
-    if (strstr(egl_extensions, "ANDROID_swap_rectangle")) {
+    if (strstr(egl_extensions, "EGL_ANDROID_swap_rectangle")) {
         mFlags |= SWAP_RECTANGLE;
     }
 
@@ -250,7 +250,7 @@ void DisplayHardware::init(uint32_t dpy)
         mFlags |= DRAW_TEXTURE_EXTENSION;
     }
     if (strstr( gl_extensions, "GL_OES_EGL_image") &&
-        (strstr(egl_extensions, "KHR_image_base") || 
+        (strstr(egl_extensions, "EGL_KHR_image_base") || 
                 strstr(egl_extensions, "EGL_KHR_image")) &&
         strstr(egl_extensions, "EGL_ANDROID_image_native_buffer")) {
         mFlags |= DIRECT_TEXTURE;

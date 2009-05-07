@@ -57,8 +57,8 @@ static char const * const gVersionString    = "1.31 Android META-EGL";
 static char const * const gClientApiString  = "OpenGL ES";
 static char const * const gExtensionString  = 
         "EGL_KHR_image "
-        "KHR_image_base "
-        "KHR_image_pixmap "
+        "EGL_KHR_image_base "
+        "EGL_KHR_image_pixmap "
         "EGL_ANDROID_image_native_buffer "
         "EGL_ANDROID_swap_rectangle "
         ;
