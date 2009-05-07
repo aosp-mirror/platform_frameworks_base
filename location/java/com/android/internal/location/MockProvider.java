@@ -182,12 +182,6 @@ public class MockProvider extends ILocationProvider.Stub {
     public void removeListener(int uid) {
     }
 
-    public void wakeLockAcquired() {
-    }
-
-    public void wakeLockReleased() {
-    }
-
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + mName);
         pw.println(prefix + "mHasLocation=" + mHasLocation);

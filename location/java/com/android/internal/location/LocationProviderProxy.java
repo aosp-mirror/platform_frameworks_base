@@ -231,20 +231,4 @@ public class LocationProviderProxy {
             Log.e(TAG, "removeListener failed", e);
         }
     }
-
-    public void wakeLockAcquired() {
-        try {
-            mProvider.wakeLockAcquired();
-        } catch (RemoteException e) {
-            Log.e(TAG, "wakeLockAcquired failed", e);
-        }
-    }
-
-    public void wakeLockReleased() {
-        try {
-            mProvider.wakeLockReleased();
-        } catch (RemoteException e) {
-            Log.e(TAG, "wakeLockReleased failed", e);
-        }
-    }
 }

@@ -34,6 +34,7 @@ import android.net.ConnectivityManager;
 import android.net.SntpClient;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -207,6 +208,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private int mSuplDataConnectionState;
     private final ConnectivityManager mConnMgr;
 
+    // Wakelocks
+    private final static String WAKELOCK_KEY = "GpsLocationProvider";
+    private final PowerManager.WakeLock mWakeLock;
+
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
     private final AlarmManager mAlarmManager;
@@ -306,6 +311,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     public GpsLocationProvider(Context context, ILocationManager locationManager) {
         mContext = context;
         mLocationManager = locationManager;
+
+        // Create a wake lock
+        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
@@ -574,12 +583,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
     }
 
-    public void wakeLockAcquired() {
-    }
-
-    public void wakeLockReleased() {
-    }
-
     public void addListener(int uid) {
         mClientUids.put(uid, 0);
         if (mNavigating) {
@@ -767,6 +770,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
 
         if (wasNavigating != mNavigating) {
+            if (mNavigating) {
+                if (DEBUG) Log.d(TAG, "Acquiring wakelock");
+                 mWakeLock.acquire();
+            }
             synchronized(mListeners) {
                 int size = mListeners.size();
                 for (int i = 0; i < size; i++) {
@@ -804,6 +811,11 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             Intent intent = new Intent(GPS_ENABLED_CHANGE_ACTION);
             intent.putExtra(EXTRA_ENABLED, mNavigating);
             mContext.sendBroadcast(intent);
+
+            if (!mNavigating) {
+                if (DEBUG) Log.d(TAG, "Releasing wakelock");
+                mWakeLock.release();
+            }
         }
     }
 

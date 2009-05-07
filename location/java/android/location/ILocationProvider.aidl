@@ -44,6 +44,4 @@ interface ILocationProvider {
     boolean sendExtraCommand(String command, inout Bundle extras);
     void addListener(int uid);
     void removeListener(int uid);
-    void wakeLockAcquired();
-    void wakeLockReleased();
 }
