@@ -21,11 +21,7 @@
 
 #include <assert.h>
 #include <GLES/gl.h>
-
-#include <private/opengles/gl_context.h>
-
-#define _NUM_COMPRESSED_TEXTURE_FORMATS \
-        (::android::OGLES_NUM_COMPRESSED_TEXTURE_FORMATS)
+#include <GLES/glext.h>
 
 static int initialized = 0;
 
@@ -65,7 +61,6 @@ nativeClassInitBuffer(JNIEnv *_env)
     elementSizeShiftID =
         _env->GetFieldID(bufferClass, "_elementSizeShift", "I");
 }
-
 
 static void
 nativeClassInit(JNIEnv *_env, jclass glImplClass)
@@ -117,12 +112,18 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining)
     return (void *) ((char *) data + offset);
 }
 
-
 static void
 releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 {
     _env->ReleasePrimitiveArrayCritical(array, data,
 					   commit ? 0 : JNI_ABORT);
+}
+
+static int
+getNumCompressedTextureFormats() {
+    int numCompressedTextureFormats = 0;
+    glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &numCompressedTextureFormats);
+    return numCompressedTextureFormats;
 }
 
 // --------------------------------------------------------------------------
