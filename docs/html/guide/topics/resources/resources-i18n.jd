@@ -111,21 +111,30 @@ the containing file.</p>
         <td><code>res/drawable/</code></td>
         <td><p>.png, .9.png, .jpg files that are compiled into the following
                 Drawable resource subtypes:</p>
-            <p>To get a resource of this type, use <code>Resource.getDrawable(<em>id</em>)</code>
-            <ul>
+            <ul class="nolist">
                 <li><a href="available-resources.html#imagefileresources">bitmap files</a></li>
                 <li><a href="available-resources.html#ninepatch">9-patches (resizable bitmaps)</a></li>
-            </ul></td>
+            </ul>
+            <p>To get a resource of this type, use <code>mContext.getResources().getDrawable(R.drawable.<em>imageId</em>)</code></p>
+            <p class="note"><strong>Note:</strong> Image resources placed in here may 
+              be automatically optimized with lossless image compression by the 
+              <a href="{@docRoot}guide/developing/tools/aapt.html">aapt</a> tool. For example, a true-color PNG 
+              that does not require more than 256 colors may be converted to an 8-bit PNG with a color palette.
+              This will result in an image of equal quality but which requires less memory. So be aware that the
+              image binaries placed in this directory can change during the build. If you plan on reading
+              an image as a bit stream in order to convert it to a bitmap, put your images in the 
+              <code>res/raw/</code> folder instead, where they will not be optimized.</p>
+        </td>
     </tr>
     <tr>
         <td><code>res/layout/</code></td>
         <td>XML files that are compiled into screen layouts (or part of a screen).
-            See <a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></td>
+            See <a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a>.</td>
     </tr>
     <tr>
         <td><code>res/values/</code></td>
         <td><p>XML files that can be compiled into many kinds of resource.</p>
-            <p class="note"><strong>Note:</strong> unlike the other res/ folders, this one
+            <p class="note"><strong>Note:</strong> Unlike the other res/ folders, this one
             can hold any number of files that hold descriptions of resources to create
             rather than the resources themselves. The XML element types control
             where these resources are placed under the R class.</p>
