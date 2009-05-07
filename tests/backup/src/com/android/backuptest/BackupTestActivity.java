@@ -31,14 +31,58 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.text.DateFormat;
+import java.util.Date;
+
 public class BackupTestActivity extends ListActivity
 {
     static final String TAG = "BackupTestActivity";
 
     static final String PREF_GROUP_SETTINGS = "settings";
     static final String PREF_KEY = "pref";
+    static final String FILE_NAME = "file.txt";
 
     Test[] mTests = new Test[] {
+        new Test("Show File") {
+            void run() {
+                StringBuffer str = new StringBuffer();
+                str.append("Text is:");
+                BufferedReader reader = null;
+                try {
+                    reader = new BufferedReader(new InputStreamReader(openFileInput(FILE_NAME)));
+                    while (reader.ready()) {
+                        str.append("\n");
+                        str.append(reader.readLine());
+                    }
+                } catch (IOException ex) {
+                    str.append("ERROR: ");
+                    str.append(ex.toString());
+                }
+                Log.d(TAG, str.toString());
+                Toast.makeText(BackupTestActivity.this, str, Toast.LENGTH_SHORT).show();
+            }
+        },
+        new Test("Append to File") {
+            void run() {
+                PrintStream output = null;
+                try {
+                    output = new PrintStream(openFileOutput(FILE_NAME, MODE_APPEND));
+                    DateFormat formatter = DateFormat.getDateTimeInstance();
+                    output.println(formatter.format(new Date()));
+                    output.close();
+                } catch (IOException ex) {
+                    if (output != null) {
+                        output.close();
+                    }
+                }
+                BackupManager bm = new BackupManager(BackupTestActivity.this);
+                bm.dataChanged();
+            }
+        },
         new Test("Show Shared Pref") {
             void run() {
                 SharedPreferences prefs = getSharedPreferences(PREF_GROUP_SETTINGS, MODE_PRIVATE);
