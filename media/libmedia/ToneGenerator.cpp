@@ -357,7 +357,7 @@ ToneGenerator::~ToneGenerator() {
 bool ToneGenerator::startTone(int toneType) {
     bool lResult = false;
 
-    if (toneType >= NUM_TONES)
+    if ((toneType < 0) || (toneType >= NUM_TONES))
         return lResult;
 
     if (mState == TONE_IDLE) {
