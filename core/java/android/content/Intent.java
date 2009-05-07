@@ -510,6 +510,7 @@ import java.util.Set;
  *     <li> {@link #ACTION_BATTERY_CHANGED}
  *     <li> {@link #ACTION_POWER_CONNECTED}
  *     <li> {@link #ACTION_POWER_DISCONNECTED} 
+ *     <li> {@link #ACTION_SHUTDOWN} 
  * </ul>
  *
  * <h3>Standard Categories</h3>
@@ -1269,6 +1270,15 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";    
+    /**
+     * Broadcast Action:  Device is shutting down.
+     * This is broadcast when the device is being shut down (completely turned
+     * off, not sleeping).  Once the broadcast is complete, the final shutdown
+     * will proceed and all unsaved data lost.  Apps will not normally need
+     * to handle this, since the forground activity will be paused as well.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";    
     /**
      * Broadcast Action:  Indicates low memory condition on the device
      */

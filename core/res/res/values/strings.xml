@@ -467,6 +467,12 @@
         the system, and steal or corrupt any data on it.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_shutdown">partial shutdown</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_shutdown">Puts the activity manager into a shutdown
+        state.  Does not perform a complete shutdown.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_runSetActivityWatcher">monitor and control all application launching</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_runSetActivityWatcher">Allows an application to

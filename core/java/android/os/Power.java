@@ -80,10 +80,9 @@ public class Power
     public static native int setLastUserActivityTimeout(long ms);
 
     /**
-     * Turn the device off.
-     *
-     * This method is considered deprecated in favor of
-     * {@link android.policy.ShutdownThread.shutdownAfterDisablingRadio()}.
+     * Low-level function turn the device off immediately, without trying
+     * to be clean.  Most people should use
+     * {@link android.internal.app.ShutdownThread} for a clean shutdown.
      *
      * @deprecated
      * @hide
