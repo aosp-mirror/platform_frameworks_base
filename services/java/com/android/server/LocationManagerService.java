@@ -918,12 +918,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 }
            }
         }
-        if (LocationManager.GPS_PROVIDER.equals(provider) ||
-                LocationManager.NETWORK_PROVIDER.equals(provider)) {
-            for (ProximityAlert alert : mProximityAlerts.values()) {
-                if (alert.mUid == uid) {
-                    return true;
-                }
+        for (ProximityAlert alert : mProximityAlerts.values()) {
+            if (alert.mUid == uid) {
+                return true;
             }
         }
         return false;
@@ -1359,13 +1356,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             mProximityListener = new ProximityListener();
             mProximityReceiver = new Receiver(mProximityListener);
 
-            LocationProviderProxy provider = mProvidersByName.get(LocationManager.GPS_PROVIDER);
-            if (provider != null) {
-                requestLocationUpdatesLocked(provider.getName(), 1000L, 1.0f, mProximityReceiver);
-            }
-
-            provider = mProvidersByName.get(LocationManager.NETWORK_PROVIDER);
-            if (provider != null) {
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                LocationProviderProxy provider = mProviders.get(i);
                 requestLocationUpdatesLocked(provider.getName(), 1000L, 1.0f, mProximityReceiver);
             }
         }
@@ -1809,9 +1801,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mProvidersByName.get(name) != null) {
                 throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
             }
+
+            // clear calling identity so INSTALL_LOCATION_PROVIDER permission is not required
+            long identity = Binder.clearCallingIdentity();
             addProvider(new LocationProviderProxy(name, provider));
             mMockProviders.put(name, provider);
             updateProvidersLocked();
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -1835,7 +1831,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
+            // clear calling identity so INSTALL_LOCATION_PROVIDER permission is not required
+            long identity = Binder.clearCallingIdentity();
             mockProvider.setLocation(loc);
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
