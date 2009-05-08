@@ -21,11 +21,7 @@
 
 #include <assert.h>
 #include <GLES/gl.h>
-
-#include <private/opengles/gl_context.h>
-
-#define _NUM_COMPRESSED_TEXTURE_FORMATS \
-        (::android::OGLES_NUM_COMPRESSED_TEXTURE_FORMATS)
+#include <GLES/glext.h>
 
 static int initialized = 0;
 
