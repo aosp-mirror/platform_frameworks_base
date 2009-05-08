@@ -228,8 +228,10 @@ public final class MotionEvent implements Parcelable {
             if (mHistory != null) {
                 float[] history = mHistory;
                 int length = history.length;
-                for (int i = 0; i < length; i++) {
+                for (int i = 0; i < length; i += 4) {
                     history[i] *= scale;
+                    history[i + 2] *= scale;
+                    history[i + 3] *= scale;
                 }
             }
         }
