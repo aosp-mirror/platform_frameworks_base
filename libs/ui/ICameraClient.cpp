@@ -32,6 +32,8 @@ enum {
     ERROR_CALLBACK,
     AUTOFOCUS_CALLBACK,
     RECORDING_CALLBACK,
+    NOTIFY_CALLBACK,
+    DATA_CALLBACK,
 };
 
 class BpCameraClient: public BpInterface<ICameraClient>
@@ -110,6 +112,30 @@ public:
         data.writeInt32(focused);
         remote()->transact(AUTOFOCUS_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
     }
+
+    // generic callback from camera service to app
+    void notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2)
+    {
+        LOGV("notifyCallback");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
+        data.writeInt32(msgType);
+        data.writeInt32(ext1);
+        data.writeInt32(ext2);
+        remote()->transact(NOTIFY_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
+    }
+
+    // generic data callback from camera service to app with image data
+    void dataCallback(int32_t msgType, const sp<IMemory>& imageData)
+    {
+        LOGV("dataCallback");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
+        data.writeInt32(msgType);
+        data.writeStrongBinder(imageData->asBinder());
+        remote()->transact(DATA_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
+    }
+
 };
 
 IMPLEMENT_META_INTERFACE(CameraClient, "android.hardware.ICameraClient");
@@ -172,6 +198,23 @@ status_t BnCameraClient::onTransact(
             CHECK_INTERFACE(ICameraClient, data, reply);
             bool focused = (bool)data.readInt32();
             autoFocusCallback(focused);
+            return NO_ERROR;
+        } break;
+        case NOTIFY_CALLBACK: {
+            LOGV("NOTIFY_CALLBACK");
+            CHECK_INTERFACE(ICameraClient, data, reply);
+            int32_t msgType = data.readInt32();
+            int32_t ext1 = data.readInt32();
+            int32_t ext2 = data.readInt32();
+            notifyCallback(msgType, ext1, ext2);
+            return NO_ERROR;
+        } break;
+        case DATA_CALLBACK: {
+            LOGV("RAW_CALLBACK");
+            CHECK_INTERFACE(ICameraClient, data, reply);
+            int32_t msgType = data.readInt32();
+            sp<IMemory> imageData = interface_cast<IMemory>(data.readStrongBinder());
+            dataCallback(msgType, imageData);
             return NO_ERROR;
         } break;
         default:

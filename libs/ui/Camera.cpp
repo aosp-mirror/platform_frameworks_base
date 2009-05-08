@@ -397,6 +397,18 @@ void Camera::errorCallback(status_t error)
     }
 }
 
+// callback from camera service
+void Camera::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2)
+{
+    LOGV("notifyCallback");
+}
+
+// callback from camera service when image is ready
+void Camera::dataCallback(int32_t msgType, const sp<IMemory>& frame)
+{
+    LOGV("dataCallback");
+}
+
 void Camera::binderDied(const wp<IBinder>& who) {
     LOGW("ICamera died");
     if (mErrorCallback) {
