@@ -208,7 +208,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 && mPopup.isShowing()
                 && mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
             mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-            mPopup.update();
+            showDropDown();
         }
     }
 
@@ -1171,9 +1171,14 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
         }
 
-        // Max height available on the screen for a popup
-        final int maxHeight =
-                mPopup.getMaxAvailableHeight(getDropDownAnchorView(), mDropDownVerticalOffset);
+        // Max height available on the screen for a popup. If this AutoCompleteTextView has
+        // the dropDownAlwaysVisible attribute, and the input method is not currently required,
+        // we then we ask for the height ignoring any bottom decorations like the input method.
+        // Otherwise we respect the input method.
+        boolean ignoreBottomDecorations = mDropDownAlwaysVisible &&
+                mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
+        final int maxHeight = mPopup.getMaxAvailableHeight(
+                getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
 
         final int measuredHeight = mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
                 0, ListView.NO_POSITION, maxHeight - otherHeights, 2) + otherHeights;
@@ -1255,7 +1260,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-                mPopup.update();
+                showDropDown();
             }
             return false;
         }

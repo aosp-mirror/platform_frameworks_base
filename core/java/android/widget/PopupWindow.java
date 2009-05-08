@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManagerImpl;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.View.OnTouchListener;
 import android.graphics.PixelFormat;
@@ -948,14 +949,38 @@ public class PopupWindow {
      *         shown.
      */
     public int getMaxAvailableHeight(View anchor, int yOffset) {
+        return getMaxAvailableHeight(anchor, yOffset, false);
+    }
+    
+    /**
+     * Returns the maximum height that is available for the popup to be
+     * completely shown, optionally ignoring any bottom decorations such as
+     * the input method. It is recommended that this height be the maximum for
+     * the popup's height, otherwise it is possible that the popup will be
+     * clipped.
+     * 
+     * @param anchor The view on which the popup window must be anchored.
+     * @param yOffset y offset from the view's bottom edge
+     * @param ignoreBottomDecorations if true, the height returned will be
+     *        all the way to the bottom of the display, ignoring any
+     *        bottom decorations
+     * @return The maximum available height for the popup to be completely
+     *         shown.
+     *         
+     * @hide Pending API council approval.
+     */
+    public int getMaxAvailableHeight(View anchor, int yOffset, boolean ignoreBottomDecorations) {
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
         final int[] anchorPos = mDrawingLocation;
         anchor.getLocationOnScreen(anchorPos);
         
-        final int distanceToBottom = displayFrame.bottom -
-                (anchorPos[1] + anchor.getHeight()) - yOffset;
+        int bottomEdge = displayFrame.bottom;
+        if (ignoreBottomDecorations) {
+            bottomEdge = WindowManagerImpl.getDefault().getDefaultDisplay().getHeight();
+        }
+        final int distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
         final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
 
         // anchorPos[1] is distance from anchor to top of screen
@@ -1116,7 +1141,7 @@ public class PopupWindow {
             p.flags = newFlags;
             update = true;
         }
-        
+
         if (update) {
             mWindowManager.updateViewLayout(mPopupView, p);
         }
