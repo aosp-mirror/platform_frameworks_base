@@ -362,7 +362,7 @@ public class Scroller  {
     
     /**
      * Extend the scroll animation. This allows a running animation to scroll
-     * further and longer, when used with {@link #setFinalX()} or {@link setFinalY()}.
+     * further and longer, when used with {@link #setFinalX(int)} or {@link #setFinalY(int)}.
      *
      * @param extend Additional time to scroll in milliseconds.
      * @see #setFinalX(int)
