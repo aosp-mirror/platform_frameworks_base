@@ -23,6 +23,8 @@ else
     LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
 
+LOCAL_CFLAGS += -fvisibility=hidden
+
 include $(BUILD_SHARED_LIBRARY)
 
 
@@ -48,5 +50,7 @@ else
     # we need to access the Bionic private header <bionic_tls.h>
     LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
+
+LOCAL_CFLAGS += -fvisibility=hidden
 
 include $(BUILD_SHARED_LIBRARY)
