@@ -45,7 +45,8 @@ static jmethodID method_onSinkPlaying;
 static jmethodID method_onSinkStopped;
 
 typedef struct {
-    JNIEnv *env;
+    JavaVM *vm;
+    int envVer;
     DBusConnection *conn;
     jobject me;  // for callbacks to java
 } native_data_t;
@@ -70,7 +71,8 @@ static bool initNative(JNIEnv* env, jobject object) {
         LOGE("%s: out of memory!", __FUNCTION__);
         return false;
     }
-    nat->env = env;
+    env->GetJavaVM( &(nat->vm) );
+    nat->envVer = env->GetVersion();
     nat->me = env->NewGlobalRef(object);
 
     DBusError err;
@@ -239,8 +241,14 @@ static void onConnectSinkResult(DBusMessage *msg, void *user, void *natData) {
 
     char *c_path = (char *)user;
     DBusError err;
+    JNIEnv *env;
+
+    if (nat->vm->GetEnv((void**)&env, nat->envVer) < 0) {
+        LOGE("%s: error finding Env for our VM\n", __FUNCTION__);
+        return;
+    }
+
     dbus_error_init(&err);
-    JNIEnv *env = nat->env;
 
     LOGV("... path = %s", c_path);
     if (dbus_set_error_from_message(&err, msg)) {
@@ -264,8 +272,14 @@ static void onDisconnectSinkResult(DBusMessage *msg, void *user, void *natData) 
 
     char *c_path = (char *)user;
     DBusError err;
+    JNIEnv *env;
+
+    if (nat->vm->GetEnv((void**)&env, nat->envVer) < 0) {
+        LOGE("%s: error finding Env for our VM\n", __FUNCTION__);
+        return;
+    }
+
     dbus_error_init(&err);
-    JNIEnv *env = nat->env;
 
     LOGV("... path = %s", c_path);
     if (dbus_set_error_from_message(&err, msg)) {
