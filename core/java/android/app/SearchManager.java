@@ -1182,6 +1182,17 @@ public class SearchManager
      * Typically you'll use this with a URI matcher.
      */
     public final static String SUGGEST_URI_PATH_QUERY = "search_suggest_query";
+
+    /**
+     * Uri path for shortcut validation.  This is the path that the search manager will use when
+     * querying your content provider to refresh a shortcutted suggestion result and to check if it
+     * is still valid.  When asked, a source may return an up to date result, or no result.  No
+     * result indicates the shortcut refers to a no longer valid sugggestion.
+     *
+     * @see #SUGGEST_COLUMN_SHORTCUT_ID
+     * @hide
+     */
+    public final static String SUGGEST_URI_PATH_SHORTCUT = "search_suggest_shortcut";
     
     /**
      * MIME type for suggestions data.  You'll use this in your suggestions content provider
@@ -1301,6 +1312,26 @@ public class SearchManager
      * used when forming the suggestion's query.
      */
     public final static String SUGGEST_COLUMN_QUERY = "suggest_intent_query";
+
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i>  This column is used to indicate whether
+     * a search suggestion should be stored as a shortcut, and whether it should be validated.  If
+     * missing, the result will be stored as a shortcut and never validated.  If set to
+     * {@link #SUGGEST_NEVER_MAKE_SHORTCUT}, the result will not be stored as a shortcut.
+     * Otherwise, the shortcut id will be used to check back for validation via
+     * {@link #SUGGEST_URI_PATH_SHORTCUT}.
+     *
+     * @hide Pending API council approval.
+     */
+    public final static String SUGGEST_COLUMN_SHORTCUT_ID = "suggest_shortcut_id";
+
+    /**
+     * Column value for suggestion column {@link #SUGGEST_COLUMN_SHORTCUT_ID} when a suggestion
+     * should not be stored as a shortcut in global search.
+     *
+     * @hide Pending API council approval.
+     */
+    public final static String SUGGEST_NEVER_MAKE_SHORTCUT = "_-1";
 
     /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
