@@ -172,6 +172,14 @@ public abstract class PackageManager {
     public static final int GET_SUPPORTS_DENSITIES    = 0x00008000;
 
     /**
+     * Resolution and querying flag: if set, only filters that support the
+     * {@link android.content.Intent#CATEGORY_DEFAULT} will be considered for
+     * matching.  This is a synonym for including the CATEGORY_DEFAULT in your
+     * supplied Intent.
+     */
+    public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
+
+    /**
      * Permission check result: this is returned by {@link #checkPermission}
      * if the permission has been granted to the given package.
      */
@@ -218,14 +226,6 @@ public abstract class PackageManager {
      * if either of the given package names are not valid.
      */
     public static final int SIGNATURE_UNKNOWN_PACKAGE = -4;
-
-    /**
-     * Resolution and querying flag: if set, only filters that support the
-     * {@link android.content.Intent#CATEGORY_DEFAULT} will be considered for
-     * matching.  This is a synonym for including the CATEGORY_DEFAULT in your
-     * supplied Intent.
-     */
-    public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
 
     public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0;
     public static final int COMPONENT_ENABLED_STATE_ENABLED = 1;
