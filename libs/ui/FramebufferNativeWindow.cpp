@@ -76,7 +76,7 @@ private:
  */
 
 FramebufferNativeWindow::FramebufferNativeWindow() 
-    : BASE(), fbDev(0), grDev(0)
+    : BASE(), fbDev(0), grDev(0), mUpdateOnDemand(false)
 {
     hw_module_t const* module;
     if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &module) == 0) {
@@ -85,6 +85,8 @@ FramebufferNativeWindow::FramebufferNativeWindow()
         gralloc_open(module, &grDev);
         int err;
 
+        
+        mUpdateOnDemand = (fbDev->setUpdateRect != 0);
         
         // initialize the buffer FIFO
         mNumBuffers = 2;
@@ -129,6 +131,14 @@ FramebufferNativeWindow::~FramebufferNativeWindow() {
     grDev->free(grDev, buffers[1]->handle);
     gralloc_close(grDev);
     framebuffer_close(fbDev);
+}
+
+status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r) 
+{
+    if (!mUpdateOnDemand) {
+        return INVALID_OPERATION;
+    }
+    return fbDev->setUpdateRect(fbDev, r.left, r.top, r.width(), r.height());
 }
 
 int FramebufferNativeWindow::setSwapInterval(

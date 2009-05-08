@@ -183,9 +183,11 @@ void DisplayHardware::init(uint32_t dpy)
     LOGI("extensions: %s", egl_extensions);
     LOGI("Client API: %s", eglQueryString(display, EGL_CLIENT_APIS)?:"Not Supported");
 
-    // TODO: get the real "update_on_demand" behavior (probably should be HAL module)
-    // FIXME: mFlags |= UPDATE_ON_DEMAND;
 
+    if (mNativeWindow->isUpdateOnDemand()) {
+        mFlags |= UPDATE_ON_DEMAND;
+    }
+    
     if (eglGetConfigAttrib(display, config, EGL_CONFIG_CAVEAT, &dummy) == EGL_TRUE) {
         if (dummy == EGL_SLOW_CONFIG)
             mFlags |= SLOW_CONFIG;
@@ -210,7 +212,7 @@ void DisplayHardware::init(uint32_t dpy)
 
     mDpiX = mNativeWindow->xdpi;
     mDpiX = mNativeWindow->ydpi;
-    mRefreshRate = mNativeWindow->getDevice()->fps; 
+    mRefreshRate = fbDev->fps; 
     
     char property[PROPERTY_VALUE_MAX];
     if (property_get("ro.sf.lcd_density", property, NULL) <= 0) {
@@ -314,6 +316,10 @@ void DisplayHardware::flip(const Region& dirty) const
                 b.left, b.top, b.width(), b.height());
     } 
 
+    if (mFlags & UPDATE_ON_DEMAND) {
+        mNativeWindow->setUpdateRectangle(dirty.bounds());
+    }
+    
     mPageFlipCount++;
     eglSwapBuffers(dpy, surface);
     checkEGLErrors("eglSwapBuffers");

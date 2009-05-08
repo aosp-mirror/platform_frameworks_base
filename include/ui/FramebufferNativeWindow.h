@@ -52,6 +52,9 @@ public:
 
     framebuffer_device_t const * getDevice() const { return fbDev; } 
 
+    bool isUpdateOnDemand() const { return mUpdateOnDemand; }
+    status_t setUpdateRectangle(const Rect& updateRect);
+    
 private:
     friend class LightRefBase<FramebufferNativeWindow>;    
     ~FramebufferNativeWindow(); // this class cannot be overloaded
@@ -71,6 +74,7 @@ private:
     int32_t mNumBuffers;
     int32_t mNumFreeBuffers;
     int32_t mBufferHead;
+    bool mUpdateOnDemand;
 };
 
 // ---------------------------------------------------------------------------
