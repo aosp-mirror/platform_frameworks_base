@@ -25,10 +25,14 @@ import android.database.CursorWrapper;
 import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.accounts.Account;
+import android.util.Config;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -86,8 +90,7 @@ public abstract class ContentResolver {
      */
     public static final String CURSOR_DIR_BASE_TYPE = "vnd.android.cursor.dir";
     
-    public ContentResolver(Context context)
-    {
+    public ContentResolver(Context context) {
         mContext = context;
     }
 
@@ -590,6 +593,46 @@ public abstract class ContentResolver {
     }
 
     /**
+     * Returns a {@link ContentProviderClient} that is associated with the {@link ContentProvider}
+     * that services the content at uri, starting the provider if necessary. Returns
+     * null if there is no provider associated wih the uri. The caller must indicate that they are
+     * done with the provider by calling {@link ContentProviderClient#release} which will allow
+     * the system to release the provider it it determines that there is no other reason for
+     * keeping it active.
+     * @param uri specifies which provider should be acquired
+     * @return a {@link ContentProviderClient} that is associated with the {@link ContentProvider}
+     * that services the content at uri or null if there isn't one.
+     */
+    public final ContentProviderClient acquireContentProviderClient(Uri uri) {
+        IContentProvider provider = acquireProvider(uri);
+        if (provider != null) {
+            return new ContentProviderClient(this, provider);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a {@link ContentProviderClient} that is associated with the {@link ContentProvider}
+     * with the authority of name, starting the provider if necessary. Returns
+     * null if there is no provider associated wih the uri. The caller must indicate that they are
+     * done with the provider by calling {@link ContentProviderClient#release} which will allow
+     * the system to release the provider it it determines that there is no other reason for
+     * keeping it active.
+     * @param name specifies which provider should be acquired
+     * @return a {@link ContentProviderClient} that is associated with the {@link ContentProvider}
+     * with the authority of name or null if there isn't one.
+     */
+    public final ContentProviderClient acquireContentProviderClient(String name) {
+        IContentProvider provider = acquireProvider(name);
+        if (provider != null) {
+            return new ContentProviderClient(this, provider);
+        }
+
+        return null;
+    }
+
+    /**
      * Register an observer class that gets callbacks when data identified by a
      * given content URI changes.
      *
@@ -606,7 +649,7 @@ public abstract class ContentResolver {
             ContentObserver observer)
     {
         try {
-            ContentServiceNative.getDefault().registerContentObserver(uri, notifyForDescendents,
+            getContentService().registerContentObserver(uri, notifyForDescendents,
                     observer.getContentObserver());
         } catch (RemoteException e) {
         }
@@ -622,7 +665,7 @@ public abstract class ContentResolver {
         try {
             IContentObserver contentObserver = observer.releaseContentObserver();
             if (contentObserver != null) {
-                ContentServiceNative.getDefault().unregisterContentObserver(
+                getContentService().unregisterContentObserver(
                         contentObserver);
             }
         } catch (RemoteException e) {
@@ -652,7 +695,7 @@ public abstract class ContentResolver {
      */
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
         try {
-            ContentServiceNative.getDefault().notifyChange(
+            getContentService().notifyChange(
                     uri, observer == null ? null : observer.getContentObserver(),
                     observer != null && observer.deliverSelfNotifications(), syncToNetwork);
         } catch (RemoteException e) {
@@ -678,7 +721,7 @@ public abstract class ContentResolver {
     public void startSync(Uri uri, Bundle extras) {
         validateSyncExtrasBundle(extras);
         try {
-            ContentServiceNative.getDefault().startSync(uri, extras);
+            getContentService().startSync(uri, extras);
         } catch (RemoteException e) {
         }
     }
@@ -721,7 +764,7 @@ public abstract class ContentResolver {
 
     public void cancelSync(Uri uri) {
         try {
-            ContentServiceNative.getDefault().cancelSync(uri);
+            getContentService().cancelSync(uri);
         } catch (RemoteException e) {
         }
     }
@@ -782,6 +825,22 @@ public abstract class ContentResolver {
         }
     }
 
+    /** @hide */
+    public static final String CONTENT_SERVICE_NAME = "content";
+    
+    /** @hide */
+    public static IContentService getContentService() {
+        if (sContentService != null) {
+            return sContentService;
+        }
+        IBinder b = ServiceManager.getService(CONTENT_SERVICE_NAME);
+        if (Config.LOGV) Log.v("ContentService", "default service binder = " + b);
+        sContentService = IContentService.Stub.asInterface(b);
+        if (Config.LOGV) Log.v("ContentService", "default service = " + sContentService);
+        return sContentService;
+    }
+    
+    private static IContentService sContentService;
     private final Context mContext;
     private static final String TAG = "ContentResolver";
 }

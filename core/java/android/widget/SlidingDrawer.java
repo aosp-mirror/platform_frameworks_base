@@ -206,8 +206,13 @@ public class SlidingDrawer extends ViewGroup {
 
         int contentId = a.getResourceId(R.styleable.SlidingDrawer_content, 0);
         if (contentId == 0) {
-            throw new IllegalArgumentException("The handle attribute is required and must refer "
+            throw new IllegalArgumentException("The content attribute is required and must refer "
                     + "to a valid child.");
+        }
+
+        if (handleId == contentId) {
+            throw new IllegalArgumentException("The content and handle attributes must refer "
+                    + "to different children.");
         }
 
         mHandleId = handleId;

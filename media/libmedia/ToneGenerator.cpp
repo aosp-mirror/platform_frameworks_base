@@ -24,44 +24,235 @@
 #include <sys/resource.h>
 #include <utils/RefBase.h>
 #include <utils/Timers.h>
+#include <cutils/properties.h>
 #include "media/ToneGenerator.h"
+
 
 namespace android {
 
+
 // Descriptors for all available tones (See ToneGenerator::ToneDescriptor class declaration for details)
-const ToneGenerator::ToneDescriptor
-    ToneGenerator::toneDescriptors[NUM_TONES] = {
-    // waveFreq[]                     segments[]                         repeatCnt
-        { { 1336, 941, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_0
-        { { 1209, 697, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_1
-        { { 1336, 697, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_2
-        { { 1477, 697, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_3
-        { { 1209, 770, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_4
-        { { 1336, 770, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_5
-        { { 1477, 770, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_6
-        { { 1209, 852, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_7
-        { { 1336, 852, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_8
-        { { 1477, 852, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_9
-        { { 1209, 941, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_S
-        { { 1477, 941, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_P
-        { { 1633, 697, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_A
-        { { 1633, 770, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_B
-        { { 1633, 852, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_C
-        { { 1633, 941, 0 },       { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_DTMF_D
-        { { 425, 0 },             { ToneGenerator::TONEGEN_INF, 0 }, ToneGenerator::TONEGEN_INF },  // TONE_SUP_DIAL
-        { { 425, 0 },             { 500, 500, 0 },                   ToneGenerator::TONEGEN_INF },  // TONE_SUP_BUSY
-        { { 425, 0 },             { 200, 200, 0 },                   ToneGenerator::TONEGEN_INF },  // TONE_SUP_CONGESTION
-        { { 425, 0 },             { 200, 0 },                        0 },                           // TONE_SUP_RADIO_ACK
-        { { 425, 0 },             { 200, 200, 0 },                   2 },                           // TONE_SUP_RADIO_NOTAVAIL
-        { { 950, 1400, 1800, 0 }, { 330, 1000, 0 },                  ToneGenerator::TONEGEN_INF },  // TONE_SUP_ERROR
-        { { 425, 0 },             { 200, 600, 200, 3000, 0 },        ToneGenerator::TONEGEN_INF },  // TONE_SUP_CALL_WAITING
-        { { 425, 0 },             { 1000, 4000, 0 },                 ToneGenerator::TONEGEN_INF },  // TONE_SUP_RINGTONE
-        { { 400, 1200, 0 },       { 40, 0 },                         0 },                           // TONE_PROP_BEEP
-        { { 1200, 0 },            { 100, 100, 0 },                   1 },                           // TONE_PROP_ACK
-        { { 300, 400, 500, 0 },   { 400, 0 },                        0 },                           // TONE_PROP_NACK
-        { { 400, 1200, 0 },       { 200, 0 },                        0 },                           // TONE_PROP_PROMPT
-        { { 400, 1200, 0 },       { 40, 200, 40, 0 },                0 }                            // TONE_PROP_BEEP2
-    };
+const ToneGenerator::ToneDescriptor ToneGenerator::sToneDescriptors[] = {
+        { segments: {{ duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 941, 0 }},
+                     { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_0
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 697, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_1
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 697, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_2
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 697, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_3
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 770, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_4
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 770, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_5
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 770, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_6
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 852, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_7
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 852, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_8
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 852, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_9
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 941, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_S
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 941, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_P
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 697, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_A
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 770, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                             // TONE_DTMF_B
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 852, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_C
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 941, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_DTMF_D
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 425, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_SUP_DIAL
+        { segments: { { duration: 500 , waveFreq: { 425, 0 }},
+                      { duration: 500, waveFreq: { 0 }},
+                         { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_SUP_BUSY
+        { segments: { { duration: 200, waveFreq: { 425, 0 } },
+                      { duration: 200, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_SUP_CONGESTION
+        { segments: { { duration: 200, waveFreq: { 425, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 0,
+          repeatSegment: 0 },                              // TONE_SUP_RADIO_ACK
+        { segments: { { duration: 200, waveFreq: { 425, 0 }},
+                      { duration: 200, waveFreq: { 0 }},
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 2,
+          repeatSegment: 0 },                              // TONE_SUP_RADIO_NOTAVAIL
+        { segments: { { duration: 330, waveFreq: { 950, 1400, 1800, 0 }},
+                      { duration: 1000, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_SUP_ERROR
+        { segments: { { duration: 200, waveFreq: { 425, 0 } },
+                      { duration: 600, waveFreq: { 0 } },
+                      { duration: 200, waveFreq: { 425, 0 } },
+                      { duration: 3000, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_SUP_CALL_WAITING
+        { segments: { { duration: 1000, waveFreq: { 425, 0 } },
+                      { duration: 4000, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_SUP_RINGTONE
+        { segments: { { duration: 40, waveFreq: { 400, 1200, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 0,
+          repeatSegment: 0 },                              // TONE_PROP_BEEP
+        { segments: { { duration: 100, waveFreq: { 1200, 0 } },
+                      { duration: 100, waveFreq: { 0 }  },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 1,
+          repeatSegment: 0 },                              // TONE_PROP_ACK
+        { segments: { { duration: 400, waveFreq: { 300, 400, 500, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 0,
+          repeatSegment: 0 },                              // TONE_PROP_NACK
+        { segments: { { duration: 200, waveFreq: { 400, 1200, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 0,
+          repeatSegment: 0 },                              // TONE_PROP_PROMPT
+        { segments: { { duration: 40, waveFreq: { 400, 1200, 0 } },
+                      { duration: 200, waveFreq: { 0 } },
+                      { duration: 40, waveFreq: { 400, 1200, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 0,
+          repeatSegment: 0 },                             // TONE_PROP_BEEP2
+        { segments: { { duration: 250, waveFreq: { 440, 0 } },
+                      { duration: 250, waveFreq: { 620, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_SUP_INTERCEPT
+        { segments: { { duration: 250, waveFreq: { 440, 0 } },
+                      { duration: 250, waveFreq: { 620, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 7,
+          repeatSegment: 0 },                             // TONE_SUP_INTERCEPT_ABBREV
+        { segments: { { duration: 250, waveFreq: { 480, 620, 0 } },
+                      { duration: 250, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 7,
+          repeatSegment: 0 },                             // TONE_SUP_CONGESTION_ABBREV
+        { segments: { { duration: 100, waveFreq: { 350, 440, 0 } },
+                      { duration: 100, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 2,
+          repeatSegment: 0 },                             // TONE_SUP_CONFIRM
+        { segments: { { duration: 100, waveFreq: { 480, 0 } },
+                      { duration: 100, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: 3,
+          repeatSegment: 0 },                              // TONE_SUP_PIP
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 350, 440, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_ANSI_DIAL
+        { segments: { { duration: 500, waveFreq: { 480, 620, 0 } },
+                      { duration: 500, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_ANSI_BUSY
+        { segments: { { duration: 250, waveFreq: { 480, 620, 0 } },
+                      { duration: 250, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_ANSI_CONGESTION
+        { segments: { { duration: 300, waveFreq: { 440, 0 } },
+                      { duration: 9700, waveFreq: { 0 } },
+                      { duration: 100, waveFreq: { 440, 0 } },
+                      { duration: 100, waveFreq: { 0 } },
+                      { duration: 100, waveFreq: { 440, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 1 },                              // TONE_ANSI_CALL_WAITING
+        { segments: { { duration: 2000, waveFreq: { 440, 480, 0 } },
+                      { duration: 4000, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_ANSI_RINGTONE
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 400, 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_JAPAN_DIAL
+        { segments: { { duration: 500, waveFreq: { 400, 0 } },
+                      { duration: 500, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_JAPAN_BUSY
+        { segments: { { duration: 1000, waveFreq: { 400, 0 } },
+                      { duration: 2000, waveFreq: { 0 } },
+                      { duration: 0 , waveFreq: { 0 }}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_JAPAN_RADIO_ACK
+};
+
+// Used by ToneGenerator::getToneForRegion() to convert user specified supervisory tone type
+// to actual tone for current region.
+const unsigned char ToneGenerator::sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONES] = {
+        {   // ANSI
+            TONE_ANSI_DIAL,             // TONE_SUP_DIAL
+            TONE_ANSI_BUSY,             // TONE_SUP_BUSY
+            TONE_ANSI_CONGESTION,       // TONE_SUP_CONGESTION
+            TONE_SUP_RADIO_ACK,         // TONE_SUP_RADIO_ACK
+            TONE_SUP_RADIO_NOTAVAIL,    // TONE_SUP_RADIO_NOTAVAIL
+            TONE_SUP_ERROR,             // TONE_SUP_ERROR
+            TONE_ANSI_CALL_WAITING,     // TONE_SUP_CALL_WAITING
+            TONE_ANSI_RINGTONE          // TONE_SUP_RINGTONE
+        },
+        {   // JAPAN
+            TONE_JAPAN_DIAL,             // TONE_SUP_DIAL
+            TONE_JAPAN_BUSY,             // TONE_SUP_BUSY
+            TONE_SUP_CONGESTION,         // TONE_SUP_CONGESTION
+            TONE_JAPAN_RADIO_ACK,        // TONE_SUP_RADIO_ACK
+            TONE_SUP_RADIO_NOTAVAIL,     // TONE_SUP_RADIO_NOTAVAIL
+            TONE_SUP_ERROR,              // TONE_SUP_ERROR
+            TONE_SUP_CALL_WAITING,       // TONE_SUP_CALL_WAITING
+            TONE_SUP_RINGTONE            // TONE_SUP_RINGTONE
+        }
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                           ToneGenerator class Implementation
@@ -104,6 +295,17 @@ ToneGenerator::ToneGenerator(int streamType, float volume) {
     mpNewToneDesc = 0;
     // Generate tone by chunks of 20 ms to keep cadencing precision
     mProcessSize = (mSamplingRate * 20) / 1000;
+
+    char value[PROPERTY_VALUE_MAX];
+    property_get("gsm.operator.iso-country", value, "");
+    if (strcmp(value,"us") == 0 ||
+        strcmp(value,"ca") == 0) {
+        mRegion = ANSI;
+    } else if (strcmp(value,"jp") == 0) {
+        mRegion = JAPAN;
+    } else {
+        mRegion = CEPT;
+    }
 
     if (initAudioTrack()) {
         LOGV("ToneGenerator INIT OK, time: %d\n", (unsigned int)(systemTime()/1000000));
@@ -155,7 +357,7 @@ ToneGenerator::~ToneGenerator() {
 bool ToneGenerator::startTone(int toneType) {
     bool lResult = false;
 
-    if (toneType >= NUM_TONES)
+    if ((toneType < 0) || (toneType >= NUM_TONES))
         return lResult;
 
     if (mState == TONE_IDLE) {
@@ -170,7 +372,8 @@ bool ToneGenerator::startTone(int toneType) {
     mLock.lock();
 
     // Get descriptor for requested tone
-    mpNewToneDesc = &toneDescriptors[toneType];
+    toneType = getToneForRegion(toneType);
+    mpNewToneDesc = &sToneDescriptors[toneType];
 
     if (mState == TONE_INIT) {
         if (prepareWave()) {
@@ -333,6 +536,7 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
     ToneGenerator *lpToneGen = static_cast<ToneGenerator *>(user);
     short *lpOut = buffer->i16;
     unsigned int lNumSmp = buffer->size/sizeof(short);
+    const ToneDescriptor *lpToneDesc = lpToneGen->mpToneDesc;
 
     if (buffer->size == 0) return;
 
@@ -377,7 +581,7 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
         
     
         // Exit if tone sequence is over
-        if (lpToneGen->mpToneDesc->segments[lpToneGen->mCurSegment] == 0) {
+        if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0) {
             if (lpToneGen->mState == TONE_PLAYING) {
                 lpToneGen->mState = TONE_STOPPING;            
             }
@@ -390,52 +594,64 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
             LOGV("End Segment, time: %d\n", (unsigned int)(systemTime()/1000000));
     
             lGenSmp = lReqSmp;
-    
-            if (lpToneGen->mCurSegment & 0x0001) {
-                // If odd segment,  OFF -> ON transition : reset wave generator
-                lWaveCmd = WaveGenerator::WAVEGEN_START;
-    
-                LOGV("OFF->ON, lGenSmp: %d, lReqSmp: %d\n", lGenSmp, lReqSmp);
-            } else {
-                // If even segment,  ON -> OFF transition : ramp volume down
+
+            // If segment,  ON -> OFF transition : ramp volume down
+            if (lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[0] != 0) {
                 lWaveCmd = WaveGenerator::WAVEGEN_STOP;
-    
+                unsigned int lFreqIdx = 0;
+                unsigned short lFrequency = lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[lFreqIdx];
+
+                while (lFrequency != 0) {
+                    WaveGenerator *lpWaveGen = lpToneGen->mWaveGens.valueFor(lFrequency);
+                    lpWaveGen->getSamples(lpOut, lGenSmp, lWaveCmd);
+                    lFrequency = lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[++lFreqIdx];
+                }
                 LOGV("ON->OFF, lGenSmp: %d, lReqSmp: %d\n", lGenSmp, lReqSmp);
             }
-    
-            // Pre increment segment index and handle loop if last segment reached
-            if (lpToneGen->mpToneDesc->segments[++lpToneGen->mCurSegment] == 0) {
+
+            // Go to next segment
+            lpToneGen->mCurSegment++;
+
+            // Handle loop if last segment reached
+            if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0) {
                 LOGV("Last Seg: %d\n", lpToneGen->mCurSegment);
     
                 // Pre increment loop count and restart if total count not reached. Stop sequence otherwise
-                if (++lpToneGen->mCurCount <= lpToneGen->mpToneDesc->repeatCnt) {
+                if (++lpToneGen->mCurCount <= lpToneDesc->repeatCnt) {
                     LOGV("Repeating Count: %d\n", lpToneGen->mCurCount);
     
-                    lpToneGen->mCurSegment = 0;
+                    lpToneGen->mCurSegment = lpToneDesc->repeatSegment;
+                    if (lpToneDesc->segments[lpToneDesc->repeatSegment].waveFreq[0] != 0) {
+                        lWaveCmd = WaveGenerator::WAVEGEN_START;
+                    }
     
                     LOGV("New segment %d, Next Time: %d\n", lpToneGen->mCurSegment,
                             (lpToneGen->mNextSegSmp*1000)/lpToneGen->mSamplingRate);
     
                 } else {
+                    lGenSmp = 0;
                     LOGV("End repeat, time: %d\n", (unsigned int)(systemTime()/1000000));
-    
-                    // Cancel OFF->ON transition in case previous segment tone state was OFF
-                    if (!(lpToneGen->mCurSegment & 0x0001)) {
-                        lGenSmp = 0;
-                    }
                 }
             } else {
                 LOGV("New segment %d, Next Time: %d\n", lpToneGen->mCurSegment,
                         (lpToneGen->mNextSegSmp*1000)/lpToneGen->mSamplingRate);
+                if (lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[0] != 0) {
+                    // If next segment is not silent,  OFF -> ON transition : reset wave generator
+                    lWaveCmd = WaveGenerator::WAVEGEN_START;
+
+                    LOGV("OFF->ON, lGenSmp: %d, lReqSmp: %d\n", lGenSmp, lReqSmp);
+                } else {
+                    lGenSmp = 0;
+                }
             }
     
             // Update next segment transition position. No harm to do it also for last segment as lpToneGen->mNextSegSmp won't be used any more
             lpToneGen->mNextSegSmp
-                    += (lpToneGen->mpToneDesc->segments[lpToneGen->mCurSegment] * lpToneGen->mSamplingRate) / 1000;
+                    += (lpToneDesc->segments[lpToneGen->mCurSegment].duration * lpToneGen->mSamplingRate) / 1000;
     
         } else {
             // Inside a segment keep tone ON or OFF
-            if (lpToneGen->mCurSegment & 0x0001) {
+            if (lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[0] == 0) {
                 lGenSmp = 0;  // If odd segment, tone is currently OFF
             } else {
                 lGenSmp = lReqSmp;  // If event segment, tone is currently ON
@@ -444,11 +660,13 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
     
         if (lGenSmp) {
             // If samples must be generated, call all active wave generators and acumulate waves in lpOut
-            unsigned int lWaveIdx;
+            unsigned int lFreqIdx = 0;
+            unsigned short lFrequency = lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[lFreqIdx];
     
-            for (lWaveIdx = 0; lWaveIdx < (unsigned int)lpToneGen->mWaveGens.size(); lWaveIdx++) {
-                WaveGenerator *lpWaveGen = lpToneGen->mWaveGens[lWaveIdx];
+            while (lFrequency != 0) {
+                WaveGenerator *lpWaveGen = lpToneGen->mWaveGens.valueFor(lFrequency);
                 lpWaveGen->getSamples(lpOut, lGenSmp, lWaveCmd);
+                lFrequency = lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[++lFreqIdx];
             }
         }
         
@@ -501,7 +719,7 @@ audioCallback_EndLoop:
 //    Method:        ToneGenerator::prepareWave()
 //
 //    Description:    Prepare wave generators and reset tone sequencer state machine.
-//      mpNewToneDesc must have been initialized befoire calling this function.
+//      mpNewToneDesc must have been initialized before calling this function.
 //    Input:
 //        none
 //
@@ -510,40 +728,48 @@ audioCallback_EndLoop:
 //
 ////////////////////////////////////////////////////////////////////////////////
 bool ToneGenerator::prepareWave() {
-    unsigned int lCnt = 0;
-    unsigned int lNumWaves;
+    unsigned int segmentIdx = 0;
 
     if (!mpNewToneDesc) {
         return false;
     }
+
     // Remove existing wave generators if any
     clearWaveGens();
 
     mpToneDesc = mpNewToneDesc;
 
-    // Get total number of sine waves: needed to adapt sine wave gain.
-    lNumWaves = numWaves();
-
-    // Instantiate as many wave generators as listed in descriptor
-    while (lCnt < lNumWaves) {
-        ToneGenerator::WaveGenerator *lpWaveGen =
-                new ToneGenerator::WaveGenerator((unsigned short)mSamplingRate,
-                        mpToneDesc->waveFreq[lCnt],
-                        TONEGEN_GAIN/lNumWaves);
-        if (lpWaveGen == 0) {
-            goto prepareWave_exit;
+    while (mpToneDesc->segments[segmentIdx].duration) {
+        // Get total number of sine waves: needed to adapt sine wave gain.
+        unsigned int lNumWaves = numWaves(segmentIdx);
+        unsigned int freqIdx = 0;
+        unsigned int frequency = mpToneDesc->segments[segmentIdx].waveFreq[freqIdx];
+        while (frequency) {
+            // Instantiate a wave generator if  ot already done for this frequency
+            if (mWaveGens.indexOfKey(frequency) == NAME_NOT_FOUND) {
+                ToneGenerator::WaveGenerator *lpWaveGen =
+                        new ToneGenerator::WaveGenerator((unsigned short)mSamplingRate,
+                                frequency,
+                                TONEGEN_GAIN/lNumWaves);
+                if (lpWaveGen == 0) {
+                    goto prepareWave_exit;
+                }
+                mWaveGens.add(frequency, lpWaveGen);
+            }
+            frequency = mpNewToneDesc->segments[segmentIdx].waveFreq[++freqIdx];
         }
-
-        mWaveGens.push(lpWaveGen);
-        LOGV("Create sine: %d\n", mpToneDesc->waveFreq[lCnt]);
-        lCnt++;
+        segmentIdx++;
     }
 
     // Initialize tone sequencer
     mTotalSmp = 0;
     mCurSegment = 0;
     mCurCount = 0;
-    mNextSegSmp = (mpToneDesc->segments[0] * mSamplingRate) / 1000;
+    if (mpToneDesc->segments[0].duration == TONEGEN_INF) {
+        mNextSegSmp = TONEGEN_INF;
+    } else{
+        mNextSegSmp = (mpToneDesc->segments[0].duration * mSamplingRate) / 1000;
+    }
 
     return true;
 
@@ -559,19 +785,22 @@ prepareWave_exit:
 //
 //    Method:        ToneGenerator::numWaves()
 //
-//    Description:    Count number of sine waves needed to generate tone (e.g 2 for DTMF).
+//    Description:    Count number of sine waves needed to generate a tone segment (e.g 2 for DTMF).
 //
 //    Input:
-//        none
+//        segmentIdx        tone segment index
 //
 //    Output:
 //        returned value:    nummber of sine waves
 //
 ////////////////////////////////////////////////////////////////////////////////
-unsigned int ToneGenerator::numWaves() {
+unsigned int ToneGenerator::numWaves(unsigned int segmentIdx) {
     unsigned int lCnt = 0;
 
-    while (mpToneDesc->waveFreq[lCnt]) {
+    if (mpToneDesc->segments[segmentIdx].duration) {
+        while (mpToneDesc->segments[segmentIdx].waveFreq[lCnt]) {
+            lCnt++;
+        }
         lCnt++;
     }
 
@@ -595,10 +824,38 @@ unsigned int ToneGenerator::numWaves() {
 void ToneGenerator::clearWaveGens() {
     LOGV("Clearing mWaveGens:");
 
-    while (!mWaveGens.isEmpty()) {
-        delete mWaveGens.top();
-        mWaveGens.pop();
+    for (size_t lIdx = 0; lIdx < mWaveGens.size(); lIdx++) {
+        delete mWaveGens.valueAt(lIdx);
     }
+    mWaveGens.clear();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//    Method:       ToneGenerator::getToneForRegion()
+//
+//    Description:  Get correct ringtone type according to current region.
+//      The corrected ring tone type is the tone descriptor index in sToneDescriptors[].
+//
+//    Input:
+//        none
+//
+//    Output:
+//        none
+//
+////////////////////////////////////////////////////////////////////////////////
+int ToneGenerator::getToneForRegion(int toneType) {
+    int regionTone;
+
+    if (mRegion == CEPT || toneType < FIRST_SUP_TONE || toneType > LAST_SUP_TONE) {
+        regionTone = toneType;
+    } else {
+        regionTone = sToneMappingTable[mRegion][toneType - FIRST_SUP_TONE];
+    }
+
+    LOGV("getToneForRegion, tone %d, region %d, regionTone %d", toneType, mRegion, regionTone);
+
+    return regionTone;
 }
 
 

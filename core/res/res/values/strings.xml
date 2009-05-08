@@ -760,6 +760,19 @@
         or other location sources.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_installLocationProvider">permission to install a location provider</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_installLocationProvider">Create mock location sources for testing.
+        Malicious applications can use this to override the location and/or status returned by real
+        location sources such as GPS or Network providers.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_installLocationCollector">permission to install a location collector</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_installLocationCollector">Create mock location sources for testing.
+        Malicious applications can use this to monitor and report your location to an external source.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">fine (GPS) location</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessFineLocation">Access fine location sources such as the

@@ -119,6 +119,7 @@ interface IPackageManager {
      *                 providers that can sync.
      * @param outInfo Filled in with a list of the ProviderInfo for each
      *                name in 'outNames'.
+     * @deprecated
      */
     void querySyncProviders(inout List<String> outNames,
             inout List<ProviderInfo> outInfo);

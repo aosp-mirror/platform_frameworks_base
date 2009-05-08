@@ -35,6 +35,7 @@ import android.content.res.XmlResourceParser;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -739,7 +740,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             throw new IllegalArgumentException("packageName and uid don't match packageName="
                     + packageName);
         }
-        if (callingUid != packageUid) {
+        if (callingUid != packageUid && Process.supportsProcesses()) {
             throw new IllegalArgumentException("packageName and uid don't match packageName="
                     + packageName);
         }

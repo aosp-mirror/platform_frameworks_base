@@ -206,15 +206,6 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     }
                     return true;
                 }
-
-                case GET_SYNC_ADAPTER_TRANSACTION:
-                {
-                    data.enforceInterface(IContentProvider.descriptor);
-                    ISyncAdapter sa = getSyncAdapter();
-                    reply.writeNoException();
-                    reply.writeStrongBinder(sa != null ? sa.asBinder() : null);
-                    return true;
-                }
             }
         } catch (Exception e) {
             DatabaseUtils.writeExceptionToParcel(reply, e);
@@ -454,23 +445,6 @@ final class ContentProviderProxy implements IContentProvider
         reply.recycle();
 
         return fd;
-    }
-
-    public ISyncAdapter getSyncAdapter() throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-
-        data.writeInterfaceToken(IContentProvider.descriptor);
-
-        mRemote.transact(IContentProvider.GET_SYNC_ADAPTER_TRANSACTION, data, reply, 0);
-
-        DatabaseUtils.readExceptionFromParcel(reply);
-        ISyncAdapter syncAdapter = ISyncAdapter.Stub.asInterface(reply.readStrongBinder());
-
-        data.recycle();
-        reply.recycle();
-
-        return syncAdapter;
     }
 
     private IBinder mRemote;

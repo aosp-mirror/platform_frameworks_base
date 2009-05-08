@@ -41,6 +41,18 @@ LOCAL_SRC_FILES := $(filter-out \
 			org/mobilecontrol/% \
 			,$(LOCAL_SRC_FILES))
 
+# Include a different set of source files when building a debug build.
+# TODO: Maybe build these into a separate .jar and put it on the classpath
+#       in front of framework.jar.
+# NOTE: Do not use this as an example; this is a very special situation.
+#       Do not modify LOCAL_SRC_FILES based on any variable other
+#       than TARGET_BUILD_TYPE, otherwise builds can become inconsistent.
+ifeq ($(TARGET_BUILD_TYPE),debug)
+  LOCAL_SRC_FILES += $(call find-other-java-files,core/config/debug)
+else
+  LOCAL_SRC_FILES += $(call find-other-java-files,core/config/ndebug)
+endif
+
 ## READ ME: ########################################################
 ##
 ## When updating this list of aidl files, consider if that aidl is
@@ -76,8 +88,10 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
+    core/java/android/content/IContentService.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
+    core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver.aidl \
@@ -119,6 +133,7 @@ LOCAL_SRC_FILES += \
 	im/java/android/im/IImPlugin.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
+	location/java/android/location/IGpsStatusProvider.aidl \
 	location/java/android/location/ILocationCollector.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
@@ -234,6 +249,11 @@ fwbase_dirs_to_document := \
 	     ) \
 	   ) \
 	 )
+
+# Pass a special "fake-out" version of some classes to the doc/API tools.
+# ConfigBuildFlags uses this trick to prevent certain fields from appearing
+# as "final" in the official SDK APIs.
+fwbase_dirs_to_document += core/config/sdk
 
 # These are relative to dalvik/libcore
 # Intentionally not included from libcore:

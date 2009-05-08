@@ -19,7 +19,7 @@ package com.android.internal.telephony.cdma.sms;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.util.HexDump;
 
-public class UserData{
+public class UserData {
 
     /**
      * User data encoding types.
@@ -50,6 +50,12 @@ public class UserData{
         'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~'};
 
     /**
+     * Only elements between these indices in the ASCII table are printable.
+     */
+    public static final int PRINTABLE_ASCII_MIN_INDEX = 0x20;
+    public static final int PRINTABLE_ASCII_MAX_INDEX = 0x7F;
+
+    /**
      * Mapping for IA5 values less than 32 are flow control signals
      * and not used here.
      */
@@ -65,6 +71,7 @@ public class UserData{
      * Contains the data encoding type for the SMS message
      */
     public int msgEncoding;
+    public boolean msgEncodingSet = false;
 
     // XXX needed when encoding is IS91 or DCS (not supported yet):
     public int msgType;
@@ -87,7 +94,7 @@ public class UserData{
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("UserData:\n");
-        builder.append("  msgEncoding: " + msgEncoding + "\n");
+        builder.append("  msgEncoding: " + (msgEncodingSet ? msgEncoding : "not set") + "\n");
         builder.append("  msgType: " + msgType + "\n");
         builder.append("  paddingBits: " + paddingBits + "\n");
         builder.append("  numFields: " + (int)numFields + "\n");

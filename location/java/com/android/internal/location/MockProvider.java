@@ -17,8 +17,12 @@
 package com.android.internal.location;
 
 import android.location.ILocationManager;
+import android.location.ILocationProvider;
 import android.location.Location;
+import android.location.LocationProvider;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.util.Log;
 import android.util.PrintWriterPrinter;
 
 import java.io.PrintWriter;
@@ -28,7 +32,9 @@ import java.io.PrintWriter;
  *
  * {@hide}
  */
-public class MockProvider extends LocationProviderImpl {
+public class MockProvider extends ILocationProvider.Stub {
+    private final String mName;
+    private final ILocationManager mLocationManager;
     private final boolean mRequiresNetwork;
     private final boolean mRequiresSatellite;
     private final boolean mRequiresCell;
@@ -46,12 +52,14 @@ public class MockProvider extends LocationProviderImpl {
     private boolean mHasStatus;
     private boolean mEnabled;
 
+    private static final String TAG = "MockProvider";
+
     public MockProvider(String name,  ILocationManager locationManager,
         boolean requiresNetwork, boolean requiresSatellite,
         boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
         boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
-        super(name, locationManager);
-
+        mName = name;
+        mLocationManager = locationManager;
         mRequiresNetwork = requiresNetwork;
         mRequiresSatellite = requiresSatellite;
         mRequiresCell = requiresCell;
@@ -64,78 +72,64 @@ public class MockProvider extends LocationProviderImpl {
         mLocation = new Location(name);
     }
 
-    @Override
     public void disable() {
         mEnabled = false;
     }
 
-    @Override
     public void enable() {
         mEnabled = true;
     }
 
-    @Override
     public int getStatus(Bundle extras) {
         if (mHasStatus) {
             extras.clear();
             extras.putAll(mExtras);
             return mStatus;
         } else {
-            return AVAILABLE;
+            return LocationProvider.AVAILABLE;
         }
     }
 
-    @Override
     public long getStatusUpdateTime() {
         return mStatusUpdateTime;
     }
 
-    @Override
     public boolean isEnabled() {
         return mEnabled;
     }
 
-    @Override
     public int getAccuracy() {
         return mAccuracy;
     }
 
-    @Override
     public int getPowerRequirement() {
         return mPowerRequirement;
     }
 
-    @Override
     public boolean hasMonetaryCost() {
         return mHasMonetaryCost;
     }
 
-    @Override
     public boolean requiresCell() {
         return mRequiresCell;
     }
 
-    @Override
     public boolean requiresNetwork() {
         return mRequiresNetwork;
     }
 
-    @Override
     public boolean requiresSatellite() {
         return mRequiresSatellite;
     }
 
-    @Override
     public boolean supportsAltitude() {
         return mSupportsAltitude;
     }
 
-    @Override
     public boolean supportsBearing() {
         return mSupportsBearing;
     }
 
-    @Override
     public boolean supportsSpeed() {
         return mSupportsSpeed;
     }
@@ -143,7 +137,11 @@ public class MockProvider extends LocationProviderImpl {
     public void setLocation(Location l) {
         mLocation.set(l);
         mHasLocation = true;
-        reportLocationChanged(mLocation);
+        try {
+            mLocationManager.reportLocation(mLocation);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling reportLocation");
+        }
     }
 
     public void clearLocation() {
@@ -165,8 +163,27 @@ public class MockProvider extends LocationProviderImpl {
         mStatusUpdateTime = 0;
     }
 
+    public void enableLocationTracking(boolean enable) {
+    }
+
+    public void setMinTime(long minTime) {
+    }
+
+    public void updateNetworkState(int state) {
+    }
+
+    public boolean sendExtraCommand(String command, Bundle extras) {
+        return false;
+    }
+
+    public void addListener(int uid) {
+    }
+
+    public void removeListener(int uid) {
+    }
+
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + getName());
+        pw.println(prefix + mName);
         pw.println(prefix + "mHasLocation=" + mHasLocation);
         pw.println(prefix + "mLocation:");
         mLocation.dump(new PrintWriterPrinter(pw), prefix + "  ");

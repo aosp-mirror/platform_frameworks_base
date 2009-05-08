@@ -43,9 +43,9 @@ public abstract class SyncAdapter {
     Transport mTransport = new Transport();
 
     /**
-     * Get the Transport object.  (note this is package private).
+     * Get the Transport object.
      */
-    final ISyncAdapter getISyncAdapter()
+    public final ISyncAdapter getISyncAdapter()
     {
         return mTransport;
     }

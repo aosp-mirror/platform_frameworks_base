@@ -44,13 +44,10 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.R;
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
 
 /**
  * A system service that provides  account, password, and authtoken management for all
@@ -221,12 +218,13 @@ public class AccountManagerService extends IAccountManager.Stub {
     public String[] getAuthenticatorTypes() {
         long identityToken = clearCallingIdentity();
         try {
-            Collection<AccountAuthenticatorCache.AuthenticatorInfo> authenticatorCollection =
-                    mAuthenticatorCache.getAllAuthenticators();
+            Collection<AccountAuthenticatorCache.ServiceInfo<String>> authenticatorCollection =
+                    mAuthenticatorCache.getAllServices();
             String[] types = new String[authenticatorCollection.size()];
             int i = 0;
-            for (AccountAuthenticatorCache.AuthenticatorInfo authenticator : authenticatorCollection) {
-                types[i] = authenticator.mType;
+            for (AccountAuthenticatorCache.ServiceInfo<String> authenticator
+                    : authenticatorCollection) {
+                types[i] = authenticator.type;
                 i++;
             }
             return types;

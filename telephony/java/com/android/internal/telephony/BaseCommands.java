@@ -54,6 +54,7 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mIccStatusChangedRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOnRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOffRegistrants = new RegistrantList();
+    protected Registrant mUnsolOemHookRawRegistrant;
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
     protected Registrant mSignalStrengthRegistrant;
@@ -456,9 +457,17 @@ public abstract class BaseCommands implements CommandsInterface {
     public void setOnRestrictedStateChanged(Handler h, int what, Object obj) {
         mRestrictedStateRegistrant = new Registrant (h, what, obj);
     }
-    
+
     public void unSetOnRestrictedStateChanged(Handler h) {
         mRestrictedStateRegistrant.clear();
+    }
+
+    public void setOnUnsolOemHookRaw(Handler h, int what, Object obj) {
+        mUnsolOemHookRawRegistrant = new Registrant (h, what, obj);
+    }
+
+    public void unSetOnUnsolOemHookRaw(Handler h) {
+        mUnsolOemHookRawRegistrant.clear();
     }
 
     //***** Protected Methods

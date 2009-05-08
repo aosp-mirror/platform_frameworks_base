@@ -29,7 +29,13 @@ package android.backup;
 interface IBackupManager {
     /**
      * Tell the system service that the caller has made changes to its
-     * data, and therefore needs to undergo a backup pass.
+     * data, and therefore needs to undergo an incremental backup pass.
      */
     oneway void dataChanged(String packageName);
+
+    /**
+     * Schedule a full backup of the given package.
+     * !!! TODO: protect with a signature-or-system permission?
+     */
+    oneway void scheduleFullBackup(String packageName);
 }

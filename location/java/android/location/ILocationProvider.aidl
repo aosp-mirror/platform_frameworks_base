@@ -19,13 +19,11 @@ package android.location;
 import android.os.Bundle;
 
 /**
- * An interface for location providers implemented outside of the system process.
+ * Binder interface for location providers.
  *
  * {@hide}
  */
 interface ILocationProvider {
-
-    /* for LocationProvider */
     boolean requiresNetwork();
     boolean requiresSatellite();
     boolean requiresCell();
@@ -35,8 +33,6 @@ interface ILocationProvider {
     boolean supportsBearing();
     int getPowerRequirement();
     int getAccuracy();
-
-    /* for LocationProviderImpl */
     void enable();
     void disable();
     boolean isEnabled();
@@ -48,6 +44,4 @@ interface ILocationProvider {
     boolean sendExtraCommand(String command, inout Bundle extras);
     void addListener(int uid);
     void removeListener(int uid);
-    void wakeLockAcquired();
-    void wakeLockReleased();
 }

@@ -19,6 +19,7 @@ package android.accounts;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.RegisteredServicesCache;
 import android.content.res.XmlResourceParser;
 import android.content.res.TypedArray;
 import android.content.BroadcastReceiver;
@@ -46,172 +47,27 @@ import org.xmlpull.v1.XmlPullParser;
  * A cache of services that export the {@link IAccountAuthenticator} interface. This cache
  * is built by interrogating the {@link PackageManager} and is updated as packages are added,
  * removed and changed. The authenticators are referred to by their account type and
- * are made available via the {@link #getAuthenticatorInfo(String type)} method.
+ * are made available via the {@link RegisteredServicesCache#getServiceInfo} method.
+ * @hide
  */
-public class AccountAuthenticatorCache {
+/* package private */ class AccountAuthenticatorCache extends RegisteredServicesCache<String> {
     private static final String TAG = "Account";
 
     private static final String SERVICE_INTERFACE = "android.accounts.AccountAuthenticator";
     private static final String SERVICE_META_DATA = "android.accounts.AccountAuthenticator";
-
-    private volatile Map<String, AuthenticatorInfo> mAuthenticators;
-
-    private final Context mContext;
-    private BroadcastReceiver mReceiver;
+    private static final String ATTRIBUTES_NAME = "account-authenticator";
 
     public AccountAuthenticatorCache(Context context) {
-        mContext = context;
-        mReceiver = new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                buildAuthenticatorList();
-            }
-        };
+        super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME);
     }
 
-    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        getAllAuthenticators();
-        Map<String, AuthenticatorInfo> authenticators = mAuthenticators;
-        fout.println("AccountAuthenticatorCache: " + authenticators.size() + " authenticators");
-        for (AuthenticatorInfo info : authenticators.values()) {
-            fout.println("  " + info);
-        }
-    }
-
-    private void monitorPackageChanges() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        mContext.registerReceiver(mReceiver, intentFilter);
-    }
-
-    /**
-     * Value type that describes an AccountAuthenticator. The information within can be used
-     * to bind to its {@link IAccountAuthenticator} interface.
-     */
-    public class AuthenticatorInfo {
-        public final String mType;
-        public final ComponentName mComponentName;
-
-        private AuthenticatorInfo(String type, ComponentName componentName) {
-            mType = type;
-            mComponentName = componentName;
-        }
-
-        public String toString() {
-            return "AuthenticatorInfo: " + mType + ", " + mComponentName;
-        }
-    }
-
-    /**
-     * Accessor for the registered authenticators.
-     * @param type the account type of the authenticator
-     * @return the AuthenticatorInfo that matches the account type or null if none is present
-     */
-    public AuthenticatorInfo getAuthenticatorInfo(String type) {
-        if (mAuthenticators == null) {
-            monitorPackageChanges();
-            buildAuthenticatorList();
-        }
-        return mAuthenticators.get(type);
-    }
-
-    /**
-     * @return a collection of {@link AuthenticatorInfo} objects for all
-     * registered authenticators.
-     */
-    public Collection<AuthenticatorInfo> getAllAuthenticators() {
-        if (mAuthenticators == null) {
-            monitorPackageChanges();
-            buildAuthenticatorList();
-        }
-        return Collections.unmodifiableCollection(mAuthenticators.values());
-    }
-
-    /**
-     * Stops the monitoring of package additions, removals and changes.
-     */
-    public void close() {
-        if (mReceiver != null) {
-            mContext.unregisterReceiver(mReceiver);
-            mReceiver = null;
-        }
-    }
-
-    protected void finalize() throws Throwable {
-        if (mReceiver != null) {
-            Log.e(TAG, "AccountAuthenticatorCache finalized without being closed");
-        }
-        close();
-        super.finalize();
-    }
-
-    private void buildAuthenticatorList() {
-        Map<String, AuthenticatorInfo> authenticators = Maps.newHashMap();
-        PackageManager pm = mContext.getPackageManager();
-
-        List<ResolveInfo> services =
-                pm.queryIntentServices(new Intent(SERVICE_INTERFACE), PackageManager.GET_META_DATA);
-
-        for (ResolveInfo resolveInfo : services) {
-            try {
-                AuthenticatorInfo info = parseAuthenticatorInfo(resolveInfo);
-                if (info != null) {
-                    authenticators.put(info.mType, info);
-                } else {
-                    Log.w(TAG, "Unable to load input method " + resolveInfo.toString());
-                }
-            } catch (XmlPullParserException e) {
-                Log.w(TAG, "Unable to load input method " + resolveInfo.toString(), e);
-            } catch (IOException e) {
-                Log.w(TAG, "Unable to load input method " + resolveInfo.toString(), e);
-            }
-        }
-
-        mAuthenticators = authenticators;
-    }
-
-    public AuthenticatorInfo parseAuthenticatorInfo(ResolveInfo service)
-            throws XmlPullParserException, IOException {
-        ServiceInfo si = service.serviceInfo;
-        ComponentName componentName = new ComponentName(si.packageName, si.name);
-
-        PackageManager pm = mContext.getPackageManager();
-        String authenticatorType = null;
-
-        XmlResourceParser parser = null;
+    public String parseServiceAttributes(AttributeSet attrs) {
+        TypedArray sa = mContext.getResources().obtainAttributes(attrs,
+                com.android.internal.R.styleable.AccountAuthenticator);
         try {
-            parser = si.loadXmlMetaData(pm, SERVICE_META_DATA);
-            if (parser == null) {
-                throw new XmlPullParserException("No " + SERVICE_META_DATA + " meta-data");
-            }
-
-            AttributeSet attrs = Xml.asAttributeSet(parser);
-
-            int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                    && type != XmlPullParser.START_TAG) {
-            }
-
-            String nodeName = parser.getName();
-            if (!"account-authenticator".equals(nodeName)) {
-                throw new XmlPullParserException(
-                        "Meta-data does not start with account-authenticator tag");
-            }
-
-            TypedArray sa = mContext.getResources().obtainAttributes(attrs,
-                    com.android.internal.R.styleable.AccountAuthenticator);
-            authenticatorType = sa.getString(
-                    com.android.internal.R.styleable.AccountAuthenticator_accountType);
-            sa.recycle();
+            return sa.getString(com.android.internal.R.styleable.AccountAuthenticator_accountType);
         } finally {
-            if (parser != null) parser.close();
+            sa.recycle();
         }
-
-        if (authenticatorType == null) {
-            return null;
-        }
-
-        return new AuthenticatorInfo(authenticatorType, componentName);
     }
 }

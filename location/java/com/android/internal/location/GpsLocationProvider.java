@@ -16,13 +16,17 @@
 
 package com.android.internal.location;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.IGpsStatusListener;
+import android.location.IGpsStatusProvider;
 import android.location.ILocationManager;
+import android.location.ILocationProvider;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -30,6 +34,7 @@ import android.net.ConnectivityManager;
 import android.net.SntpClient;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -54,9 +59,12 @@ import java.util.Properties;
  *
  * {@hide}
  */
-public class GpsLocationProvider extends LocationProviderImpl {
+public class GpsLocationProvider extends ILocationProvider.Stub {
 
     private static final String TAG = "GpsLocationProvider";
+
+    private static final boolean DEBUG = true;
+    private static final boolean VERBOSE = false;
     
     /**
      * Broadcast intent action indicating that the GPS has either been
@@ -142,13 +150,16 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private int mLocationFlags = LOCATION_INVALID;
 
     // current status
-    private int mStatus = TEMPORARILY_UNAVAILABLE;
+    private int mStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
 
     // time for last status update
     private long mStatusUpdateTime = SystemClock.elapsedRealtime();
     
     // turn off GPS fix icon if we haven't received a fix in 10 seconds
     private static final long RECENT_FIX_TIMEOUT = 10 * 1000;
+    
+    // number of fixes to receive before disabling GPS
+    private static final int MIN_FIX_COUNT = 10;
 
     // true if we are enabled
     private boolean mEnabled;
@@ -161,6 +172,9 @@ public class GpsLocationProvider extends LocationProviderImpl {
     
     // requested frequency of fixes, in seconds
     private int mFixInterval = 1;
+
+    // number of fixes we have received since we started navigating
+    private int mFixCount;
 
     private int mPositionMode = GPS_POSITION_MODE_STANDALONE;
 
@@ -178,7 +192,8 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private Properties mProperties;
     private String mNtpServer;
 
-    private Context mContext;
+    private final Context mContext;
+    private final ILocationManager mLocationManager;
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
     private Bundle mLocationExtras = new Bundle();
     private ArrayList<Listener> mListeners = new ArrayList<Listener>();
@@ -193,6 +208,15 @@ public class GpsLocationProvider extends LocationProviderImpl {
     private int mSuplDataConnectionState;
     private final ConnectivityManager mConnMgr;
 
+    // Wakelocks
+    private final static String WAKELOCK_KEY = "GpsLocationProvider";
+    private final PowerManager.WakeLock mWakeLock;
+
+    // Alarms
+    private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
+    private final AlarmManager mAlarmManager;
+    private final PendingIntent mWakeupIntent;
+
     private final IBatteryStats mBatteryStats;
     private final SparseIntArray mClientUids = new SparseIntArray();
 
@@ -203,11 +227,65 @@ public class GpsLocationProvider extends LocationProviderImpl {
     // current setting - 5 minutes
     private static final long RETRY_INTERVAL = 5*60*1000; 
 
-    private class TelephonyBroadcastReceiver extends BroadcastReceiver {
+    private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
+        public void addGpsStatusListener(IGpsStatusListener listener) throws RemoteException {
+            if (listener == null) {
+                throw new NullPointerException("listener is null in addGpsStatusListener");
+            }
+
+            synchronized(mListeners) {
+                IBinder binder = listener.asBinder();
+                int size = mListeners.size();
+                for (int i = 0; i < size; i++) {
+                    Listener test = mListeners.get(i);
+                    if (binder.equals(test.mListener.asBinder())) {
+                        // listener already added
+                        return;
+                    }
+                }
+
+                Listener l = new Listener(listener);
+                binder.linkToDeath(l, 0);
+                mListeners.add(l);
+            }
+        }
+
+        public void removeGpsStatusListener(IGpsStatusListener listener) {
+            if (listener == null) {
+                throw new NullPointerException("listener is null in addGpsStatusListener");
+            }
+
+            synchronized(mListeners) {
+                IBinder binder = listener.asBinder();
+                Listener l = null;
+                int size = mListeners.size();
+                for (int i = 0; i < size && l == null; i++) {
+                    Listener test = mListeners.get(i);
+                    if (binder.equals(test.mListener.asBinder())) {
+                        l = test;
+                    }
+                }
+
+                if (l != null) {
+                    mListeners.remove(l);
+                    binder.unlinkToDeath(l, 0);
+                }
+            }
+        }
+    };
+
+    public IGpsStatusProvider getGpsStatusProvider() {
+        return mGpsStatusProvider;
+    }
+
+    private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
+            if (action.equals(ALARM_WAKEUP)) {
+                if (DEBUG) Log.d(TAG, "ALARM_WAKEUP");
+                startNavigating();
+            } else if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
                 String state = intent.getStringExtra(Phone.STATE_KEY);
                 String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
                 String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
@@ -224,20 +302,27 @@ public class GpsLocationProvider extends LocationProviderImpl {
                 }
             }
         }
-    }
+    };
 
     public static boolean isSupported() {
         return native_is_supported();
     }
 
     public GpsLocationProvider(Context context, ILocationManager locationManager) {
-        super(LocationManager.GPS_PROVIDER, locationManager);
         mContext = context;
+        mLocationManager = locationManager;
 
-        TelephonyBroadcastReceiver receiver = new TelephonyBroadcastReceiver();
+        // Create a wake lock
+        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+
+        mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
+
         IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ALARM_WAKEUP);
         intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
-        context.registerReceiver(receiver, intentFilter);
+        context.registerReceiver(mBroadcastReciever, intentFilter);
 
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -270,7 +355,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * Returns true if the provider requires access to a
      * data network (e.g., the Internet), false otherwise.
      */
-    @Override
     public boolean requiresNetwork() {
         // We want updateNetworkState() to get called when the network state changes
         // for XTRA and NTP time injection support.
@@ -295,7 +379,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * satellite-based positioning system (e.g., GPS), false
      * otherwise.
      */
-    @Override
     public boolean requiresSatellite() {
         return true;
     }
@@ -305,7 +388,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * cellular network (e.g., to make use of cell tower IDs), false
      * otherwise.
      */
-    @Override
     public boolean requiresCell() {
         return false;
     }
@@ -315,7 +397,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * monetary charge to the user, false if use is free.  It is up to
      * each provider to give accurate information.
      */
-    @Override
     public boolean hasMonetaryCost() {
         return false;
     }
@@ -326,7 +407,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * under most circumstances but may occassionally not report it
      * should return true.
      */
-    @Override
     public boolean supportsAltitude() {
         return true;
     }
@@ -337,7 +417,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * under most circumstances but may occassionally not report it
      * should return true.
      */
-    @Override
     public boolean supportsSpeed() {
         return true;
     }
@@ -348,7 +427,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * under most circumstances but may occassionally not report it
      * should return true.
      */
-    @Override
     public boolean supportsBearing() {
         return true;
     }
@@ -359,7 +437,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * @return the power requirement for this provider, as one of the
      * constants Criteria.POWER_REQUIREMENT_*.
      */
-    @Override
     public int getPowerRequirement() {
         return Criteria.POWER_HIGH;
     }
@@ -370,7 +447,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * @return the accuracy of location from this provider, as one
      * of the constants Criteria.ACCURACY_*.
      */
-    @Override
     public int getAccuracy() {
         return Criteria.ACCURACY_FINE;
     }
@@ -380,7 +456,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * must be handled.  Hardware may be started up
      * when the provider is enabled.
      */
-    @Override
     public synchronized void enable() {
         if (Config.LOGD) Log.d(TAG, "enable");
         if (mEnabled) return;
@@ -410,7 +485,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * need not be handled.  Hardware may be shut
      * down while the provider is disabled.
      */
-    @Override
     public synchronized void disable() {
         if (Config.LOGD) Log.d(TAG, "disable");
         if (!mEnabled) return;
@@ -443,12 +517,10 @@ public class GpsLocationProvider extends LocationProviderImpl {
         native_cleanup();
     }
 
-    @Override
     public boolean isEnabled() {
         return mEnabled;
     }
 
-    @Override
     public int getStatus(Bundle extras) {
         if (extras != null) {
             extras.putInt("satellites", mSvCount);
@@ -465,27 +537,22 @@ public class GpsLocationProvider extends LocationProviderImpl {
         }
     }
 
-    @Override
     public long getStatusUpdateTime() {
         return mStatusUpdateTime;
     }
 
-    @Override
     public void enableLocationTracking(boolean enable) {
-        super.enableLocationTracking(enable);
         if (enable) {
-            mFixRequestTime = System.currentTimeMillis();
             mTTFF = 0;
             mLastFixTime = 0;
             startNavigating();
         } else {
+            mAlarmManager.cancel(mWakeupIntent);
             stopNavigating();
         }
     }
 
-    @Override
     public void setMinTime(long minTime) {
-        super.setMinTime(minTime);
         if (Config.LOGD) Log.d(TAG, "setMinTime " + minTime);
         
         if (minTime >= 0) {
@@ -516,48 +583,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
         }
     }
 
-    public void addGpsStatusListener(IGpsStatusListener listener) throws RemoteException {        
-        if (listener == null) throw new NullPointerException("listener is null in addGpsStatusListener");
-
-        synchronized(mListeners) {
-            IBinder binder = listener.asBinder();
-            int size = mListeners.size();
-            for (int i = 0; i < size; i++) {
-                Listener test = mListeners.get(i);
-                if (binder.equals(test.mListener.asBinder())) {
-                    // listener already added
-                    return;
-                }
-            }
-
-            Listener l = new Listener(listener);
-            binder.linkToDeath(l, 0);
-            mListeners.add(l);
-        }
-    }
-    
-    public void removeGpsStatusListener(IGpsStatusListener listener) {
-        if (listener == null) throw new NullPointerException("listener is null in addGpsStatusListener");
-
-        synchronized(mListeners) {        
-            IBinder binder = listener.asBinder();
-            Listener l = null;
-            int size = mListeners.size();
-            for (int i = 0; i < size && l == null; i++) {
-                Listener test = mListeners.get(i);
-                if (binder.equals(test.mListener.asBinder())) {
-                    l = test;
-                }
-            }
-
-            if (l != null) {
-                mListeners.remove(l);
-                binder.unlinkToDeath(l, 0);
-            }
-        }
-    }
-
-    @Override
     public void addListener(int uid) {
         mClientUids.put(uid, 0);
         if (mNavigating) {
@@ -569,7 +594,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
         }
     }
 
-    @Override
     public void removeListener(int uid) {
         mClientUids.delete(uid);
         if (mNavigating) {
@@ -581,7 +605,6 @@ public class GpsLocationProvider extends LocationProviderImpl {
         }
     }
 
-    @Override
     public boolean sendExtraCommand(String command, Bundle extras) {
         
         if ("delete_aiding_data".equals(command)) {
@@ -624,7 +647,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
     public void startNavigating() {
         if (!mStarted) {
-            if (Config.LOGV) Log.v(TAG, "startNavigating");
+            if (DEBUG) Log.d(TAG, "startNavigating");
             mStarted = true;
             if (!native_start(mPositionMode, false, mFixInterval)) {
                 mStarted = false;
@@ -632,12 +655,14 @@ public class GpsLocationProvider extends LocationProviderImpl {
             }
 
             // reset SV count to zero
-            updateStatus(TEMPORARILY_UNAVAILABLE, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
+            mFixCount = 0;
+            mFixRequestTime = System.currentTimeMillis();
         }
     }
 
     public void stopNavigating() {
-        if (Config.LOGV) Log.v(TAG, "stopNavigating");
+        if (DEBUG) Log.d(TAG, "stopNavigating");
         if (mStarted) {
             mStarted = false;
             native_stop();
@@ -646,7 +671,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
             mLocationFlags = LOCATION_INVALID;
 
             // reset SV count to zero
-            updateStatus(TEMPORARILY_UNAVAILABLE, 0);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
         }
     }
 
@@ -655,7 +680,7 @@ public class GpsLocationProvider extends LocationProviderImpl {
      */
     private void reportLocation(int flags, double latitude, double longitude, double altitude,
             float speed, float bearing, float accuracy, long timestamp) {
-        if (Config.LOGV) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
+        if (VERBOSE) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
                 " timestamp: " + timestamp);
 
         mLastFixTime = System.currentTimeMillis();
@@ -709,15 +734,29 @@ public class GpsLocationProvider extends LocationProviderImpl {
                 mLocation.removeAccuracy();
             }
 
-            reportLocationChanged(mLocation);
+            try {
+                mLocationManager.reportLocation(mLocation);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException calling reportLocation");
+            }
         }
 
-        if (mStarted && mStatus != AVAILABLE) {
+        if (mStarted && mStatus != LocationProvider.AVAILABLE) {
             // send an intent to notify that the GPS is receiving fixes.
             Intent intent = new Intent(GPS_FIX_CHANGE_ACTION);
             intent.putExtra(EXTRA_ENABLED, true);
             mContext.sendBroadcast(intent);
-            updateStatus(AVAILABLE, mSvCount);
+            updateStatus(LocationProvider.AVAILABLE, mSvCount);
+        }
+
+        if (mFixCount++ >= MIN_FIX_COUNT && mFixInterval > 1) {
+            if (DEBUG) Log.d(TAG, "exceeded MIN_FIX_COUNT");
+            stopNavigating();
+            mFixCount = 0;
+            mAlarmManager.cancel(mWakeupIntent);
+            long now = SystemClock.elapsedRealtime();
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + mFixInterval * 1000, mWakeupIntent);
         }
    }
 
@@ -725,12 +764,16 @@ public class GpsLocationProvider extends LocationProviderImpl {
      * called from native code to update our status
      */
     private void reportStatus(int status) {
-        if (Config.LOGV) Log.v(TAG, "reportStatus status: " + status);
+        if (VERBOSE) Log.v(TAG, "reportStatus status: " + status);
 
         boolean wasNavigating = mNavigating;
         mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
 
         if (wasNavigating != mNavigating) {
+            if (mNavigating) {
+                if (DEBUG) Log.d(TAG, "Acquiring wakelock");
+                 mWakeLock.acquire();
+            }
             synchronized(mListeners) {
                 int size = mListeners.size();
                 for (int i = 0; i < size; i++) {
@@ -768,6 +811,11 @@ public class GpsLocationProvider extends LocationProviderImpl {
             Intent intent = new Intent(GPS_ENABLED_CHANGE_ACTION);
             intent.putExtra(EXTRA_ENABLED, mNavigating);
             mContext.sendBroadcast(intent);
+
+            if (!mNavigating) {
+                if (DEBUG) Log.d(TAG, "Releasing wakelock");
+                mWakeLock.release();
+            }
         }
     }
 
@@ -795,12 +843,12 @@ public class GpsLocationProvider extends LocationProviderImpl {
             }
         }
 
-        if (Config.LOGD) {
-            if (Config.LOGV) Log.v(TAG, "SV count: " + svCount +
+        if (VERBOSE) {
+            Log.v(TAG, "SV count: " + svCount +
                     " ephemerisMask: " + Integer.toHexString(mSvMasks[EPHEMERIS_MASK]) +
                     " almanacMask: " + Integer.toHexString(mSvMasks[ALMANAC_MASK]));
             for (int i = 0; i < svCount; i++) {
-                if (Config.LOGV) Log.v(TAG, "sv: " + mSvs[i] +
+                Log.v(TAG, "sv: " + mSvs[i] +
                         " snr: " + (float)mSnrs[i]/10 +
                         " elev: " + mSvElevations[i] +
                         " azimuth: " + mSvAzimuths[i] +
@@ -812,13 +860,13 @@ public class GpsLocationProvider extends LocationProviderImpl {
 
         updateStatus(mStatus, svCount);
 
-        if (mNavigating && mStatus == AVAILABLE && mLastFixTime > 0 &&
+        if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
             System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT) {
             // send an intent to notify that the GPS is no longer receiving fixes.
             Intent intent = new Intent(GPS_FIX_CHANGE_ACTION);
             intent.putExtra(EXTRA_ENABLED, false);
             mContext.sendBroadcast(intent);
-            updateStatus(TEMPORARILY_UNAVAILABLE, mSvCount);
+            updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, mSvCount);
         }
     }
 

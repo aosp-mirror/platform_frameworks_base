@@ -34,7 +34,7 @@ that you can use to construct your UI.</p>
 {@link android.widget.TextSwitcher TextSwitcher}. </p>
 
 <p>Among the layouts available are {@link android.widget.LinearLayout LinearLayout}, 
-{@link android.widget.FrameLayout FrameLayout}, {@link android.widget.AbsoluteLayout AbsoluteLayout}, 
+{@link android.widget.FrameLayout FrameLayout}, {@link android.widget.RelativeLayout RelativeLayout}, 
 and others. For more examples, see <a href="layout-objects.html">Common Layout Objects</a>.</p>
 
 <p>If none of the prebuilt widgets or layouts meets your needs, you can create your own View subclass. 

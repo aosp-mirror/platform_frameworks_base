@@ -179,6 +179,25 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
     static final int UPDATE_FOCUS_WILL_PLACE_SURFACES = 3;
     
+    /** The minimum time between dispatching touch events. */
+    int mMinWaitTimeBetweenTouchEvents = 1000 / 35;
+
+    // Last touch event time
+    long mLastTouchEventTime = 0;
+    
+    // Last touch event type
+    int mLastTouchEventType = OTHER_EVENT;
+    
+    // Time to wait before calling useractivity again. This saves CPU usage
+    // when we get a flood of touch events.
+    static final int MIN_TIME_BETWEEN_USERACTIVITIES = 1000;
+
+    // Last time we call user activity
+    long mLastUserActivityCallTime = 0;
+
+    // Last time we updated battery stats 
+    long mLastBatteryStatsCallTime = 0;
+    
     private static final String SYSTEM_SECURE = "ro.secure";
 
     /**
@@ -2078,13 +2097,16 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             int pos = mAppTokens.size() - 1;
             int curGroup = 0;
             int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+            boolean findingBehind = false;
             boolean haveGroup = false;
             boolean lastFullscreen = false;
             while (pos >= 0) {
                 AppWindowToken wtoken = mAppTokens.get(pos);
                 pos--;
-                // if we're about to tear down this window, don't use it for orientation
-                if (!wtoken.hidden && wtoken.hiddenRequested) {
+                // if we're about to tear down this window and not seek for
+                // the behind activity, don't use it for orientation
+                if (!findingBehind
+                        && (!wtoken.hidden && wtoken.hiddenRequested)) {
                     continue;
                 }
 
@@ -2108,10 +2130,12 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     }
                 }
                 int or = wtoken.requestedOrientation;
-                // If this application is fullscreen, then just take whatever
+                // If this application is fullscreen, and didn't explicitly say
+                // to use the orientation behind it, then just take whatever
                 // orientation it has and ignores whatever is under it.
                 lastFullscreen = wtoken.appFullscreen;
-                if (lastFullscreen) {
+                if (lastFullscreen 
+                        && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
                     return or;
                 }
                 // If this application has requested an explicit orientation,
@@ -2123,6 +2147,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         or == ActivityInfo.SCREEN_ORIENTATION_USER) {
                     return or;
                 }
+                findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
             }
             return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
@@ -3688,9 +3713,20 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     // -------------------------------------------------------------
 
     private final void wakeupIfNeeded(WindowState targetWin, int eventType) {
-        if (targetWin == null ||
-                targetWin.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
-            mPowerManager.userActivity(SystemClock.uptimeMillis(), false, eventType);
+        long curTime = SystemClock.uptimeMillis();
+
+        if (eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT) {
+            if (mLastTouchEventType == eventType &&
+                    (curTime - mLastUserActivityCallTime) < MIN_TIME_BETWEEN_USERACTIVITIES) {
+                return;
+            }
+            mLastUserActivityCallTime = curTime;
+            mLastTouchEventType = eventType;
+        }
+
+        if (targetWin == null
+                || targetWin.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
+            mPowerManager.userActivity(curTime, false, eventType, false);
         }
     }
 
@@ -3758,7 +3794,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             // events in such a way, since this means the user is moving the
             // pointer without actually pressing down.  All other cases should
             // be atypical, so let's log them.
-            if (ev.getAction() != MotionEvent.ACTION_MOVE) {
+            if (action != MotionEvent.ACTION_MOVE) {
                 Log.w(TAG, "No window to dispatch pointer action " + ev.getAction());
             }
             if (qev != null) {
@@ -3845,7 +3881,39 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 return false;
             }
         } //end if target
-        
+
+        // TODO remove once we settle on a value or make it app specific
+        if (action == MotionEvent.ACTION_DOWN) {
+            int max_events_per_sec = 35;
+            try {
+                max_events_per_sec = Integer.parseInt(SystemProperties
+                        .get("windowsmgr.max_events_per_sec"));
+                if (max_events_per_sec < 1) {
+                    max_events_per_sec = 35;
+                }
+            } catch (NumberFormatException e) {
+            }
+            mMinWaitTimeBetweenTouchEvents = 1000 / max_events_per_sec;
+        }
+
+        /*
+         * Throttle events to minimize CPU usage when there's a flood of events
+         * e.g. constant contact with the screen
+         */
+        if (action == MotionEvent.ACTION_MOVE) {
+            long nextEventTime = mLastTouchEventTime + mMinWaitTimeBetweenTouchEvents;
+            long now = SystemClock.uptimeMillis();
+            if (now < nextEventTime) {
+                try {
+                    Thread.sleep(nextEventTime - now);
+                } catch (InterruptedException e) {
+                }
+                mLastTouchEventTime = nextEventTime;
+            } else {
+                mLastTouchEventTime = now;
+            }
+        }
+
         synchronized(mWindowMap) {
             if (qev != null && action == MotionEvent.ACTION_MOVE) {
                 mKeyWaiter.bindTargetWindowLocked(target,
@@ -4922,7 +4990,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     }
                     if ((actions & WindowManagerPolicy.ACTION_POKE_USER_ACTIVITY) != 0) {
                         mPowerManager.userActivity(event.when, false,
-                                LocalPowerManager.BUTTON_EVENT);
+                                LocalPowerManager.BUTTON_EVENT, false);
                     }
                     
                     if ((actions & WindowManagerPolicy.ACTION_PASS_TO_USER) != 0) {
@@ -5082,11 +5150,17 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                             eventType = LocalPowerManager.OTHER_EVENT;
                         }
                         try {
-                            mBatteryStats.noteInputEvent();
+                            long now = SystemClock.uptimeMillis();
+
+                            if ((now - mLastBatteryStatsCallTime)
+                                    >= MIN_TIME_BETWEEN_USERACTIVITIES) {
+                                mLastBatteryStatsCallTime = now;
+                                mBatteryStats.noteInputEvent();
+                            }
                         } catch (RemoteException e) {
                             // Ignore
                         }
-                        mPowerManager.userActivity(curTime, false, eventType);
+                        mPowerManager.userActivity(curTime, false, eventType, false);
                         switch (ev.classType) {
                             case RawInputEvent.CLASS_KEYBOARD:
                                 KeyEvent ke = (KeyEvent)ev.event;

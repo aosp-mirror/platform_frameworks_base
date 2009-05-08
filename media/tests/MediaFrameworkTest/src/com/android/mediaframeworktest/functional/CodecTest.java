@@ -43,11 +43,13 @@ public class CodecTest {
     private static MediaPlayer mMediaPlayer;
     private MediaPlayer.OnPreparedListener mOnPreparedListener;
     
-    private static int WAIT_FOR_COMMAND_TO_COMPLETE = 10000;  //10 seconds max.
+    private static int WAIT_FOR_COMMAND_TO_COMPLETE = 60000;  //1 min max.
     private static boolean mInitialized = false;
+    private static boolean mPrepareReset = false;
     private static Looper mLooper = null;
     private static final Object lock = new Object();
     private static final Object prepareDone = new Object();
+    private static final Object videoSizeChanged = new Object();
     private static boolean onPrepareSuccess = false;
     
 
@@ -227,28 +229,84 @@ public class CodecTest {
         mp.pause();
         mp.release();
     }
+    
+    static MediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener =
+        new MediaPlayer.OnVideoSizeChangedListener() {
+            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                synchronized (videoSizeChanged) {
+                    Log.v(TAG, "sizechanged notification received ...");
+                    videoSizeChanged.notify();
+                }
+            }
+    };
 
+    //Register the videoSizeChanged listener
     public static int videoHeight(String filePath) throws Exception {
         Log.v(TAG, "videoHeight - " + filePath);
-        int videoHeight = 0;
-        MediaPlayer mp = new MediaPlayer();
-        mp.setDataSource(filePath);
-        mp.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
-        mp.prepare();
-        videoHeight = mp.getVideoHeight();
-        mp.release();
+        int videoHeight = 0;    
+        synchronized (lock) {
+            initializeMessageLooper();
+            try {
+                lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+            } catch(Exception e) {
+                Log.v(TAG, "looper was interrupted.");
+                return 0;
+            }
+        }
+        try {
+            mMediaPlayer.setDataSource(filePath);
+            mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            mMediaPlayer.setOnVideoSizeChangedListener(mOnVideoSizeChangedListener);
+            synchronized (videoSizeChanged) {
+                try {
+                    mMediaPlayer.prepare();
+                    mMediaPlayer.start();
+                    videoSizeChanged.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                } catch (Exception e) {
+                    Log.v(TAG, "wait was interrupted");
+                }
+            }
+            videoHeight = mMediaPlayer.getVideoHeight();
+            terminateMessageLooper();
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+        
         return videoHeight;
     }
 
+    //Register the videoSizeChanged listener
     public static int videoWidth(String filePath) throws Exception {
         Log.v(TAG, "videoWidth - " + filePath);
         int videoWidth = 0;
-        MediaPlayer mp = new MediaPlayer();
-        mp.setDataSource(filePath);
-        mp.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
-        mp.prepare();
-        videoWidth = mp.getVideoWidth();
-        mp.release();
+
+        synchronized (lock) {
+            initializeMessageLooper();
+            try {
+                lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+            } catch(Exception e) {
+                Log.v(TAG, "looper was interrupted.");
+                return 0;
+            }
+        }
+        try {
+            mMediaPlayer.setDataSource(filePath);
+            mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            mMediaPlayer.setOnVideoSizeChangedListener(mOnVideoSizeChangedListener);
+            synchronized (videoSizeChanged) {
+                try {
+                    mMediaPlayer.prepare();
+                    mMediaPlayer.start();
+                    videoSizeChanged.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                } catch (Exception e) {
+                    Log.v(TAG, "wait was interrupted");
+                }
+            }
+            videoWidth = mMediaPlayer.getVideoWidth();
+            terminateMessageLooper();
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }        
         return videoWidth;
     }
 
@@ -622,6 +680,10 @@ public class CodecTest {
     static MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
         public void onPrepared(MediaPlayer mp) {
             synchronized (prepareDone) {
+                if(mPrepareReset){
+                    Log.v(TAG, "call Reset");
+                    mMediaPlayer.reset();
+                }
                 Log.v(TAG, "notify the prepare callback");
                 prepareDone.notify();
                 onPrepareSuccess = true;
@@ -629,13 +691,15 @@ public class CodecTest {
         }
     };
    
-    public static boolean prepareAsyncCallback(String filePath) throws Exception {
-        int videoWidth = 0;
-        int videoHeight = 0;
-        boolean checkVideoDimension = false;
+    public static boolean prepareAsyncCallback(String filePath, boolean reset) throws Exception {
+        //Added the PrepareReset flag which allow us to switch to different
+        //test case.
+        if (reset){
+            mPrepareReset = true;
+        }
         
-        initializeMessageLooper();
         synchronized (lock) {
+            initializeMessageLooper();
             try {
                 lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
             } catch(Exception e) {
@@ -651,14 +715,10 @@ public class CodecTest {
             synchronized (prepareDone) {
                 try {
                     prepareDone.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
-                    Log.v(TAG, "setPreview done");
                 } catch (Exception e) {
                     Log.v(TAG, "wait was interrupted.");
                 }
-            }
-            videoWidth = mMediaPlayer.getVideoWidth();
-            videoHeight = mMediaPlayer.getVideoHeight();
-            
+            }         
             terminateMessageLooper();
         }catch (Exception e){
             Log.v(TAG,e.getMessage());
@@ -666,7 +726,7 @@ public class CodecTest {
        return onPrepareSuccess;
     }
     
-    
+  
     
 }
 

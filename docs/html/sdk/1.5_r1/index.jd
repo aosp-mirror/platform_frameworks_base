@@ -50,8 +50,7 @@ page.title=Android 1.5 SDK, Release 1
 <td width="5%"><nobr>Android 1.1</nobr></td>
 <td  width="5%">2</td>
 <td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.1.html">Version Notes</a></nobr></td>
-<td>Includes a compliant Android 1.1 library and system image with a set of development applications. Also includes the Maps external library (due to legacy build system issues).</a>
-external library. </td>
+<td>Includes a compliant Android 1.1 library and system image with a set of development applications. Also includes the Maps external library (due to legacy build system issues).</td>
 
 </tr>
 </table>

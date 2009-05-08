@@ -170,12 +170,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
             return ContentProvider.this.openAssetFile(uri, mode);
         }
 
-        public ISyncAdapter getSyncAdapter() {
-            checkWritePermission(null);
-            SyncAdapter sa = ContentProvider.this.getSyncAdapter();
-            return sa != null ? sa.getISyncAdapter() : null;
-        }
-
         private void checkReadPermission(Uri uri) {
             final String rperm = getReadPermission();
             final int pid = Binder.getCallingPid();
@@ -548,23 +542,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
 
         int modeBits = ContentResolver.modeToMode(uri, mode);
         return ParcelFileDescriptor.open(new File(path), modeBits);
-    }
-
-    /**
-     * Get the sync adapter that is to be used by this content provider.
-     * This is intended for use by the sync system. If null then this
-     * content provider is considered not syncable.
-     * This method can be called from multiple
-     * threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
-     * 
-     * @return the SyncAdapter that is to be used by this ContentProvider, or null
-     *   if this ContentProvider is not syncable
-     * @hide
-     */
-    public SyncAdapter getSyncAdapter() {
-        return null;
     }
 
     /**

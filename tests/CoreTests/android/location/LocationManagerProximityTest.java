@@ -52,11 +52,7 @@ public class LocationManagerProximityTest extends AndroidTestCase {
 
     private static final String LOG_TAG = "LocationProximityTest";
 
-    // use network provider as mock location provider, because:
-    //  - proximity alert is hardcoded to listen to only network or gps
-    //  - 'network' provider is not installed in emulator, so can mock it 
-    //    using test provider APIs
-    private static final String PROVIDER_NAME = LocationManager.NETWORK_PROVIDER;
+    private static final String PROVIDER_NAME = "test";
 
     @Override
     protected void setUp() throws Exception {
@@ -84,6 +80,7 @@ public class LocationManagerProximityTest extends AndroidTestCase {
                 false, // upportsBearing,
                 Criteria.POWER_MEDIUM, // powerRequirement
                 Criteria.ACCURACY_FINE); // accuracy
+        mLocationManager.setTestProviderEnabled(PROVIDER_NAME, true);
     }
 
     @Override
