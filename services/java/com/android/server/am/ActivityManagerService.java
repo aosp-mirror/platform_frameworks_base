@@ -707,6 +707,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     boolean mSleeping = false;
 
     /**
+     * Set if we are shutting down the system, similar to sleeping.
+     */
+    boolean mShuttingDown = false;
+    
+    /**
      * Set when the system is going to sleep, until we have
      * successfully paused the current activity and released our wake lock.
      * At that point the system is allowed to actually sleep.
@@ -868,7 +873,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         return;
                     }
                     AppErrorResult res = (AppErrorResult) data.get("result");
-                    if (!mSleeping) {
+                    if (!mSleeping && !mShuttingDown) {
                         Dialog d = new AppErrorDialog(
                                 mContext, res, proc,
                                 (Integer)data.get("flags"),
@@ -1893,7 +1898,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         // If we are not going to sleep, we want to ensure the device is
         // awake until the next activity is started.
-        if (!mSleeping) {
+        if (!mSleeping && !mShuttingDown) {
             mLaunchingActivity.acquire();
             if (!mHandler.hasMessages(LAUNCH_TIMEOUT_MSG)) {
                 // To be safe, don't allow the wake lock to be held for too long.
@@ -1972,11 +1977,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mPausingActivity = null;
         }
 
-        if (!mSleeping) {
+        if (!mSleeping && !mShuttingDown) {
             resumeTopActivityLocked(prev);
         } else {
             if (mGoingToSleep.isHeld()) {
                 mGoingToSleep.release();
+            }
+            if (mShuttingDown) {
+                notifyAll();
             }
         }
         
@@ -2243,7 +2251,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         // If we are sleeping, and there is no resumed activity, and the top
         // activity is paused, well that is the state we want.
-        if (mSleeping && mLastPausedActivity == next && next.state == ActivityState.PAUSED) {
+        if ((mSleeping || mShuttingDown)
+                && mLastPausedActivity == next && next.state == ActivityState.PAUSED) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             mWindowManager.executeAppTransition();
@@ -7098,8 +7107,45 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public boolean shutdown(int timeout) {
+        if (checkCallingPermission(android.Manifest.permission.SHUTDOWN)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.SHUTDOWN);
+        }
+        
+        boolean timedout = false;
+        
+        synchronized(this) {
+            mShuttingDown = true;
+            mWindowManager.setEventDispatching(false);
+
+            if (mResumedActivity != null) {
+                pauseIfSleepingLocked();
+                final long endTime = System.currentTimeMillis() + timeout;
+                while (mResumedActivity != null || mPausingActivity != null) {
+                    long delay = endTime - System.currentTimeMillis();
+                    if (delay <= 0) {
+                        Log.w(TAG, "Activity manager shutdown timed out");
+                        timedout = true;
+                        break;
+                    }
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        }
+        
+        mUsageStatsService.shutdown();
+        mBatteryStatsService.shutdown();
+        
+        return timedout;
+    }
+    
     void pauseIfSleepingLocked() {
-        if (mSleeping) {
+        if (mSleeping || mShuttingDown) {
             if (!mGoingToSleep.isHeld()) {
                 mGoingToSleep.acquire();
                 if (mLaunchingActivity.isHeld()) {
@@ -8064,7 +8110,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     + " mBooting=" + mBooting
                     + " mBooted=" + mBooted
                     + " mFactoryTest=" + mFactoryTest);
-            pw.println("  mSleeping=" + mSleeping);
+            pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
             pw.println("  mGoingToSleep=" + mGoingToSleep);
             pw.println("  mLaunchingActivity=" + mLaunchingActivity);
             pw.println("  mDebugApp=" + mDebugApp + "/orig=" + mOrigDebugApp

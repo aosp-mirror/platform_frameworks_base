@@ -740,7 +740,7 @@ public class SyncStorageEngine extends Handler {
             }
             
             boolean writeStatisticsNow = false;
-            int day = getCurrentDay();
+            int day = getCurrentDayLocked();
             if (mDayStats[0] == null) {
                 mDayStats[0] = new DayStats(day);
             } else if (day != mDayStats[0].day) {
@@ -929,7 +929,7 @@ public class SyncStorageEngine extends Handler {
         }
     }
     
-    private int getCurrentDay() {
+    private int getCurrentDayLocked() {
         mCal.setTimeInMillis(System.currentTimeMillis());
         final int dayOfYear = mCal.get(Calendar.DAY_OF_YEAR);
         if (mYear != mCal.get(Calendar.YEAR)) {
@@ -1007,6 +1007,21 @@ public class SyncStorageEngine extends Handler {
             mSyncStatus.put(authorityId, status);
         }
         return status;
+    }
+    
+    public void writeAllState() {
+        synchronized (mAuthorities) {
+            // Account info is always written so no need to do it here.
+            
+            if (mNumPendingFinished > 0) {
+                // Only write these if they are out of date.
+                writePendingOperationsLocked();
+            }
+            
+            // Just always write these...  they are likely out of date.
+            writeStatusLocked();
+            writeStatisticsLocked();
+        }
     }
     
     /**
