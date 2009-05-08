@@ -537,6 +537,9 @@ public final class Pm {
         case PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER:
             s = "INSTALL_FAILED_CONFLICTING_PROVIDER";
             break;
+        case PackageManager.INSTALL_FAILED_NEWER_SDK:
+            s = "INSTALL_FAILED_NEWER_SDK";
+            break;
         case PackageManager.INSTALL_PARSE_FAILED_NOT_APK:
             s = "INSTALL_PARSE_FAILED_NOT_APK";
             break;

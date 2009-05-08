@@ -59,6 +59,7 @@ public class PackageParser {
     private String mArchiveSourcePath;
     private String[] mSeparateProcesses;
     private int mSdkVersion;
+    private String mSdkCodename;
 
     private int mParseError = PackageManager.INSTALL_SUCCEEDED;
 
@@ -123,8 +124,9 @@ public class PackageParser {
         mSeparateProcesses = procs;
     }
 
-    public void setSdkVersion(int sdkVersion) {
+    public void setSdkVersion(int sdkVersion, String codename) {
         mSdkVersion = sdkVersion;
+        mSdkCodename = codename;
     }
 
     private static final boolean isPackageFilename(String name) {
@@ -613,9 +615,9 @@ public class PackageParser {
         int type;
 
         final Package pkg = new Package(pkgName);
-        pkg.mSystem = (flags&PARSE_IS_SYSTEM) != 0;
         boolean foundApp = false;
-
+        boolean targetsSdk = false;
+        
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifest);
         pkg.mVersionCode = sa.getInteger(
@@ -721,19 +723,74 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
-            }  else if (tagName.equals("uses-sdk")) {
+            } else if (tagName.equals("uses-sdk")) {
                 if (mSdkVersion > 0) {
                     sa = res.obtainAttributes(attrs,
                             com.android.internal.R.styleable.AndroidManifestUsesSdk);
 
-                    int vers = sa.getInt(
-                            com.android.internal.R.styleable.AndroidManifestUsesSdk_minSdkVersion, 0);
+                    int minVers = 0;
+                    String minCode = null;
+                    int targetVers = 0;
+                    String targetCode = null;
+                    
+                    TypedValue val = sa.peekValue(
+                            com.android.internal.R.styleable.AndroidManifestUsesSdk_minSdkVersion);
+                    if (val != null) {
+                        if (val.type == TypedValue.TYPE_STRING && val.string != null) {
+                            targetCode = minCode = val.string.toString();
+                        } else {
+                            // If it's not a string, it's an integer.
+                            minVers = val.data;
+                        }
+                    }
+                    
+                    val = sa.peekValue(
+                            com.android.internal.R.styleable.AndroidManifestUsesSdk_targetSdkVersion);
+                    if (val != null) {
+                        if (val.type == TypedValue.TYPE_STRING && val.string != null) {
+                            targetCode = minCode = val.string.toString();
+                        } else {
+                            // If it's not a string, it's an integer.
+                            targetVers = val.data;
+                        }
+                    }
+                    
+                    int maxVers = sa.getInt(
+                            com.android.internal.R.styleable.AndroidManifestUsesSdk_maxSdkVersion,
+                            mSdkVersion);
 
                     sa.recycle();
 
-                    if (vers > mSdkVersion) {
-                        outError[0] = "Requires newer sdk version #" + vers
-                            + " (current version is #" + mSdkVersion + ")";
+                    if (targetCode != null) {
+                        if (!targetCode.equals(mSdkCodename)) {
+                            if (mSdkCodename != null) {
+                                outError[0] = "Requires development platform " + targetCode
+                                        + " (current platform is " + mSdkCodename + ")";
+                            } else {
+                                outError[0] = "Requires development platform " + targetCode
+                                        + " but this is a release platform.";
+                            }
+                            mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
+                            return null;
+                        }
+                        // If the code matches, it definitely targets this SDK.
+                        targetsSdk = true;
+                    } else if (targetVers >= mSdkVersion) {
+                        // If they have explicitly targeted our current version
+                        // or something after it, then note this.
+                        targetsSdk = true;
+                    }
+                    
+                    if (minVers > mSdkVersion) {
+                        outError[0] = "Requires newer sdk version #" + minVers
+                                + " (current version is #" + mSdkVersion + ")";
+                        mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
+                        return null;
+                    }
+                    
+                    if (maxVers < mSdkVersion) {
+                        outError[0] = "Requires older sdk version #" + maxVers
+                                + " (current version is #" + mSdkVersion + ")";
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
                     }
@@ -767,6 +824,10 @@ public class PackageParser {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
         }
 
+        if (targetsSdk) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_TARGETS_SDK;
+        }
+        
         if (pkg.usesLibraries.size() > 0) {
             pkg.usesLibraryFiles = new String[pkg.usesLibraries.size()];
             pkg.usesLibraries.toArray(pkg.usesLibraryFiles);
@@ -2132,9 +2193,6 @@ public class PackageParser {
 
         // If this is a 3rd party app, this is the path of the zip file.
         public String mPath;
-
-        // True if this package is part of the system image.
-        public boolean mSystem;
 
         // The version code declared for this package.
         public int mVersionCode;

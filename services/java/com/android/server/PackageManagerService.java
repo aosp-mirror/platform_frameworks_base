@@ -59,6 +59,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Parcel;
@@ -140,8 +141,9 @@ class PackageManagerService extends IPackageManager.Stub {
             Process.THREAD_PRIORITY_BACKGROUND);
     final Handler mHandler;
 
-    final int mSdkVersion = SystemProperties.getInt(
-            "ro.build.version.sdk", 0);
+    final int mSdkVersion = Build.VERSION.SDK_INT;
+    final String mSdkCodename = "REL".equals(Build.VERSION.CODENAME)
+            ? null : Build.VERSION.CODENAME;
     
     final Context mContext;
     final boolean mFactoryTest;
@@ -1751,7 +1753,7 @@ class PackageManagerService extends IPackageManager.Stub {
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser(scanFile.getPath());
         pp.setSeparateProcesses(mSeparateProcesses);
-        pp.setSdkVersion(mSdkVersion);
+        pp.setSdkVersion(mSdkVersion, mSdkCodename);
         final PackageParser.Package pkg = pp.parsePackage(scanFile,
                 destCodeFile.getAbsolutePath(), mMetrics, parseFlags);
         if (pkg == null) {
@@ -3693,7 +3695,7 @@ class PackageManagerService extends IPackageManager.Stub {
             parseFlags |= mDefParseFlags;
             PackageParser pp = new PackageParser(tmpPackageFile.getPath());
             pp.setSeparateProcesses(mSeparateProcesses);
-            pp.setSdkVersion(mSdkVersion);
+            pp.setSdkVersion(mSdkVersion, mSdkCodename);
             final PackageParser.Package pkg = pp.parsePackage(tmpPackageFile,
                     destPackageFile.getAbsolutePath(), mMetrics, parseFlags);
             if (pkg == null) {
