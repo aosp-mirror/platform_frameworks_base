@@ -454,6 +454,15 @@ public class JniCodeEmitter {
 
             String iii = indent + indent;
 
+            // emitBoundsChecks(jfunc, out, iii);
+            emitFunctionCall(jfunc, out, iii, false);
+
+            // Set the pointer after we call the native code, so that if
+            // the native code throws an exception we don't modify the
+            // pointer. We assume that the native code is written so that
+            // if an exception is thrown, then the underlying glXXXPointer
+            // function will not have been called.
+
             String fname = jfunc.getName();
             if (isPointerFunc) {
                 // TODO - deal with VBO variants
@@ -497,9 +506,6 @@ public class JniCodeEmitter {
                     out.println(iii + "}");
                 }
             }
-
-            // emitBoundsChecks(jfunc, out, iii);
-            emitFunctionCall(jfunc, out, iii, false);
 
             boolean isVoid = jfunc.getType().isVoid();
 
@@ -873,19 +879,39 @@ public class JniCodeEmitter {
                     String array = numBufferArgs <= 1 ? "_array" :
                         "_" + bufferArgNames.get(bufArgIdx++) + "Array";
 
-                    boolean nullAllowed = isNullAllowed(cfunc);
+                    boolean nullAllowed = isNullAllowed(cfunc) || isPointerFunc;
                     if (nullAllowed) {
                         out.println(indent + "if (" + cname + "_buf) {");
                         out.print(indent);
                     }
 
-                    out.println(indent +
+                    if (isPointerFunc) {
+                        out.println(indent +
                                 cname +
                                 " = (" +
                                 cfunc.getArgType(cIndex).getDeclaration() +
-                                ")getPointer(_env, " +
-                                cname +
-                                "_buf, &" + array + ", &" + remaining + ");");
+                                ") _env->GetDirectBufferAddress(" +
+                                (mUseCPlusPlus ? "" : "_env, ") +
+                                cname + "_buf);");
+                        String iii = "    ";
+                        out.println(iii + indent + "if ( ! " + cname + " ) {");
+                        out.println(iii + iii + indent +
+                                (mUseCPlusPlus ? "_env" : "(*_env)") +
+                                "->ThrowNew(" +
+                                (mUseCPlusPlus ? "" : "_env, ") +
+                                "IAEClass, \"Must use a native order direct Buffer\");");
+                        out.println(iii + iii + indent + "return;");
+                        out.println(iii + indent + "}");
+                    } else {
+                        out.println(indent +
+                                    cname +
+                                    " = (" +
+                                    cfunc.getArgType(cIndex).getDeclaration() +
+                                    ")getPointer(_env, " +
+                                    cname +
+                                    "_buf, &" + array + ", &" + remaining +
+                                    ");");
+                    }
 
                     if (nullAllowed) {
                         out.println(indent + "}");
@@ -987,17 +1013,20 @@ public class JniCodeEmitter {
                                 ");");
                     out.println(indent + "}");
                 } else if (jfunc.getArgType(idx).isBuffer()) {
-                    String array = numBufferArgs <= 1 ? "_array" :
-                        "_" + bufferArgNames.get(bufArgIdx++) + "Array";
-                    out.println(indent + "if (" + array + ") {");
-                    out.println(indent + indent +
-                                "releasePointer(_env, " + array + ", " +
-                                cfunc.getArgName(cIndex) +
-                                ", " +
-                                (cfunc.getArgType(cIndex).isConst() ?
-                                 "JNI_FALSE" : "_exception ? JNI_FALSE : JNI_TRUE") +
-                                ");");
-                    out.println(indent + "}");
+                    if (! isPointerFunc) {
+                        String array = numBufferArgs <= 1 ? "_array" :
+                            "_" + bufferArgNames.get(bufArgIdx++) + "Array";
+                        out.println(indent + "if (" + array + ") {");
+                        out.println(indent + indent +
+                                    "releasePointer(_env, " + array + ", " +
+                                    cfunc.getArgName(cIndex) +
+                                    ", " +
+                                    (cfunc.getArgType(cIndex).isConst() ?
+                                     "JNI_FALSE" : "_exception ? JNI_FALSE :" +
+                                             " JNI_TRUE") +
+                                    ");");
+                        out.println(indent + "}");
+                    }
                 }
             }
         }

@@ -143,6 +143,8 @@ public:
     virtual void        errorCallback(status_t error);
     virtual void        autoFocusCallback(bool focused);
     virtual void        recordingCallback(const sp<IMemory>& frame);
+    virtual void        notifyCallback(int32_t msgType, int32_t ext, int32_t ext2);
+    virtual void        dataCallback(int32_t msgType, const sp<IMemory>& frame);
 
     sp<ICamera>         remote();
 

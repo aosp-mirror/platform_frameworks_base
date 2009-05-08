@@ -42,7 +42,9 @@ import android.util.SparseArray;
 import android.backup.IBackupManager;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.lang.String;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +53,8 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
     
-    private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
+    private static final long COLLECTION_INTERVAL = 1000;
+    //private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
 
     private static final int MSG_RUN_BACKUP = 1;
     
@@ -338,8 +341,11 @@ class BackupManagerService extends IBackupManager.Stub {
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
+
+        Log.d(TAG, "dataChanged packageName=" + packageName);
         
         HashSet<ServiceInfo> targets = mBackupParticipants.get(Binder.getCallingUid());
+        Log.d(TAG, "targets=" + targets);
         if (targets != null) {
             synchronized (mQueueLock) {
                 // Note that this client has made data changes that need to be backed up
@@ -354,6 +360,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     }
                 }
 
+                Log.d(TAG, "Scheduling backup for " + mPendingBackups.size() + " participants");
                 // Schedule a backup pass in a few minutes.  As backup-eligible data
                 // keeps changing, continue to defer the backup pass until things
                 // settle down, to avoid extra overhead.
@@ -376,6 +383,25 @@ class BackupManagerService extends IBackupManager.Stub {
                     if (service.packageName.equals(packageName)) {
                         mPendingBackups.add(new BackupRequest(service, true));
                     }
+                }
+            }
+        }
+    }
+
+    
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        synchronized (mQueueLock) {
+            int N = mBackupParticipants.size();
+            pw.println("Participants:");
+            for (int i=0; i<N; i++) {
+                int uid = mBackupParticipants.keyAt(i);
+                pw.print("  uid: ");
+                pw.println(uid);
+                HashSet<ServiceInfo> services = mBackupParticipants.valueAt(i);
+                for (ServiceInfo s: services) {
+                    pw.print("    ");
+                    pw.println(s.toString());
                 }
             }
         }

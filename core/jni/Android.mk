@@ -117,7 +117,8 @@ LOCAL_SRC_FILES:= \
 	android_ddm_DdmHandleNativeHeap.cpp \
 	android_location_GpsLocationProvider.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
-	com_android_internal_graphics_NativeUtils.cpp
+	com_android_internal_graphics_NativeUtils.cpp \
+	android_backup_FileBackupHelper.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
