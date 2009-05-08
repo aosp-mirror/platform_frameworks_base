@@ -603,13 +603,13 @@ typedef void (GL_APIENTRYP PFNGLGETTEXGENXVOESPROC) (GLenum coord, GLenum pname,
  * dalvik extension functions
  *------------------------------------------------------------------------*/
 #ifdef ANDROID
-void glColorPointerBounds(GLint size, GLenum type, GLsizei stride,
+GL_API void GL_APIENTRY glColorPointerBounds(GLint size, GLenum type, GLsizei stride,
         const GLvoid *ptr, GLsizei count);
-void glNormalPointerBounds(GLenum type, GLsizei stride,
+GL_API void GL_APIENTRY glNormalPointerBounds(GLenum type, GLsizei stride,
         const GLvoid *pointer, GLsizei count);
-void glTexCoordPointerBounds(GLint size, GLenum type,
+GL_API void GL_APIENTRY glTexCoordPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
-void glVertexPointerBounds(GLint size, GLenum type,
+GL_API void GL_APIENTRY glVertexPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
 #endif
 
