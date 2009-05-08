@@ -23,11 +23,11 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.IServiceManager;
 import android.os.LocalPowerManager;
 import android.os.ServiceManager;
-import android.os.ServiceManagerNative;
 import android.os.SystemClock;
+
+import com.android.internal.app.ShutdownThread;
 import com.android.internal.telephony.ITelephony;
 import android.view.KeyEvent;
 import android.util.Log;
@@ -123,7 +123,7 @@ public class PowerDialog extends Dialog implements OnClickListener,
         this.dismiss();
         if (v == mPower) {
             // shutdown by making sure radio and power are handled accordingly.
-            ShutdownThread.shutdownAfterDisablingRadio(getContext(), true);
+            ShutdownThread.shutdown(getContext(), true);
         } else if (v == mRadioPower) {
             try {
                 ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
