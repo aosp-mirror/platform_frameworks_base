@@ -1184,23 +1184,32 @@ public class SearchManager
     public final static String SUGGEST_URI_PATH_QUERY = "search_suggest_query";
 
     /**
+     * MIME type for suggestions data.  You'll use this in your suggestions content provider
+     * in the getType() function.
+     */
+    public final static String SUGGEST_MIME_TYPE =
+            "vnd.android.cursor.dir/vnd.android.search.suggest";
+
+    /**
      * Uri path for shortcut validation.  This is the path that the search manager will use when
      * querying your content provider to refresh a shortcutted suggestion result and to check if it
      * is still valid.  When asked, a source may return an up to date result, or no result.  No
      * result indicates the shortcut refers to a no longer valid sugggestion.
      *
      * @see #SUGGEST_COLUMN_SHORTCUT_ID
-     * @hide
+     * 
+     * @hide pending API council approval
      */
     public final static String SUGGEST_URI_PATH_SHORTCUT = "search_suggest_shortcut";
     
     /**
-     * MIME type for suggestions data.  You'll use this in your suggestions content provider
+     * MIME type for shortcut validation.  You'll use this in your suggestions content provider
      * in the getType() function.
+     *
+     * @hide pending API council approval
      */
-    public final static String SUGGEST_MIME_TYPE = 
-                                  "vnd.android.cursor.dir/vnd.android.search.suggest";
-
+    public final static String SHORTCUT_MIME_TYPE = 
+            "vnd.android.cursor.item/vnd.android.search.suggest";
     /**
      * Column name for suggestions cursor.  <i>Unused - can be null or column can be omitted.</i>
      */
