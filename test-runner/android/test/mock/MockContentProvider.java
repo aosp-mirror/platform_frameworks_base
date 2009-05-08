@@ -18,7 +18,8 @@ package android.test.mock;
 
 import android.content.ContentValues;
 import android.content.IContentProvider;
-import android.content.ISyncAdapter;
+import android.content.Entity;
+import android.content.EntityIterator;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.CursorWindow;
@@ -46,6 +47,10 @@ public class MockContentProvider implements IContentProvider {
     public int bulkInsert(Uri url, ContentValues[] initialValues) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @SuppressWarnings("unused")
@@ -89,9 +94,18 @@ public class MockContentProvider implements IContentProvider {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
+    public EntityIterator queryEntities(Uri url, String selection, String[] selectionArgs,
+            String sortOrder) throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
     @SuppressWarnings("unused")
     public int update(Uri url, ContentValues values, String selection, String[] selectionArgs)
             throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
