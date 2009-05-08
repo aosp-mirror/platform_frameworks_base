@@ -316,18 +316,16 @@ public final class ActivityThread {
 
                 float appScale = -1.0f;
                 if (ai.supportsDensities != null) {
-                    // TODO: precompute this in DisplayMetrics
-                    float systemDensityDpi = metrics.density * DisplayMetrics.DEFAULT_DENSITY;
                     int minDiff = Integer.MAX_VALUE;
                     for (int density : ai.supportsDensities) {
-                        int tmpDiff = (int) Math.abs(systemDensityDpi - density);
+                        int tmpDiff = (int) Math.abs(DisplayMetrics.DEVICE_DENSITY - density);
                         if (tmpDiff == 0) {
                             appScale = 1.0f;
                             break;
                         }
                         // prefer higher density (appScale>1.0), unless that's only option.
                         if (tmpDiff < minDiff && appScale < 1.0f) {
-                            appScale = systemDensityDpi / density;
+                            appScale = DisplayMetrics.DEVICE_DENSITY / density;
                             minDiff = tmpDiff;
                         }
                     }
@@ -3482,6 +3480,8 @@ public final class ActivityThread {
             }
             mConfiguration.updateFrom(config);
             DisplayMetrics dm = getDisplayMetricsLocked(true);
+            DisplayMetrics appDm = new DisplayMetrics();
+            appDm.setTo(dm);
 
             // set it for java, this also affects newly created Resources
             if (config.locale != null) {
@@ -3501,7 +3501,9 @@ public final class ActivityThread {
                     WeakReference<Resources> v = it.next();
                     Resources r = v.get();
                     if (r != null) {
-                        r.updateConfiguration(config, dm);
+                        // keep the original density based on application cale.
+                        appDm.density = r.getDisplayMetrics().density;
+                        r.updateConfiguration(config, appDm);
                         //Log.i(TAG, "Updated app resources " + v.getKey()
                         //        + " " + r + ": " + r.getConfiguration());
                     } else {
