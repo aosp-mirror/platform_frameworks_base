@@ -116,12 +116,17 @@ class Request {
         mBodyProvider = bodyProvider;
         mBodyLength = bodyLength;
 
-        if (bodyProvider == null) {
+        if (bodyProvider == null && !"POST".equalsIgnoreCase(method)) {
             mHttpRequest = new BasicHttpRequest(method, getUri());
         } else {
             mHttpRequest = new BasicHttpEntityEnclosingRequest(
                     method, getUri());
-            setBodyProvider(bodyProvider, bodyLength);
+            // it is ok to have null entity for BasicHttpEntityEnclosingRequest.
+            // By using BasicHttpEntityEnclosingRequest, it will set up the
+            // correct content-length, content-type and content-encoding.
+            if (bodyProvider != null) {
+                setBodyProvider(bodyProvider, bodyLength);
+            }
         }
         addHeader(HOST_HEADER, getHostPort());
 
