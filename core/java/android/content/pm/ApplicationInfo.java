@@ -113,19 +113,25 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int FLAG_ALLOW_CLEAR_USER_DATA = 1<<6;
     
-    
     /**
-     * Value for {@link #flags}: default value for the corresponding ActivityInfo flag.
-     *  {@hide}
+     * Value for {@link #flags}: this is set if this application has been
+     * install as an update to a built-in system application.
      */
     public static final int FLAG_UPDATED_SYSTEM_APP = 1<<7;
+    
+    /**
+     * Value for {@link #flags}: this is set of the application has set
+     * its android:targetSdkVersion to something >= the current SDK version.
+     */
+    public static final int FLAG_TARGETS_SDK = 1<<8;
 
     /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and
      * {@link #FLAG_ALLOW_TASK_REPARENTING}
-     * {@link #FLAG_ALLOW_CLEAR_USER_DATA}.
+     * {@link #FLAG_ALLOW_CLEAR_USER_DATA}, {@link #FLAG_UPDATED_SYSTEM_APP},
+     * {@link #FLAG_TARGETS_SDK}.
      */
     public int flags = 0;
     

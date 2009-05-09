@@ -753,9 +753,28 @@
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestUsesSdk" parent="AndroidManifest">
         <!-- This is the minimum SDK version number that the application
-             requires.  Currently there is only one SDK version, 1.  If
-             not supplied, the application will work on any SDK. -->
-        <attr name="minSdkVersion" format="integer" />
+             requires.  This number is an abstract integer, from the list
+             in {@link android.os.Build.VERSION_CODES}  If
+             not supplied, the application will work on any SDK.  This
+             may also be string (such as "Donut") if the application was built
+             against a development branch, in which case it will only work against
+             the development builds. -->
+        <attr name="minSdkVersion" format="integer|string" />
+        <!-- This is the SDK version number that the application is targeting.
+             It is able to run on older versions (down to minSdkVersion), but
+             was explicitly tested to work with the version specified here.
+             Specifying this version allows the platform to disable compatibility
+             code that are not required or enable newer features that are not
+             available to older applications.  This may also be a string
+             (such as "Donut") if this is built against a development
+             branch, in which case minSdkVersion is also forced to be that
+             string. -->
+        <attr name="targetSdkVersion" format="integer|string" />
+        <!-- This is the maximum SDK version number that an application works
+             on.  You can use this to ensure your application is filtered out
+             of later versions of the platform when you know you have
+             incompatibility with them. -->
+        <attr name="maxSdkVersion" format="integer" />
     </declare-styleable>
     
     <!-- The <code>uses-libraries</code> specifies a shared library that this
