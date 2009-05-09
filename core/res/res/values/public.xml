@@ -1113,6 +1113,6 @@
      =============================================================== -->
   <eat-comment />
 
-  <public type="attr" name="accountType" id="0x01010270" />
-  <public type="attr" name="contentAuthority" id="0x01010271" />
+  <public type="attr" name="accountType" id="0x01010272" />
+  <public type="attr" name="contentAuthority" id="0x01010273" />
 </resources>
