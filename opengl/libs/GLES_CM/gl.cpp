@@ -37,6 +37,17 @@ using namespace android;
 // extensions for the framework
 // ----------------------------------------------------------------------------
 
+extern "C" {
+GL_API void GL_APIENTRY glColorPointerBounds(GLint size, GLenum type, GLsizei stride,
+        const GLvoid *ptr, GLsizei count);
+GL_API void GL_APIENTRY glNormalPointerBounds(GLenum type, GLsizei stride,
+        const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glTexCoordPointerBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glVertexPointerBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+}
+
 void glColorPointerBounds(GLint size, GLenum type, GLsizei stride,
         const GLvoid *ptr, GLsizei count) {
     glColorPointer(size, type, stride, ptr);
