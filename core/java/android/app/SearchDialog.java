@@ -171,7 +171,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // having windows anchored by their parent but not clipped by them.
                 ViewGroup.LayoutParams.FILL_PARENT);
         WindowManager.LayoutParams lp = theWindow.getAttributes();
-        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE;
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         theWindow.setAttributes(lp);
 
         // get the view elements for local access
@@ -528,6 +528,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mSearchAutoComplete.setDropDownAnimationStyle(0); // no animation
         mSearchAutoComplete.setThreshold(mSearchable.getSuggestThreshold());
 
+        // TODO: Use different dropdown background resource for in-app search.
         if (mGlobalSearchMode) {
             mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in
             mSearchAutoComplete.setDropDownDismissedOnCompletion(false);
