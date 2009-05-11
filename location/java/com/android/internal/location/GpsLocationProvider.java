@@ -109,13 +109,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private static final int GPS_STATUS_ENGINE_ON = 3;
     private static final int GPS_STATUS_ENGINE_OFF = 4;
 
-    // these need to match GpsSuplStatusValue defines in gps.h
-    /** SUPL status event values. */
-    private static final int GPS_REQUEST_SUPL_DATA_CONN = 1;
-    private static final int GPS_RELEASE_SUPL_DATA_CONN = 2;
-    private static final int GPS_SUPL_DATA_CONNECTED = 3;
-    private static final int GPS_SUPL_DATA_CONN_DONE = 4;
-    private static final int GPS_SUPL_DATA_CONN_FAILED = 5;
+    // these need to match GpsApgsStatusValue defines in gps.h
+    /** AGPS status event values. */
+    private static final int GPS_REQUEST_AGPS_DATA_CONN = 1;
+    private static final int GPS_RELEASE_AGPS_DATA_CONN = 2;
+    private static final int GPS_AGPS_DATA_CONNECTED = 3;
+    private static final int GPS_AGPS_DATA_CONN_DONE = 4;
+    private static final int GPS_AGPS_DATA_CONN_FAILED = 5;
 
     // these need to match GpsLocationFlags enum in gps.h
     private static final int LOCATION_INVALID = 0;
@@ -124,8 +124,8 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private static final int LOCATION_HAS_SPEED = 4;
     private static final int LOCATION_HAS_BEARING = 8;
     private static final int LOCATION_HAS_ACCURACY = 16;
-    
-// IMPORTANT - the GPS_DELETE_* symbols here must match constants in GpsLocationProvider.java
+
+// IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
     private static final int GPS_DELETE_EPHEMERIS = 0x0001;
     private static final int GPS_DELETE_ALMANAC = 0x0002;
     private static final int GPS_DELETE_POSITION = 0x0004;
@@ -140,10 +140,14 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private static final int GPS_DELETE_CELLDB_INFO = 0x8000;
     private static final int GPS_DELETE_ALL = 0xFFFF;
 
-    // for mSuplDataConnectionState
-    private static final int SUPL_DATA_CONNECTION_CLOSED = 0;
-    private static final int SUPL_DATA_CONNECTION_OPENING = 1;
-    private static final int SUPL_DATA_CONNECTION_OPEN = 2;
+    // these need to match AGpsType enum in gps.h
+    private static final int AGPS_TYPE_SUPL = 1;
+    private static final int AGPS_TYPE_C2K = 2;
+
+    // for mAGpsDataConnectionState
+    private static final int AGPS_DATA_CONNECTION_CLOSED = 0;
+    private static final int AGPS_DATA_CONNECTION_OPENING = 1;
+    private static final int AGPS_DATA_CONNECTION_OPEN = 2;
 
     private static final String PROPERTIES_FILE = "/etc/gps.conf";
 
@@ -203,9 +207,12 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
     private String mSuplHost;
     private int mSuplPort;
+    private String mC2KHost;
+    private int mC2KPort;
     private boolean mSetSuplServer;
-    private String mSuplApn;
-    private int mSuplDataConnectionState;
+    private boolean mSetC2KServer;
+    private String mAGpsApn;
+    private int mAGpsDataConnectionState;
     private final ConnectivityManager mConnMgr;
 
     // Wakelocks
@@ -293,11 +300,12 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 if (Config.LOGD) {
                     Log.d(TAG, "state: " + state +  " apnName: " + apnName + " reason: " + reason);
                 }
+                // FIXME - might not have an APN on CDMA
                 if ("CONNECTED".equals(state) && apnName != null && apnName.length() > 0) {
-                    mSuplApn = apnName;
-                    if (mSuplDataConnectionState == SUPL_DATA_CONNECTION_OPENING) {
-                        native_supl_data_conn_open(mSuplApn);
-                        mSuplDataConnectionState = SUPL_DATA_CONNECTION_OPEN;
+                    mAGpsApn = apnName;
+                    if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
+                        native_agps_data_conn_open(mAGpsApn);
+                        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
                     }
                 }
             }
@@ -336,14 +344,26 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             mProperties.load(stream);
             stream.close();
             mNtpServer = mProperties.getProperty("NTP_SERVER", null);
+
             mSuplHost = mProperties.getProperty("SUPL_HOST");
-            String suplPortString = mProperties.getProperty("SUPL_PORT");
-            if (mSuplHost != null && suplPortString != null) {
+            String portString = mProperties.getProperty("SUPL_PORT");
+            if (mSuplHost != null && portString != null) {
                 try {
-                    mSuplPort = Integer.parseInt(suplPortString);
+                    mSuplPort = Integer.parseInt(portString);
                     mSetSuplServer = true;
                 } catch (NumberFormatException e) {
-                    Log.e(TAG, "unable to parse SUPL_PORT: " + suplPortString);
+                    Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
+                }
+            }
+
+            mC2KHost = mProperties.getProperty("C2K_HOST");
+            portString = mProperties.getProperty("C2K_PORT");
+            if (mC2KHost != null && portString != null) {
+                try {
+                    mC2KPort = Integer.parseInt(portString);
+                    mSetC2KServer = true;
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "unable to parse C2K_PORT: " + portString);
                 }
             }
         } catch (IOException e) {
@@ -358,7 +378,8 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     public boolean requiresNetwork() {
         // We want updateNetworkState() to get called when the network state changes
         // for XTRA and NTP time injection support.
-        return (mNtpServer != null || native_supports_xtra() || mSuplHost != null);
+        return (mNtpServer != null || native_supports_xtra() ||
+                mSuplHost != null || mC2KHost != null);
     }
 
     public void updateNetworkState(int state) {
@@ -561,7 +582,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 interval = 1;
             }
             mFixInterval = interval;
-            native_set_fix_frequency(mFixInterval);
         }
     }
 
@@ -871,38 +891,38 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     }
 
     /**
-     * called from native code to update SUPL status
+     * called from native code to update AGPS status
      */
-    private void reportSuplStatus(int status) {
+    private void reportAGpsStatus(int type, int status) {
         switch (status) {
-            case GPS_REQUEST_SUPL_DATA_CONN:
+            case GPS_REQUEST_AGPS_DATA_CONN:
                  int result = mConnMgr.startUsingNetworkFeature(
                         ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
                 if (result == Phone.APN_ALREADY_ACTIVE) {
-                    native_supl_data_conn_open(mSuplApn);
-                    mSuplDataConnectionState = SUPL_DATA_CONNECTION_OPEN;
+                    native_agps_data_conn_open(mAGpsApn);
+                    mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
                 } else if (result == Phone.APN_REQUEST_STARTED) {
-                    mSuplDataConnectionState = SUPL_DATA_CONNECTION_OPENING;
+                    mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
                 } else {
-                    native_supl_data_conn_failed();
+                    native_agps_data_conn_failed();
                 }
                 break;
-            case GPS_RELEASE_SUPL_DATA_CONN:
-                if (mSuplDataConnectionState != SUPL_DATA_CONNECTION_CLOSED) {
+            case GPS_RELEASE_AGPS_DATA_CONN:
+                if (mAGpsDataConnectionState != AGPS_DATA_CONNECTION_CLOSED) {
                     mConnMgr.stopUsingNetworkFeature(
                             ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
-                    native_supl_data_conn_closed();
-                    mSuplDataConnectionState = SUPL_DATA_CONNECTION_CLOSED;
+                    native_agps_data_conn_closed();
+                    mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                 }
                 break;
-            case GPS_SUPL_DATA_CONNECTED:
-                // Log.d(TAG, "GPS_SUPL_DATA_CONNECTED");
+            case GPS_AGPS_DATA_CONNECTED:
+                // Log.d(TAG, "GPS_AGPS_DATA_CONNECTED");
                 break;
-            case GPS_SUPL_DATA_CONN_DONE:
-                // Log.d(TAG, "GPS_SUPL_DATA_CONN_DONE");
+            case GPS_AGPS_DATA_CONN_DONE:
+                // Log.d(TAG, "GPS_AGPS_DATA_CONN_DONE");
                 break;
-            case GPS_SUPL_DATA_CONN_FAILED:
-                // Log.d(TAG, "GPS_SUPL_DATA_CONN_FAILED");
+            case GPS_AGPS_DATA_CONN_FAILED:
+                // Log.d(TAG, "GPS_AGPS_DATA_CONN_FAILED");
                 break;
         }
     }
@@ -912,6 +932,29 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         if (mNetworkThread != null) {
             mNetworkThread.xtraDownloadRequest();
         }
+    }
+
+    private boolean setAGpsServer(int type, String host, int port) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(host);
+            if (inetAddress != null) {
+                byte[] addrBytes = inetAddress.getAddress();
+                long addr = 0;
+                for (int i = 0; i < addrBytes.length; i++) {
+                    int temp = addrBytes[i];
+                    // signed -> unsigned
+                    if (temp < 0) temp = 256 + temp;
+                    addr = addr * 256 + temp;
+                }
+                // use MS-Based position mode if SUPL support is enabled
+                mPositionMode = GPS_POSITION_MODE_MS_BASED;
+                native_set_agps_server(type, (int)addr, port);
+            }
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "unknown host for server " + host);
+            return false;
+        }
+        return true;
     }
 
     private class GpsEventThread extends Thread {
@@ -985,7 +1028,8 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                         }
                     }
                     waitTime = getWaitTime();
-                } while (!mDone && ((!mXtraDownloadRequested && !mSetSuplServer && waitTime > 0)
+                } while (!mDone && ((!mXtraDownloadRequested &&
+                        !mSetSuplServer && !mSetC2KServer && waitTime > 0)
                         || !mNetworkAvailable));
                 if (Config.LOGD) Log.d(TAG, "NetworkThread out of wake loop");
                 
@@ -1012,26 +1056,15 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                         }
                     }
 
-                    // Set the SUPL server address if we have not yet
+                    // Set the AGPS server addresses if we have not yet
                     if (mSetSuplServer) {
-                        try {
-                            InetAddress inetAddress = InetAddress.getByName(mSuplHost);
-                            if (inetAddress != null) {
-                                byte[] addrBytes = inetAddress.getAddress();
-                                long addr = 0;
-                                for (int i = 0; i < addrBytes.length; i++) {
-                                    int temp = addrBytes[i];
-                                    // signed -> unsigned
-                                    if (temp < 0) temp = 256 + temp;
-                                    addr = addr * 256 + temp;
-                                }
-                                // use MS-Based position mode if SUPL support is enabled
-                                mPositionMode = GPS_POSITION_MODE_MS_BASED;
-                                native_set_supl_server((int)addr, mSuplPort);
-                                mSetSuplServer = false; 
-                            }
-                        } catch (UnknownHostException e) {
-                            Log.e(TAG, "unknown host for SUPL server " + mSuplHost);
+                        if (setAGpsServer(AGPS_TYPE_SUPL, mSuplHost, mSuplPort)) {
+                            mSetSuplServer = false;
+                        }
+                    }
+                    if (mSetC2KServer) {
+                        if (setAGpsServer(AGPS_TYPE_C2K, mC2KHost, mC2KPort)) {
+                            mSetC2KServer = false;
                         }
                     }
 
@@ -1125,9 +1158,9 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private native boolean native_supports_xtra();
     private native void native_inject_xtra_data(byte[] data, int length);
 
-    // SUPL Support    
-    private native void native_supl_data_conn_open(String apn);
-    private native void native_supl_data_conn_closed();
-    private native void native_supl_data_conn_failed();
-    private native void native_set_supl_server(int addr, int port);
+    // AGPS Support    
+    private native void native_agps_data_conn_open(String apn);
+    private native void native_agps_data_conn_closed();
+    private native void native_agps_data_conn_failed();
+    private native void native_set_agps_server(int type, int addr, int port);
 }
