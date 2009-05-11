@@ -1796,7 +1796,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             boolean preventRequestLayout) {
         child.mParent = null;
         addViewInner(child, index, params, preventRequestLayout);
-        child.mPrivateFlags |= DRAWN;
+        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK) | DRAWN;
         return true;
     }
 
@@ -2210,7 +2210,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         addInArray(child, index);
 
         child.mParent = this;
-        child.mPrivateFlags |= DRAWN;
+        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK) | DRAWN;
 
         if (child.hasFocus()) {
             requestChildFocus(child, child.findFocus());
@@ -2320,15 +2320,33 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // ourselves and the parent to make sure the invalidate request goes
             // through
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
-    
+
+            // Check whether the child that requests the invalidate is fully opaque
+            final boolean isOpaque = child.isOpaque();
+            // Mark the child as dirty, using the appropriate flag
+            // Make sure we do not set both flags at the same time
+            final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
+
             do {
+                View view = null;
+                if (parent instanceof View) {
+                    view = (View) parent;
+                }
+
                 if (drawAnimation) {
-                    if (parent instanceof View) {
-                        ((View) parent).mPrivateFlags |= DRAW_ANIMATION;
+                    if (view != null) {
+                        view.mPrivateFlags |= DRAW_ANIMATION;
                     } else if (parent instanceof ViewRoot) {
                         ((ViewRoot) parent).mIsAnimating = true;
                     }
                 }
+
+                // If the parent is dirty opaque or not dirty, mark it dirty with the opaque
+                // flag coming from the child that initiated the invalidate
+                if (view != null && (view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
+                    view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
+                }
+
                 parent = parent.invalidateChildInParent(location, dirty);
             } while (parent != null);
         }
