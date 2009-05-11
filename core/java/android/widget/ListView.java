@@ -2781,6 +2781,9 @@ public class ListView extends AbsListView {
         return mItemsCanFocus;
     }
 
+    /**
+     * @hide Pending API council approval.
+     */
     @Override
     public boolean isOpaque() {
         return (mCachingStarted && mIsCacheColorOpaque && mDividerIsOpaque) || super.isOpaque();
