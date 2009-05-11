@@ -98,6 +98,7 @@ class CallbackProxy extends Handler {
     private static final int SCALE_CHANGED        = 123;
     private static final int RECEIVED_CERTIFICATE = 124;
     private static final int SWITCH_OUT_HISTORY   = 125;
+    private static final int JS_TIMEOUT           = 126;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY               = 200;
@@ -525,6 +526,18 @@ class CallbackProxy extends Handler {
                                             }
                                         })
                                 .show();
+                    }
+                    res.setReady();
+                }
+                break;
+
+            case JS_TIMEOUT:
+                if(mWebChromeClient != null) {
+                    final JsResult res = (JsResult) msg.obj;
+                    if(mWebChromeClient.onJsTimeout()) {
+                        res.confirm();
+                    } else {
+                        res.cancel();
                     }
                     res.setReady();
                 }
@@ -1013,6 +1026,28 @@ class CallbackProxy extends Handler {
         confirm.getData().putString("url", url);
         synchronized (this) {
             sendMessage(confirm);
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Log.e(LOGTAG, "Caught exception while waiting for jsUnload");
+                Log.e(LOGTAG, Log.getStackTraceString(e));
+            }
+        }
+        return result.getResult();
+    }
+
+    /**
+     * @hide pending API council approval
+     */
+    public boolean onJsTimeout() {
+        //always interrupt timedout JS by default
+        if (mWebChromeClient == null) {
+            return true;
+        }
+        JsResult result = new JsResult(this, true);
+        Message timeout = obtainMessage(JS_TIMEOUT, result);
+        synchronized (this) {
+            sendMessage(timeout);
             try {
                 wait();
             } catch (InterruptedException e) {

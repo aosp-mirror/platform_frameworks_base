@@ -263,6 +263,16 @@ final class WebViewCore {
         return mCallbackProxy.onJsBeforeUnload(url, message);
     }
 
+    /**
+     *
+     * Callback to notify that a JavaScript execution timeout has occured.
+     * @return True if the JavaScript execution should be interrupted. False
+     *         will continue the execution.
+     */
+    protected boolean jsInterrupt() {
+        return mCallbackProxy.onJsTimeout();
+    }
+
     //-------------------------------------------------------------------------
     // JNI methods
     //-------------------------------------------------------------------------
