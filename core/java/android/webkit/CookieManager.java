@@ -647,8 +647,6 @@ public final class CookieManager {
                     // another file in the local web server directory. Still
                     // "localhost" is the best pseudo domain name.
                     ret[0] = "localhost";
-                } else if (!ret[0].equals("localhost")) {
-                    return null;
                 }
             } else if (index == ret[0].lastIndexOf(PERIOD)) {
                 // cookie host must have at least two periods
