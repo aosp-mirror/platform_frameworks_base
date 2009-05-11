@@ -31,31 +31,31 @@ static pthread_cond_t sEventCond = PTHREAD_COND_INITIALIZER;
 static jmethodID method_reportLocation;
 static jmethodID method_reportStatus;
 static jmethodID method_reportSvStatus;
-static jmethodID method_reportSuplStatus;
+static jmethodID method_reportAGpsStatus;
 static jmethodID method_xtraDownloadRequest;
 
 static const GpsInterface* sGpsInterface = NULL;
 static const GpsXtraInterface* sGpsXtraInterface = NULL;
-static const GpsSuplInterface* sGpsSuplInterface = NULL;
+static const AGpsInterface* sAGpsInterface = NULL;
 
 // data written to by GPS callbacks
 static GpsLocation  sGpsLocation;
 static GpsStatus    sGpsStatus;
 static GpsSvStatus  sGpsSvStatus;
-static GpsSuplStatus    sGpsSuplStatus;
+static AGpsStatus   sAGpsStatus;
 
 // a copy of the data shared by android_location_GpsLocationProvider_wait_for_event
 // and android_location_GpsLocationProvider_read_status
 static GpsLocation  sGpsLocationCopy;
 static GpsStatus    sGpsStatusCopy;
 static GpsSvStatus  sGpsSvStatusCopy;
-static GpsSuplStatus    sGpsSuplStatusCopy;
+static AGpsStatus   sAGpsStatusCopy;
 
 enum CallbackType {
     kLocation = 1,
     kStatus = 2,
     kSvStatus = 4,
-    kSuplStatus = 8,
+    kAGpsStatus = 8,
     kXtraDownloadRequest = 16,
     kDisableRequest = 32,
 }; 
@@ -96,12 +96,12 @@ static void sv_status_callback(GpsSvStatus* sv_status)
     pthread_mutex_unlock(&sEventMutex);
 }
 
-static void supl_status_callback(GpsSuplStatus* supl_status)
+static void agps_status_callback(AGpsStatus* agps_status)
 {
     pthread_mutex_lock(&sEventMutex);
 
-    sPendingCallbacks |= kSuplStatus;
-    memcpy(&sGpsSuplStatus, supl_status, sizeof(GpsSuplStatus));
+    sPendingCallbacks |= kAGpsStatus;
+    memcpy(&sAGpsStatus, agps_status, sizeof(AGpsStatus));
 
     pthread_cond_signal(&sEventCond);
     pthread_mutex_unlock(&sEventMutex);
@@ -126,15 +126,15 @@ GpsXtraCallbacks sGpsXtraCallbacks = {
     download_request_callback,
 };
 
-GpsSuplCallbacks sGpsSuplCallbacks = {
-    supl_status_callback,
+AGpsCallbacks sAGpsCallbacks = {
+    agps_status_callback,
 };
 
 static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
     method_reportLocation = env->GetMethodID(clazz, "reportLocation", "(IDDDFFFJ)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "()V");
-    method_reportSuplStatus = env->GetMethodID(clazz, "reportSuplStatus", "(I)V");
+    method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II)V");
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
 }
 
@@ -151,10 +151,10 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
     if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
         return false;
 
-    if (!sGpsSuplInterface)
-        sGpsSuplInterface = (const GpsSuplInterface*)sGpsInterface->get_extension(GPS_SUPL_INTERFACE);
-    if (sGpsSuplInterface)
-        sGpsSuplInterface->init(&sGpsSuplCallbacks);
+    if (!sAGpsInterface)
+        sAGpsInterface = (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
+    if (sAGpsInterface)
+        sAGpsInterface->init(&sAGpsCallbacks);
     return true;
 }
 
@@ -187,12 +187,6 @@ static jboolean android_location_GpsLocationProvider_stop(JNIEnv* env, jobject o
     return (sGpsInterface->stop() == 0);
 }
 
-static void android_location_GpsLocationProvider_set_fix_frequency(JNIEnv* env, jobject obj, jint fixFrequency)
-{
-    if (sGpsInterface->set_fix_frequency)
-        sGpsInterface->set_fix_frequency(fixFrequency);
-}
-
 static void android_location_GpsLocationProvider_delete_aiding_data(JNIEnv* env, jobject obj, jint flags)
 {
     sGpsInterface->delete_aiding_data(flags);
@@ -212,7 +206,7 @@ static void android_location_GpsLocationProvider_wait_for_event(JNIEnv* env, job
     memcpy(&sGpsLocationCopy, &sGpsLocation, sizeof(sGpsLocationCopy));
     memcpy(&sGpsStatusCopy, &sGpsStatus, sizeof(sGpsStatusCopy));
     memcpy(&sGpsSvStatusCopy, &sGpsSvStatus, sizeof(sGpsSvStatusCopy));
-    memcpy(&sGpsSuplStatusCopy, &sGpsSuplStatus, sizeof(sGpsSuplStatusCopy));
+    memcpy(&sAGpsStatusCopy, &sAGpsStatus, sizeof(sAGpsStatusCopy));
     pthread_mutex_unlock(&sEventMutex);   
 
     if (pendingCallbacks & kLocation) { 
@@ -228,8 +222,8 @@ static void android_location_GpsLocationProvider_wait_for_event(JNIEnv* env, job
     if (pendingCallbacks & kSvStatus) {
         env->CallVoidMethod(obj, method_reportSvStatus);
     }
-    if (pendingCallbacks & kSuplStatus) {
-        env->CallVoidMethod(obj, method_reportSuplStatus, sGpsSuplStatusCopy.status);
+    if (pendingCallbacks & kAGpsStatus) {
+        env->CallVoidMethod(obj, method_reportAGpsStatus, sAGpsStatusCopy.type, sAGpsStatusCopy.status);
     }  
     if (pendingCallbacks & kXtraDownloadRequest) {    
         env->CallVoidMethod(obj, method_xtraDownloadRequest);
@@ -299,73 +293,72 @@ static void android_location_GpsLocationProvider_inject_xtra_data(JNIEnv* env, j
     env->ReleaseByteArrayElements(data, bytes, 0);
 }
 
-static void android_location_GpsLocationProvider_supl_data_conn_open(JNIEnv* env, jobject obj, jstring apn)
+static void android_location_GpsLocationProvider_agps_data_conn_open(JNIEnv* env, jobject obj, jstring apn)
 {
-    if (!sGpsSuplInterface) {
-        sGpsSuplInterface = (const GpsSuplInterface*)sGpsInterface->get_extension(GPS_SUPL_INTERFACE);
+    if (!sAGpsInterface) {
+        sAGpsInterface = (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
     }
-    if (sGpsSuplInterface) {
+    if (sAGpsInterface) {
         if (apn == NULL) {
             jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
             return;
         }
         const char *apnStr = env->GetStringUTFChars(apn, NULL);
-        sGpsSuplInterface->data_conn_open(apnStr);
+        sAGpsInterface->data_conn_open(apnStr);
         env->ReleaseStringUTFChars(apn, apnStr);
     }
 }
 
-static void android_location_GpsLocationProvider_supl_data_conn_closed(JNIEnv* env, jobject obj)
+static void android_location_GpsLocationProvider_agps_data_conn_closed(JNIEnv* env, jobject obj)
 {
-    if (!sGpsSuplInterface) {
-        sGpsSuplInterface = (const GpsSuplInterface*)sGpsInterface->get_extension(GPS_SUPL_INTERFACE);
+    if (!sAGpsInterface) {
+        sAGpsInterface = (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
     }
-    if (sGpsSuplInterface) {
-        sGpsSuplInterface->data_conn_closed();
+    if (sAGpsInterface) {
+        sAGpsInterface->data_conn_closed();
     }
 }
 
-static void android_location_GpsLocationProvider_supl_data_conn_failed(JNIEnv* env, jobject obj)
+static void android_location_GpsLocationProvider_agps_data_conn_failed(JNIEnv* env, jobject obj)
 {
-    if (!sGpsSuplInterface) {
-        sGpsSuplInterface = (const GpsSuplInterface*)sGpsInterface->get_extension(GPS_SUPL_INTERFACE);
+    if (!sAGpsInterface) {
+        sAGpsInterface = (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
     }
-    if (sGpsSuplInterface) {
-        sGpsSuplInterface->data_conn_failed();
+    if (sAGpsInterface) {
+        sAGpsInterface->data_conn_failed();
     }
 }
 
-static void android_location_GpsLocationProvider_set_supl_server(JNIEnv* env, jobject obj,
-        jint addr, jint port)
+static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jobject obj,
+        jint type, jint addr, jint port)
 {
-    if (!sGpsSuplInterface) {
-        sGpsSuplInterface = (const GpsSuplInterface*)sGpsInterface->get_extension(GPS_SUPL_INTERFACE);
+    if (!sAGpsInterface) {
+        sAGpsInterface = (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
     }
-    if (sGpsSuplInterface) {
-        sGpsSuplInterface->set_server(addr, port);
+    if (sAGpsInterface) {
+        sAGpsInterface->set_server(type, addr, port);
     }
 }
 
 static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"class_init_native", "()V", (void *)android_location_GpsLocationProvider_class_init_native},
-	{"native_is_supported", "()Z", (void*)android_location_GpsLocationProvider_is_supported},
-	{"native_init", "()Z", (void*)android_location_GpsLocationProvider_init},
-	{"native_disable", "()V", (void*)android_location_GpsLocationProvider_disable},
-	{"native_cleanup", "()V", (void*)android_location_GpsLocationProvider_cleanup},
-	{"native_start", "(IZI)Z", (void*)android_location_GpsLocationProvider_start},
-	{"native_stop", "()Z", (void*)android_location_GpsLocationProvider_stop},
-	{"native_set_fix_frequency", "(I)V", (void*)android_location_GpsLocationProvider_set_fix_frequency},
-	{"native_delete_aiding_data", "(I)V", (void*)android_location_GpsLocationProvider_delete_aiding_data},
-	{"native_wait_for_event", "()V", (void*)android_location_GpsLocationProvider_wait_for_event},
-	{"native_read_sv_status", "([I[F[F[F[I)I", (void*)android_location_GpsLocationProvider_read_sv_status},
-	{"native_inject_time", "(JJI)V", (void*)android_location_GpsLocationProvider_inject_time},
-	{"native_supports_xtra", "()Z", (void*)android_location_GpsLocationProvider_supports_xtra},
-	{"native_inject_xtra_data", "([BI)V", (void*)android_location_GpsLocationProvider_inject_xtra_data},
- 	{"native_supl_data_conn_open", "(Ljava/lang/String;)V", (void*)android_location_GpsLocationProvider_supl_data_conn_open},
- 	{"native_supl_data_conn_closed", "()V", (void*)android_location_GpsLocationProvider_supl_data_conn_closed},
- 	{"native_supl_data_conn_failed", "()V", (void*)android_location_GpsLocationProvider_supl_data_conn_failed},
- 	{"native_set_supl_server", "(II)V", (void*)android_location_GpsLocationProvider_set_supl_server},
+    {"native_is_supported", "()Z", (void*)android_location_GpsLocationProvider_is_supported},
+    {"native_init", "()Z", (void*)android_location_GpsLocationProvider_init},
+    {"native_disable", "()V", (void*)android_location_GpsLocationProvider_disable},
+    {"native_cleanup", "()V", (void*)android_location_GpsLocationProvider_cleanup},
+    {"native_start", "(IZI)Z", (void*)android_location_GpsLocationProvider_start},
+    {"native_stop", "()Z", (void*)android_location_GpsLocationProvider_stop},
+    {"native_delete_aiding_data", "(I)V", (void*)android_location_GpsLocationProvider_delete_aiding_data},
+    {"native_wait_for_event", "()V", (void*)android_location_GpsLocationProvider_wait_for_event},
+    {"native_read_sv_status", "([I[F[F[F[I)I", (void*)android_location_GpsLocationProvider_read_sv_status},
+    {"native_inject_time", "(JJI)V", (void*)android_location_GpsLocationProvider_inject_time},
+    {"native_supports_xtra", "()Z", (void*)android_location_GpsLocationProvider_supports_xtra},
+    {"native_inject_xtra_data", "([BI)V", (void*)android_location_GpsLocationProvider_inject_xtra_data},
+    {"native_agps_data_conn_open", "(Ljava/lang/String;)V", (void*)android_location_GpsLocationProvider_agps_data_conn_open},
+    {"native_agps_data_conn_closed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_closed},
+    {"native_agps_data_conn_failed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_failed},
+    {"native_set_agps_server", "(III)V", (void*)android_location_GpsLocationProvider_set_agps_server},
 };
 
 int register_android_location_GpsLocationProvider(JNIEnv* env)
