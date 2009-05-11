@@ -325,6 +325,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         // show the dialog. this will call onStart().
         if (!isShowing()) {
+            // First make sure the keyboard is showing (if needed), so that we get the right height
+            // for the dropdown to respect the IME.
+            if (getContext().getResources().getConfiguration().hardKeyboardHidden ==
+                Configuration.HARDKEYBOARDHIDDEN_YES) {
+                InputMethodManager inputManager = (InputMethodManager)
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputManager.showSoftInputUnchecked(0, null);
+            }
             show();
         }
 
@@ -528,13 +536,16 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mSearchAutoComplete.setDropDownAnimationStyle(0); // no animation
         mSearchAutoComplete.setThreshold(mSearchable.getSuggestThreshold());
 
-        // TODO: Use different dropdown background resource for in-app search.
         if (mGlobalSearchMode) {
             mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in
             mSearchAutoComplete.setDropDownDismissedOnCompletion(false);
+            mSearchAutoComplete.setDropDownBackgroundResource(
+                    com.android.internal.R.drawable.search_dropdown_background);
         } else {
             mSearchAutoComplete.setDropDownAlwaysVisible(false);
             mSearchAutoComplete.setDropDownDismissedOnCompletion(true);
+            mSearchAutoComplete.setDropDownBackgroundResource(
+                    com.android.internal.R.drawable.search_dropdown_background_apps);
         }
 
         // attach the suggestions adapter, if suggestions are available
