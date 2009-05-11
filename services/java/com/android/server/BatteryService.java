@@ -92,6 +92,8 @@ class BatteryService extends Binder {
     // This should probably be exposed in the API, though it's not critical
     private static final int BATTERY_PLUGGED_NONE = 0;
 
+    private static final int BATTERY_LEVEL_WARNING = 15;
+
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
     
@@ -260,6 +262,17 @@ class BatteryService extends Binder {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 mContext.sendBroadcast(intent);
             }
+
+            final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
+            final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
+
+            /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
+             * - is just un-plugged (previously was plugged) and battery level is under WARNING, or
+             * - is not plugged and battery level crosses the WARNING boundary (becomes < 15).
+             */
+            final boolean sendBatteryLow = !plugged
+                && mBatteryLevel < BATTERY_LEVEL_WARNING
+                && (oldPlugged || mLastBatteryLevel >= BATTERY_LEVEL_WARNING);
             
             mLastBatteryStatus = mBatteryStatus;
             mLastBatteryHealth = mBatteryHealth;
@@ -269,8 +282,11 @@ class BatteryService extends Binder {
             mLastBatteryVoltage = mBatteryVoltage;
             mLastBatteryTemperature = mBatteryTemperature;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
-            
+
             sendIntent();
+            if (sendBatteryLow) {
+                mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_LOW));
+            }
             
             // This needs to be done after sendIntent() so that we get the lastest battery stats.
             if (logOutlier && dischargeDuration != 0) {
