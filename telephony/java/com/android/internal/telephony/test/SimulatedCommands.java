@@ -1001,6 +1001,14 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(response);
     }
 
+    public void getSmscAddress(Message result) {
+        unimplemented(result);
+    }
+
+    public void setSmscAddress(String address, Message result) {
+        unimplemented(result);
+    }
+
     private boolean isSimLocked() {
         if (mSimLockedState != SimLockState.NONE) {
             return true;
