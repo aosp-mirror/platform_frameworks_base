@@ -1940,7 +1940,7 @@ public class Intent implements Parcelable {
     /**
      * If set, this marks a point in the task's activity stack that should
      * be cleared when the task is reset.  That is, the next time the task
-     * is broad to the foreground with
+     * is brought to the foreground with
      * {@link #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED} (typically as a result of
      * the user re-launching it from home), this activity and all on top of
      * it will be finished so that the user does not return to them, but
