@@ -141,6 +141,7 @@ public class WebSettings {
     private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
     private boolean         mPluginsEnabled = false;
+    private long            mWebStorageDefaultQuota = 0;
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
@@ -903,6 +904,18 @@ public class WebSettings {
     }
 
     /**
+     * @hide
+     * Set the default quota for WebStorage DBs
+     * @param quota the default quota in bytes
+     */
+    public synchronized void setWebStorageDefaultQuota(long quota) {
+        if (mWebStorageDefaultQuota != quota) {
+            mWebStorageDefaultQuota = quota;
+            postSync();
+        }
+    }
+
+    /**
      * Set the path to where database storage API databases should be saved.
      * This will update WebCore when the Sync runs in the C++ side.
      * @param databasePath String path to the directory where databases should
@@ -993,6 +1006,15 @@ public class WebSettings {
      */
     public synchronized String getPluginsPath() {
         return mPluginsPath;
+    }
+
+    /**
+     * @hide
+     * Return the default quota for WebStorage DBs
+     * @return the default quota in bytes
+     */
+    public synchronized long getWebStorageDefaultQuota() {
+        return mWebStorageDefaultQuota;
     }
 
     /**

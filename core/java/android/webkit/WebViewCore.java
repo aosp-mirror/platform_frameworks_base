@@ -143,6 +143,8 @@ final class WebViewCore {
         // The WebIconDatabase needs to be initialized within the UI thread so
         // just request the instance here.
         WebIconDatabase.getInstance();
+        // Create the WebStorage singleton
+        WebStorage.getInstance();
         // Send a message to initialize the WebViewCore.
         Message init = sWebCoreHandler.obtainMessage(
                 WebCoreThread.INITIALIZE, this);
@@ -162,6 +164,8 @@ final class WebViewCore {
         mSettings.syncSettingsAndCreateHandler(mBrowserFrame);
         // Create the handler and transfer messages for the IconDatabase
         WebIconDatabase.getInstance().createHandler();
+        // Create the handler for WebStorage
+        WebStorage.getInstance().createHandler();
         // The transferMessages call will transfer all pending messages to the
         // WebCore thread handler.
         mEventHub.transferMessages();
