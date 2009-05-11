@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Parcel;
@@ -113,7 +114,11 @@ public class ListView extends AbsListView {
 
     Drawable mDivider;
     int mDividerHeight;
+
+    private boolean mIsCacheColorOpaque;
+    private boolean mDividerIsOpaque;
     private boolean mClipDivider;
+
     private boolean mHeaderDividersEnabled;
     private boolean mFooterDividersEnabled;
 
@@ -2777,6 +2782,17 @@ public class ListView extends AbsListView {
     }
 
     @Override
+    public boolean isOpaque() {
+        return (mCachingStarted && mIsCacheColorOpaque && mDividerIsOpaque) || super.isOpaque();
+    }
+
+    @Override
+    public void setCacheColorHint(int color) {
+        mIsCacheColorOpaque = (color >>> 24) == 0xFF;
+        super.setCacheColorHint(color);
+    }
+
+    @Override
     protected void dispatchDraw(Canvas canvas) {
         // Draw the dividers
         final int dividerHeight = mDividerHeight;
@@ -2897,6 +2913,7 @@ public class ListView extends AbsListView {
             mClipDivider = false;
         }
         mDivider = divider;
+        mDividerIsOpaque = divider == null || divider.getOpacity() == PixelFormat.OPAQUE;
         requestLayoutIfNecessary();
     }
 

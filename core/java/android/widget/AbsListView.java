@@ -1947,7 +1947,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (y != mLastY) {
                     deltaY -= mMotionCorrection;
                     int incrementalDeltaY = mLastY != Integer.MIN_VALUE ? y - mLastY : deltaY;
-                    trackMotionScroll(deltaY, incrementalDeltaY);
+                    trackMotionScroll(deltaY, incrementalDeltaY, true);
 
                     // Check to see if we have bumped into the scroll limit
                     View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
@@ -2286,7 +2286,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 delta = Math.max(-(getHeight() - mPaddingBottom - mPaddingTop - 1), delta);
             }
 
-            trackMotionScroll(delta, delta);
+            trackMotionScroll(delta, delta, false);
 
             // Check to see if we have bumped into the scroll limit
             View motionView = getChildAt(mMotionPosition - mFirstPosition);
@@ -2299,6 +2299,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             if (more) {
+                invalidate();
                 mLastFlingY = y;
                 post(this);
             } else {
@@ -2323,6 +2324,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private void clearScrollingCache() {
         if (mCachingStarted) {
+            mCachingStarted = false;
             setChildrenDrawnWithCacheEnabled(false);
             if ((mPersistentDrawingCache & PERSISTENT_SCROLLING_CACHE) == 0) {
                 setChildrenDrawingCacheEnabled(false);
@@ -2330,7 +2332,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (!isAlwaysDrawnWithCacheEnabled()) {
                 invalidate();
             }
-            mCachingStarted = false;
         }
     }
 
@@ -2340,8 +2341,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @param deltaY Amount to offset mMotionView. This is the accumulated delta since the motion
      *        began. Positive numbers mean the user's finger is moving down the screen.
      * @param incrementalDeltaY Change in deltaY from the previous event.
+     * @param invalidate True to make this method call invalidate(), false otherwise.
      */
-    void trackMotionScroll(int deltaY, int incrementalDeltaY) {
+    void trackMotionScroll(int deltaY, int incrementalDeltaY, boolean invalidate) {
         final int childCount = getChildCount();
         if (childCount == 0) {
             return;
@@ -2375,7 +2377,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (spaceAbove >= absIncrementalDeltaY && spaceBelow >= absIncrementalDeltaY) {
             hideSelector();
             offsetChildrenTopAndBottom(incrementalDeltaY);
-            invalidate();
+            if (invalidate) invalidate();
             mMotionViewNewTop = mMotionViewOriginalTop + deltaY;
         } else {
             final int firstPosition = mFirstPosition;
@@ -2453,7 +2455,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mFirstPosition += count;
             }
 
-            invalidate();
+            if (invalidate) invalidate();
             fillGap(down);
             mBlockLayoutRequests = false;
 
@@ -2788,7 +2790,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         final int[] xy = new int[2];
         getLocationOnScreen(xy);
-        // TODO: The 20 below should come from the theme and be expressed in dip
+        // TODO: The 20 below should come from the theme
         // TODO: And the gravity should be defined in the theme as well
         final int bottomGap = screenHeight - xy[1] - getHeight() + (int) (mDensityScale * 20);
         if (!mPopup.isShowing()) {

@@ -539,6 +539,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
             dirty = mTempRect;
         }
+        // TODO: When doing a union with mDirty != empty, we must cancel all the DIRTY_OPAQUE flags
         mDirty.union(dirty);
         if (!mWillDrawSoon) {
             scheduleTraversals();
