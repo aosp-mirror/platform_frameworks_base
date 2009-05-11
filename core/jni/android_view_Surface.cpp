@@ -24,6 +24,7 @@
 
 #include <SkCanvas.h>
 #include <SkBitmap.h>
+#include <SkRegion.h>
 
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
@@ -268,7 +269,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
         dirty.top   = env->GetIntField(dirtyRect, ro.t);
         dirty.right = env->GetIntField(dirtyRect, ro.r);
         dirty.bottom= env->GetIntField(dirtyRect, ro.b);
-        if (dirty.left < dirty.right && dirty.top < dirty.bottom) {
+        if (!dirty.isEmpty()) {
             dirtyRegion.set(dirty);    
         }
     } else {
@@ -300,13 +301,27 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
         bitmap.setPixels(NULL);
     }
     nativeCanvas->setBitmapDevice(bitmap);
-    nativeCanvas->clipRegion(dirtyRegion.toSkRegion());
+    
+    SkRegion clipReg;
+    if (dirtyRegion.isRect()) { // very common case
+        const Rect& b(dirtyRegion.getBounds());
+        clipReg.setRect(b.left, b.top, b.right, b.bottom);
+    } else {
+        size_t count;
+        Rect const* r = dirtyRegion.getArray(&count);
+        while (count) {
+            clipReg.op(r->left, r->top, r->right, r->bottom, SkRegion::kUnion_Op);
+            r++, count--;
+        }
+    }
+
+    nativeCanvas->clipRegion(clipReg);
     
     int saveCount = nativeCanvas->save();
     env->SetIntField(clazz, so.saveCount, saveCount);
 
     if (dirtyRect) {
-        Rect bounds(dirtyRegion.bounds());
+        const Rect& bounds(dirtyRegion.getBounds());
         env->SetIntField(dirtyRect, ro.l, bounds.left);
         env->SetIntField(dirtyRect, ro.t, bounds.top);
         env->SetIntField(dirtyRect, ro.r, bounds.right);
@@ -475,7 +490,19 @@ static void Surface_setTransparentRegion(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     SkRegion* nativeRegion = (SkRegion*)env->GetIntField(argRegion, no.native_region);
-    status_t err = surface->setTransparentRegionHint(Region(*nativeRegion));
+    
+    const SkIRect& b(nativeRegion->getBounds());
+    Region reg(Rect(b.fLeft, b.fTop, b.fRight, b.fBottom));
+    if (nativeRegion->isComplex()) {
+        SkRegion::Iterator it(*nativeRegion);
+        while (!it.done()) {
+            const SkIRect& r(it.rect());
+            reg.addRectUnchecked(r.fLeft, r.fTop, r.fRight, r.fBottom);
+            it.next();
+        }
+    }
+    
+    status_t err = surface->setTransparentRegionHint(reg);
     if (err<0 && err!=NO_INIT)
         doThrow(env, "java/lang/IllegalArgumentException", NULL);
 }

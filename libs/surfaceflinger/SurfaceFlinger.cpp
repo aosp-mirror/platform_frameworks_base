@@ -913,9 +913,10 @@ void SurfaceFlinger::debugFlashRegions()
         glColor4x(0x10000, 0x10000, 0, 0x10000);
     }
 
-    Rect r;
-    Region::iterator iterator(mDirtyRegion);
-    while (iterator.iterate(&r)) {
+    Region::const_iterator it = mDirtyRegion.begin();
+    Region::const_iterator const end = mDirtyRegion.end();
+    while (it != end) {
+        const Rect& r = *it++;
         GLfloat vertices[][2] = {
                 { r.left,  r.top },
                 { r.left,  r.bottom },
@@ -951,9 +952,10 @@ void SurfaceFlinger::drawWormhole() const
 
     if (LIKELY(!mDebugBackground)) {
         glClearColorx(0,0,0,0);
-        Rect r;
-        Region::iterator iterator(region);
-        while (iterator.iterate(&r)) {
+        Region::const_iterator it = region.begin();
+        Region::const_iterator const end = region.end();
+        while (it != end) {
+            const Rect& r = *it++;
             const GLint sy = height - (r.top + r.height());
             glScissor(r.left, sy, r.width(), r.height());
             glClear(GL_COLOR_BUFFER_BIT);
@@ -971,9 +973,10 @@ void SurfaceFlinger::drawWormhole() const
         glMatrixMode(GL_TEXTURE);
         glLoadIdentity();
         glScalef(width*(1.0f/32.0f), height*(1.0f/32.0f), 1);
-        Rect r;
-        Region::iterator iterator(region);
-        while (iterator.iterate(&r)) {
+        Region::const_iterator it = region.begin();
+        Region::const_iterator const end = region.end();
+        while (it != end) {
+            const Rect& r = *it++;
             const GLint sy = height - (r.top + r.height());
             glScissor(r.left, sy, r.width(), r.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

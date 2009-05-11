@@ -29,7 +29,6 @@ LOCAL_SRC_FILES:= \
 	Time.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libcorecg \
 	libcutils \
 	libutils \
 	libpixelflinger \

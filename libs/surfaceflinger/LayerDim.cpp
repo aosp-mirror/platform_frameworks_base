@@ -52,8 +52,9 @@ void LayerDim::onDraw(const Region& clip) const
     // FIXME: on some h/w (like msm7K, it will be faster to use a texture)
     
     const State& s(drawingState());
-    Region::iterator iterator(clip);
-    if (s.alpha>0 && iterator) {
+    Region::const_iterator it = clip.begin();
+    Region::const_iterator const end = clip.end();
+    if (s.alpha>0 && (it != end)) {
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         const GGLfixed alpha = (s.alpha << 16)/255;
         const uint32_t fbHeight = hw.getHeight();
@@ -63,8 +64,8 @@ void LayerDim::onDraw(const Region& clip) const
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         glColor4x(0, 0, 0, alpha);
         glVertexPointer(2, GL_FIXED, 0, mVertices);
-        Rect r;
-        while (iterator.iterate(&r)) {
+        while (it != end) {
+            const Rect& r = *it++;
             const GLint sy = fbHeight - (r.top + r.height());
             glScissor(r.left, sy, r.width(), r.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 

@@ -289,8 +289,9 @@ void LayerBase::invalidate()
 
 void LayerBase::drawRegion(const Region& reg) const
 {
-    Region::iterator iterator(reg);
-    if (iterator) {
+    Region::const_iterator it = reg.begin();
+    Region::const_iterator const end = reg.end();
+    if (it != end) {
         Rect r;
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         const int32_t fbWidth  = hw.getWidth();
@@ -298,7 +299,8 @@ void LayerBase::drawRegion(const Region& reg) const
         const GLshort vertices[][2] = { { 0, 0 }, { fbWidth, 0 }, 
                 { fbWidth, fbHeight }, { 0, fbHeight }  };
         glVertexPointer(2, GL_SHORT, 0, vertices);
-        while (iterator.iterate(&r)) {
+        while (it != end) {
+            const Rect& r = *it++;
             const GLint sy = fbHeight - (r.top + r.height());
             glScissor(r.left, sy, r.width(), r.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
@@ -363,12 +365,14 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
-    Rect r;
-    Region::iterator iterator(clip);
-    if (iterator) {
+
+    Region::const_iterator it = clip.begin();
+    Region::const_iterator const end = clip.end();
+    if (it != end) {
         glEnable(GL_SCISSOR_TEST);
         glVertexPointer(2, GL_FIXED, 0, mVertices);
-        while (iterator.iterate(&r)) {
+        while (it != end) {
+            const Rect& r = *it++;
             const GLint sy = fbHeight - (r.top + r.height());
             glScissor(r.left, sy, r.width(), r.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
@@ -434,8 +438,9 @@ void LayerBase::drawWithOpenGL(const Region& clip,
             || !(mFlags & DisplayHardware::DRAW_TEXTURE_EXTENSION) )) 
     {
         //StopWatch watch("GL transformed");
-        Region::iterator iterator(clip);
-        if (iterator) {
+        Region::const_iterator it = clip.begin();
+        Region::const_iterator const end = clip.end();
+        if (it != end) {
             // always use high-quality filtering with fast configurations
             bool fast = !(mFlags & DisplayHardware::SLOW_CONFIG);
             if (!fast && s.flags & ISurfaceComposer::eLayerFilter) {
@@ -474,8 +479,8 @@ void LayerBase::drawWithOpenGL(const Region& clip,
             glVertexPointer(2, GL_FIXED, 0, mVertices);
             glTexCoordPointer(2, GL_FIXED, 0, texCoords);
 
-            Rect r;
-            while (iterator.iterate(&r)) {
+            while (it != end) {
+                const Rect& r = *it++;
                 const GLint sy = fbHeight - (r.top + r.height());
                 glScissor(r.left, sy, r.width(), r.height());
                 glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
@@ -488,15 +493,16 @@ void LayerBase::drawWithOpenGL(const Region& clip,
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         }
     } else {
-        Region::iterator iterator(clip);
-        if (iterator) {
-            Rect r;
+        Region::const_iterator it = clip.begin();
+        Region::const_iterator const end = clip.end();
+        if (it != end) {
             GLint crop[4] = { 0, height, width, -height };
             glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
             int x = tx();
             int y = ty();
             y = fbHeight - (y + height);
-            while (iterator.iterate(&r)) {
+            while (it != end) {
+                const Rect& r = *it++;
                 const GLint sy = fbHeight - (r.top + r.height());
                 glScissor(r.left, sy, r.width(), r.height());
                 glDrawTexiOES(x, y, 0, width, height);

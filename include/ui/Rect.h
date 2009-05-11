@@ -30,6 +30,8 @@ public:
     int right;
     int bottom;
 
+    typedef int value_type;
+    
     // we don't provide copy-ctor and operator= on purpose
     // because we want the compiler generated versions
 
@@ -53,6 +55,10 @@ public:
     }
 
     void makeInvalid();
+    
+    inline void clear() {
+        left = top = right = bottom = 0;
+    }
     
     // a valid rectangle has a non negative width and height
     inline bool isValid() const {
@@ -78,27 +84,28 @@ public:
         return bottom-top;
     }
 
-    // returns left-top Point non-const reference, can be assigned
-    inline Point& leftTop() {
-        return reinterpret_cast<Point&>(left);
-    }
-    // returns right bottom non-const reference, can be assigned
-    inline Point& rightBottom() {
-        return reinterpret_cast<Point&>(right);
-    }
-    
     // the following 4 functions return the 4 corners of the rect as Point
-    inline const Point& leftTop() const {
-        return reinterpret_cast<const Point&>(left);
+    inline Point leftTop() const {
+        return Point(left, top);
     }
-    inline const Point& rightBottom() const {
-        return reinterpret_cast<const Point&>(right);
+    inline Point rightBottom() const {
+        return Point(right, bottom);
     }
-    Point rightTop() const {
+    inline Point rightTop() const {
         return Point(right, top);
     }
-    Point leftBottom() const {
+    inline Point leftBottom() const {
         return Point(left, bottom);
+    }
+    
+    inline void setLeftTop(const Point& p) {
+        left = p.x;
+        top  = p.y;
+    }
+
+    inline void setRightBottom(const Point& p) {
+        right  = p.x;
+        bottom = p.y;
     }
 
     // comparisons

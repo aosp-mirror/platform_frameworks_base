@@ -136,8 +136,9 @@ void LayerBlur::onDraw(const Region& clip) const
         glGenTextures(1, &mTextureName);
     }
 
-    Region::iterator iterator(clip);
-    if (iterator) {
+    Region::const_iterator it = clip.begin();
+    Region::const_iterator const end = clip.end();
+    if (it != end) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, mTextureName);
     
@@ -198,27 +199,25 @@ void LayerBlur::onDraw(const Region& clip) const
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glVertexPointer(2, GL_FIXED, 0, mVertices);
             glTexCoordPointer(2, GL_FIXED, 0, mVertices);
-            Rect r;
-            while (iterator.iterate(&r)) {
+            while (it != end) {
+                const Rect& r = *it++;
                 const GLint sy = fbHeight - (r.top + r.height());
                 glScissor(r.left, sy, r.width(), r.height());
                 glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
             }       
         } else {
-            Region::iterator iterator(clip);
-            if (iterator) {
-                // NOTE: this is marginally faster with the software gl, because
-                // glReadPixels() reads the fb bottom-to-top, however we'll
-                // skip all the jaccobian computations.
-                Rect r;
-                GLint crop[4] = { 0, 0, w, h };
-                glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-                y = fbHeight - (y + h);
-                while (iterator.iterate(&r)) {
-                    const GLint sy = fbHeight - (r.top + r.height());
-                    glScissor(r.left, sy, r.width(), r.height());
-                    glDrawTexiOES(x, y, 0, w, h);
-                }
+            // NOTE: this is marginally faster with the software gl, because
+            // glReadPixels() reads the fb bottom-to-top, however we'll
+            // skip all the jaccobian computations.
+            Rect r;
+            GLint crop[4] = { 0, 0, w, h };
+            glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
+            y = fbHeight - (y + h);
+            while (it != end) {
+                const Rect& r = *it++;
+                const GLint sy = fbHeight - (r.top + r.height());
+                glScissor(r.left, sy, r.width(), r.height());
+                glDrawTexiOES(x, y, 0, w, h);
             }
         }
     }

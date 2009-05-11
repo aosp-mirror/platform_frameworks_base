@@ -125,15 +125,17 @@ static void copyBlt(
     uint8_t* dst_bits;
     dst->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, reg.bounds(), (void**)&dst_bits);
     
-    Region::iterator iterator(reg);
-    if (iterator) {
+    size_t c;
+    Rect const* const rects = reg.getArray(&c);
+    
+    if (c) {
         // NOTE: dst and src must be the same format
-        Rect r;
         const size_t bpp = bytesPerPixel(src->format);
         const size_t dbpr = dst->stride * bpp;
         const size_t sbpr = src->stride * bpp;
 
-        while (iterator.iterate(&r)) {
+        for (size_t i=0 ; i<c ; i++) {
+            const Rect& r = rects[i];
             ssize_t h = r.height();
             if (h <= 0) continue;
             size_t size = r.width() * bpp;
