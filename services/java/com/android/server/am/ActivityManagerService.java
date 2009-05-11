@@ -169,6 +169,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int LOG_BOOT_PROGRESS_AMS_READY = 3040;
     static final int LOG_BOOT_PROGRESS_ENABLE_SCREEN = 3050;
 
+    // The flags that are set for all calls we make to the package manager.
+    static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES
+            | PackageManager.GET_SUPPORTS_DENSITIES;
+    
     private static final String SYSTEM_SECURE = "ro.secure";
 
     // This is the maximum number of application processes we would like
@@ -1058,7 +1062,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             ApplicationInfo info =
                 mSelf.mContext.getPackageManager().getApplicationInfo(
-                        "android", PackageManager.GET_SHARED_LIBRARY_FILES);
+                        "android", STOCK_PM_FLAGS);
             synchronized (mSelf) {
                 ProcessRecord app = mSelf.newProcessRecordLocked(
                         mSystemThread.getApplicationThread(), info,
@@ -2224,7 +2228,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             ActivityInfo aInfo =
                 intent.resolveActivityInfo(mContext.getPackageManager(),
-                        PackageManager.GET_SHARED_LIBRARY_FILES);
+                        STOCK_PM_FLAGS);
             if (aInfo != null) {
                 intent.setComponent(new ComponentName(
                         aInfo.applicationInfo.packageName, aInfo.name));
@@ -3181,7 +3185,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 ActivityThread.getPackageManager().resolveIntent(
                         intent, resolvedType,
                         PackageManager.MATCH_DEFAULT_ONLY
-                        | PackageManager.GET_SHARED_LIBRARY_FILES);
+                        | STOCK_PM_FLAGS);
             aInfo = rInfo != null ? rInfo.activityInfo : null;
         } catch (RemoteException e) {
             aInfo = null;
@@ -3242,8 +3246,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 List<ResolveInfo> resolves =
                     ActivityThread.getPackageManager().queryIntentActivities(
                             intent, r.resolvedType,
-                            PackageManager.MATCH_DEFAULT_ONLY
-                            | PackageManager.GET_SHARED_LIBRARY_FILES);
+                            PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS);
 
                 // Look for the original activity in the list...
                 final int N = resolves != null ? resolves.size() : 0;
@@ -3325,8 +3328,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ResolveInfo rInfo =
                 ActivityThread.getPackageManager().resolveIntent(
                         intent, resolvedType,
-                        PackageManager.MATCH_DEFAULT_ONLY
-                        | PackageManager.GET_SHARED_LIBRARY_FILES);
+                        PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS);
             aInfo = rInfo != null ? rInfo.activityInfo : null;
         } catch (RemoteException e) {
             aInfo = null;
@@ -4608,7 +4610,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     mWaitForDebugger = mOrigWaitForDebugger;
                 }
             }
-            thread.bindApplication(processName, app.info, providers,
+            thread.bindApplication(processName, app.instrumentationInfo != null
+                    ? app.instrumentationInfo : app.info, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
                     mConfiguration, getCommonServicesLocked());
@@ -6651,8 +6654,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         try {
             providers = ActivityThread.getPackageManager().
                 queryContentProviders(app.processName, app.info.uid,
-                        PackageManager.GET_SHARED_LIBRARY_FILES
-                        | PackageManager.GET_URI_PERMISSION_PATTERNS);
+                        STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS);
         } catch (RemoteException ex) {
         }
         if (providers != null) {
@@ -6756,7 +6758,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } else {
                 try {
                     cpi = ActivityThread.getPackageManager().
-                        resolveContentProvider(name, PackageManager.GET_URI_PERMISSION_PATTERNS);
+                        resolveContentProvider(name,
+                                STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS);
                 } catch (RemoteException ex) {
                 }
                 if (cpi == null) {
@@ -6777,7 +6780,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             ActivityThread.getPackageManager().
                                 getApplicationInfo(
                                         cpi.applicationInfo.packageName,
-                                        PackageManager.GET_SHARED_LIBRARY_FILES);
+                                        STOCK_PM_FLAGS);
                         if (ai == null) {
                             Log.w(TAG, "No package info for content provider "
                                     + cpi.name);
@@ -7513,7 +7516,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 ResolveInfo ri = mContext.getPackageManager()
                         .resolveActivity(new Intent(Intent.ACTION_FACTORY_TEST),
-                                0);
+                                STOCK_PM_FLAGS);
                 CharSequence errorMsg = null;
                 if (ri != null) {
                     ActivityInfo ai = ri.activityInfo;
@@ -7549,7 +7552,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 try {
                     List apps = ActivityThread.getPackageManager().
-                        getPersistentApplications(PackageManager.GET_SHARED_LIBRARY_FILES);
+                        getPersistentApplications(STOCK_PM_FLAGS);
                     if (apps != null) {
                         int N = apps.size();
                         int i;
@@ -8964,7 +8967,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             try {
                 ResolveInfo rInfo =
                     ActivityThread.getPackageManager().resolveService(
-                            service, resolvedType, PackageManager.GET_SHARED_LIBRARY_FILES);
+                            service, resolvedType, STOCK_PM_FLAGS);
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {
@@ -10182,7 +10185,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (intent.getComponent() != null) {
                 // Broadcast is going to one specific receiver class...
                 ActivityInfo ai = ActivityThread.getPackageManager().
-                    getReceiverInfo(intent.getComponent(), 0);
+                    getReceiverInfo(intent.getComponent(), STOCK_PM_FLAGS);
                 if (ai != null) {
                     receivers = new ArrayList();
                     ResolveInfo ri = new ResolveInfo();
@@ -10195,7 +10198,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                          == 0) {
                     receivers =
                         ActivityThread.getPackageManager().queryIntentReceivers(
-                                intent, resolvedType, PackageManager.GET_SHARED_LIBRARY_FILES);
+                                intent, resolvedType, STOCK_PM_FLAGS);
                 }
                 registeredReceivers = mReceiverResolver.queryIntent(resolver,
                         intent, resolvedType, false);
@@ -10932,9 +10935,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ApplicationInfo ai = null;
             try {
                 ii = mContext.getPackageManager().getInstrumentationInfo(
-                    className, 0);
+                    className, STOCK_PM_FLAGS);
                 ai = mContext.getPackageManager().getApplicationInfo(
-                    ii.targetPackage, PackageManager.GET_SHARED_LIBRARY_FILES);
+                    ii.targetPackage, STOCK_PM_FLAGS);
             } catch (PackageManager.NameNotFoundException e) {
             }
             if (ii == null) {
@@ -10966,6 +10969,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             uninstallPackageLocked(ii.targetPackage, -1, true);
             ProcessRecord app = addAppLocked(ai);
             app.instrumentationClass = className;
+            app.instrumentationInfo = ai;
             app.instrumentationProfileFile = profileFile;
             app.instrumentationArguments = arguments;
             app.instrumentationWatcher = watcher;
@@ -11013,6 +11017,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         app.instrumentationWatcher = null;
         app.instrumentationClass = null;
+        app.instrumentationInfo = null;
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
