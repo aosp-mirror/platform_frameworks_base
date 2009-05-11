@@ -551,9 +551,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
      */
     static private class FastBitmapDrawable extends Drawable {
         private Bitmap mBitmap;
+        private int mOpacity;
 
         private FastBitmapDrawable(Bitmap bitmap) {
             mBitmap = bitmap;
+            mOpacity = mBitmap.hasAlpha() ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
         }
 
         @Override
@@ -567,7 +569,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         @Override
         public int getOpacity() {
-            return PixelFormat.TRANSLUCENT;
+            return mOpacity;
         }
 
         @Override
