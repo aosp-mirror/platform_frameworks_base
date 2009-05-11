@@ -5917,8 +5917,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         final boolean dirtyOpaque = (mPrivateFlags & DIRTY_MASK) == DIRTY_OPAQUE;
         mPrivateFlags = (mPrivateFlags & ~DIRTY_MASK) | DRAWN;
 
-        if (dirtyOpaque) android.util.Log.d("View", "Skipping draw in " + this);
-
         /*
          * Draw traversal performs several drawing steps which must be executed
          * in the appropriate order:
