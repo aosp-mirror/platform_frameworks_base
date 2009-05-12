@@ -150,7 +150,7 @@ static JNINativeMethod gTypefaceMethods[] = {
     { "nativeGetStyle",           "(I)I",  (void*)Typeface_getStyle },
     { "nativeCreateFromAsset",    "(Landroid/content/res/AssetManager;Ljava/lang/String;)I",
                                            (void*)Typeface_createFromAsset },
-    { "nativeCreateFromFile",     "(Ljava/lang/String)I",
+    { "nativeCreateFromFile",     "(Ljava/lang/String;)I",
                                            (void*)Typeface_createFromFile }
 };
 
