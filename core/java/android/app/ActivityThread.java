@@ -191,16 +191,11 @@ public final class ActivityThread {
                 usePreloaded = false;
                 DisplayMetrics newMetrics = new DisplayMetrics();
                 newMetrics.setTo(metrics);
-                float invertedScale = 1.0f / applicationScale;
-                newMetrics.density *= invertedScale;
-                newMetrics.xdpi *= invertedScale;
-                newMetrics.ydpi *= invertedScale;
-                newMetrics.widthPixels *= invertedScale;
-                newMetrics.heightPixels *= invertedScale;
+                float newDensity = metrics.density / applicationScale;
+                newMetrics.updateDensity(newDensity);
                 metrics = newMetrics;
             }
-            //Log.i(TAG, "Resource:" + appDir + ", density " + newMetrics.density + ", orig density:" +
-            //      metrics.density);
+            //Log.i(TAG, "Resource:" + appDir + ", display metrics=" + metrics);
             r = new Resources(assets, metrics, getConfiguration(), usePreloaded);
             //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
             // XXX need to remove entries when weak references go away
@@ -3502,8 +3497,11 @@ public final class ActivityThread {
                     Resources r = v.get();
                     if (r != null) {
                         // keep the original density based on application cale.
-                        appDm.density = r.getDisplayMetrics().density;
+                        appDm.updateDensity(r.getDisplayMetrics().density);
+                        Log.i("oshima", "Updated app display metrics " + appDm);
                         r.updateConfiguration(config, appDm);
+                        // reset
+                        appDm.setTo(dm);
                         //Log.i(TAG, "Updated app resources " + v.getKey()
                         //        + " " + r + ": " + r.getConfiguration());
                     } else {
