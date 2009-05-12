@@ -4556,6 +4556,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      *
      * @hide Pending API council approval
      */
+    @ViewDebug.ExportedProperty
     public boolean isOpaque() {
         return mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE;
     }
