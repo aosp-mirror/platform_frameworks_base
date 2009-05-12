@@ -215,8 +215,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         public int hashCode() {
             return mKey.hashCode();
         }
-        
-        
+
         @Override
         public String toString() {
             if (mListener != null) {
@@ -611,6 +610,17 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
 
         synchronized (mLock) {
+            // check to see if we are reinstalling a dead provider
+            LocationProviderProxy oldProvider = mProvidersByName.get(name);
+            if (oldProvider != null) {
+                if (oldProvider.isDead()) {
+                    Log.d(TAG, "replacing dead provider");
+                    removeProvider(oldProvider);
+                } else {
+                    throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
+                }
+            }
+
             LocationProviderProxy proxy = new LocationProviderProxy(name, provider);
             addProvider(proxy);
             updateProvidersLocked();
@@ -1616,6 +1626,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                                 mCollector.updateLocation(location);
                             } catch (RemoteException e) {
                                 Log.w(TAG, "mCollector.updateLocation failed");
+                                mCollector = null;
                             }
                         }
 
@@ -1750,6 +1761,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         variant, appName,  addrs);
             } catch (RemoteException e) {
                 Log.e(TAG, "getFromLocation failed", e);
+                mGeocodeProvider = null;
             }
         }
         return null;
@@ -1768,6 +1780,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         maxResults, language, country, variant, appName, addrs);
             } catch (RemoteException e) {
                 Log.e(TAG, "getFromLocationName failed", e);
+                mGeocodeProvider = null;
             }
         }
         return null;
