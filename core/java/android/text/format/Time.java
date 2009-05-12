@@ -135,6 +135,7 @@ public class Time {
     private static Locale sLocale;
     private static String[] sShortMonths;
     private static String[] sLongMonths;
+    private static String[] sLongStandaloneMonths;
     private static String[] sShortWeekdays;
     private static String[] sLongWeekdays;
     private static String sTimeOnlyFormat;
@@ -320,6 +321,20 @@ public class Time {
                     r.getString(com.android.internal.R.string.month_long_october),
                     r.getString(com.android.internal.R.string.month_long_november),
                     r.getString(com.android.internal.R.string.month_long_december),
+                };
+                sLongStandaloneMonths = new String[] {
+                    r.getString(com.android.internal.R.string.month_long_standalone_january),
+                    r.getString(com.android.internal.R.string.month_long_standalone_february),
+                    r.getString(com.android.internal.R.string.month_long_standalone_march),
+                    r.getString(com.android.internal.R.string.month_long_standalone_april),
+                    r.getString(com.android.internal.R.string.month_long_standalone_may),
+                    r.getString(com.android.internal.R.string.month_long_standalone_june),
+                    r.getString(com.android.internal.R.string.month_long_standalone_july),
+                    r.getString(com.android.internal.R.string.month_long_standalone_august),
+                    r.getString(com.android.internal.R.string.month_long_standalone_september),
+                    r.getString(com.android.internal.R.string.month_long_standalone_october),
+                    r.getString(com.android.internal.R.string.month_long_standalone_november),
+                    r.getString(com.android.internal.R.string.month_long_standalone_december),
                 };
                 sShortWeekdays = new String[] {
                     r.getString(com.android.internal.R.string.day_of_week_medium_sunday),
