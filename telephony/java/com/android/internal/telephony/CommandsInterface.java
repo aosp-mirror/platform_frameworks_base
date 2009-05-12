@@ -1023,6 +1023,21 @@ public interface CommandsInterface {
      */
     void setLocationUpdates(boolean enable, Message response);
 
+    /**
+     * Gets the default SMSC address.
+     *
+     * @param result Callback message contains the SMSC address.
+     */
+    void getSmscAddress(Message result);
+
+    /**
+     * Sets the default SMSC address.
+     *
+     * @param address new SMSC address
+     * @param result Callback message is empty on completion
+     */
+    void setSmscAddress(String address, Message result);
+
 
     void invokeOemRilRequestRaw(byte[] data, Message response);
 
