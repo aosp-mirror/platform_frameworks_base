@@ -18,4 +18,5 @@ package com.android.dumprendertree;
 
 public interface TestShellCallback {
     public void finished();
+    public void timedOut(String url);
 }
