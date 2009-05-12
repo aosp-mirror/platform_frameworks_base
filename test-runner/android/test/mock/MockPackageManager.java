@@ -284,6 +284,9 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @hide - to match hiding in superclass
+     */
     @Override
     public void installPackage(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName) {
@@ -395,11 +398,6 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void installPackage(Uri packageURI) {
         throw new UnsupportedOperationException();
     }
 
