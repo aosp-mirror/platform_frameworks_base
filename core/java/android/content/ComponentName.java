@@ -18,6 +18,7 @@ package android.content;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.lang.Comparable;
 
 /**
  * Identifier for a specific application component
@@ -29,7 +30,7 @@ import android.os.Parcelable;
  * name inside of that package.
  * 
  */
-public final class ComponentName implements Parcelable {
+public final class ComponentName implements Parcelable, Comparable<ComponentName> {
     private final String mPackage;
     private final String mClass;
 
@@ -195,6 +196,15 @@ public final class ComponentName implements Parcelable {
     @Override
     public int hashCode() {
         return mPackage.hashCode() + mClass.hashCode();
+    }
+
+    public int compareTo(ComponentName that) {
+        int v;
+        v = this.mPackage.compareTo(that.mPackage);
+        if (v != 0) {
+            return v;
+        }
+        return this.mClass.compareTo(that.mClass);
     }
     
     public int describeContents() {
