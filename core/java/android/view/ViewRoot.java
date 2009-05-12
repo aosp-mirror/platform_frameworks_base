@@ -960,11 +960,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                         mTmpLocation[1] + host.mBottom - host.mTop);
 
                 host.gatherTransparentRegion(mTransparentRegion);
+                if (mAppScale != 1.0f) {
+                    mTransparentRegion.scale(mAppScale);
+                }
 
-                // TODO: scale the region, like:
-                // Region uses native methods. We probabl should have ScalableRegion class.
-
-                // Region does not have equals method ?
                 if (!mTransparentRegion.equals(mPreviousTransparentRegion)) {
                     mPreviousTransparentRegion.set(mTransparentRegion);
                     // reconfigure window manager

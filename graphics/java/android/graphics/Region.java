@@ -211,6 +211,26 @@ public class Region implements Parcelable {
      */
     public native void translate(int dx, int dy, Region dst);
 
+    /**
+     * Scale the region by the given scale amount. This re-constructs new region by
+     * scaling the rects that this region consists of. New rectis are computed by scaling 
+     * coordinates by float, then rounded by roundf() function to integers. This may results
+     * in less internal rects if 0 < scale < 1. Zero and Negative scale result in
+     * an empty region. If this region is empty, do nothing.
+     *
+     * @hide
+     */
+    public void scale(float scale) {
+        scale(scale, null);
+    }
+
+    /**
+     * Set the dst region to the result of scaling this region by the given scale amount.
+     * If this region is empty, then dst will be set to empty.
+     * @hide
+     */
+    public native void scale(float scale, Region dst);
+
     public final boolean union(Rect r) {
         return op(r, Op.UNION);
     }
@@ -294,7 +314,16 @@ public class Region implements Parcelable {
             throw new RuntimeException();
         }
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof Region)) {
+            return false;
+        }
+        Region peer = (Region) obj;
+        return nativeEquals(mNativeRegion, peer.mNativeRegion);
+    }
+
     protected void finalize() throws Throwable {
         nativeDestructor(mNativeRegion);
     }
@@ -339,6 +368,8 @@ public class Region implements Parcelable {
     private static native int nativeCreateFromParcel(Parcel p);
     private static native boolean nativeWriteToParcel(int native_region,
                                                       Parcel p);
+
+    private static native boolean nativeEquals(int native_r1, int native_r2);
 
     private final int mNativeRegion;
 }
