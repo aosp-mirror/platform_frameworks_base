@@ -20,6 +20,9 @@ import android.util.Log;
 
 import android.telephony.SmsMessage;
 
+import android.text.format.Time;
+
+import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.cdma.sms.UserData;
@@ -38,15 +41,16 @@ public final class BearerData{
     /**
      * Bearer Data Subparameter Indentifiers
      * (See 3GPP2 C.S0015-B, v2.0, table 4.5-1)
+     * NOTE: Commented subparameter types are not implemented.
      */
     private final static byte SUBPARAM_MESSAGE_IDENTIFIER               = 0x00;
     private final static byte SUBPARAM_USER_DATA                        = 0x01;
     private final static byte SUBPARAM_USER_REPONSE_CODE                = 0x02;
     private final static byte SUBPARAM_MESSAGE_CENTER_TIME_STAMP        = 0x03;
-    //private final static byte SUBPARAM_VALIDITY_PERIOD_ABSOLUTE         = 0x04;
-    //private final static byte SUBPARAM_VALIDITY_PERIOD_RELATIVE         = 0x05;
-    //private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE  = 0x06;
-    //private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE  = 0x07;
+    private final static byte SUBPARAM_VALIDITY_PERIOD_ABSOLUTE         = 0x04;
+    private final static byte SUBPARAM_VALIDITY_PERIOD_RELATIVE         = 0x05;
+    private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE  = 0x06;
+    private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE  = 0x07;
     private final static byte SUBPARAM_PRIORITY_INDICATOR               = 0x08;
     private final static byte SUBPARAM_PRIVACY_INDICATOR                = 0x09;
     private final static byte SUBPARAM_REPLY_OPTION                     = 0x0A;
@@ -56,7 +60,7 @@ public final class BearerData{
     private final static byte SUBPARAM_CALLBACK_NUMBER                  = 0x0E;
     private final static byte SUBPARAM_MESSAGE_DISPLAY_MODE             = 0x0F;
     //private final static byte SUBPARAM_MULTIPLE_ENCODING_USER_DATA      = 0x10;
-    //private final static byte SUBPARAM_MESSAGE_DEPOSIT_INDEX            = 0x11;
+    private final static byte SUBPARAM_MESSAGE_DEPOSIT_INDEX            = 0x11;
     //private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_DATA    = 0x12;
     //private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_RESULTS = 0x13;
     private final static byte SUBPARAM_MESSAGE_STATUS                   = 0x14;
@@ -205,23 +209,94 @@ public final class BearerData{
      */
     public UserData userData;
 
-    //public UserResponseCode userResponseCode;
+    /**
+     * The User Response Code subparameter is used in the SMS User
+     * Acknowledgment Message to respond to previously received short
+     * messages. This message center-specific element carries the
+     * identifier of a predefined response. (See 3GPP2 C.S.0015-B, v2,
+     * 4.5.3)
+     */
+    public boolean userResponseCodeSet = false;
+    public int userResponseCode;
 
     /**
      * 6-byte-field, see 3GPP2 C.S0015-B, v2, 4.5.4
-     * year, month, day, hours, minutes, seconds;
      */
-    public byte[] timeStamp;
+    public static class TimeStamp extends Time {
 
-    //public SmsTime validityPeriodAbsolute;
-    //public SmsRelTime validityPeriodRelative;
-    //public SmsTime deferredDeliveryTimeAbsolute;
-    //public SmsRelTime deferredDeliveryTimeRelative;
+        public TimeStamp() {
+            super(Time.TIMEZONE_UTC);
+        }
+
+        public static TimeStamp fromByteArray(byte[] data) {
+            TimeStamp ts = new TimeStamp();
+            // C.S0015-B v2.0, 4.5.4: range is 1996-2095
+            int year = IccUtils.beBcdByteToInt(data[0]);
+            if (year > 99 || year < 0) return null;
+            ts.year = year >= 96 ? year + 1900 : year + 2000;
+            int month = IccUtils.beBcdByteToInt(data[1]);
+            if (month < 1 || month > 12) return null;
+            ts.month = month - 1;
+            int day = IccUtils.beBcdByteToInt(data[2]);
+            if (day < 1 || day > 31) return null;
+            ts.monthDay = day;
+            int hour = IccUtils.beBcdByteToInt(data[3]);
+            if (hour < 0 || hour > 23) return null;
+            ts.hour = hour;
+            int minute = IccUtils.beBcdByteToInt(data[4]);
+            if (minute < 0 || minute > 59) return null;
+            ts.minute = minute;
+            int second = IccUtils.beBcdByteToInt(data[5]);
+            if (second < 0 || second > 59) return null;
+            ts.second = second;
+            return ts;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("TimeStamp ");
+            builder.append("{ year=" + year);
+            builder.append(", month=" + month);
+            builder.append(", day=" + monthDay);
+            builder.append(", hour=" + hour);
+            builder.append(", minute=" + minute);
+            builder.append(", second=" + second);
+            builder.append(" }");
+            return builder.toString();
+        }
+    }
+
+    public TimeStamp msgCenterTimeStamp;
+    public TimeStamp validityPeriodAbsolute;
+    public TimeStamp deferredDeliveryTimeAbsolute;
 
     /**
-     * Reply Option
-     * 1-bit values which indicate whether SMS acknowledgment is requested or not.
-     * (See 3GPP2 C.S0015-B, v2, 4.5.11)
+     * Relative time is specified as one byte, the value of which
+     * falls into a series of ranges, as specified below.  The idea is
+     * that shorter time intervals allow greater precision -- the
+     * value means minutes from zero until the MINS_LIMIT (inclusive),
+     * upon which it means hours until the HOURS_LIMIT, and so
+     * forth. (See 3GPP2 C.S0015-B, v2, 4.5.6-1)
+     */
+    public static final int RELATIVE_TIME_MINS_LIMIT      = 143;
+    public static final int RELATIVE_TIME_HOURS_LIMIT     = 167;
+    public static final int RELATIVE_TIME_DAYS_LIMIT      = 196;
+    public static final int RELATIVE_TIME_WEEKS_LIMIT     = 244;
+    public static final int RELATIVE_TIME_INDEFINITE      = 245;
+    public static final int RELATIVE_TIME_NOW             = 246;
+    public static final int RELATIVE_TIME_MOBILE_INACTIVE = 247;
+    public static final int RELATIVE_TIME_RESERVED        = 248;
+
+    public boolean validityPeriodRelativeSet;
+    public int validityPeriodRelative;
+    public boolean deferredDeliveryTimeRelativeSet;
+    public int deferredDeliveryTimeRelative;
+
+    /**
+     * The Reply Option subparameter contains 1-bit values which
+     * indicate whether SMS acknowledgment is requested or not.  (See
+     * 3GPP2 C.S0015-B, v2, 4.5.11)
      */
     public boolean userAckReq;
     public boolean deliveryAckReq;
@@ -229,12 +304,26 @@ public final class BearerData{
     public boolean reportReq;
 
     /**
-     * The number of Messages element (8-bit value) is a decimal number in the 0 to 99 range
-     * representing the number of messages stored at the Voice Mail System. This element is
-     * used by the Voice Mail Notification service.
-     * (See 3GPP2 C.S0015-B, v2, 4.5.12)
+     * The Number of Messages subparameter (8-bit value) is a decimal
+     * number in the 0 to 99 range representing the number of messages
+     * stored at the Voice Mail System. This element is used by the
+     * Voice Mail Notification service.  (See 3GPP2 C.S0015-B, v2,
+     * 4.5.12)
      */
     public int numberOfMessages;
+
+    /**
+     * The Message Deposit Index subparameter is assigned by the
+     * message center as a unique index to the contents of the User
+     * Data subparameter in each message sent to a particular mobile
+     * station. The mobile station, when replying to a previously
+     * received short message which included a Message Deposit Index
+     * subparameter, may include the Message Deposit Index of the
+     * received message to indicate to the message center that the
+     * original contents of the message are to be included in the
+     * reply.  (See 3GPP2 C.S0015-B, v2, 4.5.18)
+     */
+    public int depositIndex;
 
     /**
      * 4-bit or 8-bit value that indicates the number to be dialed in reply to a
@@ -262,14 +351,23 @@ public final class BearerData{
         builder.append(", language=" + (languageIndicatorSet ? language : "unset"));
         builder.append(", errorClass=" + (messageStatusSet ? errorClass : "unset"));
         builder.append(", msgStatus=" + (messageStatusSet ? messageStatus : "unset"));
-        builder.append(", timeStamp=" +
-                ((timeStamp != null) ? HexDump.toHexString(timeStamp) : "unset"));
+        builder.append(", msgCenterTimeStamp=" +
+                ((msgCenterTimeStamp != null) ? msgCenterTimeStamp : "unset"));
+        builder.append(", validityPeriodAbsolute=" +
+                ((validityPeriodAbsolute != null) ? validityPeriodAbsolute : "unset"));
+        builder.append(", validityPeriodRelative=" +
+                ((validityPeriodRelativeSet) ? validityPeriodRelative : "unset"));
+        builder.append(", deferredDeliveryTimeAbsolute=" +
+                ((deferredDeliveryTimeAbsolute != null) ? deferredDeliveryTimeAbsolute : "unset"));
+        builder.append(", deferredDeliveryTimeRelative=" +
+                ((deferredDeliveryTimeRelativeSet) ? deferredDeliveryTimeRelative : "unset"));
         builder.append(", userAckReq=" + userAckReq);
         builder.append(", deliveryAckReq=" + deliveryAckReq);
         builder.append(", readAckReq=" + readAckReq);
         builder.append(", reportReq=" + reportReq);
         builder.append(", numberOfMessages=" + numberOfMessages);
         builder.append(", callbackNumber=" + callbackNumber);
+        builder.append(", depositIndex=" + depositIndex);
         builder.append(", hasUserDataHeader=" + hasUserDataHeader);
         builder.append(", userData=" + userData);
         builder.append(" }");
@@ -518,11 +616,11 @@ public final class BearerData{
         outStream.write(8, bData.numberOfMessages);
     }
 
-    private static void encodeMsgCenterTimeStamp(BearerData bData, BitwiseOutputStream outStream)
+    private static void encodeValidityPeriodRel(BearerData bData, BitwiseOutputStream outStream)
         throws BitwiseOutputStream.AccessException
     {
-        outStream.write(8, 6);
-        outStream.writeByteArray(6 * 8, bData.timeStamp);
+        outStream.write(8, 1);
+        outStream.write(8, bData.validityPeriodRelative);
     }
 
     private static void encodePrivacyIndicator(BearerData bData, BitwiseOutputStream outStream)
@@ -595,9 +693,9 @@ public final class BearerData{
                 outStream.write(8, SUBPARAM_NUMBER_OF_MESSAGES);
                 encodeMsgCount(bData, outStream);
             }
-            if (bData.timeStamp != null) {
-                outStream.write(8, SUBPARAM_MESSAGE_CENTER_TIME_STAMP);
-                encodeMsgCenterTimeStamp(bData, outStream);
+            if (bData.validityPeriodRelativeSet) {
+                outStream.write(8, SUBPARAM_VALIDITY_PERIOD_RELATIVE);
+                encodeValidityPeriodRel(bData, outStream);
             }
             if (bData.privacyIndicatorSet) {
                 outStream.write(8, SUBPARAM_PRIVACY_INDICATOR);
@@ -791,6 +889,15 @@ public final class BearerData{
         bData.numberOfMessages = inStream.read(8);
     }
 
+    private static void decodeDepositIndex(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 2) {
+            throw new CodingException("MESSAGE_DEPOSIT_INDEX subparam size incorrect");
+        }
+        bData.depositIndex = (inStream.read(8) << 8) | inStream.read(8);
+    }
+
     private static String decodeDtmfSmsAddress(byte[] rawData, int numFields)
         throws CodingException
     {
@@ -863,14 +970,51 @@ public final class BearerData{
         bData.messageStatusSet = true;
     }
 
-    private static void decodeMsgCenterTimeStamp(BearerData bData,
-                                                 BitwiseInputStream inStream)
+    private static void decodeMsgCenterTimeStamp(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
         if (inStream.read(8) != 6) {
             throw new CodingException("MESSAGE_CENTER_TIME_STAMP subparam size incorrect");
         }
-        bData.timeStamp = inStream.readByteArray(6 * 8);
+        bData.msgCenterTimeStamp = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+    }
+
+    private static void decodeValidityAbs(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 6) {
+            throw new CodingException("VALIDITY_PERIOD_ABSOLUTE subparam size incorrect");
+        }
+        bData.validityPeriodAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+    }
+
+    private static void decodeDeferredDeliveryAbs(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 6) {
+            throw new CodingException("DEFERRED_DELIVERY_TIME_ABSOLUTE subparam size incorrect");
+        }
+        bData.deferredDeliveryTimeAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+    }
+
+    private static void decodeValidityRel(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("VALIDITY_PERIOD_RELATIVE subparam size incorrect");
+        }
+        bData.deferredDeliveryTimeRelative = inStream.read(8);
+        bData.deferredDeliveryTimeRelativeSet = true;
+    }
+
+    private static void decodeDeferredDeliveryRel(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("DEFERRED_DELIVERY_TIME_RELATIVE subparam size incorrect");
+        }
+        bData.validityPeriodRelative = inStream.read(8);
+        bData.validityPeriodRelativeSet = true;
     }
 
     private static void decodePrivacyIndicator(BearerData bData, BitwiseInputStream inStream)
@@ -927,6 +1071,16 @@ public final class BearerData{
         bData.alertIndicatorSet = true;
     }
 
+    private static void decodeUserResponseCode(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("USER_REPONSE_CODE subparam size incorrect");
+        }
+        bData.userResponseCode = inStream.read(8);
+        bData.userResponseCodeSet = true;
+    }
+
     /**
      * Create BearerData object from serialized representation.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
@@ -955,6 +1109,9 @@ public final class BearerData{
                 case SUBPARAM_USER_DATA:
                     decodeUserData(bData, inStream);
                     break;
+                case SUBPARAM_USER_REPONSE_CODE:
+                    decodeUserResponseCode(bData, inStream);
+                    break;
                 case SUBPARAM_REPLY_OPTION:
                     decodeReplyOption(bData, inStream);
                     break;
@@ -970,6 +1127,18 @@ public final class BearerData{
                 case SUBPARAM_MESSAGE_CENTER_TIME_STAMP:
                     decodeMsgCenterTimeStamp(bData, inStream);
                     break;
+                case SUBPARAM_VALIDITY_PERIOD_ABSOLUTE:
+                    decodeValidityAbs(bData, inStream);
+                    break;
+                case SUBPARAM_VALIDITY_PERIOD_RELATIVE:
+                    decodeValidityRel(bData, inStream);
+                    break;
+                case SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE:
+                    decodeDeferredDeliveryAbs(bData, inStream);
+                    break;
+                case SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE:
+                    decodeDeferredDeliveryRel(bData, inStream);
+                    break;
                 case SUBPARAM_PRIVACY_INDICATOR:
                     decodePrivacyIndicator(bData, inStream);
                     break;
@@ -984,6 +1153,9 @@ public final class BearerData{
                     break;
                 case SUBPARAM_ALERT_ON_MESSAGE_DELIVERY:
                     decodeMsgDeliveryAlert(bData, inStream);
+                    break;
+                case SUBPARAM_MESSAGE_DEPOSIT_INDEX:
+                    decodeDepositIndex(bData, inStream);
                     break;
                 default:
                     throw new CodingException("unsupported bearer data subparameter ("
