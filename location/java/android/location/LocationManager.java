@@ -1257,7 +1257,7 @@ public class LocationManager {
     }
 
     /**
-     * Installs a network location provider.
+     * Installs a location provider.
      *
      * @param name of the location provider
      * @param provider Binder interface for the location provider
