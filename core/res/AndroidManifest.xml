@@ -1037,7 +1037,7 @@
         <receiver android:name="com.android.server.MasterClearReceiver"
             android:permission="android.permission.MASTER_CLEAR" >
             <intent-filter>
-                <action android:name="android.intent.action.GTALK_DATA_MESSAGE_RECEIVED" />
+                <action android:name="android.intent.action.REMOTE_INTENT" />
                 <category android:name="android.intent.category.MASTER_CLEAR" />
             </intent-filter>
         </receiver>
