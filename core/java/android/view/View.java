@@ -850,6 +850,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     public static final int HAPTIC_FEEDBACK_ENABLED = 0x10000000;
 
     /**
+     * View flag indicating whether this view was invalidated (fully or partially.)
+     *
+     * @hide
+     */
+    static final int DIRTY = 0x20000000;
+
+    /**
+     * View flag indicating whether this view was invalidated by an opaque
+     * invalidate request.
+     *
+     * @hide
+     */
+    static final int DIRTY_OPAQUE = 0x40000000;
+
+    /**
+     * Mask for {@link #DIRTY} and {@link #DIRTY_OPAQUE}.
+     *
+     * @hide
+     */
+    static final int DIRTY_MASK = 0x60000000;
+
+    /**
      * Use with {@link #focusSearch}. Move focus to the previous selectable
      * item.
      */
@@ -4522,6 +4544,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     /**
+     * Indicates whether this View is opaque. An opaque View guarantees that it will
+     * draw all the pixels overlapping its bounds using a fully opaque color.
+     *
+     * Subclasses of View should override this method whenever possible to indicate
+     * whether an instance is opaque. Opaque Views are treated in a special way by
+     * the View hierarchy, possibly allowing it to perform optimizations during
+     * invalidate/draw passes.
+     * 
+     * @return True if this View is guaranteed to be fully opaque, false otherwise.
+     *
+     * @hide Pending API council approval
+     */
+    public boolean isOpaque() {
+        return mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE;
+    }
+
+    /**
      * @return A handler associated with the thread running the View. This
      * handler can be used to pump events in the UI events queue.
      */
@@ -5687,7 +5726,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             final int restoreCount = canvas.save();
             canvas.translate(-mScrollX, -mScrollY);
 
-            mPrivateFlags |= DRAWN;
+            mPrivateFlags = (mPrivateFlags & ~DIRTY_MASK) | DRAWN; 
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
@@ -5875,7 +5914,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
         }
 
-        mPrivateFlags |= DRAWN;                    
+        final boolean dirtyOpaque = (mPrivateFlags & DIRTY_MASK) == DIRTY_OPAQUE;
+        mPrivateFlags = (mPrivateFlags & ~DIRTY_MASK) | DRAWN;
+
+        if (dirtyOpaque) android.util.Log.d("View", "Skipping draw in " + this);
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -5892,22 +5934,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         // Step 1, draw the background, if needed
         int saveCount;
 
-        final Drawable background = mBGDrawable;
-        if (background != null) {
-            final int scrollX = mScrollX;
-            final int scrollY = mScrollY;
+        if (!dirtyOpaque) {
+            final Drawable background = mBGDrawable;
+            if (background != null) {
+                final int scrollX = mScrollX;
+                final int scrollY = mScrollY;
 
-            if (mBackgroundSizeChanged) {
-                background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
-                mBackgroundSizeChanged = false;
-            }
+                if (mBackgroundSizeChanged) {
+                    background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
+                    mBackgroundSizeChanged = false;
+                }
 
-            if ((scrollX | scrollY) == 0) {
-                background.draw(canvas);
-            } else {
-                canvas.translate(scrollX, scrollY);
-                background.draw(canvas);
-                canvas.translate(-scrollX, -scrollY);
+                if ((scrollX | scrollY) == 0) {
+                    background.draw(canvas);
+                } else {
+                    canvas.translate(scrollX, scrollY);
+                    background.draw(canvas);
+                    canvas.translate(-scrollX, -scrollY);
+                }
             }
         }
 
@@ -5917,7 +5961,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         boolean verticalEdges = (viewFlags & FADING_EDGE_VERTICAL) != 0;
         if (!verticalEdges && !horizontalEdges) {
             // Step 3, draw the content
-            onDraw(canvas);
+            if (!dirtyOpaque) onDraw(canvas);
 
             // Step 4, draw the children
             dispatchDraw(canvas);
@@ -6020,7 +6064,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         }
 
         // Step 3, draw the content
-        onDraw(canvas);
+        if (!dirtyOpaque) onDraw(canvas);
 
         // Step 4, draw the children
         dispatchDraw(canvas);
