@@ -3498,7 +3498,6 @@ public final class ActivityThread {
                     if (r != null) {
                         // keep the original density based on application cale.
                         appDm.updateDensity(r.getDisplayMetrics().density);
-                        Log.i("oshima", "Updated app display metrics " + appDm);
                         r.updateConfiguration(config, appDm);
                         // reset
                         appDm.setTo(dm);
