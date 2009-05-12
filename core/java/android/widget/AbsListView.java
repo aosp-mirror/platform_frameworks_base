@@ -433,7 +433,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private InputConnection mDefInputConnection;
     private InputConnectionWrapper mPublicInputConnection;
-    
+
+    private Runnable mClearScrollingCache;
+
     /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
@@ -1947,7 +1949,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (y != mLastY) {
                     deltaY -= mMotionCorrection;
                     int incrementalDeltaY = mLastY != Integer.MIN_VALUE ? y - mLastY : deltaY;
-                    trackMotionScroll(deltaY, incrementalDeltaY, true);
+                    trackMotionScroll(deltaY, incrementalDeltaY);
 
                     // Check to see if we have bumped into the scroll limit
                     View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
@@ -2286,7 +2288,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 delta = Math.max(-(getHeight() - mPaddingBottom - mPaddingTop - 1), delta);
             }
 
-            trackMotionScroll(delta, delta, false);
+            trackMotionScroll(delta, delta);
 
             // Check to see if we have bumped into the scroll limit
             View motionView = getChildAt(mMotionPosition - mFirstPosition);
@@ -2323,16 +2325,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void clearScrollingCache() {
-        if (mCachingStarted) {
-            mCachingStarted = false;
-            setChildrenDrawnWithCacheEnabled(false);
-            if ((mPersistentDrawingCache & PERSISTENT_SCROLLING_CACHE) == 0) {
-                setChildrenDrawingCacheEnabled(false);
-            }
-            if (!isAlwaysDrawnWithCacheEnabled()) {
-                invalidate();
-            }
+        if (mClearScrollingCache == null) {
+            mClearScrollingCache = new Runnable() {
+                public void run() {
+                    if (mCachingStarted) {
+                        mCachingStarted = false;
+                        setChildrenDrawnWithCacheEnabled(false);
+                        if ((mPersistentDrawingCache & PERSISTENT_SCROLLING_CACHE) == 0) {
+                            setChildrenDrawingCacheEnabled(false);
+                        }
+                        if (!isAlwaysDrawnWithCacheEnabled()) {
+                            invalidate();
+                        }
+                    }
+                }
+            };
         }
+        post(mClearScrollingCache);
     }
 
     /**
@@ -2341,9 +2350,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @param deltaY Amount to offset mMotionView. This is the accumulated delta since the motion
      *        began. Positive numbers mean the user's finger is moving down the screen.
      * @param incrementalDeltaY Change in deltaY from the previous event.
-     * @param invalidate True to make this method call invalidate(), false otherwise.
      */
-    void trackMotionScroll(int deltaY, int incrementalDeltaY, boolean invalidate) {
+    void trackMotionScroll(int deltaY, int incrementalDeltaY) {
         final int childCount = getChildCount();
         if (childCount == 0) {
             return;
@@ -2377,7 +2385,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (spaceAbove >= absIncrementalDeltaY && spaceBelow >= absIncrementalDeltaY) {
             hideSelector();
             offsetChildrenTopAndBottom(incrementalDeltaY);
-            if (invalidate) invalidate();
+            invalidate();
             mMotionViewNewTop = mMotionViewOriginalTop + deltaY;
         } else {
             final int firstPosition = mFirstPosition;
@@ -2455,7 +2463,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mFirstPosition += count;
             }
 
-            if (invalidate) invalidate();
+            invalidate();
             fillGap(down);
             mBlockLayoutRequests = false;
 
