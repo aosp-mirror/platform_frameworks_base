@@ -671,5 +671,13 @@ public class PhoneProxy extends Handler implements Phone {
     public void notifyDataActivity() {
          mActivePhone.notifyDataActivity();
     }
+
+    public void getSmscAddress(Message result) {
+        mActivePhone.getSmscAddress(result);
+    }
+
+    public void setSmscAddress(String address, Message result) {
+        mActivePhone.setSmscAddress(address, result);
+    }
 }
 
