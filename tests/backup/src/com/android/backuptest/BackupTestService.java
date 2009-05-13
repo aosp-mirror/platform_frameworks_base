@@ -17,6 +17,8 @@
 package com.android.backuptest;
 
 import android.backup.BackupService;
+import android.backup.BackupDataOutput;
+import android.backup.FileBackupHelper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -25,10 +27,12 @@ public class BackupTestService extends BackupService
     static final String TAG = "BackupTestService";
 
     @Override
-    public void onBackup(ParcelFileDescriptor oldState,
-            ParcelFileDescriptor data,
-            ParcelFileDescriptor newState) {
+    public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+             ParcelFileDescriptor newState) {
         Log.d(TAG, "onBackup");
+        FileBackupHelper.performBackup(this, oldState, data, newState, new String[] {
+                    BackupTestActivity.FILE_NAME
+                });
     }
 
     @Override

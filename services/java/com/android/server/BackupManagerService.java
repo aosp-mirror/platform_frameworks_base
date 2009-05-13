@@ -220,6 +220,9 @@ class BackupManagerService extends IBackupManager.Stub {
 
             BackupRequest request;
             synchronized (mQueueLock) {
+                if (mBackupQueue == null) {
+                    Log.d(TAG, "mBackupQueue is null.  WHY?");
+                }
                 request = mBackupQueue.get(0);
             }
 

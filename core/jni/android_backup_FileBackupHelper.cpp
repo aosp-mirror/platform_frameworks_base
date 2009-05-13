@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "FileBackupHelper_native"
+#include <utils/Log.h>
+
 #include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 
@@ -22,29 +25,29 @@
 namespace android
 {
 
-static jfieldID s_descriptorField;
+static jfieldID s_descriptorField = 0;
 
 static int
-performBackup_native(JNIEnv* env, jstring basePath,
-            jobject oldSnapshot, jobject newSnapshot,
-            jobject data, jobjectArray files)
+performBackup_native(JNIEnv* env, jobject clazz, jstring basePath, jobject oldState, jobject data,
+        jobject newState, jobjectArray files)
 {
     int err;
 
     // all parameters have already been checked against null
-
-    int oldSnapshotFD = env->GetIntField(oldSnapshot, s_descriptorField);
-    int newSnapshotFD = env->GetIntField(newSnapshot, s_descriptorField);
+    LOGD("oldState=%p newState=%p data=%p\n", oldState, newState, data);
+    int oldStateFD = oldState != NULL ? env->GetIntField(oldState, s_descriptorField) : -1;
+    int newStateFD = env->GetIntField(newState, s_descriptorField);
     int dataFD = env->GetIntField(data, s_descriptorField);
 
     char const* basePathUTF = env->GetStringUTFChars(basePath, NULL);
+    LOGD("basePathUTF=\"%s\"\n", basePathUTF);
     const int fileCount = env->GetArrayLength(files);
     char const** filesUTF = (char const**)malloc(sizeof(char*)*fileCount);
     for (int i=0; i<fileCount; i++) {
         filesUTF[i] = env->GetStringUTFChars((jstring)env->GetObjectArrayElement(files, i), NULL);
     }
 
-    err = back_up_files(oldSnapshotFD, newSnapshotFD, dataFD, basePathUTF, filesUTF, fileCount);
+    err = back_up_files(oldStateFD, dataFD, newStateFD, basePathUTF, filesUTF, fileCount);
 
     for (int i=0; i<fileCount; i++) {
         env->ReleaseStringUTFChars((jstring)env->GetObjectArrayElement(files, i), filesUTF[i]);
@@ -64,6 +67,8 @@ static const JNINativeMethod g_methods[] = {
 
 int register_android_backup_FileBackupHelper(JNIEnv* env)
 {
+    LOGD("register_android_backup_FileBackupHelper");
+
     jclass clazz;
 
     clazz = env->FindClass("java/io/FileDescriptor");
