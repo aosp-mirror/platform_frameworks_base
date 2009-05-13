@@ -309,11 +309,23 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     + appSearchData + ", " + globalSearch + ")");
         }
         
+        // Try to get the searchable info for the provided component (or for global search,
+        // if globalSearch == true).
         mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
-        if (mSearchable == null) {
-            // unfortunately, we can't log here.  it would be logspam every time the user
-            // clicks the "search" key on a non-search app
-            return false;
+        
+        // If we got back nothing, and it wasn't a request for global search, then try again
+        // for global search, as we'll try to launch that in lieu of any component-specific search.
+        if (!globalSearch && mSearchable == null) {
+            globalSearch = true;
+            mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
+            
+            // If we still get back null (i.e., there's not even a searchable info available
+            // for global search), then really give up.
+            if (mSearchable == null) {
+                // Unfortunately, we can't log here.  it would be logspam every time the user
+                // clicks the "search" key on a non-search app.
+                return false;
+            }
         }
         
         mLaunchComponent = componentName;
