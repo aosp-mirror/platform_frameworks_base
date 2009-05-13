@@ -187,6 +187,7 @@ private:
         virtual status_t        setAudioStreamType(int type);
         virtual status_t        setLooping(int loop);
         virtual status_t        setVolume(float leftVolume, float rightVolume);
+        virtual status_t        invoke(const Parcel& request, Parcel *reply);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
                 status_t        setDataSource(const char *url);
@@ -238,4 +239,3 @@ private:
 }; // namespace android
 
 #endif // ANDROID_MEDIAPLAYERSERVICE_H
-

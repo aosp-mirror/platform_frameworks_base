@@ -196,6 +196,20 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
     return err;
 }
 
+status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
+{
+    Mutex::Autolock _l(mLock);
+    if ((mPlayer != NULL) && ( mCurrentState & MEDIA_PLAYER_INITIALIZED ))
+    {
+         LOGV("invoke %d", request.dataSize());
+         return  mPlayer->invoke(request, reply);
+    }
+    LOGE("invoke failed: wrong state %X", mCurrentState);
+    return INVALID_OPERATION;
+}
+
+
+
 status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
 {
     LOGV("setVideoSurface");

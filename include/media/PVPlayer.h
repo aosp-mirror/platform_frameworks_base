@@ -52,6 +52,7 @@ public:
     virtual status_t    reset();
     virtual status_t    setLooping(int loop);
     virtual player_type playerType() { return PV_PLAYER; }
+    virtual status_t    invoke(const Parcel& request, Parcel *reply);
 
     // make available to PlayerDriver
     void        sendEvent(int msg, int ext1=0, int ext2=0) { MediaPlayerBase::sendEvent(msg, ext1, ext2); }

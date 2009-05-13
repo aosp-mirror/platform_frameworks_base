@@ -23,6 +23,7 @@
 
 namespace android {
 
+class Parcel;
 class ISurface;
 
 class IMediaPlayer: public IInterface
@@ -45,6 +46,14 @@ public:
     virtual status_t        setAudioStreamType(int type) = 0;
     virtual status_t        setLooping(int loop) = 0;
     virtual status_t        setVolume(float leftVolume, float rightVolume) = 0;
+
+    // Invoke a generic method on the player by using opaque parcels
+    // for the request and reply.
+    // @param request Parcel that must start with the media player
+    // interface token.
+    // @param[out] reply Parcel to hold the reply data. Cannot be null.
+    // @return OK if the invocation was made. PERMISSION_DENIED otherwise.
+    virtual status_t        invoke(const Parcel& request, Parcel *reply) = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -61,4 +70,3 @@ public:
 }; // namespace android
 
 #endif // ANDROID_IMEDIAPLAYER_H
-

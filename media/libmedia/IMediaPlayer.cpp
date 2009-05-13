@@ -39,7 +39,8 @@ enum {
     RESET,
     SET_AUDIO_STREAM_TYPE,
     SET_LOOPING,
-    SET_VOLUME
+    SET_VOLUME,
+    INVOKE,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -170,6 +171,13 @@ public:
         remote()->transact(SET_VOLUME, data, &reply);
         return reply.readInt32();
     }
+
+    status_t invoke(const Parcel& request, Parcel *reply)
+    { // Avoid doing any extra copy. The interface descriptor should
+      // have been set by MediaPlayer.java.
+        status_t retcode = remote()->transact(INVOKE, request, reply);
+        return retcode;
+    }
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
@@ -258,6 +266,11 @@ status_t BnMediaPlayer::onTransact(
         case SET_VOLUME: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(setVolume(data.readFloat(), data.readFloat()));
+            return NO_ERROR;
+        } break;
+        case INVOKE: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            invoke(data, reply);
             return NO_ERROR;
         } break;
         default:

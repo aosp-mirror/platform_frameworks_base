@@ -151,7 +151,7 @@ public:
             void            notify(int msg, int ext1, int ext2);
     static  sp<IMemory>     decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     static  sp<IMemory>     decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
-
+            status_t        invoke(const Parcel& request, Parcel *reply);
 private:
             void            clear_l();
             status_t        seekTo_l(int msec);

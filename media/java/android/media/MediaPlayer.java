@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.util.Log;
@@ -435,6 +436,10 @@ public class MediaPlayer
     }
 
     private final static String TAG = "MediaPlayer";
+    // Name of the remote interface for the media player. Must be kept
+    // in sync with the 2nd parameter of the IMPLEMENT_META_INTERFACE
+    // macro invocation in IMediaPlayer.cpp
+    private final static String IMEDIA_PLAYER = "android.media.IMediaPlayer";
 
     private int mNativeContext; // accessed by native methods
     private int mListenerContext; // accessed by native methods
@@ -473,6 +478,43 @@ public class MediaPlayer
      * Update the MediaPlayer ISurface. Call after updating mSurface.
      */
     private native void _setVideoSurface();
+
+    /**
+     * Create a request parcel which can be routed to the native media
+     * player using {@link #invoke(Parcel, Parcel)}. The Parcel
+     * returned has the proper InterfaceToken set. The caller should
+     * not overwrite that token, i.e it can only append data to the
+     * Parcel.
+     *
+     * @return A parcel suitable to hold a request for the native
+     * player.
+     */
+    public Parcel newRequest() {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInterfaceToken(IMEDIA_PLAYER);
+        return parcel;
+    }
+
+    /**
+     * Invoke a generic method on the native player using opaque
+     * parcels for the request and reply. Both payloads' format is a
+     * convention between the java caller and the native player.
+     * Must be called after setDataSource to make sure a native player
+     * exists.
+     *
+     * @param request Parcel with the data for the extension. The
+     * caller must use {@link #newRequest()} to get one.
+     *
+     * @param[out] reply Parcel with the data returned by the
+     * native player.
+     *
+     * @return The status code see utils/Errors.h
+     */
+    public int invoke(Parcel request, Parcel reply) {
+        int retcode = native_invoke(request, reply);
+        reply.setDataPosition(0);
+        return retcode;
+    }
 
     /**
      * Sets the SurfaceHolder to use for displaying the video portion of the media.
@@ -915,8 +957,18 @@ public class MediaPlayer
      */
     public native Bitmap getFrameAt(int msec) throws IllegalStateException;
 
+    /**
+     * @param request Parcel destinated to the media player. The
+     *                Interface token must be set to the IMediaPlayer
+     *                one to be routed correctly through the system.
+     * @param reply Parcel that will contain the reply.
+     * @return The status code.
+     */
+    private native final int native_invoke(Parcel request, Parcel reply);
+
     private native final void native_setup(Object mediaplayer_this);
     private native final void native_finalize();
+
     @Override
     protected void finalize() { native_finalize(); }
 
