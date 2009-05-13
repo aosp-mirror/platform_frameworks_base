@@ -256,6 +256,23 @@ public class SurfaceView extends View {
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // SurfaceView uses pre-scaled size unless fixed size is requested. This hook
+        // scales the event back to the pre-scaled coordinates for such surface.
+        if (mRequestedWidth < 0 && mAppScale != 1.0f) {
+            MotionEvent scaledBack = MotionEvent.obtain(event);
+            scaledBack.scale(mAppScale);
+            try {
+                return super.dispatchTouchEvent(scaledBack);
+            } finally {
+                scaledBack.recycle();
+            }
+        } else {
+            return super.dispatchTouchEvent(event);
+        }
+    }
+
+    @Override
     protected void dispatchDraw(Canvas canvas) {
         // if SKIP_DRAW is cleared, draw() has already punched a hole
         if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
@@ -277,7 +294,13 @@ public class SurfaceView extends View {
         if (myWidth <= 0) myWidth = getWidth();
         int myHeight = mRequestedHeight;
         if (myHeight <= 0) myHeight = getHeight();
-        
+
+        // Use original size for surface unless fixed size is requested.
+        if (mRequestedWidth <= 0) {
+            myWidth *= mAppScale;
+            myHeight *= mAppScale;
+        }
+
         getLocationInWindow(mLocation);
         final boolean creating = mWindow == null;
         final boolean formatChanged = mFormat != mRequestedFormat;
@@ -333,7 +356,7 @@ public class SurfaceView extends View {
                 mSurfaceLock.lock();
                 mDrawingStopped = !visible;
                 final int relayoutResult = mSession.relayout(
-                    mWindow, mLayout, (int) (mWidth * mAppScale), (int) (mHeight * mAppScale),
+                    mWindow, mLayout, mWidth, mHeight,
                         visible ? VISIBLE : GONE, false, mWinFrame, mContentInsets,
                         mVisibleInsets, mSurface);
 
