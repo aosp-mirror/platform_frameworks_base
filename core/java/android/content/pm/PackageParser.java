@@ -1187,6 +1187,12 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_testOnly,
+                true)) {
+            ai.flags |= ApplicationInfo.FLAG_TEST_ONLY;
+        }
+
         String str;
         str = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestApplication_permission);

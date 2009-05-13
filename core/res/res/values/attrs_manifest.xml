@@ -79,6 +79,13 @@
          by applications. -->
     <attr name="allowClearUserData" format="boolean" />
     
+    <!-- Option to indicate this application is only for testing purposes.
+         For example, it may expose functionality or data outside of itself
+         that would cause a security hole, but is useful for testing.  This
+         kind of application can not be installed without the
+         INSTALL_ALLOW_TEST flag, which means only through adb install.  -->
+    <attr name="testOnly" format="boolean" />
+    
     <!-- A unique name for the given item.  This must use a Java-style naming
          convention to ensure the name is unique, for example
          "com.mycompany.MyName". -->  
@@ -635,6 +642,7 @@
         <!-- Name of activity to be launched for managing the application's space on the device. -->
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />
+        <attr name="testOnly" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be

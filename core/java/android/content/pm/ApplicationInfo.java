@@ -126,6 +126,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_TARGETS_SDK = 1<<8;
 
     /**
+     * Value for {@link #flags}: this is set of the application has set
+     * its android:targetSdkVersion to something >= the current SDK version.
+     */
+    public static final int FLAG_TEST_ONLY = 1<<9;
+
+    /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and

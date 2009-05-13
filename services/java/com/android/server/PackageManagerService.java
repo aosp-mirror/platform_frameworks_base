@@ -3399,7 +3399,7 @@ class PackageManagerService extends IPackageManager.Stub {
             oldInstallerPackageName = mSettings.getInstallerPackageName(pkgName);
         }
         
-        int parseFlags = PackageManager.REPLACE_EXISTING_PACKAGE;
+        int parseFlags = PackageManager.INSTALL_REPLACE_EXISTING;
         // First delete the existing package while retaining the data directory
         if (!deletePackageLI(pkgName, false, PackageManager.DONT_DELETE_DATA,
                 res.removedInfo)) {
@@ -3471,7 +3471,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 installPackageLI(
                         Uri.fromFile(new File(deletedPackage.mPath)),
                         isForwardLocked(deletedPackage)
-                        ? PackageManager.FORWARD_LOCK_PACKAGE
+                        ? PackageManager.INSTALL_FORWARD_LOCK
                                 : 0, false, oldInstallerPackageName);
             }
         }
@@ -3484,7 +3484,7 @@ class PackageManagerService extends IPackageManager.Stub {
             String installerPackageName, PackageInstalledInfo res) {
         PackageParser.Package newPackage = null;
         boolean updatedSettings = false;
-        int parseFlags = PackageManager.REPLACE_EXISTING_PACKAGE |
+        int parseFlags = PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageParser.PARSE_IS_SYSTEM;
         String packageName = deletedPackage.packageName;
         res.returnCode = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
@@ -3700,13 +3700,13 @@ class PackageManagerService extends IPackageManager.Stub {
             res.name = pkgName;
             //initialize some variables before installing pkg
             final String pkgFileName = pkgName + ".apk";
-            final File destDir = ((pFlags&PackageManager.FORWARD_LOCK_PACKAGE) != 0)
+            final File destDir = ((pFlags&PackageManager.INSTALL_FORWARD_LOCK) != 0)
                                  ?  mDrmAppPrivateInstallDir
                                  : mAppInstallDir;
             final File destPackageFile = new File(destDir, pkgFileName);
             final String destFilePath = destPackageFile.getAbsolutePath();
             File destResourceFile;
-            if ((pFlags&PackageManager.FORWARD_LOCK_PACKAGE) != 0) {
+            if ((pFlags&PackageManager.INSTALL_FORWARD_LOCK) != 0) {
                 final String publicZipFileName = pkgName + ".zip";
                 destResourceFile = new File(mAppInstallDir, publicZipFileName);
                 forwardLocked = true;
@@ -3725,6 +3725,12 @@ class PackageManagerService extends IPackageManager.Stub {
                 res.returnCode = pp.getParseError();
                 break main_flow;
             }
+            if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_TEST_ONLY) != 0) {
+                if ((pFlags&PackageManager.INSTALL_ALLOW_TEST) == 0) {
+                    res.returnCode = PackageManager.INSTALL_FAILED_TEST_ONLY;
+                    break main_flow;
+                }
+            }
             if (GET_CERTIFICATES && !pp.collectCertificates(pkg, parseFlags)) {
                 res.returnCode = pp.getParseError();
                 break main_flow;
@@ -3732,7 +3738,7 @@ class PackageManagerService extends IPackageManager.Stub {
             
             synchronized (mPackages) {
                 //check if installing already existing package
-                if ((pFlags&PackageManager.REPLACE_EXISTING_PACKAGE) != 0
+                if ((pFlags&PackageManager.INSTALL_REPLACE_EXISTING) != 0
                         && mPackages.containsKey(pkgName)) {
                     replacingExistingPackage = true;
                 }
