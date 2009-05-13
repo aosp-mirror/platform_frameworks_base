@@ -1519,43 +1519,31 @@ class ApplicationContext extends Context {
             throw new NameNotFoundException(packageName);
         }
 
-        public Intent getLaunchIntentForPackage(String packageName)
-                throws NameNotFoundException {
+        @Override
+        public Intent getLaunchIntentForPackage(String packageName) {
             // First see if the package has an INFO activity; the existence of
             // such an activity is implied to be the desired front-door for the
             // overall package (such as if it has multiple launcher entries).
-            Intent intent = getLaunchIntentForPackageCategory(this, packageName,
-                    Intent.CATEGORY_INFO);
-            if (intent != null) {
-                return intent;
-            }
-            
+            Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
+            intentToResolve.addCategory(Intent.CATEGORY_INFO);
+            ResolveInfo resolveInfo = resolveActivity(intentToResolve, 0, packageName);
+
             // Otherwise, try to find a main launcher activity.
-            return getLaunchIntentForPackageCategory(this, packageName,
-                    Intent.CATEGORY_LAUNCHER);
-        }
-        
-        // XXX This should be implemented as a call to the package manager,
-        // to reduce the work needed.
-        static Intent getLaunchIntentForPackageCategory(PackageManager pm,
-                String packageName, String category) {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Intent intentToResolve = new Intent(Intent.ACTION_MAIN, null);
-            intentToResolve.addCategory(category);
-            final List<ResolveInfo> apps =
-                    pm.queryIntentActivities(intentToResolve, 0);
-            // I wish there were a way to directly get the "main" activity of a
-            // package but ...
-            for (ResolveInfo app : apps) {
-                if (app.activityInfo.packageName.equals(packageName)) {
-                    intent.setClassName(packageName, app.activityInfo.name);
-                    return intent;
-                }
+            if (resolveInfo == null) {
+                // reuse the intent instance
+                intentToResolve.removeCategory(Intent.CATEGORY_INFO);
+                intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
+                resolveInfo = resolveActivity(intentToResolve, 0, packageName);
             }
-            return null;
+            if (resolveInfo == null) {
+                return null;
+            }
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setClassName(packageName, resolveInfo.activityInfo.name);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            return intent;
         }
-        
+
         @Override
         public int[] getPackageGids(String packageName)
             throws NameNotFoundException {
@@ -1787,6 +1775,19 @@ class ApplicationContext extends Context {
                     intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                     flags);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+        }
+
+        @Override
+        public ResolveInfo resolveActivity(Intent intent, int flags, String packageName) {
+            try {
+                return mPM.resolveIntentForPackage(
+                    intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    flags,
+                    packageName);
             } catch (RemoteException e) {
                 throw new RuntimeException("Package manager has died", e);
             }

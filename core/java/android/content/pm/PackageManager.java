@@ -563,9 +563,8 @@ public abstract class PackageManager {
      * launch the main activity in the package, or null if the package does
      * not contain such an activity.
      */
-    public abstract Intent getLaunchIntentForPackage(String packageName)
-            throws NameNotFoundException;
-    
+    public abstract Intent getLaunchIntentForPackage(String packageName);
+
     /**
      * Return an array of all of the secondary group-ids that have been
      * assigned to a package.
@@ -969,6 +968,23 @@ public abstract class PackageManager {
      * @see #GET_RESOLVED_FILTER
      */
     public abstract ResolveInfo resolveActivity(Intent intent, int flags);
+
+    /**
+     * Resolve the intent restricted to a package.
+     * {@see #resolveActivity}
+     *
+     * @param intent An intent containing all of the desired specification
+     *               (action, data, type, category, and/or component).
+     * @param flags Additional option flags.  The most important is
+     *                    MATCH_DEFAULT_ONLY, to limit the resolution to only
+     *                    those activities that support the CATEGORY_DEFAULT.
+     * @param packageName Restrict the intent resolution to this package.
+     *
+     * @return Returns a ResolveInfo containing the final activity intent that
+     *         was determined to be the best action.  Returns null if no
+     *         matching activity was found.
+     */
+    public abstract ResolveInfo resolveActivity(Intent intent, int flags, String packageName);
 
     /**
      * Retrieve all activities that can be performed for the given intent.

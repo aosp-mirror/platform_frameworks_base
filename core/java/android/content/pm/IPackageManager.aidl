@@ -81,6 +81,9 @@ interface IPackageManager {
     
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags);
 
+    ResolveInfo resolveIntentForPackage(in Intent intent, String resolvedType, int flags,
+            String packageName);
+
     List<ResolveInfo> queryIntentActivities(in Intent intent, 
             String resolvedType, int flags);
 
