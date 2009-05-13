@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.apis.app;
+package com.android.backuptest;
 
 import android.backup.BackupService;
 import android.os.ParcelFileDescriptor;
