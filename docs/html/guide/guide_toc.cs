@@ -95,7 +95,7 @@
           </ul>
       </li> -->
 <!--  <li><a style="color:gray;">Localization</a></li>  -->
-      <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">AppWidgets</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">App Widgets</a></li>
     </ul>
 </li>
 
@@ -146,7 +146,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">UI Guidelines</a></div>
           <ul>
-            <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">Widget Design</a></li>
+            <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">App Widget Design</a></li>
           </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">Designing for Performance</a></li>
