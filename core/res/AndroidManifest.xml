@@ -389,11 +389,11 @@
         android:description="@string/permgroupdesc_storage" />
 
     <!-- Allows an application to write to the SD card -->
-    <permission android:name="android.permission.SDCARD_WRITE"
+    <permission android:name="android.permission.WRITE_SDCARD"
         android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
-        android:protectionLevel="normal" />
+        android:protectionLevel="dangerous" />
 
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->

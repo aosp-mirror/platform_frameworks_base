@@ -99,6 +99,17 @@ public:
     const android::Vector<const char*>& getNoCompressExtensions() const { return mNoCompressExtensions; }
     void addNoCompressExtension(const char* ext) { mNoCompressExtensions.add(ext); }
 
+    const char*  getMinSdkVersion() const { return mMinSdkVersion; }
+    void setMinSdkVersion(const char*  val) { mMinSdkVersion = val; }
+    const char*  getTargetSdkVersion() const { return mTargetSdkVersion; }
+    void setTargetSdkVersion(const char*  val) { mTargetSdkVersion = val; }
+    const char*  getMaxSdkVersion() const { return mMaxSdkVersion; }
+    void setMaxSdkVersion(const char*  val) { mMaxSdkVersion = val; }
+    const char*  getVersionCode() const { return mVersionCode; }
+    void setVersionCode(const char*  val) { mVersionCode = val; }
+    const char* getVersionName() const { return mVersionName; }
+    void setVersionName(const char* val) { mVersionName = val; }
+    
     /*
      * Set and get the file specification.
      *
@@ -150,6 +161,12 @@ private:
     android::Vector<const char*> mJarFiles;
     android::Vector<const char*> mNoCompressExtensions;
     android::Vector<const char*> mResourceSourceDirs;
+    
+    const char* mMinSdkVersion;
+    const char* mTargetSdkVersion;
+    const char* mMaxSdkVersion;
+    const char* mVersionCode;
+    const char* mVersionName;
     
     /* file specification */
     int         mArgc;
