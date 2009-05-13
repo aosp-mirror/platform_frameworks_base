@@ -55,6 +55,30 @@ import java.util.jar.JarFile;
  * {@hide}
  */
 public class PackageParser {
+    /** @hide */
+    public static class NewPermissionInfo {
+        public final String name;
+        public final int sdkVersion;
+        public final int fileVersion;
+        
+        public NewPermissionInfo(String name, int sdkVersion, int fileVersion) {
+            this.name = name;
+            this.sdkVersion = sdkVersion;
+            this.fileVersion = fileVersion;
+        }
+    }
+    
+    /**
+     * List of new permissions that have been added since 1.0.
+     * NOTE: These must be declared in SDK version order, with permissions
+     * added to older SDKs appearing before those added to newer SDKs.
+     * @hide
+     */
+    public static final PackageParser.NewPermissionInfo NEW_PERMISSIONS[] = new PackageParser.NewPermissionInfo[] {
+        new PackageParser.NewPermissionInfo(android.Manifest.permission.WRITE_SDCARD,
+                android.os.Build.VERSION_CODES.DONUT,
+                0)
+    };
 
     private String mArchiveSourcePath;
     private String[] mSeparateProcesses;
@@ -616,7 +640,6 @@ public class PackageParser {
 
         final Package pkg = new Package(pkgName);
         boolean foundApp = false;
-        boolean targetsSdk = false;
         
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifest);
@@ -774,11 +797,10 @@ public class PackageParser {
                             return null;
                         }
                         // If the code matches, it definitely targets this SDK.
-                        targetsSdk = true;
-                    } else if (targetVers >= mSdkVersion) {
-                        // If they have explicitly targeted our current version
-                        // or something after it, then note this.
-                        targetsSdk = true;
+                        pkg.applicationInfo.targetSdkVersion
+                                = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
+                    } else {
+                        pkg.applicationInfo.targetSdkVersion = targetVers;
                     }
                     
                     if (minVers > mSdkVersion) {
@@ -824,8 +846,18 @@ public class PackageParser {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
         }
 
-        if (targetsSdk) {
-            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_TARGETS_SDK;
+        final int NP = PackageParser.NEW_PERMISSIONS.length;
+        for (int ip=0; ip<NP; ip++) {
+            final PackageParser.NewPermissionInfo npi
+                    = PackageParser.NEW_PERMISSIONS[ip];
+            if (pkg.applicationInfo.targetSdkVersion >= npi.sdkVersion) {
+                break;
+            }
+            if (!pkg.requestedPermissions.contains(npi.name)) {
+                Log.i(TAG, "Impliciting adding " + npi.name + " to old pkg "
+                        + pkg.packageName);
+                pkg.requestedPermissions.add(npi.name);
+            }
         }
         
         if (pkg.usesLibraries.size() > 0) {

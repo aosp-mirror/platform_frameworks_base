@@ -23,6 +23,16 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
     if (root == NULL) {
         return UNKNOWN_ERROR;
     }
+    
+    return compileXmlFile(assets, root, target, table, options);
+}
+
+status_t compileXmlFile(const sp<AaptAssets>& assets,
+                        const sp<XMLNode>& root,
+                        const sp<AaptFile>& target,
+                        ResourceTable* table,
+                        int options)
+{
     if ((options&XML_COMPILE_STRIP_WHITESPACE) != 0) {
         root->removeWhitespace(true, NULL);
     } else  if ((options&XML_COMPILE_COMPACT_WHITESPACE) != 0) {
@@ -1307,7 +1317,7 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
             } else if (id != 0) {
                 if (id == 127) {
                     if (mHaveAppPackage) {
-                        fprintf(stderr, "Included resource have two application packages!\n");
+                        fprintf(stderr, "Included resources have two application packages!\n");
                         return UNKNOWN_ERROR;
                     }
                     mHaveAppPackage = true;

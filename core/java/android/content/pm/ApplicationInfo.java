@@ -123,13 +123,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Value for {@link #flags}: this is set of the application has set
      * its android:targetSdkVersion to something >= the current SDK version.
      */
-    public static final int FLAG_TARGETS_SDK = 1<<8;
-
-    /**
-     * Value for {@link #flags}: this is set of the application has set
-     * its android:targetSdkVersion to something >= the current SDK version.
-     */
-    public static final int FLAG_TEST_ONLY = 1<<9;
+    public static final int FLAG_TEST_ONLY = 1<<8;
 
     /**
      * Flags associated with the application.  Any combination of
@@ -137,7 +131,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and
      * {@link #FLAG_ALLOW_TASK_REPARENTING}
      * {@link #FLAG_ALLOW_CLEAR_USER_DATA}, {@link #FLAG_UPDATED_SYSTEM_APP},
-     * {@link #FLAG_TARGETS_SDK}.
+     * {@link #FLAG_TEST_ONLY}.
      */
     public int flags = 0;
     
@@ -182,6 +176,16 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int[] supportsDensities;
 
     /**
+     * The minimum SDK version this application targets.  It may run on earilier
+     * versions, but it knows how to work with any new behavior added at this
+     * version.  Will be {@link android.os.Build.VERSION_CODES#CUR_DEVELOPMENT}
+     * if this is a development build and the app is targeting that.  You should
+     * compare that this number is >= the SDK version number at which your
+     * behavior was introduced.
+     */
+    public int targetSdkVersion;
+    
+    /**
      * When false, indicates that all components within this application are
      * considered disabled, regardless of their individually set enabled status.
      */
@@ -200,6 +204,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "publicSourceDir=" + publicSourceDir);
         pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);
         pw.println(prefix + "dataDir=" + dataDir);
+        pw.println(prefix + "targetSdkVersion=" + targetSdkVersion);
         pw.println(prefix + "enabled=" + enabled);
         pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
         pw.println(prefix + "description=0x"+Integer.toHexString(descriptionRes));
@@ -246,6 +251,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         sharedLibraryFiles = orig.sharedLibraryFiles;
         dataDir = orig.dataDir;
         uid = orig.uid;
+        targetSdkVersion = orig.targetSdkVersion;
         enabled = orig.enabled;
         manageSpaceActivityName = orig.manageSpaceActivityName;
         descriptionRes = orig.descriptionRes;
@@ -276,6 +282,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeStringArray(sharedLibraryFiles);
         dest.writeString(dataDir);
         dest.writeInt(uid);
+        dest.writeInt(targetSdkVersion);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeString(manageSpaceActivityName);
         dest.writeInt(descriptionRes);
@@ -305,6 +312,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         sharedLibraryFiles = source.readStringArray();
         dataDir = source.readString();
         uid = source.readInt();
+        targetSdkVersion = source.readInt();
         enabled = source.readInt() != 0;
         manageSpaceActivityName = source.readString();
         descriptionRes = source.readInt();

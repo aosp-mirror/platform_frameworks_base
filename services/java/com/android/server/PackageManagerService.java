@@ -2831,6 +2831,21 @@ class PackageManagerService extends IPackageManager.Stub {
                         // we can't add any new permissions to it.
                         if (!gp.loadedPermissions.contains(perm)) {
                             allowed = false;
+                            // Except...  if this is a permission that was added
+                            // to the platform (note: need to only do this when
+                            // updating the platform).
+                            final int NP = PackageParser.NEW_PERMISSIONS.length;
+                            for (int ip=0; ip<NP; ip++) {
+                                final PackageParser.NewPermissionInfo npi
+                                        = PackageParser.NEW_PERMISSIONS[ip];
+                                if (npi.name.equals(perm)
+                                        && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
+                                    allowed = true;
+                                    Log.i(TAG, "Auto-granting WRITE_SDCARD to old pkg "
+                                            + pkg.packageName);
+                                    break;
+                                }
+                            }
                         }
                     }
                     if (allowed) {
@@ -3589,7 +3604,9 @@ class PackageManagerService extends IPackageManager.Stub {
         } else {
             // Re installation failed. Restore old information
             // Remove new pkg information
-            removePackageLI(newPackage, true);
+            if (newPackage != null) {
+                removePackageLI(newPackage, true);
+            }
             // Add back the old system package
             scanPackageLI(oldPkgSetting.codePath, oldPkgSetting.codePath, 
                     oldPkgSetting.resourcePath,

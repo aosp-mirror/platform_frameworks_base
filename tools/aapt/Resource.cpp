@@ -488,6 +488,58 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
     return;
 }
 
+void addTagAttribute(const sp<XMLNode>& node, const char* ns8,
+        const char* attr8, const char* value)
+{
+    if (value == NULL) {
+        return;
+    }
+    
+    const String16 ns(ns8);
+    const String16 attr(attr8);
+    
+    if (node->getAttribute(ns, attr) != NULL) {
+        fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s)\n",
+                String8(attr).string(), String8(ns).string());
+        return;
+    }
+    
+    node->addAttribute(ns, attr, String16(value));
+}
+
+status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
+{
+    root = root->searchElement(String16(), String16("manifest"));
+    if (root == NULL) {
+        fprintf(stderr, "No <manifest> tag.\n");
+        return UNKNOWN_ERROR;
+    }
+    
+    addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionCode",
+            bundle->getVersionCode());
+    addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionName",
+            bundle->getVersionName());
+    
+    if (bundle->getMinSdkVersion() != NULL
+            || bundle->getTargetSdkVersion() != NULL
+            || bundle->getMaxSdkVersion() != NULL) {
+        sp<XMLNode> vers = root->getChildElement(String16(), String16("uses-sdk"));
+        if (vers == NULL) {
+            vers = XMLNode::newElement(root->getFilename(), String16(), String16("uses-sdk"));
+            root->insertChildAt(vers, 0);
+        }
+        
+        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "minSdkVersion",
+                bundle->getMinSdkVersion());
+        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "targetSdkVersion",
+                bundle->getTargetSdkVersion());
+        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "maxSdkVersion",
+                bundle->getMaxSdkVersion());
+    }
+    
+    return NO_ERROR;
+}
+
 #define ASSIGN_IT(n) \
         do { \
             ssize_t index = resources->indexOfKey(String8(#n)); \
@@ -1006,7 +1058,15 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     // Generate final compiled manifest file.
     manifestFile->clearData();
-    err = compileXmlFile(assets, manifestFile, &table);
+    sp<XMLNode> manifestTree = XMLNode::parse(manifestFile);
+    if (manifestTree == NULL) {
+        return UNKNOWN_ERROR;
+    }
+    err = massageManifest(bundle, manifestTree);
+    if (err < NO_ERROR) {
+        return err;
+    }
+    err = compileXmlFile(assets, manifestTree, manifestFile, &table);
     if (err < NO_ERROR) {
         return err;
     }
