@@ -1878,9 +1878,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         } else {
             didFinish = false;
         }
-        if (event != null) {
-            event.scale(mAppScaleInverted);
-        }
 
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
 
