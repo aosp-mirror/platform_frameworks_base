@@ -1189,7 +1189,7 @@ public class PackageParser {
 
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_testOnly,
-                true)) {
+                false)) {
             ai.flags |= ApplicationInfo.FLAG_TEST_ONLY;
         }
 
