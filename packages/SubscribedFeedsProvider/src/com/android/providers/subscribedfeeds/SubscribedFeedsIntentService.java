@@ -43,8 +43,7 @@ public class SubscribedFeedsIntentService extends IntentService {
 
     private static final String sSubscribedFeedsPrefs = "subscribedFeeds";
 
-    private static final String GTALK_DATA_MESSAGE_RECEIVED =
-            "android.intent.action.GTALK_DATA_MESSAGE_RECEIVED";
+    private static final String REMOTE_INTENT_ACTION = Intent.ACTION_REMOTE_INTENT;
 
     private static final String SUBSCRIBED_FEEDS_REFRESH_ACTION =
             "com.android.subscribedfeeds.action.REFRESH";
@@ -56,8 +55,9 @@ public class SubscribedFeedsIntentService extends IntentService {
     }
 
     protected void onHandleIntent(Intent intent) {
-        if (GTALK_DATA_MESSAGE_RECEIVED.equals(intent.getAction())) {
-            boolean fromTrustedServer = intent.getBooleanExtra("from_trusted_server", false);
+        if (REMOTE_INTENT_ACTION.equals(intent.getAction())) {
+            boolean fromTrustedServer = intent.getBooleanExtra(
+                    "android.intent.extra.from_trusted_server", false);
             if (fromTrustedServer) {
                 String accountName = intent.getStringExtra("account");
                 String token = intent.getStringExtra("message_token");

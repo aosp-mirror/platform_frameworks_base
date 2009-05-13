@@ -1542,6 +1542,21 @@ public class Intent implements Parcelable {
     public static final String ACTION_REBOOT =
             "android.intent.action.REBOOT";
 
+    /**
+     * Broadcast Action: a remote intent is to be broadcasted.
+     *
+     * A remote intent is used for remote RPC between devices. The remote intent
+     * is serialized and sent from one device to another device. The receiving
+     * device parses the remote intent and broadcasts it. Note that anyone can
+     * broadcast a remote intent. However, if the intent receiver of the remote intent
+     * does not trust intent broadcasts from arbitrary intent senders, it should require
+     * the sender to hold certain permissions so only trusted sender's broadcast will be
+     * let through.
+     */
+    public static final String ACTION_REMOTE_INTENT =
+            "android.intent.action.REMOTE_INTENT";
+
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
@@ -1781,6 +1796,13 @@ public class Intent implements Parcelable {
      * delivered.
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
+
+    /**
+     * Used in the extra field in the remote intent. It's astring token passed with the
+     * remote intent.
+     */
+    public static final String EXTRA_REMOTE_INTENT_TOKEN =
+            "android.intent.extra.remote_intent_token";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
