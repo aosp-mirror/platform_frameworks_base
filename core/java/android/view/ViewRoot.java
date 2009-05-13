@@ -75,13 +75,6 @@ public final class ViewRoot extends Handler implements ViewParent,
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean WATCH_POINTER = false;
 
-    static final boolean PROFILE_DRAWING = false;
-    private static final boolean PROFILE_LAYOUT = false;
-    // profiles real fps (times between draws) and displays the result
-    private static final boolean SHOW_FPS = false;
-    // used by SHOW_FPS
-    private static int sDrawTime;
-
     /**
      * Maximum time we allow the user to roll the trackball enough to generate
      * a key event, before resetting the counters.
@@ -96,6 +89,8 @@ public final class ViewRoot extends Handler implements ViewParent,
     static boolean mInitialized = false;
 
     static final ThreadLocal<RunQueue> sRunQueues = new ThreadLocal<RunQueue>();
+
+    private static int sDrawTime;    
 
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
@@ -796,7 +791,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             final Rect frame = mWinFrame;
             boolean initialized = false;
             boolean contentInsetsChanged = false;
-            boolean visibleInsetsChanged = false;
+            boolean visibleInsetsChanged;
             try {
                 boolean hadSurface = mSurface.isValid();
                 int fl = 0;
@@ -937,14 +932,22 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(
                 "ViewRoot", "Laying out " + host + " to (" +
                 host.mMeasuredWidth + ", " + host.mMeasuredHeight + ")");
-            long startTime;
-            if (PROFILE_LAYOUT) {
+            long startTime = 0L;
+            if (Config.DEBUG && ViewDebug.profileLayout) {
                 startTime = SystemClock.elapsedRealtime();
             }
 
             host.layout(0, 0, host.mMeasuredWidth, host.mMeasuredHeight);
 
-            if (PROFILE_LAYOUT) {
+            if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                if (!host.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_LAYOUT)) {
+                    throw new IllegalStateException("The view hierarchy is an inconsistent state,"
+                            + "please refer to the logs with the tag "
+                            + ViewDebug.CONSISTENCY_LOG_TAG + " for more infomation.");
+                }
+            }
+
+            if (Config.DEBUG && ViewDebug.profileLayout) {
                 EventLog.writeEvent(60001, SystemClock.elapsedRealtime() - startTime);
             }
 
@@ -960,10 +963,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                         mTmpLocation[1] + host.mBottom - host.mTop);
 
                 host.gatherTransparentRegion(mTransparentRegion);
-                if (mAppScale != 1.0f) {
-                    mTransparentRegion.scale(mAppScale);
-                }
 
+                // TODO: scale the region, like:
+                // Region uses native methods. We probabl should have ScalableRegion class.
+
+                // Region does not have equals method ?
                 if (!mTransparentRegion.equals(mPreviousTransparentRegion)) {
                     mPreviousTransparentRegion.set(mTransparentRegion);
                     // reconfigure window manager
@@ -1168,6 +1172,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                             canvas.scale(scale, scale);
                         }
                         mView.draw(canvas);
+                        if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                            mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
+                        }
                     } finally {
                         canvas.restoreToCount(saveCount);
                     }
@@ -1175,7 +1182,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
                     checkEglErrors();
 
-                    if (SHOW_FPS) {
+                    if (Config.DEBUG && ViewDebug.showFps) {
                         int now = (int)SystemClock.elapsedRealtime();
                         if (sDrawTime != 0) {
                             nativeShowFPS(canvas, now - sDrawTime);
@@ -1216,7 +1223,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         try {
             if (!dirty.isEmpty() || mIsAnimating) {
-                long startTime;
+                long startTime = 0L;
 
                 if (DEBUG_ORIENTATION || DEBUG_DRAW) {
                     Log.v("ViewRoot", "Surface " + surface + " drawing to bitmap w="
@@ -1224,7 +1231,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     //canvas.drawARGB(255, 255, 0, 0);
                 }
 
-                if (PROFILE_DRAWING) {
+                if (Config.DEBUG && ViewDebug.profileDrawing) {
                     startTime = SystemClock.elapsedRealtime();
                 }
 
@@ -1259,11 +1266,15 @@ public final class ViewRoot extends Handler implements ViewParent,
                         canvas.scale(scale, scale);
                     }
                     mView.draw(canvas);
+
+                    if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                        mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
+                    }
                 } finally {
                     canvas.restoreToCount(saveCount);
                 }
 
-                if (SHOW_FPS) {
+                if (Config.DEBUG && ViewDebug.showFps) {
                     int now = (int)SystemClock.elapsedRealtime();
                     if (sDrawTime != 0) {
                         nativeShowFPS(canvas, now - sDrawTime);
@@ -1271,7 +1282,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     sDrawTime = now;
                 }
 
-                if (PROFILE_DRAWING) {
+                if (Config.DEBUG && ViewDebug.profileDrawing) {
                     EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
                 }
             }
@@ -1877,6 +1888,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             didFinish = true;
         } else {
             didFinish = false;
+        }
+        if (event != null) {
+            event.scale(mAppScaleInverted);
         }
 
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);

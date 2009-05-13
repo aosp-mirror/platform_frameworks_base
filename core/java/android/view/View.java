@@ -49,6 +49,7 @@ import android.util.Poolable;
 import android.util.Pool;
 import android.util.Pools;
 import android.util.PoolableManager;
+import android.util.Config;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputConnection;
@@ -5641,7 +5642,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             if (ViewDebug.TRACE_HIERARCHY) {
                 ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
             }
-            if (ViewRoot.PROFILE_DRAWING) {
+            if (Config.DEBUG && ViewDebug.profileDrawing) {
                 EventLog.writeEvent(60002, hashCode());
             }
 
@@ -7163,6 +7164,60 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         }
 
         tags.put(key, tag);
+    }
+
+    /**
+     * @param consistency The type of consistency. See ViewDebug for more information.
+     *
+     * @hide
+     */
+    protected boolean dispatchConsistencyCheck(int consistency) {
+        return onConsistencyCheck(consistency);
+    }
+
+    /**
+     * Method that subclasses should implement to check their consistency. The type of
+     * consistency check is indicated by the bit field passed as a parameter.
+     * 
+     * @param consistency The type of consistency. See ViewDebug for more information.
+     *
+     * @throws IllegalStateException if the view is in an inconsistent state.
+     *
+     * @hide
+     */
+    protected boolean onConsistencyCheck(int consistency) {
+        boolean result = true;
+
+        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
+        final boolean checkDrawing = (consistency & ViewDebug.CONSISTENCY_DRAWING) != 0;
+
+        if (checkLayout) {
+            if (getParent() == null) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " does not have a parent.");
+            }
+
+            if (mAttachInfo == null) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " is not attached to a window.");
+            }
+        }
+
+        if (checkDrawing) {
+            // Do not check the DIRTY/DRAWN flags because views can call invalidate()
+            // from their draw() method
+
+            if ((mPrivateFlags & DRAWN) != DRAWN &&
+                    (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " was invalidated but its drawing cache is valid.");
+            }
+        }
+
+        return result;
     }
 
     /**
