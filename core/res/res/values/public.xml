@@ -1099,7 +1099,7 @@
    <public type="attr" name="onClick" id="0x0101026f" />
    <public type="attr" name="targetSdkVersion" id="0x01010270" />
    <public type="attr" name="maxSdkVersion" id="0x01010271" />
-   <public type="attr" name="testOnly" id="0x01010272" />
+   <public type="attr" name="testOnly" id="0x01010274" />
 
    <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
    <public type="anim" name="overshoot_interpolator" id="0x010a0008" />
