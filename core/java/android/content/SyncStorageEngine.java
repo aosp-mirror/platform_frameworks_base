@@ -391,8 +391,7 @@ public class SyncStorageEngine extends Handler {
                 while (i > 0) {
                     i--;
                     AuthorityInfo authority = mAuthorities.get(i);
-                    if (authority.account.equals(account)
-                            && authority.authority.equals(providerName)) {
+                    if (authority.authority.equals(providerName)) {
                         authority.enabled = sync;
                     }
                 }
