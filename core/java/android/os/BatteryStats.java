@@ -61,6 +61,13 @@ public abstract class BatteryStats implements Parcelable {
      */
     public static final int SCAN_WIFI_LOCK = 6;
 
+     /**
+      * A constant indicating a wifi multicast timer
+      *
+      * {@hide}
+      */
+     public static final int WIFI_MULTICAST_ENABLED = 7;
+
     /**
      * Include all of the data in the stats, including previously saved data.
      */
@@ -225,9 +232,13 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void noteFullWifiLockReleasedLocked();
         public abstract void noteScanWifiLockAcquiredLocked();
         public abstract void noteScanWifiLockReleasedLocked();
+        public abstract void noteWifiMulticastEnabledLocked();
+        public abstract void noteWifiMulticastDisabledLocked();
         public abstract long getWifiTurnedOnTime(long batteryRealtime, int which);
         public abstract long getFullWifiLockTime(long batteryRealtime, int which);
         public abstract long getScanWifiLockTime(long batteryRealtime, int which);
+        public abstract long getWifiMulticastTime(long batteryRealtime,
+                                                  int which);
 
         /**
          * Note that these must match the constants in android.os.LocalPowerManager.
