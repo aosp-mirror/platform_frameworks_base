@@ -851,28 +851,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     public static final int HAPTIC_FEEDBACK_ENABLED = 0x10000000;
 
     /**
-     * View flag indicating whether this view was invalidated (fully or partially.)
-     *
-     * @hide
-     */
-    static final int DIRTY = 0x20000000;
-
-    /**
-     * View flag indicating whether this view was invalidated by an opaque
-     * invalidate request.
-     *
-     * @hide
-     */
-    static final int DIRTY_OPAQUE = 0x40000000;
-
-    /**
-     * Mask for {@link #DIRTY} and {@link #DIRTY_OPAQUE}.
-     *
-     * @hide
-     */
-    static final int DIRTY_MASK = 0x60000000;
-
-    /**
      * Use with {@link #focusSearch}. Move focus to the previous selectable
      * item.
      */
@@ -1428,6 +1406,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     static final int SCROLL_CONTAINER_ADDED         = 0x00100000;
 
     /**
+     * View flag indicating whether this view was invalidated (fully or partially.)
+     *
+     * @hide
+     */
+    static final int DIRTY                          = 0x00200000;
+
+    /**
+     * View flag indicating whether this view was invalidated by an opaque
+     * invalidate request.
+     *
+     * @hide
+     */
+    static final int DIRTY_OPAQUE                   = 0x00400000;
+
+    /**
+     * Mask for {@link #DIRTY} and {@link #DIRTY_OPAQUE}.
+     *
+     * @hide
+     */
+    static final int DIRTY_MASK                     = 0x00600000;
+
+    /**
      * The parent this view is attached to.
      * {@hide}
      *
@@ -1443,7 +1443,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     /**
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(flagMapping = {
+        @ViewDebug.FlagToString(mask = FORCE_LAYOUT, equals = FORCE_LAYOUT,
+                name = "FORCE_LAYOUT"),
+        @ViewDebug.FlagToString(mask = LAYOUT_REQUIRED, equals = LAYOUT_REQUIRED,
+                name = "LAYOUT_REQUIRED"),
+        @ViewDebug.FlagToString(mask = DRAWING_CACHE_VALID, equals = DRAWING_CACHE_VALID,
+            name = "DRAWING_CACHE_VALID", outputIf = false),
+        @ViewDebug.FlagToString(mask = DRAWN, equals = DRAWN, name = "DRAWN", outputIf = true),
+        @ViewDebug.FlagToString(mask = DRAWN, equals = DRAWN, name = "NOT_DRAWN", outputIf = false),
+        @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY_OPAQUE, name = "DIRTY_OPAQUE"),
+        @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY, name = "DIRTY")
+    })
     int mPrivateFlags;
 
     /**
