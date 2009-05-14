@@ -70,6 +70,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IActivityWatcher.aidl \
 	core/java/android/app/IAlarmManager.aidl \
+    core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/IIntentReceiver.aidl \
 	core/java/android/app/IIntentSender.aidl \
@@ -82,7 +83,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IWallpaperService.aidl \
 	core/java/android/app/IWallpaperServiceCallback.aidl \
 	core/java/android/backup/IBackupManager.aidl \
-	core/java/android/backup/IBackupService.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \

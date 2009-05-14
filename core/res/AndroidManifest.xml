@@ -972,6 +972,13 @@
         android:description="@string/permdesc_batteryStats"
         android:protectionLevel="normal" />
 
+    <!-- Allows an application to control the backup and restore process
+         @hide pending API council -->
+    <permission android:name="android.permission.BACKUP"
+        android:label="@string/permlab_backup"
+        android:description="@string/permdesc_backup"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to tell the AppWidget service which application
          can access AppWidget's data.  The normal user flow is that a user
          picks an AppWidget to go into a particular host, thereby giving that

@@ -58,9 +58,20 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Class implementing the Application's manage space
      * functionality.  From the "manageSpaceActivity"
      * attribute. This is an optional attribute and will be null if
-     * application's dont specify it in their manifest
+     * applications don't specify it in their manifest
      */
     public String manageSpaceActivityName;    
+    
+    /**
+     * Class implementing the Application's backup functionality.  From
+     * the "backupAgent" attribute.  This is an optional attribute and
+     * will be null if the application does not specify it in its manifest.
+     * 
+     * <p>If android:allowBackup is set to false, this attribute is ignored.
+     * 
+     * {@hide}
+     */
+    public String backupAgentName;
     
     /**
      * Value for {@link #flags}: if set, this application is installed in the
@@ -93,7 +104,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_PERSISTENT = 1<<3;
 
     /**
-     * Value for {@link #flags}: set to true iif this application holds the
+     * Value for {@link #flags}: set to true if this application holds the
      * {@link android.Manifest.permission#FACTORY_TEST} permission and the
      * device is running in factory test mode.
      */
@@ -125,6 +136,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int FLAG_TEST_ONLY = 1<<8;
 
+    /**
+     * Value for {@link #flags}: this is false if the application has set
+     * its android:allowBackup to false, true otherwise.
+     * 
+     * {@hide}
+     */
+    public static final int FLAG_ALLOW_BACKUP = 1<<10;
+    
     /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
@@ -285,6 +304,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(targetSdkVersion);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeString(manageSpaceActivityName);
+        dest.writeString(backupAgentName);
         dest.writeInt(descriptionRes);
         dest.writeIntArray(supportsDensities);
     }
@@ -315,6 +335,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         targetSdkVersion = source.readInt();
         enabled = source.readInt() != 0;
         manageSpaceActivityName = source.readString();
+        backupAgentName = source.readString();
         descriptionRes = source.readInt();
         supportsDensities = source.createIntArray();
     }

@@ -1113,7 +1113,9 @@
   <public type="attr" name="gestureStrokeAngleThreshold" />
   <public type="attr" name="eventsInterceptionEnabled" />
   <public type="attr" name="fadeEnabled" />
-
+  <public type="attr" name="backupAgent" />
+  <public type="attr" name="allowBackup" />
+  
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 
   <public-padding type="id" name="donut_resource_pad" end="0x01020040" />
