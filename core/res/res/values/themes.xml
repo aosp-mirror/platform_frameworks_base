@@ -50,6 +50,7 @@
         <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_light_nodisable</item>
         <item name="textColorHint">@android:color/hint_foreground_dark</item>
         <item name="textColorHintInverse">@android:color/hint_foreground_light</item>
+        <item name="textColorSearchUrl">@android:color/search_url_text</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Large</item>
         <item name="textAppearanceMedium">@android:style/TextAppearance.Medium</item>
