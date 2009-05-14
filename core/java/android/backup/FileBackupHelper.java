@@ -60,9 +60,6 @@ public class FileBackupHelper {
         if (newStateFd == null) {
             throw new NullPointerException();
         }
-        if (files == null) {
-            throw new NullPointerException();
-        }
 
         int err = performBackup_native(basePath, oldStateFd, data.fd, newStateFd, files);
 
