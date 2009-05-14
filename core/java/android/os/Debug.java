@@ -864,6 +864,8 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Equivalent to <code>setFieldsOn(cl, false)</code>.
      *
      * @see #setFieldsOn(Class, boolean)
+     *
+     * @hide
      */
     public static void setFieldsOn(Class<?> cl) {
         setFieldsOn(cl, false);
