@@ -326,8 +326,9 @@ public class SurfaceView extends View {
                 mFormat = mRequestedFormat;
                 mType = mRequestedType;
 
-                mLayout.x = mLeft;
-                mLayout.y = mTop;
+                // Scaling window's layout here beause mLayout is not used elsewhere.
+                mLayout.x = (int) (mLeft * mAppScale);
+                mLayout.y = (int) (mTop * mAppScale);
                 mLayout.width = (int) (getWidth() * mAppScale);
                 mLayout.height = (int) (getHeight() * mAppScale);
                 mLayout.format = mRequestedFormat;
@@ -380,7 +381,7 @@ public class SurfaceView extends View {
                         synchronized (mCallbacks) {
                             callbacks = new SurfaceHolder.Callback[mCallbacks.size()];
                             mCallbacks.toArray(callbacks);
-                        }            
+                        }
 
                         if (visibleChanged) {
                             mIsCreating = true;

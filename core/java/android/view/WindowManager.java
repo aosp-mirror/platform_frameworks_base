@@ -18,6 +18,7 @@ package android.view;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -954,16 +955,39 @@ public interface WindowManager extends ViewManager {
             return sb.toString();
         }
 
-        void scale(float scale) {
+        /**
+         * Scale the layout params' coordinates and size.
+         * Returns the original info as a backup so that the caller can
+         * restore the layout params;
+         */
+        void scale(float scale, int[] backup) {
             if (scale != 1.0f) {
+                backup[0] = x;
+                backup[1] = y;
                 x *= scale;
                 y *= scale;
                 if (width > 0) {
+                    backup[2] = width;
                     width *= scale;
                 }
                 if (height > 0) {
+                    backup[3] = height;
                     height *= scale;
                 }
+            }
+        }
+
+        /**
+         * Restore the layout params' coordinates and size.
+         */
+        void restore(int[] backup) {
+            x = backup[0];
+            y = backup[1];
+            if (width > 0) {
+                width = backup[2];
+            }
+            if (height > 0) {
+                height = backup[3];
             }
         }
 
