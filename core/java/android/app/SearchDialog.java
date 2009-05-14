@@ -1353,7 +1353,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         private SearchDialog mSearchDialog;
         
         public SearchAutoComplete(Context context) {
-            super(null);
+            super(context);
             mThreshold = getThreshold();
         }
         
