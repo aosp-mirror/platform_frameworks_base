@@ -17,7 +17,7 @@
 package com.android.internal.util;
 
 /**
- * An object that rovides bitwise incremental write access to a byte array.
+ * An object that provides bitwise incremental write access to a byte array.
  *
  * This is useful, for example, when writing a series of fields that
  * may not be aligned on byte boundaries.
