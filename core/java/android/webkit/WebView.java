@@ -4404,7 +4404,7 @@ public class WebView extends AbsoluteLayout
             View v = mTextEntry;
             int x = viewToContent((v.getLeft() + v.getRight()) >> 1);
             int y = viewToContent((v.getTop() + v.getBottom()) >> 1);
-            nativeMotionUp(x, y, mNavSlop, true);
+            nativeMotionUp(x, y, mNavSlop);
         }
     }
 
@@ -4416,7 +4416,7 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        if (nativeMotionUp(contentX, contentY, mNavSlop, true)) {
+        if (nativeMotionUp(contentX, contentY, mNavSlop)) {
             if (mLogEvent) {
                 Checkin.updateStats(mContext.getContentResolver(),
                         Checkin.Stats.Tag.BROWSER_SNAP_CENTER, 1, 0.0);
@@ -5172,13 +5172,12 @@ public class WebView extends AbsoluteLayout
 
     // called by JNI
     private void sendMotionUp(int touchGeneration, int buildGeneration,
-            int frame, int node, int x, int y, int size, boolean isClick,
+            int frame, int node, int x, int y, int size,
             boolean retry) {
         WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
         touchUpData.mMoveGeneration = touchGeneration;
         touchUpData.mBuildGeneration = buildGeneration;
         touchUpData.mSize = size;
-        touchUpData.mIsClick = isClick;
         touchUpData.mRetry = retry;
         mFocusData.mFrame = touchUpData.mFrame = frame;
         mFocusData.mNode = touchUpData.mNode = node;
@@ -5315,7 +5314,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeInstrumentReport();
     private native void     nativeMarkNodeInvalid(int node);
     // return true if the page has been scrolled
-    private native boolean  nativeMotionUp(int x, int y, int slop, boolean isClick);
+    private native boolean  nativeMotionUp(int x, int y, int slop);
     // returns false if it handled the key
     private native boolean  nativeMoveFocus(int keyCode, int count, 
             boolean noScroll);

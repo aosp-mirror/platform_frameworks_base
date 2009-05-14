@@ -384,7 +384,7 @@ final class WebViewCore {
     
     private native void nativeTouchUp(int touchGeneration, 
             int buildGeneration, int framePtr, int nodePtr, int x, int y, 
-            int size, boolean isClick, boolean retry);
+            int size, boolean retry);
 
     private native boolean nativeHandleTouchEvent(int action, int x, int y);
 
@@ -540,7 +540,6 @@ final class WebViewCore {
         int mX;
         int mY;
         int mSize;
-        boolean mIsClick;
         boolean mRetry;
     }
 
@@ -906,7 +905,7 @@ final class WebViewCore {
                                     touchUpData.mBuildGeneration,
                                     touchUpData.mFrame, touchUpData.mNode,
                                     touchUpData.mX, touchUpData.mY, 
-                                    touchUpData.mSize, touchUpData.mIsClick,
+                                    touchUpData.mSize,
                                     touchUpData.mRetry);
                             break;
 
