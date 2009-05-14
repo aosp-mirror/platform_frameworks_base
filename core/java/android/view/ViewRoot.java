@@ -123,9 +123,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mHeight;
     Rect mDirty; // will be a graphics.Region soon
     boolean mIsAnimating;
-    // TODO: change these to scaler class.
-    float mAppScale;
-    float mAppScaleInverted; // = 1.0f / mAppScale
+    // TODO: change these to scalar class.
+    private float mAppScale;
+    private float mAppScaleInverted; // = 1.0f / mAppScale
+    private int[] mWindowLayoutParamsBackup = null;
 
     final View.AttachInfo mAttachInfo;
 
@@ -384,6 +385,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (mView == null) {
                 mView = view;
                 mAppScale = mView.getContext().getApplicationScale();
+                if (mAppScale != 1.0f) {
+                    mWindowLayoutParamsBackup = new int[4];
+                }
                 mAppScaleInverted = 1.0f / mAppScale;
                 mWindowAttributes.copyFrom(attrs);
                 mSoftInputMode = attrs.softInputMode;
@@ -473,7 +477,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         synchronized (this) {
             int oldSoftInputMode = mWindowAttributes.softInputMode;
             mWindowAttributes.copyFrom(attrs);
-            mWindowAttributes.scale(mAppScale);
 
             if (newView) {
                 mSoftInputMode = attrs.softInputMode;
@@ -2320,12 +2323,22 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
             boolean insetsPending) throws RemoteException {
+
+        boolean restore = false;
+        if (params != null && mAppScale != 1.0f) {
+            restore = true;
+            params.scale(mAppScale, mWindowLayoutParamsBackup);
+        }
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
                 (int) (mView.mMeasuredWidth * mAppScale),
                 (int) (mView.mMeasuredHeight * mAppScale),
                 viewVisibility, insetsPending, mWinFrame,
                 mPendingContentInsets, mPendingVisibleInsets, mSurface);
+        if (restore) {
+            params.restore(mWindowLayoutParamsBackup);
+        }
+
         mPendingContentInsets.scale(mAppScaleInverted);
         mPendingVisibleInsets.scale(mAppScaleInverted);
         mWinFrame.scale(mAppScaleInverted);
@@ -2427,7 +2440,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         msg.arg2 = handled ? 1 : 0;
         sendMessage(msg);
     }
-    
+
     public void dispatchResized(int w, int h, Rect coveredInsets,
             Rect visibleInsets, boolean reportDraw) {
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": w=" + w
