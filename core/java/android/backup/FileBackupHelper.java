@@ -18,20 +18,24 @@ package android.backup;
 
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 
+/** @hide */
 public class FileBackupHelper {
+    private static final String TAG = "FileBackupHelper";
+
     /**
-     * Based on oldSnapshot, determine which of the files from the application's data directory
-     * need to be backed up, write them to the data stream, and fill in newSnapshot with the
+     * Based on oldState, determine which of the files from the application's data directory
+     * need to be backed up, write them to the data stream, and fill in newState with the
      * state as it exists now.
      */
     public static void performBackup(Context context,
-            ParcelFileDescriptor oldSnapshot, ParcelFileDescriptor newSnapshot,
-            BackupDataOutput data, String[] files) {
+            ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState, String[] files) {
         String basePath = context.getFilesDir().getAbsolutePath();
-        performBackup_checked(basePath, oldSnapshot, newSnapshot, data, files);
+        performBackup_checked(basePath, oldState, data, newState, files);
     }
 
     /**
@@ -39,30 +43,34 @@ public class FileBackupHelper {
      * since it's easier to do that from java.
      */
     static void performBackup_checked(String basePath,
-            ParcelFileDescriptor oldSnapshot, ParcelFileDescriptor newSnapshot,
-            BackupDataOutput data, String[] files) {
-        if (newSnapshot == null) {
-            throw new NullPointerException("newSnapshot==null");
+            ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState, String[] files) {
+        if (files.length == 0) {
+            return;
         }
-        if (data == null) {
-            throw new NullPointerException("data==null");
+        if (basePath == null) {
+            throw new NullPointerException();
         }
+        // oldStateFd can be null
+        FileDescriptor oldStateFd = oldState != null ? oldState.getFileDescriptor() : null;
         if (data.fd == null) {
-            throw new NullPointerException("data.fd==null");
+            throw new NullPointerException();
+        }
+        FileDescriptor newStateFd = newState.getFileDescriptor();
+        if (newStateFd == null) {
+            throw new NullPointerException();
         }
         if (files == null) {
-            throw new NullPointerException("files==null");
+            throw new NullPointerException();
         }
 
-        int err = performBackup_native(basePath, oldSnapshot.getFileDescriptor(),
-                newSnapshot.getFileDescriptor(), data.fd, files);
+        int err = performBackup_native(basePath, oldStateFd, data.fd, newStateFd, files);
 
         if (err != 0) {
             throw new RuntimeException("Backup failed"); // TODO: more here
         }
     }
 
-    native private static int performBackup_native(String basePath,
-            FileDescriptor oldSnapshot, FileDescriptor newSnapshot,
-            FileDescriptor data, String[] files);
+    native private static int performBackup_native(String basePath, FileDescriptor oldState,
+            FileDescriptor data, FileDescriptor newState, String[] files);
 }

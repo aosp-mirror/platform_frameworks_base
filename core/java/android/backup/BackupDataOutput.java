@@ -20,6 +20,7 @@ import android.content.Context;
 
 import java.io.FileDescriptor;
 
+/** @hide */
 public class BackupDataOutput {
     /* package */ FileDescriptor fd;
 

@@ -30,6 +30,10 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
@@ -876,6 +880,15 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
 
     /**
+     * Equivalent to <code>setFieldsOn(cl, false)</code>.
+     *
+     * @see #setFieldsOn(Class, boolean)
+     */
+    public static void setFieldsOn(Class<?> cl) {
+        setFieldsOn(cl, false);
+    }
+
+    /**
      * Reflectively sets static fields of a class based on internal debugging
      * properties.  This method is a no-op if android.util.Config.DEBUG is
      * false.
@@ -887,7 +900,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Class setup: define a class whose only fields are non-final, static
      * primitive types (except for "char") or Strings.  In a static block
      * after the field definitions/initializations, pass the class to
-     * this method, Debug.setFieldsOn().  Example:
+     * this method, Debug.setFieldsOn(). Example:
      * <pre>
      * package com.example;
      *
@@ -899,12 +912,18 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *    public static String ns = null;
      *    public static boolean b = false;
      *    public static int i = 5;
+     *    @Debug.DebugProperty
      *    public static float f = 0.1f;
+     *    @@Debug.DebugProperty
      *    public static double d = 0.5d;
      *
      *    // This MUST appear AFTER all fields are defined and initialized!
      *    static {
+     *        // Sets all the fields
      *        Debug.setFieldsOn(MyDebugVars.class);
+     * 
+     *        // Sets only the fields annotated with @Debug.DebugProperty
+     *        // Debug.setFieldsOn(MyDebugVars.class, true);
      *    }
      * }
      * </pre>
@@ -917,25 +936,31 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * {@hide}
      *
      * @param cl The class to (possibly) modify
+     * @param partial If false, sets all static fields, otherwise, only set
+     *        fields with the {@link android.os.Debug.DebugProperty}
+     *        annotation
      * @throws IllegalArgumentException if any fields are final or non-static,
      *         or if the type of the field does not match the type of
      *         the internal debugging property value.
      */
-    public static void setFieldsOn(Class<?> cl) {
+    public static void setFieldsOn(Class<?> cl, boolean partial) {
         if (Config.DEBUG) {
             if (debugProperties != null) {
                 /* Only look for fields declared directly by the class,
                  * so we don't mysteriously change static fields in superclasses.
                  */
                 for (Field field : cl.getDeclaredFields()) {
-                    final String propertyName = cl.getName() + "." + field.getName();
-                    boolean isStatic = Modifier.isStatic(field.getModifiers());
-                    boolean isFinal = Modifier.isFinal(field.getModifiers());
-                    if (!isStatic || isFinal) {
-                        throw new IllegalArgumentException(propertyName +
-                            " must be static and non-final");
+                    if (!partial || field.getAnnotation(DebugProperty.class) != null) {
+                        final String propertyName = cl.getName() + "." + field.getName();
+                        boolean isStatic = Modifier.isStatic(field.getModifiers());
+                        boolean isFinal = Modifier.isFinal(field.getModifiers());
+
+                        if (!isStatic || isFinal) {
+                            throw new IllegalArgumentException(propertyName +
+                                " must be static and non-final");
+                        }
+                        modifyFieldIfSet(field, debugProperties, propertyName);
                     }
-                    modifyFieldIfSet(field, debugProperties, propertyName);
                 }
             }
         } else {
@@ -943,5 +968,16 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
                   "setFieldsOn(" + (cl == null ? "null" : cl.getName()) +
                   ") called in non-DEBUG build");
         }
+    }
+
+    /**
+     * Annotation to put on fields you want to set with
+     * {@link Debug#setFieldsOn(Class, boolean)}.
+     *
+     * @hide
+     */
+    @Target({ ElementType.FIELD })
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface DebugProperty {
     }
 }

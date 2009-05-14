@@ -1048,6 +1048,17 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SEARCH_LONG_PRESS = "android.intent.action.SEARCH_LONG_PRESS";
 
+    /**
+     * Activity Action: The user pressed the "Report" button in the crash/ANR dialog.
+     * This intent is delivered to the package which installed the application, usually
+     * the Market.
+     * <p>Input: No data is specified. The bug report is passed in using
+     * an {@link #EXTRA_BUG_REPORT} field.
+     * <p>Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
@@ -1796,6 +1807,24 @@ public class Intent implements Parcelable {
      * delivered.
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
+    
+    /**
+     * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
+     * the bug report.
+     * 
+     * @hide
+     */
+    public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
+
+    /**
+     * Used as a string extra field when sending an intent to PackageInstaller to install a 
+     * package. Specifies the installer package name; this package will receive the
+     * {@link #ACTION_APP_ERROR} intent.
+     * 
+     * @hide
+     */
+    public static final String EXTRA_INSTALLER_PACKAGE_NAME 
+            = "android.intent.extra.INSTALLER_PACKAGE_NAME";
 
     /**
      * Used in the extra field in the remote intent. It's astring token passed with the

@@ -32,6 +32,7 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.Config;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
@@ -1404,7 +1405,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // Clear the flag as early as possible to allow draw() implementations
         // to call invalidate() successfully when doing animations
-        child.mPrivateFlags |= DRAWN;
+        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK) | DRAWN;
 
         if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
                 (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
@@ -1494,7 +1495,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 cachePaint.setAlpha(255);
                 mGroupFlags &= ~FLAG_ALPHA_LOWER_THAN_ONE;
             }
-            if (ViewRoot.PROFILE_DRAWING) {
+            if (Config.DEBUG && ViewDebug.profileDrawing) {
                 EventLog.writeEvent(60003, hashCode());
             }
             canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
@@ -2747,6 +2748,61 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected boolean dispatchConsistencyCheck(int consistency) {
+        boolean result = super.dispatchConsistencyCheck(consistency);
+
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            if (!children[i].dispatchConsistencyCheck(consistency)) result = false;
+        }
+
+        return result;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected boolean onConsistencyCheck(int consistency) {
+        boolean result = super.onConsistencyCheck(consistency);
+
+        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
+        final boolean checkDrawing = (consistency & ViewDebug.CONSISTENCY_DRAWING) != 0;
+
+        if (checkLayout) {
+            final int count = mChildrenCount;
+            final View[] children = mChildren;
+            for (int i = 0; i < count; i++) {
+                if (children[i].getParent() != this) {
+                    result = false;
+                    android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                            "View " + children[i] + " has no parent/a parent that is not " + this);
+                }
+            }
+        }
+
+        if (checkDrawing) {
+            // If this group is dirty, check that the parent is dirty as well
+            if ((mPrivateFlags & DIRTY_MASK) != 0) {
+                final ViewParent parent = getParent();
+                if (parent != null && !(parent instanceof ViewRoot)) {
+                    if ((((View) parent).mPrivateFlags & DIRTY_MASK) == 0) {
+                        result = false;
+                        android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                                "ViewGroup " + this + " is dirty but its parent is not: " + this);
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
