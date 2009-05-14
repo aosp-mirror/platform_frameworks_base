@@ -40,6 +40,9 @@ final class JWebCoreJavaBridge extends Handler {
     private boolean mTimerPaused;
     private boolean mHasDeferredTimers;
 
+    /* package */
+    static final int REFRESH_PLUGINS = 100;
+
     /**
      * Construct a new JWebCoreJavaBridge to interface with
      * WebCore timers and cookies.
@@ -83,6 +86,11 @@ final class JWebCoreJavaBridge extends Handler {
             }
             case FUNCPTR_MESSAGE:
                 nativeServiceFuncPtrQueue();
+                break;
+            case REFRESH_PLUGINS:
+                nativeUpdatePluginDirectories(PluginManager.getInstance(null)
+                        .getPluginDirecoties(), ((Boolean) msg.obj)
+                        .booleanValue());
                 break;
         }
     }
@@ -171,6 +179,13 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     /**
+     * Returns an array of plugin directoies
+     */
+    private String[] getPluginDirectories() {
+        return PluginManager.getInstance(null).getPluginDirecoties();
+    }
+
+    /**
      * setSharedTimer
      * @param timemillis The relative time when the timer should fire
      */
@@ -210,5 +225,7 @@ final class JWebCoreJavaBridge extends Handler {
     private native void nativeConstructor();
     private native void nativeFinalize();
     private native void sharedTimerFired();
+    private native void nativeUpdatePluginDirectories(String[] directories,
+            boolean reload);
     public native void setNetworkOnLine(boolean online);
 }

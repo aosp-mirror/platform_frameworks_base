@@ -131,7 +131,6 @@ public class WebSettings {
     private String          mUserAgent;
     private boolean         mUseDefaultUserAgent;
     private String          mAcceptLanguage;
-    private String          mPluginsPath = "";
     private int             mMinimumFontSize = 8;
     private int             mMinimumLogicalFontSize = 8;
     private int             mDefaultFontSize = 16;
@@ -892,15 +891,9 @@ public class WebSettings {
     }
 
     /**
-     * Set a custom path to plugins used by the WebView. The client
-     * must ensure it exists before this call.
-     * @param pluginsPath String path to the directory containing plugins.
+     * TODO: need to add @Deprecated
      */
     public synchronized void setPluginsPath(String pluginsPath) {
-        if (pluginsPath != null && !pluginsPath.equals(mPluginsPath)) {
-            mPluginsPath = pluginsPath;
-            postSync();
-        }
     }
 
     /**
@@ -1001,11 +994,10 @@ public class WebSettings {
     }
 
     /**
-     * Return the current path used for plugins in the WebView.
-     * @return The string path to the WebView plugins.
+     * TODO: need to add @Deprecated
      */
     public synchronized String getPluginsPath() {
-        return mPluginsPath;
+        return "";
     }
 
     /**

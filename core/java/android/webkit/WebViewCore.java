@@ -404,8 +404,6 @@ final class WebViewCore {
 
     private native void nativeDumpNavTree();
 
-    private native void nativeRefreshPlugins(boolean reloadOpenPages);
-    
     /**
      *  Delete text from start to end in the focused textfield. If there is no
      *  focus, or if start == end, silently fail.  If start and end are out of 
@@ -582,7 +580,7 @@ final class WebViewCore {
             "GET_SELECTION", // = 129;
             "WEBKIT_DRAW", // = 130;
             "SYNC_SCROLL", // = 131;
-            "REFRESH_PLUGINS", // = 132;
+            "", // = 132;
             "SPLIT_PICTURE_SET", // = 133;
             "CLEAR_CONTENT", // = 134;
             "SET_FINAL_FOCUS", // = 135;
@@ -629,7 +627,6 @@ final class WebViewCore {
         static final int GET_SELECTION = 129;
         static final int WEBKIT_DRAW = 130;
         static final int SYNC_SCROLL = 131;
-        static final int REFRESH_PLUGINS = 132;
         static final int SPLIT_PICTURE_SET = 133;
         static final int CLEAR_CONTENT = 134;
         
@@ -1048,10 +1045,6 @@ final class WebViewCore {
                             mWebkitScrollY = msg.arg2;
                             break;
 
-                        case REFRESH_PLUGINS:
-                            nativeRefreshPlugins(msg.arg1 != 0);
-                            break;
-                            
                         case SPLIT_PICTURE_SET:
                             nativeSplitContent();
                             mSplitPictureIsScheduled = false;
