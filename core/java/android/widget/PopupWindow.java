@@ -73,8 +73,8 @@ public class PopupWindow {
      */
     public static final int INPUT_METHOD_NOT_NEEDED = 2;
     
-    private final Context mContext;
-    private final WindowManager mWindowManager;
+    private Context mContext;
+    private WindowManager mWindowManager;
     
     private boolean mIsShowing;
     private boolean mIsDropdown;
@@ -159,8 +159,7 @@ public class PopupWindow {
      */
     public PopupWindow(Context context, AttributeSet attrs, int defStyle) {
         mContext = context;
-        mWindowManager = (WindowManager)context.getSystemService(
-                Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 
         TypedArray a =
             context.obtainStyledAttributes(
@@ -273,11 +272,11 @@ public class PopupWindow {
      * @param height the popup's height
      * @param focusable true if the popup can be focused, false otherwise
      */
-    public PopupWindow(View contentView, int width, int height,
-            boolean focusable) {
-        mContext = contentView.getContext();
-        mWindowManager = (WindowManager)mContext.getSystemService(
-                Context.WINDOW_SERVICE);
+    public PopupWindow(View contentView, int width, int height, boolean focusable) {
+        if (contentView != null) {
+            mContext = contentView.getContext();
+            mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        }
         setContentView(contentView);
         setWidth(width);
         setHeight(height);
@@ -374,6 +373,14 @@ public class PopupWindow {
         }
 
         mContentView = contentView;
+
+        if (mContext == null) {
+            mContext = mContentView.getContext();
+        }
+
+        if (mWindowManager == null) {
+            mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        }
     }
 
     /**
@@ -748,6 +755,11 @@ public class PopupWindow {
      * @param p the layout parameters of the popup's content view
      */
     private void preparePopup(WindowManager.LayoutParams p) {
+        if (mContentView == null || mContext == null || mWindowManager == null) {
+            throw new IllegalStateException("You must specify a valid content view by "
+                    + "calling setContentView() before attempting to show the popup.");
+        }
+
         if (mBackground != null) {
             final ViewGroup.LayoutParams layoutParams = mContentView.getLayoutParams();
             int height = ViewGroup.LayoutParams.FILL_PARENT;
