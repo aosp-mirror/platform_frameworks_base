@@ -400,7 +400,7 @@ public final class Bitmap implements Parcelable {
      * @param y        The y coordinate of the first pixel in source
      * @param width    The number of pixels in each row
      * @param height   The number of rows
-     * @param m        Option matrix to be applied to the pixels
+     * @param m        Optional matrix to be applied to the pixels
      * @param filter   true if the source should be filtered.
      *                   Only applies if the matrix contains more than just
      *                   translation.
