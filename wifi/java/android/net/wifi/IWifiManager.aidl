@@ -69,5 +69,11 @@ interface IWifiManager
     boolean acquireWifiLock(IBinder lock, int lockType, String tag);
 
     boolean releaseWifiLock(IBinder lock);
+
+    boolean isWifiMulticastEnabled();
+
+    void enableWifiMulticast(IBinder binder, String tag);
+
+    void disableWifiMulticast();
 }
 

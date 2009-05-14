@@ -823,4 +823,65 @@ public class WifiManager {
     public WifiLock createWifiLock(String tag) {
         return new WifiLock(WIFI_MODE_FULL, tag);
     }
+
+    /**
+     * Check multicast filter status.
+     *
+     * @return true if multicast packets are allowed.
+     *
+     * @hide pending API council approval
+     */
+    public boolean isWifiMulticastEnabled() {
+        try {
+            return mService.isWifiMulticastEnabled();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Turn on the reception of multicast packets.
+     * The default behavior is to disable multicast packets as they
+     * have a noticable negative effect on battery life.  An
+     * application can turn them on, but should not leave it on for longer
+     * than needed.  When the app quits (or crashes) its request will
+     * be reverted.
+     *
+     * @param tag a string associated with this request for debugging.
+     *
+     * @return true on success
+     *
+     * @see #disableWifiMulticast
+     *
+     * @hide pending API council approval
+     */
+    public boolean enableWifiMulticast(String tag) {
+        try {
+            mService.enableWifiMulticast(new Binder(), tag);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Return to the default multicast-off setting.
+     * Note that if others had turned on Multicast reception, your
+     * call will not turn it back off - they must also turn off their
+     * request for multicast reception.
+     *
+     * @return true on success
+     *
+     * @see #enableWifiMulticast
+     *
+     * @hide pending API council approval
+     */
+    public boolean disableWifiMulticast() {
+        try {
+            mService.disableWifiMulticast();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
 }

@@ -96,6 +96,11 @@ public class WifiService extends IWifiManager.Stub {
     private int mScanLocksAcquired;
     private int mScanLocksReleased;
 
+    private final List<WifiMulticaster> mMulticasters =
+            new ArrayList<WifiMulticaster>();
+    private int mMulticastEnabled;
+    private int mMulticastDisabled;
+
     private final IBatteryStats mBatteryStats;
     
     /**
@@ -1727,21 +1732,9 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    private class WifiLock implements IBinder.DeathRecipient {
-        String mTag;
-        int mLockMode;
-        IBinder mBinder;
-
+    private class WifiLock extends WifiDeathRecipient {
         WifiLock(int lockMode, String tag, IBinder binder) {
-            super();
-            mTag = tag;
-            mLockMode = lockMode;
-            mBinder = binder;
-            try {
-                mBinder.linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                binderDied();
-            }
+            super(lockMode, tag, binder);
         }
 
         public void binderDied() {
@@ -1751,7 +1744,7 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         public String toString() {
-            return "WifiLock{" + mTag + " type=" + mLockMode + " binder=" + mBinder + "}";
+            return "WifiLock{" + mTag + " type=" + mMode + " binder=" + mBinder + "}";
         }
     }
 
@@ -1771,7 +1764,7 @@ public class WifiService extends IWifiManager.Stub {
                 return WifiManager.WIFI_MODE_FULL;
             }
             for (WifiLock l : mList) {
-                if (l.mLockMode == WifiManager.WIFI_MODE_FULL) {
+                if (l.mMode == WifiManager.WIFI_MODE_FULL) {
                     return WifiManager.WIFI_MODE_FULL;
                 }
             }
@@ -1826,7 +1819,7 @@ public class WifiService extends IWifiManager.Stub {
         int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
-            switch(wifiLock.mLockMode) {
+            switch(wifiLock.mMode) {
             case WifiManager.WIFI_MODE_FULL:
                 ++mFullLocksAcquired;
                 mBatteryStats.noteFullWifiLockAcquired(uid);
@@ -1862,7 +1855,7 @@ public class WifiService extends IWifiManager.Stub {
             int uid = Binder.getCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
-                switch(wifiLock.mLockMode) {
+                switch(wifiLock.mMode) {
                     case WifiManager.WIFI_MODE_FULL:
                         ++mFullLocksReleased;
                         mBatteryStats.noteFullWifiLockReleased(uid);
@@ -1880,5 +1873,111 @@ public class WifiService extends IWifiManager.Stub {
         
         updateWifiState();
         return hadLock;
+    }
+
+    private abstract class WifiDeathRecipient
+            implements IBinder.DeathRecipient {
+        String mTag;
+        int mMode;
+        IBinder mBinder;
+
+        WifiDeathRecipient(int mode, String tag, IBinder binder) {
+            super();
+            mTag = tag;
+            mMode = mode;
+            mBinder = binder;
+            try {
+                mBinder.linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                binderDied();
+            }
+        }
+    }
+
+    private class WifiMulticaster extends WifiDeathRecipient {
+        WifiMulticaster(String tag, IBinder binder) {
+            super(Binder.getCallingUid(), tag, binder);
+        }
+
+        public void binderDied() {
+            Log.e(TAG, "WifiMulticaster binderDied");
+            synchronized (mMulticasters) {
+                int i = mMulticasters.indexOf(this);
+                if (i != -1) {
+                    removeMulticasterLocked(i, mMode);
+                }
+            }
+        }
+
+        public String toString() {
+            return "WifiMulticaster{" + mTag + " binder=" + mBinder + "}";
+        }
+
+        public int getUid() {
+            return mMode;
+        }
+    }
+
+    public void enableWifiMulticast(IBinder binder, String tag) {
+        enforceChangePermission();
+
+        synchronized (mMulticasters) {
+            mMulticastEnabled++;
+            mMulticasters.add(new WifiMulticaster(tag, binder));
+            // Note that we could call stopPacketFiltering only when
+            // our new size == 1 (first call), but this function won't
+            // be called often and by making the stopPacket call each
+            // time we're less fragile and self-healing.
+            WifiNative.stopPacketFiltering();
+        }
+
+        int uid = Binder.getCallingUid();
+        Long ident = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.noteWifiMulticastEnabled(uid);
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    public void disableWifiMulticast() {
+        enforceChangePermission();
+
+        int uid = Binder.getCallingUid();
+        synchronized (mMulticasters) {
+            mMulticastDisabled++;
+            int size = mMulticasters.size();
+            for (int i = size - 1; i >= 0; i--) {
+                WifiMulticaster m = mMulticasters.get(i);
+                if ((m != null) && (m.getUid() == uid)) {
+                    removeMulticasterLocked(i, uid);
+                }
+            }
+        }
+    }
+
+    private void removeMulticasterLocked(int i, int uid)
+    {
+        mMulticasters.remove(i);
+        if (mMulticasters.size() == 0) {
+            WifiNative.startPacketFiltering();
+        }
+
+        Long ident = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.noteWifiMulticastDisabled(uid);
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    public boolean isWifiMulticastEnabled() {
+        enforceAccessPermission();
+
+        synchronized (mMulticasters) {
+            return (mMulticasters.size() > 0);
+        }
     }
 }

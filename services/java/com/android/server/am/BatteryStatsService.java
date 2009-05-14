@@ -261,6 +261,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    public void noteWifiMulticastEnabled(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastEnabledLocked(uid);
+        }
+    }
+
+    public void noteWifiMulticastDisabled(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastDisabledLocked(uid);
+        }
+    }
+
     public boolean isOnBattery() {
         return mStats.isOnBattery();
     }
