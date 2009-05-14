@@ -160,10 +160,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private long mStatusUpdateTime = SystemClock.elapsedRealtime();
     
     // turn off GPS fix icon if we haven't received a fix in 10 seconds
-    private static final long RECENT_FIX_TIMEOUT = 10 * 1000;
+    private static final long RECENT_FIX_TIMEOUT = 10;
     
     // number of fixes to receive before disabling GPS
     private static final int MIN_FIX_COUNT = 10;
+
+    // stop trying if we do not receive a fix within 60 seconds
+    private static final int NO_FIX_TIMEOUT = 60;
 
     // true if we are enabled
     private boolean mEnabled;
@@ -221,8 +224,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
+    private final static String ALARM_TIMEOUT = "com.android.internal.location.ALARM_TIMEOUT";
     private final AlarmManager mAlarmManager;
     private final PendingIntent mWakeupIntent;
+    private final PendingIntent mTimeoutIntent;
 
     private final IBatteryStats mBatteryStats;
     private final SparseIntArray mClientUids = new SparseIntArray();
@@ -292,6 +297,9 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             if (action.equals(ALARM_WAKEUP)) {
                 if (DEBUG) Log.d(TAG, "ALARM_WAKEUP");
                 startNavigating();
+            } else if (action.equals(ALARM_TIMEOUT)) {
+                if (DEBUG) Log.d(TAG, "ALARM_TIMEOUT");
+                hibernate();
             } else if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
                 String state = intent.getStringExtra(Phone.STATE_KEY);
                 String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
@@ -326,9 +334,11 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
+        mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ALARM_WAKEUP);
+        intentFilter.addAction(ALARM_TIMEOUT);
         intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         context.registerReceiver(mBroadcastReciever, intentFilter);
 
@@ -569,6 +579,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             startNavigating();
         } else {
             mAlarmManager.cancel(mWakeupIntent);
+            mAlarmManager.cancel(mTimeoutIntent);
             stopNavigating();
         }
     }
@@ -672,12 +683,19 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             if (!native_start(mPositionMode, false, mFixInterval)) {
                 mStarted = false;
                 Log.e(TAG, "native_start failed in startNavigating()");
+                return;
             }
 
             // reset SV count to zero
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
             mFixCount = 0;
             mFixRequestTime = System.currentTimeMillis();
+            // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
+            // and our fix interval is not short
+            if (mFixInterval >= NO_FIX_TIMEOUT) {
+                mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT * 1000, mTimeoutIntent);
+            }
         }
     }
 
@@ -693,6 +711,17 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             // reset SV count to zero
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
         }
+    }
+
+    private void hibernate() {
+        // stop GPS until our next fix interval arrives
+        stopNavigating();
+        mFixCount = 0;
+        mAlarmManager.cancel(mTimeoutIntent);
+        mAlarmManager.cancel(mWakeupIntent);
+        long now = SystemClock.elapsedRealtime();
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + mFixInterval * 1000, mWakeupIntent);
     }
 
     /**
@@ -762,6 +791,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
 
         if (mStarted && mStatus != LocationProvider.AVAILABLE) {
+            mAlarmManager.cancel(mTimeoutIntent);
             // send an intent to notify that the GPS is receiving fixes.
             Intent intent = new Intent(GPS_FIX_CHANGE_ACTION);
             intent.putExtra(EXTRA_ENABLED, true);
@@ -771,12 +801,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
         if (mFixCount++ >= MIN_FIX_COUNT && mFixInterval > 1) {
             if (DEBUG) Log.d(TAG, "exceeded MIN_FIX_COUNT");
-            stopNavigating();
-            mFixCount = 0;
-            mAlarmManager.cancel(mWakeupIntent);
-            long now = SystemClock.elapsedRealtime();
-            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + mFixInterval * 1000, mWakeupIntent);
+            hibernate();
         }
    }
 
@@ -881,7 +906,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         updateStatus(mStatus, svCount);
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
-            System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT) {
+            System.currentTimeMillis() - mLastFixTime > RECENT_FIX_TIMEOUT * 1000) {
             // send an intent to notify that the GPS is no longer receiving fixes.
             Intent intent = new Intent(GPS_FIX_CHANGE_ACTION);
             intent.putExtra(EXTRA_ENABLED, false);
