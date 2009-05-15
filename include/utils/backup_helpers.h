@@ -25,8 +25,28 @@ namespace android {
 int back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
         char const* fileBase, char const* const* files, int fileCount);
 
+// the sizes of all of these match.
+typedef struct {
+    int type; // == APP_MAGIC_V1
+    int packageLen; // length of the name of the package that follows, not including the null.
+    int cookie;
+} app_header_v1;
+
+typedef struct {
+    int type; // ENTITY_MAGIC_V1
+    int keyLen; // length of the key name, not including the null terminator
+    int dataSize; // size of the data, not including the padding
+} entity_header_v1;
+
+typedef struct {
+    int type; // FOOTER_MAGIC_V1
+    int entityCount; // the number of entities that were written
+    int cookie;
+} app_footer_v1;
+
+
 /**
- * Reads the data.
+ * Writes the data.
  *
  * If an error occurs, it poisons this object and all write calls will fail
  * with the error that occurred.
@@ -38,12 +58,12 @@ public:
     // does not close fd
     ~BackupDataWriter();
 
-    status_t WriteAppHeader(const String8& packageName);
+    status_t WriteAppHeader(const String8& packageName, int cookie);
 
     status_t WriteEntityHeader(const String8& key, size_t dataSize);
     status_t WriteEntityData(const void* data, size_t size);
 
-    status_t WriteAppFooter();
+    status_t WriteAppFooter(int cookie);
 
 private:
     explicit BackupDataWriter();
@@ -55,6 +75,44 @@ private:
     int m_entityCount;
 };
 
+/**
+ * Reads the data.
+ *
+ * If an error occurs, it poisons this object and all write calls will fail
+ * with the error that occurred.
+ */
+class BackupDataReader
+{
+public:
+    BackupDataReader(int fd);
+    // does not close fd
+    ~BackupDataReader();
+
+    status_t Status();
+    status_t ReadNextHeader();
+
+    status_t ReadAppHeader(String8* packageName, int* cookie);
+    bool HasEntities();
+    status_t ReadEntityHeader(String8* key, size_t* dataSize);
+    status_t ReadEntityData(void* data, size_t size);
+    status_t ReadAppFooter(int* cookie);
+
+private:
+    explicit BackupDataReader();
+    status_t skip_padding();
+    
+    int m_fd;
+    status_t m_status;
+    ssize_t m_pos;
+    int m_entityCount;
+    union {
+        int type;
+        app_header_v1 app;
+        entity_header_v1 entity;
+        app_footer_v1 footer;
+    } m_header;
+};
+
 #define TEST_BACKUP_HELPERS 0
 
 #if TEST_BACKUP_HELPERS
@@ -62,6 +120,7 @@ int backup_helper_test_empty();
 int backup_helper_test_four();
 int backup_helper_test_files();
 int backup_helper_test_data_writer();
+int backup_helper_test_data_reader();
 #endif
 
 } // namespace android

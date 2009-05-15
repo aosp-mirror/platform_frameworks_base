@@ -599,13 +599,14 @@ backup_helper_test_four()
 // hexdump -v -e '"    " 8/1 " 0x%02x," "\n"' data_writer.data
 const unsigned char DATA_GOLDEN_FILE[] = {
      0x41, 0x70, 0x70, 0x31, 0x0b, 0x00, 0x00, 0x00,
-     0x6e, 0x6f, 0x5f, 0x70, 0x61, 0x64, 0x64, 0x69,
-     0x6e, 0x67, 0x5f, 0x00, 0x44, 0x61, 0x74, 0x61,
-     0x0b, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00,
-     0x6e, 0x6f, 0x5f, 0x70, 0x61, 0x64, 0x64, 0x69,
-     0x6e, 0x67, 0x5f, 0x00, 0x6e, 0x6f, 0x5f, 0x70,
+     0xdd, 0xcc, 0xbb, 0xaa, 0x6e, 0x6f, 0x5f, 0x70,
      0x61, 0x64, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x00,
-     0x41, 0x70, 0x70, 0x31, 0x0c, 0x00, 0x00, 0x00,
+     0x44, 0x61, 0x74, 0x61, 0x0b, 0x00, 0x00, 0x00,
+     0x0c, 0x00, 0x00, 0x00, 0x6e, 0x6f, 0x5f, 0x70,
+     0x61, 0x64, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x00,
+     0x6e, 0x6f, 0x5f, 0x70, 0x61, 0x64, 0x64, 0x69,
+     0x6e, 0x67, 0x5f, 0x00, 0x41, 0x70, 0x70, 0x31,
+     0x0c, 0x00, 0x00, 0x00, 0xdd, 0xcc, 0xbb, 0xaa,
      0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
      0x6f, 0x5f, 0x5f, 0x33, 0x00, 0xbc, 0xbc, 0xbc,
      0x44, 0x61, 0x74, 0x61, 0x0c, 0x00, 0x00, 0x00,
@@ -614,15 +615,16 @@ const unsigned char DATA_GOLDEN_FILE[] = {
      0x00, 0xbc, 0xbc, 0xbc, 0x70, 0x61, 0x64, 0x64,
      0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x5f, 0x33,
      0x00, 0xbc, 0xbc, 0xbc, 0x41, 0x70, 0x70, 0x31,
-     0x0d, 0x00, 0x00, 0x00, 0x70, 0x61, 0x64, 0x64,
+     0x0d, 0x00, 0x00, 0x00, 0xdd, 0xcc, 0xbb, 0xaa,
+     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
+     0x6f, 0x5f, 0x32, 0x5f, 0x5f, 0x00, 0xbc, 0xbc,
+     0x44, 0x61, 0x74, 0x61, 0x0d, 0x00, 0x00, 0x00,
+     0x0e, 0x00, 0x00, 0x00, 0x70, 0x61, 0x64, 0x64,
      0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x32, 0x5f,
-     0x5f, 0x00, 0xbc, 0xbc, 0x44, 0x61, 0x74, 0x61,
-     0x0d, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00,
-     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
-     0x6f, 0x5f, 0x32, 0x5f, 0x5f, 0x00, 0xbc, 0xbc,
-     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
-     0x6f, 0x5f, 0x32, 0x5f, 0x5f, 0x00, 0xbc, 0xbc,
-     0x41, 0x70, 0x70, 0x31, 0x0a, 0x00, 0x00, 0x00,
+     0x5f, 0x00, 0xbc, 0xbc, 0x70, 0x61, 0x64, 0x64,
+     0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x32, 0x5f,
+     0x5f, 0x00, 0xbc, 0xbc, 0x41, 0x70, 0x70, 0x31,
+     0x0a, 0x00, 0x00, 0x00, 0xdd, 0xcc, 0xbb, 0xaa,
      0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
      0x6f, 0x31, 0x00, 0xbc, 0x44, 0x61, 0x74, 0x61,
      0x0a, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00,
@@ -630,6 +632,7 @@ const unsigned char DATA_GOLDEN_FILE[] = {
      0x6f, 0x31, 0x00, 0xbc, 0x70, 0x61, 0x64, 0x64,
      0x65, 0x64, 0x5f, 0x74, 0x6f, 0x31, 0x00, 0xbc,
      0x46, 0x6f, 0x6f, 0x74, 0x04, 0x00, 0x00, 0x00,
+     0x99, 0x99, 0x77, 0x77
 };
 const int DATA_GOLDEN_FILE_SIZE = sizeof(DATA_GOLDEN_FILE);
 
@@ -639,7 +642,7 @@ test_write_header_and_entity(BackupDataWriter& writer, const char* str)
     int err;
     String8 text(str);
 
-    err = writer.WriteAppHeader(text);
+    err = writer.WriteAppHeader(text, 0xaabbccdd);
     if (err != 0) {
         fprintf(stderr, "WriteAppHeader failed with %s\n", strerror(err));
         return err;
@@ -685,7 +688,7 @@ backup_helper_test_data_writer()
     err |= test_write_header_and_entity(writer, "padded_to_2__");
     err |= test_write_header_and_entity(writer, "padded_to1");
 
-    writer.WriteAppFooter();
+    writer.WriteAppFooter(0x77779999);
 
     close(fd);
 
@@ -693,6 +696,162 @@ backup_helper_test_data_writer()
     if (err != 0) {
         return err;
     }
+
+    return err;
+}
+
+int
+test_read_header_and_entity(BackupDataReader& reader, const char* str)
+{
+    int err;
+    int bufSize = strlen(str)+1;
+    char* buf = (char*)malloc(bufSize);
+    String8 string;
+    int cookie = 0x11111111;
+    size_t actualSize;
+
+    // printf("\n\n---------- test_read_header_and_entity -- %s\n\n", str);
+
+    err = reader.ReadNextHeader();
+    if (err != 0) {
+        fprintf(stderr, "ReadNextHeader (for app header) failed with %s\n", strerror(err));
+        goto done;
+    }
+
+    err = reader.ReadAppHeader(&string, &cookie);
+    if (err != 0) {
+        fprintf(stderr, "ReadAppHeader failed with %s\n", strerror(err));
+        goto done;
+    }
+    if (string != str) {
+        fprintf(stderr, "ReadAppHeader expected packageName '%s' got '%s'\n", str, string.string());
+        err = EINVAL;
+        goto done;
+    }
+    if (cookie != (int)0xaabbccdd) {
+        fprintf(stderr, "ReadAppHeader expected cookie 0x%08x got 0x%08x\n", 0xaabbccdd, cookie);
+        err = EINVAL;
+        goto done;
+    }
+
+    err = reader.ReadNextHeader();
+    if (err != 0) {
+        fprintf(stderr, "ReadNextHeader (for entity header) failed with %s\n", strerror(err));
+        goto done;
+    }
+
+    err = reader.ReadEntityHeader(&string, &actualSize);
+    if (err != 0) {
+        fprintf(stderr, "ReadEntityHeader failed with %s\n", strerror(err));
+        goto done;
+    }
+    if (string != str) {
+        fprintf(stderr, "ReadEntityHeader expected key '%s' got '%s'\n", str, string.string());
+        err = EINVAL;
+        goto done;
+    }
+    if ((int)actualSize != bufSize) {
+        fprintf(stderr, "ReadEntityHeader expected dataSize 0x%08x got 0x%08x\n", bufSize,
+                actualSize);
+        err = EINVAL;
+        goto done;
+    }
+
+    err = reader.ReadEntityData(buf, bufSize);
+    if (err != NO_ERROR) {
+        fprintf(stderr, "ReadEntityData failed with %s\n", strerror(err));
+        goto done;
+    }
+
+    if (0 != memcmp(buf, str, bufSize)) {
+        fprintf(stderr, "ReadEntityData expected '%s' but got something starting with "
+                "%02x %02x %02x %02x\n", str, buf[0], buf[1], buf[2], buf[3]);
+        err = EINVAL;
+        goto done;
+    }
+
+    // The next read will confirm whether it got the right amount of data.
+
+done:
+    if (err != NO_ERROR) {
+        fprintf(stderr, "test_read_header_and_entity failed with %s\n", strerror(err));
+    }
+    free(buf);
+    return err;
+}
+
+int
+backup_helper_test_data_reader()
+{
+    int err;
+    int fd;
+    const char* filename = SCRATCH_DIR "data_reader.data";
+
+    system("rm -r " SCRATCH_DIR);
+    mkdir(SCRATCH_DIR, 0777);
+    mkdir(SCRATCH_DIR "data", 0777);
+    
+    fd = creat(filename, 0666);
+    if (fd == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
+    err = write(fd, DATA_GOLDEN_FILE, DATA_GOLDEN_FILE_SIZE);
+    if (err != DATA_GOLDEN_FILE_SIZE) {
+        fprintf(stderr, "Error \"%s\" writing golden file %s\n", strerror(errno), filename);
+        return errno;
+    }
+
+    close(fd);
+
+    fd = open(filename, O_RDONLY);
+    if (fd == -1) {
+        fprintf(stderr, "Error \"%s\" opening golden file %s for read\n", strerror(errno),
+                filename);
+        return errno;
+    }
+
+    {
+        BackupDataReader reader(fd);
+
+        err = 0;
+
+        if (err == NO_ERROR) {
+            err = test_read_header_and_entity(reader, "no_padding_");
+        }
+
+        if (err == NO_ERROR) {
+            err = test_read_header_and_entity(reader, "padded_to__3");
+        }
+
+        if (err == NO_ERROR) {
+            err = test_read_header_and_entity(reader, "padded_to_2__");
+        }
+
+        if (err == NO_ERROR) {
+            err = test_read_header_and_entity(reader, "padded_to1");
+        }
+
+        if (err == NO_ERROR) {
+            err = reader.ReadNextHeader();
+            if (err != 0) {
+                fprintf(stderr, "ReadNextHeader (for app header) failed with %s\n", strerror(err));
+            }
+
+            if (err == NO_ERROR) {
+                int cookie;
+                err |= reader.ReadAppFooter(&cookie);
+                if (cookie != 0x77779999) {
+                    fprintf(stderr, "app footer cookie expected=0x%08x actual=0x%08x\n",
+                        0x77779999, cookie);
+                    err = EINVAL;
+                }
+            }
+        }
+    }
+
+    close(fd);
 
     return err;
 }
