@@ -25,6 +25,7 @@ import android.util.Log;
 
 /**
  * ICPC interface methods for an iterator over Entity objects.
+ * @hide
  */
 public interface IEntityIterator extends IInterface {
     /** Local-side IPC implementation stub class. */
@@ -92,7 +93,6 @@ public interface IEntityIterator extends IInterface {
                         return true;
                     }
                     reply.writeNoException();
-                    reply.writeString(entity.getClass().getName());
                     reply.writeParcelable(entity, 0);
                     return true;
                 }
@@ -145,22 +145,15 @@ public interface IEntityIterator extends IInterface {
             public Entity next() throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
-                Entity _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     mRemote.transact(Stub.TRANSACTION_next, _data, _reply, 0);
                     _reply.readException();
-                    final String className = _reply.readString();
-                    final Class entityClass = Class.forName(className);
-                    ClassLoader classLoader = entityClass.getClassLoader();
-                    _result = (Entity) _reply.readParcelable(classLoader);
-                } catch (ClassNotFoundException e) {
-                   throw new RuntimeException(e);
+                    return (Entity) _reply.readParcelable(null /* classLoader */);
                 } finally {
                     _reply.recycle();
                     _data.recycle();
                 }
-                return _result;
             }
 
             public void close() throws RemoteException {

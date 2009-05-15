@@ -18,10 +18,15 @@ package android.content;
 
 import android.net.Uri;
 import android.database.Cursor;
+import android.os.Parcelable;
+import android.os.Parcel;
 
 import java.util.Map;
+import java.util.HashMap;
 
-public class ContentProviderOperation {
+import dalvik.system.VMStack;
+
+public class ContentProviderOperation implements Parcelable {
     private final static int TYPE_INSERT = 1;
     private final static int TYPE_UPDATE = 2;
     private final static int TYPE_DELETE = 3;
@@ -32,6 +37,7 @@ public class ContentProviderOperation {
     private final String mSelection;
     private final String[] mSelectionArgs;
     private final ContentValues mValues;
+    private final Entity mEntity;
     private final Integer mExpectedCount;
     private final ContentValues mValuesBackReferences;
     private final Map<Integer, Integer> mSelectionArgsBackReferences;
@@ -46,11 +52,81 @@ public class ContentProviderOperation {
         mType = builder.mType;
         mUri = builder.mUri;
         mValues = builder.mValues;
+        mEntity = builder.mEntity;
         mSelection = builder.mSelection;
         mSelectionArgs = builder.mSelectionArgs;
         mExpectedCount = builder.mExpectedCount;
         mSelectionArgsBackReferences = builder.mSelectionArgsBackReferences;
         mValuesBackReferences = builder.mValuesBackReferences;
+    }
+
+    private ContentProviderOperation(Parcel source, ClassLoader classLoader) {
+        mType = source.readInt();
+        mUri = Uri.CREATOR.createFromParcel(source);
+        mValues = source.readInt() != 0 ? ContentValues.CREATOR.createFromParcel(source) : null;
+        mEntity = (Entity) source.readParcelable(classLoader);
+        mSelection = source.readInt() != 0 ? source.readString() : null;
+        mSelectionArgs = source.readInt() != 0 ? source.readStringArray() : null;
+        mExpectedCount = source.readInt() != 0 ? source.readInt() : null;
+        mValuesBackReferences = source.readInt() != 0
+                
+                ? ContentValues.CREATOR.createFromParcel(source)
+                : null;
+        mSelectionArgsBackReferences = source.readInt() != 0
+                ? new HashMap<Integer, Integer>()
+                : null;
+        if (mSelectionArgsBackReferences != null) {
+            final int count = source.readInt();
+            for (int i = 0; i < count; i++) {
+                mSelectionArgsBackReferences.put(source.readInt(), source.readInt());
+            }
+        }
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mType);
+        Uri.writeToParcel(dest, mUri);
+        if (mValues != null) {
+            dest.writeInt(1);
+            mValues.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
+        }
+        dest.writeParcelable(mEntity, 0);
+        if (mSelection != null) {
+            dest.writeInt(1);
+            dest.writeString(mSelection);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mSelectionArgs != null) {
+            dest.writeInt(1);
+            dest.writeStringArray(mSelectionArgs);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mExpectedCount != null) {
+            dest.writeInt(1);
+            dest.writeInt(mExpectedCount);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mValuesBackReferences != null) {
+            dest.writeInt(1);
+            mValuesBackReferences.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mSelectionArgsBackReferences != null) {
+            dest.writeInt(1);
+            dest.writeInt(mSelectionArgsBackReferences.size());
+            for (Map.Entry<Integer, Integer> entry : mSelectionArgsBackReferences.entrySet()) {
+                dest.writeInt(entry.getKey());
+                dest.writeInt(entry.getValue());
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /**
@@ -92,6 +168,18 @@ public class ContentProviderOperation {
         return new Builder(TYPE_COUNT, uri);
     }
 
+    public Uri getUri() {
+        return mUri;
+    }
+
+    public boolean isWriteOperation() {
+        return mType == TYPE_DELETE || mType == TYPE_INSERT || mType == TYPE_UPDATE;
+    }
+
+    public boolean isReadOperation() {
+        return mType == TYPE_COUNT;
+    }
+
     /**
      * Applies this operation using the given provider. The backRefs array is used to resolve any
      * back references that were requested using
@@ -113,7 +201,12 @@ public class ContentProviderOperation {
                 resolveSelectionArgsBackReferences(backRefs, numBackRefs);
 
         if (mType == TYPE_INSERT) {
-            Uri newUri = provider.insert(mUri, values);
+            Uri newUri;
+            if (mEntity != null) {
+                newUri = provider.insertEntity(mUri, mEntity);
+            } else {
+                newUri = provider.insert(mUri, values);
+            }
             if (newUri == null) {
                 throw new OperationApplicationException("insert failed");
             }
@@ -124,7 +217,11 @@ public class ContentProviderOperation {
         if (mType == TYPE_DELETE) {
             numRows = provider.delete(mUri, mSelection, selectionArgs);
         } else if (mType == TYPE_UPDATE) {
-            numRows = provider.update(mUri, values, mSelection, selectionArgs);
+            if (mEntity != null) {
+                numRows = provider.updateEntity(mUri, mEntity);
+            } else {
+                numRows = provider.update(mUri, values, mSelection, selectionArgs);
+            }
         } else if (mType == TYPE_COUNT) {
             Cursor cursor = provider.query(mUri, COUNT_COLUMNS, mSelection, selectionArgs, null);
             try {
@@ -239,6 +336,22 @@ public class ContentProviderOperation {
         return backRefValue;
     }
 
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<ContentProviderOperation> CREATOR =
+            new Creator<ContentProviderOperation>() {
+        public ContentProviderOperation createFromParcel(Parcel source) {
+            return new ContentProviderOperation(source, VMStack.getCallingClassLoader2());
+        }
+
+        public ContentProviderOperation[] newArray(int size) {
+            return new ContentProviderOperation[size];
+        }
+    };
+
+
     /**
      * Used to add parameters to a {@link ContentProviderOperation}. The {@link Builder} is
      * first created by calling {@link ContentProviderOperation#newInsert(android.net.Uri)},
@@ -255,6 +368,7 @@ public class ContentProviderOperation {
         private String mSelection;
         private String[] mSelectionArgs;
         private ContentValues mValues;
+        private Entity mEntity;
         private Integer mExpectedCount;
         private ContentValues mValuesBackReferences;
         private Map<Integer, Integer> mSelectionArgsBackReferences;
@@ -268,8 +382,16 @@ public class ContentProviderOperation {
             mUri = uri;
         }
 
-        /** Create a ContentroviderOperation from this {@link Builder}. */
+        /** Create a ContentProviderOperation from this {@link Builder}. */
         public ContentProviderOperation build() {
+            if (mValues != null && mEntity != null) {
+                throw new IllegalArgumentException("you are not allowed to specify both an entity "
+                        + "and a values");
+            }
+            if (mEntity != null && mValuesBackReferences != null) {
+                throw new IllegalArgumentException("you are not allowed to specify both an entity "
+                        + "and a values backreference");
+            }
             return new ContentProviderOperation(this);
         }
 
@@ -295,7 +417,7 @@ public class ContentProviderOperation {
          * Add a {@link Map} of back references. The integer key is the index of the selection arg
          * to set and the integer value is the index of the previous result whose
          * value should be used for the arg. If any value at that index of the selection arg
-         * that was specified by {@likn withSelection} will be overwritten.
+         * that was specified by {@link #withSelection} will be overwritten.
          * This can only be used with builders of type update, delete, or count query.
          * @return this builder, to allow for chaining.
          */
@@ -319,6 +441,20 @@ public class ContentProviderOperation {
                 throw new IllegalArgumentException("only inserts and updates can have values");
             }
             mValues = values;
+            return this;
+        }
+
+        /**
+         * The ContentValues to use. This may be null. These values may be overwritten by
+         * the corresponding value specified by {@link #withValueBackReferences(ContentValues)}.
+         * This can only be used with builders of type insert or update.
+         * @return this builder, to allow for chaining.
+         */
+        public Builder withEntity(Entity entity) {
+            if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
+                throw new IllegalArgumentException("only inserts and updates can have an entity");
+            }
+            mEntity = entity;
             return this;
         }
 
