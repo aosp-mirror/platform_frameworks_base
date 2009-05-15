@@ -16,8 +16,11 @@
 
 package android.app;
 
-import com.google.android.collect.Maps;
+import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.XmlUtils;
+import com.google.android.collect.Maps;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.IBluetoothDevice;
@@ -37,9 +40,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageStatsObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
+import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -68,15 +71,15 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.RemoteException;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Vibrator;
 import android.os.FileUtils.FileStatus;
@@ -87,11 +90,10 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.WindowManagerImpl;
+import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
-
-import com.android.internal.policy.PolicyManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -102,15 +104,13 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.WeakHashMap;
 import java.util.Map.Entry;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -175,6 +175,7 @@ class ApplicationContext extends Context {
     private Resources.Theme mTheme = null;
     private PackageManager mPackageManager;
     private NotificationManager mNotificationManager = null;
+    private AccessibilityManager mAccessibilityManager = null;
     private ActivityManager mActivityManager = null;
     private Context mReceiverRestrictedContext = null;
     private SearchManager mSearchManager = null;
@@ -909,6 +910,8 @@ class ApplicationContext extends Context {
             return getNotificationManager();
         } else if (KEYGUARD_SERVICE.equals(name)) {
             return new KeyguardManager();
+        } else if (ACCESSIBILITY_SERVICE.equals(name)) {
+            return AccessibilityManager.getInstance(this);
         } else if (LOCATION_SERVICE.equals(name)) {
             return getLocationManager();
         } else if (SEARCH_SERVICE.equals(name)) {

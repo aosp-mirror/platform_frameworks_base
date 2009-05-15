@@ -24,15 +24,16 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.RectF;
+import android.graphics.Region;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.Config;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
@@ -601,6 +602,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public void addFocusables(ArrayList<View> views, int direction) {
+        addFocusables(views, direction, FOCUSABLES_TOUCH_MODE);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
         final int focusableCount = views.size();
 
         final int descendantFocusability = getDescendantFocusability();
@@ -612,7 +621,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = 0; i < count; i++) {
                 final View child = children[i];
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
-                    child.addFocusables(views, direction);
+                    child.addFocusables(views, direction, focusableMode);
                 }
             }
         }
@@ -625,7 +634,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             descendantFocusability != FOCUS_AFTER_DESCENDANTS ||
                 // No focusable descendants
                 (focusableCount == views.size())) {
-            super.addFocusables(views, direction);
+            super.addFocusables(views, direction, focusableMode);
         }
     }
 
@@ -1018,6 +1027,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < count; i++) {
             children[i].dispatchAttachedToWindow(info, visibility);
         }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean populated = false;
+        for (int i = 0, count = getChildCount(); i < count; i++) {
+            populated |= getChildAt(i).dispatchPopulateAccessibilityEvent(event);
+        }
+        return populated;
     }
 
     /**

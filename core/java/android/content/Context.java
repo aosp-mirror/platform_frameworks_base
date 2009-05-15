@@ -1145,6 +1145,15 @@ public abstract class Context {
     public static final String NOTIFICATION_SERVICE = "notification";
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.view.accessibility.AccessibilityManager} for giving the user
+     * feedback for UI events through the registered event listeners.
+     *
+     * @see #getSystemService
+     * @see android.view.accessibility.AccessibilityManager
+     */
+    public static final String ACCESSIBILITY_SERVICE = "accessibility";
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.NotificationManager} for controlling keyguard.
      *
      * @see #getSystemService

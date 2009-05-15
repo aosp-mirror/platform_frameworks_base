@@ -16,32 +16,34 @@
 
 package android.app;
 
+import com.android.internal.policy.PolicyManager;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Bundle;
 import android.util.Config;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
-
-import com.android.internal.policy.PolicyManager;
+import android.view.ViewGroup.LayoutParams;
+import android.view.accessibility.AccessibilityEvent;
 
 import java.lang.ref.WeakReference;
 
@@ -81,6 +83,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * {@hide}
      */
     protected boolean mCancelable = true;
+
     private Message mCancelMessage;
     private Message mDismissMessage;
 
@@ -209,7 +212,9 @@ public class Dialog implements DialogInterface, Window.Callback,
         if (mShowing) {
             if (Config.LOGV) Log.v(LOG_TAG,
                     "[Dialog] start: already showing, ignore");
-            if (mDecor != null) mDecor.setVisibility(View.VISIBLE);
+            if (mDecor != null) {
+                mDecor.setVisibility(View.VISIBLE);
+            }
             return;
         }
 
@@ -236,7 +241,9 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Hide the dialog, but do not dismiss it.
      */
     public void hide() {
-        if (mDecor != null) mDecor.setVisibility(View.GONE);
+        if (mDecor != null) {
+            mDecor.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -266,6 +273,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
 
         mWindowManager.removeView(mDecor);
+
         mDecor = null;
         mWindow.closeAllPanels();
         onStop();
@@ -280,7 +288,7 @@ public class Dialog implements DialogInterface, Window.Callback,
             Message.obtain(mDismissMessage).sendToTarget();
         }
     }
-    
+
     // internal method to make sure mcreated is set properly without requiring
     // users to call through to super in onCreate
     void dispatchOnCreate(Bundle savedInstanceState) {
@@ -606,6 +614,18 @@ public class Dialog implements DialogInterface, Window.Callback,
             return true;
         }
         return onTrackballEvent(ev);
+    }
+
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        event.setClassName(getClass().getName());
+        event.setPackageName(mContext.getPackageName());
+
+        LayoutParams params = getWindow().getAttributes();
+        boolean isFullScreen = (params.width == LayoutParams.FILL_PARENT) &&
+            (params.height == LayoutParams.FILL_PARENT);
+        event.setFullScreen(isFullScreen);
+
+        return false;
     }
 
     /**

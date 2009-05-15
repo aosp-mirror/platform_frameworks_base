@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
@@ -23,6 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Checkable;
 import android.widget.TextView;
 
@@ -42,6 +45,9 @@ public class CheckBoxPreference extends Preference {
     private CharSequence mSummaryOff;
     
     private boolean mChecked;
+    private boolean mSendAccessibilityEventViewClickedType;
+
+    private AccessibilityManager mAccessibilityManager;
     
     private boolean mDisableDependentsState;
     
@@ -55,6 +61,9 @@ public class CheckBoxPreference extends Preference {
         mDisableDependentsState = a.getBoolean(
                 com.android.internal.R.styleable.CheckBoxPreference_disableDependentsState, false);
         a.recycle();
+
+        mAccessibilityManager =
+            (AccessibilityManager) getContext().getSystemService(Service.ACCESSIBILITY_SERVICE);
     }
 
     public CheckBoxPreference(Context context, AttributeSet attrs) {
@@ -64,14 +73,26 @@ public class CheckBoxPreference extends Preference {
     public CheckBoxPreference(Context context) {
         this(context, null);
     }
-    
+
     @Override
     protected void onBindView(View view) {
         super.onBindView(view);
-        
+
         View checkboxView = view.findViewById(com.android.internal.R.id.checkbox);
         if (checkboxView != null && checkboxView instanceof Checkable) {
             ((Checkable) checkboxView).setChecked(mChecked);
+
+            // send an event to announce the value change of the CheckBox and is done here
+            // because clicking a preference does not immediately change the checked state
+            // for example when enabling the WiFi
+            if (mSendAccessibilityEventViewClickedType &&
+                    mAccessibilityManager.isEnabled() &&
+                    checkboxView.isEnabled()) {
+                mSendAccessibilityEventViewClickedType = false;
+
+                int eventType = AccessibilityEvent.TYPE_VIEW_CLICKED;
+                checkboxView.sendAccessibilityEventUnchecked(AccessibilityEvent.obtain(eventType));
+            }
         }
 
         // Sync the summary view
@@ -85,7 +106,7 @@ public class CheckBoxPreference extends Preference {
                 summaryView.setText(mSummaryOff);
                 useDefaultSummary = false;
             }
-            
+
             if (useDefaultSummary) {
                 final CharSequence summary = getSummary();
                 if (summary != null) {
@@ -111,6 +132,10 @@ public class CheckBoxPreference extends Preference {
         
         boolean newValue = !isChecked();
         
+        // in onBindView() an AccessibilityEventViewClickedType is sent to announce the change
+        // not sending
+        mSendAccessibilityEventViewClickedType = true;
+
         if (!callChangeListener(newValue)) {
             return;
         }
@@ -124,10 +149,11 @@ public class CheckBoxPreference extends Preference {
      * @param checked The checked state.
      */
     public void setChecked(boolean checked) {
+
         mChecked = checked;
 
         persistBoolean(checked);
-     
+
         notifyDependencyChange(shouldDisableDependents());
         
         notifyChanged();

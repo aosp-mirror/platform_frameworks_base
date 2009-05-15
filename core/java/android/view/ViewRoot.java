@@ -34,6 +34,8 @@ import android.util.Log;
 import android.util.EventLog;
 import android.util.SparseArray;
 import android.view.View.MeasureSpec;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
@@ -640,6 +642,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             host.dispatchAttachedToWindow(attachInfo, 0);
             getRunQueue().executeActions(attachInfo.mHandler);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
+
         } else {
             desiredWindowWidth = mWinFrame.width();
             desiredWindowHeight = mWinFrame.height();
@@ -1723,7 +1726,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                     mView.dispatchWindowFocusChanged(hasWindowFocus);
                 }
-                
+
                 // Note: must be done after the focus change callbacks,
                 // so all of the view state is set up correctly.
                 if (hasWindowFocus) {
@@ -1740,6 +1743,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                             .softInputMode &=
                                 ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
                     mHasHadWindowFocus = true;
+                }
+
+                if (hasWindowFocus && mView != null) {
+                    sendAccessibilityEvents();
                 }
             }
         } break;
@@ -2524,6 +2531,21 @@ public final class ViewRoot extends Handler implements ViewParent,
         msg.arg1 = hasFocus ? 1 : 0;
         msg.arg2 = inTouchMode ? 1 : 0;
         sendMessage(msg);
+    }
+
+    /**
+     * The window is getting focus so if there is anything focused/selected
+     * send an {@link AccessibilityEvent} to announce that.
+     */
+    private void sendAccessibilityEvents() {
+        if (!AccessibilityManager.getInstance(mView.getContext()).isEnabled()) {
+            return;
+        }
+        mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        View focusedView = mView.findFocus();
+        if (focusedView != null && focusedView != mView) {
+            focusedView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+        }
     }
 
     public boolean showContextMenuForChild(View originalView) {

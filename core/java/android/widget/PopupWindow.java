@@ -18,6 +18,8 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,8 +35,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.IBinder;
-import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import java.lang.ref.WeakReference;
@@ -1017,6 +1017,7 @@ public class PopupWindow {
             unregisterForScrollChanged();
 
             mWindowManager.removeView(mPopupView);
+
             if (mPopupView != mContentView && mPopupView instanceof ViewGroup) {
                 ((ViewGroup) mPopupView).removeView(mContentView);
             }
@@ -1316,7 +1317,16 @@ public class PopupWindow {
                 return super.onTouchEvent(event);
             }
         }
-        
+
+        @Override
+        public void sendAccessibilityEvent(int eventType) {
+            // clinets are interested in the content not the container, make it event source
+            if (mContentView != null) {
+                mContentView.sendAccessibilityEvent(eventType);
+            } else {
+                super.sendAccessibilityEvent(eventType);
+            }
+        }
     }
     
 }

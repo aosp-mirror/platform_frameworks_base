@@ -16,6 +16,9 @@
 
 package android.view;
 
+import com.android.internal.R;
+import com.android.internal.view.menu.MenuBuilder;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -25,12 +28,12 @@ import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Shader;
-import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -42,30 +45,30 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
+import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.Poolable;
 import android.util.Pool;
-import android.util.Pools;
+import android.util.Poolable;
 import android.util.PoolableManager;
-import android.util.Config;
+import android.util.Pools;
+import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityEventSource;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ScrollBarDrawable;
 
-import com.android.internal.R;
-import com.android.internal.view.menu.MenuBuilder;
-
+import java.lang.ref.SoftReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.WeakHashMap;
-import java.lang.ref.SoftReference;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * <p>
@@ -553,7 +556,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @see android.view.ViewGroup
  */
-public class View implements Drawable.Callback, KeyEvent.Callback {
+public class View implements Drawable.Callback, KeyEvent.Callback, AccessibilityEventSource {
     private static final boolean DBG = false;
 
     /**
@@ -849,6 +852,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * enabled for events such as long presses.
      */
     public static final int HAPTIC_FEEDBACK_ENABLED = 0x10000000;
+
+    /**
+     * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
+     * should add all focusable Views regardless if they are focusable in touch mode.
+     */
+    public static final int FOCUSABLES_ALL = 0x00000000;
+
+    /**
+     * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
+     * should add only Views focusable in touch mode.
+     */
+    public static final int FOCUSABLES_TOUCH_MODE = 0x00000001;
 
     /**
      * Use with {@link #focusSearch}. Move focus to the previous selectable
@@ -1551,6 +1566,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     protected int mPaddingBottom;
 
     /**
+     * Briefly describes the view and is primarily used for accessibility support.
+     */
+    private CharSequence mContentDescription;
+
+    /**
      * Cache the paddingRight set by the user to append to the scrollbar's size.
      */
     @ViewDebug.ExportedProperty
@@ -1857,6 +1877,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                         viewFlagValues |= DRAWING_CACHE_QUALITY_FLAGS[cacheQuality];
                         viewFlagMasks |= DRAWING_CACHE_QUALITY_MASK;
                     }
+                    break;
+                case com.android.internal.R.styleable.View_contentDescription:
+                    mContentDescription = a.getString(attr);
                     break;
                 case com.android.internal.R.styleable.View_soundEffectsEnabled:
                     if (!a.getBoolean(attr, true)) {
@@ -2255,6 +2278,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      *         otherwise is returned.
      */
     public boolean performClick() {
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+
         if (mOnClickListener != null) {
             playSoundEffect(SoundEffectConstants.CLICK);
             mOnClickListener.onClick(this);
@@ -2272,6 +2297,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      *         otherwise is returned.
      */
     public boolean performLongClick() {
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+
         boolean handled = false;
         if (mOnLongClickListener != null) {
             handled = mOnLongClickListener.onLongClick(View.this);
@@ -2492,6 +2519,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      *        from (in addition to direction).  Will be <code>null</code> otherwise.
      */
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
+        if (gainFocus) {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+        }
+
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (!gainFocus) {
             if (isPressed()) {
@@ -2511,6 +2542,79 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         if (mOnFocusChangeListener != null) {
             mOnFocusChangeListener.onFocusChange(this, gainFocus);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void sendAccessibilityEvent(int eventType) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            sendAccessibilityEventUnchecked(AccessibilityEvent.obtain(eventType));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
+        event.setClassName(getClass().getName());
+        event.setPackageName(getContext().getPackageName());
+        event.setEnabled(isEnabled());
+        event.setContentDescription(mContentDescription);
+
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && mAttachInfo != null) {
+            ArrayList<View> focusablesTempList = mAttachInfo.mFocusablesTempList;
+            getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD, FOCUSABLES_ALL);
+            event.setItemCount(focusablesTempList.size());
+            event.setCurrentItemIndex(focusablesTempList.indexOf(this));
+            focusablesTempList.clear();
+        }
+
+        dispatchPopulateAccessibilityEvent(event);
+
+        AccessibilityManager.getInstance(mContext).sendAccessibilityEvent(event);
+    }
+
+    /**
+     * Dispatches an {@link AccessibilityEvent} to the {@link View} children
+     * to be populated.
+     *
+     * @param event The event.
+     *
+     * @return True if the event population was completed.
+     */
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        return false;
+    }
+
+    /**
+     * Gets the {@link View} description. It briefly describes the view and is
+     * primarily used for accessibility support. Set this property to enable
+     * better accessibility support for your application. This is especially
+     * true for views that do not have textual representation (For example,
+     * ImageButton).
+     *
+     * @return The content descriptiopn.
+     *
+     * @attr ref android.R.styleable#View_contentDescription
+     */
+    public CharSequence getContentDescription() {
+        return mContentDescription;
+    }
+
+    /**
+     * Sets the {@link View} description. It briefly describes the view and is
+     * primarily used for accessibility support. Set this property to enable
+     * better accessibility support for your application. This is especially
+     * true for views that do not have textual representation (For example,
+     * ImageButton).
+     *
+     * @param contentDescription The content description.
+     *
+     * @attr ref android.R.styleable#View_contentDescription
+     */
+    public void setContentDescription(CharSequence contentDescription) {
+        mContentDescription = contentDescription;
     }
 
     /**
@@ -3222,11 +3326,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * @param direction The direction of the focus
      */
     public void addFocusables(ArrayList<View> views, int direction) {
-        if (!isFocusable()) return;
+        addFocusables(views, direction, FOCUSABLES_TOUCH_MODE);
+    }
 
-        if (isInTouchMode() && !isFocusableInTouchMode()) return;
+    /**
+     * Adds any focusable views that are descendants of this view (possibly
+     * including this view if it is focusable itself) to views. This method
+     * adds all focusable views regardless if we are in touch mode or
+     * only views focusable in touch mode if we are in touch mode depending on
+     * the focusable mode paramater.
+     *
+     * @param views Focusable views found so far or null if all we are interested is
+     *        the number of focusables.
+     * @param direction The direction of the focus.
+     * @param focusableMode The type of focusables to be added.
+     *
+     * @see #FOCUSABLES_ALL
+     * @see #FOCUSABLES_TOUCH_MODE
+     */
+    public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
+        if (!isFocusable()) {
+            return;
+        }
 
-        views.add(this);
+        if ((focusableMode & FOCUSABLES_TOUCH_MODE) == FOCUSABLES_TOUCH_MODE &&
+                isInTouchMode() && !isFocusableInTouchMode()) {
+            return;
+        }
+
+        if (views != null) {
+            views.add(this);
+        }
     }
 
     /**
@@ -8378,7 +8508,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
          * calling up the hierarchy.
          */
         final Rect mTmpInvalRect = new Rect();
-        
+
+        /**
+         * Temporary list for use in collecting focusable descendents of a view.
+         */
+        final ArrayList<View> mFocusablesTempList = new ArrayList<View>(24);
+
         /**
          * Creates a new set of attachment information with the specified
          * events handler and thread.

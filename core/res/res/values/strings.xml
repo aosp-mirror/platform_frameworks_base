@@ -894,7 +894,6 @@
         properties uploaded by the checkin service.  Not for use by normal
         applications.</string>
 
-
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindGadget">choose widgets</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -2374,9 +2373,11 @@
     <!-- This string array should be overridden by the manufacture to present a list of carrier-id,locale pairs.  This is used at startup to set a default locale by checking the system property ro.carrier for the carrier-id and searching through this array -->
     <string-array translatable="false" name="carrier_locales">
     </string-array>
+
+     <!-- Title for the selected state of a CompoundButton. -->
+     <string name="accessibility_compound_button_selected">checked</string>
+
+     <!-- Title for the unselected state of a CompoundButton. -->
+     <string name="accessibility_compound_button_unselected">not checked</string>
+
 </resources>
-
-
-
-
-
