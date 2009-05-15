@@ -65,6 +65,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -197,6 +198,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     WindowState mTopFullscreenOpaqueWindowState;
     boolean mForceStatusBar;
+    boolean mHideKeyguard;
     boolean mHomePressed;
     Intent mHomeIntent;
     boolean mSearchKeyPressed;
@@ -988,6 +990,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mTopFullscreenOpaqueWindowState = null;
         mForceStatusBar = false;
+        mHideKeyguard = false;
         
         // decide where the status bar goes ahead of time
         if (mStatusBar != null) {
@@ -1195,6 +1198,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
                 mTopFullscreenOpaqueWindowState = win;
             }
+            if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
+                // TODO Add a check for the window to be full screen
+                if (localLOGV) Log.i(TAG, "Setting mHideKeyguard to true by win " + win);
+                mHideKeyguard = true;
+            }
         }
         
         // Dock windows carve out the bottom of the screen, so normal windows
@@ -1242,6 +1250,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                     changed |= mStatusBar.showLw(true);
                 }
+            }
+        }
+        // Hide the key guard if a visible window explicitly specifies that it wants to be displayed
+        // when the screen is locked
+        if (mKeyguard != null) {
+            if (localLOGV) Log.i(TAG, "finishLayoutLw::mHideKeyguard="+mHideKeyguard);
+            if (mHideKeyguard) {
+                changed |= mKeyguard.hideLw(true);
+            } else {
+                changed |= mKeyguard.showLw(true);
             }
         }
         
