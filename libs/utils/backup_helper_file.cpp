@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #define LOG_TAG "file_backup_helper"
 
 #include <utils/backup_helpers.h>
@@ -19,13 +35,16 @@
 
 #include <cutils/log.h>
 
-using namespace android;
+namespace android {
 
 #define MAGIC0 0x70616e53 // Snap
 #define MAGIC1 0x656c6946 // File
 
+#if TEST_BACKUP_HELPERS
+#define LOGP(x...) printf(x)
+#else
 #define LOGP(x...) LOGD(x)
-//#define LOGP(x...) printf(x)
+#endif
 
 struct SnapshotHeader {
     int magic0;
@@ -117,6 +136,8 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileState>& snapshot)
         const String8& name = snapshot.keyAt(i);
         bytesWritten += sizeof(FileState) + round_up(name.length());
     }
+
+    LOGP("write_snapshot_file fd=%d\n", fd);
 
     int amt;
     SnapshotHeader header = { MAGIC0, N, MAGIC1, bytesWritten };
@@ -248,11 +269,13 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
             // file added
             String8 realFilename(base);
             realFilename.appendPath(q);
+            LOGP("file added: %s\n", realFilename.string());
             write_update_file(realFilename, q);
             m++;
         }
         else if (cmp < 0) {
             // file removed
+            LOGP("file removed: %s\n", p.string());
             write_delete_file(p);
             n++;
         }
@@ -573,6 +596,107 @@ backup_helper_test_four()
     return matched ? 0 : 1;
 }
 
+// hexdump -v -e '"    " 8/1 " 0x%02x," "\n"' data_writer.data
+const unsigned char DATA_GOLDEN_FILE[] = {
+     0x41, 0x70, 0x70, 0x31, 0x0b, 0x00, 0x00, 0x00,
+     0x6e, 0x6f, 0x5f, 0x70, 0x61, 0x64, 0x64, 0x69,
+     0x6e, 0x67, 0x5f, 0x00, 0x44, 0x61, 0x74, 0x61,
+     0x0b, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00,
+     0x6e, 0x6f, 0x5f, 0x70, 0x61, 0x64, 0x64, 0x69,
+     0x6e, 0x67, 0x5f, 0x00, 0x6e, 0x6f, 0x5f, 0x70,
+     0x61, 0x64, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x00,
+     0x41, 0x70, 0x70, 0x31, 0x0c, 0x00, 0x00, 0x00,
+     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
+     0x6f, 0x5f, 0x5f, 0x33, 0x00, 0xbc, 0xbc, 0xbc,
+     0x44, 0x61, 0x74, 0x61, 0x0c, 0x00, 0x00, 0x00,
+     0x0d, 0x00, 0x00, 0x00, 0x70, 0x61, 0x64, 0x64,
+     0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x5f, 0x33,
+     0x00, 0xbc, 0xbc, 0xbc, 0x70, 0x61, 0x64, 0x64,
+     0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x5f, 0x33,
+     0x00, 0xbc, 0xbc, 0xbc, 0x41, 0x70, 0x70, 0x31,
+     0x0d, 0x00, 0x00, 0x00, 0x70, 0x61, 0x64, 0x64,
+     0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x32, 0x5f,
+     0x5f, 0x00, 0xbc, 0xbc, 0x44, 0x61, 0x74, 0x61,
+     0x0d, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00,
+     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
+     0x6f, 0x5f, 0x32, 0x5f, 0x5f, 0x00, 0xbc, 0xbc,
+     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
+     0x6f, 0x5f, 0x32, 0x5f, 0x5f, 0x00, 0xbc, 0xbc,
+     0x41, 0x70, 0x70, 0x31, 0x0a, 0x00, 0x00, 0x00,
+     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
+     0x6f, 0x31, 0x00, 0xbc, 0x44, 0x61, 0x74, 0x61,
+     0x0a, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00,
+     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
+     0x6f, 0x31, 0x00, 0xbc, 0x70, 0x61, 0x64, 0x64,
+     0x65, 0x64, 0x5f, 0x74, 0x6f, 0x31, 0x00, 0xbc,
+     0x46, 0x6f, 0x6f, 0x74, 0x04, 0x00, 0x00, 0x00,
+};
+const int DATA_GOLDEN_FILE_SIZE = sizeof(DATA_GOLDEN_FILE);
+
+static int
+test_write_header_and_entity(BackupDataWriter& writer, const char* str)
+{
+    int err;
+    String8 text(str);
+
+    err = writer.WriteAppHeader(text);
+    if (err != 0) {
+        fprintf(stderr, "WriteAppHeader failed with %s\n", strerror(err));
+        return err;
+    }
+
+    err = writer.WriteEntityHeader(text, text.length()+1);
+    if (err != 0) {
+        fprintf(stderr, "WriteEntityHeader failed with %s\n", strerror(err));
+        return err;
+    }
+
+    err = writer.WriteEntityData(text.string(), text.length()+1);
+    if (err != 0) {
+        fprintf(stderr, "write failed for data '%s'\n", text.string());
+        return errno;
+    }
+
+    return err;
+}
+
+int
+backup_helper_test_data_writer()
+{
+    int err;
+    int fd;
+    const char* filename = SCRATCH_DIR "data_writer.data";
+
+    system("rm -r " SCRATCH_DIR);
+    mkdir(SCRATCH_DIR, 0777);
+    mkdir(SCRATCH_DIR "data", 0777);
+    
+    fd = creat(filename, 0666);
+    if (fd == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
+    BackupDataWriter writer(fd);
+
+    err = 0;
+    err |= test_write_header_and_entity(writer, "no_padding_");
+    err |= test_write_header_and_entity(writer, "padded_to__3");
+    err |= test_write_header_and_entity(writer, "padded_to_2__");
+    err |= test_write_header_and_entity(writer, "padded_to1");
+
+    writer.WriteAppFooter();
+
+    close(fd);
+
+    err = compare_file(filename, DATA_GOLDEN_FILE, DATA_GOLDEN_FILE_SIZE);
+    if (err != 0) {
+        return err;
+    }
+
+    return err;
+}
+
 static int
 get_mod_time(const char* filename, struct timeval times[2])
 {
@@ -594,8 +718,9 @@ int
 backup_helper_test_files()
 {
     int err;
-    int newSnapshotFD;
     int oldSnapshotFD;
+    int dataStreamFD;
+    int newSnapshotFD;
 
     system("rm -r " SCRATCH_DIR);
     mkdir(SCRATCH_DIR, 0777);
@@ -616,17 +741,24 @@ backup_helper_test_files()
         "data/f"
     };
 
+    dataStreamFD = creat(SCRATCH_DIR "1.data", 0666);
+    if (dataStreamFD == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
     newSnapshotFD = creat(SCRATCH_DIR "before.snap", 0666);
     if (newSnapshotFD == -1) {
         fprintf(stderr, "error creating: %s\n", strerror(errno));
         return errno;
     }
-
-    err = back_up_files(-1, newSnapshotFD, 0, SCRATCH_DIR, files_before, 5);
+    
+    err = back_up_files(-1, dataStreamFD, newSnapshotFD, SCRATCH_DIR, files_before, 5);
     if (err != 0) {
         return err;
     }
 
+    close(dataStreamFD);
     close(newSnapshotFD);
 
     sleep(3);
@@ -665,21 +797,30 @@ backup_helper_test_files()
         return errno;
     }
 
+    dataStreamFD = creat(SCRATCH_DIR "2.data", 0666);
+    if (dataStreamFD == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
     newSnapshotFD = creat(SCRATCH_DIR "after.snap", 0666);
     if (newSnapshotFD == -1) {
         fprintf(stderr, "error creating: %s\n", strerror(errno));
         return errno;
     }
 
-    err = back_up_files(oldSnapshotFD, newSnapshotFD, 0, SCRATCH_DIR, files_after, 6);
+    err = back_up_files(oldSnapshotFD, dataStreamFD, newSnapshotFD, SCRATCH_DIR, files_after, 6);
     if (err != 0) {
         return err;
     }
 
     close(oldSnapshotFD);
+    close(dataStreamFD);
     close(newSnapshotFD);
     
     return 0;
 }
 
 #endif // TEST_BACKUP_HELPERS
+
+}
