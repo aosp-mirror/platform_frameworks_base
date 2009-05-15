@@ -73,7 +73,7 @@ public class CallLog {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/calls";
 
         /**
-         * The type of the the phone number.
+         * The type of the call (incoming, outgoing or missed).
          * <P>Type: INTEGER (int)</P>
          */
         public static final String TYPE = "type";
