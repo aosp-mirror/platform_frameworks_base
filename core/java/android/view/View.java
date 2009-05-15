@@ -1449,7 +1449,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         @ViewDebug.FlagToString(mask = LAYOUT_REQUIRED, equals = LAYOUT_REQUIRED,
                 name = "LAYOUT_REQUIRED"),
         @ViewDebug.FlagToString(mask = DRAWING_CACHE_VALID, equals = DRAWING_CACHE_VALID,
-            name = "DRAWING_CACHE_VALID", outputIf = false),
+            name = "DRAWING_CACHE_INVALID", outputIf = false),
         @ViewDebug.FlagToString(mask = DRAWN, equals = DRAWN, name = "DRAWN", outputIf = true),
         @ViewDebug.FlagToString(mask = DRAWN, equals = DRAWN, name = "NOT_DRAWN", outputIf = false),
         @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY_OPAQUE, name = "DIRTY_OPAQUE"),
@@ -5739,13 +5739,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             final int restoreCount = canvas.save();
             canvas.translate(-mScrollX, -mScrollY);
 
-            mPrivateFlags = (mPrivateFlags & ~DIRTY_MASK) | DRAWN; 
+            mPrivateFlags |= DRAWN;
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
                 if (ViewDebug.TRACE_HIERARCHY) {
                     ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
                 }
+                mPrivateFlags &= ~DIRTY_MASK;
                 dispatchDraw(canvas);
             } else {
                 draw(canvas);
@@ -5792,7 +5793,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             canvas = new Canvas(bitmap);
         }
 
-        if ((backgroundColor&0xff000000) != 0) {
+        if ((backgroundColor & 0xff000000) != 0) {
             bitmap.eraseColor(backgroundColor);
         }
 
@@ -5800,12 +5801,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         final int restoreCount = canvas.save();
         canvas.translate(-mScrollX, -mScrollY);
 
+        // Temporarily remove the dirty mask
+        int flags = mPrivateFlags;
+        mPrivateFlags &= ~DIRTY_MASK;
+
         // Fast path for layouts with no backgrounds
         if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
             dispatchDraw(canvas);
         } else {
             draw(canvas);
         }
+
+        mPrivateFlags = flags;
 
         canvas.restoreToCount(restoreCount);
 
@@ -5927,8 +5934,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
         }
 
-        final boolean dirtyOpaque = (mPrivateFlags & DIRTY_MASK) == DIRTY_OPAQUE;
-        mPrivateFlags = (mPrivateFlags & ~DIRTY_MASK) | DRAWN;
+        final int privateFlags = mPrivateFlags;
+        final boolean dirtyOpaque = (privateFlags & DIRTY_MASK) == DIRTY_OPAQUE &&
+                (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
+        mPrivateFlags = (privateFlags & ~DIRTY_MASK) | DRAWN;
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -8158,7 +8167,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * window.
      */
     static class AttachInfo {
-
         interface Callbacks {
             void playSoundEffect(int effectId);
             boolean performHapticFeedback(int effectId, boolean always);
@@ -8286,6 +8294,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
          * Indicates the time at which drawing started to occur.
          */
         long mDrawingTime;
+
+        /**
+         * Indicates whether or not ignoring the DIRTY_MASK flags.
+         */
+        boolean mIgnoreDirtyState;
 
         /**
          * Indicates whether the view's window is currently in touch mode.

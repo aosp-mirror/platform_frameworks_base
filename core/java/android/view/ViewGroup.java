@@ -1403,9 +1403,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        // Clear the flag as early as possible to allow draw() implementations
+        // Sets the flag as early as possible to allow draw() implementations
         // to call invalidate() successfully when doing animations
-        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK) | DRAWN;
+        child.mPrivateFlags |= DRAWN;
 
         if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
                 (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
@@ -1482,6 +1482,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (ViewDebug.TRACE_HIERARCHY) {
                     ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
                 }
+                child.mPrivateFlags &= ~DIRTY_MASK;                
                 child.dispatchDraw(canvas);
             } else {
                 child.draw(canvas);
