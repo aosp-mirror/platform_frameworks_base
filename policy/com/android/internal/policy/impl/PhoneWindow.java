@@ -15,6 +15,12 @@
 
 package com.android.internal.policy.impl;
 
+import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
@@ -57,15 +63,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.view.ViewManager;
 import android.view.VolumePanel;
 import android.view.Window;
 import android.view.WindowManager;
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
@@ -81,6 +84,7 @@ import android.widget.TextView;
  * in android.widget.
  */
 public class PhoneWindow extends Window implements MenuBuilder.Callback {
+
     private final static String TAG = "PhoneWindow";
 
     private final static boolean SWEEP_OPEN_MENU = false;
@@ -570,6 +574,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         lp.gravity = st.gravity;
         lp.windowAnimations = st.windowAnimations;
+        
         wm.addView(st.decorView, lp);
         // Log.v(TAG, "Adding main menu to window manager.");
     }
@@ -1796,6 +1801,37 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             return false;
+        }
+
+        @Override
+        public void sendAccessibilityEvent(int eventType) {
+            if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+                return;
+            }
+ 
+            // if we are showing a feature that should be announced and one child
+            // make this child the event source since this is the feature itself
+            // otherwise the callback will take over and announce its client
+            if ((mFeatureId == FEATURE_OPTIONS_PANEL ||
+                    mFeatureId == FEATURE_CONTEXT_MENU ||
+                    mFeatureId == FEATURE_PROGRESS ||
+                    mFeatureId == FEATURE_INDETERMINATE_PROGRESS)
+                    && getChildCount() == 1) {
+                getChildAt(0).sendAccessibilityEvent(eventType);
+            } else {
+                super.sendAccessibilityEvent(eventType);
+            }
+        }
+
+        @Override
+        public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+            final Callback cb = getCallback();
+            if (cb != null) {
+                if (cb.dispatchPopulateAccessibilityEvent(event)) {
+                    return true;
+                }
+            }
+            return super.dispatchPopulateAccessibilityEvent(event);
         }
 
         @Override
