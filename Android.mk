@@ -64,6 +64,8 @@ endif
 ##
 ## READ ME: ########################################################
 LOCAL_SRC_FILES += \
+	core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl \
+  core/java/android/accessibilityservice/IEventListener.aidl \
 	core/java/android/accounts/IAccountsService.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IActivityWatcher.aidl \
@@ -106,6 +108,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
 	core/java/android/text/IClipboard.aidl \
+	core/java/android/view/accessibility/IAccessibilityManager.aidl \
+	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
 	core/java/android/view/IRotationWatcher.aidl \

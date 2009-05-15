@@ -228,6 +228,14 @@ class ServerThread extends Thread {
             }
 
             try {
+              Log.i(TAG, "Starting Accessibility Manager.");
+              ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
+                      new AccessibilityManagerService(context));
+            } catch (Throwable e) {
+              Log.e(TAG, "Failure starting Accessibility Manager", e);
+            }
+
+            try {
                 Log.i(TAG, "Starting Notification Manager.");
                 ServiceManager.addService(Context.NOTIFICATION_SERVICE,
                         new NotificationManagerService(context, statusBar, hardware));

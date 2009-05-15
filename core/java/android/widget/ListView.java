@@ -35,6 +35,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.SoundEffectConstants;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.google.android.collect.Lists;
 import com.android.internal.R;
@@ -1843,6 +1844,32 @@ public class ListView extends AbsListView {
             }
             return position;
         }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean populated = super.dispatchPopulateAccessibilityEvent(event);
+
+        if (!populated) {
+            int itemCount = 0;
+            int currentItemIndex = getSelectedItemPosition();
+
+            ListAdapter adapter = getAdapter();
+            if (adapter != null) {
+                for (int i = 0, count = adapter.getCount(); i < count; i++) {
+                    if (adapter.isEnabled(i)) {
+                        itemCount++;
+                    } else if (i <= currentItemIndex) {
+                        currentItemIndex--;
+                    }
+                }
+            }
+
+            event.setItemCount(itemCount);
+            event.setCurrentItemIndex(currentItemIndex);
+        }
+
+        return populated;
     }
 
     /**

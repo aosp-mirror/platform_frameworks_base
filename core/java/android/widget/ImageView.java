@@ -32,6 +32,8 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.RemoteViews.RemoteView;
 
 
@@ -848,7 +850,7 @@ public class ImageView extends View {
     public int getBaseline() {
         return mBaselineAligned ? getMeasuredHeight() : -1;
     }
-    
+
     /**
      * Set a tinting option for the image.
      * 
@@ -878,7 +880,7 @@ public class ImageView extends View {
             invalidate();
         }
     }
-    
+
     public void setAlpha(int alpha) {
         alpha &= 0xFF;          // keep it legal
         if (mAlpha != alpha) {

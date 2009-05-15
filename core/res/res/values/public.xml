@@ -1100,6 +1100,7 @@
    <public type="attr" name="targetSdkVersion" id="0x01010270" />
    <public type="attr" name="maxSdkVersion" id="0x01010271" />
    <public type="attr" name="testOnly" id="0x01010272" />
+   <public type="attr" name="contentDescription" id="0x01010273" />
 
    <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
    <public type="anim" name="overshoot_interpolator" id="0x010a0008" />

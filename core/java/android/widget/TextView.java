@@ -16,6 +16,11 @@
 
 package android.widget;
 
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -31,17 +36,17 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
-import android.os.Message;
 import android.text.BoringLayout;
+import android.text.ClipboardManager;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.GetChars;
 import android.text.GraphicsOperations;
-import android.text.ClipboardManager;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
@@ -49,9 +54,9 @@ import android.text.ParcelableSpan;
 import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.SpannedString;
-import android.text.SpannableString;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -64,19 +69,18 @@ import android.text.method.KeyListener;
 import android.text.method.LinkMovementMethod;
 import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
-import android.text.method.TimeKeyListener;
-
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.SingleLineTransformationMethod;
 import android.text.method.TextKeyListener;
+import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.style.ParagraphStyle;
 import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.FloatMath;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.Gravity;
@@ -89,24 +93,21 @@ import android.view.ViewDebug;
 import android.view.ViewRoot;
 import android.view.ViewTreeObserver;
 import android.view.ViewGroup.LayoutParams;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.EditorInfo;
 import android.widget.RemoteViews.RemoteView;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
@@ -6129,10 +6130,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private class ChangeWatcher
     implements TextWatcher, SpanWatcher {
+
+        private CharSequence mBeforeText;
+
         public void beforeTextChanged(CharSequence buffer, int start,
                                       int before, int after) {
             if (DEBUG_EXTRACT) Log.v(TAG, "beforeTextChanged start=" + start
                     + " before=" + before + " after=" + after + ": " + buffer);
+
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                mBeforeText = buffer.toString();
+            }
+
             TextView.this.sendBeforeTextChanged(buffer, start, before, after);
         }
 
@@ -6141,6 +6150,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (DEBUG_EXTRACT) Log.v(TAG, "onTextChanged start=" + start
                     + " before=" + before + " after=" + after + ": " + buffer);
             TextView.this.handleTextChanged(buffer, start, before, after);
+
+            if (AccessibilityManager.getInstance(mContext).isEnabled() &&
+                    (isFocused() || isSelected() &&
+                    isShown())) {
+                sendAccessibilityEventTypeViewTextChanged(mBeforeText, start, before, after);
+                mBeforeText = null;
+            }
         }
 
         public void afterTextChanged(Editable buffer) {
@@ -6773,6 +6789,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return TextUtils.substring(mTransformed, start, end);
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean isPassword =
+            (mInputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION)) ==
+            (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+
+        if (!isPassword) {
+            CharSequence text = getText();
+            if (TextUtils.isEmpty(text)) {
+                text = getHint();
+            }
+            if (!TextUtils.isEmpty(text)) {
+                if (text.length() > AccessibilityEvent.MAX_TEXT_LENGTH) {
+                    text = text.subSequence(0, AccessibilityEvent.MAX_TEXT_LENGTH + 1);
+                }
+                event.getText().add(text);
+            }
+        } else {
+            event.setPassword(isPassword);
+        }
+        return false;
+    }
+
+    void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
+            int fromIndex, int removedCount, int addedCount) {
+        AccessibilityEvent event =
+            AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+        event.setFromIndex(fromIndex);
+        event.setRemovedCount(removedCount);
+        event.setAddedCount(addedCount);
+        event.setBeforeText(beforeText);
+        sendAccessibilityEventUnchecked(event);
     }
 
     @Override

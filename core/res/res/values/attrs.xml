@@ -1165,6 +1165,11 @@
              enabled for events such as long presses. -->
         <attr name="hapticFeedbackEnabled" format="boolean" />
 
+        <!-- Defines text that briefly describes content of the view. This property is used
+             primarily for accessibility. Since some views do not have textual
+             representation this attribute can be used for providing such. -->
+        <attr name="contentDescription" format="string" localization="suggested" />
+
         <!-- Name of the method in this View's context to invoke when the view is
              clicked. This name must correspond to a public method that takes
              exactly one parameter of type View. For instance, if you specify
