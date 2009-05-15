@@ -43,7 +43,7 @@ class DataLoader extends StreamLoader {
             String contentType = url.substring(0, commaIndex);
             data = url.substring(commaIndex + 1).getBytes();
             loadListener.parseContentTypeHeader(contentType);
-            if (loadListener.transferEncoding().equals("base64")) {
+            if ("base64".equals(loadListener.transferEncoding())) {
                 data = Base64.decode(data);
             }
         } else {
