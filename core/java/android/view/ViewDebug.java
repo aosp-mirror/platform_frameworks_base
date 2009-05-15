@@ -1235,10 +1235,11 @@ public class ViewDebug {
         for (int j = 0; j < count; j++) {
             final FlagToString flagMapping = mapping[j];
             final boolean ifTrue = flagMapping.outputIf();
-            final boolean test = (intValue & flagMapping.mask()) == flagMapping.equals();
+            final int maskResult = intValue & flagMapping.mask();
+            final boolean test = maskResult == flagMapping.equals();
             if ((test && ifTrue) || (!test && !ifTrue)) {
                 final String name = flagMapping.name();
-                final String value = ifTrue ? "true" : "false";
+                final String value = "0x" + Integer.toHexString(maskResult);
                 writeEntry(out, prefix, name, "", value);
             }
         }
