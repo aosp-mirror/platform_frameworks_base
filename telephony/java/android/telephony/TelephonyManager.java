@@ -16,25 +16,23 @@
 
 package android.telephony;
 
-import com.android.internal.telephony.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.telephony.CellLocation;
 
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyProperties;
+
+import java.util.List;
 
 /**
  * Provides access to information about the telephony services on
@@ -239,10 +237,10 @@ public class TelephonyManager {
 
     /**
      * Returns the neighboring cell information of the device.
-     * 
+     *
      * @return List of NeighboringCellInfo or null if info unavailable.
-     * 
-     * <p>Requires Permission: 
+     *
+     * <p>Requires Permission:
      * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
      */
     public List<NeighboringCellInfo> getNeighboringCellInfo() {
@@ -251,24 +249,25 @@ public class TelephonyManager {
        } catch (RemoteException ex) {
        }
        return null;
-       
+
     }
-    
+
     /**
      * No phone module
+     *
      */
     public static final int PHONE_TYPE_NONE = 0;
 
     /**
      * GSM phone
      */
-    public static final int PHONE_TYPE_GSM = 1;
+    public static final int PHONE_TYPE_GSM = RILConstants.GSM_PHONE;
 
     /**
      * CDMA phone
      * @hide
      */
-    public static final int PHONE_TYPE_CDMA = 2;
+    public static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
 
     /**
      * Returns a constant indicating the device phone type.
@@ -279,16 +278,41 @@ public class TelephonyManager {
      */
     public int getPhoneType() {
         try{
-            if(getITelephony().getActivePhoneType() == RILConstants.CDMA_PHONE) {
-                return PHONE_TYPE_CDMA;
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if(telephony.getActivePhoneType() == RILConstants.CDMA_PHONE) {
+                    return PHONE_TYPE_CDMA;
+                } else {
+                    return PHONE_TYPE_GSM;
+                }
             } else {
-                return PHONE_TYPE_GSM;
+                // This can happen when the ITelephony interface is not up yet.
+                return getPhoneTypeFromProperty();
             }
-        }catch(RemoteException ex){
-            return PHONE_TYPE_NONE;
+        } catch(RemoteException ex){
+            // This shouldn't happen in the normal case, as a backup we
+            // read from the system property.
+            return getPhoneTypeFromProperty();
         }
     }
 
+
+    private int getPhoneTypeFromProperty() {
+        int type =
+            SystemProperties.getInt(TelephonyProperties.CURRENT_ACTIVE_PHONE,
+                    getPhoneTypeFromNetworkType());
+        return type;
+    }
+
+    private int getPhoneTypeFromNetworkType() {
+        // When the system property CURRENT_ACTIVE_PHONE, has not been set,
+        // use the system property for default network type.
+        // This is a fail safe, and can only happen at first boot.
+        int mode = SystemProperties.getInt("ro.telephony.default_network", -1);
+        if (mode == -1)
+            return PHONE_TYPE_NONE;
+        return PhoneFactory.getPhoneType(mode);
+    }
     //
     //
     // Current Network
@@ -640,8 +664,10 @@ public class TelephonyManager {
     /** Data connection activity: Currently both sending and receiving
      *  IP PPP traffic. */
     public static final int DATA_ACTIVITY_INOUT = DATA_ACTIVITY_IN | DATA_ACTIVITY_OUT;
-    /** Data connection is active, but physical link is down */
-    /** @hide */
+    /**
+     * Data connection is active, but physical link is down
+     * @hide
+     */
     public static final int DATA_ACTIVITY_DORMANT = 0x00000004;
 
     /**

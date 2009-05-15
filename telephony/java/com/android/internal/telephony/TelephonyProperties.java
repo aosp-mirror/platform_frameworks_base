@@ -69,6 +69,8 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_OPERATOR_ISO_COUNTRY = "gsm.operator.iso-country";
 
+    static final String CURRENT_ACTIVE_PHONE = "gsm.current.phone-type";
+
     //****** SIM Card
     /**
      * One of <code>"UNKNOWN"</code> <code>"ABSENT"</code> <code>"PIN_REQUIRED"</code>
