@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 The Android Open Source Project
+ * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package com.android.gesture.example;
 
 import android.app.Activity;
+import android.graphics.Matrix;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -28,156 +30,228 @@ import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.android.gesture.Gesture;
-import com.android.gesture.GestureLibrary;
-import com.android.gesture.GestureOverlay;
+import com.android.gesture.GestureLib;
+import com.android.gesture.GesturePad;
+import com.android.gesture.R;
+import com.android.gesture.recognizer.Instance;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * GestureLibViewer gives an example on how to browse existing gestures and
+ * GestureLibViewer is for viewing existing gestures and 
  * removing unwanted gestures.
  */
 
-public class GestureLibViewer extends Activity {
-
-    private GestureOverlay mGesturePad;
-
-    private Spinner mGestureCategory;
-
-    private GestureLibrary mGesureLibrary;
-
-    private ArrayList<Gesture> mGestures;
-
-    private int mCurrentGestureIndex;
-
-    private class RemoveGestureListener implements OnClickListener {
-        public void onClick(View v) {
-            if (mGestures.isEmpty()) {
-                return;
-            }
-
-            String name = (String) mGestureCategory.getSelectedItem();
-            Gesture gesture = mGestures.get(mCurrentGestureIndex);
-            mGesureLibrary.removeGesture(name, gesture);
-
-            mGestures = mGesureLibrary.getGestures(name);
-
-            if (mGestures == null) {
-                // delete the entire entry
-                mCurrentGestureIndex = 0;
-                ArrayList<String> list = new ArrayList<String>();
-                list.addAll(mGesureLibrary.getGestureEntries());
-                Collections.sort(list);
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(GestureLibViewer.this,
-                        android.R.layout.simple_spinner_item, list);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                mGestureCategory.setAdapter(adapter);
-            } else {
-                if (mCurrentGestureIndex > mGestures.size() - 1) {
-                    mCurrentGestureIndex--;
-                }
-                gesture = mGestures.get(mCurrentGestureIndex);
-                mGesturePad.setCurrentGesture(gesture);
-                mGesturePad.invalidate();
-            }
-        }
-    }
+public class GestureLibViewer  extends Activity {
+  
+    GesturePad          mView;
+    Spinner             mResult;
+    GestureLib          mRecognizer;
+    ArrayList<Gesture>  mSamples;
+    int                 mCurrentGestureIndex;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gestureviewer);
+        
+        // create the area for drawing a glyph
+        mView = (GesturePad)this.findViewById(R.id.drawingpad);
+        mView.cacheGesture(false);
+        mView.setFadingOut(false);
+        mView.setEnableInput(false);
+        
+        // init the recognizer
+        mRecognizer = new GestureLib("/sdcard/gestureentry");
+        mRecognizer.load();
 
-        // create the area for drawing a gesture
-        mGesturePad = (GestureOverlay) findViewById(R.id.drawingpad);
-        mGesturePad.setEnabled(false);
-
-        // init the gesture library
-        mGesureLibrary = new GestureLibrary(GestureEntry.GESTURE_FILE_NAME);
-        mGesureLibrary.load();
-
-        mGestureCategory = (Spinner) findViewById(R.id.spinner);
+        mResult = (Spinner) findViewById(R.id.spinner);
         ArrayList<String> list = new ArrayList<String>();
-        if (!mGesureLibrary.getGestureEntries().isEmpty()) {
-            list.addAll(mGesureLibrary.getGestureEntries());
-            Collections.sort(list);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                    android.R.layout.simple_spinner_item, list);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mGestureCategory.setAdapter(adapter);
-            mGestures = mGesureLibrary.getGestures(list.get(0));
+        list.addAll(mRecognizer.getLabels());
+        Collections.sort(list);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
+                    android.R.layout.simple_spinner_item, 
+                    list);
+        adapter.setDropDownViewResource(
+                    android.R.layout.simple_spinner_dropdown_item);
+        mResult.setAdapter(adapter);
+        mSamples = mRecognizer.getGestures(list.get(0));
+        if (mSamples.isEmpty() == false) {
             mCurrentGestureIndex = 0;
-            Gesture gesture = mGestures.get(mCurrentGestureIndex);
-            mGesturePad.setCurrentGesture(gesture);
+            Gesture gesture = mSamples.get(mCurrentGestureIndex);
+            mView.setCurrentGesture(gesture);
+            mView.clearDebugPath();
+            mView.addDebugPath(
+                toPath(mRecognizer.getClassifier().getInstance(gesture.getID())));
         }
-
-        mGestureCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
+        
+        mResult.setOnItemSelectedListener(new OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mGestures = mGesureLibrary.getGestures((String) mGestureCategory.getSelectedItem());
-                if (!mGestures.isEmpty()) {
+                // TODO Auto-generated method stub
+                mSamples = mRecognizer.getGestures(
+                    (String)mResult.getSelectedItem());
+                if (mSamples.isEmpty() == false) {
                     mCurrentGestureIndex = 0;
-                    Gesture gesture = mGestures.get(mCurrentGestureIndex);
-                    mGesturePad.setCurrentGesture(gesture);
+                    Gesture gesture = mSamples.get(mCurrentGestureIndex);
+                    mView.setCurrentGesture(gesture);
+                    mView.clearDebugPath();
+                    mView.addDebugPath(
+                        toPath(mRecognizer.getClassifier().getInstance(gesture.getID())));
                 }
-                mGesturePad.invalidate();
+                mView.invalidate();
             }
-
+  
             public void onNothingSelected(AdapterView<?> parent) {
+              // TODO Auto-generated method stub
+              
             }
-
+          
         });
-
-        Button remove = (Button) findViewById(R.id.remove);
-        remove.setOnClickListener(new RemoveGestureListener());
-
-        Button next = (Button) findViewById(R.id.next);
+        
+        Button remove = (Button)this.findViewById(R.id.remove);
+        remove.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                if (mSamples.isEmpty())
+                    return;
+                
+                String name = (String)mResult.getSelectedItem();
+                Gesture gesture = mSamples.get(mCurrentGestureIndex);
+                mRecognizer.removeGesture(name, gesture);
+                
+                mSamples = mRecognizer.getGestures(name);
+                
+                if (mSamples == null) {
+                    // delete the entire entry
+                    mCurrentGestureIndex = 0;
+                    ArrayList<String> list = new ArrayList<String>();
+                    list.addAll(mRecognizer.getLabels());
+                    Collections.sort(list);
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                                GestureLibViewer.this, 
+                                android.R.layout.simple_spinner_item, 
+                                list);
+                    adapter.setDropDownViewResource(
+                                android.R.layout.simple_spinner_dropdown_item);
+                    mResult.setAdapter(adapter);
+                } else {
+                    if (mCurrentGestureIndex > mSamples.size()-1) {
+                        mCurrentGestureIndex--;
+                    }
+                    gesture = mSamples.get(mCurrentGestureIndex);
+                    mView.setCurrentGesture(gesture);
+                    mView.clearDebugPath();
+                    mView.addDebugPath(
+                        toPath(mRecognizer.getClassifier().getInstance(gesture.getID())));
+                    mView.invalidate();
+                }
+            }
+        });
+        
+        Button next = (Button)this.findViewById(R.id.next);
         next.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                if (mCurrentGestureIndex >= mGestures.size() - 1) {
+                // TODO Auto-generated method stub
+                if (mCurrentGestureIndex >= mSamples.size()-1)
                     return;
-                }
+                
                 mCurrentGestureIndex++;
-                Gesture gesture = mGestures.get(mCurrentGestureIndex);
-                mGesturePad.setCurrentGesture(gesture);
-                mGesturePad.invalidate();
+                Gesture gesture = mSamples.get(mCurrentGestureIndex);
+                mView.setCurrentGesture(gesture);
+                mView.clearDebugPath();
+                mView.addDebugPath(
+                    toPath(mRecognizer.getClassifier().getInstance(gesture.getID())));
+                mView.invalidate();
             }
         });
 
-        Button previous = (Button) findViewById(R.id.previous);
+        Button previous = (Button)this.findViewById(R.id.previous);
         previous.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                if (mCurrentGestureIndex >= 1 && !mGestures.isEmpty()) {
+                // TODO Auto-generated method stub
+                if (mCurrentGestureIndex >= 1 &&
+                    mSamples.isEmpty() == false) {
                     mCurrentGestureIndex--;
-                    Gesture gesture = mGestures.get(mCurrentGestureIndex);
-                    mGesturePad.setCurrentGesture(gesture);
-                    mGesturePad.invalidate();
+                    Gesture gesture = mSamples.get(mCurrentGestureIndex);
+                    mView.setCurrentGesture(gesture);
+                    mView.clearDebugPath();
+                    mView.addDebugPath(
+                        toPath(mRecognizer.getClassifier().getInstance(gesture.getID())));
+                    mView.invalidate();
                 }
             }
         });
     }
-
+    
+    public static ArrayList<Path> toPath(Instance instance) {
+        ArrayList<Path> paths = new ArrayList();
+        Path path = null;
+        float minx = 0, miny = 0;
+        float mX = 0, mY = 0;
+        for (int i=0; i<instance.vector.length; i+=2) {
+            float x = instance.vector[i];
+            float y = instance.vector[i+1];
+            if (x < minx)
+                minx = x;
+            if (y < miny)
+                miny = y;
+            if (path == null) {
+              path = new Path();
+              path.moveTo(x, y);
+              mX = x;
+              mY = y;
+            } else {
+              float dx = Math.abs(x - mX);
+              float dy = Math.abs(y - mY);
+              if (dx >= 3 || dy >= 3) {
+                  path.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+                  mX = x;
+                  mY = y;
+              }
+            }
+        }
+        Matrix matrix = new Matrix();
+        matrix.setTranslate(-minx + 10, -miny + 10);
+        path.transform(matrix);
+        paths.add(path);
+        
+        path = new Path();
+        path.moveTo(instance.vector[0]-5, instance.vector[1]-5);
+        path.lineTo(instance.vector[0]-5, instance.vector[1]+5);
+        path.lineTo(instance.vector[0]+5, instance.vector[1]+5);
+        path.lineTo(instance.vector[0]+5, instance.vector[1]-5);
+        path.close();
+        path.transform(matrix);
+        paths.add(path);
+        
+        return paths;
+    }
+    
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            mGesureLibrary.save();
-            setResult(RESULT_OK);
-            finish();
-            return true;
-        } else {
-            return false;
-        }
+      // TODO Auto-generated method stub
+      if (keyCode == KeyEvent.KEYCODE_BACK) {
+          mRecognizer.save();
+          this.setResult(RESULT_OK);
+          finish();
+          return true;
+      }
+      else
+        return false;
     }
-
+    
     @Override
     protected void onPause() {
+        // TODO Auto-generated method stub
         super.onPause();
-        mGesureLibrary.save();
+        mRecognizer.save();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        // TODO Auto-generated method stub
         super.onSaveInstanceState(outState);
-        mGesureLibrary.save();
+        mRecognizer.save();
     }
 }
