@@ -64,6 +64,8 @@ endif
 ##
 ## READ ME: ########################################################
 LOCAL_SRC_FILES += \
+	core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl \
+        core/java/android/accessibilityservice/IEventListener.aidl \
 	core/java/android/accounts/IAccountManager.aidl \
 	core/java/android/accounts/IAccountManagerResponse.aidl \
 	core/java/android/accounts/IAccountAuthenticator.aidl \
@@ -88,10 +90,10 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
-    core/java/android/content/IContentService.aidl \
+        core/java/android/content/IContentService.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
-    core/java/android/content/ISyncStatusObserver.aidl \
+        core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver.aidl \
@@ -109,6 +111,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
 	core/java/android/text/IClipboard.aidl \
+	core/java/android/view/accessibility/IAccessibilityManager.aidl \
+	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
 	core/java/android/view/IRotationWatcher.aidl \

@@ -2318,16 +2318,10 @@ public class WebView extends AbsoluteLayout
     }
 
    /**
-    * Signal the WebCore thread to refresh its list of plugins. Use
-    * this if the directory contents of one of the plugin directories
-    * has been modified and needs its changes reflecting. May cause
-    * plugin load and/or unload.
-    * @param reloadOpenPages Set to true to reload all open pages.
+     * TODO: need to add @Deprecated
     */
     public void refreshPlugins(boolean reloadOpenPages) {
-        if (mWebViewCore != null) {
-            mWebViewCore.sendMessage(EventHub.REFRESH_PLUGINS, reloadOpenPages);
-        }
+        PluginManager.getInstance(mContext).refreshPlugins(reloadOpenPages);
     }
 
     //-------------------------------------------------------------------------

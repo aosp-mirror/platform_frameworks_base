@@ -16,6 +16,8 @@
 
 package android.app;
 
+import com.android.internal.policy.PolicyManager;
+
 import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -32,11 +34,12 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
 import android.util.Config;
@@ -58,9 +61,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
-
-import com.android.internal.policy.PolicyManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -2013,7 +2016,24 @@ public class Activity extends ContextThemeWrapper
         }
         return onTrackballEvent(ev);
     }
-    
+
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        event.setClassName(getClass().getName());
+        event.setPackageName(getPackageName());
+
+        LayoutParams params = getWindow().getAttributes();
+        boolean isFullScreen = (params.width == LayoutParams.FILL_PARENT) &&
+            (params.height == LayoutParams.FILL_PARENT);
+        event.setFullScreen(isFullScreen);
+
+        CharSequence title = getTitle();
+        if (!TextUtils.isEmpty(title)) {
+           event.getText().add(title);
+        }
+
+        return true;
+    }
+
     /**
      * Default implementation of
      * {@link android.view.Window.Callback#onCreatePanelView}

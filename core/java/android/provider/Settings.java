@@ -1921,6 +1921,17 @@ public final class Settings {
         public static final String USE_GOOGLE_MAIL = "use_google_mail";
     
         /**
+         * If accessibility is enabled.
+         */
+        public static final String ACCESSIBILITY_ENABLED = "accessibility_enabled";
+
+        /**
+         * List of the enabled accessibility providers.
+         */
+        public static final String ENABLED_ACCESSIBILITY_SERVICES =
+            "enabled_accessibility_services";
+
+        /**
          * Whether to notify the user of open networks.
          * <p>
          * If not connected and the scan results have an open network, we will

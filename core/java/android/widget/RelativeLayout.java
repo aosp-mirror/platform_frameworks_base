@@ -16,17 +16,22 @@
 
 package android.widget;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Gravity;
-import android.view.ViewDebug;
-import android.widget.RemoteViews.RemoteView;
-import android.graphics.Rect;
 import com.android.internal.R;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Rect;
+import android.util.AttributeSet;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewDebug;
+import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.widget.RemoteViews.RemoteView;
+
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A Layout where the positions of the children can be described in relation to each other or to the
@@ -136,6 +141,8 @@ public class RelativeLayout extends ViewGroup {
     private final Rect mContentBounds = new Rect();
     private final Rect mSelfBounds = new Rect();
     private int mIgnoreGravity;
+
+    private static SortedSet<View> mTopToBottomLeftToRightSet = null;
 
     public RelativeLayout(Context context) {
         super(context);
@@ -780,6 +787,57 @@ public class RelativeLayout extends ViewGroup {
     @Override
     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         return new LayoutParams(p);
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (mTopToBottomLeftToRightSet == null) {
+            mTopToBottomLeftToRightSet = new TreeSet<View>(new TopToBottomLeftToRightComparator());
+        }
+
+        // sort children top-to-bottom and left-to-right
+        for (int i = 0, count = getChildCount(); i < count; i++) {
+            mTopToBottomLeftToRightSet.add(getChildAt(i));
+        }
+
+        for (View view : mTopToBottomLeftToRightSet) {
+            if (view.dispatchPopulateAccessibilityEvent(event)) {
+                mTopToBottomLeftToRightSet.clear();
+                return true;
+            }
+        }
+
+        mTopToBottomLeftToRightSet.clear();
+        return false;
+    }
+
+    /**
+     * Compares two views in left-to-right and top-to-bottom fashion.
+     */
+     private class TopToBottomLeftToRightComparator implements Comparator<View> {
+        public int compare(View first, View second) {
+            // top - bottom
+            int topDifference = first.getTop() - second.getTop();
+            if (topDifference != 0) {
+                return topDifference;
+            }
+            // left - right
+            int leftDifference = first.getLeft() - second.getLeft();
+            if (leftDifference != 0) {
+                return leftDifference;
+            }
+            // break tie by height
+            int heightDiference = first.getHeight() - second.getHeight();
+            if (heightDiference != 0) {
+                return heightDiference;
+            }
+            // break tie by width
+            int widthDiference = first.getWidth() - second.getWidth();
+            if (widthDiference != 0) {
+                return widthDiference;
+            }
+            return 0;
+        }
     }
 
     /**

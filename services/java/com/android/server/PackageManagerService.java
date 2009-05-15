@@ -1203,6 +1203,33 @@ class PackageManagerService extends IPackageManager.Stub {
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags) {
         List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags);
+        return chooseBestActivity(intent, resolvedType, flags, query);
+    }
+
+    public ResolveInfo resolveIntentForPackage(Intent intent, String resolvedType,
+                                               int flags, String packageName) {
+        ComponentName comp = intent.getComponent();
+        if (comp != null) {
+            // if this is an explicit intent, it must have the same the packageName
+            if (packageName.equals(comp.getPackageName())) {
+                return resolveIntent(intent, resolvedType, flags);
+            }
+            return null;
+        } else {
+            List<ResolveInfo> query = null;
+            synchronized (mPackages) {
+                PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg != null) {
+                    query = (List<ResolveInfo>) mActivities.
+                        queryIntentForPackage(intent, resolvedType, flags, pkg.activities);
+                }
+            }
+            return chooseBestActivity(intent, resolvedType, flags, query);
+        }
+    }
+
+    private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
+                                           int flags, List<ResolveInfo> query) {
         if (query != null) {
             final int N = query.size();
             if (N == 1) {
@@ -2856,6 +2883,22 @@ class PackageManagerService extends IPackageManager.Stub {
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
         }
 
+        public List queryIntentForPackage(Intent intent, String resolvedType, int flags,
+                                          ArrayList<PackageParser.Activity> packageActivities) {
+            if (packageActivities == null) {
+                return null;
+            }
+            mFlags = flags;
+            final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
+            int N = packageActivities.size();
+            ArrayList<ArrayList<PackageParser.ActivityIntentInfo>> listCut =
+                new ArrayList<ArrayList<PackageParser.ActivityIntentInfo>>(N);
+            for (int i = 0; i < N; ++i) {
+                listCut.add(packageActivities.get(i).intents);
+            }
+            return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut);
+        }
+
         public final void addActivity(PackageParser.Activity a, String type) {
             mActivities.put(a.component, a);
             if (SHOW_INFO || Config.LOGV) Log.v(
@@ -2863,8 +2906,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 (a.info.nonLocalizedLabel != null ? a.info.nonLocalizedLabel : a.info.name) + ":");
             if (SHOW_INFO || Config.LOGV) Log.v(TAG, "    Class=" + a.info.name);
             int NI = a.intents.size();
-            int j;
-            for (j=0; j<NI; j++) {
+            for (int j=0; j<NI; j++) {
                 PackageParser.ActivityIntentInfo intent = a.intents.get(j);
                 if (SHOW_INFO || Config.LOGV) {
                     Log.v(TAG, "    IntentFilter:");
@@ -2884,8 +2926,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 (a.info.nonLocalizedLabel != null ? a.info.nonLocalizedLabel : a.info.name) + ":");
             if (SHOW_INFO || Config.LOGV) Log.v(TAG, "    Class=" + a.info.name);
             int NI = a.intents.size();
-            int j;
-            for (j=0; j<NI; j++) {
+            for (int j=0; j<NI; j++) {
                 PackageParser.ActivityIntentInfo intent = a.intents.get(j);
                 if (SHOW_INFO || Config.LOGV) {
                     Log.v(TAG, "    IntentFilter:");
