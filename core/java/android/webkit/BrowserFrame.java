@@ -109,6 +109,8 @@ class BrowserFrame extends Handler {
             CacheManager.init(context);
             // create CookieSyncManager with current Context
             CookieSyncManager.createInstance(context);
+            // create PluginManager with current Context
+            PluginManager.getInstance(context);
         }
         AssetManager am = context.getAssets();
         nativeCreateFrame(w, am, proxy.getBackForwardList());
