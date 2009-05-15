@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,29 +21,34 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.android.gesture.Gesture;
-import com.android.gesture.GestureLib;
+import com.android.gesture.GestureLibrary;
 import com.android.gesture.GestureListener;
 import com.android.gesture.GesturePad;
-import com.android.gesture.R;
-import com.android.gesture.recognizer.Prediction;
+import com.android.gesture.Prediction;
 
 import java.util.ArrayList;
 
 /**
  * The demo shows how to construct a gesture-based user interface on Android.
+ * 
+ * @author liyang@google.com (Yang Li)
+ *
  */
 
 public class GestureEntryDemo extends Activity {
@@ -52,31 +57,35 @@ public class GestureEntryDemo extends Activity {
     private static final int NEW_ID = Menu.FIRST;
     private static final int VIEW_ID = Menu.FIRST + 1;
 
-    GesturePad  mView;
-    Spinner     mResult;
-    GestureLib  mRecognizer;
-    boolean     mChangedByRecognizer = false;
+    private GesturePad mGesturePad;
+    private Spinner mRecognitionResult;
+    private GestureLibrary mGestureLibrary;
+    private boolean mChangedByRecognizer = false;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.demo);
         
-        // init the recognizer
-        mRecognizer = new GestureLib("/sdcard/gestureentry");
-        mRecognizer.load();
+        // init the gesture library
+        mGestureLibrary = new GestureLibrary(
+            "/sdcard/gestureentry/gestures.xml");
+        mGestureLibrary.load();
         
         // create the spinner for showing the recognition results
         // the spinner also allows a user to correct a prediction
-        mResult = (Spinner) findViewById(R.id.spinner);
-        mResult.setOnItemSelectedListener(new OnItemSelectedListener() {
+        mRecognitionResult = (Spinner) findViewById(R.id.spinner);
+        mRecognitionResult.setOnItemSelectedListener(
+            new OnItemSelectedListener() {
 
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(
+                AdapterView<?> parent, View view, int position, long id) {
                 // TODO Auto-generated method stub
                 // correct the recognition result by adding the new example
                 if (mChangedByRecognizer == false) {
-                    mRecognizer.addGesture(parent.getSelectedItem().toString(), 
-                      mView.getCurrentGesture());
+                    mGestureLibrary.addGesture(
+                        parent.getSelectedItem().toString(), 
+                        mGesturePad.getCurrentGesture());
                 } else {
                     mChangedByRecognizer = false;
                 }
@@ -90,28 +99,35 @@ public class GestureEntryDemo extends Activity {
         });
         
         // create the area for drawing a gesture
-        mView = (GesturePad)this.findViewById(R.id.drawingpad);
-        mView.cacheGesture(false);
-        mView.setFadingOut(false);
-        mView.addGestureListener(new GestureListener() {
-            public void onFinishGesture(GesturePad patch, MotionEvent event) {
+        mGesturePad = (GesturePad)this.findViewById(R.id.drawingpad);
+        mGesturePad.setBackgroundColor(Color.BLACK);
+        mGesturePad.addGestureListener(new GestureListener() {
+            public void onFinishGesture(GesturePad pad, MotionEvent event) {
                 // TODO Auto-generated method stub
-                recognize(patch.getCurrentGesture());
+                recognize(pad.getCurrentGesture());
             }
-            public void onGesture(GesturePad patch, MotionEvent event) {
+            public void onGesture(GesturePad pad, MotionEvent event) {
               // TODO Auto-generated method stub
-              
             }
-            public void onStartGesture(GesturePad patch, MotionEvent event) {
-              // TODO Auto-generated method stub
-              
+            public void onStartGesture(GesturePad pad, MotionEvent event) {
+                // TODO Auto-generated method stub
             }
         });
         
+        Button clear = (Button)this.findViewById(R.id.clear);
+        clear.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                mGesturePad.clear(false);
+                mGesturePad.invalidate();
+            }
+        });
         
         if (savedInstanceState != null) {
-            mView.setCurrentGesture(
-                (Gesture)savedInstanceState.getParcelable("gesture"));
+            Gesture g = (Gesture)savedInstanceState.getParcelable("gesture");
+            if (g != null) {
+                mGesturePad.setCurrentGesture(g);
+            }
         }
     }
     
@@ -129,10 +145,12 @@ public class GestureEntryDemo extends Activity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     /* User clicked OK so do some stuff */
                     EditText edittext =
-                      (EditText)((AlertDialog)dialog).findViewById(R.id.gesturename_edit);
+                      (EditText)((AlertDialog)dialog).findViewById(
+                          R.id.gesturename_edit);
                     String text = edittext.getText().toString().trim();
                     if (text.length() > 0) {
-                        mRecognizer.addGesture(text, mView.getCurrentGesture());
+                        mGestureLibrary.addGesture(
+                            text, mGesturePad.getCurrentGesture());
                     }
                 }
             })
@@ -164,7 +182,7 @@ public class GestureEntryDemo extends Activity {
         switch (item.getItemId()) {
             case NEW_ID:
                 // if there has been a gesture on the canvas
-                if (mView.getCurrentGesture() != null) {
+                if (mGesturePad.getCurrentGesture() != null) {
                     showDialog(DIALOG_NEW_ENTRY);
                 }
                 break;
@@ -180,16 +198,17 @@ public class GestureEntryDemo extends Activity {
     
     
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mRecognizer.load();
-        mView.clear();
+    protected void onActivityResult(
+        int requestCode, int resultCode, Intent data) {
+        mGestureLibrary.load();
+        mGesturePad.clear(false);
     }
     
     @Override
     protected void onPause() {
         // TODO Auto-generated method stub
         super.onPause();
-        mRecognizer.save();
+        mGestureLibrary.save();
     }
     
     
@@ -203,18 +222,20 @@ public class GestureEntryDemo extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         // TODO Auto-generated method stub
         super.onSaveInstanceState(outState);
-        outState.putParcelable("gesture", mView.getCurrentGesture());
-        mRecognizer.save();
+        Gesture gesture = mGesturePad.getCurrentGesture();
+        if (gesture != null)
+            outState.putParcelable("gesture", gesture);
+        mGestureLibrary.save();
     }
 
     public void recognize(Gesture ink) {
         mChangedByRecognizer = true;
-        ArrayList<Prediction> predictions = mRecognizer.recognize(ink);
-        ArrayAdapter adapter = new ArrayAdapter(this, 
+        ArrayList<Prediction> predictions = mGestureLibrary.recognize(ink);
+        ArrayAdapter<Prediction> adapter = new ArrayAdapter<Prediction>(this, 
                     android.R.layout.simple_spinner_item, predictions);
         adapter.setDropDownViewResource(
                     android.R.layout.simple_spinner_dropdown_item);
-        mResult.setAdapter(adapter);
+        mRecognitionResult.setAdapter(adapter);
     }
 
 }

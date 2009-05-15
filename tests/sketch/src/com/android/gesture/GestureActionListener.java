@@ -16,15 +16,7 @@
 
 package com.android.gesture;
 
-import android.view.MotionEvent;
 
-/**
- * An interface for processing gesture events
- */
-public interface GestureListener {
-    public void onStartGesture(GestureOverlay overlay, MotionEvent event);
-
-    public void onGesture(GestureOverlay overlay, MotionEvent event);
-
-    public void onFinishGesture(GestureOverlay overlay, MotionEvent event);
+public interface GestureActionListener {
+    public void onGesturePerformed(GestureOverlay overlay, Gesture gesture);
 }
