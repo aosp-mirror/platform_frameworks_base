@@ -23,7 +23,8 @@ package com.android.mediaframeworktest;
  *
  */
 public class MediaNames {
-  
+    //A directory to hold all kinds of media files
+    public static final String MEDIA_SAMPLE_POOL = "/sdcard/media_api/samples/";
     //Audio files
     public static final String MP3CBR = "/sdcard/media_api/music/MP3CBR.mp3";  
     public static final String MP3VBR = "/sdcard/media_api/music/MP3VBR.mp3";
