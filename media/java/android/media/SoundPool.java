@@ -149,7 +149,9 @@ public class SoundPool
                     fd.close();
                 }
             }
-        } catch (java.io.IOException e) {}
+        } catch (java.io.IOException e) {
+            Log.d(TAG, "error loading " + path);
+        }
         return id;
     }
 

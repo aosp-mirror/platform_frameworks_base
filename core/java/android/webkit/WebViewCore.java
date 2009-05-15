@@ -143,6 +143,8 @@ final class WebViewCore {
         // The WebIconDatabase needs to be initialized within the UI thread so
         // just request the instance here.
         WebIconDatabase.getInstance();
+        // Create the WebStorage singleton
+        WebStorage.getInstance();
         // Send a message to initialize the WebViewCore.
         Message init = sWebCoreHandler.obtainMessage(
                 WebCoreThread.INITIALIZE, this);
@@ -162,6 +164,8 @@ final class WebViewCore {
         mSettings.syncSettingsAndCreateHandler(mBrowserFrame);
         // Create the handler and transfer messages for the IconDatabase
         WebIconDatabase.getInstance().createHandler();
+        // Create the handler for WebStorage
+        WebStorage.getInstance().createHandler();
         // The transferMessages call will transfer all pending messages to the
         // WebCore thread handler.
         mEventHub.transferMessages();
@@ -284,6 +288,16 @@ final class WebViewCore {
         return mCallbackProxy.onJsBeforeUnload(url, message);
     }
 
+    /**
+     *
+     * Callback to notify that a JavaScript execution timeout has occured.
+     * @return True if the JavaScript execution should be interrupted. False
+     *         will continue the execution.
+     */
+    protected boolean jsInterrupt() {
+        return mCallbackProxy.onJsTimeout();
+    }
+
     //-------------------------------------------------------------------------
     // JNI methods
     //-------------------------------------------------------------------------
@@ -370,7 +384,7 @@ final class WebViewCore {
     
     private native void nativeTouchUp(int touchGeneration, 
             int buildGeneration, int framePtr, int nodePtr, int x, int y, 
-            int size, boolean isClick, boolean retry);
+            int size, boolean retry);
 
     private native boolean nativeHandleTouchEvent(int action, int x, int y);
 
@@ -526,7 +540,6 @@ final class WebViewCore {
         int mX;
         int mY;
         int mSize;
-        boolean mIsClick;
         boolean mRetry;
     }
 
@@ -892,7 +905,7 @@ final class WebViewCore {
                                     touchUpData.mBuildGeneration,
                                     touchUpData.mFrame, touchUpData.mNode,
                                     touchUpData.mX, touchUpData.mY, 
-                                    touchUpData.mSize, touchUpData.mIsClick,
+                                    touchUpData.mSize,
                                     touchUpData.mRetry);
                             break;
 

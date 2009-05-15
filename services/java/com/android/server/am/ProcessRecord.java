@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.PrintWriterPrinter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying repeated trav
     ComponentName instrumentationClass;// class installed to instrument app
+    ApplicationInfo instrumentationInfo; // the application being instrumented
     String instrumentationProfileFile; // where to save profiling
     IInstrumentationWatcher instrumentationWatcher; // who is waiting
     Bundle instrumentationArguments;// as given to us
@@ -125,6 +127,11 @@ class ProcessRecord implements Watchdog.PssRequestor {
                     pw.println(instrumentationProfileFile);
             pw.print(prefix); pw.print("instrumentationArguments=");
                     pw.println(instrumentationArguments);
+            pw.print(prefix); pw.print("instrumentationInfo=");
+                    pw.println(instrumentationInfo);
+            if (instrumentationInfo != null) {
+                instrumentationInfo.dump(new PrintWriterPrinter(pw), prefix + "  ");
+            }
         }
         pw.print(prefix); pw.print("thread="); pw.print(thread);
                 pw.print(" curReceiver="); pw.println(curReceiver);

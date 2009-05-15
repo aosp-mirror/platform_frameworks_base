@@ -599,21 +599,6 @@ typedef void (GL_APIENTRYP PFNGLGETTEXGENXVOESPROC) (GLenum coord, GLenum pname,
 #define GL_EXT_texture_filter_anisotropic 1
 #endif
 
-/*------------------------------------------------------------------------*
- * dalvik extension functions
- *------------------------------------------------------------------------*/
-#ifdef ANDROID
-void glColorPointerBounds(GLint size, GLenum type, GLsizei stride,
-        const GLvoid *ptr, GLsizei count);
-void glNormalPointerBounds(GLenum type, GLsizei stride,
-        const GLvoid *pointer, GLsizei count);
-void glTexCoordPointerBounds(GLint size, GLenum type,
-        GLsizei stride, const GLvoid *pointer, GLsizei count);
-void glVertexPointerBounds(GLint size, GLenum type,
-        GLsizei stride, const GLvoid *pointer, GLsizei count);
-#endif
-
-
 #ifdef __cplusplus
 }
 #endif

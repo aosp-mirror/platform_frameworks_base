@@ -1,7 +1,7 @@
 #ifndef _UTILS_BACKUP_HELPERS_H
 #define _UTILS_BACKUP_HELPERS_H
 
-int back_up_files(int oldSnapshotFD, int newSnapshotFD, int oldDataStream,
+int back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
         char const* fileBase, char const* const* files, int fileCount);
 
 #define TEST_BACKUP_HELPERS 0

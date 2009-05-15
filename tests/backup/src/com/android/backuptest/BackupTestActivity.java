@@ -83,6 +83,27 @@ public class BackupTestActivity extends ListActivity
                 bm.dataChanged();
             }
         },
+        new Test("Clear File") {
+            void run() {
+                PrintStream output = null;
+                try {
+                    output = new PrintStream(openFileOutput(FILE_NAME, MODE_PRIVATE));
+                    output.close();
+                } catch (IOException ex) {
+                    if (output != null) {
+                        output.close();
+                    }
+                }
+                BackupManager bm = new BackupManager(BackupTestActivity.this);
+                bm.dataChanged();
+            }
+        },
+        new Test("Poke") {
+            void run() {
+                BackupManager bm = new BackupManager(BackupTestActivity.this);
+                bm.dataChanged();
+            }
+        },
         new Test("Show Shared Pref") {
             void run() {
                 SharedPreferences prefs = getSharedPreferences(PREF_GROUP_SETTINGS, MODE_PRIVATE);

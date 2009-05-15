@@ -32,6 +32,7 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.Config;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
@@ -1402,7 +1403,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        // Clear the flag as early as possible to allow draw() implementations
+        // Sets the flag as early as possible to allow draw() implementations
         // to call invalidate() successfully when doing animations
         child.mPrivateFlags |= DRAWN;
 
@@ -1481,6 +1482,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (ViewDebug.TRACE_HIERARCHY) {
                     ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
                 }
+                child.mPrivateFlags &= ~DIRTY_MASK;                
                 child.dispatchDraw(canvas);
             } else {
                 child.draw(canvas);
@@ -1494,7 +1496,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 cachePaint.setAlpha(255);
                 mGroupFlags &= ~FLAG_ALPHA_LOWER_THAN_ONE;
             }
-            if (ViewRoot.PROFILE_DRAWING) {
+            if (Config.DEBUG && ViewDebug.profileDrawing) {
                 EventLog.writeEvent(60003, hashCode());
             }
             canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
@@ -1796,7 +1798,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             boolean preventRequestLayout) {
         child.mParent = null;
         addViewInner(child, index, params, preventRequestLayout);
-        child.mPrivateFlags |= DRAWN;
+        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK) | DRAWN;
         return true;
     }
 
@@ -2210,7 +2212,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         addInArray(child, index);
 
         child.mParent = this;
-        child.mPrivateFlags |= DRAWN;
+        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK) | DRAWN;
 
         if (child.hasFocus()) {
             requestChildFocus(child, child.findFocus());
@@ -2320,15 +2322,33 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // ourselves and the parent to make sure the invalidate request goes
             // through
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
-    
+
+            // Check whether the child that requests the invalidate is fully opaque
+            final boolean isOpaque = child.isOpaque();
+            // Mark the child as dirty, using the appropriate flag
+            // Make sure we do not set both flags at the same time
+            final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
+
             do {
+                View view = null;
+                if (parent instanceof View) {
+                    view = (View) parent;
+                }
+
                 if (drawAnimation) {
-                    if (parent instanceof View) {
-                        ((View) parent).mPrivateFlags |= DRAW_ANIMATION;
+                    if (view != null) {
+                        view.mPrivateFlags |= DRAW_ANIMATION;
                     } else if (parent instanceof ViewRoot) {
                         ((ViewRoot) parent).mIsAnimating = true;
                     }
                 }
+
+                // If the parent is dirty opaque or not dirty, mark it dirty with the opaque
+                // flag coming from the child that initiated the invalidate
+                if (view != null && (view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
+                    view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
+                }
+
                 parent = parent.invalidateChildInParent(location, dirty);
             } while (parent != null);
         }
@@ -2729,6 +2749,61 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected boolean dispatchConsistencyCheck(int consistency) {
+        boolean result = super.dispatchConsistencyCheck(consistency);
+
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            if (!children[i].dispatchConsistencyCheck(consistency)) result = false;
+        }
+
+        return result;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected boolean onConsistencyCheck(int consistency) {
+        boolean result = super.onConsistencyCheck(consistency);
+
+        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
+        final boolean checkDrawing = (consistency & ViewDebug.CONSISTENCY_DRAWING) != 0;
+
+        if (checkLayout) {
+            final int count = mChildrenCount;
+            final View[] children = mChildren;
+            for (int i = 0; i < count; i++) {
+                if (children[i].getParent() != this) {
+                    result = false;
+                    android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                            "View " + children[i] + " has no parent/a parent that is not " + this);
+                }
+            }
+        }
+
+        if (checkDrawing) {
+            // If this group is dirty, check that the parent is dirty as well
+            if ((mPrivateFlags & DIRTY_MASK) != 0) {
+                final ViewParent parent = getParent();
+                if (parent != null && !(parent instanceof ViewRoot)) {
+                    if ((((View) parent).mPrivateFlags & DIRTY_MASK) == 0) {
+                        result = false;
+                        android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                                "ViewGroup " + this + " is dirty but its parent is not: " + this);
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

@@ -255,6 +255,14 @@ class SyncManager implements OnAccountsUpdatedListener {
         }
     };
 
+    private BroadcastReceiver mShutdownIntentReceiver =
+            new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            Log.w(TAG, "Writing sync state before shutdown...");
+            getSyncStorageEngine().writeAllState();
+        }
+    };
+
     private static final String ACTION_SYNC_ALARM = "android.content.syncmanager.SYNC_ALARM";
     private static final String SYNC_POLL_ALARM = "android.content.syncmanager.SYNC_POLL_ALARM";
     private final SyncHandler mSyncHandler;
@@ -300,6 +308,10 @@ class SyncManager implements OnAccountsUpdatedListener {
         intentFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
         intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
         context.registerReceiver(mStorageIntentReceiver, intentFilter);
+
+        intentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
+        intentFilter.setPriority(100);
+        context.registerReceiver(mShutdownIntentReceiver, intentFilter);
 
         if (!factoryTest) {
             mNotificationMgr = (NotificationManager)

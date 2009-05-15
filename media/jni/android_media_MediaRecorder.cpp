@@ -150,6 +150,11 @@ static sp<MediaRecorder> setMediaRecorder(JNIEnv* env, jobject thiz, const sp<Me
 
 static void android_media_MediaRecorder_setCamera(JNIEnv* env, jobject thiz, jobject camera)
 {
+    // we should not pass a null camera to get_native_camera() call.
+    if (camera == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", "camera object is a NULL pointer");
+        return;
+    }
     sp<Camera> c = get_native_camera(env, camera, NULL);
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setCamera(c->remote()),

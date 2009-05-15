@@ -126,6 +126,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     // Indicates whether this AutoCompleteTextView is attached to a window or not
     // The widget is attached to a window when mAttachCount > 0
     private int mAttachCount;
+    
+    private AutoCompleteTextView.PassThroughClickListener mPassThroughClickListener;
 
     public AutoCompleteTextView(Context context) {
         this(context, null);
@@ -186,6 +188,28 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         setFocusable(true);
 
         addTextChangedListener(new MyWatcher());
+        
+        mPassThroughClickListener = new PassThroughClickListener();
+        super.setOnClickListener(mPassThroughClickListener);
+    }
+
+    @Override
+    public void setOnClickListener(OnClickListener listener) {
+        mPassThroughClickListener.mWrapped = listener;
+    }
+
+    /**
+     * Private hook into the on click event, dispatched from {@link PassThroughClickListener}
+     */
+    private void onClickImpl() {
+        // if drop down should always visible, bring it back in front of the soft
+        // keyboard when the user touches the text field
+        if (mDropDownAlwaysVisible
+                && mPopup.isShowing()
+                && mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
+            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+            showDropDown();
+        }
     }
 
     /**
@@ -1130,9 +1154,14 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
         }
 
-        // Max height available on the screen for a popup
-        final int maxHeight =
-                mPopup.getMaxAvailableHeight(getDropDownAnchorView(), mDropDownVerticalOffset);
+        // Max height available on the screen for a popup. If this AutoCompleteTextView has
+        // the dropDownAlwaysVisible attribute, and the input method is not currently required,
+        // we then we ask for the height ignoring any bottom decorations like the input method.
+        // Otherwise we respect the input method.
+        boolean ignoreBottomDecorations = mDropDownAlwaysVisible &&
+                mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
+        final int maxHeight = mPopup.getMaxAvailableHeight(
+                getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
 
         final int measuredHeight = mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
                 0, ListView.NO_POSITION, maxHeight - otherHeights, 2) + otherHeights;
@@ -1214,7 +1243,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-                mPopup.update();
+                showDropDown();
             }
             return false;
         }
@@ -1353,4 +1382,21 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
          */
         CharSequence fixText(CharSequence invalidText);
     }
+    
+    /**
+     * Allows us a private hook into the on click event without preventing users from setting
+     * their own click listener.
+     */
+    private class PassThroughClickListener implements OnClickListener {
+
+        private View.OnClickListener mWrapped;
+
+        /** {@inheritDoc} */
+        public void onClick(View v) {
+            onClickImpl();
+
+            if (mWrapped != null) mWrapped.onClick(v);
+        }
+    }
+    
 }

@@ -171,7 +171,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // having windows anchored by their parent but not clipped by them.
                 ViewGroup.LayoutParams.FILL_PARENT);
         WindowManager.LayoutParams lp = theWindow.getAttributes();
-        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE;
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         theWindow.setAttributes(lp);
 
         // get the view elements for local access
@@ -309,11 +309,23 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     + appSearchData + ", " + globalSearch + ")");
         }
         
+        // Try to get the searchable info for the provided component (or for global search,
+        // if globalSearch == true).
         mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
-        if (mSearchable == null) {
-            // unfortunately, we can't log here.  it would be logspam every time the user
-            // clicks the "search" key on a non-search app
-            return false;
+        
+        // If we got back nothing, and it wasn't a request for global search, then try again
+        // for global search, as we'll try to launch that in lieu of any component-specific search.
+        if (!globalSearch && mSearchable == null) {
+            globalSearch = true;
+            mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
+            
+            // If we still get back null (i.e., there's not even a searchable info available
+            // for global search), then really give up.
+            if (mSearchable == null) {
+                // Unfortunately, we can't log here.  it would be logspam every time the user
+                // clicks the "search" key on a non-search app.
+                return false;
+            }
         }
         
         mLaunchComponent = componentName;
@@ -325,6 +337,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         // show the dialog. this will call onStart().
         if (!isShowing()) {
+            // First make sure the keyboard is showing (if needed), so that we get the right height
+            // for the dropdown to respect the IME.
+            if (getContext().getResources().getConfiguration().hardKeyboardHidden ==
+                Configuration.HARDKEYBOARDHIDDEN_YES) {
+                InputMethodManager inputManager = (InputMethodManager)
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputManager.showSoftInputUnchecked(0, null);
+            }
             show();
         }
 
@@ -531,9 +551,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (mGlobalSearchMode) {
             mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in
             mSearchAutoComplete.setDropDownDismissedOnCompletion(false);
+            mSearchAutoComplete.setDropDownBackgroundResource(
+                    com.android.internal.R.drawable.search_dropdown_background);
         } else {
             mSearchAutoComplete.setDropDownAlwaysVisible(false);
             mSearchAutoComplete.setDropDownDismissedOnCompletion(true);
+            mSearchAutoComplete.setDropDownBackgroundResource(
+                    com.android.internal.R.drawable.search_dropdown_background_apps);
         }
 
         // attach the suggestions adapter, if suggestions are available
@@ -1329,7 +1353,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         private SearchDialog mSearchDialog;
         
         public SearchAutoComplete(Context context) {
-            super(null);
+            super(context);
             mThreshold = getThreshold();
         }
         

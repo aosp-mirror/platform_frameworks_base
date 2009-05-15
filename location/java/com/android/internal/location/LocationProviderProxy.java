@@ -21,6 +21,7 @@ import android.location.ILocationProvider;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -31,7 +32,7 @@ import java.util.List;
  *
  * {@hide}
  */
-public class LocationProviderProxy {
+public class LocationProviderProxy implements IBinder.DeathRecipient {
 
     private static final String TAG = "LocationProviderProxy";
 
@@ -39,14 +40,25 @@ public class LocationProviderProxy {
     private final ILocationProvider mProvider;
     private boolean mLocationTracking = false;
     private long mMinTime = 0;
+    private boolean mDead;
 
     public LocationProviderProxy(String name, ILocationProvider provider) {
         mName = name;
         mProvider = provider;
+        try {
+            provider.asBinder().linkToDeath(this, 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "linkToDeath failed", e);
+            mDead = true;
+        }
     }
 
     public String getName() {
         return mName;
+    }
+
+    public boolean isDead() {
+        return mDead;
     }
 
     public boolean requiresNetwork() {
@@ -230,5 +242,10 @@ public class LocationProviderProxy {
         } catch (RemoteException e) {
             Log.e(TAG, "removeListener failed", e);
         }
+    }
+
+    public void binderDied() {
+        Log.w(TAG, "Location Provider " + mName + " died");
+        mDead = true;
     }
 }

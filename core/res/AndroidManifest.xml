@@ -803,6 +803,14 @@
         android:description="@string/permdesc_runSetActivityWatcher"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to watch and control how activities are
+         started globally in the system.  Only for is in debugging
+         (usually the monkey command). -->
+    <permission android:name="android.permission.SHUTDOWN"
+        android:label="@string/permlab_shutdown"
+        android:description="@string/permdesc_shutdown"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to retrieve the current state of keys and
          switches.  This is only for use by the system.-->
     <permission android:name="android.permission.READ_INPUT_STATE"
@@ -1029,7 +1037,7 @@
         <receiver android:name="com.android.server.MasterClearReceiver"
             android:permission="android.permission.MASTER_CLEAR" >
             <intent-filter>
-                <action android:name="android.intent.action.GTALK_DATA_MESSAGE_RECEIVED" />
+                <action android:name="android.intent.action.REMOTE_INTENT" />
                 <category android:name="android.intent.category.MASTER_CLEAR" />
             </intent-filter>
         </receiver>

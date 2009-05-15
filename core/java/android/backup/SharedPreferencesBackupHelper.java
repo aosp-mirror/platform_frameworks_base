@@ -21,6 +21,7 @@ import android.os.ParcelFileDescriptor;
 
 import java.io.FileDescriptor;
 
+/** @hide */
 public class SharedPreferencesBackupHelper {
     public static void performBackup(Context context,
             ParcelFileDescriptor oldSnapshot, ParcelFileDescriptor newSnapshot,
@@ -34,7 +35,7 @@ public class SharedPreferencesBackupHelper {
             files[i] = prefGroups[i] + ".xml";
         }
 
-        FileBackupHelper.performBackup_checked(basePath, oldSnapshot, newSnapshot, data, files);
+        FileBackupHelper.performBackup_checked(basePath, oldSnapshot, data, newSnapshot, files);
     }
 }
 

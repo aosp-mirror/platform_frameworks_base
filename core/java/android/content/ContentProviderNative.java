@@ -105,6 +105,20 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     return true;
                 }
 
+                case QUERY_ENTITIES_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+                    String selection = data.readString();
+                    String[] selectionArgs = data.readStringArray();
+                    String sortOrder = data.readString();
+                    EntityIterator entityIterator = queryEntities(url, selection, selectionArgs,
+                            sortOrder);
+                    reply.writeNoException();
+                    reply.writeStrongBinder(new IEntityIteratorImpl(entityIterator).asBinder());
+                    return true;
+                }
+
                 case GET_TYPE_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
@@ -137,6 +151,40 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     int count = bulkInsert(url, values);
                     reply.writeNoException();
                     reply.writeInt(count);
+                    return true;
+                }
+
+                case BULK_INSERT_ENTITIES_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    Uri uri = Uri.CREATOR.createFromParcel(data);
+                    String className = data.readString();
+                    Class entityClass = Class.forName(className);
+                    int numEntities = data.readInt();
+                    Entity[] entities = new Entity[numEntities];
+                    for (int i = 0; i < numEntities; i++) {
+                        entities[i] = (Entity) data.readParcelable(entityClass.getClassLoader());
+                    }
+                    Uri[] uris = bulkInsertEntities(uri, entities);
+                    reply.writeNoException();
+                    reply.writeTypedArray(uris, 0);
+                    return true;
+                }
+
+                case BULK_UPDATE_ENTITIES_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    Uri uri = Uri.CREATOR.createFromParcel(data);
+                    String className = data.readString();
+                    Class entityClass = Class.forName(className);
+                    int numEntities = data.readInt();
+                    Entity[] entities = new Entity[numEntities];
+                    for (int i = 0; i < numEntities; i++) {
+                        entities[i] = (Entity) data.readParcelable(entityClass.getClassLoader());
+                    }
+                    int[] counts = bulkUpdateEntities(uri, entities);
+                    reply.writeNoException();
+                    reply.writeIntArray(counts);
                     return true;
                 }
 
@@ -215,6 +263,25 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
         return super.onTransact(code, data, reply, flags);
     }
 
+    private class IEntityIteratorImpl extends IEntityIterator.Stub {
+        private final EntityIterator mEntityIterator;
+
+        IEntityIteratorImpl(EntityIterator iterator) {
+            mEntityIterator = iterator;
+        }
+        public boolean hasNext() throws RemoteException {
+            return mEntityIterator.hasNext();
+        }
+
+        public Entity next() throws RemoteException {
+            return mEntityIterator.next();
+        }
+
+        public void close() throws RemoteException {
+            mEntityIterator.close();
+        }
+    }
+
     public IBinder asBinder()
     {
         return this;
@@ -288,12 +355,60 @@ final class ContentProviderProxy implements IContentProvider
         BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
         IBulkCursor bulkCursor = bulkQuery(url, projection, selection, selectionArgs, sortOrder,
                 adaptor.getObserver(), window);
-         
+
         if (bulkCursor == null) {
             return null;
         }
         adaptor.set(bulkCursor);
         return adaptor;
+    }
+
+    public EntityIterator queryEntities(Uri url, String selection, String[] selectionArgs,
+            String sortOrder)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+
+        data.writeInterfaceToken(IContentProvider.descriptor);
+
+        url.writeToParcel(data, 0);
+        data.writeString(selection);
+        data.writeStringArray(selectionArgs);
+        data.writeString(sortOrder);
+
+        mRemote.transact(IContentProvider.QUERY_ENTITIES_TRANSACTION, data, reply, 0);
+
+        DatabaseUtils.readExceptionFromParcel(reply);
+
+        IBinder entityIteratorBinder = reply.readStrongBinder();
+
+        data.recycle();
+        reply.recycle();
+
+        return new RemoteEntityIterator(IEntityIterator.Stub.asInterface(entityIteratorBinder));
+    }
+
+    static class RemoteEntityIterator implements EntityIterator {
+        private final IEntityIterator mEntityIterator;
+        RemoteEntityIterator(IEntityIterator entityIterator) {
+            mEntityIterator = entityIterator;
+        }
+
+        public boolean hasNext() throws RemoteException {
+            return mEntityIterator.hasNext();
+        }
+
+        public Entity next() throws RemoteException {
+            return mEntityIterator.next();
+        }
+
+        public void close() {
+            try {
+                mEntityIterator.close();
+            } catch (RemoteException e) {
+                // doesn't matter
+            }
+        }
     }
 
     public String getType(Uri url) throws RemoteException
@@ -355,6 +470,54 @@ final class ContentProviderProxy implements IContentProvider
         reply.recycle();
 
         return count;
+    }
+
+    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+
+        data.writeInterfaceToken(IContentProvider.descriptor);
+        uri.writeToParcel(data, 0);
+        data.writeString(entities[0].getClass().getName());
+        data.writeInt(entities.length);
+        for (Entity entity : entities) {
+            data.writeParcelable(entity, 0);
+        }
+
+        mRemote.transact(IContentProvider.BULK_INSERT_ENTITIES_TRANSACTION, data, reply, 0);
+
+        DatabaseUtils.readExceptionFromParcel(reply);
+        Uri[] results = new Uri[entities.length];
+        reply.readTypedArray(results, Uri.CREATOR);
+
+        data.recycle();
+        reply.recycle();
+
+        return results;
+    }
+
+    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+
+        data.writeInterfaceToken(IContentProvider.descriptor);
+        uri.writeToParcel(data, 0);
+        data.writeString(entities[0].getClass().getName());
+        data.writeInt(entities.length);
+        for (Entity entity : entities) {
+            data.writeParcelable(entity, 0);
+        }
+
+        mRemote.transact(IContentProvider.BULK_UPDATE_ENTITIES_TRANSACTION, data, reply, 0);
+
+        DatabaseUtils.readExceptionFromParcel(reply);
+        int[] results = new int[entities.length];
+        reply.readIntArray(results);
+
+        data.recycle();
+        reply.recycle();
+
+        return results;
     }
 
     public int delete(Uri url, String selection, String[] selectionArgs)

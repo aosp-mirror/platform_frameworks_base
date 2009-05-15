@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import com.android.internal.app.IUsageStats;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
@@ -416,6 +417,11 @@ public final class UsageStatsService extends IUsageStats.Stub {
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService(SERVICE_NAME, asBinder());
+    }
+    
+    public void shutdown() {
+        Log.w(TAG, "Writing usage stats before shutdown...");
+        writeStatsToFile(true);
     }
     
     public static IUsageStats getService() {

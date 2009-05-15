@@ -178,8 +178,8 @@ static pthread_key_t gEGLThreadLocalStorageKey = -1;
 
 // ----------------------------------------------------------------------------
 
-gl_hooks_t gHooks[IMPL_NUM_IMPLEMENTATIONS];
-pthread_key_t gGLWrapperKey = -1;
+EGLAPI gl_hooks_t gHooks[IMPL_NUM_IMPLEMENTATIONS];
+EGLAPI pthread_key_t gGLWrapperKey = -1;
 
 // ----------------------------------------------------------------------------
 

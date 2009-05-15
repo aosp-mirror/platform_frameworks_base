@@ -574,6 +574,14 @@ public abstract class PhoneBase implements Phone {
         mCM.getPreferredNetworkType(response);
     }
 
+    public void getSmscAddress(Message result) {
+        mCM.getSmscAddress(result);
+    }
+
+    public void setSmscAddress(String address, Message result) {
+        mCM.setSmscAddress(address, result);
+    }
+
     public void setTTYModeEnabled(boolean enable, Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");

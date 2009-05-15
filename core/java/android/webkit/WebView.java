@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -60,6 +61,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.TextDialog.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
 import android.widget.AbsoluteLayout;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
@@ -4402,7 +4404,7 @@ public class WebView extends AbsoluteLayout
             View v = mTextEntry;
             int x = viewToContent((v.getLeft() + v.getRight()) >> 1);
             int y = viewToContent((v.getTop() + v.getBottom()) >> 1);
-            nativeMotionUp(x, y, mNavSlop, true);
+            nativeMotionUp(x, y, mNavSlop);
         }
     }
 
@@ -4414,7 +4416,7 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContent((int) mLastTouchX + mScrollX);
         int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        if (nativeMotionUp(contentX, contentY, mNavSlop, true)) {
+        if (nativeMotionUp(contentX, contentY, mNavSlop)) {
             if (mLogEvent) {
                 Checkin.updateStats(mContext.getContentResolver(),
                         Checkin.Stats.Tag.BROWSER_SNAP_CENTER, 1, 0.0);
@@ -4933,7 +4935,10 @@ public class WebView extends AbsoluteLayout
 
             @Override
             public boolean hasStableIds() {
-                return true;
+                // AdapterView's onChanged method uses this to determine whether
+                // to restore the old state.  Return false so that the old (out
+                // of date) state does not replace the new, valid state.
+                return false;
             }
 
             private Container item(int position) {
@@ -4997,6 +5002,51 @@ public class WebView extends AbsoluteLayout
             }
         }
 
+        /*
+         * Whenever the data set changes due to filtering, this class ensures
+         * that the checked item remains checked.
+         */
+        private class SingleDataSetObserver extends DataSetObserver {
+            private long        mCheckedId;
+            private ListView    mListView;
+            private Adapter     mAdapter;
+
+            /*
+             * Create a new observer.
+             * @param id The ID of the item to keep checked.
+             * @param l ListView for getting and clearing the checked states
+             * @param a Adapter for getting the IDs
+             */
+            public SingleDataSetObserver(long id, ListView l, Adapter a) {
+                mCheckedId = id;
+                mListView = l;
+                mAdapter = a;
+            }
+
+            public void onChanged() {
+                // The filter may have changed which item is checked.  Find the
+                // item that the ListView thinks is checked.
+                int position = mListView.getCheckedItemPosition();
+                long id = mAdapter.getItemId(position);
+                if (mCheckedId != id) {
+                    // Clear the ListView's idea of the checked item, since
+                    // it is incorrect
+                    mListView.clearChoices();
+                    // Search for mCheckedId.  If it is in the filtered list,
+                    // mark it as checked
+                    int count = mAdapter.getCount();
+                    for (int i = 0; i < count; i++) {
+                        if (mAdapter.getItemId(i) == mCheckedId) {
+                            mListView.setItemChecked(i, true);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            public void onInvalidate() {}
+        }
+
         public void run() {
             final ListView listView = (ListView) LayoutInflater.from(mContext)
                     .inflate(com.android.internal.R.layout.select_dialog, null);
@@ -5030,8 +5080,7 @@ public class WebView extends AbsoluteLayout
             // filtered.  Do not allow filtering on multiple lists until
             // that bug is fixed.
             
-            // Disable filter altogether
-            // listView.setTextFilterEnabled(!mMultiple);
+            listView.setTextFilterEnabled(!mMultiple);
             if (mMultiple) {
                 listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
                 int length = mSelectedArray.length;
@@ -5051,6 +5100,9 @@ public class WebView extends AbsoluteLayout
                     listView.setSelection(mSelection);
                     listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
                     listView.setItemChecked(mSelection, true);
+                    DataSetObserver observer = new SingleDataSetObserver(
+                            adapter.getItemId(mSelection), listView, adapter);
+                    adapter.registerDataSetObserver(observer);
                 }
             }
             dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -5120,13 +5172,12 @@ public class WebView extends AbsoluteLayout
 
     // called by JNI
     private void sendMotionUp(int touchGeneration, int buildGeneration,
-            int frame, int node, int x, int y, int size, boolean isClick,
+            int frame, int node, int x, int y, int size,
             boolean retry) {
         WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
         touchUpData.mMoveGeneration = touchGeneration;
         touchUpData.mBuildGeneration = buildGeneration;
         touchUpData.mSize = size;
-        touchUpData.mIsClick = isClick;
         touchUpData.mRetry = retry;
         mFocusData.mFrame = touchUpData.mFrame = frame;
         mFocusData.mNode = touchUpData.mNode = node;
@@ -5263,7 +5314,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeInstrumentReport();
     private native void     nativeMarkNodeInvalid(int node);
     // return true if the page has been scrolled
-    private native boolean  nativeMotionUp(int x, int y, int slop, boolean isClick);
+    private native boolean  nativeMotionUp(int x, int y, int slop);
     // returns false if it handled the key
     private native boolean  nativeMoveFocus(int keyCode, int count, 
             boolean noScroll);

@@ -925,6 +925,21 @@ public interface Phone {
     void getPreferredNetworkType(Message response);
 
     /**
+     * Gets the default SMSC address.
+     *
+     * @param result Callback message contains the SMSC address.
+     */
+    void getSmscAddress(Message result);
+
+    /**
+     * Sets the default SMSC address.
+     *
+     * @param address new SMSC address
+     * @param result Callback message is empty on completion
+     */
+    void setSmscAddress(String address, Message result);
+
+    /**
      * Query neighboring cell IDs.  <code>response</code> is dispatched when
      * this is complete.  <code>response.obj</code> will be an AsyncResult,
      * and <code>response.obj.exception</code> will be non-null on failure.

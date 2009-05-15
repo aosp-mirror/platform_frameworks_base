@@ -43,14 +43,19 @@ public interface IContentProvider extends IInterface {
             CursorWindow window) throws RemoteException;
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException;
+    public EntityIterator queryEntities(Uri url, String selection,
+            String[] selectionArgs, String sortOrder)
+            throws RemoteException;
     public String getType(Uri url) throws RemoteException;
     public Uri insert(Uri url, ContentValues initialValues)
             throws RemoteException;
     public int bulkInsert(Uri url, ContentValues[] initialValues) throws RemoteException;
+    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) throws RemoteException;
     public int delete(Uri url, String selection, String[] selectionArgs)
             throws RemoteException;
     public int update(Uri url, ContentValues values, String selection,
             String[] selectionArgs) throws RemoteException;
+    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) throws RemoteException;
     public ParcelFileDescriptor openFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException;
     public AssetFileDescriptor openAssetFile(Uri url, String mode)
@@ -67,4 +72,7 @@ public interface IContentProvider extends IInterface {
     static final int BULK_INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 12;
     static final int OPEN_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 13;
     static final int OPEN_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 14;
+    static final int BULK_INSERT_ENTITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 16;
+    static final int BULK_UPDATE_ENTITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 17;
+    static final int QUERY_ENTITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 18;
 }

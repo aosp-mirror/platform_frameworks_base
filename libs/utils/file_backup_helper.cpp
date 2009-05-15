@@ -24,6 +24,9 @@ using namespace android;
 #define MAGIC0 0x70616e53 // Snap
 #define MAGIC1 0x656c6946 // File
 
+#define LOGP(x...) LOGD(x)
+//#define LOGP(x...) printf(x)
+
 struct SnapshotHeader {
     int magic0;
     int fileCount;
@@ -159,14 +162,14 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileState>& snapshot)
 static int
 write_delete_file(const String8& key)
 {
-    printf("write_delete_file %s\n", key.string());
+    LOGP("write_delete_file %s\n", key.string());
     return 0;
 }
 
 static int
 write_update_file(const String8& realFilename, const String8& key)
 {
-    printf("write_update_file %s (%s)\n", realFilename.string(), key.string());
+    LOGP("write_update_file %s (%s)\n", realFilename.string(), key.string());
     return 0;
 }
 
@@ -195,7 +198,7 @@ compute_crc32(const String8& filename)
 }
 
 int
-back_up_files(int oldSnapshotFD, int newSnapshotFD, int oldDataStream,
+back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
         char const* fileBase, char const* const* files, int fileCount)
 {
     int err;
@@ -260,10 +263,10 @@ back_up_files(int oldSnapshotFD, int newSnapshotFD, int oldDataStream,
             const FileState& f = oldSnapshot.valueAt(n);
             const FileState& g = newSnapshot.valueAt(m);
 
-            printf("%s\n", q.string());
-            printf("  new: modTime=%d,%d size=%-3d crc32=0x%08x\n",
+            LOGP("%s\n", q.string());
+            LOGP("  new: modTime=%d,%d size=%-3d crc32=0x%08x\n",
                     f.modTime_sec, f.modTime_nsec, f.size, f.crc32);
-            printf("  old: modTime=%d,%d size=%-3d crc32=0x%08x\n",
+            LOGP("  old: modTime=%d,%d size=%-3d crc32=0x%08x\n",
                     g.modTime_sec, g.modTime_nsec, g.size, g.crc32);
             if (f.modTime_sec != g.modTime_sec || f.modTime_nsec != g.modTime_nsec
                     || f.size != g.size || f.crc32 != g.crc32) {

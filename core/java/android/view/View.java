@@ -49,6 +49,7 @@ import android.util.Poolable;
 import android.util.Pool;
 import android.util.Pools;
 import android.util.PoolableManager;
+import android.util.Config;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputConnection;
@@ -1405,6 +1406,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     static final int SCROLL_CONTAINER_ADDED         = 0x00100000;
 
     /**
+     * View flag indicating whether this view was invalidated (fully or partially.)
+     *
+     * @hide
+     */
+    static final int DIRTY                          = 0x00200000;
+
+    /**
+     * View flag indicating whether this view was invalidated by an opaque
+     * invalidate request.
+     *
+     * @hide
+     */
+    static final int DIRTY_OPAQUE                   = 0x00400000;
+
+    /**
+     * Mask for {@link #DIRTY} and {@link #DIRTY_OPAQUE}.
+     *
+     * @hide
+     */
+    static final int DIRTY_MASK                     = 0x00600000;
+
+    /**
      * The parent this view is attached to.
      * {@hide}
      *
@@ -1420,7 +1443,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     /**
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(flagMapping = {
+        @ViewDebug.FlagToString(mask = FORCE_LAYOUT, equals = FORCE_LAYOUT,
+                name = "FORCE_LAYOUT"),
+        @ViewDebug.FlagToString(mask = LAYOUT_REQUIRED, equals = LAYOUT_REQUIRED,
+                name = "LAYOUT_REQUIRED"),
+        @ViewDebug.FlagToString(mask = DRAWING_CACHE_VALID, equals = DRAWING_CACHE_VALID,
+            name = "DRAWING_CACHE_INVALID", outputIf = false),
+        @ViewDebug.FlagToString(mask = DRAWN, equals = DRAWN, name = "DRAWN", outputIf = true),
+        @ViewDebug.FlagToString(mask = DRAWN, equals = DRAWN, name = "NOT_DRAWN", outputIf = false),
+        @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY_OPAQUE, name = "DIRTY_OPAQUE"),
+        @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY, name = "DIRTY")
+    })
     int mPrivateFlags;
 
     /**
@@ -4522,6 +4556,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     /**
+     * Indicates whether this View is opaque. An opaque View guarantees that it will
+     * draw all the pixels overlapping its bounds using a fully opaque color.
+     *
+     * Subclasses of View should override this method whenever possible to indicate
+     * whether an instance is opaque. Opaque Views are treated in a special way by
+     * the View hierarchy, possibly allowing it to perform optimizations during
+     * invalidate/draw passes.
+     * 
+     * @return True if this View is guaranteed to be fully opaque, false otherwise.
+     *
+     * @hide Pending API council approval
+     */
+    @ViewDebug.ExportedProperty
+    public boolean isOpaque() {
+        return mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE;
+    }
+
+    /**
      * @return A handler associated with the thread running the View. This
      * handler can be used to pump events in the UI events queue.
      */
@@ -5601,7 +5653,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             if (ViewDebug.TRACE_HIERARCHY) {
                 ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
             }
-            if (ViewRoot.PROFILE_DRAWING) {
+            if (Config.DEBUG && ViewDebug.profileDrawing) {
                 EventLog.writeEvent(60002, hashCode());
             }
 
@@ -5694,6 +5746,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                 if (ViewDebug.TRACE_HIERARCHY) {
                     ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
                 }
+                mPrivateFlags &= ~DIRTY_MASK;
                 dispatchDraw(canvas);
             } else {
                 draw(canvas);
@@ -5740,7 +5793,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             canvas = new Canvas(bitmap);
         }
 
-        if ((backgroundColor&0xff000000) != 0) {
+        if ((backgroundColor & 0xff000000) != 0) {
             bitmap.eraseColor(backgroundColor);
         }
 
@@ -5748,12 +5801,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         final int restoreCount = canvas.save();
         canvas.translate(-mScrollX, -mScrollY);
 
+        // Temporarily remove the dirty mask
+        int flags = mPrivateFlags;
+        mPrivateFlags &= ~DIRTY_MASK;
+
         // Fast path for layouts with no backgrounds
         if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
             dispatchDraw(canvas);
         } else {
             draw(canvas);
         }
+
+        mPrivateFlags = flags;
 
         canvas.restoreToCount(restoreCount);
 
@@ -5875,7 +5934,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
         }
 
-        mPrivateFlags |= DRAWN;                    
+        final int privateFlags = mPrivateFlags;
+        final boolean dirtyOpaque = (privateFlags & DIRTY_MASK) == DIRTY_OPAQUE &&
+                (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
+        mPrivateFlags = (privateFlags & ~DIRTY_MASK) | DRAWN;
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -5892,22 +5954,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         // Step 1, draw the background, if needed
         int saveCount;
 
-        final Drawable background = mBGDrawable;
-        if (background != null) {
-            final int scrollX = mScrollX;
-            final int scrollY = mScrollY;
+        if (!dirtyOpaque) {
+            final Drawable background = mBGDrawable;
+            if (background != null) {
+                final int scrollX = mScrollX;
+                final int scrollY = mScrollY;
 
-            if (mBackgroundSizeChanged) {
-                background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
-                mBackgroundSizeChanged = false;
-            }
+                if (mBackgroundSizeChanged) {
+                    background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
+                    mBackgroundSizeChanged = false;
+                }
 
-            if ((scrollX | scrollY) == 0) {
-                background.draw(canvas);
-            } else {
-                canvas.translate(scrollX, scrollY);
-                background.draw(canvas);
-                canvas.translate(-scrollX, -scrollY);
+                if ((scrollX | scrollY) == 0) {
+                    background.draw(canvas);
+                } else {
+                    canvas.translate(scrollX, scrollY);
+                    background.draw(canvas);
+                    canvas.translate(-scrollX, -scrollY);
+                }
             }
         }
 
@@ -5917,7 +5981,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         boolean verticalEdges = (viewFlags & FADING_EDGE_VERTICAL) != 0;
         if (!verticalEdges && !horizontalEdges) {
             // Step 3, draw the content
-            onDraw(canvas);
+            if (!dirtyOpaque) onDraw(canvas);
 
             // Step 4, draw the children
             dispatchDraw(canvas);
@@ -6020,7 +6084,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         }
 
         // Step 3, draw the content
-        onDraw(canvas);
+        if (!dirtyOpaque) onDraw(canvas);
 
         // Step 4, draw the children
         dispatchDraw(canvas);
@@ -7123,6 +7187,60 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     }
 
     /**
+     * @param consistency The type of consistency. See ViewDebug for more information.
+     *
+     * @hide
+     */
+    protected boolean dispatchConsistencyCheck(int consistency) {
+        return onConsistencyCheck(consistency);
+    }
+
+    /**
+     * Method that subclasses should implement to check their consistency. The type of
+     * consistency check is indicated by the bit field passed as a parameter.
+     * 
+     * @param consistency The type of consistency. See ViewDebug for more information.
+     *
+     * @throws IllegalStateException if the view is in an inconsistent state.
+     *
+     * @hide
+     */
+    protected boolean onConsistencyCheck(int consistency) {
+        boolean result = true;
+
+        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
+        final boolean checkDrawing = (consistency & ViewDebug.CONSISTENCY_DRAWING) != 0;
+
+        if (checkLayout) {
+            if (getParent() == null) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " does not have a parent.");
+            }
+
+            if (mAttachInfo == null) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " is not attached to a window.");
+            }
+        }
+
+        if (checkDrawing) {
+            // Do not check the DIRTY/DRAWN flags because views can call invalidate()
+            // from their draw() method
+
+            if ((mPrivateFlags & DRAWN) != DRAWN &&
+                    (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " was invalidated but its drawing cache is valid.");
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Prints information about this view in the log output, with the tag
      * {@link #VIEW_LOG_TAG}.
      *
@@ -8049,7 +8167,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * window.
      */
     static class AttachInfo {
-
         interface Callbacks {
             void playSoundEffect(int effectId);
             boolean performHapticFeedback(int effectId, boolean always);
@@ -8177,6 +8294,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
          * Indicates the time at which drawing started to occur.
          */
         long mDrawingTime;
+
+        /**
+         * Indicates whether or not ignoring the DIRTY_MASK flags.
+         */
+        boolean mIgnoreDirtyState;
 
         /**
          * Indicates whether the view's window is currently in touch mode.

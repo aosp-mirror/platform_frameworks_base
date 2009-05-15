@@ -25,8 +25,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
-import android.telephony.TelephonyManager;
-import android.util.PrintWriterPrinter;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -48,6 +47,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService("batteryinfo", asBinder());
+    }
+    
+    public void shutdown() {
+        Log.w("BatteryStats", "Writing battery stats before shutdown...");
+        synchronized (mStats) {
+            mStats.writeLocked();
+        }
     }
     
     public static IBatteryStats getService() {
@@ -252,6 +258,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteScanWifiLockReleasedLocked(uid);
+        }
+    }
+
+    public void noteWifiMulticastEnabled(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastEnabledLocked(uid);
+        }
+    }
+
+    public void noteWifiMulticastDisabled(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastDisabledLocked(uid);
         }
     }
 

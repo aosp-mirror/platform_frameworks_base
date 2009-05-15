@@ -4434,29 +4434,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     
     boolean reportExtractedText() {
         final InputMethodState ims = mInputMethodState;
-        final boolean contentChanged = ims.mContentChanged;
-        if (ims != null && (contentChanged || ims.mSelectionModeChanged)) {
-            ims.mContentChanged = false;
-            ims.mSelectionModeChanged = false;
-            final ExtractedTextRequest req = mInputMethodState.mExtracting;
-            if (req != null) {
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
-                    if (DEBUG_EXTRACT) Log.v(TAG, "Retrieving extracted start="
-                            + ims.mChangedStart + " end=" + ims.mChangedEnd
-                            + " delta=" + ims.mChangedDelta);
-                    if (ims.mChangedStart < 0 && !contentChanged) {
-                        ims.mChangedStart = EXTRACT_NOTHING;
-                    }
-                    if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
-                            ims.mChangedDelta, ims.mTmpExtracted)) {
-                        if (DEBUG_EXTRACT) Log.v(TAG, "Reporting extracted start="
-                                + ims.mTmpExtracted.partialStartOffset
-                                + " end=" + ims.mTmpExtracted.partialEndOffset
-                                + ": " + ims.mTmpExtracted.text);
-                        imm.updateExtractedText(this, req.token,
-                                mInputMethodState.mTmpExtracted);
-                        return true;
+        if (ims != null) {
+            final boolean contentChanged = ims.mContentChanged;
+            if (contentChanged || ims.mSelectionModeChanged) {
+                ims.mContentChanged = false;
+                ims.mSelectionModeChanged = false;
+                final ExtractedTextRequest req = mInputMethodState.mExtracting;
+                if (req != null) {
+                    InputMethodManager imm = InputMethodManager.peekInstance();
+                    if (imm != null) {
+                        if (DEBUG_EXTRACT) Log.v(TAG, "Retrieving extracted start="
+                                + ims.mChangedStart + " end=" + ims.mChangedEnd
+                                + " delta=" + ims.mChangedDelta);
+                        if (ims.mChangedStart < 0 && !contentChanged) {
+                            ims.mChangedStart = EXTRACT_NOTHING;
+                        }
+                        if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
+                                ims.mChangedDelta, ims.mTmpExtracted)) {
+                            if (DEBUG_EXTRACT) Log.v(TAG, "Reporting extracted start="
+                                    + ims.mTmpExtracted.partialStartOffset
+                                    + " end=" + ims.mTmpExtracted.partialEndOffset
+                                    + ": " + ims.mTmpExtracted.text);
+                            imm.updateExtractedText(this, req.token,
+                                    mInputMethodState.mTmpExtracted);
+                            return true;
+                        }
                     }
                 }
             }

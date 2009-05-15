@@ -99,4 +99,24 @@ public class DisplayMetrics {
         xdpi = DEVICE_DENSITY;
         ydpi = DEVICE_DENSITY;
     }
+
+    /**
+     * Set the display metrics' density and update parameters depend on it.
+     * @hide
+     */
+    public void updateDensity(float newDensity) {
+        float ratio = newDensity / density;
+        density = newDensity;
+        scaledDensity = density;
+        widthPixels *= ratio;
+        heightPixels *= ratio;
+        xdpi *= ratio;
+        ydpi *= ratio;
+    }
+
+    public String toString() {
+        return "DisplayMetrics{density=" + density + ", width=" + widthPixels +
+            ", height=" + heightPixels + ", scaledDensity=" + scaledDensity +
+            ", xdpi=" + xdpi + ", ydpi=" + ydpi + "}";
+    }
 }

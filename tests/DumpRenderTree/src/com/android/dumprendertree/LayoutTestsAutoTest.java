@@ -41,6 +41,7 @@ class MyTestRecorder {
     private BufferedOutputStream mBufferedOutputPassedStream;
     private BufferedOutputStream mBufferedOutputFailedStream;
     private BufferedOutputStream mBufferedOutputNoresultStream;
+    private BufferedOutputStream mBufferedOutputTimedoutStream;
     
     public void passed(String layout_file) {
         try {
@@ -72,11 +73,22 @@ class MyTestRecorder {
         }
     }
     
+    public void timedout(String url) {
+        try {
+            mBufferedOutputTimedoutStream.write(url.getBytes());
+            mBufferedOutputTimedoutStream.write('\n');
+            mBufferedOutputTimedoutStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public MyTestRecorder(boolean resume) {
         try {
             File resultsPassedFile = new File("/sdcard/layout_tests_passed.txt");
             File resultsFailedFile = new File("/sdcard/layout_tests_failed.txt");
             File noExpectedResultFile = new File("/sdcard/layout_tests_nontext.txt");
+            File resultTimedoutFile = new File("/sdcard/layout_tests_timedout.txt");
           
             mBufferedOutputPassedStream =
                 new BufferedOutputStream(new FileOutputStream(resultsPassedFile, resume));
@@ -84,6 +96,8 @@ class MyTestRecorder {
                 new BufferedOutputStream(new FileOutputStream(resultsFailedFile, resume));
             mBufferedOutputNoresultStream =
                 new BufferedOutputStream(new FileOutputStream(noExpectedResultFile, resume));
+            mBufferedOutputTimedoutStream =
+                new BufferedOutputStream(new FileOutputStream(resultTimedoutFile, resume));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,6 +108,7 @@ class MyTestRecorder {
             mBufferedOutputPassedStream.close();
             mBufferedOutputFailedStream.close();
             mBufferedOutputNoresultStream.close();
+            mBufferedOutputTimedoutStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -281,7 +296,10 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                     mFinished = true;
                     LayoutTestsAutoTest.this.notifyAll();
                 }
-            }         
+            }
+            
+            public void timedOut(String url) {
+            }
         });
 
         String resultFile = getResultFile(test);

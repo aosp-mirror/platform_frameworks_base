@@ -75,13 +75,6 @@ public final class ViewRoot extends Handler implements ViewParent,
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean WATCH_POINTER = false;
 
-    static final boolean PROFILE_DRAWING = false;
-    private static final boolean PROFILE_LAYOUT = false;
-    // profiles real fps (times between draws) and displays the result
-    private static final boolean SHOW_FPS = false;
-    // used by SHOW_FPS
-    private static int sDrawTime;
-
     /**
      * Maximum time we allow the user to roll the trackball enough to generate
      * a key event, before resetting the counters.
@@ -96,6 +89,8 @@ public final class ViewRoot extends Handler implements ViewParent,
     static boolean mInitialized = false;
 
     static final ThreadLocal<RunQueue> sRunQueues = new ThreadLocal<RunQueue>();
+
+    private static int sDrawTime;    
 
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
@@ -128,9 +123,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mHeight;
     Rect mDirty; // will be a graphics.Region soon
     boolean mIsAnimating;
-    // TODO: change these to scaler class.
-    float mAppScale;
-    float mAppScaleInverted; // = 1.0f / mAppScale
+    // TODO: change these to scalar class.
+    private float mAppScale;
+    private float mAppScaleInverted; // = 1.0f / mAppScale
+    private int[] mWindowLayoutParamsBackup = null;
 
     final View.AttachInfo mAttachInfo;
 
@@ -389,6 +385,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (mView == null) {
                 mView = view;
                 mAppScale = mView.getContext().getApplicationScale();
+                if (mAppScale != 1.0f) {
+                    mWindowLayoutParamsBackup = new int[4];
+                }
                 mAppScaleInverted = 1.0f / mAppScale;
                 mWindowAttributes.copyFrom(attrs);
                 mSoftInputMode = attrs.softInputMode;
@@ -478,7 +477,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         synchronized (this) {
             int oldSoftInputMode = mWindowAttributes.softInputMode;
             mWindowAttributes.copyFrom(attrs);
-            mWindowAttributes.scale(mAppScale);
 
             if (newView) {
                 mSoftInputMode = attrs.softInputMode;
@@ -795,7 +793,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             final Rect frame = mWinFrame;
             boolean initialized = false;
             boolean contentInsetsChanged = false;
-            boolean visibleInsetsChanged = false;
+            boolean visibleInsetsChanged;
             try {
                 boolean hadSurface = mSurface.isValid();
                 int fl = 0;
@@ -936,14 +934,22 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(
                 "ViewRoot", "Laying out " + host + " to (" +
                 host.mMeasuredWidth + ", " + host.mMeasuredHeight + ")");
-            long startTime;
-            if (PROFILE_LAYOUT) {
+            long startTime = 0L;
+            if (Config.DEBUG && ViewDebug.profileLayout) {
                 startTime = SystemClock.elapsedRealtime();
             }
 
             host.layout(0, 0, host.mMeasuredWidth, host.mMeasuredHeight);
 
-            if (PROFILE_LAYOUT) {
+            if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                if (!host.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_LAYOUT)) {
+                    throw new IllegalStateException("The view hierarchy is an inconsistent state,"
+                            + "please refer to the logs with the tag "
+                            + ViewDebug.CONSISTENCY_LOG_TAG + " for more infomation.");
+                }
+            }
+
+            if (Config.DEBUG && ViewDebug.profileLayout) {
                 EventLog.writeEvent(60001, SystemClock.elapsedRealtime() - startTime);
             }
 
@@ -1135,8 +1141,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
         
         int yoff;
-        final boolean scrolling = mScroller != null
-                && mScroller.computeScrollOffset();
+        final boolean scrolling = mScroller != null && mScroller.computeScrollOffset();
         if (scrolling) {
             yoff = mScroller.getCurrY();
         } else {
@@ -1151,13 +1156,14 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (mUseGL) {
             if (!dirty.isEmpty()) {
                 Canvas canvas = mGlCanvas;
-                if (mGL!=null && canvas != null) {
+                if (mGL != null && canvas != null) {
                     mGL.glDisable(GL_SCISSOR_TEST);
                     mGL.glClearColor(0, 0, 0, 0);
                     mGL.glClear(GL_COLOR_BUFFER_BIT);
                     mGL.glEnable(GL_SCISSOR_TEST);
 
                     mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
+                    mAttachInfo.mIgnoreDirtyState = true;
                     mView.mPrivateFlags |= View.DRAWN;
 
                     float scale = mAppScale;
@@ -1168,14 +1174,19 @@ public final class ViewRoot extends Handler implements ViewParent,
                             canvas.scale(scale, scale);
                         }
                         mView.draw(canvas);
+                        if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                            mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
+                        }
                     } finally {
                         canvas.restoreToCount(saveCount);
                     }
 
+                    mAttachInfo.mIgnoreDirtyState = false;
+
                     mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
                     checkEglErrors();
 
-                    if (SHOW_FPS) {
+                    if (Config.DEBUG && ViewDebug.showFps) {
                         int now = (int)SystemClock.elapsedRealtime();
                         if (sDrawTime != 0) {
                             nativeShowFPS(canvas, now - sDrawTime);
@@ -1191,8 +1202,10 @@ public final class ViewRoot extends Handler implements ViewParent,
             return;
         }
 
-        if (fullRedrawNeeded)
+        if (fullRedrawNeeded) {
+            mAttachInfo.mIgnoreDirtyState = true;            
             dirty.union(0, 0, (int) (mWidth * mAppScale), (int) (mHeight * mAppScale));
+        }
 
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
             Log.v("ViewRoot", "Draw " + mView + "/"
@@ -1204,7 +1217,18 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         Canvas canvas;
         try {
+            int left = dirty.left;
+            int top = dirty.top;
+            int right = dirty.right;
+            int bottom = dirty.bottom;
+
             canvas = surface.lockCanvas(dirty);
+
+            if (left != dirty.left || top != dirty.top || right != dirty.right ||
+                    bottom != dirty.bottom) {
+                mAttachInfo.mIgnoreDirtyState = true;
+            }
+
             // TODO: Do this in native
             canvas.setDensityScale(mDensity);
         } catch (Surface.OutOfResourcesException e) {
@@ -1216,7 +1240,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         try {
             if (!dirty.isEmpty() || mIsAnimating) {
-                long startTime;
+                long startTime = 0L;
 
                 if (DEBUG_ORIENTATION || DEBUG_DRAW) {
                     Log.v("ViewRoot", "Surface " + surface + " drawing to bitmap w="
@@ -1224,7 +1248,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     //canvas.drawARGB(255, 255, 0, 0);
                 }
 
-                if (PROFILE_DRAWING) {
+                if (Config.DEBUG && ViewDebug.profileDrawing) {
                     startTime = SystemClock.elapsedRealtime();
                 }
 
@@ -1232,12 +1256,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // need to clear it before drawing so that the child will
                 // properly re-composite its drawing on a transparent
                 // background. This automatically respects the clip/dirty region
-                if (!canvas.isOpaque()) {
-                    canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
-                } else if (yoff != 0) {
-                    // If we are applying an offset, we need to clear the area
-                    // where the offset doesn't appear to avoid having garbage
-                    // left in the blank areas.
+                // or
+                // If we are applying an offset, we need to clear the area
+                // where the offset doesn't appear to avoid having garbage
+                // left in the blank areas.
+                if (!canvas.isOpaque() || yoff != 0) {
                     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                 }
 
@@ -1247,9 +1270,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mView.mPrivateFlags |= View.DRAWN;
 
                 float scale = mAppScale;
-                Context cxt = mView.getContext();
                 if (DEBUG_DRAW) {
-                    Log.i(TAG, "Drawing: package:" + cxt.getPackageName() + ", appScale=" + mAppScale);
+                    Context cxt = mView.getContext();
+                    Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
+                            ", appScale=" + mAppScale);
                 }
                 int saveCount =  canvas.save(Canvas.MATRIX_SAVE_FLAG);
                 try {
@@ -1260,10 +1284,15 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                     mView.draw(canvas);
                 } finally {
+                    mAttachInfo.mIgnoreDirtyState = false;
                     canvas.restoreToCount(saveCount);
                 }
 
-                if (SHOW_FPS) {
+                if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                    mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
+                }
+
+                if (Config.DEBUG && ViewDebug.showFps) {
                     int now = (int)SystemClock.elapsedRealtime();
                     if (sDrawTime != 0) {
                         nativeShowFPS(canvas, now - sDrawTime);
@@ -1271,7 +1300,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     sDrawTime = now;
                 }
 
-                if (PROFILE_DRAWING) {
+                if (Config.DEBUG && ViewDebug.profileDrawing) {
                     EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
                 }
             }
@@ -2309,12 +2338,22 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
             boolean insetsPending) throws RemoteException {
+
+        boolean restore = false;
+        if (params != null && mAppScale != 1.0f) {
+            restore = true;
+            params.scale(mAppScale, mWindowLayoutParamsBackup);
+        }
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
                 (int) (mView.mMeasuredWidth * mAppScale),
                 (int) (mView.mMeasuredHeight * mAppScale),
                 viewVisibility, insetsPending, mWinFrame,
                 mPendingContentInsets, mPendingVisibleInsets, mSurface);
+        if (restore) {
+            params.restore(mWindowLayoutParamsBackup);
+        }
+
         mPendingContentInsets.scale(mAppScaleInverted);
         mPendingVisibleInsets.scale(mAppScaleInverted);
         mWinFrame.scale(mAppScaleInverted);
@@ -2416,7 +2455,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         msg.arg2 = handled ? 1 : 0;
         sendMessage(msg);
     }
-    
+
     public void dispatchResized(int w, int h, Rect coveredInsets,
             Rect visibleInsets, boolean reportDraw) {
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": w=" + w

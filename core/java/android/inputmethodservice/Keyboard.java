@@ -27,8 +27,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.util.Xml;
-import android.view.Display;
-import android.view.WindowManager;
+import android.util.DisplayMetrics;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -510,10 +509,11 @@ public class Keyboard {
      * @param modeId keyboard mode identifier
      */
     public Keyboard(Context context, int xmlLayoutResId, int modeId) {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        final Display display = wm.getDefaultDisplay();
-        mDisplayWidth = display.getWidth();
-        mDisplayHeight = display.getHeight();
+        DisplayMetrics dm = context.getResources().getDisplayMetrics();
+        mDisplayWidth = dm.widthPixels;
+        mDisplayHeight = dm.heightPixels;
+        //Log.v(TAG, "keyboard's display metrics:" + dm);
+
         mDefaultHorizontalGap = 0;
         mDefaultWidth = mDisplayWidth / 10;
         mDefaultVerticalGap = 0;

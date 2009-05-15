@@ -21,6 +21,7 @@
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <EGL/eglplatform.h>
 
 // ----------------------------------------------------------------------------
 namespace android {
@@ -37,7 +38,7 @@ struct egl_connection_t
     int                 unavailable;
 };
 
-EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
+EGLAPI EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
 
 // ----------------------------------------------------------------------------
 }; // namespace android

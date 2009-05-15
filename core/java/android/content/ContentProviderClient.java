@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.content;
 
 import android.database.Cursor;
@@ -26,50 +42,76 @@ public class ContentProviderClient {
         mContentResolver = contentResolver;
     }
 
-    /** {@see ContentProvider#query} */
+    /** see {@link ContentProvider#query} */
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException {
         return mContentProvider.query(url, projection, selection,  selectionArgs, sortOrder);
     }
 
-    /** {@see ContentProvider#getType} */
+    /** see {@link ContentProvider#getType} */
     public String getType(Uri url) throws RemoteException {
         return mContentProvider.getType(url);
     }
 
-    /** {@see ContentProvider#insert} */
+    /** see {@link ContentProvider#insert} */
     public Uri insert(Uri url, ContentValues initialValues)
             throws RemoteException {
         return mContentProvider.insert(url, initialValues);
     }
 
-    /** {@see ContentProvider#bulkInsert} */
+    /** see {@link ContentProvider#bulkInsert} */
     public int bulkInsert(Uri url, ContentValues[] initialValues) throws RemoteException {
         return mContentProvider.bulkInsert(url, initialValues);
     }
 
-    /** {@see ContentProvider#delete} */
+    /** see {@link ContentProvider#delete} */
     public int delete(Uri url, String selection, String[] selectionArgs)
             throws RemoteException {
         return mContentProvider.delete(url, selection, selectionArgs);
     }
 
-    /** {@see ContentProvider#update} */
+    /** see {@link ContentProvider#update} */
     public int update(Uri url, ContentValues values, String selection,
             String[] selectionArgs) throws RemoteException {
         return mContentProvider.update(url, values, selection, selectionArgs);
     }
 
-    /** {@see ContentProvider#openFile} */
+    /** see {@link ContentProvider#openFile} */
     public ParcelFileDescriptor openFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException {
         return mContentProvider.openFile(url, mode);
     }
 
-    /** {@see ContentProvider#openAssetFile} */
+    /** see {@link ContentProvider#openAssetFile} */
     public AssetFileDescriptor openAssetFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException {
         return mContentProvider.openAssetFile(url, mode);
+    }
+
+    /** see {@link ContentProvider#queryEntities} */
+    public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
+            String sortOrder) throws RemoteException {
+        return mContentProvider.queryEntities(uri, selection, selectionArgs, sortOrder);
+    }
+
+    /** see {@link ContentProvider#insertEntity} */
+    public Uri insertEntity(Uri uri, Entity entity) throws RemoteException {
+        return mContentProvider.bulkInsertEntities(uri, new Entity[]{entity})[0];
+    }
+
+    /** see {@link ContentProvider#bulkInsertEntities} */
+    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) throws RemoteException {
+        return mContentProvider.bulkInsertEntities(uri, entities);
+    }
+
+    /** see {@link ContentProvider#updateEntity} */
+    public int updateEntity(Uri uri, Entity entity) throws RemoteException {
+        return mContentProvider.bulkUpdateEntities(uri, new Entity[]{entity})[0];
+    }
+
+    /** see {@link ContentProvider#bulkUpdateEntities} */
+    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) throws RemoteException {
+        return mContentProvider.bulkUpdateEntities(uri, entities);
     }
 
     /**

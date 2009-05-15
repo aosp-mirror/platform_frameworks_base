@@ -130,6 +130,12 @@ public abstract class ContentProvider implements ComponentCallbacks {
                     selectionArgs, sortOrder);
         }
 
+        public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
+                String sortOrder) {
+            checkReadPermission(uri);
+            return ContentProvider.this.queryEntities(uri, selection, selectionArgs, sortOrder);
+        }
+
         public String getType(Uri uri) {
             return ContentProvider.this.getType(uri);
         }
@@ -145,6 +151,11 @@ public abstract class ContentProvider implements ComponentCallbacks {
             return ContentProvider.this.bulkInsert(uri, initialValues);
         }
 
+        public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) {
+            checkWritePermission(uri);
+            return ContentProvider.this.bulkInsertEntities(uri, entities);
+        }
+
         public int delete(Uri uri, String selection, String[] selectionArgs) {
             checkWritePermission(uri);
             return ContentProvider.this.delete(uri, selection, selectionArgs);
@@ -154,6 +165,11 @@ public abstract class ContentProvider implements ComponentCallbacks {
                 String[] selectionArgs) {
             checkWritePermission(uri);
             return ContentProvider.this.update(uri, values, selection, selectionArgs);
+        }
+
+        public int[] bulkUpdateEntities(Uri uri, Entity[] entities) {
+            checkWritePermission(uri);
+            return ContentProvider.this.bulkUpdateEntities(uri, entities);
         }
 
         public ParcelFileDescriptor openFile(Uri uri, String mode)
@@ -328,6 +344,11 @@ public abstract class ContentProvider implements ComponentCallbacks {
     public abstract Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder);
 
+    public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
+            String sortOrder) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Return the MIME type of the data at the given URI. This should start with
      * <code>vnd.android.cursor.item</code> for a single record,
@@ -378,6 +399,18 @@ public abstract class ContentProvider implements ComponentCallbacks {
         return numValues;
     }
 
+    public Uri insertEntity(Uri uri, Entity entity) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) {
+        Uri[] result = new Uri[entities.length];
+        for (int i = 0; i < entities.length; i++) {
+            result[i] = insertEntity(uri, entities[i]);
+        }
+        return result;
+    }
+
     /**
      * A request to delete one or more rows. The selection clause is applied when performing
      * the deletion, allowing the operation to affect multiple rows in a
@@ -421,6 +454,18 @@ public abstract class ContentProvider implements ComponentCallbacks {
      */
     public abstract int update(Uri uri, ContentValues values, String selection,
             String[] selectionArgs);
+
+    public int updateEntity(Uri uri, Entity entity) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) {
+        int[] result = new int[entities.length];
+        for (int i = 0; i < entities.length; i++) {
+            result[i] = updateEntity(uri, entities[i]);
+        }
+        return result;
+    }
 
     /**
      * Open a file blob associated with a content URI.

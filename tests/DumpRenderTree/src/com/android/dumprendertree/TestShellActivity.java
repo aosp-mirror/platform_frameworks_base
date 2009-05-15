@@ -16,29 +16,40 @@
 
 package com.android.dumprendertree;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.http.SslError;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.view.ViewGroup;
+import android.webkit.HttpAuthHandler;
+import android.webkit.JsPromptResult;
+import android.webkit.JsResult;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.util.Log;
-import android.webkit.JsPromptResult;
-import android.webkit.JsResult;
-import android.view.ViewGroup;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.widget.LinearLayout;
-import android.os.*;
-
 public class TestShellActivity extends Activity implements LayoutTestController {
+    
+    static enum DumpDataType {DUMP_AS_TEXT, EXT_REPR, NO_OP}
+    
     public class AsyncHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_TIMEOUT) {
                 mTimedOut = true;
+                mCallback.timedOut(mWebView.getUrl());
                 requestWebKitData();
                 return;
             } else if (msg.what == MSG_WEBKIT_DATA) {
@@ -57,10 +68,16 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             throw new AssertionError("Requested webkit data twice: " + mWebView.getUrl());
         
         mRequestedWebKitData = true;
-        if (mDumpAsText) { 
-            mWebView.documentAsText(callback);
-        } else {
-            mWebView.externalRepresentation(callback);
+        switch (mDumpDataType) {
+            case DUMP_AS_TEXT:
+                mWebView.documentAsText(callback);
+                break;
+            case EXT_REPR:
+                mWebView.externalRepresentation(callback);
+                break;
+            default:
+                finished();
+                break;
         }
     } 
 
@@ -75,6 +92,41 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mWebView = new WebView(this);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebChromeClient(mChromeClient);
+        mWebView.setWebViewClient(new WebViewClient(){
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                Log.v(LOGTAG, "onPageFinished, url=" + url);
+                super.onPageFinished(view, url);
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                Log.v(LOGTAG, "onPageStarted, url=" + url);
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description,
+                    String failingUrl) {
+                Log.v(LOGTAG, "onReceivedError, errorCode=" + errorCode
+                        + ", desc=" + description + ", url=" + failingUrl);
+                super.onReceivedError(view, errorCode, description, failingUrl);
+            }
+
+            @Override
+            public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler,
+                    String host, String realm) {
+                handler.cancel();
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler,
+                    SslError error) {
+                handler.proceed();
+            }
+
+        });
         mEventSender = new WebViewEventSender(mWebView);
         mCallbackProxy = new CallbackProxy(mEventSender, this);
 
@@ -186,10 +238,14 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
     }
    
+    public void setDefaultDumpDataType(DumpDataType defaultDumpDataType) {
+        mDefaultDumpDataType = defaultDumpDataType;
+    }
+
     // .......................................
     // LayoutTestController Functions
     public void dumpAsText() {
-        mDumpAsText = true;
+        mDumpDataType = DumpDataType.DUMP_AS_TEXT;
         if (mWebView != null) {
             String url = mWebView.getUrl();
             Log.v(LOGTAG, "dumpAsText called: "+url);
@@ -382,7 +438,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     
     private void resetTestStatus() {
         mWaitUntilDone = false;
-        mDumpAsText = false;
+        mDumpDataType = mDefaultDumpDataType;
         mTimedOut = false;
         mDumpTitleChanges = false;
         mRequestedWebKitData = false;
@@ -406,7 +462,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private boolean mFinishedRunning;
 
     // Layout test controller variables.
-    private boolean mDumpAsText;
+    private DumpDataType mDumpDataType;
+    private DumpDataType mDefaultDumpDataType = DumpDataType.EXT_REPR;
     private boolean mWaitUntilDone;
     private boolean mDumpTitleChanges;
     private StringBuffer mTitleChanges;

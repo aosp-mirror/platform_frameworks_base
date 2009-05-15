@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManagerImpl;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.View.OnTouchListener;
 import android.graphics.PixelFormat;
@@ -72,8 +73,8 @@ public class PopupWindow {
      */
     public static final int INPUT_METHOD_NOT_NEEDED = 2;
     
-    private final Context mContext;
-    private final WindowManager mWindowManager;
+    private Context mContext;
+    private WindowManager mWindowManager;
     
     private boolean mIsShowing;
     private boolean mIsDropdown;
@@ -158,8 +159,7 @@ public class PopupWindow {
      */
     public PopupWindow(Context context, AttributeSet attrs, int defStyle) {
         mContext = context;
-        mWindowManager = (WindowManager)context.getSystemService(
-                Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 
         TypedArray a =
             context.obtainStyledAttributes(
@@ -272,11 +272,11 @@ public class PopupWindow {
      * @param height the popup's height
      * @param focusable true if the popup can be focused, false otherwise
      */
-    public PopupWindow(View contentView, int width, int height,
-            boolean focusable) {
-        mContext = contentView.getContext();
-        mWindowManager = (WindowManager)mContext.getSystemService(
-                Context.WINDOW_SERVICE);
+    public PopupWindow(View contentView, int width, int height, boolean focusable) {
+        if (contentView != null) {
+            mContext = contentView.getContext();
+            mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        }
         setContentView(contentView);
         setWidth(width);
         setHeight(height);
@@ -373,6 +373,14 @@ public class PopupWindow {
         }
 
         mContentView = contentView;
+
+        if (mContext == null) {
+            mContext = mContentView.getContext();
+        }
+
+        if (mWindowManager == null) {
+            mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        }
     }
 
     /**
@@ -747,6 +755,11 @@ public class PopupWindow {
      * @param p the layout parameters of the popup's content view
      */
     private void preparePopup(WindowManager.LayoutParams p) {
+        if (mContentView == null || mContext == null || mWindowManager == null) {
+            throw new IllegalStateException("You must specify a valid content view by "
+                    + "calling setContentView() before attempting to show the popup.");
+        }
+
         if (mBackground != null) {
             final ViewGroup.LayoutParams layoutParams = mContentView.getLayoutParams();
             int height = ViewGroup.LayoutParams.FILL_PARENT;
@@ -948,14 +961,38 @@ public class PopupWindow {
      *         shown.
      */
     public int getMaxAvailableHeight(View anchor, int yOffset) {
+        return getMaxAvailableHeight(anchor, yOffset, false);
+    }
+    
+    /**
+     * Returns the maximum height that is available for the popup to be
+     * completely shown, optionally ignoring any bottom decorations such as
+     * the input method. It is recommended that this height be the maximum for
+     * the popup's height, otherwise it is possible that the popup will be
+     * clipped.
+     * 
+     * @param anchor The view on which the popup window must be anchored.
+     * @param yOffset y offset from the view's bottom edge
+     * @param ignoreBottomDecorations if true, the height returned will be
+     *        all the way to the bottom of the display, ignoring any
+     *        bottom decorations
+     * @return The maximum available height for the popup to be completely
+     *         shown.
+     *         
+     * @hide Pending API council approval.
+     */
+    public int getMaxAvailableHeight(View anchor, int yOffset, boolean ignoreBottomDecorations) {
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
         final int[] anchorPos = mDrawingLocation;
         anchor.getLocationOnScreen(anchorPos);
         
-        final int distanceToBottom = displayFrame.bottom -
-                (anchorPos[1] + anchor.getHeight()) - yOffset;
+        int bottomEdge = displayFrame.bottom;
+        if (ignoreBottomDecorations) {
+            bottomEdge = WindowManagerImpl.getDefault().getDefaultDisplay().getHeight();
+        }
+        final int distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
         final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
 
         // anchorPos[1] is distance from anchor to top of screen
@@ -1116,7 +1153,7 @@ public class PopupWindow {
             p.flags = newFlags;
             update = true;
         }
-        
+
         if (update) {
             mWindowManager.updateViewLayout(mPopupView, p);
         }

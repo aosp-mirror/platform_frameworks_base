@@ -510,6 +510,7 @@ import java.util.Set;
  *     <li> {@link #ACTION_BATTERY_CHANGED}
  *     <li> {@link #ACTION_POWER_CONNECTED}
  *     <li> {@link #ACTION_POWER_DISCONNECTED} 
+ *     <li> {@link #ACTION_SHUTDOWN} 
  * </ul>
  *
  * <h3>Standard Categories</h3>
@@ -1047,6 +1048,17 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SEARCH_LONG_PRESS = "android.intent.action.SEARCH_LONG_PRESS";
 
+    /**
+     * Activity Action: The user pressed the "Report" button in the crash/ANR dialog.
+     * This intent is delivered to the package which installed the application, usually
+     * the Market.
+     * <p>Input: No data is specified. The bug report is passed in using
+     * an {@link #EXTRA_BUG_REPORT} field.
+     * <p>Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
@@ -1270,6 +1282,15 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_POWER_DISCONNECTED =
             "android.intent.action.POWER_DISCONNECTED";    
+    /**
+     * Broadcast Action:  Device is shutting down.
+     * This is broadcast when the device is being shut down (completely turned
+     * off, not sleeping).  Once the broadcast is complete, the final shutdown
+     * will proceed and all unsaved data lost.  Apps will not normally need
+     * to handle this, since the forground activity will be paused as well.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";    
     /**
      * Broadcast Action:  Indicates low memory condition on the device
      */
@@ -1532,6 +1553,21 @@ public class Intent implements Parcelable {
     public static final String ACTION_REBOOT =
             "android.intent.action.REBOOT";
 
+    /**
+     * Broadcast Action: a remote intent is to be broadcasted.
+     *
+     * A remote intent is used for remote RPC between devices. The remote intent
+     * is serialized and sent from one device to another device. The receiving
+     * device parses the remote intent and broadcasts it. Note that anyone can
+     * broadcast a remote intent. However, if the intent receiver of the remote intent
+     * does not trust intent broadcasts from arbitrary intent senders, it should require
+     * the sender to hold certain permissions so only trusted sender's broadcast will be
+     * let through.
+     */
+    public static final String ACTION_REMOTE_INTENT =
+            "android.intent.action.REMOTE_INTENT";
+
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
@@ -1771,6 +1807,31 @@ public class Intent implements Parcelable {
      * delivered.
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
+    
+    /**
+     * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
+     * the bug report.
+     * 
+     * @hide
+     */
+    public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
+
+    /**
+     * Used as a string extra field when sending an intent to PackageInstaller to install a 
+     * package. Specifies the installer package name; this package will receive the
+     * {@link #ACTION_APP_ERROR} intent.
+     * 
+     * @hide
+     */
+    public static final String EXTRA_INSTALLER_PACKAGE_NAME 
+            = "android.intent.extra.INSTALLER_PACKAGE_NAME";
+
+    /**
+     * Used in the extra field in the remote intent. It's astring token passed with the
+     * remote intent.
+     */
+    public static final String EXTRA_REMOTE_INTENT_TOKEN =
+            "android.intent.extra.remote_intent_token";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -1931,7 +1992,7 @@ public class Intent implements Parcelable {
     /**
      * If set, this marks a point in the task's activity stack that should
      * be cleared when the task is reset.  That is, the next time the task
-     * is broad to the foreground with
+     * is brought to the foreground with
      * {@link #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED} (typically as a result of
      * the user re-launching it from home), this activity and all on top of
      * it will be finished so that the user does not return to them, but

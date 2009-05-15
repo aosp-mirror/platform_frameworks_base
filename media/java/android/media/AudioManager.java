@@ -39,11 +39,6 @@ public class AudioManager {
     private final Context mContext;
     private final Handler mHandler;
 
-    // used to listen for updates to the sound effects settings so we don't
-    // poll it for every UI sound
-    private ContentObserver mContentObserver;
-
-
     private static String TAG = "AudioManager";
     private static boolean DEBUG = false;
     private static boolean localLOGV = DEBUG || android.util.Config.LOGV;

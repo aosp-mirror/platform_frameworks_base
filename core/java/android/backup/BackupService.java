@@ -75,9 +75,8 @@ public abstract class BackupService extends Service {
      *                 file.  The application should record the final backup state
      *                 here after writing the requested data to dataFd.
      */
-    public abstract void onBackup(ParcelFileDescriptor oldState,
-            ParcelFileDescriptor data,
-            ParcelFileDescriptor newState);
+    public abstract void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+             ParcelFileDescriptor newState);
     
     /**
      * The application is being restored from backup, and should replace any
@@ -92,7 +91,7 @@ public abstract class BackupService extends Service {
      *                 file.  The application should record the final backup state
      *                 here after restoring its data from dataFd.
      */
-    public abstract void onRestore(ParcelFileDescriptor data, ParcelFileDescriptor newState);
+    public abstract void onRestore(ParcelFileDescriptor /* TODO: BackupDataInput */ data, ParcelFileDescriptor newState);
 
 
     // ----- Core implementation -----
@@ -117,7 +116,15 @@ public abstract class BackupService extends Service {
                 ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
             Log.v("BackupServiceBinder", "doBackup() invoked");
-            BackupService.this.onBackup(oldState, data, newState);
+            BackupDataOutput output = new BackupDataOutput(BackupService.this,
+                    data.getFileDescriptor());
+            try {
+                BackupService.this.onBackup(oldState, output, newState);
+            } catch (RuntimeException ex) {
+                Log.d("BackupService", "onBackup ("
+                        + BackupService.this.getClass().getName() + ") threw", ex);
+                throw ex;
+            }
         }
 
         public void doRestore(ParcelFileDescriptor data,

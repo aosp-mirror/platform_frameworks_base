@@ -16,6 +16,16 @@
 
 package android.webkit;
 
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.HashMap;
+import java.util.Vector;
+
 /**
  * Functionality for manipulating the webstorage databases.
  */
@@ -32,4 +42,242 @@ public final class WebStorage {
     public interface QuotaUpdater {
         public void updateQuota(long newQuota);
     };
+
+    // Log tag
+    private static final String TAG = "webstorage";
+
+    // Global instance of a WebStorage
+    private static WebStorage sWebStorage;
+
+    // We keep a copy of the origins, quotas and usages
+    // that we protect via a lock and update in syncValues()
+    private static Lock mLock = new ReentrantLock();
+    private static Condition mCacheUpdated = mLock.newCondition();
+
+    // Message ids
+    static final int UPDATE = 0;
+    static final int SET_QUOTA_ORIGIN = 1;
+    static final int DELETE_ORIGIN = 2;
+    static final int DELETE_ALL = 3;
+
+    private Vector <String> mOrigins;
+    private HashMap <String, Long> mQuotas = new HashMap<String, Long>();
+    private HashMap <String, Long> mUsages = new HashMap<String, Long>();
+
+    private Handler mHandler = null;
+
+    private class Origin {
+        String mOrigin = null;
+        long mQuota = 0;
+
+        public Origin(String origin, long quota) {
+            mOrigin = origin;
+            mQuota = quota;
+        }
+
+        public Origin(String origin) {
+            mOrigin = origin;
+        }
+
+        public String getOrigin() {
+            return mOrigin;
+        }
+
+        public long getQuota() {
+            return mQuota;
+        }
+    }
+
+    /**
+     * @hide
+     * Message handler
+     */
+    public void createHandler() {
+        if (mHandler == null) {
+            mHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case SET_QUOTA_ORIGIN: {
+                            Origin website = (Origin) msg.obj;
+                            nativeSetQuotaForOrigin(website.getOrigin(),
+                                                    website.getQuota());
+                            syncValues();
+                            } break;
+
+                        case DELETE_ORIGIN: {
+                            Origin website = (Origin) msg.obj;
+                            nativeDeleteOrigin(website.getOrigin());
+                            syncValues();
+                            } break;
+
+                        case DELETE_ALL:
+                            nativeDeleteAllDatabases();
+                            syncValues();
+                            break;
+
+                        case UPDATE:
+                            syncValues();
+                            break;
+                    }
+                }
+            };
+        }
+    }
+
+    /**
+     * @hide
+     * Returns a list of origins having a database
+     */
+    public Vector getOrigins() {
+        Vector ret = null;
+        mLock.lock();
+        try {
+            update();
+            mCacheUpdated.await();
+            ret = mOrigins;
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Exception while waiting on the updated origins", e);
+        } finally {
+            mLock.unlock();
+        }
+        return ret;
+    }
+
+    /**
+     * @hide
+     * Returns the use for a given origin
+     */
+    public long getUsageForOrigin(String origin) {
+        long ret = 0;
+        if (origin == null) {
+          return ret;
+        }
+        mLock.lock();
+        try {
+            update();
+            mCacheUpdated.await();
+            Long usage = mUsages.get(origin);
+            if (usage != null) {
+                ret = usage.longValue();
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Exception while waiting on the updated origins", e);
+        } finally {
+            mLock.unlock();
+        }
+        return ret;
+    }
+
+    /**
+     * @hide
+     * Returns the quota for a given origin
+     */
+    public long getQuotaForOrigin(String origin) {
+        long ret = 0;
+        if (origin == null) {
+          return ret;
+        }
+        mLock.lock();
+        try {
+            update();
+            mCacheUpdated.await();
+            Long quota = mQuotas.get(origin);
+            if (quota != null) {
+                ret = quota.longValue();
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Exception while waiting on the updated origins", e);
+        } finally {
+            mLock.unlock();
+        }
+        return ret;
+    }
+
+    /**
+     * @hide
+     * Set the quota for a given origin
+     */
+    public void setQuotaForOrigin(String origin, long quota) {
+        if (origin != null) {
+            postMessage(Message.obtain(null, SET_QUOTA_ORIGIN,
+                new Origin(origin, quota)));
+        }
+    }
+
+    /**
+     * @hide
+     * Delete a given origin
+     */
+    public void deleteOrigin(String origin) {
+        if (origin != null) {
+            postMessage(Message.obtain(null, DELETE_ORIGIN,
+                new Origin(origin)));
+        }
+    }
+
+    /**
+     * @hide
+     * Delete all databases
+     */
+    public void deleteAllDatabases() {
+        postMessage(Message.obtain(null, DELETE_ALL));
+    }
+
+    /**
+     * Utility function to send a message to our handler
+     */
+    private void postMessage(Message msg) {
+        if (mHandler != null) {
+            mHandler.sendMessage(msg);
+        }
+    }
+
+    /**
+     * @hide
+     * Get the global instance of WebStorage.
+     * @return A single instance of WebStorage.
+     */
+    public static WebStorage getInstance() {
+      if (sWebStorage == null) {
+          sWebStorage = new WebStorage();
+      }
+      return sWebStorage;
+    }
+
+    /**
+     * @hide
+     * Post a Sync request
+     */
+    public void update() {
+        postMessage(Message.obtain(null, UPDATE));
+    }
+
+    /**
+     * Run on the webcore thread
+     * sync the local cached values with the real ones
+     */
+    private void syncValues() {
+        mLock.lock();
+        Vector tmp = nativeGetOrigins();
+        mOrigins = new Vector<String>();
+        mQuotas.clear();
+        mUsages.clear();
+        for (int i = 0; i < tmp.size(); i++) {
+            String origin = (String) tmp.get(i);
+            mOrigins.add(origin);
+            mQuotas.put(origin, new Long(nativeGetQuotaForOrigin(origin)));
+            mUsages.put(origin, new Long(nativeGetUsageForOrigin(origin)));
+        }
+        mCacheUpdated.signal();
+        mLock.unlock();
+    }
+
+    // Native functions
+    private static native Vector nativeGetOrigins();
+    private static native long nativeGetUsageForOrigin(String origin);
+    private static native long nativeGetQuotaForOrigin(String origin);
+    private static native void nativeSetQuotaForOrigin(String origin, long quota);
+    private static native void nativeDeleteOrigin(String origin);
+    private static native void nativeDeleteAllDatabases();
 }

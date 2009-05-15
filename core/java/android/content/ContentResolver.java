@@ -166,6 +166,53 @@ public abstract class ContentResolver {
         }
     }
 
+    class EntityIteratorWrapper implements EntityIterator {
+        private final EntityIterator mInner;
+        private final ContentProviderClient mClient;
+
+        EntityIteratorWrapper(EntityIterator inner, ContentProviderClient client) {
+            mInner = inner;
+            mClient = client;
+        }
+
+        public boolean hasNext() throws RemoteException {
+            return mInner.hasNext();
+        }
+
+        public Entity next() throws RemoteException {
+            return mInner.next();
+        }
+
+        public void close() {
+            mClient.release();
+            mInner.close();
+        }
+
+        protected void finalize() throws Throwable {
+            close();
+            super.finalize();
+        }
+    }
+
+    public final EntityIterator queryEntity(Uri uri,
+            String selection, String[] selectionArgs, String sortOrder) throws RemoteException {
+        ContentProviderClient provider = acquireContentProviderClient(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URL " + uri);
+        }
+        try {
+            EntityIterator entityIterator =
+                    provider.queryEntities(uri, selection, selectionArgs, sortOrder);
+            return new EntityIteratorWrapper(entityIterator, provider);
+        } catch(RuntimeException e) {
+            provider.release();
+            throw e;
+        } catch(RemoteException e) {
+            provider.release();
+            throw e;
+        }
+    }
+
     /**
      * Open a stream on to the content associated with a content URI.  If there
      * is no data associated with the URI, FileNotFoundException is thrown.
@@ -482,6 +529,56 @@ public abstract class ContentResolver {
             return null;
         } finally {
             releaseProvider(provider);
+        }
+    }
+
+    public final Uri insertEntity(Uri uri, Entity entity) throws RemoteException {
+        ContentProviderClient provider = acquireContentProviderClient(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URL " + uri);
+        }
+        try {
+            return provider.insertEntity(uri, entity);
+        } finally {
+            provider.release();
+        }
+    }
+
+    public final int updateEntity(Uri uri, Entity entity) throws RemoteException {
+        ContentProviderClient provider = acquireContentProviderClient(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URL " + uri);
+        }
+        try {
+            return provider.updateEntity(uri, entity);
+        } finally {
+            provider.release();
+        }
+    }
+
+    public final Uri[] bulkInsertEntities(Uri uri, Entity[] entities)
+            throws RemoteException {
+        ContentProviderClient provider = acquireContentProviderClient(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URL " + uri);
+        }
+        try {
+            return provider.bulkInsertEntities(uri, entities);
+        } finally {
+            provider.release();
+        }
+    }
+
+    public final int[] bulkUpdateEntities(Uri uri, Entity[] entities)
+            throws RemoteException {
+        ContentProviderClient provider = acquireContentProviderClient(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URL " + uri);
+        }
+        try {
+            return provider.bulkUpdateEntities(uri, entities);
+        } finally {
+            provider.release();
         }
     }
 
