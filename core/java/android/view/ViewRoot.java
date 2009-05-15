@@ -537,7 +537,6 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
             dirty = mTempRect;
         }
-        // TODO: When doing a union with mDirty != empty, we must cancel all the DIRTY_OPAQUE flags
         mDirty.union(dirty);
         if (!mWillDrawSoon) {
             scheduleTraversals();
@@ -1142,8 +1141,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
         
         int yoff;
-        final boolean scrolling = mScroller != null
-                && mScroller.computeScrollOffset();
+        final boolean scrolling = mScroller != null && mScroller.computeScrollOffset();
         if (scrolling) {
             yoff = mScroller.getCurrY();
         } else {
@@ -1158,13 +1156,14 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (mUseGL) {
             if (!dirty.isEmpty()) {
                 Canvas canvas = mGlCanvas;
-                if (mGL!=null && canvas != null) {
+                if (mGL != null && canvas != null) {
                     mGL.glDisable(GL_SCISSOR_TEST);
                     mGL.glClearColor(0, 0, 0, 0);
                     mGL.glClear(GL_COLOR_BUFFER_BIT);
                     mGL.glEnable(GL_SCISSOR_TEST);
 
                     mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
+                    mAttachInfo.mIgnoreDirtyState = true;
                     mView.mPrivateFlags |= View.DRAWN;
 
                     float scale = mAppScale;
@@ -1181,6 +1180,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                     } finally {
                         canvas.restoreToCount(saveCount);
                     }
+
+                    mAttachInfo.mIgnoreDirtyState = false;
 
                     mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
                     checkEglErrors();
@@ -1201,8 +1202,10 @@ public final class ViewRoot extends Handler implements ViewParent,
             return;
         }
 
-        if (fullRedrawNeeded)
+        if (fullRedrawNeeded) {
+            mAttachInfo.mIgnoreDirtyState = true;            
             dirty.union(0, 0, (int) (mWidth * mAppScale), (int) (mHeight * mAppScale));
+        }
 
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
             Log.v("ViewRoot", "Draw " + mView + "/"
@@ -1214,7 +1217,18 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         Canvas canvas;
         try {
+            int left = dirty.left;
+            int top = dirty.top;
+            int right = dirty.right;
+            int bottom = dirty.bottom;
+
             canvas = surface.lockCanvas(dirty);
+
+            if (left != dirty.left || top != dirty.top || right != dirty.right ||
+                    bottom != dirty.bottom) {
+                mAttachInfo.mIgnoreDirtyState = true;
+            }
+
             // TODO: Do this in native
             canvas.setDensityScale(mDensity);
         } catch (Surface.OutOfResourcesException e) {
@@ -1242,12 +1256,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // need to clear it before drawing so that the child will
                 // properly re-composite its drawing on a transparent
                 // background. This automatically respects the clip/dirty region
-                if (!canvas.isOpaque()) {
-                    canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
-                } else if (yoff != 0) {
-                    // If we are applying an offset, we need to clear the area
-                    // where the offset doesn't appear to avoid having garbage
-                    // left in the blank areas.
+                // or
+                // If we are applying an offset, we need to clear the area
+                // where the offset doesn't appear to avoid having garbage
+                // left in the blank areas.
+                if (!canvas.isOpaque() || yoff != 0) {
                     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                 }
 
@@ -1257,9 +1270,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mView.mPrivateFlags |= View.DRAWN;
 
                 float scale = mAppScale;
-                Context cxt = mView.getContext();
                 if (DEBUG_DRAW) {
-                    Log.i(TAG, "Drawing: package:" + cxt.getPackageName() + ", appScale=" + mAppScale);
+                    Context cxt = mView.getContext();
+                    Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
+                            ", appScale=" + mAppScale);
                 }
                 int saveCount =  canvas.save(Canvas.MATRIX_SAVE_FLAG);
                 try {
@@ -1269,12 +1283,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                         canvas.scale(scale, scale);
                     }
                     mView.draw(canvas);
-
-                    if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
-                        mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
-                    }
                 } finally {
+                    mAttachInfo.mIgnoreDirtyState = false;
                     canvas.restoreToCount(saveCount);
+                }
+
+                if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                    mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
                 }
 
                 if (Config.DEBUG && ViewDebug.showFps) {
