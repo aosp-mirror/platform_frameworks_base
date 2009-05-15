@@ -1443,6 +1443,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     static final int DIRTY_MASK                     = 0x00600000;
 
     /**
+     * Indicates whether the background is opaque.
+     *
+     * @hide
+     */
+    static final int OPAQUE_BACKGROUND              = 0x00800000;
+
+    /**
+     * Indicates whether the scrollbars are opaque.
+     *
+     * @hide
+     */
+    static final int OPAQUE_SCROLLBARS              = 0x01000000;
+
+    /**
+     * Indicates whether the view is opaque.
+     *
+     * @hide
+     */
+    static final int OPAQUE_MASK                    = 0x01800000;
+
+    /**
      * The parent this view is attached to.
      * {@hide}
      *
@@ -1721,7 +1742,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public View(Context context) {
         mContext = context;
         mResources = context != null ? context.getResources() : null;
-        mViewFlags = SOUND_EFFECTS_ENABLED|HAPTIC_FEEDBACK_ENABLED;
+        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
         ++sInstanceCount;
     }
 
@@ -2013,7 +2034,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (!setScrollContainer && (viewFlagValues&SCROLLBARS_VERTICAL) != 0) {
             setScrollContainer(true);
         }
-  
+
+        computeOpaqueFlags();
+
         a.recycle();
     }
 
@@ -4700,7 +4723,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     @ViewDebug.ExportedProperty
     public boolean isOpaque() {
-        return mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE;
+        return (mPrivateFlags & OPAQUE_MASK) == OPAQUE_MASK;
+    }
+
+    private void computeOpaqueFlags() {
+        // Opaque if:
+        //   - Has a background
+        //   - Background is opaque
+        //   - Doesn't have scrollbars or scrollbars are inside overlay
+
+        if (mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE) {
+            mPrivateFlags |= OPAQUE_BACKGROUND;
+        } else {
+            mPrivateFlags &= ~OPAQUE_BACKGROUND;
+        }
+
+        final int flags = mViewFlags;
+        if (((flags & SCROLLBARS_VERTICAL) == 0 && (flags & SCROLLBARS_HORIZONTAL) == 0) ||
+                (flags & SCROLLBARS_STYLE_MASK) == SCROLLBARS_INSIDE_OVERLAY) {
+            mPrivateFlags |= OPAQUE_SCROLLBARS;
+        } else {
+            mPrivateFlags &= ~OPAQUE_SCROLLBARS;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    protected boolean hasOpaqueScrollbars() {
+        return (mPrivateFlags & OPAQUE_SCROLLBARS) == OPAQUE_SCROLLBARS;
     }
 
     /**
@@ -5027,6 +5078,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setHorizontalScrollBarEnabled(boolean horizontalScrollBarEnabled) {
         if (isHorizontalScrollBarEnabled() != horizontalScrollBarEnabled) {
             mViewFlags ^= SCROLLBARS_HORIZONTAL;
+            computeOpaqueFlags();
             recomputePadding();
         }
     }
@@ -5056,6 +5108,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setVerticalScrollBarEnabled(boolean verticalScrollBarEnabled) {
         if (isVerticalScrollBarEnabled() != verticalScrollBarEnabled) {
             mViewFlags ^= SCROLLBARS_VERTICAL;
+            computeOpaqueFlags();
             recomputePadding();
         }
     }
@@ -5084,6 +5137,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setScrollBarStyle(int style) {
         if (style != (mViewFlags & SCROLLBARS_STYLE_MASK)) {
             mViewFlags = (mViewFlags & ~SCROLLBARS_STYLE_MASK) | (style & SCROLLBARS_STYLE_MASK);
+            computeOpaqueFlags();
             recomputePadding();
         }
     }
@@ -6847,6 +6901,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             // View's layout, so let's requestLayout
             requestLayout = true;
         }
+
+        computeOpaqueFlags();
 
         if (requestLayout) {
             requestLayout();
