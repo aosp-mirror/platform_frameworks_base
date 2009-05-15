@@ -117,7 +117,8 @@ LOCAL_SRC_FILES:= \
 	IPermissionController.cpp \
 	IServiceManager.cpp \
 	Unicode.cpp \
-	file_backup_helper.cpp
+    backup_data.cpp \
+	backup_helper_file.cpp
 
 ifeq ($(TARGET_SIMULATOR),true)
 LOCAL_SRC_FILES += $(hostSources)
