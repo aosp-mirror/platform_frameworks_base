@@ -2187,6 +2187,13 @@ public final class Settings {
         public static final String CHANGED_ACTION =
             "com.google.gservices.intent.action.GSERVICES_CHANGED";
 
+        /**
+         * Intent action to override Gservices for testing.  (Requires WRITE_GSERVICES permission.)
+         */
+        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        public static final String OVERRIDE_ACTION =
+            "com.google.gservices.intent.action.GSERVICES_OVERRIDE";
+
         private static volatile NameValueCache mNameValueCache = null;
         private static final Object mNameValueCacheLock = new Object();
 
@@ -3279,4 +3286,3 @@ public final class Settings {
         return "android-" + Long.toHexString(androidId);
     }
 }
-
