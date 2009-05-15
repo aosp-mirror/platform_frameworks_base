@@ -57,11 +57,15 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
-    public Intent getLaunchIntentForPackage(String packageName)
-            throws NameNotFoundException {
+    public Intent getLaunchIntentForPackage(String packageName) {
         throw new UnsupportedOperationException();
     }
-    
+
+    @Override
+    public ResolveInfo resolveActivity(Intent intent, int flags, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public int[] getPackageGids(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException();
