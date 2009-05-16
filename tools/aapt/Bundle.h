@@ -38,6 +38,8 @@ public:
           mAssetSourceDir(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL),
+          mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
+          mVersionCode(NULL), mVersionName(NULL),
           mArgc(0), mArgv(NULL)
         {}
     ~Bundle(void) {}
