@@ -95,16 +95,20 @@ public class PdpConnection extends DataConnection {
                 apn.password, obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE));
     }
 
+    private void tearDownData(Message msg) {
+        if (dataLink != null) {
+            dataLink.disconnect();
+        }
+
+        if (phone.mCM.getRadioState().isOn()) {
+            phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, msg));
+        }
+    }
+
     protected void disconnect(Message msg) {
         onDisconnect = msg;
         if (state == State.ACTIVE) {
-            if (dataLink != null) {
-                dataLink.disconnect();
-            }
-
-            if (phone.mCM.getRadioState().isOn()) {
-                phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, msg));
-            }
+            tearDownData(msg);
         } else if (state == State.ACTIVATING) {
             receivedDisconnectReq = true;
         } else {
@@ -243,7 +247,7 @@ public class PdpConnection extends DataConnection {
                 // Don't bother reporting success if there's already a
                 // pending disconnect request, since DataConnectionTracker
                 // has already updated its state.
-                disconnect(onDisconnect);
+                tearDownData(onDisconnect);
             } else {
                 String[] response = ((String[]) ar.result);
                 cid = Integer.parseInt(response[0]);
