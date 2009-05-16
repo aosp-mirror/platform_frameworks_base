@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 Google Inc.
+ * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,67 +18,64 @@ package com.android.gesture;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import java.util.ArrayList;
-
+import java.util.Iterator;
 
 /**
- * A (transparent) view for gesture input that can be placed on top of other
- * widgets. The background of the view is customizable. 
- * 
- * @author liyang@google.com (Yang Li)
- *
+ * A view for rendering and processing gestures
  */
 
 public class GesturePad extends View {
 
-    private static final float TOUCH_TOLERANCE = 4;
-    public static final int DEFAULT_GESTURE_COLOR = Color.argb(255, 255, 255, 0);
+    public static final float TOUCH_TOLERANCE = 4;
+    public static final int default_foreground = Color.argb(255, 255, 255, 0);
+    private int         background = Color.argb(0, 0, 0, 0);
+    private int         foreground = default_foreground;
+    private int         uncertain_foreground = Color.argb(55, 255, 255, 0);
+    private Bitmap      mBitmap;
+    private Canvas      mCanvas;
+    private Path        mPath;
+    private Paint       mBitmapPaint;
+    private Paint       mPaint;
+    private Paint       mDebugPaint;
+    private float       mX, mY;
+    private boolean     mEnableInput = true; 
+    private boolean     mEnableRendering = true;
+    private boolean     mCacheGesture = true;
+    private Gesture       mCurrentGesture = null;
+    ArrayList<GestureListener> mGestureListeners = new ArrayList<GestureListener>();
+
+    private boolean     mShouldFadingOut = true;
+    private boolean     mIsFadingOut = false;
+    private float       mFadingAlpha = 1;
     
-    // double buffering 
-    private Paint mGesturePaint;
-    private Bitmap mBitmap; // with transparent background
-    private Canvas mBitmapCanvas;
-
-    // for rendering immediate ink feedback
-    private Path mPath;
-    private float mX;
-    private float mY;
-
-    // current gesture
-    private Gesture mCurrentGesture = null;
+    private boolean     reconstruct = false;
     
-    // gesture event handlers
-    ArrayList<GestureListener> mGestureListeners =
-                                new ArrayList<GestureListener>();
-    private ArrayList<GesturePoint> mPointBuffer = null;
-
-    // fading out effect
-    private boolean mIsFadingOut = false;
-    private float mFadingAlpha = 1;
+    private ArrayList<Path> debug = new ArrayList<Path>();
     private Handler mHandler = new Handler();
+    
     private Runnable mFadingOut = new Runnable() {
-        public void run() {
-            mFadingAlpha -= 0.03f;
-            if (mFadingAlpha <= 0) {
-                mIsFadingOut = false;
-                mPath = null;
-                mCurrentGesture = null;
-                mBitmap.eraseColor(Color.argb(0, 0, 0, 0));
-            } else {
-                mHandler.postDelayed(this, 100);
-            }
-            invalidate();
-        }
-    };
+      public void run() {
+          mFadingAlpha -= 0.03f;
+          if (mFadingAlpha <= 0) {
+              mIsFadingOut = false;
+              mPath.reset();
+          } else {
+              mHandler.postDelayed(this, 100);
+          }
+          invalidate();
+      }
+   };
 
     public GesturePad(Context context) {
         super(context);
@@ -90,76 +87,82 @@ public class GesturePad extends View {
         init();
     }
     
-    public ArrayList<GesturePoint> getCurrentStroke() {
-        return this.mPointBuffer;
+    public boolean isEnableRendering() {
+        return this.mEnableRendering;
     }
     
     public Gesture getCurrentGesture() {
         return mCurrentGesture;
     }
     
-    /**
-     * Set Gesture color
-     * @param c
-     */
-    public void setGestureColor(int c) {
-        this.mGesturePaint.setColor(c);
-        if (mCurrentGesture != null) {
-            mBitmap.eraseColor(Color.argb(0, 0, 0, 0));
-            mCurrentGesture.draw(mBitmapCanvas, mGesturePaint);
-        }
+    public Paint getPaint() {
+        return mPaint;
     }
     
-    /**
-     * Set the gesture to be shown in the view
-     * @param gesture
-     */
-    public void setCurrentGesture(Gesture gesture) {
-        if (this.mCurrentGesture != null) {
-            clear(false);
-        }
-        
-        this.mCurrentGesture = gesture;
-        
-        if (this.mCurrentGesture != null) {
-            if (mBitmapCanvas != null) {
-                this.mCurrentGesture.draw(mBitmapCanvas, mGesturePaint);
-                this.invalidate();
-            }
-        }
+    public void setColor(int c) {
+        this.foreground = c;
+    }
+    
+    public void setFadingAlpha(float f) {
+        mFadingAlpha = f;
+    }
+    
+    public void setCurrentGesture(Gesture stk) {
+        this.mCurrentGesture = stk;
+        reconstruct = true;
     }
     
     private void init() {
-        mGesturePaint = new Paint();
-        mGesturePaint.setAntiAlias(true);
-        mGesturePaint.setDither(true);
-        mGesturePaint.setColor(DEFAULT_GESTURE_COLOR);
-        mGesturePaint.setStyle(Paint.Style.STROKE);
-        mGesturePaint.setStrokeJoin(Paint.Join.ROUND);
-        mGesturePaint.setStrokeCap(Paint.Cap.ROUND);
-        mGesturePaint.setStrokeWidth(12);
-        mGesturePaint.setMaskFilter(
-            new BlurMaskFilter(1, BlurMaskFilter.Blur.NORMAL));
+        mDebugPaint = new Paint();
+        mDebugPaint.setColor(Color.WHITE);
+        mDebugPaint.setStrokeWidth(4);
+        mDebugPaint.setAntiAlias(true);
+        mDebugPaint.setStyle(Paint.Style.STROKE);
         
-        mPath = null;
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setDither(true);
+        mPaint.setColor(foreground);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPaint.setStrokeWidth(12);
+        
+        mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+        mPath = new Path();
+        
+        reconstruct = false;
     }
+
+    public void cacheGesture(boolean b) {
+        mCacheGesture = b;
+    }
+      
+    public void enableRendering(boolean b) {
+        mEnableRendering = b;
+    }
+  
     
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         // TODO Auto-generated method stub
         super.onSizeChanged(w, h, oldw, oldh);
-        if (w <= 0 || h <= 0) {
+        
+        if (w <=0 || h <=0)
             return;
+        
+        int width = w>oldw? w : oldw;
+        int height = h>oldh? h : oldh;
+        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(newBitmap);
+        
+        if (mBitmap != null) {
+            mCanvas.drawColor(background);
+            mCanvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+            mCanvas.drawPath(mPath, mPaint);
         }
-        int width = w > oldw? w : oldw;
-        int height = h > oldh? h : oldh;
-        mBitmap = Bitmap.createBitmap(
-            width, height, Bitmap.Config.ARGB_8888);
-        mBitmapCanvas = new Canvas(mBitmap);
-        mBitmapCanvas.drawColor(Color.argb(0, 0, 0, 0));
-        if (mCurrentGesture != null) {
-            mCurrentGesture.draw(mBitmapCanvas, mGesturePaint);
-        }
+        
+        mBitmap = newBitmap;
     }
 
     public void addGestureListener(GestureListener l) {
@@ -172,50 +175,111 @@ public class GesturePad extends View {
   
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        // draw double buffer
-        Paint paint = new Paint(Paint.DITHER_FLAG);
+        canvas.drawColor(background);
+        
+        if (mCacheGesture)
+            canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+        
         if (mIsFadingOut) {
-            paint.setAlpha((int)(255 * mFadingAlpha));
-            canvas.drawBitmap(mBitmap, 0, 0, paint);
+            int color = foreground;
+            int alpha = (int)(Color.alpha(color) * mFadingAlpha);
+            mPaint.setColor(Color.argb(alpha, 
+                Color.red(color), 
+                Color.green(color), 
+                Color.blue(color)));
+        } else if (mEnableRendering == false) {
+            mPaint.setColor(uncertain_foreground);
         } else {
-            canvas.drawBitmap(mBitmap, 0, 0, paint);
+            mPaint.setColor(foreground);
         }
         
-        // draw the current stroke
-        if (mPath != null) {
-            canvas.drawPath(mPath, mGesturePaint);
+        if (reconstruct) {
+            
+            if (this.mCurrentGesture != null) {
+                float xedge = 30;
+                float yedge = 30;
+                float w = this.getWidth() - 2 * xedge;
+                float h = this.getHeight() - 2 * yedge;
+                float sx =  w / this.mCurrentGesture.getBBX().width();
+                float sy = h / mCurrentGesture.getBBX().height();
+                float scale = sx>sy?sy:sx;
+                convertFromStroke(mCurrentGesture);
+                Matrix matrix = new Matrix();
+                matrix.preTranslate(-mCurrentGesture.getBBX().centerX(), -mCurrentGesture.getBBX().centerY());
+                matrix.postScale(scale, scale);
+                matrix.postTranslate(this.getWidth()/2, this.getHeight()/2);
+                this.mPath.transform(matrix);
+            } else {
+                mPath.reset();
+            }
+            
+            reconstruct = false;
+        }
+        
+        canvas.drawPath(mPath, mPaint);
+        
+        Iterator<Path> it = debug.iterator();
+        while (it.hasNext()) {
+            Path path = it.next();
+            canvas.drawPath(path, mDebugPaint);
         }
     }
-
-    /**
-     * Clear up the gesture pad
-     * @param fadeOut whether the gesture on the pad should fade out gradually
-     * or disappear immediately
-     */
-    public void clear(boolean fadeOut) {
-        if (fadeOut) {
-            mFadingAlpha = 1;
-            mIsFadingOut = true;
-            mHandler.removeCallbacks(mFadingOut);
-            mHandler.postDelayed(mFadingOut, 100);
-        } else {
-            mPath = null;
-            this.mCurrentGesture = null;
-            if (mBitmap != null) {
-                mBitmap.eraseColor(Color.argb(0, 0, 0, 0));
-                this.invalidate();
+    
+    public void clearDebugPath() {
+        debug.clear();
+    }
+    
+    public void addDebugPath(Path path) {
+        debug.add(path);
+    }
+    
+    public void addDebugPath(ArrayList<Path> paths) {
+        debug.addAll(paths);
+    }
+    
+    public void clear() {
+        mPath = new Path();
+        this.mCurrentGesture = null;
+        mCanvas.drawColor(background);
+        this.invalidate();
+    }
+    
+    private void convertFromStroke(Gesture stk) {
+        mPath = null;
+        Iterator it = stk.getPoints().iterator();
+        while (it.hasNext()) {
+            PointF p = (PointF) it.next();
+            if (mPath == null) {
+                mPath = new Path();
+                mPath.moveTo(p.x, p.y);
+                mX = p.x;
+                mY = p.y;
+            } else {
+                float dx = Math.abs(p.x - mX);
+                float dy = Math.abs(p.y - mY);
+                if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+                    mPath.quadTo(mX, mY, (p.x + mX)/2, (p.y + mY)/2);
+                    mX = p.x;
+                    mY = p.y;
+                }
             }
         }
+        mPath.lineTo(mX, mY);
+    }
+    
+    public void setEnableInput(boolean b) {
+        mEnableInput = b;
+    }
+    
+    public boolean isEnableInput() {
+        return mEnableInput;
     }
     
     @Override
     public boolean onTouchEvent(MotionEvent event) {
       
-        if(this.isEnabled() == false) { 
+        if(mEnableInput == false) 
             return true;
-        }
         
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -231,41 +295,28 @@ public class GesturePad extends View {
                 invalidate();
                 break;
         }
-        
         return true;
     }
     
     private void touch_start(MotionEvent event) {
-        // if there is fading-out effect, stop it.
-        if (mIsFadingOut) {
-            mIsFadingOut = false;
-            mHandler.removeCallbacks(mFadingOut);
-            mBitmap.eraseColor(Color.argb(0, 0, 0, 0));
-            this.mCurrentGesture = null;
-        }
+        mIsFadingOut = false;
+        mHandler.removeCallbacks(mFadingOut);
       
         float x = event.getX();
         float y = event.getY();
 
+        mCurrentGesture = new Gesture();
+        mCurrentGesture.addPoint(x, y);
+        
+        mPath.reset();
+        mPath.moveTo(x, y);
         mX = x;
         mY = y;
         
-        // pass the event to handlers
-        int count = mGestureListeners.size();
-        for (int i = 0; i < count; i++) {
-            GestureListener listener = mGestureListeners.get(i);
-            listener.onStartGesture(this, event);
+        Iterator<GestureListener> it = mGestureListeners.iterator();
+        while (it.hasNext()) {
+            it.next().onStartGesture(this, event);
         }
-
-        if (mCurrentGesture == null) {
-            mCurrentGesture = new Gesture();
-        }
-        
-        mPointBuffer = new ArrayList<GesturePoint>();
-        mPointBuffer.add(new GesturePoint(x, y, event.getEventTime()));
-
-        mPath = new Path();
-        mPath.moveTo(x, y);
     }
     
     private void touch_move(MotionEvent event) {
@@ -280,32 +331,41 @@ public class GesturePad extends View {
             mY = y;
         }
         
-        mPointBuffer.add(new GesturePoint(x, y, event.getEventTime()));
-
-        // pass the event to handlers
-        int count = mGestureListeners.size();
-        for (int i = 0; i < count; i++) {
-            GestureListener listener = mGestureListeners.get(i);
-            listener.onGesture(this, event);
+        mCurrentGesture.addPoint(x, y);
+        
+        Iterator<GestureListener> it = mGestureListeners.iterator();
+        while (it.hasNext()) {
+            it.next().onGesture(this, event);
         }
     }
-
+    
+    public void setFadingOut(boolean b) {
+        mShouldFadingOut = b;
+        mIsFadingOut = false;
+    }
+    
+    public boolean shouldFadingOut() {
+        return mShouldFadingOut;
+    }
     
     private void touch_up(MotionEvent event) {
-        // add the stroke to the current gesture
-        mCurrentGesture.addStroke(new GestureStroke(mPointBuffer));
-        mPointBuffer = null;
-
-        // add the stroke to the double buffer
-        mBitmapCanvas.drawPath(mPath, mGesturePaint);
-        mPath = null;
+        mPath.lineTo(mX, mY);
         
-        // pass the event to handlers
-        int count = mGestureListeners.size();
-        for (int i = 0; i < count; i++) {
-            GestureListener listener = mGestureListeners.get(i);
-            listener.onFinishGesture(this, event);
+        if (mCacheGesture)
+            mCanvas.drawPath(mPath, mPaint);
+        
+        // kill this so we don't double draw
+        if (shouldFadingOut()) {
+            mFadingAlpha = 1;
+            mIsFadingOut = true;
+            mHandler.removeCallbacks(mFadingOut);
+            mHandler.postDelayed(mFadingOut, 100);
+        }
+        
+        Iterator<GestureListener> it = mGestureListeners.iterator();
+        while (it.hasNext()) {
+            it.next().onFinishGesture(this, event);
         }
     }
-    
+
 }

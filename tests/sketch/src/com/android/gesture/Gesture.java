@@ -18,290 +18,343 @@ package com.android.gesture;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.gesture.recognizer.RecognitionUtil;
 
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.StringTokenizer;
 
 /**
- * A gesture can have a single or multiple strokes
+ * A single stroke gesture.
  */
 
 public class Gesture implements Parcelable {
 
-    private static final long GESTURE_ID_BASE = System.currentTimeMillis();
-
-    private static final int BITMAP_RENDERING_WIDTH = 2;
-
-    private static final boolean BITMAP_RENDERING_ANTIALIAS = true;
-
-    private static final boolean BITMAP_RENDERING_DITHER = true;
-
-    private static int sGestureCount = 0;
-
-    private RectF mBoundingBox;
-
-    // the same as its instance ID
-    private long mGestureID;
-
-    private ArrayList<GestureStroke> mStrokes = new ArrayList<GestureStroke>();
+    private RectF mBBX;
+    private float mLength = 0;
+    private int mColor;
+    private float mWidth;
+    private ArrayList<PointF> mPtsBuffer = new ArrayList<PointF>();
+    private long mTimestamp = 0;
+    private long mID;
+    
+    private static final long systemStartupTime = System.currentTimeMillis();
+    private static int instanceCount = 0; 
 
     public Gesture() {
-        mGestureID = GESTURE_ID_BASE + sGestureCount++;
+        mID = systemStartupTime + instanceCount++;
     }
 
-    /**
-     * @return all the strokes of the gesture
-     */
-    public ArrayList<GestureStroke> getStrokes() {
-        return mStrokes;
+    public void setColor(int c) {
+        mColor = c;
+    }
+    
+    public void setStrokeWidth(float w) {
+        mWidth = w;
+    }
+    
+    public int getColor() {
+        return mColor;
+    }
+    
+    public float getStrokeWidth() {
+        return mWidth;
+    }
+  
+    public ArrayList<PointF> getPoints() {
+        return this.mPtsBuffer;
+    }
+  
+    public int numOfPoints() {
+        return this.mPtsBuffer.size();
     }
 
-    /**
-     * @return the number of strokes included by this gesture
-     */
-    public int getStrokesCount() {
-        return mStrokes.size();
-    }
-
-    /**
-     * Add a stroke to the gesture
-     * 
-     * @param stroke
-     */
-    public void addStroke(GestureStroke stroke) {
-        mStrokes.add(stroke);
-
-        if (mBoundingBox == null) {
-            mBoundingBox = new RectF(stroke.boundingBox);
-        } else {
-            mBoundingBox.union(stroke.boundingBox);
+    public void addPoint(float x, float y) {
+        mPtsBuffer.add(new PointF(x, y));
+        if (mBBX == null) {
+            mBBX = new RectF();
+            mBBX.top = y;
+            mBBX.left = x;
+            mBBX.right = x;
+            mBBX.bottom = y;
+            mLength = 0;
         }
+        else {
+            PointF lst = mPtsBuffer.get(mPtsBuffer.size()-2);
+            mLength += Math.sqrt(Math.pow(x-lst.x, 2)+Math.pow(y-lst.y, 2));
+            mBBX.union(x, y);
+        }
+        mTimestamp = System.currentTimeMillis();
     }
 
     /**
-     * Get the total length of the gesture. When there are multiple strokes in
-     * the gesture, this returns the sum of the lengths of all the strokes
-     * 
      * @return the length of the gesture
      */
     public float getLength() {
-        int len = 0;
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
-        for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            len += stroke.length;
-        }
-        return len;
+        return this.mLength;
     }
-
-    /**
-     * @return the bounding box of the gesture
-     */
-    public RectF getBoundingBox() {
-        return mBoundingBox;
+  
+    public RectF getBBX() {
+        return mBBX;
     }
-
-    /**
-     * Set the id of the gesture
-     * 
-     * @param id
-     */
-    void setID(long id) {
-        mGestureID = id;
+  
+    public void setID(long id) {
+        mID = id;
     }
-
-    /**
-     * @return the id of the gesture
-     */
+    
     public long getID() {
-        return mGestureID;
+        return mID;
     }
-
+    
+    public long getTimeStamp() {
+        return mTimestamp;
+    }
+    
+    public void setTimestamp(long t) {
+  	    this.mTimestamp = t;
+    }
+    
     /**
      * draw the gesture
-     * 
      * @param canvas
      */
-    void draw(Canvas canvas, Paint paint) {
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
-        for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            stroke.draw(canvas, paint);
-        }
-    }
-
-    /**
-     * Create a bitmap of the gesture with a transparent background
-     * 
-     * @param width width of the target bitmap
-     * @param height height of the target bitmap
-     * @param edge the edge
-     * @param numSample
-     * @param color
-     * @return the bitmap
-     */
-    public Bitmap toBitmap(int width, int height, int edge, int numSample, int color) {
-        RectF bbx = getBoundingBox();
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.translate(edge, edge);
+    public void draw(Canvas canvas) {
         Paint paint = new Paint();
-        paint.setAntiAlias(BITMAP_RENDERING_ANTIALIAS);
-        paint.setDither(BITMAP_RENDERING_DITHER);
-        paint.setColor(color);
+        paint.setAntiAlias(true);
+        paint.setDither(true);
+        paint.setColor(mColor);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeWidth(BITMAP_RENDERING_WIDTH);
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
-        for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            Path path = stroke.toPath(width - 2 * edge, height - 2 * edge, numSample);
-            canvas.drawPath(path, paint);
+        paint.setStrokeWidth(mWidth);
+        
+        Path path = null;
+        float mX = 0, mY = 0;
+        Iterator<PointF> it = mPtsBuffer.iterator();
+        while (it.hasNext()) {
+          PointF p = it.next();
+          float x = p.x;
+          float y = p.y;
+          if (path == null) {
+            path = new Path();
+            path.moveTo(x, y);
+            mX = x;
+            mY = y;
+          } else {
+            float dx = Math.abs(x - mX);
+            float dy = Math.abs(y - mY);
+            if (dx >= 3 || dy >= 3) {
+                path.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+                mX = x;
+                mY = y;
+            }
+          }
         }
-
-        return bitmap;
+        
+        canvas.drawPath(path, paint);
     }
-
+    
     /**
-     * Create a bitmap of the gesture with a transparent background
-     * 
-     * @param width
-     * @param height
+     * convert the gesture to a Path
+     * @param width the width of the bounding box of the target path
+     * @param height the height of the bounding box of the target path
+     * @param numSample the num of points needed
+     * @return the path
+     */
+    public Path toPath(float width, float height, int numSample) {
+        float[] pts = RecognitionUtil.resample(this, numSample);
+        RectF rect = this.getBBX();
+        float scale = height / rect.height();
+        Matrix matrix = new Matrix();
+        matrix.setTranslate(-rect.left, -rect.top);
+        Matrix scalem = new Matrix();
+        scalem.setScale(scale, scale);
+        matrix.postConcat(scalem);
+        Matrix translate = new Matrix();
+        matrix.postConcat(translate);
+        matrix.mapPoints(pts);
+        
+        Path path = null;
+        float mX = 0, mY = 0;
+        for (int i=0; i<pts.length-1; i+=2) {
+          float x = pts[i];
+          float y = pts[i+1];
+          if (path == null) {
+            path = new Path();
+            path.moveTo(x, y);
+            mX = x;
+            mY = y;
+          } else {
+            float dx = Math.abs(x - mX);
+            float dy = Math.abs(y - mY);
+            if (dx >= 3 || dy >= 3) {
+                path.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+                mX = x;
+                mY = y;
+            }
+          }
+        }
+        return path;
+    }
+  
+    /**
+     * get a bitmap thumbnail of the gesture with a transparent background
+     * @param w
+     * @param h
      * @param edge
-     * @param color
-     * @return the bitmap
+     * @param numSample
+     * @param foreground
+     * @return
      */
-    public Bitmap toBitmap(int width, int height, int edge, int color) {
-        RectF bbx = getBoundingBox();
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.translate(edge, edge);
+    public Bitmap toBitmap(int w, int h, 
+        int edge, int numSample) {
+        RectF bbx = this.getBBX();
+        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Path path = this.toPath(w - 2 * edge, h - 2 * edge, numSample);
+        Canvas c = new Canvas(bitmap);
+        //c.drawColor(background);
+        c.translate(edge, edge);
         Paint paint = new Paint();
-        paint.setAntiAlias(BITMAP_RENDERING_ANTIALIAS);
-        paint.setDither(BITMAP_RENDERING_DITHER);
-        paint.setColor(color);
+        paint.setAntiAlias(true);
+        paint.setDither(true);
+        paint.setColor(mColor);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeWidth(BITMAP_RENDERING_WIDTH);
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
-        for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            stroke.draw(canvas, paint);
-        }
-
+        paint.setStrokeWidth(2);
+        c.drawPath(path, paint);
         return bitmap;
     }
-
+    
     /**
-     * Save the gesture as XML
-     * 
+     * save the gesture as XML
      * @param namespace
      * @param serializer
      * @throws IOException
      */
-    void toXML(String namespace, XmlSerializer serializer) throws IOException {
-        serializer.startTag(namespace, GestureConstants.XML_TAG_GESTURE);
-        serializer.attribute(namespace, GestureConstants.XML_TAG_ID, Long.toString(mGestureID));
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
-        for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            stroke.toXML(namespace, serializer);
+    public void toXML(String namespace, XmlSerializer serializer) throws IOException {
+        serializer.startTag(namespace, "stroke");
+        serializer.attribute(namespace, "timestamp", Long.toString(mTimestamp));
+        serializer.attribute(namespace, "id", Long.toString(mID));
+        serializer.attribute(namespace, "color", Integer.toString(mColor));
+        serializer.attribute(namespace, "width", Float.toString(mWidth));
+        Iterator it = this.mPtsBuffer.iterator();
+        String pts = "";
+        while (it.hasNext()) {
+        	PointF fp = (PointF)it.next();
+        	if (pts.length() > 0)
+        		pts += ",";
+        	pts += fp.x + "," + fp.y;
         }
-        serializer.endTag(namespace, GestureConstants.XML_TAG_GESTURE);
+        serializer.text(pts);
+        serializer.endTag(namespace, "stroke");
     }
-
-    /**
-     * Create the gesture from a string
-     * 
-     * @param str
-     */
+    
+    
     public void createFromString(String str) {
-        int startIndex = 0;
-        int endIndex;
-        while ((endIndex = str.indexOf(GestureConstants.STRING_GESTURE_DELIIMITER, startIndex + 1)) != -1) {
-            String token = str.substring(startIndex, endIndex);
-            if (startIndex > 0) { // stroke tokens
-                addStroke(GestureStroke.createFromString(token));
-            } else { // id token
-                mGestureID = Long.parseLong(token);
-            }
-            startIndex = endIndex + 1;
+        StringTokenizer st = new StringTokenizer(str, "#");
+        
+        String para = st.nextToken();
+        StringTokenizer innerst = new StringTokenizer(para, ",");
+        this.mBBX = new RectF();
+        this.mBBX.left = Float.parseFloat(innerst.nextToken());
+        this.mBBX.top = Float.parseFloat(innerst.nextToken());
+        this.mBBX.right = Float.parseFloat(innerst.nextToken());
+        this.mBBX.bottom = Float.parseFloat(innerst.nextToken());
+        
+        para = st.nextToken();
+        innerst = new StringTokenizer(para, ",");
+        while (innerst.hasMoreTokens()) {
+          String s = innerst.nextToken().trim();
+          if (s.length()==0)
+            break;
+          float x = Float.parseFloat(s);
+          float y = Float.parseFloat(innerst.nextToken());
+          this.mPtsBuffer.add(new PointF(x, y));
         }
+  
+        para = st.nextToken();
+        this.mColor = Integer.parseInt(para);
+        
+        para = st.nextToken();
+        this.mWidth = Float.parseFloat(para);
+        
+        para = st.nextToken();
+        this.mLength = Float.parseFloat(para);
+        
+        para = st.nextToken();
+        this.mTimestamp = Long.parseLong(para);
     }
-
-    /**
-     * Convert the gesture to string
-     */
+    
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(mGestureID);
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
-        for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            str.append(GestureConstants.STRING_GESTURE_DELIIMITER);
-            str.append(stroke.toString());
+        String str = "";
+        
+        str += "#" + this.mBBX.left + "," + this.mBBX.top + "," +
+               this.mBBX.right + "," + this.mBBX.bottom;
+        
+        str += "#";
+        Iterator<PointF> it = this.mPtsBuffer.iterator();
+        while (it.hasNext()) {
+          PointF fp = it.next();
+          str += fp.x + "," + fp.y + ","; 
         }
 
-        return str.toString();
+        str += "#";
+        str += this.mColor;
+        
+        str += "#";
+        str += this.mWidth;
+        
+        str += "#";
+        str += this.mLength;
+        
+        str += "#";
+        str += this.mTimestamp;
+  
+        return str;
     }
-
-    public static final Parcelable.Creator<Gesture> CREATOR = new Parcelable.Creator<Gesture>() {
+    
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public Gesture createFromParcel(Parcel in) {
             String str = in.readString();
-            Gesture gesture = new Gesture();
-            gesture.createFromString(str);
-            return gesture;
+            Gesture stk = new Gesture();
+            stk.createFromString(str);
+            return stk;
         }
-
+    
         public Gesture[] newArray(int size) {
             return new Gesture[size];
         }
     };
-
-    /**
-     * Build a gesture from a byte array
-     * 
-     * @param bytes
-     * @return the gesture
-     */
-    static Gesture buildFromArray(byte[] bytes) {
+    
+    public static Gesture buildFromArray(byte[] bytes) {
         String str = new String(bytes);
-        Gesture gesture = new Gesture();
-        gesture.createFromString(str);
-        return gesture;
+        Gesture stk = new Gesture();
+        stk.createFromString(str);
+        return stk;
     }
-
-    /**
-     * Save a gesture to a byte array
-     * 
-     * @param stroke
-     * @return the byte array
-     */
-    static byte[] saveToArray(Gesture stroke) {
-        String str = stroke.toString();
+    
+    public static byte[] saveToArray(Gesture stk) {
+        String str = stk.toString();   
         return str.getBytes();
     }
-
+    
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(toString());
+        out.writeString(this.toString());
     }
-
+      
     public int describeContents() {
         return CONTENTS_FILE_DESCRIPTOR;
     }
