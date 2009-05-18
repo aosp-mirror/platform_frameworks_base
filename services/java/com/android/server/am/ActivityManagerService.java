@@ -30,6 +30,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
+import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
@@ -41,6 +42,7 @@ import android.app.IThumbnailReceiver;
 import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -78,10 +80,14 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Checkin;
 import android.provider.Settings;
+import android.server.data.CrashData;
+import android.server.data.StackTraceElementData;
+import android.server.data.ThrowableData;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.LogPrinter;
 import android.util.PrintWriterPrinter;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -92,10 +98,13 @@ import android.view.WindowManagerPolicy;
 
 import dalvik.system.Zygote;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
@@ -7809,6 +7818,30 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return handleAppCrashLocked(app);
     }
 
+    private ComponentName getErrorReportReceiver(ProcessRecord app) {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        try {
+            // was an installer package name specified when this app was
+            // installed?
+            String installerPackageName = pm.getInstallerPackageName(app.info.packageName);
+            if (installerPackageName == null) {
+                return null;
+            }
+
+            // is there an Activity in this package that handles ACTION_APP_ERROR?
+            Intent intent = new Intent(Intent.ACTION_APP_ERROR);
+            ResolveInfo info = pm.resolveIntentForPackage(intent, null, 0, installerPackageName);
+            if (info == null || info.activityInfo == null) {
+                return null;
+            }
+
+            return new ComponentName(installerPackageName, info.activityInfo.name);
+        } catch (RemoteException e) {
+            // will return null and no error report will be delivered
+        }
+        return null;
+    }
+
     void makeAppNotRespondingLocked(ProcessRecord app,
             String tag, String shortMsg, String longMsg, byte[] crashData) {
         app.notResponding = true;
@@ -7927,6 +7960,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     void startAppProblemLocked(ProcessRecord app) {
+        app.errorReportReceiver = getErrorReportReceiver(app);
         skipCurrentReceiverLocked(app);
     }
 
@@ -7959,7 +7993,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public int handleApplicationError(IBinder app, int flags,
             String tag, String shortMsg, String longMsg, byte[] crashData) {
         AppErrorResult result = new AppErrorResult();
-
         ProcessRecord r = null;
         synchronized (this) {
             if (app != null) {
@@ -8048,16 +8081,96 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         int res = result.get();
 
+        Intent appErrorIntent = null;
         synchronized (this) {
             if (r != null) {
                 mProcessCrashTimes.put(r.info.processName, r.info.uid,
                         SystemClock.uptimeMillis());
+            }
+            if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
+                appErrorIntent = createAppErrorIntentLocked(r);
+                res = AppErrorDialog.FORCE_QUIT;
+            }
+        }
+
+        if (appErrorIntent != null) {
+            try {
+                mContext.startActivity(appErrorIntent);
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "bug report receiver dissappeared", e);
             }
         }
 
         return res;
     }
     
+    Intent createAppErrorIntentLocked(ProcessRecord r) {
+        ApplicationErrorReport report = createAppErrorReportLocked(r);
+        if (report == null) {
+            return null;
+        }
+        Intent result = new Intent(Intent.ACTION_APP_ERROR);
+        result.setComponent(r.errorReportReceiver);
+        result.putExtra(Intent.EXTRA_BUG_REPORT, report);
+        result.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return result;
+    }
+
+    ApplicationErrorReport createAppErrorReportLocked(ProcessRecord r) {
+        if (r.errorReportReceiver == null) {
+            return null;
+        }
+
+        if (!r.crashing && !r.notResponding) {
+            return null;
+        }
+
+        try {
+            ApplicationErrorReport report = new ApplicationErrorReport();
+            report.packageName = r.info.packageName;
+            report.installerPackageName = r.errorReportReceiver.getPackageName();
+            report.processName = r.processName;
+
+            if (r.crashing) {
+                report.type = ApplicationErrorReport.TYPE_CRASH;
+                report.crashInfo = new ApplicationErrorReport.CrashInfo();
+
+                ByteArrayInputStream byteStream = new ByteArrayInputStream(
+                        r.crashingReport.crashData);
+                DataInputStream dataStream = new DataInputStream(byteStream);
+                CrashData crashData = new CrashData(dataStream);
+                ThrowableData throwData = crashData.getThrowableData();
+
+                report.time = crashData.getTime();
+                report.crashInfo.stackTrace = throwData.toString();
+
+                // extract the source of the exception, useful for report
+                // clustering
+                while (throwData.getCause() != null) {
+                    throwData = throwData.getCause();
+                }
+                StackTraceElementData trace = throwData.getStackTrace()[0];
+                report.crashInfo.exceptionClassName = throwData.getType();
+                report.crashInfo.throwFileName = trace.getFileName();
+                report.crashInfo.throwClassName = trace.getClassName();
+                report.crashInfo.throwMethodName = trace.getMethodName();
+            } else if (r.notResponding) {
+                report.type = ApplicationErrorReport.TYPE_ANR;
+                report.anrInfo = new ApplicationErrorReport.AnrInfo();
+
+                report.anrInfo.activity = r.notRespondingReport.tag;
+                report.anrInfo.cause = r.notRespondingReport.shortMsg;
+                report.anrInfo.info = r.notRespondingReport.longMsg;
+            }
+
+            return report;
+        } catch (IOException e) {
+            // we don't send it
+        }
+
+        return null;
+    }
+
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState() {
         // assume our apps are happy - lazy create the list
         List<ActivityManager.ProcessErrorStateInfo> errList = null;
