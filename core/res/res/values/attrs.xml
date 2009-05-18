@@ -725,7 +725,7 @@ grav<?xml version="1.0" encoding="utf-8"?>
     <attr name="entries" format="reference" />
 
     <!-- Standard gravity constant that a child can supply to its parent.
-         Defines how to place the view, both its x and y axis, within is parent view group. -->
+         Defines how to place the view, both its x and y axis, within its parent view group. -->
     <attr name="layout_gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
