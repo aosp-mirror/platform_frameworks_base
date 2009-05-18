@@ -32,6 +32,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libcorecg \
 	libcutils \
 	libutils \
+	libbinder \
 	libpixelflinger \
 	libhardware \
 	libhardware_legacy

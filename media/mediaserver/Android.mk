@@ -8,7 +8,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libaudioflinger \
 	libcameraservice \
 	libmediaplayerservice \
-	libutils
+	libutils \
+	libbinder
 
 base := $(LOCAL_PATH)/../..
 

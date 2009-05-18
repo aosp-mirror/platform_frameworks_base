@@ -34,6 +34,7 @@ endif
 LOCAL_SHARED_LIBRARIES := \
 	libhardware \
 	libutils \
+	libbinder \
 	libcutils \
 	libui \
 	libcorecg \

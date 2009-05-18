@@ -23,7 +23,7 @@
 #include <utils/Parcel.h>
 #include <utils/String8.h>
 
-#include <private/utils/Static.h>
+#include <private/binder/Static.h>
 
 namespace android {
 

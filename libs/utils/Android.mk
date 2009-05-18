@@ -103,19 +103,6 @@ include $(CLEAR_VARS)
 # we have the common sources, plus some device-specific stuff
 LOCAL_SRC_FILES:= \
 	$(commonSources) \
-	Binder.cpp \
-	BpBinder.cpp \
-	IInterface.cpp \
-	IMemory.cpp \
-	IPCThreadState.cpp \
-	MemoryDealer.cpp \
-    MemoryBase.cpp \
-    MemoryHeapBase.cpp \
-    MemoryHeapPmem.cpp \
-	Parcel.cpp \
-	ProcessState.cpp \
-	IPermissionController.cpp \
-	IServiceManager.cpp \
 	Unicode.cpp \
     backup_data.cpp \
 	backup_helper_file.cpp

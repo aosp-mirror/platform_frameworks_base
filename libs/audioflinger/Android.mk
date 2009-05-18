@@ -11,6 +11,7 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
+	libbinder \
     libmedia \
     libhardware_legacy
 
@@ -34,6 +35,7 @@ LOCAL_SRC_FILES:=               \
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
+	libbinder \
     libmedia \
     libhardware_legacy
 

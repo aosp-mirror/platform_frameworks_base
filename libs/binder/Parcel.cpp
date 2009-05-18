@@ -29,7 +29,7 @@
 #include <utils/TextOutput.h>
 #include <utils/misc.h>
 
-#include <private/utils/binder_module.h>
+#include <private/binder/binder_module.h>
 
 #include <stdio.h>
 #include <stdlib.h>

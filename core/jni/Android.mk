@@ -146,6 +146,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libcutils \
 	libutils \
+	libbinder \
 	libnetutils \
 	libui \
 	libskiagl \

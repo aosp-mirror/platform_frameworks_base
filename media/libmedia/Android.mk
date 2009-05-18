@@ -21,7 +21,7 @@ LOCAL_SRC_FILES:= \
 	JetPlayer.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libui libcutils libutils libsonivox
+	libui libcutils libutils libbinder libsonivox
 
 LOCAL_MODULE:= libmedia
 

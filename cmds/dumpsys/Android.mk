@@ -5,7 +5,9 @@ LOCAL_SRC_FILES:= \
 	dumpsys.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libutils
+	libutils \
+	libbinder
+	
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX

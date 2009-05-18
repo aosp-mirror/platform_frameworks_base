@@ -6,6 +6,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libsurfaceflinger \
+	libbinder \
 	libutils
 
 LOCAL_C_INCLUDES := \

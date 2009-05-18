@@ -11,7 +11,7 @@ LOCAL_SRC_FILES:= 	\
 	EGL/gpu.cpp			\
 #
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libui
+LOCAL_SHARED_LIBRARIES += libcutils libutils libbinder libui
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libEGL
 

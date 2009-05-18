@@ -9,6 +9,7 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
+	libbinder \
 	libandroid_runtime \
 	libnativehelper \
 	libmedia

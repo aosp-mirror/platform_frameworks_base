@@ -25,7 +25,7 @@
 #include <utils/String8.h>
 #include <utils/SystemClock.h>
 
-#include <private/utils/Static.h>
+#include <private/binder/Static.h>
 
 #include <unistd.h>
 
