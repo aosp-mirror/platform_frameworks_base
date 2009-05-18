@@ -1095,6 +1095,9 @@
         <item>Custom</item>
     </string-array>
 
+    <!-- String which means the type "mobile phone". -->
+    <string name="mobileEmailTypeName">Mobile</string>
+
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Postal address types from android.provider.Contacts. This could be used when adding a new address for a contact, for example. -->
     <string-array name="postalAddressTypes">

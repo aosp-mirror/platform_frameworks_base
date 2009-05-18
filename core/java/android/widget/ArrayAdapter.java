@@ -348,7 +348,12 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
                     "ArrayAdapter requires the resource ID to be a TextView", e);
         }
 
-        text.setText(getItem(position).toString());
+        T item = getItem(position);
+        if (item instanceof CharSequence) {
+            text.setText((CharSequence)item);
+        } else {
+            text.setText(item.toString());
+        }
 
         return view;
     }
