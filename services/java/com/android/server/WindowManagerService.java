@@ -1307,7 +1307,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     mKeyWaiter.handleNewWindowLocked(mCurrentFocus);
                 }
             }
-            
             if (localLOGV) Log.v(
                 TAG, "New client " + client.asBinder()
                 + ": window=" + win);
@@ -7767,7 +7766,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         int i;
 
         // FIRST LOOP: Perform a layout, if needed.
-        
         performLayoutLockedInner();
         
         if (mFxSession == null) {
@@ -7787,7 +7785,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         // SECOND LOOP: Execute animations and update visibility of windows.
-        
         boolean orientationChangeComplete = true;
         Session holdScreen = null;
         float screenBrightness = -1;
