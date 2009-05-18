@@ -15,6 +15,7 @@
  */
 
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <dlfcn.h>
@@ -34,10 +35,6 @@
 #include <cutils/atomic.h>
 #include <cutils/properties.h>
 #include <cutils/memory.h>
-
-#include <utils/RefBase.h>
-#include <utils/threads.h>
-#include <utils/KeyedVector.h>
 
 #include "hooks.h"
 #include "egl_impl.h"
