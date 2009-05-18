@@ -180,8 +180,7 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         return resultList;
     }
 
-    public List<R> queryIntent(ContentResolver resolver, Intent intent,
-            String resolvedType, boolean defaultOnly) {
+    public List<R> queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
         String scheme = intent.getScheme();
 
         ArrayList<R> finalList = new ArrayList<R>();

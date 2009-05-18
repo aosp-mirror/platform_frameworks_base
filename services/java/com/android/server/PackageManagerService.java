@@ -1270,8 +1270,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             if (DEBUG_PREFERRED) intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
             List<PreferredActivity> prefs =
-                    mSettings.mPreferredActivities.queryIntent(null,
-                            intent, resolvedType,
+                    mSettings.mPreferredActivities.queryIntent(intent, resolvedType,
                             (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
             if (prefs != null && prefs.size() > 0) {
                 // First figure out how good the original match set is.
@@ -1348,7 +1347,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         synchronized (mPackages) {
             return (List<ResolveInfo>)mActivities.
-                queryIntent(null, intent, resolvedType, flags);
+                queryIntent(intent, resolvedType, flags);
         }
     }
 
@@ -1517,7 +1516,7 @@ class PackageManagerService extends IPackageManager.Stub {
             String resolvedType, int flags) {
         synchronized (mPackages) {
             return (List<ResolveInfo>)mReceivers.
-                queryIntent(null, intent, resolvedType, flags);
+                queryIntent(intent, resolvedType, flags);
         }
     }
 
@@ -1550,8 +1549,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         synchronized (mPackages) {
-            return (List<ResolveInfo>)mServices.
-                queryIntent(null, intent, resolvedType, flags);
+            return (List<ResolveInfo>)mServices.queryIntent(intent, resolvedType, flags);
         }
     }
     
@@ -2884,17 +2882,14 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
-        public List queryIntent(ContentResolver resolver, Intent intent,
-                String resolvedType, boolean defaultOnly) {
+        public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(resolver, intent, resolvedType, defaultOnly);
+            return super.queryIntent(intent, resolvedType, defaultOnly);
         }
 
-        public List queryIntent(ContentResolver resolver, Intent intent,
-                String resolvedType, int flags) {
+        public List queryIntent(Intent intent, String resolvedType, int flags) {
             mFlags = flags;
-            return super.queryIntent(
-                resolver, intent, resolvedType,
+            return super.queryIntent(intent, resolvedType,
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
         }
 
@@ -3028,17 +3023,14 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private final class ServiceIntentResolver
             extends IntentResolver<PackageParser.ServiceIntentInfo, ResolveInfo> {
-        public List queryIntent(ContentResolver resolver, Intent intent,
-                String resolvedType, boolean defaultOnly) {
+        public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(resolver, intent, resolvedType, defaultOnly);
+            return super.queryIntent(intent, resolvedType, defaultOnly);
         }
 
-        public List queryIntent(ContentResolver resolver, Intent intent,
-                String resolvedType, int flags) {
+        public List queryIntent(Intent intent, String resolvedType, int flags) {
             mFlags = flags;
-            return super.queryIntent(
-                resolver, intent, resolvedType,
+            return super.queryIntent(intent, resolvedType,
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
         }
 
