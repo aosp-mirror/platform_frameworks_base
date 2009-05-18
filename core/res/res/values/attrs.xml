@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+grav<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2006 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -668,8 +668,8 @@
     <!-- A coordinate in the Y dimension. -->
     <attr name="y" format="dimension" />
           
-    <!-- Specifies how to place an object, both
-         its x and y axis, within a larger containing object. -->
+    <!-- Specifies how to place the content of an object, both
+         on the x and y axis, within the object itself. -->
     <attr name="gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
@@ -725,8 +725,7 @@
     <attr name="entries" format="reference" />
 
     <!-- Standard gravity constant that a child can supply to its parent.
-         Defines how to place an object, both
-         its x and y axis, within a larger containing object. -->
+         Defines how to place the view, both its x and y axis, within is parent view group. -->
     <attr name="layout_gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
