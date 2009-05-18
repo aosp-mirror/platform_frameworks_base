@@ -10176,8 +10176,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        final ContentResolver resolver = mContext.getContentResolver();
-
         // Figure out who all will receive this broadcast.
         List receivers = null;
         List<BroadcastFilter> registeredReceivers = null;
@@ -10200,8 +10198,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         ActivityThread.getPackageManager().queryIntentReceivers(
                                 intent, resolvedType, STOCK_PM_FLAGS);
                 }
-                registeredReceivers = mReceiverResolver.queryIntent(resolver,
-                        intent, resolvedType, false);
+                registeredReceivers = mReceiverResolver.queryIntent(intent, resolvedType, false);
             }
         } catch (RemoteException ex) {
             // pm is in same process, this will never happen.
