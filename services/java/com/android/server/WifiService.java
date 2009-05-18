@@ -1449,10 +1449,12 @@ public class WifiService extends IWifiManager.Stub {
                     Settings.System.getInt(mContext.getContentResolver(),
                                            Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                Log.d(TAG, "ACTION_SCREEN_ON");
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                Log.d(TAG, "ACTION_SCREEN_OFF");
                 mScreenOff = true;
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
@@ -1461,12 +1463,20 @@ public class WifiService extends IWifiManager.Stub {
                  * or plugged in to AC).
                  */
                 if (!shouldWifiStayAwake(stayAwakeConditions, mPluggedType)) {
-                    long triggerTime = System.currentTimeMillis() + idleMillis;
-                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                    if (!mWifiStateTracker.hasIpAddress()) {
+                        // do not keep Wifi awake when screen is off if Wifi is not fully active
+                        mDeviceIdle = true;
+                        updateWifiState();
+                    } else {
+                        long triggerTime = System.currentTimeMillis() + idleMillis;
+                        Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
+                        mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                    }
                 }
                 /* we can return now -- there's nothing to do until we get the idle intent back */
                 return;
             } else if (action.equals(ACTION_DEVICE_IDLE)) {
+                Log.d(TAG, "got ACTION_DEVICE_IDLE");
                 mDeviceIdle = true;
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 /*
@@ -1477,9 +1487,11 @@ public class WifiService extends IWifiManager.Stub {
                  * the already-set timer.
                  */
                 int pluggedType = intent.getIntExtra("plugged", 0);
+                Log.d(TAG, "ACTION_BATTERY_CHANGED pluggedType: " + pluggedType);
                 if (mScreenOff && shouldWifiStayAwake(stayAwakeConditions, mPluggedType) &&
                         !shouldWifiStayAwake(stayAwakeConditions, pluggedType)) {
                     long triggerTime = System.currentTimeMillis() + idleMillis;
+                    Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                     mPluggedType = pluggedType;
                     return;
