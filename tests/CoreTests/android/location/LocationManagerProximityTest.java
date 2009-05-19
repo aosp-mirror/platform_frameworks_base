@@ -26,6 +26,7 @@ import android.location.LocationManager;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 /**
@@ -37,9 +38,11 @@ import android.util.Log;
  *  adb shell am instrument -e class android.location.LocationManagerProximityTest \
  *     -w android.core/android.test.InstrumentationTestRunner
  *     
- * This test requires that the "Allow mock locations" setting be enabled     
+ * This test requires that the "Allow mock locations" setting be enabled.
+ * To ensure reliable results, all location providers should be disabled.
  * 
  */
+@Suppress
 @MediumTest
 public class LocationManagerProximityTest extends AndroidTestCase {
 
