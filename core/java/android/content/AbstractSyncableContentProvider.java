@@ -388,8 +388,32 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         return completed;
     }
 
-    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
-            throws OperationApplicationException {
+    /**
+     * <p>
+     * Call mOpenHelper.getWritableDatabase() and mDb.beginTransaction().
+     * {@link #endTransaction} MUST be called after calling this method.
+     * Those methods should be used like this:
+     * </p>
+     *
+     * <pre class="prettyprint">
+     * boolean successful = false;
+     * if (!beginTransaction()) {
+     *     return;
+     * }
+     * try {
+     *     // Do something related to mDb
+     *     successful = true;
+     *     return ret;
+     * } finally {
+     *     endTransaction(successful);
+     * }
+     * </pre>
+     *
+     * @hide This method should be used only when {@link #applyBatch} is not enough and must be
+     * used with {@link #endTransaction}.
+     * e.g. If returned value has to be used during one transaction, this method might be useful.
+     */
+    public final void beginBatch() {
         // initialize if this is the first time this thread has applied a batch
         if (mApplyingBatch.get() == null) {
             mApplyingBatch.set(false);
@@ -400,12 +424,36 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
             throw new IllegalStateException(
                     "applyBatch is not reentrant but mApplyingBatch is already set");
         }
-        getDatabase().beginTransaction();
+        SQLiteDatabase db = getDatabase();
+        db.beginTransaction();
+        boolean successful = false;
         try {
             mApplyingBatch.set(true);
-            ContentProviderResult[] results = super.applyBatch(operations);
-            getDatabase().setTransactionSuccessful();
-            return results;
+            successful = true;
+        } finally {
+            if (!successful) {
+                // Something unexpected happened. We must call endTransaction() at least.
+                db.endTransaction();
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * Call mDb.endTransaction(). If successful is true, try to call
+     * mDb.setTransactionSuccessful() before calling mDb.endTransaction().
+     * This method MUST be used with {@link #beginBatch()}.
+     * </p>
+     *
+     * @hide This method must be used with {@link #beginTransaction}
+     */
+    public final void endBatch(boolean successful) {
+        try {
+            if (successful) {
+                // setTransactionSuccessful() must be called just once during opening the
+                // transaction.
+                mDb.setTransactionSuccessful();
+            }
         } finally {
             mApplyingBatch.set(false);
             getDatabase().endTransaction();
@@ -413,9 +461,23 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
                 getContext().getContentResolver().notifyChange(url, null /* observer */,
                         changeRequiresLocalSync(url));
             }
+            mDb.endTransaction();
         }
     }
-    
+
+    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+            throws OperationApplicationException {
+        boolean successful = false;
+        beginBatch();
+        try {
+            ContentProviderResult[] results = super.applyBatch(operations);
+            successful = true;
+            return results;
+        } finally {
+            endBatch(successful);
+        }
+    }
+
     /**
      * Check if changes to this URI can be syncable changes.
      * @param uri the URI of the resource that was changed

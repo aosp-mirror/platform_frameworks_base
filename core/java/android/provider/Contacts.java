@@ -890,6 +890,17 @@ public class Contacts {
         public static final int TYPE_OTHER = 3;
 
         /**
+         * @hide This is temporal. TYPE_MOBILE should be added to TYPE in the future.
+         */
+        public static final int MOBILE_EMAIL_TYPE_INDEX = 2;
+
+        /**
+         * @hide This is temporal. TYPE_MOBILE should be added to TYPE in the future.
+         * This is not "mobile" but "CELL" since vCard uses it for identifying mobile phone.
+         */
+        public static final String MOBILE_EMAIL_TYPE_NAME = "_AUTO_CELL";
+
+        /**
          * The user defined label for the the contact method.
          * <P>Type: TEXT</P>
          */
