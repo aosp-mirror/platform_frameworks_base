@@ -29,6 +29,7 @@ import android.os.RegistrantList;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -50,6 +51,15 @@ import java.util.Locale;
  *
  *  {@hide}
  *
+ */
+
+/**
+ * TODO(Teleca): This has a multitude of methods that are CDMA specific
+ * , (registerForVoicePrivacy, registerCdmaInformationRecord, registerCdmaCallWaiting,
+ * setCdmaRoamingPreference, setCdmaSubscription, getCdmaEriIcon, getCdmaEriText, ...) can
+ * these type of calls be more abstract. For example CallWaiting is common between the GSM/CDMA
+ * it would seem that doesn't need to be cdma specific. Also, should the application be directly
+ * dealing with the CdmaInformationRecord's could they be abstracted to something more generic.
  */
 
 public abstract class PhoneBase implements Phone {
@@ -90,6 +100,8 @@ public abstract class PhoneBase implements Phone {
     protected static final int EVENT_RUIM_RECORDS_LOADED            = 21;
     protected static final int EVENT_NV_READY                       = 22;
     protected static final int EVENT_SET_ENHANCED_VP                = 23;
+    protected static final int EVENT_CDMA_CALL_WAITING              = 24;
+    protected static final int EVENT_EMERGENCY_CALLBACK_MODE        = 25;
 
     // Key used to read/write current CLIR setting
     public static final String CLIR_KEY = "clir_key";
@@ -187,7 +199,7 @@ public abstract class PhoneBase implements Phone {
         setUnitTestMode(unitTestMode);
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        mDnsCheckDisabled = sp.getBoolean(DNS_SERVER_CHECK_DISABLED_KEY, false);        
+        mDnsCheckDisabled = sp.getBoolean(DNS_SERVER_CHECK_DISABLED_KEY, false);
     }
 
     // Inherited documentation suffices.
@@ -204,7 +216,7 @@ public abstract class PhoneBase implements Phone {
         mDnsCheckDisabled = b;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
-        editor.putBoolean(DNS_SERVER_CHECK_DISABLED_KEY, b);        
+        editor.putBoolean(DNS_SERVER_CHECK_DISABLED_KEY, b);
         editor.commit();
     }
 
@@ -282,6 +294,35 @@ public abstract class PhoneBase implements Phone {
         mCM.unregisterForInCallVoicePrivacyOff(h);
     }
 
+    // Inherited documentation suffices.
+    public void registerForOtaStatusChange(Handler h, int what, Object obj){
+        mCM.registerForOtaSessionStatus(h,what,obj);
+    }
+
+    // Inherited documentation suffices.
+    public void unregisterForOtaStatusChange(Handler h){
+        mCM.unregisterForOtaSessionStatus(h);
+    }
+
+    // Inherited documentation suffices.
+    public void registerCdmaInformationRecord(Handler h, int what, Object obj){
+        mCM.registerCdmaInformationRecord(h,what,obj);
+    }
+
+    // Inherited documentation suffices.
+    public void unregisterCdmaInformationRecord(Handler h){
+        mCM.unregisterCdmaInformationRecord(h);
+    }
+
+    // Inherited documentation suffices.
+    public void registerForCdmaCallWaiting(Handler h, int what, Object obj){
+        mCM.registerForCdmaCallWaiting(h,what,obj);
+    }
+
+    // Inherited documentation suffices.
+    public void unregisterForCdmaCallWaiting(Handler h){
+        mCM.unregisterForCdmaCallWaiting(h);
+    }
 
     /**
      * Notifiy registrants of a new ringing Connection.
@@ -567,9 +608,6 @@ public abstract class PhoneBase implements Phone {
         mCM.setPreferredNetworkType(networkType, response);
     }
 
-    /**
-     *  Set the status of the preferred Network Type: Global, CDMA only or GSM/UMTS only
-     */
     public void getPreferredNetworkType(Message response) {
         mCM.getPreferredNetworkType(response);
     }
@@ -582,12 +620,20 @@ public abstract class PhoneBase implements Phone {
         mCM.setSmscAddress(address, result);
     }
 
-    public void setTTYModeEnabled(boolean enable, Message onComplete) {
+    public void setTTYMode(int ttyMode, Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
     }
 
-    public void queryTTYModeEnabled(Message onComplete) {
+    public void queryTTYMode(Message onComplete) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    /**
+     *  Send the exit emergency callback mode message
+     */
+    public void exitEmergencyCallbackMode(Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
     }
@@ -637,5 +683,31 @@ public abstract class PhoneBase implements Phone {
     }
 
     public abstract String getPhoneName();
+
+    /**
+     * Returns the CDMA ERI icon index to display
+     */
+    public int getCdmaEriIconIndex() {
+        Log.e(LOG_TAG, "Error! getCdmaEriIconIndex should never be executed in GSM mode");
+        return -1;
+    }
+
+    /**
+     * Returns the CDMA ERI icon mode,
+     * 0 - ON
+     * 1 - FLASHING
+     */
+    public int getCdmaEriIconMode() {
+        Log.e(LOG_TAG, "Error! getCdmaEriIconMode should never be executed in GSM mode");
+        return -1;
+    }
+
+    /**
+     * Returns the CDMA ERI text,
+     */
+    public String getCdmaEriText() {
+        Log.e(LOG_TAG, "Error! getCdmaEriText should never be executed in GSM mode");
+        return "GSM nw, no ERI";
+    }
 
 }

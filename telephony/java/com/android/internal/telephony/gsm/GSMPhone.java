@@ -34,6 +34,7 @@ import android.provider.Telephony;
 import android.telephony.CellLocation;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -285,9 +286,8 @@ public class GSMPhone extends PhoneBase {
         return mDataConnection.getActiveApnString();
     }
 
-    public int
-    getSignalStrengthASU() {
-        return mSST.rssi == 99 ? -1 : mSST.rssi;
+    public SignalStrength getSignalStrength() {
+        return mSST.mSignalStrength;
     }
 
     public boolean
@@ -825,6 +825,11 @@ public class GSMPhone extends PhoneBase {
     }
 
     public void
+    sendBurstDtmf(String dtmfString) {
+        Log.e(LOG_TAG, "[GSMPhone] sendBurstDtmf() is a CDMA method");
+    }
+
+    public void
     setRadioPower(boolean power) {
         mSST.setRadioPower(power);
     }
@@ -870,6 +875,11 @@ public class GSMPhone extends PhoneBase {
         }
 
         return ret;
+    }
+
+    public String getMin() {
+        Log.e(LOG_TAG, "[GSMPhone] getMin() is a CDMA method");
+        return "0";
     }
 
     public String getDeviceId() {

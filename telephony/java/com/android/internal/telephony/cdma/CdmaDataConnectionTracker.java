@@ -44,6 +44,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.DataConnectionTracker;
@@ -97,6 +98,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private static final String INTENT_RECONNECT_ALARM =
             "com.android.internal.telephony.cdma-reconnect";
     private static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
+
+    /**
+     * Constants for the data connection activity:
+     * physical link down/up
+     */
+     private static final int DATA_CONNECTION_ACTIVE_PH_LINK_DOWN = 1;
+     private static final int DATA_CONNECTION_ACTIVE_PH_LINK_UP = 2;
 
     // Possibly promoate to base class, the only difference is
     // the INTENT_RECONNECT_ALARM action is a different string.
@@ -258,7 +266,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
-     * Simply tear down data connections due to radio off 
+     * Simply tear down data connections due to radio off
      * and don't setup again.
      */
     public void cleanConnectionBeforeRadioOff() {
@@ -515,7 +523,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
          * override it with an unconditional power on.
          */
     }
-    
+
     private Runnable mPollNetStat = new Runnable() {
 
         public void run() {
@@ -608,19 +616,19 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * Return true if data connection need to be setup after disconnected due to
      * reason.
-     * 
+     *
      * @param reason the reason why data is disconnected
-     * @return true if try setup data connection is need for this reason 
+     * @return true if try setup data connection is need for this reason
      */
     private boolean retryAfterDisconnected(String reason) {
         boolean retry = true;
-        
+
         if ( Phone.REASON_RADIO_TURNED_OFF.equals(reason) ||
-             Phone.REASON_DATA_DISABLED.equals(reason) ) { 
+             Phone.REASON_DATA_DISABLED.equals(reason) ) {
             retry = false;
         }
         return retry;
-    }   
+    }
 
     private void reconnectAfterFail(FailCause lastFailCauseCode, String reason) {
         if (state == State.FAILED) {
@@ -843,6 +851,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected void onDataStateChanged (AsyncResult ar) {
+        ArrayList<DataCallState> dataCallStates = (ArrayList<DataCallState>)(ar.result);
+
         if (ar.exception != null) {
             // This is probably "radio not available" or something
             // of that sort. If so, the whole connection is going
@@ -851,7 +861,14 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (state == State.CONNECTED) {
-            Log.i(LOG_TAG, "Data connection has changed.");
+            if (dataCallStates.get(0).active == DATA_CONNECTION_ACTIVE_PH_LINK_UP ) {
+                activity = Activity.NONE;
+                phone.notifyDataActivity();
+            } else if (dataCallStates.get(0).active == DATA_CONNECTION_ACTIVE_PH_LINK_DOWN ) {
+                activity = Activity.DORMANT;
+                phone.notifyDataActivity();
+            }
+        } else {
 
             int cid = -1;
             EventLog.List val = new EventLog.List(cid,

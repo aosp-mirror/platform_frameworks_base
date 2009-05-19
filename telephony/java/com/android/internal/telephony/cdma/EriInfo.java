@@ -1,0 +1,65 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.internal.telephony.cdma;
+
+public final class EriInfo {
+
+    public static final int ROAMING_INDICATOR_ON    = 0;
+    public static final int ROAMING_INDICATOR_OFF   = 1;
+    public static final int ROAMING_INDICATOR_FLASH = 2;
+
+    public static final int ROAMING_ICON_MODE_NORMAL    = 0;
+    public static final int ROAMING_ICON_MODE_FLASH     = 1;
+
+    /**
+     * TODO(Teleca): These strings appear to be used by the UI
+     * hence they must be changed to resources so they can be
+     * translated to the appropriate language.
+     */
+    public static final String ROAMING_TEXT_0  = "Roaming Indicator On";
+    public static final String ROAMING_TEXT_1  = "Roaming Indicator Off";
+    public static final String ROAMING_TEXT_2  = "Roaming Indicator Flashing";
+    public static final String ROAMING_TEXT_3  = "Out of Neighborhood";
+    public static final String ROAMING_TEXT_4  = "Out of Building";
+    public static final String ROAMING_TEXT_5  = "Roaming - Preferred System";
+    public static final String ROAMING_TEXT_6  = "Roaming - Available System";
+    public static final String ROAMING_TEXT_7  = "Roaming - Alliance Partner";
+    public static final String ROAMING_TEXT_8  = "Roaming - Premium Partner";
+    public static final String ROAMING_TEXT_9  = "Roaming - Full Service Functionality";
+    public static final String ROAMING_TEXT_10 = "Roaming - Partial Service Functionality";
+    public static final String ROAMING_TEXT_11 = "Roaming Banner On";
+    public static final String ROAMING_TEXT_12 = "Roaming Banner Off";
+
+    public static final String SEARCHING_TEXT  = "Searching for Svc.";
+
+
+    public int mRoamingIndicator;
+    public int mIconIndex;
+    public int mIconMode;
+    public String mEriText;
+    public int mCallPromptId;
+    public int mAlertId;
+
+    public EriInfo (int roamingIndicator, int iconIndex, int iconMode, String eriText,
+            int callPromptId, int alertId) {
+
+        this.mRoamingIndicator = roamingIndicator;
+        this.mIconIndex = iconIndex;
+        this.mIconMode = iconMode;
+        this.mEriText = eriText;
+        this.mCallPromptId = callPromptId;
+        this.mAlertId = alertId;
+    }
+}

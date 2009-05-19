@@ -49,13 +49,12 @@ public final class RuimRecords extends IccRecords {
     private static final boolean DBG = true;
 
     //***** Instance Variables
-    String imsi_m;
-    String mdn = null;  // My mobile number
-    String h_sid;
-    String h_nid;
-    String min2_min1;   // 10 digit MIN value MIN2+MIN1 NEWRIL:TODO currently unused
 
-    // is not initialized
+    private String mImsi;       // TODO(Teleca): to be checked, if this should be removed!
+    private String mMyMobileNumber;
+    private String mSid;        // TODO(Teleca): Unused should this be removed
+    private String mNid;        // TODO(Teleca): Unused should this be removed
+    private String mMin2Min1;
 
     //***** Event Constants
 
@@ -63,6 +62,7 @@ public final class RuimRecords extends IccRecords {
     private static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 2;
     private static final int EVENT_GET_DEVICE_IDENTITY_DONE = 4;
     private static final int EVENT_GET_ICCID_DONE = 5;
+    private static final int EVENT_NV_READY = 9;
     private static final int EVENT_GET_CDMA_SUBSCRIPTION_DONE = 10;
     private static final int EVENT_UPDATE_DONE = 14;
     private static final int EVENT_GET_SST_DONE = 17;
@@ -73,8 +73,6 @@ public final class RuimRecords extends IccRecords {
     private static final int EVENT_GET_SMS_DONE = 22;
 
     private static final int EVENT_RUIM_REFRESH = 31;
-
-    //***** Constructor
 
     RuimRecords(CDMAPhone p) {
         super(p);
@@ -88,6 +86,7 @@ public final class RuimRecords extends IccRecords {
 
 
         p.mCM.registerForRUIMReady(this, EVENT_RUIM_READY, null);
+        p.mCM.registerForNVReady(this, EVENT_NV_READY, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         // NOTE the EVENT_SMS_ON_RUIM is not registered
         p.mCM.setOnIccRefresh(this, EVENT_RUIM_REFRESH, null);
@@ -104,10 +103,12 @@ public final class RuimRecords extends IccRecords {
         phone.mCM.unSetOnIccRefresh(this);
     }
 
+    @Override
     protected void finalize() {
         if(DBG) Log.d(LOG_TAG, "RuimRecords finalized");
     }
 
+    @Override
     protected void onRadioOffOrNotAvailable() {
         countVoiceMessages = 0;
         mncLength = 0;
@@ -124,17 +125,20 @@ public final class RuimRecords extends IccRecords {
         recordsRequested = false;
     }
 
-    //***** Public Methods
-
     /** Returns null if RUIM is not yet ready */
     public String getIMSI_M() {
-        return imsi_m;
+        return mImsi;
     }
 
     public String getMdnNumber() {
-        return mdn;
+        return mMyMobileNumber;
     }
 
+    public String getMin() {
+         return mMin2Min1;
+    }
+
+    @Override
     public void setVoiceMailNumber(String alphaTag, String voiceNumber, Message onComplete){
         // In CDMA this is Operator/OEM dependent
         AsyncResult.forMessage((onComplete)).exception =
@@ -148,6 +152,7 @@ public final class RuimRecords extends IccRecords {
      * @param fileChanged indicates whether any files changed
      * @param fileList if non-null, a list of EF files that changed
      */
+    @Override
     public void onRefresh(boolean fileChanged, int[] fileList) {
         if (fileChanged) {
             // A future optimization would be to inspect fileList and
@@ -157,11 +162,12 @@ public final class RuimRecords extends IccRecords {
         }
     }
 
-    /** Returns the 5 or 6 digit MCC/MNC of the operator that
+    /** 
+     * Returns the 5 or 6 digit MCC/MNC of the operator that
      *  provided the RUIM card. Returns null of RUIM is not yet ready
      */
-    String getRUIMOperatorNumeric() {
-        if (imsi_m == null) {
+    public String getRUIMOperatorNumeric() {
+        if (mImsi == null) {
             return null;
         }
 
@@ -169,7 +175,7 @@ public final class RuimRecords extends IccRecords {
             // Length = length of MCC + length of MNC
             // TODO: change spec name
             // length of mcc = 3 (3GPP2 C.S0005 - Section 2.3)
-            return imsi_m.substring(0, 3 + mncLength);
+            return mImsi.substring(0, 3 + mncLength);
         }
 
         // Guess the MNC length based on the MCC if we don't
@@ -177,12 +183,12 @@ public final class RuimRecords extends IccRecords {
 
         int mcc;
 
-        mcc = Integer.parseInt(imsi_m.substring(0,3));
+        mcc = Integer.parseInt(mImsi.substring(0,3));
 
-        return imsi_m.substring(0, 3 + MccTable.smallestDigitsMccForMnc(mcc));
+        return mImsi.substring(0, 3 + MccTable.smallestDigitsMccForMnc(mcc));
     }
 
-    //***** Overridden from Handler
+    @Override
     public void handleMessage(Message msg) {
         AsyncResult ar;
 
@@ -194,7 +200,9 @@ public final class RuimRecords extends IccRecords {
             case EVENT_RUIM_READY:
                 onRuimReady();
             break;
-
+            case EVENT_NV_READY:
+                onNvReady();
+            break;
             case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:
                 onRadioOffOrNotAvailable();
             break;
@@ -212,14 +220,12 @@ public final class RuimRecords extends IccRecords {
                     break;
                 }
 
-                mdn    = localTemp[0];
-                h_sid  = localTemp[1];
-                h_nid  = localTemp[2];
-                if (localTemp.length >= 3) { // NEWRIL:TODO remove when new ril always returns min2_min1
-                    min2_min1 = localTemp[3];
-                }
+                mMyMobileNumber = localTemp[0];
+                mSid = localTemp[1];
+                mNid = localTemp[2];
+                mMin2Min1 = localTemp[3];
 
-                Log.d(LOG_TAG, "MDN: " + mdn);
+                Log.d(LOG_TAG, "MDN: " + mMyMobileNumber + " MIN: " + mMin2Min1);
 
             break;
 
@@ -277,6 +283,7 @@ public final class RuimRecords extends IccRecords {
         }
     }
 
+    @Override
     protected void onRecordLoaded() {
         // One record loaded successfully or failed, In either case
         // we need to update the recordsToLoad count
@@ -290,6 +297,7 @@ public final class RuimRecords extends IccRecords {
         }
     }
 
+    @Override
     protected void onAllRecordsLoaded() {
         Log.d(LOG_TAG, "RuimRecords: record load complete");
 
@@ -301,9 +309,6 @@ public final class RuimRecords extends IccRecords {
                 RuimCard.INTENT_VALUE_ICC_LOADED, null);
     }
 
-
-    //***** Private Methods
-
     private void onRuimReady() {
         /* broadcast intent ICC_READY here so that we can make sure
           READY is sent before IMSI ready
@@ -314,6 +319,11 @@ public final class RuimRecords extends IccRecords {
 
         fetchRuimRecords();
 
+        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
+
+    }
+
+    private void onNvReady() {
         phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
 
     }
@@ -391,9 +401,9 @@ public final class RuimRecords extends IccRecords {
         }
     }
 
+    @Override
     protected void log(String s) {
         Log.d(LOG_TAG, "[RuimRecords] " + s);
     }
 
 }
-

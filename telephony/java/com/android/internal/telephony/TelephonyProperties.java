@@ -44,6 +44,7 @@ public interface TelephonyProperties
      *  Availability: when registered to a network
      */
     static final String PROPERTY_OPERATOR_ALPHA = "gsm.operator.alpha";
+    //TODO: most of these proprieties are generic, substitute gsm. with phone. bug 1856959
 
     /** Numeric name (MCC+MNC) of current registered operator.
      *  Availability: when registered to a network

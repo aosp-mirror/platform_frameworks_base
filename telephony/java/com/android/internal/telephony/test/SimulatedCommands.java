@@ -26,8 +26,8 @@ import android.util.Log;
 import com.android.internal.telephony.BaseCommands;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.gsm.CallFailCause;
-import com.android.internal.telephony.gsm.PDPContextState;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.Phone;
 
@@ -59,7 +59,7 @@ public final class SimulatedCommands extends BaseCommands
     private final static String SIM_PUK2_CODE = "87654321";
 
     //***** Instance Variables
-    
+
     SimulatedGsmCallState simulatedCallState;
     HandlerThread mHandlerThread;
     SimLockState mSimLockedState;
@@ -79,7 +79,7 @@ public final class SimulatedCommands extends BaseCommands
     ArrayList<Message> pausedResponses = new ArrayList<Message>();
 
     int nextCallFailCause = CallFailCause.NORMAL_CLEARING;
-    
+
     //***** Constructor
 
     public
@@ -88,9 +88,9 @@ public final class SimulatedCommands extends BaseCommands
         mHandlerThread = new HandlerThread("SimulatedCommands");
         mHandlerThread.start();
         Looper looper = mHandlerThread.getLooper();
-        
+
         simulatedCallState = new SimulatedGsmCallState(looper);
-        
+
         setRadioState(RadioState.RADIO_OFF);
         mSimLockedState = INITIAL_LOCK_STATE;
         mSimLockEnabled = (mSimLockedState != SimLockState.NONE);
@@ -353,11 +353,11 @@ public final class SimulatedCommands extends BaseCommands
     public void
     setSuppServiceNotifications(boolean enable, Message result) {
         resultSuccess(result, null);
-        
+
         if (enable && mSsnNotifyOn) {
             Log.w(LOG_TAG, "Supp Service Notifications already enabled!");
         }
-        
+
         mSsnNotifyOn = enable;
     }
 
@@ -465,7 +465,7 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(result);
     }
 
-    /** 
+    /**
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
@@ -479,13 +479,13 @@ public final class SimulatedCommands extends BaseCommands
             resultSuccess(result, simulatedCallState.getDriverCalls());
         } else {
             //Log.i("GSM", "[SimCmds] getCurrentCalls: SIM not ready!");
-            resultFail(result, 
+            resultFail(result,
                 new CommandException(
                     CommandException.Error.RADIO_NOT_AVAILABLE));
         }
     }
 
-    /** 
+    /**
      *  @deprecated
      */
     public void getPDPContextList(Message result) {
@@ -497,13 +497,13 @@ public final class SimulatedCommands extends BaseCommands
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
-     *  ar.result contains a List of PDPContextState
+     *  ar.result contains a List of DataCallState
      */
     public void getDataCallList(Message result) {
-        resultSuccess(result, new ArrayList<PDPContextState>(0));
+        resultSuccess(result, new ArrayList<DataCallState>(0));
     }
 
-    /** 
+    /**
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
@@ -520,7 +520,7 @@ public final class SimulatedCommands extends BaseCommands
         resultSuccess(result, null);
     }
 
-    /** 
+    /**
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
@@ -531,7 +531,7 @@ public final class SimulatedCommands extends BaseCommands
         resultSuccess(result, "012345678901234");
     }
 
-    /** 
+    /**
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
@@ -542,7 +542,7 @@ public final class SimulatedCommands extends BaseCommands
         resultSuccess(result, "012345678901234");
     }
 
-    /** 
+    /**
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
@@ -553,7 +553,7 @@ public final class SimulatedCommands extends BaseCommands
         resultSuccess(result, "99");
     }
 
-    /** 
+    /**
      * Hang up one individual connection.
      *  returned message
      *  retMsg.obj = AsyncResult ar
@@ -566,7 +566,7 @@ public final class SimulatedCommands extends BaseCommands
      */
     public void hangupConnection (int gsmIndex, Message result) {
         boolean success;
-        
+
         success = simulatedCallState.onChld('1', (char)('0'+gsmIndex));
 
         if (!success){
@@ -588,7 +588,7 @@ public final class SimulatedCommands extends BaseCommands
      */
     public void hangupWaitingOrBackground (Message result) {
         boolean success;
-        
+
         success = simulatedCallState.onChld('0', '\0');
 
         if (!success){
@@ -600,7 +600,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      * 3GPP 22.030 6.5.5
-     * "Releases all active calls (if any exist) and accepts 
+     * "Releases all active calls (if any exist) and accepts
      *  the other (held or waiting) call."
      *
      *  ar.exception carries exception on failure
@@ -609,7 +609,7 @@ public final class SimulatedCommands extends BaseCommands
      */
     public void hangupForegroundResumeBackground (Message result) {
         boolean success;
-        
+
         success = simulatedCallState.onChld('1', '\0');
 
         if (!success){
@@ -621,7 +621,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      * 3GPP 22.030 6.5.5
-     * "Places all active calls (if any exist) on hold and accepts 
+     * "Places all active calls (if any exist) on hold and accepts
      *  the other (held or waiting) call."
      *
      *  ar.exception carries exception on failure
@@ -630,7 +630,7 @@ public final class SimulatedCommands extends BaseCommands
      */
     public void switchWaitingOrHoldingAndActive (Message result) {
         boolean success;
-        
+
         success = simulatedCallState.onChld('2', '\0');
 
         if (!success){
@@ -647,10 +647,10 @@ public final class SimulatedCommands extends BaseCommands
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
      *  ar.result is null on success and failure
-     */    
+     */
     public void conference (Message result) {
         boolean success;
-        
+
         success = simulatedCallState.onChld('3', '\0');
 
         if (!success){
@@ -682,7 +682,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      * 3GPP 22.030 6.5.5
-     * "Places all active calls on hold except call X with which 
+     * "Places all active calls on hold except call X with which
      *  communication shall be supported."
      */
     public void separateConnection (int gsmIndex, Message result) {
@@ -703,10 +703,10 @@ public final class SimulatedCommands extends BaseCommands
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
      *  ar.result is null on success and failure
-     */    
+     */
     public void acceptCall (Message result) {
         boolean success;
-        
+
         success = simulatedCallState.onAnswer();
 
         if (!success){
@@ -716,15 +716,15 @@ public final class SimulatedCommands extends BaseCommands
         }
     }
 
-    /** 
+    /**
      *  also known as UDUB
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
      *  ar.result is null on success and failure
-     */    
+     */
     public void rejectCall (Message result) {
         boolean success;
-        
+
         success = simulatedCallState.onChld('0', '\0');
 
         if (!success){
@@ -734,7 +734,7 @@ public final class SimulatedCommands extends BaseCommands
         }
     }
 
-    /** 
+    /**
      * cause code returned as Integer in Message.obj.response
      * Returns integer cause code defined in TS 24.008
      * Annex H or closest approximation.
@@ -765,11 +765,11 @@ public final class SimulatedCommands extends BaseCommands
 
     public void getMute (Message result) {unimplemented(result);}
 
-    /** 
+    /**
      * response.obj is an AsyncResult
      * response.obj.result is an int[2]
-     * response.obj.result[0] is received signal strength (0-31, 99) 
-     * response.obj.result[1] is  bit error rate (0-7, 99) 
+     * response.obj.result[0] is received signal strength (0-31, 99)
+     * response.obj.result[1] is  bit error rate (0-7, 99)
      * as defined in TS 27.007 8.5
      */
     public void getSignalStrength (Message result) {
@@ -893,7 +893,7 @@ public final class SimulatedCommands extends BaseCommands
      * response.obj.result[0] is long alpha or null if unregistered
      * response.obj.result[1] is short alpha or null if unregistered
      * response.obj.result[2] is numeric or null if unregistered
-     */ 
+     */
     public void getOperator(Message result) {
         String[] ret = new String[3];
 
@@ -908,7 +908,7 @@ public final class SimulatedCommands extends BaseCommands
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
      *  ar.result is null on success and failure
-     */    
+     */
     public void sendDtmf(char c, Message result) {
         resultSuccess(result, null);
     }
@@ -932,10 +932,19 @@ public final class SimulatedCommands extends BaseCommands
     }
 
     /**
+     *  ar.exception carries exception on failure
+     *  ar.userObject contains the orignal value of result.obj
+     *  ar.result is null on success and failure
+     */
+    public void sendBurstDtmf(String dtmfString, Message result) {
+        resultSuccess(result, null);
+    }
+
+    /**
      * smscPDU is smsc address in PDU form GSM BCD format prefixed
      *      by a length byte (as expected by TS 27.005) or NULL for default SMSC
      * pdu is SMS in PDU format as an ASCII hex string
-     *      less the SMSC address     
+     *      less the SMSC address
      */
     public void sendSMS (String smscPDU, String pdu, Message result) {unimplemented(result);}
 
@@ -1040,8 +1049,8 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(result);
     }
 
-    /** 
-     * parameters equivilient to 27.007 AT+CRSM command 
+    /**
+     * parameters equivilient to 27.007 AT+CRSM command
      * response.obj will be an AsyncResult
      * response.obj.userObj will be a SimIoResult on success
      */
@@ -1052,7 +1061,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      * (AsyncResult)response.obj).result is an int[] with element [0] set to
-     * 1 for "CLIP is provisioned", and 0 for "CLIP is not provisioned". 
+     * 1 for "CLIP is provisioned", and 0 for "CLIP is not provisioned".
      *
      * @param response is callback message
      */
@@ -1063,46 +1072,46 @@ public final class SimulatedCommands extends BaseCommands
      * response.obj will be a an int[2]
      *
      * response.obj[0] will be TS 27.007 +CLIR parameter 'n'
-     *  0 presentation indicator is used according to the subscription of the CLIR service 
-     *  1 CLIR invocation 
-     *  2 CLIR suppression 
+     *  0 presentation indicator is used according to the subscription of the CLIR service
+     *  1 CLIR invocation
+     *  2 CLIR suppression
      *
      * response.obj[1] will be TS 27.007 +CLIR parameter 'm'
-     *  0 CLIR not provisioned 
-     *  1 CLIR provisioned in permanent mode 
-     *  2 unknown (e.g. no network, etc.) 
-     *  3 CLIR temporary mode presentation restricted 
-     *  4 CLIR temporary mode presentation allowed 
+     *  0 CLIR not provisioned
+     *  1 CLIR provisioned in permanent mode
+     *  2 unknown (e.g. no network, etc.)
+     *  3 CLIR temporary mode presentation restricted
+     *  4 CLIR temporary mode presentation allowed
      */
 
     public void getCLIR(Message result) {unimplemented(result);}
-    
+
     /**
      * clirMode is one of the CLIR_* constants above
      *
      * response.obj is null
      */
-    
+
     public void setCLIR(int clirMode, Message result) {unimplemented(result);}
 
     /**
      * (AsyncResult)response.obj).result is an int[] with element [0] set to
-     * 0 for disabled, 1 for enabled. 
+     * 0 for disabled, 1 for enabled.
      *
      * @param serviceClass is a sum of SERVICE_CLASS_*
      * @param response is callback message
      */
-    
+
     public void queryCallWaiting(int serviceClass, Message response) {
         unimplemented(response);
     }
-    
+
     /**
      * @param enable is true to enable, false to disable
      * @param serviceClass is a sum of SERVICE_CLASS_*
      * @param response is callback message
      */
-    
+
     public void setCallWaiting(boolean enable, int serviceClass,
             Message response) {
         unimplemented(response);
@@ -1111,9 +1120,9 @@ public final class SimulatedCommands extends BaseCommands
     /**
      * @param action is one of CF_ACTION_*
      * @param cfReason is one of CF_REASON_*
-     * @param serviceClass is a sum of SERVICE_CLASSS_* 
+     * @param serviceClass is a sum of SERVICE_CLASSS_*
      */
-    public void setCallForward(int action, int cfReason, int serviceClass, 
+    public void setCallForward(int action, int cfReason, int serviceClass,
             String number, int timeSeconds, Message result) {unimplemented(result);}
 
     /**
@@ -1121,7 +1130,7 @@ public final class SimulatedCommands extends BaseCommands
      *
      * ((AsyncResult)response.obj).result will be an array of
      * CallForwardInfo's
-     * 
+     *
      * An array of length 0 means "disabled for all codes"
      */
     public void queryCallForwardStatus(int cfReason, int serviceClass,
@@ -1155,7 +1164,7 @@ public final class SimulatedCommands extends BaseCommands
     public void getAvailableNetworks(Message result) {unimplemented(result);}
 
     public void getBasebandVersion (Message result) {
-        resultSuccess(result, "SimulatedCommands"); 
+        resultSuccess(result, "SimulatedCommands");
     }
 
     /**
@@ -1167,7 +1176,7 @@ public final class SimulatedCommands extends BaseCommands
     public void triggerIncomingUssd(String statusCode, String message) {
         if (mUSSDRegistrant != null) {
             String[] result = {statusCode, message};
-            mUSSDRegistrant.notifyResult(result);            
+            mUSSDRegistrant.notifyResult(result);
         }
     }
 
@@ -1215,7 +1224,7 @@ public final class SimulatedCommands extends BaseCommands
 
     //***** SimulatedRadioControl
 
-    
+
     /** Start the simulated phone ringing */
     public void
     triggerRing(String number) {
@@ -1249,9 +1258,9 @@ public final class SimulatedCommands extends BaseCommands
         simulatedCallState.setNextDialFailImmediately(b);
     }
 
-    public void 
+    public void
     setNextCallFailCause(int gsmCause) {
-        nextCallFailCause = gsmCause;    
+        nextCallFailCause = gsmCause;
     }
 
     public void
@@ -1319,7 +1328,7 @@ public final class SimulatedCommands extends BaseCommands
 
     private void unimplemented(Message result) {
         if (result != null) {
-            AsyncResult.forMessage(result).exception 
+            AsyncResult.forMessage(result).exception
                 = new RuntimeException("Unimplemented");
 
             if (pausedResponseCount > 0) {
@@ -1359,13 +1368,13 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(response);
     }
 
-    public void 
+    public void
     getCDMASubscription(Message response) {
         Log.w(LOG_TAG, "CDMA not implemented in SimulatedCommands");
         unimplemented(response);
     }
 
-    public void 
+    public void
     setCdmaSubscription(int cdmaSubscriptionType, Message response) {
         Log.w(LOG_TAG, "CDMA not implemented in SimulatedCommands");
         unimplemented(response);
@@ -1403,7 +1412,7 @@ public final class SimulatedCommands extends BaseCommands
      * @param serviceClass is a sum of SERVICE_CLASS_*
      * @param response is callback message
      */
-    public void setTTYModeEnabled(boolean enable, Message response) {
+    public void setTTYMode(int ttyMode, Message response) {
         Log.w(LOG_TAG, "CDMA not implemented in SimulatedCommands");
         unimplemented(response);
     }
@@ -1411,12 +1420,12 @@ public final class SimulatedCommands extends BaseCommands
     /**
      *  Query the TTY mode for the CDMA phone
      * (AsyncResult)response.obj).result is an int[] with element [0] set to
-     * 0 for disabled, 1 for enabled. 
-     *  
+     * 0 for disabled, 1 for enabled.
+     *
      * @param serviceClass is a sum of SERVICE_CLASS_*
      * @param response is callback message
      */
-    public void queryTTYModeEnabled(Message response) {
+    public void queryTTYMode(Message response) {
         Log.w(LOG_TAG, "CDMA not implemented in SimulatedCommands");
         unimplemented(response);
     }
@@ -1451,4 +1460,11 @@ public final class SimulatedCommands extends BaseCommands
 
     }
 
+    public void exitEmergencyCallbackMode(Message response) {
+        // TODO method stub
+    }
+
+    public void forceDataDormancy(Message response) {
+        // TODO method stub
+    }
 }

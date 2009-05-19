@@ -84,7 +84,7 @@ public class CdmaConnection extends Connection {
     static final int EVENT_PAUSE_DONE = 2;
     static final int EVENT_NEXT_POST_DIAL = 3;
     static final int EVENT_WAKE_LOCK_TIMEOUT = 4;
-    
+
     //***** Constants
     static final int PAUSE_DELAY_FIRST_MILLIS = 100;
     static final int PAUSE_DELAY_MILLIS = 3 * 1000;
@@ -139,7 +139,7 @@ public class CdmaConnection extends Connection {
     CdmaConnection (Context context, String dialString, CdmaCallTracker ct, CdmaCall parent) {
         createWakeLock(context);
         acquireWakeLock();
-		
+
         owner = ct;
         h = new MyHandler(owner.getLooper());
 
@@ -344,6 +344,32 @@ public class CdmaConnection extends Connection {
         switch (causeCode) {
             case CallFailCause.USER_BUSY:
                 return DisconnectCause.BUSY;
+            case CallFailCause.NO_CIRCUIT_AVAIL:
+                return DisconnectCause.CONGESTION;
+            case CallFailCause.ACM_LIMIT_EXCEEDED:
+                return DisconnectCause.LIMIT_EXCEEDED;
+            case CallFailCause.CALL_BARRED:
+                return DisconnectCause.CALL_BARRED;
+            case CallFailCause.FDN_BLOCKED:
+                return DisconnectCause.FDN_BLOCKED;
+            case CallFailCause.CDMA_LOCKED_UNTIL_POWER_CYCLE:
+                return DisconnectCause.CDMA_LOCKED_UNTIL_POWER_CYCLE;
+            case CallFailCause.CDMA_DROP:
+                return DisconnectCause.CDMA_DROP;
+            case CallFailCause.CDMA_INTERCEPT:
+                return DisconnectCause.CDMA_INTERCEPT;
+            case CallFailCause.CDMA_REORDER:
+                return DisconnectCause.CDMA_REORDER;
+            case CallFailCause.CDMA_SO_REJECT:
+                return DisconnectCause.CDMA_SO_REJECT;
+            case CallFailCause.CDMA_RETRY_ORDER:
+                return DisconnectCause.CDMA_RETRY_ORDER;
+            case CallFailCause.CDMA_ACCESS_FAILURE:
+                return DisconnectCause.CDMA_ACCESS_FAILURE;
+            case CallFailCause.CDMA_PREEMPTED:
+                return DisconnectCause.CDMA_PREEMPTED;
+            case CallFailCause.CDMA_NOT_EMERGENCY:
+                return DisconnectCause.CDMA_NOT_EMERGENCY;
             case CallFailCause.ERROR_UNSPECIFIED:
             case CallFailCause.NORMAL_CLEARING:
             default:
@@ -352,7 +378,7 @@ public class CdmaConnection extends Connection {
                 if (serviceState == ServiceState.STATE_POWER_OFF) {
                     return DisconnectCause.POWER_OFF;
                 } else if (serviceState == ServiceState.STATE_OUT_OF_SERVICE
-                        || serviceState == ServiceState.STATE_EMERGENCY_ONLY ) {
+                        || serviceState == ServiceState.STATE_EMERGENCY_ONLY) {
                     return DisconnectCause.OUT_OF_SERVICE;
                 } else if (phone.mCM.getRadioState() != CommandsInterface.RadioState.NV_READY
                         && phone.getIccCard().getState() != RuimCard.State.READY) {
@@ -549,7 +575,7 @@ public class CdmaConnection extends Connection {
 
         return postDialString.substring(nextPostDialChar);
     }
-    
+
     @Override
     protected void finalize()
     {
@@ -583,7 +609,7 @@ public class CdmaConnection extends Connection {
             c = 0;
         } else {
             boolean isValid;
-            
+
             setPostDialState(PostDialState.STARTED);
 
             c = postDialString.charAt(nextPostDialChar++);
@@ -653,31 +679,31 @@ public class CdmaConnection extends Connection {
     }
 
     /**
-     * Set post dial state and acquire wake lock while switching to "started" 
-     * state, the wake lock will be released if state switches out of "started" 
-     * state or after WAKE_LOCK_TIMEOUT_MILLIS. 
+     * Set post dial state and acquire wake lock while switching to "started"
+     * state, the wake lock will be released if state switches out of "started"
+     * state or after WAKE_LOCK_TIMEOUT_MILLIS.
      * @param s new PostDialState
      */
     private void setPostDialState(PostDialState s) {
-        if (postDialState != PostDialState.STARTED 
+        if (postDialState != PostDialState.STARTED
                 && s == PostDialState.STARTED) {
             acquireWakeLock();
             Message msg = h.obtainMessage(EVENT_WAKE_LOCK_TIMEOUT);
             h.sendMessageDelayed(msg, WAKE_LOCK_TIMEOUT_MILLIS);
-        } else if (postDialState == PostDialState.STARTED 
+        } else if (postDialState == PostDialState.STARTED
                 && s != PostDialState.STARTED) {
             h.removeMessages(EVENT_WAKE_LOCK_TIMEOUT);
             releaseWakeLock();
         }
         postDialState = s;
     }
-    
+
     private void
     createWakeLock(Context context) {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG);
     }
-    
+
     private void
     acquireWakeLock() {
         log("acquireWakeLock");
@@ -693,7 +719,7 @@ public class CdmaConnection extends Connection {
             }
         }
     }
-    
+
     private void log(String msg) {
         Log.d(LOG_TAG, "[CDMAConn] " + msg);
     }

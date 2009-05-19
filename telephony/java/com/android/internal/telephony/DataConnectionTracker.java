@@ -63,7 +63,8 @@ public abstract class DataConnectionTracker extends Handler {
         NONE,
         DATAIN,
         DATAOUT,
-        DATAINANDOUT
+        DATAINANDOUT,
+        DORMANT
     }
 
     //***** Event Codes

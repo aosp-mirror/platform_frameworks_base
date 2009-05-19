@@ -110,7 +110,10 @@
         <item><xliff:g id="id">alarm_clock</xliff:g></item>
         <item><xliff:g id="id">battery</xliff:g></item>
         <item><xliff:g id="id">phone_signal</xliff:g></item>
+        <item><xliff:g id="id">phone_evdo_signal</xliff:g></item>
         <item><xliff:g id="id">data_connection</xliff:g></item>
+        <item><xliff:g id="id">cdma_eri</xliff:g></item>
+        <item><xliff:g id="id">tty</xliff:g></item>
         <item><xliff:g id="id">volume</xliff:g></item>
         <item><xliff:g id="id">mute</xliff:g></item>
         <item><xliff:g id="id">speakerphone</xliff:g></item>

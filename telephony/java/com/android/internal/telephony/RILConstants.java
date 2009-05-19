@@ -16,6 +16,13 @@
 
 package com.android.internal.telephony;
 
+/**
+ * TODO: This should probably not be an interface see
+ * http://www.javaworld.com/javaworld/javaqa/2001-06/01-qa-0608-constants.html and google with
+ * http://www.google.com/search?q=interface+constants&ie=utf-8&oe=utf-8&aq=t&rls=com.ubuntu:en-US:unofficial&client=firefox-a
+ *
+ * Also they should all probably be static final.
+ */
 
 /**
  * {@hide}
@@ -51,7 +58,7 @@ public interface RILConstants {
     int NETWORK_MODE_EVDO_NO_CDMA   = 6; /* EvDo only */
     int NETWORK_MODE_GLOBAL         = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)
                                             AVAILABLE Application Settings menu*/
-    int PREFERRED_NETWORK_MODE      = NETWORK_MODE_GSM_ONLY;
+    int PREFERRED_NETWORK_MODE      = NETWORK_MODE_WCDMA_PREF;
 
     /* CDMA subscription source. See ril.h RIL_REQUEST_CDMA_SET_SUBSCRIPTION */
     int SUBSCRIPTION_FROM_RUIM      = 0; /* CDMA subscription from RUIM when available */
@@ -66,6 +73,10 @@ public interface RILConstants {
 
     int CDM_TTY_MODE_DISABLED = 0;
     int CDM_TTY_MODE_ENABLED = 1;
+
+    int CDM_TTY_FULL_MODE = 1;
+    int CDM_TTY_HCO_MODE = 2;
+    int CDM_TTY_VCO_MODE = 3;
 
     byte CDMA_VOICE_PRIVACY = 0x70;           /* "p" value used in Ril_Call.isVoice if Privacy
                                                  is active  */
@@ -208,6 +219,7 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM = 96;
     int RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM = 97;
     int RIL_REQUEST_DEVICE_IDENTITY = 98;
+    int RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE = 99;
     int RIL_REQUEST_GET_SMSC_ADDRESS = 100;
     int RIL_REQUEST_SET_SMSC_ADDRESS = 101;
     int RIL_UNSOL_RESPONSE_BASE = 1000;

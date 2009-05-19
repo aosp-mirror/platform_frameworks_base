@@ -67,8 +67,8 @@ public abstract class CellLocation {
 
         // NOTE here TelephonyManager.getDefault().getPhoneType() cannot be used since at startup
         //      ITelephony have not been created
-        if (RILConstants.CDMA_PHONE ==
-                SystemProperties.getInt(Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.GSM_PHONE)) {
+        if (RILConstants.CDMA_PHONE == SystemProperties.getInt(
+                Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.CDMA_PHONE)) {
             return new CdmaCellLocation(bundle);
         } else {
             return new GsmCellLocation(bundle);
@@ -90,12 +90,11 @@ public abstract class CellLocation {
 
         // NOTE here TelephonyManager.getDefault().getPhoneType() cannot be used since at startup
         //      ITelephony have not been created
-        if (RILConstants.CDMA_PHONE ==
-                SystemProperties.getInt(Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.GSM_PHONE)) {
+        if (RILConstants.CDMA_PHONE == SystemProperties.getInt(
+                Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.CDMA_PHONE)) {
             return new CdmaCellLocation();
         } else {
             return new GsmCellLocation();
         }
     }
-
 }

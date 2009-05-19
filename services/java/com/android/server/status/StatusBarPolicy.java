@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -57,6 +58,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.cdma.EriInfo;
 import com.android.internal.telephony.cdma.TtyIntent;
 import com.android.server.am.BatteryStatsService;
 
@@ -106,45 +108,140 @@ public class StatusBarPolicy {
     // phone
     private TelephonyManager mPhone;
     private IBinder mPhoneIcon;
+    private IBinder mPhoneEvdoIcon;
 
     //***** Signal strength icons
     private IconData mPhoneData;
+    private IconData mPhoneEvdoData;
     //GSM/UMTS
     private static final int[] sSignalImages = new int[] {
-            com.android.internal.R.drawable.stat_sys_signal_0,
-            com.android.internal.R.drawable.stat_sys_signal_1,
-            com.android.internal.R.drawable.stat_sys_signal_2,
-            com.android.internal.R.drawable.stat_sys_signal_3,
-            com.android.internal.R.drawable.stat_sys_signal_4
-        };
+        com.android.internal.R.drawable.stat_sys_signal_0,
+        com.android.internal.R.drawable.stat_sys_signal_1,
+        com.android.internal.R.drawable.stat_sys_signal_2,
+        com.android.internal.R.drawable.stat_sys_signal_3,
+        com.android.internal.R.drawable.stat_sys_signal_4
+    };
     private static final int[] sSignalImages_r = new int[] {
-            com.android.internal.R.drawable.stat_sys_r_signal_0,
-            com.android.internal.R.drawable.stat_sys_r_signal_1,
-            com.android.internal.R.drawable.stat_sys_r_signal_2,
-            com.android.internal.R.drawable.stat_sys_r_signal_3,
-            com.android.internal.R.drawable.stat_sys_r_signal_4
-        };
+        com.android.internal.R.drawable.stat_sys_r_signal_0,
+        com.android.internal.R.drawable.stat_sys_r_signal_1,
+        com.android.internal.R.drawable.stat_sys_r_signal_2,
+        com.android.internal.R.drawable.stat_sys_r_signal_3,
+        com.android.internal.R.drawable.stat_sys_r_signal_4
+    };
     //CDMA
     private static final int[] sSignalImages_cdma = new int[] {
-        com.android.internal.R.drawable.stat_sys_signal_0_cdma,
-        com.android.internal.R.drawable.stat_sys_signal_1_cdma,
-        com.android.internal.R.drawable.stat_sys_signal_2_cdma,
-        com.android.internal.R.drawable.stat_sys_signal_3_cdma,
-        com.android.internal.R.drawable.stat_sys_signal_4_cdma
+        com.android.internal.R.drawable.stat_sys_signal_cdma_0,
+        com.android.internal.R.drawable.stat_sys_signal_cdma_1,
+        com.android.internal.R.drawable.stat_sys_signal_cdma_2,
+        com.android.internal.R.drawable.stat_sys_signal_cdma_3,
+        com.android.internal.R.drawable.stat_sys_signal_cdma_4
     };
-    private static final int[] sSignalImages_r_cdma = new int[] {
-        com.android.internal.R.drawable.stat_sys_r_signal_0_cdma,
-        com.android.internal.R.drawable.stat_sys_r_signal_1_cdma,
-        com.android.internal.R.drawable.stat_sys_r_signal_2_cdma,
-        com.android.internal.R.drawable.stat_sys_r_signal_3_cdma,
-        com.android.internal.R.drawable.stat_sys_r_signal_4_cdma
+    private static final int[] sRoamingIndicatorImages_cdma = new int[] {
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0, //Standard Roaming Indicator
+        // 1 is Standard Roaming Indicator OFF
+        // TODO T: image never used, remove and put 0 instead?
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+
+        // 2 is Standard Roaming Indicator FLASHING
+        // TODO T: image never used, remove and put 0 instead?
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+
+        // 3-12 Standard ERI
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0, //3
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+
+        // 13-63 Reserved for Standard ERI
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0, //13
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+
+        // 64-127 Reserved for Non Standard (Operator Specific) ERI
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0, //64
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0,
+        com.android.internal.R.drawable.stat_sys_roaming_cdma_0 //83
+
+        // 128-255 Reserved
     };
-    private static final int[] sSignalImages_ra_cdma = new int[] {
-        com.android.internal.R.drawable.stat_sys_ra_signal_0_cdma,
-        com.android.internal.R.drawable.stat_sys_ra_signal_1_cdma,
-        com.android.internal.R.drawable.stat_sys_ra_signal_2_cdma,
-        com.android.internal.R.drawable.stat_sys_ra_signal_3_cdma,
-        com.android.internal.R.drawable.stat_sys_ra_signal_4_cdma
+    // EVDO
+    private static final int[] sSignalImages_evdo = new int[] {
+        com.android.internal.R.drawable.stat_sys_signal_evdo_0,
+        com.android.internal.R.drawable.stat_sys_signal_evdo_1,
+        com.android.internal.R.drawable.stat_sys_signal_evdo_2,
+        com.android.internal.R.drawable.stat_sys_signal_evdo_3,
+        com.android.internal.R.drawable.stat_sys_signal_evdo_4
     };
 
     //***** Data connection icons
@@ -174,12 +271,14 @@ public class StatusBarPolicy {
         com.android.internal.R.drawable.stat_sys_data_in_evdo,
         com.android.internal.R.drawable.stat_sys_data_out_evdo,
         com.android.internal.R.drawable.stat_sys_data_inandout_evdo,
+        com.android.internal.R.drawable.stat_sys_data_dormant_evdo,
     };
     private static final int[] sDataNetType_1xrtt = new int[] {
         com.android.internal.R.drawable.stat_sys_data_connected_1xrtt,
         com.android.internal.R.drawable.stat_sys_data_in_1xrtt,
         com.android.internal.R.drawable.stat_sys_data_out_1xrtt,
         com.android.internal.R.drawable.stat_sys_data_inandout_1xrtt,
+        com.android.internal.R.drawable.stat_sys_data_dormant_1xrtt,
     };
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
@@ -189,7 +288,7 @@ public class StatusBarPolicy {
     int mDataState = TelephonyManager.DATA_DISCONNECTED;
     int mDataActivity = TelephonyManager.DATA_ACTIVITY_NONE;
     ServiceState mServiceState;
-    int mSignalAsu = -1;
+    SignalStrength mSignalStrength;
 
     // data connection
     private IBinder mDataIcon;
@@ -243,6 +342,10 @@ public class StatusBarPolicy {
     // Icon lit when TTY mode is enabled
     private IBinder mTTYModeIcon;
     private IconData mTTYModeEnableIconData;
+
+    // Cdma Roaming Indicator, ERI
+    private IBinder mCdmaRoamingIndicatorIcon;
+    private IconData mCdmaRoamingIndicatorIconData;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -304,6 +407,7 @@ public class StatusBarPolicy {
     private StatusBarPolicy(Context context, StatusBarService service) {
         mContext = context;
         mService = service;
+        mSignalStrength = new SignalStrength();
         mBatteryStats = BatteryStatsService.getService();
 
         // clock
@@ -319,14 +423,21 @@ public class StatusBarPolicy {
 
         // phone_signal
         mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-        mPhoneData = IconData.makeIcon("phone_signal", 
+        mPhoneData = IconData.makeIcon("phone_signal",
                 null, com.android.internal.R.drawable.stat_sys_signal_null, 0, 0);
         mPhoneIcon = service.addIcon(mPhoneData, null);
+
+        // phone_evdo_signal
+        mPhoneEvdoData = IconData.makeIcon("phone_evdo_signal",
+                null, com.android.internal.R.drawable.stat_sys_signal_evdo_0, 0, 0);
+        mPhoneEvdoIcon = service.addIcon(mPhoneEvdoData, null);
+        service.setIconVisibility(mPhoneEvdoIcon, false);
+
         // register for phone state notifications.
         ((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
                 .listen(mPhoneStateListener,
                           PhoneStateListener.LISTEN_SERVICE_STATE
-                        | PhoneStateListener.LISTEN_SIGNAL_STRENGTH
+                        | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
                         | PhoneStateListener.LISTEN_CALL_STATE
                         | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
                         | PhoneStateListener.LISTEN_DATA_ACTIVITY);
@@ -348,6 +459,12 @@ public class StatusBarPolicy {
                 null, com.android.internal.R.drawable.stat_sys_tty_mode, 0, 0);
         mTTYModeIcon = service.addIcon(mTTYModeEnableIconData, null);
         service.setIconVisibility(mTTYModeIcon, false);
+
+        // Cdma Roaming Indicator, ERI
+        mCdmaRoamingIndicatorIconData = IconData.makeIcon("cdma_eri",
+                null, com.android.internal.R.drawable.stat_sys_roaming_cdma_0, 0, 0);
+        mCdmaRoamingIndicatorIcon = service.addIcon(mCdmaRoamingIndicatorIconData, null);
+        service.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
 
         // bluetooth status
         mBluetoothData = IconData.makeIcon("bluetooth",
@@ -645,8 +762,8 @@ public class StatusBarPolicy {
 
     private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
-        public void onSignalStrengthChanged(int asu) {
-            mSignalAsu = asu;
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+            mSignalStrength = signalStrength;
             updateSignalStrength();
         }
 
@@ -654,6 +771,7 @@ public class StatusBarPolicy {
         public void onServiceStateChanged(ServiceState state) {
             mServiceState = state;
             updateSignalStrength();
+            updateCdmaRoamingIcon();
             updateDataIcon();
         }
 
@@ -675,7 +793,6 @@ public class StatusBarPolicy {
             updateDataIcon();
         }
     };
-    
 
     private final void updateSimState(Intent intent) {
         String stateExtra = intent.getStringExtra(IccCard.INTENT_KEY_ICC_STATE);
@@ -702,25 +819,51 @@ public class StatusBarPolicy {
         updateDataIcon();
     }
 
-    private final void updateSignalStrength() {
-        int asu = mSignalAsu;
-        ServiceState ss = mServiceState;
+    // TODO(Teleca): I've add isCdma() to reduce some code duplication and simplify.
+    //               Please validate the correctness of these changes
+    private boolean isCdma() {
+        // Is this equivalent, if so it seems simpler?
+//        return ((mPhone != null) && (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA));
 
-        boolean hasService = true;
-        
-        if (ss != null) {
-            int state = ss.getState();
-            switch (state) {
-                case ServiceState.STATE_OUT_OF_SERVICE:
-                case ServiceState.STATE_POWER_OFF:
-                    hasService = false;
-                    break;
+        if (mServiceState != null) {
+            switch(mServiceState.getRadioTechnology()) {
+                case ServiceState.RADIO_TECHNOLOGY_1xRTT:
+                case ServiceState.RADIO_TECHNOLOGY_EVDO_0:
+                case ServiceState.RADIO_TECHNOLOGY_EVDO_A:
+                case ServiceState.RADIO_TECHNOLOGY_IS95A:
+                case ServiceState.RADIO_TECHNOLOGY_IS95B:
+                  return true;
+                default:
+                  return false;
             }
         } else {
-            hasService = false;
+            return false;
         }
+    }
 
-        if (!hasService) {
+    // TODO(Teleca): I've add hasService() to reduce some code duplication and simplify.
+    //               Please validate the correctness of these changes.
+    private boolean hasService() {
+        if (mServiceState != null) {
+            switch (mServiceState.getState()) {
+                case ServiceState.STATE_OUT_OF_SERVICE:
+                case ServiceState.STATE_POWER_OFF:
+                    return false;
+                default:
+                    return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private final void updateSignalStrength() {
+        int iconLevel = -1;
+        int evdoIconLevel = -1;
+        int[] iconList;
+        int[] evdoIconList;
+
+        if (!hasService()) {
             //Log.d(TAG, "updateSignalStrength: no service");
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
@@ -729,48 +872,92 @@ public class StatusBarPolicy {
                 mPhoneData.iconId = com.android.internal.R.drawable.stat_sys_signal_null;
             }
             mService.updateIcon(mPhoneIcon, mPhoneData, null);
+            mService.setIconVisibility(mPhoneEvdoIcon,false);
             return;
         }
 
-        // ASU ranges from 0 to 31 - TS 27.007 Sec 8.5
-        // asu = 0 (-113dB or less) is very weak
-        // signal, its better to show 0 bars to the user in such cases.
-        // asu = 99 is a special case, where the signal strength is unknown.
-        if (asu <= 0 || asu == 99) asu = 0;
-        else if (asu >= 16) asu = 4;
-        else if (asu >= 8)  asu = 3;
-        else if (asu >= 4)  asu = 2;
-        else asu = 1;
+        if (!isCdma()) {
+            int asu = mSignalStrength.getGsmSignalStrength();
 
-        int[] iconList;
-        if (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
-            switch(ss.getExtendedCdmaRoaming()) {
-            case ServiceState.REGISTRATION_STATE_ROAMING:
-                iconList = this.sSignalImages_r_cdma;
-                break;
-            case ServiceState.REGISTRATION_STATE_ROAMING_AFFILIATE:
-                iconList = this.sSignalImages_ra_cdma;
-                break;
-            default:
-                iconList = this.sSignalImages_cdma;
-            break;
+            // ASU ranges from 0 to 31 - TS 27.007 Sec 8.5
+            // asu = 0 (-113dB or less) is very weak
+            // signal, its better to show 0 bars to the user in such cases.
+            // asu = 99 is a special case, where the signal strength is unknown.
+            if (asu <= 0 || asu == 99) iconLevel = 0;
+            else if (asu >= 16) iconLevel = 4;
+            else if (asu >= 8)  iconLevel = 3;
+            else if (asu >= 4)  iconLevel = 2;
+            else iconLevel = 1;
+
+            if (mPhone.isNetworkRoaming()) {
+                iconList = sSignalImages_r;
+            } else {
+                iconList = sSignalImages;
             }
-        } else if (mPhone.isNetworkRoaming()) {
-            iconList = sSignalImages_r;
         } else {
-            iconList = sSignalImages;
+            iconList = this.sSignalImages_cdma;
+
+            int cdmaDbm = mSignalStrength.getCdmaDbm();
+            int cdmaEcio = mSignalStrength.getCdmaEcio();
+            int levelDbm = 0;
+            int levelEcio = 0;
+
+            if (cdmaDbm >= -75) levelDbm = 4;
+            else if (cdmaDbm >= -85) levelDbm = 3;
+            else if (cdmaDbm >= -95) levelDbm = 2;
+            else if (cdmaDbm >= -100) levelDbm = 1;
+            else levelDbm = 0;
+
+            // Ec/Io are in dB*10
+            if (cdmaEcio >= -90) levelEcio = 4;
+            else if (cdmaEcio >= -110) levelEcio = 3;
+            else if (cdmaEcio >= -130) levelEcio = 2;
+            else if (cdmaEcio >= -150) levelEcio = 1;
+            else levelEcio = 0;
+
+            iconLevel = (levelDbm < levelEcio) ? levelDbm : levelEcio;
         }
 
-        mPhoneData.iconId = iconList[asu];
+        if ((mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
+                  || (mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_A)) {
+            // Use Evdo icon
+            evdoIconList = this.sSignalImages_evdo;
+
+            int evdoEcio = mSignalStrength.getEvdoEcio();
+            int evdoSnr = mSignalStrength.getEvdoSnr();
+            int levelEvdoEcio = 0;
+            int levelEvdoSnr = 0;
+
+            // Ec/Io are in dB*10
+            if (evdoEcio >= -650) levelEvdoEcio = 4;
+            else if (evdoEcio >= -750) levelEvdoEcio = 3;
+            else if (evdoEcio >= -900) levelEvdoEcio = 2;
+            else if (evdoEcio >= -1050) levelEvdoEcio = 1;
+            else levelEvdoEcio = 0;
+
+            if (evdoSnr > 7) levelEvdoSnr = 4;
+            else if (evdoSnr > 5) levelEvdoSnr = 3;
+            else if (evdoSnr > 3) levelEvdoSnr = 2;
+            else if (evdoSnr > 1) levelEvdoSnr = 1;
+            else levelEvdoSnr = 0;
+
+            evdoIconLevel = (levelEvdoEcio < levelEvdoSnr) ? levelEvdoEcio : levelEvdoSnr;
+
+            mPhoneEvdoData.iconId = evdoIconList[evdoIconLevel];
+            mService.updateIcon(mPhoneEvdoIcon, mPhoneEvdoData, null);
+            mService.setIconVisibility(mPhoneEvdoIcon,true);
+        } else {
+            mService.setIconVisibility(mPhoneEvdoIcon,false);
+        }
+
+        mPhoneData.iconId = iconList[iconLevel];
         mService.updateIcon(mPhoneIcon, mPhoneData, null);
     }
 
     private final void updateDataNetType() {
         int net = mPhone.getNetworkType();
-        ServiceState ss = this.mServiceState;
 
         switch (net) {
-
         case TelephonyManager.NETWORK_TYPE_EDGE:
             mDataIconList = sDataNetType_e;
             break;
@@ -798,32 +985,51 @@ public class StatusBarPolicy {
         int iconId;
         boolean visible = true;
 
-        if (mSimState == IccCard.State.READY || mSimState == IccCard.State.UNKNOWN) {
-            int data = mDataState;
-
-            int[] list = mDataIconList;
-
-            ServiceState ss = mServiceState;
-
-            boolean hasService = false;
-
-            if (ss != null) {
-                hasService = (ss.getState() == ServiceState.STATE_IN_SERVICE);
+        if (!isCdma()) {
+            // GSM case, we have to check also the sim state
+            if (mSimState == IccCard.State.READY || mSimState == IccCard.State.UNKNOWN) {
+                if (hasService() && mDataState == TelephonyManager.DATA_CONNECTED) {
+                    switch (mDataActivity) {
+                        case TelephonyManager.DATA_ACTIVITY_IN:
+                            iconId = mDataIconList[1];
+                            break;
+                        case TelephonyManager.DATA_ACTIVITY_OUT:
+                            iconId = mDataIconList[2];
+                            break;
+                        case TelephonyManager.DATA_ACTIVITY_INOUT:
+                            iconId = mDataIconList[3];
+                            break;
+                        default:
+                            iconId = mDataIconList[0];
+                            break;
+                    }
+                    mDataData.iconId = iconId;
+                    mService.updateIcon(mDataIcon, mDataData, null);
+                } else {
+                    visible = false;
+                }
+            } else {
+                mDataData.iconId = com.android.internal.R.drawable.stat_sys_no_sim;
+                mService.updateIcon(mDataIcon, mDataData, null);
             }
-
-            if (hasService && data == TelephonyManager.DATA_CONNECTED) {
+        } else {
+            // CDMA case, mDataActivity can be also DATA_ACTIVITY_DORMANT
+            if (hasService() && mDataState == TelephonyManager.DATA_CONNECTED) {
                 switch (mDataActivity) {
                     case TelephonyManager.DATA_ACTIVITY_IN:
-                        iconId = list[1];
+                        iconId = mDataIconList[1];
                         break;
                     case TelephonyManager.DATA_ACTIVITY_OUT:
-                        iconId = list[2];
+                        iconId = mDataIconList[2];
                         break;
                     case TelephonyManager.DATA_ACTIVITY_INOUT:
-                        iconId = list[3];
+                        iconId = mDataIconList[3];
+                        break;
+                    case TelephonyManager.DATA_ACTIVITY_DORMANT:
+                        iconId = mDataIconList[4];
                         break;
                     default:
-                        iconId = list[0];
+                        iconId = mDataIconList[0];
                         break;
                 }
                 mDataData.iconId = iconId;
@@ -831,10 +1037,8 @@ public class StatusBarPolicy {
             } else {
                 visible = false;
             }
-        } else {
-            mDataData.iconId = com.android.internal.R.drawable.stat_sys_no_sim;
-            mService.updateIcon(mDataIcon, mDataData, null);
         }
+
         long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.notePhoneDataConnectionState(mPhone.getNetworkType(), visible);
@@ -842,6 +1046,7 @@ public class StatusBarPolicy {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+
         if (mDataIconVisible != visible) {
             mService.setIconVisibility(mDataIcon, visible);
             mDataIconVisible = visible;
@@ -852,7 +1057,7 @@ public class StatusBarPolicy {
         AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         final int ringerMode = audioManager.getRingerMode();
         final boolean visible = ringerMode == AudioManager.RINGER_MODE_SILENT ||
-                ringerMode == AudioManager.RINGER_MODE_VIBRATE; 
+                ringerMode == AudioManager.RINGER_MODE_VIBRATE;
         final int iconId = audioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)
                 ? com.android.internal.R.drawable.stat_sys_ringer_vibrate
                 : com.android.internal.R.drawable.stat_sys_ringer_silent;
@@ -884,7 +1089,7 @@ public class StatusBarPolicy {
         } else {
             return;
         }
-        
+
         if (mBluetoothHeadsetState == BluetoothHeadset.STATE_CONNECTED ||
                 mBluetoothA2dpState == BluetoothA2dp.STATE_CONNECTED ||
                 mBluetoothA2dpState == BluetoothA2dp.STATE_PLAYING) {
@@ -899,15 +1104,15 @@ public class StatusBarPolicy {
     private final void updateWifi(Intent intent) {
         final String action = intent.getAction();
         if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-            
+
             final boolean enabled = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                     WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED;
-            
+
             if (!enabled) {
                 // If disabled, hide the icon. (We show icon when connected.)
                 mService.setIconVisibility(mWifiIcon, false);
             }
-            
+
         } else if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
             final boolean enabled = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED,
                                                            false);
@@ -916,9 +1121,9 @@ public class StatusBarPolicy {
             }
         } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
 
-            final NetworkInfo networkInfo = (NetworkInfo) 
+            final NetworkInfo networkInfo = (NetworkInfo)
                     intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-            
+
             int iconId;
             if (networkInfo != null && networkInfo.isConnected()) {
                 mIsWifiConnected = true;
@@ -965,18 +1170,18 @@ public class StatusBarPolicy {
         if (action.equals(GpsLocationProvider.GPS_FIX_CHANGE_ACTION) && enabled) {
             // GPS is getting fixes
             mService.updateIcon(mGpsIcon, mGpsFixIconData, null);
-            mService.setIconVisibility(mGpsIcon, true);           
+            mService.setIconVisibility(mGpsIcon, true);
         } else if (action.equals(GpsLocationProvider.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
             // GPS is off
-            mService.setIconVisibility(mGpsIcon, false);           
+            mService.setIconVisibility(mGpsIcon, false);
         } else {
             // GPS is on, but not receiving fixes
             mService.updateIcon(mGpsIcon, mGpsEnabledIconData, null);
-            mService.setIconVisibility(mGpsIcon, true);           
+            mService.setIconVisibility(mGpsIcon, true);
         }
     }
 
-    private final void updateTTY(Intent intent) {       
+    private final void updateTTY(Intent intent) {
         final String action = intent.getAction();
         final boolean enabled = intent.getBooleanExtra(TtyIntent.TTY_ENABLED, false);
 
@@ -986,13 +1191,58 @@ public class StatusBarPolicy {
             // TTY is on
             Log.i(TAG, "updateTTY: set TTY on");
             mService.updateIcon(mTTYModeIcon, mTTYModeEnableIconData, null);
-            mService.setIconVisibility(mTTYModeIcon, true);          
+            mService.setIconVisibility(mTTYModeIcon, true);
         } else {
             // TTY is off
             Log.i(TAG, "updateTTY: set TTY off");
-            mService.setIconVisibility(mTTYModeIcon, false);           
+            mService.setIconVisibility(mTTYModeIcon, false);
         }
     }
+
+    private final void updateCdmaRoamingIcon() {
+        if (!hasService()) {
+            mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+        }
+
+        if (!isCdma()) {
+            mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+        }
+
+        int[] iconList = sRoamingIndicatorImages_cdma;
+        int iconIndex = mPhone.getCdmaEriIconIndex();
+        int iconMode = mPhone.getCdmaEriIconMode();
+
+        if (iconIndex == -1) {
+            Log.e(TAG, "getCdmaEriIconIndex returned null, skipping ERI icon update");
+            return;
+        }
+
+        if (iconMode == -1) {
+            Log.e(TAG, "getCdmeEriIconMode returned null, skipping ERI icon update");
+            return;
+        }
+
+        if (iconIndex == EriInfo.ROAMING_INDICATOR_OFF) {
+            Log.d(TAG, "Cdma ROAMING_INDICATOR_OFF, removing ERI icon");
+            mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+            return;
+        }
+
+        switch (iconMode) {
+            case EriInfo.ROAMING_ICON_MODE_NORMAL:
+                mCdmaRoamingIndicatorIconData.iconId = iconList[iconIndex];
+                mService.updateIcon(mCdmaRoamingIndicatorIcon, mCdmaRoamingIndicatorIconData, null);
+                mService.setIconVisibility(mCdmaRoamingIndicatorIcon, true);
+                break;
+            case EriInfo.ROAMING_ICON_MODE_FLASH:
+                mCdmaRoamingIndicatorIconData.iconId = com.android.internal.R.drawable.stat_sys_roaming_cdma_flash;
+                mService.updateIcon(mCdmaRoamingIndicatorIcon, mCdmaRoamingIndicatorIconData, null);
+                break;
+
+        }
+        mService.updateIcon(mPhoneIcon, mPhoneData, null);
+    }
+
 
     private class StatusBarHandler extends Handler {
         @Override
@@ -1007,6 +1257,3 @@ public class StatusBarPolicy {
         }
     }
 }
-
-
-
