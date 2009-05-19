@@ -26,6 +26,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.util.Log;
 
 import com.android.internal.telephony.cdma.CDMAPhone;
@@ -127,10 +128,9 @@ public class PhoneProxy extends Handler implements Phone {
             Intent intent = new Intent(TelephonyIntents.ACTION_RADIO_TECHNOLOGY_CHANGED);
             intent.putExtra(Phone.PHONE_NAME_KEY, mActivePhone.getPhoneName());
             ActivityManagerNative.broadcastStickyIntent(intent, null);
-
             break;
         default:
-            Log.e(LOG_TAG, "Error! This handler was not registered for this message type. Message: "
+            Log.e(LOG_TAG,"Error! This handler was not registered for this message type. Message: "
                     + msg.what);
         break;
         }
@@ -198,8 +198,8 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getActiveApn();
     }
 
-    public int getSignalStrengthASU() {
-        return mActivePhone.getSignalStrengthASU();
+    public SignalStrength getSignalStrength() {
+        return mActivePhone.getSignalStrength();
     }
 
     public void registerForUnknownConnection(Handler h, int what, Object obj) {
@@ -306,6 +306,30 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.unregisterForInCallVoicePrivacyOff(h);
     }
 
+    public void registerCdmaInformationRecord(Handler h, int what, Object obj) {
+        mActivePhone.registerCdmaInformationRecord(h,what,obj);
+    }
+
+    public void unregisterCdmaInformationRecord(Handler h) {
+        mActivePhone.unregisterCdmaInformationRecord(h);
+    }
+
+    public void registerForOtaStatusChange(Handler h, int what, Object obj){
+        mActivePhone.registerForOtaStatusChange(h,what,obj);
+    }
+
+    public void unregisterForOtaStatusChange(Handler h){
+        mActivePhone.unregisterForOtaStatusChange(h);
+    }
+
+    public void registerForCdmaCallWaiting(Handler h, int what, Object obj){
+        mActivePhone.registerForCdmaCallWaiting(h,what,obj);
+    }
+
+    public void unregisterForCdmaCallWaiting(Handler h){
+        mActivePhone.unregisterForCdmaCallWaiting(h);
+    }
+
     public boolean getIccRecordsLoaded() {
         return mActivePhone.getIccRecordsLoaded();
     }
@@ -388,6 +412,10 @@ public class PhoneProxy extends Handler implements Phone {
 
     public void stopDtmf() {
         mActivePhone.stopDtmf();
+    }
+
+    public void sendBurstDtmf(String dtmfString) {
+        mActivePhone.sendBurstDtmf(dtmfString);
     }
 
     public void setRadioPower(boolean power) {
@@ -628,6 +656,10 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getIccSerialNumber();
     }
 
+    public String getMin() {
+        return mActivePhone.getMin();
+    }
+
     public String getEsn() {
         return mActivePhone.getEsn();
     }
@@ -648,12 +680,16 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getIccPhoneBookInterfaceManager();
     }
 
-    public void setTTYModeEnabled(boolean enable, Message onComplete) {
-        mActivePhone.setTTYModeEnabled(enable, onComplete);
+    public void setTTYMode(int ttyMode, Message onComplete) {
+        mActivePhone.setTTYMode(ttyMode, onComplete);
     }
 
-    public void queryTTYModeEnabled(Message onComplete) {
-        mActivePhone.queryTTYModeEnabled(onComplete);
+    public void queryTTYMode(Message onComplete) {
+        mActivePhone.queryTTYMode(onComplete);
+    }
+
+    public void exitEmergencyCallbackMode(Message onComplete) {
+        mActivePhone.exitEmergencyCallbackMode(onComplete);
     }
 
     public void activateCellBroadcastSms(int activate, Message response) {
@@ -678,6 +714,18 @@ public class PhoneProxy extends Handler implements Phone {
 
     public void setSmscAddress(String address, Message result) {
         mActivePhone.setSmscAddress(address, result);
+    }
+
+    public int getCdmaEriIconIndex() {
+         return mActivePhone.getCdmaEriIconIndex();
+    }
+
+    public int getCdmaEriIconMode() {
+         return mActivePhone.getCdmaEriIconMode();
+    }
+
+    public String getCdmaEriText() {
+         return mActivePhone.getCdmaEriText();
     }
 }
 

@@ -23,6 +23,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.gsm.NetworkInfo;
@@ -82,9 +83,11 @@ public interface Phone {
          * <li>DATAIN = Receiving IP ppp traffic</li>
          * <li>DATAOUT = Sending IP ppp traffic</li>
          * <li>DATAINANDOUT = Both receiving and sending IP ppp traffic</li>
+         * <li>DORMANT = The data connection is still active,
+                                     but physical link is down</li>
          * </ul>
          */
-        NONE, DATAIN, DATAOUT, DATAINANDOUT;
+        NONE, DATAIN, DATAOUT, DATAINANDOUT, DORMANT;
     };
 
     enum SuppService {
@@ -150,7 +153,7 @@ public interface Phone {
     static final String REASON_PS_RESTRICT_ENABLED = "psRestrictEnabled";
     static final String REASON_PS_RESTRICT_DISABLED = "psRestrictDisabled";
     static final String REASON_SIM_LOADED = "simLoaded";
-    
+
     // Used for band mode selection methods
     static final int BM_UNSPECIFIED = 0; // selected by baseband automatically
     static final int BM_EURO_BAND   = 1; // GSM-900 / DCS-1800 / WCDMA-IMT-2000
@@ -162,28 +165,35 @@ public interface Phone {
 
     // Used for preferred network type
     // Note NT_* substitute RILConstants.NETWORK_MODE_* above the Phone
-    int NT_MODE_WCDMA_PREF   = 0; /* GSM/WCDMA (WCDMA preferred) */
-    int NT_MODE_GSM_ONLY     = 1; /* GSM only */
-    int NT_MODE_WCDMA_ONLY   = 2; /* WCDMA only */
-    int NT_MODE_GSM_UMTS     = 3; /* GSM/WCDMA (auto mode, according to PRL)
-                                     AVAILABLE Application Settings menu*/
-    int NT_MODE_CDMA         = 4; /* CDMA and EvDo (auto mode, according to PRL)
-                                     AVAILABLE Application Settings menu*/
-    int NT_MODE_CDMA_NO_EVDO = 5; /* CDMA only */
-    int NT_MODE_EVDO_NO_CDMA = 6; /* EvDo only */
-    int NT_MODE_GLOBAL       = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)
-                                     AVAILABLE Application Settings menu*/
-    int PREFERRED_NT_MODE    = NT_MODE_GSM_ONLY;
+    static final int NT_MODE_WCDMA_PREF   = 0; /* GSM/WCDMA (WCDMA preferred) */
+    static final int NT_MODE_GSM_ONLY     = 1; /* GSM only */
+    static final int NT_MODE_WCDMA_ONLY   = 2; /* WCDMA only */
+    static final int NT_MODE_GSM_UMTS     = 3; /* GSM/WCDMA (auto mode, according to PRL)
+                                                  AVAILABLE Application Settings menu */
+    static final int NT_MODE_CDMA         = 4; /* CDMA and EvDo (auto mode, according to PRL)
+                                                  AVAILABLE Application Settings menu */
+    static final int NT_MODE_CDMA_NO_EVDO = 5; /* CDMA only */
+    static final int NT_MODE_EVDO_NO_CDMA = 6; /* EvDo only */
+    static final int NT_MODE_GLOBAL       = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according
+                                                  to PRL) AVAILABLE Application Settings menu */
+    static final int PREFERRED_NT_MODE    = NT_MODE_GLOBAL;
 
 
     // Used for CDMA roaming mode
-    static final int CDMA_RM_HOME        = 0;  //Home Networks only, as defined in PRL
-    static final int CDMA_RM_AFFILIATED = 1;  //Roaming an Affiliated networks, as defined in PRL
-    static final int CDMA_RM_ANY        = 2;  //Roaming on Any Network, as defined in PRL
+    static final int CDMA_RM_HOME        = 0;  // Home Networks only, as defined in PRL
+    static final int CDMA_RM_AFFILIATED  = 1;  // Roaming an Affiliated networks, as defined in PRL
+    static final int CDMA_RM_ANY         = 2;  // Roaming on Any Network, as defined in PRL
 
     // Used for CDMA subscription mode
-    static final int CDMA_SUBSCRIPTION_RUIM_SIM    = 0; //RUIM/SIM (default)
-    static final int CDMA_SUBSCRIPTION_NV        = 1; //NV -> non-volatile memory
+    static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0; // RUIM/SIM (default)
+    static final int CDMA_SUBSCRIPTION_NV       = 1; // NV -> non-volatile memory
+
+    static final int PREFERRED_CDMA_SUBSCRIPTION = CDMA_SUBSCRIPTION_NV;
+
+    static final int TTY_MODE_OFF = 0;
+    static final int TTY_MODE_FULL = 1;
+    static final int TTY_MODE_HCO = 2;
+    static final int TTY_MODE_VCO = 3;
 
     /**
      * Get the current ServiceState. Use
@@ -263,16 +273,11 @@ public interface Phone {
     String getActiveApn();
 
     /**
-     * Get current signal strength. No change notification available on this
-     * interface. Use <code>PhoneStateNotifier</code> or an equivalent.
-     * An ASU is 0-31 or -1 if unknown (for GSM, dBm = -113 - 2 * asu).
-     * The following special values are defined:</p>
-     * <ul><li>0 means "-113 dBm or less".</li>
-     * <li>31 means "-51 dBm or greater".</li></ul>
+     * Get current signal strength.
      *
-     * @return Current signal strength in ASU's.
+     * @return Current signal strength as SignalStrength
      */
-    int getSignalStrengthASU();
+    SignalStrength getSignalStrength();
 
     /**
      * Notifies when a previously untracked non-ringing/waiting connection has appeared.
@@ -494,6 +499,53 @@ public interface Phone {
     void unregisterForInCallVoicePrivacyOff(Handler h);
 
     /**
+     * Register for notifications about information record available
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerCdmaInformationRecord(Handler h, int what, Object obj);
+
+    /**
+     * Unregister for notifications about information record available
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterCdmaInformationRecord(Handler h);
+
+    /**
+     * Register for the indication of OTA status change
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForOtaStatusChange(Handler h, int what, Object obj);
+
+    /**
+     * Unregister for the indication of OTA status change
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForOtaStatusChange(Handler h);
+
+    /**
+     * Register for the indication of Cdma Call Waiting
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForCdmaCallWaiting(Handler h, int what, Object obj);
+
+    /**
+     * Unregister for the indication of Cdma Call Waiting
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForCdmaCallWaiting(Handler h);
+    /**
      * Returns SIM record load state. Use
      * <code>getSimCard().registerForReady()</code> for change notification.
      *
@@ -707,6 +759,10 @@ public interface Phone {
      */
     void stopDtmf();
 
+    /**
+     * Play a Burst of DTMF tone on the active call. Ignored if there is no active call.
+     */
+    void sendBurstDtmf(String dtmfString);
 
     /**
      * Sets the radio power on/off state (off is sometimes
@@ -1279,6 +1335,10 @@ public interface Phone {
 
     //***** CDMA support methods
 
+    /**
+     * Retrieves the MIN for CDMA phones.
+     */
+    String getMin();
 
     /**
      * Retrieves the ESN for CDMA phones.
@@ -1306,22 +1366,30 @@ public interface Phone {
     public IccPhoneBookInterfaceManager getIccPhoneBookInterfaceManager();
 
     /**
-     * setTTYModeEnabled
+     * setTTYMode
      * sets a TTY mode option.
      *
      * @param enable is a boolean representing the state that you are
      *        requesting, true for enabled, false for disabled.
      * @param onComplete a callback message when the action is completed
      */
-    void setTTYModeEnabled(boolean enable, Message onComplete);
+    void setTTYMode(int ttyMode, Message onComplete);
 
     /**
-     * queryTTYModeEnabled
+     * queryTTYMode
      * query the status of the TTY mode
      *
      * @param onComplete a callback message when the action is completed.
      */
-    void queryTTYModeEnabled(Message onComplete);
+    void queryTTYMode(Message onComplete);
+
+    /**
+     * exitEmergencyCallbackMode
+     * exits the emergency callback mode
+     *
+     * @param onComplete a callback message when the action is completed.
+     */
+    void exitEmergencyCallbackMode(Message onComplete);
 
     /**
      * Activate or deactivate cell broadcast SMS.
@@ -1344,10 +1412,30 @@ public interface Phone {
     /**
      * Configure cell broadcast SMS.
      *
+     * TODO: Change the configValuesArray to a RIL_BroadcastSMSConfig
+     *
      * @param response
      *            Callback message is empty on completion
      */
     public void setCellBroadcastSmsConfig(int[] configValuesArray, Message response);
 
     public void notifyDataActivity();
+
+    /**
+     * Returns the CDMA ERI icon index to display
+     */
+    public int getCdmaEriIconIndex();
+
+    /**
+     * Returns the CDMA ERI icon mode,
+     * 0 - ON
+     * 1 - FLASHING
+     */
+    public int getCdmaEriIconMode();
+
+    /**
+     * Returns the CDMA ERI text,
+     */
+    public String getCdmaEriText();
+
 }

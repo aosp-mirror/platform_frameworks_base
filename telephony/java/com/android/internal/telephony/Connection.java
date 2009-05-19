@@ -29,25 +29,34 @@ public abstract class Connection {
 
     
     public enum DisconnectCause {
-        NOT_DISCONNECTED,   /* has not yet disconnected */
-        INCOMING_MISSED,    /* an incoming call that was missed and never answered */
-        NORMAL,             /* normal; remote */
-        LOCAL,              /* normal; local hangup */
-        BUSY,               /* outgoing call to busy line */
-        CONGESTION,         /* outgoing call to congested network */
-        MMI,                /* not presently used; dial() returns null */
-        INVALID_NUMBER,     /* invalid dial string */
+        NOT_DISCONNECTED,               /* has not yet disconnected */
+        INCOMING_MISSED,                /* an incoming call that was missed and never answered */
+        NORMAL,                         /* normal; remote */
+        LOCAL,                          /* normal; local hangup */
+        BUSY,                           /* outgoing call to busy line */
+        CONGESTION,                     /* outgoing call to congested network */
+        MMI,                            /* not presently used; dial() returns null */
+        INVALID_NUMBER,                 /* invalid dial string */
         LOST_SIGNAL,
-        LIMIT_EXCEEDED,     /* eg GSM ACM limit exceeded */
-        INCOMING_REJECTED,  /* an incoming call that was rejected */
-        POWER_OFF,          /* radio is turned off explicitly */
-        OUT_OF_SERVICE,     /* out of service */
-        ICC_ERROR,          /* No ICC, ICC locked, or other ICC error */
-        CALL_BARRED,        /* call was blocked by call barrring */
-        FDN_BLOCKED,        /* call was blocked by fixed dial number */
-        CS_RESTRICTED,      /* call was blocked by restricted all voice access */
-        CS_RESTRICTED_NORMAL,/* call was blocked by restricted normal voice access */
-        CS_RESTRICTED_EMERGENCY/* call was blocked by restricted emergency voice access */
+        LIMIT_EXCEEDED,                 /* eg GSM ACM limit exceeded */
+        INCOMING_REJECTED,              /* an incoming call that was rejected */
+        POWER_OFF,                      /* radio is turned off explicitly */
+        OUT_OF_SERVICE,                 /* out of service */
+        ICC_ERROR,                      /* No ICC, ICC locked, or other ICC error */
+        CALL_BARRED,                    /* call was blocked by call barrring */
+        FDN_BLOCKED,                    /* call was blocked by fixed dial number */
+        CS_RESTRICTED,                  /* call was blocked by restricted all voice access */
+        CS_RESTRICTED_NORMAL,           /* call was blocked by restricted normal voice access */
+        CS_RESTRICTED_EMERGENCY,        /* call was blocked by restricted emergency voice access */
+        CDMA_LOCKED_UNTIL_POWER_CYCLE,  /* MS is locked until next power cycle */
+        CDMA_DROP,
+        CDMA_INTERCEPT,                 /* INTERCEPT order received, MS state idle entered */
+        CDMA_REORDER,                   /* MS has been redirected, call is cancelled */
+        CDMA_SO_REJECT,                 /* service option rejection */
+        CDMA_RETRY_ORDER,               /* requeseted service is rejected, retry delay is set */
+        CDMA_ACCESS_FAILURE,
+        CDMA_PREEMPTED,
+        CDMA_NOT_EMERGENCY              /* not an emergency call */
     }
 
     Object userData;

@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.telephony.SignalStrength;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -177,10 +178,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
-    public void notePhoneSignalStrength(int asu) {
+    public void notePhoneSignalStrength(SignalStrength signalStrength) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.notePhoneSignalStrengthLocked(asu);
+            mStats.notePhoneSignalStrengthLocked(signalStrength);
         }
     }
     

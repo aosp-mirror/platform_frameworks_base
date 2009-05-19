@@ -50,6 +50,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
+import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.DataConnectionTracker;
@@ -779,7 +780,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private boolean
-    pdpStatesHasCID (ArrayList<PDPContextState> states, int cid) {
+    pdpStatesHasCID (ArrayList<DataCallState> states, int cid) {
         for (int i = 0, s = states.size() ; i < s ; i++) {
             if (states.get(i).cid == cid) return true;
         }
@@ -788,9 +789,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private boolean
-    pdpStatesHasActiveCID (ArrayList<PDPContextState> states, int cid) {
+    pdpStatesHasActiveCID (ArrayList<DataCallState> states, int cid) {
         for (int i = 0, s = states.size() ; i < s ; i++) {
-            if (states.get(i).cid == cid) return (states.get(i).active != 0);
+            if ((states.get(i).cid == cid) && (states.get(i).active != 0)) {
+                return true;
+            }
         }
 
         return false;
@@ -825,9 +828,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * previous state
      */
     protected void onPdpStateChanged (AsyncResult ar, boolean explicitPoll) {
-        ArrayList<PDPContextState> pdpStates;
+        ArrayList<DataCallState> pdpStates;
 
-        pdpStates = (ArrayList<PDPContextState>)(ar.result);
+        pdpStates = (ArrayList<DataCallState>)(ar.result);
 
         if (ar.exception != null) {
             // This is probably "radio not available" or something
