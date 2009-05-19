@@ -510,7 +510,8 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         mDatabase.execSQL("CREATE TABLE tokens (" +
                 "token TEXT COLLATE unicode," +
                 "source INTEGER," +
-                "token_index INTEGER" +
+                "token_index INTEGER," +
+                "tag TEXT" +
                 ");");
         mDatabase.execSQL("CREATE TABLE tokens_no_index (" +
                 "token TEXT COLLATE unicode," +
@@ -527,8 +528,10 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
                 "SELECT _TOKENIZE('tokens', 10, 'some string', NULL)", null));
      
         Assert.assertEquals(3, DatabaseUtils.longForQuery(mDatabase, 
-                "SELECT _TOKENIZE('tokens', 11, 'some string ok', ' ', 1)", null));
-        
+                "SELECT _TOKENIZE('tokens', 11, 'some string ok', ' ', 1, 'foo')", null));
+        Assert.assertEquals(2, DatabaseUtils.longForQuery(mDatabase,
+                "SELECT _TOKENIZE('tokens', 11, 'second field', ' ', 1, 'bar')", null));
+
         Assert.assertEquals(3, DatabaseUtils.longForQuery(mDatabase,
                 "SELECT _TOKENIZE('tokens_no_index', 20, 'some string ok', ' ')", null));
         Assert.assertEquals(3, DatabaseUtils.longForQuery(mDatabase,
@@ -544,7 +547,7 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         Assert.assertEquals(2, DatabaseUtils.longForQuery(mDatabase, 
                 "SELECT _TOKENIZE('tokens', 13, '" + icustr + "', ' ', 1)", null));
         
-        Assert.assertEquals(7, DatabaseUtils.longForQuery(mDatabase, 
+        Assert.assertEquals(9, DatabaseUtils.longForQuery(mDatabase,
                 "SELECT count(*) from tokens;", null));      
 
         String key = DatabaseUtils.getHexCollationKey("Frederic Hjonneva");
@@ -569,6 +572,8 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
                 "SELECT source from tokens where token GLOB '" + key + "*'", null));
         Assert.assertEquals(0, DatabaseUtils.longForQuery(mDatabase,
                 "SELECT token_index from tokens where token GLOB '" + key + "*'", null));
+        Assert.assertEquals("foo", DatabaseUtils.stringForQuery(mDatabase,
+                "SELECT tag from tokens where token GLOB '" + key + "*'", null));
         key = DatabaseUtils.getHexCollationKey("string");
         Assert.assertEquals(1, DatabaseUtils.longForQuery(mDatabase, 
                 "SELECT count(*) from tokens where token GLOB '" + key + "*'", null));
@@ -576,6 +581,8 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
                 "SELECT source from tokens where token GLOB '" + key + "*'", null));
         Assert.assertEquals(1, DatabaseUtils.longForQuery(mDatabase,
                 "SELECT token_index from tokens where token GLOB '" + key + "*'", null));
+        Assert.assertEquals("foo", DatabaseUtils.stringForQuery(mDatabase,
+                "SELECT tag from tokens where token GLOB '" + key + "*'", null));
         key = DatabaseUtils.getHexCollationKey("ok");
         Assert.assertEquals(1, DatabaseUtils.longForQuery(mDatabase, 
                 "SELECT count(*) from tokens where token GLOB '" + key + "*'", null));
@@ -583,7 +590,28 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
                 "SELECT source from tokens where token GLOB '" + key + "*'", null));
         Assert.assertEquals(2, DatabaseUtils.longForQuery(mDatabase,
                 "SELECT token_index from tokens where token GLOB '" + key + "*'", null));
-        
+        Assert.assertEquals("foo", DatabaseUtils.stringForQuery(mDatabase,
+                "SELECT tag from tokens where token GLOB '" + key + "*'", null));
+
+        key = DatabaseUtils.getHexCollationKey("second field");
+        Assert.assertEquals(1, DatabaseUtils.longForQuery(mDatabase,
+                "SELECT count(*) from tokens where token GLOB '" + key + "*'", null));
+        Assert.assertEquals(11, DatabaseUtils.longForQuery(mDatabase,
+                "SELECT source from tokens where token GLOB '" + key + "*'", null));
+        Assert.assertEquals(0, DatabaseUtils.longForQuery(mDatabase,
+                "SELECT token_index from tokens where token GLOB '" + key + "*'", null));
+        Assert.assertEquals("bar", DatabaseUtils.stringForQuery(mDatabase,
+                "SELECT tag from tokens where token GLOB '" + key + "*'", null));
+        key = DatabaseUtils.getHexCollationKey("field");
+        Assert.assertEquals(1, DatabaseUtils.longForQuery(mDatabase,
+                "SELECT count(*) from tokens where token GLOB '" + key + "*'", null));
+        Assert.assertEquals(11, DatabaseUtils.longForQuery(mDatabase,
+                "SELECT source from tokens where token GLOB '" + key + "*'", null));
+        Assert.assertEquals(1, DatabaseUtils.longForQuery(mDatabase,
+                "SELECT token_index from tokens where token GLOB '" + key + "*'", null));
+        Assert.assertEquals("bar", DatabaseUtils.stringForQuery(mDatabase,
+                "SELECT tag from tokens where token GLOB '" + key + "*'", null));
+
         key = DatabaseUtils.getHexCollationKey(chinese);
         String[] a = new String[1];
         a[0] = key;
