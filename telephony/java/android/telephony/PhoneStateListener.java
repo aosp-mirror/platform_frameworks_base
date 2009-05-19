@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.CellLocation;
 import android.util.Log;
 
@@ -42,10 +43,10 @@ public class PhoneStateListener {
     /**
      * Listen for changes to the network signal strength (cellular).
      * <p>
-     * Example: The status bar uses this to control the signal-strength
-     * icon.
      *
      * @see #onSignalStrengthChanged
+     *
+     * TODO: @deprecated to be deprecated by LISTEN_SIGNAL_STRENGTHS, @see #onSignalStrengthsChanged
      */
     public static final int LISTEN_SIGNAL_STRENGTH                          = 0x00000002;
 
@@ -107,6 +108,18 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_DATA_ACTIVITY                            = 0x00000080;
 
+    /**
+     * Listen for changes to the network signal strengths (cellular).
+     * <p>
+     * Example: The status bar uses this to control the signal-strength
+     * icon.
+     *
+     * @see #onSignalStrengthsChanged
+     *
+     * @hide
+     */
+    public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
+
     public PhoneStateListener() {
     }
 
@@ -129,6 +142,7 @@ public class PhoneStateListener {
      * @see ServiceState#STATE_IN_SERVICE
      * @see ServiceState#STATE_OUT_OF_SERVICE
      * @see ServiceState#STATE_POWER_OFF
+     * @deprecated, @see #onSignalStrengthsChanged
      */
     public void onSignalStrengthChanged(int asu) {
         // default implementation empty
@@ -185,8 +199,23 @@ public class PhoneStateListener {
      * @see TelephonyManager#DATA_ACTIVITY_IN
      * @see TelephonyManager#DATA_ACTIVITY_OUT
      * @see TelephonyManager#DATA_ACTIVITY_INOUT
+     * @see TelephonyManager#DATA_ACTIVITY_DORMANT
      */
     public void onDataActivity(int direction) {
+        // default implementation empty
+    }
+
+    /**
+     * Callback invoked when network signal strengths changes.
+     *
+     * @see ServiceState#STATE_EMERGENCY_ONLY
+     * @see ServiceState#STATE_IN_SERVICE
+     * @see ServiceState#STATE_OUT_OF_SERVICE
+     * @see ServiceState#STATE_POWER_OFF
+     *
+     * @hide
+     */
+    public void onSignalStrengthsChanged(SignalStrength signalStrength) {
         // default implementation empty
     }
 
@@ -229,6 +258,9 @@ public class PhoneStateListener {
         public void onDataActivity(int direction) {
             Message.obtain(mHandler, LISTEN_DATA_ACTIVITY, direction, 0, null).sendToTarget();
         }
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+            Message.obtain(mHandler, LISTEN_SIGNAL_STRENGTHS, 0, 0, signalStrength).sendToTarget();
+        }
     };
 
     Handler mHandler = new Handler() {
@@ -258,6 +290,9 @@ public class PhoneStateListener {
                     break;
                 case LISTEN_DATA_ACTIVITY:
                     PhoneStateListener.this.onDataActivity(msg.arg1);
+                    break;
+                case LISTEN_SIGNAL_STRENGTHS:
+                    PhoneStateListener.this.onSignalStrengthsChanged((SignalStrength)msg.obj);
                     break;
             }
         }

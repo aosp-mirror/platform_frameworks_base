@@ -108,23 +108,26 @@ public class PhoneFactory {
                 sCommandsInterface = new RIL(context, networkMode, cdmaSubscription);
 
                 switch(networkMode) {
-                    case RILConstants.NETWORK_MODE_CDMA:
-                    case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
-                    case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
-                    case RILConstants.NETWORK_MODE_GLOBAL:
-                        sProxyPhone = new PhoneProxy(new CDMAPhone(context,
-                                sCommandsInterface, sPhoneNotifier));
-                        Log.i(LOG_TAG, "Creating CDMAPhone");
-                        break;
                     case RILConstants.NETWORK_MODE_WCDMA_PREF:
                     case RILConstants.NETWORK_MODE_GSM_ONLY:
                     case RILConstants.NETWORK_MODE_WCDMA_ONLY:
                     case RILConstants.NETWORK_MODE_GSM_UMTS:
-                    default:
                         sProxyPhone = new PhoneProxy(new GSMPhone(context,
                                 sCommandsInterface, sPhoneNotifier));
                         Log.i(LOG_TAG, "Creating GSMPhone");
                         break;
+                    case RILConstants.NETWORK_MODE_CDMA:
+                    case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
+                    case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
+                        sProxyPhone = new PhoneProxy(new CDMAPhone(context,
+                                sCommandsInterface, sPhoneNotifier));
+                        Log.i(LOG_TAG, "Creating CDMAPhone");
+                        break;
+                    case RILConstants.NETWORK_MODE_GLOBAL:
+                    default:
+                        sProxyPhone = new PhoneProxy(new CDMAPhone(context,
+                                sCommandsInterface, sPhoneNotifier));
+                        Log.i(LOG_TAG, "Creating CDMAPhone");
                 }
                 sMadeDefaults = true;
             }

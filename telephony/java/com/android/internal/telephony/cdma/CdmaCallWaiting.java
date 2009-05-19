@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,25 +12,22 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm;
+package com.android.internal.telephony.cdma;
 
-/**
- * {@hide}
- */
-public class PDPContextState {
-    public int cid;
-    public int active;
-    public String type;
-    public String apn;
-    public String address;
+import com.android.internal.telephony.CdmaInformationRecord;
 
+public class CdmaCallWaiting {
+    public String number;
+    public int numberPresentation;
+    public String name;
+
+    public CdmaInformationRecord.CdmaSignalInfoRec signalInfoRecord =
+                                   new CdmaInformationRecord.CdmaSignalInfoRec();
+
+    @Override
     public String toString() {
-        return "com.android.internal.telephony.gsm.PDPContextState: {" +
-               " cid: " + cid +
-               ", active: " + active +
-               ", type: " + type +
-               ", apn: " + apn +
-               ", address: " + address +
-               " }";
+        return "CdmaCallWaiting: {" + " number: " + number + " numberPresentation: "
+                + numberPresentation + " name: " + name + " signalInfoRecord: "
+                + signalInfoRecord + " }";
     }
 }

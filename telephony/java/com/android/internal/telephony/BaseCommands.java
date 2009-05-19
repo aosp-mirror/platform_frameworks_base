@@ -54,34 +54,32 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mIccStatusChangedRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOnRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOffRegistrants = new RegistrantList();
+    protected RegistrantList mOtaSessionRegistrants = new RegistrantList();
+    protected RegistrantList mCallWaitingRegistrants = new RegistrantList();
+    protected RegistrantList mInformationRecordsRegistrants = new RegistrantList();
     protected Registrant mUnsolOemHookRawRegistrant;
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
     protected Registrant mSignalStrengthRegistrant;
     protected Registrant mUSSDRegistrant;
     protected Registrant mSmsOnSimRegistrant;
-    /** Registrant for handling SMS Status Reports */
     protected Registrant mSmsStatusRegistrant;
-    /** Registrant for handling Supplementary Service Notifications */
     protected Registrant mSsnRegistrant;
     protected Registrant mStkSessionEndRegistrant;
     protected Registrant mStkProCmdRegistrant;
     protected Registrant mStkEventRegistrant;
     protected Registrant mStkCallSetUpRegistrant;
-    /** Registrant for handling SIM/RUIM SMS storage full messages */
     protected Registrant mIccSmsFullRegistrant;
-    /** Registrant for handling Icc Refresh notifications */
+    protected Registrant mEmergencyCallbackModeRegistrant;
     protected Registrant mIccRefreshRegistrant;
-    /** Registrant for handling RING notifications */
     protected Registrant mRingRegistrant;
-    /** Registrant for handling RESTRICTED STATE changed notification */
     protected Registrant mRestrictedStateRegistrant;
 
-    //Network Mode received from PhoneFactory
+    // Network Mode received from PhoneFactory
     protected int mNetworkMode;
-    //CDMA subscription received from PhoneFactory
+    // CDMA subscription received from PhoneFactory
     protected int mCdmaSubscription;
-    //Type of Phone, GSM or CDMA. Set by CDMAPhone or GSMPhone.
+    // Type of Phone, GSM or CDMA. Set by CDMAPhone or GSMPhone.
     protected int mPhoneType;
 
 
@@ -424,6 +422,10 @@ public abstract class BaseCommands implements CommandsInterface {
         mIccRefreshRegistrant = new Registrant (h, what, obj);
     }
 
+    public void setEmergencyCallbackMode(Handler h, int what, Object obj) {
+        mEmergencyCallbackModeRegistrant = new Registrant (h, what, obj);
+    }
+
     public void unSetOnIccRefresh(Handler h) {
         mIccRefreshRegistrant.clear();
     }
@@ -468,6 +470,33 @@ public abstract class BaseCommands implements CommandsInterface {
 
     public void unSetOnUnsolOemHookRaw(Handler h) {
         mUnsolOemHookRawRegistrant.clear();
+    }
+
+    public void registerForOtaSessionStatus(Handler h, int what, Object obj){
+        Registrant r = new Registrant (h, what, obj);
+        mOtaSessionRegistrants.add(r);
+    }
+
+    public void unregisterForOtaSessionStatus(Handler h){
+        mOtaSessionRegistrants.remove(h);
+    }
+
+    public void registerForCdmaCallWaiting(Handler h, int what, Object obj){
+        Registrant r = new Registrant (h, what, obj);
+        mCallWaitingRegistrants.add(r);
+    }
+
+    public void unregisterForCdmaCallWaiting(Handler h){
+        mCallWaitingRegistrants.remove(h);
+    }
+
+    public void registerCdmaInformationRecord(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mInformationRecordsRegistrants.add(r);
+    }
+
+    public void unregisterCdmaInformationRecord(Handler h) {
+        mInformationRecordsRegistrants.remove(h);
     }
 
     //***** Protected Methods

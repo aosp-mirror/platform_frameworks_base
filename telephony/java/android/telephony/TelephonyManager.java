@@ -639,6 +639,9 @@ public class TelephonyManager {
     /** Data connection activity: Currently both sending and receiving
      *  IP PPP traffic. */
     public static final int DATA_ACTIVITY_INOUT = DATA_ACTIVITY_IN | DATA_ACTIVITY_OUT;
+    /** Data connection is active, but physical link is down */
+    /** @hide */
+    public static final int DATA_ACTIVITY_DORMANT = 0x00000004;
 
     /**
      * Returns a constant indicating the type of activity on a data connection
@@ -648,6 +651,7 @@ public class TelephonyManager {
      * @see #DATA_ACTIVITY_IN
      * @see #DATA_ACTIVITY_OUT
      * @see #DATA_ACTIVITY_INOUT
+     * @see #DATA_ACTIVITY_DORMANT
      */
     public int getDataActivity() {
         try {
@@ -727,6 +731,50 @@ public class TelephonyManager {
             mRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
+        }
+    }
+
+    /**
+     * Returns the CDMA ERI icon index to display
+     *
+     * @hide
+     */
+    public int getCdmaEriIconIndex() {
+        try {
+            return getITelephony().getCdmaEriIconIndex();
+        } catch (RemoteException ex) {
+            // the phone process is restarting.
+            return -1;
+        }
+    }
+
+    /**
+     * Returns the CDMA ERI icon mode,
+     * 0 - ON
+     * 1 - FLASHING
+     *
+     * @hide
+     */
+    public int getCdmaEriIconMode() {
+        try {
+            return getITelephony().getCdmaEriIconMode();
+        } catch (RemoteException ex) {
+            // the phone process is restarting.
+            return -1;
+        }
+    }
+
+    /**
+     * Returns the CDMA ERI text,
+     *
+     * @hide
+     */
+    public String getCdmaEriText() {
+        try {
+            return getITelephony().getCdmaEriText();
+        } catch (RemoteException ex) {
+            // the phone process is restarting.
+            return null;
         }
     }
 }

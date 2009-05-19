@@ -2069,13 +2069,29 @@ public final class Settings {
         public static final String CURRENT_ACTIVE_PHONE = "current_active_phone";
 
         /**
-         * The preferred network mode 7 = Global, CDMA default
-         *                            4 = CDMA only
-         *                            3 = GSM/UMTS only
+         * The preferred network mode 7 = Global
+         *                            6 = EvDo only
+         *                            5 = CDMA w/o EvDo
+         *                            4 = CDMA / EvDo auto
+         *                            3 = GSM / WCDMA auto
+         *                            2 = WCDMA only
+         *                            1 = GSM only
+         *                            0 = GSM / WCDMA preferred
          * @hide
          */
         public static final String PREFERRED_NETWORK_MODE =
                 "preferred_network_mode";
+
+        /**
+         * The preferred TTY mode     0 = TTy Off, CDMA default
+         *                            1 = TTY Full
+         *                            2 = TTY HCO
+         *                            3 = TTY VCO
+         * @hide
+         */
+        public static final String PREFERRED_TTY_MODE =
+                "preferred_tty_mode";
+
 
         /**
          * CDMA Cell Broadcast SMS
