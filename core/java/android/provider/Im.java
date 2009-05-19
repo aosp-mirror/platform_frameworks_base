@@ -973,7 +973,7 @@ public class Im {
         /**
          * Gets the Uri to query messages by provider.
          *
-         * @param providerId the server provider id.
+         * @param providerId the service provider id.
          * @return the Uri
          */
         public static final Uri getContentUriByProvider(long providerId) {
@@ -983,21 +983,74 @@ public class Im {
         }
 
         /**
-         * Gets the Uri to query groupchat messages by thread id.
+         * Gets the Uri to query off the record messages by account.
          *
-         * @param threadId the thread id of the groupchat message.
+         * @param accountId the account id.
          * @return the Uri
          */
-        public static final Uri getGroupChatContentUriByThreadId(long threadId) {
-            Uri.Builder builder = GROUP_CHAT_CONTENT_URI_MESSAGES_BY_THREAD_ID.buildUpon();
+        public static final Uri getContentUriByAccount(long accountId) {
+            Uri.Builder builder = CONTENT_URI_BY_ACCOUNT.buildUpon();
+            ContentUris.appendId(builder, accountId);
+            return builder.build();
+        }
+
+        /**
+         * Gets the Uri to query off the record messages by thread id.
+         *
+         * @param threadId the thread id of the message.
+         * @return the Uri
+         */
+        public static final Uri getOtrMessagesContentUriByThreadId(long threadId) {
+            Uri.Builder builder = OTR_MESSAGES_CONTENT_URI_BY_THREAD_ID.buildUpon();
             ContentUris.appendId(builder, threadId);
+            return builder.build();
+        }
+
+        /**
+         * @deprecated
+         *
+         * Gets the Uri to query off the record messages by account and contact.
+         *
+         * @param accountId the account id of the contact.
+         * @param username the user name of the contact.
+         * @return the Uri
+         */
+        public static final Uri getOtrMessagesContentUriByContact(long accountId, String username) {
+            Uri.Builder builder = OTR_MESSAGES_CONTENT_URI_BY_ACCOUNT_AND_CONTACT.buildUpon();
+            ContentUris.appendId(builder, accountId);
+            builder.appendPath(username);
+            return builder.build();
+        }
+
+        /**
+         * Gets the Uri to query off the record messages by provider.
+         *
+         * @param providerId the service provider id.
+         * @return the Uri
+         */
+        public static final Uri getOtrMessagesContentUriByProvider(long providerId) {
+            Uri.Builder builder = OTR_MESSAGES_CONTENT_URI_BY_PROVIDER.buildUpon();
+            ContentUris.appendId(builder, providerId);
+            return builder.build();
+        }
+
+        /**
+         * Gets the Uri to query off the record messages by account.
+         *
+         * @param accountId the account id.
+         * @return the Uri
+         */
+        public static final Uri getOtrMessagesContentUriByAccount(long accountId) {
+            Uri.Builder builder = OTR_MESSAGES_CONTENT_URI_BY_ACCOUNT.buildUpon();
+            ContentUris.appendId(builder, accountId);
             return builder.build();
         }
 
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/messages");
+        public static final Uri CONTENT_URI =
+                Uri.parse("content://im/messages");
 
         /**
          * The content:// style URL for messages by thread id
@@ -1018,32 +1071,47 @@ public class Im {
                 Uri.parse("content://im/messagesByProvider");
 
         /**
-         * The content:// style URL for groupchat messages.
+         * The content:// style URL for messages by account
          */
-        public static final Uri GROUP_CHAT_CONTENT_URI = Uri.parse("content://im/groupMessages");
+        public static final Uri CONTENT_URI_BY_ACCOUNT =
+                Uri.parse("content://im/messagesByAccount");
 
         /**
-         * The content:// style URL for groupchat messages by thread id
+         * The content:// style url for off the record messages
          */
-        public static final Uri GROUP_CHAT_CONTENT_URI_MESSAGES_BY_THREAD_ID =
-                Uri.parse("content://im/groupMessagesByThreadId");
+        public static final Uri OTR_MESSAGES_CONTENT_URI =
+                Uri.parse("content://im/otrMessages");
 
         /**
-         * The MIME type of {@link #CONTENT_URI} providing a directory of groupchat messages.
+         * The content:// style url for off the record messages by thread id
          */
-        public static final String GROUP_CHAT_CONTENT_TYPE =
-                "vnd.android.cursor.dir/im-groupMessages";
+        public static final Uri OTR_MESSAGES_CONTENT_URI_BY_THREAD_ID =
+                Uri.parse("content://im/otrMessagesByThreadId");
 
         /**
-         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single groupchat message.
+         * The content:// style url for off the record messages by account and contact
          */
-        public static final String GROUP_CHAT_CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-groupMessages";
+        public static final Uri OTR_MESSAGES_CONTENT_URI_BY_ACCOUNT_AND_CONTACT =
+                Uri.parse("content://im/otrMessagesByAcctAndContact");
+
+        /**
+         * The content:// style URL for off the record messages by provider
+         */
+        public static final Uri OTR_MESSAGES_CONTENT_URI_BY_PROVIDER =
+                Uri.parse("content://im/otrMessagesByProvider");
+
+        /**
+         * The content:// style URL for off the record messages by account
+         */
+        public static final Uri OTR_MESSAGES_CONTENT_URI_BY_ACCOUNT =
+                Uri.parse("content://im/otrMessagesByAccount");
+
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-messages";
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/im-messages";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
