@@ -236,6 +236,36 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint
         signalExceptionForGroupError(env, clazz, errno);
 }
 
+void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp) 
+{
+    DIR *d;
+    FILE *fp;
+    char proc_path[255];
+    struct dirent *de;
+
+    if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
+        signalExceptionForGroupError(env, clazz, EINVAL);
+        return;
+    }
+
+    sprintf(proc_path, "/proc/%d/task", pid);
+    if (!(d = opendir(proc_path))) {
+        signalExceptionForGroupError(env, clazz, errno);
+        return;
+    }
+
+    while ((de = readdir(d))) {
+        if (de->d_name[0] == '.')
+            continue;
+        if (add_pid_to_cgroup(atoi(de->d_name), grp)) {
+            signalExceptionForGroupError(env, clazz, errno);
+            closedir(d);
+            return;
+        }
+    }
+    closedir(d);
+}
+
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
@@ -820,6 +850,7 @@ static const JNINativeMethod methods[] = {
     {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
+    {"setProcessGroup",      "(II)V", (void*)android_os_Process_setProcessGroup},
     {"setOomAdj",   "(II)Z", (void*)android_os_Process_setOomAdj},
     {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
     {"setUid", "(I)I", (void*)android_os_Process_setUid},
