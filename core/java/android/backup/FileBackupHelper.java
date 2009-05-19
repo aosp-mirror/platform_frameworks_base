@@ -53,15 +53,12 @@ public class FileBackupHelper {
         }
         // oldStateFd can be null
         FileDescriptor oldStateFd = oldState != null ? oldState.getFileDescriptor() : null;
-        if (data.fd == null) {
-            throw new NullPointerException();
-        }
         FileDescriptor newStateFd = newState.getFileDescriptor();
         if (newStateFd == null) {
             throw new NullPointerException();
         }
 
-        int err = performBackup_native(basePath, oldStateFd, data.fd, newStateFd, files);
+        int err = performBackup_native(basePath, oldStateFd, data.mBackupWriter, newStateFd, files);
 
         if (err != 0) {
             throw new RuntimeException("Backup failed"); // TODO: more here
@@ -69,5 +66,5 @@ public class FileBackupHelper {
     }
 
     native private static int performBackup_native(String basePath, FileDescriptor oldState,
-            FileDescriptor data, FileDescriptor newState, String[] files);
+            int data, FileDescriptor newState, String[] files);
 }

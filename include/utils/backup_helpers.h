@@ -22,24 +22,27 @@
 
 namespace android {
 
-int back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
-        char const* fileBase, char const* const* files, int fileCount);
+enum {
+    BACKUP_HEADER_APP_V1 = 0x31707041, // App1 (little endian)
+    BACKUP_HEADER_ENTITY_V1 = 0x61746144, // Data (little endian)
+    BACKUP_FOOTER_APP_V1 = 0x746f6f46, // Foot (little endian)
+};
 
 // the sizes of all of these match.
 typedef struct {
-    int type; // == APP_MAGIC_V1
+    int type; // == BACKUP_HEADER_APP_V1
     int packageLen; // length of the name of the package that follows, not including the null.
     int cookie;
 } app_header_v1;
 
 typedef struct {
-    int type; // ENTITY_MAGIC_V1
+    int type; // BACKUP_HEADER_ENTITY_V1
     int keyLen; // length of the key name, not including the null terminator
-    int dataSize; // size of the data, not including the padding
+    int dataSize; // size of the data, not including the padding, -1 means delete
 } entity_header_v1;
 
 typedef struct {
-    int type; // FOOTER_MAGIC_V1
+    int type; // BACKUP_FOOTER_APP_V1
     int entityCount; // the number of entities that were written
     int cookie;
 } app_footer_v1;
@@ -89,11 +92,12 @@ public:
     ~BackupDataReader();
 
     status_t Status();
-    status_t ReadNextHeader();
+    status_t ReadNextHeader(int* type = NULL);
 
     status_t ReadAppHeader(String8* packageName, int* cookie);
     bool HasEntities();
     status_t ReadEntityHeader(String8* key, size_t* dataSize);
+    status_t SkipEntityData(); // must be called with the pointer at the begining of the data.
     status_t ReadEntityData(void* data, size_t size);
     status_t ReadAppFooter(int* cookie);
 
@@ -113,7 +117,11 @@ private:
     } m_header;
 };
 
-#define TEST_BACKUP_HELPERS 0
+int back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD,
+        char const* fileBase, char const* const* files, int fileCount);
+
+
+#define TEST_BACKUP_HELPERS 1
 
 #if TEST_BACKUP_HELPERS
 int backup_helper_test_empty();

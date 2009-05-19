@@ -28,7 +28,7 @@ namespace android
 static jfieldID s_descriptorField = 0;
 
 static int
-performBackup_native(JNIEnv* env, jobject clazz, jstring basePath, jobject oldState, jobject data,
+performBackup_native(JNIEnv* env, jobject clazz, jstring basePath, jobject oldState, int data,
         jobject newState, jobjectArray files)
 {
     int err;
@@ -37,7 +37,7 @@ performBackup_native(JNIEnv* env, jobject clazz, jstring basePath, jobject oldSt
     LOGD("oldState=%p newState=%p data=%p\n", oldState, newState, data);
     int oldStateFD = oldState != NULL ? env->GetIntField(oldState, s_descriptorField) : -1;
     int newStateFD = env->GetIntField(newState, s_descriptorField);
-    int dataFD = env->GetIntField(data, s_descriptorField);
+    BackupDataWriter* dataStream = (BackupDataWriter*)data;
 
     char const* basePathUTF = env->GetStringUTFChars(basePath, NULL);
     LOGD("basePathUTF=\"%s\"\n", basePathUTF);
@@ -47,7 +47,7 @@ performBackup_native(JNIEnv* env, jobject clazz, jstring basePath, jobject oldSt
         filesUTF[i] = env->GetStringUTFChars((jstring)env->GetObjectArrayElement(files, i), NULL);
     }
 
-    err = back_up_files(oldStateFD, dataFD, newStateFD, basePathUTF, filesUTF, fileCount);
+    err = back_up_files(oldStateFD, dataStream, newStateFD, basePathUTF, filesUTF, fileCount);
 
     for (int i=0; i<fileCount; i++) {
         env->ReleaseStringUTFChars((jstring)env->GetObjectArrayElement(files, i), filesUTF[i]);
@@ -60,8 +60,7 @@ performBackup_native(JNIEnv* env, jobject clazz, jstring basePath, jobject oldSt
 
 static const JNINativeMethod g_methods[] = {
     { "performBackup_native",
-        "(Ljava/lang/String;Ljava/io/FileDescriptor;Ljava/io/FileDescriptor;"
-        "Ljava/io/FileDescriptor;[Ljava/lang/String;)I",
+        "(Ljava/lang/String;Ljava/io/FileDescriptor;ILjava/io/FileDescriptor;[Ljava/lang/String;)I",
         (void*)performBackup_native },
 };
 
