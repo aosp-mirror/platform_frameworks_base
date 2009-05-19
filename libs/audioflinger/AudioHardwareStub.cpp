@@ -23,6 +23,7 @@
 #include <utils/String8.h>
 
 #include "AudioHardwareStub.h"
+#include <media/AudioRecord.h>
 
 namespace android {
 
@@ -56,9 +57,15 @@ AudioStreamOut* AudioHardwareStub::openOutputStream(
 }
 
 AudioStreamIn* AudioHardwareStub::openInputStream(
-        int format, int channelCount, uint32_t sampleRate,
+        int inputSource, int format, int channelCount, uint32_t sampleRate,
         status_t *status, AudioSystem::audio_in_acoustics acoustics)
 {
+    // check for valid input source
+    if ((inputSource != AudioRecord::DEFAULT_INPUT) &&
+            (inputSource != AudioRecord::MIC_INPUT)) {
+        return 0;
+    }
+
     AudioStreamInStub* in = new AudioStreamInStub();
     status_t lStatus = in->set(format, channelCount, sampleRate, acoustics);
     if (status) {
@@ -68,6 +75,15 @@ AudioStreamIn* AudioHardwareStub::openInputStream(
         return in;
     delete in;
     return 0;
+}
+
+// DEPRECATED
+AudioStreamIn* AudioHardwareStub::openInputStream(
+        int format, int channelCount, uint32_t sampleRate, status_t *status,
+        AudioSystem::audio_in_acoustics acoustic_flags)
+{
+    return openInputStream(AudioRecord::DEFAULT_INPUT, format, channelCount,
+            sampleRate, status, acoustic_flags);
 }
 
 status_t AudioHardwareStub::setVoiceVolume(float volume)
