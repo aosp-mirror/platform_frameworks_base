@@ -747,8 +747,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                  * first and then off.. if nobody else wants it on it'll be
                  * off then and it's all synchronized within the API.
                  */
-                mWM.enableWifiMulticast("WifiStateTracker");
-                mWM.disableWifiMulticast();
+                mWM.enableMulticast("WifiStateTracker");
+                mWM.disableMulticast();
 
                 if (mBluetoothA2dp == null) {
                     mBluetoothA2dp = new BluetoothA2dp(mContext);

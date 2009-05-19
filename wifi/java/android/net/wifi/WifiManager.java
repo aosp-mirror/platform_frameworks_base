@@ -831,9 +831,9 @@ public class WifiManager {
      *
      * @hide pending API council approval
      */
-    public boolean isWifiMulticastEnabled() {
+    public boolean isMulticastEnabled() {
         try {
-            return mService.isWifiMulticastEnabled();
+            return mService.isMulticastEnabled();
         } catch (RemoteException e) {
             return false;
         }
@@ -851,13 +851,13 @@ public class WifiManager {
      *
      * @return true on success
      *
-     * @see #disableWifiMulticast
+     * @see #disableMulticast
      *
      * @hide pending API council approval
      */
-    public boolean enableWifiMulticast(String tag) {
+    public boolean enableMulticast(String tag) {
         try {
-            mService.enableWifiMulticast(new Binder(), tag);
+            mService.enableMulticast(new Binder(), tag);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -872,13 +872,13 @@ public class WifiManager {
      *
      * @return true on success
      *
-     * @see #enableWifiMulticast
+     * @see #enableMulticast
      *
      * @hide pending API council approval
      */
-    public boolean disableWifiMulticast() {
+    public boolean disableMulticast() {
         try {
-            mService.disableWifiMulticast();
+            mService.disableMulticast();
             return true;
         } catch (RemoteException e) {
             return false;

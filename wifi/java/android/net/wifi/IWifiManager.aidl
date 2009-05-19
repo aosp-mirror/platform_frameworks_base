@@ -70,10 +70,10 @@ interface IWifiManager
 
     boolean releaseWifiLock(IBinder lock);
 
-    boolean isWifiMulticastEnabled();
+    boolean isMulticastEnabled();
 
-    void enableWifiMulticast(IBinder binder, String tag);
+    void enableMulticast(IBinder binder, String tag);
 
-    void disableWifiMulticast();
+    void disableMulticast();
 }
 
