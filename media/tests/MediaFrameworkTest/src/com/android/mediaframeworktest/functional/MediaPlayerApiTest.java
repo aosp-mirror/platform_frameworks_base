@@ -410,7 +410,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     //Play a mid file which the duration is around 210 seconds
     @LargeTest
     public void testMidiResources() throws Exception {
-      boolean midiResources = CodecTest.resourcesPlayback(MediaFrameworkTest.midiafd,180000);
+      boolean midiResources = CodecTest.resourcesPlayback(MediaFrameworkTest.midiafd,16000);
       assertTrue("Play midi from resources", midiResources);         
     }
     
@@ -422,7 +422,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @MediumTest
     public void testPrepareAsyncReset() throws Exception {
-      boolean isReset = CodecTest.prepareAsyncReset(MediaNames.STREAM_LARGE_MP3);
+      boolean isReset = CodecTest.prepareAsyncReset(MediaNames.STREAM_MP3);
       assertTrue("PrepareAsync Reset", isReset);         
     }
     
