@@ -223,7 +223,10 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     }
     
     private String getExpectedResultFile(String test) {
-        String shortName = test.substring(0, test.lastIndexOf('.'));
+        int pos = test.lastIndexOf('.');
+        if(pos == -1)
+            return null;
+        String shortName = test.substring(0, pos);
         return shortName + "-expected.txt";          
     }
 
@@ -303,6 +306,10 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         });
 
         String resultFile = getResultFile(test);
+        if(resultFile == null) {
+            //simply ignore this test
+            return;
+        }
         if (mRebaselineResults) {
             String expectedResultFile = getExpectedResultFile(test);
             File f = new File(expectedResultFile);
