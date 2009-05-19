@@ -1329,9 +1329,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } else {
                     // We need to retain the last set padding, so just clear
                     // out all of the fields in the existing structure.
+                    if (dr.mDrawableLeft != null) dr.mDrawableLeft.setCallback(null);
                     dr.mDrawableLeft = null;
+                    if (dr.mDrawableTop != null) dr.mDrawableTop.setCallback(null);
                     dr.mDrawableTop = null;
+                    if (dr.mDrawableRight != null) dr.mDrawableRight.setCallback(null);
                     dr.mDrawableRight = null;
+                    if (dr.mDrawableBottom != null) dr.mDrawableBottom.setCallback(null);
                     dr.mDrawableBottom = null;
                     dr.mDrawableSizeLeft = dr.mDrawableHeightLeft = 0;
                     dr.mDrawableSizeRight = dr.mDrawableHeightRight = 0;
@@ -1344,19 +1348,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mDrawables = dr = new Drawables();
             }
 
+            if (dr.mDrawableLeft != left && dr.mDrawableLeft != null) {
+                dr.mDrawableLeft.setCallback(null);
+            }
             dr.mDrawableLeft = left;
+            if (dr.mDrawableTop != left && dr.mDrawableTop != null) {
+                dr.mDrawableTop.setCallback(null);
+            }
             dr.mDrawableTop = top;
+            if (dr.mDrawableRight != left && dr.mDrawableRight != null) {
+                dr.mDrawableRight.setCallback(null);
+            }
             dr.mDrawableRight = right;
+            if (dr.mDrawableBottom != left && dr.mDrawableBottom != null) {
+                dr.mDrawableBottom.setCallback(null);
+            }
             dr.mDrawableBottom = bottom;
 
             final Rect compoundRect = dr.mCompoundRect;
-            int[] state = null;
+            int[] state;
 
             state = getDrawableState();
 
             if (left != null) {
                 left.setState(state);
                 left.copyBounds(compoundRect);
+                left.setCallback(this);
                 dr.mDrawableSizeLeft = compoundRect.width();
                 dr.mDrawableHeightLeft = compoundRect.height();
             } else {
@@ -1366,6 +1383,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (right != null) {
                 right.setState(state);
                 right.copyBounds(compoundRect);
+                right.setCallback(this);
                 dr.mDrawableSizeRight = compoundRect.width();
                 dr.mDrawableHeightRight = compoundRect.height();
             } else {
@@ -1375,6 +1393,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (top != null) {
                 top.setState(state);
                 top.copyBounds(compoundRect);
+                top.setCallback(this);
                 dr.mDrawableSizeTop = compoundRect.height();
                 dr.mDrawableWidthTop = compoundRect.width();
             } else {
@@ -1384,6 +1403,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (bottom != null) {
                 bottom.setState(state);
                 bottom.copyBounds(compoundRect);
+                bottom.setCallback(this);
                 dr.mDrawableSizeBottom = compoundRect.height();
                 dr.mDrawableWidthBottom = compoundRect.width();
             } else {
