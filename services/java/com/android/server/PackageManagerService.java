@@ -2903,8 +2903,13 @@ class PackageManagerService extends IPackageManager.Stub {
             int N = packageActivities.size();
             ArrayList<ArrayList<PackageParser.ActivityIntentInfo>> listCut =
                 new ArrayList<ArrayList<PackageParser.ActivityIntentInfo>>(N);
+
+            ArrayList<PackageParser.ActivityIntentInfo> intentFilters;
             for (int i = 0; i < N; ++i) {
-                listCut.add(packageActivities.get(i).intents);
+                intentFilters = packageActivities.get(i).intents;
+                if (intentFilters != null && intentFilters.size() > 0) {
+                    listCut.add(intentFilters);
+                }
             }
             return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut);
         }
