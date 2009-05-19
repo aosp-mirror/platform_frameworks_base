@@ -32,8 +32,13 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.io.FileOutputStream;
 import java.util.Random;
 /**
  * Junit / Instrumentation test case for the media player api
@@ -80,7 +85,9 @@ public class CodecTest {
         try{
             mp.setDataSource(filePath);
             mp.prepare(); 
-        }catch (Exception e){}
+        }catch (Exception e){
+            Log.v(TAG, e.toString());
+        }
         int duration = mp.getDuration();
         Log.v(TAG, "Duration " + duration);
         mp.release();
@@ -529,7 +536,6 @@ public class CodecTest {
 
             //Verify the thumbnail 
             Bitmap goldenBitmap = mBitmapFactory.decodeFile(goldenPath);
-
             outputWidth = outThumbnail.getWidth();
             outputHeight = outThumbnail.getHeight();
             goldenHeight = goldenBitmap.getHeight();
@@ -539,15 +545,18 @@ public class CodecTest {
             if ((outputWidth != goldenWidth) || (outputHeight != goldenHeight))
                 return false;
 
-            //Check one line of pixel
-            int x = goldenHeight/2;
-            for (int j=0; j<goldenWidth; j++){
-                if (goldenBitmap.getPixel(x, j) != outThumbnail.getPixel(x, j)){
+            // Check half line of pixel
+            int x = goldenHeight / 2;
+            for (int j = 1; j < goldenWidth / 2; j++) {
+                if (goldenBitmap.getPixel(x, j) != outThumbnail.getPixel(x, j)) {
                     Log.v(TAG, "pixel = " + goldenBitmap.getPixel(x, j));
-                    return false;    
+                    return false;
                 }
-            }
-        }catch (Exception e){}
+           }
+        }catch (Exception e){
+            Log.v(TAG, e.toString());
+            return false;
+        }
         return true;
     }
 
