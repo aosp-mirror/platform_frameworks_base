@@ -390,27 +390,24 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
 
     /**
      * <p>
-     * Call mOpenHelper.getWritableDatabase() and mDb.beginTransaction().
-     * {@link #endTransaction} MUST be called after calling this method.
-     * Those methods should be used like this:
+     * Start batch transaction. {@link #endTransaction} MUST be called after 
+     * calling this method. Those methods should be used like this:
      * </p>
      *
      * <pre class="prettyprint">
      * boolean successful = false;
-     * if (!beginTransaction()) {
-     *     return;
-     * }
+     * beginBatch()
      * try {
      *     // Do something related to mDb
      *     successful = true;
      *     return ret;
      * } finally {
-     *     endTransaction(successful);
+     *     endBatch(successful);
      * }
      * </pre>
      *
      * @hide This method should be used only when {@link #applyBatch} is not enough and must be
-     * used with {@link #endTransaction}.
+     * used with {@link #endBatch}.
      * e.g. If returned value has to be used during one transaction, this method might be useful.
      */
     public final void beginBatch() {
@@ -440,7 +437,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
 
     /**
      * <p>
-     * Call mDb.endTransaction(). If successful is true, try to call
+     * Finish batch transaction. If "successful" is true, try to call
      * mDb.setTransactionSuccessful() before calling mDb.endTransaction().
      * This method MUST be used with {@link #beginBatch()}.
      * </p>
@@ -461,7 +458,6 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
                 getContext().getContentResolver().notifyChange(url, null /* observer */,
                         changeRequiresLocalSync(url));
             }
-            mDb.endTransaction();
         }
     }
 
