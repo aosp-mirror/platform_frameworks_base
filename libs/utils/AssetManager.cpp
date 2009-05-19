@@ -901,6 +901,60 @@ AssetDir* AssetManager::openDir(const char* dirName)
 }
 
 /*
+ * Open a directory in the non-asset namespace.
+ *
+ * An "asset directory" is simply the combination of all files in all
+ * locations, with ".gz" stripped for loose files.  With app, locale, and
+ * vendor defined, we have 8 directories and 2 Zip archives to scan.
+ *
+ * Pass in "" for the root dir.
+ */
+AssetDir* AssetManager::openNonAssetDir(void* cookie, const char* dirName)
+{
+    AutoMutex _l(mLock);
+
+    AssetDir* pDir = NULL;
+    SortedVector<AssetDir::FileInfo>* pMergedInfo = NULL;
+
+    LOG_FATAL_IF(mAssetPaths.size() == 0, "No assets added to AssetManager");
+    assert(dirName != NULL);
+
+    //printf("+++ openDir(%s) in '%s'\n", dirName, (const char*) mAssetBase);
+
+    if (mCacheMode != CACHE_OFF && !mCacheValid)
+        loadFileNameCacheLocked();
+
+    pDir = new AssetDir;
+
+    pMergedInfo = new SortedVector<AssetDir::FileInfo>;
+
+    const size_t which = ((size_t)cookie)-1;
+
+    if (which < mAssetPaths.size()) {
+        const asset_path& ap = mAssetPaths.itemAt(which);
+        if (ap.type == kFileTypeRegular) {
+            LOGV("Adding directory %s from zip %s", dirName, ap.path.string());
+            scanAndMergeZipLocked(pMergedInfo, ap, NULL, dirName);
+        } else {
+            LOGV("Adding directory %s from dir %s", dirName, ap.path.string());
+            scanAndMergeDirLocked(pMergedInfo, ap, NULL, dirName);
+        }
+    }
+
+#if 0
+    printf("FILE LIST:\n");
+    for (i = 0; i < (size_t) pMergedInfo->size(); i++) {
+        printf(" %d: (%d) '%s'\n", i,
+            pMergedInfo->itemAt(i).getFileType(),
+            (const char*) pMergedInfo->itemAt(i).getFileName());
+    }
+#endif
+
+    pDir->setFileList(pMergedInfo);
+    return pDir;
+}
+
+/*
  * Scan the contents of the specified directory and merge them into the
  * "pMergedInfo" vector, removing previous entries if we find "exclude"
  * directives.
@@ -1143,6 +1197,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
             LOGE("ARGH: name too long?\n");
             continue;
         }
+        //printf("Comparing %s in %s?\n", nameBuf, dirName.string());
         if (dirNameLen == 0 ||
             (strncmp(nameBuf, dirName.string(), dirNameLen) == 0 &&
              nameBuf[dirNameLen] == '/'))
@@ -1165,7 +1220,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
                     createZipSourceNameLocked(zipName, dirName, info.getFileName()));
 
                 contents.add(info);
-                //printf("FOUND: file '%s'\n", (const char*) info.mFileName);
+                //printf("FOUND: file '%s'\n", info.getFileName().string());
             } else {
                 /* this is a subdir; add it if we don't already have it*/
                 String8 subdirName(cp, nextSlash - cp);
@@ -1181,7 +1236,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
                     dirs.add(subdirName);
                 }
 
-                //printf("FOUND: dir '%s'\n", (const char*) subdirName);
+                //printf("FOUND: dir '%s'\n", subdirName.string());
             }
         }
     }

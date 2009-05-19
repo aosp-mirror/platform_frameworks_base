@@ -153,6 +153,18 @@ public:
     AssetDir* openDir(const char* dirName);
 
     /*
+     * Open a directory within a particular path of the asset manager.
+     *
+     * The contents of the directory are an amalgam of vendor-specific,
+     * locale-specific, and generic assets stored loosely or in asset
+     * packages.  Depending on the cache setting and previous accesses,
+     * this call may incur significant disk overhead.
+     *
+     * To open the top-level directory, pass in "".
+     */
+    AssetDir* openNonAssetDir(void* cookie, const char* dirName);
+
+    /*
      * Get the type of a file in the asset hierarchy.  They will either
      * be "regular" or "directory".  [Currently only works for "regular".]
      *
