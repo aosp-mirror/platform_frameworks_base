@@ -16,15 +16,20 @@
 
 package com.android.gesture;
 
-import android.view.MotionEvent;
-
 /**
- * An interface for processing gesture events
+ * A timed point of a gesture stroke
  */
-public interface GestureListener {
-    public void onStartGesture(GestureOverlay overlay, MotionEvent event);
 
-    public void onGesture(GestureOverlay overlay, MotionEvent event);
+public class GesturePoint {
+    public final float xpos;
 
-    public void onFinishGesture(GestureOverlay overlay, MotionEvent event);
+    public final float ypos;
+
+    public final long timestamp;
+
+    public GesturePoint(float x, float y, long t) {
+        xpos = x;
+        ypos = y;
+        timestamp = t;
+    }
 }

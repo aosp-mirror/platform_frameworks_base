@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package com.android.gesture.example;
 
-import android.view.MotionEvent;
 
-/**
- * An interface for processing gesture events
- */
-public interface GestureListener {
-    public void onStartGesture(GestureOverlay overlay, MotionEvent event);
+class ContactItem {
+    final String itemName;
 
-    public void onGesture(GestureOverlay overlay, MotionEvent event);
+    final long itemID;
 
-    public void onFinishGesture(GestureOverlay overlay, MotionEvent event);
+    public ContactItem(long id, String name) {
+        itemID = id;
+        itemName = name;
+    }
+
+    @Override
+    public String toString() {
+        return itemName;
+    }
 }
