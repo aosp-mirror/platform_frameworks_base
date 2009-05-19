@@ -112,9 +112,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (events != 0) {
             // check permissions
             if ((events & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
-
+                // ACCESS_FINE_LOCATION implies ACCESS_COARSE_LOCATION
+                if (mContext.checkCallingPermission(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    mContext.enforceCallingOrSelfPermission(
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
+                }
             }
 
             synchronized (mRecords) {

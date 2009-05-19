@@ -192,8 +192,9 @@ public class TelephonyManager {
     /**
      * Returns the current location of the device.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#ACCESS_COARSE_LOCATION
-     * ACCESS_COARSE_LOCATION}.
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_FINE_LOCATION}.
      */
     public CellLocation getCellLocation() {
         try {
