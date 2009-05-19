@@ -2407,7 +2407,9 @@ bool AudioFlinger::AudioRecordThread::threadLoop()
                
                 LOGV("AudioRecordThread: loop starting");
                 if (mRecordTrack != 0) {
-                    input = mAudioHardware->openInputStream(mRecordTrack->format(), 
+                    input = mAudioHardware->openInputStream(
+                                    mRecordTrack->type(),
+                                    mRecordTrack->format(), 
                                     mRecordTrack->channelCount(), 
                                     mRecordTrack->sampleRate(), 
                                     &mStartStatus,
