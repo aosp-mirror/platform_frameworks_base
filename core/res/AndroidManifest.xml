@@ -973,7 +973,7 @@
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:label="@string/permlab_bindGadget"
         android:description="@string/permdesc_bindGadget"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows applications to change the background data setting
          @hide pending API council -->
