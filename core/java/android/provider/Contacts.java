@@ -349,27 +349,33 @@ public class Contacts {
         }
 
         /**
+         * @hide Used in vCard parser code.
+         */
+        public static long tryGetMyContactsGroupId(ContentResolver resolver) {
+            Cursor groupsCursor = resolver.query(Groups.CONTENT_URI, GROUPS_PROJECTION,
+                    Groups.SYSTEM_ID + "='" + Groups.GROUP_MY_CONTACTS + "'", null, null);
+            if (groupsCursor != null) {
+                try {
+                    if (groupsCursor.moveToFirst()) {
+                        return groupsCursor.getLong(0);
+                    }
+                } finally {
+                    groupsCursor.close();
+                }
+            }
+            return 0;
+        }
+
+        /**
          * Adds a person to the My Contacts group.
-         * 
+         *
          * @param resolver the resolver to use
          * @param personId the person to add to the group
          * @return the URI of the group membership row
          * @throws IllegalStateException if the My Contacts group can't be found
          */
         public static Uri addToMyContactsGroup(ContentResolver resolver, long personId) {
-            long groupId = 0;
-            Cursor groupsCursor = resolver.query(Groups.CONTENT_URI, GROUPS_PROJECTION,
-                    Groups.SYSTEM_ID + "='" + Groups.GROUP_MY_CONTACTS + "'", null, null);
-            if (groupsCursor != null) {
-                try {
-                    if (groupsCursor.moveToFirst()) {
-                        groupId = groupsCursor.getLong(0);
-                    }
-                } finally {
-                    groupsCursor.close();
-                }
-            }
-
+            long groupId = tryGetMyContactsGroupId(resolver);
             if (groupId == 0) {
                 throw new IllegalStateException("Failed to find the My Contacts group");
             }
