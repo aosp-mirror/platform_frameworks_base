@@ -604,6 +604,20 @@ public class Process {
      */
     public static final native void setThreadGroup(int tid, int group)
             throws IllegalArgumentException, SecurityException;
+    /**
+     * Sets the scheduling group for a process and all child threads
+     * @hide
+     * @param pid The indentifier of the process to change.
+     * @param group The target group for this process.
+     * 
+     * @throws IllegalArgumentException Throws IllegalArgumentException if
+     * <var>tid</var> does not exist.
+     * @throws SecurityException Throws SecurityException if your process does
+     * not have permission to modify the given thread, or to use the given
+     * priority.
+     */
+    public static final native void setProcessGroup(int pid, int group)
+            throws IllegalArgumentException, SecurityException;
     
     /**
      * Set the priority of the calling thread, based on Linux priorities.  See
