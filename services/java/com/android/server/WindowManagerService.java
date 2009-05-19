@@ -3721,7 +3721,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     private final void wakeupIfNeeded(WindowState targetWin, int eventType) {
         long curTime = SystemClock.uptimeMillis();
 
-        if (eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT) {
+        if (eventType == TOUCH_EVENT || eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT) {
             if (mLastTouchEventType == eventType &&
                     (curTime - mLastUserActivityCallTime) < MIN_TIME_BETWEEN_USERACTIVITIES) {
                 return;
@@ -5194,7 +5194,21 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         } catch (RemoteException e) {
                             // Ignore
                         }
-                        mPowerManager.userActivity(curTime, false, eventType, false);
+
+                        if (eventType != TOUCH_EVENT
+                                && eventType != LONG_TOUCH_EVENT
+                                && eventType != CHEEK_EVENT) {
+                            mPowerManager.userActivity(curTime, false,
+                                    eventType, false);
+                        } else if (mLastTouchEventType != eventType
+                                || (curTime - mLastUserActivityCallTime)
+                                >= MIN_TIME_BETWEEN_USERACTIVITIES) {
+                            mLastUserActivityCallTime = curTime;
+                            mLastTouchEventType = eventType;
+                            mPowerManager.userActivity(curTime, false,
+                                    eventType, false);
+                        }
+
                         switch (ev.classType) {
                             case RawInputEvent.CLASS_KEYBOARD:
                                 KeyEvent ke = (KeyEvent)ev.event;
