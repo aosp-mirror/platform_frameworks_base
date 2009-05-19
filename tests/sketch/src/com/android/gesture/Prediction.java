@@ -16,15 +16,18 @@
 
 package com.android.gesture;
 
-import android.view.MotionEvent;
+public class Prediction {
+    public final String name;
 
-/**
- * An interface for processing gesture events
- */
-public interface GestureListener {
-    public void onStartGesture(GestureOverlay overlay, MotionEvent event);
+    public double score;
 
-    public void onGesture(GestureOverlay overlay, MotionEvent event);
+    Prediction(String label, double predictionScore) {
+        name = label;
+        score = predictionScore;
+    }
 
-    public void onFinishGesture(GestureOverlay overlay, MotionEvent event);
+    @Override
+    public String toString() {
+        return name;
+    }
 }
