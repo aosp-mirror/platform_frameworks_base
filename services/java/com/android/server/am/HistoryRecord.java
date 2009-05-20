@@ -85,6 +85,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean haveState;      // have we gotten the last activity state?
     boolean stopped;        // is activity pause finished?
+    boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
     boolean configDestroy;  // need to destroy due to config change?
     int configChangeFlags;  // which config values have changed
@@ -146,6 +147,7 @@ class HistoryRecord extends IApplicationToken.Stub {
                 pw.print(" icicle="); pw.println(icicle);
         pw.print(prefix); pw.print("state="); pw.print(state);
                 pw.print(" stopped="); pw.print(stopped);
+                pw.print(" delayedResume="); pw.print(delayedResume);
                 pw.print(" finishing="); pw.println(finishing);
         pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
                 pw.print(" inHistory="); pw.print(inHistory);
@@ -191,6 +193,7 @@ class HistoryRecord extends IApplicationToken.Stub {
         launchFailed = false;
         haveState = false;
         stopped = false;
+        delayedResume = false;
         finishing = false;
         configDestroy = false;
         keysPaused = false;

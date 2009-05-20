@@ -44,9 +44,30 @@ import java.util.List;
  * {@hide}
  */
 public interface IActivityManager extends IInterface {
+    /**
+     * Returned by startActivity() if the start request was canceled because
+     * app switches are temporarily canceled to ensure the user's last request
+     * (such as pressing home) is performed.
+     */
+    public static final int START_SWITCHES_CANCELED = 4;
+    /**
+     * Returned by startActivity() if an activity wasn't really started, but
+     * the given Intent was given to the existing top activity.
+     */
     public static final int START_DELIVERED_TO_TOP = 3;
+    /**
+     * Returned by startActivity() if an activity wasn't really started, but
+     * a task was simply brought to the foreground.
+     */
     public static final int START_TASK_TO_FRONT = 2;
+    /**
+     * Returned by startActivity() if the caller asked that the Intent not
+     * be executed if it is the recipient, and that is indeed the case.
+     */
     public static final int START_RETURN_INTENT_TO_CALLER = 1;
+    /**
+     * Activity was started successfully as normal.
+     */
     public static final int START_SUCCESS = 0;
     public static final int START_INTENT_NOT_RESOLVED = -1;
     public static final int START_CLASS_NOT_FOUND = -2;
@@ -225,6 +246,9 @@ public interface IActivityManager extends IInterface {
     
     public boolean shutdown(int timeout) throws RemoteException;
     
+    public void stopAppSwitches() throws RemoteException;
+    public void resumeAppSwitches() throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -371,4 +395,6 @@ public interface IActivityManager extends IInterface {
     int PEEK_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+84;
     int PROFILE_CONTROL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+85;
     int SHUTDOWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+86;
+    int STOP_APP_SWITCHES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+87;
+    int RESUME_APP_SWITCHES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+88;
 }

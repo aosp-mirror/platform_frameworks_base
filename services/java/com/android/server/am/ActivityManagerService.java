@@ -191,6 +191,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // Maximum number of recent tasks that we can remember.
     static final int MAX_RECENT_TASKS = 20;
 
+    // Amount of time after a call to stopAppSwitches() during which we will
+    // prevent further untrusted switches from happening.
+    static final long APP_SWITCH_DELAY_TIME = 5*1000;
+    
     // How long until we reset a task when the user returns to it.  Currently
     // 30 minutes.
     static final long ACTIVITY_INACTIVE_RESET_TIME = 1000*60*30;
@@ -327,6 +331,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     final ArrayList mHistory = new ArrayList();
 
+    /**
+     * Description of a request to start a new activity, which has been held
+     * due to app switches being disabled.
+     */
+    class PendingActivityLaunch {
+        HistoryRecord r;
+        HistoryRecord sourceRecord;
+        Uri[] grantedUriPermissions;
+        int grantedMode;
+        boolean onlyIfNeeded;
+    }
+    
+    final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
+            = new ArrayList<PendingActivityLaunch>();
+    
     /**
      * List of all active broadcasts that are to be executed immediately
      * (without waiting for another broadcast to finish).  Currently this only
@@ -705,6 +724,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     int mFactoryTest;
 
     /**
+     * The time at which we will allow normal application switches again,
+     * after a call to {@link #stopAppSwitches()}.
+     */
+    long mAppSwitchesAllowedTime;
+
+    /**
+     * This is set to true after the first switch after mAppSwitchesAllowedTime
+     * is set; any switches after that will clear the time.
+     */
+    boolean mDidAppSwitch;
+    
+    /**
      * Set while we are wanting to sleep, to prevent any
      * activities from being started/resumed.
      */
@@ -852,6 +883,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int SERVICE_ERROR_MSG = 18;
     static final int RESUME_TOP_ACTIVITY_MSG = 19;
     static final int PROC_START_TIMEOUT_MSG = 20;
+    static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 21;
 
     AlertDialog mUidAlert;
 
@@ -910,6 +942,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     d.show();
                     proc.anrDialog = d;
                 }
+                
+                ensureScreenEnabled();
             } break;
             case SHOW_FACTORY_ERROR_MSG: {
                 Dialog d = new FactoryErrorDialog(
@@ -1039,6 +1073,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processStartTimedOutLocked(app);
+                }
+            }
+            case DO_PENDING_ACTIVITY_LAUNCHES_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    doPendingActivityLaunchesLocked(true);
                 }
             }
             }
@@ -1488,6 +1527,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         while (i >= 0) {
             HistoryRecord r = (HistoryRecord)mHistory.get(i);
             if (!r.finishing && r != notTop) {
+                return r;
+            }
+            i--;
+        }
+        return null;
+    }
+
+    private final HistoryRecord topRunningNonDelayedActivityLocked(HistoryRecord notTop) {
+        int i = mHistory.size()-1;
+        while (i >= 0) {
+            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            if (!r.finishing && !r.delayedResume && r != notTop) {
                 return r;
             }
             i--;
@@ -2245,6 +2296,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return true;
         }
 
+        next.delayedResume = false;
+        
         // If the top activity is the resumed one, nothing to do.
         if (mResumedActivity == next && next.state == ActivityState.RESUMED) {
             // Make sure we have executed any pending transitions, since there
@@ -2471,7 +2524,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return true;
     }
 
-    private final void startActivityLocked(HistoryRecord r, boolean newTask) {
+    private final void startActivityLocked(HistoryRecord r, boolean newTask,
+            boolean doResume) {
         final int NH = mHistory.size();
 
         int addPos = -1;
@@ -2558,7 +2612,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if ((r.intent.getFlags()
                         &Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
                     resetTaskIfNeededLocked(r, r);
-                    doShow = topRunningActivityLocked(null) == r;
+                    doShow = topRunningNonDelayedActivityLocked(null) == r;
                 }
             }
             if (SHOW_APP_STARTING_ICON && doShow) {
@@ -2588,13 +2642,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mWindowManager.validateAppTokens(mHistory);
         }
 
-        resumeTopActivityLocked(null);
+        if (doResume) {
+            resumeTopActivityLocked(null);
+        }
     }
 
     /**
      * Perform clear operation as requested by
-     * {@link Intent#FLAG_ACTIVITY_CLEAR_TOP}: assuming the top task on the
-     * stack is the one that the new activity is being launched in, look for
+     * {@link Intent#FLAG_ACTIVITY_CLEAR_TOP}: search from the top of the
+     * stack to the given task, then look for
      * an instance of that activity in the stack and, if found, finish all
      * activities on top of it and return the instance.
      *
@@ -2602,9 +2658,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @return Returns the old activity that should be continue to be used,
      * or null if none was found.
      */
-    private final HistoryRecord performClearTopTaskLocked(int taskId,
+    private final HistoryRecord performClearTaskLocked(int taskId,
             HistoryRecord newR, boolean doClear) {
         int i = mHistory.size();
+        
+        // First find the requested task.
+        while (i > 0) {
+            i--;
+            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            if (r.task.taskId == taskId) {
+                i++;
+                break;
+            }
+        }
+        
+        // Now clear it.
         while (i > 0) {
             i--;
             HistoryRecord r = (HistoryRecord)mHistory.get(i);
@@ -2840,15 +2908,75 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 intent, resolvedType, aInfo, mConfiguration,
                 resultRecord, resultWho, requestCode, componentSpecified);
 
-        HistoryRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
-                != 0 ? r : null;
-
+        if (mResumedActivity == null
+                || mResumedActivity.info.applicationInfo.uid != callingUid) {
+            if (!checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
+                PendingActivityLaunch pal = new PendingActivityLaunch();
+                pal.r = r;
+                pal.sourceRecord = sourceRecord;
+                pal.grantedUriPermissions = grantedUriPermissions;
+                pal.grantedMode = grantedMode;
+                pal.onlyIfNeeded = onlyIfNeeded;
+                mPendingActivityLaunches.add(pal);
+                return START_SWITCHES_CANCELED;
+            }
+        }
+        
+        if (mDidAppSwitch) {
+            // This is the second allowed switch since we stopped switches,
+            // so now just generally allow switches.  Use case: user presses
+            // home (switches disabled, switch to home, mDidAppSwitch now true);
+            // user taps a home icon (coming from home so allowed, we hit here
+            // and now allow anyone to switch again).
+            mAppSwitchesAllowedTime = 0;
+        } else {
+            mDidAppSwitch = true;
+        }
+     
+        doPendingActivityLaunchesLocked(false);
+        
+        return startActivityUncheckedLocked(r, sourceRecord,
+                grantedUriPermissions, grantedMode, onlyIfNeeded, true);
+    }
+  
+    private final void doPendingActivityLaunchesLocked(boolean doResume) {
+        final int N = mPendingActivityLaunches.size();
+        if (N <= 0) {
+            return;
+        }
+        for (int i=0; i<N; i++) {
+            PendingActivityLaunch pal = mPendingActivityLaunches.get(i);
+            startActivityUncheckedLocked(pal.r, pal.sourceRecord,
+                    pal.grantedUriPermissions, pal.grantedMode, pal.onlyIfNeeded,
+                    doResume && i == (N-1));
+        }
+        mPendingActivityLaunches.clear();
+    }
+    
+    private final int startActivityUncheckedLocked(HistoryRecord r,
+            HistoryRecord sourceRecord, Uri[] grantedUriPermissions,
+            int grantedMode, boolean onlyIfNeeded, boolean doResume) {
+        final Intent intent = r.intent;
+        final int callingUid = r.launchedFromUid;
+        
+        int launchFlags = intent.getFlags();
+        
         // We'll invoke onUserLeaving before onPause only if the launching
         // activity did not explicitly state that this is an automated launch.
         mUserLeaving = (launchFlags&Intent.FLAG_ACTIVITY_NO_USER_ACTION) == 0;
         if (DEBUG_USER_LEAVING) Log.v(TAG,
                 "startActivity() => mUserLeaving=" + mUserLeaving);
         
+        // If the caller has asked not to resume at this point, we make note
+        // of this in the record so that we can skip it when trying to find
+        // the top running activity.
+        if (!doResume) {
+            r.delayedResume = true;
+        }
+        
+        HistoryRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
+                != 0 ? r : null;
+
         // If the onlyIfNeeded flag is set, then we can do this if the activity
         // being launched is the same as the one making the call...  or, as
         // a special case, if we do not know the caller then we count the
@@ -2856,7 +2984,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (onlyIfNeeded) {
             HistoryRecord checkedCaller = sourceRecord;
             if (checkedCaller == null) {
-                checkedCaller = topRunningActivityLocked(notTop);
+                checkedCaller = topRunningNonDelayedActivityLocked(notTop);
             }
             if (!checkedCaller.realActivity.equals(r.realActivity)) {
                 // Caller is not the same as launcher, so always needed.
@@ -2894,7 +3022,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
         }
 
-        if (resultRecord != null && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+        if (r.resultTo != null && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new
             // task...  yet the caller has requested a result back.  Well, that
             // is pretty messed up, so instead immediately send back a cancel
@@ -2902,10 +3030,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // dependency on its originator.
             Log.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
             sendActivityResultLocked(-1,
-                resultRecord, resultWho, requestCode,
+                    r.resultTo, r.resultWho, r.requestCode,
                 Activity.RESULT_CANCELED, null);
             r.resultTo = null;
-            resultRecord = null;
         }
 
         boolean addingToTask = false;
@@ -2916,7 +3043,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // If bring to front is requested, and no result is requested, and
             // we can find a task that was started with this same
             // component, then instead of launching bring that one to the front.
-            if (resultRecord == null) {
+            if (r.resultTo == null) {
                 // See if there is a task to bring to the front.  If this is
                 // a SINGLE_INSTANCE activity, there can be one and only one
                 // instance of it in the history, and it is always in its own
@@ -2938,7 +3065,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     // to have the same behavior as if a new instance was
                     // being started, which means not bringing it to the front
                     // if the caller is not itself in the front.
-                    HistoryRecord curTop = topRunningActivityLocked(notTop);
+                    HistoryRecord curTop = topRunningNonDelayedActivityLocked(notTop);
                     if (curTop.task != taskTop.task) {
                         r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                         boolean callerAtFront = sourceRecord == null
@@ -2959,7 +3086,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // the client said not to do anything if that
                         // is the case, so this is it!  And for paranoia, make
                         // sure we have correctly resumed the top activity.
-                        resumeTopActivityLocked(null);
+                        if (doResume) {
+                            resumeTopActivityLocked(null);
+                        }
                         return START_RETURN_INTENT_TO_CALLER;
                     }
                     if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
@@ -2969,7 +3098,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // from the task up to the one being started.  In most
                         // cases this means we are resetting the task to its
                         // initial state.
-                        HistoryRecord top = performClearTopTaskLocked(
+                        HistoryRecord top = performClearTaskLocked(
                                 taskTop.task.taskId, r, true);
                         if (top != null) {
                             if (top.frontOfTask) {
@@ -3035,7 +3164,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // We didn't do anything...  but it was needed (a.k.a., client
                         // don't use that intent!)  And for paranoia, make
                         // sure we have correctly resumed the top activity.
-                        resumeTopActivityLocked(null);
+                        if (doResume) {
+                            resumeTopActivityLocked(null);
+                        }
                         return START_TASK_TO_FRONT;
                     }
                 }
@@ -3052,8 +3183,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // If the activity being launched is the same as the one currently
             // at the top, then we need to check if it should only be launched
             // once.
-            HistoryRecord top = topRunningActivityLocked(notTop);
-            if (top != null && resultRecord == null) {
+            HistoryRecord top = topRunningNonDelayedActivityLocked(notTop);
+            if (top != null && r.resultTo == null) {
                 if (top.realActivity.equals(r.realActivity)) {
                     if (top.app != null && top.app.thread != null) {
                         if ((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
@@ -3062,7 +3193,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             logStartActivity(LOG_AM_NEW_INTENT, top, top.task);
                             // For paranoia, make sure we have correctly
                             // resumed the top activity.
-                            resumeTopActivityLocked(null);
+                            if (doResume) {
+                                resumeTopActivityLocked(null);
+                            }
                             if (onlyIfNeeded) {
                                 // We don't need to start a new activity, and
                                 // the client said not to do anything if that
@@ -3077,9 +3210,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
         } else {
-            if (resultRecord != null) {
+            if (r.resultTo != null) {
                 sendActivityResultLocked(-1,
-                    resultRecord, resultWho, requestCode,
+                        r.resultTo, r.resultWho, r.requestCode,
                     Activity.RESULT_CANCELED, null);
             }
             return START_CLASS_NOT_FOUND;
@@ -3088,7 +3221,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         boolean newTask = false;
 
         // Should this be considered a new task?
-        if (resultRecord == null && !addingToTask
+        if (r.resultTo == null && !addingToTask
                 && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // todo: should do better management of integers.
             mCurTask++;
@@ -3108,14 +3241,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // In this case, we are adding the activity to an existing
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
-                HistoryRecord top = performClearTopTaskLocked(
+                HistoryRecord top = performClearTaskLocked(
                         sourceRecord.task.taskId, r, true);
                 if (top != null) {
                     logStartActivity(LOG_AM_NEW_INTENT, r, top.task);
                     deliverNewIntentLocked(top, r.intent);
                     // For paranoia, make sure we have correctly
                     // resumed the top activity.
-                    resumeTopActivityLocked(null);
+                    if (doResume) {
+                        resumeTopActivityLocked(null);
+                    }
                     return START_DELIVERED_TO_TOP;
                 }
             } else if (!addingToTask &&
@@ -3128,7 +3263,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     HistoryRecord top = moveActivityToFrontLocked(where);
                     logStartActivity(LOG_AM_NEW_INTENT, r, top.task);
                     deliverNewIntentLocked(top, r.intent);
-                    resumeTopActivityLocked(null);
+                    if (doResume) {
+                        resumeTopActivityLocked(null);
+                    }
                     return START_DELIVERED_TO_TOP;
                 }
             }
@@ -3157,7 +3294,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             EventLog.writeEvent(LOG_AM_CREATE_TASK, r.task.taskId);
         }
         logStartActivity(LOG_AM_CREATE_ACTIVITY, r, r.task);
-        startActivityLocked(r, newTask);
+        startActivityLocked(r, newTask, doResume);
         return START_SUCCESS;
     }
 
@@ -4911,6 +5048,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    final void ensureScreenEnabled() {
+        boolean enableScreen;
+        synchronized (this) {
+            enableScreen = !mBooted;
+            mBooted = true;
+        }
+
+        if (enableScreen) {
+            EventLog.writeEvent(LOG_BOOT_PROGRESS_ENABLE_SCREEN,
+                SystemClock.uptimeMillis());
+            enableScreenAfterBoot();
+        }
+    }
+    
     public final void activityPaused(IBinder token, Bundle icicle) {
         // Refuse possible leaked file descriptors
         if (icicle != null && icicle.hasFileDescriptors()) {
@@ -6251,6 +6402,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 "moveTaskToFront()");
 
         synchronized(this) {
+            if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
+                    Binder.getCallingUid(), "Task to front")) {
+                return;
+            }
             final long origId = Binder.clearCallingIdentity();
             try {
                 int N = mRecentTasks.size();
@@ -6335,6 +6490,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 "moveTaskToBack()");
 
         synchronized(this) {
+            if (mResumedActivity != null && mResumedActivity.task.taskId == task) {
+                if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
+                        Binder.getCallingUid(), "Task to back")) {
+                    return;
+                }
+            }
             final long origId = Binder.clearCallingIdentity();
             moveTaskToBackLocked(task);
             Binder.restoreCallingIdentity(origId);
@@ -6438,6 +6599,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 "moveTaskBackwards()");
 
         synchronized(this) {
+            if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
+                    Binder.getCallingUid(), "Task backwards")) {
+                return;
+            }
             final long origId = Binder.clearCallingIdentity();
             moveTaskBackwardsLocked(task);
             Binder.restoreCallingIdentity(origId);
@@ -7179,6 +7344,55 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public void stopAppSwitches() {
+        if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.STOP_APP_SWITCHES);
+        }
+        
+        synchronized(this) {
+            mAppSwitchesAllowedTime = SystemClock.uptimeMillis()
+                    + APP_SWITCH_DELAY_TIME;
+            mDidAppSwitch = false;
+            mHandler.removeMessages(DO_PENDING_ACTIVITY_LAUNCHES_MSG);
+            Message msg = mHandler.obtainMessage(DO_PENDING_ACTIVITY_LAUNCHES_MSG);
+            mHandler.sendMessageDelayed(msg, APP_SWITCH_DELAY_TIME);
+        }
+    }
+    
+    public void resumeAppSwitches() {
+        if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.STOP_APP_SWITCHES);
+        }
+        
+        synchronized(this) {
+            // Note that we don't execute any pending app switches... we will
+            // let those wait until either the timeout, or the next start
+            // activity request.
+            mAppSwitchesAllowedTime = 0;
+        }
+    }
+    
+    boolean checkAppSwitchAllowedLocked(int callingPid, int callingUid,
+            String name) {
+        if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
+            return true;
+        }
+            
+        final int perm = checkComponentPermission(
+                android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
+                callingUid, -1);
+        if (perm == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        
+        Log.w(TAG, name + " request from " + callingUid + " stopped");
+        return false;
+    }
+    
     public void setDebugApp(String packageName, boolean waitForDebugger,
             boolean persistent) {
         enforceCallingPermission(android.Manifest.permission.SET_DEBUG_APP,
