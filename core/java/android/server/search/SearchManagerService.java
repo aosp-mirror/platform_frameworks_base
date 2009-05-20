@@ -37,9 +37,6 @@ public class SearchManagerService extends ISearchManager.Stub
         // general debugging support
     private static final String TAG = "SearchManagerService";
     private static final boolean DEBUG = false;
-    
-        // configuration choices
-    private static final boolean IMMEDIATE_SEARCHABLES_UPDATE = true;
 
         // class maintenance and general shared data
     private final Context mContext;
@@ -70,9 +67,7 @@ public class SearchManagerService extends ISearchManager.Stub
         
         // After startup settles down, preload the searchables list,
         // which will reduce the delay when the search UI is invoked.
-        if (IMMEDIATE_SEARCHABLES_UPDATE) {
-            mHandler.post(mRunUpdateSearchable);
-        }
+        mHandler.post(mRunUpdateSearchable);
     }
     
     /**
@@ -91,9 +86,7 @@ public class SearchManagerService extends ISearchManager.Stub
                 action.equals(Intent.ACTION_PACKAGE_REMOVED) ||
                 action.equals(Intent.ACTION_PACKAGE_CHANGED)) {
                 mSearchablesDirty = true;
-                if (IMMEDIATE_SEARCHABLES_UPDATE) {
-                    mHandler.post(mRunUpdateSearchable);
-                }
+                mHandler.post(mRunUpdateSearchable);
                 return;
             }
         }
@@ -104,9 +97,7 @@ public class SearchManagerService extends ISearchManager.Stub
      */
     private Runnable mRunUpdateSearchable = new Runnable() {
         public void run() {
-            if (mSearchablesDirty) {
-                updateSearchables();
-            }
+            updateSearchablesIfDirty();
         } 
     };
 
@@ -117,6 +108,15 @@ public class SearchManagerService extends ISearchManager.Stub
     private void updateSearchables() {
         mSearchables.buildSearchableList();
         mSearchablesDirty = false;
+    }
+
+    /**
+     * Updates the list of searchables if needed.
+     */
+    private void updateSearchablesIfDirty() {
+        if (mSearchablesDirty) {
+            updateSearchables();
+        }
     }
 
     /**
@@ -131,11 +131,7 @@ public class SearchManagerService extends ISearchManager.Stub
      * or null if no searchable metadata was available.
      */
     public SearchableInfo getSearchableInfo(ComponentName launchActivity, boolean globalSearch) {
-        // final check.  however we should try to avoid this, because
-        // it slows down the entry into the UI.
-        if (mSearchablesDirty) {
-            updateSearchables();
-        }
+        updateSearchablesIfDirty();
         SearchableInfo si = null;
         if (globalSearch) {
             si = mSearchables.getDefaultSearchable();
@@ -150,6 +146,7 @@ public class SearchManagerService extends ISearchManager.Stub
      * Returns a list of the searchable activities that can be included in global search.
      */
     public List<SearchableInfo> getSearchablesInGlobalSearch() {
+        updateSearchablesIfDirty();
         return mSearchables.getSearchablesInGlobalSearchList();
     }
 
