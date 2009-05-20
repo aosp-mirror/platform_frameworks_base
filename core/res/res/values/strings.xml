@@ -1761,6 +1761,8 @@
     <string name="anr_process">Process <xliff:g id="process">%1$s</xliff:g> is not responding.</string>
     <!-- Button allowing the user to close an application that is not responding. This will kill the application. -->
     <string name="force_close">Force close</string>
+    <!-- Button allowing the user to send a bug report for application which has encountered an error. -->
+    <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
     <!-- Button allowing a developer to connect a debugger to an application that is not responding. -->
