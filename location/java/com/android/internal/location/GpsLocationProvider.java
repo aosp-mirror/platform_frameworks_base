@@ -641,6 +641,16 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         if ("delete_aiding_data".equals(command)) {
             return deleteAidingData(extras);
         }
+        if ("force_time_injection".equals(command)) {
+            return forceTimeInjection();
+        }
+        if ("force_xtra_injection".equals(command)) {
+            if (native_supports_xtra() && mNetworkThread != null) {
+                xtraDownloadRequest();
+                return true;
+            }
+            return false;
+        }
         
         Log.w(TAG, "sendExtraCommand: unknown command " + command);
         return false;
@@ -673,6 +683,15 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             return true;
         }
 
+        return false;
+    }
+
+    private boolean forceTimeInjection() {
+        if (Config.LOGD) Log.d(TAG, "forceTimeInjection");
+        if (mNetworkThread != null) {
+            mNetworkThread.timeInjectRequest();
+            return true;
+        }
         return false;
     }
 
@@ -1004,6 +1023,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
         private long mNextNtpTime = 0;
         private long mNextXtraTime = 0;
+        private boolean mTimeInjectRequested = false;
         private boolean mXtraDownloadRequested = false;
         private boolean mDone = false;
 
@@ -1054,16 +1074,17 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                     }
                     waitTime = getWaitTime();
                 } while (!mDone && ((!mXtraDownloadRequested &&
-                        !mSetSuplServer && !mSetC2KServer && waitTime > 0)
+                        !mTimeInjectRequested && !mSetSuplServer && !mSetC2KServer && waitTime > 0)
                         || !mNetworkAvailable));
                 if (Config.LOGD) Log.d(TAG, "NetworkThread out of wake loop");
                 
                 if (!mDone) {
                     if (mNtpServer != null && 
-                            mNextNtpTime <= System.currentTimeMillis()) {
+                            (mTimeInjectRequested || mNextNtpTime <= System.currentTimeMillis())) {
                         if (Config.LOGD) {
                             Log.d(TAG, "Requesting time from NTP server " + mNtpServer);
                         }
+                        mTimeInjectRequested = false;
                         if (client.requestTime(mNtpServer, 10000)) {
                             long time = client.getNtpTime();
                             long timeReference = client.getNtpTimeReference();
@@ -1096,6 +1117,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                     if ((mXtraDownloadRequested || 
                             (mNextXtraTime > 0 && mNextXtraTime <= System.currentTimeMillis()))
                             && xtraDownloader != null) {
+                        mXtraDownloadRequested = false;
                         byte[] data = xtraDownloader.downloadXtraData();
                         if (data != null) {
                             if (Config.LOGD) {
@@ -1103,7 +1125,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                             }
                             native_inject_xtra_data(data, data.length);
                             mNextXtraTime = 0;
-                            mXtraDownloadRequested = false;
                         } else {
                             mNextXtraTime = System.currentTimeMillis() + RETRY_INTERVAL;
                         }
@@ -1115,6 +1136,11 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         
         synchronized void xtraDownloadRequest() {
             mXtraDownloadRequested = true;
+            notify();
+        }
+
+        synchronized void timeInjectRequest() {
+            mTimeInjectRequested = true;
             notify();
         }
 
