@@ -23,7 +23,6 @@ import android.graphics.Path;
  * An oriented bounding box
  */
 public class OrientedBoundingBox {
-
     public final float squareness;
 
     public final float width;

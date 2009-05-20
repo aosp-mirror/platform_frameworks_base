@@ -21,15 +21,14 @@ package com.android.gesture;
  */
 
 public class GesturePoint {
-    public final float xpos;
-
-    public final float ypos;
+    public final float x;
+    public final float y;
 
     public final long timestamp;
 
     public GesturePoint(float x, float y, long t) {
-        xpos = x;
-        ypos = y;
+        this.x = x;
+        this.y = y;
         timestamp = t;
     }
 }

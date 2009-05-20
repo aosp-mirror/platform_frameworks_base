@@ -69,7 +69,7 @@ public class ContactListGestureOverlay extends Activity {
         setProgressBarIndeterminateVisibility(true);
 
         // create a letter recognizer
-        mRecognizer = LetterRecognizer.getLetterRecognizer(this, LetterRecognizer.LATTIN_LOWERCASE);
+        mRecognizer = LetterRecognizer.getLetterRecognizer(this, LetterRecognizer.LATIN_LOWERCASE);
 
         // load the contact list
         mContactList = (ListView) findViewById(R.id.list);
