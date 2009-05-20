@@ -21,10 +21,10 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
-#include <utils/IMemory.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
+#include <binder/Parcel.h>
+#include <binder/IMemory.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 
 #include <ui/ISurface.h>
 #include <ui/ISurfaceFlingerClient.h>

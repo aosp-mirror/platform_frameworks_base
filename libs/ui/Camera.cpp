@@ -19,9 +19,9 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "Camera"
 #include <utils/Log.h>
-#include <utils/IServiceManager.h>
+#include <binder/IServiceManager.h>
 #include <utils/threads.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <ui/Surface.h>
 #include <ui/Camera.h>
 #include <ui/ICameraService.h>

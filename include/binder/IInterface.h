@@ -18,7 +18,7 @@
 #ifndef ANDROID_IINTERFACE_H
 #define ANDROID_IINTERFACE_H
 
-#include <utils/Binder.h>
+#include <binder/Binder.h>
 
 namespace android {
 

@@ -17,7 +17,7 @@
 #ifndef ANDROID_HARDWARE_CAMERA_HARDWARE_INTERFACE_H
 #define ANDROID_HARDWARE_CAMERA_HARDWARE_INTERFACE_H
 
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <utils/RefBase.h>
 #include <ui/CameraParameters.h>
 #include <ui/Overlay.h>

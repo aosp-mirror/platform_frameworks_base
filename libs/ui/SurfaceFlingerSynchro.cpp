@@ -25,7 +25,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <utils/IPCThreadState.h>
+#include <binder/IPCThreadState.h>
 #include <utils/Log.h>
 
 #include <private/ui/SurfaceFlingerSynchro.h>

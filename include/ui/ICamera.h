@@ -18,10 +18,10 @@
 #define ANDROID_HARDWARE_ICAMERA_H
 
 #include <utils/RefBase.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
 #include <ui/ISurface.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <utils/String8.h>
 #include <ui/Camera.h>
 

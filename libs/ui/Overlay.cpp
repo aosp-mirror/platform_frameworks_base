@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <utils/IMemory.h>
-#include <utils/Parcel.h>
+#include <binder/IMemory.h>
+#include <binder/Parcel.h>
 #include <utils/Errors.h>
-#include <utils/MemoryHeapBase.h>
+#include <binder/MemoryHeapBase.h>
 
 #include <ui/IOverlay.h>
 #include <ui/Overlay.h>

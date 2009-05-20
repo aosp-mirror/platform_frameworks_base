@@ -29,9 +29,9 @@
 #include <utils/Errors.h>
 #include <utils/threads.h>
 #include <utils/KeyedVector.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
-#include <utils/IMemory.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/IMemory.h>
 #include <utils/Log.h>
 
 #include <ui/ISurfaceComposer.h>
@@ -48,7 +48,7 @@
 
 #include <pixelflinger/pixelflinger.h>
 
-#include <utils/BpBinder.h>
+#include <binder/BpBinder.h>
 
 #define VERBOSE(...)	((void)0)
 //#define VERBOSE			LOGD

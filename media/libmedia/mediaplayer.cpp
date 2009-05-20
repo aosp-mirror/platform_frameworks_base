@@ -24,13 +24,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <utils/IServiceManager.h>
-#include <utils/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/IPCThreadState.h>
 
 #include <media/mediaplayer.h>
 #include <media/AudioTrack.h>
 
-#include <utils/MemoryBase.h>
+#include <binder/MemoryBase.h>
 
 namespace android {
 

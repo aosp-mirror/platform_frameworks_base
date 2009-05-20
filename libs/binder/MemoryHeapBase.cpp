@@ -29,7 +29,7 @@
 #include <cutils/ashmem.h>
 #include <cutils/atomic.h>
 
-#include <utils/MemoryHeapBase.h>
+#include <binder/MemoryHeapBase.h>
 
 #if HAVE_ANDROID_OS
 #include <linux/android_pmem.h>

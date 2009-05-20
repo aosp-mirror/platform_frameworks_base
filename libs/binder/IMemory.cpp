@@ -25,11 +25,11 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <utils/Atomic.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <utils/CallStack.h>
 
 #define VERBOSE   0

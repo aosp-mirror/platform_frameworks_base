@@ -18,7 +18,7 @@
 //#define LOG_NDEBUG 0
 
 #include <utils/Log.h>
-#include <utils/IServiceManager.h>
+#include <binder/IServiceManager.h>
 #include <media/AudioSystem.h>
 #include <math.h>
 

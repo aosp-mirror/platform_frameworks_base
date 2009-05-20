@@ -27,8 +27,8 @@
 
 #include <cutils/log.h>
 
-#include <utils/MemoryHeapPmem.h>
-#include <utils/MemoryHeapBase.h>
+#include <binder/MemoryHeapPmem.h>
+#include <binder/MemoryHeapBase.h>
 
 #if HAVE_ANDROID_OS
 #include <linux/android_pmem.h>

@@ -16,13 +16,13 @@
 
 #define LOG_TAG "MemoryDealer"
 
-#include <utils/MemoryDealer.h>
+#include <binder/MemoryDealer.h>
 
 #include <utils/Log.h>
-#include <utils/IPCThreadState.h>
+#include <binder/IPCThreadState.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
-#include <utils/MemoryBase.h>
+#include <binder/MemoryBase.h>
 
 #include <stdint.h>
 #include <stdio.h>

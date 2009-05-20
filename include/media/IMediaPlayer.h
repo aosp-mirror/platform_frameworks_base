@@ -18,8 +18,8 @@
 #define ANDROID_IMEDIAPLAYER_H
 
 #include <utils/RefBase.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
 
 namespace android {
 

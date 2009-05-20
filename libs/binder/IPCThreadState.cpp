@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <utils/IPCThreadState.h>
+#include <binder/IPCThreadState.h>
 
-#include <utils/Binder.h>
-#include <utils/BpBinder.h>
+#include <binder/Binder.h>
+#include <binder/BpBinder.h>
 #include <utils/Debug.h>
 #include <utils/Log.h>
 #include <utils/TextOutput.h>

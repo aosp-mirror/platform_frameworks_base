@@ -25,7 +25,7 @@
 #include <utils/threads.h>
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
-#include <utils/MemoryDealer.h>
+#include <binder/MemoryDealer.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/ISurfaceComposer.h>

@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 
 #include <media/IAudioFlingerClient.h>
 

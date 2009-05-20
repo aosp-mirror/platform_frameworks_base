@@ -18,7 +18,7 @@
 #ifndef ANDROID_IPERMISSION_CONTROLLER_H
 #define ANDROID_IPERMISSION_CONTROLLER_H
 
-#include <utils/IInterface.h>
+#include <binder/IInterface.h>
 
 namespace android {
 

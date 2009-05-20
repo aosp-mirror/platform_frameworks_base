@@ -18,9 +18,9 @@
 #define ANDROID_HARDWARE_ICAMERA_APP_H
 
 #include <utils/RefBase.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
-#include <utils/IMemory.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
+#include <binder/IMemory.h>
 
 namespace android {
 

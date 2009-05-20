@@ -20,16 +20,6 @@
 #include <utils/threads.h>
 #include <utils/KeyedVector.h>
 
-/*
-#ifndef LIBUTILS_NATIVE
-#include <utils/IBinder.h>
-#include <utils/IMemory.h>
-#include <utils/ProcessState.h>
-#include <utils/IPermissionController.h>
-#include <utils/IServiceManager.h>
-#endif
-*/
-
 namespace android {
 // For TextStream.cpp
 extern Vector<int32_t> gTextBuffers;
@@ -41,21 +31,5 @@ extern void terminate_string8();
 // For String16.cpp
 extern void initialize_string16();
 extern void terminate_string16();
-
-
-/*
-#ifndef LIBUTILS_NATIVE
-
-// For ProcessState.cpp
-extern Mutex gProcessMutex;
-extern sp<ProcessState> gProcess;
-
-// For ServiceManager.cpp
-extern Mutex gDefaultServiceManagerLock;
-extern sp<IServiceManager> gDefaultServiceManager;
-extern sp<IPermissionController> gPermissionController;
-
-#endif
-*/
 
 }   // namespace android

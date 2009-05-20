@@ -20,9 +20,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <utils/MemoryDealer.h>
-#include <utils/MemoryHeapBase.h>
-#include <utils/IMemory.h>
+#include <binder/MemoryDealer.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/IMemory.h>
 #include <utils/SortedVector.h>
 
 namespace android {

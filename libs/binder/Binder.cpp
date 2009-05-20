@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include <utils/Binder.h>
+#include <binder/Binder.h>
 
 #include <utils/Atomic.h>
-#include <utils/BpBinder.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
+#include <binder/BpBinder.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
 
 #include <stdio.h>
 

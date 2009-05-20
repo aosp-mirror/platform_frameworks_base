@@ -32,9 +32,9 @@
 #include <media/AudioTrack.h>
 
 #include <utils/Log.h>
-#include <utils/MemoryDealer.h>
-#include <utils/Parcel.h>
-#include <utils/IPCThreadState.h>
+#include <binder/MemoryDealer.h>
+#include <binder/Parcel.h>
+#include <binder/IPCThreadState.h>
 #include <utils/Timers.h>
 #include <cutils/atomic.h>
 

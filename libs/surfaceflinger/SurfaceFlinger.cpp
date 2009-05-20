@@ -31,10 +31,10 @@
 #include <cutils/log.h>
 #include <cutils/properties.h>
 
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
-#include <utils/MemoryDealer.h>
-#include <utils/MemoryBase.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/MemoryDealer.h>
+#include <binder/MemoryBase.h>
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include <utils/StopWatch.h>

@@ -25,10 +25,10 @@
 #include <string.h>
 #include <cutils/atomic.h>
 #include <android_runtime/ActivityManager.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
-#include <utils/MemoryHeapBase.h>
-#include <utils/MemoryBase.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
 #include <media/PVMediaRecorder.h>
 #include <utils/String16.h>
 

@@ -17,9 +17,9 @@
 #define LOG_TAG "BpBinder"
 //#define LOG_NDEBUG 0
 
-#include <utils/BpBinder.h>
+#include <binder/BpBinder.h>
 
-#include <utils/IPCThreadState.h>
+#include <binder/IPCThreadState.h>
 #include <utils/Log.h>
 
 #include <stdio.h>

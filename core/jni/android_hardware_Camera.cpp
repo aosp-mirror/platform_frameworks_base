@@ -25,7 +25,7 @@
 
 #include <ui/Surface.h>
 #include <ui/Camera.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 
 using namespace android;
 

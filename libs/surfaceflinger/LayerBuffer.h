@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <private/ui/LayerState.h>
 #include <EGL/eglnatives.h>
 

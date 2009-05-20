@@ -19,11 +19,11 @@
 //#define LOG_NDEBUG 0
 
 #include <android_runtime/AndroidRuntime.h>
-#include <utils/IBinder.h>
-#include <utils/IServiceManager.h>
+#include <binder/IBinder.h>
+#include <binder/IServiceManager.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <utils/string_array.h>
 #include <utils/threads.h>
 #include <cutils/properties.h>

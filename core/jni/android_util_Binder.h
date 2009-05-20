@@ -15,7 +15,7 @@
 ** limitations under the License.
 */
 
-#include <utils/IBinder.h>
+#include <binder/IBinder.h>
 
 #include "jni.h"
 

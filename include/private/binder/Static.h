@@ -19,11 +19,11 @@
 
 #include <utils/threads.h>
 
-#include <utils/IBinder.h>
-#include <utils/IMemory.h>
-#include <utils/ProcessState.h>
-#include <utils/IPermissionController.h>
-#include <utils/IServiceManager.h>
+#include <binder/IBinder.h>
+#include <binder/IMemory.h>
+#include <binder/ProcessState.h>
+#include <binder/IPermissionController.h>
+#include <binder/IServiceManager.h>
 
 namespace android {
 

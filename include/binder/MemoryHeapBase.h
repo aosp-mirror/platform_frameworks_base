@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 
 
 namespace android {

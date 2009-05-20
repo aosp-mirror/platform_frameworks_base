@@ -17,7 +17,7 @@
 #ifndef ANDROID_BINDER_H
 #define ANDROID_BINDER_H
 
-#include <utils/IBinder.h>
+#include <binder/IBinder.h>
 
 // ---------------------------------------------------------------------------
 namespace android {

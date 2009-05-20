@@ -23,8 +23,8 @@
 #include <cutils/memory.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
-#include <utils/MemoryDealer.h>
-#include <utils/IMemory.h>
+#include <binder/MemoryDealer.h>
+#include <binder/IMemory.h>
 #include <ui/PixelFormat.h>
 #include <pixelflinger/pixelflinger.h>
 

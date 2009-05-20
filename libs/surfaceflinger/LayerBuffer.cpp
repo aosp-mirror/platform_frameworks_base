@@ -25,8 +25,8 @@
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
 
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/EGLDisplaySurface.h>

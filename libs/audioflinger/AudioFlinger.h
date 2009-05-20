@@ -30,7 +30,7 @@
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/threads.h>
-#include <utils/MemoryDealer.h>
+#include <binder/MemoryDealer.h>
 #include <utils/KeyedVector.h>
 #include <utils/SortedVector.h>
 #include <utils/Vector.h>

@@ -20,12 +20,12 @@
 #define LOG_TAG "CameraService"
 #include <utils/Log.h>
 
-#include <utils/IServiceManager.h>
-#include <utils/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/IPCThreadState.h>
 #include <utils/String16.h>
 #include <utils/Errors.h>
-#include <utils/MemoryBase.h>
-#include <utils/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
+#include <binder/MemoryHeapBase.h>
 #include <ui/ICameraService.h>
 
 #include <media/mediaplayer.h>

@@ -21,7 +21,7 @@
 #include <sys/types.h>
 
 #include <utils/Errors.h>
-#include <utils/IInterface.h>
+#include <binder/IInterface.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
 

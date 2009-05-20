@@ -29,11 +29,11 @@
 #include <cutils/log.h>
 #include <cutils/properties.h>
 
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <utils/threads.h>
-#include <utils/IServiceManager.h>
-#include <utils/IPCThreadState.h>
-#include <utils/Parcel.h>
+#include <binder/IServiceManager.h>
+#include <binder/IPCThreadState.h>
+#include <binder/Parcel.h>
 
 #include <ui/EGLDisplaySurface.h>
 #include <ui/ISurfaceComposer.h>

@@ -19,7 +19,7 @@
 
 #include <private/binder/Static.h>
 
-#include <utils/IPCThreadState.h>
+#include <binder/IPCThreadState.h>
 #include <utils/Log.h>
 
 namespace android {

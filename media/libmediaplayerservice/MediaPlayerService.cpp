@@ -30,10 +30,10 @@
 #include <cutils/atomic.h>
 
 #include <android_runtime/ActivityManager.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
-#include <utils/MemoryHeapBase.h>
-#include <utils/MemoryBase.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
 #include <cutils/properties.h>
 
 #include <media/MediaPlayerInterface.h>
