@@ -119,13 +119,6 @@ public:
             status_t *status,
             AudioSystem::audio_in_acoustics acoustics);
 
-    virtual AudioStreamIn* openInputStream(
-            int format,
-            int channelCount,
-            uint32_t sampleRate,
-            status_t *status,
-            AudioSystem::audio_in_acoustics acoustics);
-
             void            closeOutputStream(AudioStreamOutGeneric* out);
             void            closeInputStream(AudioStreamInGeneric* in);
 protected:

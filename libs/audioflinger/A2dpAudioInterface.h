@@ -62,17 +62,6 @@ public:
                                 status_t *status,
                                 AudioSystem::audio_in_acoustics acoustics);
 
-    // DEPRECATED - WILL BE REMOVED
-    virtual AudioStreamIn* openInputStream(
-                                int format,
-                                int channelCount,
-                                uint32_t sampleRate,
-                                status_t *status,
-                                AudioSystem::audio_in_acoustics acoustics)
-    {
-        return openInputStream(-1, format, channelCount, sampleRate, status, acoustics);
-    }
-
 protected:
     virtual status_t    doRouting();
     virtual status_t    dump(int fd, const Vector<String16>& args);

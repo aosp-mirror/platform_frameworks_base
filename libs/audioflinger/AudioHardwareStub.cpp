@@ -77,15 +77,6 @@ AudioStreamIn* AudioHardwareStub::openInputStream(
     return 0;
 }
 
-// DEPRECATED
-AudioStreamIn* AudioHardwareStub::openInputStream(
-        int format, int channelCount, uint32_t sampleRate, status_t *status,
-        AudioSystem::audio_in_acoustics acoustic_flags)
-{
-    return openInputStream(AudioRecord::DEFAULT_INPUT, format, channelCount,
-            sampleRate, status, acoustic_flags);
-}
-
 status_t AudioHardwareStub::setVoiceVolume(float volume)
 {
     return NO_ERROR;
