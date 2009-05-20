@@ -138,7 +138,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             byte[][] pdus = new byte[1][];
             pdus[0] = sms.getPdu();
 
-            if (smsHeader.portAddrs != null) {
+            if (smsHeader != null && smsHeader.portAddrs != null) {
                 if (smsHeader.portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
                     // GSM-style WAP indication
                     mWapPush.dispatchWapPdu(sms.getUserData());

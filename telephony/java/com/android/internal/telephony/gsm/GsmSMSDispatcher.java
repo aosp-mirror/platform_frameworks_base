@@ -122,7 +122,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             byte[][] pdus = new byte[1][];
             pdus[0] = sms.getPdu();
 
-            if (smsHeader.portAddrs != null) {
+            if (smsHeader != null && smsHeader.portAddrs != null) {
                 if (smsHeader.portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
                     mWapPush.dispatchWapPdu(sms.getUserData());
                 }
