@@ -954,6 +954,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardMediator.verifyUnlock(new OnKeyguardExitResult() {
                 public void onKeyguardExitResult(boolean success) {
                     if (success) {
+                        try {
+                            ActivityManagerNative.getDefault().stopAppSwitches();
+                        } catch (RemoteException e) {
+                        }
                         mContext.startActivity(mHomeIntent);
                         sendCloseSystemWindows();
                     }
@@ -961,6 +965,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             });
         } else {
             // no keyguard stuff to worry about, just launch home!
+            try {
+                ActivityManagerNative.getDefault().stopAppSwitches();
+            } catch (RemoteException e) {
+            }
             mContext.startActivity(mHomeIntent);
             sendCloseSystemWindows();
         }
@@ -1801,11 +1809,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean goHome() {
         if (false) {
             // This code always brings home to the front.
+            try {
+                ActivityManagerNative.getDefault().stopAppSwitches();
+            } catch (RemoteException e) {
+            }
             mContext.startActivity(mHomeIntent);
         } else {
             // This code brings home to the front or, if it is already
             // at the front, puts the device to sleep.
             try {
+                ActivityManagerNative.getDefault().stopAppSwitches();
                 int result = ActivityManagerNative.getDefault()
                         .startActivity(null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
