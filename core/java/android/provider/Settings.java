@@ -148,7 +148,7 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_WIFI_SETTINGS =
             "android.settings.WIFI_SETTINGS";
-    
+
     /**
      * Activity Action: Show settings to allow configuration of a static IP
      * address for Wi-Fi.
@@ -305,7 +305,7 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_QUICK_LAUNCH_SETTINGS =
             "android.settings.QUICK_LAUNCH_SETTINGS";
-    
+
     /**
      * Activity Action: Show settings to manage installed applications.
      * <p>
@@ -319,7 +319,7 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APPLICATIONS_SETTINGS =
             "android.settings.MANAGE_APPLICATIONS_SETTINGS";
-    
+
     /**
      * Activity Action: Show settings for system update functionality.
      * <p>
@@ -329,7 +329,7 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
-     * 
+     *
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -349,7 +349,7 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SYNC_SETTINGS =
             "android.settings.SYNC_SETTINGS";
-    
+
     /**
      * Activity Action: Show settings for selecting the network operator.
      * <p>
@@ -404,7 +404,7 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MEMORY_CARD_SETTINGS =
             "android.settings.MEMORY_CARD_SETTINGS";
-    
+
     // End of Intent actions for Settings
 
     private static final String JID_RESOURCE_PREFIX = "android";
@@ -495,7 +495,7 @@ public final class Settings {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_system_version";
 
         private static volatile NameValueCache mNameValueCache = null;
-        
+
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
             MOVED_TO_SECURE = new HashSet<String>(30);
@@ -901,12 +901,12 @@ public final class Settings {
          * plugged in.
          */
         public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1;
-        
+
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to never go to sleep.
          */
         public static final int WIFI_SLEEP_POLICY_NEVER = 2;
-        
+
         /**
          * Whether to use static IP and other static network attributes.
          * <p>
@@ -1115,12 +1115,12 @@ public final class Settings {
          * Note: This is a one-off setting that will be removed in the future
          * when there is profile support. For this reason, it is kept hidden
          * from the public APIs.
-         * 
+         *
          * @hide
          */
-        public static final String NOTIFICATIONS_USE_RING_VOLUME = 
+        public static final String NOTIFICATIONS_USE_RING_VOLUME =
             "notifications_use_ring_volume";
-        
+
         /**
          * The mapping of stream type (integer) to its setting.
          */
@@ -1204,7 +1204,7 @@ public final class Settings {
          * feature converts two spaces to a "." and space.
          */
         public static final String TEXT_AUTO_PUNCTUATE = "auto_punctuate";
-        
+
         /**
          * Setting to showing password characters in text editors. 1 = On, 0 = Off
          */
@@ -1286,13 +1286,13 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String SOUND_EFFECTS_ENABLED = "sound_effects_enabled";
-        
+
         /**
          * Whether the haptic feedback (long presses, ...) are enabled. The value is
          * boolean (1 or 0).
          */
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
-        
+
         // Settings moved to Settings.Secure
 
         /**
@@ -1337,7 +1337,7 @@ public final class Settings {
          */
         @Deprecated
         public static final String INSTALL_NON_MARKET_APPS = Secure.INSTALL_NON_MARKET_APPS;
-        
+
         /**
          * @deprecated Use {@link android.provider.Settings.Secure#LOCATION_PROVIDERS_ALLOWED}
          * instead
@@ -1350,7 +1350,7 @@ public final class Settings {
          */
         @Deprecated
         public static final String LOGGING_ID = Secure.LOGGING_ID;
-        
+
         /**
          * @deprecated Use {@link android.provider.Settings.Secure#NETWORK_PREFERENCE} instead
          */
@@ -1390,7 +1390,7 @@ public final class Settings {
          */
         @Deprecated
         public static final String USB_MASS_STORAGE_ENABLED = Secure.USB_MASS_STORAGE_ENABLED;
-        
+
         /**
          * @deprecated Use {@link android.provider.Settings.Secure#USE_GOOGLE_MAIL} instead
          */
@@ -1428,7 +1428,7 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
             Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY;
-        
+
         /**
          * @deprecated Use {@link android.provider.Settings.Secure#WIFI_NUM_OPEN_NETWORKS_KEPT}
          * instead
@@ -1464,7 +1464,7 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS =
                 Secure.WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS;
-        
+
         /**
          * @deprecated Use
          * {@link android.provider.Settings.Secure#WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED} instead
@@ -1840,19 +1840,19 @@ public final class Settings {
          * Whether the device has been provisioned (0 = false, 1 = true)
          */
         public static final String DEVICE_PROVISIONED = "device_provisioned";
-    
+
         /**
          * List of input methods that are currently enabled.  This is a string
          * containing the IDs of all enabled input methods, each ID separated
          * by ':'.
          */
         public static final String ENABLED_INPUT_METHODS = "enabled_input_methods";
-    
+
         /**
          * Host name and port for a user-selected proxy.
          */
         public static final String HTTP_PROXY = "http_proxy";
-    
+
         /**
          * Whether the package installer should allow installation of apps downloaded from
          * sources other than the Android Market (vending machine).
@@ -1861,12 +1861,12 @@ public final class Settings {
          * 0 = only allow installing from the Android Market
          */
         public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
-    
+
         /**
          * Comma-separated list of location providers that activities may access.
          */
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
-    
+
         /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
@@ -1888,19 +1888,19 @@ public final class Settings {
          * connectivity service should touch this.
          */
         public static final String NETWORK_PREFERENCE = "network_preference";
-    
-        /** 
+
+        /**
          */
         public static final String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
-    
-        /** 
+
+        /**
          */
         public static final String PARENTAL_CONTROL_LAST_UPDATE = "parental_control_last_update";
-    
-        /** 
+
+        /**
          */
         public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
-    
+
         /**
          * Settings classname to launch when Settings is clicked from All
          * Applications.  Needed because of user testing between the old
@@ -1908,18 +1908,18 @@ public final class Settings {
          */
         // TODO: 881807
         public static final String SETTINGS_CLASSNAME = "settings_classname";
-    
+
         /**
          * USB Mass Storage Enabled
          */
         public static final String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
-    
+
         /**
          * If this setting is set (to anything), then all references
          * to Gmail on the device must change to Google Mail.
          */
         public static final String USE_GOOGLE_MAIL = "use_google_mail";
-    
+
         /**
          * If accessibility is enabled.
          */
@@ -1942,64 +1942,64 @@ public final class Settings {
          */
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 "wifi_networks_available_notification_on";
-    
+
         /**
          * Delay (in seconds) before repeating the Wi-Fi networks available notification.
          * Connecting to a network will reset the timer.
          */
         public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
                 "wifi_networks_available_repeat_delay";
-    
+
         /**
          * The number of radio channels that are allowed in the local
          * 802.11 regulatory domain.
          * @hide
          */
         public static final String WIFI_NUM_ALLOWED_CHANNELS = "wifi_num_allowed_channels";
-    
+
         /**
          * When the number of open networks exceeds this number, the
          * least-recently-used excess networks will be removed.
          */
         public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
-    
+
         /**
          * Whether the Wi-Fi should be on.  Only the Wi-Fi service should touch this.
          */
         public static final String WIFI_ON = "wifi_on";
-    
+
         /**
          * The acceptable packet loss percentage (range 0 - 100) before trying
          * another AP on the same network.
          */
         public static final String WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE =
                 "wifi_watchdog_acceptable_packet_loss_percentage";
-    
+
         /**
          * The number of access points required for a network in order for the
          * watchdog to monitor it.
          */
         public static final String WIFI_WATCHDOG_AP_COUNT = "wifi_watchdog_ap_count";
-    
+
         /**
          * The delay between background checks.
          */
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS =
                 "wifi_watchdog_background_check_delay_ms";
-    
+
         /**
          * Whether the Wi-Fi watchdog is enabled for background checking even
          * after it thinks the user has connected to a good access point.
          */
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED =
                 "wifi_watchdog_background_check_enabled";
-    
+
         /**
          * The timeout for a background ping
          */
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS =
                 "wifi_watchdog_background_check_timeout_ms";
-    
+
         /**
          * The number of initial pings to perform that *may* be ignored if they
          * fail. Again, if these fail, they will *not* be used in packet loss
@@ -2008,7 +2008,7 @@ public final class Settings {
          */
         public static final String WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT =
             "wifi_watchdog_initial_ignored_ping_count";
-    
+
         /**
          * The maximum number of access points (per network) to attempt to test.
          * If this number is reached, the watchdog will no longer monitor the
@@ -2016,7 +2016,7 @@ public final class Settings {
          * networks containing multiple APs whose DNS does not respond to pings.
          */
         public static final String WIFI_WATCHDOG_MAX_AP_CHECKS = "wifi_watchdog_max_ap_checks";
-    
+
         /**
          * Whether the Wi-Fi watchdog is enabled.
          */
@@ -2031,24 +2031,24 @@ public final class Settings {
          * The number of pings to test if an access point is a good connection.
          */
         public static final String WIFI_WATCHDOG_PING_COUNT = "wifi_watchdog_ping_count";
-    
+
         /**
          * The delay between pings.
          */
         public static final String WIFI_WATCHDOG_PING_DELAY_MS = "wifi_watchdog_ping_delay_ms";
-    
+
         /**
          * The timeout per ping.
          */
         public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";
-    
+
         /**
          * The maximum number of times we will retry a connection to an access
          * point for which we have failed in acquiring an IP address from DHCP.
          * A value of N means that we will make N+1 connection attempts in all.
          */
         public static final String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
-    
+
         /**
          * Maximum amount of time in milliseconds to hold a wakelock while waiting for mobile
          * data connectivity to be established after a disconnect from Wi-Fi.
@@ -2078,21 +2078,14 @@ public final class Settings {
         public static final String CDMA_SUBSCRIPTION_MODE = "subscription_mode";
 
         /**
-         * represents current active phone class
-         * 1 = GSM-Phone, 0 = CDMA-Phone
-         * @hide
-         */
-        public static final String CURRENT_ACTIVE_PHONE = "current_active_phone";
-
-        /**
-         * The preferred network mode 7 = Global
-         *                            6 = EvDo only
-         *                            5 = CDMA w/o EvDo
-         *                            4 = CDMA / EvDo auto
-         *                            3 = GSM / WCDMA auto
-         *                            2 = WCDMA only
-         *                            1 = GSM only
-         *                            0 = GSM / WCDMA preferred
+         * The preferred network mode   7 = Global
+         *                              6 = EvDo only
+         *                              5 = CDMA w/o EvDo
+         *                              4 = CDMA / EvDo auto
+         *                              3 = GSM / WCDMA auto
+         *                              2 = WCDMA only
+         *                              1 = GSM only
+         *                              0 = GSM / WCDMA preferred
          * @hide
          */
         public static final String PREFERRED_NETWORK_MODE =
@@ -2158,7 +2151,7 @@ public final class Settings {
                         allowedProviders.startsWith(provider + ",") ||
                         allowedProviders.endsWith("," + provider));
             }
-            return false;           
+            return false;
         }
 
         /**
@@ -2182,7 +2175,7 @@ public final class Settings {
             putString(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider);
         }
     }
-    
+
     /**
      * Gservices settings, containing the network names for Google's
      * various services. This table holds simple name/addr pairs.
@@ -2310,7 +2303,7 @@ public final class Settings {
          * Event tags from the kernel event log to upload during checkin.
          */
         public static final String CHECKIN_EVENTS = "checkin_events";
-        
+
         /**
          * Event tags for list of services to upload during checkin.
          */
@@ -3005,7 +2998,7 @@ public final class Settings {
         public static final String BATTERY_DISCHARGE_DURATION_THRESHOLD =
                 "battery_discharge_duration_threshold";
         public static final String BATTERY_DISCHARGE_THRESHOLD = "battery_discharge_threshold";
-        
+
         /**
          * An email address that anr bugreports should be sent to.
          */
@@ -3149,7 +3142,7 @@ public final class Settings {
 
         /**
          * Add a new bookmark to the system.
-         * 
+         *
          * @param cr The ContentResolver to query.
          * @param intent The desired target of the bookmark.
          * @param title Bookmark title that is shown to the user; null if none
@@ -3214,7 +3207,7 @@ public final class Settings {
         /**
          * Return the title as it should be displayed to the user. This takes
          * care of localizing bookmarks that point to activities.
-         * 
+         *
          * @param context A context.
          * @param cursor A cursor pointing to the row whose title should be
          *        returned. The cursor must contain at least the {@link #TITLE}
@@ -3229,24 +3222,24 @@ public final class Settings {
                 throw new IllegalArgumentException(
                         "The cursor must contain the TITLE and INTENT columns.");
             }
-            
+
             String title = cursor.getString(titleColumn);
             if (!TextUtils.isEmpty(title)) {
                 return title;
             }
-            
+
             String intentUri = cursor.getString(intentColumn);
             if (TextUtils.isEmpty(intentUri)) {
                 return "";
             }
-            
+
             Intent intent;
             try {
                 intent = Intent.getIntent(intentUri);
             } catch (URISyntaxException e) {
                 return "";
             }
-            
+
             PackageManager packageManager = context.getPackageManager();
             ResolveInfo info = packageManager.resolveActivity(intent, 0);
             return info != null ? info.loadLabel(packageManager) : "";
