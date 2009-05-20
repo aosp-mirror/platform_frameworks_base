@@ -82,10 +82,6 @@ public:
             uint32_t sampleRate, status_t *status, AudioSystem::audio_in_acoustics acoustics)
         { return mFinalInterface->openInputStream(inputSource, format, channelCount, sampleRate, status, acoustics); }
 
-    virtual AudioStreamIn* openInputStream(int format, int channelCount, uint32_t sampleRate,
-            status_t *status, AudioSystem::audio_in_acoustics acoustics)
-        { return mFinalInterface->openInputStream(-1, format, channelCount, sampleRate, status, acoustics); }
-
     virtual status_t    dump(int fd, const Vector<String16>& args) { return mFinalInterface->dumpState(fd, args); }
 
 protected:

@@ -127,15 +127,6 @@ AudioStreamIn* AudioHardwareGeneric::openInputStream(
     return mInput;
 }
 
-// DEPRECATED
-AudioStreamIn* AudioHardwareGeneric::openInputStream(
-        int format, int channelCount, uint32_t sampleRate, status_t *status,
-        AudioSystem::audio_in_acoustics acoustic_flags)
-{
-    return openInputStream(AudioRecord::DEFAULT_INPUT, format, channelCount,
-            sampleRate, status, acoustic_flags);
-}
-
 void AudioHardwareGeneric::closeInputStream(AudioStreamInGeneric* in) {
     if (in == mInput) mInput = 0;
 }
