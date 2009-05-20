@@ -84,6 +84,14 @@ public:
                                 status_t *status,
 				AudioSystem::audio_in_acoustics acoustics);
 
+    virtual AudioStreamIn* openInputStream(
+                                int inputSource,
+                                int format,
+                                int channelCount,
+                                uint32_t sampleRate,
+                                status_t *status,
+				AudioSystem::audio_in_acoustics acoustics);
+
 protected:
     virtual status_t    doRouting() { return NO_ERROR; }
     virtual status_t    dump(int fd, const Vector<String16>& args);
