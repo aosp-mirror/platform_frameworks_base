@@ -803,12 +803,20 @@
         android:description="@string/permdesc_runSetActivityWatcher"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to watch and control how activities are
-         started globally in the system.  Only for is in debugging
-         (usually the monkey command). -->
+    <!-- Allows an application to call the activity manager shutdown() API
+         to put the higher-level system there into a shutdown state. -->
     <permission android:name="android.permission.SHUTDOWN"
         android:label="@string/permlab_shutdown"
         android:description="@string/permdesc_shutdown"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to tell the activity manager to temporarily
+         stop application switches, putting it into a special mode that
+         prevents applications from immediately switching away from some
+         critical UI such as the home screen. -->
+    <permission android:name="android.permission.STOP_APP_SWITCHES"
+        android:label="@string/permlab_stopAppSwitches"
+        android:description="@string/permdesc_stopAppSwitches"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to retrieve the current state of keys and

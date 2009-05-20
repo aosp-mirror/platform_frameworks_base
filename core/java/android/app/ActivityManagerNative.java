@@ -998,6 +998,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
         
+        case STOP_APP_SWITCHES_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            stopAppSwitches();
+            reply.writeNoException();
+            return true;
+        }
+        
+        case RESUME_APP_SWITCHES_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            resumeAppSwitches();
+            reply.writeNoException();
+            return true;
+        }
+        
         case PEEK_SERVICE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             Intent service = Intent.CREATOR.createFromParcel(data);
@@ -2180,6 +2194,26 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
         return res;
+    }
+    
+    public void stopAppSwitches() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(STOP_APP_SWITCHES_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
+    }
+    
+    public void resumeAppSwitches() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(RESUME_APP_SWITCHES_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
     }
     
     private IBinder mRemote;

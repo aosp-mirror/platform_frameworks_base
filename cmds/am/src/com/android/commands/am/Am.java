@@ -194,34 +194,23 @@ public class Am {
         if (intent != null) {
             System.out.println("Starting: " + intent);
             try {
-                intent.addFlags(intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 // XXX should do something to determine the MIME type.
                 int res = mAm.startActivity(null, intent, intent.getType(),
                         null, 0, null, null, 0, false, mDebugOption);
                 switch (res) {
                     case IActivityManager.START_SUCCESS:
                         break;
-                    case IActivityManager.START_CLASS_NOT_FOUND:
-                        System.err.println("Error type 3");
-                        System.err.println("Error: Activity class " +
-                                intent.getComponent().toShortString()
-                                + " does not exist.");
+                    case IActivityManager.START_SWITCHES_CANCELED:
+                        System.err.println(
+                                "Warning: Activity not started because the "
+                                + " current activity is being kept for the user.");
                         break;
                     case IActivityManager.START_DELIVERED_TO_TOP:
                         System.err.println(
                                 "Warning: Activity not started, intent has "
                                 + "been delivered to currently running "
                                 + "top-most instance.");
-                        break;
-                    case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
-                        System.err.println(
-                                "Error: Activity not started, you requested to "
-                                + "both forward and receive its result");
-                        break;
-                    case IActivityManager.START_INTENT_NOT_RESOLVED:
-                        System.err.println(
-                                "Error: Activity not started, unable to "
-                                + "resolve " + intent.toString());
                         break;
                     case IActivityManager.START_RETURN_INTENT_TO_CALLER:
                         System.err.println(
@@ -232,6 +221,27 @@ public class Am {
                         System.err.println(
                                 "Warning: Activity not started, its current "
                                 + "task has been brought to the front");
+                        break;
+                    case IActivityManager.START_INTENT_NOT_RESOLVED:
+                        System.err.println(
+                                "Error: Activity not started, unable to "
+                                + "resolve " + intent.toString());
+                        break;
+                    case IActivityManager.START_CLASS_NOT_FOUND:
+                        System.err.println("Error type 3");
+                        System.err.println("Error: Activity class " +
+                                intent.getComponent().toShortString()
+                                + " does not exist.");
+                        break;
+                    case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
+                        System.err.println(
+                                "Error: Activity not started, you requested to "
+                                + "both forward and receive its result");
+                        break;
+                    case IActivityManager.START_PERMISSION_DENIED:
+                        System.err.println(
+                                "Error: Activity not started, you do not "
+                                + "have permission to access it.");
                         break;
                     default:
                         System.err.println(
