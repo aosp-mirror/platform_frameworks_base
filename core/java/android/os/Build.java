@@ -38,6 +38,9 @@ public class Build {
     /** The name of the underlying board, like "goldfish". */
     public static final String BOARD = getString("ro.product.board");
 
+    /** The manufacturer of the product/hardware. */
+    public static final String MANUFACTURER = getString("ro.product.manufacturer");
+
     /** The brand (e.g., carrier) the software is customized for, if any. */
     public static final String BRAND = getString("ro.product.brand");
 
