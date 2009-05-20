@@ -64,15 +64,22 @@ Camera::Camera()
     init();
 }
 
-Camera::Camera(const sp<ICamera>& camera)
+// construct a camera client from an existing camera remote
+sp<Camera> Camera::create(const sp<ICamera>& camera)
 {
-    init();
-    // connect this client to existing camera remote
-    if (camera->connect(this) == NO_ERROR) {
-        mStatus = NO_ERROR;
-        mCamera = camera;
-        camera->asBinder()->linkToDeath(this);
+     LOGV("create");
+     if (camera == 0) {
+         LOGE("camera remote is a NULL pointer");
+         return 0;
+     }
+
+    sp<Camera> c = new Camera();
+    if (camera->connect(c) == NO_ERROR) {
+        c->mStatus = NO_ERROR;
+        c->mCamera = camera;
+        camera->asBinder()->linkToDeath(c);
     }
+    return c;
 }
 
 void Camera::init()
@@ -330,63 +337,65 @@ void Camera::setErrorCallback(error_callback cb, void *cookie)
     mErrorCallbackCookie = cookie;
 }
 
-void Camera::autoFocusCallback(bool focused)
+// callback from camera service
+void Camera::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2)
 {
-    LOGV("autoFocusCallback");
-    if (mAutoFocusCallback) {
-        mAutoFocusCallback(focused, mAutoFocusCallbackCookie);
+    switch(msgType) {
+    case CAMERA_MSG_ERROR:
+        LOGV("errorCallback");
+        if (mErrorCallback) {
+            mErrorCallback((status_t)ext1, mErrorCallbackCookie);
+        }
+        break;
+    case CAMERA_MSG_FOCUS:
+        LOGV("autoFocusCallback");
+        if (mAutoFocusCallback) {
+            mAutoFocusCallback((bool)ext1, mAutoFocusCallbackCookie);
+        }
+        break;
+    case CAMERA_MSG_SHUTTER:
+        LOGV("shutterCallback");
+        if (mShutterCallback) {
+            mShutterCallback(mShutterCallbackCookie);
+        }
+        break;
+    default:
+        LOGV("notifyCallback(%d, %d, %d)", msgType, ext1, ext2);
+        break;
     }
 }
 
-void Camera::shutterCallback()
+// callback from camera service when frame or image is ready
+void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
 {
-    LOGV("shutterCallback");
-    if (mShutterCallback) {
-        mShutterCallback(mShutterCallbackCookie);
-    }
-}
-
-void Camera::rawCallback(const sp<IMemory>& picture)
-{
-    LOGV("rawCallback");
-    if (mRawCallback) {
-        mRawCallback(picture, mRawCallbackCookie);
-    }
-}
-
-// callback from camera service when image is ready
-void Camera::jpegCallback(const sp<IMemory>& picture)
-{
-    LOGV("jpegCallback");
-    if (mJpegCallback) {
-        mJpegCallback(picture, mJpegCallbackCookie);
-    }
-}
-
-// callback from camera service when preview frame is ready
-void Camera::previewCallback(const sp<IMemory>& frame)
-{
-    LOGV("frameCallback");
-    if (mPreviewCallback) {
-        mPreviewCallback(frame, mPreviewCallbackCookie);
-    }
-}
-
-// callback from camera service when a recording frame is ready
-void Camera::recordingCallback(const sp<IMemory>& frame)
-{
-    LOGV("recordingCallback");
-    if (mRecordingCallback) {
-        mRecordingCallback(frame, mRecordingCallbackCookie);
-    }
-}
-
-// callback from camera service when an error occurs in preview or takePicture
-void Camera::errorCallback(status_t error)
-{
-    LOGV("errorCallback");
-    if (mErrorCallback) {
-        mErrorCallback(error, mErrorCallbackCookie);
+    switch(msgType) {
+    case CAMERA_MSG_PREVIEW_FRAME:
+        LOGV("previewCallback");
+        if (mPreviewCallback) {
+            mPreviewCallback(dataPtr, mPreviewCallbackCookie);
+        }
+        break;
+    case CAMERA_MSG_VIDEO_FRAME:
+        LOGV("recordingCallback");
+        if (mRecordingCallback) {
+            mRecordingCallback(dataPtr, mRecordingCallbackCookie);
+        }
+        break;
+    case CAMERA_MSG_RAW_IMAGE:
+        LOGV("rawCallback");
+        if (mRawCallback) {
+            mRawCallback(dataPtr, mRawCallbackCookie);
+        }
+        break;
+    case CAMERA_MSG_COMPRESSED_IMAGE:
+        LOGV("jpegCallback");
+        if (mJpegCallback) {
+            mJpegCallback(dataPtr, mJpegCallbackCookie);
+        }
+        break;
+    default:
+        LOGV("dataCallback(%d, %p)", msgType, dataPtr.get());
+        break;
     }
 }
 

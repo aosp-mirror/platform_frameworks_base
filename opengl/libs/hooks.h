@@ -22,9 +22,10 @@
 #include <errno.h>
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES/gl.h>
+#include <GLES/glext.h>
 
-#define GL_LOGGER                   0
 #if !defined(__arm__)
 #define USE_SLOW_BINDING            1
 #else
@@ -35,7 +36,7 @@
 #define MAX_NUMBER_OF_GL_EXTENSIONS 32
 
 
-#if defined(HAVE_ANDROID_OS) && !USE_SLOW_BINDING && !GL_LOGGER && __OPTIMIZE__
+#if defined(HAVE_ANDROID_OS) && !USE_SLOW_BINDING && __OPTIMIZE__
 #define USE_FAST_TLS_KEY            1
 #else
 #define USE_FAST_TLS_KEY            0
@@ -55,7 +56,10 @@ const unsigned int NUM_DISPLAYS = 1;
 enum {
     IMPL_HARDWARE = 0,
     IMPL_SOFTWARE,
-    IMPL_CONTEXT_LOST,
+    
+    IMPL_NUM_DRIVERS_IMPLEMENTATIONS,
+
+    IMPL_CONTEXT_LOST = IMPL_NUM_DRIVERS_IMPLEMENTATIONS,
     IMPL_NO_CONTEXT,
     
     IMPL_NUM_IMPLEMENTATIONS
@@ -73,6 +77,7 @@ enum {
 struct gl_hooks_t {
     struct gl_t {
         #include "gl_entries.in"
+        #include "glext_entries.in"
     } gl;
     struct egl_t {
         #include "egl_entries.in"

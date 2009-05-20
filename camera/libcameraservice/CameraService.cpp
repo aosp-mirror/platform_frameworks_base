@@ -217,7 +217,13 @@ status_t CameraService::Client::unlock()
     // allow anyone to use camera
     LOGV("unlock (%p)", getCameraClient()->asBinder().get());
     status_t result = checkPid();
-    if (result == NO_ERROR) mClientPid = 0;
+    if (result == NO_ERROR) {
+        mClientPid = 0;
+
+        // we need to remove the reference so that when app goes
+        // away, the reference count goes to 0.
+        mCameraClient.clear();
+    }
     return result;
 }
 
@@ -894,8 +900,6 @@ status_t CameraService::Client::setParameters(const String8& params)
 // get preview/capture parameters - key/value pairs
 String8 CameraService::Client::getParameters() const
 {
-    LOGD("getParameters");
-
     Mutex::Autolock lock(mLock);
 
     if (mHardware == 0) {
@@ -903,30 +907,32 @@ String8 CameraService::Client::getParameters() const
         return String8();
     }
 
-    return mHardware->getParameters().flatten();
+    String8 params(mHardware->getParameters().flatten());
+    LOGD("getParameters(%s)", params.string());
+    return params;
 }
 
 void CameraService::Client::postAutoFocus(bool focused)
 {
     LOGV("postAutoFocus");
-    mCameraClient->autoFocusCallback(focused);
+    mCameraClient->notifyCallback(CAMERA_MSG_FOCUS, (int32_t)focused, 0);
 }
 
 void CameraService::Client::postShutter()
 {
-    mCameraClient->shutterCallback();
+    mCameraClient->notifyCallback(CAMERA_MSG_SHUTTER, 0, 0);
 }
 
 void CameraService::Client::postRaw(const sp<IMemory>& mem)
 {
     LOGD("postRaw");
-    mCameraClient->rawCallback(mem);
+    mCameraClient->dataCallback(CAMERA_MSG_RAW_IMAGE, mem);
 }
 
 void CameraService::Client::postJpeg(const sp<IMemory>& mem)
 {
     LOGD("postJpeg");
-    mCameraClient->jpegCallback(mem);
+    mCameraClient->dataCallback(CAMERA_MSG_COMPRESSED_IMAGE, mem);
 }
 
 void CameraService::Client::copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size)
@@ -954,7 +960,7 @@ void CameraService::Client::copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, si
         LOGE("failed to allocate space for frame callback");
         return;
     }
-    mCameraClient->previewCallback(frame);
+    mCameraClient->dataCallback(CAMERA_MSG_PREVIEW_FRAME, frame);
 }
 
 void CameraService::Client::postRecordingFrame(const sp<IMemory>& frame)
@@ -964,7 +970,7 @@ void CameraService::Client::postRecordingFrame(const sp<IMemory>& frame)
         LOGW("frame is a null pointer");
         return;
     }
-    mCameraClient->recordingCallback(frame);
+    mCameraClient->dataCallback(CAMERA_MSG_VIDEO_FRAME, frame);
 }
 
 void CameraService::Client::postPreviewFrame(const sp<IMemory>& mem)
@@ -998,7 +1004,7 @@ void CameraService::Client::postPreviewFrame(const sp<IMemory>& mem)
         copyFrameAndPostCopiedFrame(heap, offset, size);
     } else {
         LOGV("frame is directly sent out without copying");
-        mCameraClient->previewCallback(mem);
+        mCameraClient->dataCallback(CAMERA_MSG_PREVIEW_FRAME, mem);
     }
 
     // Is this is one-shot only?
@@ -1012,7 +1018,7 @@ void CameraService::Client::postPreviewFrame(const sp<IMemory>& mem)
 
 void CameraService::Client::postError(status_t error)
 {
-    mCameraClient->errorCallback(error);
+    mCameraClient->notifyCallback(CAMERA_MSG_ERROR, error, 0);
 }
 
 status_t CameraService::dump(int fd, const Vector<String16>& args)

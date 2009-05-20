@@ -135,20 +135,28 @@ public class SurfaceView extends View {
     int mFormat = -1;
     int mType = -1;
     final Rect mSurfaceFrame = new Rect();
+    private final float mAppScale;
+    private final float mAppScaleInverted;
 
     public SurfaceView(Context context) {
         super(context);
         setWillNotDraw(true);
+        mAppScale = context.getApplicationScale();
+        mAppScaleInverted = 1.0f / mAppScale;
     }
     
     public SurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(true);
+        mAppScale = context.getApplicationScale();
+        mAppScaleInverted = 1.0f / mAppScale;
     }
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         setWillNotDraw(true);
+        mAppScale = context.getApplicationScale();
+        mAppScaleInverted = 1.0f / mAppScale;
     }
     
     /**
@@ -248,6 +256,23 @@ public class SurfaceView extends View {
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // SurfaceView uses pre-scaled size unless fixed size is requested. This hook
+        // scales the event back to the pre-scaled coordinates for such surface.
+        if (mRequestedWidth < 0 && mAppScale != 1.0f) {
+            MotionEvent scaledBack = MotionEvent.obtain(event);
+            scaledBack.scale(mAppScale);
+            try {
+                return super.dispatchTouchEvent(scaledBack);
+            } finally {
+                scaledBack.recycle();
+            }
+        } else {
+            return super.dispatchTouchEvent(event);
+        }
+    }
+
+    @Override
     protected void dispatchDraw(Canvas canvas) {
         // if SKIP_DRAW is cleared, draw() has already punched a hole
         if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
@@ -269,7 +294,13 @@ public class SurfaceView extends View {
         if (myWidth <= 0) myWidth = getWidth();
         int myHeight = mRequestedHeight;
         if (myHeight <= 0) myHeight = getHeight();
-        
+
+        // Use original size for surface unless fixed size is requested.
+        if (mRequestedWidth <= 0) {
+            myWidth *= mAppScale;
+            myHeight *= mAppScale;
+        }
+
         getLocationInWindow(mLocation);
         final boolean creating = mWindow == null;
         final boolean formatChanged = mFormat != mRequestedFormat;
@@ -295,10 +326,11 @@ public class SurfaceView extends View {
                 mFormat = mRequestedFormat;
                 mType = mRequestedType;
 
-                mLayout.x = mLeft;
-                mLayout.y = mTop;
-                mLayout.width = getWidth();
-                mLayout.height = getHeight();
+                // Scaling window's layout here beause mLayout is not used elsewhere.
+                mLayout.x = (int) (mLeft * mAppScale);
+                mLayout.y = (int) (mTop * mAppScale);
+                mLayout.width = (int) (getWidth() * mAppScale);
+                mLayout.height = (int) (getHeight() * mAppScale);
                 mLayout.format = mRequestedFormat;
                 mLayout.flags |=WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                               | WindowManager.LayoutParams.FLAG_SCALED
@@ -325,9 +357,14 @@ public class SurfaceView extends View {
                 mSurfaceLock.lock();
                 mDrawingStopped = !visible;
                 final int relayoutResult = mSession.relayout(
-                        mWindow, mLayout, mWidth, mHeight,
+                    mWindow, mLayout, mWidth, mHeight,
                         visible ? VISIBLE : GONE, false, mWinFrame, mContentInsets,
                         mVisibleInsets, mSurface);
+
+                mContentInsets.scale(mAppScaleInverted);
+                mVisibleInsets.scale(mAppScaleInverted);
+                mWinFrame.scale(mAppScaleInverted);
+
                 if (localLOGV) Log.i(TAG, "New surface: " + mSurface
                         + ", vis=" + visible + ", frame=" + mWinFrame);
                 mSurfaceFrame.left = 0;
@@ -344,7 +381,7 @@ public class SurfaceView extends View {
                         synchronized (mCallbacks) {
                             callbacks = new SurfaceHolder.Callback[mCallbacks.size()];
                             mCallbacks.toArray(callbacks);
-                        }            
+                        }
 
                         if (visibleChanged) {
                             mIsCreating = true;
@@ -395,15 +432,25 @@ public class SurfaceView extends View {
     }
 
     private static class MyWindow extends IWindow.Stub {
-        private WeakReference<SurfaceView> mSurfaceView;
+        private final WeakReference<SurfaceView> mSurfaceView;
+        private final float mAppScale;
+        private final float mAppScaleInverted;
 
         public MyWindow(SurfaceView surfaceView) {
             mSurfaceView = new WeakReference<SurfaceView>(surfaceView);
+            mAppScale = surfaceView.getContext().getApplicationScale();
+            mAppScaleInverted = 1.0f / mAppScale;
         }
 
         public void resized(int w, int h, Rect coveredInsets,
                 Rect visibleInsets, boolean reportDraw) {
             SurfaceView surfaceView = mSurfaceView.get();
+            float scale = mAppScaleInverted;
+            w *= scale;
+            h *= scale;
+            coveredInsets.scale(scale);
+            visibleInsets.scale(scale);
+
             if (surfaceView != null) {
                 if (localLOGV) Log.v(
                         "SurfaceView", surfaceView + " got resized: w=" +
@@ -566,6 +613,7 @@ public class SurfaceView extends View {
             Canvas c = null;
             if (!mDrawingStopped && mWindow != null) {
                 Rect frame = dirty != null ? dirty : mSurfaceFrame;
+                frame.scale(mAppScale);
                 try {
                     c = mSurface.lockCanvas(frame);
                 } catch (Exception e) {
@@ -611,4 +659,3 @@ public class SurfaceView extends View {
         }
     };
 }
-

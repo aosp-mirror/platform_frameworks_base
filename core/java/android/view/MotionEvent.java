@@ -102,7 +102,7 @@ public final class MotionEvent implements Parcelable {
     private float mYPrecision;
     private int mDeviceId;
     private int mEdgeFlags;
-    
+
     private MotionEvent mNext;
     private RuntimeException mRecycledLocation;
     private boolean mRecycled;
@@ -210,7 +210,33 @@ public final class MotionEvent implements Parcelable {
 
         return ev;
     }
-    
+
+    /**
+     * Scales down the cood of this event by the given scale.
+     *
+     * @hide
+     */
+    public void scale(float scale) {
+        if (scale != 1.0f) {
+            mX *= scale;
+            mY *= scale;
+            mRawX *= scale;
+            mRawY *= scale;
+            mSize *= scale;
+            mXPrecision *= scale;
+            mYPrecision *= scale;
+            if (mHistory != null) {
+                float[] history = mHistory;
+                int length = history.length;
+                for (int i = 0; i < length; i += 4) {
+                    history[i] *= scale;
+                    history[i + 2] *= scale;
+                    history[i + 3] *= scale;
+                }
+            }
+        }
+    }
+
     /**
      * Create a new MotionEvent, copying from an existing one.
      */
@@ -682,4 +708,3 @@ public final class MotionEvent implements Parcelable {
     }
 
 }
-

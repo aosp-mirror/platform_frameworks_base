@@ -8,7 +8,268 @@ sys.date=April 2009
 <em>API Level:</em>&nbsp;<strong>3</strong></p>
 
 
-<p>Please see <a href="{@docRoot}sdk/preview/index.html">Download the Android 1.5 Early Look SDK</a> for more information. </p>
+<p>This document provides version notes for the Android 1.5 system image included in the SDK. </p>
+
+<ul>
+<li><a href="#overview">Overview</a>
+<li><a href="#overview">External Libraries</a>
+<li><a href="#comp">Device Compatibility</a>
+<li><a href="#apps">Built-in Applications</a>
+<li><a href="#locs">UI Localizations</a>
+<li><a href="#features">New Features</a>
+<li><a href="#api-changes">API Changes</a>
+</ul>
+
+<h2 id="overview">Overview</h2>
+
+<p>The Android 1.5 system delivered in the SDK (as library and system image) is
+the development counterpart to the Android 1.5 production system image,
+deployable to Android-powered handsets starting in May 2009. The system is fully
+compliant and includes no external libraries. This is the first version of the 
+Android SDK that does not include the Maps external library.</p>
+
+<p>The Android 1.5 system delivers an updated version of the framework
+API. As with previous versions, the Android 1.5 API 
+is assigned an integer identifier &mdash; <strong>3</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application.</p>
+
+<p>Applications can reference a specific API Level value in their
+manifest files, to indicate the minimum version of the Android system
+required to run the application. To reference a minimum API Level, applications 
+can add an <code>android:minSdkVersion</code> attribute in their manifest files.
+The value of the attribute is an integer corresponding to an API Level 
+identifier. Prior to installing an application, the system then checks the value of 
+<code>android:minSdkVersion</code> and allows the install only
+if the referenced integer is less than or equal to the API Level integer stored
+in the system itself. </p>
+
+<p>When you migrate your application to the new SDK, you will need to choose
+the platform version against which you will compile your application. In
+general, you should compile your application against the lowest possible
+version of the platform that your application can support. After you determine 
+the lowest version, you should ensure that your application's manifest file 
+defines the API Level of the lowest compatible platform version in the 
+<code>android:minSdkVersion</code> attribute.
+
+<p>After compiling your application, you should make sure to test it on the
+platform specified in the application's <code>android:minSdkVersion</code> attribute. To
+ensure forward-compatibility, you should also run the application on platforms
+using a higher API Level than that used by your application. To run your
+application against different platform versions in the emulator, you create an
+AVD for each platform version that you want to test. For more information about
+AVDs, see <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
+Devices</a>. If you are using a physical device for testing, ensure that you
+know the API Level of the Android platform it runs.</p>
+
+<p>If you build an application using the Android 1.5 library and your
+application makes use of any APIs introduced in API Level 3, you <strong><span
+style="color:red;">must</span></strong> set the
+<code>android:minSdkVersion</code> attribute in the application's manifest to
+"3". </p>
+
+<p>Specifically, you define the <code>android:minSdkVersion</code>
+attribute in a <code>&lt;uses-sdk&gt;</code> element as a child of
+<code>&lt;manifest&gt;</code> in the manifest file. When set, the
+attribute looks like this: </p>
+
+<pre>&lt;manifest&gt;
+  ...
+  &lt;uses-sdk android:minSdkVersion="3" /&gt;
+  ...
+&lt;/manifest&gt;</pre>
+
+<p>By setting <code>android:minSdkVersion</code> in this way, you ensure that
+users will only be able to install your application if their devices are running
+a compatible version of the Android platform. In turn, this ensures that your
+application will function properly on their devices. This is especially
+important if your application uses <a href="#apichange">APIs or system features
+introduced in Android 1.5</a>. </p>
+
+<p>If your application uses APIs introduced in Android 1.5 but does not
+declare <code>&lt;uses-sdk android:minSdkVersion="3" /&gt;</code>, then it will
+run properly on Android 1.5 devices but <em>not</em> on Android 1.0
+devices. In the latter case, the application will crash at runtime when
+it tries to use the Android 1.5 APIs.</p>
+
+<p>Conversely, if your application does not use any new APIs introduced in 
+Android 1.5, the application will in most cases function normally on devices 
+running a later version of the  platform.  However, if you have published 
+the application, you are strongly encouraged to install and test your 
+application on the Android 1.5 system image included in the SDK. This will 
+ensure a smooth transition for users, as they upgrade their devices to 
+the new version of the Android platform. </p>
+
+<p>Finally, if your application does not use any new APIs introduced since 
+Android 1.1, you can indicate general Android 1.1 compatibility by 
+setting the attribute to "2". If your application does not use any
+new APIs introduced since Android 1.0, you can remove the attribute or 
+set it to "1". However,
+before publishing your application, you must make sure to compile your
+application against the Android library that corresponds to the application's
+<code>android:minSdkVeresion</code> value.</p>
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image includes these built-in applications:</p>
+	<ul>
+	<li>Alarm Clock</li>
+	<li>Browser</li>
+	<li>Calculator</li>
+	<li>Camcorder</li>
+	<li>Camera</li>
+	<li>Contacts</li>
+	<li>Custom Locale (developer app)</li>
+	<li>Dev Tools (developer app)</li>
+	<li>Dialer</li>
+	<li>Email</li>
+	<li>Gallery</li>
+	<li>Messaging</li>
+	<li>Music</li>
+	<li>Settings</li>
+	<li>Spare Parts (developer app)</li>
+	</ul>
+
+<h2 id="locs">Locales</h2>
+
+<p>The system image provides a variety of built-in locales. In some cases, 
+region-specific strings are available for the locales. In other cases, 
+a default version of the language is used. The languages that will be 
+available in the Android 1.5 system image are listed below (with 
+<em>language</em>_<em>country/region</em> locale descriptor).</p>
+
+<table style="border:0;">
+<tr>
+<td style="border:0">
+<ul>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+<li>Czech (cs_CZ)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>English, US (en_US)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Canada(en_CA)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>French, France (fr_FR)</li>
+<li>French, Belgium (fr_BE)</li>
+</ul>
+</td>
+<td style="border:0;padding-left:5em;">
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Austria(de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Polish (pl_PL)</li>
+<li>Russian (ru_RU)</li>
+<li>Spanish (es_ES)</li>
+</td>
+</tr>
+</table>
+
+<p>Localized UI strings match the locales that are displayable in 
+the emulator, accessible through the device Settings application.</p>
+
+<h2 id="features">New Features</h2>
+
+<p>For a list of new system features, see the <a
+href="{@docRoot}sdk/android-1.5-highlights.html">Android 1.5 Platform
+Highlights</a> document.</p>
+
+<h2 id="api-changes">API Changes</h2>
+
+<h3>Overview</strong></h3>
+
+<ul>
+<li>UI framework</li>
+  <ul>
+    <li>Framework for easier background/UI thread interaction</li>
+    <li>New {@link android.widget.SlidingDrawer SlidingDrawer} widget</li>
+    <li>New {@link android.widget.HorizontalScrollView HorizontalScrollview} widget</li>
+  </ul>
+</li>
+
+<li>AppWidget framework
+  <ul>
+    <li>APIs for creating secure home screen {@link android.appwidget
+AppWidgets}. For information about how to use AppWidgets, see the Developer's
+Guide <a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a>
+documentation. Also see <a
+href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">
+Introducing home screen widgets and the AppWidget
+framework</a> on the Android Developer's Blog.</li>
+    <li>APIs for populating {@link android.provider.LiveFolders Live Folders}
+        with custom content.</li>
+  </ul>
+</li>
+
+<li>Media framework</li>
+  <ul>
+    <li>Raw audio recording and playback APIs</li>
+    <li>Interactive MIDI playback engine</li>
+    <li>Video recording APIs for developers (3GP format)</li>
+    <li>Video and photo sharing Intents</li>
+    <li>Media search Intent</li>
+  </ul>
+</li>
+
+<li>Input Method framework 
+   <ul>
+    <li>{@link android.inputmethodservice.InputMethodService Input Method
+        Service} framework</li>
+    <li>Text-prediction engine</li>
+    <li>Ability to provide downloadable IMEs to users</li>
+  </ul>
+</li>
+
+<li>Application-defined hardware requirements
+   <p>Applications can now use a new element in their manifest files, <a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-
+configuration&gt;</a> to indicate to the Android system what hardware features
+they require in order to function properly. For example, an application might
+use the element to specify that it requires a physical keyboard or a particular
+navigation device, such as a trackball. Prior to installing the application, the
+Android system checks the attributes defined for the
+<code>&lt;uses-configuration&gt;</code> element and allows the installation to
+continue only if the required hardware is present.</p>
+</li>
+
+<li>Speech recognition framework
+    <ul>
+    <li>Support for using speech recognition libraries via Intent. See {@link
+android.speech.RecognizerIntent RecognizerIntent}.</li>
+  </ul>
+</li>
+
+<li>Miscellaneous API additions
+  <ul>
+    <li>LocationManager - Applications can get location change updates via
+        Intent</li>
+    <li>WebView - Touch start/end/move/cancel DOM event support</li>
+    <li>Redesigned {@link android.hardware.SensorManager Sensor Manager
+        APIs}</li>
+    <li>GLSurfaceView - convenience framework for creating OpenGL
+        applications</li>
+    <li>Broadcast Intent for app update install succeeded - for smoother app
+        upgrade experience</li>
+  </ul>
+</li>
+
+</ul>
+
+<h3 id="api-diff">API Change Details</h3>
+
+<p>For a detailed view of API changes in this platform (API Level 3), see the <a
+href="{@docRoot}sdk/api_diff/3/changes.html">API Differences Report</a>.</p>
 
 
 

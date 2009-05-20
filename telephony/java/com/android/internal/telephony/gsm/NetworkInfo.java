@@ -22,8 +22,7 @@ import android.os.Parcelable;
 /**
  * {@hide}
  */
-public class NetworkInfo implements Parcelable
-{
+public class NetworkInfo implements Parcelable {
     public enum State {
         UNKNOWN,
         AVAILABLE,
@@ -39,34 +38,29 @@ public class NetworkInfo implements Parcelable
 
 
     public String
-    getOperatorAlphaLong()
-    {
+    getOperatorAlphaLong() {
         return operatorAlphaLong;
     }
 
     public String
-    getOperatorAlphaShort()
-    {
+    getOperatorAlphaShort() {
         return operatorAlphaShort;
     }
 
     public String
-    getOperatorNumeric()
-    {
+    getOperatorNumeric() {
         return operatorNumeric;
     }
 
     public State
-    getState()
-    {
+    getState() {
         return state;
     }
 
-    NetworkInfo(String operatorAlphaLong, 
-                String operatorAlphaShort, 
-                String operatorNumeric, 
-                State state)
-    {
+    NetworkInfo(String operatorAlphaLong,
+                String operatorAlphaShort,
+                String operatorNumeric,
+                State state) {
 
         this.operatorAlphaLong = operatorAlphaLong;
         this.operatorAlphaShort = operatorAlphaShort;
@@ -76,20 +70,18 @@ public class NetworkInfo implements Parcelable
     }
 
 
-    NetworkInfo(String operatorAlphaLong, 
-                String operatorAlphaShort, 
-                String operatorNumeric, 
-                String stateString)
-    {
-        this (operatorAlphaLong, operatorAlphaShort, 
+    public NetworkInfo(String operatorAlphaLong,
+                String operatorAlphaShort,
+                String operatorNumeric,
+                String stateString) {
+        this (operatorAlphaLong, operatorAlphaShort,
                 operatorNumeric, rilStateToState(stateString));
     }
 
     /**
      * See state strings defined in ril.h RIL_REQUEST_QUERY_AVAILABLE_NETWORKS
      */
-    private static State rilStateToState(String s)
-    {
+    private static State rilStateToState(String s) {
         if (s.equals("unknown")) {
             return State.UNKNOWN;
         } else if (s.equals("available")) {
@@ -105,29 +97,28 @@ public class NetworkInfo implements Parcelable
     }
 
 
-    public String toString()
-    {
-        return "NetworkInfo " + operatorAlphaLong 
-                + "/" + operatorAlphaShort 
-                + "/" + operatorNumeric 
+    public String toString() {
+        return "NetworkInfo " + operatorAlphaLong
+                + "/" + operatorAlphaShort
+                + "/" + operatorNumeric
                 + "/" + state;
     }
-    
-    /** 
+
+    /**
      * Parcelable interface implemented below.
      * This is a simple effort to make NetworkInfo parcelable rather than
      * trying to make the conventional containing object (AsyncResult),
-     * implement parcelable.  This functionality is needed for the 
+     * implement parcelable.  This functionality is needed for the
      * NetworkQueryService to fix 1128695.
      */
-    
+
     public int describeContents() {
         return 0;
     }
 
-    /** 
+    /**
      * Implement the Parcelable interface.
-     * Method to serialize a NetworkInfo object. 
+     * Method to serialize a NetworkInfo object.
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(operatorAlphaLong);
@@ -136,9 +127,9 @@ public class NetworkInfo implements Parcelable
         dest.writeSerializable(state);
     }
 
-    /** 
+    /**
      * Implement the Parcelable interface
-     * Method to deserialize a NetworkInfo object, or an array thereof. 
+     * Method to deserialize a NetworkInfo object, or an array thereof.
      */
     public static final Creator<NetworkInfo> CREATOR =
         new Creator<NetworkInfo>() {

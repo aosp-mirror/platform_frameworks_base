@@ -97,6 +97,12 @@
     <string name="PwdMmi">Password change</string>
     <!-- Displayed as the title for a success/failure report changing the SIM PIN. -->
     <string name="PinMmi">PIN change</string>
+    <string name="CnipMmi">Calling number present</string>
+    <string name="CnirMmi">Calling number restricted</string>
+    <string name="ThreeWCMmi">Three way calling</string>
+    <string name="RuacMmi">Rejection of undesired annoying calls</string>
+    <string name="CndMmi">Calling number delivery</string>
+    <string name="DndMmi">Do not disturb</string>
 
     <!-- Displayed to confirm to the user that caller ID will be restricted on the next call as usual. -->
     <string name="CLIRDefaultOnNextCallOn">Caller ID defaults to restricted. Next call: Restricted</string>
@@ -161,6 +167,11 @@
     <!-- Displayed when the call forwarding query was set but forwarding is not enabled. -->
     <string name="cfTemplateRegisteredTime"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
 
+    <!-- android.net.http Error strings --> <skip />
+    <!-- Displayed when a feature code (non-phone number) is dialed and completes successfully. -->
+    <string name="fcComplete">Feature code complete.</string>
+    <!-- Displayed when a feature code (non-phone number) is dialed and completes unsuccessfully. -->
+    <string name="fcError">Connection problem or invalid feature code.</string>
     <!-- android.net.http Error strings --> <skip />
     <!-- Displayed when a web request was successful. -->
     <string name="httpErrorOk">OK</string>
@@ -324,6 +335,11 @@
     <string name="permgroupdesc_developmentTools">Features only needed for
         application developers.</string>
 
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_storage">Storage</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_storage">Access the SD card.</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -449,6 +465,12 @@
     <string name="permdesc_addSystemService">Allows application to publish
         its own low-level system services. Malicious applications may hijack
         the system, and steal or corrupt any data on it.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_shutdown">partial shutdown</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_shutdown">Puts the activity manager into a shutdown
+        state.  Does not perform a complete shutdown.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_runSetActivityWatcher">monitor and control all application launching</string>
@@ -735,6 +757,19 @@
     <string name="permdesc_accessLocationExtraCommands">Access extra location provider commands.
         Malicious applications could use this to interfere with the operation of the GPS
         or other location sources.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_installLocationProvider">permission to install a location provider</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_installLocationProvider">Create mock location sources for testing.
+        Malicious applications can use this to override the location and/or status returned by real
+        location sources such as GPS or Network providers.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_installLocationCollector">permission to install a location collector</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_installLocationCollector">Create mock location sources for testing.
+        Malicious applications can use this to monitor and report your location to an external source.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">fine (GPS) location</string>
@@ -1033,6 +1068,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_writeDictionary">Allows an application to write new words into the
       user dictionary.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_sdcardWrite">write to SD card</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_sdcardWrite">Allows an application to write to the SD card.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->
@@ -2290,6 +2330,7 @@
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
 
+
     <!-- Shown in gadget hosts (e.g. the home screen) when there was an error inflating
     the gadget. -->
     <string name="gadget_host_error_inflating">Error inflating widget</string>
@@ -2316,6 +2357,7 @@
          ContactsProvider and GoogleContactsProvider -->
     <skip />
 
+
     <!-- This string appears (on two lines) when you type a number into contacts search, to let you dial the phone number you typed.  The first line will be in bigger type than the second. -->
     <string name="dial_number_using">Dial number\nusing <xliff:g id="number" example="555">%s</xliff:g></string>
 
@@ -2326,3 +2368,8 @@
     <string-array translatable="false" name="carrier_locales">
     </string-array>    
 </resources>
+
+
+
+
+

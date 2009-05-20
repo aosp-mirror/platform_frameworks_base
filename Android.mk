@@ -41,9 +41,21 @@ LOCAL_SRC_FILES := $(filter-out \
 			org/mobilecontrol/% \
 			,$(LOCAL_SRC_FILES))
 
+# Include a different set of source files when building a debug build.
+# TODO: Maybe build these into a separate .jar and put it on the classpath
+#       in front of framework.jar.
+# NOTE: Do not use this as an example; this is a very special situation.
+#       Do not modify LOCAL_SRC_FILES based on any variable other
+#       than TARGET_BUILD_TYPE, otherwise builds can become inconsistent.
+ifeq ($(TARGET_BUILD_TYPE),debug)
+  LOCAL_SRC_FILES += $(call find-other-java-files,core/config/debug)
+else
+  LOCAL_SRC_FILES += $(call find-other-java-files,core/config/ndebug)
+endif
+
 ## READ ME: ########################################################
 ##
-## When updading this list of aidl files, consider if that aidl is
+## When updating this list of aidl files, consider if that aidl is
 ## part of the SDK API.  If it is, also add it to the list below that
 ## is preprocessed and distributed with the SDK.  This list should
 ## not contain any aidl files for parcelables, but the one below should
@@ -67,12 +79,16 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/ITransientNotification.aidl \
 	core/java/android/app/IWallpaperService.aidl \
 	core/java/android/app/IWallpaperServiceCallback.aidl \
+	core/java/android/backup/IBackupManager.aidl \
+	core/java/android/backup/IBackupService.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
+    core/java/android/content/IContentService.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
+    core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver.aidl \
@@ -96,10 +112,13 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IWindow.aidl \
 	core/java/android/view/IWindowManager.aidl \
 	core/java/android/view/IWindowSession.aidl \
+	core/java/android/speech/IRecognitionListener.aidl \
+	core/java/android/speech/IRecognitionService.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IUsageStats.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
+	core/java/com/android/internal/backup/IBackupTransport.aidl \
 	core/java/com/android/internal/os/IResultReceiver.aidl \
 	core/java/com/android/internal/view/IInputContext.aidl \
 	core/java/com/android/internal/view/IInputContextCallback.aidl \
@@ -109,9 +128,13 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodManager.aidl \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
 	im/java/android/im/IImPlugin.aidl \
+	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
+	location/java/android/location/IGpsStatusProvider.aidl \
+	location/java/android/location/ILocationCollector.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
+	location/java/android/location/ILocationProvider.aidl \
 	media/java/android/media/IAudioService.aidl \
 	media/java/android/media/IMediaScannerListener.aidl \
 	media/java/android/media/IMediaScannerService.aidl \
@@ -119,8 +142,8 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
-	telephony/java/com/android/internal/telephony/gsm/ISimPhoneBook.aidl \
-	telephony/java/com/android/internal/telephony/gsm/ISms.aidl \
+	telephony/java/com/android/internal/telephony/IIccPhoneBook.aidl \
+	telephony/java/com/android/internal/telephony/ISms.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl
 
@@ -221,6 +244,11 @@ fwbase_dirs_to_document := \
 	   ) \
 	 )
 
+# Pass a special "fake-out" version of some classes to the doc/API tools.
+# ConfigBuildFlags uses this trick to prevent certain fields from appearing
+# as "final" in the official SDK APIs.
+fwbase_dirs_to_document += core/config/sdk
+
 # These are relative to dalvik/libcore
 # Intentionally not included from libcore:
 #     icu openssl suncompat support
@@ -292,12 +320,6 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:=$(call intermediates-dir-for,JAVA_LIBRARIES,framework)
 
-web_docs_sample_code_flags := \
-		-hdf android.hasSamples 1 \
-		-samplecode samples/ApiDemos guide/samples/ApiDemos "API Demos" \
-		-samplecode samples/LunarLander guide/samples/LunarLander "Lunar Lander" \
-		-samplecode samples/NotePad guide/samples/NotePad "Note Pad"
-
 sample_dir := development/samples
 
 web_docs_sample_code_flags := \
@@ -309,6 +331,19 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/NotePad \
 		            guide/samples/NotePad "Note Pad"
 
+# SDK version identifiers used in the published docs. 
+
+# major[.minor] version for SDK. Typically identical to the 
+# most current Android platform version included in the SDK package. 
+framework_docs_SDK_VERSION :=  1.5
+# release version for SDK (ie "Release x")
+framework_docs_SDK_REL_ID :=   1
+framework_docs_SDK_CURRENT_DIR := $(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
+
+framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+		-hdf sdk.version $(framework_docs_SDK_VERSION) \
+		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
+		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR)
 
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
@@ -341,7 +376,7 @@ include $(BUILD_DROIDDOC)
 
 static_doc_index_redirect := $(out_dir)/index.html
 $(static_doc_index_redirect): \
-		$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
+	$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
 	$(hide) mkdir -p $(dir $@)
 	$(hide) $(ACP) $< $@
 
@@ -366,10 +401,10 @@ LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
 LOCAL_MODULE := online-sdk
 
 LOCAL_DROIDDOC_OPTIONS:= \
-	$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-	$(web_docs_sample_code_flags) \
-	-toroot / \
-    -hdf android.whichdoc online
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		$(web_docs_sample_code_flags) \
+		-toroot / \
+		-hdf android.whichdoc online
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
@@ -432,3 +467,5 @@ include $(BUILD_JAVA_LIBRARY)
 ifeq (,$(ONE_SHOT_MAKEFILE))
 include $(call first-makefiles-under,$(LOCAL_PATH))
 endif
+
+

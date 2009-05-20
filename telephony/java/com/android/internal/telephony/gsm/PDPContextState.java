@@ -19,10 +19,9 @@ package com.android.internal.telephony.gsm;
 /**
  * {@hide}
  */
-public class PDPContextState
-{
+public class PDPContextState {
     public int cid;
-    public boolean active;
+    public int active;
     public String type;
     public String apn;
     public String address;

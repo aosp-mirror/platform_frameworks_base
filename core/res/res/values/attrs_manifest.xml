@@ -79,6 +79,13 @@
          by applications. -->
     <attr name="allowClearUserData" format="boolean" />
     
+    <!-- Option to indicate this application is only for testing purposes.
+         For example, it may expose functionality or data outside of itself
+         that would cause a security hole, but is useful for testing.  This
+         kind of application can not be installed without the
+         INSTALL_ALLOW_TEST flag, which means only through adb install.  -->
+    <attr name="testOnly" format="boolean" />
+    
     <!-- A unique name for the given item.  This must use a Java-style naming
          convention to ensure the name is unique, for example
          "com.mycompany.MyName". -->  
@@ -635,6 +642,7 @@
         <!-- Name of activity to be launched for managing the application's space on the device. -->
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />
+        <attr name="testOnly" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
@@ -753,9 +761,28 @@
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestUsesSdk" parent="AndroidManifest">
         <!-- This is the minimum SDK version number that the application
-             requires.  Currently there is only one SDK version, 1.  If
-             not supplied, the application will work on any SDK. -->
-        <attr name="minSdkVersion" format="integer" />
+             requires.  This number is an abstract integer, from the list
+             in {@link android.os.Build.VERSION_CODES}  If
+             not supplied, the application will work on any SDK.  This
+             may also be string (such as "Donut") if the application was built
+             against a development branch, in which case it will only work against
+             the development builds. -->
+        <attr name="minSdkVersion" format="integer|string" />
+        <!-- This is the SDK version number that the application is targeting.
+             It is able to run on older versions (down to minSdkVersion), but
+             was explicitly tested to work with the version specified here.
+             Specifying this version allows the platform to disable compatibility
+             code that are not required or enable newer features that are not
+             available to older applications.  This may also be a string
+             (such as "Donut") if this is built against a development
+             branch, in which case minSdkVersion is also forced to be that
+             string. -->
+        <attr name="targetSdkVersion" format="integer|string" />
+        <!-- This is the maximum SDK version number that an application works
+             on.  You can use this to ensure your application is filtered out
+             of later versions of the platform when you know you have
+             incompatibility with them. -->
+        <attr name="maxSdkVersion" format="integer" />
     </declare-styleable>
     
     <!-- The <code>uses-libraries</code> specifies a shared library that this
@@ -769,6 +796,15 @@
         <attr name="name" />
     </declare-styleable>
     
+    <!-- The <code>supports-density</code> specifies a screen density that this
+         package supports. Application can specify multiple densities it supports.
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestSupportsDensity" parent="AndroidManifestApplication">
+        <!-- Required value of the density in dip (device independent pixel). -->
+        <attr name="density" format="integer" />
+    </declare-styleable>
+
     <!-- The <code>provider</code> tag declares a
          {@link android.content.ContentProvider} class that is available
          as part of the package's application components, supplying structured

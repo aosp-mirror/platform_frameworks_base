@@ -19,8 +19,14 @@ package android.telephony;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
+import android.provider.Settings;
+
+
+import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.RILConstants;
 
 /**
  * Abstract class that represents the location of the device.  Currently the only
@@ -56,7 +62,17 @@ public abstract class CellLocation {
      * @hide
      */
     public static CellLocation newFromBundle(Bundle bundle) {
-        return new GsmCellLocation(bundle);
+        // TODO: My need to be use: Settings.Secure.getInt(mContext, Settings.Secure.CURRENT_ACTIVE_PHONE, 0))
+        //       instead of SystemProperties???
+
+        // NOTE here TelephonyManager.getDefault().getPhoneType() cannot be used since at startup
+        //      ITelephony have not been created
+        if (RILConstants.CDMA_PHONE ==
+                SystemProperties.getInt(Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.GSM_PHONE)) {
+            return new CdmaCellLocation(bundle);
+        } else {
+            return new GsmCellLocation(bundle);
+        }
     }
 
     /**
@@ -66,8 +82,20 @@ public abstract class CellLocation {
 
     /**
      * Return a new CellLocation object representing an unknown location.
+     *
      */
     public static CellLocation getEmpty() {
-        return new GsmCellLocation();
+        // TODO: My need to be use: Settings.Secure.getInt(mContext, Settings.Secure.CURRENT_ACTIVE_PHONE, 0))
+        //       instead of SystemProperties???
+
+        // NOTE here TelephonyManager.getDefault().getPhoneType() cannot be used since at startup
+        //      ITelephony have not been created
+        if (RILConstants.CDMA_PHONE ==
+                SystemProperties.getInt(Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.GSM_PHONE)) {
+            return new CdmaCellLocation();
+        } else {
+            return new GsmCellLocation();
+        }
     }
+
 }

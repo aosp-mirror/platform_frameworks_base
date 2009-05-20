@@ -242,7 +242,7 @@ href="{@docRoot}reference/index.html">Reference</a> tab</li>
 <p><strong>Explore the SDK</strong></p>
 <ul>
 <li>Get an overview of the <a
-href="{@docRoot}guide/development/tools/index.html">development
+href="{@docRoot}guide/developing/tools/index.html">development
 tools</a> that are available to you</li>
 <li>Read the overviews of how to develop <a
 href="{@docRoot}guide/developing/eclipse-adt.html">in Eclipse/ADT</a> or

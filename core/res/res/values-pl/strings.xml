@@ -41,19 +41,19 @@
     <string name="invalidPin">"Wpisz kod PIN o długości od 4 do 8 cyfr."</string>
     <string name="needPuk">"Karta SIM jest zablokowana kodem PUK. Wprowadź kod PUK, aby odblokować kartę."</string>
     <string name="needPuk2">"Wprowadź kod PUK2, aby odblokować kartę SIM."</string>
-    <string name="ClipMmi">"Identyfikator rozmówcy przy połączeniach przychodzących"</string>
-    <string name="ClirMmi">"Identyfikator rozmówcy przy połączeniach wychodzących"</string>
+    <string name="ClipMmi">"Identyfikator dzwoniącego przy połączeniach przychodzących"</string>
+    <string name="ClirMmi">"Identyfikator dzwoniącego przy połączeniach wychodzących"</string>
     <string name="CfMmi">"Przekierowania połączeń"</string>
     <string name="CwMmi">"Połączenia oczekujące"</string>
     <string name="BaMmi">"Blokada dzwonienia"</string>
     <string name="PwdMmi">"Zmiana hasła"</string>
     <string name="PinMmi">"Zmiana kodu PIN"</string>
-    <string name="CLIRDefaultOnNextCallOn">"Identyfikator rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
-    <string name="CLIRDefaultOnNextCallOff">"Identyfikator rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
-    <string name="CLIRDefaultOffNextCallOn">"Identyfikator rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
-    <string name="CLIRDefaultOffNextCallOff">"Identyfikator rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
+    <string name="CLIRDefaultOnNextCallOn">"Identyfikator dzwoniącego ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
+    <string name="CLIRDefaultOnNextCallOff">"Identyfikator dzwoniącego ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
+    <string name="CLIRDefaultOffNextCallOn">"Identyfikator dzwoniącego ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
+    <string name="CLIRDefaultOffNextCallOff">"Identyfikator dzwoniącego ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="serviceNotProvisioned">"Usługa nie jest świadczona."</string>
-    <string name="CLIRPermanent">"Nie można zmienić ustawienia identyfikatora rozmówcy."</string>
+    <string name="CLIRPermanent">"Nie można zmienić ustawienia identyfikatora dzwoniącego."</string>
     <string name="RestrictedChangedTitle">"Zmieniono ograniczenie dostępu"</string>
     <string name="RestrictedOnData">"Usługa transmisji danych jest zablokowana."</string>
     <string name="RestrictedOnEmergency">"Usługa połączeń alarmowych jest zablokowana."</string>
@@ -108,9 +108,9 @@
     <string name="global_action_toggle_silent_mode">"Tryb cichy"</string>
     <string name="global_action_silent_mode_on_status">"Dźwięk jest wyłączony"</string>
     <string name="global_action_silent_mode_off_status">"Dźwięk jest włączony"</string>
-    <string name="global_actions_toggle_airplane_mode">"Tryb samolotowy"</string>
-    <string name="global_actions_airplane_mode_on_status">"Tryb samolotowy jest włączony"</string>
-    <string name="global_actions_airplane_mode_off_status">"Tryb samolotowy jest wyłączony"</string>
+    <string name="global_actions_toggle_airplane_mode">"Tryb lotniczy"</string>
+    <string name="global_actions_airplane_mode_on_status">"Tryb lotniczy jest włączony"</string>
+    <string name="global_actions_airplane_mode_off_status">"Tryb lotniczy jest wyłączony"</string>
     <string name="safeMode">"Tryb awaryjny"</string>
     <string name="android_system_label">"System Android"</string>
     <string name="permgrouplab_costMoney">"Usługi płatne"</string>
@@ -731,8 +731,8 @@
     <string name="volume_alarm">"Głośność alarmu"</string>
     <string name="volume_notification">"Głośność powiadomienia"</string>
     <string name="volume_unknown">"Głośność"</string>
-    <string name="ringtone_default">"Dzwonek domyślny"</string>
-    <string name="ringtone_default_with_actual">"Dzwonek domyślny (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default">"Domyślny dzwonek"</string>
+    <string name="ringtone_default_with_actual">"Domyślny dzwonek (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent">"Cichy"</string>
     <string name="ringtone_picker_title">"Dzwonki"</string>
     <string name="ringtone_unknown">"Nieznany dzwonek"</string>

@@ -380,35 +380,35 @@ public class MediaNames {
   public static final String META_DATA_MP3 [][] = {
       {"/sdcard/media_api/metaDataTestMedias/MP3/ID3V1_ID3V2.mp3", "1/10", "ID3V2.3 Album", "ID3V2.3 Artist",
           "ID3V2.3 Lyricist", "ID3V2.3 Composer", null, "Blues",
-          "ID3V2.3 Title", "1234", "321", "1"},
+          "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/ID3V2.mp3", "1/10", "ID3V2.3 Album", "ID3V2.3 Artist",
           "ID3V2.3 Lyricist", "ID3V2.3 Composer", null, "Blues", 
-          "ID3V2.3 Title", "1234", "313", "1"},
-      {"/sdcard/media_api/metaDataTestMedias/MP3/ID3V1.mp3", null, "test ID3V1 Album", "test ID3V1 Artist",
-          null, null, null, null, "test ID3V1 Title", "1234", "231332", "1"},
+          "ID3V2.3 Title", "1234", "287", "1"},
+      {"/sdcard/media_api/metaDataTestMedias/MP3/ID3V1.mp3", "1", "test ID3V1 Album", "test ID3V1 Artist",
+          null, null, null, "255", "test ID3V1 Title", "1234", "231332", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V1.mp3" , null, null, null,
               null, null, null, null, null, null, "231330", "1"},
       //The corrupted TALB field in id3v2 would not switch to id3v1 tag automatically
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TALB.mp3", "01", null, "ID3V2.3 Artist",
           "ID3V2.3 Lyricist", "ID3V2.3 Composer", null, 
-          "Blues", "ID3V2.3 Title", "1234", "321", "1"},
+          "Blues", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TCOM.mp3", "01", "ID3V2.3 Album", 
            "ID3V2.3 Artist", "ID3V2.3 Lyricist", null, null, 
-           "Blues", "ID3V2.3 Title", "1234", "321", "1"},
+           "Blues", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TCOM_2.mp3", "01", "ID3V2.3 Album", 
-           "ID3V2.3 Artist", null, null, null, "Blues", "ID3V2.3 Title", "1234", "321", "1"},
+           "ID3V2.3 Artist", null, null, null, "Blues", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TRCK.mp3", "dd", "ID3V2.3 Album", 
            "ID3V2.3 Artist", "ID3V2.3 Lyricist", "ID3V2.3 Composer", null,
-           "Blues", "ID3V2.3 Title", "1234", "321", "1"},
+           "Blues", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TRCK_2.mp3", "01", "ID3V2.3 Album", 
-           "ID3V2.3 Artist", null, null, null, null, "ID3V2.3 Title", null, "321", "1"},
+           "ID3V2.3 Artist", null, null, null, "255", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TYER.mp3", "01", "ID3V2.3 Album",
-           "ID3V2.3 Artist", null, null, null, null, "ID3V2.3 Title", "9999", "321", "1"},
+           "ID3V2.3 Artist", null, null, null, null, "ID3V2.3 Title", "9999", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TYER_2.mp3", "01", "ID3V2.3 Album",
            "ID3V2.3 Artist", "ID3V2.3 Lyricist", "ID3V2.3 Composer", null, 
-           "Blues", "ID3V2.3 Title", null, "321", "1"},
+           "Blues", "ID3V2.3 Title", null, "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TIT.mp3", null, null, null,
-          null, null, null, null, null, null, "577", "1"}
+          null, null, null, null, null, null, "295", "1"}
   };
 
   public static final String META_DATA_OTHERS [][] = {
@@ -432,7 +432,7 @@ public class MediaNames {
           null, null, "2005", "231180", "1"}, 
       {"/sdcard/media_api/metaDataTestMedias/MP4/kung_fu_panda_h264.mp4", null, "mp4 album Kung Fu Panda", 
           "mp4 artist Kung Fu Panda", null, null, "20080517T091451.000Z", 
-          "Kung Fu Panda", "Kung Fu Panda", "2008", "5667840", "2"},
+          "41", "Kung Fu Panda", "2008", "5667840", "2"},
       {"/sdcard/media_api/metaDataTestMedias/OGG/Ring_Classic_02.ogg", null, "Suspended Animation", 
           "John Petrucci", null, null, "20070510T125223.000Z", 
           null, null, "2005", "231180", "1"},
@@ -464,6 +464,7 @@ public class MediaNames {
   public static final String RECORDED_SQVGA_H263 = "/sdcard/SQVGA_H263.3gp";
   public static final String RECORDED_CIF_H263 = "/sdcard/CIF_H263.3gp";
   public static final String RECORDED_QCIF_H263 = "/sdcard/QCIF_H263.3gp";
+  public static final String RECORDED_PORTRAIT_H263 = "/sdcard/QCIF_mp4.3gp";
   
   public static final String RECORDED_HVGA_MP4 = "/sdcard/HVGA_mp4.mp4";
   public static final String RECORDED_QVGA_MP4 = "/sdcard/QVGA_mp4.mp4";

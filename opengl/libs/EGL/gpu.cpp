@@ -53,7 +53,7 @@ namespace android {
 static Mutex                            gRegionsLock;
 static request_gpu_t                    gRegions;
 static sp<ISurfaceComposer>             gSurfaceManager;
-ISurfaceComposer*                       GLES_localSurfaceManager = 0;
+GL_API ISurfaceComposer*                GLES_localSurfaceManager = 0;
 
 extern egl_connection_t gEGLImpl[2];
 

@@ -20,7 +20,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
 
-import com.android.internal.telephony.gsm.GsmAlphabet;
+import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.gsm.SIMFileHandler;
 
 import java.util.Iterator;

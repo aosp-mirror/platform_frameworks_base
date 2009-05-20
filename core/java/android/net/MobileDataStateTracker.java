@@ -117,28 +117,28 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                     mMobileDataState = state;
 
                     switch (state) {
-                        case DISCONNECTED:
-                            setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
-                            if (mInterfaceName != null) {
-                                NetworkUtils.resetConnections(mInterfaceName);
-                            }
-                            mInterfaceName = null;
-                            mDefaultGatewayAddr = 0;
-                            break;
-                        case CONNECTING:
-                            setDetailedState(DetailedState.CONNECTING, reason, apnName);
-                            break;
-                        case SUSPENDED:
-                            setDetailedState(DetailedState.SUSPENDED, reason, apnName);
-                            break;
-                        case CONNECTED:
-                            mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
-                            if (mInterfaceName == null) {
-                                Log.d(TAG, "CONNECTED event did not supply interface name.");
-                            }
-                            setupDnsProperties();
-                            setDetailedState(DetailedState.CONNECTED, reason, apnName);
-                            break;
+                    case DISCONNECTED:
+                        setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
+                        if (mInterfaceName != null) {
+                            NetworkUtils.resetConnections(mInterfaceName);
+                        }
+                        mInterfaceName = null;
+                        mDefaultGatewayAddr = 0;
+                        break;
+                    case CONNECTING:
+                        setDetailedState(DetailedState.CONNECTING, reason, apnName);
+                        break;
+                    case SUSPENDED:
+                        setDetailedState(DetailedState.SUSPENDED, reason, apnName);
+                        break;
+                    case CONNECTED:
+                        mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                        if (mInterfaceName == null) {
+                            Log.d(TAG, "CONNECTED event did not supply interface name.");
+                        }
+                        setupDnsProperties();
+                        setDetailedState(DetailedState.CONNECTED, reason, apnName);
+                        break;
                     }
                 }
             } else if (intent.getAction().equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
@@ -199,7 +199,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      */
     public boolean isAvailable() {
         getPhoneService(false);
-        
+
         /*
          * If the phone process has crashed in the past, we'll get a
          * RemoteException and need to re-reference the service.
@@ -214,7 +214,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 if (retry == 0) getPhoneService(true);
             }
         }
-        
+
         return false;
     }
 
@@ -241,17 +241,27 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * for this network.
      */
     public String getTcpBufferSizesPropName() {
-      String networkTypeStr = "unknown";
+        String networkTypeStr = "unknown";
         TelephonyManager tm = new TelephonyManager(mContext);
+        //TODO We have to edit the parameter for getNetworkType regarding CDMA
         switch(tm.getNetworkType()) {
-          case TelephonyManager.NETWORK_TYPE_GPRS:
+        case TelephonyManager.NETWORK_TYPE_GPRS:
             networkTypeStr = "gprs";
             break;
-          case TelephonyManager.NETWORK_TYPE_EDGE:
+        case TelephonyManager.NETWORK_TYPE_EDGE:
             networkTypeStr = "edge";
             break;
-          case TelephonyManager.NETWORK_TYPE_UMTS:
+        case TelephonyManager.NETWORK_TYPE_UMTS:
             networkTypeStr = "umts";
+            break;
+        case TelephonyManager.NETWORK_TYPE_CDMA:
+            networkTypeStr = "cdma";
+            break;
+        case TelephonyManager.NETWORK_TYPE_EVDO_0:
+            networkTypeStr = "evdo";
+            break;
+        case TelephonyManager.NETWORK_TYPE_EVDO_A:
+            networkTypeStr = "evdo";
             break;
         }
         return "net.tcp.buffersize." + networkTypeStr;
@@ -281,7 +291,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 if (retry == 0) getPhoneService(true);
             }
         }
-        
+
         Log.w(TAG, "Failed to tear down mobile data connectivity");
         return false;
     }
@@ -330,7 +340,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                     "Ignoring mobile radio request because could not acquire PhoneService");
                 break;
             }
-            
+
             try {
                 return mPhoneService.setRadio(turnOn);
             } catch (RemoteException e) {
@@ -344,9 +354,10 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
     /**
      * Tells the phone sub-system that the caller wants to
-     * begin using the named feature. The only supported feature at
-     * this time is {@code Phone.FEATURE_ENABLE_MMS}, which allows an application
-     * to specify that it wants to send and/or receive MMS data.
+     * begin using the named feature. The only supported features at
+     * this time are {@code Phone.FEATURE_ENABLE_MMS}, which allows an application
+     * to specify that it wants to send and/or receive MMS data, and
+     * {@code Phone.FEATURE_ENABLE_SUPL}, which is used for Assisted GPS.
      * @param feature the name of the feature to be used
      * @param callingPid the process ID of the process that is issuing this request
      * @param callingUid the user ID of the process that is issuing this request
@@ -366,6 +377,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
             mLastCallingPid = callingPid;
             return setEnableApn(Phone.APN_TYPE_MMS, true);
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
+            return setEnableApn(Phone.APN_TYPE_SUPL, true);
         } else {
             return -1;
         }
@@ -386,6 +399,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
     public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
         if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
             return setEnableApn(Phone.APN_TYPE_MMS, false);
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
+            return setEnableApn(Phone.APN_TYPE_SUPL, false);
         } else {
             return -1;
         }

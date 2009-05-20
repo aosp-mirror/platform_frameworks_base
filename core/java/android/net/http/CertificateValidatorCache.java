@@ -236,15 +236,17 @@ class CertificateValidatorCache {
                 }
             }
 
-            int hashLength = secureHash.length;
-            if (secureHash != null && 0 < hashLength) {
-                if (hashLength == mHash.length) {
-                    for (int i = 0; i < hashLength; ++i) {
-                        if (secureHash[i] != mHash[i]) {
-                            return false;
+            if (secureHash != null) {
+                int hashLength = secureHash.length;
+                if (0 < hashLength) {
+                    if (hashLength == mHash.length) {
+                        for (int i = 0; i < hashLength; ++i) {
+                            if (secureHash[i] != mHash[i]) {
+                                return false;
+                            }
                         }
+                        return true;
                     }
-                    return true;
                 }
             }
 

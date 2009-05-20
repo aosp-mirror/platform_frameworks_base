@@ -108,7 +108,8 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
     sp<Camera> camera = Camera::connect();
 
     if (camera == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
+        jniThrowException(env, "java/lang/RuntimeException",
+                          "Fail to connect to camera service");
         return;
     }
 

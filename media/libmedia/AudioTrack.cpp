@@ -92,7 +92,6 @@ AudioTrack::~AudioTrack()
         // Otherwise the callback thread will never exit.
         stop();
         if (mAudioTrackThread != 0) {
-            mCblk->cv.signal();
             mAudioTrackThread->requestExitAndWait();
             mAudioTrackThread.clear();
         }
@@ -117,7 +116,7 @@ status_t AudioTrack::set(
 
     LOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
 
-    if (mAudioFlinger != 0) {
+    if (mAudioTrack != 0) {
         LOGE("Track already in use");
         return INVALID_OPERATION;
     }
@@ -228,7 +227,6 @@ status_t AudioTrack::set(
 
     mStatus = NO_ERROR;
 
-    mAudioFlinger = audioFlinger;
     mAudioTrack = track;
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
@@ -357,6 +355,7 @@ void AudioTrack::stop()
     }
 
     if (android_atomic_and(~1, &mActive) == 1) {
+        mCblk->cv.signal();
         mAudioTrack->stop();
         // Cancel loops (If we are in the middle of a loop, playback
         // would not stop until loopCount reaches 0).
@@ -596,6 +595,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     status_t result;
     audio_track_cblk_t* cblk = mCblk;
     uint32_t framesReq = audioBuffer->frameCount;
+    uint32_t waitTimeMs = (waitCount < 0) ? cblk->bufferTimeoutMs : WAIT_PERIOD_MS;
 
     audioBuffer->frameCount  = 0;
     audioBuffer->size = 0;
@@ -614,9 +614,9 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
             if (UNLIKELY(!waitCount))
                 return WOULD_BLOCK;
             timeout = 0;
-            result = cblk->cv.waitRelative(cblk->lock, milliseconds(WAIT_PERIOD_MS));
+            result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
             if (__builtin_expect(result!=NO_ERROR, false)) { 
-                cblk->waitTimeMs += WAIT_PERIOD_MS;
+                cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
                     // timing out when a loop has been set and we have already written upto loop end
                     // is a normal condition: no need to wake AudioFlinger up.
@@ -798,7 +798,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         status_t err = obtainBuffer(&audioBuffer, 1);
         if (err < NO_ERROR) {
             if (err != TIMED_OUT) {
-                LOGE("Error obtaining an audio buffer, giving up.");
+                LOGE_IF(err != status_t(NO_MORE_BUFFERS), "Error obtaining an audio buffer, giving up.");
                 return false;
             }
             break;

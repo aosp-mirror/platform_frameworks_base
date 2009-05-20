@@ -28,11 +28,13 @@ class ConnectionRecord {
     final HistoryRecord activity;   // If non-null, the owning activity.
     final IServiceConnection conn;  // The client connection.
     final int flags;                // Binding options.
-
+    String stringName;              // Caching of toString.
+    
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
         pw.println(prefix + "binding=" + binding);
-        pw.println(prefix + "activity=" + activity);
+        if (activity != null) {
+            pw.println(prefix + "activity=" + activity);
+        }
         pw.println(prefix + "conn=" + conn.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
     }
@@ -46,9 +48,17 @@ class ConnectionRecord {
     }
 
     public String toString() {
-        return "ConnectionRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + binding.service.shortName
-            + ":@" + Integer.toHexString(System.identityHashCode(conn.asBinder())) + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("ConnectionRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(binding.service.shortName);
+        sb.append(":@");
+        sb.append(Integer.toHexString(System.identityHashCode(conn.asBinder())));
+        sb.append('}');
+        return stringName = sb.toString();
     }
 }

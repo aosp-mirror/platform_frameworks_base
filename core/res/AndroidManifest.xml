@@ -214,6 +214,18 @@
         android:label="@string/permlab_accessLocationExtraCommands"
         android:description="@string/permdesc_accessLocationExtraCommands" />
 
+    <!-- Allows an application to install a location provider into the Location Manager -->
+    <permission android:name="android.permission.INSTALL_LOCATION_PROVIDER"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_installLocationProvider"
+        android:description="@string/permdesc_installLocationProvider" />
+
+    <!-- Allows an application to install a location collector into the Location Manager -->
+    <permission android:name="android.permission.INSTALL_LOCATION_COLLECTOR"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_installLocationCollector"
+        android:description="@string/permdesc_installLocationCollector" />
+
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->
@@ -365,6 +377,23 @@
         android:protectionLevel="dangerous"
         android:label="@string/permlab_readPhoneState"
         android:description="@string/permdesc_readPhoneState" />
+
+    <!-- ================================== -->
+    <!-- Permissions for sdcard interaction -->
+    <!-- ================================== -->
+    <eat-comment />
+
+    <!-- Group of permissions that are related to SD card access. -->
+    <permission-group android:name="android.permission-group.STORAGE"
+        android:label="@string/permgrouplab_storage"
+        android:description="@string/permgroupdesc_storage" />
+
+    <!-- Allows an application to write to the SD card -->
+    <permission android:name="android.permission.SDCARD_WRITE"
+        android:permissionGroup="android.permission-group.STORAGE"
+        android:label="@string/permlab_sdcardWrite"
+        android:description="@string/permdesc_sdcardWrite"
+        android:protectionLevel="normal" />
 
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->
@@ -774,6 +803,14 @@
         android:description="@string/permdesc_runSetActivityWatcher"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to watch and control how activities are
+         started globally in the system.  Only for is in debugging
+         (usually the monkey command). -->
+    <permission android:name="android.permission.SHUTDOWN"
+        android:label="@string/permlab_shutdown"
+        android:description="@string/permdesc_shutdown"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to retrieve the current state of keys and
          switches.  This is only for use by the system.-->
     <permission android:name="android.permission.READ_INPUT_STATE"
@@ -904,7 +941,7 @@
     <permission android:name="android.permission.CONTROL_LOCATION_UPDATES"
         android:label="@string/permlab_locationUpdates"
         android:description="@string/permdesc_locationUpdates"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows read/write access to the "properties" table in the checkin
          database, to change values that get uploaded. -->
@@ -982,9 +1019,6 @@
                 android:theme="@style/Theme.Dialog.Alert"
                 android:excludeFromRecents="true">
         </activity>
-
-        <provider android:name=".content.SyncProvider"
-                android:authorities="sync" android:multiprocess="false" />
 
         <service android:name="com.android.server.LoadAverageService"
             android:exported="true" />

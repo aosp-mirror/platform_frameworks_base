@@ -161,7 +161,7 @@ public final class ActivityThread {
         return metrics;
     }
 
-    Resources getTopLevelResources(String appDir) {
+    Resources getTopLevelResources(String appDir, float applicationScale) {
         synchronized (mPackages) {
             //Log.w(TAG, "getTopLevelResources: " + appDir);
             WeakReference<Resources> wr = mActiveResources.get(appDir);
@@ -181,7 +181,22 @@ public final class ActivityThread {
                 return null;
             }
             DisplayMetrics metrics = getDisplayMetricsLocked(false);
-            r = new Resources(assets, metrics, getConfiguration());
+            // density used to load resources
+            // scaledDensity is calculated in Resources constructor
+            //
+            boolean usePreloaded = true;
+
+            // TODO: use explicit flag to indicate the compatibility mode.
+            if (applicationScale != 1.0f) {
+                usePreloaded = false;
+                DisplayMetrics newMetrics = new DisplayMetrics();
+                newMetrics.setTo(metrics);
+                float newDensity = metrics.density / applicationScale;
+                newMetrics.updateDensity(newDensity);
+                metrics = newMetrics;
+            }
+            //Log.i(TAG, "Resource:" + appDir + ", display metrics=" + metrics);
+            r = new Resources(assets, metrics, getConfiguration(), usePreloaded);
             //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
             // XXX need to remove entries when weak references go away
             mActiveResources.put(appDir, new WeakReference<Resources>(r));
@@ -209,6 +224,8 @@ public final class ActivityThread {
         private Resources mResources;
         private ClassLoader mClassLoader;
         private Application mApplication;
+        private float mApplicationScale;
+
         private final HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
             = new HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>>();
         private final HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>> mUnregisteredReceivers
@@ -241,8 +258,8 @@ public final class ActivityThread {
                     mSystemContext =
                         ApplicationContext.createSystemContext(mainThread);
                     mSystemContext.getResources().updateConfiguration(
-                            mainThread.getConfiguration(),
-                            mainThread.getDisplayMetricsLocked(false));
+                             mainThread.getConfiguration(),
+                             mainThread.getDisplayMetricsLocked(false));
                     //Log.i(TAG, "Created system resources "
                     //        + mSystemContext.getResources() + ": "
                     //        + mSystemContext.getResources().getConfiguration());
@@ -250,6 +267,8 @@ public final class ActivityThread {
                 mClassLoader = mSystemContext.getClassLoader();
                 mResources = mSystemContext.getResources();
             }
+
+            mApplicationScale = -1.0f;
         }
 
         public PackageInfo(ActivityThread activityThread, String name,
@@ -268,6 +287,7 @@ public final class ActivityThread {
             mIncludeCode = true;
             mClassLoader = systemContext.getClassLoader();
             mResources = systemContext.getResources();
+            mApplicationScale = systemContext.getApplicationScale();
         }
 
         public String getPackageName() {
@@ -276,6 +296,45 @@ public final class ActivityThread {
 
         public boolean isSecurityViolation() {
             return mSecurityViolation;
+        }
+
+        public float getApplicationScale() {
+            if (mApplicationScale > 0.0f) {
+                return mApplicationScale;
+            }
+            DisplayMetrics metrics = mActivityThread.getDisplayMetricsLocked(false);
+            // Find out the density scale (relative to 160) of the supported density  that
+            // is closest to the system's density.
+            try {
+                ApplicationInfo ai = getPackageManager().getApplicationInfo(
+                        mPackageName, PackageManager.GET_SUPPORTS_DENSITIES);
+
+                float appScale = -1.0f;
+                if (ai.supportsDensities != null) {
+                    int minDiff = Integer.MAX_VALUE;
+                    for (int density : ai.supportsDensities) {
+                        int tmpDiff = (int) Math.abs(DisplayMetrics.DEVICE_DENSITY - density);
+                        if (tmpDiff == 0) {
+                            appScale = 1.0f;
+                            break;
+                        }
+                        // prefer higher density (appScale>1.0), unless that's only option.
+                        if (tmpDiff < minDiff && appScale < 1.0f) {
+                            appScale = DisplayMetrics.DEVICE_DENSITY / density;
+                            minDiff = tmpDiff;
+                        }
+                    }
+                }
+                if (appScale < 0.0f) {
+                    mApplicationScale = metrics.density;
+                } else {
+                    mApplicationScale = appScale;
+                }
+            } catch (RemoteException e) {
+                throw new AssertionError(e);
+            }
+            if (localLOGV) Log.v(TAG, "appScale=" + mApplicationScale + ", pkg=" + mPackageName);
+            return mApplicationScale;
         }
 
         /**
@@ -435,7 +494,7 @@ public final class ActivityThread {
 
         public Resources getResources(ActivityThread mainThread) {
             if (mResources == null) {
-                mResources = mainThread.getTopLevelResources(mResDir);
+                mResources = mainThread.getTopLevelResources(mResDir, getApplicationScale());
             }
             return mResources;
         }
@@ -1689,7 +1748,7 @@ public final class ActivityThread {
 
                     r.packageInfo = getPackageInfoNoCheck(
                             r.activityInfo.applicationInfo);
-                    handleLaunchActivity(r);
+                    handleLaunchActivity(r, null);
                 } break;
                 case RELAUNCH_ACTIVITY: {
                     ActivityRecord r = (ActivityRecord)msg.obj;
@@ -2109,7 +2168,7 @@ public final class ActivityThread {
                     + ", comp=" + name
                     + ", token=" + token);
         }
-        return performLaunchActivity(r);
+        return performLaunchActivity(r, null);
     }
 
     public final Activity getActivity(IBinder token) {
@@ -2159,7 +2218,7 @@ public final class ActivityThread {
         queueOrSendMessage(H.CLEAN_UP_CONTEXT, cci);
     }
 
-    private final Activity performLaunchActivity(ActivityRecord r) {
+    private final Activity performLaunchActivity(ActivityRecord r, Intent customIntent) {
         // System.out.println("##### [" + System.currentTimeMillis() + "] ActivityThread.performLaunchActivity(" + r + ")");
 
         ActivityInfo aInfo = r.activityInfo;
@@ -2219,6 +2278,9 @@ public final class ActivityThread {
                         r.lastNonConfigurationInstance, r.lastNonConfigurationChildInstances,
                         config);
                 
+                if (customIntent != null) {
+                    activity.mIntent = customIntent;
+                }
                 r.lastNonConfigurationInstance = null;
                 r.lastNonConfigurationChildInstances = null;
                 activity.mStartedActivity = false;
@@ -2274,14 +2336,14 @@ public final class ActivityThread {
         return activity;
     }
 
-    private final void handleLaunchActivity(ActivityRecord r) {
+    private final void handleLaunchActivity(ActivityRecord r, Intent customIntent) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
 
         if (localLOGV) Log.v(
             TAG, "Handling launch of " + r);
-        Activity a = performLaunchActivity(r);
+        Activity a = performLaunchActivity(r, customIntent);
 
         if (a != null) {
             handleResumeActivity(r.token, false, r.isForward);
@@ -3243,6 +3305,7 @@ public final class ActivityThread {
         }
         
         r.activity.mConfigChangeFlags |= configChanges;
+        Intent currentIntent = r.activity.mIntent;
         
         Bundle savedState = null;
         if (!r.paused) {
@@ -3275,7 +3338,7 @@ public final class ActivityThread {
             r.state = savedState;
         }
         
-        handleLaunchActivity(r);
+        handleLaunchActivity(r, currentIntent);
     }
 
     private final void handleRequestThumbnail(IBinder token) {
@@ -3412,6 +3475,8 @@ public final class ActivityThread {
             }
             mConfiguration.updateFrom(config);
             DisplayMetrics dm = getDisplayMetricsLocked(true);
+            DisplayMetrics appDm = new DisplayMetrics();
+            appDm.setTo(dm);
 
             // set it for java, this also affects newly created Resources
             if (config.locale != null) {
@@ -3431,7 +3496,11 @@ public final class ActivityThread {
                     WeakReference<Resources> v = it.next();
                     Resources r = v.get();
                     if (r != null) {
-                        r.updateConfiguration(config, dm);
+                        // keep the original density based on application cale.
+                        appDm.updateDensity(r.getDisplayMetrics().density);
+                        r.updateConfiguration(config, appDm);
+                        // reset
+                        appDm.setTo(dm);
                         //Log.i(TAG, "Updated app resources " + v.getKey()
                         //        + " " + r + ": " + r.getConfiguration());
                     } else {
@@ -3492,6 +3561,9 @@ public final class ActivityThread {
             int sqliteReleased = SQLiteDatabase.releaseMemory();
             EventLog.writeEvent(SQLITE_MEM_RELEASED_EVENT_LOG_TAG, sqliteReleased);
         }
+        
+        // Ask graphics to free up as much as possible (font/image caches)
+        Canvas.freeCaches();
 
         BinderInternal.forceGc("mem");
     }

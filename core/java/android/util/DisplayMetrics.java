@@ -31,7 +31,11 @@ public class DisplayMetrics {
      */
     public static final int DEFAULT_DENSITY = 160;
 
-    private static final int sLcdDensity = SystemProperties.getInt("ro.sf.lcd_density",
+    /**
+     * The device's density.
+     * @hide
+     */
+    public static final int DEVICE_DENSITY = SystemProperties.getInt("ro.sf.lcd_density",
             DEFAULT_DENSITY);
 
     /**
@@ -90,9 +94,29 @@ public class DisplayMetrics {
     public void setToDefaults() {
         widthPixels = 0;
         heightPixels = 0;
-        density = sLcdDensity / (float) DEFAULT_DENSITY;
+        density = DEVICE_DENSITY / (float) DEFAULT_DENSITY;
         scaledDensity = density;
-        xdpi = sLcdDensity;
-        ydpi = sLcdDensity;
+        xdpi = DEVICE_DENSITY;
+        ydpi = DEVICE_DENSITY;
+    }
+
+    /**
+     * Set the display metrics' density and update parameters depend on it.
+     * @hide
+     */
+    public void updateDensity(float newDensity) {
+        float ratio = newDensity / density;
+        density = newDensity;
+        scaledDensity = density;
+        widthPixels *= ratio;
+        heightPixels *= ratio;
+        xdpi *= ratio;
+        ydpi *= ratio;
+    }
+
+    public String toString() {
+        return "DisplayMetrics{density=" + density + ", width=" + widthPixels +
+            ", height=" + heightPixels + ", scaledDensity=" + scaledDensity +
+            ", xdpi=" + xdpi + ", ydpi=" + ydpi + "}";
     }
 }

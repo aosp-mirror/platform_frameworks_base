@@ -157,4 +157,19 @@ public class WebChromeClient {
             JsResult result) {
         return false;
     }
+
+    /**
+     * Tell the client that a JavaScript execution timeout has occured. And the
+     * client may decide whether or not to interrupt the execution. If the
+     * client returns true, the JavaScript will be interrupted. If the client
+     * returns false, the execution will continue. Note that in the case of
+     * continuing execution, the timeout counter will be reset, and the callback
+     * will continue to occur if the script does not finish at the next check
+     * point.
+     * @return boolean Whether the JavaScript execution should be interrupted.
+     * @hide pending API Council approval
+     */
+    public boolean onJsTimeout() {
+        return true;
+    }
 }

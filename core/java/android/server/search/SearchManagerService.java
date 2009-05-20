@@ -23,7 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
-import android.util.Config;
+
+import java.util.List;
 
 /**
  * This is a simplified version of the Search Manager service.  It no longer handles
@@ -36,7 +37,6 @@ public class SearchManagerService extends ISearchManager.Stub
         // general debugging support
     private static final String TAG = "SearchManagerService";
     private static final boolean DEBUG = false;
-    private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
     
         // configuration choices
     private static final boolean IMMEDIATE_SEARCHABLES_UPDATE = true;
@@ -45,9 +45,10 @@ public class SearchManagerService extends ISearchManager.Stub
     private final Context mContext;
     private final Handler mHandler;
     private boolean mSearchablesDirty;
+    private Searchables mSearchables;
     
     /**
-     * Initialize the Search Manager service in the provided system context.
+     * Initializes the Search Manager service in the provided system context.
      * Only one instance of this object should be created!
      *
      * @param context to use for accessing DB, window manager, etc.
@@ -55,6 +56,8 @@ public class SearchManagerService extends ISearchManager.Stub
     public SearchManagerService(Context context)  {     
         mContext = context;
         mHandler = new Handler();
+        mSearchablesDirty = true;
+        mSearchables = new Searchables(context);
         
         // Setup the infrastructure for updating and maintaining the list
         // of searchable activities.
@@ -64,7 +67,6 @@ public class SearchManagerService extends ISearchManager.Stub
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
-        mSearchablesDirty = true;
         
         // After startup settles down, preload the searchables list,
         // which will reduce the delay when the search UI is invoked.
@@ -109,34 +111,24 @@ public class SearchManagerService extends ISearchManager.Stub
     };
 
     /**
-     * Update the list of searchables, either at startup or in response to
+     * Updates the list of searchables, either at startup or in response to
      * a package add/remove broadcast message.
      */
     private void updateSearchables() {
-        SearchableInfo.buildSearchableList(mContext);
+        mSearchables.buildSearchableList();
         mSearchablesDirty = false;
-        
-        // TODO This is a hack.  This shouldn't be hardcoded here, it's probably
-        // a policy.
-//      ComponentName defaultSearch = new ComponentName( 
-//              "com.android.contacts", 
-//              "com.android.contacts.ContactsListActivity" );
-        ComponentName defaultSearch = new ComponentName( 
-                "com.android.googlesearch", 
-                "com.android.googlesearch.GoogleSearch" );
-        SearchableInfo.setDefaultSearchable(mContext, defaultSearch);
     }
 
     /**
-     * Return the searchableinfo for a given activity
+     * Returns the SearchableInfo for a given activity
      *
      * @param launchActivity The activity from which we're launching this search.
-     * @return Returns a SearchableInfo record describing the parameters of the search,
-     * or null if no searchable metadata was available.
      * @param globalSearch If false, this will only launch the search that has been specifically
      * defined by the application (which is usually defined as a local search).  If no default 
      * search is defined in the current application or activity, no search will be launched.
      * If true, this will always launch a platform-global (e.g. web-based) search instead.
+     * @return Returns a SearchableInfo record describing the parameters of the search,
+     * or null if no searchable metadata was available.
      */
     public SearchableInfo getSearchableInfo(ComponentName launchActivity, boolean globalSearch) {
         // final check.  however we should try to avoid this, because
@@ -146,11 +138,19 @@ public class SearchManagerService extends ISearchManager.Stub
         }
         SearchableInfo si = null;
         if (globalSearch) {
-            si = SearchableInfo.getDefaultSearchable();
+            si = mSearchables.getDefaultSearchable();
         } else {
-            si = SearchableInfo.getSearchableInfo(mContext, launchActivity);
+            si = mSearchables.getSearchableInfo(launchActivity);
         }
 
         return si;
     }
+    
+    /**
+     * Returns a list of the searchable activities that can be included in global search.
+     */
+    public List<SearchableInfo> getSearchablesInGlobalSearch() {
+        return mSearchables.getSearchablesInGlobalSearchList();
+    }
+
 }

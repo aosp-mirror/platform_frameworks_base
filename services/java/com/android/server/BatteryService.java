@@ -84,7 +84,7 @@ class BatteryService extends Binder {
     private static final int CRITICAL_BATTERY_LEVEL = 4; 
 
     private static final int DUMP_MAX_LENGTH = 24 * 1024;
-    private static final String[] DUMPSYS_ARGS = new String[] { "-c", "-u" };
+    private static final String[] DUMPSYS_ARGS = new String[] { "--checkin", "-u" };
     private static final String BATTERY_STATS_SERVICE_NAME = "batteryinfo";
     
     private static final String DUMPSYS_DATA_PATH = "/data/system/";
@@ -229,12 +229,36 @@ class BatteryService extends Binder {
                 EventLog.writeEvent(LOG_BATTERY_LEVEL,
                         mBatteryLevel, mBatteryVoltage, mBatteryTemperature);
             }
+            if (mBatteryLevel != mLastBatteryLevel && mPlugType == BATTERY_PLUGGED_NONE) {
+                // If the battery level has changed and we are on battery, update the current level.
+                // This is used for discharge cycle tracking so this shouldn't be updated while the 
+                // battery is charging.
+                try {
+                    mBatteryStats.recordCurrentLevel(mBatteryLevel);
+                } catch (RemoteException e) {
+                    // Should never happen.
+                }
+            }
             if (mBatteryLevelCritical && !mLastBatteryLevelCritical &&
                     mPlugType == BATTERY_PLUGGED_NONE) {
                 // We want to make sure we log discharge cycle outliers
                 // if the battery is about to die.
                 dischargeDuration = SystemClock.elapsedRealtime() - mDischargeStartTime;
                 logOutlier = true;
+            }
+            
+            // Separate broadcast is sent for power connected / not connected
+            // since the standard intent will not wake any applications and some
+            // applications may want to have smart behavior based on this.
+            if (mPlugType != 0 && mLastPlugType == 0) {
+                Intent intent = new Intent(Intent.ACTION_POWER_CONNECTED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                mContext.sendBroadcast(intent);
+            }
+            else if (mPlugType == 0 && mLastPlugType != 0) {
+                Intent intent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                mContext.sendBroadcast(intent);
             }
             
             mLastBatteryStatus = mBatteryStatus;

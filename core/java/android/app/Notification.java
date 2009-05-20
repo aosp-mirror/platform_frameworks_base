@@ -34,6 +34,9 @@ import android.widget.RemoteViews;
  * A class that represents how a persistent notification is to be presented to
  * the user using the {@link android.app.NotificationManager}.
  *
+ * <p>For a guide to creating notifications, see the
+ * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Creating Status 
+ * Bar Notifications</a> document in the Dev Guide.</p>
  */
 public class Notification implements Parcelable
 {
@@ -52,7 +55,8 @@ public class Notification implements Parcelable
 
     /**
      * Use the default notification vibrate. This will ignore any given
-     * {@link #vibrate}.
+     * {@link #vibrate}. Using phone vibration requires the 
+     * {@link android.Manifest.permission#VIBRATE VIBRATE} permission.
      * 
      * @see #defaults
      */ 
@@ -149,8 +153,7 @@ public class Notification implements Parcelable
 
     
     /**
-     * The pattern with which to vibrate. This pattern will repeat if {@link
-     * #FLAG_INSISTENT} bit is set in the {@link #flags} field.
+     * The pattern with which to vibrate. 
      * 
      * <p>
      * To vibrate the default pattern, see {@link #defaults}.
@@ -228,13 +231,8 @@ public class Notification implements Parcelable
 
     /**
      * Bit to be bitwise-ored into the {@link #flags} field that if set,
-     * the audio and vibration will be repeated until the notification is
-     * cancelled.
-     *
-     * <p>
-     * NOTE: This notion will change when we have decided exactly
-     * what the UI will be.
-     * </p>
+     * the audio will be repeated until the notification is
+     * cancelled or the notification window is opened.
      */
     public static final int FLAG_INSISTENT          = 0x00000004;
 

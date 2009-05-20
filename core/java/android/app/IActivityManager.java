@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.app.ActivityManager.MemoryInfo;
 import android.content.ComponentName;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
@@ -34,7 +33,6 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
-import android.text.TextUtils;
 import android.os.Bundle;
 
 import java.util.List;
@@ -225,6 +223,8 @@ public interface IActivityManager extends IInterface {
     public boolean profileControl(String process, boolean start,
             String path) throws RemoteException;
     
+    public boolean shutdown(int timeout) throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -370,4 +370,5 @@ public interface IActivityManager extends IInterface {
     int GET_DEVICE_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+83;
     int PEEK_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+84;
     int PROFILE_CONTROL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+85;
+    int SHUTDOWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+86;
 }

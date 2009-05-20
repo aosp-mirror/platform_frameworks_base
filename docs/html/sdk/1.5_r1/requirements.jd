@@ -16,8 +16,9 @@ page.title=System Requirements
     <ul>
       <li><a href="http://www.eclipse.org/downloads/">Eclipse</a> 3.3 (Europa), 3.4 (Ganymede)
         <ul>
+        <li>Recommended Eclipse IDE packages: Eclipse IDE for Java EE Developers, Eclipse IDE for Java Developers, Eclipse for RCP/Plug-in Developers</li>
         <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included in most Eclipse IDE packages) </li>
-        <li><a href="http://www.eclipse.org/webtools">WST</a> (optional, but needed for the Android Editors feature; included in <a href="http://www.eclipse.org/downloads/moreinfo/compare.php">most Eclipse IDE packages</a>)</li>
+        <li>Eclipse Classic IDE package is not supported.</li>
         </ul>
       </li>     
       <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK 6</a> (JRE alone is not sufficient)</li>

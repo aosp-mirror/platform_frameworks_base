@@ -14,18 +14,18 @@ using your mouse or keyboard to generate events for your application. It also
 provides a screen in which your application is displayed, together with any other 
 Android applications running. </p>
 
-<p>To help you model and test your application, the emulator lets your application 
-use the services of the Android platform to invoke other applications, access the 
-network, play audio and video, store and retrieve data, notify the user, and render 
-graphical transitions and themes. </p>
+<p>To let you model and test your application more easily, the emulator supports
+Android Virtual Device (AVD) configurations. AVDs let you specify the Android
+platform that you want to run on the emulator, as well as the hardware options
+and emulator skin files tht you want to use. Once your application is running on
+the emulator, it can use the services of the Android platform to invoke other
+applications, access the network, play audio and video, store and retrieve data,
+notify the user, and render graphical transitions and themes. </p>
 
 <p>The emulator also includes a variety of debug capabilities, such as a console 
 from which you can log kernel output, simulate application interrupts (such as 
 arriving SMS messages or phone calls), and simulate latency effects and dropouts 
 on the data channel.</p>
-
-
-
 
 <div class="inline-toc" style="whitespace:nowrap;">
 <h4>In this document:</h4>
@@ -33,11 +33,12 @@ on the data channel.</p>
 <ol class="toc">
 <li><a href="#overview">Overview</a></li>
 <li><a href="#starting">Starting and Stopping the Emulator</a></li>
+<li><a href="#starting">Android Virtual Devices and the Emulator</a></li>
 <li><a href="#controlling">Controlling the Emulator</a></li>
 <li><a href="#startup-options">Emulator Startup Options</a></li>
 <li><a href="#diskimages">Working with Emulator Disk Images</a>
 	<ol class="toc">
-	<li><a href="#systemimages">System Images</a></li>
+	<li><a href="#defaultimages">Default Images</a></li>
 	<li><a href="#runtimeimages">Runtime Images: User Data and SD Card</a></li>
 	<li><a href="#temporaryimages">Temporary Images</a></li>
 	</ol></li>
@@ -76,7 +77,8 @@ on the data channel.</p>
 <li><a href="#apps">Installing Applications on the Emulator</a></li>
 <li><a href="#sdcard">SD Card Emulation</a>
 	<ol class="toc">
-	<li><a href="#creating">Creating a Disk Image</a></li>
+	<li><a href="#creatinga">Creating an SD card image using the android tool</li>
+	<li><a href="#creatingm">Creating an SD card image using mksdcard</a></li>
 	<li><a href="#copying">Copying Files to a Disk Image</a></li>
 	<li><a href="#loading">Loading the Disk Image at Emulator Startup</a></li>
 	</ol></li>
@@ -92,12 +94,14 @@ on the data channel.</p>
 <h2>Overview</h2>
 
 <p>The Android emulator is a QEMU-based application that provides a virtual ARM
-mobile device on which you can run your Android applications. It provides a full
-Android system stack, down to the kernel level, and includes a set of
+mobile device on which you can run your Android applications. It runs a full
+Android system stack, down to the kernel level, that includes a set of
 preinstalled applications (such as the dialer) that you can access from your
-applications. It provides a skinnable mobile device UI, customizable key
-mappings, and a variety of commands and options for controlling the behaviors of
-the emulated environment.  </p>
+applications. You can choose what version of the Android system you want to 
+run in the emulator by configuring AVDs, and you can also customize the 
+mobile device skin and key mappings. When launching the emulator and at runtime,
+you can use a variety of commands and options to control the its behaviors. 
+</p>
 
 <p>The Android system image distributed in the SDK contains ARM machine code for
 the Android Linux kernel, the native libraries, the Dalvik VM, and the various
@@ -132,9 +136,9 @@ it for developing Android applications.</p>
 <p>During development and testing of your application, you install and run your
 application in the Android emulator. You can launch the emulator as a standalone
 application, from a command line, or you can use it as part of your Eclipse
-development environment. In either case, you can specify the startup options
-described in this document to control the emulator.
- </p>
+development environment. In either case, you specify the AVD configuration to 
+load and any startup options you want to use, as described in this document.
+</p>
 
 <p>You can run your application on a single instance of the emulator or,
 depending on your needs, you can start multiple emulator instances and run your
@@ -146,9 +150,14 @@ Emulation</a>, <a href="#sms">SMS Emulation</a>, and
 <a href="#emulatornetworking">Emulator Networking</a></p>
 
 <p>To start an instance of the emulator from the command line, change to the
-<code>tools/</code> folder of the SDK and enter <code>emulator</code> or
-<code>./emulator</code>. This initializes the Android system and you will see
-the emulator window appear on your screen. </p>
+<code>tools/</code> folder of the SDK. Enter <code>emulator</code> command
+like this: </p>
+
+<pre>emulator -avd &lt;avd_name&gt;</pre> 
+
+<p>This initializes the emulator and loads an AVD configuration (see the next
+section for more information about AVDs). You will see the emulator window
+appear on your screen. </p>
 
 <p>If you are working in Eclipse, the ADT plugin for Eclipse installs your
 application and starts the emulator automatically, when you run or debug 
@@ -162,6 +171,27 @@ on the Emulator</a> for information about how to install your application.</p>
 <p>To stop an emulator instance, just close the emulator's window.</p>
 
 <a name="controlling"></a>
+
+<a name="avds"></a>
+
+<h2>Android Virtual Devices and the Emulator</h2>
+
+<p>To use the emulator, you first must create one or more AVD configurations. In each
+configuration, you specify an Android platform to run in the emulator and the set of hardware 
+options and emulator skin you want to use. Then, when you launch the emulator, you specify
+the AVD configuration that you want to load. </p>
+
+<p>To specify the AVD you want to load when starting the emulator, you use the 
+<code>-avd</code> argument, as shown in the previous section. </p>
+
+<p>Each AVD functions as an independent device, with its own private storage for 
+user data, SD card, and so on. When you launch the emulator with an AVD configuration, 
+it automatically loads the user data and SD card data from the AVD directory. By default,
+the emulator stores the user data, SD card data, and cache in the AVD directory.</p>
+
+<p>To create and manage AVDs you use the android tool, a command-line utility
+included in the SDK. For complete information about how to set up AVDs, see <a
+href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.</p>
 
 <h2>Controlling the Emulator</h2>
 
@@ -279,7 +309,7 @@ the keys of your keyboard. </p>
 when launching the emulator, to control its appearance or behavior. 
 Here's the command-line usage for launching the emulator with options: </p>
 
-<pre>emulator [-&lt;option&gt; [&lt;value&gt;]] ... [-&lt;qemu args&gt;]</pre>
+<pre>emulator -avd &lt;avd_name&gt; [-&lt;option&gt; [&lt;value&gt;]] ... [-&lt;qemu args&gt;]</pre>
 
 <p>The table below summarizes the available options.</p>
 
@@ -292,7 +322,7 @@ Here's the command-line usage for launching the emulator with options: </p>
 </tr>
 
 <tr>
-  <td rowspan="8">Help</td>
+  <td rowspan="9">Help</td>
   <td><code>-help</code></td>
   <td>Print a list of all emulator options.</td>
   <td>&nbsp;</td>
@@ -331,9 +361,22 @@ Here's the command-line usage for launching the emulator with options: </p>
   <td>Print help for defining a custom key mappings file.</td>
   <td>&nbsp;</td>
 </tr>
-
 <tr>
-  <td rowspan="10">Disk Images</td>
+  <td><code>-help-virtual-device</code></td>
+  <td>Print help for Android Virtual Device usage.</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td>AVD</td>
+  <td><code>-avd &lt;avd_name&gt;</code> or <br>
+      <code>@&lt;avd_name&gt;</code></td>
+  <td><strong>Required</strong>. Specifies the AVD to load for this emulator
+      instance.</td>
+  <td>You must create an AVD configuration before launching the emulator. For
+      information, see <a href="{@docRoot}guide/developing/tools/avd.html">Android
+      Virtual Devices</a>.</td>
+<tr>
+  <td rowspan="7">Disk Images</td>
   <td><code>-cache&nbsp;&lt;filepath&gt;</code></td>
   <td>Use &lt;filepath&gt; as the working cache partition image. </td>
   <td>Optionally, you can specify a path relative to the current working directory. 
@@ -345,13 +388,7 @@ Here's the command-line usage for launching the emulator with options: </p>
   <td>Use &lt;filepath&gt; as the working user-data disk image. </td>
   <td>Optionally, you can specify a path relative to the current working directory. 
   If <code>-data</code> is not used, the emulator looks for a file named &quot;userdata-qemu.img&quot; 
-  in the directory specified in &lt;datadir&gt;. ~/.android/SDK-1.0 (on Linux/Mac) or 
-  C:\Documents and Settings\&lt;user&gt;\Local Settings\Application Data\Android\SDK-1.0 (on Windows). 
-  <p> If you use <code>-data &lt;filepath&gt;</code> but the file does not exist, the emulator creates 
-  a file at that location using the specified name. </p>
-  <p>See <a href="#multipleinstances">Running Multiple Emulator Instances</a> for information about how 
-  to use <code>-data</code> to let multiple emulator instances preserve their user data across sessions.</p>
-  <p>For more information on disk images, use <code>-help-disk-images</code>.</p>
+  in the storage area of the AVD being used (see <code>-avd</code>). 
 </td></tr>
 <!--
 <tr>
@@ -359,28 +396,32 @@ Here's the command-line usage for launching the emulator with options: </p>
   <td>Search for the user-data disk image specified in <code>-data</code> in &lt;dir&gt;</td>
   <td><code>&lt;dir&gt;</code> is a path relative to the current working directory. 
 
-<p>If you do not specify <code>-datadir</code>, the emulator looks for the user-data image in the 
-  directory ~/.android/SDK-1.0 (on Linux/Mac) or C:\Documents and Settings\&lt;user&gt;\Local Settings\Application 
-  Data\Android\SDK-1.0 (on Windows). </p><p>For more information on disk images, use <code>-help-disk-images</code>.</p>
+<p>If you do not specify <code>-datadir</code>, the emulator looks for the user-data image 
+in the storage area of the AVD being used (see <code>-avd</code>)</p><p>For more information 
+on disk images, use <code>-help-disk-images</code>.</p>
 </td></tr>
 -->
+<!-- 
 <tr>
   <td><code>-image&nbsp;&lt;filepath&gt;</code></td>
   <td>Use &lt;filepath&gt; as the system image.</td>
   <td>Optionally, you can specify a path relative to the current working directory. 
    Default is &lt;system&gt;/system.img.</td>
 </tr>
+-->
 <tr>
   <td><code>-initdata&nbsp;&lt;filepath&gt;</code></td>
   <td>When resetting the user-data image (through <code>-wipe-data</code>), copy the contents 
   of this file to the new user-data disk image. By default, the emulator copies the <code>&lt;system&gt;/userdata.img</code>.</td>
   <td>Optionally, you can specify a path relative to the current working directory. See also <code>-wipe-data</code>. <p>For more information on disk images, use <code>-help-disk-images</code>.</p></td>
 </tr>
+<!--
 <tr>
   <td><code>-kernel&nbsp;&lt;filepath&gt;</code></td>
   <td>Use &lt;filepath&gt; as the emulated kernel.</td>
   <td>Optionally, you can specify a path relative to the current working directory. </td>
 </tr>
+-->
 <tr>
   <td><code>-nocache</code></td>
   <td>Start the emulator without a cache partition.</td>
@@ -400,12 +441,14 @@ Here's the command-line usage for launching the emulator with options: </p>
   <p>Optionally, you can specify a path relative to the current working directory. For more information on disk images, use <code>-help-disk-images</code>.</p>
 </td>
 </tr>
+<!--
 <tr>
  <td><code>-system&nbsp;&lt;dirpath&gt;</code></td>
  <td>Search for system, ramdisk and user data images in &lt;dir&gt;.</td>
  <td><code>&lt;dir&gt;</code> is a directory path relative to the current 
   working directory.</td>
 </tr>
+-->
 <tr>
   <td><code>-wipe-data</code></td>
   <td>Reset the current user-data disk image (that is, the file specified by <code>-datadir</code> and 
@@ -448,8 +491,8 @@ Here's the command-line usage for launching the emulator with options: </p>
   <td><code>-shell-serial&nbsp;&lt;device&gt;</code></td>
   <td>Enable the root shell (as in <code>-shell</code> and specify the QEMU character 
   device to use for communication with the shell.</td>
-  <td>&lt;device&gt; must be a QEMU device type. See the documentation for 'serial -dev' at 
-  <a href="http://www.bellard.org/qemu/qemu-doc.html#SEC10">http://www.bellard.org/qemu/qemu-doc.html#SEC10</a> 
+  <td>&lt;device&gt; must be a QEMU device type. See the documentation for '-serial <em>dev</em>' at 
+  <a href="http://www.nongnu.org/qemu/qemu-doc.html#SEC10">http://www.bellard.org/qemu/qemu-doc.html#SEC10</a> 
   for a list of device types.</p>
 
 <p>Here are some examples: </p>
@@ -679,7 +722,8 @@ scale in direct relationship with &lt;delay&gt; values.</p>
 <tr>
   <td><code>-skin &lt;skinID&gt;</code></td>
   <td>Start the emulator with the specified skin. </td>
-  <td>The SDK includes a <a href="#skins">choice of four skins</a>:<br />
+  <td>The standard Android platforms includes a <a href="#skins">choice of 
+      four skins</a>:<br />
       <li>HVGA-L (480x320, landscape)</li>
       <li>HVGA-P (320x480, portrait) (default) </li>
       <li>QVGA-L (320x240, landscape)</li>
@@ -702,10 +746,16 @@ disk image containing an emulator-specific kernel, the Android system, a
 ramdisk image, and writeable images for user data and simulated SD card.</p>
 
 <p>To run properly, the emulator requires access to a specific set of disk image
-files. The Android SDK includes default versions of the required images, stored
-in predetermined locations in the SDK directory structure. At startup, the
-emulator looks for and reads the image files, using their default names and
-storage locations. </p>
+files. By default, the Emulator always looks for the disk images in the 
+private storage area of the AVD in use. If no images exist there when 
+the Emulator is launched, it creates the images in the AVD directory based on 
+default versions stored in the SDK. </p>
+
+<p class="note"><strong>Note:</strong> The default storage location for 
+AVDs is in <code>~/.android/avd</code> on OS X and Linux, <code>C:\Documents and 
+Settings\&lt;user&gt;\.android\</code> on Windows XP, and 
+<code>C:\Users\&lt;user&gt;\.android\</code>
+on Windows Vista.</p>
 
 <p>To let you use alternate or custom versions of the image files, the emulator
 provides startup options that override the default locations and filenames of
@@ -713,32 +763,26 @@ the image files. When you use the options, the emulator searches for the image
 file under the image name or location that you specify; if it can not locate the
 image, it reverts to using the default names and location.</p>
 
-<p>The emulator uses three types of image files: system image files, runtime
+<p>The emulator uses three types of image files: default image files, runtime
 image files, and temporary image files. The sections below describe how to
 override the location/name of each type of file. </p>
 
-<a name="systemimages"></a>
-<h3>System Images</h3>
+<a name="defaultimages"></a>
+<h3>Default Images</h3>
 
-<p>System images contain system data and default settings without which the
-emulator can not run. The image files are read-only &mdash; the emulator reads
-the images at startup and does not modify them during the session.</p>
-
-<p>All of the system image files are stored in a single directory. By default,
-the system images are stored in the <code>lib/images</code>' under the
-emulator's program location. </p>
+<p>When the emulator launches but does not find an existing user data image in
+the active AVD's storage area, it creates a new one from a default version
+included in the SDK. The default user data image is read-only. The image 
+files are read-only.</p>
 
 <p>The emulator provides the <code>-system &lt;dir&gt;</code> startup option to
-let you override the location under which the emulator looks for the system
-images files. </p>
+let you override the location under which the emulator looks for the default
+user data image. </p>
 
-<p>The emulator also provides startup options that let you override the names of
-the system images, as described in the table below. When you use one of the 
-options, the emulator looks in the default directory, or in a custom location
-(if you specified <code>-system &lt;dir&gt;</code>). Note that, if you provide
-alternate system image file, it must contain the same type of data as the
-default. For example, your override of the system.img file must point to a disk
-image containing an Android system. </p>
+<p>The emulator also provides a startup option that lets you override the name
+of the default user data image, as described in the table below. When you use the 
+option, the emulator looks in the default directory, or in a custom location
+(if you specified <code>-system &lt;dir&gt;</code>). </p>
 
 
 <table>
@@ -748,6 +792,7 @@ image containing an Android system. </p>
     <th width="40%" >Comments</th>
 </tr>
 
+<!--
 <tr>
   <td><code>kernel-qemu.img</code></td>
   <td>The emulator-specific Linux kernel image</td>
@@ -765,7 +810,7 @@ image containing an Android system. </p>
   <td>The <em>initial</em> Android system image.</td>
   <td>Override using <code>-image &lt;file&gt;</code></td>
 </tr>
-
+-->
 <tr>
   <td><code>userdata.img</code></td>
   <td>The <em>initial</em> user-data disk image</td>
@@ -784,13 +829,7 @@ partition and removable storage media on actual device. </p>
 
 <p>The emulator provides a default user-data disk image. At startup, the emulator 
 creates the default image as a copy of the system user-data image (user-data.img), 
-described above. The emulator stores the default image in this location on 
-on your development machine: </p>
-
-<ul>
-  <li>Linux and OS X: <code>~/.android/SDK-1.0</code></li>
-  <li>Windows: <code>C:\Documents and Settings\&lt;user&gt;\Local Settings\Application Data\Android\SDK-1.0</code></li>
-</ul>
+described above. The emulator stores the new image with the files of the active AVD.</p>
 
 <!--
 <p>The emulator provides a startup option, <code>-datadir &lt;dir&gt;</code>, 
@@ -801,7 +840,7 @@ image files. </p>
 <p>The emulator provides startup options to let you override the actual names and storage 
 locations of the runtime images to load, as described in the table below. When you use one 
 of these options, the emulator looks for the specified file(s) in the current working directory,
-in the default directory, or in a custom location (if you specified a path with the filename. </p>
+in the AVD directory, or in a custom location (if you specified a path with the filename). </p>
 
 <table>
 <tr>
@@ -837,12 +876,12 @@ installed application data, settings, databases, and files. </p>
 
 <p>At startup, the emulator attempts to load a user-data image stored during 
 a previous session. It looks for the file in the current working directory, 
-at the default location, as described above, and at the custom location/name 
+in the AVD directory as described above, and at the custom location/name 
 that you specified at startup. </p>
 
 <ul>
-<li>If it finds a user-data image, it mounts the image and makes it available to the system
-for reading/writing of user data. </li>
+<li>If it finds a user-data image, it mounts the image and makes it available 
+to the system for reading/writing of user data. </li>
 <li>If it does not find one, it creates an image by copying the system user-data
 image (userdata.img), described above. At device power-off, the system persists
 the user data to the image, so that it will be available in the next session. 
@@ -850,19 +889,19 @@ Note that the emulator stores the new disk image at the location/name that you
 specify in <code>-data</code> startup option.</li>
 </ul>
 
-<p>If you are planning to run multiple emulator instances concurrently, note
-that only the first emulator instance can persist user-data, if no explicit
-user-data image file is specified in the startup command. When running multiple
-emulator instances, you must specify a name for the image file to use (or
-create), by using the <code>-data &lt;name&gt;</code> option with a unique
-<code>&lt;name&gt;</code> value. For more information, see
-<a href="#multipleinstances">Running Multiple Emulator Instances</a>.</p>
+<p class="note"><strong>Note:</strong> Because of the AVD configurations used in the emulator,
+each emulator instance now gets its own dedicated storage. There is no need 
+to use the <code>-d</code> option to specify an instance-specific storage area.</p>
 
 <h4>SD Card</h4>
 
 <P>Optionally, you can create a writeable disk image that the emulator can use
 to simulate removeable storage in an actual device. For information about how to create an 
 emulated SD card and load it in the emulator, see <a href="#sdcard">SD Card Emulation</a></p>
+
+<p>You can also use the android tool to automatically create an SD Card image
+for you, when creating an AVD. For more information, see <a 
+href="{@docRoot}guide/developing/tools/avd.html#options">Command-line options for AVDs</a>.
 
 <a name="temporaryimages"></a>
 <h3>Temporary Images</h3>
@@ -1637,21 +1676,11 @@ kilobits/sec):</p>
 
 <h2>Running Multiple Emulator Instances</h2>
 
-<p>You can run multiple instances of the emulator concurrently, if necessary. Each emulator instance can use a separate user-data image file and a different console port. This lets you manage each instance in isolation. </p>
-
-<p>However, if you will run multiple emulator instances, note that there are limitations on the capability of each instance to maintain its persistent user data &mdash; user settings and installed applications &mdash; across sessions. Specifically:</p>
-
-<ul>
-  <li>By default, only the first-launched emulator instance can preserve user data across sessions. When a session closes, 
-  the emulator stores the user data to a user-data image file &mdash; by default, it stores the data in the file 
-  <code>~/.android/SDK-1.0/userdata-qemu.img </code>(on Linux and Mac) or <code>C:\Documents and Settings\&lt;user&gt;\Local
-   Settings\Application Data\Android\SDK-1.0\userdata-qemu.img</code> (on Windows) in your development computer.</li>
-
-<li>Emulator instances that you start after the first instance (that are running concurrently) can also store user data during a session, but they <em>do not</em> preserve it for the next session, unless you have specified a unique user-data image file in which the data should be stored. </li>
-
-</ul>
-
-<p>To run multiple emulator instances and let each maintain user data across sessions, start the instances with the <code>-data</code> option (see <a href="#startup-options">Startup Options</a>) and supply the path to a user-data file. </p>
+<p>Through the AVDs configurations used by the emulator, you can run multiple
+instances of the emulator concurrently, each with its own AVD configuration and
+storage area for user data, SD card, and so on. You no longer need to use the
+<code>-d</code> option when launching the emulator, to point to an
+instance-specific storage area. </p>
 
 <a name="apps"></a>
 
@@ -1675,19 +1704,43 @@ For more information about the user-data partition and other emulator storage,
 see <a href="#diskimages">Working with Emulator Disk Images</a>.</p>
 
 <a name="sdcard"></a>
-
-<h2>SD Card Emulation</h2>
-<p>You can create a disk image and then load it to the emulator at startup, to simulate the presence of a user's SD card in the device. The sections below describe how to create the disk image, how to copy files to it, and how to load it in the emulator at startup. </p>
-
-<p>Note that you can only load disk image at emulator startup. Similarly, you can not remove a simulated SD card from a running emulator. However, you can browse, send files to, and copy/remove files from a simulated SD card either with adb or the emulator. </p>
-
-<p>The emulator supports emulated SDHC cards, so you can create an SD card image of any size up to 128 gigabytes.</p>
-
 <a name="creating"></a>
 
-<h3>Creating  a Disk Image</h3>
+<h2>SD Card Emulation</h2>
 
-<p>You can use the mksdcard tool, included in the SDK, to create a FAT32 disk image that you can load in the emulator at startup. You can access mksdcard in the tools/ directory of the SDK and create a disk image like this: </p>
+<p>You can create a disk image and then load it to the emulator at startup, to
+simulate the presence of a user's SD card in the device. To do this, you can use
+the android tool to create a new SD card image with a new AVD, or you can use
+the mksdcard utility included in the SDK. </p>
+
+<p>The sections below describe how to create an SD card disk image, how to copy
+files to it, and how to load it in the emulator at startup. </p>
+
+<p>Note that you can only load disk image at emulator startup. Similarly, you
+can not remove a simulated SD card from a running emulator. However, you can
+browse, send files to, and copy/remove files from a simulated SD card either
+with adb or the emulator. </p>
+
+<p>The emulator supports emulated SDHC cards, so you can create an SD card image
+of any size up to 128 gigabytes.</p>
+
+<h3 id="creatinga">Creating an SD card image using the android tool</h3>
+
+<p>The easiest way to create a new SD card is to use the android tool. When
+creating an AVD, you simply specify the <code>-c</code> option, like this: </p>
+
+<pre>android create avd -n &lt;avd_name&gt; -t &lt;targetID&gt; -c &lt;size&gt;[K|M]</pre>
+
+<p>You can also use the <code>-c</code> option to specify a path to an SD card
+image to use in the new AVD. For more information, see <a
+href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.
+</p>
+
+<h3 id="creatingm">Creating an SD card image using mksdcard</h3>
+
+<p>You can use the mksdcard tool, included in the SDK, to create a FAT32 disk
+image that you can load in the emulator at startup. You can access mksdcard in
+the tools/ directory of the SDK and create a disk image like this: </p>
 
 <pre>mksdcard &lt;size&gt; &lt;file&gt;</pre>
 	
@@ -1700,13 +1753,23 @@ see <a href="#diskimages">Working with Emulator Disk Images</a>.</p>
 <a name="copying"></a>
 <h3>Copying Files to a Disk Image</h3>
 
-<p>Once you have created the disk image, you can copy files to it prior to loading it in the emulator. To copy files, you can mount the image as a loop device and then copy the files to it, or you can use a utility such as mtools to copy the files directly to the image. The mtools package is available for Linux, Mac, and Windows.</p>
+<p>Once you have created the disk image, you can copy files to it prior to
+loading it in the emulator. To copy files, you can mount the image as a loop
+device and then copy the files to it, or you can use a utility such as mtools to
+copy the files directly to the image. The mtools package is available for Linux,
+Mac, and Windows.</p>
 
 <a name="loading"></a>
 <a name="step3" id="step3"></a>
 
 <h3>Loading the Disk Image at Emulator Startup</h3>
-<p>To load FAT32 disk image in the emulator, start the emulator with the <code>-sdcard</code> flag and specify the name and path of your image (relative to the current working directory): </p>
+
+<p>By default, the emulator loads the SD card image that is stored with the active
+AVD (see the <code>-avd</code> startup option).</p>
+
+<p>Alternatively, you ca start the emulator with the
+<code>-sdcard</code> flag and specify the name and path of your image (relative
+to the current working directory): </p>
 
 <pre>emulator -sdcard &lt;filepath&gt;</pre>
 

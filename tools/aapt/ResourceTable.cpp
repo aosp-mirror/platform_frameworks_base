@@ -1225,7 +1225,7 @@ status_t compileResourceFile(Bundle* bundle,
                         // pseudolocalize here
                         block.setPosition(parserPosition);
                         err = parseAndAddEntry(bundle, in, &block, pseudoParams, myPackage, curType,
-                                ident, *curTag, curIsStyled, curFormat, true, false, outTable);
+                                ident, *curTag, curIsStyled, curFormat, true, overwrite, outTable);
                         if (err != NO_ERROR) {
                             hasErrors = localHasErrors = true;
                         }

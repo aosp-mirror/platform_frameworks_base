@@ -22,7 +22,6 @@ import android.os.PowerManager;
 import android.provider.Telephony.Sms.Intents;
 import android.util.Config;
 import android.util.Log;
-import com.android.internal.telephony.gsm.SimUtils;
 
 
 /**
@@ -44,6 +43,7 @@ public class WapPushOverSms {
     private final int WAKE_LOCK_TIMEOUT = 5000;
 
     public WapPushOverSms(Phone phone) {
+
         mContext = phone.getContext();
         createWakelock();
     }
@@ -56,7 +56,7 @@ public class WapPushOverSms {
      */
     public void dispatchWapPdu(byte[] pdu) {
 
-        if (Config.LOGD) Log.d(LOG_TAG, "Rx: " + SimUtils.bytesToHexString(pdu));
+        if (Config.LOGD) Log.d(LOG_TAG, "Rx: " + IccUtils.bytesToHexString(pdu));
 
         int index = 0;
         int transactionId = pdu[index++] & 0xFF;
@@ -225,3 +225,4 @@ public class WapPushOverSms {
         mContext.sendBroadcast(intent, permission);
     }
 }
+

@@ -19,8 +19,8 @@ package com.android.internal.telephony;
 /**
  * {@hide}
  */
-public abstract class Connection
-{
+public abstract class Connection {
+
     // Number presentation type for caller id display
     public static int PRESENTATION_ALLOWED = 1;    // normal
     public static int PRESENTATION_RESTRICTED = 2; // block by user
@@ -42,7 +42,7 @@ public abstract class Connection
         INCOMING_REJECTED,  /* an incoming call that was rejected */
         POWER_OFF,          /* radio is turned off explicitly */
         OUT_OF_SERVICE,     /* out of service */
-        SIM_ERROR,          /* No SIM, SIM locked, or other SIM error */
+        ICC_ERROR,          /* No ICC, ICC locked, or other ICC error */
         CALL_BARRED,        /* call was blocked by call barrring */
         FDN_BLOCKED,        /* call was blocked by fixed dial number */
         CS_RESTRICTED,      /* call was blocked by restricted all voice access */
@@ -54,7 +54,7 @@ public abstract class Connection
 
     /* Instance Methods */
 
-    /** 
+    /**
      * Gets address (e.g., phone number) associated with connection
      * TODO: distinguish reasons for unavailablity
      *
@@ -92,7 +92,7 @@ public abstract class Connection
     public abstract long getDisconnectTime();
 
     /**
-     * returns the number of milliseconds the call has been connected, 
+     * returns the number of milliseconds the call has been connected,
      * or 0 if the call has never connected.
      * If the call is still connected, then returns the elapsed
      * time since connect
@@ -113,8 +113,8 @@ public abstract class Connection
     public abstract DisconnectCause getDisconnectCause();
 
     /**
-     * Returns true of this connection originated elsewhere 
-     * ("MT" or mobile terminated; another party called this terminal) 
+     * Returns true of this connection originated elsewhere
+     * ("MT" or mobile terminated; another party called this terminal)
      * or false if this call originated here (MO or mobile originated)
      */
     public abstract boolean isIncoming();
@@ -122,32 +122,30 @@ public abstract class Connection
     /**
      * If this Connection is connected, then it is associated with
      * a Call.
-     * 
+     *
      * Returns getCall().getState() or Call.State.IDLE if not
      * connected
      */
-    public Call.State getState()
-    {
+    public Call.State getState() {
         Call c;
 
         c = getCall();
 
-        if (c == null) { 
+        if (c == null) {
             return Call.State.IDLE;
         } else {
             return c.getState();
         }
     }
-    
+
     /**
      * isAlive()
-     * 
+     *
      * @return true if the connection isn't disconnected
      * (could be active, holding, ringing, dialing, etc)
      */
     public boolean
-    isAlive()
-    {
+    isAlive() {
         return getState().isAlive();
     }
 
@@ -155,29 +153,26 @@ public abstract class Connection
      * Returns true if Connection is connected and is INCOMING or WAITING
      */
     public boolean
-    isRinging()
-    {
+    isRinging() {
         return getState().isRinging();
     }
 
     /**
-     * 
+     *
      * @return the userdata set in setUserData()
      */
-    public Object getUserData()
-    {
+    public Object getUserData() {
         return userData;
     }
 
     /**
-     * 
+     *
      * @param userdata user can store an any userdata in the Connection object.
      */
-    public void setUserData(Object userdata)
-    {
+    public void setUserData(Object userdata) {
         this.userData = userdata;
     }
-    
+
     /**
      * Hangup individual Connection
      */
@@ -191,16 +186,16 @@ public abstract class Connection
     public abstract void separate() throws CallStateException;
 
     public enum PostDialState {
-        NOT_STARTED,    /* The post dial string playback hasn't 
-                           been started, or this call is not yet 
+        NOT_STARTED,    /* The post dial string playback hasn't
+                           been started, or this call is not yet
                            connected, or this is an incoming call */
         STARTED,        /* The post dial string playback has begun */
-        WAIT,           /* The post dial string playback is waiting for a 
+        WAIT,           /* The post dial string playback is waiting for a
                            call to proceedAfterWaitChar() */
-        WILD,           /* The post dial string playback is waiting for a 
+        WILD,           /* The post dial string playback is waiting for a
                            call to proceedAfterWildChar() */
         COMPLETE,       /* The post dial string playback is complete */
-        CANCELLED       /* The post dial string playback was cancelled 
+        CANCELLED       /* The post dial string playback was cancelled
                            with cancelPostDial() */
     }
 
@@ -215,7 +210,7 @@ public abstract class Connection
     /**
      * See Phone.setOnPostDialWaitCharacter()
      */
-     
+
     public abstract void proceedAfterWaitChar();
 
     /**
@@ -232,5 +227,5 @@ public abstract class Connection
      * @return one of PRESENTATION_*
      */
     public abstract int getNumberPresentation();
-    
+
 }

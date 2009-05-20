@@ -1,0 +1,274 @@
+page.title=Widget Design Guidelines
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Widget design quickview</h2>
+
+<ul>
+<li>Widgets have six standard sizes on the Home screen</li>
+<li>Widgets have standards for size, frames, shadows, and file format, which you can copy</li>
+<li>A few tricks make it easier to design widgets that fit graphically on the Home screeen</li>
+</ul>
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#anatomy">Standard widget anatomy</a></li>
+<li><a href="#design">Designing a widget</a></li>
+<li><a href="#sizes">Standard widget sizes</a></li>
+<li><a href="#frames">Standard widget frames</a></li>
+<li><a href="#shadows">Standard widget shadows</a></li>
+<li><a href="#tricks">Widget graphics tips and tricks</a></li>
+<li><a href="#file">Widget graphics file format</a></li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a> topic in the <em>Dev Guide</em></li>
+<li><a href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">AppWidgets blog post</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Widgets are a feature introduced in Android 1.5. A widget displays an
+application's most important or timely information at a glance, on a user's Home
+screen. The standard Android system image includes several examples of widgets,
+including widgets for Analog Clock, Music, and other applications.</p>
+
+<p>Users pick the widgets they want to display on their Home screens by touching
+&amp; holding an empty area of the Home screen, selecting Widgets from the menu,
+and then selecting the widget they want.</p>
+
+<p><img src="{@docRoot}images/widget_design/widget_examples.png" alt="Example
+Widgets"></p>
+
+<p>This document describes how to design a widget so it fits graphically with
+other widgets and with the other elements of the Android Home screen. It also
+describes some standards for widget artwork and some widget graphics tips and
+tricks from the Android team.<p>
+
+<p>For information about developing widgets, see the <a
+href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a> section of
+the <em>Developer's Guide</em> and the <a
+href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">AppWidgets</a> blog post.</p>
+
+
+<h2 id="anatomy">Standard widget anatomy</h2>
+
+<p>Typical Android widgets have three main components: A bounding box, a frame,
+and the widget's graphical controls and other elements. Well-designed widgets
+leave some padding between the edges of the bounding box and the frame, and
+between the inner edges of the frame and the widget's controls. Widgets designed
+to fit visually with other widgets on the Home screen take cues from the other
+elements on the Home screen for alignment; they also use standard shading
+effects. All of these details are described in this document.
+
+<p><strong>Standard Widget Sizes in Portrait Orientation</strong><br/>
+<img src="{@docRoot}images/widget_design/widget_sizes_portrait.png"
+alt="Standard Widget Sizes in Portrait Orientation"></p>
+
+<p>&nbsp;</p>
+
+<p><strong>Standard Widget Sizes in Landscape Orientation</strong><br/>
+<img src="{@docRoot}images/widget_design/widget_sizes_landscape.png"
+alt="Standard Widget Sizes in Landscape Orientation"></p>
+
+  
+<h2 id="design">Designing a widget</h2>
+
+<ol>
+<li><strong>Select a bounding box size for your widget.</strong></li>
+
+<p>The most effective widgets display your application's most useful or timely
+data in the smallest widget size. Users will weigh the usefulness or your widget
+against the portion of the Home screen it covers, so the smaller the better.</p>
+
+<p>All widgets must fit within the bounding box of one of the six supported
+widget sizes, or better yet, within a pair of portrait and landscape orientation
+sizes, so your widget looks good when the user switches screen
+orientations.</p> 
+
+<p><a href="#sizes">Standard widget sizes</a> illustrates the bounding
+dimensions of the six widget sizes (three in portrait and three in landscape
+orientation).</p>
+
+
+<li><strong>Select a matching frame.</strong></li>
+
+<p><a href="#frames">Standard widget frames</a> illustrates the standard frames
+for the six widget sizes, with links so you can download copies for your own
+use. You don't have to use these frames for your widget, but if you do, your
+widgets are more likely to fit visually with other widgets.</p>
+
+<li><strong>Apply standard shadow effect to your graphics.</strong></li>
+
+<p>Again, you don't have to use this effect, but <a href="#shadows">Standard
+widget shadows</a> shows the Photoshop settings used for standard widgets.</p>
+
+<li><strong>If your widget includes buttons,  draw them in three states
+(default, pressed, and selected).</strong></li>
+
+<p>You can <a
+href="{@docRoot}images/widget_design/Music_widget_button_states.psd">download a
+Photoshop file that contains the three states of the Play button</a>, taken from
+the Music widget, to analyze the Photoshop settings used for the three standard
+button effects.</p>
+
+<p><a href="{@docRoot}images/widget_design/Music_widget_button_states.psd"> <img
+src="{@docRoot}images/widget_design/buttons.png" alt="Click to download
+Photoshop template"></a></p>
+ 
+<li><strong>Finish drawing your artwork and then scale and align it to
+fit.</strong></li>
+
+<p><a href="#tricks">Widget alignment tips and tricks</a> describes some
+techniques for aligning your widget's graphics inside the standard frames, along
+with a few other widget graphics tricks.</p>
+
+<li><strong>Save your widget with the correct graphics file
+settings.</strong></li>
+
+<p><a href="#file">Windows graphics file format</a> describes the correct
+settings for your widget graphics files.</p>
+
+</ol>
+
+
+<h2 id="sizes">Standard widget sizes</h2>
+
+<p>There are six standard widget sizes, based on a Home screen grid of 4 x 4
+(portrait) or 4 x 4 (landscape) cells. These dimensions are the bounding boxes
+for the six standard widget sizes. The contents of typical widgets don't draw to
+the edge of these dimensions, but fit inside a frame withing the bounding box,
+as described in <a href="#design">Designing a widget</a>.</p>
+
+<p>In portrait orientation, each cell is 80 pixels wide by 100 pixels tall (the
+diagram shows a cell in portrait orientation). The three supported widget sizes
+in portrait orientation are:<p>
+
+<table>
+<tr><th>Cells</th><th>Pixels</th></tr>
+<tr><td>4 x 1</td><td>320 x 100</td></tr>
+<tr><td>3 x 3</td><td>240 x 300</td></tr>
+<tr><td>2 x 2</td><td>160 x 200</td></tr>
+</table>
+
+<p><img src="{@docRoot}images/widget_design/portrait_sizes.png" alt="Widget
+dimensions in portrait orientation"></p>
+
+<p>In landscape orientation, each cell is 106 pixels wide by 74 pixels tall. The
+three supported widget sizes in landscape orientation are:</p>
+
+<table>
+<tr><th>Cells</th><th>Pixels</th></tr>
+<tr><td>4 x 1</td><td>424 x 74</td></tr>
+<tr><td>3 x 3</td><td>318 x 222</td></tr>
+<tr><td>2 x 2</td><td>212 x 148</td></tr>
+</table>
+
+<p><img src="{@docRoot}images/widget_design/landscape_sizes.png" alt="Widget
+dimensions in landscape orientation"></p>
+
+
+<h2 id="frames">Standard widget frames</h2>
+
+<p>For each of the six standard widget sizes there is a standard frame. You can
+click the images of the frames in this section to download a Photoshop file for
+that frame, which you can use for your own widgets.<p>
+
+<p><a href="{@docRoot}images/widget_design/4x1_Widget_Frame_Portrait.psd"> <img
+src="{@docRoot}images/widget_design/4x1_Widget_Frame_Portrait.png" alt="Click to
+download"></a><br>4x1_Widget_Frame_Portrait.psd</p>
+
+<p><a href="{@docRoot}images/widget_design/3x3_Widget_Frame_Portrait.psd"> <img
+src="{@docRoot}images/widget_design/3x3_Widget_Frame_Portrait.png" alt="Click to
+download"></a><br>3x3_Widget_Frame_Portrait.psd</p>
+
+<p><a href="{@docRoot}images/widget_design/2x2_Widget_Frame_Portrait.psd"> <img
+src="{@docRoot}images/widget_design/2x2_Widget_Frame_Portrait.png" alt="Click to
+download"></a><br>2x2_Widget_Frame_Portrait.psd</p>
+
+<p><a href="{@docRoot}images/widget_design/4x1_Widget_Frame_Landscape.psd"> <img
+src="{@docRoot}images/widget_design/4x1_Widget_Frame_Landscape.png" alt="Click
+to download"></a><br>4x1_Widget_Frame_Landscape.psd</p>
+
+<p><a href="{@docRoot}images/widget_design/3x3_Widget_Frame_Landscape.psd"> <img
+src="{@docRoot}images/widget_design/3x3_Widget_Frame_Landscape.png" alt="Click
+to download"></a><br>3x3_Widget_Frame_Landscape.psd</p>
+
+<p><a href="{@docRoot}images/widget_design/2x2_Widget_Frame_Landscape.psd"> <img
+src="{@docRoot}images/widget_design/2x2_Widget_Frame_Landscape.png" alt="Click
+to download"></a><br>2x2_Widget_Frame_Landscape.psd</p>
+
+
+<h2 id="shadows">Standard widget shadows</h2>
+
+<p>You can apply a shadow effect to your widget's artwork, so it matches other
+standard Android widgets, using the following settings in the Photoshop Layer
+Style dialog box.</p>
+
+<p><img src="{@docRoot}images/widget_design/Layer_Style.png" alt="Layer Style
+settings for standard shadows"></p>
+
+
+<h2 id="tricks">Widget graphics tips and tricks</h2>
+
+<p>The Android team has developed a few tricks for aligning widget artwork
+within standard widget bounding boxes and frames, so the widget aligns visually
+with other widgets and the other elements of the Home screen, as well as other
+techniques for creating widgets.
+
+<ul>
+
+<li>Use a screen shot from the Android SDK emulator to align both the shapes and
+shadows of your widget controls with the Search widget and with other elements
+on the Home screen.</li>
+
+<p>Cut the widget artwork asset" based on the full size of a cell, including any
+padding you want. (That is, for a 4 x 1 widget, cut the asset at 320 by 100
+pixels.)</p>
+
+<p><img src="{@docRoot}images/widget_design/alignment.png" alt="Aligning widget
+graphics" ></p>
+
+<li>To reduce banding when exporting a widget, apply the following Photoshop Add
+Noise setting to your graphic.</li>
+
+<p><img src="{@docRoot}images/widget_design/Add_Noise.png" alt="Add Noise
+settings for widget graphics" ></p>
+
+<li>Apply 9-patch techniques to shrink the graphic and set the padding of the
+content area. (<a href="{@docRoot}guide/developing/tools/draw9patch.html">See
+the detailed guide here.</a>)</li>
+
+<p><strong>Note:</strong> The current Android widget templates were designed
+using a custom gradient angle, which means the 9-patch techniques can't be used
+to optimize the size of the asset. However, 9-patch techniques were used to set
+the content area padding.</p>
+
+<li>In some cases, devices have low pixel depths that can cause visual banding
+and dithering issues. To solve this, application developers should pass assets
+through a "proxy" drawable defined as <code>XML:<nine-patch
+android:src="@drawable/background" android:dither="true" /></code>. This
+technique references the original artwork, in this case
+<code>"background.9.png"</code>, and instructs the device to dither it as
+needed.</li>
+
+</ul>
+
+<h2 id="file">Widget graphics file format</h2>
+
+<p>Save your widget artwork using the appropriate bounding box size in PNG-24
+format on a transparent background and in 8-bit color.</p>
+
+<p><img src="{@docRoot}images/widget_design/file_format.png" alt="Widget graphics file format" ></p>
+
+
+  
+
+

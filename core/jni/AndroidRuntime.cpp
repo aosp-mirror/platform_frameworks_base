@@ -30,6 +30,7 @@
 
 #include <SkGraphics.h>
 #include <SkImageDecoder.h>
+#include <SkImageRef_GlobalPool.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -66,6 +67,10 @@ extern int register_android_graphics_Typeface(JNIEnv* env);
 
 extern int register_com_google_android_gles_jni_EGLImpl(JNIEnv* env);
 extern int register_com_google_android_gles_jni_GLImpl(JNIEnv* env);
+extern int register_android_opengl_jni_GLES10(JNIEnv* env);
+extern int register_android_opengl_jni_GLES10Ext(JNIEnv* env);
+extern int register_android_opengl_jni_GLES11(JNIEnv* env);
+extern int register_android_opengl_jni_GLES11Ext(JNIEnv* env);
 
 extern int register_android_hardware_Camera(JNIEnv *env);
 
@@ -150,6 +155,7 @@ extern int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv* env);
 extern int register_android_util_Base64(JNIEnv* env);
 extern int register_android_location_GpsLocationProvider(JNIEnv* env);
+extern int register_android_backup_FileBackupHelper(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -224,6 +230,13 @@ AndroidRuntime::AndroidRuntime()
     // this sets our preference for 16bit images during decode
     // in case the src is opaque and 24bit
     SkImageDecoder::SetDeviceConfig(SkBitmap::kRGB_565_Config);
+    // This cache is shared between browser native images, and java "purgeable"
+    // bitmaps. This globalpool is for images that do not either use the java
+    // heap, or are not backed by ashmem. See BitmapFactory.cpp for the key
+    // java call site.
+    SkImageRef_GlobalPool::SetRAMBudget(512 * 1024);
+    // There is also a global font cache, but its budget is specified in code
+    // see SkFontHost_android.cpp
 
     // Pre-allocate enough space to hold a fair number of options.
     mOptions.setCapacity(20);
@@ -1042,6 +1055,10 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_ViewRoot),
     REG_JNI(register_com_google_android_gles_jni_EGLImpl),
     REG_JNI(register_com_google_android_gles_jni_GLImpl),
+    REG_JNI(register_android_opengl_jni_GLES10),
+    REG_JNI(register_android_opengl_jni_GLES10Ext),
+    REG_JNI(register_android_opengl_jni_GLES11),
+    REG_JNI(register_android_opengl_jni_GLES11Ext),
 
     REG_JNI(register_android_graphics_Bitmap),
     REG_JNI(register_android_graphics_BitmapFactory),
@@ -1109,6 +1126,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_ddm_DdmHandleNativeHeap),
     REG_JNI(register_android_util_Base64),
     REG_JNI(register_android_location_GpsLocationProvider),
+    REG_JNI(register_android_backup_FileBackupHelper),
 };
 
 /*

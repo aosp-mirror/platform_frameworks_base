@@ -1280,7 +1280,7 @@ public final class Settings {
         // Settings moved to Settings.Secure
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Secure#LOCATION_PROVIDERS_ALLOWED}
+         * @deprecated Use {@link android.provider.Settings.Secure#ADB_ENABLED}
          * instead
          */
         @Deprecated
@@ -2034,6 +2034,110 @@ public final class Settings {
          * ConnectivityManager for more info.
          */
         public static final String BACKGROUND_DATA = "background_data";
+
+        /**
+         * The CDMA roaming mode 0 = Home Networks, CDMA default
+         *                       1 = Roaming on Affiliated networks
+         *                       2 = Roaming on any networks
+         * @hide
+         */
+        public static final String CDMA_ROAMING_MODE = "roaming_settings";
+
+        /**
+         * The CDMA subscription mode 0 = RUIM/SIM (default)
+         *                                1 = NV
+         * @hide
+         */
+        public static final String CDMA_SUBSCRIPTION_MODE = "subscription_mode";
+
+        /**
+         * represents current active phone class
+         * 1 = GSM-Phone, 0 = CDMA-Phone
+         * @hide
+         */
+        public static final String CURRENT_ACTIVE_PHONE = "current_active_phone";
+
+        /**
+         * The preferred network mode 7 = Global, CDMA default
+         *                            4 = CDMA only
+         *                            3 = GSM/UMTS only
+         * @hide
+         */
+        public static final String PREFERRED_NETWORK_MODE =
+                "preferred_network_mode";
+
+        /**
+         * CDMA Cell Broadcast SMS
+         *                            0 = CDMA Cell Broadcast SMS disabled
+         *                            1 = CDMA Cell Broadcast SMS enabled
+         * @hide
+         */
+        public static final String CDMA_CELL_BROADCAST_SMS =
+                "cdma_cell_broadcast_sms";
+
+        /**
+         * The cdma subscription 0 = Subscription from RUIM, when available
+         *                       1 = Subscription from NV
+         * @hide
+         */
+        public static final String PREFERRED_CDMA_SUBSCRIPTION =
+                "preferred_cdma_subscription";
+
+        /**
+         * Whether the enhanced voice privacy mode is enabled.
+         * 0 = normal voice privacy
+         * 1 = enhanced voice privacy
+         * @hide
+         */
+        public static final String ENHANCED_VOICE_PRIVACY_ENABLED = "enhanced_voice_privacy_enabled";
+
+        /**
+         * Whether the TTY mode mode is enabled.
+         * 0 = disabled
+         * 1 = enabled
+         * @hide
+         */
+        public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
+
+        /**
+         * Helper method for determining if a location provider is enabled.
+         * @param cr the content resolver to use
+         * @param provider the location provider to query
+         * @return true if the provider is enabled
+         *
+         * @hide
+         */
+        public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
+            String allowedProviders = Settings.Secure.getString(cr, LOCATION_PROVIDERS_ALLOWED);
+            if (allowedProviders != null) {
+                return (allowedProviders.equals(provider) ||
+                        allowedProviders.contains("," + provider + ",") ||
+                        allowedProviders.startsWith(provider + ",") ||
+                        allowedProviders.endsWith("," + provider));
+            }
+            return false;           
+        }
+
+        /**
+         * Thread-safe method for enabling or disabling a single location provider.
+         * @param cr the content resolver to use
+         * @param provider the location provider to enable or disable
+         * @param enabled true if the provider should be enabled
+         *
+         * @hide
+         */
+        public static final void setLocationProviderEnabled(ContentResolver cr,
+                String provider, boolean enabled) {
+            // to ensure thread safety, we write the provider name with a '+' or '-'
+            // and let the SettingsProvider handle it rather than reading and modifying
+            // the list of enabled providers.
+            if (enabled) {
+                provider = "+" + provider;
+            } else {
+                provider = "-" + provider;
+            }
+            putString(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider);
+        }
     }
     
     /**
@@ -2322,6 +2426,12 @@ public final class Settings {
          * (including not set) disable buffering.
          */
         public static final String GMAIL_BUFFER_SERVER_RESPONSE = "gmail_buffer_server_response";
+
+        /**
+         * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
+         * an integer where non-zero means true. Defaults to 1.
+         */
+        public static final String GMAIL_DISCARD_ERROR_UPHILL_OP = "gmail_discard_error_uphill_op";
 
         /**
          * Hostname of the GTalk server.
@@ -3112,13 +3222,13 @@ public final class Settings {
             throw new RuntimeException("this should never happen");
         }
 
-        String imei = TelephonyManager.getDefault().getDeviceId();
-        if (TextUtils.isEmpty(imei)) {
+        String deviceId = TelephonyManager.getDefault().getDeviceId();
+        if (TextUtils.isEmpty(deviceId)) {
             return "";
         }
 
-        byte[] hashedImei = digest.digest(imei.getBytes());
-        String id = new String(Base64.encodeBase64(hashedImei), 0, 12);
+        byte[] hashedDeviceId = digest.digest(deviceId.getBytes());
+        String id = new String(Base64.encodeBase64(hashedDeviceId), 0, 12);
         id = id.replaceAll("/", "_");
         sJidResource = JID_RESOURCE_PREFIX + id;
         return sJidResource;
@@ -3137,3 +3247,4 @@ public final class Settings {
         return "android-" + Long.toHexString(androidId);
     }
 }
+

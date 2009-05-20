@@ -43,7 +43,7 @@
     <string name="needPuk2">"Geben Sie zum Entsperren der SIM-Karte den PUK2 ein."</string>
     <string name="ClipMmi">"Anrufer-ID für eingehenden Anruf"</string>
     <string name="ClirMmi">"Anrufer-ID für abgehenden Anruf"</string>
-    <string name="CfMmi">"Rufweiterleitung"</string>
+    <string name="CfMmi">"Anrufweiterleitung"</string>
     <string name="CwMmi">"Anklopfen"</string>
     <string name="BaMmi">"Anrufsperre"</string>
     <string name="PwdMmi">"Passwort-Änderung"</string>
@@ -108,9 +108,9 @@
     <string name="global_action_toggle_silent_mode">"Lautlos"</string>
     <string name="global_action_silent_mode_on_status">"Ton ist bereits AUS"</string>
     <string name="global_action_silent_mode_off_status">"Ton ist momentan AN"</string>
-    <string name="global_actions_toggle_airplane_mode">"Flugmodus"</string>
-    <string name="global_actions_airplane_mode_on_status">"Flugmodus ist AN"</string>
-    <string name="global_actions_airplane_mode_off_status">"Flugmodus ist AUS"</string>
+    <string name="global_actions_toggle_airplane_mode">"Flugzeugmodus"</string>
+    <string name="global_actions_airplane_mode_on_status">"Flugzeugmodus ist AN"</string>
+    <string name="global_actions_airplane_mode_off_status">"Flugzeugmodus ist AUS"</string>
     <string name="safeMode">"Abgesicherter Modus"</string>
     <string name="android_system_label">"Android System"</string>
     <string name="permgrouplab_costMoney">"Kostenpflichtige Dienste"</string>
@@ -284,13 +284,13 @@
     <string name="permlab_callPrivileged">"Alle Telefonnummern direkt anrufen"</string>
     <string name="permdesc_callPrivileged">"Ermöglicht der Anwendung, ohne Ihr Eingreifen eine beliebige Telefonnummer zu wählen, einschließlich Notfallnummern. Schädliche Anwendungen können so unnötige und illegale Anrufe an Notdienste tätigen."</string>
     <string name="permlab_locationUpdates">"Benachrichtigungen für Standortaktualisierung steuern"</string>
-    <string name="permdesc_locationUpdates">"Ermöglicht die Aktivierung/Deaktivierung der Mobilfunkbenachrichtigungen über Standort-Updates. Nicht für normale Anwendungen vorgesehen."</string>
+    <string name="permdesc_locationUpdates">"Ermöglicht die Aktivierung/Deaktivierung der Radio-Benachrichtigungen über Standort-Updates. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_checkinProperties">"Auf Check-In-Eigenschaften zugreifen"</string>
     <string name="permdesc_checkinProperties">"Ermöglicht den Schreib-/Lesezugriff auf vom Check-In-Service hochgeladene Elemente. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_bindGadget">"Widgets auswählen"</string>
     <string name="permdesc_bindGadget">"Ermöglicht der Anwendung, dem System zu melden, welche Widgets von welcher Anwendung verwendet werden können. Mit dieser Berechtigung können Anwendungen anderen Anwendungen Zugriff auf persönliche Daten gewähren. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_modifyPhoneState">"Telefonstatus ändern"</string>
-    <string name="permdesc_modifyPhoneState">"Ermöglicht einer Anwendung, die Telefonfunktionen des Gerätes zu steuern. Eine Anwendung mit dieser Berechtigung kann unter anderem das Netzwerk wechseln oder die Mobilfunkverbindung des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
+    <string name="permdesc_modifyPhoneState">"Ermöglicht einer Anwendung, die Telefonfunktionen des Gerätes zu steuern. Eine Anwendung mit dieser Berechtigung kann unter anderem das Netzwerk wechseln oder das Radio des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
     <string name="permlab_readPhoneState">"Telefonstatus lesen"</string>
     <string name="permdesc_readPhoneState">"Ermöglicht der Anwendung, auf die Telefonfunktionen des Gerätes zuzugreifen. Eine Anwendung mit dieser Berechtigung kann unter anderem bestimmen, welche Telefonnummer dieses Telefon verwendet, ob ein Anruf aktiv ist oder mit welcher Nummer der Anrufer verbunden ist."</string>
     <string name="permlab_wakeLock">"Standby-Modus deaktivieren"</string>
@@ -388,12 +388,12 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"PIN-Code eingeben"</string>
     <string name="keyguard_password_wrong_pin_code">"Falscher PIN-Code!"</string>
-    <string name="keyguard_label_text">"Drücken Sie zum Entsperren die Menütaste und dann auf \"0\"."</string>
+    <string name="keyguard_label_text">"Drücken Sie zum Entsperren auf \"Menü\" und dann auf \"0\"."</string>
     <string name="emergency_call_dialog_number_for_display">"Notrufnummer"</string>
     <string name="lockscreen_carrier_default">"(kein Dienst)"</string>
     <string name="lockscreen_screen_locked">"Display gesperrt."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Drücken Sie die Menütaste, um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"Zum Entsperren die Menütaste drücken"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Drücken Sie auf \"Menü\", um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Drücken Sie zum Entsperren auf \"Menü\"."</string>
     <string name="lockscreen_pattern_instructions">"Schema für Entsperrung zeichnen"</string>
     <string name="lockscreen_emergency_call">"Notruf"</string>
     <string name="lockscreen_pattern_correct">"Korrekt!"</string>
@@ -406,7 +406,7 @@
     <string name="lockscreen_network_locked_message">"Netzwerk gesperrt"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-Karte ist gesperrt. PUK-Eingabe erforderlich."</string>
     <string name="lockscreen_sim_puk_locked_instructions">"Weitere Informationen finden Sie in der Bedienungsanleitung oder wenden Sie sich an den Kundendienst."</string>
-    <string name="lockscreen_sim_locked_message">"Bitte PIN-Code eingeben"</string>
+    <string name="lockscreen_sim_locked_message">"SIM-Karte ist gesperrt."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM-Karte wird entsperrt..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="lockscreen_failed_attempts_almost_glogin">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe Ihrer Google-Anmeldeinformationen zu entsperren. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
@@ -576,7 +576,7 @@
     <string name="Noon">"Mittag"</string>
     <string name="midnight">"Mitternacht"</string>
     <string name="Midnight">"Mitternacht"</string>
-    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g>"</string>
+    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
     <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
@@ -587,9 +587,9 @@
     <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>,  <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <string name="same_year_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
     <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> –  <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
@@ -609,7 +609,7 @@
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>. <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>. <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="abbrev_month_day">"<xliff:g id="DAY">%-d</xliff:g>. <xliff:g id="MONTH">%b</xliff:g>"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"Sonntag"</string>
@@ -706,7 +706,7 @@
     <string name="dialog_alert_title">"Achtung"</string>
     <string name="capital_on">"EIN"</string>
     <string name="capital_off">"AUS"</string>
-    <string name="whichApplication">"Aktion durchführen mit"</string>
+    <string name="whichApplication">"Aktion beenden mit"</string>
     <string name="alwaysUse">"Standardmäßig für diese Aktion verwenden."</string>
     <string name="clearDefaultHintMsg">"Löschen Sie die Standardeinstellungen unter \"Starteinstellungen &gt; Anwendungen &gt; Anwendungen verwalten\"."</string>
     <string name="chooseActivity">"Aktion auswählen"</string>

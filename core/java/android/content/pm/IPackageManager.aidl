@@ -139,8 +139,11 @@ interface IPackageManager {
      * @param observer a callback to use to notify when the package installation in finished.
      * @param flags - possible values: {@link #FORWARD_LOCK_PACKAGE},
      * {@link #REPLACE_EXISITING_PACKAGE}
+     * @param installerPackageName Optional package name of the application that is performing the
+     * installation. This identifies which market the package came from.
      */
-    void installPackage(in Uri packageURI, IPackageInstallObserver observer, int flags);
+    void installPackage(in Uri packageURI, IPackageInstallObserver observer, int flags,
+            in String installerPackageName);
 
     /**
      * Delete a package.
@@ -150,6 +153,8 @@ interface IPackageManager {
      * @param flags - possible values: {@link #DONT_DELETE_DATA}
      */
     void deletePackage(in String packageName, IPackageDeleteObserver observer, int flags);
+
+    String getInstallerPackageName(in String packageName);
 
     void addPackageToPreferred(String packageName);
     

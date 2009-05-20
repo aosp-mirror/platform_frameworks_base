@@ -25,8 +25,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
-import android.telephony.TelephonyManager;
-import android.util.PrintWriterPrinter;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -48,6 +47,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService("batteryinfo", asBinder());
+    }
+    
+    public void shutdown() {
+        Log.w("BatteryStats", "Writing battery stats before shutdown...");
+        synchronized (mStats) {
+            mStats.writeLocked();
+        }
     }
     
     public static IBatteryStats getService() {
@@ -255,6 +261,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    public void noteWifiMulticastEnabled(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastEnabledLocked(uid);
+        }
+    }
+
+    public void noteWifiMulticastDisabled(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastDisabledLocked(uid);
+        }
+    }
+
     public boolean isOnBattery() {
         return mStats.isOnBattery();
     }
@@ -262,6 +282,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void setOnBattery(boolean onBattery, int level) {
         enforceCallingPermission();
         mStats.setOnBattery(onBattery, level);
+    }
+    
+    public void recordCurrentLevel(int level) {
+        enforceCallingPermission();
+        mStats.recordCurrentLevel(level);
     }
     
     public long getAwakeTimeBattery() {
@@ -290,14 +315,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             boolean isCheckin = false;
             if (args != null) {
                 for (String arg : args) {
-                    if ("-c".equals(arg)) {
+                    if ("--checkin".equals(arg)) {
                         isCheckin = true;
                         break;
                     }
                 }
             }
             if (isCheckin) mStats.dumpCheckinLocked(pw, args);
-            else mStats.dumpLocked(new PrintWriterPrinter(pw));
+            else mStats.dumpLocked(pw);
         }
     }
 }

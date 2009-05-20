@@ -18,6 +18,10 @@ package android.view;
 
 import android.util.Config;
 import android.util.Log;
+import android.util.Poolable;
+import android.util.Pool;
+import android.util.Pools;
+import android.util.PoolableManager;
 
 /**
  * Helper for tracking the velocity of touch events, for implementing
@@ -28,53 +32,72 @@ import android.util.Log;
  * {@link #computeCurrentVelocity(int)} and then {@link #getXVelocity()}
  * and {@link #getXVelocity()}.
  */
-public final class VelocityTracker {
+public final class VelocityTracker implements Poolable<VelocityTracker> {
     static final String TAG = "VelocityTracker";
     static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG || Config.LOGV;
-    
+
     static final int NUM_PAST = 10;
     static final int LONGEST_PAST_TIME = 200;
-    
+
     static final VelocityTracker[] mPool = new VelocityTracker[1];
-    
+    private static final Pool<VelocityTracker> sPool = Pools.synchronizedPool(
+            Pools.finitePool(new PoolableManager<VelocityTracker>() {
+                public VelocityTracker newInstance() {
+                    return new VelocityTracker();
+                }
+
+                public void onAcquired(VelocityTracker element) {
+                    element.clear();
+                }
+
+                public void onReleased(VelocityTracker element) {
+                }
+            }, 2));
+
     final float mPastX[] = new float[NUM_PAST];
     final float mPastY[] = new float[NUM_PAST];
     final long mPastTime[] = new long[NUM_PAST];
-   
+
     float mYVelocity;
     float mXVelocity;
-    
+
+    private VelocityTracker mNext;
+
     /**
      * Retrieve a new VelocityTracker object to watch the velocity of a
      * motion.  Be sure to call {@link #recycle} when done.  You should
      * generally only maintain an active object while tracking a movement,
      * so that the VelocityTracker can be re-used elsewhere.
-     * 
+     *
      * @return Returns a new VelocityTracker.
      */
     static public VelocityTracker obtain() {
-        synchronized (mPool) {
-            VelocityTracker vt = mPool[0];
-            if (vt != null) {
-                vt.clear();
-                mPool[0] = null;
-                return vt;
-            }
-            return new VelocityTracker();
-        }
+        return sPool.acquire();
     }
-    
+
     /**
      * Return a VelocityTracker object back to be re-used by others.  You must
      * not touch the object after calling this function.
      */
     public void recycle() {
-        synchronized (mPool) {
-            mPool[0] = this;
-        }
+        sPool.release(this);
     }
-    
+
+    /**
+     * @hide
+     */
+    public void setNextPoolable(VelocityTracker element) {
+        mNext = element;
+    }
+
+    /**
+     * @hide
+     */
+    public VelocityTracker getNextPoolable() {
+        return mNext;
+    }
+
     private VelocityTracker() {
     }
     

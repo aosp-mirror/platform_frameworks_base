@@ -45,6 +45,11 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.Poolable;
+import android.util.Pool;
+import android.util.Pools;
+import android.util.PoolableManager;
+import android.util.Config;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputConnection;
@@ -57,7 +62,10 @@ import com.android.internal.view.menu.MenuBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.WeakHashMap;
 import java.lang.ref.SoftReference;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * <p>
@@ -1281,7 +1289,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * a Rect. :)
      */
     static final ThreadLocal<Rect> sThreadLocal = new ThreadLocal<Rect>();
-    
+
+    /**
+     * Map used to store views' tags.
+     */
+    private static WeakHashMap<View, SparseArray<Object>> sTags;
+
+    /**
+     * Lock used to access sTags.
+     */
+    private static final Object sTagsLock = new Object();
+
     /**
      * The animation currently associated with this view.
      * @hide
@@ -1388,6 +1406,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     static final int SCROLL_CONTAINER_ADDED         = 0x00100000;
 
     /**
+     * View flag indicating whether this view was invalidated (fully or partially.)
+     *
+     * @hide
+     */
+    static final int DIRTY                          = 0x00200000;
+
+    /**
+     * View flag indicating whether this view was invalidated by an opaque
+     * invalidate request.
+     *
+     * @hide
+     */
+    static final int DIRTY_OPAQUE                   = 0x00400000;
+
+    /**
+     * Mask for {@link #DIRTY} and {@link #DIRTY_OPAQUE}.
+     *
+     * @hide
+     */
+    static final int DIRTY_MASK                     = 0x00600000;
+
+    /**
      * The parent this view is attached to.
      * {@hide}
      *
@@ -1403,7 +1443,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     /**
      * {@hide}
      */
-    @ViewDebug.ExportedProperty
+    @ViewDebug.ExportedProperty(flagMapping = {
+        @ViewDebug.FlagToString(mask = FORCE_LAYOUT, equals = FORCE_LAYOUT,
+                name = "FORCE_LAYOUT"),
+        @ViewDebug.FlagToString(mask = LAYOUT_REQUIRED, equals = LAYOUT_REQUIRED,
+                name = "LAYOUT_REQUIRED"),
+        @ViewDebug.FlagToString(mask = DRAWING_CACHE_VALID, equals = DRAWING_CACHE_VALID,
+            name = "DRAWING_CACHE_VALID", outputIf = false),
+        @ViewDebug.FlagToString(mask = DRAWN, equals = DRAWN, name = "DRAWN", outputIf = true),
+        @ViewDebug.FlagToString(mask = DRAWN, equals = DRAWN, name = "NOT_DRAWN", outputIf = false),
+        @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY_OPAQUE, name = "DIRTY_OPAQUE"),
+        @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY, name = "DIRTY")
+    })
     int mPrivateFlags;
 
     /**
@@ -1869,6 +1920,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                     break;
                 case R.styleable.View_minHeight:
                     mMinHeight = a.getDimensionPixelSize(attr, 0);
+                    break;
+                case R.styleable.View_onClick:
+                    final String handlerName = a.getString(attr);
+                    if (handlerName != null) {
+                        setOnClickListener(new OnClickListener() {
+                            private Method mHandler;
+
+                            public void onClick(View v) {
+                                if (mHandler == null) {
+                                    try {
+                                        mHandler = getContext().getClass().getMethod(handlerName,
+                                                View.class);
+                                    } catch (NoSuchMethodException e) {
+                                        throw new IllegalStateException("Could not find a method " +
+                                                handlerName + "(View) in the activity", e);
+                                    }
+                                }
+
+                                try {
+                                    mHandler.invoke(getContext(), View.this);
+                                } catch (IllegalAccessException e) {
+                                    throw new IllegalStateException("Could not execute non "
+                                            + "public method of the activity", e);
+                                } catch (InvocationTargetException e) {
+                                    throw new IllegalStateException("Could not execute "
+                                            + "method of the activity", e);
+                                }
+                            }
+                        });
+                    }
                     break;
             }
         }
@@ -2420,6 +2501,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                     && mAttachInfo.mHasWindowFocus) {
                 imm.focusOut(this);
             }
+            onFocusLost();
         } else if (imm != null && mAttachInfo != null
                 && mAttachInfo.mHasWindowFocus) {
             imm.focusIn(this);
@@ -2428,6 +2510,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         invalidate();
         if (mOnFocusChangeListener != null) {
             mOnFocusChangeListener.onFocusChange(this, gainFocus);
+        }
+    }
+
+    /**
+     * Invoked whenever this view loses focus, either by losing window focus or by losing
+     * focus within its window. This method can be used to clear any state tied to the
+     * focus. For instance, if a button is held pressed with the trackball and the window
+     * loses focus, this method can be used to cancel the press.
+     *
+     * Subclasses of View overriding this method should always call super.onFocusLost().
+     *
+     * @see #onFocusChanged(boolean, int, android.graphics.Rect)
+     * @see #onWindowFocusChanged(boolean) 
+     *
+     * @hide pending API council approval
+     */
+    protected void onFocusLost() {
+        resetPressedState();
+    }
+
+    private void resetPressedState() {
+        if ((mViewFlags & ENABLED_MASK) == DISABLED) {
+            return;
+        }
+
+        if (isPressed()) {
+            setPressed(false);
+
+            if (!mHasPerformedLongPress) {
+                if (mPendingCheckForLongPress != null) {
+                    removeCallbacks(mPendingCheckForLongPress);
+                }
+            }
         }
     }
 
@@ -3412,6 +3527,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             if (mPendingCheckForLongPress != null) {
                 removeCallbacks(mPendingCheckForLongPress);
             }
+            onFocusLost();
         } else if (imm != null && (mPrivateFlags & FOCUSED) != 0) {
             imm.focusIn(this);
         }
@@ -4437,6 +4553,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
                 p.invalidateChild(this, r);
             }
         }
+    }
+
+    /**
+     * Indicates whether this View is opaque. An opaque View guarantees that it will
+     * draw all the pixels overlapping its bounds using a fully opaque color.
+     *
+     * Subclasses of View should override this method whenever possible to indicate
+     * whether an instance is opaque. Opaque Views are treated in a special way by
+     * the View hierarchy, possibly allowing it to perform optimizations during
+     * invalidate/draw passes.
+     * 
+     * @return True if this View is guaranteed to be fully opaque, false otherwise.
+     *
+     * @hide Pending API council approval
+     */
+    @ViewDebug.ExportedProperty
+    public boolean isOpaque() {
+        return mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE;
     }
 
     /**
@@ -5519,7 +5653,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             if (ViewDebug.TRACE_HIERARCHY) {
                 ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
             }
-            if (ViewRoot.PROFILE_DRAWING) {
+            if (Config.DEBUG && ViewDebug.profileDrawing) {
                 EventLog.writeEvent(60002, hashCode());
             }
 
@@ -5605,7 +5739,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             final int restoreCount = canvas.save();
             canvas.translate(-mScrollX, -mScrollY);
 
-            mPrivateFlags |= DRAWN;
+            mPrivateFlags = (mPrivateFlags & ~DIRTY_MASK) | DRAWN; 
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
@@ -5631,7 +5765,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * Create a snapshot of the view into a bitmap.  We should probably make
      * some form of this public, but should think about the API.
      */
-    /*package*/ Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor) {
+    Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor) {
         final int width = mRight - mLeft;
         final int height = mBottom - mTop;
 
@@ -5793,7 +5927,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
         }
 
-        mPrivateFlags |= DRAWN;                    
+        final boolean dirtyOpaque = (mPrivateFlags & DIRTY_MASK) == DIRTY_OPAQUE;
+        mPrivateFlags = (mPrivateFlags & ~DIRTY_MASK) | DRAWN;
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -5810,22 +5945,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         // Step 1, draw the background, if needed
         int saveCount;
 
-        final Drawable background = mBGDrawable;
-        if (background != null) {
-            final int scrollX = mScrollX;
-            final int scrollY = mScrollY;
+        if (!dirtyOpaque) {
+            final Drawable background = mBGDrawable;
+            if (background != null) {
+                final int scrollX = mScrollX;
+                final int scrollY = mScrollY;
 
-            if (mBackgroundSizeChanged) {
-                background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
-                mBackgroundSizeChanged = false;
-            }
+                if (mBackgroundSizeChanged) {
+                    background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
+                    mBackgroundSizeChanged = false;
+                }
 
-            if ((scrollX | scrollY) == 0) {
-                background.draw(canvas);
-            } else {
-                canvas.translate(scrollX, scrollY);
-                background.draw(canvas);
-                canvas.translate(-scrollX, -scrollY);
+                if ((scrollX | scrollY) == 0) {
+                    background.draw(canvas);
+                } else {
+                    canvas.translate(scrollX, scrollY);
+                    background.draw(canvas);
+                    canvas.translate(-scrollX, -scrollY);
+                }
             }
         }
 
@@ -5835,7 +5972,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         boolean verticalEdges = (viewFlags & FADING_EDGE_VERTICAL) != 0;
         if (!verticalEdges && !horizontalEdges) {
             // Step 3, draw the content
-            onDraw(canvas);
+            if (!dirtyOpaque) onDraw(canvas);
 
             // Step 4, draw the children
             dispatchDraw(canvas);
@@ -5938,7 +6075,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
         }
 
         // Step 3, draw the content
-        onDraw(canvas);
+        if (!dirtyOpaque) onDraw(canvas);
 
         // Step 4, draw the children
         dispatchDraw(canvas);
@@ -6701,6 +6838,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
     public void setSelected(boolean selected) {
         if (((mPrivateFlags & SELECTED) != 0) != selected) {
             mPrivateFlags = (mPrivateFlags & ~SELECTED) | (selected ? SELECTED : 0);
+            if (!selected) resetPressedState();
             invalidate();
             refreshDrawableState();
             dispatchSetSelected(selected);
@@ -6928,6 +7066,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * Returns this view's tag.
      *
      * @return the Object stored in this view as a tag
+     *
+     * @see #setTag(Object)
+     * @see #getTag(int)
      */
     @ViewDebug.ExportedProperty
     public Object getTag() {
@@ -6941,9 +7082,153 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
      * resorting to another data structure.
      *
      * @param tag an Object to tag the view with
+     *
+     * @see #getTag()
+     * @see #setTag(int, Object)
      */
     public void setTag(final Object tag) {
         mTag = tag;
+    }
+
+    /**
+     * Returns the tag associated with this view and the specified key.
+     *
+     * @param key The key identifying the tag
+     *
+     * @return the Object stored in this view as a tag
+     *
+     * @see #setTag(int, Object)
+     * @see #getTag() 
+     */
+    public Object getTag(int key) {
+        SparseArray<Object> tags = null;
+        synchronized (sTagsLock) {
+            if (sTags != null) {
+                tags = sTags.get(this);
+            }
+        }
+
+        if (tags != null) return tags.get(key);
+        return null;
+    }
+
+    /**
+     * Sets a tag associated with this view and a key. A tag can be used
+     * to mark a view in its hierarchy and does not have to be unique within
+     * the hierarchy. Tags can also be used to store data within a view
+     * without resorting to another data structure.
+     *
+     * The specified key should be an id declared in the resources of the
+     * application to ensure it is unique. Keys identified as belonging to
+     * the Android framework or not associated with any package will cause
+     * an {@link IllegalArgumentException} to be thrown.
+     *
+     * @param key The key identifying the tag
+     * @param tag An Object to tag the view with
+     *
+     * @throws IllegalArgumentException If they specified key is not valid
+     *
+     * @see #setTag(Object)
+     * @see #getTag(int)
+     */
+    public void setTag(int key, final Object tag) {
+        // If the package id is 0x00 or 0x01, it's either an undefined package
+        // or a framework id
+        if ((key >>> 24) < 2) {
+            throw new IllegalArgumentException("The key must be an application-specific "
+                    + "resource id.");
+        }
+
+        setTagInternal(this, key, tag);
+    }
+
+    /**
+     * Variation of {@link #setTag(int, Object)} that enforces the key to be a
+     * framework id.
+     *
+     * @hide
+     */
+    public void setTagInternal(int key, Object tag) {
+        if ((key >>> 24) != 0x1) {
+            throw new IllegalArgumentException("The key must be a framework-specific "
+                    + "resource id.");
+        }
+
+        setTagInternal(this, key, tag);        
+    }
+
+    private static void setTagInternal(View view, int key, Object tag) {
+        SparseArray<Object> tags = null;
+        synchronized (sTagsLock) {
+            if (sTags == null) {
+                sTags = new WeakHashMap<View, SparseArray<Object>>();
+            } else {
+                tags = sTags.get(view);
+            }
+        }
+
+        if (tags == null) {
+            tags = new SparseArray<Object>(2);
+            synchronized (sTagsLock) {
+                sTags.put(view, tags);
+            }
+        }
+
+        tags.put(key, tag);
+    }
+
+    /**
+     * @param consistency The type of consistency. See ViewDebug for more information.
+     *
+     * @hide
+     */
+    protected boolean dispatchConsistencyCheck(int consistency) {
+        return onConsistencyCheck(consistency);
+    }
+
+    /**
+     * Method that subclasses should implement to check their consistency. The type of
+     * consistency check is indicated by the bit field passed as a parameter.
+     * 
+     * @param consistency The type of consistency. See ViewDebug for more information.
+     *
+     * @throws IllegalStateException if the view is in an inconsistent state.
+     *
+     * @hide
+     */
+    protected boolean onConsistencyCheck(int consistency) {
+        boolean result = true;
+
+        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
+        final boolean checkDrawing = (consistency & ViewDebug.CONSISTENCY_DRAWING) != 0;
+
+        if (checkLayout) {
+            if (getParent() == null) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " does not have a parent.");
+            }
+
+            if (mAttachInfo == null) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " is not attached to a window.");
+            }
+        }
+
+        if (checkDrawing) {
+            // Do not check the DIRTY/DRAWN flags because views can call invalidate()
+            // from their draw() method
+
+            if ((mPrivateFlags & DRAWN) != DRAWN &&
+                    (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                        "View " + this + " was invalidated but its drawing cache is valid.");
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -7887,26 +8172,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
          * For performance purposes, this class also implements a pool of up to
          * POOL_LIMIT objects that get reused. This reduces memory allocations
          * whenever possible.
-         *
-         * The pool is implemented as a linked list of InvalidateInfo object with
-         * the root pointing to the next available InvalidateInfo. If the root
-         * is null (i.e. when all instances from the pool have been acquired),
-         * then a new InvalidateInfo is created and returned to the caller.
-         *
-         * An InvalidateInfo is sent back to the pool by calling its release()
-         * method. If the pool is full the object is simply discarded.
-         *
-         * This implementation follows the object pool pattern used in the
-         * MotionEvent class.
          */
-        static class InvalidateInfo {
+        static class InvalidateInfo implements Poolable<InvalidateInfo> {
             private static final int POOL_LIMIT = 10;
-            private static final Object sLock = new Object();
+            private static final Pool<InvalidateInfo> sPool = Pools.synchronizedPool(
+                    Pools.finitePool(new PoolableManager<InvalidateInfo>() {
+                        public InvalidateInfo newInstance() {
+                            return new InvalidateInfo();
+                        }
 
-            private static int sAcquiredCount = 0;
-            private static InvalidateInfo sRoot;
+                        public void onAcquired(InvalidateInfo element) {
+                        }
 
-            private InvalidateInfo next;
+                        public void onReleased(InvalidateInfo element) {
+                        }
+                    }, POOL_LIMIT)
+            );
+
+            private InvalidateInfo mNext;
 
             View target;
 
@@ -7915,28 +8198,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback {
             int right;
             int bottom;
 
+            public void setNextPoolable(InvalidateInfo element) {
+                mNext = element;
+            }
+
+            public InvalidateInfo getNextPoolable() {
+                return mNext;
+            }
+
             static InvalidateInfo acquire() {
-                synchronized (sLock) {
-                    if (sRoot == null) {
-                        return new InvalidateInfo();
-                    }
-
-                    InvalidateInfo info = sRoot;
-                    sRoot = info.next;
-                    sAcquiredCount--;
-
-                    return info;
-                }
+                return sPool.acquire();
             }
 
             void release() {
-                synchronized (sLock) {
-                    if (sAcquiredCount < POOL_LIMIT) {
-                        sAcquiredCount++;
-                        next = sRoot;
-                        sRoot = this;
-                    }
-                }
+                sPool.release(this);
             }
         }
 

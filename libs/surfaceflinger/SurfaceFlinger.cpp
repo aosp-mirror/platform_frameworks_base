@@ -241,6 +241,9 @@ sp<IMemory> SurfaceFlinger::getCblk() const
 status_t SurfaceFlinger::requestGPU(const sp<IGPUCallback>& callback,
         gpu_info_t* gpu)
 {
+    if (mGPU == 0)
+        return INVALID_OPERATION;
+
     IPCThreadState* ipc = IPCThreadState::self();
     const int pid = ipc->getCallingPid();
     status_t err = mGPU->request(pid, callback, gpu);
@@ -249,6 +252,9 @@ status_t SurfaceFlinger::requestGPU(const sp<IGPUCallback>& callback,
 
 status_t SurfaceFlinger::revokeGPU()
 {
+    if (mGPU == 0)
+        return INVALID_OPERATION;
+
     return mGPU->friendlyRevoke();
 }
 
@@ -1600,10 +1606,14 @@ status_t SurfaceFlinger::onTransact(
             }
             return NO_ERROR;
             case 1005: // ask GPU revoke
-                mGPU->friendlyRevoke();
+                if (mGPU != 0) {
+                    mGPU->friendlyRevoke();
+                }
                 return NO_ERROR;
             case 1006: // revoke GPU
-                mGPU->unconditionalRevoke();
+                if (mGPU != 0) {
+                    mGPU->unconditionalRevoke();
+                }
                 return NO_ERROR;
             case 1007: // set mFreezeCount
                 mFreezeCount = data.readInt32();

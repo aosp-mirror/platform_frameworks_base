@@ -486,12 +486,20 @@ public class SQLiteQueryBuilder
                     String userColumn = projectionIn[i];
                     String column = mProjectionMap.get(userColumn);
 
-                    if (column == null) {
-                        throw new IllegalArgumentException(
-                                    "Invalid column " + projectionIn[i]);
-                    } else {
+                    if (column != null) {
                         projection[i] = column;
+                        continue;
                     }
+
+                    if (userColumn.contains(" AS ")
+                            || userColumn.contains(" as ")) {
+                        /* A column alias already exist */
+                        projection[i] = userColumn;
+                        continue;
+                    }
+
+                    throw new IllegalArgumentException("Invalid column "
+                            + projectionIn[i]);
                 }
                 return projection;
             } else {

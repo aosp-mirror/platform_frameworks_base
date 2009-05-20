@@ -10,7 +10,6 @@ parent.link=index.html
     <li><a href="#framelayout">FrameLayout</a></li>
     <li><a href="#linearlayout">LinearLayout</a></li>
     <li><a href="#tablelayout">TableLayout</a></li>
-    <li><a href="#absolutelayout">AbsoluteLayout</a></li>
     <li><a href="#relativelayout">RelativeLayout</a></li>
     <li><a href="#viewgroupsummary">Summary of Important View Groups</a></li>
   </ol>
@@ -143,16 +142,6 @@ documentation for more details. </p>
 TableLayout</a> tutorial.</p>
 
 
-<h2 id="absolutelayout">AbsoluteLayout</h2>
-<p>{@link android.widget.AbsoluteLayout} enables child views to specify
-    their own exact x/y coordinates on the screen. Coordinates <em>(0,0)</em> is the upper left
-    corner, and values increase as you move down and to the right. Margins are not
-    supported, and overlapping elements are allowed (although not recommended). We
-    generally recommend against using AbsoluteLayout unless you have good reasons
-    to use it, because it is fairly rigid and does not adjust to different types of
-    displays. </p>
-
-
 <h2 id="relativelayout">RelativeLayout</h2>
 <p>{@link android.widget.RelativeLayout} lets child views specify their
     position relative to the parent view or to each other (specified by ID). So you can
@@ -230,11 +219,6 @@ RelativeLayout</a> tutorial.</p>
     <tr>
         <th scope="col">Class</th>
         <th scope="col">Description</th>
-    </tr>
-    <tr>
-        <td>{@link android.widget.AbsoluteLayout AbsoluteLayout}<br /></td>
-        <td>Enables you to specify the location of child objects relative to the
-            parent in exact measurements (for example, pixels). </td>
     </tr>
     <tr>
         <td>{@link android.widget.FrameLayout FrameLayout}</td>

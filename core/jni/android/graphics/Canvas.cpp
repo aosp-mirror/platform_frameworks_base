@@ -21,6 +21,8 @@
 #include "SkCanvas.h"
 #include "SkDevice.h"
 #include "SkGLCanvas.h"
+#include "SkGraphics.h"
+#include "SkImageRef_GlobalPool.h"
 #include "SkShader.h"
 #include "SkTemplates.h"
 
@@ -58,8 +60,11 @@ public:
         return new SkGLCanvas;
     }
     
-    static void freeGlCaches(JNIEnv* env, jobject) {
+    static void freeCaches(JNIEnv* env, jobject) {
+        // these are called in no particular order
         SkGLCanvas::DeleteAllTextures();
+        SkImageRef_GlobalPool::SetRAMUsed(0);
+        SkGraphics::SetFontCacheUsed(0);
     }
     
     static jboolean isOpaque(JNIEnv* env, jobject jcanvas) {
@@ -717,8 +722,7 @@ public:
         jsize textCount = env->GetArrayLength(text);
         SkScalar x_ = SkFloatToScalar(x);
         SkScalar y_ = SkFloatToScalar(y);
-        textArray += index;
-        canvas->drawText(textArray, count << 1, x_, y_, *paint);
+        canvas->drawText(textArray + index, count << 1, x_, y_, *paint);
         env->ReleaseCharArrayElements(text, textArray, 0);
     }
  
@@ -762,8 +766,7 @@ public:
             posPtr[indx].fX = SkFloatToScalar(posArray[indx << 1]);
             posPtr[indx].fY = SkFloatToScalar(posArray[(indx << 1) + 1]);
         }
-        textArray += index;
-        canvas->drawPosText(textArray, count << 1, posPtr, *paint);
+        canvas->drawPosText(textArray + index, count << 1, posPtr, *paint);
         if (text) {
             env->ReleaseCharArrayElements(text, textArray, 0);
         }
@@ -933,7 +936,7 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawTextOnPath__StringPathFFPaint},
     {"native_drawPicture", "(II)V", (void*) SkCanvasGlue::drawPicture},
 
-    {"freeGlCaches", "()V", (void*) SkCanvasGlue::freeGlCaches}
+    {"freeCaches", "()V", (void*) SkCanvasGlue::freeCaches}
 };
 
 #include <android_runtime/AndroidRuntime.h>

@@ -94,6 +94,11 @@
         <!-- Text color, typeface, size, and style for "small" inverse text. Defaults to secondary inverse text color. -->
         <attr name="textAppearanceSmallInverse" format="reference" />
 
+        <!-- Text color, typeface, size, and style for system search result title. Defaults to primary inverse text color. @hide -->	
+        <attr name="textAppearanceSearchResultTitle" format="reference" />	
+        <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. @hide -->	
+        <attr name="textAppearanceSearchResultSubtitle" format="reference" />
+
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
         
@@ -147,6 +152,8 @@
         <!-- The preferred list item height -->
         <attr name="listPreferredItemHeight" format="dimension" />
         <!-- The drawable for the list divider -->
+	<!-- The list item height for search results. @hide -->
+	<attr name="searchResultListItemHeight" format="dimension" />
         <attr name="listDivider" format="reference" />
         <!-- TextView style for list separators. -->
         <attr name="listSeparatorTextViewStyle" format="reference" />
@@ -1158,6 +1165,13 @@
              enabled for events such as long presses. -->
         <attr name="hapticFeedbackEnabled" format="boolean" />
 
+        <!-- Name of the method in this View's context to invoke when the view is
+             clicked. This name must correspond to a public method that takes
+             exactly one parameter of type View. For instance, if you specify
+             <code>android:onClick="sayHello"</code>, you must declare a
+             <code>public void sayHello(View v)</code> method of your context
+             (typically, your Activity.)-->
+        <attr name="onClick" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
@@ -2524,17 +2538,34 @@
     </declare-styleable>
 
     <declare-styleable name="AccelerateInterpolator">
-        <!-- This is the amount of deceleration to ad when easing in. -->
+        <!-- This is the amount of deceleration to add when easing in. -->
         <attr name="factor" format="float" />
     </declare-styleable>
     
     <declare-styleable name="DecelerateInterpolator">
-        <!-- This is the amount of acceleration to ad when easing out. -->
+        <!-- This is the amount of acceleration to add when easing out. -->
         <attr name="factor" />
     </declare-styleable>
     
     <declare-styleable name="CycleInterpolator">
         <attr name="cycles" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="AnticipateInterpolator">
+        <!-- This is the amount of tension. -->
+        <attr name="tension" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="OvershootInterpolator">
+        <!-- This is the amount of tension. -->
+        <attr name="tension" />
+    </declare-styleable>
+
+    <declare-styleable name="AnticipateOvershootInterpolator">
+        <!-- This is the amount of tension. -->
+        <attr name="tension" />
+        <!-- This is the amount by which to multiply the tension. -->
+        <attr name="extraTension" format="float" />
     </declare-styleable>
 
     <!-- ========================== -->
@@ -2703,12 +2734,13 @@
           <flag name="showVoiceSearchButton" value="0x01" />
           <!-- If set, the voice search button will take the user directly to a built-in
                voice web search activity.  Most applications will not use this flag, as it
-               will take the user away from your searchable activity. -->
+               will take the user away from the activity in which search was invoked. -->
           <flag name="launchWebSearch" value="0x02" />
           <!-- If set, the voice search button will take the user directly to a built-in
                voice recording activity.  This activity will prompt the user to speak,
-               transcribe the spoke text, and forward the resulting query text to your
-               searchable activity, just as if the user had typed it into the search UI. -->
+               transcribe the spoken text, and forward the resulting query
+               text to the searchable activity, just as if the user had typed it into
+               the search UI and clicked the search button. -->
           <flag name="launchRecognizer" value="0x04" />
         </attr>
 
@@ -2755,6 +2787,15 @@
             string will be placed in the data field of the {@link android.content.Intent Intent} 
             when the user clicks a suggestion.  <i>Optional attribute.</i> -->
         <attr name="searchSuggestIntentData" format="string" />
+        
+        <!-- If provided, this is the minimum number of characters needed to trigger
+             search suggestions. The default value is 0. <i>Optional attribute.</i> -->
+        <attr name="searchSuggestThreshold" format="integer" />
+        
+        <!-- If provided and <code>true</code>, this searchable activity will be
+             included in any global lists of search targets.
+             The default value is <code>false</code>. <i>Optional attribute.</i>. -->
+        <attr name="includeInGlobalSearch" format="boolean" />
         
     </declare-styleable>
 

@@ -1641,6 +1641,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @android.view.RemotableViewMethod
     public void setTextScaleX(float size) {
         if (size != mTextPaint.getTextScaleX()) {
+            mUserSetTextScaleX = true;
             mTextPaint.setTextScaleX(size);
 
             if (mLayout != null) {
@@ -2510,6 +2511,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (text == null) {
             text = "";
         }
+
+        if (!mUserSetTextScaleX) mTextPaint.setTextScaleX(1.0f);
 
         if (text instanceof Spanned &&
             ((Spanned) text).getSpanStart(TextUtils.TruncateAt.MARQUEE) >= 0) {
@@ -3920,6 +3923,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         layout.draw(canvas, highlight, mHighlightPaint, voffsetCursor - voffsetText);
 
+        if (mMarquee != null && mMarquee.shouldDrawGhost()) {
+            canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
+            layout.draw(canvas, highlight, mHighlightPaint, voffsetCursor - voffsetText);
+        }
+
         /*  Comment out until we decide what to do about animations
         if (currentTransformation != null) {
             mTextPaint.setLinearTextOn(isLinearTextOn);
@@ -4426,29 +4434,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     
     boolean reportExtractedText() {
         final InputMethodState ims = mInputMethodState;
-        final boolean contentChanged = ims.mContentChanged;
-        if (ims != null && (contentChanged || ims.mSelectionModeChanged)) {
-            ims.mContentChanged = false;
-            ims.mSelectionModeChanged = false;
-            final ExtractedTextRequest req = mInputMethodState.mExtracting;
-            if (req != null) {
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
-                    if (DEBUG_EXTRACT) Log.v(TAG, "Retrieving extracted start="
-                            + ims.mChangedStart + " end=" + ims.mChangedEnd
-                            + " delta=" + ims.mChangedDelta);
-                    if (ims.mChangedStart < 0 && !contentChanged) {
-                        ims.mChangedStart = EXTRACT_NOTHING;
-                    }
-                    if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
-                            ims.mChangedDelta, ims.mTmpExtracted)) {
-                        if (DEBUG_EXTRACT) Log.v(TAG, "Reporting extracted start="
-                                + ims.mTmpExtracted.partialStartOffset
-                                + " end=" + ims.mTmpExtracted.partialEndOffset
-                                + ": " + ims.mTmpExtracted.text);
-                        imm.updateExtractedText(this, req.token,
-                                mInputMethodState.mTmpExtracted);
-                        return true;
+        if (ims != null) {
+            final boolean contentChanged = ims.mContentChanged;
+            if (contentChanged || ims.mSelectionModeChanged) {
+                ims.mContentChanged = false;
+                ims.mSelectionModeChanged = false;
+                final ExtractedTextRequest req = mInputMethodState.mExtracting;
+                if (req != null) {
+                    InputMethodManager imm = InputMethodManager.peekInstance();
+                    if (imm != null) {
+                        if (DEBUG_EXTRACT) Log.v(TAG, "Retrieving extracted start="
+                                + ims.mChangedStart + " end=" + ims.mChangedEnd
+                                + " delta=" + ims.mChangedDelta);
+                        if (ims.mChangedStart < 0 && !contentChanged) {
+                            ims.mChangedStart = EXTRACT_NOTHING;
+                        }
+                        if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
+                                ims.mChangedDelta, ims.mTmpExtracted)) {
+                            if (DEBUG_EXTRACT) Log.v(TAG, "Reporting extracted start="
+                                    + ims.mTmpExtracted.partialStartOffset
+                                    + " end=" + ims.mTmpExtracted.partialEndOffset
+                                    + ": " + ims.mTmpExtracted.text);
+                            imm.updateExtractedText(this, req.token,
+                                    mInputMethodState.mTmpExtracted);
+                            return true;
+                        }
                     }
                 }
             }
@@ -4814,16 +4824,38 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
-            final int height = mLayoutParams.height;
-            // If the size of the view does not depend on the size of the text, try to
-            // start the marquee immediately
-            if (height != LayoutParams.WRAP_CONTENT && height != LayoutParams.FILL_PARENT) {
-                startMarquee();
-            } else {
-                // Defer the start of the marquee until we know our width (see setFrame())
-                mRestartMarquee = true;
+            if (!compressText(ellipsisWidth)) {
+                final int height = mLayoutParams.height;
+                // If the size of the view does not depend on the size of the text, try to
+                // start the marquee immediately
+                if (height != LayoutParams.WRAP_CONTENT && height != LayoutParams.FILL_PARENT) {
+                    startMarquee();
+                } else {
+                    // Defer the start of the marquee until we know our width (see setFrame())
+                    mRestartMarquee = true;
+                }
             }
         }
+    }
+
+    private boolean compressText(float width) {
+        // Only compress the text if it hasn't been compressed by the previous pass
+        if (width > 0.0f && mLayout != null && getLineCount() == 1 && !mUserSetTextScaleX &&
+                mTextPaint.getTextScaleX() == 1.0f) {
+            final float textWidth = mLayout.getLineWidth(0);
+            final float overflow = (textWidth + 1.0f - width) / width;
+            if (overflow > 0.0f && overflow <= Marquee.MARQUEE_DELTA_MAX) {
+                mTextPaint.setTextScaleX(1.0f - overflow - 0.005f);
+                post(new Runnable() {
+                    public void run() {
+                        requestLayout();
+                    }
+                });
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static int desired(Layout layout) {
@@ -5683,8 +5715,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void startMarquee() {
+        if (compressText(getWidth() - getCompoundPaddingLeft() - getCompoundPaddingRight())) {
+            return;
+        }
+
         if ((mMarquee == null || mMarquee.isStopped()) && (isFocused() || isSelected()) &&
                 getLineCount() == 1 && canMarquee()) {
+
             if (mMarquee == null) mMarquee = new Marquee(this);
             mMarquee.start(mMarqueeRepeatLimit);
         }
@@ -5708,6 +5745,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private static final class Marquee extends Handler {
         // TODO: Add an option to configure this
+        private static final float MARQUEE_DELTA_MAX = 0.07f;
         private static final int MARQUEE_DELAY = 1200;
         private static final int MARQUEE_RESTART_DELAY = 1200;
         private static final int MARQUEE_RESOLUTION = 1000 / 30;
@@ -5726,6 +5764,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private byte mStatus = MARQUEE_STOPPED;
         private float mScrollUnit;
         private float mMaxScroll;
+        float mMaxFadeScroll;
+        private float mGhostStart;
+        private float mGhostOffset;
+        private float mFadeStop;
         private int mRepeatLimit;
 
         float mScroll;
@@ -5801,11 +5843,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (textView != null && textView.mLayout != null) {
                 mStatus = MARQUEE_STARTING;
                 mScroll = 0.0f;
-                mMaxScroll = textView.mLayout.getLineWidth(0) - (textView.getWidth() -
-                        textView.getCompoundPaddingLeft() - textView.getCompoundPaddingRight());
+                final int textWidth = textView.getWidth() - textView.getCompoundPaddingLeft() -
+                        textView.getCompoundPaddingRight();
+                final float lineWidth = textView.mLayout.getLineWidth(0);
+                final float gap = textWidth / 3.0f;
+                mGhostStart = lineWidth - textWidth + gap;
+                mMaxScroll = mGhostStart + textWidth;
+                mGhostOffset = lineWidth + gap;
+                mFadeStop = lineWidth + textWidth / 6.0f;
+                mMaxFadeScroll = mGhostStart + lineWidth + lineWidth;
+
                 textView.invalidate();
                 sendEmptyMessageDelayed(MESSAGE_START, MARQUEE_DELAY);
             }
+        }
+
+        float getGhostOffset() {
+            return mGhostOffset;
+        }
+
+        boolean shouldDrawLeftFade() {
+            return mScroll <= mFadeStop;
+        }
+
+        boolean shouldDrawGhost() {
+            return mStatus == MARQUEE_RUNNING && mScroll > mGhostStart;
         }
 
         boolean isRunning() {
@@ -6433,7 +6495,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
-                return marquee.mScroll / getHorizontalFadingEdgeLength();
+                if (marquee.shouldDrawLeftFade()) {
+                    return marquee.mScroll / getHorizontalFadingEdgeLength();
+                } else {
+                    return 0.0f;
+                }
             } else if (getLineCount() == 1) {
                 switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
@@ -6455,7 +6521,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
-                return (marquee.mMaxScroll - marquee.mScroll) / getHorizontalFadingEdgeLength();
+                return (marquee.mMaxFadeScroll - marquee.mScroll) / getHorizontalFadingEdgeLength();
             } else if (getLineCount() == 1) {
                 switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
@@ -6994,7 +7060,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private ArrayList<TextWatcher>  mListeners = null;
 
     // display attributes
-    private TextPaint mTextPaint;
+    private TextPaint               mTextPaint;
+    private boolean                 mUserSetTextScaleX;
     private Paint                   mHighlightPaint;
     private int                     mHighlightColor = 0xFFBBDDFF;
     private Layout                  mLayout;

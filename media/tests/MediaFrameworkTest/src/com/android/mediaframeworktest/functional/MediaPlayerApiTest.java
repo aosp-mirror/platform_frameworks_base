@@ -78,6 +78,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI getDuration", duratoinWithinTolerence);  
     }
     
+    @Suppress
     @MediumTest
     public void testWMA9GetDuration() throws Exception {
       int duration = CodecTest.getDuration(MediaNames.WMA9); 
@@ -118,7 +119,8 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.MIDI);  
       assertTrue("MIDI GetCurrentPosition", currentPosition);  
     }
-   
+    
+    @Suppress
     @LargeTest
     public void testWMA9GetCurrentPosition() throws Exception {
       boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.WMA9);  
@@ -156,6 +158,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI Pause", isPaused);  
     }
    
+    @Suppress
     @LargeTest
     public void testWMA9Pause() throws Exception {
       boolean isPaused = CodecTest.pause(MediaNames.WMA9);  
@@ -227,6 +230,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI setLooping", isLoop);  
     }
     
+    @Suppress
     @LargeTest
     public void testWMA9SetLooping() throws Exception {
       boolean isLoop = CodecTest.setLooping(MediaNames.WMA9);  
@@ -265,6 +269,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI seekTo", isLoop);  
     }
     
+    @Suppress
     @LargeTest
     public void testWMA9SeekTo() throws Exception {
       boolean isLoop = CodecTest.seekTo(MediaNames.WMA9);  
@@ -304,6 +309,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI seekToEnd", isEnd);  
     }
     
+    @Suppress
     @LargeTest
     public void testWMA9SeekToEnd() throws Exception {
       boolean isEnd = CodecTest.seekToEnd(MediaNames.WMA9);  
@@ -379,7 +385,8 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_H264_AMR);
       assertTrue("H264AMR SeekTo", isSeek);         
     }
-    
+   
+    @Suppress
     @LargeTest
     public void testVideoWMVSeekTo() throws Exception {
       boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_WMV);
@@ -432,15 +439,21 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     @LargeTest
     public void testLocalMp3PrepareAsyncCallback() throws Exception {
         boolean onPrepareSuccess = 
-            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR);
+            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR, false);
         assertTrue("LocalMp3prepareAsyncCallback", onPrepareSuccess);
     }
     
     @LargeTest
     public void testStreamPrepareAsyncCallback() throws Exception {
         boolean onPrepareSuccess = 
-            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k);
+            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, false);
+        assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
+    }
+    
+    @LargeTest
+    public void testStreamPrepareAsyncCallbackReset() throws Exception {
+        boolean onPrepareSuccess = 
+            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, true);
         assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
     }
 }
-

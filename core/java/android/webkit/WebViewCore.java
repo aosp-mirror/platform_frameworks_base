@@ -29,7 +29,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.util.Config;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -43,7 +42,7 @@ final class WebViewCore {
 
     private static final String LOGTAG = "webcore";
     static final boolean DEBUG = false;
-    static final boolean LOGV_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean LOGV_ENABLED = DEBUG;
 
     static {
         // Load libwebcore during static initialization. This happens in the
@@ -262,6 +261,16 @@ final class WebViewCore {
      */
     protected boolean jsUnload(String url, String message) {
         return mCallbackProxy.onJsBeforeUnload(url, message);
+    }
+
+    /**
+     *
+     * Callback to notify that a JavaScript execution timeout has occured.
+     * @return True if the JavaScript execution should be interrupted. False
+     *         will continue the execution.
+     */
+    protected boolean jsInterrupt() {
+        return mCallbackProxy.onJsTimeout();
     }
 
     //-------------------------------------------------------------------------

@@ -33,7 +33,7 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
     private static final boolean DBG = true;
     private ITelephonyRegistry mRegistry;
 
-    /*package*/ 
+    /*package*/
     DefaultPhoneNotifier() {
         mRegistry = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
@@ -94,7 +94,7 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
 
     public void notifyDataConnection(Phone sender, String reason) {
         try {
-            mRegistry.notifyDataConnection(convertDataState(sender.getDataConnectionState()), 
+            mRegistry.notifyDataConnection(convertDataState(sender.getDataConnectionState()),
                     sender.isDataConnectivityPossible(), reason, sender.getActiveApn(),
                     sender.getInterfaceName(null));
         } catch (RemoteException ex) {
@@ -119,7 +119,7 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
             // system process is dead
         }
     }
-    
+
     private void log(String s) {
         Log.d(LOG_TAG, "[PhoneNotifier] " + s);
     }

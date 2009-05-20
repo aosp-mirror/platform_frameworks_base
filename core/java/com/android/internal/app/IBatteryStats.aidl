@@ -45,7 +45,10 @@ interface IBatteryStats {
     void noteFullWifiLockReleased(int uid);
     void noteScanWifiLockAcquired(int uid);
     void noteScanWifiLockReleased(int uid);
+    void noteWifiMulticastEnabled(int uid);
+    void noteWifiMulticastDisabled(int uid);
     void setOnBattery(boolean onBattery, int level);
+    void recordCurrentLevel(int level);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 }

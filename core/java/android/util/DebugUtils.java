@@ -43,8 +43,8 @@ public class DebugUtils {
      *
      * <p>This class is useful for debugging and logging purpose:</p>
      * <pre>
-     * if (Config.DEBUG) {
-     *   if (DebugUtils.isObjectSelected(childView) && Config.LOGV) {
+     * if (DEBUG) {
+     *   if (DebugUtils.isObjectSelected(childView) && LOGV_ENABLED) {
      *     Log.v(TAG, "Object " + childView + " logged!");
      *   }
      * }

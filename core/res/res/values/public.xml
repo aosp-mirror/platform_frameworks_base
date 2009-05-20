@@ -1085,4 +1085,28 @@
   <public type="integer" name="config_shortAnimTime" id="0x010e0000" />
   <public type="integer" name="config_mediumAnimTime" id="0x010e0001" />
   <public type="integer" name="config_longAnimTime" id="0x010e0002" />
+
+<!-- ===============================================================
+     Resources added in Donut.
+     =============================================================== -->
+  <eat-comment />
+
+   <public type="attr" name="tension" id="0x0101026a" />
+   <public type="attr" name="extraTension" id="0x0101026b" />
+   <public type="attr" name="density" id="0x0101026c" />
+   <public type="attr" name="searchSuggestThreshold" id="0x0101026d" />
+   <public type="attr" name="includeInGlobalSearch" id="0x0101026e" />
+   <public type="attr" name="onClick" id="0x0101026f" />
+   <public type="attr" name="targetSdkVersion" id="0x01010270" />
+   <public type="attr" name="maxSdkVersion" id="0x01010271" />
+   <public type="attr" name="testOnly" id="0x01010272" />
+
+   <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
+   <public type="anim" name="overshoot_interpolator" id="0x010a0008" />
+   <public type="anim" name="anticipate_overshoot_interpolator" id="0x010a0009" />
+   <public type="anim" name="bounce_interpolator" id="0x010a000a" />
+
+  <public type="drawable" name="stat_sys_vp_phone_call" id="0x0108022d" />
+  <public type="drawable" name="stat_sys_vp_phone_call_on_hold" id="0x0108022e" />
+
 </resources>

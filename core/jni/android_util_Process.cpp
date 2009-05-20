@@ -50,6 +50,16 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
+#define ENABLE_CGROUP_ERR_LOGGING 0
+
+/*
+ * List of cgroup names which map to ANDROID_TGROUP_ values in Thread.h
+ * and Process.java
+ * These names are used to construct the path to the cgroup control dir
+ */
+
+static const char *cgroup_names[] = { NULL, "bg_non_interactive", "fg_boost" };
+
 using namespace android;
 
 static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
@@ -72,6 +82,28 @@ static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
             break;
     }
 }
+
+static void signalExceptionForGroupError(JNIEnv* env, jobject obj, int err)
+{
+    switch (err) {
+        case EINVAL:
+            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+            break;
+        case ESRCH:
+            jniThrowException(env, "java/lang/IllegalArgumentException", "Given thread does not exist");
+            break;
+        case EPERM:
+            jniThrowException(env, "java/lang/SecurityException", "No permission to modify given thread");
+            break;
+        case EACCES:
+            jniThrowException(env, "java/lang/SecurityException", "No permission to set to given group");
+            break;
+        default:
+            jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
+            break;
+    }
+}
+
 
 static void fakeProcessEntry(void* arg)
 {
@@ -164,9 +196,55 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
     return -1;
 }
 
+static int add_pid_to_cgroup(int pid, int grp)
+{
+    FILE *fp;
+    char path[255];
+    int rc;
+
+    sprintf(path, "/dev/cpuctl/%s/tasks", (cgroup_names[grp] ? cgroup_names[grp] : ""));
+
+    if (!(fp = fopen(path, "w"))) {
+#if ENABLE_CGROUP_ERR_LOGGING
+        LOGW("Unable to open %s (%s)\n", path, strerror(errno));
+#endif
+        return -errno;
+    }
+
+    rc = fprintf(fp, "%d", pid);
+    fclose(fp);
+
+    if (rc < 0) {
+#if ENABLE_CGROUP_ERR_LOGGING
+        LOGW("Unable to move pid %d to cgroup %s (%s)\n", pid,
+             (cgroup_names[grp] ? cgroup_names[grp] : "<default>"),
+             strerror(errno));
+#endif
+    }
+
+    return (rc < 0) ? errno : 0;
+}
+
+void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
+{
+    if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
+        signalExceptionForGroupError(env, clazz, EINVAL);
+        return;
+    }
+
+    if (add_pid_to_cgroup(pid, grp))
+        signalExceptionForGroupError(env, clazz, errno);
+}
+
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
+    if (pri == ANDROID_PRIORITY_BACKGROUND) {
+        add_pid_to_cgroup(pid, ANDROID_TGROUP_BG_NONINTERACT);
+    } else if (getpriority(PRIO_PROCESS, pid) == ANDROID_PRIORITY_BACKGROUND) {
+        add_pid_to_cgroup(pid, ANDROID_TGROUP_DEFAULT);
+    }
+
     if (setpriority(PRIO_PROCESS, pid, pri) < 0) {
         signalExceptionForPriorityError(env, clazz, errno);
     }
@@ -516,39 +594,10 @@ enum {
     PROC_OUT_FLOAT = 0x4000,
 };
 
-jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
-        jstring file, jintArray format, jobjectArray outStrings,
-        jlongArray outLongs, jfloatArray outFloats)
+jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
+        char* buffer, jint startIndex, jint endIndex, jintArray format, 
+        jobjectArray outStrings, jlongArray outLongs, jfloatArray outFloats)
 {
-    if (file == NULL || format == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        return JNI_FALSE;
-    }
-    
-    const char* file8 = env->GetStringUTFChars(file, NULL);
-    if (file8 == NULL) {
-        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
-        return JNI_FALSE;
-    }
-    int fd = open(file8, O_RDONLY);
-    env->ReleaseStringUTFChars(file, file8);
-    
-    if (fd < 0) {
-        //LOGW("Unable to open process file: %s\n", file8);
-        return JNI_FALSE;
-    }
-    
-    char buffer[256];
-    const int len = read(fd, buffer, sizeof(buffer)-1);
-    close(fd);
-    
-    if (len < 0) {
-        //LOGW("Unable to open process file: %s fd=%d\n", file8, fd);
-        return JNI_FALSE;
-    }
-    buffer[len] = 0;
-    
-    //LOGI("Process file %s: %s\n", file8, buffer);
     
     const jsize NF = env->GetArrayLength(format);
     const jsize NS = outStrings ? env->GetArrayLength(outStrings) : 0;
@@ -575,7 +624,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         return JNI_FALSE;
     }
 
-    jsize i = 0;
+    jsize i = startIndex;
     jsize di = 0;
     
     jboolean res = JNI_TRUE;
@@ -587,30 +636,30 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         }
         const char term = (char)(mode&PROC_TERM_MASK);
         const jsize start = i;
-        if (i >= len) {
+        if (i >= endIndex) {
             res = JNI_FALSE;
             break;
         }
         
         jsize end = -1;
         if ((mode&PROC_PARENS) != 0) {
-            while (buffer[i] != ')' && i < len) {
+            while (buffer[i] != ')' && i < endIndex) {
                 i++;
             }
             end = i;
             i++;
         }
-        while (buffer[i] != term && i < len) {
+        while (buffer[i] != term && i < endIndex) {
             i++;
         }
         if (end < 0) {
             end = i;
         }
         
-        if (i < len) {
+        if (i < endIndex) {
             i++;
             if ((mode&PROC_COMBINE) != 0) {
-                while (buffer[i] == term && i < len) {
+                while (buffer[i] == term && i < endIndex) {
                     i++;
                 }
             }
@@ -647,6 +696,58 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     }
     
     return res;
+}
+
+jboolean android_os_Process_parseProcLine(JNIEnv* env, jobject clazz,
+        jbyteArray buffer, jint startIndex, jint endIndex, jintArray format, 
+        jobjectArray outStrings, jlongArray outLongs, jfloatArray outFloats)
+{
+        jbyte* bufferArray = env->GetByteArrayElements(buffer, NULL);
+
+        jboolean result = android_os_Process_parseProcLineArray(env, clazz, 
+                (char*) bufferArray, startIndex, endIndex, format, outStrings, 
+                outLongs, outFloats);
+                
+        env->ReleaseByteArrayElements(buffer, bufferArray, 0);
+        
+        return result;
+}
+
+jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
+        jstring file, jintArray format, jobjectArray outStrings,
+        jlongArray outLongs, jfloatArray outFloats)
+{
+    if (file == NULL || format == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        return JNI_FALSE;
+    }
+
+    const char* file8 = env->GetStringUTFChars(file, NULL);
+    if (file8 == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return JNI_FALSE;
+    }
+    int fd = open(file8, O_RDONLY);
+    env->ReleaseStringUTFChars(file, file8);
+    
+    if (fd < 0) {
+        //LOGW("Unable to open process file: %s\n", file8);
+        return JNI_FALSE;
+    }
+    
+    char buffer[256];
+    const int len = read(fd, buffer, sizeof(buffer)-1);
+    close(fd);
+    
+    if (len < 0) {
+        //LOGW("Unable to open process file: %s fd=%d\n", file8, fd);
+        return JNI_FALSE;
+    }
+    buffer[len] = 0;
+    
+    return android_os_Process_parseProcLineArray(env, clazz, buffer, 0, len, 
+            format, outStrings, outLongs, outFloats);
+    
 }
 
 void android_os_Process_setApplicationObject(JNIEnv* env, jobject clazz,
@@ -718,6 +819,7 @@ static const JNINativeMethod methods[] = {
     {"setThreadPriority",   "(II)V", (void*)android_os_Process_setThreadPriority},
     {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
+    {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
     {"setOomAdj",   "(II)Z", (void*)android_os_Process_setOomAdj},
     {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
     {"setUid", "(I)I", (void*)android_os_Process_setUid},
@@ -728,6 +830,7 @@ static const JNINativeMethod methods[] = {
     {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
     {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
     {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_readProcFile},
+    {"parseProcLine", "([BII[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_parseProcLine},
     {"getElapsedCpuTime", "()J", (void*)android_os_Process_getElapsedCpuTime},
     {"getPss", "(I)J", (void*)android_os_Process_getPss},
     //{"setApplicationObject", "(Landroid/os/IBinder;)V", (void*)android_os_Process_setApplicationObject},
@@ -746,4 +849,3 @@ int register_android_os_Process(JNIEnv* env)
         env, kProcessPathName,
         methods, NELEM(methods));
 }
-

@@ -433,7 +433,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private InputConnection mDefInputConnection;
     private InputConnectionWrapper mPublicInputConnection;
-    
+
+    private Runnable mClearScrollingCache;
+
     /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
@@ -982,18 +984,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mSelectedTop = 0;
         mSelectorRect.setEmpty();
         invalidate();
-    }
-    
-    /**
-     * The list is empty and we need to change the layout, so *really* clear everything out.
-     * @hide - for AutoCompleteTextView & SearchDialog only
-     */
-    /* package */ void resetListAndClearViews() {
-        rememberSyncState();
-        removeAllViewsInLayout();
-        mRecycler.clear();
-        mRecycler.setViewTypeCount(mAdapter.getViewTypeCount());
-        requestLayout();
     }
 
     @Override
@@ -1920,6 +1910,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // User clicked on whitespace, or stopped a fling. It is a scroll.
                     createScrollingCache();
                     mTouchMode = TOUCH_MODE_SCROLL;
+                    mMotionCorrection = 0;
                     motionPosition = findMotionRow(y);
                     reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                 }
@@ -2310,6 +2301,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             if (more) {
+                invalidate();
                 mLastFlingY = y;
                 post(this);
             } else {
@@ -2333,16 +2325,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void clearScrollingCache() {
-        if (mCachingStarted) {
-            setChildrenDrawnWithCacheEnabled(false);
-            if ((mPersistentDrawingCache & PERSISTENT_SCROLLING_CACHE) == 0) {
-                setChildrenDrawingCacheEnabled(false);
-            }
-            if (!isAlwaysDrawnWithCacheEnabled()) {
-                invalidate();
-            }
-            mCachingStarted = false;
+        if (mClearScrollingCache == null) {
+            mClearScrollingCache = new Runnable() {
+                public void run() {
+                    if (mCachingStarted) {
+                        mCachingStarted = false;
+                        setChildrenDrawnWithCacheEnabled(false);
+                        if ((mPersistentDrawingCache & PERSISTENT_SCROLLING_CACHE) == 0) {
+                            setChildrenDrawingCacheEnabled(false);
+                        }
+                        if (!isAlwaysDrawnWithCacheEnabled()) {
+                            invalidate();
+                        }
+                    }
+                }
+            };
         }
+        post(mClearScrollingCache);
     }
 
     /**
@@ -2799,7 +2798,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         final int[] xy = new int[2];
         getLocationOnScreen(xy);
-        // TODO: The 20 below should come from the theme and be expressed in dip
+        // TODO: The 20 below should come from the theme
         // TODO: And the gravity should be defined in the theme as well
         final int bottomGap = screenHeight - xy[1] - getHeight() + (int) (mDensityScale * 20);
         if (!mPopup.isShowing()) {
@@ -3191,7 +3190,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // Reclaim views on screen
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            AbsListView.LayoutParams lp = (AbsListView.LayoutParams)child.getLayoutParams();
+            AbsListView.LayoutParams lp = (AbsListView.LayoutParams) child.getLayoutParams();
             // Don't reclaim header or footer views, or views that should be ignored
             if (lp != null && mRecycler.shouldRecycleViewType(lp.viewType)) {
                 views.add(child);
@@ -3203,6 +3202,63 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         mRecycler.reclaimScrapViews(views);
         removeAllViewsInLayout();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected boolean onConsistencyCheck(int consistency) {
+        boolean result = super.onConsistencyCheck(consistency);
+
+        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
+
+        if (checkLayout) {
+            // The active recycler must be empty
+            final View[] activeViews = mRecycler.mActiveViews;
+            int count = activeViews.length;
+            for (int i = 0; i < count; i++) {
+                if (activeViews[i] != null) {
+                    result = false;
+                    android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                            "AbsListView " + this + " has a view in its active recycler: " +
+                                    activeViews[i]);
+                }
+            }
+
+            // All views in the recycler must NOT be on screen and must NOT have a parent
+            final ArrayList<View> scrap = mRecycler.mCurrentScrap;
+            if (!checkScrap(scrap)) result = false;
+            final ArrayList<View>[] scraps = mRecycler.mScrapViews;
+            count = scraps.length;
+            for (int i = 0; i < count; i++) {
+                if (!checkScrap(scraps[i])) result = false;
+            }
+        }
+
+        return result;
+    }
+
+    private boolean checkScrap(ArrayList<View> scrap) {
+        if (scrap == null) return true;
+        boolean result = true;
+
+        final int count = scrap.size();
+        for (int i = 0; i < count; i++) {
+            final View view = scrap.get(i);
+            if (view.getParent() != null) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
+                        " has a view in its scrap heap still attached to a parent: " + view);
+            }
+            if (indexOfChild(view) >= 0) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
+                        " has a view in its scrap heap that is also a direct child: " + view);
+            }
+        }
+
+        return result;
     }
 
     /**

@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
  * This class is used in conjunction with the {@link Listener} interface.
  */
 public final class GpsStatus {
-    private static final int NUM_SATELLITES = 32;
+    private static final int NUM_SATELLITES = 255;
 
     /* These package private values are modified by the LocationManager class */
     private int mTimeToFirstFix;

@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemProperties;
@@ -56,11 +57,13 @@ public class Resources {
     // Information about preloaded resources.  Note that they are not
     // protected by a lock, because while preloading in zygote we are all
     // single-threaded, and after that these are immutable.
-    private static final SparseArray<Drawable.ConstantState> mPreloadedDrawables
+    private static final SparseArray<Drawable.ConstantState> sPreloadedDrawables
             = new SparseArray<Drawable.ConstantState>();
     private static final SparseArray<ColorStateList> mPreloadedColorStateLists
             = new SparseArray<ColorStateList>();
     private static boolean mPreloaded;
+
+    private final SparseArray<Drawable.ConstantState> mPreloadedDrawables;
 
     /*package*/ final TypedValue mTmpValue = new TypedValue();
 
@@ -81,6 +84,22 @@ public class Resources {
     private final Configuration mConfiguration = new Configuration();
     /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
     PluralRules mPluralRule;
+
+    private static final SparseArray<Object> EMPTY_ARRAY = new SparseArray<Object>() {
+        @Override
+        public void put(int k, Object o) {
+            throw new UnsupportedOperationException();
+        }
+        @Override
+        public void append(int k, Object o) {
+            throw new UnsupportedOperationException();
+        }
+    };
+
+    @SuppressWarnings("unchecked")
+    private static <T> SparseArray<T> emptySparseArray() {
+        return (SparseArray<T>) EMPTY_ARRAY;
+    }
 
     /**
      * This exception is thrown by the resource APIs when a requested resource
@@ -107,11 +126,27 @@ public class Resources {
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
             Configuration config) {
+        this(assets, metrics, config, true);
+    }
+
+    /**
+     * Create a resource with an additional flag for preloaded
+     * drawable cache. Used by {@link ActivityThread}.
+     *
+     * @hide
+     */
+    public Resources(AssetManager assets, DisplayMetrics metrics,
+        Configuration config, boolean usePreloadedCache) {
         mAssets = assets;
         mConfiguration.setToDefaults();
         mMetrics.setToDefaults();
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
+        if (usePreloadedCache) {
+            mPreloadedDrawables = sPreloadedDrawables;
+        } else {
+            mPreloadedDrawables = emptySparseArray();
+        }
     }
 
     /**
@@ -1218,6 +1253,7 @@ public class Resources {
                 mMetrics.setTo(metrics);
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
+
             String locale = null;
             if (mConfiguration.locale != null) {
                 locale = mConfiguration.locale.getLanguage();
@@ -1653,7 +1689,7 @@ public class Resources {
             cs = dr.getConstantState();
             if (cs != null) {
                 if (mPreloading) {
-                    mPreloadedDrawables.put(key, cs);
+                    sPreloadedDrawables.put(key, cs);
                 } else {
                     synchronized (mTmpValue) {
                         //Log.i(TAG, "Saving cached drawable @ #" +
@@ -1883,6 +1919,6 @@ public class Resources {
         mMetrics.setToDefaults();
         updateConfiguration(null, null);
         mAssets.ensureStringBlocks();
+        mPreloadedDrawables = sPreloadedDrawables;
     }
 }
-

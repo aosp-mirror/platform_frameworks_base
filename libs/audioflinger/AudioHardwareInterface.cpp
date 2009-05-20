@@ -53,7 +53,7 @@ static const char* routeStrings[] =
     "EARPIECE ",
     "SPEAKER ",
     "BLUETOOTH ",
-    "HEADSET "
+    "HEADSET ",
     "BLUETOOTH_A2DP "
 };
 static const char* routeNone = "NONE";

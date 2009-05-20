@@ -77,7 +77,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
 import android.provider.Settings;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -137,7 +136,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean BLUR = true;
-    static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean localLOGV = DEBUG;
     
     static final int LOG_WM_NO_SURFACE_MEMORY = 31000;
     
@@ -179,6 +178,25 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
     static final int UPDATE_FOCUS_WILL_PLACE_SURFACES = 3;
+    
+    /** The minimum time between dispatching touch events. */
+    int mMinWaitTimeBetweenTouchEvents = 1000 / 35;
+
+    // Last touch event time
+    long mLastTouchEventTime = 0;
+    
+    // Last touch event type
+    int mLastTouchEventType = OTHER_EVENT;
+    
+    // Time to wait before calling useractivity again. This saves CPU usage
+    // when we get a flood of touch events.
+    static final int MIN_TIME_BETWEEN_USERACTIVITIES = 1000;
+
+    // Last time we call user activity
+    long mLastUserActivityCallTime = 0;
+
+    // Last time we updated battery stats 
+    long mLastBatteryStatsCallTime = 0;
     
     private static final String SYSTEM_SECURE = "ro.secure";
 
@@ -2023,7 +2041,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             wtoken.appFullscreen = fullscreen;
             wtoken.requestedOrientation = requestedOrientation;
             mAppTokens.add(addPos, wtoken);
-            if (Config.LOGV) Log.v(TAG, "Adding new app token: " + wtoken);
+            if (localLOGV) Log.v(TAG, "Adding new app token: " + wtoken);
             mTokenMap.put(token.asBinder(), wtoken);
             mTokenList.add(wtoken);
             
@@ -2079,13 +2097,16 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             int pos = mAppTokens.size() - 1;
             int curGroup = 0;
             int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+            boolean findingBehind = false;
             boolean haveGroup = false;
             boolean lastFullscreen = false;
             while (pos >= 0) {
                 AppWindowToken wtoken = mAppTokens.get(pos);
                 pos--;
-                // if we're about to tear down this window, don't use it for orientation
-                if (!wtoken.hidden && wtoken.hiddenRequested) {
+                // if we're about to tear down this window and not seek for
+                // the behind activity, don't use it for orientation
+                if (!findingBehind
+                        && (!wtoken.hidden && wtoken.hiddenRequested)) {
                     continue;
                 }
 
@@ -2109,10 +2130,12 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     }
                 }
                 int or = wtoken.requestedOrientation;
-                // If this application is fullscreen, then just take whatever
+                // If this application is fullscreen, and didn't explicitly say
+                // to use the orientation behind it, then just take whatever
                 // orientation it has and ignores whatever is under it.
                 lastFullscreen = wtoken.appFullscreen;
-                if (lastFullscreen) {
+                if (lastFullscreen 
+                        && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
                     return or;
                 }
                 // If this application has requested an explicit orientation,
@@ -2124,6 +2147,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         or == ActivityInfo.SCREEN_ORIENTATION_USER) {
                     return or;
                 }
+                findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
             }
             return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
@@ -3689,9 +3713,20 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     // -------------------------------------------------------------
 
     private final void wakeupIfNeeded(WindowState targetWin, int eventType) {
-        if (targetWin == null ||
-                targetWin.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
-            mPowerManager.userActivity(SystemClock.uptimeMillis(), false, eventType);
+        long curTime = SystemClock.uptimeMillis();
+
+        if (eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT) {
+            if (mLastTouchEventType == eventType &&
+                    (curTime - mLastUserActivityCallTime) < MIN_TIME_BETWEEN_USERACTIVITIES) {
+                return;
+            }
+            mLastUserActivityCallTime = curTime;
+            mLastTouchEventType = eventType;
+        }
+
+        if (targetWin == null
+                || targetWin.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD) {
+            mPowerManager.userActivity(curTime, false, eventType, false);
         }
     }
 
@@ -3759,7 +3794,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             // events in such a way, since this means the user is moving the
             // pointer without actually pressing down.  All other cases should
             // be atypical, so let's log them.
-            if (ev.getAction() != MotionEvent.ACTION_MOVE) {
+            if (action != MotionEvent.ACTION_MOVE) {
                 Log.w(TAG, "No window to dispatch pointer action " + ev.getAction());
             }
             if (qev != null) {
@@ -3846,7 +3881,39 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 return false;
             }
         } //end if target
-        
+
+        // TODO remove once we settle on a value or make it app specific
+        if (action == MotionEvent.ACTION_DOWN) {
+            int max_events_per_sec = 35;
+            try {
+                max_events_per_sec = Integer.parseInt(SystemProperties
+                        .get("windowsmgr.max_events_per_sec"));
+                if (max_events_per_sec < 1) {
+                    max_events_per_sec = 35;
+                }
+            } catch (NumberFormatException e) {
+            }
+            mMinWaitTimeBetweenTouchEvents = 1000 / max_events_per_sec;
+        }
+
+        /*
+         * Throttle events to minimize CPU usage when there's a flood of events
+         * e.g. constant contact with the screen
+         */
+        if (action == MotionEvent.ACTION_MOVE) {
+            long nextEventTime = mLastTouchEventTime + mMinWaitTimeBetweenTouchEvents;
+            long now = SystemClock.uptimeMillis();
+            if (now < nextEventTime) {
+                try {
+                    Thread.sleep(nextEventTime - now);
+                } catch (InterruptedException e) {
+                }
+                mLastTouchEventTime = nextEventTime;
+            } else {
+                mLastTouchEventTime = now;
+            }
+        }
+
         synchronized(mWindowMap) {
             if (qev != null && action == MotionEvent.ACTION_MOVE) {
                 mKeyWaiter.bindTargetWindowLocked(target,
@@ -4801,14 +4868,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     mPaused = true;
                 } else {
                     if (mLastWin == null) {
-                        if (Config.LOGI) Log.i(
-                            TAG, "Key dispatching not paused: no last window.");
+                        Log.i(TAG, "Key dispatching not paused: no last window.");
                     } else if (mFinished) {
-                        if (Config.LOGI) Log.i(
-                            TAG, "Key dispatching not paused: finished last key.");
+                        Log.i(TAG, "Key dispatching not paused: finished last key.");
                     } else {
-                        if (Config.LOGI) Log.i(
-                            TAG, "Key dispatching not paused: window in higher layer.");
+                        Log.i(TAG, "Key dispatching not paused: window in higher layer.");
                     }
                 }
                 */
@@ -4926,7 +4990,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     }
                     if ((actions & WindowManagerPolicy.ACTION_POKE_USER_ACTIVITY) != 0) {
                         mPowerManager.userActivity(event.when, false,
-                                LocalPowerManager.BUTTON_EVENT);
+                                LocalPowerManager.BUTTON_EVENT, false);
                     }
                     
                     if ((actions & WindowManagerPolicy.ACTION_PASS_TO_USER) != 0) {
@@ -5086,11 +5150,17 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                             eventType = LocalPowerManager.OTHER_EVENT;
                         }
                         try {
-                            mBatteryStats.noteInputEvent();
+                            long now = SystemClock.uptimeMillis();
+
+                            if ((now - mLastBatteryStatsCallTime)
+                                    >= MIN_TIME_BETWEEN_USERACTIVITIES) {
+                                mLastBatteryStatsCallTime = now;
+                                mBatteryStats.noteInputEvent();
+                            }
                         } catch (RemoteException e) {
                             // Ignore
                         }
-                        mPowerManager.userActivity(curTime, false, eventType);
+                        mPowerManager.userActivity(curTime, false, eventType, false);
                         switch (ev.classType) {
                             case RawInputEvent.CLASS_KEYBOARD:
                                 KeyEvent ke = (KeyEvent)ev.event;
@@ -5179,6 +5249,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         final IInputContext mInputContext;
         final int mUid;
         final int mPid;
+        final String mStringName;
         SurfaceSession mSurfaceSession;
         int mNumWindow = 0;
         boolean mClientDead = false;
@@ -5202,6 +5273,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             mInputContext = inputContext;
             mUid = Binder.getCallingUid();
             mPid = Binder.getCallingPid();
+            StringBuilder sb = new StringBuilder();
+            sb.append("Session{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(" uid ");
+            sb.append(mUid);
+            sb.append("}");
+            mStringName = sb.toString();
+            
             synchronized (mWindowMap) {
                 if (mInputMethodManager == null && mHaveInputMethods) {
                     IBinder b = ServiceManager.getService(
@@ -5381,20 +5460,24 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
         
         void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + this);
-            pw.println(prefix + "mNumWindow=" + mNumWindow
-                    + " mClientDead=" + mClientDead
-                    + " mSurfaceSession=" + mSurfaceSession);
-            pw.println(prefix + "mPendingPointerWindow=" + mPendingPointerWindow
-                    + " mPendingPointerMove=" + mPendingPointerMove);
-            pw.println(prefix + "mPendingTrackballWindow=" + mPendingTrackballWindow
-                    + " mPendingTrackballMove=" + mPendingTrackballMove);
+            pw.print(prefix); pw.print("mNumWindow="); pw.print(mNumWindow);
+                    pw.print(" mClientDead="); pw.print(mClientDead);
+                    pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
+            if (mPendingPointerWindow != null || mPendingPointerMove != null) {
+                pw.print(prefix);
+                        pw.print("mPendingPointerWindow="); pw.print(mPendingPointerWindow);
+                        pw.print(" mPendingPointerMove="); pw.println(mPendingPointerMove);
+            }
+            if (mPendingTrackballWindow != null || mPendingTrackballMove != null) {
+                pw.print(prefix);
+                        pw.print("mPendingTrackballWindow="); pw.print(mPendingTrackballWindow);
+                        pw.print(" mPendingTrackballMove="); pw.println(mPendingTrackballMove);
+            }
         }
 
         @Override
         public String toString() {
-            return "Session{"
-                + Integer.toHexString(System.identityHashCode(this)) + "}";
+            return mStringName;
         }
     }
 
@@ -6462,67 +6545,114 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + this);
-            pw.println(prefix + "mSession=" + mSession
-                  + " mClient=" + mClient.asBinder());
-            pw.println(prefix + "mAttrs=" + mAttrs);
-            pw.println(prefix + "mAttachedWindow=" + mAttachedWindow
-                    + " mLayoutAttached=" + mLayoutAttached
-                    + " mIsImWindow=" + mIsImWindow);
-            pw.println(prefix + "mBaseLayer=" + mBaseLayer
-                  + " mSubLayer=" + mSubLayer
-                  + " mAnimLayer=" + mLayer + "+"
-                  + (mTargetAppToken != null ? mTargetAppToken.animLayerAdjustment
-                          : (mAppToken != null ? mAppToken.animLayerAdjustment : 0))
-                  + "=" + mAnimLayer
-                  + " mLastLayer=" + mLastLayer);
-            pw.println(prefix + "mSurface=" + mSurface);
-            pw.println(prefix + "mToken=" + mToken);
-            pw.println(prefix + "mRootToken=" + mRootToken);
-            pw.println(prefix + "mAppToken=" + mAppToken);
-            pw.println(prefix + "mTargetAppToken=" + mTargetAppToken);
-            pw.println(prefix + "mViewVisibility=0x" + Integer.toHexString(mViewVisibility)
-                  + " mPolicyVisibility=" + mPolicyVisibility
-                  + " (after=" + mPolicyVisibilityAfterAnim
-                  + ") mAttachedHidden=" + mAttachedHidden
-                  + " mLastHidden=" + mLastHidden
-                  + " mHaveFrame=" + mHaveFrame);
-            pw.println(prefix + "Requested w=" + mRequestedWidth + " h=" + mRequestedHeight
-                  + " x=" + mReqXPos + " y=" + mReqYPos);
-            pw.println(prefix + "mGivenContentInsets=" + mGivenContentInsets.toShortString()
-                    + " mGivenVisibleInsets=" + mGivenVisibleInsets.toShortString()
-                    + " mTouchableInsets=" + mTouchableInsets
-                    + " pending=" + mGivenInsetsPending);
-            pw.println(prefix + "mShownFrame=" + mShownFrame.toShortString()
-                  + " last=" + mLastShownFrame.toShortString());
-            pw.println(prefix + "mFrame=" + mFrame.toShortString()
-                    + " last=" + mLastFrame.toShortString());
-            pw.println(prefix + "mContainingFrame=" + mContainingFrame.toShortString()
-                    + " mDisplayFrame=" + mDisplayFrame.toShortString());
-            pw.println(prefix + "mContentFrame=" + mContentFrame.toShortString()
-                    + " mVisibleFrame=" + mVisibleFrame.toShortString());
-            pw.println(prefix + "mContentInsets=" + mContentInsets.toShortString()
-                    + " last=" + mLastContentInsets.toShortString()
-                    + " mVisibleInsets=" + mVisibleInsets.toShortString()
-                    + " last=" + mLastVisibleInsets.toShortString());
-            pw.println(prefix + "mShownAlpha=" + mShownAlpha
-                  + " mAlpha=" + mAlpha + " mLastAlpha=" + mLastAlpha);
-            pw.println(prefix + "mAnimating=" + mAnimating
-                    + " mLocalAnimating=" + mLocalAnimating
-                    + " mAnimationIsEntrance=" + mAnimationIsEntrance
-                    + " mAnimation=" + mAnimation);
-            pw.println(prefix + "XForm: has=" + mHasTransformation
-                    + " " + mTransformation.toShortString());
-            pw.println(prefix + "mDrawPending=" + mDrawPending
-                  + " mCommitDrawPending=" + mCommitDrawPending
-                  + " mReadyToShow=" + mReadyToShow
-                  + " mHasDrawn=" + mHasDrawn);
-            pw.println(prefix + "mExiting=" + mExiting
-                    + " mRemoveOnExit=" + mRemoveOnExit
-                    + " mDestroying=" + mDestroying
-                    + " mRemoved=" + mRemoved);
-            pw.println(prefix + "mOrientationChanging=" + mOrientationChanging
-                    + " mAppFreezing=" + mAppFreezing);
+            StringBuilder sb = new StringBuilder(64);
+            
+            pw.print(prefix); pw.print("mSession="); pw.print(mSession);
+                    pw.print(" mClient="); pw.println(mClient.asBinder());
+            pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs);
+            if (mAttachedWindow != null || mLayoutAttached) {
+                pw.print(prefix); pw.print("mAttachedWindow="); pw.print(mAttachedWindow);
+                        pw.print(" mLayoutAttached="); pw.println(mLayoutAttached);
+            }
+            if (mIsImWindow) {
+                pw.print(prefix); pw.print("mIsImWindow="); pw.println(mIsImWindow);
+            }
+            pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
+                    pw.print(" mSubLayer="); pw.print(mSubLayer);
+                    pw.print(" mAnimLayer="); pw.print(mLayer); pw.print("+");
+                    pw.print((mTargetAppToken != null ? mTargetAppToken.animLayerAdjustment
+                          : (mAppToken != null ? mAppToken.animLayerAdjustment : 0)));
+                    pw.print("="); pw.print(mAnimLayer);
+                    pw.print(" mLastLayer="); pw.println(mLastLayer);
+            if (mSurface != null) {
+                pw.print(prefix); pw.print("mSurface="); pw.println(mSurface);
+            }
+            pw.print(prefix); pw.print("mToken="); pw.println(mToken);
+            pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
+            if (mAppToken != null) {
+                pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
+            }
+            if (mTargetAppToken != null) {
+                pw.print(prefix); pw.print("mTargetAppToken="); pw.println(mTargetAppToken);
+            }
+            pw.print(prefix); pw.print("mViewVisibility=0x");
+                    pw.print(Integer.toHexString(mViewVisibility));
+                    pw.print(" mLastHidden="); pw.print(mLastHidden);
+                    pw.print(" mHaveFrame="); pw.println(mHaveFrame);
+            if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || mAttachedHidden) {
+                pw.print(prefix); pw.print("mPolicyVisibility=");
+                        pw.print(mPolicyVisibility);
+                        pw.print(" mPolicyVisibilityAfterAnim=");
+                        pw.print(mPolicyVisibilityAfterAnim);
+                        pw.print(" mAttachedHidden="); pw.println(mAttachedHidden);
+            }
+            pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
+                    pw.print(" h="); pw.print(mRequestedHeight);
+                    pw.print(" x="); pw.print(mReqXPos);
+                    pw.print(" y="); pw.println(mReqYPos);
+            pw.print(prefix); pw.print("mGivenContentInsets=");
+                    mGivenContentInsets.printShortString(pw);
+                    pw.print(" mGivenVisibleInsets=");
+                    mGivenVisibleInsets.printShortString(pw);
+                    pw.println();
+            if (mTouchableInsets != 0 || mGivenInsetsPending) {
+                pw.print(prefix); pw.print("mTouchableInsets="); pw.print(mTouchableInsets);
+                        pw.print(" mGivenInsetsPending="); pw.println(mGivenInsetsPending);
+            }
+            pw.print(prefix); pw.print("mShownFrame=");
+                    mShownFrame.printShortString(pw);
+                    pw.print(" last="); mLastShownFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
+                    pw.print(" last="); mLastFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("mContainingFrame=");
+                    mContainingFrame.printShortString(pw);
+                    pw.print(" mDisplayFrame=");
+                    mDisplayFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("mContentFrame="); mContentFrame.printShortString(pw);
+                    pw.print(" mVisibleFrame="); mVisibleFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("mContentInsets="); mContentInsets.printShortString(pw);
+                    pw.print(" last="); mLastContentInsets.printShortString(pw);
+                    pw.print(" mVisibleInsets="); mVisibleInsets.printShortString(pw);
+                    pw.print(" last="); mLastVisibleInsets.printShortString(pw);
+                    pw.println();
+            if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {
+                pw.print(prefix); pw.print("mShownAlpha="); pw.print(mShownAlpha);
+                        pw.print(" mAlpha="); pw.print(mAlpha);
+                        pw.print(" mLastAlpha="); pw.println(mLastAlpha);
+            }
+            if (mAnimating || mLocalAnimating || mAnimationIsEntrance
+                    || mAnimation != null) {
+                pw.print(prefix); pw.print("mAnimating="); pw.print(mAnimating);
+                        pw.print(" mLocalAnimating="); pw.print(mLocalAnimating);
+                        pw.print(" mAnimationIsEntrance="); pw.print(mAnimationIsEntrance);
+                        pw.print(" mAnimation="); pw.println(mAnimation);
+            }
+            if (mHasTransformation || mHasLocalTransformation) {
+                pw.print(prefix); pw.print("XForm: has=");
+                        pw.print(mHasTransformation);
+                        pw.print(" hasLocal="); pw.print(mHasLocalTransformation);
+                        pw.print(" "); mTransformation.printShortString(pw);
+                        pw.println();
+            }
+            pw.print(prefix); pw.print("mDrawPending="); pw.print(mDrawPending);
+                    pw.print(" mCommitDrawPending="); pw.print(mCommitDrawPending);
+                    pw.print(" mReadyToShow="); pw.print(mReadyToShow);
+                    pw.print(" mHasDrawn="); pw.println(mHasDrawn);
+            if (mExiting || mRemoveOnExit || mDestroying || mRemoved) {
+                pw.print(prefix); pw.print("mExiting="); pw.print(mExiting);
+                        pw.print(" mRemoveOnExit="); pw.print(mRemoveOnExit);
+                        pw.print(" mDestroying="); pw.print(mDestroying);
+                        pw.print(" mRemoved="); pw.println(mRemoved);
+            }
+            if (mOrientationChanging || mAppFreezing) {
+                pw.print(prefix); pw.print("mOrientationChanging=");
+                        pw.print(mOrientationChanging);
+                        pw.print(" mAppFreezing="); pw.println(mAppFreezing);
+            }
         }
 
         @Override
@@ -6548,6 +6678,9 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         // not be removed when all windows are removed.
         final boolean explicit;
         
+        // For printing.
+        String stringName;
+        
         // If this is an AppWindowToken, this is non-null.
         AppWindowToken appWindowToken;
         
@@ -6570,18 +6703,23 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + this);
-            pw.println(prefix + "token=" + token);
-            pw.println(prefix + "windows=" + windows);
-            pw.println(prefix + "windowType=" + windowType + " hidden=" + hidden
-                    + " hasVisible=" + hasVisible);
+            pw.print(prefix); pw.print("token="); pw.println(token);
+            pw.print(prefix); pw.print("windows="); pw.println(windows);
+            pw.print(prefix); pw.print("windowType="); pw.print(windowType);
+                    pw.print(" hidden="); pw.print(hidden);
+                    pw.print(" hasVisible="); pw.println(hasVisible);
         }
 
         @Override
         public String toString() {
-            return "WindowToken{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " token=" + token + "}";
+            if (stringName == null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("WindowToken{");
+                sb.append(Integer.toHexString(System.identityHashCode(this)));
+                sb.append(" token="); sb.append(token); sb.append('}');
+                stringName = sb.toString();
+            }
+            return stringName;
         }
     };
 
@@ -6869,38 +7007,66 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         
         void dump(PrintWriter pw, String prefix) {
             super.dump(pw, prefix);
-            pw.println(prefix + "app=" + (appToken != null));
-            pw.println(prefix + "allAppWindows=" + allAppWindows);
-            pw.println(prefix + "groupId=" + groupId
-                    + " requestedOrientation=" + requestedOrientation);
-            pw.println(prefix + "hiddenRequested=" + hiddenRequested
-                    + " clientHidden=" + clientHidden
-                    + " willBeHidden=" + willBeHidden
-                    + " reportedVisible=" + reportedVisible);
-            pw.println(prefix + "paused=" + paused
-                    + " freezingScreen=" + freezingScreen);
-            pw.println(prefix + "numInterestingWindows=" + numInterestingWindows
-                    + " numDrawnWindows=" + numDrawnWindows
-                    + " inPendingTransaction=" + inPendingTransaction
-                    + " allDrawn=" + allDrawn);
-            pw.println(prefix + "animating=" + animating
-                    + " animation=" + animation);
-            pw.println(prefix + "animLayerAdjustment=" + animLayerAdjustment
-                    + " transformation=" + transformation.toShortString());
-            pw.println(prefix + "startingData=" + startingData
-                    + " removed=" + removed
-                    + " firstWindowDrawn=" + firstWindowDrawn);
-            pw.println(prefix + "startingWindow=" + startingWindow
-                    + " startingView=" + startingView
-                    + " startingDisplayed=" + startingDisplayed
-                    + " startingMoved" + startingMoved);
+            if (appToken != null) {
+                pw.print(prefix); pw.println("app=true");
+            }
+            if (allAppWindows.size() > 0) {
+                pw.print(prefix); pw.print("allAppWindows="); pw.println(allAppWindows);
+            }
+            pw.print(prefix); pw.print("groupId="); pw.print(groupId);
+                    pw.print(" requestedOrientation="); pw.println(requestedOrientation);
+            pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
+                    pw.print(" clientHidden="); pw.print(clientHidden);
+                    pw.print(" willBeHidden="); pw.print(willBeHidden);
+                    pw.print(" reportedVisible="); pw.println(reportedVisible);
+            if (paused || freezingScreen) {
+                pw.print(prefix); pw.print("paused="); pw.print(paused);
+                        pw.print(" freezingScreen="); pw.println(freezingScreen);
+            }
+            if (numInterestingWindows != 0 || numDrawnWindows != 0
+                    || inPendingTransaction || allDrawn) {
+                pw.print(prefix); pw.print("numInterestingWindows=");
+                        pw.print(numInterestingWindows);
+                        pw.print(" numDrawnWindows="); pw.print(numDrawnWindows);
+                        pw.print(" inPendingTransaction="); pw.print(inPendingTransaction);
+                        pw.print(" allDrawn="); pw.println(allDrawn);
+            }
+            if (animating || animation != null) {
+                pw.print(prefix); pw.print("animating="); pw.print(animating);
+                        pw.print(" animation="); pw.println(animation);
+            }
+            if (animLayerAdjustment != 0) {
+                pw.print(prefix); pw.print("animLayerAdjustment="); pw.println(animLayerAdjustment);
+            }
+            if (hasTransformation) {
+                pw.print(prefix); pw.print("hasTransformation="); pw.print(hasTransformation);
+                        pw.print(" transformation="); transformation.printShortString(pw);
+                        pw.println();
+            }
+            if (startingData != null || removed || firstWindowDrawn) {
+                pw.print(prefix); pw.print("startingData="); pw.print(startingData);
+                        pw.print(" removed="); pw.print(removed);
+                        pw.print(" firstWindowDrawn="); pw.println(firstWindowDrawn);
+            }
+            if (startingWindow != null || startingView != null
+                    || startingDisplayed || startingMoved) {
+                pw.print(prefix); pw.print("startingWindow="); pw.print(startingWindow);
+                        pw.print(" startingView="); pw.print(startingView);
+                        pw.print(" startingDisplayed="); pw.print(startingDisplayed);
+                        pw.print(" startingMoved"); pw.println(startingMoved);
+            }
         }
 
         @Override
         public String toString() {
-            return "AppWindowToken{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " token=" + token + "}";
+            if (stringName == null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("AppWindowToken{");
+                sb.append(Integer.toHexString(System.identityHashCode(this)));
+                sb.append(" token="); sb.append(token); sb.append('}');
+                stringName = sb.toString();
+            }
+            return stringName;
         }
     }
     
@@ -7423,7 +7589,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     private boolean mInLayout = false;
     private final void performLayoutAndPlaceSurfacesLocked() {
         if (mInLayout) {
-            if (Config.DEBUG) {
+            if (DEBUG) {
                 throw new RuntimeException("Recursive call!");
             }
             Log.w(TAG, "performLayoutAndPlaceSurfacesLocked called while in layout");
@@ -8656,7 +8822,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             pw.println("Current Window Manager state:");
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
-                pw.println("  Window #" + i + ":");
+                pw.print("  Window #"); pw.print(i); pw.print(' ');
+                        pw.print(w); pw.println(":");
                 w.dump(pw, "    ");
             }
             if (mInputMethodDialogs.size() > 0) {
@@ -8664,7 +8831,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println("  Input method dialogs:");
                 for (int i=mInputMethodDialogs.size()-1; i>=0; i--) {
                     WindowState w = mInputMethodDialogs.get(i);
-                    pw.println("  IM Dialog #" + i + ": " + w);
+                    pw.print("  IM Dialog #"); pw.print(i); pw.print(": "); pw.println(w);
                 }
             }
             if (mPendingRemove.size() > 0) {
@@ -8672,7 +8839,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println("  Remove pending for:");
                 for (int i=mPendingRemove.size()-1; i>=0; i--) {
                     WindowState w = mPendingRemove.get(i);
-                    pw.println("  Remove #" + i + ":");
+                    pw.print("  Remove #"); pw.print(i); pw.print(' ');
+                            pw.print(w); pw.println(":");
                     w.dump(pw, "    ");
                 }
             }
@@ -8681,7 +8849,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println("  Windows force removing:");
                 for (int i=mForceRemoves.size()-1; i>=0; i--) {
                     WindowState w = mForceRemoves.get(i);
-                    pw.println("  Removing #" + i + ":");
+                    pw.print("  Removing #"); pw.print(i); pw.print(' ');
+                            pw.print(w); pw.println(":");
                     w.dump(pw, "    ");
                 }
             }
@@ -8690,7 +8859,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println("  Windows waiting to destroy their surface:");
                 for (int i=mDestroySurface.size()-1; i>=0; i--) {
                     WindowState w = mDestroySurface.get(i);
-                    pw.println("  Destroy #" + i + ":");
+                    pw.print("  Destroy #"); pw.print(i); pw.print(' ');
+                            pw.print(w); pw.println(":");
                     w.dump(pw, "    ");
                 }
             }
@@ -8699,7 +8869,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println("  Windows losing focus:");
                 for (int i=mLosingFocus.size()-1; i>=0; i--) {
                     WindowState w = mLosingFocus.get(i);
-                    pw.println("  Losing #" + i + ":");
+                    pw.print("  Losing #"); pw.print(i); pw.print(' ');
+                            pw.print(w); pw.println(":");
                     w.dump(pw, "    ");
                 }
             }
@@ -8709,7 +8880,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 Iterator<Session> it = mSessions.iterator();
                 while (it.hasNext()) {
                     Session s = it.next();
-                    pw.println("  Session " + s);
+                    pw.print("  Session "); pw.print(s); pw.println(':');
                     s.dump(pw, "    ");
                 }
             }
@@ -8719,7 +8890,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 Iterator<WindowToken> it = mTokenMap.values().iterator();
                 while (it.hasNext()) {
                     WindowToken token = it.next();
-                    pw.println("  Token " + token.token);
+                    pw.print("  Token "); pw.print(token.token); pw.println(':');
                     token.dump(pw, "    ");
                 }
             }
@@ -8727,14 +8898,16 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println(" ");
                 pw.println("  Window token list:");
                 for (int i=0; i<mTokenList.size(); i++) {
-                    pw.println("  WindowToken #" + i + ": " + mTokenList.get(i));
+                    pw.print("  #"); pw.print(i); pw.print(": ");
+                            pw.println(mTokenList.get(i));
                 }
             }
             if (mAppTokens.size() > 0) {
                 pw.println(" ");
                 pw.println("  Application tokens in Z order:");
                 for (int i=mAppTokens.size()-1; i>=0; i--) {
-                    pw.println("  AppWindowToken #" + i + ": " + mAppTokens.get(i));
+                    pw.print("  App #"); pw.print(i); pw.print(": ");
+                            pw.println(mAppTokens.get(i));
                 }
             }
             if (mFinishedStarting.size() > 0) {
@@ -8742,7 +8915,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println("  Finishing start of application tokens:");
                 for (int i=mFinishedStarting.size()-1; i>=0; i--) {
                     WindowToken token = mFinishedStarting.get(i);
-                    pw.println("  Finish Starting App Token #" + i + ":");
+                    pw.print("  Finished Starting #"); pw.print(i);
+                            pw.print(' '); pw.print(token); pw.println(':');
                     token.dump(pw, "    ");
                 }
             }
@@ -8751,7 +8925,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println("  Exiting tokens:");
                 for (int i=mExitingTokens.size()-1; i>=0; i--) {
                     WindowToken token = mExitingTokens.get(i);
-                    pw.println("  Exiting Token #" + i + ":");
+                    pw.print("  Exiting #"); pw.print(i);
+                            pw.print(' '); pw.print(token); pw.println(':');
                     token.dump(pw, "    ");
                 }
             }
@@ -8760,54 +8935,59 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 pw.println("  Exiting application tokens:");
                 for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
                     WindowToken token = mExitingAppTokens.get(i);
-                    pw.println("  Exiting App Token #" + i + ":");
+                    pw.print("  Exiting App #"); pw.print(i);
+                            pw.print(' '); pw.print(token); pw.println(':');
                     token.dump(pw, "    ");
                 }
             }
             pw.println(" ");
-            pw.println("  mCurrentFocus=" + mCurrentFocus);
-            pw.println("  mLastFocus=" + mLastFocus);
-            pw.println("  mFocusedApp=" + mFocusedApp);
-            pw.println("  mInputMethodTarget=" + mInputMethodTarget);
-            pw.println("  mInputMethodWindow=" + mInputMethodWindow);
-            pw.println("  mInTouchMode=" + mInTouchMode);
-            pw.println("  mSystemBooted=" + mSystemBooted
-                    + " mDisplayEnabled=" + mDisplayEnabled);
-            pw.println("  mLayoutNeeded=" + mLayoutNeeded
-                    + " mBlurShown=" + mBlurShown);
-            pw.println("  mDimShown=" + mDimShown
-                    + " current=" + mDimCurrentAlpha
-                    + " target=" + mDimTargetAlpha
-                    + " delta=" + mDimDeltaPerMs
-                    + " lastAnimTime=" + mLastDimAnimTime);
-            pw.println("  mInputMethodAnimLayerAdjustment="
-                    + mInputMethodAnimLayerAdjustment);
-            pw.println("  mDisplayFrozen=" + mDisplayFrozen
-                    + " mWindowsFreezingScreen=" + mWindowsFreezingScreen
-                    + " mAppsFreezingScreen=" + mAppsFreezingScreen);
-            pw.println("  mRotation=" + mRotation
-                    + ", mForcedAppOrientation=" + mForcedAppOrientation
-                    + ", mRequestedRotation=" + mRequestedRotation);
-            pw.println("  mAnimationPending=" + mAnimationPending
-                    + " mWindowAnimationScale=" + mWindowAnimationScale
-                    + " mTransitionWindowAnimationScale=" + mTransitionAnimationScale);
-            pw.println("  mNextAppTransition=0x"
-                    + Integer.toHexString(mNextAppTransition)
-                    + ", mAppTransitionReady=" + mAppTransitionReady
-                    + ", mAppTransitionTimeout=" + mAppTransitionTimeout);
-            pw.println("  mStartingIconInTransition=" + mStartingIconInTransition
-                    + ", mSkipAppTransitionAnimation=" + mSkipAppTransitionAnimation);
-            pw.println("  mOpeningApps=" + mOpeningApps);
-                    pw.println("  mClosingApps=" + mClosingApps);
-            pw.println("  DisplayWidth=" + mDisplay.getWidth()
-                    + " DisplayHeight=" + mDisplay.getHeight());
+            pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
+            pw.print("  mLastFocus="); pw.println(mLastFocus);
+            pw.print("  mFocusedApp="); pw.println(mFocusedApp);
+            pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
+            pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
+            pw.print("  mInTouchMode="); pw.println(mInTouchMode);
+            pw.print("  mSystemBooted="); pw.print(mSystemBooted);
+                    pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
+            pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
+                    pw.print(" mBlurShown="); pw.println(mBlurShown);
+            pw.print("  mDimShown="); pw.print(mDimShown);
+                    pw.print(" current="); pw.print(mDimCurrentAlpha);
+                    pw.print(" target="); pw.print(mDimTargetAlpha);
+                    pw.print(" delta="); pw.print(mDimDeltaPerMs);
+                    pw.print(" lastAnimTime="); pw.println(mLastDimAnimTime);
+            pw.print("  mInputMethodAnimLayerAdjustment=");
+                    pw.println(mInputMethodAnimLayerAdjustment);
+            pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
+                    pw.print(" mWindowsFreezingScreen="); pw.print(mWindowsFreezingScreen);
+                    pw.print(" mAppsFreezingScreen="); pw.println(mAppsFreezingScreen);
+            pw.print("  mRotation="); pw.print(mRotation);
+                    pw.print(", mForcedAppOrientation="); pw.print(mForcedAppOrientation);
+                    pw.print(", mRequestedRotation="); pw.println(mRequestedRotation);
+            pw.print("  mAnimationPending="); pw.print(mAnimationPending);
+                    pw.print(" mWindowAnimationScale="); pw.print(mWindowAnimationScale);
+                    pw.print(" mTransitionWindowAnimationScale="); pw.println(mTransitionAnimationScale);
+            pw.print("  mNextAppTransition=0x");
+                    pw.print(Integer.toHexString(mNextAppTransition));
+                    pw.print(", mAppTransitionReady="); pw.print(mAppTransitionReady);
+                    pw.print(", mAppTransitionTimeout="); pw.println( mAppTransitionTimeout);
+            pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
+                    pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
+            if (mOpeningApps.size() > 0) {
+                pw.print("  mOpeningApps="); pw.println(mOpeningApps);
+            }
+            if (mClosingApps.size() > 0) {
+                pw.print("  mClosingApps="); pw.println(mClosingApps);
+            }
+            pw.print("  DisplayWidth="); pw.print(mDisplay.getWidth());
+                    pw.print(" DisplayHeight="); pw.println(mDisplay.getHeight());
             pw.println("  KeyWaiter state:");
-            pw.println("    mLastWin=" + mKeyWaiter.mLastWin
-                    + " mLastBinder=" + mKeyWaiter.mLastBinder);
-            pw.println("    mFinished=" + mKeyWaiter.mFinished
-                    + " mGotFirstWindow=" + mKeyWaiter.mGotFirstWindow
-                    + " mEventDispatching=" + mKeyWaiter.mEventDispatching
-                    + " mTimeToSwitch=" + mKeyWaiter.mTimeToSwitch);
+            pw.print("    mLastWin="); pw.print(mKeyWaiter.mLastWin);
+                    pw.print(" mLastBinder="); pw.println(mKeyWaiter.mLastBinder);
+            pw.print("    mFinished="); pw.print(mKeyWaiter.mFinished);
+                    pw.print(" mGotFirstWindow="); pw.print(mKeyWaiter.mGotFirstWindow);
+                    pw.print(" mEventDispatching="); pw.print(mKeyWaiter.mEventDispatching);
+                    pw.print(" mTimeToSwitch="); pw.println(mKeyWaiter.mTimeToSwitch);
         }
     }
 

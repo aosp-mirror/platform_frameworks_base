@@ -527,6 +527,16 @@ public abstract class Context {
     public abstract int getWallpaperDesiredMinimumHeight();
 
     /**
+     * Returns the scale in which the application will be drawn on the
+     * screen. This is usually 1.0f if the application supports the device's
+     * resolution/density. This will be 1.5f, for example, if the application
+     * that supports only 160 density runs on 240 density screen.
+     *
+     * @hide
+     */
+    public abstract float getApplicationScale();
+
+    /**
      * Change the current system wallpaper to a bitmap.  The given bitmap is
      * converted to a PNG and stored as the wallpaper.  On success, the intent
      * {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
@@ -1257,6 +1267,15 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String APPWIDGET_SERVICE = "appwidget";
+    
+    /**
+     * Use with {@link #getSystemService} to retrieve an
+     * {@blink android.backup.IBackupManager IBackupManager} for communicating
+     * with the backup mechanism.
+     *
+     * @see #getSystemService
+     */
+    public static final String BACKUP_SERVICE = "backup";
     
     /**
      * Determine whether the given permission is allowed for a particular

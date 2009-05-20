@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Parcel;
@@ -113,7 +114,11 @@ public class ListView extends AbsListView {
 
     Drawable mDivider;
     int mDividerHeight;
+
+    private boolean mIsCacheColorOpaque;
+    private boolean mDividerIsOpaque;
     private boolean mClipDivider;
+
     private boolean mHeaderDividersEnabled;
     private boolean mFooterDividersEnabled;
 
@@ -460,8 +465,28 @@ public class ListView extends AbsListView {
      */
     @Override
     void resetList() {
+        // The parent's resetList() will remove all views from the layout so we need to
+        // cleanup the state of our footers and headers
+        clearRecycledState(mHeaderViewInfos);
+        clearRecycledState(mFooterViewInfos);
+
         super.resetList();
+
         mLayoutMode = LAYOUT_NORMAL;
+    }
+
+    private void clearRecycledState(ArrayList<FixedViewInfo> infos) {
+        if (infos != null) {
+            final int count = infos.size();
+
+            for (int i = 0; i < count; i++) {
+                final View child = infos.get(i).view;
+                final LayoutParams p = (LayoutParams) child.getLayoutParams();
+                if (p != null) {
+                    p.recycledHeaderFooter = false;
+                }
+            }
+        }
     }
 
     /**
@@ -1394,6 +1419,11 @@ public class ListView extends AbsListView {
                 resetList();
                 invokeOnItemScrollListener();
                 return;
+            } else if (mItemCount != mAdapter.getCount()) {
+                throw new IllegalStateException("The content of the adapter has changed but "
+                        + "ListView did not receive a notification. Make sure the content of "
+                        + "your adapter is not modified from a background thread, but only "
+                        + "from the UI thread.");
             }
 
             setSelectedPositionInt(mNextSelectedPosition);
@@ -2751,6 +2781,20 @@ public class ListView extends AbsListView {
         return mItemsCanFocus;
     }
 
+    /**
+     * @hide Pending API council approval.
+     */
+    @Override
+    public boolean isOpaque() {
+        return (mCachingStarted && mIsCacheColorOpaque && mDividerIsOpaque) || super.isOpaque();
+    }
+
+    @Override
+    public void setCacheColorHint(int color) {
+        mIsCacheColorOpaque = (color >>> 24) == 0xFF;
+        super.setCacheColorHint(color);
+    }
+
     @Override
     protected void dispatchDraw(Canvas canvas) {
         // Draw the dividers
@@ -2872,6 +2916,7 @@ public class ListView extends AbsListView {
             mClipDivider = false;
         }
         mDivider = divider;
+        mDividerIsOpaque = divider == null || divider.getOpacity() == PixelFormat.OPAQUE;
         requestLayoutIfNecessary();
     }
 
@@ -3212,6 +3257,29 @@ public class ListView extends AbsListView {
             return mCheckStates;
         }
         return null;
+    }
+
+    /**
+     * Returns the set of checked items ids. The result is only valid if
+     * the choice mode has not been set to {@link #CHOICE_MODE_SINGLE}.
+     *
+     * @return A new array which contains the id of each checked item in the list.
+     */
+    public long[] getCheckItemIds() {
+        if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null && mAdapter != null) {
+            final SparseBooleanArray states = mCheckStates;
+            final int count = states.size();
+            final long[] ids = new long[count];
+            final ListAdapter adapter = mAdapter;
+
+            for (int i = 0; i < count; i++) {
+                ids[i]= adapter.getItemId(states.keyAt(i));
+            }
+
+            return ids;
+        }
+
+        return new long[0];
     }
 
     /**

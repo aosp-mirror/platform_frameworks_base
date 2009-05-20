@@ -130,25 +130,35 @@ public class ToneGenerator
      */
     public static final int TONE_DTMF_D = 15;
     /**
-     * Call supervisory tone, Dial tone: 425Hz, continuous
-     * 
+     * Call supervisory tone, Dial tone:
+     *      CEPT:           425Hz, continuous
+     *      ANSI (IS-95):   350Hz+440Hz, continuous
+     *      JAPAN:          400Hz, continuous
+     *
      * @see #ToneGenerator(int, int)
      */
     public static final int TONE_SUP_DIAL = 16;
     /**
-     * Call supervisory tone, Busy: 425Hz, 500ms ON, 500ms OFF...
-     * 
+     * Call supervisory tone, Busy:
+     *      CEPT:           425Hz, 500ms ON, 500ms OFF...
+     *      ANSI (IS-95):   480Hz+620Hz, 500ms ON, 500ms OFF...
+     *      JAPAN:          400Hz, 500ms ON, 500ms OFF...
+     *
      * @see #ToneGenerator(int, int)
      */
     public static final int TONE_SUP_BUSY = 17;
     /**
-     * Call supervisory tone, Congestion: 425Hz, 200ms ON, 200ms OFF...
+     * Call supervisory tone, Congestion:
+     *      CEPT, JAPAN:    425Hz, 200ms ON, 200ms OFF...
+     *      ANSI (IS-95):   480Hz+620Hz, 250ms ON, 250ms OFF...
      * 
      * @see #ToneGenerator(int, int)
      */
     public static final int TONE_SUP_CONGESTION = 18;
     /**
-     * Call supervisory tone, Radio path acknowlegment : 425Hz, 200ms ON
+     * Call supervisory tone, Radio path acknowlegment :
+     *      CEPT, ANSI:    425Hz, 200ms ON
+     *      JAPAN:         400Hz, 1s ON, 2s OFF...
      * 
      * @see #ToneGenerator(int, int)
      */
@@ -166,13 +176,17 @@ public class ToneGenerator
      */
     public static final int TONE_SUP_ERROR = 21;
     /**
-     * Call supervisory tone, Call Waiting: 425Hz, 200ms ON, 600ms OFF, 200ms ON, 3s OFF...
+     * Call supervisory tone, Call Waiting:
+     *      CEPT, JAPAN:    425Hz, 200ms ON, 600ms OFF, 200ms ON, 3s OFF...
+     *      ANSI (IS-95):   440 Hz, 300 ms ON, 9.7 s OFF, (100 ms ON, 100 ms OFF, 100 ms ON, 9.7s OFF ...)
      * 
      * @see #ToneGenerator(int, int)
      */
     public static final int TONE_SUP_CALL_WAITING = 22;
     /**
-     * Call supervisory tone, Ring Tone: 425Hz, 1s ON, 4s OFF...
+     * Call supervisory tone, Ring Tone:
+     *      CEPT, JAPAN:    425Hz, 1s ON, 4s OFF...
+     *      ANSI (IS-95):   440Hz + 480Hz, 2s ON, 4s OFF...
      * 
      * @see #ToneGenerator(int, int)
      */
@@ -207,6 +221,37 @@ public class ToneGenerator
      * @see #ToneGenerator(int, int)
      */
     public static final int TONE_PROP_BEEP2 = 28;
+    /**
+     * Call supervisory tone (IS-95), intercept tone: alternating 440 Hz and 620 Hz tones, each on for 250 ms
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_SUP_INTERCEPT = 29;
+    /**
+     * Call supervisory tone (IS-95), abbreviated intercept: intercept tone limited to 4 seconds
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_SUP_INTERCEPT_ABBREV = 30;
+    /**
+     * Call supervisory tone (IS-95), abbreviated congestion: congestion tone limited to 4 seconds
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_SUP_CONGESTION_ABBREV = 31;
+    /**
+     * Call supervisory tone (IS-95), confirm tone: a 350 Hz tone added to a 440 Hz tone repeated 3 times in a 100 ms on, 100 ms off cycle
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_SUP_CONFIRM = 32;
+    /**
+     * Call supervisory tone (IS-95), pip tone: four bursts of 480 Hz tone (0.1 s on, 0.1 s off).
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_SUP_PIP = 33;
+
 
     /** Maximum volume, for use with {@link #ToneGenerator(int,int)} */
     public static final int MAX_VOLUME = AudioSystem.MAX_VOLUME;
@@ -258,6 +303,11 @@ public class ToneGenerator
      * <li>{@link #TONE_PROP_NACK}
      * <li>{@link #TONE_PROP_PROMPT}
      * <li>{@link #TONE_PROP_BEEP2}
+     * <li>{@link #TONE_SUP_INTERCEPT}
+     * <li>{@link #TONE_SUP_INTERCEPT_ABBREV}
+     * <li>{@link #TONE_SUP_CONGESTION_ABBREV}
+     * <li>{@link #TONE_SUP_CONFIRM}
+     * <li>{@link #TONE_SUP_PIP}
      * </ul>
      * @see #ToneGenerator(int, int)
     */

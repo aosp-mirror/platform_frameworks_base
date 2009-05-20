@@ -63,6 +63,23 @@ namespace android {
 #define FRAME_CALLBACK_FLAG_CAMERA                   0x05
 #define FRAME_CALLBACK_FLAG_BARCODE_SCANNER          0x07
 
+// msgType in notifyCallback function
+enum {
+    CAMERA_MSG_ERROR,
+    CAMERA_MSG_SHUTTER,
+    CAMERA_MSG_FOCUS,
+    CAMERA_MSG_ZOOM
+};
+
+// msgType in dataCallback function
+enum {
+    CAMERA_MSG_PREVIEW_FRAME,
+    CAMERA_MSG_VIDEO_FRAME,
+    CAMERA_MSG_POSTVIEW_FRAME,
+    CAMERA_MSG_RAW_IMAGE,
+    CAMERA_MSG_COMPRESSED_IMAGE
+};
+
 class ICameraService;
 class ICamera;
 class Surface;
@@ -78,8 +95,7 @@ class Camera : public BnCameraClient, public IBinder::DeathRecipient
 {
 public:
             // construct a camera client from an existing remote
-            Camera(const sp<ICamera>& camera);
-
+    static  sp<Camera>  create(const sp<ICamera>& camera);
     static  sp<Camera>  connect();
                         ~Camera();
             void        init();
@@ -137,13 +153,8 @@ public:
             void        setAutoFocusCallback(autofocus_callback cb, void *cookie);
 
     // ICameraClient interface
-    virtual void        shutterCallback();
-    virtual void        rawCallback(const sp<IMemory>& picture);
-    virtual void        jpegCallback(const sp<IMemory>& picture);
-    virtual void        previewCallback(const sp<IMemory>& frame);
-    virtual void        errorCallback(status_t error);
-    virtual void        autoFocusCallback(bool focused);
-    virtual void        recordingCallback(const sp<IMemory>& frame);
+    virtual void        notifyCallback(int32_t msgType, int32_t ext, int32_t ext2);
+    virtual void        dataCallback(int32_t msgType, const sp<IMemory>& dataPtr);
 
     sp<ICamera>         remote();
 

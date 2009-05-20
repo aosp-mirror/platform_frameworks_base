@@ -16,8 +16,8 @@
 
 package com.android.internal.telephony.gsm.stk;
 
-import com.android.internal.telephony.gsm.GsmAlphabet;
-import com.android.internal.telephony.gsm.SimUtils;
+import com.android.internal.telephony.GsmAlphabet;
+import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.gsm.stk.Duration.TimeUnit;
 
 import java.io.UnsupportedEncodingException;
@@ -117,7 +117,7 @@ abstract class ValueParser {
 
             try {
                 int id = rawValue[valueIndex] & 0xff;
-                String text = SimUtils.adnStringFieldToString(rawValue,
+                String text = IccUtils.adnStringFieldToString(rawValue,
                         valueIndex + 1, textLen);
                 item = new Item(id, text);
             } catch (IndexOutOfBoundsException e) {
@@ -278,7 +278,7 @@ abstract class ValueParser {
         int length = ctlv.getLength();
         if (length != 0) {
             try {
-                return SimUtils.adnStringFieldToString(rawValue, valueIndex,
+                return IccUtils.adnStringFieldToString(rawValue, valueIndex,
                         length);
             } catch (IndexOutOfBoundsException e) {
                 throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);

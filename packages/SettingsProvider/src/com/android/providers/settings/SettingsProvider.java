@@ -244,6 +244,72 @@ public class SettingsProvider extends ContentProvider {
         return values.length;
     }
 
+    /*
+     * Used to parse changes to the value of Settings.Secure.LOCATION_PROVIDERS_ALLOWED.
+     * This setting contains a list of the currently enabled location providers.
+     * But helper functions in android.providers.Settings can enable or disable
+     * a single provider by using a "+" or "-" prefix before the provider name.
+     */
+    private boolean parseProviderList(Uri url, ContentValues initialValues) {
+        String value = initialValues.getAsString(Settings.Secure.VALUE);
+        String newProviders = null;
+        if (value != null && value.length() > 1) {
+            char prefix = value.charAt(0);
+            if (prefix == '+' || prefix == '-') {
+                // skip prefix
+                value = value.substring(1);
+
+                // read list of enabled providers into "providers"
+                String providers = "";
+                String[] columns = {Settings.Secure.VALUE};
+                String where = Settings.Secure.NAME + "=\'" + Settings.Secure.LOCATION_PROVIDERS_ALLOWED + "\'";
+                Cursor cursor = query(url, columns, where, null, null);
+                if (cursor != null && cursor.getCount() == 1) {
+                    try {
+                        cursor.moveToFirst();
+                        providers = cursor.getString(0);
+                    } finally {
+                        cursor.close();
+                    }
+                }
+
+                int index = providers.indexOf(value);
+                int end = index + value.length();
+                // check for commas to avoid matching on partial string
+                if (index > 0 && providers.charAt(index - 1) != ',') index = -1;
+                if (end < providers.length() && providers.charAt(end) != ',') index = -1;
+
+                if (prefix == '+' && index < 0) {
+                    // append the provider to the list if not present
+                    if (providers.length() == 0) {
+                        newProviders = value;
+                    } else {
+                        newProviders = providers + ',' + value;
+                    }
+                } else if (prefix == '-' && index >= 0) {
+                    // remove the provider from the list if present
+                    // remove leading and trailing commas
+                    if (index > 0) index--;
+                    if (end < providers.length()) end++;
+
+                    newProviders = providers.substring(0, index);
+                    if (end < providers.length()) {
+                        newProviders += providers.substring(end);
+                    }
+                } else {
+                    // nothing changed, so no need to update the database
+                    return false;
+                }
+
+                if (newProviders != null) {
+                    initialValues.put(Settings.Secure.VALUE, newProviders);
+                }
+            }
+        }
+        
+        return true;
+    }
+
     @Override
     public Uri insert(Uri url, ContentValues initialValues) {
         SqlArguments args = new SqlArguments(url);
@@ -251,6 +317,13 @@ public class SettingsProvider extends ContentProvider {
             return null;
         }
         checkWritePermissions(args);
+
+        // Special case LOCATION_PROVIDERS_ALLOWED.
+        // Support enabling/disabling a single provider (using "+" or "-" prefix)
+        String name = initialValues.getAsString(Settings.Secure.NAME);
+        if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
+            if (!parseProviderList(url, initialValues)) return null;
+        }
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final long rowId = db.insert(args.table, null, initialValues);

@@ -508,6 +508,9 @@ import java.util.Set;
  *     <li> {@link #ACTION_PACKAGE_DATA_CLEARED}
  *     <li> {@link #ACTION_UID_REMOVED}
  *     <li> {@link #ACTION_BATTERY_CHANGED}
+ *     <li> {@link #ACTION_POWER_CONNECTED}
+ *     <li> {@link #ACTION_POWER_DISCONNECTED} 
+ *     <li> {@link #ACTION_SHUTDOWN} 
  * </ul>
  *
  * <h3>Standard Categories</h3>
@@ -1045,6 +1048,17 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SEARCH_LONG_PRESS = "android.intent.action.SEARCH_LONG_PRESS";
 
+    /**
+     * Activity Action: The user pressed the "Report" button in the crash/ANR dialog.
+     * This intent is delivered to the package which installed the application, usually
+     * the Market.
+     * <p>Input: No data is specified. The bug report is passed in using
+     * an {@link #EXTRA_BUG_REPORT} field.
+     * <p>Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
@@ -1249,6 +1263,33 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
+    /**
+     * Broadcast Action:  External power has been connected to the device.
+     * This is intended for applications that wish to register specifically to this notification.
+     * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
+     * stay active to receive this notification.  This action can be used to implement actions
+     * that wait until power is available to trigger.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_CONNECTED = "android.intent.action.ACTION_POWER_CONNECTED";
+    /**
+     * Broadcast Action:  External power has been removed from the device.
+     * This is intended for applications that wish to register specifically to this notification.
+     * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
+     * stay active to receive this notification.  This action can be used to implement actions
+     * that wait until power is available to trigger. 
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";    
+    /**
+     * Broadcast Action:  Device is shutting down.
+     * This is broadcast when the device is being shut down (completely turned
+     * off, not sleeping).  Once the broadcast is complete, the final shutdown
+     * will proceed and all unsaved data lost.  Apps will not normally need
+     * to handle this, since the forground activity will be paused as well.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";    
     /**
      * Broadcast Action:  Indicates low memory condition on the device
      */
@@ -1750,6 +1791,24 @@ public class Intent implements Parcelable {
      * delivered.
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
+    
+    /**
+     * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
+     * the bug report.
+     * 
+     * @hide
+     */
+    public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
+
+    /**
+     * Used as a string extra field when sending an intent to PackageInstaller to install a 
+     * package. Specifies the installer package name; this package will receive the
+     * {@link #ACTION_APP_ERROR} intent.
+     * 
+     * @hide
+     */
+    public static final String EXTRA_INSTALLER_PACKAGE_NAME 
+            = "android.intent.extra.INSTALLER_PACKAGE_NAME";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -1910,7 +1969,7 @@ public class Intent implements Parcelable {
     /**
      * If set, this marks a point in the task's activity stack that should
      * be cleared when the task is reset.  That is, the next time the task
-     * is broad to the foreground with
+     * is brought to the foreground with
      * {@link #FLAG_ACTIVITY_RESET_TASK_IF_NEEDED} (typically as a result of
      * the user re-launching it from home), this activity and all on top of
      * it will be finished so that the user does not return to them, but
@@ -4370,12 +4429,35 @@ public class Intent implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder   b = new StringBuilder();
+        StringBuilder   b = new StringBuilder(128);
 
-        b.append("Intent {");
-        if (mAction != null) b.append(" action=").append(mAction);
+        b.append("Intent { ");
+        toShortString(b, true, true);
+        b.append(" }");
+
+        return b.toString();
+    }
+
+    /** @hide */
+    public String toShortString(boolean comp, boolean extras) {
+        StringBuilder   b = new StringBuilder(128);
+        toShortString(b, comp, extras);
+        return b.toString();
+    }
+    
+    /** @hide */
+    public void toShortString(StringBuilder b, boolean comp, boolean extras) {
+        boolean first = true;
+        if (mAction != null) {
+            b.append("act=").append(mAction);
+            first = false;
+        }
         if (mCategories != null) {
-            b.append(" categories={");
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("cat=[");
             Iterator<String> i = mCategories.iterator();
             boolean didone = false;
             while (i.hasNext()) {
@@ -4383,20 +4465,48 @@ public class Intent implements Parcelable {
                 didone = true;
                 b.append(i.next());
             }
-            b.append("}");
+            b.append("]");
         }
-        if (mData != null) b.append(" data=").append(mData);
-        if (mType != null) b.append(" type=").append(mType);
-        if (mFlags != 0) b.append(" flags=0x").append(Integer.toHexString(mFlags));
-        if (mComponent != null) b.append(" comp=").append(mComponent.toShortString());
-        if (mExtras != null) b.append(" (has extras)");
-        b.append(" }");
-
-        return b.toString();
+        if (mData != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("dat=").append(mData);
+        }
+        if (mType != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("typ=").append(mType);
+        }
+        if (mFlags != 0) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("flg=0x").append(Integer.toHexString(mFlags));
+        }
+        if (comp && mComponent != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("cmp=").append(mComponent.flattenToShortString());
+        }
+        if (extras && mExtras != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("(has extras)");
+        }
     }
 
     public String toURI() {
-        StringBuilder uri = new StringBuilder(mData != null ? mData.toString() : "");
+        StringBuilder uri = new StringBuilder(128);
+        if (mData != null) uri.append(mData.toString());
 
         uri.append("#Intent;");
 

@@ -25,11 +25,11 @@
     <string name="ellipsis">"..."</string>
     <string name="emptyPhoneNumber">"(沒有電話號碼)"</string>
     <string name="unknownName">"(未知的)"</string>
-    <string name="defaultVoiceMailAlphaTag">"語音信箱"</string>
+    <string name="defaultVoiceMailAlphaTag">"語音留言"</string>
     <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
     <string name="mmiError">"連線發生問題或錯誤的 MMI 碼。"</string>
-    <string name="serviceEnabled">"服務已啟動。"</string>
-    <string name="serviceEnabledFor">"已啟動服務："</string>
+    <string name="serviceEnabled">"服務已啟用。"</string>
+    <string name="serviceEnabledFor">"已啟用服務："</string>
     <string name="serviceDisabled">"服務已停用。"</string>
     <string name="serviceRegistered">"註冊成功。"</string>
     <string name="serviceErased">"清除成功。"</string>
@@ -41,29 +41,24 @@
     <string name="invalidPin">"輸入 4~8 個數字的 PIN。"</string>
     <string name="needPuk">"SIM 卡的 PUK 已鎖定。請輸入 PUK 碼解除鎖定。"</string>
     <string name="needPuk2">"請輸入 PUK2 以解鎖 SIM 卡。"</string>
-    <string name="ClipMmi">"來電號碼"</string>
-    <string name="ClirMmi">"發話號碼"</string>
-    <string name="CfMmi">"通話指定轉接"</string>
-    <string name="CwMmi">"話中插接"</string>
+    <string name="ClipMmi">"來電顯示"</string>
+    <string name="ClirMmi">"本機號碼"</string>
+    <string name="CfMmi">"來電轉接"</string>
+    <string name="CwMmi">"來電待接"</string>
     <string name="BaMmi">"通話限制"</string>
     <string name="PwdMmi">"變更密碼"</string>
     <string name="PinMmi">"PIN 已變更"</string>
-    <string name="CLIRDefaultOnNextCallOn">"預設不顯示本機號碼，下一通也不顯示。"</string>
+    <string name="CLIRDefaultOnNextCallOn">"預設不顯示本機號碼，下一通電話也不顯示。"</string>
     <string name="CLIRDefaultOnNextCallOff">"預設不顯示本機號碼，但下一通電話顯示。"</string>
-    <string name="CLIRDefaultOffNextCallOn">"預設顯示本機號碼，但下一通不顯示。"</string>
-    <string name="CLIRDefaultOffNextCallOff">"預設顯示本機號碼，下一通也顯示。"</string>
-    <string name="serviceNotProvisioned">"服務未設定完成。"</string>
-    <string name="CLIRPermanent">"本機號碼設定無法變更。"</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="CLIRDefaultOffNextCallOn">"預設顯示本機號碼，但下一通電話不顯示。"</string>
+    <string name="CLIRDefaultOffNextCallOff">"預設顯示本機號碼，下一通電話也繼續顯示。"</string>
+    <string name="serviceNotProvisioned">"無法提供此服務。"</string>
+    <string name="CLIRPermanent">"本機號碼顯示設定無法變更。"</string>
+    <string name="RestrictedChangedTitle">"受限存取已變更"</string>
+    <string name="RestrictedOnData">"已封鎖資料傳輸服務。"</string>
+    <string name="RestrictedOnEmergency">"已封鎖緊急服務。"</string>
+    <string name="RestrictedOnNormal">"已封鎖語音/SMS 服務。"</string>
+    <string name="RestrictedOnAll">"已封鎖所有語音/SMS 服務。"</string>
     <string name="serviceClassVoice">"語音"</string>
     <string name="serviceClassData">"資料"</string>
     <string name="serviceClassFAX">"傳真"</string>
@@ -95,7 +90,7 @@
     <string name="httpErrorTooManyRequests">"太多執行要求。請稍後再試一次。"</string>
     <string name="contentServiceSync">"同步處理"</string>
     <string name="contentServiceSyncNotificationTitle">"同步處理"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc">"太多 <xliff:g id="CONTENT_TYPE">%s</xliff:g> 要刪除。"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"同時刪除太多 <xliff:g id="CONTENT_TYPE">%s</xliff:g>。"</string>
     <string name="low_memory">"手機儲存空間已滿！請刪除一些檔案增加空間。"</string>
     <string name="me">"我"</string>
     <string name="power_dialog">"電話選項"</string>
@@ -112,7 +107,7 @@
     <string name="global_action_power_off">"關機"</string>
     <string name="global_action_toggle_silent_mode">"靜音模式"</string>
     <string name="global_action_silent_mode_on_status">"音效已關閉"</string>
-    <string name="global_action_silent_mode_off_status">"聲音已開啟"</string>
+    <string name="global_action_silent_mode_off_status">"音效已開啟"</string>
     <string name="global_actions_toggle_airplane_mode">"飛航模式"</string>
     <string name="global_actions_airplane_mode_on_status">"飛航模式為 [開啟]"</string>
     <string name="global_actions_airplane_mode_off_status">"飛航模式為 [關閉]"</string>
@@ -123,7 +118,7 @@
     <string name="permgrouplab_messages">"您的簡訊"</string>
     <string name="permgroupdesc_messages">"讀取編輯 SMS、電子郵件與其他簡訊。"</string>
     <string name="permgrouplab_personalInfo">"您的個人資訊"</string>
-    <string name="permgroupdesc_personalInfo">"直接存取手機上的通訊錄與行事曆。"</string>
+    <string name="permgroupdesc_personalInfo">"直接存取手機上的聯絡人與日曆。"</string>
     <string name="permgrouplab_location">"您的位置"</string>
     <string name="permgroupdesc_location">"監視實際位置"</string>
     <string name="permgrouplab_network">"網路通訊"</string>
@@ -142,28 +137,28 @@
     <string name="permdesc_statusBar">"允許應用程式停用狀態列或新增、移除系統圖示。"</string>
     <string name="permlab_expandStatusBar">"展開/收攏狀態列"</string>
     <string name="permdesc_expandStatusBar">"允許應用程式展開或收攏狀態列。"</string>
-    <string name="permlab_processOutgoingCalls">"攔截發話"</string>
-    <string name="permdesc_processOutgoingCalls">"允許應用程式撥打電話、變更撥號號碼。惡意程式可能會以此監控，轉向或阻擋發話。"</string>
+    <string name="permlab_processOutgoingCalls">"攔截撥出電話"</string>
+    <string name="permdesc_processOutgoingCalls">"允許應用程式處理撥出電話及變更撥號。請注意：惡意程式可能藉以監控，轉接或阻擋電話撥出。"</string>
     <string name="permlab_receiveSms">"接收 SMS"</string>
-    <string name="permdesc_receiveSms">"允許應用程式接收、處理 SMS 簡訊。惡意程式可使用此功能監控簡訊或在您讀取前擅自刪除。"</string>
+    <string name="permdesc_receiveSms">"允許應用程式接收、處理 SMS 簡訊。請注意：惡意程式可能使用此功能監控簡訊或在您讀取前擅自刪除。"</string>
     <string name="permlab_receiveMms">"接收 MMS"</string>
-    <string name="permdesc_receiveMms">"允許應用程式接收、處理 MMS 簡訊。惡意程式可使用此功能監控簡訊或在您讀取前擅自刪除。"</string>
+    <string name="permdesc_receiveMms">"允許應用程式接收、處理 MMS 簡訊。請注意：惡意程式可能使用此功能監控簡訊或在您讀取前擅自刪除。"</string>
     <string name="permlab_sendSms">"傳送 SMS 簡訊"</string>
-    <string name="permdesc_sendSms">"允許應用程式傳送 SMS 簡訊。惡意程式可能會擅自傳送簡訊，增加您的花費。"</string>
+    <string name="permdesc_sendSms">"允許應用程式傳送 SMS 簡訊。請注意：惡意程式可能會擅自傳送簡訊，增加您的支出。"</string>
     <string name="permlab_readSms">"讀取 SMS 或 MMS"</string>
-    <string name="permdesc_readSms">"允許應用程式讀取手機或 SIM 卡上的 SMS 簡訊。惡意程式可能會利用此功能讀取您的機密簡訊。"</string>
+    <string name="permdesc_readSms">"允許應用程式讀取手機或 SIM 卡上的 SMS 簡訊。請注意：惡意程式可能會利用此功能讀取您的機密簡訊。"</string>
     <string name="permlab_writeSms">"編輯 SMS 或 MMS"</string>
-    <string name="permdesc_writeSms">"允許應用程式編輯 SMS 簡訊，存入手機或 SIM 卡。惡意程式可能會刪除您的簡訊。"</string>
+    <string name="permdesc_writeSms">"允許應用程式編輯 SMS 簡訊，存入手機或 SIM 卡。請注意：惡意程式可能會刪除您的簡訊。"</string>
     <string name="permlab_receiveWapPush">"接收 WAP"</string>
-    <string name="permdesc_receiveWapPush">"允許應用程式接收、處理 WAP 簡訊。惡意程式可使用此功能監控簡訊或在您讀取前擅自刪除。"</string>
+    <string name="permdesc_receiveWapPush">"允許應用程式為其他程式開啟偵錯功能。請注意：惡意程式可能利用此功能終止其他應用程式。"</string>
     <string name="permlab_getTasks">"取得執行中應用程式"</string>
-    <string name="permdesc_getTasks">"允許應用程式取得最近執行任務的資訊。惡意程式可利用此功能找出其他應用程式的隱私資訊。"</string>
+    <string name="permdesc_getTasks">"允許應用程式取得最近執行任務的資訊。請注意：惡意程式可能利用此功能找出其他應用程式的隱私資訊。"</string>
     <string name="permlab_reorderTasks">"重新安排執行中的應用程式"</string>
-    <string name="permdesc_reorderTasks">"允許應用程式將任務移至前端與背景處理。惡意程式可使用此功能將自己強制拉到前端。"</string>
-    <string name="permlab_setDebugApp">"啟動應用程式除錯"</string>
-    <string name="permdesc_setDebugApp">"允許應用程式為其他程式開啟除錯功能。惡意程式可利用此功能終止其他應用程式。"</string>
+    <string name="permdesc_reorderTasks">"允許應用程式將工作移至前端或背景作業。請注意：惡意程式可能使用此功能自行把自己拉到前端。"</string>
+    <string name="permlab_setDebugApp">"啟用應用程式偵錯"</string>
+    <string name="permdesc_setDebugApp">"允許應用程式為其他程式開啟偵錯功能。請注意：惡意程式可利用此功能終止其他應用程式。"</string>
     <string name="permlab_changeConfiguration">"變更介面設定"</string>
-    <string name="permdesc_changeConfiguration">"允許應用程式變更目前設定，例如：地區或字型大小。"</string>
+    <string name="permdesc_changeConfiguration">"允許應用程式變更目前設定，例如：地區設定或字型大小。"</string>
     <string name="permlab_restartPackages">"重新啟動其他應用程式"</string>
     <string name="permdesc_restartPackages">"允許應用程式強制重新啟動其他應用程式。"</string>
     <string name="permlab_setProcessForeground">"保持已停止狀態"</string>
@@ -171,36 +166,36 @@
     <string name="permlab_forceBack">"強制關閉應用程式"</string>
     <string name="permdesc_forceBack">"允許應用程式強制關閉在前端運作的活動並返回。一般應用程式不需要此功能。"</string>
     <string name="permlab_dump">"接收系統內部狀態"</string>
-    <string name="permdesc_dump">"允許應用程式取得系統內部狀態。惡意程式可利用此功能，取得他們應該不需要的私人、安全資料。"</string>
+    <string name="permdesc_dump">"允許應用程式取得系統內部狀態。請注意：惡意程式可能利用此功能，不當取得私人或安全性資料。"</string>
     <string name="permlab_addSystemService">"發行低階服務"</string>
-    <string name="permdesc_addSystemService">"允許應用程式發行自有低階系統服務。惡意程式可利用此功能綁架系統或偷取、竄改資料內容。"</string>
+    <string name="permdesc_addSystemService">"允許應用程式發行自有低階系統服務。請注意：惡意程式可能利用此功能綁架系統或偷取、竄改資料內容。"</string>
     <string name="permlab_runSetActivityWatcher">"監視控制所有應用程式啟動狀態。"</string>
-    <string name="permdesc_runSetActivityWatcher">"允許應用程式監控管理系統啟動活動。惡意程式可能因此癱瘓整個系統。此權限只在開發時需要，一般手機使用不需要此權限。"</string>
+    <string name="permdesc_runSetActivityWatcher">"允許應用程式監控管理系統啟動活動。請注意：惡意程式可能因此癱瘓整個系統。此權限只在開發時需要，一般手機使用不需要此權限。"</string>
     <string name="permlab_broadcastPackageRemoved">"傳送程式已移除廣播"</string>
-    <string name="permdesc_broadcastPackageRemoved">"允許應用程式在程式被移除時，發送廣播通知。惡意程式可利用此功能，關閉其他正在執行的程式。"</string>
+    <string name="permdesc_broadcastPackageRemoved">"允許應用程式在其他應用程式被移除時發送通知。請注意：惡意程式可能利用此功能，關閉其他執行中的程式。"</string>
     <string name="permlab_broadcastSmsReceived">"傳送已接收 SMS 廣播"</string>
-    <string name="permdesc_broadcastSmsReceived">"允許應用程式收到 SMS 簡訊時，廣播收訊通知。惡意程式可利用此功能，偽造 SMS 簡訊。"</string>
+    <string name="permdesc_broadcastSmsReceived">"允許應用程式在收到 SMS 簡訊時發出通知。請注意：惡意程式可能利用此功能偽造 SMS 簡訊。"</string>
     <string name="permlab_broadcastWapPush">"送出「WAP PUSH 已接收」廣播"</string>
-    <string name="permdesc_broadcastWapPush">"允許應用程式收到 WAP PUSH 簡訊時，廣播收訊通知。惡意程式可利用此功能，偽造 MMS 簡訊回條或秘密更換網頁內容。"</string>
+    <string name="permdesc_broadcastWapPush">"允許應用程式在收到 WAP PUSH 簡訊時發送通知。請注意：惡意程式可能利用此功能，偽造 MMS 簡訊回條或秘密更換網頁內容。"</string>
     <string name="permlab_setProcessLimit">"執行程序限制數"</string>
     <string name="permdesc_setProcessLimit">"允許應用程式控制可使用的最大執行緒。一般應用程式不需要此功能。"</string>
     <string name="permlab_setAlwaysFinish">"關閉所有背景程式"</string>
     <string name="permdesc_setAlwaysFinish">"允許應用程式控制哪些活動在被移到背景執行時，儘速結束。一般應用程式不需要此功能。"</string>
     <string name="permlab_fotaUpdate">"自動安裝系統更新"</string>
-    <string name="permdesc_fotaUpdate">"允許應用程式接收系統更新擱置通知，並觸發安裝程序。惡意程式可使用未授權更新竄改系統，或干擾更新程序。"</string>
+    <string name="permdesc_fotaUpdate">"允許應用程式接收可安裝系統更新的通知，並啟動安裝。請注意：惡意程式可能透過未授權的更新竄改系統，或干擾更新程序。"</string>
     <string name="permlab_batteryStats">"編輯電池狀態"</string>
     <string name="permdesc_batteryStats">"允許修改電池狀態。一般應用程式不會使用此功能。"</string>
     <string name="permlab_internalSystemWindow">"顯示未授權視窗"</string>
     <string name="permdesc_internalSystemWindow">"允許內部系統使用介面建立視窗。一般應用程式不會使用此功能。"</string>
-    <string name="permlab_systemAlertWindow">"顯示系統警告"</string>
-    <string name="permdesc_systemAlertWindow">"允許應用程式顯示系統警告視窗。惡意程式可使用此功能接管手機螢幕。"</string>
+    <string name="permlab_systemAlertWindow">"顯示系統警示"</string>
+    <string name="permdesc_systemAlertWindow">"允許應用程式顯示系統警告視窗。請注意：惡意程式可使用此功能接管手機螢幕。"</string>
     <string name="permlab_setAnimationScale">"編輯全域動畫速度"</string>
     <string name="permdesc_setAnimationScale">"允許應用程式變更全域動畫速度 (更快或更慢)。"</string>
     <string name="permlab_manageAppTokens">"管理應用程式 token"</string>
     <string name="permdesc_manageAppTokens">"允許應用程式略過一般 Z-ordering，建立與管理自己的 token。一般應用程式不需要此功能。"</string>
-    <string name="permlab_injectEvents">"按下按鍵以及控制各按鈕"</string>
-    <string name="permdesc_injectEvents">"允許應用程式發送輸入事件 (按鍵等) 給其他應用程式。惡意程式可使用此功能接管手機。"</string>
-    <string name="permlab_readInputState">"錄製輸入的內容與動作"</string>
+    <string name="permlab_injectEvents">"按鍵及控制按鈕"</string>
+    <string name="permdesc_injectEvents">"允許應用程式發送輸入事件 (按鍵等) 給其他應用程式。請注意：惡意程式可能使用此功能接管手機。"</string>
+    <string name="permlab_readInputState">"記錄您的輸入內容與操作"</string>
     <string name="permdesc_readInputState">"允許應用程式在使用者操作其他程式時 (例如：輸入密碼)，仍可監看輸入的按鍵。一般應用程式應不需要此功能。"</string>
     <string name="permlab_bindInputMethod">"連結至輸入法"</string>
     <string name="permdesc_bindInputMethod">"允許擁有人連結至輸入法的最頂層介面。一般應用程式不需使用此選項。"</string>
@@ -211,7 +206,7 @@
     <string name="permlab_persistentActivity">"設定應用程式持續執行"</string>
     <string name="permdesc_persistentActivity">"允許應用程式持續執行，避免系統將它應用到其他程式。"</string>
     <string name="permlab_deletePackages">"刪除應用程式"</string>
-    <string name="permdesc_deletePackages">"允許應用程式刪除 Android 程式。惡意程式可利用此功能刪除重要應用程式。"</string>
+    <string name="permdesc_deletePackages">"允許應用程式刪除 Android 程式。請注意：惡意程式可能利用此功能刪除重要應用程式。"</string>
     <string name="permlab_clearAppUserData">"刪除其他應用程式資料"</string>
     <string name="permdesc_clearAppUserData">"允許應用程式清除使用者資料。"</string>
     <string name="permlab_deleteCacheFiles">"刪除其他應用程式快取"</string>
@@ -219,7 +214,7 @@
     <string name="permlab_getPackageSize">"估算應用程式占用的儲存空間"</string>
     <string name="permdesc_getPackageSize">"允許應用程式取得程式碼、資料與快取大小"</string>
     <string name="permlab_installPackages">"直接安裝應用程式"</string>
-    <string name="permdesc_installPackages">"允許應用程式安裝新的 Android 程式或更新。惡意程式可利用此功能新增具有高權限的程式。"</string>
+    <string name="permdesc_installPackages">"允許應用程式安裝新的 Android 程式或更新。請注意：惡意程式可能利用此功能新增具有極高權限的程式。"</string>
     <string name="permlab_clearAppCache">"刪除所有應用程式快取資料。"</string>
     <string name="permdesc_clearAppCache">"允許應用程式刪除快取目錄裡的檔案，釋放儲存空間。此操作通常受到系統程序嚴格限制。"</string>
     <string name="permlab_readLogs">"讀取系統記錄檔"</string>
@@ -227,11 +222,11 @@
     <string name="permlab_diagnostic">"讀寫 diag 擁有的資源"</string>
     <string name="permdesc_diagnostic">"允許應用程式讀寫 diag 群組的資源；例如：/dev 裡的檔案。這可能會影響系統穩定性與安全性。此功能僅供製造商或技術人員用於硬體規格偵測。"</string>
     <string name="permlab_changeComponentState">"啟用或停用應用程式元件"</string>
-    <string name="permdesc_changeComponentState">"允許應用程式變更是否啟用其他元件或應用程式。惡意程式可利用此功能，停用重要的手機功能。請在取得許可的狀態下小心使用，此功能可能導致應用程式元件無法使用、不一致或不穩定。"</string>
+    <string name="permdesc_changeComponentState">"允許應用程式變更是否啟用其他元件或應用程式。請注意：惡意程式可能利用此功能，停用重要的手機功能。由於此功能可能導致應用程式元件無法使用、不一致或不穩定，請小心斟酌授權。"</string>
     <string name="permlab_setPreferredApplications">"設定喜好的應用程式"</string>
-    <string name="permdesc_setPreferredApplications">"允許應用程式修改您偏好使用的應用程式。惡意程式可能依此秘密竄改執行的程式，偽造已存在的程式以收集私人資料。"</string>
+    <string name="permdesc_setPreferredApplications">"允許應用程式修改您偏好的應用程式。請注意：惡意程式可能藉以秘密竄改執行的程式，或偽造已存在的程式以收集私人資料。"</string>
     <string name="permlab_writeSettings">"編輯全域系統設定"</string>
-    <string name="permdesc_writeSettings">"允許應用程式修改系統設定。惡意程式可使用此功能中斷系統設定。"</string>
+    <string name="permdesc_writeSettings">"允許應用程式修改系統設定。請注意：惡意程式可能使用此功能損毀系統設定。"</string>
     <string name="permlab_writeSecureSettings">"編輯安全系統設定"</string>
     <string name="permdesc_writeSecureSettings">"允許應用程式修改系統的安全設定資料。一般應用程式不會使用此功能。"</string>
     <string name="permlab_writeGservices">"修改 Google 服務地圖"</string>
@@ -239,27 +234,27 @@
     <string name="permlab_receiveBootCompleted">"開機時自動啟用"</string>
     <string name="permdesc_receiveBootCompleted">"允許應用程式在開機後盡快啟動。此項設定會讓開機時間拉長，並允許應用程式持續執行，因此拖慢手機速度。"</string>
     <string name="permlab_broadcastSticky">"傳送附屬廣播"</string>
-    <string name="permdesc_broadcastSticky">"允許應用程式在廣播結束後，持續送出附屬廣播。惡意程式可利用此功能，佔據過多記憶體，讓手機變慢或不穩定。"</string>
+    <string name="permdesc_broadcastSticky">"允許應用程式傳送持久的廣播。請注意：惡意程式可能利用此功能來佔據過多記憶體，讓手機速度變慢或不穩定。"</string>
     <string name="permlab_readContacts">"讀取聯絡人資料"</string>
-    <string name="permdesc_readContacts">"允許應用程式讀取手機上所有聯絡人 (地址)。惡意程式可利用此功能將您的資料傳送給其他人。"</string>
+    <string name="permdesc_readContacts">"允許應用程式讀取手機上所有聯絡人 (地址)。請注意：惡意程式可能利用此功能將您的資料傳送給其他人。"</string>
     <string name="permlab_writeContacts">"輸入聯絡人資料"</string>
-    <string name="permdesc_writeContacts">"允許應用程式更改聯絡資訊 (地址)。惡意程式可利用此功能，清除或修改聯絡資料。"</string>
-    <string name="permlab_writeOwnerData">"輸入擁有者資料"</string>
-    <string name="permdesc_writeOwnerData">"允許應用程式更改手機擁有者資料。惡意程式可利用此功能，清除或修改擁有者資料。"</string>
-    <string name="permlab_readOwnerData">"讀取擁有者資料"</string>
-    <string name="permdesc_readOwnerData">"允許應用程式讀取手機擁有者資料。惡意程式可利用此功能讀取擁有者資料。"</string>
-    <string name="permlab_readCalendar">"讀取行事曆資料"</string>
-    <string name="permdesc_readCalendar">"允許應用程式讀取手機上所有行事曆行程。惡意程式可利用此功能將您的行事曆行程傳送給其他人。"</string>
-    <string name="permlab_writeCalendar">"寫入行事曆資料"</string>
-    <string name="permdesc_writeCalendar">"允許應用程式更改行事曆行程。惡意程式可利用此功能，清除或修改行事曆資料。"</string>
+    <string name="permdesc_writeContacts">"允許應用程式更改聯絡資訊 (地址)。請注意：惡意程式可能利用此功能，清除或修改聯絡資料。"</string>
+    <string name="permlab_writeOwnerData">"寫入持有者的資料"</string>
+    <string name="permdesc_writeOwnerData">"允許應用程式更改手機持有者的資料。請注意：惡意程式可能利用此功能，清除或修改持有者的資料。"</string>
+    <string name="permlab_readOwnerData">"讀取持有者的資料"</string>
+    <string name="permdesc_readOwnerData">"允許應用程式讀取手機持有者資料。請注意：惡意程式可能利用此功能讀取持有者的資料。"</string>
+    <string name="permlab_readCalendar">"讀取日曆資料"</string>
+    <string name="permdesc_readCalendar">"允許應用程式讀取手機上所有日曆資料。請注意：惡意程式可能利用此功能將您的日曆資料傳送給其他人。"</string>
+    <string name="permlab_writeCalendar">"寫入日曆資料"</string>
+    <string name="permdesc_writeCalendar">"允許應用程式編輯日曆資料。請注意：惡意程式可能利用此功能，清除或修改您的日曆資料。"</string>
     <string name="permlab_accessMockLocation">"模擬位置來源以供測試"</string>
-    <string name="permdesc_accessMockLocation">"建立模擬位置來源以供測試。惡意程式可利用此功能覆寫 GPS 或網路服務商回傳的位置及/或狀態。"</string>
-    <string name="permlab_accessLocationExtraCommands">"存取額外位置提供者命令"</string>
-    <string name="permdesc_accessLocationExtraCommands">"存取額外位置提供者命令。惡意程式可利用此功能干擾 GPS 或其他位置來源。"</string>
-    <string name="permlab_accessFineLocation">"良好的 (GPS) 位置"</string>
-    <string name="permdesc_accessFineLocation">"存取正確位置來源，例如：手機 GPS。惡意程式可使用此功能知道您的位置，並且可能額外消耗電力。"</string>
-    <string name="permlab_accessCoarseLocation">"大略位置 (以網路為基準)"</string>
-    <string name="permdesc_accessCoarseLocation">"接收粗略的位置來源 (例如：行動網路資料庫)，計算出目前大概位置。惡意程式可使用此功能得知您的所在地。"</string>
+    <string name="permdesc_accessMockLocation">"建立模擬位置來源以供測試。請注意：惡意程式可能利用此功能覆寫 GPS 或電信業者傳回的位置及/或狀態。"</string>
+    <string name="permlab_accessLocationExtraCommands">"接收額外的位置提供者指令"</string>
+    <string name="permdesc_accessLocationExtraCommands">"存取額外位置提供者命令。請注意：惡意程式可能利用此功能干擾 GPS 或其他位置來源。"</string>
+    <string name="permlab_accessFineLocation">"精確定位 (GPS)"</string>
+    <string name="permdesc_accessFineLocation">"接收精確的位置來源 (例如：手機 GPS)。請注意：惡意程式可能使用此功能得知您的位置，並可能消耗額外電源。"</string>
+    <string name="permlab_accessCoarseLocation">"約略位置 (以網路為基準)"</string>
+    <string name="permdesc_accessCoarseLocation">"接收約略的位置來源 (例如：行動網路資料庫)，計算出目前大概位置。請注意：惡意程式可能使用此功能得知您的所在地。"</string>
     <string name="permlab_accessSurfaceFlinger">"存取 SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger">"允許應用程式使用 SurfaceFlinger 低階功能。"</string>
     <string name="permlab_readFrameBuffer">"讀取框架緩衝"</string>
@@ -269,7 +264,7 @@
     <string name="permlab_recordAudio">"錄製音訊"</string>
     <string name="permdesc_recordAudio">"允許應用程式存取音訊錄製路徑。"</string>
     <string name="permlab_camera">"照相"</string>
-    <string name="permdesc_camera">"允許應用程式使用相機照相。此功能可讓應用程式隨時透過相機拍攝照片。"</string>
+    <string name="permdesc_camera">"允許應用程式使用相機拍照。此功能可讓應用程式隨時透過相機拍攝照片。"</string>
     <string name="permlab_brick">"永久停用電話"</string>
     <string name="permdesc_brick">"允許應用程式永久停用手機。此項操作非常危險。"</string>
     <string name="permlab_reboot">"強制重開機"</string>
@@ -278,16 +273,16 @@
     <string name="permdesc_mount_unmount_filesystems">"允許應用程式掛載/卸載抽取式儲存設備的檔案系統。"</string>
     <string name="permlab_mount_format_filesystems">"將外接式儲存裝置格式化"</string>
     <string name="permdesc_mount_format_filesystems">"允許應用程式將可移除式儲存裝置格式化。"</string>
-    <string name="permlab_vibrate">"控制震動器"</string>
-    <string name="permdesc_vibrate">"允許應用程式控制震動器。"</string>
+    <string name="permlab_vibrate">"控制震動"</string>
+    <string name="permdesc_vibrate">"允許應用程式控制震動。"</string>
     <string name="permlab_flashlight">"控制閃光燈"</string>
     <string name="permdesc_flashlight">"允許應用程式控制閃光燈。"</string>
     <string name="permlab_hardware_test">"測試硬體"</string>
     <string name="permdesc_hardware_test">"允許應用程式控制各種週邊設備，以供測試用。"</string>
     <string name="permlab_callPhone">"直接撥打電話號碼"</string>
-    <string name="permdesc_callPhone">"允許應用程式自行撥打電話。惡意程式可能會撥打其他電話，造成額外支出。但請注意此選項不允許應用程式撥打緊急電話號碼。"</string>
+    <string name="permdesc_callPhone">"允許應用程式自行撥打電話。請注意：惡意程式可能任意撥打電話，造成預期外的支出。但此選項並不允許應用程式撥打緊急電話號碼。"</string>
     <string name="permlab_callPrivileged">"直接撥打任何電話號碼"</string>
-    <string name="permdesc_callPrivileged">"允許應用程式自行撥打任何電話號碼，包括緊急電話號碼。惡意程式可利用此功能濫用緊急服務，撥打不需要或違法的電話。"</string>
+    <string name="permdesc_callPrivileged">"允許應用程式自行撥打任何電話號碼，包括緊急電話號碼。請注意：惡意程式可能利用此功能濫用緊急服務，撥打不必要或違法的電話。"</string>
     <string name="permlab_locationUpdates">"控制位置更新通知"</string>
     <string name="permdesc_locationUpdates">"允許啟用/停用無線通訊位置更新通知。一般應用程式不會使用此功能。"</string>
     <string name="permlab_checkinProperties">"存取登機選項"</string>
@@ -297,9 +292,9 @@
     <string name="permlab_modifyPhoneState">"修改手機狀態"</string>
     <string name="permdesc_modifyPhoneState">"允許應用程式控制電話功能。擁有此權限的程式可自行切換網路、開關無線通訊功能。"</string>
     <string name="permlab_readPhoneState">"讀取手機狀態"</string>
-    <string name="permdesc_readPhoneState">"允許應用程式存取裝置的電話功能。通話時，有此權限的應用程式可設定手機是否通話、撥出的號碼等等。"</string>
+    <string name="permdesc_readPhoneState">"允許應用程式存取裝置的電話功能。有此權限的應用程式可取得手機的號碼、是否在通話中，以及通話另一方的電話號碼等資料。"</string>
     <string name="permlab_wakeLock">"防止手機進入待命狀態"</string>
-    <string name="permdesc_wakeLock">"允許應用程式阻止手機進入待命。"</string>
+    <string name="permdesc_wakeLock">"允許應用程式防止手機進入待命。"</string>
     <string name="permlab_devicePower">"開啟或關閉電源"</string>
     <string name="permdesc_devicePower">"允許應用程式開啟或關閉電話。"</string>
     <string name="permlab_factoryTest">"在出廠測試模式下執行"</string>
@@ -308,7 +303,7 @@
     <string name="permdesc_setWallpaper">"允許應用程式設定系統桌布。"</string>
     <string name="permlab_setWallpaperHints">"設定桌布大小提示"</string>
     <string name="permdesc_setWallpaperHints">"允許應用程式設定系統桌布大小提示。"</string>
-    <string name="permlab_masterClear">"將系統回復出廠預設值"</string>
+    <string name="permlab_masterClear">"將系統還原至出廠預設值"</string>
     <string name="permdesc_masterClear">"允許應用程式將手機完全重設至出廠設定，清除所有資料、設定與已安裝程式。"</string>
     <string name="permlab_setTimeZone">"設定時區"</string>
     <string name="permdesc_setTimeZone">"允許應用程式變更時區。"</string>
@@ -316,7 +311,7 @@
     <string name="permdesc_getAccounts">"允許應用程式取得手機上的帳戶清單。"</string>
     <string name="permlab_accessNetworkState">"檢視網路狀態"</string>
     <string name="permdesc_accessNetworkState">"允許應用程式檢視網路狀態。"</string>
-    <string name="permlab_createNetworkSockets">"完整網際網路存取"</string>
+    <string name="permlab_createNetworkSockets">"網際網路完整存取"</string>
     <string name="permdesc_createNetworkSockets">"允許應用程式建立網路設定。"</string>
     <string name="permlab_writeApnSettings">"輸入存取點名稱設定"</string>
     <string name="permdesc_writeApnSettings">"允許應用程式修改 APN 設定，例如：Proxy 及 APN 的連接埠。"</string>
@@ -327,51 +322,51 @@
     <string name="permlab_accessWifiState">"檢視 Wi-Fi 狀態"</string>
     <string name="permdesc_accessWifiState">"允許應用程式檢視 Wi-Fi 狀態資訊。"</string>
     <string name="permlab_changeWifiState">"變更 Wi-Fi 狀態"</string>
-    <string name="permdesc_changeWifiState">"允許應用程式與 Wi-Fi 存取點連線或斷線，並可變更 Wi-Fi 網路設定。"</string>
+    <string name="permdesc_changeWifiState">"允許應用程式與 Wi-Fi 存取點連線或中斷連線，並可變更 Wi-Fi 網路設定。"</string>
     <string name="permlab_bluetoothAdmin">"藍牙管理"</string>
     <string name="permdesc_bluetoothAdmin">"允許應用程式設定本機藍牙電話，以及偵測與配對其他遠端裝置。"</string>
     <string name="permlab_bluetooth">"建立藍牙連線"</string>
-    <string name="permdesc_bluetooth">"允許應用程式檢視本地藍牙電話設定，並與其他配對裝置連線。"</string>
+    <string name="permdesc_bluetooth">"允許應用程式檢視本機藍牙電話設定，並與其他配對裝置連線。"</string>
     <string name="permlab_disableKeyguard">"停用按鍵鎖定"</string>
-    <string name="permdesc_disableKeyguard">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性。合理的範例是：收到來電時解開按鍵鎖定，通話結束後重新啟動按鍵鎖定。"</string>
+    <string name="permdesc_disableKeyguard">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性。例如：收到來電時解除按鍵鎖定，通話結束後重新啟動按鍵鎖定。"</string>
     <string name="permlab_readSyncSettings">"讀取同步處理設定"</string>
-    <string name="permdesc_readSyncSettings">"允許應用程式讀取同步處理設定，例如：是否同步處理 [通訊錄]。"</string>
+    <string name="permdesc_readSyncSettings">"允許應用程式讀取同步處理設定，例如：是否同步處理 [聯絡人]。"</string>
     <string name="permlab_writeSyncSettings">"編輯同步處理設定"</string>
-    <string name="permdesc_writeSyncSettings">"允許應用程式修改同步處理設定，例如：是否要同步處理 [通訊錄]。"</string>
+    <string name="permdesc_writeSyncSettings">"允許應用程式修改同步處理設定，例如：是否要同步處理 [聯絡人]。"</string>
     <string name="permlab_readSyncStats">"讀取同步處理狀態"</string>
     <string name="permdesc_readSyncStats">"允許應用程式讀取同步處理狀態；例如：同步處理記錄。"</string>
     <string name="permlab_subscribedFeedsRead">"讀取訂閱資訊提供"</string>
     <string name="permdesc_subscribedFeedsRead">"允許應用程式取得目前已同步處理的資訊提供。"</string>
     <string name="permlab_subscribedFeedsWrite">"寫入訂閱資訊提供"</string>
-    <string name="permdesc_subscribedFeedsWrite">"允許應用程式修改已同步處理的資訊提供。惡意程式可使用此功能變更已同步處理的資訊提供。"</string>
+    <string name="permdesc_subscribedFeedsWrite">"允許應用程式修改已同步處理的資訊提供。請注意：惡意程式可能使用此功能變更已同步處理的資訊提供。"</string>
     <string name="permlab_readDictionary">"讀取使用者定義的字典"</string>
     <string name="permdesc_readDictionary">"允許應用程式讀取使用者儲存在使用者字典內的任何私人字詞、名稱和詞組。"</string>
     <string name="permlab_writeDictionary">"寫入使用者定義的字典"</string>
     <string name="permdesc_writeDictionary">"允許應用程式將新字詞寫入使用者的字典。"</string>
   <string-array name="phoneTypes">
-    <item>"首頁"</item>
-    <item>"行動"</item>
-    <item>"工作"</item>
-    <item>"辦公傳真"</item>
-    <item>"家用傳真"</item>
+    <item>"住家電話"</item>
+    <item>"行動電話"</item>
+    <item>"公司電話"</item>
+    <item>"公司傳真"</item>
+    <item>"住家傳真"</item>
     <item>"呼叫器"</item>
     <item>"其他"</item>
     <item>"自訂"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item>"首頁"</item>
-    <item>"工作"</item>
-    <item>"其他"</item>
+    <item>"主要信箱"</item>
+    <item>"公司信箱"</item>
+    <item>"其他信箱"</item>
     <item>"自訂"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item>"首頁"</item>
-    <item>"工作"</item>
+    <item>"住家"</item>
+    <item>"公司"</item>
     <item>"其他"</item>
     <item>"自訂"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item>"首頁"</item>
+    <item>"住家"</item>
     <item>"工作"</item>
     <item>"其他"</item>
     <item>"自訂"</item>
@@ -393,7 +388,7 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"輸入 PIN 碼"</string>
     <string name="keyguard_password_wrong_pin_code">"PIN 碼錯誤！"</string>
-    <string name="keyguard_label_text">"若要解鎖，按下 [選單]、[0]。"</string>
+    <string name="keyguard_label_text">"如要解鎖，請按 [選單]，然後按 [0]。"</string>
     <string name="emergency_call_dialog_number_for_display">"緊急電話號碼"</string>
     <string name="lockscreen_carrier_default">"(沒有服務)"</string>
     <string name="lockscreen_screen_locked">"螢幕已鎖定。"</string>
@@ -402,7 +397,7 @@
     <string name="lockscreen_pattern_instructions">"畫出解鎖圖形"</string>
     <string name="lockscreen_emergency_call">"緊急電話"</string>
     <string name="lockscreen_pattern_correct">"正確！"</string>
-    <string name="lockscreen_pattern_wrong">"抱歉，請再試一次"</string>
+    <string name="lockscreen_pattern_wrong">"很抱歉，請再試一次"</string>
     <string name="lockscreen_plugged_in">"正在充電 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"請連接充電器。"</string>
     <string name="lockscreen_missing_sim_message_short">"沒有 SIM  卡。"</string>
@@ -410,8 +405,7 @@
     <string name="lockscreen_missing_sim_instructions">"請插入 SIM 卡。"</string>
     <string name="lockscreen_network_locked_message">"網路已鎖定"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM 的 PUK 已鎖定。"</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"請參閱《使用者指南》或聯絡客戶服務中心。"</string>
     <string name="lockscreen_sim_locked_message">"SIM 卡已鎖定。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"解鎖 SIM 卡中..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"畫出解鎖圖形已錯誤 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n" 請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再嘗試。"</string>
@@ -419,7 +413,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_forgot_pattern_button_text">"忘記解鎖圖形？"</string>
     <string name="lockscreen_glogin_too_many_attempts">"解鎖圖形出錯次數過多！"</string>
-    <string name="lockscreen_glogin_instructions">"若要解除鎖定，請使用 Google 帳戶登入"</string>
+    <string name="lockscreen_glogin_instructions">"如要解除鎖定，請使用 Google 帳戶登入"</string>
     <string name="lockscreen_glogin_username_hint">"使用者名稱 (電子郵件)"</string>
     <string name="lockscreen_glogin_password_hint">"密碼"</string>
     <string name="lockscreen_glogin_submit_button">"登入"</string>
@@ -439,7 +433,7 @@
     <string name="battery_low_subtitle">"電池電量即將不足："</string>
     <string name="battery_low_percent_format">"電池電量不到 <xliff:g id="NUMBER">%d%%</xliff:g>。"</string>
     <string name="factorytest_failed">"出廠測試失敗"</string>
-    <string name="factorytest_not_system">"FACTORY_TEST 動作只支援安裝在 /system/app 裡的程式。"</string>
+    <string name="factorytest_not_system">"只有安裝在 /system/app 裡的程式才能支援 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action">"找不到提供 FACTORY_TEST 的程式。"</string>
     <string name="factorytest_reboot">"重新開機"</string>
     <string name="js_dialog_title">"「<xliff:g id="TITLE">%s</xliff:g>」的網頁指出："</string>
@@ -451,9 +445,9 @@
     <string name="save_password_remember">"記住"</string>
     <string name="save_password_never">"從不"</string>
     <string name="open_permission_deny">"您沒有開啟此頁的權限。"</string>
-    <string name="text_copied">"已複製到剪貼簿的文字。"</string>
+    <string name="text_copied">"文字已複製到剪貼簿。"</string>
     <string name="more_item_label">"更多"</string>
-    <string name="prepend_shortcut_label">"[選單]+"</string>
+    <string name="prepend_shortcut_label">"[選單] +"</string>
     <string name="menu_space_shortcut_label">"空白鍵"</string>
     <string name="menu_enter_shortcut_label">"輸入"</string>
     <string name="menu_delete_shortcut_label">"刪除"</string>
@@ -551,71 +545,71 @@
     <string name="saturday">"星期六"</string>
     <string name="every_weekday">"每天 (週一至週五)"</string>
     <string name="daily">"每天"</string>
-    <string name="weekly">"每週 <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="weekly">"每週<xliff:g id="DAY">%s</xliff:g>"</string>
     <string name="monthly">"每月"</string>
     <string name="yearly">"每年"</string>
     <string name="VideoView_error_title">"無法播放影片"</string>
     <string name="VideoView_error_text_invalid_progressive_playback">"很抱歉，影片格式無效，裝置無法進行串流處理。"</string>
-    <string name="VideoView_error_text_unknown">"抱歉，無法撥放此影片。"</string>
+    <string name="VideoView_error_text_unknown">"很抱歉，此影片無法播放。"</string>
     <string name="VideoView_error_button">"確定"</string>
     <string name="am">"上午"</string>
     <string name="pm">"下午"</string>
     <string name="numeric_date">"<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="DATE1">%2$s</xliff:g>，<xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>，<xliff:g id="DATE2">%5$s</xliff:g>，<xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>，<xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>，<xliff:g id="WEEKDAY2">%4$s</xliff:g>，<xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>，<xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
     <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>，<xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>，<xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
-    <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>，<xliff:g id="WEEKDAY">%2$s</xliff:g>，<xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>，<xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>，<xliff:g id="DATE">%3$s</xliff:g>"</string>
+    <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g>，<xliff:g id="WEEKDAY">%2$s</xliff:g>，<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g>，<xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
+    <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>，<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>，<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>，<xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>，<xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
+    <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>，<xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
     <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
     <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>'，'<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
     <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"中午"</string>
     <string name="Noon">"中午"</string>
     <string name="midnight">"午夜"</string>
     <string name="Midnight">"午夜"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g><xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>，<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g><xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日"</string>
+    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g> 年<xliff:g id="MONTH">%B</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>，<xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日，<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日 – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>， <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
     <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>， <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="YEAR1">%4$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="YEAR2">%9$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="abbrev_month_day_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>，<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g><xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g><xliff:g id="DAY">%-d</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日 – <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
+    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日 – <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
+    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> 日，<xliff:g id="WEEKDAY1">%1$s</xliff:g>，<xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> 日，<xliff:g id="WEEKDAY2">%6$s</xliff:g>，<xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日"</string>
+    <string name="abbrev_month_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g>"</string>
+    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g> 日"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"星期日"</string>
@@ -630,26 +624,26 @@
     <string name="day_of_week_medium_tuesday">"週二"</string>
     <string name="day_of_week_medium_wednesday">"週三"</string>
     <string name="day_of_week_medium_thursday">"週四"</string>
-    <string name="day_of_week_medium_friday">"週五"</string>
+    <string name="day_of_week_medium_friday">"五"</string>
     <string name="day_of_week_medium_saturday">"週六"</string>
-    <string name="day_of_week_short_sunday">"週日"</string>
-    <string name="day_of_week_short_monday">"週一"</string>
-    <string name="day_of_week_short_tuesday">"週二"</string>
-    <string name="day_of_week_short_wednesday">"週三"</string>
+    <string name="day_of_week_short_sunday">"日"</string>
+    <string name="day_of_week_short_monday">"一"</string>
+    <string name="day_of_week_short_tuesday">"二"</string>
+    <string name="day_of_week_short_wednesday">"三"</string>
     <string name="day_of_week_short_thursday">"週四"</string>
-    <string name="day_of_week_short_friday">"週五"</string>
-    <string name="day_of_week_short_saturday">"週六"</string>
-    <string name="day_of_week_shorter_sunday">"週日"</string>
+    <string name="day_of_week_short_friday">"五"</string>
+    <string name="day_of_week_short_saturday">"六"</string>
+    <string name="day_of_week_shorter_sunday">"日"</string>
     <string name="day_of_week_shorter_monday">"一"</string>
-    <string name="day_of_week_shorter_tuesday">"週二"</string>
+    <string name="day_of_week_shorter_tuesday">"二"</string>
     <string name="day_of_week_shorter_wednesday">"三"</string>
-    <string name="day_of_week_shorter_thursday">"週四"</string>
+    <string name="day_of_week_shorter_thursday">"四"</string>
     <string name="day_of_week_shorter_friday">"五"</string>
-    <string name="day_of_week_shorter_saturday">"週六"</string>
+    <string name="day_of_week_shorter_saturday">"六"</string>
     <string name="day_of_week_shortest_sunday">"日"</string>
-    <string name="day_of_week_shortest_monday">"週一"</string>
+    <string name="day_of_week_shortest_monday">"一"</string>
     <string name="day_of_week_shortest_tuesday">"二"</string>
-    <string name="day_of_week_shortest_wednesday">"週三"</string>
+    <string name="day_of_week_shortest_wednesday">"三"</string>
     <string name="day_of_week_shortest_thursday">"四"</string>
     <string name="day_of_week_shortest_friday">"五"</string>
     <string name="day_of_week_shortest_saturday">"六"</string>
@@ -703,32 +697,32 @@
     <string name="inputMethod">"輸入法"</string>
     <string name="addToDictionary">"將「%s」新增到字典"</string>
     <string name="editTextMenuTitle">"編輯文字"</string>
-    <string name="low_internal_storage_view_title">"儲存空間太少"</string>
+    <string name="low_internal_storage_view_title">"儲存空間即將不足"</string>
     <string name="low_internal_storage_view_text">"手機儲存空間即將不足。"</string>
     <string name="ok">"確定"</string>
     <string name="cancel">"取消"</string>
     <string name="yes">"確定"</string>
     <string name="no">"取消"</string>
-    <string name="dialog_alert_title">"注意"</string>
+    <string name="dialog_alert_title">"請注意"</string>
     <string name="capital_on">"開啟"</string>
     <string name="capital_off">"關閉"</string>
-    <string name="whichApplication">"選取...完成動作"</string>
+    <string name="whichApplication">"完成操作需使用"</string>
     <string name="alwaysUse">"以此為本操作預設值。"</string>
     <string name="clearDefaultHintMsg">"清除首頁設定 (應用程式) 管理應用程式的預設值。"</string>
     <string name="chooseActivity">"選取一項操作"</string>
-    <string name="noApplications">"沒有應用程式可進行此操作。"</string>
-    <string name="aerr_title">"抱歉！"</string>
-    <string name="aerr_application">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 未正常終止。請再試一次。"</string>
-    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 未正常終止。請再試一次。"</string>
-    <string name="anr_title">"抱歉！"</string>
+    <string name="noApplications">"沒有應用程式可執行此項操作。"</string>
+    <string name="aerr_title">"很抱歉！"</string>
+    <string name="aerr_application">"<xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式 (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 異常終止。請再試一次。"</string>
+    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 異常終止。請再試一次。"</string>
+    <string name="anr_title">"很抱歉！"</string>
     <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (應用程式：<xliff:g id="APPLICATION">%2$s</xliff:g>) 無回應。"</string>
     <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 無回應。"</string>
     <string name="anr_application_process">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 無回應。"</string>
-    <string name="anr_process">"程序 <xliff:g id="PROCESS">%1$s</xliff:g> 沒有回應。"</string>
+    <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 程序無回應。"</string>
     <string name="force_close">"強制關閉"</string>
     <string name="wait">"等待"</string>
-    <string name="debug">"除錯"</string>
-    <string name="sendText">"選取文字動作"</string>
+    <string name="debug">"偵錯"</string>
+    <string name="sendText">"訊息傳送方式"</string>
     <string name="volume_ringtone">"鈴聲音量"</string>
     <string name="volume_music">"媒體音量"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"透過藍牙播放"</string>
@@ -763,7 +757,7 @@
     <string name="perms_show_all"><b>"顯示全部"</b></string>
     <string name="googlewebcontenthelper_loading">"載入中..."</string>
     <string name="usb_storage_title">"USB 已連接"</string>
-    <string name="usb_storage_message">"已透過 USB 連接手機與電腦。若要從電腦或 SD 卡複製檔案，請選取 [掛載]。"</string>
+    <string name="usb_storage_message">"已透過 USB 連接手機與電腦。如要從電腦或 SD 卡複製檔案，請選取 [掛載]。"</string>
     <string name="usb_storage_button_mount">"掛載"</string>
     <string name="usb_storage_button_unmount">"不要掛載"</string>
     <string name="usb_storage_error_message">"把 SD 卡當成 USB 儲存裝置時發生問題。"</string>
@@ -789,7 +783,7 @@
     <string name="ext_media_nofs_notification_message">"SD 卡為空白或使用不支援的檔案系統。"</string>
     <string name="ext_media_unmountable_notification_title">"SD 卡已損壞"</string>
     <string name="ext_media_unmountable_notification_message">"SD 卡已損壞。您可能需要將 SD 卡重新格式化。"</string>
-    <string name="ext_media_badremoval_notification_title">"SD 卡未預期移除"</string>
+    <string name="ext_media_badremoval_notification_title">"SD 卡未正常移除"</string>
     <string name="ext_media_badremoval_notification_message">"請先卸載 SD 卡，再將其移除，以免資料遺失。"</string>
     <string name="ext_media_safe_unmount_notification_title">"可安全移除 SD 卡"</string>
     <string name="ext_media_safe_unmount_notification_message">"現在可以安全移除 SD 卡。"</string>
@@ -806,8 +800,6 @@
     <string name="ime_action_next">"下一步"</string>
     <string name="ime_action_done">"完成"</string>
     <string name="ime_action_default">"執行"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="dial_number_using">"使用 <xliff:g id="NUMBER">%s</xliff:g>"\n"撥號"</string>
+    <string name="create_contact_using">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>"\n"的聯絡人"</string>
 </resources>

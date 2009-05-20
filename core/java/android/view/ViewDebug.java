@@ -54,6 +54,27 @@ import java.lang.reflect.AccessibleObject;
  */
 public class ViewDebug {
     /**
+     * Log tag used to log errors related to the consistency of the view hierarchy.
+     *
+     * @hide
+     */
+    public static final String CONSISTENCY_LOG_TAG = "ViewConsistency";
+
+    /**
+     * Flag indicating the consistency check should check layout-related properties.
+     *
+     * @hide
+     */
+    public static final int CONSISTENCY_LAYOUT = 0x1;
+
+    /**
+     * Flag indicating the consistency check should check drawing-related properties.
+     *
+     * @hide
+     */
+    public static final int CONSISTENCY_DRAWING = 0x2;
+
+    /**
      * Enables or disables view hierarchy tracing. Any invoker of
      * {@link #trace(View, android.view.ViewDebug.HierarchyTraceType)} should first
      * check that this value is set to true as not to affect performance.
@@ -78,6 +99,49 @@ public class ViewDebug {
      * when it is set, we log key events, touch/motion and trackball events
      */    
     static final String SYSTEM_PROPERTY_CAPTURE_EVENT = "debug.captureevent";
+
+    /**
+     * Profiles drawing times in the events log.
+     *
+     * @hide
+     */
+    @Debug.DebugProperty
+    public static boolean profileDrawing = false;
+
+    /**
+     * Profiles layout times in the events log.
+     *
+     * @hide
+     */
+    @Debug.DebugProperty
+    public static boolean profileLayout = false;
+
+    /**
+     * Profiles real fps (times between draws) and displays the result.
+     *
+     * @hide
+     */
+    @Debug.DebugProperty
+    public static boolean showFps = false;
+
+    /**
+     * <p>Enables or disables views consistency check. Even when this property is enabled,
+     * view consistency checks happen only if {@link android.util.Config#DEBUG} is set
+     * to true. The value of this property can be configured externally in one of the
+     * following files:</p>
+     * <ul>
+     *  <li>/system/debug.prop</li>
+     *  <li>/debug.prop</li>
+     *  <li>/data/debug.prop</li>
+     * </ul>
+     * @hide
+     */
+    @Debug.DebugProperty
+    public static boolean consistencyCheckEnabled = false;
+
+    static {
+        Debug.setFieldsOn(ViewDebug.class, true);
+    }
 
     /**
      * This annotation can be used to mark fields and methods to be dumped by
@@ -123,7 +187,7 @@ public class ViewDebug {
          * of an array:
          *
          * <pre>
-         * @ViewDebug.ExportedProperty(mapping = {
+         * @ViewDebug.ExportedProperty(indexMapping = {
          *     @ViewDebug.IntToString(from = 0, to = "INVALID"),
          *     @ViewDebug.IntToString(from = 1, to = "FIRST"),
          *     @ViewDebug.IntToString(from = 2, to = "SECOND")
@@ -137,6 +201,25 @@ public class ViewDebug {
          * @see #mapping()
          */
         IntToString[] indexMapping() default { };
+
+        /**
+         * A flags mapping can be defined to map flags encoded in an integer to
+         * specific strings. A mapping can be used to see human readable values
+         * for the flags of an integer:
+         *
+         * <pre>
+         * @ViewDebug.ExportedProperty(flagMapping = {
+         *     @ViewDebug.FlagToString(mask = ENABLED_MASK, equals = ENABLED, name = "ENABLED"),
+         *     @ViewDebug.FlagToString(mask = ENABLED_MASK, equals = DISABLED, name = "DISABLED"),
+         * })
+         * private int mFlags;
+         * <pre>
+         *
+         * A specified String is output when the following is true:
+         * 
+         * @return An array of int to String mappings
+         */
+        FlagToString[] flagMapping() default { };
 
         /**
          * When deep export is turned on, this property is not dumped. Instead, the
@@ -182,7 +265,45 @@ public class ViewDebug {
          */
         String to();
     }
-    
+
+    /**
+     * Defines a mapping from an flag to a String. Such a mapping can be used
+     * in a @ExportedProperty to provide more meaningful values to the end user.
+     *
+     * @see android.view.ViewDebug.ExportedProperty
+     */
+    @Target({ ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface FlagToString {
+        /**
+         * The mask to apply to the original value.
+         *
+         * @return An arbitrary int value.
+         */
+        int mask();
+
+        /**
+         * The value to compare to the result of:
+         * <code>original value &amp; {@link #mask()}</code>.
+         *
+         * @return An arbitrary value.
+         */
+        int equals();
+
+        /**
+         * The String to use in place of the original int value.
+         *
+         * @return An arbitrary non-null String.
+         */
+        String name();
+
+        /**
+         * Indicates whether to output the flag when the test is true,
+         * or false. Defaults to true.
+         */
+        boolean outputIf() default true;
+    }
+
     /**
      * This annotation can be used to mark fields and methods to be dumped when
      * the view is captured. Methods with this annotation must have no arguments
@@ -975,6 +1096,13 @@ public class ViewDebug {
                         final int id = (Integer) methodValue;
                         methodValue = resolveId(context, id);
                     } else {
+                        final FlagToString[] flagsMapping = property.flagMapping();
+                        if (flagsMapping.length > 0) {
+                            final int intValue = (Integer) methodValue;
+                            final String valuePrefix = prefix + method.getName() + '_';
+                            exportUnrolledFlags(out, flagsMapping, intValue, valuePrefix);
+                        }
+
                         final IntToString[] mapping = property.mapping();
                         if (mapping.length > 0) {
                             final int intValue = (Integer) methodValue;
@@ -1036,6 +1164,13 @@ public class ViewDebug {
                         final int id = field.getInt(view);
                         fieldValue = resolveId(context, id);
                     } else {
+                        final FlagToString[] flagsMapping = property.flagMapping();
+                        if (flagsMapping.length > 0) {
+                            final int intValue = field.getInt(view);
+                            final String valuePrefix = prefix + field.getName() + '_';
+                            exportUnrolledFlags(out, flagsMapping, intValue, valuePrefix);
+                        }
+
                         final IntToString[] mapping = property.mapping();
                         if (mapping.length > 0) {
                             final int intValue = field.getInt(view);
@@ -1091,6 +1226,22 @@ public class ViewDebug {
         out.write("=");
         writeValue(out, value);
         out.write(' ');
+    }
+
+    private static void exportUnrolledFlags(BufferedWriter out, FlagToString[] mapping,
+            int intValue, String prefix) throws IOException {
+
+        final int count = mapping.length;
+        for (int j = 0; j < count; j++) {
+            final FlagToString flagMapping = mapping[j];
+            final boolean ifTrue = flagMapping.outputIf();
+            final boolean test = (intValue & flagMapping.mask()) == flagMapping.equals();
+            if ((test && ifTrue) || (!test && !ifTrue)) {
+                final String name = flagMapping.name();
+                final String value = ifTrue ? "true" : "false";
+                writeEntry(out, prefix, name, "", value);
+            }
+        }
     }
 
     private static void exportUnrolledArray(Context context, BufferedWriter out,
