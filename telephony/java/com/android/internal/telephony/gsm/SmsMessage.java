@@ -330,9 +330,20 @@ public class SmsMessage extends SmsMessageBase{
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, short destinationPort, byte[] data,
             boolean statusReportRequested) {
-        if (data.length > (MAX_USER_DATA_BYTES - 7 /* UDH size */)) {
+
+        SmsHeader.PortAddrs portAddrs = new SmsHeader.PortAddrs();
+        portAddrs.destPort = destinationPort;
+        portAddrs.origPort = 0;
+        portAddrs.areEightBits = false;
+
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.portAddrs = portAddrs;
+
+        byte[] smsHeaderData = SmsHeader.toByteArray(smsHeader);
+
+        if ((data.length + smsHeaderData.length + 1) > MAX_USER_DATA_BYTES) {
             Log.e(LOG_TAG, "SMS data message may only contain "
-                    + (MAX_USER_DATA_BYTES - 7) + " bytes");
+                    + (MAX_USER_DATA_BYTES - smsHeaderData.length - 1) + " bytes");
             return null;
         }
 
@@ -348,21 +359,12 @@ public class SmsMessage extends SmsMessageBase{
 
         // (no TP-Validity-Period)
 
-        // User data size
-        bo.write(data.length + 7);
+        // Total size
+        bo.write(data.length + smsHeaderData.length + 1);
 
-        // User data header size
-        bo.write(0x06); // header is 6 octets
-
-        // User data header, indicating the destination port
-        bo.write(SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT); // port
-                                                                // addressing
-                                                                // header
-        bo.write(0x04); // each port is 2 octets
-        bo.write((destinationPort >> 8) & 0xFF); // MSB of destination port
-        bo.write(destinationPort & 0xFF); // LSB of destination port
-        bo.write(0x00); // MSB of originating port
-        bo.write(0x00); // LSB of originating port
+        // User data header
+        bo.write(smsHeaderData.length);
+        bo.write(smsHeaderData, 0, smsHeaderData.length);
 
         // User data
         bo.write(data, 0, data.length);
@@ -562,7 +564,7 @@ public class SmsMessage extends SmsMessageBase{
 
                 byte[] udh = new byte[userDataHeaderLength];
                 System.arraycopy(pdu, offset, udh, 0, userDataHeaderLength);
-                userDataHeader = SmsHeader.parse(udh);
+                userDataHeader = SmsHeader.fromByteArray(udh);
                 offset += userDataHeaderLength;
 
                 int headerBits = (userDataHeaderLength + 1) * 8;

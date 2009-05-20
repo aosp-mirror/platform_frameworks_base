@@ -29,7 +29,6 @@ import android.util.Log;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SMSDispatcher;
-//import com.android.internal.telephony.SMSDispatcher.SmsTracker;
 import com.android.internal.telephony.cdma.SmsMessage;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.util.HexDump;
@@ -42,8 +41,11 @@ import java.util.HashMap;
 final class CdmaSMSDispatcher extends SMSDispatcher {
     private static final String TAG = "CDMA";
 
+    private CDMAPhone mCdmaPhone;
+
     CdmaSMSDispatcher(CDMAPhone phone) {
         super(phone);
+        mCdmaPhone = phone;
     }
 
     /**
@@ -70,50 +72,39 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         if (smsb == null) {
             return;
         }
-        SmsMessage sms = (SmsMessage) smsb;
-        int teleService;
-        boolean handled = false;
 
         // Decode BD stream and set sms variables.
+        SmsMessage sms = (SmsMessage) smsb;
         sms.parseSms();
-        teleService = sms.getTeleService();
+        int teleService = sms.getTeleService();
+        boolean handled = false;
 
         // Teleservices W(E)MT and VMN are handled together:
-        if ((SmsEnvelope.TELESERVICE_WMT == teleService)
-                ||(SmsEnvelope.TELESERVICE_WEMT == teleService)
-                ||(SmsEnvelope.TELESERVICE_VMN == teleService)){
+        if ((teleService == SmsEnvelope.TELESERVICE_WMT)
+                || (teleService == SmsEnvelope.TELESERVICE_WEMT)
+                || (teleService == SmsEnvelope.TELESERVICE_VMN)) {
             // From here on we need decoded BD.
             // Special case the message waiting indicator messages
             if (sms.isMWISetMessage()) {
-                ((CDMAPhone) mPhone).updateMessageWaitingIndicator(true);
-
-                if (sms.isMwiDontStore()) {
-                    handled = true;
-                }
-
+                mCdmaPhone.updateMessageWaitingIndicator(true);
+                handled |= sms.isMwiDontStore();
                 if (Config.LOGD) {
-                    Log.d(TAG,
-                            "Received voice mail indicator set SMS shouldStore=" + !handled);
+                    Log.d(TAG, "Received voice mail indicator set SMS shouldStore=" + !handled);
                 }
             } else if (sms.isMWIClearMessage()) {
-                ((CDMAPhone) mPhone).updateMessageWaitingIndicator(false);
-
-                if (sms.isMwiDontStore()) {
-                    handled = true;
-                }
-
+                mCdmaPhone.updateMessageWaitingIndicator(false);
+                handled |= sms.isMwiDontStore();
                 if (Config.LOGD) {
-                    Log.d(TAG,
-                            "Received voice mail indicator clear SMS shouldStore=" + !handled);
+                    Log.d(TAG, "Received voice mail indicator clear SMS shouldStore=" + !handled);
                 }
             }
         }
 
-        if (null == sms.getUserData()){
-            handled = true;
+        if (sms.getUserData() == null) {
             if (Config.LOGD) {
                 Log.d(TAG, "Received SMS without user data");
             }
+            handled = true;
         }
 
         if (handled) return;
@@ -123,82 +114,44 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return;
         }
 
-        // Parse the headers to see if this is partial, or port addressed
-        int referenceNumber = -1;
-        int count = 0;
-        int sequence = 0;
-        int destPort = -1;
-        // From here on we need BD distributed to SMS member variables.
+        /**
+         * TODO(cleanup): Why are we using a getter method for this
+         * (and for so many other sms fields)?  Trivial getters and
+         * setters like this are direct violations of the style guide.
+         * If the purpose is to protect agaist writes (by not
+         * providing a setter) then any protection is illusory (and
+         * hence bad) for cases where the values are not primitives,
+         * such as this call for the header.  Since this is an issue
+         * with the public API it cannot be changed easily, but maybe
+         * something can be done eventually.
+         */
+        SmsHeader smsHeader = sms.getUserDataHeader();
 
-        SmsHeader header = sms.getUserDataHeader();
-        if (header != null) {
-            for (SmsHeader.Element element : header.getElements()) {
-                try {
-                    switch (element.getID()) {
-                        case SmsHeader.CONCATENATED_8_BIT_REFERENCE: {
-                            byte[] data = element.getData();
-                            
-                            referenceNumber = data[0] & 0xff;
-                            count = data[1] & 0xff;
-                            sequence = data[2] & 0xff;
-                            
-                            // Per TS 23.040, 9.2.3.24.1: If the count is zero, sequence
-                            // is zero, or sequence > count, ignore the entire element
-                            if (count == 0 || sequence == 0 || sequence > count) {
-                                referenceNumber = -1;
-                            }
-                            break;
-                        }
-                        
-                        case SmsHeader.CONCATENATED_16_BIT_REFERENCE: {
-                            byte[] data = element.getData();
-                            
-                            referenceNumber = (data[0] & 0xff) * 256 + (data[1] & 0xff);
-                            count = data[2] & 0xff;
-                            sequence = data[3] & 0xff;
-                            
-                            // Per TS 23.040, 9.2.3.24.8: If the count is zero, sequence
-                            // is zero, or sequence > count, ignore the entire element
-                            if (count == 0 || sequence == 0 || sequence > count) {
-                                referenceNumber = -1;
-                            }
-                            break;
-                        }
-                        
-                        case SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT: {
-                            byte[] data = element.getData();
-                            
-                            destPort = (data[0] & 0xff) << 8;
-                            destPort |= (data[1] & 0xff);
-                            
-                            break;
-                        }
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    Log.e(TAG, "Bad element in header", e);
-                    return;  // TODO: NACK the message or something, don't just discard.
-                }
-            }
-        }
-
-        if (referenceNumber == -1) {
-            // notify everyone of the message if it isn't partial
+        /**
+         * TODO(cleanup): Since both CDMA and GSM use the same header
+         * format, this dispatch processing is naturally identical,
+         * and code should probably not be replicated explicitly.
+         */
+        // See if message is partial or port addressed.
+        if ((smsHeader == null) || (smsHeader.concatRef == null)) {
+            // Message is not partial (not part of concatenated sequence).
             byte[][] pdus = new byte[1][];
             pdus[0] = sms.getPdu();
 
-            if (destPort != -1) {// GSM-style WAP indication
-                if (destPort == SmsHeader.PORT_WAP_PUSH) {
+            if (smsHeader.portAddrs != null) {
+                if (smsHeader.portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
+                    // GSM-style WAP indication
                     mWapPush.dispatchWapPdu(sms.getUserData());
                 }
-                // The message was sent to a port, so concoct a URI for it
-                dispatchPortAddressedPdus(pdus, destPort);
+                // The message was sent to a port, so concoct a URI for it.
+                dispatchPortAddressedPdus(pdus, smsHeader.portAddrs.destPort);
             } else {
-                // It's a normal message, dispatch it
+                // Normal short and non-port-addressed message, dispatch it.
                 dispatchPdus(pdus);
             }
         } else {
-            // Process the message part
-            processMessagePart(sms, referenceNumber, sequence, count, destPort);
+            // Process the message part.
+            processMessagePart(sms, smsHeader.concatRef, smsHeader.portAddrs);
         }
     }
 
@@ -314,41 +267,49 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
-    protected void sendMultipartText(String destinationAddress, String scAddress,
+    protected void sendMultipartText(String destAddr, String scAddr,
             ArrayList<String> parts, ArrayList<PendingIntent> sentIntents,
             ArrayList<PendingIntent> deliveryIntents) {
 
-        int ref = ++sConcatenatedRef & 0xff;
+        /**
+         * TODO(cleanup): There is no real code difference between
+         * this and the GSM version, and hence it should be moved to
+         * the base class or consolidated somehow, provided calling
+         * the proper submitpdu stuff can be arranged.
+         */
 
-        for (int i = 0, count = parts.size(); i < count; i++) {
-            // build SmsHeader data
-            byte[] data = new byte[5];
-            data[0] = (byte) SmsHeader.CONCATENATED_8_BIT_REFERENCE;
-            data[1] = (byte) 3;   // 3 bytes follow
-            data[2] = (byte) ref;   // reference #, unique per message
-            data[3] = (byte) count; // total part count
-            data[4] = (byte) (i + 1);  // 1-based sequence
+        int refNumber = getNextConcatenatedRef() & 0x00FF;
+
+        for (int i = 0, msgCount = parts.size(); i < msgCount; i++) {
+            SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+            concatRef.refNumber = refNumber;
+            concatRef.seqNumber = i + 1;  // 1-based sequence
+            concatRef.msgCount = msgCount;
+            concatRef.isEightBits = true;
+            SmsHeader smsHeader = new SmsHeader();
+            smsHeader.concatRef = concatRef;
 
             PendingIntent sentIntent = null;
-            PendingIntent deliveryIntent = null;
-
             if (sentIntents != null && sentIntents.size() > i) {
                 sentIntent = sentIntents.get(i);
             }
+
+            PendingIntent deliveryIntent = null;
             if (deliveryIntents != null && deliveryIntents.size() > i) {
                 deliveryIntent = deliveryIntents.get(i);
             }
 
-            SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
-                    parts.get(i), deliveryIntent != null, data);
+            SmsMessage.SubmitPdu submitPdu = SmsMessage.getSubmitPdu(scAddr, destAddr,
+                    parts.get(i), deliveryIntent != null, smsHeader);
 
-            sendRawPdu(pdus.encodedScAddress, pdus.encodedMessage, sentIntent, deliveryIntent);
+            sendSubmitPdu(submitPdu, sentIntent, deliveryIntent);
         }
     }
 
-    protected void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
+    protected void sendSubmitPdu(SmsMessage.SubmitPdu submitPdu, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
-        super.sendRawPdu(smsc, pdu, sentIntent, deliveryIntent);
+        sendRawPdu(submitPdu.encodedScAddress, submitPdu.encodedMessage,
+                sentIntent, deliveryIntent);
     }
 
     /** {@inheritDoc} */

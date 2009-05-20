@@ -93,14 +93,15 @@ public class UserData {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("UserData:\n");
-        builder.append("  msgEncoding: " + (msgEncodingSet ? msgEncoding : "not set") + "\n");
-        builder.append("  msgType: " + msgType + "\n");
-        builder.append("  paddingBits: " + paddingBits + "\n");
-        builder.append("  numFields: " + (int)numFields + "\n");
-        builder.append("  userDataHeader: " + userDataHeader + "\n");
-        builder.append("  payload: '" + HexDump.toHexString(payload) + "'");
-        builder.append(", payloadStr: '" + payloadStr + "'");
+        builder.append("UserData ");
+        builder.append("{ msgEncoding=" + (msgEncodingSet ? msgEncoding : "unset"));
+        builder.append(", msgType=" + msgType);
+        builder.append(", paddingBits=" + paddingBits);
+        builder.append(", numFields=" + (int)numFields);
+        builder.append(", userDataHeader=" + userDataHeader);
+        builder.append(", payload='" + HexDump.toHexString(payload) + "'");
+        builder.append(", payloadStr='" + payloadStr + "'");
+        builder.append(" }");
         return builder.toString();
     }
 
