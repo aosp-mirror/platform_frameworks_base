@@ -245,8 +245,6 @@ public abstract class SmsMessageBase {
     /**
      * Returns an object representing the user data header
      *
-     * @return an object representing the user data header
-     *
      * {@hide}
      */
     public SmsHeader getUserDataHeader() {
@@ -254,9 +252,14 @@ public abstract class SmsMessageBase {
     }
 
     /**
+     * TODO(cleanup): The term PDU is used in a seemingly non-unique
+     * manner -- for example, what is the difference between this byte
+     * array and the contents of SubmitPdu objects.  Maybe a more
+     * illustrative term would be appropriate.
+     */
+
+    /**
      * Returns the raw PDU for the message.
-     *
-     * @return the raw PDU for the message.
      */
     public byte[] getPdu() {
         return mPdu;

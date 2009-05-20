@@ -39,8 +39,11 @@ import java.util.HashMap;
 final class GsmSMSDispatcher extends SMSDispatcher {
     private static final String TAG = "GSM";
 
+    private GSMPhone mGsmPhone;
+
     GsmSMSDispatcher(GSMPhone phone) {
         super(phone);
+        mGsmPhone = phone;
     }
 
     /**
@@ -97,110 +100,41 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
         // Special case the message waiting indicator messages
         if (sms.isMWISetMessage()) {
-            ((GSMPhone) mPhone).updateMessageWaitingIndicator(true);
-
-            if (sms.isMwiDontStore()) {
-                handled = true;
-            }
-
+            mGsmPhone.updateMessageWaitingIndicator(true);
+            handled |= sms.isMwiDontStore();
             if (Config.LOGD) {
-                Log.d(TAG,
-                        "Received voice mail indicator set SMS shouldStore="
-                         + !handled);
+                Log.d(TAG, "Received voice mail indicator set SMS shouldStore=" + !handled);
             }
         } else if (sms.isMWIClearMessage()) {
-            ((GSMPhone) mPhone).updateMessageWaitingIndicator(false);
-
-            if (sms.isMwiDontStore()) {
-                handled = true;
-            }
-
+            mGsmPhone.updateMessageWaitingIndicator(false);
+            handled |= sms.isMwiDontStore();
             if (Config.LOGD) {
-                Log.d(TAG,
-                        "Received voice mail indicator clear SMS shouldStore="
-                        + !handled);
+                Log.d(TAG, "Received voice mail indicator clear SMS shouldStore=" + !handled);
             }
         }
 
-        if (handled) {
-            return;
-        }
+        if (handled) return;
 
-        // Parse the headers to see if this is partial, or port addressed
-        int referenceNumber = -1;
-        int count = 0;
-        int sequence = 0;
-        int destPort = -1;
-
-        SmsHeader header = sms.getUserDataHeader();
-        if (header != null) {
-            for (SmsHeader.Element element : header.getElements()) {
-                try {
-                    switch (element.getID()) {
-                        case SmsHeader.CONCATENATED_8_BIT_REFERENCE: {
-                            byte[] data = element.getData();
-                            
-                            referenceNumber = data[0] & 0xff;
-                            count = data[1] & 0xff;
-                            sequence = data[2] & 0xff;
-                            
-                            // Per TS 23.040, 9.2.3.24.1: If the count is zero, sequence
-                            // is zero, or sequence > count, ignore the entire element
-                            if (count == 0 || sequence == 0 || sequence > count) {
-                                referenceNumber = -1;
-                            }
-                            break;
-                        }
-                        
-                        case SmsHeader.CONCATENATED_16_BIT_REFERENCE: {
-                            byte[] data = element.getData();
-                            
-                            referenceNumber = (data[0] & 0xff) * 256 + (data[1] & 0xff);
-                            count = data[2] & 0xff;
-                            sequence = data[3] & 0xff;
-                            
-                            // Per TS 23.040, 9.2.3.24.8: If the count is zero, sequence
-                            // is zero, or sequence > count, ignore the entire element
-                            if (count == 0 || sequence == 0 || sequence > count) {
-                                referenceNumber = -1;
-                            }
-                            break;
-                        }
-                        
-                        case SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT: {
-                            byte[] data = element.getData();
-                            
-                            destPort = (data[0] & 0xff) << 8;
-                            destPort |= (data[1] & 0xff);
-                            
-                            break;
-                        }
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    Log.e(TAG, "Bad element in header", e);
-                    return;  // TODO: NACK the message or something, don't just discard.
-                }
-            }
-        }
-
-        if (referenceNumber == -1) {
-            // notify everyone of the message if it isn't partial
+        SmsHeader smsHeader = sms.getUserDataHeader();
+         // See if message is partial or port addressed.
+        if ((smsHeader == null) || (smsHeader.concatRef == null)) {
+            // Message is not partial (not part of concatenated sequence).
             byte[][] pdus = new byte[1][];
             pdus[0] = sms.getPdu();
 
-            if (destPort != -1) {
-                if (destPort == SmsHeader.PORT_WAP_PUSH) {
+            if (smsHeader.portAddrs != null) {
+                if (smsHeader.portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
                     mWapPush.dispatchWapPdu(sms.getUserData());
                 }
-                // The message was sent to a port, so concoct a URI for it
-                dispatchPortAddressedPdus(pdus, destPort);
+                // The message was sent to a port, so concoct a URI for it.
+                dispatchPortAddressedPdus(pdus, smsHeader.portAddrs.destPort);
             } else {
-                // It's a normal message, dispatch it
+                // Normal short and non-port-addressed message, dispatch it.
                 dispatchPdus(pdus);
             }
         } else {
-            // Process the message part
-            processMessagePart(sms, referenceNumber, sequence, count, destPort);
+            // Process the message part.
+            processMessagePart(sms, smsHeader.concatRef, smsHeader.portAddrs);
         }
     }
 
@@ -208,28 +142,30 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     protected void sendMultipartText(String destinationAddress, String scAddress,
             ArrayList<String> parts, ArrayList<PendingIntent> sentIntents,
             ArrayList<PendingIntent> deliveryIntents) {
-        int ref = ++sConcatenatedRef & 0xff;
 
-        for (int i = 0, count = parts.size(); i < count; i++) {
-            // build SmsHeader
-            byte[] data = new byte[3];
-            data[0] = (byte) ref;   // reference #, unique per message
-            data[1] = (byte) count; // total part count
-            data[2] = (byte) (i + 1);  // 1-based sequence
-            SmsHeader header = new SmsHeader();
-            header.add(new SmsHeader.Element(SmsHeader.CONCATENATED_8_BIT_REFERENCE, data));
+        int refNumber = getNextConcatenatedRef() & 0x00FF;
+
+        for (int i = 0, msgCount = parts.size(); i < msgCount; i++) {
+            SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+            concatRef.refNumber = refNumber;
+            concatRef.seqNumber = i + 1;  // 1-based sequence
+            concatRef.msgCount = msgCount;
+            concatRef.isEightBits = false;
+            SmsHeader smsHeader = new SmsHeader();
+            smsHeader.concatRef = concatRef;
+
             PendingIntent sentIntent = null;
-            PendingIntent deliveryIntent = null;
-
             if (sentIntents != null && sentIntents.size() > i) {
                 sentIntent = sentIntents.get(i);
             }
+
+            PendingIntent deliveryIntent = null;
             if (deliveryIntents != null && deliveryIntents.size() > i) {
                 deliveryIntent = deliveryIntents.get(i);
             }
 
             SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
-                    parts.get(i), deliveryIntent != null, header.toByteArray());
+                    parts.get(i), deliveryIntent != null, SmsHeader.toByteArray(smsHeader));
 
             sendRawPdu(pdus.encodedScAddress, pdus.encodedMessage, sentIntent, deliveryIntent);
         }
@@ -259,18 +195,16 @@ final class GsmSMSDispatcher extends SMSDispatcher {
      *   to the recipient.  The raw pdu of the status report is in the
      *   extended data ("pdu").
      */
-    private void sendMultipartTextWithPermit(String destinationAddress, 
+    private void sendMultipartTextWithPermit(String destinationAddress,
             String scAddress, ArrayList<String> parts,
-            ArrayList<PendingIntent> sentIntents, 
+            ArrayList<PendingIntent> sentIntents,
             ArrayList<PendingIntent> deliveryIntents) {
-        
-        PendingIntent sentIntent = null;
-        PendingIntent deliveryIntent = null;
-        
+
         // check if in service
         int ss = mPhone.getServiceState().getState();
         if (ss != ServiceState.STATE_IN_SERVICE) {
             for (int i = 0, count = parts.size(); i < count; i++) {
+                PendingIntent sentIntent = null;
                 if (sentIntents != null && sentIntents.size() > i) {
                     sentIntent = sentIntents.get(i);
                 }
@@ -280,26 +214,29 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             return;
         }
 
-        int ref = ++sConcatenatedRef & 0xff;
+        int refNumber = getNextConcatenatedRef() & 0x00FF;
 
-        for (int i = 0, count = parts.size(); i < count; i++) {
-            // build SmsHeader
-            byte[] data = new byte[3];
-            data[0] = (byte) ref;   // reference #, unique per message
-            data[1] = (byte) count; // total part count
-            data[2] = (byte) (i + 1);  // 1-based sequence
-            SmsHeader header = new SmsHeader();
-            header.add(new SmsHeader.Element(SmsHeader.CONCATENATED_8_BIT_REFERENCE, data));
- 
+        for (int i = 0, msgCount = parts.size(); i < msgCount; i++) {
+            SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+            concatRef.refNumber = refNumber;
+            concatRef.seqNumber = i + 1;  // 1-based sequence
+            concatRef.msgCount = msgCount;
+            concatRef.isEightBits = false;
+            SmsHeader smsHeader = new SmsHeader();
+            smsHeader.concatRef = concatRef;
+
+            PendingIntent sentIntent = null;
             if (sentIntents != null && sentIntents.size() > i) {
                 sentIntent = sentIntents.get(i);
             }
+
+            PendingIntent deliveryIntent = null;
             if (deliveryIntents != null && deliveryIntents.size() > i) {
                 deliveryIntent = deliveryIntents.get(i);
             }
 
             SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
-                    parts.get(i), deliveryIntent != null, header.toByteArray());
+                    parts.get(i), deliveryIntent != null, SmsHeader.toByteArray(smsHeader));
 
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("smsc", pdus.encodedScAddress);
@@ -307,7 +244,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
             SmsTracker tracker =  SmsTrackerFactory(map, sentIntent, deliveryIntent);
             sendSms(tracker);
-        }        
+        }
     }
 
     /** {@inheritDoc} */
@@ -376,4 +313,3 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
 }
-
