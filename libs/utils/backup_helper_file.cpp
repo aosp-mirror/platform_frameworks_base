@@ -40,7 +40,7 @@ namespace android {
 #define MAGIC0 0x70616e53 // Snap
 #define MAGIC1 0x656c6946 // File
 
-#if TEST_BACKUP_HELPERS
+#if 0 // TEST_BACKUP_HELPERS
 #define LOGP(x...) printf(x)
 #else
 #define LOGP(x...) LOGD(x)
@@ -181,45 +181,105 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileState>& snapshot)
 }
 
 static int
-write_delete_file(const String8& key)
+write_delete_file(BackupDataWriter* dataStream, const String8& key)
 {
     LOGP("write_delete_file %s\n", key.string());
-    return 0;
+    return dataStream->WriteEntityHeader(key, -1);
 }
 
 static int
-write_update_file(const String8& realFilename, const String8& key)
+write_update_file(BackupDataWriter* dataStream, int fd, const String8& key,
+        const String8& realFilename)
 {
     LOGP("write_update_file %s (%s)\n", realFilename.string(), key.string());
-    return 0;
+
+    const int bufsize = 4*1024;
+    int err;
+    int amt;
+    int fileSize;
+    int bytesLeft;
+
+    char* buf = (char*)malloc(bufsize);
+    int crc = crc32(0L, Z_NULL, 0);
+
+
+    bytesLeft = fileSize = lseek(fd, 0, SEEK_END);
+    lseek(fd, 0, SEEK_SET);
+
+    err = dataStream->WriteEntityHeader(key, bytesLeft);
+    if (err != 0) {
+        return err;
+    }
+
+    while ((amt = read(fd, buf, bufsize)) != 0 && bytesLeft > 0) {
+        bytesLeft -= amt;
+        if (bytesLeft < 0) {
+            amt += bytesLeft; // Plus a negative is minus.  Don't write more than we promised.
+        }
+        err = dataStream->WriteEntityData(buf, amt);
+        if (err != 0) {
+            return err;
+        }
+    }
+    if (bytesLeft != 0) {
+        if (bytesLeft > 0) {
+            // Pad out the space we promised in the buffer.  We can't corrupt the buffer,
+            // even though the data we're sending is probably bad.
+            memset(buf, 0, bufsize);
+            while (bytesLeft > 0) {
+                amt = bytesLeft < bufsize ? bytesLeft : bufsize;
+                bytesLeft -= amt;
+                err = dataStream->WriteEntityData(buf, amt);
+                if (err != 0) {
+                    return err;
+                }
+            }
+        }
+        LOGE("write_update_file size mismatch for %s. expected=%d actual=%d."
+                " You aren't doing proper locking!",
+                realFilename.string(), fileSize, fileSize-bytesLeft);
+    }
+
+    free(buf);
+
+    return NO_ERROR;
 }
 
 static int
-compute_crc32(const String8& filename)
+write_update_file(BackupDataWriter* dataStream, const String8& key, const String8& realFilename)
+{
+    int err;
+    int fd = open(realFilename.string(), O_RDONLY);
+    if (fd == -1) {
+        return errno;
+    }
+    err = write_update_file(dataStream, fd, key, realFilename);
+    close(fd);
+    return err;
+}
+
+static int
+compute_crc32(int fd)
 {
     const int bufsize = 4*1024;
     int amt;
 
-    int fd = open(filename.string(), O_RDONLY);
-    if (fd == -1) {
-        return -1;
-    }
-
     char* buf = (char*)malloc(bufsize);
     int crc = crc32(0L, Z_NULL, 0);
+
+    lseek(fd, 0, SEEK_SET);
 
     while ((amt = read(fd, buf, bufsize)) != 0) {
         crc = crc32(crc, (Bytef*)buf, amt);
     }
 
-    close(fd);
     free(buf);
 
     return crc;
 }
 
 int
-back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
+back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD,
         char const* fileBase, char const* const* files, int fileCount)
 {
     int err;
@@ -252,7 +312,8 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
         s.modTime_nsec = 0; // workaround sim breakage
         //s.modTime_nsec = st.st_mtime_nsec;
         s.size = st.st_size;
-        s.crc32 = compute_crc32(realFilename);
+
+        // we compute the crc32 later down below, when we already have the file open.
 
         newSnapshot.add(name, s);
     }
@@ -270,30 +331,42 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
             String8 realFilename(base);
             realFilename.appendPath(q);
             LOGP("file added: %s\n", realFilename.string());
-            write_update_file(realFilename, q);
+            write_update_file(dataStream, q, realFilename);
             m++;
         }
         else if (cmp < 0) {
             // file removed
             LOGP("file removed: %s\n", p.string());
-            write_delete_file(p);
+            dataStream->WriteEntityHeader(p, -1);
             n++;
         }
         else {
+
             // both files exist, check them
             String8 realFilename(base);
             realFilename.appendPath(q);
             const FileState& f = oldSnapshot.valueAt(n);
-            const FileState& g = newSnapshot.valueAt(m);
+            FileState& g = newSnapshot.editValueAt(m);
 
-            LOGP("%s\n", q.string());
-            LOGP("  new: modTime=%d,%d size=%-3d crc32=0x%08x\n",
-                    f.modTime_sec, f.modTime_nsec, f.size, f.crc32);
-            LOGP("  old: modTime=%d,%d size=%-3d crc32=0x%08x\n",
-                    g.modTime_sec, g.modTime_nsec, g.size, g.crc32);
-            if (f.modTime_sec != g.modTime_sec || f.modTime_nsec != g.modTime_nsec
-                    || f.size != g.size || f.crc32 != g.crc32) {
-                write_update_file(realFilename, p);
+            int fd = open(realFilename.string(), O_RDONLY);
+            if (fd != -1) {
+                // We can't open the file.  Don't report it as a delete either.  Let the
+                // server keep the old version.  Maybe they'll be able to deal with it
+                // on restore.
+            } else {
+                g.crc32 = compute_crc32(fd);
+
+                LOGP("%s\n", q.string());
+                LOGP("  new: modTime=%d,%d size=%-3d crc32=0x%08x\n",
+                        f.modTime_sec, f.modTime_nsec, f.size, f.crc32);
+                LOGP("  old: modTime=%d,%d size=%-3d crc32=0x%08x\n",
+                        g.modTime_sec, g.modTime_nsec, g.size, g.crc32);
+                if (f.modTime_sec != g.modTime_sec || f.modTime_nsec != g.modTime_nsec
+                        || f.size != g.size || f.crc32 != g.crc32) {
+                    write_update_file(dataStream, fd, p, realFilename);
+                }
+
+                close(fd);
             }
             n++;
             m++;
@@ -302,7 +375,7 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
 
     // these were deleted
     while (n<N) {
-        write_delete_file(oldSnapshot.keyAt(n));
+        dataStream->WriteEntityHeader(oldSnapshot.keyAt(n), -1);
         n++;
     }
 
@@ -311,7 +384,7 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
         const String8& q = newSnapshot.keyAt(m);
         String8 realFilename(base);
         realFilename.appendPath(q);
-        write_update_file(realFilename, q);
+        write_update_file(dataStream, q, realFilename);
         m++;
     }
 
@@ -911,10 +984,14 @@ backup_helper_test_files()
         fprintf(stderr, "error creating: %s\n", strerror(errno));
         return errno;
     }
+
+    {
+        BackupDataWriter dataStream(dataStreamFD);
     
-    err = back_up_files(-1, dataStreamFD, newSnapshotFD, SCRATCH_DIR, files_before, 5);
-    if (err != 0) {
-        return err;
+        err = back_up_files(-1, &dataStream, newSnapshotFD, SCRATCH_DIR, files_before, 5);
+        if (err != 0) {
+            return err;
+        }
     }
 
     close(dataStreamFD);
@@ -968,10 +1045,15 @@ backup_helper_test_files()
         return errno;
     }
 
-    err = back_up_files(oldSnapshotFD, dataStreamFD, newSnapshotFD, SCRATCH_DIR, files_after, 6);
-    if (err != 0) {
-        return err;
-    }
+    {
+        BackupDataWriter dataStream(dataStreamFD);
+    
+        err = back_up_files(oldSnapshotFD, &dataStream, newSnapshotFD, SCRATCH_DIR,
+                files_after, 6);
+        if (err != 0) {
+            return err;
+        }
+}
 
     close(oldSnapshotFD);
     close(dataStreamFD);
