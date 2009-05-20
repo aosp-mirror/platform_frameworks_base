@@ -73,7 +73,7 @@ public class GoogleHttpClient implements HttpClient {
     private final AndroidHttpClient mClient;
     private final ContentResolver mResolver;
     private final String mAppName, mUserAgent;
-    private final ThreadLocal mConnectionAllocated = new ThreadLocal<Boolean>();
+    private final ThreadLocal<Boolean> mConnectionAllocated = new ThreadLocal<Boolean>();
 
     /**
      * Create an HTTP client without SSL session persistence.
@@ -153,6 +153,8 @@ public class GoogleHttpClient implements HttpClient {
      * Delegating wrapper for SocketFactory records when sockets are connected.
      * We use this to know whether a connection was created vs reused, to
      * gather per-app statistics about connection reuse rates.
+     * (Note, we record only *connection*, not *creation* of sockets --
+     * what we care about is the network overhead of an actual TCP connect.)
      */
     private class WrappedSocketFactory implements SocketFactory {
         private SocketFactory mDelegate;
@@ -227,6 +229,8 @@ public class GoogleHttpClient implements HttpClient {
         } finally {
             // Record some statistics to the checkin service about the outcome.
             // Note that this is only describing execute(), not body download.
+            // We assume the database writes are much faster than network I/O,
+            // and not worth running in a background thread or anything.
             try {
                 long elapsed = SystemClock.elapsedRealtime() - start;
                 ContentValues values = new ContentValues();
