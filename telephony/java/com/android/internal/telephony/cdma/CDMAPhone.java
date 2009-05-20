@@ -52,6 +52,7 @@ import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.PhoneSubInfo;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,8 +127,8 @@ public class CDMAPhone extends PhoneBase {
 
 
         //Change the system setting
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.CDMA_PHONE);
+        SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
+                new Integer(RILConstants.CDMA_PHONE).toString());
     }
 
     public void dispose() {
