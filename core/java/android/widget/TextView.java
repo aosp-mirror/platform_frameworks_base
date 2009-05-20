@@ -3701,6 +3701,52 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    public void invalidateDrawable(Drawable drawable) {
+        if (verifyDrawable(drawable)) {
+            final Rect dirty = drawable.getBounds();
+            int scrollX = mScrollX;
+            int scrollY = mScrollY;
+
+            // IMPORTANT: The coordinates below are based on the coordinates computed
+            // for each compound drawable in onDraw(). Make sure to update each section
+            // accordingly.
+            final TextView.Drawables drawables = mDrawables;
+            if (drawable == drawables.mDrawableLeft) {
+                final int compoundPaddingTop = getCompoundPaddingTop();
+                final int compoundPaddingBottom = getCompoundPaddingBottom();
+                final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
+
+                scrollX += mPaddingLeft;
+                scrollY += compoundPaddingTop + (vspace - drawables.mDrawableHeightLeft) / 2;
+            } else if (drawable == drawables.mDrawableRight) {
+                final int compoundPaddingTop = getCompoundPaddingTop();
+                final int compoundPaddingBottom = getCompoundPaddingBottom();
+                final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
+
+                scrollX += (mRight - mLeft - mPaddingRight - drawables.mDrawableSizeRight);
+                scrollY += compoundPaddingTop + (vspace - drawables.mDrawableHeightRight) / 2;
+            } else if (drawable == drawables.mDrawableTop) {
+                final int compoundPaddingLeft = getCompoundPaddingLeft();
+                final int compoundPaddingRight = getCompoundPaddingRight();
+                final int hspace = mRight - mLeft - compoundPaddingRight - compoundPaddingLeft;
+
+                scrollX += compoundPaddingLeft + (hspace - drawables.mDrawableWidthTop) / 2;
+                scrollY += mPaddingTop;
+            } else if (drawable == drawables.mDrawableBottom) {
+                final int compoundPaddingLeft = getCompoundPaddingLeft();
+                final int compoundPaddingRight = getCompoundPaddingRight();
+                final int hspace = mRight - mLeft - compoundPaddingRight - compoundPaddingLeft;
+
+                scrollX += compoundPaddingLeft + (hspace - drawables.mDrawableWidthBottom) / 2;
+                scrollY += (mBottom - mTop - mPaddingBottom - drawables.mDrawableSizeBottom);
+            }
+
+            invalidate(dirty.left + scrollX, dirty.top + scrollY,
+                    dirty.right + scrollX, dirty.bottom + scrollY);
+        }
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         restartMarqueeIfNeeded();
 
@@ -3728,6 +3774,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int vspace = bottom - top - compoundPaddingBottom - compoundPaddingTop;
             int hspace = right - left - compoundPaddingRight - compoundPaddingLeft;
 
+            // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
+            // Make sure to update invalidateDrawable() when changing this code.
             if (dr.mDrawableLeft != null) {
                 canvas.save();
                 canvas.translate(scrollX + mPaddingLeft,
@@ -3737,6 +3785,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 canvas.restore();
             }
 
+            // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
+            // Make sure to update invalidateDrawable() when changing this code.
             if (dr.mDrawableRight != null) {
                 canvas.save();
                 canvas.translate(scrollX + right - left - mPaddingRight - dr.mDrawableSizeRight,
@@ -3745,6 +3795,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 canvas.restore();
             }
 
+            // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
+            // Make sure to update invalidateDrawable() when changing this code.
             if (dr.mDrawableTop != null) {
                 canvas.save();
                 canvas.translate(scrollX + compoundPaddingLeft + (hspace - dr.mDrawableWidthTop) / 2,
@@ -3753,6 +3805,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 canvas.restore();
             }
 
+            // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
+            // Make sure to update invalidateDrawable() when changing this code.
             if (dr.mDrawableBottom != null) {
                 canvas.save();
                 canvas.translate(scrollX + compoundPaddingLeft +
