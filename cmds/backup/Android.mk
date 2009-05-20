@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= backup.cpp
 
-LOCAL_SHARED_LIBRARIES := libcutils libc libutils
+LOCAL_SHARED_LIBRARIES := libcutils libutils
 
 LOCAL_MODULE:= btool
 
