@@ -21,7 +21,6 @@ package com.android.gesture;
  * label is null.
  */
 class Instance {
-
     private static final int SEQUENCE_SAMPLE_SIZE = 16;
 
     private static final int PATCH_SAMPLE_SIZE = 8;
@@ -40,10 +39,10 @@ class Instance {
     final float magnitude;
 
     // the id of the instance
-    final long instanceID;
+    final long id;
 
     private Instance(long id, float[] sample, String sampleName) {
-        instanceID = id;
+        this.id = id;
         vector = sample;
         label = sampleName;
         float sum = 0;
@@ -72,14 +71,13 @@ class Instance {
     }
 
     private static float[] spatialSampler(Gesture gesture) {
-        float[] pts = GestureUtils.spatialSampling(gesture, PATCH_SAMPLE_SIZE);
-        return pts;
+        return GestureUtilities.spatialSampling(gesture, PATCH_SAMPLE_SIZE);
     }
 
     private static float[] temporalSampler(GestureLibrary gesturelib, Gesture gesture) {
-        float[] pts = GestureUtils.temporalSampling(gesture.getStrokes().get(0),
+        float[] pts = GestureUtilities.temporalSampling(gesture.getStrokes().get(0),
                 SEQUENCE_SAMPLE_SIZE);
-        float[] center = GestureUtils.computeCentroid(pts);
+        float[] center = GestureUtilities.computeCentroid(pts);
         float orientation = (float) Math.atan2(pts[1] - center[1], pts[0] - center[0]);
         orientation *= 180 / Math.PI;
 

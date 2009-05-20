@@ -28,4 +28,5 @@ interface GestureConstants {
     static final int STROKE_STRING_BUFFER_SIZE = 1024;
     static final int STROKE_POINT_BUFFER_SIZE = 100; // number of points
     static final int IO_BUFFER_SIZE = 8 * 1024; // 8K
+    String LOG_TAG = "GestureLibrary";
 }

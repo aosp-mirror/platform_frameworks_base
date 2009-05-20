@@ -34,13 +34,11 @@ import java.util.ArrayList;
  */
 
 public class Gesture implements Parcelable {
-
     private static final long GESTURE_ID_BASE = System.currentTimeMillis();
 
     private static final int BITMAP_RENDERING_WIDTH = 2;
 
     private static final boolean BITMAP_RENDERING_ANTIALIAS = true;
-
     private static final boolean BITMAP_RENDERING_DITHER = true;
 
     private static int sGestureCount = 0;
@@ -50,7 +48,7 @@ public class Gesture implements Parcelable {
     // the same as its instance ID
     private long mGestureID;
 
-    private ArrayList<GestureStroke> mStrokes = new ArrayList<GestureStroke>();
+    private final ArrayList<GestureStroke> mStrokes = new ArrayList<GestureStroke>();
 
     public Gesture() {
         mGestureID = GESTURE_ID_BASE + sGestureCount++;
@@ -93,12 +91,13 @@ public class Gesture implements Parcelable {
      */
     public float getLength() {
         int len = 0;
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
+        final ArrayList<GestureStroke> strokes = mStrokes;
+        final int count = strokes.size();
+
         for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            len += stroke.length;
+            len += strokes.get(i).length;
         }
+
         return len;
     }
 
@@ -131,11 +130,11 @@ public class Gesture implements Parcelable {
      * @param canvas
      */
     void draw(Canvas canvas, Paint paint) {
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
+        final ArrayList<GestureStroke> strokes = mStrokes;
+        final int count = strokes.size();
+
         for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            stroke.draw(canvas, paint);
+            strokes.get(i).draw(canvas, paint);
         }
     }
 
@@ -150,7 +149,6 @@ public class Gesture implements Parcelable {
      * @return the bitmap
      */
     public Bitmap toBitmap(int width, int height, int edge, int numSample, int color) {
-        RectF bbx = getBoundingBox();
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.translate(edge, edge);
@@ -162,11 +160,12 @@ public class Gesture implements Parcelable {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(BITMAP_RENDERING_WIDTH);
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
+
+        final ArrayList<GestureStroke> strokes = mStrokes;
+        final int count = strokes.size();
+
         for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            Path path = stroke.toPath(width - 2 * edge, height - 2 * edge, numSample);
+            Path path = strokes.get(i).toPath(width - 2 * edge, height - 2 * edge, numSample);
             canvas.drawPath(path, paint);
         }
 
@@ -183,7 +182,6 @@ public class Gesture implements Parcelable {
      * @return the bitmap
      */
     public Bitmap toBitmap(int width, int height, int edge, int color) {
-        RectF bbx = getBoundingBox();
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.translate(edge, edge);
@@ -232,7 +230,8 @@ public class Gesture implements Parcelable {
     public void createFromString(String str) {
         int startIndex = 0;
         int endIndex;
-        while ((endIndex = str.indexOf(GestureConstants.STRING_GESTURE_DELIIMITER, startIndex + 1)) != -1) {
+        while ((endIndex =
+                str.indexOf(GestureConstants.STRING_GESTURE_DELIIMITER, startIndex + 1)) != -1) {
             String token = str.substring(startIndex, endIndex);
             if (startIndex > 0) { // stroke tokens
                 addStroke(GestureStroke.createFromString(token));
