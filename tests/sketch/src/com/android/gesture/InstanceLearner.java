@@ -46,9 +46,9 @@ class InstanceLearner extends Learner {
             }
             double distance;
             if (lib.getGestureType() == GestureLibrary.SEQUENCE_SENSITIVE) {
-                distance = GestureUtils.cosineDistance(sample, instance);
+                distance = GestureUtilities.cosineDistance(sample, instance);
             } else {
-                distance = GestureUtils.squaredEuclideanDistance(sample.vector, instance.vector);
+                distance = GestureUtilities.squaredEuclideanDistance(sample.vector, instance.vector);
             }
             double weight;
             if (distance == 0) {

@@ -34,50 +34,48 @@ public class GestureStroke {
     public final RectF boundingBox;
 
     public final float length;
-
     public final float[] points;
 
     private final long[] timestamps;
-
     private Path mCachedPath;
 
     /**
      * Construct a gesture stroke from a list of gesture points
      * 
-     * @param pts
+     * @param points
      */
-    public GestureStroke(ArrayList<GesturePoint> pts) {
-        float[] tmpPoints = new float[pts.size() * 2];
-        long[] times = new long[pts.size()];
+    public GestureStroke(ArrayList<GesturePoint> points) {
+        final int count = points.size();
+        final float[] tmpPoints = new float[count * 2];
+        final long[] times = new long[count];
 
         RectF bx = null;
         float len = 0;
         int index = 0;
-        int count = pts.size();
 
         for (int i = 0; i < count; i++) {
-            GesturePoint p = pts.get(i);
-            tmpPoints[i * 2] = p.xpos;
-            tmpPoints[i * 2 + 1] = p.ypos;
+            final GesturePoint p = points.get(i);
+            tmpPoints[i * 2] = p.x;
+            tmpPoints[i * 2 + 1] = p.y;
             times[index] = p.timestamp;
 
             if (bx == null) {
                 bx = new RectF();
-                bx.top = p.ypos;
-                bx.left = p.xpos;
-                bx.right = p.xpos;
-                bx.bottom = p.ypos;
+                bx.top = p.y;
+                bx.left = p.x;
+                bx.right = p.x;
+                bx.bottom = p.y;
                 len = 0;
             } else {
-                len += Math.sqrt(Math.pow(p.xpos - tmpPoints[(i - 1) * 2], 2)
-                        + Math.pow(p.ypos - tmpPoints[(i -1 ) * 2 + 1], 2));
-                bx.union(p.xpos, p.ypos);
+                len += Math.sqrt(Math.pow(p.x - tmpPoints[(i - 1) * 2], 2)
+                        + Math.pow(p.y - tmpPoints[(i -1 ) * 2 + 1], 2));
+                bx.union(p.x, p.y);
             }
             index++;
         }
         
         timestamps = times;
-        points = tmpPoints;
+        this.points = tmpPoints;
         boundingBox = bx;
         length = len;
     }
@@ -89,13 +87,17 @@ public class GestureStroke {
      */
     void draw(Canvas canvas, Paint paint) {
         if (mCachedPath == null) {
-            float[] pts = points;
-            int count = pts.length;
+            final float[] localPoints = points;
+            final int count = localPoints.length;
+
             Path path = null;
-            float mX = 0, mY = 0;
+
+            float mX = 0;
+            float mY = 0;
+
             for (int i = 0; i < count; i += 2) {
-                float x = pts[i];
-                float y = pts[i + 1];
+                float x = localPoints[i];
+                float y = localPoints[i + 1];
                 if (path == null) {
                     path = new Path();
                     path.moveTo(x, y);
@@ -127,22 +129,22 @@ public class GestureStroke {
      * @return the path
      */
     public Path toPath(float width, float height, int numSample) {
-        float[] pts = GestureUtils.temporalSampling(this, numSample);
-        RectF rect = boundingBox;
-        float scale = height / rect.height();
-        Matrix matrix = new Matrix();
+        final float[] pts = GestureUtilities.temporalSampling(this, numSample);
+        final RectF rect = boundingBox;
+        final float scale = height / rect.height();
+
+        final Matrix matrix = new Matrix();
         matrix.setTranslate(-rect.left, -rect.top);
-        Matrix scaleMatrix = new Matrix();
-        scaleMatrix.setScale(scale, scale);
-        matrix.postConcat(scaleMatrix);
-        Matrix translate = new Matrix();
-        matrix.postConcat(translate);
+        matrix.postScale(scale, scale);
         matrix.mapPoints(pts);
 
-        Path path = null;
         float mX = 0;
         float mY = 0;
-        int count = pts.length;
+
+        Path path = null;
+
+        final int count = pts.length;
+
         for (int i = 0; i < count; i += 2) {
             float x = pts[i];
             float y = pts[i + 1];
@@ -161,6 +163,7 @@ public class GestureStroke {
                 }
             }
         }
+
         return path;
     }
 
@@ -184,11 +187,14 @@ public class GestureStroke {
      * @return the gesture stroke
      */
     public static GestureStroke createFromString(String str) {
-        ArrayList<GesturePoint> points = new ArrayList<GesturePoint>(
+        final ArrayList<GesturePoint> points = new ArrayList<GesturePoint>(
                 GestureConstants.STROKE_POINT_BUFFER_SIZE);
+
         int endIndex;
         int startIndex = 0;
-        while ((endIndex = str.indexOf(GestureConstants.STRING_STROKE_DELIIMITER, startIndex + 1)) != -1) {
+
+        while ((endIndex =
+                str.indexOf(GestureConstants.STRING_STROKE_DELIIMITER, startIndex + 1)) != -1) {
 
             // parse x
             String token = str.substring(startIndex, endIndex);
@@ -209,6 +215,7 @@ public class GestureStroke {
 
             points.add(new GesturePoint(x, y, time));
         }
+
         return new GestureStroke(points);
     }
 
@@ -217,15 +224,17 @@ public class GestureStroke {
      */
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder(GestureConstants.STROKE_STRING_BUFFER_SIZE);
-        float[] pts = points;
-        long[] times = timestamps;
-        int count = points.length;
+        final StringBuilder str = new StringBuilder(GestureConstants.STROKE_STRING_BUFFER_SIZE);
+        final float[] pts = points;
+        final long[] times = timestamps;
+        final int count = points.length;
+
         for (int i = 0; i < count; i += 2) {
-            str.append(points[i] + GestureConstants.STRING_STROKE_DELIIMITER + points[i + 1]
-                    + GestureConstants.STRING_STROKE_DELIIMITER + times[i / 2]
-                    + GestureConstants.STRING_STROKE_DELIIMITER);
+            str.append(pts[i]).append(GestureConstants.STRING_STROKE_DELIIMITER);
+            str.append(pts[i + 1]).append(GestureConstants.STRING_STROKE_DELIIMITER);
+            str.append(times[i / 2]).append(GestureConstants.STRING_STROKE_DELIIMITER);
         }
+
         return str.toString();
     }
 

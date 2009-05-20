@@ -20,45 +20,44 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.DataInputStream;
+import java.io.BufferedInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
 public class LetterRecognizer {
+    private static final String LOG_TAG = "LetterRecognizer";
 
-    private static final String LOGTAG = "LetterRecognizer";
-
-    public final static int LATTIN_LOWERCASE = 0;
+    public final static int LATIN_LOWERCASE = 0;
 
     private SigmoidUnit[] mHiddenLayer;
-
     private SigmoidUnit[] mOutputLayer;
 
     private final String[] mClasses;
 
     private final int mInputCount;
 
-    private class SigmoidUnit {
+    private static class SigmoidUnit {
+        final float[] mWeights;
 
-        private float[] mWeights;
-
-        private SigmoidUnit(float[] weights) {
+        SigmoidUnit(float[] weights) {
             mWeights = weights;
         }
 
         private float compute(float[] inputs) {
             float sum = 0;
-            int count = inputs.length;
-            float[] weights = mWeights;
+
+            final int count = inputs.length;
+            final float[] weights = mWeights;
+
             for (int i = 0; i < count; i++) {
                 sum += inputs[i] * weights[i];
             }
             sum += weights[weights.length - 1];
-            return 1 / (float)(1 + Math.exp(-sum));
+
+            return 1.0f / (float) (1 + Math.exp(-sum));
         }
     }
 
@@ -71,33 +70,35 @@ public class LetterRecognizer {
 
     public static LetterRecognizer getLetterRecognizer(Context context, int type) {
         switch (type) {
-            case LATTIN_LOWERCASE: {
-                return createFromResource(context, com.android.internal.R.raw.lattin_lowercase);
+            case LATIN_LOWERCASE: {
+                return createFromResource(context, com.android.internal.R.raw.latin_lowercase);
             }
         }
         return null;
     }
 
     public ArrayList<Prediction> recognize(Gesture gesture) {
-        return this.classify(GestureUtils.spatialSampling(gesture, mInputCount));
+        return classify(GestureUtilities.spatialSampling(gesture, mInputCount));
     }
 
     private ArrayList<Prediction> classify(float[] vector) {
-        float[] intermediateOutput = compute(mHiddenLayer, vector);
-        float[] output = compute(mOutputLayer, intermediateOutput);
-        ArrayList<Prediction> predictions = new ArrayList<Prediction>();
+        final float[] intermediateOutput = compute(mHiddenLayer, vector);
+        final float[] output = compute(mOutputLayer, intermediateOutput);
+        final ArrayList<Prediction> predictions = new ArrayList<Prediction>();
+
         double sum = 0;
-        int count = mClasses.length;
+
+        final String[] classes = mClasses;
+        final int count = classes.length;
+
         for (int i = 0; i < count; i++) {
-            String name = mClasses[i];
             double score = output[i];
             sum += score;
-            predictions.add(new Prediction(name, score));
+            predictions.add(new Prediction(classes[i], score));
         }
 
         for (int i = 0; i < count; i++) {
-            Prediction name = predictions.get(i);
-            name.score /= sum;
+            predictions.get(i).score /= sum;
         }
 
         Collections.sort(predictions, new Comparator<Prediction>() {
@@ -117,82 +118,63 @@ public class LetterRecognizer {
     }
 
     private float[] compute(SigmoidUnit[] layer, float[] input) {
-        float[] output = new float[layer.length];
-        int count = layer.length;
+        final float[] output = new float[layer.length];
+        final int count = layer.length;
+
         for (int i = 0; i < count; i++) {
             output[i] = layer[i].compute(input);
         }
+
         return output;
     }
 
     private static LetterRecognizer createFromResource(Context context, int resourceID) {
-        Resources resources = context.getResources();
-        InputStream stream = resources.openRawResource(resourceID);
+        final Resources resources = context.getResources();
+
+        DataInputStream in = null;
+        LetterRecognizer classifier = null;
+
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            in = new DataInputStream(new BufferedInputStream(resources.openRawResource(resourceID)));
 
-            String line = reader.readLine();
-            int startIndex = 0;
-            int endIndex = -1;
-            endIndex = line.indexOf(" ", startIndex);
-            int iCount = Integer.parseInt(line.substring(startIndex, endIndex));
+            final int iCount = in.readInt();
+            final int hCount = in.readInt();
+            final int oCount = in.readInt();
 
-            startIndex = endIndex + 1;
-            endIndex = line.indexOf(" ", startIndex);
-            int hCount = Integer.parseInt(line.substring(startIndex, endIndex));
-
-            startIndex = endIndex + 1;
-            endIndex = line.length();
-            int oCount = Integer.parseInt(line.substring(startIndex, endIndex));
-
-            String[] classes = new String[oCount];
-            line = reader.readLine();
-            startIndex = 0;
-            endIndex = -1;
-            for (int i = 0; i < oCount; i++) {
-                endIndex = line.indexOf(" ", startIndex);
-                classes[i] = line.substring(startIndex, endIndex);
-                startIndex = endIndex + 1;
+            final String[] classes = new String[oCount];
+            for (int i = 0; i < classes.length; i++) {
+                classes[i] = in.readUTF();
             }
 
-            LetterRecognizer classifier = new LetterRecognizer(iCount, hCount, classes);
+            classifier = new LetterRecognizer(iCount, hCount, classes);
             SigmoidUnit[] hiddenLayer = new SigmoidUnit[hCount];
             SigmoidUnit[] outputLayer = new SigmoidUnit[oCount];
 
             for (int i = 0; i < hCount; i++) {
                 float[] weights = new float[iCount];
-                line = reader.readLine();
-                startIndex = 0;
                 for (int j = 0; j < iCount; j++) {
-                    endIndex = line.indexOf(" ", startIndex);
-                    weights[j] = Float.parseFloat(line.substring(startIndex, endIndex));
-                    startIndex = endIndex + 1;
+                    weights[j] = in.readFloat();
                 }
-                hiddenLayer[i] = classifier.new SigmoidUnit(weights);
+                hiddenLayer[i] = new SigmoidUnit(weights);
             }
 
             for (int i = 0; i < oCount; i++) {
                 float[] weights = new float[hCount];
-                line = reader.readLine();
-                startIndex = 0;
                 for (int j = 0; j < hCount; j++) {
-                    endIndex = line.indexOf(" ", startIndex);
-                    weights[j] = Float.parseFloat(line.substring(startIndex, endIndex));
-                    startIndex = endIndex + 1;
+                    weights[j] = in.readFloat();
                 }
-                outputLayer[i] = classifier.new SigmoidUnit(weights);
+                outputLayer[i] = new SigmoidUnit(weights);
             }
-
-            reader.close();
 
             classifier.mHiddenLayer = hiddenLayer;
             classifier.mOutputLayer = outputLayer;
 
-            return classifier;
-
-        } catch (IOException ex) {
-            Log.d(LOGTAG, "Failed to save gestures:", ex);
+        } catch (IOException e) {
+            Log.d(LOG_TAG, "Failed to load gestures:", e);
+        } finally {
+            GestureUtilities.closeStream(in);
         }
-        return null;
+
+        return classifier;
     }
 }

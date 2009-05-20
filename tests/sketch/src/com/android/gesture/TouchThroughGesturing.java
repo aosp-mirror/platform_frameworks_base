@@ -30,15 +30,11 @@ import java.util.ArrayList;
  */
 
 public class TouchThroughGesturing implements GestureListener {
-
     public static final int SINGLE_STROKE = 0;
-
     public static final int MULTIPLE_STROKE = 1;
 
     private static final float STROKE_LENGTH_THRESHOLD = 30;
-
     private static final float SQUARENESS_THRESHOLD = 0.275f;
-    
     private static final float ANGLE_THRESHOLD = 40;
 
     public static final int DEFAULT_UNCERTAIN_GESTURE_COLOR = Color.argb(60, 255, 255, 0);
@@ -47,15 +43,18 @@ public class TouchThroughGesturing implements GestureListener {
 
     private float mTotalLength;
 
-    private float mX, mY;
+    private float mX;
+    private float mY;
 
+    // TODO: Use WeakReference?
     private View mModel;
 
     private int mGestureType = SINGLE_STROKE;
-    
     private int mUncertainGestureColor = DEFAULT_UNCERTAIN_GESTURE_COLOR;
 
-    private ArrayList<GestureActionListener> mActionListeners = new ArrayList<GestureActionListener>();
+    // TODO: Use WeakReferences
+    private final ArrayList<GestureActionListener> mActionListeners =
+            new ArrayList<GestureActionListener>();
 
     public TouchThroughGesturing(View model) {
         mModel = model;
@@ -77,14 +76,17 @@ public class TouchThroughGesturing implements GestureListener {
         if (mGestureType == MULTIPLE_STROKE) {
             overlay.cancelFadingOut();
         }
+
         mX = event.getX();
         mY = event.getY();
         mTotalLength = 0;
         mIsGesturing = false;
+
         if (mGestureType == SINGLE_STROKE || overlay.getCurrentGesture() == null
                 || overlay.getCurrentGesture().getStrokesCount() == 0) {
             overlay.setGestureColor(mUncertainGestureColor);
         }
+
         mModel.dispatchTouchEvent(event);
     }
 
@@ -92,40 +94,45 @@ public class TouchThroughGesturing implements GestureListener {
         if (mIsGesturing) {
             return;
         }
-        float x = event.getX();
-        float y = event.getY();
-        float dx = x - mX;
-        float dy = y - mY;
+
+        final float x = event.getX();
+        final float y = event.getY();
+        final float dx = x - mX;
+        final float dy = y - mY;
+
         mTotalLength += (float)Math.sqrt(dx * dx + dy * dy);
         mX = x;
         mY = y;
 
         if (mTotalLength > STROKE_LENGTH_THRESHOLD) {
-            OrientedBoundingBox bbx = GestureUtils.computeOrientedBBX(overlay.getCurrentStroke());
-            float angle = Math.abs(bbx.orientation);
+            final OrientedBoundingBox box =
+                    GestureUtilities.computeOrientedBoundingBox(overlay.getCurrentStroke());
+            float angle = Math.abs(box.orientation);
             if (angle > 90) {
                 angle = 180 - angle;
             }
-            if (bbx.squareness > SQUARENESS_THRESHOLD || angle < ANGLE_THRESHOLD) {
+            if (box.squareness > SQUARENESS_THRESHOLD || angle < ANGLE_THRESHOLD) {
                 mIsGesturing = true;
                 overlay.setGestureColor(GestureOverlay.DEFAULT_GESTURE_COLOR);
                 event = MotionEvent.obtain(event.getDownTime(), System.currentTimeMillis(),
-                        MotionEvent.ACTION_UP, x, y, event.getPressure(), event.getSize(), event
-                                .getMetaState(), event.getXPrecision(), event.getYPrecision(),
+                        MotionEvent.ACTION_UP, x, y, event.getPressure(), event.getSize(),
+                        event.getMetaState(), event.getXPrecision(), event.getYPrecision(),
                         event.getDeviceId(), event.getEdgeFlags());
             }
         }
+
         mModel.dispatchTouchEvent(event);
     }
 
     public void onFinishGesture(GestureOverlay overlay, MotionEvent event) {
         if (mIsGesturing) {
             overlay.clear(true);
-            ArrayList<GestureActionListener> listeners = mActionListeners;
-            int count = listeners.size();
+
+            final ArrayList<GestureActionListener> listeners = mActionListeners;
+            final int count = listeners.size();
+
             for (int i = 0; i < count; i++) {
-                GestureActionListener listener = listeners.get(i);
-                listener.onGesturePerformed(overlay, overlay.getCurrentGesture());
+                listeners.get(i).onGesturePerformed(overlay, overlay.getCurrentGesture());
             }
         } else {
             mModel.dispatchTouchEvent(event);

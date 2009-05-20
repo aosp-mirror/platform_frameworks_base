@@ -17,15 +17,37 @@
 package com.android.gesture;
 
 import android.graphics.RectF;
+import android.graphics.Matrix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.io.Closeable;
+import java.io.IOException;
 
-public class GestureUtils {
+import static com.android.gesture.GestureConstants.*;
 
+public final class GestureUtilities {
     private static final int TEMPORAL_SAMPLING_RATE = 16;
-   
-    protected static float[] spatialSampling(Gesture gesture, int sampleMatrixDimension) {
+
+    private GestureUtilities() {
+    }
+
+    /**
+     * Closes the specified stream.
+     *
+     * @param stream The stream to close.
+     */
+    static void closeStream(Closeable stream) {
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                android.util.Log.e(LOG_TAG, "Could not close stream", e);
+            }
+        }
+    }
+
+    static float[] spatialSampling(Gesture gesture, int sampleMatrixDimension) {
         final float targetPatchSize = sampleMatrixDimension - 1; // edge inclusive
         float[] sample = new float[sampleMatrixDimension * sampleMatrixDimension];
         Arrays.fill(sample, 0);
@@ -120,7 +142,6 @@ public class GestureUtils {
         return sample;
     }
 
-    
     private static void plot(float x, float y, float[] sample, int sampleSize) {
         x = x < 0 ? 0 : x;
         y = y < 0 ? 0 : y;
@@ -175,7 +196,7 @@ public class GestureUtils {
      * @param sampleSize
      * @return a float array
      */
-    protected static float[] temporalSampling(GestureStroke stroke, int sampleSize) {
+    static float[] temporalSampling(GestureStroke stroke, int sampleSize) {
         final float increment = stroke.length / (sampleSize - 1);
         int vectorLength = sampleSize * 2;
         float[] vector = new float[vectorLength];
@@ -237,7 +258,7 @@ public class GestureUtils {
      * @param points
      * @return the centroid
      */
-    public static float[] computeCentroid(float[] points) {
+    static float[] computeCentroid(float[] points) {
         float centerX = 0;
         float centerY = 0;
         int count = points.length;
@@ -283,7 +304,7 @@ public class GestureUtils {
         return array;
     }
 
-    public static float computeTotalLength(float[] points) {
+    static float computeTotalLength(float[] points) {
         float sum = 0;
         int count = points.length - 4;
         for (int i = 0; i < count; i += 2) {
@@ -294,14 +315,14 @@ public class GestureUtils {
         return sum;
     }
 
-    public static double computeStraightness(float[] points) {
+    static double computeStraightness(float[] points) {
         float totalLen = computeTotalLength(points);
         float dx = points[2] - points[0];
         float dy = points[3] - points[1];
         return Math.sqrt(dx * dx + dy * dy) / totalLen;
     }
 
-    public static double computeStraightness(float[] points, float totalLen) {
+    static double computeStraightness(float[] points, float totalLen) {
         float dx = points[2] - points[0];
         float dy = points[3] - points[1];
         return Math.sqrt(dx * dx + dy * dy) / totalLen;
@@ -314,7 +335,7 @@ public class GestureUtils {
      * @param vector2
      * @return the distance
      */
-    protected static double squaredEuclideanDistance(float[] vector1, float[] vector2) {
+    static double squaredEuclideanDistance(float[] vector1, float[] vector2) {
         double squaredDistance = 0;
         int size = vector1.length;
         for (int i = 0; i < size; i++) {
@@ -331,7 +352,7 @@ public class GestureUtils {
      * @param in2
      * @return the distance between 0 and Math.PI
      */
-    protected static double cosineDistance(Instance in1, Instance in2) {
+    static double cosineDistance(Instance in1, Instance in2) {
         float sum = 0;
         float[] vector1 = in1.vector;
         float[] vector2 = in2.vector;
@@ -342,20 +363,19 @@ public class GestureUtils {
         return Math.acos(sum / (in1.magnitude * in2.magnitude));
     }
 
-    public static OrientedBoundingBox computeOrientedBBX(ArrayList<GesturePoint> pts) {
+    public static OrientedBoundingBox computeOrientedBoundingBox(ArrayList<GesturePoint> pts) {
         GestureStroke stroke = new GestureStroke(pts);
         float[] points = temporalSampling(stroke, TEMPORAL_SAMPLING_RATE);
-        return computeOrientedBBX(points);
+        return computeOrientedBoundingBox(points);
     }
 
-    public static OrientedBoundingBox computeOrientedBBX(float[] points) {
+    public static OrientedBoundingBox computeOrientedBoundingBox(float[] points) {
         float[] meanVector = computeCentroid(points);
-        return computeOrientedBBX(points, meanVector);
+        return computeOrientedBoundingBox(points, meanVector);
     }
 
-    public static OrientedBoundingBox computeOrientedBBX(float[] points, float[] centroid) {
-
-        android.graphics.Matrix tr = new android.graphics.Matrix();
+    public static OrientedBoundingBox computeOrientedBoundingBox(float[] points, float[] centroid) {
+        Matrix tr = new Matrix();
         tr.setTranslate(-centroid[0], -centroid[1]);
         tr.mapPoints(points);
 
@@ -394,9 +414,7 @@ public class GestureUtils {
             }
         }
 
-        OrientedBoundingBox bbx = new OrientedBoundingBox(angle, centroid[0], centroid[1], maxx
-                - minx, maxy - miny);
-        return bbx;
+        return new OrientedBoundingBox(angle, centroid[0], centroid[1], maxx - minx, maxy - miny);
     }
 
     private static double[] computeOrientation(double[][] covarianceMatrix) {

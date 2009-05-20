@@ -22,7 +22,6 @@ import java.util.ArrayList;
  * The abstract class of a gesture learner
  */
 abstract class Learner {
-
     private final ArrayList<Instance> mInstances = new ArrayList<Instance>();
 
     /**
@@ -53,7 +52,7 @@ abstract class Learner {
         int count = instances.size();
         for (int i = 0; i < count; i++) {
             Instance instance = instances.get(i);
-            if (id == instance.instanceID) {
+            if (id == instance.id) {
                 instances.remove(instance);
                 return;
             }
@@ -66,16 +65,18 @@ abstract class Learner {
      * @param name the category name
      */
     void removeInstances(String name) {
-        ArrayList<Instance> toDelete = new ArrayList<Instance>();
-        ArrayList<Instance> instances = mInstances;
-        int count = instances.size();
+        final ArrayList<Instance> toDelete = new ArrayList<Instance>();
+        final ArrayList<Instance> instances = mInstances;
+        final int count = instances.size();
+
         for (int i = 0; i < count; i++) {
-            Instance instance = instances.get(i);
-            if (instance.label.equals(name)) {
+            final Instance instance = instances.get(i);
+            // the label can be null, as specified in Instance
+            if ((instance.label == null && name == null) || instance.label.equals(name)) {
                 toDelete.add(instance);
             }
         }
-        mInstances.removeAll(toDelete);
+        instances.removeAll(toDelete);
     }
 
     abstract ArrayList<Prediction> classify(GestureLibrary library, Instance instance);

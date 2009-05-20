@@ -16,7 +16,6 @@
 
 package com.android.gesture;
 
-
 public interface GestureActionListener {
     public void onGesturePerformed(GestureOverlay overlay, Gesture gesture);
 }
