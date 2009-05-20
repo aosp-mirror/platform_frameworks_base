@@ -176,7 +176,7 @@ static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject 
 {
     int result = sGpsInterface->set_position_mode(positionMode, (singleFix ? 0 : fixFrequency));
     if (result) {
-        return result;
+        return false;
     }
 
     return (sGpsInterface->start() == 0);
