@@ -165,18 +165,18 @@ public interface Phone {
 
     // Used for preferred network type
     // Note NT_* substitute RILConstants.NETWORK_MODE_* above the Phone
-    static final int NT_MODE_WCDMA_PREF   = 0; /* GSM/WCDMA (WCDMA preferred) */
-    static final int NT_MODE_GSM_ONLY     = 1; /* GSM only */
-    static final int NT_MODE_WCDMA_ONLY   = 2; /* WCDMA only */
-    static final int NT_MODE_GSM_UMTS     = 3; /* GSM/WCDMA (auto mode, according to PRL)
-                                                  AVAILABLE Application Settings menu */
-    static final int NT_MODE_CDMA         = 4; /* CDMA and EvDo (auto mode, according to PRL)
-                                                  AVAILABLE Application Settings menu */
-    static final int NT_MODE_CDMA_NO_EVDO = 5; /* CDMA only */
-    static final int NT_MODE_EVDO_NO_CDMA = 6; /* EvDo only */
-    static final int NT_MODE_GLOBAL       = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according
-                                                  to PRL) AVAILABLE Application Settings menu */
-    static final int PREFERRED_NT_MODE    = NT_MODE_GLOBAL;
+    int NT_MODE_WCDMA_PREF   = RILConstants.NETWORK_MODE_WCDMA_PREF;
+    int NT_MODE_GSM_ONLY     = RILConstants.NETWORK_MODE_GSM_ONLY;
+    int NT_MODE_WCDMA_ONLY   = RILConstants.NETWORK_MODE_WCDMA_ONLY;
+    int NT_MODE_GSM_UMTS     = RILConstants.NETWORK_MODE_GSM_UMTS;
+
+    int NT_MODE_CDMA         = RILConstants.NETWORK_MODE_CDMA;
+
+    int NT_MODE_CDMA_NO_EVDO = RILConstants.NETWORK_MODE_CDMA_NO_EVDO;
+    int NT_MODE_EVDO_NO_CDMA = RILConstants.NETWORK_MODE_EVDO_NO_CDMA;
+    int NT_MODE_GLOBAL       = RILConstants.NETWORK_MODE_GLOBAL;
+
+    int PREFERRED_NT_MODE    = RILConstants.PREFERRED_NETWORK_MODE;
 
 
     // Used for CDMA roaming mode

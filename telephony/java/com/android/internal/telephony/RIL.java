@@ -1857,7 +1857,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                  * and/or radio knowing.
                  */
                 if (RILJ_LOGD) Log.d(LOG_TAG, "Radio ON @ init; reset to OFF");
-                    setRadioPower(false, null);
+                setRadioPower(false, null);
             } else {
                 if (DBG) Log.d(LOG_TAG, "Radio OFF @ init");
                 setRadioState(newState);

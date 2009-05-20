@@ -659,8 +659,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         // Set the preferred network mode to 0 = Global, CDMA default
-        loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE,
+        int type = SystemProperties.getInt("ro.telephony.default_network",
                 RILConstants.PREFERRED_NETWORK_MODE);
+        loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE, type);
 
         // Enable or disable Cell Broadcast SMS
         loadSetting(stmt, Settings.Secure.CDMA_CELL_BROADCAST_SMS,
@@ -706,4 +707,3 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Float.toString(mContext.getResources().getFraction(resid, base, base)));
     }
 }
-
