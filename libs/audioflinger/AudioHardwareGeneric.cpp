@@ -30,6 +30,7 @@
 #include <utils/String8.h>
 
 #include "AudioHardwareGeneric.h"
+#include <media/AudioRecord.h>
 
 namespace android {
 
@@ -93,9 +94,15 @@ void AudioHardwareGeneric::closeOutputStream(AudioStreamOutGeneric* out) {
 }
 
 AudioStreamIn* AudioHardwareGeneric::openInputStream(
-        int format, int channelCount, uint32_t sampleRate, status_t *status,
-        AudioSystem::audio_in_acoustics acoustics)
+        int inputSource, int format, int channelCount, uint32_t sampleRate,
+        status_t *status, AudioSystem::audio_in_acoustics acoustics)
 {
+    // check for valid input source
+    if ((inputSource != AudioRecord::DEFAULT_INPUT) &&
+            (inputSource != AudioRecord::MIC_INPUT)) {
+        return 0;
+    }
+
     AutoMutex lock(mLock);
 
     // only one input stream allowed
@@ -118,6 +125,15 @@ AudioStreamIn* AudioHardwareGeneric::openInputStream(
         delete in;
     }
     return mInput;
+}
+
+// DEPRECATED
+AudioStreamIn* AudioHardwareGeneric::openInputStream(
+        int format, int channelCount, uint32_t sampleRate, status_t *status,
+        AudioSystem::audio_in_acoustics acoustic_flags)
+{
+    return openInputStream(AudioRecord::DEFAULT_INPUT, format, channelCount,
+            sampleRate, status, acoustic_flags);
 }
 
 void AudioHardwareGeneric::closeInputStream(AudioStreamInGeneric* in) {
