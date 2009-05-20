@@ -21,7 +21,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
     backup_helper_test.cpp
  
-LOCAL_MODULE_TAGS := user
+LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := backup_helper_test
 LOCAL_SHARED_LIBRARIES := libutils
 
@@ -31,7 +31,7 @@ include $(BUILD_EXECUTABLE)
 # ========================================
 include $(CLEAR_VARS)
 
-LOCAL_MODULE_TAGS := user
+LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 

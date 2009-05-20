@@ -158,11 +158,13 @@ class BackupManagerService extends IBackupManager.Stub {
             case MSG_RUN_BACKUP:
                 // snapshot the pending-backup set and work on that
                 synchronized (mQueueLock) {
-                    mBackupQueue = new ArrayList();
-                    for (BackupRequest b: mPendingBackups.values()) {
-                        mBackupQueue.add(b);
+                    if (mBackupQueue == null) {
+                        mBackupQueue = new ArrayList();
+                        for (BackupRequest b: mPendingBackups.values()) {
+                            mBackupQueue.add(b);
+                        }
+                        mPendingBackups = new HashMap<ComponentName,BackupRequest>();
                     }
-                    mPendingBackups = new HashMap<ComponentName,BackupRequest>();
                     // !!! TODO: start a new backup-queue journal file too
                     // WARNING: If we crash after this line, anything in mPendingBackups will
                     // be lost.  FIX THIS.
@@ -190,9 +192,13 @@ class BackupManagerService extends IBackupManager.Stub {
             BackupRequest request;
             synchronized (mQueueLock) {
                 int queueSize = mBackupQueue.size();
+                Log.d(TAG, "mBackupQueue.size=" + queueSize);
                 if (queueSize == 0) {
                     mBackupQueue = null;
-                    // TODO: Anything else to do here?
+                    // if there are pending backups, start those after a short delay
+                    if (mPendingBackups.size() > 0) {
+                        mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, COLLECTION_INTERVAL);
+                    }
                     return;
                 }
                 request = mBackupQueue.get(0);
@@ -267,7 +273,7 @@ class BackupManagerService extends IBackupManager.Stub {
             
             // !!! TODO: After successful transport, delete the now-stale data
             // and juggle the files so that next time the new state is passed
-            backupDataName.delete();
+            //backupDataName.delete();
             newStateName.renameTo(savedStateName);
             
         } catch (FileNotFoundException fnf) {
@@ -284,6 +290,9 @@ class BackupManagerService extends IBackupManager.Stub {
             mBackupQueue.remove(0);
         }
         mContext.unbindService(mBackupHandler);
+
+        // start the next one
+        startOneService();
     }
 
     // Add the backup services in the given package to our set of known backup participants.
