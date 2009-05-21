@@ -1052,8 +1052,6 @@ status_t CameraService::dump(int fd, const Vector<String16>& args)
 }
 
 
-#if DEBUG_HEAP_LEAKS
-
 #define CHECK_INTERFACE(interface, data, reply) \
         do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
             LOGW("Call incorrectly routed to " #interface); \
@@ -1084,6 +1082,8 @@ status_t CameraService::onTransact(
     }
 
     status_t err = BnCameraService::onTransact(code, data, reply, flags);
+
+#if DEBUG_HEAP_LEAKS
 
     LOGD("+++ onTransact err %d code %d", err, code);
 
@@ -1120,9 +1120,8 @@ status_t CameraService::onTransact(
             break;
         }
     }
+#endif // DEBUG_HEAP_LEAKS
     return err;
 }
-
-#endif // DEBUG_HEAP_LEAKS
 
 }; // namespace android
