@@ -34,12 +34,11 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.gesture.Gesture;
 
-import com.android.gesture.Gesture;
-import com.android.gesture.GestureLibrary;
-import com.android.gesture.GestureListener;
-import com.android.gesture.GestureOverlay;
-import com.android.gesture.Prediction;
+import android.gesture.GestureLibrary;
+import android.gesture.GestureOverlayView;
+import android.gesture.Prediction;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -57,7 +56,7 @@ public class GestureEntry extends Activity {
 
     private static final int VIEW_ID = Menu.FIRST + 1;
 
-    private GestureOverlay mGesturePad;
+    private GestureOverlayView mGesturePad;
 
     private Spinner mRecognitionResult;
 
@@ -96,17 +95,17 @@ public class GestureEntry extends Activity {
         });
 
         // create the area for drawing a gesture
-        mGesturePad = (GestureOverlay) findViewById(R.id.drawingpad);
+        mGesturePad = (GestureOverlayView) findViewById(R.id.drawingpad);
         mGesturePad.setBackgroundColor(Color.BLACK);
-        mGesturePad.addGestureListener(new GestureListener() {
-            public void onFinishGesture(GestureOverlay overlay, MotionEvent event) {
+        mGesturePad.addOnGestureListener(new GestureOverlayView.OnGestureListener() {
+            public void onGestureEnded(GestureOverlayView overlay, MotionEvent event) {
                 recognize(overlay.getCurrentGesture());
             }
 
-            public void onGesture(GestureOverlay overlay, MotionEvent event) {
+            public void onGesture(GestureOverlayView overlay, MotionEvent event) {
             }
 
-            public void onStartGesture(GestureOverlay overlay, MotionEvent event) {
+            public void onGestureStarted(GestureOverlayView overlay, MotionEvent event) {
                 overlay.clear(false);
             }
         });

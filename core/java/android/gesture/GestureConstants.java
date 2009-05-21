@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
-public class Prediction {
-    public final String name;
+interface GestureConstants {
+    static final int STROKE_STRING_BUFFER_SIZE = 1024;
+    static final int STROKE_POINT_BUFFER_SIZE = 100; // number of points
 
-    public double score;
+    static final int IO_BUFFER_SIZE = 32 * 1024; // 32K
 
-    Prediction(String label, double predictionScore) {
-        name = label;
-        score = predictionScore;
-    }
-
-    @Override
-    public String toString() {
-        return name;
-    }
+    static final String LOG_TAG = "Gestures";
 }

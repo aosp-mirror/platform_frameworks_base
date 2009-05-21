@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.Color;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -35,7 +36,7 @@ import java.util.ArrayList;
  * widgets. The view can also be opaque.
  */
 
-public class GestureOverlay extends View {
+public class GestureOverlayView extends View {
     static final float TOUCH_TOLERANCE = 3;
 
     // TODO: Move all these values into XML attributes
@@ -52,19 +53,21 @@ public class GestureOverlay extends View {
     private static final boolean DITHER_FLAG = true;
 
     public static final int DEFAULT_GESTURE_COLOR = 0xFFFFFF00;
+    public static final int DEFAULT_UNCERTAIN_GESTURE_COLOR = Color.argb(60, 255, 255, 0);
 
     private static final int REFRESH_RANGE = 10;
 
     private static final BlurMaskFilter BLUR_MASK_FILTER =
             new BlurMaskFilter(1, BlurMaskFilter.Blur.NORMAL);
-    
 
-    // double buffering
     private Paint mGesturePaint;
 
     private final Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
     private Bitmap mBitmap; // with transparent background
     private Canvas mBitmapCanvas;
+
+    private int mCertainGestureColor = DEFAULT_GESTURE_COLOR;
+    private int mUncertainGestureColor = DEFAULT_UNCERTAIN_GESTURE_COLOR;
 
     // for rendering immediate ink feedback
     private Rect mInvalidRect = new Rect();
@@ -81,7 +84,7 @@ public class GestureOverlay extends View {
     private Gesture mCurrentGesture = null;
 
     // TODO: Make this a list of WeakReferences
-    private final ArrayList<GestureListener> mGestureListeners = new ArrayList<GestureListener>();
+    private final ArrayList<OnGestureListener> mOnGestureListeners = new ArrayList<OnGestureListener>();
     private ArrayList<GesturePoint> mPointBuffer = null;
 
     // fading out effect
@@ -107,12 +110,12 @@ public class GestureOverlay extends View {
         }
     };
 
-    public GestureOverlay(Context context) {
+    public GestureOverlayView(Context context) {
         super(context);
         init();
     }
 
-    public GestureOverlay(Context context, AttributeSet attrs) {
+    public GestureOverlayView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
@@ -130,12 +133,28 @@ public class GestureOverlay extends View {
      * 
      * @param color
      */
-    public void setGestureColor(int color) {
+    public void setGestureDrawingColor(int color) {
         mGesturePaint.setColor(color);
         if (mCurrentGesture != null) {
             mBitmap.eraseColor(TRANSPARENT_BACKGROUND);
             mCurrentGesture.draw(mBitmapCanvas, mGesturePaint);
         }
+    }
+
+    public void setGestureColor(int color) {
+        mCertainGestureColor = color;
+    }
+
+    public void setUncertainGestureColor(int color) {
+        mUncertainGestureColor = color;
+    }
+
+    public int getUncertainGestureColor() {
+        return mUncertainGestureColor;
+    }
+
+    public int getGestureColor() {
+        return mCertainGestureColor;
     }
 
     /**
@@ -199,12 +218,12 @@ public class GestureOverlay extends View {
         }
     }
 
-    public void addGestureListener(GestureListener listener) {
-        mGestureListeners.add(listener);
+    public void addOnGestureListener(OnGestureListener listener) {
+        mOnGestureListeners.add(listener);
     }
 
-    public void removeGestureListener(GestureListener listener) {
-        mGestureListeners.remove(listener);
+    public void removeOnGestureListener(OnGestureListener listener) {
+        mOnGestureListeners.remove(listener);
     }
 
     @Override
@@ -281,11 +300,11 @@ public class GestureOverlay extends View {
 
     private Rect touchStart(MotionEvent event) {
         // pass the event to handlers
-        final ArrayList<GestureListener> listeners = mGestureListeners;
+        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
         final int count = listeners.size();
         for (int i = 0; i < count; i++) {
-            GestureListener listener = listeners.get(i);
-            listener.onStartGesture(this, event);
+            OnGestureListener listener = listeners.get(i);
+            listener.onGestureStarted(this, event);
         }
 
         // if there is fading out going on, stop it.
@@ -358,7 +377,7 @@ public class GestureOverlay extends View {
         mPointBuffer.add(new GesturePoint(x, y, event.getEventTime()));
 
         // pass the event to handlers
-        final ArrayList<GestureListener> listeners = mGestureListeners;
+        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
         final int count = listeners.size();
         for (int i = 0; i < count; i++) {
             listeners.get(i).onGesture(this, event);
@@ -377,14 +396,24 @@ public class GestureOverlay extends View {
         mGesturePaint.setMaskFilter(null);
         
         // pass the event to handlers
-        final ArrayList<GestureListener> listeners = mGestureListeners;
+        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
         final int count = listeners.size();
         for (int i = 0; i < count; i++) {
-            listeners.get(i).onFinishGesture(this, event);
+            listeners.get(i).onGestureEnded(this, event);
         }
         
         mPath = null;        
         mPointBuffer = null;
     }
 
+    /**
+     * An interface for processing gesture events
+     */
+    public static interface OnGestureListener {
+        public void onGestureStarted(GestureOverlayView overlay, MotionEvent event);
+
+        public void onGesture(GestureOverlayView overlay, MotionEvent event);
+
+        public void onGestureEnded(GestureOverlayView overlay, MotionEvent event);
+    }
 }

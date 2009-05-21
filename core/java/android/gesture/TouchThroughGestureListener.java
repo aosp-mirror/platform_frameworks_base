@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
-import android.graphics.Color;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.lang.ref.WeakReference;
 
 /**
  * TouchThroughGesturing implements the interaction behavior that allows a user
@@ -28,18 +28,14 @@ import java.util.ArrayList;
  * still allows a user to perform basic interactions (clicking, scrolling and panning) 
  * with the underlying widget.
  */
-
-public class TouchThroughGesturing implements GestureListener {
+public class TouchThroughGestureListener implements GestureOverlayView.OnGestureListener {
     public static final int SINGLE_STROKE = 0;
     public static final int MULTIPLE_STROKE = 1;
 
+    // TODO: Add properties for all these
     private static final float STROKE_LENGTH_THRESHOLD = 30;
     private static final float SQUARENESS_THRESHOLD = 0.275f;
     private static final float ANGLE_THRESHOLD = 40;
-
-    private static final boolean STEAL_EVENTS = false;
-
-    public static final int DEFAULT_UNCERTAIN_GESTURE_COLOR = Color.argb(60, 255, 255, 0);
 
     private boolean mIsGesturing = false;
 
@@ -48,18 +44,23 @@ public class TouchThroughGesturing implements GestureListener {
     private float mX;
     private float mY;
 
-    // TODO: Use WeakReference?
-    private View mModel;
+    private WeakReference<View> mModel;
 
     private int mGestureType = SINGLE_STROKE;
-    private int mUncertainGestureColor = DEFAULT_UNCERTAIN_GESTURE_COLOR;
 
     // TODO: Use WeakReferences
-    private final ArrayList<GestureActionListener> mActionListeners =
-            new ArrayList<GestureActionListener>();
+    private final ArrayList<OnGesturePerformedListener> mPerformedListeners =
+            new ArrayList<OnGesturePerformedListener>();
 
-    public TouchThroughGesturing(View model) {
-        mModel = model;
+    private boolean mStealEvents = false;
+
+    public TouchThroughGestureListener(View model) {
+        this(model, false);
+    }
+
+    public TouchThroughGestureListener(View model, boolean stealEvents) {
+        mModel = new WeakReference<View>(model);
+        mStealEvents = stealEvents;
     }
 
     /**
@@ -70,11 +71,7 @@ public class TouchThroughGesturing implements GestureListener {
         mGestureType = type;
     }
     
-    public void setUncertainGestureColor(int color) {
-        mUncertainGestureColor = color;
-    }
-
-    public void onStartGesture(GestureOverlay overlay, MotionEvent event) {
+    public void onGestureStarted(GestureOverlayView overlay, MotionEvent event) {
         if (mGestureType == MULTIPLE_STROKE) {
             overlay.cancelFadingOut();
         }
@@ -86,16 +83,21 @@ public class TouchThroughGesturing implements GestureListener {
 
         if (mGestureType == SINGLE_STROKE || overlay.getCurrentGesture() == null
                 || overlay.getCurrentGesture().getStrokesCount() == 0) {
-            overlay.setGestureColor(mUncertainGestureColor);
+            overlay.setGestureDrawingColor(overlay.getUncertainGestureColor());
         }
 
-        mModel.dispatchTouchEvent(event);
+        dispatchEventToModel(event);
     }
 
-    public void onGesture(GestureOverlay overlay, MotionEvent event) {
+    private void dispatchEventToModel(MotionEvent event) {
+        View v = mModel.get();
+        if (v != null) v.dispatchTouchEvent(event);
+    }
+
+    public void onGesture(GestureOverlayView overlay, MotionEvent event) {
         //noinspection PointlessBooleanExpression
-        if (!STEAL_EVENTS) {
-            mModel.dispatchTouchEvent(event);
+        if (!mStealEvents) {
+            dispatchEventToModel(event);
         }
 
         if (mIsGesturing) {
@@ -107,7 +109,7 @@ public class TouchThroughGesturing implements GestureListener {
         final float dx = x - mX;
         final float dy = y - mY;
 
-        mTotalLength += (float)Math.sqrt(dx * dx + dy * dy);
+        mTotalLength += (float) Math.sqrt(dx * dx + dy * dy);
         mX = x;
         mY = y;
 
@@ -120,8 +122,8 @@ public class TouchThroughGesturing implements GestureListener {
             }
             if (box.squareness > SQUARENESS_THRESHOLD || angle < ANGLE_THRESHOLD) {
                 mIsGesturing = true;
-                overlay.setGestureColor(GestureOverlay.DEFAULT_GESTURE_COLOR);
-                if (STEAL_EVENTS) {
+                overlay.setGestureDrawingColor(overlay.getGestureColor());
+                if (mStealEvents) {
                     event = MotionEvent.obtain(event.getDownTime(), System.currentTimeMillis(),
                             MotionEvent.ACTION_UP, x, y, event.getPressure(), event.getSize(),
                             event.getMetaState(), event.getXPrecision(), event.getYPrecision(),
@@ -130,36 +132,40 @@ public class TouchThroughGesturing implements GestureListener {
             }
         }
 
-        if (STEAL_EVENTS) {
-            mModel.dispatchTouchEvent(event);
+        if (mStealEvents) {
+            dispatchEventToModel(event);
         }
     }
 
-    public void onFinishGesture(GestureOverlay overlay, MotionEvent event) {
+    public void onGestureEnded(GestureOverlayView overlay, MotionEvent event) {
         if (mIsGesturing) {
             overlay.clear(true);
 
-            final ArrayList<GestureActionListener> listeners = mActionListeners;
+            final ArrayList<OnGesturePerformedListener> listeners = mPerformedListeners;
             final int count = listeners.size();
 
             for (int i = 0; i < count; i++) {
                 listeners.get(i).onGesturePerformed(overlay, overlay.getCurrentGesture());
             }
         } else {
-            mModel.dispatchTouchEvent(event);
+            dispatchEventToModel(event);
             overlay.clear(false);
         }
     }
 
-    public void addGestureActionListener(GestureActionListener listener) {
-        mActionListeners.add(listener);
+    public void addOnGestureActionListener(OnGesturePerformedListener listener) {
+        mPerformedListeners.add(listener);
     }
 
-    public void removeGestureActionListener(GestureActionListener listener) {
-        mActionListeners.remove(listener);
+    public void removeOnGestureActionListener(OnGesturePerformedListener listener) {
+        mPerformedListeners.remove(listener);
     }
 
     public boolean isGesturing() {
         return mIsGesturing;
+    }
+
+    public static interface OnGesturePerformedListener {
+        public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import android.graphics.Matrix;
 import android.graphics.Path;
@@ -47,6 +47,11 @@ public class OrientedBoundingBox {
         }
     }
 
+    /**
+     * Currently used for debugging purpose only.
+     *
+     * @hide
+     */
     public Path toPath() {
         Path path = new Path();
         float[] point = new float[2];

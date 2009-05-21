@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import android.graphics.RectF;
 import android.graphics.Matrix;
@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.io.Closeable;
 import java.io.IOException;
 
-import static com.android.gesture.GestureConstants.*;
+import static android.gesture.GestureConstants.*;
 
 final class GestureUtilities {
     private static final int TEMPORAL_SAMPLING_RATE = 16;
