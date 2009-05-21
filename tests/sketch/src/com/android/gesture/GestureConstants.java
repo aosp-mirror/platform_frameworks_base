@@ -17,16 +17,13 @@
 package com.android.gesture;
 
 interface GestureConstants {
-    static final String XML_TAG_LIBRARY = "library";
-    static final String XML_TAG_ENTRY = "entry";
-    static final String XML_TAG_GESTURE = "gesture";
-    static final String XML_TAG_STROKE = "stroke";
-    static final String XML_TAG_ID = "id";
-    static final String XML_TAG_NAME = "name";
     static final String STRING_GESTURE_DELIIMITER = "#";
     static final String STRING_STROKE_DELIIMITER = ",";
+
     static final int STROKE_STRING_BUFFER_SIZE = 1024;
     static final int STROKE_POINT_BUFFER_SIZE = 100; // number of points
-    static final int IO_BUFFER_SIZE = 8 * 1024; // 8K
-    String LOG_TAG = "GestureLibrary";
+
+    static final int IO_BUFFER_SIZE = 32 * 1024; // 32K
+
+    static final String LOG_TAG = "Gestures";
 }

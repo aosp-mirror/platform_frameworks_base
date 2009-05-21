@@ -23,11 +23,16 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import org.xmlpull.v1.XmlSerializer;
+import android.util.Log;
 
 import java.io.IOException;
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+
+import static com.android.gesture.GestureConstants.LOG_TAG;
 
 /**
  * A gesture can have a single or multiple strokes
@@ -149,10 +154,12 @@ public class Gesture implements Parcelable {
      * @return the bitmap
      */
     public Bitmap toBitmap(int width, int height, int edge, int numSample, int color) {
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bitmap);
+
         canvas.translate(edge, edge);
-        Paint paint = new Paint();
+
+        final Paint paint = new Paint();
         paint.setAntiAlias(BITMAP_RENDERING_ANTIALIAS);
         paint.setDither(BITMAP_RENDERING_DITHER);
         paint.setColor(color);
@@ -182,10 +189,12 @@ public class Gesture implements Parcelable {
      * @return the bitmap
      */
     public Bitmap toBitmap(int width, int height, int edge, int color) {
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bitmap);
+
         canvas.translate(edge, edge);
-        Paint paint = new Paint();
+
+        final Paint paint = new Paint();
         paint.setAntiAlias(BITMAP_RENDERING_ANTIALIAS);
         paint.setDither(BITMAP_RENDERING_DITHER);
         paint.setColor(color);
@@ -193,53 +202,44 @@ public class Gesture implements Parcelable {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(BITMAP_RENDERING_WIDTH);
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
+
+        final ArrayList<GestureStroke> strokes = mStrokes;
+        final int count = strokes.size();
+
         for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            stroke.draw(canvas, paint);
+            strokes.get(i).draw(canvas, paint);
         }
 
         return bitmap;
     }
 
-    /**
-     * Save the gesture as XML
-     * 
-     * @param namespace
-     * @param serializer
-     * @throws IOException
-     */
-    void toXML(String namespace, XmlSerializer serializer) throws IOException {
-        serializer.startTag(namespace, GestureConstants.XML_TAG_GESTURE);
-        serializer.attribute(namespace, GestureConstants.XML_TAG_ID, Long.toString(mGestureID));
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
+    void serialize(DataOutputStream out) throws IOException {
+        final ArrayList<GestureStroke> strokes = mStrokes;
+        final int count = strokes.size();
+
+        // Write gesture ID
+        out.writeLong(mGestureID);
+        // Write number of strokes
+        out.writeInt(count);
+
         for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
-            stroke.toXML(namespace, serializer);
+            strokes.get(i).serialize(out);
         }
-        serializer.endTag(namespace, GestureConstants.XML_TAG_GESTURE);
     }
 
-    /**
-     * Create the gesture from a string
-     * 
-     * @param str
-     */
-    public void createFromString(String str) {
-        int startIndex = 0;
-        int endIndex;
-        while ((endIndex =
-                str.indexOf(GestureConstants.STRING_GESTURE_DELIIMITER, startIndex + 1)) != -1) {
-            String token = str.substring(startIndex, endIndex);
-            if (startIndex > 0) { // stroke tokens
-                addStroke(GestureStroke.createFromString(token));
-            } else { // id token
-                mGestureID = Long.parseLong(token);
-            }
-            startIndex = endIndex + 1;
+    static Gesture deserialize(DataInputStream in) throws IOException {
+        final Gesture gesture = new Gesture();
+
+        // Gesture ID
+        gesture.mGestureID = in.readLong();
+        // Number of strokes
+        final int count = in.readInt();
+
+        for (int i = 0; i < count; i++) {
+            gesture.addStroke(GestureStroke.deserialize(in));
         }
+
+        return gesture;
     }
 
     /**
@@ -247,12 +247,14 @@ public class Gesture implements Parcelable {
      */
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
+        final StringBuilder str = new StringBuilder();
         str.append(mGestureID);
-        ArrayList<GestureStroke> strokes = mStrokes;
-        int count = strokes.size();
+
+        final ArrayList<GestureStroke> strokes = mStrokes;
+        final int count = strokes.size();
+
         for (int i = 0; i < count; i++) {
-            GestureStroke stroke = strokes.get(i);
+            final GestureStroke stroke = strokes.get(i);
             str.append(GestureConstants.STRING_GESTURE_DELIIMITER);
             str.append(stroke.toString());
         }
@@ -262,9 +264,24 @@ public class Gesture implements Parcelable {
 
     public static final Parcelable.Creator<Gesture> CREATOR = new Parcelable.Creator<Gesture>() {
         public Gesture createFromParcel(Parcel in) {
-            String str = in.readString();
-            Gesture gesture = new Gesture();
-            gesture.createFromString(str);
+            Gesture gesture = null;
+            final long gestureID = in.readLong();
+
+            final DataInputStream inStream = new DataInputStream(
+                    new ByteArrayInputStream(in.createByteArray()));
+
+            try {
+                gesture = deserialize(inStream);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error reading Gesture from parcel:", e);
+            } finally {
+                GestureUtilities.closeStream(inStream);
+            }
+
+            if (gesture != null) {
+                gesture.mGestureID = gestureID;
+            }
+
             return gesture;
         }
 
@@ -273,35 +290,31 @@ public class Gesture implements Parcelable {
         }
     };
 
-    /**
-     * Build a gesture from a byte array
-     * 
-     * @param bytes
-     * @return the gesture
-     */
-    static Gesture buildFromArray(byte[] bytes) {
-        String str = new String(bytes);
-        Gesture gesture = new Gesture();
-        gesture.createFromString(str);
-        return gesture;
-    }
-
-    /**
-     * Save a gesture to a byte array
-     * 
-     * @param stroke
-     * @return the byte array
-     */
-    static byte[] saveToArray(Gesture stroke) {
-        String str = stroke.toString();
-        return str.getBytes();
-    }
-
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(toString());
+        out.writeLong(mGestureID);
+
+        boolean result = false;
+        final ByteArrayOutputStream byteStream =
+                new ByteArrayOutputStream(GestureConstants.IO_BUFFER_SIZE);
+        final DataOutputStream outStream = new DataOutputStream(byteStream);
+
+        try {
+            serialize(outStream);
+            result = true;
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error writing Gesture to parcel:", e);
+        } finally {
+            GestureUtilities.closeStream(outStream);
+            GestureUtilities.closeStream(byteStream);
+        }
+
+        if (result) {
+            out.writeByteArray(byteStream.toByteArray());
+        }
     }
 
     public int describeContents() {
-        return CONTENTS_FILE_DESCRIPTOR;
+        return 0;
     }
 }
+

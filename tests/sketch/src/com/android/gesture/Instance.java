@@ -16,6 +16,8 @@
 
 package com.android.gesture;
 
+import android.graphics.Matrix;
+
 /**
  * An instance represents a sample if the label is available or a query if the
  * label is null.
@@ -47,10 +49,12 @@ class Instance {
     private void normalize() {
         float[] sample = vector;
         float sum = 0;
+
         int size = sample.length;
         for (int i = 0; i < size; i++) {
             sum += sample[i] * sample[i];
         }
+
         float magnitude = (float) Math.sqrt(sum);
         for (int i = 0; i < size; i++) {
             sample[i] /= magnitude;
@@ -100,12 +104,11 @@ class Instance {
             }
         }
 
-        android.graphics.Matrix m = new android.graphics.Matrix();
+        Matrix m = new Matrix();
         m.setTranslate(-center[0], -center[1]);
-        android.graphics.Matrix rotation = new android.graphics.Matrix();
-        rotation.setRotate(adjustment);
-        m.postConcat(rotation);
+        m.postRotate(adjustment);
         m.mapPoints(pts);
+
         return pts;
     }
 
