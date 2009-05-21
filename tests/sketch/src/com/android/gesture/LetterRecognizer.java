@@ -197,7 +197,7 @@ public class LetterRecognizer {
     public void enablePersonalization(boolean enable) {
         if (enable) {
             mGestureLibrary = new GestureLibrary(GESTURE_FILE_NAME);
-            mGestureLibrary.setGestureType(GestureLibrary.SEQUENCE_INVARIANT);
+            mGestureLibrary.setSequenceType(GestureLibrary.SEQUENCE_INVARIANT);
             mGestureLibrary.load();
         } else {
             mGestureLibrary = null;

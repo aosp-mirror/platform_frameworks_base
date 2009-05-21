@@ -106,11 +106,17 @@ public class GestureLibrary {
         return mOrientationStyle;
     }
 
-    public void setGestureType(int type) {
+    /**
+     * @param type SEQUENCE_INVARIANT or SEQUENCE_SENSITIVE
+     */
+    public void setSequenceType(int type) {
         mSequenceType = type;
     }
 
-    public int getGestureType() {
+    /**
+     * @return SEQUENCE_INVARIANT or SEQUENCE_SENSITIVE
+     */
+    public int getSequenceType() {
         return mSequenceType;
     }
 
