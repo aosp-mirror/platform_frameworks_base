@@ -31,5 +31,6 @@
         android:targetPackage="com.android.dumprendertree"
         android:label="Layout test automation runner"
     />
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_SDCARD" />
 </manifest>
