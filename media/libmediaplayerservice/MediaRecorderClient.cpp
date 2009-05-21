@@ -37,6 +37,7 @@
 namespace android {
 
 const char* cameraPermission = "android.permission.CAMERA";
+const char* recordAudioPermission = "android.permission.RECORD_AUDIO";
 
 static bool checkPermission(const char* permissionString) {
 #ifndef HAVE_ANDROID_OS
@@ -86,6 +87,9 @@ status_t MediaRecorderClient::setVideoSource(int vs)
 status_t MediaRecorderClient::setAudioSource(int as)
 {
     LOGV("setAudioSource(%d)", as);
+    if (!checkPermission(recordAudioPermission)) {
+        return PERMISSION_DENIED;
+    }
     Mutex::Autolock lock(mLock);
     if (mRecorder == NULL)  {
         LOGE("recorder is not initialized");
