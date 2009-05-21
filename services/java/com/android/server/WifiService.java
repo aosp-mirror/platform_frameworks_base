@@ -1360,14 +1360,17 @@ public class WifiService extends IWifiManager.Stub {
      * Set the number of radio frequency channels that are allowed to be used
      * in the current regulatory domain. This method should be used only
      * if the correct number of channels cannot be determined automatically
-     * for some reason. If the operation is successful, the new value is
+     * for some reason. If the operation is successful, the new value may be
      * persisted as a Secure setting.
      * @param numChannels the number of allowed channels. Must be greater than 0
      * and less than or equal to 16.
+     * @param persist {@code true} if the setting should be remembered.
      * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
      * {@code numChannels} is outside the valid range.
      */
-    public boolean setNumAllowedChannels(int numChannels) {
+    public boolean setNumAllowedChannels(int numChannels, boolean persist) {
+        Log.i(TAG, "WifiService trying to setNumAllowed to "+numChannels+
+                " with persist set to "+persist);
         enforceChangePermission();
         /*
          * Validate the argument. We'd like to let the Wi-Fi driver do this,
@@ -1386,9 +1389,11 @@ public class WifiService extends IWifiManager.Stub {
             return false;
         }
 
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                               Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
-                               numChannels);
+        if (persist) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                                   Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
+                                   numChannels);
+        }
         mWifiStateTracker.setNumAllowedChannels(numChannels);
         return true;
     }

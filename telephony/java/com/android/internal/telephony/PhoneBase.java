@@ -21,6 +21,7 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.SharedPreferences;
+import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
@@ -28,6 +29,7 @@ import android.os.Message;
 import android.os.RegistrantList;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.text.TextUtils;
@@ -194,7 +196,7 @@ public abstract class PhoneBase implements Phone {
         this.mContext = context;
         mLooper = Looper.myLooper();
 
-        setLocaleByCarrier();
+        setPropertiesByCarrier();
 
         setUnitTestMode(unitTestMode);
 
@@ -489,10 +491,10 @@ public abstract class PhoneBase implements Phone {
     }
 
     /**
-     * Set the locale by matching the carrier string in
+     * Set the properties by matching the carrier string in
      * a string-array resource
      */
-    private void setLocaleByCarrier() {
+    private void setPropertiesByCarrier() {
         String carrier = SystemProperties.get("ro.carrier");
 
         if (null == carrier || 0 == carrier.length()) {
@@ -500,18 +502,36 @@ public abstract class PhoneBase implements Phone {
         }
 
         CharSequence[] carrierLocales = mContext.
-                getResources().getTextArray(R.array.carrier_locales);
+                getResources().getTextArray(R.array.carrier_properties);
 
-        for (int i = 0; i < carrierLocales.length-1; i+=2) {
+        for (int i = 0; i < carrierLocales.length; i+=3) {
             String c = carrierLocales[i].toString();
-            String l = carrierLocales[i+1].toString();
             if (carrier.equals(c)) {
+                String l = carrierLocales[i+1].toString();
+                int wifiChannels = 0;
+                try {
+                    wifiChannels = Integer.parseInt(
+                            carrierLocales[i+2].toString());
+                } catch (NumberFormatException e) { }
+
                 String language = l.substring(0, 2);
                 String country = "";
                 if (l.length() >=5) {
                     country = l.substring(3, 5);
                 }
                 setSystemLocale(language, country);
+
+                if (wifiChannels != 0) {
+                    try {
+                        Settings.Secure.getInt(mContext.getContentResolver(),
+                                Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS);
+                    } catch (Settings.SettingNotFoundException e) {
+                        // note this is not persisting
+                        WifiManager wM = (WifiManager)
+                                mContext.getSystemService(Context.WIFI_SERVICE);
+                        wM.setNumAllowedChannels(wifiChannels, false);
+                    }
+                }
                 return;
             }
         }
