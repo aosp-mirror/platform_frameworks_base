@@ -26,7 +26,7 @@ import java.io.IOException;
 
 import static com.android.gesture.GestureConstants.*;
 
-public final class GestureUtilities {
+final class GestureUtilities {
     private static final int TEMPORAL_SAMPLING_RATE = 16;
 
     private GestureUtilities() {
@@ -348,33 +348,31 @@ public final class GestureUtilities {
     /**
      * Calculate the cosine distance between two instances
      * 
-     * @param in1
-     * @param in2
+     * @param vector1
+     * @param vector2
      * @return the distance between 0 and Math.PI
      */
-    static double cosineDistance(Instance in1, Instance in2) {
+    static double cosineDistance(float[] vector1, float[] vector2) {
         float sum = 0;
-        float[] vector1 = in1.vector;
-        float[] vector2 = in2.vector;
         int len = vector1.length;
         for (int i = 0; i < len; i++) {
             sum += vector1[i] * vector2[i];
         }
-        return Math.acos(sum / (in1.magnitude * in2.magnitude));
+        return Math.acos(sum);
     }
 
-    public static OrientedBoundingBox computeOrientedBoundingBox(ArrayList<GesturePoint> pts) {
+    static OrientedBoundingBox computeOrientedBoundingBox(ArrayList<GesturePoint> pts) {
         GestureStroke stroke = new GestureStroke(pts);
         float[] points = temporalSampling(stroke, TEMPORAL_SAMPLING_RATE);
         return computeOrientedBoundingBox(points);
     }
 
-    public static OrientedBoundingBox computeOrientedBoundingBox(float[] points) {
+    static OrientedBoundingBox computeOrientedBoundingBox(float[] points) {
         float[] meanVector = computeCentroid(points);
         return computeOrientedBoundingBox(points, meanVector);
     }
 
-    public static OrientedBoundingBox computeOrientedBoundingBox(float[] points, float[] centroid) {
+    static OrientedBoundingBox computeOrientedBoundingBox(float[] points, float[] centroid) {
         Matrix tr = new Matrix();
         tr.setTranslate(-centroid[0], -centroid[1]);
         tr.mapPoints(points);
