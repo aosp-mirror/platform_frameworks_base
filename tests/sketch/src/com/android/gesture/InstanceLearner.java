@@ -34,21 +34,21 @@ class InstanceLearner extends Learner {
     private static final String LOGTAG = "InstanceLearner";
 
     @Override
-    ArrayList<Prediction> classify(GestureLibrary lib, Instance instance) {
+    ArrayList<Prediction> classify(int gestureType, float[] vector) {
         ArrayList<Prediction> predictions = new ArrayList<Prediction>();
         ArrayList<Instance> instances = getInstances();
         int count = instances.size();
         TreeMap<String, Double> label2score = new TreeMap<String, Double>();
         for (int i = 0; i < count; i++) {
             Instance sample = instances.get(i);
-            if (sample.vector.length != instance.vector.length) {
+            if (sample.vector.length != vector.length) {
                 continue;
             }
             double distance;
-            if (lib.getGestureType() == GestureLibrary.SEQUENCE_SENSITIVE) {
-                distance = GestureUtilities.cosineDistance(sample, instance);
+            if (gestureType == GestureLibrary.SEQUENCE_SENSITIVE) {
+                distance = GestureUtilities.cosineDistance(sample.vector, vector);
             } else {
-                distance = GestureUtilities.squaredEuclideanDistance(sample.vector, instance.vector);
+                distance = GestureUtilities.squaredEuclideanDistance(sample.vector, vector);
             }
             double weight;
             if (distance == 0) {

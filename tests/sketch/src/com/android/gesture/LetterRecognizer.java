@@ -20,12 +20,14 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import java.io.IOException;
-import java.io.DataInputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 public class LetterRecognizer {
     private static final String LOG_TAG = "LetterRecognizer";
@@ -37,8 +39,13 @@ public class LetterRecognizer {
 
     private final String[] mClasses;
 
-    private final int mInputCount;
+    private final int mPatchSize;
+    
+    static final String GESTURE_FILE_NAME = "letters.xml";
 
+    private GestureLibrary mGestureLibrary; 
+    private final static int ADJUST_RANGE = 3;
+    
     private static class SigmoidUnit {
         final float[] mWeights;
 
@@ -62,10 +69,14 @@ public class LetterRecognizer {
     }
 
     private LetterRecognizer(int numOfInput, int numOfHidden, String[] classes) {
-        mInputCount = (int)Math.sqrt(numOfInput);
+        mPatchSize = (int)Math.sqrt(numOfInput);
         mHiddenLayer = new SigmoidUnit[numOfHidden];
         mClasses = classes;
         mOutputLayer = new SigmoidUnit[classes.length];
+    }
+    
+    public void save() {
+        mGestureLibrary.save();
     }
 
     public static LetterRecognizer getLetterRecognizer(Context context, int type) {
@@ -78,7 +89,12 @@ public class LetterRecognizer {
     }
 
     public ArrayList<Prediction> recognize(Gesture gesture) {
-        return classify(GestureUtilities.spatialSampling(gesture, mInputCount));
+        float[] query = GestureUtilities.spatialSampling(gesture, mPatchSize);
+        ArrayList<Prediction> predictions = classify(query);
+        if (mGestureLibrary != null) {
+            adjustPrediction(gesture, predictions);
+        }
+        return predictions;
     }
 
     private ArrayList<Prediction> classify(float[] vector) {
@@ -151,16 +167,16 @@ public class LetterRecognizer {
             SigmoidUnit[] outputLayer = new SigmoidUnit[oCount];
 
             for (int i = 0; i < hCount; i++) {
-                float[] weights = new float[iCount];
-                for (int j = 0; j < iCount; j++) {
+                float[] weights = new float[iCount + 1];
+                for (int j = 0; j <= iCount; j++) {
                     weights[j] = in.readFloat();
                 }
                 hiddenLayer[i] = new SigmoidUnit(weights);
             }
 
             for (int i = 0; i < oCount; i++) {
-                float[] weights = new float[hCount];
-                for (int j = 0; j < hCount; j++) {
+                float[] weights = new float[hCount + 1];
+                for (int j = 0; j <= hCount; j++) {
                     weights[j] = in.readFloat();
                 }
                 outputLayer[i] = new SigmoidUnit(weights);
@@ -170,11 +186,43 @@ public class LetterRecognizer {
             classifier.mOutputLayer = outputLayer;
 
         } catch (IOException e) {
-            Log.d(LOG_TAG, "Failed to load gestures:", e);
+            Log.d(LOG_TAG, "Failed to load handwriting data:", e);
         } finally {
             GestureUtilities.closeStream(in);
         }
 
         return classifier;
+    }
+    
+    public void enablePersonalization(boolean enable) {
+        if (enable) {
+            mGestureLibrary = new GestureLibrary(GESTURE_FILE_NAME);
+            mGestureLibrary.setGestureType(GestureLibrary.SEQUENCE_INVARIANT);
+            mGestureLibrary.load();
+        } else {
+            mGestureLibrary = null;
+        }
+    }
+
+    public void addExample(String letter, Gesture example) {
+        mGestureLibrary.addGesture(letter, example);
+    }
+    
+    private void adjustPrediction(Gesture query, ArrayList<Prediction> predictions) {
+        ArrayList<Prediction> results = mGestureLibrary.recognize(query);
+        HashMap<String, Prediction> topNList = new HashMap<String, Prediction>();
+        for (int j = 0; j < ADJUST_RANGE; j++) {
+            Prediction prediction = predictions.remove(0);
+            topNList.put(prediction.name, prediction);
+        }
+        int count = results.size();
+        for (int j = count - 1; j >= 0 && !topNList.isEmpty(); j--) {
+            Prediction item = results.get(j);
+            Prediction original = topNList.get(item.name);
+            if (original != null) {
+                predictions.add(0, original);
+                topNList.remove(item.name);
+            }
+        }
     }
 }

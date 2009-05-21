@@ -23,7 +23,7 @@ package com.android.gesture;
 class Instance {
     private static final int SEQUENCE_SAMPLE_SIZE = 16;
 
-    private static final int PATCH_SAMPLE_SIZE = 8;
+    private static final int PATCH_SAMPLE_SIZE = 16;
 
     private final static float[] ORIENTATIONS = {
             0, 45, 90, 135, 180, -0, -45, -90, -135, -180
@@ -35,22 +35,26 @@ class Instance {
     // the label can be null
     final String label;
 
-    // the length of the vector
-    final float magnitude;
-
     // the id of the instance
     final long id;
-
+    
     private Instance(long id, float[] sample, String sampleName) {
         this.id = id;
         vector = sample;
         label = sampleName;
+    }
+    
+    private void normalize() {
+        float[] sample = vector;
         float sum = 0;
         int size = sample.length;
         for (int i = 0; i < size; i++) {
             sum += sample[i] * sample[i];
         }
-        magnitude = (float) Math.sqrt(sum);
+        float magnitude = (float) Math.sqrt(sum);
+        for (int i = 0; i < size; i++) {
+            sample[i] /= magnitude;
+        }
     }
 
     /**
@@ -60,21 +64,25 @@ class Instance {
      * @param label
      * @return the instance
      */
-    static Instance createInstance(GestureLibrary gesturelib, Gesture gesture, String label) {
+    static Instance createInstance(int samplingType, Gesture gesture, String label) {
         float[] pts;
-        if (gesturelib.getGestureType() == GestureLibrary.SEQUENCE_SENSITIVE) {
-            pts = temporalSampler(gesturelib, gesture);
+        Instance instance;
+        if (samplingType == GestureLibrary.SEQUENCE_SENSITIVE) {
+            pts = temporalSampler(samplingType, gesture);
+            instance = new Instance(gesture.getID(), pts, label);
+            instance.normalize();
         } else {
             pts = spatialSampler(gesture);
+            instance = new Instance(gesture.getID(), pts, label);
         }
-        return new Instance(gesture.getID(), pts, label);
+        return instance;
     }
-
+    
     private static float[] spatialSampler(Gesture gesture) {
         return GestureUtilities.spatialSampling(gesture, PATCH_SAMPLE_SIZE);
     }
 
-    private static float[] temporalSampler(GestureLibrary gesturelib, Gesture gesture) {
+    private static float[] temporalSampler(int samplingType, Gesture gesture) {
         float[] pts = GestureUtilities.temporalSampling(gesture.getStrokes().get(0),
                 SEQUENCE_SAMPLE_SIZE);
         float[] center = GestureUtilities.computeCentroid(pts);
@@ -82,7 +90,7 @@ class Instance {
         orientation *= 180 / Math.PI;
 
         float adjustment = -orientation;
-        if (gesturelib.getOrientationStyle() == GestureLibrary.ORIENTATION_SENSITIVE) {
+        if (samplingType == GestureLibrary.ORIENTATION_SENSITIVE) {
             int count = ORIENTATIONS.length;
             for (int i = 0; i < count; i++) {
                 float delta = ORIENTATIONS[i] - orientation;
