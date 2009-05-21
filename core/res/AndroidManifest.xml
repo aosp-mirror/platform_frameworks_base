@@ -220,12 +220,6 @@
         android:label="@string/permlab_installLocationProvider"
         android:description="@string/permdesc_installLocationProvider" />
 
-    <!-- Allows an application to install a location collector into the Location Manager -->
-    <permission android:name="android.permission.INSTALL_LOCATION_COLLECTOR"
-        android:protectionLevel="signatureOrSystem"
-        android:label="@string/permlab_installLocationCollector"
-        android:description="@string/permdesc_installLocationCollector" />
-
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->

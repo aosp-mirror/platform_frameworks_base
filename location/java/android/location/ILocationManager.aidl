@@ -20,7 +20,6 @@ import android.app.PendingIntent;
 import android.location.Address;
 import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
-import android.location.ILocationCollector;
 import android.location.ILocationListener;
 import android.location.ILocationProvider;
 import android.location.Location;
@@ -83,6 +82,5 @@ interface ILocationManager
 
     /* for installing external Location Providers */
     void installLocationProvider(String name, ILocationProvider provider);
-    void installLocationCollector(ILocationCollector collector);
     void installGeocodeProvider(IGeocodeProvider provider);
 }
