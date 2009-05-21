@@ -661,6 +661,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 string_array16("string-array");
     const String16 integer_array16("integer-array");
     const String16 public16("public");
+    const String16 public_padding16("public-padding");
     const String16 private_symbols16("private-symbols");
     const String16 skip16("skip");
     const String16 eat_comment16("eat-comment");
@@ -695,7 +696,7 @@ status_t compileResourceFile(Bundle* bundle,
 
     bool hasErrors = false;
     
-    uint32_t nextPublicId = 0;
+    DefaultKeyedVector<String16, uint32_t> nextPublicId(0);
 
     ResXMLTree::event_code_t code;
     do {
@@ -784,15 +785,15 @@ status_t compileResourceFile(Bundle* bundle,
                         hasErrors = localHasErrors = true;
                     } else {
                         ident = identValue.data;
-                        nextPublicId = ident+1;
+                        nextPublicId.replaceValueFor(type, ident+1);
                     }
-                } else if (nextPublicId == 0) {
+                } else if (nextPublicId.indexOfKey(type) < 0) {
                     srcPos.error("No 'id' attribute supplied <public>,"
                             " and no previous id defined in this file.\n");
                     hasErrors = localHasErrors = true;
                 } else if (!localHasErrors) {
-                    ident = nextPublicId;
-                    nextPublicId++;
+                    ident = nextPublicId.valueFor(type);
+                    nextPublicId.replaceValueFor(type, ident+1);
                 }
 
                 if (!localHasErrors) {
@@ -820,6 +821,116 @@ status_t compileResourceFile(Bundle* bundle,
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
                         if (strcmp16(block.getElementName(&len), public16.string()) == 0) {
+                            break;
+                        }
+                    }
+                }
+                continue;
+
+            } else if (strcmp16(block.getElementName(&len), public_padding16.string()) == 0) {
+                SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
+            
+                String16 type;
+                ssize_t typeIdx = block.indexOfAttribute(NULL, "type");
+                if (typeIdx < 0) {
+                    srcPos.error("A 'type' attribute is required for <public-padding>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                type = String16(block.getAttributeStringValue(typeIdx, &len));
+
+                String16 name;
+                ssize_t nameIdx = block.indexOfAttribute(NULL, "name");
+                if (nameIdx < 0) {
+                    srcPos.error("A 'name' attribute is required for <public-padding>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                name = String16(block.getAttributeStringValue(nameIdx, &len));
+
+                uint32_t start = 0;
+                ssize_t startIdx = block.indexOfAttribute(NULL, "start");
+                if (startIdx >= 0) {
+                    const char16_t* startStr = block.getAttributeStringValue(startIdx, &len);
+                    Res_value startValue;
+                    if (!ResTable::stringToInt(startStr, len, &startValue)) {
+                        srcPos.error("Given 'start' attribute is not an integer: %s\n",
+                                String8(block.getAttributeStringValue(startIdx, &len)).string());
+                        hasErrors = localHasErrors = true;
+                    } else {
+                        start = startValue.data;
+                    }
+                } else if (nextPublicId.indexOfKey(type) < 0) {
+                    srcPos.error("No 'start' attribute supplied <public-padding>,"
+                            " and no previous id defined in this file.\n");
+                    hasErrors = localHasErrors = true;
+                } else if (!localHasErrors) {
+                    start = nextPublicId.valueFor(type);
+                }
+
+                uint32_t end = 0;
+                ssize_t endIdx = block.indexOfAttribute(NULL, "end");
+                if (endIdx >= 0) {
+                    const char16_t* endStr = block.getAttributeStringValue(endIdx, &len);
+                    Res_value endValue;
+                    if (!ResTable::stringToInt(endStr, len, &endValue)) {
+                        srcPos.error("Given 'end' attribute is not an integer: %s\n",
+                                String8(block.getAttributeStringValue(endIdx, &len)).string());
+                        hasErrors = localHasErrors = true;
+                    } else {
+                        end = endValue.data;
+                    }
+                } else {
+                    srcPos.error("No 'end' attribute supplied <public-padding>\n");
+                    hasErrors = localHasErrors = true;
+                }
+
+                if (end >= start) {
+                    nextPublicId.replaceValueFor(type, end+1);
+                } else {
+                    srcPos.error("Padding start '%ul' is after end '%ul'\n",
+                            start, end);
+                    hasErrors = localHasErrors = true;
+                }
+                
+                String16 comment(
+                    block.getComment(&len) ? block.getComment(&len) : nulStr);
+                for (uint32_t curIdent=start; curIdent<=end; curIdent++) {
+                    if (localHasErrors) {
+                        break;
+                    }
+                    String16 curName(name);
+                    char buf[64];
+                    sprintf(buf, "%d", (int)(end-curIdent+1));
+                    curName.append(String16(buf));
+                    
+                    err = outTable->addEntry(srcPos, myPackage, type, curName,
+                                             String16("padding"), NULL, &curParams, false,
+                                             ResTable_map::TYPE_STRING, overwrite);
+                    if (err < NO_ERROR) {
+                        hasErrors = localHasErrors = true;
+                        break;
+                    }
+                    err = outTable->addPublic(srcPos, myPackage, type,
+                            curName, curIdent);
+                    if (err < NO_ERROR) {
+                        hasErrors = localHasErrors = true;
+                        break;
+                    }
+                    sp<AaptSymbols> symbols = assets->getSymbolsFor(String8("R"));
+                    if (symbols != NULL) {
+                        symbols = symbols->addNestedSymbol(String8(type), srcPos);
+                    }
+                    if (symbols != NULL) {
+                        symbols->makeSymbolPublic(String8(curName), srcPos);
+                        symbols->appendComment(String8(curName), comment, srcPos);
+                    } else {
+                        srcPos.error("Unable to create symbols!\n");
+                        hasErrors = localHasErrors = true;
+                    }
+                }
+
+                while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+                    if (code == ResXMLTree::END_TAG) {
+                        if (strcmp16(block.getElementName(&len), public_padding16.string()) == 0) {
                             break;
                         }
                     }
