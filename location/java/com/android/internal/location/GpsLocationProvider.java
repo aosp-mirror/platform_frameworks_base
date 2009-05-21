@@ -406,6 +406,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     }
 
     /**
+     * This is called to inform us when another location provider returns a location.
+     * Someday we might use this for network location injection to aid the GPS
+     */
+    public void updateLocation(Location location) {
+    }
+
+    /**
      * Returns true if the provider requires access to a
      * satellite-based positioning system (e.g., GPS), false
      * otherwise.
