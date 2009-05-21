@@ -58,10 +58,8 @@ public:
 
             void            removeClient(const sp<ICameraClient>& cameraClient);
 
-#if DEBUG_HEAP_LEAKS
     virtual status_t onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
-#endif
 
 private:
 
