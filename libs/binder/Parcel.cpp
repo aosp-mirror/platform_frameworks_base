@@ -650,28 +650,26 @@ status_t Parcel::writeWeakBinder(const wp<IBinder>& val)
     return flatten_binder(ProcessState::self(), val, this);
 }
 
-status_t Parcel::writeNativeHandle(const native_handle& handle)
+status_t Parcel::writeNativeHandle(const native_handle* handle)
 {
-    if (handle.version != sizeof(native_handle))
+    if (handle->version != sizeof(native_handle))
         return BAD_TYPE;
 
     status_t err;
-    err = writeInt32(handle.numFds);
+    err = writeInt32(handle->numFds);
     if (err != NO_ERROR) return err;
 
-    err = writeInt32(handle.numInts);
+    err = writeInt32(handle->numInts);
     if (err != NO_ERROR) return err;
 
-    for (int i=0 ; err==NO_ERROR && i<handle.numFds ; i++)
-        err = writeDupFileDescriptor(handle.data[i]);
+    for (int i=0 ; err==NO_ERROR && i<handle->numFds ; i++)
+        err = writeDupFileDescriptor(handle->data[i]);
 
     if (err != NO_ERROR) {
         LOGD("write native handle, write dup fd failed");
         return err;
     }
-
-    err = write(handle.data + handle.numFds, sizeof(int)*handle.numInts);
-
+    err = write(handle->data + handle->numFds, sizeof(int)*handle->numInts);
     return err;
 }
 
@@ -928,7 +926,7 @@ wp<IBinder> Parcel::readWeakBinder() const
 }
 
 
-native_handle* Parcel::readNativeHandle(native_handle* (*alloc)(void*, int, int), void* cookie) const
+native_handle* Parcel::readNativeHandle() const
 {
     int numFds, numInts;
     status_t err;
@@ -937,30 +935,15 @@ native_handle* Parcel::readNativeHandle(native_handle* (*alloc)(void*, int, int)
     err = readInt32(&numInts);
     if (err != NO_ERROR) return 0;
 
-    native_handle* h;
-    if (alloc == 0) {
-        size_t size = sizeof(native_handle) + sizeof(int)*(numFds + numInts);
-        h = (native_handle*)malloc(size); 
-        h->version = sizeof(native_handle);
-        h->numFds = numFds;
-        h->numInts = numInts;
-    } else {
-        h = alloc(cookie, numFds, numInts);
-        if (h->version != sizeof(native_handle)) {
-            return 0;
-        }
-    }
+    native_handle* h = native_handle_create(numFds, numInts);
     for (int i=0 ; err==NO_ERROR && i<numFds ; i++) {
         h->data[i] = dup(readFileDescriptor());
         if (h->data[i] < 0) err = BAD_VALUE;
     }
-
     err = read(h->data + numFds, sizeof(int)*numInts);
-
     if (err != NO_ERROR) {
-        if (alloc == 0) {
-            free(h);
-        }
+        native_handle_close(h);
+        native_handle_delete(h);
         h = 0;
     }
     return h;
