@@ -46,7 +46,6 @@ import android.location.Address;
 import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
-import android.location.ILocationCollector;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
 import android.location.ILocationProvider;
@@ -107,8 +106,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         android.Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS;
     private static final String INSTALL_LOCATION_PROVIDER =
         android.Manifest.permission.INSTALL_LOCATION_PROVIDER;
-    private static final String INSTALL_LOCATION_COLLECTOR =
-        android.Manifest.permission.INSTALL_LOCATION_COLLECTOR;
 
     // Set of providers that are explicitly enabled
     private final Set<String> mEnabledProviders = new HashSet<String>();
@@ -170,9 +167,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     // Last known location for each provider
     private HashMap<String,Location> mLastKnownLocation =
         new HashMap<String,Location>();
-
-    // Location collector
-    private ILocationCollector mCollector;
 
     private int mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
 
@@ -628,16 +622,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             // notify provider of current network state
             proxy.updateNetworkState(mNetworkState);
         }
-    }
-
-    public void installLocationCollector(ILocationCollector collector) {
-        if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_COLLECTOR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires INSTALL_LOCATION_COLLECTOR permission");
-        }
-
-        // FIXME - only support one collector
-        mCollector = collector;
     }
 
     public void installGeocodeProvider(IGeocodeProvider provider) {
@@ -1619,23 +1603,19 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
                     synchronized (mLock) {
                         Location location = (Location) msg.obj;
+                        String provider = location.getProvider();
 
-                        if (mCollector != null && 
-                                LocationManager.GPS_PROVIDER.equals(location.getProvider())) {
-                            try {
-                                mCollector.updateLocation(location);
-                            } catch (RemoteException e) {
-                                Log.w(TAG, "mCollector.updateLocation failed");
-                                mCollector = null;
+                        // notify other providers of the new location
+                        for (int i = mProviders.size() - 1; i >= 0; i--) {
+                            LocationProviderProxy proxy = mProviders.get(i);
+                            if (!provider.equals(proxy.getName())) {
+                                proxy.updateLocation(location);
                             }
                         }
 
-                        String provider = location.getProvider();
-                        if (!isAllowedBySettingsLocked(provider)) {
-                            return;
+                        if (isAllowedBySettingsLocked(provider)) {
+                            handleLocationChangedLocked(location);
                         }
-
-                        handleLocationChangedLocked(location);
                     }
                 }
             } catch (Exception e) {
@@ -1935,7 +1915,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         synchronized (mLock) {
             pw.println("Current Location Manager state:");
             pw.println("  sProvidersLoaded=" + sProvidersLoaded);
-            pw.println("  mCollector=" + mCollector);
             pw.println("  Listeners:");
             int N = mReceivers.size();
             for (int i=0; i<N; i++) {
