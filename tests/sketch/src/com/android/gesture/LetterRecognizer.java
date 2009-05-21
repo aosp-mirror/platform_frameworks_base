@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,9 +28,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
-public class LetterRecognizer {
-    private static final String LOG_TAG = "LetterRecognizer";
+import static com.android.gesture.GestureConstants.LOG_TAG;
 
+public class LetterRecognizer {
     public final static int LATIN_LOWERCASE = 0;
 
     private SigmoidUnit[] mHiddenLayer;
@@ -41,7 +40,7 @@ public class LetterRecognizer {
 
     private final int mPatchSize;
     
-    static final String GESTURE_FILE_NAME = "letters.xml";
+    static final String GESTURE_FILE_NAME = "letters.gestures";
 
     private GestureLibrary mGestureLibrary; 
     private final static int ADJUST_RANGE = 3;
@@ -151,7 +150,8 @@ public class LetterRecognizer {
         LetterRecognizer classifier = null;
 
         try {
-            in = new DataInputStream(new BufferedInputStream(resources.openRawResource(resourceID)));
+            in = new DataInputStream(new BufferedInputStream(resources.openRawResource(resourceID),
+                    GestureConstants.IO_BUFFER_SIZE));
 
             final int iCount = in.readInt();
             final int hCount = in.readInt();

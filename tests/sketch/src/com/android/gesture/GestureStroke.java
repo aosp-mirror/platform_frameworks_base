@@ -22,9 +22,9 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 
-import org.xmlpull.v1.XmlSerializer;
-
 import java.io.IOException;
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.util.ArrayList;
 
 /**
@@ -167,57 +167,35 @@ public class GestureStroke {
         return path;
     }
 
-    /**
-     * Save the gesture stroke as XML
-     * 
-     * @param namespace
-     * @param serializer
-     * @throws IOException
-     */
-    void toXML(String namespace, XmlSerializer serializer) throws IOException {
-        serializer.startTag(namespace, GestureConstants.XML_TAG_STROKE);
-        serializer.text(toString());
-        serializer.endTag(namespace, GestureConstants.XML_TAG_STROKE);
+    void serialize(DataOutputStream out) throws IOException {
+        final float[] pts = points;
+        final long[] times = timestamps;
+        final int count = points.length;
+
+        // Write number of points
+        out.writeInt(count / 2);
+
+        for (int i = 0; i < count; i += 2) {
+            // Write X
+            out.writeFloat(pts[i]);
+            // Write Y
+            out.writeFloat(pts[i + 1]);
+            // Write timestamp
+            out.writeLong(times[i / 2]);
+        }
     }
 
-    /**
-     * Create a gesture stroke from a string
-     * 
-     * @param str
-     * @return the gesture stroke
-     */
-    public static GestureStroke createFromString(String str) {
-        final ArrayList<GesturePoint> points = new ArrayList<GesturePoint>(
-                GestureConstants.STROKE_POINT_BUFFER_SIZE);
+    static GestureStroke deserialize(DataInputStream in) throws IOException {
+        // Number of points
+        final int count = in.readInt();
 
-        int endIndex;
-        int startIndex = 0;
-
-        while ((endIndex =
-                str.indexOf(GestureConstants.STRING_STROKE_DELIIMITER, startIndex + 1)) != -1) {
-
-            // parse x
-            String token = str.substring(startIndex, endIndex);
-            float x = Float.parseFloat(token);
-            startIndex = endIndex + 1;
-
-            // parse y
-            endIndex = str.indexOf(GestureConstants.STRING_STROKE_DELIIMITER, startIndex + 1);
-            token = str.substring(startIndex, endIndex);
-            float y = Float.parseFloat(token);
-            startIndex = endIndex + 1;
-
-            // parse t
-            endIndex = str.indexOf(GestureConstants.STRING_STROKE_DELIIMITER, startIndex + 1);
-            token = str.substring(startIndex, endIndex);
-            long time = Long.parseLong(token);
-            startIndex = endIndex + 1;
-
-            points.add(new GesturePoint(x, y, time));
+        final ArrayList<GesturePoint> points = new ArrayList<GesturePoint>(count);
+        for (int i = 0; i < count; i++) {
+            points.add(GesturePoint.deserialize(in));
         }
 
         return new GestureStroke(points);
-    }
+    }    
 
     /**
      * Convert the stroke to string

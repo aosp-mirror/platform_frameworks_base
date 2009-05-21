@@ -18,6 +18,7 @@ package com.android.gesture;
 
 import android.graphics.RectF;
 import android.graphics.Matrix;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,7 @@ final class GestureUtilities {
             try {
                 stream.close();
             } catch (IOException e) {
-                android.util.Log.e(LOG_TAG, "Could not close stream", e);
+                Log.e(LOG_TAG, "Could not close stream", e);
             }
         }
     }
@@ -56,24 +57,25 @@ final class GestureUtilities {
         float sx = targetPatchSize / rect.width();
         float sy = targetPatchSize / rect.height();
         float scale = sx < sy ? sx : sy;
-        android.graphics.Matrix trans = new android.graphics.Matrix();
-        trans.setScale(scale, scale);
-        android.graphics.Matrix translate1 = new android.graphics.Matrix();
-        translate1.setTranslate(-rect.centerX(), -rect.centerY());
-        trans.preConcat(translate1);
-        android.graphics.Matrix translate2 = new android.graphics.Matrix();
-        translate2.setTranslate(targetPatchSize / 2, targetPatchSize / 2);
-        trans.postConcat(translate2);
 
-        ArrayList<GestureStroke> strokes = gesture.getStrokes();
-        int count = strokes.size();
+        Matrix trans = new Matrix();
+        trans.setScale(scale, scale);
+        trans.preTranslate(-rect.centerX(), -rect.centerY());
+        trans.postTranslate(targetPatchSize / 2, targetPatchSize / 2);
+
+        final ArrayList<GestureStroke> strokes = gesture.getStrokes();
+        final int count = strokes.size();
+
         int size;
         float xpos;
         float ypos;
+
         for (int index = 0; index < count; index++) {
-            GestureStroke stroke = strokes.get(index);
+            final GestureStroke stroke = strokes.get(index);
             size = stroke.points.length;
-            float[] pts = new float[size];
+
+            final float[] pts = new float[size];
+
             trans.mapPoints(pts, 0, stroke.points, 0, size / 2);
             float segmentEndX = -1;
             float segmentEndY = -1;

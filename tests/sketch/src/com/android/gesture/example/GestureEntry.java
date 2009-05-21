@@ -49,7 +49,7 @@ public class GestureEntry extends Activity {
     private static final String PARCEL_KEY = "gesture";
 
     static final String GESTURE_FILE_NAME = Environment.getExternalStorageDirectory().getAbsolutePath()
-            + File.separator + "gestureEntry.xml";
+            + File.separator + "demo_library.gestures";
 
     private static final int DIALOG_NEW_ENTRY = 1;
 

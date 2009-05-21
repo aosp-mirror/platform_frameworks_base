@@ -16,16 +16,8 @@
 
 package com.android.gesture;
 
-import android.util.Config;
 import android.util.Log;
-import android.util.Xml;
-import android.util.Xml.Encoding;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xmlpull.v1.XmlSerializer;
+import android.os.SystemClock;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -33,10 +25,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Map;
 
 import static com.android.gesture.GestureConstants.LOG_TAG;
 
@@ -44,10 +38,28 @@ import static com.android.gesture.GestureConstants.LOG_TAG;
  * GestureLibrary maintains gesture examples and makes predictions on a new
  * gesture
  */
+//
+//    File format for GestureLibrary:
+//
+//                Nb. bytes   Java type   Description
+//                -----------------------------------
+//    Header
+//                2 bytes     short       File format version number
+//                4 bytes     int         Number of entries
+//    Entry
+//                X bytes     UTF String  Entry name
+//                4 bytes     int         Number of gestures
+//    Gesture
+//                8 bytes     long        Gesture ID
+//                4 bytes     int         Number of strokes
+//    Stroke
+//                4 bytes     int         Number of points
+//    Point
+//                4 bytes     float       X coordinate of the point
+//                4 bytes     float       Y coordinate of the point
+//                8 bytes     long        Time stamp
+//
 public class GestureLibrary {
-
-    private static final String NAMESPACE = "";
-
     public static final int SEQUENCE_INVARIANT = 1;
     // when SEQUENCE_SENSITIVE is used, only single stroke gestures are currently allowed
     public static final int SEQUENCE_SENSITIVE = 2;
@@ -56,12 +68,16 @@ public class GestureLibrary {
     public static final int ORIENTATION_INVARIANT = 1;
     public static final int ORIENTATION_SENSITIVE = 2;
 
+    private static final short FILE_FORMAT_VERSION = 1;
+
+    private static final boolean PROFILE_LOADING_SAVING = false;
+
     private int mSequenceType = SEQUENCE_SENSITIVE;
     private int mOrientationStyle = ORIENTATION_SENSITIVE;
 
     private final String mGestureFileName;
 
-    private final HashMap<String, ArrayList<Gesture>> mEntryName2gestures =
+    private final HashMap<String, ArrayList<Gesture>> mNamedGestures =
             new HashMap<String, ArrayList<Gesture>>();
 
     private Learner mClassifier;
@@ -104,7 +120,7 @@ public class GestureLibrary {
      * @return a set of strings
      */
     public Set<String> getGestureEntries() {
-        return mEntryName2gestures.keySet();
+        return mNamedGestures.keySet();
     }
 
     /**
@@ -128,10 +144,10 @@ public class GestureLibrary {
         if (entryName == null || entryName.length() == 0) {
             return;
         }
-        ArrayList<Gesture> gestures = mEntryName2gestures.get(entryName);
+        ArrayList<Gesture> gestures = mNamedGestures.get(entryName);
         if (gestures == null) {
             gestures = new ArrayList<Gesture>();
-            mEntryName2gestures.put(entryName, gestures);
+            mNamedGestures.put(entryName, gestures);
         }
         gestures.add(gesture);
         mClassifier.addInstance(Instance.createInstance(mSequenceType, gesture, entryName));
@@ -146,7 +162,7 @@ public class GestureLibrary {
      * @param gesture
      */
     public void removeGesture(String entryName, Gesture gesture) {
-        ArrayList<Gesture> gestures = mEntryName2gestures.get(entryName);
+        ArrayList<Gesture> gestures = mNamedGestures.get(entryName);
         if (gestures == null) {
             return;
         }
@@ -155,7 +171,7 @@ public class GestureLibrary {
 
         // if there are no more samples, remove the entry automatically
         if (gestures.isEmpty()) {
-            mEntryName2gestures.remove(entryName);
+            mNamedGestures.remove(entryName);
         }
 
         mClassifier.removeInstance(gesture.getID());
@@ -169,7 +185,7 @@ public class GestureLibrary {
      * @param entryName the entry name
      */
     public void removeEntireEntry(String entryName) {
-        mEntryName2gestures.remove(entryName);
+        mNamedGestures.remove(entryName);
         mClassifier.removeInstances(entryName);
         mChanged = true;
     }
@@ -181,7 +197,7 @@ public class GestureLibrary {
      * @return the list of gestures that is under this name
      */
     public ArrayList<Gesture> getGestures(String entryName) {
-        ArrayList<Gesture> gestures = mEntryName2gestures.get(entryName);
+        ArrayList<Gesture> gestures = mNamedGestures.get(entryName);
         if (gestures != null) {
             return new ArrayList<Gesture>(gestures);
         } else {
@@ -197,8 +213,8 @@ public class GestureLibrary {
             return true;
         }
 
-        boolean result= false;
-        PrintWriter writer = null;
+        boolean result = false;
+        DataOutputStream out = null;
 
         try {
             File file = new File(mGestureFileName);
@@ -208,40 +224,48 @@ public class GestureLibrary {
                 }
             }
 
-            writer = new PrintWriter(new BufferedOutputStream(new FileOutputStream(
-                    mGestureFileName), GestureConstants.IO_BUFFER_SIZE));
-
-            final XmlSerializer serializer = Xml.newSerializer();
-            serializer.setOutput(writer);
-            serializer.startDocument(Encoding.ISO_8859_1.name(), null);
-            serializer.startTag(NAMESPACE, GestureConstants.XML_TAG_LIBRARY);
-
-            final HashMap<String, ArrayList<Gesture>> maps = mEntryName2gestures;
-
-            for (String key : maps.keySet()) {
-                ArrayList<Gesture> examples = maps.get(key);
-                // save an entry
-                serializer.startTag(NAMESPACE, GestureConstants.XML_TAG_ENTRY);
-                serializer.attribute(NAMESPACE, GestureConstants.XML_TAG_NAME, key);
-                int count = examples.size();
-                for (int i = 0; i < count; i++) {
-                    Gesture gesture = examples.get(i);
-                    // save each gesture in the entry
-                    gesture.toXML(NAMESPACE, serializer);
-                }
-                serializer.endTag(NAMESPACE, GestureConstants.XML_TAG_ENTRY);
+            long start;
+            if (PROFILE_LOADING_SAVING) {
+                start = SystemClock.elapsedRealtime();
             }
 
-            serializer.endTag(NAMESPACE, GestureConstants.XML_TAG_LIBRARY);
-            serializer.endDocument();
-            serializer.flush();
+            final HashMap<String, ArrayList<Gesture>> maps = mNamedGestures;
+
+            out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file),
+                    GestureConstants.IO_BUFFER_SIZE));
+            // Write version number
+            out.writeShort(FILE_FORMAT_VERSION);
+            // Write number of entries
+            out.writeInt(maps.size());
+
+            for (Map.Entry<String, ArrayList<Gesture>> entry : maps.entrySet()) {
+                final String key = entry.getKey();
+                final ArrayList<Gesture> examples = entry.getValue();
+                final int count = examples.size();
+
+                // Write entry name
+                out.writeUTF(key);
+                // Write number of examples for this entry
+                out.writeInt(count);
+
+                for (int i = 0; i < count; i++) {
+                    examples.get(i).serialize(out);
+                }
+            }
+
+            out.flush();
+
+            if (PROFILE_LOADING_SAVING) {
+                long end = SystemClock.elapsedRealtime();
+                Log.d(LOG_TAG, "Saving gestures library = " + (end - start) + " ms");
+            }
 
             mChanged = false;
             result = true;
         } catch (IOException ex) {
             Log.d(LOG_TAG, "Failed to save gestures:", ex);
         } finally {
-            GestureUtilities.closeStream(writer);
+            GestureUtilities.closeStream(out);
         }
 
         return result;
@@ -255,17 +279,30 @@ public class GestureLibrary {
 
         final File file = new File(mGestureFileName);
         if (file.exists()) {
-            BufferedInputStream in = null;
+            DataInputStream in = null;
             try {
-                if (Config.DEBUG) {
-                    Log.v(LOG_TAG, "Load from " + mGestureFileName);
+                in = new DataInputStream(new BufferedInputStream(
+                        new FileInputStream(mGestureFileName), GestureConstants.IO_BUFFER_SIZE));
+
+                long start;
+                if (PROFILE_LOADING_SAVING) {
+                    start = SystemClock.elapsedRealtime();
                 }
-                in = new BufferedInputStream(new FileInputStream(
-                        mGestureFileName), GestureConstants.IO_BUFFER_SIZE);
-                Xml.parse(in, Encoding.ISO_8859_1, new CompactInkHandler());
+
+                // Read file format version number
+                final short versionNumber = in.readShort();
+                switch (versionNumber) {
+                    case 1:
+                        readFormatV1(in);
+                        break;
+                }
+
+                if (PROFILE_LOADING_SAVING) {
+                    long end = SystemClock.elapsedRealtime();
+                    Log.d(LOG_TAG, "Loading gestures library = " + (end - start) + " ms");
+                }
+
                 result = true;
-            } catch (SAXException ex) {
-                Log.d(LOG_TAG, "Failed to load gestures:", ex);
             } catch (IOException ex) {
                 Log.d(LOG_TAG, "Failed to load gestures:", ex);
             } finally {
@@ -276,69 +313,28 @@ public class GestureLibrary {
         return result;
     }
 
-    private class CompactInkHandler implements ContentHandler {
-        final StringBuilder mBuffer = new StringBuilder(GestureConstants.STROKE_STRING_BUFFER_SIZE);
+    private void readFormatV1(DataInputStream in) throws IOException {
+        final Learner classifier = mClassifier;
+        final HashMap<String, ArrayList<Gesture>> namedGestures = mNamedGestures;
+        namedGestures.clear();
 
-        String mEntryName;
+        // Number of entries in the library
+        final int entriesCount = in.readInt();
 
-        Gesture mCurrentGesture = null;
-        ArrayList<Gesture> mGestures;
+        for (int i = 0; i < entriesCount; i++) {
+            // Entry name
+            final String name = in.readUTF();
+            // Number of gestures
+            final int gestureCount = in.readInt();
 
-        CompactInkHandler() {
-        }
-
-        public void characters(char[] ch, int start, int length) {
-            mBuffer.append(ch, start, length);
-        }
-
-        public void endDocument() {
-        }
-
-        public void endElement(String uri, String localName, String qName) {
-            if (localName.equals(GestureConstants.XML_TAG_ENTRY)) {
-                mEntryName2gestures.put(mEntryName, mGestures);
-                mGestures = null;
-            } else if (localName.equals(GestureConstants.XML_TAG_GESTURE)) {
-                mGestures.add(mCurrentGesture);
-                mClassifier.addInstance(Instance.createInstance(mSequenceType,
-                        mCurrentGesture, mEntryName));
-                mCurrentGesture = null;
-            } else if (localName.equals(GestureConstants.XML_TAG_STROKE)) {
-                mCurrentGesture.addStroke(GestureStroke.createFromString(mBuffer.toString()));
-                mBuffer.setLength(0);
+            final ArrayList<Gesture> gestures = new ArrayList<Gesture>(gestureCount);
+            for (int j = 0; j < gestureCount; j++) {
+                final Gesture gesture = Gesture.deserialize(in);
+                gestures.add(gesture);
+                classifier.addInstance(Instance.createInstance(mSequenceType, gesture, name));
             }
-        }
 
-        public void endPrefixMapping(String prefix) {
-        }
-
-        public void ignorableWhitespace(char[] ch, int start, int length) {
-        }
-
-        public void processingInstruction(String target, String data) {
-        }
-
-        public void setDocumentLocator(Locator locator) {
-        }
-
-        public void skippedEntity(String name) {
-        }
-
-        public void startDocument() {
-        }
-
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
-            if (localName.equals(GestureConstants.XML_TAG_ENTRY)) {
-                mGestures = new ArrayList<Gesture>();
-                mEntryName = attributes.getValue(NAMESPACE, GestureConstants.XML_TAG_NAME);
-            } else if (localName.equals(GestureConstants.XML_TAG_GESTURE)) {
-                mCurrentGesture = new Gesture();
-                mCurrentGesture.setID(Long.parseLong(attributes.getValue(NAMESPACE,
-                        GestureConstants.XML_TAG_ID)));
-            }
-        }
-
-        public void startPrefixMapping(String prefix, String uri) {
+            namedGestures.put(name, gestures);
         }
     }
 }

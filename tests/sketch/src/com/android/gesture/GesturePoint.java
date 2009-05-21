@@ -16,6 +16,9 @@
 
 package com.android.gesture;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+
 /**
  * A timed point of a gesture stroke
  */
@@ -30,5 +33,14 @@ public class GesturePoint {
         this.x = x;
         this.y = y;
         timestamp = t;
+    }
+
+    static GesturePoint deserialize(DataInputStream in) throws IOException {
+        // Read X and Y
+        final float x = in.readFloat();
+        final float y = in.readFloat();
+        // Read timestamp
+        final long timeStamp = in.readLong();
+        return new GesturePoint(x, y, timeStamp);
     }
 }
