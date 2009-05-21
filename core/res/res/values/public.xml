@@ -1132,12 +1132,13 @@
   
   
 <!-- ===============================================================
-     Resources added in version 5 of the platform.
+     Resources added in Eclair.
      =============================================================== -->
   <eat-comment />
 
-  <public type="attr" name="accountType" id="0x010102A9" />
-  <public type="attr" name="contentAuthority" id="0x010102AA" />
+  <public type="attr" name="accountType" />
+  <public type="attr" name="contentAuthority" />
+
   <public type="drawable" name="stat_sys_vp_phone_call" />
   <public type="drawable" name="stat_sys_vp_phone_call_on_hold" />
   
