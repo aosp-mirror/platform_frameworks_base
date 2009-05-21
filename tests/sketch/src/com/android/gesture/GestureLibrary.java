@@ -49,11 +49,11 @@ public class GestureLibrary {
     private static final String NAMESPACE = "";
 
     public static final int SEQUENCE_INVARIANT = 1;
-    // when SEQUENCE_SENSITIVE is used, only single stroke gestures are allowed
+    // when SEQUENCE_SENSITIVE is used, only single stroke gestures are currently allowed
     public static final int SEQUENCE_SENSITIVE = 2;
 
+    // ORIENTATION_SENSITIVE and ORIENTATION_INVARIANT are only for SEQUENCE_SENSITIVE gestures
     public static final int ORIENTATION_INVARIANT = 1;
-    // ORIENTATION_SENSITIVE is only available for single stroke gestures
     public static final int ORIENTATION_SENSITIVE = 2;
 
     private int mSequenceType = SEQUENCE_SENSITIVE;
@@ -77,8 +77,8 @@ public class GestureLibrary {
     }
 
     /**
-     * Specify whether the gesture library will handle orientation sensitive
-     * gestures. Use ORIENTATION_INVARIANT or ORIENTATION_SENSITIVE
+     * Specify how the gesture library will handle orientation. 
+     * Use ORIENTATION_INVARIANT or ORIENTATION_SENSITIVE
      * 
      * @param style
      */
@@ -114,8 +114,8 @@ public class GestureLibrary {
      * @return a list of predictions of possible entries for a given gesture
      */
     public ArrayList<Prediction> recognize(Gesture gesture) {
-        Instance instance = Instance.createInstance(this, gesture, null);
-        return mClassifier.classify(this, instance);
+        Instance instance = Instance.createInstance(mSequenceType, gesture, null);
+        return mClassifier.classify(mSequenceType, instance.vector);
     }
 
     /**
@@ -134,7 +134,7 @@ public class GestureLibrary {
             mEntryName2gestures.put(entryName, gestures);
         }
         gestures.add(gesture);
-        mClassifier.addInstance(Instance.createInstance(this, gesture, entryName));
+        mClassifier.addInstance(Instance.createInstance(mSequenceType, gesture, entryName));
         mChanged = true;
     }
 
@@ -300,7 +300,7 @@ public class GestureLibrary {
                 mGestures = null;
             } else if (localName.equals(GestureConstants.XML_TAG_GESTURE)) {
                 mGestures.add(mCurrentGesture);
-                mClassifier.addInstance(Instance.createInstance(GestureLibrary.this,
+                mClassifier.addInstance(Instance.createInstance(mSequenceType,
                         mCurrentGesture, mEntryName));
                 mCurrentGesture = null;
             } else if (localName.equals(GestureConstants.XML_TAG_STROKE)) {

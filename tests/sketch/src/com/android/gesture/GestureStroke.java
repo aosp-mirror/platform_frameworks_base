@@ -244,4 +244,12 @@ public class GestureStroke {
     public void invalidate() {
         mCachedPath = null;
     }
+    
+    /**
+     * Compute an oriented bounding box of the stroke
+     * @return OrientedBoundingBox
+     */
+    public OrientedBoundingBox computeOrientedBoundingBox() {
+        return GestureUtilities.computeOrientedBoundingBox(points);
+    }
 }
