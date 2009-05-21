@@ -38,6 +38,9 @@ public class Build {
     /** The name of the underlying board, like "goldfish". */
     public static final String BOARD = getString("ro.product.board");
 
+    /** The name of the instruction set (CPU type + ABI convention) of native code. */
+    public static final String CPU_ABI = getString("ro.product.cpu.abi");
+
     /** The manufacturer of the product/hardware. */
     public static final String MANUFACTURER = getString("ro.product.manufacturer");
 

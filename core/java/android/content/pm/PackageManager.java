@@ -398,6 +398,15 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_TEST_ONLY = -15;
 
     /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the package being installed contains native code, but none that is
+     * compatible with the the device's CPU_ABI.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
+
+    /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was given a path that is not a file, or does not end with the expected

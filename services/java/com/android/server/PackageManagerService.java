@@ -2151,16 +2151,9 @@ class PackageManagerService extends IPackageManager.Stub {
             String path = scanFile.getPath();
             if (scanFileNewer) {
                 Log.i(TAG, path + " changed; unpacking");
-                try {
-                    cachePackageSharedLibsLI(pkg, dataPath, scanFile);
-                } catch (IOException e) {
-                    Log.e(TAG, "Failure extracting shared libs", e);
-                    if(mInstaller != null) {
-                        mInstaller.remove(pkgName);
-                    } else {
-                        dataPath.delete();
-                    }
-                    mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                int err = cachePackageSharedLibsLI(pkg, dataPath, scanFile);
+                if (err != PackageManager.INSTALL_SUCCEEDED) {
+                    mLastScanError = err;
                     return null;
                 }
             }
@@ -2444,14 +2437,15 @@ class PackageManagerService extends IPackageManager.Stub {
         return pkg;
     }
 
-    private void cachePackageSharedLibsLI(PackageParser.Package pkg,
-            File dataPath, File scanFile) throws IOException {
+    private int cachePackageSharedLibsLI(PackageParser.Package pkg,
+            File dataPath, File scanFile) {
         File sharedLibraryDir = new File(dataPath.getPath() + "/lib");
-        final String sharedLibraryABI = "armeabi";
+        final String sharedLibraryABI = Build.CPU_ABI;
         final String apkLibraryDirectory = "lib/" + sharedLibraryABI + "/";
         final String apkSharedLibraryPrefix = apkLibraryDirectory + "lib";
         final String sharedLibrarySuffix = ".so";
-        boolean createdSharedLib = false;
+        boolean hasNativeCode = false;
+        boolean installedNativeCode = false;
         try {
             ZipFile zipFile = new ZipFile(scanFile);
             Enumeration<ZipEntry> entries =
@@ -2460,9 +2454,15 @@ class PackageManagerService extends IPackageManager.Stub {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 if (entry.isDirectory()) {
+                    if (!hasNativeCode && entry.getName().startsWith("lib")) {
+                        hasNativeCode = true;
+                    }
                     continue;
                 }
                 String entryName = entry.getName();
+                if (entryName.startsWith("lib/")) {
+                    hasNativeCode = true;
+                }
                 if (! (entryName.startsWith(apkSharedLibraryPrefix)
                         && entryName.endsWith(sharedLibrarySuffix))) {
                     continue;
@@ -2473,6 +2473,9 @@ class PackageManagerService extends IPackageManager.Stub {
                         || (!FileUtils.isFilenameSafe(new File(libFileName)))) {
                     continue;
                 }
+                
+                installedNativeCode = true;
+                
                 String sharedLibraryFilePath = sharedLibraryDir.getPath() +
                     File.separator + libFileName;
                 File sharedLibraryFile = new File(sharedLibraryFilePath);
@@ -2484,19 +2487,23 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (mInstaller == null) {
                         sharedLibraryDir.mkdir();
-                        createdSharedLib = true;
                     }
                     cacheSharedLibLI(pkg, zipFile, entry, sharedLibraryDir,
                             sharedLibraryFile);
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG, "Failed to cache package shared libs", e);
-            if(createdSharedLib) {
-                sharedLibraryDir.delete();
-            }
-            throw e;
+            Log.w(TAG, "Failed to cache package shared libs", e);
+            return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
         }
+        
+        if (hasNativeCode && !installedNativeCode) {
+            Log.w(TAG, "Install failed: .apk has native code but none for arch "
+                    + Build.CPU_ABI);
+            return PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
+        }
+        
+        return PackageManager.INSTALL_SUCCEEDED;
     }
 
     private void cacheSharedLibLI(PackageParser.Package pkg,
