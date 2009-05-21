@@ -37,6 +37,8 @@ public class TouchThroughGesturing implements GestureListener {
     private static final float SQUARENESS_THRESHOLD = 0.275f;
     private static final float ANGLE_THRESHOLD = 40;
 
+    private static final boolean STEAL_EVENTS = false;
+
     public static final int DEFAULT_UNCERTAIN_GESTURE_COLOR = Color.argb(60, 255, 255, 0);
 
     private boolean mIsGesturing = false;
@@ -91,6 +93,11 @@ public class TouchThroughGesturing implements GestureListener {
     }
 
     public void onGesture(GestureOverlay overlay, MotionEvent event) {
+        //noinspection PointlessBooleanExpression
+        if (!STEAL_EVENTS) {
+            mModel.dispatchTouchEvent(event);
+        }
+
         if (mIsGesturing) {
             return;
         }
@@ -114,14 +121,18 @@ public class TouchThroughGesturing implements GestureListener {
             if (box.squareness > SQUARENESS_THRESHOLD || angle < ANGLE_THRESHOLD) {
                 mIsGesturing = true;
                 overlay.setGestureColor(GestureOverlay.DEFAULT_GESTURE_COLOR);
-                event = MotionEvent.obtain(event.getDownTime(), System.currentTimeMillis(),
-                        MotionEvent.ACTION_UP, x, y, event.getPressure(), event.getSize(),
-                        event.getMetaState(), event.getXPrecision(), event.getYPrecision(),
-                        event.getDeviceId(), event.getEdgeFlags());
+                if (STEAL_EVENTS) {
+                    event = MotionEvent.obtain(event.getDownTime(), System.currentTimeMillis(),
+                            MotionEvent.ACTION_UP, x, y, event.getPressure(), event.getSize(),
+                            event.getMetaState(), event.getXPrecision(), event.getYPrecision(),
+                            event.getDeviceId(), event.getEdgeFlags());
+                }
             }
         }
 
-        mModel.dispatchTouchEvent(event);
+        if (STEAL_EVENTS) {
+            mModel.dispatchTouchEvent(event);
+        }
     }
 
     public void onFinishGesture(GestureOverlay overlay, MotionEvent event) {

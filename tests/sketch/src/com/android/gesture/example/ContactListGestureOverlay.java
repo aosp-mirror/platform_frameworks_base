@@ -50,8 +50,6 @@ public class ContactListGestureOverlay extends Activity {
             People.DISPLAY_NAME, // 1
     };
 
-    private GestureOverlay mOverlay;
-
     private ContactAdapter mContactAdapter;
 
     private TouchThroughGesturing mGestureProcessor;
@@ -97,7 +95,7 @@ public class ContactListGestureOverlay extends Activity {
         setProgressBarIndeterminateVisibility(false);
 
         // add a gesture overlay on top of the ListView
-        mOverlay = new GestureOverlay(this);
+        GestureOverlay overlay = new GestureOverlay(this);
         mGestureProcessor = new TouchThroughGesturing(mContactList);
         mGestureProcessor.setGestureType(TouchThroughGesturing.MULTIPLE_STROKE);
         mGestureProcessor.addGestureActionListener(new GestureActionListener() {
@@ -114,9 +112,9 @@ public class ContactListGestureOverlay extends Activity {
                 }
             }
         });
-        mOverlay.addGestureListener(mGestureProcessor);
+        overlay.addGestureListener(mGestureProcessor);
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
-        this.addContentView(mOverlay, params);
+        this.addContentView(overlay, params);
     }
 }

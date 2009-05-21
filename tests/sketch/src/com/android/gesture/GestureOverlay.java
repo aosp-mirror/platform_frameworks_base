@@ -41,8 +41,10 @@ public class GestureOverlay extends View {
     // TODO: Move all these values into XML attributes
     private static final int TRANSPARENT_BACKGROUND = 0x00000000;
 
-    private static final float FADING_ALPHA_CHANGE = 0.03f;
-    private static final long FADING_REFRESHING_RATE = 100;
+    // TODO: SHOULD BE A TOTAL DURATION
+    private static final float FADING_ALPHA_CHANGE = 0.15f;
+    private static final long FADING_OFFSET = 300;
+    private static final long FADING_REFRESHING_RATE = 16;
 
     private static final int GESTURE_STROKE_WIDTH = 12;
     private static final boolean GESTURE_RENDERING_ANTIALIAS = true;
@@ -235,7 +237,7 @@ public class GestureOverlay extends View {
             mFadingAlpha = 1;
             mIsFadingOut = true;
             mHandler.removeCallbacks(mFadingOut);
-            mHandler.postDelayed(mFadingOut, FADING_REFRESHING_RATE);
+            mHandler.postDelayed(mFadingOut, FADING_OFFSET);
         } else {
             mPath = null;
             mCurrentGesture = null;
