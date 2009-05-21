@@ -25,6 +25,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.server.search.SearchableInfo;
 import android.text.Html;
 import android.text.TextUtils;
@@ -45,12 +46,18 @@ import java.util.WeakHashMap;
  * @hide
  */
 class SuggestionsAdapter extends ResourceCursorAdapter {
+    // The value used to query a cursor whether it is still expecting more input,
+    // so we can correctly display (or not display) the 'working' spinner in the search dialog.
+    public static final String IS_WORKING = "isWorking";
+    
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
     
+    private SearchDialog mSearchDialog;
     private SearchableInfo mSearchable;
     private Context mProviderContext;
     private WeakHashMap<String, Drawable> mOutsideDrawablesCache;
+    private boolean mGlobalSearchMode;
 
     // Cached column indexes, updated when the cursor changes. 
     private int mFormatCol;
@@ -61,12 +68,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mIconBitmap1Col;
     private int mIconBitmap2Col;
     
-    public SuggestionsAdapter(Context context, SearchableInfo searchable,
-            WeakHashMap<String, Drawable> outsideDrawablesCache) {
+    public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
+            WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
         super(context,
                 com.android.internal.R.layout.search_dropdown_item_icons_2line,
                 null,   // no initial cursor
                 true);  // auto-requery
+        mSearchDialog = searchDialog;
         mSearchable = searchable;
         
         // set up provider resources (gives us icons, etc.)
@@ -74,6 +82,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
         
         mOutsideDrawablesCache = outsideDrawablesCache;
+        mGlobalSearchMode = globalSearchMode;
     }
     
     /**
@@ -117,6 +126,28 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
             mIconBitmap1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1_BITMAP);
             mIconBitmap2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2_BITMAP);
+        }
+        updateWorking();
+    }
+        
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+        updateWorking();
+    }
+    
+    /**
+     * Updates the search dialog according to the current working status of the cursor.
+     */
+    private void updateWorking() {
+        if (!mGlobalSearchMode || mCursor == null) return;
+        
+        Bundle request = new Bundle();
+        request.putString(SearchManager.EXTRA_DATA_KEY, IS_WORKING);
+        Bundle response = mCursor.respond(request);
+        if (response.containsKey(IS_WORKING)) {
+            boolean isWorking = response.getBoolean(IS_WORKING);
+            mSearchDialog.setWorking(isWorking);
         }
     }
     

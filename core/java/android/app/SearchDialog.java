@@ -31,6 +31,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -103,6 +104,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private Button mGoButton;
     private ImageButton mVoiceButton;
     private View mSearchPlate;
+    private AnimationDrawable mWorkingSpinner;
 
     // interaction with searchable application
     private SearchableInfo mSearchable;
@@ -182,6 +184,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mGoButton = (Button) findViewById(com.android.internal.R.id.search_go_btn);
         mVoiceButton = (ImageButton) findViewById(com.android.internal.R.id.search_voice_btn);
         mSearchPlate = findViewById(com.android.internal.R.id.search_plate);
+        mWorkingSpinner = (AnimationDrawable) getContext().getResources().
+                getDrawable(com.android.internal.R.drawable.search_spinner);
         
         // attach listeners
         mSearchAutoComplete.addTextChangedListener(mTextWatcher);
@@ -238,7 +242,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         return doShow(initialQuery, selectInitialQuery, componentName, appSearchData, globalSearch);
     }
-    
     
     /**
      * Called in response to a press of the hard search button in
@@ -393,6 +396,24 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mActivityContext = null;
         mUserQuery = null;
         mPreviousComponents = null;
+    }
+    
+    /**
+     * Sets the search dialog to the 'working' state, which shows a working spinner in the
+     * right hand size of the text field.
+     * 
+     * @param working true to show spinner, false to hide spinner
+     */
+    public void setWorking(boolean working) {
+        if (working) {
+            mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
+                    null, null, mWorkingSpinner, null);
+            mWorkingSpinner.start();
+        } else {
+            mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
+                    null, null, null, null);
+            mWorkingSpinner.stop();
+        }
     }
     
     /**
@@ -563,8 +584,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // attach the suggestions adapter, if suggestions are available
         // The existence of a suggestions authority is the proxy for "suggestions available here"
         if (mSearchable.getSuggestAuthority() != null) {
-            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), mSearchable, 
-                    mOutsideDrawablesCache);
+            mSuggestionsAdapter = new SuggestionsAdapter(getContext(), this, mSearchable, 
+                    mOutsideDrawablesCache, mGlobalSearchMode);
             mSearchAutoComplete.setAdapter(mSuggestionsAdapter);
         }
     }
