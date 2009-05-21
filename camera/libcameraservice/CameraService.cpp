@@ -1084,7 +1084,6 @@ status_t CameraService::onTransact(
     status_t err = BnCameraService::onTransact(code, data, reply, flags);
 
 #if DEBUG_HEAP_LEAKS
-
     LOGD("+++ onTransact err %d code %d", err, code);
 
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {
@@ -1121,6 +1120,7 @@ status_t CameraService::onTransact(
         }
     }
 #endif // DEBUG_HEAP_LEAKS
+
     return err;
 }
 
