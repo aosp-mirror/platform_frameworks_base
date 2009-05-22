@@ -70,6 +70,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -130,8 +131,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // things in here CAN NOT take focus, but are shown on top of everything else.
     static final int SYSTEM_OVERLAY_LAYER = 14;
 
+    static final int APPLICATION_MEDIA_SUBLAYER = -2;
+    static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
     static final int APPLICATION_PANEL_SUBLAYER = 1;
-    static final int APPLICATION_MEDIA_SUBLAYER = -1;
     static final int APPLICATION_SUB_PANEL_SUBLAYER = 2;
 
     static final float SLIDE_TOUCH_EVENT_SIZE_LIMIT = 0.6f;
@@ -575,6 +577,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return APPLICATION_PANEL_SUBLAYER;
         case TYPE_APPLICATION_MEDIA:
             return APPLICATION_MEDIA_SUBLAYER;
+        case TYPE_APPLICATION_MEDIA_OVERLAY:
+            return APPLICATION_MEDIA_OVERLAY_SUBLAYER;
         case TYPE_APPLICATION_SUB_PANEL:
             return APPLICATION_SUB_PANEL_SUBLAYER;
         }
