@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -31,8 +31,6 @@ import java.io.DataInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-
-import static com.android.gesture.GestureConstants.LOG_TAG;
 
 /**
  * A gesture can have a single or multiple strokes
@@ -242,26 +240,6 @@ public class Gesture implements Parcelable {
         return gesture;
     }
 
-    /**
-     * Convert the gesture to string
-     */
-    @Override
-    public String toString() {
-        final StringBuilder str = new StringBuilder();
-        str.append(mGestureID);
-
-        final ArrayList<GestureStroke> strokes = mStrokes;
-        final int count = strokes.size();
-
-        for (int i = 0; i < count; i++) {
-            final GestureStroke stroke = strokes.get(i);
-            str.append(GestureConstants.STRING_GESTURE_DELIIMITER);
-            str.append(stroke.toString());
-        }
-
-        return str.toString();
-    }
-
     public static final Parcelable.Creator<Gesture> CREATOR = new Parcelable.Creator<Gesture>() {
         public Gesture createFromParcel(Parcel in) {
             Gesture gesture = null;
@@ -273,7 +251,7 @@ public class Gesture implements Parcelable {
             try {
                 gesture = deserialize(inStream);
             } catch (IOException e) {
-                Log.e(LOG_TAG, "Error reading Gesture from parcel:", e);
+                Log.e(GestureConstants.LOG_TAG, "Error reading Gesture from parcel:", e);
             } finally {
                 GestureUtilities.closeStream(inStream);
             }
@@ -302,7 +280,7 @@ public class Gesture implements Parcelable {
             serialize(outStream);
             result = true;
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error writing Gesture to parcel:", e);
+            Log.e(GestureConstants.LOG_TAG, "Error writing Gesture to parcel:", e);
         } finally {
             GestureUtilities.closeStream(outStream);
             GestureUtilities.closeStream(byteStream);

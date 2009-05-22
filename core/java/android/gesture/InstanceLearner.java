@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import android.util.Config;
 import android.util.Log;
+import static android.gesture.GestureConstants.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,9 +31,6 @@ import java.util.TreeMap;
  */
 
 class InstanceLearner extends Learner {
-
-    private static final String LOGTAG = "InstanceLearner";
-
     @Override
     ArrayList<Prediction> classify(int gestureType, float[] vector) {
         ArrayList<Prediction> predictions = new ArrayList<Prediction>();
@@ -63,19 +61,15 @@ class InstanceLearner extends Learner {
         }
 
         double sum = 0;
-        Iterator<String> lableIterator = label2score.keySet().iterator();
-        while (lableIterator.hasNext()) {
-            String name = lableIterator.next();
+        for (String name : label2score.keySet()) {
             double score = label2score.get(name);
             sum += score;
             predictions.add(new Prediction(name, score));
         }
 
         // normalize
-        Iterator<Prediction> predictionIterator = predictions.iterator();
-        while (predictionIterator.hasNext()) {
-            Prediction name = predictionIterator.next();
-            name.score /= sum;
+        for (Prediction prediction : predictions) {
+            prediction.score /= sum;
         }
 
         Collections.sort(predictions, new Comparator<Prediction>() {
@@ -91,14 +85,6 @@ class InstanceLearner extends Learner {
                 }
             }
         });
-
-        if (Config.DEBUG) {
-            predictionIterator = predictions.iterator();
-            while (predictionIterator.hasNext()) {
-                Prediction name = predictionIterator.next();
-                Log.v(LOGTAG, "prediction [" + name.name + " = " + name.score + "]");
-            }
-        }
 
         return predictions;
     }

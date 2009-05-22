@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import android.util.Log;
 import android.os.SystemClock;
@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Map;
 
-import static com.android.gesture.GestureConstants.LOG_TAG;
+import static android.gesture.GestureConstants.LOG_TAG;
 
 /**
  * GestureLibrary maintains gesture examples and makes predictions on a new
@@ -190,7 +190,7 @@ public class GestureLibrary {
      * 
      * @param entryName the entry name
      */
-    public void removeEntireEntry(String entryName) {
+    public void removeEntry(String entryName) {
         mNamedGestures.remove(entryName);
         mClassifier.removeInstances(entryName);
         mChanged = true;
