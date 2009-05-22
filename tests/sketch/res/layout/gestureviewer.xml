@@ -26,7 +26,7 @@
         android:drawSelectorOnTop="true"
         android:prompt="@string/recognition_result"/>
     
-    <com.android.gesture.GestureOverlay 
+    <android.gesture.GestureOverlayView
         android:id="@+id/drawingpad"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

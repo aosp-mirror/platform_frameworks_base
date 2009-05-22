@@ -538,21 +538,48 @@ import java.util.WeakHashMap;
  * take care of redrawing the appropriate views until the animation completes.
  * </p>
  *
+ * @attr ref android.R.styleable#View_background
+ * @attr ref android.R.styleable#View_clickable
+ * @attr ref android.R.styleable#View_contentDescription
+ * @attr ref android.R.styleable#View_drawingCacheQuality
+ * @attr ref android.R.styleable#View_duplicateParentState
+ * @attr ref android.R.styleable#View_id
+ * @attr ref android.R.styleable#View_fadingEdge
+ * @attr ref android.R.styleable#View_fadingEdgeLength
  * @attr ref android.R.styleable#View_fitsSystemWindows
+ * @attr ref android.R.styleable#View_isScrollContainer
+ * @attr ref android.R.styleable#View_focusable
+ * @attr ref android.R.styleable#View_focusableInTouchMode
+ * @attr ref android.R.styleable#View_hapticFeedbackEnabled
+ * @attr ref android.R.styleable#View_keepScreenOn
+ * @attr ref android.R.styleable#View_longClickable
+ * @attr ref android.R.styleable#View_minHeight
+ * @attr ref android.R.styleable#View_minWidth
  * @attr ref android.R.styleable#View_nextFocusDown
  * @attr ref android.R.styleable#View_nextFocusLeft
  * @attr ref android.R.styleable#View_nextFocusRight
  * @attr ref android.R.styleable#View_nextFocusUp
+ * @attr ref android.R.styleable#View_onClick
+ * @attr ref android.R.styleable#View_padding
+ * @attr ref android.R.styleable#View_paddingBottom
+ * @attr ref android.R.styleable#View_paddingLeft
+ * @attr ref android.R.styleable#View_paddingRight
+ * @attr ref android.R.styleable#View_paddingTop
+ * @attr ref android.R.styleable#View_saveEnabled
  * @attr ref android.R.styleable#View_scrollX
  * @attr ref android.R.styleable#View_scrollY
+ * @attr ref android.R.styleable#View_scrollbarSize
+ * @attr ref android.R.styleable#View_scrollbarStyle
+ * @attr ref android.R.styleable#View_scrollbars
  * @attr ref android.R.styleable#View_scrollbarTrackHorizontal
  * @attr ref android.R.styleable#View_scrollbarThumbHorizontal
- * @attr ref android.R.styleable#View_scrollbarSize
- * @attr ref android.R.styleable#View_scrollbars
  * @attr ref android.R.styleable#View_scrollbarThumbVertical
  * @attr ref android.R.styleable#View_scrollbarTrackVertical
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawHorizontalTrack
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawVerticalTrack
+ * @attr ref android.R.styleable#View_soundEffectsEnabled
+ * @attr ref android.R.styleable#View_tag
+ * @attr ref android.R.styleable#View_visibility
  *
  * @see android.view.ViewGroup
  */

@@ -101,9 +101,12 @@ public class ContactListGestureOverlay extends Activity {
             public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
                 ArrayList<Prediction> predictions = mRecognizer.recognize(gesture);
                 if (!predictions.isEmpty()) {
-                    Log.v(LOGTAG, "1st Prediction : " + predictions.get(0).name);
-                    Log.v(LOGTAG, "2nd Prediction : " + predictions.get(1).name);
-                    Log.v(LOGTAG, "3rd Prediction : " + predictions.get(2).name);
+                    Log.v(LOGTAG, "1st Prediction : " + predictions.get(0).name +
+                            " @" + predictions.get(0).score);
+                    Log.v(LOGTAG, "2nd Prediction : " + predictions.get(1).name +
+                            " @" + predictions.get(1).score);
+                    Log.v(LOGTAG, "3rd Prediction : " + predictions.get(2).name +
+                            " @" + predictions.get(2).score);
                     int index = mContactAdapter.search(predictions.get(0).name);
                     if (index != -1) {
                         mContactList.setSelection(index);

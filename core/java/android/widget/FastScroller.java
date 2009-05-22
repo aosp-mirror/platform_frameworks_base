@@ -134,7 +134,7 @@ class FastScroller {
         
         mScrollCompleted = true;
 
-        getSections();
+        getSectionsFromIndexer();
         
         mOverlayPos = new RectF();
         mScrollFade = new ScrollFade();
@@ -250,7 +250,18 @@ class FastScroller {
         }
     }
 
-    private void getSections() {
+    SectionIndexer getSectionIndexer() {
+        return mSectionIndexer;
+    }
+
+    Object[] getSections() {
+        if (mListAdapter == null && mList != null) {
+            getSectionsFromIndexer();
+        }
+        return mSections;
+    }
+
+    private void getSectionsFromIndexer() {
         Adapter adapter = mList.getAdapter();
         mSectionIndexer = null;
         if (adapter instanceof HeaderViewListAdapter) {
@@ -411,7 +422,7 @@ class FastScroller {
                 
                 setState(STATE_DRAGGING);
                 if (mListAdapter == null && mList != null) {
-                    getSections();
+                    getSectionsFromIndexer();
                 }
 
                 cancelFling();
@@ -448,7 +459,7 @@ class FastScroller {
         }
         return false;
     }
-    
+
     public class ScrollFade implements Runnable {
         
         long mStartTime;

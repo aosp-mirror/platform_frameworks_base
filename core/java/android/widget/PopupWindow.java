@@ -1072,6 +1072,20 @@ public class PopupWindow {
             mWindowManager.updateViewLayout(mPopupView, p);
         }
     }
+
+    /**
+     * <p>Updates the dimension of the popup window. Calling this function
+     * also updates the window with the current popup state as described
+     * for {@link #update()}.</p>
+     *
+     * @param width the new width
+     * @param height the new height
+     */
+    public void update(int width, int height) {
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams)
+                mPopupView.getLayoutParams();
+        update(p.x, p.y, width, height, false);
+    }
     
     /**
      * <p>Updates the position and the dimension of the popup window. Width and
