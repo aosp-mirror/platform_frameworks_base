@@ -127,6 +127,8 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#TextView_textColor
  * @attr ref android.R.styleable#TextView_textColorHighlight
  * @attr ref android.R.styleable#TextView_textColorHint
+ * @attr ref android.R.styleable#TextView_textAppearance
+ * @attr ref android.R.styleable#TextView_textColorLink
  * @attr ref android.R.styleable#TextView_textSize
  * @attr ref android.R.styleable#TextView_textScaleX
  * @attr ref android.R.styleable#TextView_typeface
@@ -164,13 +166,22 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#TextView_capitalize
  * @attr ref android.R.styleable#TextView_autoText
  * @attr ref android.R.styleable#TextView_editable
+ * @attr ref android.R.styleable#TextView_freezesText
+ * @attr ref android.R.styleable#TextView_ellipsize
  * @attr ref android.R.styleable#TextView_drawableTop
  * @attr ref android.R.styleable#TextView_drawableBottom
  * @attr ref android.R.styleable#TextView_drawableRight
  * @attr ref android.R.styleable#TextView_drawableLeft
+ * @attr ref android.R.styleable#TextView_drawablePadding
  * @attr ref android.R.styleable#TextView_lineSpacingExtra
  * @attr ref android.R.styleable#TextView_lineSpacingMultiplier
  * @attr ref android.R.styleable#TextView_marqueeRepeatLimit
+ * @attr ref android.R.styleable#TextView_inputType
+ * @attr ref android.R.styleable#TextView_imeOptions
+ * @attr ref android.R.styleable#TextView_privateImeOptions
+ * @attr ref android.R.styleable#TextView_imeActionLabel
+ * @attr ref android.R.styleable#TextView_imeActionId
+ * @attr ref android.R.styleable#TextView_editorExtras
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {

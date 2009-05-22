@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,62 +17,54 @@
 package android.gesture;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.Color;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import com.android.internal.R;
 
 import java.util.ArrayList;
 
 /**
  * A (transparent) overlay for gesture input that can be placed on top of other
- * widgets. The view can also be opaque.
+ * widgets.
+ *
+ * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeWidth
+ * @attr ref android.R.styleable#GestureOverlayView_gestureColor
+ * @attr ref android.R.styleable#GestureOverlayView_uncertainGestureColor
+ * @attr ref android.R.styleable#GestureOverlayView_fadeDuration
+ * @attr ref android.R.styleable#GestureOverlayView_fadeOffset
  */
-
 public class GestureOverlayView extends View {
-    static final float TOUCH_TOLERANCE = 3;
-
-    // TODO: Move all these values into XML attributes
     private static final int TRANSPARENT_BACKGROUND = 0x00000000;
-
-    // TODO: SHOULD BE A TOTAL DURATION
-    private static final float FADING_ALPHA_CHANGE = 0.15f;
-    private static final long FADING_OFFSET = 300;
-    private static final long FADING_REFRESHING_RATE = 16;
-
-    private static final int GESTURE_STROKE_WIDTH = 12;
     private static final boolean GESTURE_RENDERING_ANTIALIAS = true;
-
     private static final boolean DITHER_FLAG = true;
-
-    public static final int DEFAULT_GESTURE_COLOR = 0xFFFFFF00;
-    public static final int DEFAULT_UNCERTAIN_GESTURE_COLOR = Color.argb(60, 255, 255, 0);
-
-    private static final int REFRESH_RANGE = 10;
-
-    private static final BlurMaskFilter BLUR_MASK_FILTER =
-            new BlurMaskFilter(1, BlurMaskFilter.Blur.NORMAL);
 
     private Paint mGesturePaint;
 
     private final Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
-    private Bitmap mBitmap; // with transparent background
+    private Bitmap mBitmap;
     private Canvas mBitmapCanvas;
 
-    private int mCertainGestureColor = DEFAULT_GESTURE_COLOR;
-    private int mUncertainGestureColor = DEFAULT_UNCERTAIN_GESTURE_COLOR;
+    private long mFadeDuration = 300;
+    private long mFadeOffset = 300;
+    private long mFadingStart;
+
+    private float mGestureStroke = 12.0f;
+    private int mCertainGestureColor = 0xFFFFFF00;
+    private int mUncertainGestureColor = 0x3CFFFF00;
+    private int mInvalidateExtraBorder = 10;
 
     // for rendering immediate ink feedback
-    private Rect mInvalidRect = new Rect();
-
-    private Path mPath;
+    private final Rect mInvalidRect = new Rect();
+    private final Path mPath = new Path();
 
     private float mX;
     private float mY;
@@ -84,26 +76,32 @@ public class GestureOverlayView extends View {
     private Gesture mCurrentGesture = null;
 
     // TODO: Make this a list of WeakReferences
-    private final ArrayList<OnGestureListener> mOnGestureListeners = new ArrayList<OnGestureListener>();
-    private ArrayList<GesturePoint> mPointBuffer = null;
+    private final ArrayList<OnGestureListener> mOnGestureListeners =
+            new ArrayList<OnGestureListener>();
+    private final ArrayList<GesturePoint> mPointBuffer = new ArrayList<GesturePoint>(100);
 
     // fading out effect
     private boolean mIsFadingOut = false;
     private float mFadingAlpha = 1;
-
-    private Handler mHandler = new Handler();
+    private final AccelerateDecelerateInterpolator mInterpolator =
+            new AccelerateDecelerateInterpolator();
 
     private final Runnable mFadingOut = new Runnable() {
         public void run() {
             if (mIsFadingOut) {
-                mFadingAlpha -= FADING_ALPHA_CHANGE;
-                if (mFadingAlpha <= 0) {
+                final long now = AnimationUtils.currentAnimationTimeMillis();
+                final long duration = now - mFadingStart;
+
+                if (duration > mFadeDuration) {
                     mIsFadingOut = false;
-                    mPath = null;
+                    mPath.rewind();
                     mCurrentGesture = null;
                     mBitmap.eraseColor(TRANSPARENT_BACKGROUND);
                 } else {
-                    mHandler.postDelayed(this, FADING_REFRESHING_RATE);
+                    float interpolatedTime = Math.max(0.0f,
+                            Math.min(1.0f, duration / (float) mFadeDuration));
+                    mFadingAlpha = 1.0f - mInterpolator.getInterpolation(interpolatedTime);
+                    postDelayed(this, 16);
                 }
                 invalidate();
             }
@@ -116,7 +114,27 @@ public class GestureOverlayView extends View {
     }
 
     public GestureOverlayView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, com.android.internal.R.attr.gestureOverlayViewStyle);
+    }
+
+    public GestureOverlayView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                R.styleable.GestureOverlayView, defStyle, 0);
+
+        mGestureStroke = a.getFloat(R.styleable.GestureOverlayView_gestureStrokeWidth,
+                mGestureStroke);
+        mInvalidateExtraBorder = Math.max(1, ((int) mGestureStroke) - 1);
+        mCertainGestureColor = a.getColor(R.styleable.GestureOverlayView_gestureColor,
+                mCertainGestureColor);
+        mUncertainGestureColor = a.getColor(R.styleable.GestureOverlayView_uncertainGestureColor,
+                mUncertainGestureColor);
+        mFadeDuration = a.getInt(R.styleable.GestureOverlayView_fadeDuration, (int) mFadeDuration);
+        mFadeOffset = a.getInt(R.styleable.GestureOverlayView_fadeOffset, (int) mFadeOffset);
+
+        a.recycle();
+
         init();
     }
 
@@ -139,6 +157,7 @@ public class GestureOverlayView extends View {
             mBitmap.eraseColor(TRANSPARENT_BACKGROUND);
             mCurrentGesture.draw(mBitmapCanvas, mGesturePaint);
         }
+        invalidate();
     }
 
     public void setGestureColor(int color) {
@@ -155,6 +174,16 @@ public class GestureOverlayView extends View {
 
     public int getGestureColor() {
         return mCertainGestureColor;
+    }
+
+    public float getGestureStroke() {
+        return mGestureStroke;
+    }
+
+    public void setGestureStroke(float gestureStroke) {
+        mGestureStroke = gestureStroke;
+        mInvalidateExtraBorder = Math.max(1, ((int) mGestureStroke) - 1);
+        mGesturePaint.setStrokeWidth(mGestureStroke);
     }
 
     /**
@@ -182,14 +211,12 @@ public class GestureOverlayView extends View {
 
         final Paint gesturePaint = mGesturePaint;
         gesturePaint.setAntiAlias(GESTURE_RENDERING_ANTIALIAS);
-        gesturePaint.setColor(DEFAULT_GESTURE_COLOR);
+        gesturePaint.setColor(mCertainGestureColor);
         gesturePaint.setStyle(Paint.Style.STROKE);
         gesturePaint.setStrokeJoin(Paint.Join.ROUND);
         gesturePaint.setStrokeCap(Paint.Cap.ROUND);
-        gesturePaint.setStrokeWidth(GESTURE_STROKE_WIDTH);
+        gesturePaint.setStrokeWidth(mGestureStroke);
         gesturePaint.setDither(DITHER_FLAG);
-
-        mPath = null;
     }
 
     @Override
@@ -226,6 +253,10 @@ public class GestureOverlayView extends View {
         mOnGestureListeners.remove(listener);
     }
 
+    public void removeAllOnGestureListeners() {
+        mOnGestureListeners.clear();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -240,25 +271,24 @@ public class GestureOverlayView extends View {
         }
 
         // draw the current stroke
-        if (mPath != null) {
-            canvas.drawPath(mPath, mGesturePaint);
-        }
+        canvas.drawPath(mPath, mGesturePaint);
     }
 
     /**
      * Clear up the overlay
      * 
      * @param fadeOut whether the gesture on the overlay should fade out
-     *            gradually or disappear immediately
+     *        gradually or disappear immediately
      */
     public void clear(boolean fadeOut) {
         if (fadeOut) {
-            mFadingAlpha = 1;
+            mFadingAlpha = 1.0f;
             mIsFadingOut = true;
-            mHandler.removeCallbacks(mFadingOut);
-            mHandler.postDelayed(mFadingOut, FADING_OFFSET);
+            removeCallbacks(mFadingOut);
+            mFadingStart = AnimationUtils.currentAnimationTimeMillis() + mFadeOffset;
+            postDelayed(mFadingOut, mFadeOffset);
         } else {
-            mPath = null;
+            mPath.rewind();
             mCurrentGesture = null;
             if (mBitmap != null) {
                 mBitmap.eraseColor(TRANSPARENT_BACKGROUND);
@@ -269,7 +299,7 @@ public class GestureOverlayView extends View {
 
     public void cancelFadingOut() {
         mIsFadingOut = false;
-        mHandler.removeCallbacks(mFadingOut);
+        removeCallbacks(mFadingOut);
     }
 
     @Override
@@ -278,6 +308,12 @@ public class GestureOverlayView extends View {
             return true;
         }
 
+        processEvent(event);
+
+        return true;
+    }
+
+    public void processEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 Rect rect = touchStart(event);
@@ -290,12 +326,14 @@ public class GestureOverlayView extends View {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                touchUp(event);
+                touchUp(event, false);
+                invalidate();
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                touchUp(event, true);
                 invalidate();
                 break;
         }
-
-        return true;
     }
 
     private Rect touchStart(MotionEvent event) {
@@ -310,7 +348,7 @@ public class GestureOverlayView extends View {
         // if there is fading out going on, stop it.
         if (mIsFadingOut) {
             mIsFadingOut = false;
-            mHandler.removeCallbacks(mFadingOut);
+            removeCallbacks(mFadingOut);
             mBitmap.eraseColor(TRANSPARENT_BACKGROUND);
             mCurrentGesture = null;
         }
@@ -325,14 +363,13 @@ public class GestureOverlayView extends View {
             mCurrentGesture = new Gesture();
         }
 
-        mPointBuffer = new ArrayList<GesturePoint>();
         mPointBuffer.add(new GesturePoint(x, y, event.getEventTime()));
 
-        mPath = new Path();
+        mPath.rewind();
         mPath.moveTo(x, y);
 
-        mInvalidRect.set((int) x - REFRESH_RANGE, (int) y - REFRESH_RANGE,
-                (int) x + REFRESH_RANGE, (int) y + REFRESH_RANGE);
+        mInvalidRect.set((int) x - mInvalidateExtraBorder, (int) y - mInvalidateExtraBorder,
+                (int) x + mInvalidateExtraBorder, (int) y + mInvalidateExtraBorder);
         
         mCurveEndX = x;
         mCurveEndY = y;
@@ -343,36 +380,47 @@ public class GestureOverlayView extends View {
     private Rect touchMove(MotionEvent event) {
         Rect areaToRefresh = null;
         
-        float x = event.getX();
-        float y = event.getY();
+        final float x = event.getX();
+        final float y = event.getY();
 
-        float dx = Math.abs(x - mX);
-        float dy = Math.abs(y - mY);
+        final float previousX = mX;
+        final float previousY = mY;
+
+        final float dx = Math.abs(x - previousX);
+        final float dy = Math.abs(y - previousY);
         
-        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-            
+        if (dx >= GestureStroke.TOUCH_TOLERANCE || dy >= GestureStroke.TOUCH_TOLERANCE) {
+            areaToRefresh = mInvalidRect;
+
             // start with the curve end
-            mInvalidRect.set((int) mCurveEndX - REFRESH_RANGE, (int) mCurveEndY - REFRESH_RANGE,
-                    (int) mCurveEndX + REFRESH_RANGE, (int) mCurveEndY + REFRESH_RANGE);
+            areaToRefresh.set(
+                    (int) mCurveEndX - mInvalidateExtraBorder,
+                    (int) mCurveEndY - mInvalidateExtraBorder,
+                    (int) mCurveEndX + mInvalidateExtraBorder,
+                    (int) mCurveEndY + mInvalidateExtraBorder);
             
-            mCurveEndX  = (x + mX) / 2;
-            mCurveEndY = (y + mY) / 2;
-            mPath.quadTo(mX, mY, mCurveEndX, mCurveEndY);
+            mCurveEndX = (x + previousX) / 2;
+            mCurveEndY = (y + previousY) / 2;
+
+            mPath.quadTo(previousX, previousY, mCurveEndX, mCurveEndY);
             
             // union with the control point of the new curve
-            mInvalidRect.union((int) mX - REFRESH_RANGE, (int) mY - REFRESH_RANGE,
-                    (int) mX + REFRESH_RANGE, (int) mY + REFRESH_RANGE);
+            areaToRefresh.union(
+                    (int) previousX - mInvalidateExtraBorder,
+                    (int) previousY - mInvalidateExtraBorder,
+                    (int) previousX + mInvalidateExtraBorder,
+                    (int) previousY + mInvalidateExtraBorder);
             
             // union with the end point of the new curve
-            mInvalidRect.union((int) mCurveEndX - REFRESH_RANGE, (int) mCurveEndY - REFRESH_RANGE,
-                    (int) mCurveEndX + REFRESH_RANGE, (int) mCurveEndY + REFRESH_RANGE);
+            areaToRefresh.union(
+                    (int) mCurveEndX - mInvalidateExtraBorder,
+                    (int) mCurveEndY - mInvalidateExtraBorder,
+                    (int) mCurveEndX + mInvalidateExtraBorder,
+                    (int) mCurveEndY + mInvalidateExtraBorder);
 
-            areaToRefresh = mInvalidRect;
-            
             mX = x;
             mY = y;
         }
-        
 
         mPointBuffer.add(new GesturePoint(x, y, event.getEventTime()));
 
@@ -386,34 +434,43 @@ public class GestureOverlayView extends View {
         return areaToRefresh;
     }
 
-    private void touchUp(MotionEvent event) {
+    private void touchUp(MotionEvent event, boolean cancel) {
         // add the stroke to the current gesture
         mCurrentGesture.addStroke(new GestureStroke(mPointBuffer));
 
         // add the stroke to the double buffer
-        mGesturePaint.setMaskFilter(BLUR_MASK_FILTER);
         mBitmapCanvas.drawPath(mPath, mGesturePaint);
-        mGesturePaint.setMaskFilter(null);
-        
-        // pass the event to handlers
-        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
-        final int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-            listeners.get(i).onGestureEnded(this, event);
+
+        if (!cancel) {
+            // pass the event to handlers
+            final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
+            final int count = listeners.size();
+            for (int i = 0; i < count; i++) {
+                listeners.get(i).onGestureEnded(this, event);
+            }
+        } else {
+            // pass the event to handlers
+            final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
+            final int count = listeners.size();
+            for (int i = 0; i < count; i++) {
+                listeners.get(i).onGestureCancelled(this, event);
+            }
         }
-        
-        mPath = null;        
-        mPointBuffer = null;
+
+        mPath.rewind();
+        mPointBuffer.clear();
     }
 
     /**
      * An interface for processing gesture events
      */
     public static interface OnGestureListener {
-        public void onGestureStarted(GestureOverlayView overlay, MotionEvent event);
+        void onGestureStarted(GestureOverlayView overlay, MotionEvent event);
 
-        public void onGesture(GestureOverlayView overlay, MotionEvent event);
+        void onGesture(GestureOverlayView overlay, MotionEvent event);
 
-        public void onGestureEnded(GestureOverlayView overlay, MotionEvent event);
+        void onGestureEnded(GestureOverlayView overlay, MotionEvent event);
+
+        void onGestureCancelled(GestureOverlayView overlay, MotionEvent event);
     }
 }

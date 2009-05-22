@@ -55,7 +55,7 @@ public class TouchThroughGestureListener implements GestureOverlayView.OnGesture
     private boolean mStealEvents = false;
 
     public TouchThroughGestureListener(View model) {
-        this(model, false);
+        this(model, true);
     }
 
     public TouchThroughGestureListener(View model, boolean stealEvents) {
@@ -125,7 +125,7 @@ public class TouchThroughGestureListener implements GestureOverlayView.OnGesture
                 overlay.setGestureDrawingColor(overlay.getGestureColor());
                 if (mStealEvents) {
                     event = MotionEvent.obtain(event.getDownTime(), System.currentTimeMillis(),
-                            MotionEvent.ACTION_UP, x, y, event.getPressure(), event.getSize(),
+                            MotionEvent.ACTION_CANCEL, x, y, event.getPressure(), event.getSize(),
                             event.getMetaState(), event.getXPrecision(), event.getYPrecision(),
                             event.getDeviceId(), event.getEdgeFlags());
                 }
@@ -150,6 +150,13 @@ public class TouchThroughGestureListener implements GestureOverlayView.OnGesture
         } else {
             dispatchEventToModel(event);
             overlay.clear(false);
+        }
+    }
+
+    public void onGestureCancelled(GestureOverlayView overlay, MotionEvent event) {
+        overlay.clear(mIsGesturing);
+        if (!mIsGesturing) {
+            dispatchEventToModel(event);            
         }
     }
 
