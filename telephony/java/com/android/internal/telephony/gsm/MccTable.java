@@ -35,6 +35,7 @@ public final class MccTable
         int smallestDigitsMnc;
         String timezone;
         String language;
+        int wifiChannelsAllowed;
 
         MccEntry(int mnc, String iso, int smallestDigitsMCC) {
             this(mnc, iso, smallestDigitsMCC, null);
@@ -45,11 +46,16 @@ public final class MccTable
         }
 
         MccEntry(int mnc, String iso, int smallestDigitsMCC, String timezone, String language) {
+            this(mnc, iso, smallestDigitsMCC, timezone, language, 0);
+        }
+
+        MccEntry(int mnc, String iso, int smallestDigitsMCC, String timezone, String language, int wifiChannels) {
             this.mcc = mnc;
             this.iso = iso;
             this.smallestDigitsMnc = smallestDigitsMCC;
             this.timezone = timezone;
             this.language = language;
+            this.wifiChannelsAllowed = wifiChannels;
         }
 
         public int compareTo(MccEntry o)
@@ -148,6 +154,23 @@ public final class MccTable
         }
     }
 
+    /**
+     * Given a GSM Mobile Country Code, returns
+     * the number of wifi channels allowed in that country.
+     * Returns 0 if unavailable
+     */
+    public static int wifiChannelsForMcc(int mcc) {
+        MccEntry entry;
+
+        entry = entryForMcc(mcc);
+
+        if (entry == null) {
+            return 0;
+        } else {
+            return entry.wifiChannelsAllowed;
+        }
+    }
+
     static {
         table = new ArrayList<MccEntry>(240);
 
@@ -169,7 +192,7 @@ public final class MccTable
          */
 
 		table.add(new MccEntry(202,"gr",2));	//Greece
-		table.add(new MccEntry(204,"nl",2,"Europe/Amsterdam","nl"));	//Netherlands (Kingdom of the)
+		table.add(new MccEntry(204,"nl",2,"Europe/Amsterdam","nl",13)); //Netherlands (Kingdom of the)
 		table.add(new MccEntry(206,"be",2));	//Belgium
 		table.add(new MccEntry(208,"fr",2,"Europe/Paris","fr"));	//France
 		table.add(new MccEntry(212,"mc",2));	//Monaco (Principality of)
@@ -183,11 +206,11 @@ public final class MccTable
 		table.add(new MccEntry(225,"va",2,"Europe/Rome","it"));	//Vatican City State
 		table.add(new MccEntry(226,"ro",2));	//Romania
 		table.add(new MccEntry(228,"ch",2,"Europe/Zurich","de"));	//Switzerland (Confederation of)
-		table.add(new MccEntry(230,"cz",2,"Europe/Prague","cs"));	//Czech Republic
+		table.add(new MccEntry(230,"cz",2,"Europe/Prague","cs", 13));	//Czech Republic
 		table.add(new MccEntry(231,"sk",2));	//Slovak Republic
-		table.add(new MccEntry(232,"at",2,"Europe/Vienna","de"));	//Austria
-		table.add(new MccEntry(234,"gb",2,"Europe/London","en"));	//United Kingdom of Great Britain and Northern Ireland
-		table.add(new MccEntry(235,"gb",2,"Europe/London","en"));	//United Kingdom of Great Britain and Northern Ireland
+		table.add(new MccEntry(232,"at",2,"Europe/Vienna","de", 13));   //Austria
+		table.add(new MccEntry(234,"gb",2,"Europe/London","en", 13));   //United Kingdom of Great Britain and Northern Ireland
+		table.add(new MccEntry(235,"gb",2,"Europe/London","en", 13));   //United Kingdom of Great Britain and Northern Ireland
 		table.add(new MccEntry(238,"dk",2));	//Denmark
 		table.add(new MccEntry(240,"se",2));	//Sweden
 		table.add(new MccEntry(242,"no",2));	//Norway
@@ -200,7 +223,7 @@ public final class MccTable
 		table.add(new MccEntry(257,"by",2));	//Belarus (Republic of)
 		table.add(new MccEntry(259,"md",2));	//Moldova (Republic of)
 		table.add(new MccEntry(260,"pl",2,"Europe/Warsaw"));	//Poland (Republic of)
-		table.add(new MccEntry(262,"de",2,"Europe/Berlin","de"));	//Germany (Federal Republic of)
+		table.add(new MccEntry(262,"de",2,"Europe/Berlin","de", 13));   //Germany (Federal Republic of)
 		table.add(new MccEntry(266,"gi",2));	//Gibraltar
 		table.add(new MccEntry(268,"pt",2));	//Portugal
 		table.add(new MccEntry(270,"lu",2));	//Luxembourg
@@ -219,15 +242,15 @@ public final class MccTable
 		table.add(new MccEntry(293,"sl",2));	//Slovenia (Republic of)
                 table.add(new MccEntry(294,"mk",2));   //The Former Yugoslav Republic of Macedonia
 		table.add(new MccEntry(295,"li",2));	//Liechtenstein (Principality of)
-		table.add(new MccEntry(302,"ca",2));	//Canada
+		table.add(new MccEntry(302,"ca",2, "", "", 11));        //Canada
 		table.add(new MccEntry(308,"pm",2));	//Saint Pierre and Miquelon (Collectivit territoriale de la Rpublique franaise)
-		table.add(new MccEntry(310,"us",3,"","en"));	//United States of America
-		table.add(new MccEntry(311,"us",3,"","en"));	//United States of America
-		table.add(new MccEntry(312,"us",3,"","en"));	//United States of America
-		table.add(new MccEntry(313,"us",3,"","en"));	//United States of America
-		table.add(new MccEntry(314,"us",3,"","en"));	//United States of America
-		table.add(new MccEntry(315,"us",3,"","en"));	//United States of America
-		table.add(new MccEntry(316,"us",3,"","en"));	//United States of America
+		table.add(new MccEntry(310,"us",3,"","en", 11));        //United States of America
+		table.add(new MccEntry(311,"us",3,"","en", 11));        //United States of America
+		table.add(new MccEntry(312,"us",3,"","en", 11));        //United States of America
+		table.add(new MccEntry(313,"us",3,"","en", 11));        //United States of America
+		table.add(new MccEntry(314,"us",3,"","en", 11));        //United States of America
+		table.add(new MccEntry(315,"us",3,"","en", 11));        //United States of America
+		table.add(new MccEntry(316,"us",3,"","en", 11));        //United States of America
 		table.add(new MccEntry(330,"pr",2));	//Puerto Rico
 		table.add(new MccEntry(332,"vi",2));	//United States Virgin Islands
 		table.add(new MccEntry(334,"mx",3));	//Mexico
@@ -283,8 +306,8 @@ public final class MccTable
 		table.add(new MccEntry(436,"tj",2));	//Tajikistan (Republic of)
 		table.add(new MccEntry(437,"kg",2));	//Kyrgyz Republic
 		table.add(new MccEntry(438,"tm",2));	//Turkmenistan
-		table.add(new MccEntry(440,"jp",2,"Asia/Tokyo","ja"));	//Japan
-		table.add(new MccEntry(441,"jp",2,"Asia/Tokyo","ja"));	//Japan
+		table.add(new MccEntry(440,"jp",2,"Asia/Tokyo","ja", 14));              //Japan
+		table.add(new MccEntry(441,"jp",2,"Asia/Tokyo","ja", 14));              //Japan
 		table.add(new MccEntry(450,"kr",2));	//Korea (Republic of)
 		table.add(new MccEntry(452,"vn",2));	//Viet Nam (Socialist Republic of)
 		table.add(new MccEntry(454,"hk",2));	//"Hong Kong, China"
@@ -298,12 +321,12 @@ public final class MccTable
 		table.add(new MccEntry(470,"bd",2));	//Bangladesh (People's Republic of)
 		table.add(new MccEntry(472,"mv",2));	//Maldives (Republic of)
 		table.add(new MccEntry(502,"my",2));	//Malaysia
-		table.add(new MccEntry(505,"au",2,"Australia/Sydney","en"));	//Australia
+		table.add(new MccEntry(505,"au",2,"Australia/Sydney","en", 11));        //Australia
 		table.add(new MccEntry(510,"id",2));	//Indonesia (Republic of)
 		table.add(new MccEntry(514,"tl",2));	//Democratic Republic of Timor-Leste
 		table.add(new MccEntry(515,"ph",2));	//Philippines (Republic of the)
 		table.add(new MccEntry(520,"th",2));	//Thailand
-		table.add(new MccEntry(525,"sg",2,"Singapore","en"));	//Singapore (Republic of)
+		table.add(new MccEntry(525,"sg",2,"Singapore","en", 11));               //Singapore (Republic of)
 		table.add(new MccEntry(528,"bn",2));	//Brunei Darussalam
 		table.add(new MccEntry(530,"nz",2,"Pacific/Auckland", "en"));	//New Zealand
 		table.add(new MccEntry(534,"mp",2));	//Northern Mariana Islands (Commonwealth of the)
