@@ -1101,7 +1101,13 @@
   <public type="attr" name="maxSdkVersion" />
   <public type="attr" name="testOnly" />
   <public type="attr" name="contentDescription" />
-  
+  <public type="attr" name="gestureStrokeWidth" />
+  <public type="attr" name="gestureColor" />
+  <public type="attr" name="uncertainGestureColor" />
+  <public type="attr" name="fadeOffset" />
+  <public type="attr" name="fadeDuration" />
+  <public type="attr" name="gestures" />
+
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 
   <public-padding type="id" name="donut_resource_pad" end="0x01020040" />

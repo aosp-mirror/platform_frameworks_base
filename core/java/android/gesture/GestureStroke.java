@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import java.util.ArrayList;
  * A gesture stroke started on a touch down and ended on a touch up.
  */
 public class GestureStroke {
+    static final float TOUCH_TOLERANCE = 3;
+
     public final RectF boundingBox;
 
     public final float length;
@@ -156,8 +158,8 @@ public class GestureStroke {
             } else {
                 float dx = Math.abs(x - mX);
                 float dy = Math.abs(y - mY);
-                if (dx >= GestureOverlayView.TOUCH_TOLERANCE ||
-                        dy >= GestureOverlayView.TOUCH_TOLERANCE) {
+                if (dx >= TOUCH_TOLERANCE ||
+                        dy >= TOUCH_TOLERANCE) {
                     path.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
                     mX = x;
                     mY = y;

@@ -171,6 +171,19 @@
         <item name="android:fadingEdge">vertical</item>
     </style>
 
+    <style name="Widget.GestureOverlayView">
+        <item name="android:gestureStrokeWidth">12.0</item>
+        <item name="android:gestureColor">#ffffff00</item>
+        <item name="android:uncertainGestureColor">#3cffff00</item>
+        <item name="android:fadeOffset">300</item>
+        <item name="android:fadeDuration">300</item>
+    </style>
+
+    <style name="Widget.GestureOverlayView.White">
+        <item name="android:gestureColor">#ff00ff00</item>
+        <item name="android:uncertainGestureColor">#3c00ff00</item>
+    </style>
+
     <style name="Widget.Button">
         <item name="android:background">@android:drawable/btn_default</item>
         <item name="android:focusable">true</item>
