@@ -1,0 +1,87 @@
+sdk.version=1.5
+sdk.rel.id=2
+sdk.date=May 2009
+
+sdk.win_download=android-sdk-windows-1.5_r2.zip
+sdk.win_bytes=178346828
+sdk.win_checksum=ba54ac6bda45921d442b74b6de6ff6a9
+
+sdk.mac_download=android-sdk-mac_x86-1.5_r2.zip
+sdk.mac_bytes=169945128
+sdk.mac_checksum=f4e06a5194410243f213d0177713d6c9
+
+sdk.linux_download=android-sdk-linux_x86-1.5_r2.zip
+sdk.linux_bytes=165035130
+sdk.linux_checksum=1d3c3d099e95a31c43a7b3e6ae307ed3
+
+page.title=Android 1.5 SDK, Release 2
+@jd:body
+
+<p>For more information on this SDK release, read the
+<a href="{@docRoot}sdk/RELEASENOTES.html#1.5_r2">Release Notes</a>.</p>
+
+<h2>SDK Contents</h2>
+
+<h4>Development tools</h4>
+
+<p>The SDK includes a full set of tools for developing and debugging application code and designing an application UI. You can read about the tools in the  
+<a href="{@docRoot}guide/developing/tools/index.html">Dev Guide</a> and access them in the <code>&lt;sdk&gt;/tools/</code> directory. 
+
+<p>The tools package in this SDK includes updates from those provided in the previous SDK. The tools also require a different project structure. To use the new tools, you need to migrate your applications to the new development environment. For more information about how to migrate, see <a href="{@docRoot}sdk/1.5_r2/upgrading.html">Upgrading the SDK</a>.
+
+<p>For more information about the new tools features, see the <a href="{@docRoot}sdk/RELEASENOTES.html">SDK Release Notes</a>. 
+
+<h4 id="system_images">Android Platforms</h4>
+
+<p>This SDK includes multiple Android platform versions that you use to develop applications. For each version, both a fully compliant Android library and system image are provided. The table below lists the platform versions included in this SDK. For more information about a platform version &mdash; features, applications included, localizations, API changes, and so on &mdash; see its Version Notes. </p>
+
+<table style="margin-right:1em;" width="80%">
+<tr>
+<th><nobr>Platform</nobr></th><th><nobr>API Level</nobr></th><th>Notes</th><th>Description</th>
+</tr>
+
+<tr>
+<td width="5%"><nobr>Android 1.5</nobr></td>
+<td  width="5%">3</td>
+<td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.5.html">Version Notes</a></nobr></td>
+<td>Includes a standard Android 1.5 library and system image with a set of development applications. Does not include any external libraries (such as the Maps external library).</td>
+</tr>
+<tr>
+<td width="5%"><nobr>Android 1.1</nobr></td>
+<td  width="5%">2</td>
+<td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.1.html">Version Notes</a></nobr></td>
+<td>Includes a compliant Android 1.1 library and system image with a set of development applications. Also includes the Maps external library (due to legacy build system issues).</td>
+</tr>
+</table>
+
+<h4 id="system_images">SDK Add-Ons</h4>
+
+<p>An SDK add-on provides a development environment for an Android external library or a customized (but fully compliant) Android system image. This SDK includes the SDK add-on listed below. The Android system API Level required by the add-on is noted.</p>
+
+<table style="margin-right:1em;" width="80%">
+<tr>
+<th><nobr>Add-On</nobr></th><th><nobr>API Level</nobr></th><th>Notes</th><th>Description</th>
+</tr>
+<tr>
+<td width="5%"><nobr>Google APIs</nobr></td>
+<td  width="5%">3</td>
+<td  width="5%">&nbsp;</td>
+<td>Includes the com.google.android.maps external library, a compliant 
+system image, a {@link android.location.Geocoder Geocoder}
+backend service implementation, documentation, and sample code. </td>
+</tr>
+</table>
+
+<h4>Sample Code and Applications</h4>
+
+<p>You can look at a variety of tutorials and samples in the <a href="{@docRoot}guide/samples/index.html">Dev Guide</a> and access the sample code itself
+in the <code>&lt;sdk&gt;/platforms/android-1.5/samples/</code> directory of the SDK package. Note the new location &mdash; the SDK now includes multiple platform versions that you can develop against and each has its own sample code directory. </p>
+
+<h4>Documentation</h4>
+
+<p>The SDK package includes a full set of local documentation. To view it, open the <code>&lt;sdk&gt;/documentation.html</code> file in a web browser. If you are developing in an IDE such as Eclipse, you can also view the reference documentation directly in the IDE. </p>
+
+<p>The most current documentation is always available on the Android Developers site:</p>
+
+<p style="margin-left:2em;"><a href="http://developer.android.com/index.html">http://developer.android.com/</a></p>
+

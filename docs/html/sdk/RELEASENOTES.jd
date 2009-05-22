@@ -3,8 +3,16 @@ page.title=SDK Release Notes
 
 <p>This document provides version-specific information about Android SDK
 releases. For the latest known issues, please ensure that you're viewing this
-page at: 
-<a href="http://developer.android.com/sdk/RELEASENOTES.html">http://developer.android.com/sdk/RELEASENOTES.html</a>.</p>
+page at <a href="http://developer.android.com/sdk/RELEASENOTES.html">http://developer.android.com/sdk/RELEASENOTES.html</a>.</p>
+
+
+<h2 id="1.5_r2">Android 1.5 SDK, Release 2</h2>
+
+<p>This SDK release provides the same developer tools as the Android 1.5 SDK,
+Release 1, but provides an updated Android 1.5 system image that includes a
+security patch for the issue described in the oCert advisory below:</p>
+
+<p style="margin-left:2em;"><a href="http://www.ocert.org/advisories/ocert-2009-006.html">http://www.ocert.org/advisories/ocert-2009-006.html</a></p>
 
 <h2 id="1.5_r1">Android 1.5 SDK, Release 1</h2>
 
