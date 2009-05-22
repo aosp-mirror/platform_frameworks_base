@@ -376,8 +376,14 @@ public abstract class Window {
                     String title;
                     if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA) {
                         title="Media";
+                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY) {
+                        title="MediaOvr";
                     } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
                         title="Panel";
+                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL) {
+                        title="SubPanel";
+                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG) {
+                        title="AtchDlg";
                     } else {
                         title=Integer.toString(wp.type);
                     }
