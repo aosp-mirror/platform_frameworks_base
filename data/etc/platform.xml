@@ -138,6 +138,8 @@
     <assign-permission name="android.permission.ACCESS_DRM" uid="media" />
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="media" />
 
+    <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="graphics" />
+
     <!-- This is a list of all the libraries available for application
          code to link against. -->
 
