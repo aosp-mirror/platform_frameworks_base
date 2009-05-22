@@ -108,6 +108,9 @@ public class GestureEntry extends Activity {
             public void onGestureStarted(GestureOverlayView overlay, MotionEvent event) {
                 overlay.clear(false);
             }
+            
+            public void onGestureCancelled(GestureOverlayView overlay, MotionEvent event) {
+            }
         });
 
         if (savedInstanceState != null) {
