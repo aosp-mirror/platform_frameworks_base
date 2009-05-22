@@ -2609,6 +2609,16 @@ public final class Settings {
         public static final String GTALK_COMPRESS = "gtalk_compress";
 
         /**
+         * This is the timeout for which Google Talk will send the message using bareJID. In a
+         * established chat between two XMPP endpoints, Google Talk uses fullJID in the format
+         * of user@domain/resource in order to send the message to the specific client. However,
+         * if Google Talk hasn't received a message from that client after some time, it would
+         * fall back to use the bareJID, which would broadcast the message to all clients for
+         * the other user.
+         */
+        public static final String GTALK_USE_BARE_JID_TIMEOUT_MS = "gtalk_use_barejid_timeout_ms";
+
+        /**
          * Enable use of ssl session caching.
          * 'db' - save each session in a (per process) database
          * 'file' - save each session in a (per process) file
