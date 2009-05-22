@@ -78,6 +78,10 @@ public final class Bundle implements Parcelable, Cloneable {
         readFromParcel(parcelledData);
     }
 
+    /* package */ Bundle(Parcel parcelledData, int length) {
+        readFromParcelInner(parcelledData, length);
+    }
+
     /**
      * Constructs a new, empty Bundle that uses a specific ClassLoader for
      * instantiating Parcelable and Serializable objects.
@@ -155,13 +159,14 @@ public final class Bundle implements Parcelable, Cloneable {
             return;
         }
 
-        mParcelledData.setDataPosition(0);
-        Bundle b = mParcelledData.readBundleUnpacked(mClassLoader);
-        mMap = b.mMap;
-
-        mHasFds = mParcelledData.hasFileDescriptors();
-        mFdsKnown = true;
-        
+        int N = mParcelledData.readInt();
+        if (N < 0) {
+            return;
+        }
+        if (mMap == null) {
+            mMap = new HashMap<String, Object>();
+        }
+        mParcelledData.readMapInternal(mMap, N, mClassLoader);
         mParcelledData.recycle();
         mParcelledData = null;
     }
@@ -1427,7 +1432,25 @@ public final class Bundle implements Parcelable, Cloneable {
      * @param parcel The parcel to copy this bundle to.
      */
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeBundle(this);
+        if (mParcelledData != null) {
+            int length = mParcelledData.dataSize();
+            parcel.writeInt(length);
+            parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
+            parcel.appendFrom(mParcelledData, 0, length);
+        } else {
+            parcel.writeInt(-1); // dummy, will hold length
+            parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
+
+            int oldPos = parcel.dataPosition();
+            parcel.writeMapInternal(mMap);
+            int newPos = parcel.dataPosition();
+
+            // Backpatch length
+            parcel.setDataPosition(oldPos - 8);
+            int length = newPos - oldPos;
+            parcel.writeInt(length);
+            parcel.setDataPosition(newPos);
+        }
     }
 
     /**
@@ -1436,8 +1459,33 @@ public final class Bundle implements Parcelable, Cloneable {
      * @param parcel The parcel to overwrite this bundle from.
      */
     public void readFromParcel(Parcel parcel) {
-        mParcelledData = parcel;
-        mHasFds = mParcelledData.hasFileDescriptors();
+        int length = parcel.readInt();
+        if (length < 0) {
+            throw new RuntimeException("Bad length in parcel: " + length);
+        }
+        readFromParcelInner(parcel, length);
+    }
+
+    void readFromParcelInner(Parcel parcel, int length) {
+        int magic = parcel.readInt();
+        if (magic != 0x4C444E42) {
+            //noinspection ThrowableInstanceNeverThrown
+            String st = Log.getStackTraceString(new RuntimeException());
+            Log.e("Bundle", "readBundle: bad magic number");
+            Log.e("Bundle", "readBundle: trace = " + st);
+        }
+
+        // Advance within this Parcel
+        int offset = parcel.dataPosition();
+        parcel.setDataPosition(offset + length);
+
+        Parcel p = Parcel.obtain();
+        p.setDataPosition(0);
+        p.appendFrom(parcel, offset, length);
+        p.setDataPosition(0);
+        
+        mParcelledData = p;
+        mHasFds = p.hasFileDescriptors();
         mFdsKnown = true;
     }
 
