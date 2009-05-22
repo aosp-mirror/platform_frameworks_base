@@ -6,7 +6,6 @@ LOCAL_SRC_FILES:= \
     DisplayHardware/DisplayHardware.cpp \
     DisplayHardware/DisplayHardwareBase.cpp \
     GPUHardware/GPUHardware.cpp \
-    BootAnimation.cpp \
     BlurFilter.cpp.arm \
     CPUGauge.cpp \
     Layer.cpp \

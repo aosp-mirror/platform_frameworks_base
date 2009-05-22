@@ -29,8 +29,6 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
-#include "Barrier.h"
-
 class SkBitmap;
 
 namespace android {
@@ -43,11 +41,10 @@ class EGLNativeWindowSurface;
 class BootAnimation : public Thread
 {
 public:
-                BootAnimation(const sp<ISurfaceComposer>& composer);
+                BootAnimation();
     virtual     ~BootAnimation();
 
     const sp<SurfaceComposerClient>& session() const;
-    virtual void        requestExit();
 
 private:
     virtual bool        threadLoop();
@@ -73,7 +70,6 @@ private:
     EGLDisplay  mSurface;
     sp<Surface> mFlingerSurface;
     sp<EGLNativeWindowSurface> mNativeWindowSurface;
-    Barrier mBarrier;
 };
 
 // ---------------------------------------------------------------------------

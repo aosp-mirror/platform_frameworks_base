@@ -35,6 +35,8 @@
 #include <binder/MemoryHeapPmem.h>
 #include <binder/MemoryHeapBase.h>
 
+#include <EGL/eglnatives.h>
+
 #include "GPUHardware/GPUHardware.h"
 #include "SurfaceFlinger.h"
 #include "VRamHeap.h"

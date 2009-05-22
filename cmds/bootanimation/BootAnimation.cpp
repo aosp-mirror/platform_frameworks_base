@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <utils/misc.h>
 
+#include <utils/IPCThreadState.h>
 #include <utils/threads.h>
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
@@ -49,10 +50,9 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-BootAnimation::BootAnimation(const sp<ISurfaceComposer>& composer) :
-    Thread(false) {
-    mSession = SurfaceComposerClient::clientForConnection(
-            composer->createConnection()->asBinder());
+BootAnimation::BootAnimation() : Thread(false)
+{    
+    mSession = new SurfaceComposerClient();
 }
 
 BootAnimation::~BootAnimation() {
@@ -131,7 +131,7 @@ status_t BootAnimation::readyToRun() {
 
     // create the native surface
     sp<Surface> s = session()->createSurface(getpid(), 0, dinfo.w, dinfo.h,
-            PIXEL_FORMAT_RGB_565);
+            PIXEL_FORMAT_RGB_565, ISurfaceComposer::eGPU);
     session()->openTransaction();
     s->setLayer(0x40000000);
     session()->closeTransaction();
@@ -144,7 +144,10 @@ status_t BootAnimation::readyToRun() {
     EGLConfig config;
     EGLSurface surface;
     EGLContext context;
+
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    eglInitialize(display, 0, 0);
     eglChooseConfig(display, attribs, &config, 1, &numConfigs);
 
     mNativeWindowSurface = new EGLNativeWindowSurface(s);
@@ -170,17 +173,15 @@ status_t BootAnimation::readyToRun() {
     return NO_ERROR;
 }
 
-void BootAnimation::requestExit() {
-    mBarrier.open();
-    Thread::requestExit();
-}
-
 bool BootAnimation::threadLoop() {
     bool r = android();
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(mDisplay, mContext);
     eglDestroySurface(mDisplay, mSurface);
     mNativeWindowSurface.clear();
+    mFlingerSurface.clear();
+    eglTerminate(mDisplay);
+    IPCThreadState::self()->stopProcess();
     return r;
 }
 
@@ -227,8 +228,10 @@ bool BootAnimation::android() {
         glBindTexture(GL_TEXTURE_2D, mAndroid[0].name);
         glDrawTexiOES(xc, yc, 0, mAndroid[0].w, mAndroid[0].h);
 
-        eglSwapBuffers(mDisplay, mSurface);
-        
+        EGLBoolean res = eglSwapBuffers(mDisplay, mSurface);
+        if (res == EGL_FALSE)
+            break;
+
         // 12fps: don't animate too fast to preserve CPU
         const nsecs_t sleepTime = 83333 - ns2us(systemTime() - now);
         if (sleepTime > 0)
