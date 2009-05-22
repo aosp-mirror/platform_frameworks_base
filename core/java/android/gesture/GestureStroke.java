@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -126,16 +126,16 @@ public class GestureStroke {
      * @param width the width of the bounding box of the target path
      * @param height the height of the bounding box of the target path
      * @param numSample the number of points needed
+     * 
      * @return the path
      */
     public Path toPath(float width, float height, int numSample) {
         final float[] pts = GestureUtilities.temporalSampling(this, numSample);
         final RectF rect = boundingBox;
-        final float scale = height / rect.height();
 
         final Matrix matrix = new Matrix();
         matrix.setTranslate(-rect.left, -rect.top);
-        matrix.postScale(scale, scale);
+        matrix.postScale(width / rect.width(), height / rect.height());
         matrix.mapPoints(pts);
 
         float mX = 0;
@@ -156,7 +156,8 @@ public class GestureStroke {
             } else {
                 float dx = Math.abs(x - mX);
                 float dy = Math.abs(y - mY);
-                if (dx >= GestureOverlay.TOUCH_TOLERANCE || dy >= GestureOverlay.TOUCH_TOLERANCE) {
+                if (dx >= GestureOverlayView.TOUCH_TOLERANCE ||
+                        dy >= GestureOverlayView.TOUCH_TOLERANCE) {
                     path.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
                     mX = x;
                     mY = y;
@@ -198,29 +199,10 @@ public class GestureStroke {
     }    
 
     /**
-     * Convert the stroke to string
+     * Invalidate the cached path that is used to render the stroke
      */
-    @Override
-    public String toString() {
-        final StringBuilder str = new StringBuilder(GestureConstants.STROKE_STRING_BUFFER_SIZE);
-        final float[] pts = points;
-        final long[] times = timestamps;
-        final int count = points.length;
-
-        for (int i = 0; i < count; i += 2) {
-            str.append(pts[i]).append(GestureConstants.STRING_STROKE_DELIIMITER);
-            str.append(pts[i + 1]).append(GestureConstants.STRING_STROKE_DELIIMITER);
-            str.append(times[i / 2]).append(GestureConstants.STRING_STROKE_DELIIMITER);
-        }
-
-        return str.toString();
-    }
-
-    /**
-     * Invalidate the cached path that is used for rendering the stroke
-     */
-    public void invalidate() {
-        mCachedPath = null;
+    public void clearPath() {
+        if (mCachedPath != null) mCachedPath.rewind();
     }
     
     /**

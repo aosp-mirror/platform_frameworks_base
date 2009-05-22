@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -28,10 +28,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import static com.android.gesture.GestureConstants.LOG_TAG;
+import static android.gesture.GestureConstants.LOG_TAG;
 
 public class LetterRecognizer {
-    public final static int LATIN_LOWERCASE = 0;
+    public final static int RECOGNIZER_LATIN_LOWERCASE = 0;
+    static final String GESTURE_FILE_NAME = "letters.gestures";
+
+    private final static int ADJUST_RANGE = 3;    
 
     private SigmoidUnit[] mHiddenLayer;
     private SigmoidUnit[] mOutputLayer;
@@ -40,59 +43,57 @@ public class LetterRecognizer {
 
     private final int mPatchSize;
     
-    static final String GESTURE_FILE_NAME = "letters.gestures";
+    private GestureLibrary mGestureLibrary;
 
-    private GestureLibrary mGestureLibrary; 
-    private final static int ADJUST_RANGE = 3;
-    
     private static class SigmoidUnit {
         final float[] mWeights;
+
+        private boolean mComputed;
+        private float mResult;
 
         SigmoidUnit(float[] weights) {
             mWeights = weights;
         }
 
         private float compute(float[] inputs) {
-            float sum = 0;
+            if (!mComputed) {
+                float sum = 0;
 
-            final int count = inputs.length;
-            final float[] weights = mWeights;
+                final int count = inputs.length;
+                final float[] weights = mWeights;
 
-            for (int i = 0; i < count; i++) {
-                sum += inputs[i] * weights[i];
+                for (int i = 0; i < count; i++) {
+                    sum += inputs[i] * weights[i];
+                }
+                sum += weights[weights.length - 1];
+
+                mResult = 1.0f / (float) (1 + Math.exp(-sum));
+                mComputed = true;
             }
-            sum += weights[weights.length - 1];
-
-            return 1.0f / (float) (1 + Math.exp(-sum));
+            return mResult;
         }
-    }
-
-    private LetterRecognizer(int numOfInput, int numOfHidden, String[] classes) {
-        mPatchSize = (int)Math.sqrt(numOfInput);
-        mHiddenLayer = new SigmoidUnit[numOfHidden];
-        mClasses = classes;
-        mOutputLayer = new SigmoidUnit[classes.length];
-    }
-    
-    public void save() {
-        mGestureLibrary.save();
     }
 
     public static LetterRecognizer getLetterRecognizer(Context context, int type) {
         switch (type) {
-            case LATIN_LOWERCASE: {
+            case RECOGNIZER_LATIN_LOWERCASE: {
                 return createFromResource(context, com.android.internal.R.raw.latin_lowercase);
             }
         }
         return null;
     }
 
+    private LetterRecognizer(int numOfInput, int numOfHidden, String[] classes) {
+        mPatchSize = (int) Math.sqrt(numOfInput);
+        mHiddenLayer = new SigmoidUnit[numOfHidden];
+        mClasses = classes;
+        mOutputLayer = new SigmoidUnit[classes.length];
+    }
+
     public ArrayList<Prediction> recognize(Gesture gesture) {
         float[] query = GestureUtilities.spatialSampling(gesture, mPatchSize);
         ArrayList<Prediction> predictions = classify(query);
-        if (mGestureLibrary != null) {
-            adjustPrediction(gesture, predictions);
-        }
+        adjustPrediction(gesture, predictions);
         return predictions;
     }
 
@@ -153,37 +154,13 @@ public class LetterRecognizer {
             in = new DataInputStream(new BufferedInputStream(resources.openRawResource(resourceID),
                     GestureConstants.IO_BUFFER_SIZE));
 
-            final int iCount = in.readInt();
-            final int hCount = in.readInt();
-            final int oCount = in.readInt();
+            final int version = in.readShort();
 
-            final String[] classes = new String[oCount];
-            for (int i = 0; i < classes.length; i++) {
-                classes[i] = in.readUTF();
+            switch (version) {
+                case 1:
+                    classifier = readV1(in);
+                    break;
             }
-
-            classifier = new LetterRecognizer(iCount, hCount, classes);
-            SigmoidUnit[] hiddenLayer = new SigmoidUnit[hCount];
-            SigmoidUnit[] outputLayer = new SigmoidUnit[oCount];
-
-            for (int i = 0; i < hCount; i++) {
-                float[] weights = new float[iCount + 1];
-                for (int j = 0; j <= iCount; j++) {
-                    weights[j] = in.readFloat();
-                }
-                hiddenLayer[i] = new SigmoidUnit(weights);
-            }
-
-            for (int i = 0; i < oCount; i++) {
-                float[] weights = new float[hCount + 1];
-                for (int j = 0; j <= hCount; j++) {
-                    weights[j] = in.readFloat();
-                }
-                outputLayer[i] = new SigmoidUnit(weights);
-            }
-
-            classifier.mHiddenLayer = hiddenLayer;
-            classifier.mOutputLayer = outputLayer;
 
         } catch (IOException e) {
             Log.d(LOG_TAG, "Failed to load handwriting data:", e);
@@ -193,9 +170,65 @@ public class LetterRecognizer {
 
         return classifier;
     }
-    
-    public void enablePersonalization(boolean enable) {
-        if (enable) {
+
+    private static LetterRecognizer readV1(DataInputStream in) throws IOException {
+
+        final int iCount = in.readInt();
+        final int hCount = in.readInt();
+        final int oCount = in.readInt();
+
+        final String[] classes = new String[oCount];
+        for (int i = 0; i < classes.length; i++) {
+            classes[i] = in.readUTF();
+        }
+
+        final LetterRecognizer classifier = new LetterRecognizer(iCount, hCount, classes);
+        final SigmoidUnit[] hiddenLayer = new SigmoidUnit[hCount];
+        final SigmoidUnit[] outputLayer = new SigmoidUnit[oCount];
+
+        for (int i = 0; i < hCount; i++) {
+            final float[] weights = new float[iCount + 1];
+            for (int j = 0; j <= iCount; j++) {
+                weights[j] = in.readFloat();
+            }
+            hiddenLayer[i] = new SigmoidUnit(weights);
+        }
+
+        for (int i = 0; i < oCount; i++) {
+            final float[] weights = new float[hCount + 1];
+            for (int j = 0; j <= hCount; j++) {
+                weights[j] = in.readFloat();
+            }
+            outputLayer[i] = new SigmoidUnit(weights);
+        }
+
+        classifier.mHiddenLayer = hiddenLayer;
+        classifier.mOutputLayer = outputLayer;
+
+        return classifier;
+    }
+
+    /**
+     * TODO: Publish this API once we figure out where we should save the personzlied
+     * gestures, and how to do so across all apps
+     *
+     * @hide
+     */
+    public boolean save() {
+        if (mGestureLibrary != null) {
+            return mGestureLibrary.save();
+        }
+        return false;
+    }
+
+    /**
+     * TODO: Publish this API once we figure out where we should save the personzlied
+     * gestures, and how to do so across all apps
+     *
+     * @hide
+     */
+    public void setPersonalizationEnabled(boolean enabled) {
+        if (enabled) {
             mGestureLibrary = new GestureLibrary(GESTURE_FILE_NAME);
             mGestureLibrary.setSequenceType(GestureLibrary.SEQUENCE_INVARIANT);
             mGestureLibrary.load();
@@ -204,24 +237,36 @@ public class LetterRecognizer {
         }
     }
 
+    /**
+     * TODO: Publish this API once we figure out where we should save the personzlied
+     * gestures, and how to do so across all apps
+     *
+     * @hide
+     */
     public void addExample(String letter, Gesture example) {
-        mGestureLibrary.addGesture(letter, example);
+        if (mGestureLibrary != null) {
+            mGestureLibrary.addGesture(letter, example);
+        }
     }
     
     private void adjustPrediction(Gesture query, ArrayList<Prediction> predictions) {
-        ArrayList<Prediction> results = mGestureLibrary.recognize(query);
-        HashMap<String, Prediction> topNList = new HashMap<String, Prediction>();
-        for (int j = 0; j < ADJUST_RANGE; j++) {
-            Prediction prediction = predictions.remove(0);
-            topNList.put(prediction.name, prediction);
-        }
-        int count = results.size();
-        for (int j = count - 1; j >= 0 && !topNList.isEmpty(); j--) {
-            Prediction item = results.get(j);
-            Prediction original = topNList.get(item.name);
-            if (original != null) {
-                predictions.add(0, original);
-                topNList.remove(item.name);
+        if (mGestureLibrary != null) {
+            final ArrayList<Prediction> results = mGestureLibrary.recognize(query);
+            final HashMap<String, Prediction> topNList = new HashMap<String, Prediction>();
+
+            for (int j = 0; j < ADJUST_RANGE; j++) {
+                Prediction prediction = predictions.remove(0);
+                topNList.put(prediction.name, prediction);
+            }
+
+            final int count = results.size();
+            for (int j = count - 1; j >= 0 && !topNList.isEmpty(); j--) {
+                final Prediction item = results.get(j);
+                final Prediction original = topNList.get(item.name);
+                if (original != null) {
+                    predictions.add(0, original);
+                    topNList.remove(item.name);
+                }
             }
         }
     }

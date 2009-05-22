@@ -14,9 +14,7 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.gesture.example"
-    android:versionCode="1"
-    android:versionName="1.0.0">
+    package="com.android.gesture.example">
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_SDCARD" />

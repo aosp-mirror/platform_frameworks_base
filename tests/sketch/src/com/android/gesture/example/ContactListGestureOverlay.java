@@ -30,12 +30,11 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.android.gesture.Gesture;
-import com.android.gesture.GestureActionListener;
-import com.android.gesture.GestureOverlay;
-import com.android.gesture.LetterRecognizer;
-import com.android.gesture.Prediction;
-import com.android.gesture.TouchThroughGesturing;
+import android.gesture.Gesture;
+import android.gesture.GestureOverlayView;
+import android.gesture.LetterRecognizer;
+import android.gesture.Prediction;
+import android.gesture.TouchThroughGestureListener;
 
 import java.util.ArrayList;
 
@@ -52,7 +51,7 @@ public class ContactListGestureOverlay extends Activity {
 
     private ContactAdapter mContactAdapter;
 
-    private TouchThroughGesturing mGestureProcessor;
+    private TouchThroughGestureListener mGestureProcessor;
 
     private LetterRecognizer mRecognizer;
 
@@ -67,7 +66,7 @@ public class ContactListGestureOverlay extends Activity {
         setProgressBarIndeterminateVisibility(true);
 
         // create a letter recognizer
-        mRecognizer = LetterRecognizer.getLetterRecognizer(this, LetterRecognizer.LATIN_LOWERCASE);
+        mRecognizer = LetterRecognizer.getLetterRecognizer(this, LetterRecognizer.RECOGNIZER_LATIN_LOWERCASE);
 
         // load the contact list
         mContactList = (ListView) findViewById(R.id.list);
@@ -95,11 +94,11 @@ public class ContactListGestureOverlay extends Activity {
         setProgressBarIndeterminateVisibility(false);
 
         // add a gesture overlay on top of the ListView
-        GestureOverlay overlay = new GestureOverlay(this);
-        mGestureProcessor = new TouchThroughGesturing(mContactList);
-        mGestureProcessor.setGestureType(TouchThroughGesturing.MULTIPLE_STROKE);
-        mGestureProcessor.addGestureActionListener(new GestureActionListener() {
-            public void onGesturePerformed(GestureOverlay overlay, Gesture gesture) {
+        GestureOverlayView overlay = new GestureOverlayView(this);
+        mGestureProcessor = new TouchThroughGestureListener(mContactList);
+        mGestureProcessor.setGestureType(TouchThroughGestureListener.MULTIPLE_STROKE);
+        mGestureProcessor.addOnGestureActionListener(new TouchThroughGestureListener.OnGesturePerformedListener() {
+            public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
                 ArrayList<Prediction> predictions = mRecognizer.recognize(gesture);
                 if (!predictions.isEmpty()) {
                     Log.v(LOGTAG, "1st Prediction : " + predictions.get(0).name);
@@ -112,7 +111,7 @@ public class ContactListGestureOverlay extends Activity {
                 }
             }
         });
-        overlay.addGestureListener(mGestureProcessor);
+        overlay.addOnGestureListener(mGestureProcessor);
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
         this.addContentView(overlay, params);

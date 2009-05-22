@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.gesture;
+package android.gesture;
 
 import java.io.DataInputStream;
 import java.io.IOException;

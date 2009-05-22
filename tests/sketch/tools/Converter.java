@@ -15,6 +15,7 @@ import java.io.BufferedInputStream;
  */
 public class Converter {
     private final File mFile;
+    private static final short VERSION_NUMBER = 1;
 
     Converter(File file) {
         mFile = file;
@@ -63,10 +64,10 @@ public class Converter {
 
             iWeights = new float[hCount][];
             for (int i = 0; i < hCount; i++) {
-                iWeights[i] = new float[iCount];
+                iWeights[i] = new float[iCount + 1];
                 line = reader.readLine();
                 startIndex = 0;
-                for (int j = 0; j < iCount; j++) {
+                for (int j = 0; j <= iCount; j++) {
                     endIndex = line.indexOf(" ", startIndex);
                     iWeights[i][j] = Float.parseFloat(line.substring(startIndex, endIndex));
                     startIndex = endIndex + 1;
@@ -75,10 +76,10 @@ public class Converter {
 
             oWeights = new float[oCount][];
             for (int i = 0; i < oCount; i++) {
-                oWeights[i] = new float[hCount];
+                oWeights[i] = new float[hCount + 1];
                 line = reader.readLine();
                 startIndex = 0;
-                for (int j = 0; j < hCount; j++) {
+                for (int j = 0; j <= hCount; j++) {
                     endIndex = line.indexOf(" ", startIndex);
                     oWeights[i][j] = Float.parseFloat(line.substring(startIndex, endIndex));
                     startIndex = endIndex + 1;
@@ -105,6 +106,7 @@ public class Converter {
             try {
                 out = new DataOutputStream(new FileOutputStream(mFile));
 
+                out.writeShort(VERSION_NUMBER);
                 out.writeInt(iCount);
                 out.writeInt(hCount);
                 out.writeInt(oCount);

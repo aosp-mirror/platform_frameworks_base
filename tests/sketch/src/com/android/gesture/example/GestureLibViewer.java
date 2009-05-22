@@ -26,10 +26,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.gesture.Gesture;
 
-import com.android.gesture.Gesture;
-import com.android.gesture.GestureLibrary;
-import com.android.gesture.GestureOverlay;
+import android.gesture.GestureLibrary;
+import android.gesture.GestureOverlayView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +41,7 @@ import java.util.Collections;
 
 public class GestureLibViewer extends Activity {
 
-    private GestureOverlay mGesturePad;
+    private GestureOverlayView mGesturePad;
 
     private Spinner mGestureCategory;
 
@@ -90,7 +90,7 @@ public class GestureLibViewer extends Activity {
         setContentView(R.layout.gestureviewer);
 
         // create the area for drawing a gesture
-        mGesturePad = (GestureOverlay) findViewById(R.id.drawingpad);
+        mGesturePad = (GestureOverlayView) findViewById(R.id.drawingpad);
         mGesturePad.setEnabled(false);
 
         // init the gesture library
