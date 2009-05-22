@@ -210,6 +210,15 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW+3;
         
         /**
+         * Window type: window for showing overlays on top of media windows.
+         * These windows are displayed between TYPE_APPLICATION_MEDIA and the
+         * application window.  They should be translucent to be useful.  This
+         * is a big ugly hack so:
+         * @hide
+         */
+        public static final int TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW+4;
+    
+        /**
          * End of types of sub-windows.
          */
         public static final int LAST_SUB_WINDOW         = 1999;
