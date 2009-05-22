@@ -134,7 +134,7 @@ public class ListView extends AbsListView {
 
     // used for temporary calculations.
     private final Rect mTempRect = new Rect();
-    private Paint mDividerPaint;
+    private final Paint mDividerPaint = new Paint();
 
     // the single allocated result per list view; kinda cheesey but avoids
     // allocating these thingies too often.
@@ -2824,9 +2824,6 @@ public class ListView extends AbsListView {
         final boolean opaque = (color >>> 24) == 0xFF;
         mIsCacheColorOpaque = opaque;
         if (opaque) {
-            if (mDividerPaint == null) {
-                mDividerPaint = new Paint();
-            }
             mDividerPaint.setColor(color);
         }
         super.setCacheColorHint(color);
