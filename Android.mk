@@ -147,6 +147,8 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
 	telephony/java/com/android/internal/telephony/IIccPhoneBook.aidl \
 	telephony/java/com/android/internal/telephony/ISms.aidl \
+	tts/java/android/tts/ITtsCallback.aidl \
+	tts/java/android/tts/ITts.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl
 
