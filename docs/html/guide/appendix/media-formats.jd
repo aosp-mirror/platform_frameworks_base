@@ -2,8 +2,9 @@ page.title=Android Supported Media Formats
 @jd:body
 
 <p>The <a href="#core">Core Media Formats</a> table below describes the media format support built into the Android platform. Note that any given mobile device may provide support for additional formats or file types not listed in the table. </p>
-<p>For your convenience, the table <a href="#g1">T-Mobile G1 Media Formats</a> describes additional media format details for the T-Mobile G1 device. </p>
+<p>For your convenience, the table <a href="#g1">T-Mobile G1 Media Formats</a> describes additional media formats and characteristics provided by the T-Mobile G1 device. Other devices may support additional formats not listed on this page. </p>
 
+<p>As an application developer, you are free to make use of any media codec that is available on any Android-powered device, including those provided by the Android platform and those that are device-specific.</p>
 
 <h2 id="core">Core Media Formats</h2>
 
@@ -130,7 +131,7 @@ page.title=Android Supported Media Formats
 <td style="text-align: center;">X</td>
 <td style="text-align: center;">X</td>
 <td>&nbsp;</td>
-<td>3GPP (.3gp)</td>
+<td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
 </tr>
 
 <tr>
@@ -151,9 +152,9 @@ page.title=Android Supported Media Formats
 
 </tbody></table>
 
-<h2 id="g1">T-Mobile G1 Media Formats</h2>
+<h2 id="g1">T-Mobile G1 Media Formats and Characteristics</h2>
 
-<p>In addition to the core media formats supported in the Android platform, the T-Mobile G1 also supports the formats listed below.</p>
+<p>The table below lists media formats supported by the T-Mobile G1 in addition to those provided as part of the Android platform. This table also details G1-specific performance characteristics of some Android core media formats.</p>
 
 <table>
 <tbody>
@@ -163,7 +164,7 @@ page.title=Android Supported Media Formats
 <th>Format</th>
 <th>Encoder</th>
 <th>Decoder</th>
-<th>Details</th>
+<th>Comment</th>
 <th>File Type(s) Supported</th>
 </tr>
 
@@ -178,13 +179,13 @@ page.title=Android Supported Media Formats
 <li>L2: &lt;=161 kbps &lt;=48 kHz</li>
 <li>L3: &lt;385 kbps &lt;=48 kHz</li>
 </ul>
-Mono and stereo profiles with 16-bits per sample. Decoder does not support WMA Pro, Lossless, or Speech codecs.
+Mono and stereo profiles with 16-bits per sample. Decoder does not support WMA Pro, Lossless, or Speech codecs. 
 </td>
 <td>Windows Media Audio (.wma)</td>
 </tr>
 
 <tr>
-<td rowspan="3">Video</td>
+<td rowspan="2">Video</td>
 <td>WMV</td>
 <td>&nbsp;</td>
 <td style="text-align: center;">X</td>
@@ -193,22 +194,16 @@ Mono and stereo profiles with 16-bits per sample. Decoder does not support WMA P
 </tr>
 
 <tr>
-<td>H.263</td>
-<td style="text-align: center;">X</td>
-<td style="text-align: center;">X</td>
-<td>&nbsp;</td>
-<td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
-</tr>
-
-<tr>
 <td>H.264&nbsp;AVC</td>
 <td>&nbsp;</td>
 <td style="text-align: center;">X</td>
-<td>Limited to baseline profile up to 480x320, and 600 kbps average bitrate for the video stream.</td>
+<td>On the G1, this decoder is limited to baseline profile up to 480x320, and 600 kbps average bitrate for the video stream.</td>
 <td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
 </tr>
 
 </tbody></table>
 
 
-<p>Note that Windows Media codecs are not part of the Android platform and require special licensing from Microsoft or an authorized developer such as Packet Video.</p>
+
+
+
