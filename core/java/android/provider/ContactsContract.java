@@ -31,6 +31,75 @@ public final class ContactsContract {
     /** A content:// style uri to the authority for the contacts provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
+    public interface AccountsColumns {
+        /**
+         * The name of this account data
+         * <P>Type: TEXT</P>
+         */
+        public static final String NAME = "name";
+        /**
+         * The name of this account data
+         * <P>Type: TEXT</P>
+         */
+        public static final String TYPE = "type";
+        /**
+         * The name of this account data
+         * <P>Type: TEXT</P>
+         */
+        public static final String DATA1 = "data1";
+
+        /**
+         * The value for this account data
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA2 = "data2";
+
+        /**
+         * The value for this account data
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA3 = "data3";
+
+        /**
+         * The value for this account data
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA4 = "data4";
+
+        /**
+         * The value for this account data
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA5 = "data5";
+    }
+
+    /**
+     * Constants for the aggregates table, which contains a record per group
+     * of contact representing the same person.
+     */
+    public static final class Accounts implements BaseColumns, AccountsColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Accounts()  {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "accounts");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of
+         * account data.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contacts_account";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a account
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contacts_account";
+    }
+
     public interface AggregatesColumns {
         /**
          * The display name for the contact.
@@ -136,6 +205,11 @@ public final class ContactsContract {
         private Contacts()  {}
 
         /**
+         * A reference to the {@link Accounts#_ID} that this data belongs to.
+         */
+        public static final String ACCOUNTS_ID = "accounts_id";
+
+        /**
          * A reference to the {@link Aggregates#_ID} that this data belongs to.
          */
         public static final String AGGREGATE_ID = "aggregate_id";
@@ -165,6 +239,22 @@ public final class ContactsContract {
          * person.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/person";
+
+        /**
+         * A string that uniquely identifies this contact to its source, which is referred to
+         * by the {@link #ACCOUNTS_ID}
+         */
+        public static final String SOURCE_ID = "sourceid";
+
+        /**
+         * An integer that is updated whenever this contact or its data changes.
+         */
+        public static final String VERSION = "version";
+
+        /**
+         * Set to 1 whenever the version changes
+         */
+        public static final String DIRTY = "dirty";
 
         /**
          * A sub-directory of a single contact that contains all of their {@link Data} rows.

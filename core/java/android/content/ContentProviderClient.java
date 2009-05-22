@@ -23,6 +23,7 @@ import android.os.ParcelFileDescriptor;
 import android.content.res.AssetFileDescriptor;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * The public interface object used to interact with a {@link ContentProvider}. This is obtained by
@@ -105,7 +106,7 @@ public class ContentProviderClient {
     }
 
     /** see {@link ContentProvider#applyBatch} */
-    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException {
         return mContentProvider.applyBatch(operations);
     }

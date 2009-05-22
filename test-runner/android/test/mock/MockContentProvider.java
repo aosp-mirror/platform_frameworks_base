@@ -34,6 +34,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * Mock implementation of IContentProvider that does nothing.  All methods are non-functional and 
@@ -91,7 +92,8 @@ public class MockContentProvider implements IContentProvider {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
-    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations) throws RemoteException, OperationApplicationException {
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+            throws RemoteException, OperationApplicationException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 

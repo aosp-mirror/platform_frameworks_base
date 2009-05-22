@@ -406,7 +406,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * }
      * </pre>
      *
-     * @hide This method should be used only when {@link #applyBatch} is not enough and must be
+     * @hide This method should be used only when {@link ContentProvider#applyBatch} is not enough and must be
      * used with {@link #endBatch}.
      * e.g. If returned value has to be used during one transaction, this method might be useful.
      */
@@ -461,7 +461,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         }
     }
 
-    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws OperationApplicationException {
         boolean successful = false;
         beginBatch();

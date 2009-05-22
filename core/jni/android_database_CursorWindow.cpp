@@ -229,7 +229,7 @@ static jboolean isBlob_native(JNIEnv* env, jobject object, jint row, jint column
 {
     int32_t err;
     CursorWindow * window = GET_WINDOW(env, object);
-LOG_WINDOW("Checking if column is a blob for %d,%d from %p", row, column, window);
+LOG_WINDOW("Checking if column is a blob or null for %d,%d from %p", row, column, window);
 
     field_slot_t field;
     err = window->read_field_slot(row, column, &field);
@@ -239,6 +239,54 @@ LOG_WINDOW("Checking if column is a blob for %d,%d from %p", row, column, window
     }
 
     return field.type == FIELD_TYPE_BLOB || field.type == FIELD_TYPE_NULL;
+}
+
+static jboolean isString_native(JNIEnv* env, jobject object, jint row, jint column)
+{
+    int32_t err;
+    CursorWindow * window = GET_WINDOW(env, object);
+LOG_WINDOW("Checking if column is a string or null for %d,%d from %p", row, column, window);
+
+    field_slot_t field;
+    err = window->read_field_slot(row, column, &field);
+    if (err != 0) {
+        throwExceptionWithRowCol(env, row, column);
+        return NULL;
+    }
+
+    return field.type == FIELD_TYPE_STRING || field.type == FIELD_TYPE_NULL;
+}
+
+static jboolean isInteger_native(JNIEnv* env, jobject object, jint row, jint column)
+{
+    int32_t err;
+    CursorWindow * window = GET_WINDOW(env, object);
+LOG_WINDOW("Checking if column is an integer for %d,%d from %p", row, column, window);
+
+    field_slot_t field;
+    err = window->read_field_slot(row, column, &field);
+    if (err != 0) {
+        throwExceptionWithRowCol(env, row, column);
+        return NULL;
+    }
+
+    return field.type == FIELD_TYPE_INTEGER;
+}
+
+static jboolean isFloat_native(JNIEnv* env, jobject object, jint row, jint column)
+{
+    int32_t err;
+    CursorWindow * window = GET_WINDOW(env, object);
+LOG_WINDOW("Checking if column is a float for %d,%d from %p", row, column, window);
+
+    field_slot_t field;
+    err = window->read_field_slot(row, column, &field);
+    if (err != 0) {
+        throwExceptionWithRowCol(env, row, column);
+        return NULL;
+    }
+
+    return field.type == FIELD_TYPE_FLOAT;
 }
 
 static jstring getString_native(JNIEnv* env, jobject object, jint row, jint column)
@@ -326,11 +374,11 @@ LOG_WINDOW("Copying string for %d,%d from %p", row, column, window);
         jniThrowException(env, "java/lang/IllegalStateException", "Unable to get field slot");
         return NULL;
     }
-    
+
     jcharArray buffer = (jcharArray)env->GetObjectField(buf, gBufferField);
     if (buffer == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", "buf should not be null");
-        return NULL;        
+        return NULL;
     }
     jchar* dst = env->GetCharArrayElements(buffer, NULL);
     uint8_t type = field.type;
@@ -338,7 +386,7 @@ LOG_WINDOW("Copying string for %d,%d from %p", row, column, window);
     jcharArray newArray = NULL;
     if (type == FIELD_TYPE_STRING) {
         uint32_t size = field.data.buffer.size;
-        if (size > 0) {            
+        if (size > 0) {
 #if WINDOW_STORAGE_UTF8
             // Pass size - 1 since the UTF8 is null terminated and we don't want a null terminator on the UTF16 string
             String16 utf16((char const *)window->offsetToPtr(field.data.buffer.offset), size - 1);
@@ -346,7 +394,7 @@ LOG_WINDOW("Copying string for %d,%d from %p", row, column, window);
             if (strSize > bufferSize || dst == NULL) {
                 newArray = env->NewCharArray(strSize);
                 env->SetCharArrayRegion(newArray, 0, strSize, (jchar const *)utf16.string());
-            } else {                
+            } else {
                 memcpy(dst, (jchar const *)utf16.string(), strSize * 2);
             }
             sizeCopied = strSize;
@@ -359,7 +407,7 @@ LOG_WINDOW("Copying string for %d,%d from %p", row, column, window);
                 memcpy(dst, (jchar const *)window->offsetToPtr(field.data.buffer.offset), size);
             }
 #endif
-        } 
+        }
     } else if (type == FIELD_TYPE_INTEGER) {
         int64_t value;
         if (window->getLong(row, column, &value)) {
@@ -628,6 +676,9 @@ static JNINativeMethod sMethods[] =
     {"putDouble_native", "(DII)Z", (void *)putDouble_native},
     {"freeLastRow_native", "()V", (void *)freeLastRow},
     {"putNull_native", "(II)Z", (void *)putNull_native},
+    {"isString_native", "(II)Z", (void *)isString_native},
+    {"isFloat_native", "(II)Z", (void *)isFloat_native},
+    {"isInteger_native", "(II)Z", (void *)isInteger_native},
 };
 
 int register_android_database_CursorWindow(JNIEnv * env)
@@ -646,7 +697,7 @@ int register_android_database_CursorWindow(JNIEnv * env)
         LOGE("Error locating fields");
         return -1;
     }
-    
+
     clazz =  env->FindClass("android/database/CharArrayBuffer");
     if (clazz == NULL) {
         LOGE("Can't find android/database/CharArrayBuffer");

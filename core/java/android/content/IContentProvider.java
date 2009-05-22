@@ -28,6 +28,7 @@ import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * The ipc interface to talk to a content provider.
@@ -60,7 +61,7 @@ public interface IContentProvider extends IInterface {
             throws RemoteException, FileNotFoundException;
     public AssetFileDescriptor openAssetFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException;
-    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException;
 
     /* IPC constants */
