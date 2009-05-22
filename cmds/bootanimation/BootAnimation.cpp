@@ -22,7 +22,7 @@
 #include <fcntl.h>
 #include <utils/misc.h>
 
-#include <utils/IPCThreadState.h>
+#include <binder/IPCThreadState.h>
 #include <utils/threads.h>
 #include <utils/Atomic.h>
 #include <utils/Errors.h>

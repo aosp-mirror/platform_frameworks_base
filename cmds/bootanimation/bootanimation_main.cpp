@@ -16,9 +16,9 @@
 
 #define LOG_TAG "BootAnimation"
 
-#include <utils/IPCThreadState.h>
-#include <utils/ProcessState.h>
-#include <utils/IServiceManager.h>
+#include <binder/IPCThreadState.h>
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
 
