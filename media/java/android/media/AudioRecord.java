@@ -88,7 +88,7 @@ public class AudioRecord
     private static final int AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      = -16;
     private static final int AUDIORECORD_ERROR_SETUP_INVALIDCHANNELCOUNT = -17;
     private static final int AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       = -18;
-    private static final int AUDIORECORD_ERROR_SETUP_INVALIDSTREAMTYPE   = -19;
+    private static final int AUDIORECORD_ERROR_SETUP_INVALIDSOURCE       = -19;
     private static final int AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    = -20;
     
     // Events:
@@ -113,13 +113,7 @@ public class AudioRecord
      */
     @SuppressWarnings("unused")
     private int mNativeRecorderInJavaObj;
-    /** 
-     * Accessed by native methods: provides access to record source constants 
-     */
-    @SuppressWarnings("unused")
-    private final static int SOURCE_DEFAULT = MediaRecorder.AudioSource.DEFAULT;
-    @SuppressWarnings("unused")
-    private final static int SOURCE_MIC = MediaRecorder.AudioSource.MIC;
+
     /** 
      * Accessed by native methods: provides access to the callback data.
      */
@@ -252,8 +246,8 @@ public class AudioRecord
 
         //--------------
         // audio source
-        if ( (audioSource != MediaRecorder.AudioSource.DEFAULT)
-                && (audioSource != MediaRecorder.AudioSource.MIC) ) {
+        if ( (audioSource < MediaRecorder.AudioSource.DEFAULT) ||
+             (audioSource > MediaRecorder.getAudioSourceMax()) )  {
             throw (new IllegalArgumentException("Invalid audio source."));
         } else {
             mRecordSource = audioSource;

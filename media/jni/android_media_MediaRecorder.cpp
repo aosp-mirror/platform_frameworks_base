@@ -177,7 +177,7 @@ static void
 android_media_MediaRecorder_setAudioSource(JNIEnv *env, jobject thiz, jint as)
 {
     LOGV("setAudioSource(%d)", as);
-    if (as < AUDIO_SOURCE_DEFAULT || as > AUDIO_SOURCE_MIC) {
+    if (as < AUDIO_SOURCE_DEFAULT || as > AUDIO_SOURCE_MAX) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid audio source");
         return;
     }

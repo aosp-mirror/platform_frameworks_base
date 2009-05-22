@@ -45,8 +45,6 @@ struct fields_t {
     jmethodID postNativeEventInJava; //... event post callback method
     int       PCM16;                 //...  format constants
     int       PCM8;                  //...  format constants
-    int       SOURCE_DEFAULT;        //...  record source constants
-    int       SOURCE_MIC;            //...  record source constants
     jfieldID  nativeRecorderInJavaObj; // provides access to the C++ AudioRecord object
     jfieldID  nativeCallbackCookie;    // provides access to the AudioRecord callback data
 };
@@ -66,7 +64,7 @@ struct audiorecord_callback_cookie {
 #define AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      -16
 #define AUDIORECORD_ERROR_SETUP_INVALIDCHANNELCOUNT -17
 #define AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       -18
-#define AUDIORECORD_ERROR_SETUP_INVALIDSTREAMTYPE   -19
+#define AUDIORECORD_ERROR_SETUP_INVALIDSOURCE       -19
 #define AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    -20
 
 jint android_media_translateRecorderErrorCode(int code) {
@@ -154,17 +152,16 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     int frameSize = nbChannels * bytesPerSample;
     size_t frameCount = buffSizeInBytes / frameSize;
     
-    // compare the source against the Java constants
-    AudioRecord::stream_type arSource;
-    if (source == javaAudioRecordFields.SOURCE_DEFAULT) {
-        arSource = AudioRecord::DEFAULT_INPUT;
-    } else if (source == javaAudioRecordFields.SOURCE_MIC) {
-        arSource = AudioRecord::MIC_INPUT;
-    } else {
+    // convert and check input source value
+    // input_source values defined in AudioRecord.h are equal to
+    // JAVA MediaRecord.AudioSource values minus 1.
+    AudioRecord::input_source arSource = (AudioRecord::input_source)(source - 1);
+    if (arSource < AudioRecord::DEFAULT_INPUT ||
+        arSource >= AudioRecord::NUM_INPUT_SOURCES) {
         LOGE("Error creating AudioRecord: unknown source.");
-        return AUDIORECORD_ERROR_SETUP_INVALIDSTREAMTYPE;
+        return AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
     }
-     
+
     audiorecord_callback_cookie *lpCallbackData = NULL;
     AudioRecord* lpRecorder = NULL;
 
@@ -511,8 +508,6 @@ static JNINativeMethod gMethods[] = {
 #define JAVA_POSTEVENT_CALLBACK_NAME  "postEventFromNative"
 #define JAVA_CONST_PCM16_NAME         "ENCODING_PCM_16BIT"
 #define JAVA_CONST_PCM8_NAME          "ENCODING_PCM_8BIT"
-#define JAVA_CONST_SOURCEDEFAULT_NAME "SOURCE_DEFAULT"
-#define JAVA_CONST_SOURCEMIC_NAME     "SOURCE_MIC"
 #define JAVA_NATIVERECORDERINJAVAOBJ_FIELD_NAME  "mNativeRecorderInJavaObj"
 #define JAVA_NATIVECALLBACKINFO_FIELD_NAME       "mNativeCallbackCookie"
 
@@ -579,17 +574,6 @@ int register_android_media_AudioRecord(JNIEnv *env)
            || !android_media_getIntConstantFromClass(env, audioFormatClass, 
                 JAVA_AUDIOFORMAT_CLASS_NAME, 
                 JAVA_CONST_PCM8_NAME, &(javaAudioRecordFields.PCM8)) ) {
-        // error log performed in getIntConstantFromClass() 
-        return -1;
-    }
-
-    // Get the recording source constants from the AudioRecord class
-    if ( !android_media_getIntConstantFromClass(env, javaAudioRecordFields.audioRecordClass, 
-                kClassPathName,
-                JAVA_CONST_SOURCEDEFAULT_NAME, &(javaAudioRecordFields.SOURCE_DEFAULT))
-        || !android_media_getIntConstantFromClass(env, javaAudioRecordFields.audioRecordClass, 
-                kClassPathName,
-                JAVA_CONST_SOURCEMIC_NAME, &(javaAudioRecordFields.SOURCE_MIC)) ) {
         // error log performed in getIntConstantFromClass() 
         return -1;
     }
