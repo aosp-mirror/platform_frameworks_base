@@ -8,8 +8,8 @@
 #include "SignalHandler.h"
 
 #include <utils.h>
-#include <utils/IPCThreadState.h>
-#include <utils/ProcessState.h>
+#include <binder/IPCThreadState.h>
+#include <binder/ProcessState.h>
 #include <utils/Log.h>  
 #include <cutils/zygote.h>
 

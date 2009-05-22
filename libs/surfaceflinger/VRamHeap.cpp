@@ -30,10 +30,12 @@
 #include <cutils/log.h>
 #include <cutils/properties.h>
 
-#include <utils/MemoryDealer.h>
-#include <utils/MemoryBase.h>
-#include <utils/MemoryHeapPmem.h>
-#include <utils/MemoryHeapBase.h>
+#include <binder/MemoryDealer.h>
+#include <binder/MemoryBase.h>
+#include <binder/MemoryHeapPmem.h>
+#include <binder/MemoryHeapBase.h>
+
+#include <EGL/eglnatives.h>
 
 #include "GPUHardware/GPUHardware.h"
 #include "SurfaceFlinger.h"

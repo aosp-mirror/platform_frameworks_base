@@ -242,64 +242,48 @@ public class DateFormat {
 
     /**
      * Returns a {@link java.text.DateFormat} object that can format the time according
-     * to the current user preference. 
+     * to the current locale. 
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that properly formats the time.
      */
     public static final java.text.DateFormat getTimeFormat(Context context) {
-        boolean b24 = is24HourFormat(context);
-        int res;
-
-        if (b24) {
-            res = R.string.twenty_four_hour_time_format;
-        } else {
-            res = R.string.twelve_hour_time_format;
-        }
-
-        return new java.text.SimpleDateFormat(context.getString(res));
+        return java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT);
     }
 
     /**
-     * Returns a {@link java.text.DateFormat} object that can format the date according
-     * to the current user preference.
+     * Returns a {@link java.text.DateFormat} object that can format the date 
+     * in short form (such as 12/31/1999) according
+     * to the current locale.
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that properly formats the date.
      */
     public static final java.text.DateFormat getDateFormat(Context context) {
-        String value = getDateFormatString(context);
+        /*
+         * We use a resource string here instead of just DateFormat.SHORT
+         * so that we get a four-digit year instead a two-digit year.
+         */
+        String value = context.getString(R.string.numeric_date_format);
         return new java.text.SimpleDateFormat(value);
     }
     
     /**
      * Returns a {@link java.text.DateFormat} object that can format the date
-     * in long form (such as December 31, 1999) based on user preference.
+     * in long form (such as December 31, 1999) for the current locale.
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that formats the date in long form.
      */
     public static final java.text.DateFormat getLongDateFormat(Context context) {
-        String value = getDateFormatString(context);
-        if (value.indexOf('M') < value.indexOf('d')) {
-            value = context.getString(R.string.full_date_month_first);
-        } else {
-            value = context.getString(R.string.full_date_day_first);
-        }
-        return new java.text.SimpleDateFormat(value);
+        return java.text.DateFormat.getDateInstance(java.text.DateFormat.LONG);
     }
 
     /**
      * Returns a {@link java.text.DateFormat} object that can format the date
-     * in medium form (such as Dec. 31, 1999) based on user preference.
+     * in medium form (such as Dec. 31, 1999) for the current locale.
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that formats the date in long form.
      */
     public static final java.text.DateFormat getMediumDateFormat(Context context) {
-        String value = getDateFormatString(context);
-        if (value.indexOf('M') < value.indexOf('d')) {
-            value = context.getString(R.string.medium_date_month_first);
-        } else {
-            value = context.getString(R.string.medium_date_day_first);
-        }
-        return new java.text.SimpleDateFormat(value);
+        return java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM);
     }
 
     /**
@@ -338,6 +322,12 @@ public class DateFormat {
     }
     
     private static String getDateFormatString(Context context) {
+        java.text.DateFormat df;
+        df = java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT);
+        if (df instanceof SimpleDateFormat) {
+            return ((SimpleDateFormat) df).toPattern();
+        }
+
         String value = Settings.System.getString(context.getContentResolver(),
                 Settings.System.DATE_FORMAT);
         if (value == null || value.length() < 6) {

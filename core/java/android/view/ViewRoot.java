@@ -77,6 +77,9 @@ public final class ViewRoot extends Handler implements ViewParent,
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean WATCH_POINTER = false;
 
+    private static final boolean MEASURE_LATENCY = false;
+    private static LatencyTimer lt;
+
     /**
      * Maximum time we allow the user to roll the trackball enough to generate
      * a key event, before resetting the counters.
@@ -191,6 +194,10 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     public ViewRoot(Context context) {
         super();
+
+        if (MEASURE_LATENCY && lt == null) {
+            lt = new LatencyTimer(100, 1000);
+        }
 
         ++sInstanceCount;
 
@@ -1579,7 +1586,17 @@ public final class ViewRoot extends Handler implements ViewParent,
             boolean didFinish;
             if (event == null) {
                 try {
+                    long timeBeforeGettingEvents;
+                    if (MEASURE_LATENCY) {
+                        timeBeforeGettingEvents = System.nanoTime();
+                    }
+
                     event = sWindowSession.getPendingPointerMove(mWindow);
+
+                    if (MEASURE_LATENCY && event != null) {
+                        lt.sample("9 Client got events      ", System.nanoTime() - event.getEventTimeNano());
+                        lt.sample("8 Client getting events  ", timeBeforeGettingEvents - event.getEventTimeNano());
+                    }
                 } catch (RemoteException e) {
                 }
                 didFinish = true;
@@ -1603,7 +1620,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                         captureMotionLog("captureDispatchPointer", event);
                     }
                     event.offsetLocation(0, mCurScrollY);
+                    if (MEASURE_LATENCY) {
+                        lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
+                    }
                     handled = mView.dispatchTouchEvent(event);
+                    if (MEASURE_LATENCY) {
+                        lt.sample("B Dispatched TouchEvents ", System.nanoTime() - event.getEventTimeNano());
+                    }
                     if (!handled && isDown) {
                         int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
 
@@ -2685,7 +2708,11 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         public void dispatchPointer(MotionEvent event, long eventTime) {
             final ViewRoot viewRoot = mViewRoot.get();
-            if (viewRoot != null) {
+            if (viewRoot != null) {                
+                if (MEASURE_LATENCY) {
+                    // Note: eventTime is in milliseconds
+                    ViewRoot.lt.sample("* ViewRoot b4 dispatchPtr", System.nanoTime() - eventTime * 1000000);
+                }
                 viewRoot.dispatchPointer(event, eventTime);
             } else {
                 new EventCompletion(mMainLooper, this, null, true, event);

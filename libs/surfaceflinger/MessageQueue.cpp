@@ -21,7 +21,7 @@
 #include <utils/threads.h>
 #include <utils/Timers.h>
 #include <utils/Log.h>
-#include <utils/IPCThreadState.h>
+#include <binder/IPCThreadState.h>
 
 #include "MessageQueue.h"
 

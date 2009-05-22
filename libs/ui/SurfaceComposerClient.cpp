@@ -29,8 +29,8 @@
 #include <utils/Errors.h>
 #include <utils/threads.h>
 #include <utils/KeyedVector.h>
-#include <utils/IServiceManager.h>
-#include <utils/IMemory.h>
+#include <binder/IServiceManager.h>
+#include <binder/IMemory.h>
 #include <utils/Log.h>
 
 #include <ui/DisplayInfo.h>

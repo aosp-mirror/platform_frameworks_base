@@ -220,12 +220,6 @@
         android:label="@string/permlab_installLocationProvider"
         android:description="@string/permdesc_installLocationProvider" />
 
-    <!-- Allows an application to install a location collector into the Location Manager -->
-    <permission android:name="android.permission.INSTALL_LOCATION_COLLECTOR"
-        android:protectionLevel="signatureOrSystem"
-        android:label="@string/permlab_installLocationCollector"
-        android:description="@string/permdesc_installLocationCollector" />
-
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->
@@ -389,11 +383,11 @@
         android:description="@string/permgroupdesc_storage" />
 
     <!-- Allows an application to write to the SD card -->
-    <permission android:name="android.permission.SDCARD_WRITE"
+    <permission android:name="android.permission.WRITE_SDCARD"
         android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
-        android:protectionLevel="normal" />
+        android:protectionLevel="dangerous" />
 
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->
@@ -803,12 +797,20 @@
         android:description="@string/permdesc_runSetActivityWatcher"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to watch and control how activities are
-         started globally in the system.  Only for is in debugging
-         (usually the monkey command). -->
+    <!-- Allows an application to call the activity manager shutdown() API
+         to put the higher-level system there into a shutdown state. -->
     <permission android:name="android.permission.SHUTDOWN"
         android:label="@string/permlab_shutdown"
         android:description="@string/permdesc_shutdown"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to tell the activity manager to temporarily
+         stop application switches, putting it into a special mode that
+         prevents applications from immediately switching away from some
+         critical UI such as the home screen. -->
+    <permission android:name="android.permission.STOP_APP_SWITCHES"
+        android:label="@string/permlab_stopAppSwitches"
+        android:description="@string/permdesc_stopAppSwitches"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to retrieve the current state of keys and
@@ -973,7 +975,7 @@
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:label="@string/permlab_bindGadget"
         android:description="@string/permdesc_bindGadget"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows applications to change the background data setting
          @hide pending API council -->

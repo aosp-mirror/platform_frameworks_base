@@ -38,8 +38,10 @@ import android.telephony.SmsMessage;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.telephony.CdmaInformationRecord;
+import com.android.internal.telephony.cdma.CdmaCallWaiting;
+import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.gsm.NetworkInfo;
-import com.android.internal.telephony.gsm.PDPContextState;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 
 import java.io.ByteArrayInputStream;
@@ -233,6 +235,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     private static final int CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES = 31;
 
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 sendScreenState(true);
@@ -562,18 +565,22 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         mNetworkMode = networkMode;
         //At startup mPhoneType is first set from networkMode
         switch(networkMode) {
-            case RILConstants.NETWORK_MODE_CDMA:
-            case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
-            case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
-            case RILConstants.NETWORK_MODE_GLOBAL:
-                mPhoneType = RILConstants.CDMA_PHONE;
-                break;
             case RILConstants.NETWORK_MODE_WCDMA_PREF:
             case RILConstants.NETWORK_MODE_GSM_ONLY:
             case RILConstants.NETWORK_MODE_WCDMA_ONLY:
             case RILConstants.NETWORK_MODE_GSM_UMTS:
-            default:
                 mPhoneType = RILConstants.GSM_PHONE;
+                break;
+            case RILConstants.NETWORK_MODE_CDMA:
+            case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
+            case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
+                mPhoneType = RILConstants.CDMA_PHONE;
+                break;
+            case RILConstants.NETWORK_MODE_GLOBAL:
+                mPhoneType = RILConstants.CDMA_PHONE;
+                break;
+            default:
+                mPhoneType = RILConstants.CDMA_PHONE;
         }
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -1052,6 +1059,16 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
+    public void
+    sendBurstDtmf(String dtmfString, Message result) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_CDMA_BURST_DTMF, result);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        rr.mp.writeString(dtmfString);
+
+        send(rr);
+    }
 
     public void
     sendSMS (String smscPDU, String pdu, Message result) {
@@ -1361,6 +1378,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         if (RILJ_LOGD) riljLog(rr.serialString() + "> iccIO: " + requestToString(rr.mRequest)
                 + " 0x" + Integer.toHexString(command)
                 + " 0x" + Integer.toHexString(fileid) + " "
+                + " path: " + path + ","
                 + p1 + "," + p2 + "," + p3);
 
         send(rr);
@@ -1793,7 +1811,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeInt(1);
         rr.mp.writeInt(on ? 1 : 0);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest) + ": " + on);
+        if (RILJ_LOGD) riljLog(rr.serialString()
+                + "> " + requestToString(rr.mRequest) + ": " + on);
 
         send(rr);
     }
@@ -1838,7 +1857,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                  * and/or radio knowing.
                  */
                 if (RILJ_LOGD) Log.d(LOG_TAG, "Radio ON @ init; reset to OFF");
-                    setRadioPower(false, null);
+                setRadioPower(false, null);
             } else {
                 if (DBG) Log.d(LOG_TAG, "Radio OFF @ init");
                 setRadioState(newState);
@@ -2055,6 +2074,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_DEVICE_IDENTITY: ret =  responseStrings(p); break;
             case RIL_REQUEST_GET_SMSC_ADDRESS: ret = responseString(p); break;
             case RIL_REQUEST_SET_SMSC_ADDRESS: ret = responseVoid(p); break;
+            case RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: ret = responseVoid(p); break;
             default:
                 throw new RuntimeException("Unrecognized solicited response: " + rr.mRequest);
             //break;
@@ -2176,13 +2196,18 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_STK_CALL_SETUP: ret = responseInts(p); break;
             case RIL_UNSOL_SIM_SMS_STORAGE_FULL: ret =  responseVoid(p); break;
             case RIL_UNSOL_SIM_REFRESH: ret =  responseInts(p); break;
-            case RIL_UNSOL_CALL_RING: ret =  responseVoid(p); break;
+            case RIL_UNSOL_CALL_RING: ret =  responseCallRing(p); break;
             case RIL_UNSOL_RESTRICTED_STATE_CHANGED: ret = responseInts(p); break;
             case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:  ret =  responseVoid(p); break;
             case RIL_UNSOL_RESPONSE_CDMA_NEW_SMS:  ret =  responseCdmaSms(p); break;
             case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS:  ret =  responseString(p); break;
             case RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL:  ret =  responseVoid(p); break;
+            case RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: ret = responseVoid(p); break;
+            case RIL_UNSOL_CDMA_CALL_WAITING: ret = responseCdmaCallWaiting(p); break;
+            case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: ret = responseInts(p); break;
+            case RIL_UNSOL_CDMA_INFO_REC: ret = responseCdmaInformationRecord(p); break;
             case RIL_UNSOL_OEM_HOOK_RAW: ret = responseRaw(p); break;
+
             default:
                 throw new RuntimeException("Unrecognized unsol response: " + response);
             //break; (implied)
@@ -2415,6 +2440,39 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                     mUnsolOemHookRawRegistrant.notifyRegistrant(new AsyncResult(null, ret, null));
                 }
                 break;
+
+            case RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE:
+                if (RILJ_LOGD) unsljLog(response);
+
+                if (mEmergencyCallbackModeRegistrant != null) {
+                    mEmergencyCallbackModeRegistrant.notifyRegistrant();
+                }
+                break;
+
+            case RIL_UNSOL_CDMA_CALL_WAITING:
+                if (RILJ_LOGD) unsljLog(response);
+
+                if(mCallWaitingRegistrants != null) {
+                    mCallWaitingRegistrants.notifyRegistrants(new AsyncResult (null, ret, null));
+                }
+                break;
+
+            case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS:
+                if (RILJ_LOGD) unsljLog(response);
+
+                if (mOtaSessionRegistrants != null) {
+                    mOtaSessionRegistrants.notifyRegistrants(new AsyncResult(null, ret, null));
+                }
+                break;
+
+            case RIL_UNSOL_CDMA_INFO_REC:
+                if (RILJ_LOGD)
+                    unsljLog(response);
+                if (mInformationRecordsRegistrants != null) {
+                    mInformationRecordsRegistrants.notifyRegistrants(new AsyncResult(null, ret,
+                            null));
+                }
+                break;
         }
     }
 
@@ -2547,6 +2605,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         String s = p.readString();
 
+        if (RILJ_LOGD) riljLog("< iccIO: "
+                + " 0x" + Integer.toHexString(sw1)
+                + " 0x" + Integer.toHexString(sw2) + " "
+                + s);
+
         return new IccIoResult(sw1, sw2, s);
     }
 
@@ -2677,14 +2740,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
             response.add(dc);
 
-            if ( RILConstants.CDMA_VOICE_PRIVACY == voiceSettings ) {
+            if ( RILConstants.CDMA_VOICE_PRIVACY == voicePrivacy ) {
                 mVoicePrivacyOnRegistrants.notifyRegistrants();
                 Log.d(LOG_TAG, "InCall VoicePrivacy is enabled: " +
-                        Integer.toString(voiceSettings));
+                        Integer.toString(voicePrivacy));
             } else {
                 mVoicePrivacyOffRegistrants.notifyRegistrants();
                 Log.d(LOG_TAG, "InCall VoicePrivacy is disabled: " +
-                        Integer.toString(voiceSettings));
+                        Integer.toString(voicePrivacy));
             }
         }
 
@@ -2696,21 +2759,21 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     private Object
     responseDataCallList(Parcel p) {
         int num;
-        ArrayList<PDPContextState> response;
+        ArrayList<DataCallState> response;
 
         num = p.readInt();
-        response = new ArrayList<PDPContextState>(num);
+        response = new ArrayList<DataCallState>(num);
 
         for (int i = 0; i < num; i++) {
-            PDPContextState pdp = new PDPContextState();
+            DataCallState dataCall = new DataCallState();
 
-            pdp.cid = p.readInt();
-            pdp.active = p.readInt();
-            pdp.type = p.readString();
-            pdp.apn = p.readString();
-            pdp.address = p.readString();
+            dataCall.cid = p.readInt();
+            dataCall.active = p.readInt();
+            dataCall.type = p.readString();
+            dataCall.apn = p.readString();
+            dataCall.address = p.readString();
 
-            response.add(pdp);
+            response.add(dataCall);
         }
 
         return response;
@@ -2771,38 +2834,131 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     private Object
     responseCDMA_BR_CNF(Parcel p) {
-        int numServiceCategories;
+        int numInts;
         int response[];
 
-        numServiceCategories = p.readInt();
+        numInts = p.readInt();
 
-        if (numServiceCategories == 0) {
-            int numInts;
-            numInts = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES * CDMA_BSI_NO_OF_INTS_STRUCT + 1;
-            response = new int[numInts];
+        response = new int[numInts];
 
-            // indicate that a zero length table was received
-            response[0] = 0;
-            //for all supported service categories set 'english' as default language
-            //and selection status to false
-            for (int i = 1, j = 1
-                    ; i <= (CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES
-                                * CDMA_BSI_NO_OF_INTS_STRUCT)
-                                        ; i += CDMA_BSI_NO_OF_INTS_STRUCT, j++ ) {
-                response[i] = j;
-                response[i+1] = 1;
-                response[i+2] = 0;
-            }
-        } else {
-            int numInts;
-            numInts = numServiceCategories * CDMA_BSI_NO_OF_INTS_STRUCT + 1;
-            response = new int[numInts];
-
-            response[0] = numServiceCategories;
-            for (int i = 1 ; i < numInts; i++) {
-                 response[i] = p.readInt();
-             }
+        response[0] = numInts;
+        for (int i = 1 ; i < numInts; i++) {
+            response[i] = p.readInt();
         }
+
+        return response;
+    }
+
+    private Object
+    responseCdmaInformationRecord(Parcel p){
+
+        int num;
+        ArrayList<CdmaInformationRecord> response;
+
+        num = p.readInt();
+
+        response = new ArrayList<CdmaInformationRecord>(num);
+
+        for (int i = 0; i < num; i++) {
+            int name = p.readInt();
+            CdmaInformationRecord InfoRec = new CdmaInformationRecord(name);
+
+            char buffer[];
+            int length;
+            switch (name) {
+                case CdmaInformationRecord.RIL_CDMA_DISPLAY_INFO_REC:
+                case CdmaInformationRecord.RIL_CDMA_EXTENDED_DISPLAY_INFO_REC:
+                    length = p.readInt();
+                    buffer = new char[length];
+                    for (int j = 0; j < length; j++) {
+                        buffer[j] = (char)p.readInt();
+                    }
+                    InfoRec.createDisplayInfo(length, buffer);
+                    break;
+
+                case CdmaInformationRecord.RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC:
+                case CdmaInformationRecord.RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC:
+                case CdmaInformationRecord.RIL_CDMA_CONNECTED_NUMBER_INFO_REC:
+                    length = p.readInt();
+                    buffer = new char[length + 4];
+                    for (int j = 0; j < (length + 4); j++) {
+                        buffer[j] = (char)p.readInt();
+                    }
+                    InfoRec.createNumberInfo(length, buffer);
+                    break;
+
+                case CdmaInformationRecord.RIL_CDMA_SIGNAL_INFO_REC:
+                    buffer = new char[4];
+                    for (int j = 0; j < 4; j++) {
+                        buffer[j] = (char)p.readInt();
+                    }
+                    InfoRec.createSignalInfo(buffer);
+                    break;
+
+                case CdmaInformationRecord.RIL_CDMA_REDIRECTING_NUMBER_INFO_REC:
+                    length = p.readInt();
+                    buffer = new char[length + 4];
+                    int reason;
+                    for (int j = 0; j < (length + 4); j++) {
+                        buffer[j] = (char)p.readInt();
+                    }
+                    reason = p.readInt();
+                    InfoRec.createRedirectingNumberInfo(length, buffer, reason);
+                    break;
+
+                case CdmaInformationRecord.RIL_CDMA_LINE_CONTROL_INFO_REC:
+                    buffer = new char[4];
+                    for (int j = 0; j < 4; j++) {
+                        buffer[j] = (char)p.readInt();
+                    }
+                    InfoRec.createLineControlInfo(buffer);
+                    break;
+
+                case CdmaInformationRecord.RIL_CDMA_T53_CLIR_INFO_REC:
+                    char ch = (char)p.readInt();
+                    InfoRec.createT53ClirInfo(ch);
+                    break;
+
+                case CdmaInformationRecord.RIL_CDMA_T53_RELEASE_INFO_REC:
+                    break;
+
+                case CdmaInformationRecord.RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC:
+                    char ul = (char)p.readInt();
+                    char dl = (char)p.readInt();
+                    InfoRec.createT53AudioControlInfo(ul, dl);
+                    break;
+
+                default:
+                    break;
+            }
+            response.add(InfoRec);
+        }
+
+        return response;
+    }
+
+    private Object
+    responseCdmaCallWaiting(Parcel p){
+        CdmaCallWaiting response = new CdmaCallWaiting();
+        response.number = p.readString();
+        response.numberPresentation = p.readInt();
+        response.name = p.readString();
+        response.signalInfoRecord.isPresent =  p.readInt() == 0 ? false : true;
+        response.signalInfoRecord.signalType = p.readInt();
+        response.signalInfoRecord.alertPitch = p.readInt();
+        response.signalInfoRecord.signalCode = p.readInt();
+
+        return response;
+    }
+
+    private Object
+    responseCallRing(Parcel p){
+        char response[] = new char[4];
+
+        response[0] = (char) p.readInt();    // isPresent
+        response[1] = (char) p.readInt();    // signalType
+        response[2] = (char) p.readInt();    // alertPitch
+        response[3] = (char) p.readInt();    // signal
 
         return response;
     }
@@ -2915,6 +3071,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_DEVICE_IDENTITY: return "RIL_REQUEST_DEVICE_IDENTITY";
             case RIL_REQUEST_GET_SMSC_ADDRESS: return "RIL_REQUEST_GET_SMSC_ADDRESS";
             case RIL_REQUEST_SET_SMSC_ADDRESS: return "RIL_REQUEST_SET_SMSC_ADDRESS";
+            case RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: return "REQUEST_EXIT_EMERGENCY_CALLBACK_MODE";
             default: return "<unknown request>";
         }
     }
@@ -2949,6 +3106,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_CALL_RING: return "UNSOL_CALL_RING";
             case RIL_UNSOL_RESTRICTED_STATE_CHANGED: return "RIL_UNSOL_RESTRICTED_STATE_CHANGED";
             case RIL_UNSOL_OEM_HOOK_RAW: return "RIL_UNSOL_OEM_HOOK_RAW";
+            case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED: return "UNSOL_RESPONSE_SIM_STATUS_CHANGED";
+            case RIL_UNSOL_RESPONSE_CDMA_NEW_SMS: return "UNSOL_RESPONSE_CDMA_NEW_SMS";
+            case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS: return "UNSOL_RESPONSE_NEW_BROADCAST_SMS";
+            case RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL: return "UNSOL_CDMA_RUIM_SMS_STORAGE_FULL";
+            case RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: return "UNSOL_ENTER_EMERGENCY_CALLBACK_MODE";
+            case RIL_UNSOL_CDMA_CALL_WAITING: return "UNSOL_CDMA_CALL_WAITING";
+            case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: return "UNSOL_CDMA_OTA_PROVISION_STATUS";
+            case RIL_UNSOL_CDMA_INFO_REC: return "UNSOL_CDMA_INFO_REC";
             default: return "<unknown reponse>";
         }
     }
@@ -3048,7 +3213,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     /**
      * {@inheritDoc}
      */
-    public void queryTTYModeEnabled(Message response) {
+    public void queryTTYMode(Message response) {
         RILRequest rr = RILRequest.obtain(
                 RILConstants.RIL_REQUEST_QUERY_TTY_MODE, response);
 
@@ -3058,12 +3223,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     /**
      * {@inheritDoc}
      */
-    public void setTTYModeEnabled(boolean enable, Message response) {
+    public void setTTYMode(int ttyMode, Message response) {
         RILRequest rr = RILRequest.obtain(
                 RILConstants.RIL_REQUEST_SET_TTY_MODE, response);
 
         rr.mp.writeInt(1);
-        rr.mp.writeInt(enable ? 1 : 0);
+        rr.mp.writeInt(ttyMode);
 
         send(rr);
     }
@@ -3090,11 +3255,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
+    /**
+     * TODO(Teleca): configValuesArray is represented as a RIL_BroadcastSMSConfig
+     * so we think this should be a class with the appropriate parameters not an array?
+     */
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message response) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG, response);
 
-        rr.mp.writeInt(configValuesArray[0]);
-        for(int i = 1; i <= (configValuesArray[0] * 3); i++) {
+        for(int i = 0; i < configValuesArray.length; i++) {
             rr.mp.writeInt(configValuesArray[i]);
         }
 
@@ -3108,6 +3276,18 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         rr.mp.writeInt(1);
         rr.mp.writeInt(activate);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        send(rr);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void exitEmergencyCallbackMode(Message response) {
+        RILRequest rr
+                = RILRequest.obtain(RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE, response);
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 

@@ -19,7 +19,6 @@
 #include <hardware_legacy/power.h>
 
 #include <cutils/properties.h>
-#include <utils/IServiceManager.h>
 #include <utils/Log.h>
 #include <utils/Timers.h>
 #include <utils.h>

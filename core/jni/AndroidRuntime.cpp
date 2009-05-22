@@ -19,11 +19,11 @@
 //#define LOG_NDEBUG 0
 
 #include <android_runtime/AndroidRuntime.h>
-#include <utils/IBinder.h>
-#include <utils/IServiceManager.h>
+#include <binder/IBinder.h>
+#include <binder/IServiceManager.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <utils/string_array.h>
 #include <utils/threads.h>
 #include <cutils/properties.h>
@@ -142,7 +142,6 @@ extern int register_android_security_Md5MessageDigest(JNIEnv *env);
 extern int register_android_text_AndroidCharacter(JNIEnv *env);
 extern int register_android_text_KeyCharacterMap(JNIEnv *env);
 extern int register_android_opengl_classes(JNIEnv *env);
-extern int register_android_bluetooth_Database(JNIEnv* env);
 extern int register_android_bluetooth_HeadsetBase(JNIEnv* env);
 extern int register_android_bluetooth_BluetoothAudioGateway(JNIEnv* env);
 extern int register_android_bluetooth_RfcommSocket(JNIEnv *env);
@@ -154,6 +153,7 @@ extern int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv* env);
 extern int register_android_util_Base64(JNIEnv* env);
 extern int register_android_location_GpsLocationProvider(JNIEnv* env);
+extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelper(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
@@ -1157,7 +1157,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_media_ToneGenerator),
 
     REG_JNI(register_android_opengl_classes),
-    REG_JNI(register_android_bluetooth_Database),
     REG_JNI(register_android_bluetooth_HeadsetBase),
     REG_JNI(register_android_bluetooth_BluetoothAudioGateway),
     REG_JNI(register_android_bluetooth_RfcommSocket),
@@ -1169,6 +1168,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_ddm_DdmHandleNativeHeap),
     REG_JNI(register_android_util_Base64),
     REG_JNI(register_android_location_GpsLocationProvider),
+    REG_JNI(register_android_backup_BackupDataOutput),
     REG_JNI(register_android_backup_FileBackupHelper),
 };
 

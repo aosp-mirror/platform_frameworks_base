@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "backup_data"
+
 #include <utils/backup_helpers.h>
 #include <utils/ByteOrder.h>
 
 #include <stdio.h>
 #include <unistd.h>
+
+#include <cutils/log.h>
 
 namespace android {
 
@@ -34,26 +38,6 @@ namespace android {
  *      - The key, utf-8, null terminated, padded to 4-byte boundary.
  *      - The value, padded to 4 byte boundary
  */
-
-#define APP_MAGIC_V1 0x31707041 // App1 (little endian)
-#define ENTITY_MAGIC_V1 0x61746144 // Data (little endian)
-#define FOOTER_MAGIC_V1 0x746f6f46 // Foot (little endian)
-
-typedef struct {
-    int type; // == APP_MAGIC_V1
-    int packageLen; // length of the name of the package that follows, not including the null.
-} app_header_v1;
-
-typedef struct {
-    int type; // ENTITY_MAGIC_V1
-    int keyLen; // length of the key name, not including the null terminator
-    int dataSize; // size of the data, not including the padding
-} entity_header_v1;
-
-typedef struct {
-    int type; // FOOTER_MAGIC_V1
-    int entityCount; // the number of entities that were written
-} app_footer_v1;
 
 const static int ROUND_UP[4] = { 0, 3, 2, 1 };
 
@@ -102,7 +86,7 @@ BackupDataWriter::write_padding_for(int n)
 }
 
 status_t
-BackupDataWriter::WriteAppHeader(const String8& packageName)
+BackupDataWriter::WriteAppHeader(const String8& packageName, int cookie)
 {
     if (m_status != NO_ERROR) {
         return m_status;
@@ -120,8 +104,9 @@ BackupDataWriter::WriteAppHeader(const String8& packageName)
 
     nameLen = packageName.length();
 
-    header.type = tolel(APP_MAGIC_V1);
+    header.type = tolel(BACKUP_HEADER_APP_V1);
     header.packageLen = tolel(nameLen);
+    header.cookie = cookie;
 
     amt = write(m_fd, &header, sizeof(app_header_v1));
     if (amt != sizeof(app_header_v1)) {
@@ -159,7 +144,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
 
     keyLen = key.length();
 
-    header.type = tolel(ENTITY_MAGIC_V1);
+    header.type = tolel(BACKUP_HEADER_ENTITY_V1);
     header.keyLen = tolel(keyLen);
     header.dataSize = tolel(dataSize);
 
@@ -204,7 +189,7 @@ BackupDataWriter::WriteEntityData(const void* data, size_t size)
 }
 
 status_t
-BackupDataWriter::WriteAppFooter()
+BackupDataWriter::WriteAppFooter(int cookie)
 {
     if (m_status != NO_ERROR) {
         return m_status;
@@ -220,8 +205,9 @@ BackupDataWriter::WriteAppFooter()
     app_footer_v1 footer;
     ssize_t nameLen;
 
-    footer.type = tolel(FOOTER_MAGIC_V1);
+    footer.type = tolel(BACKUP_FOOTER_APP_V1);
     footer.entityCount = tolel(m_entityCount);
+    footer.cookie = cookie;
 
     amt = write(m_fd, &footer, sizeof(app_footer_v1));
     if (amt != sizeof(app_footer_v1)) {
@@ -232,5 +218,222 @@ BackupDataWriter::WriteAppFooter()
 
     return NO_ERROR;
 }
+
+
+BackupDataReader::BackupDataReader(int fd)
+    :m_fd(fd),
+     m_status(NO_ERROR),
+     m_pos(0),
+     m_entityCount(0)
+{
+    memset(&m_header, 0, sizeof(m_header));
+}
+
+BackupDataReader::~BackupDataReader()
+{
+}
+
+status_t
+BackupDataReader::Status()
+{
+    return m_status;
+}
+
+#define CHECK_SIZE(actual, expected) \
+    do { \
+        if ((actual) != (expected)) { \
+            if ((actual) == 0) { \
+                m_status = EIO; \
+            } else { \
+                m_status = errno; \
+            } \
+            return m_status; \
+        } \
+    } while(0)
+#define SKIP_PADDING() \
+    do { \
+        status_t err = skip_padding(); \
+        if (err != NO_ERROR) { \
+            m_status = err; \
+            return err; \
+        } \
+    } while(0)
+
+status_t
+BackupDataReader::ReadNextHeader(int* type)
+{
+    if (m_status != NO_ERROR) {
+        return m_status;
+    }
+
+    int amt;
+
+    SKIP_PADDING();
+    amt = read(m_fd, &m_header, sizeof(m_header));
+    CHECK_SIZE(amt, sizeof(m_header));
+
+    // validate and fix up the fields.
+    m_header.type = fromlel(m_header.type);
+    switch (m_header.type)
+    {
+        case BACKUP_HEADER_APP_V1:
+            m_header.app.packageLen = fromlel(m_header.app.packageLen);
+            if (m_header.app.packageLen < 0) {
+                LOGD("App header at %d has packageLen<0: 0x%08x\n", (int)m_pos,
+                    (int)m_header.app.packageLen);
+                m_status = EINVAL;
+            }
+            m_header.app.cookie = m_header.app.cookie;
+            break;
+        case BACKUP_HEADER_ENTITY_V1:
+            m_header.entity.keyLen = fromlel(m_header.entity.keyLen);
+            if (m_header.entity.keyLen <= 0) {
+                LOGD("Entity header at %d has keyLen<=0: 0x%08x\n", (int)m_pos,
+                        (int)m_header.entity.keyLen);
+                m_status = EINVAL;
+            }
+            m_header.entity.dataSize = fromlel(m_header.entity.dataSize);
+            m_entityCount++;
+            break;
+        case BACKUP_FOOTER_APP_V1:
+            m_header.footer.entityCount = fromlel(m_header.footer.entityCount);
+            if (m_header.footer.entityCount < 0) {
+                LOGD("Entity header at %d has entityCount<0: 0x%08x\n", (int)m_pos,
+                        (int)m_header.footer.entityCount);
+                m_status = EINVAL;
+            }
+            m_header.footer.cookie = m_header.footer.cookie;
+            break;
+        default:
+            LOGD("Chunk header at %d has invalid type: 0x%08x", (int)m_pos, (int)m_header.type);
+            m_status = EINVAL;
+    }
+    m_pos += sizeof(m_header);
+    if (type) {
+        *type = m_header.type;
+    }
+    
+    return m_status;
+}
+
+status_t
+BackupDataReader::ReadAppHeader(String8* packageName, int* cookie)
+{
+    if (m_status != NO_ERROR) {
+        return m_status;
+    }
+    if (m_header.type != BACKUP_HEADER_APP_V1) {
+        return EINVAL;
+    }
+    size_t size = m_header.app.packageLen;
+    char* buf = packageName->lockBuffer(size);
+    if (packageName == NULL) {
+        packageName->unlockBuffer();
+        m_status = ENOMEM;
+        return m_status;
+    }
+    int amt = read(m_fd, buf, size+1);
+    CHECK_SIZE(amt, (int)size+1);
+    packageName->unlockBuffer(size);
+    m_pos += size+1;
+    *cookie = m_header.app.cookie;
+    return NO_ERROR;
+}
+
+bool
+BackupDataReader::HasEntities()
+{
+    return m_status == NO_ERROR && m_header.type == BACKUP_HEADER_ENTITY_V1;
+}
+
+status_t
+BackupDataReader::ReadEntityHeader(String8* key, size_t* dataSize)
+{
+    if (m_status != NO_ERROR) {
+        return m_status;
+    }
+    if (m_header.type != BACKUP_HEADER_ENTITY_V1) {
+        return EINVAL;
+    }
+    size_t size = m_header.entity.keyLen;
+    char* buf = key->lockBuffer(size);
+    if (key == NULL) {
+        key->unlockBuffer();
+        m_status = ENOMEM;
+        return m_status;
+    }
+    int amt = read(m_fd, buf, size+1);
+    CHECK_SIZE(amt, (int)size+1);
+    key->unlockBuffer(size);
+    m_pos += size+1;
+    *dataSize = m_header.entity.dataSize;
+    SKIP_PADDING();
+    return NO_ERROR;
+}
+
+status_t
+BackupDataReader::SkipEntityData()
+{
+    if (m_status != NO_ERROR) {
+        return m_status;
+    }
+    if (m_header.type != BACKUP_HEADER_ENTITY_V1) {
+        return EINVAL;
+    }
+    if (m_header.entity.dataSize > 0) {
+        int pos = lseek(m_fd, m_header.entity.dataSize, SEEK_CUR);
+        return pos == -1 ? (int)errno : (int)NO_ERROR;
+    } else {
+        return NO_ERROR;
+    }
+}
+
+status_t
+BackupDataReader::ReadEntityData(void* data, size_t size)
+{
+    if (m_status != NO_ERROR) {
+        return m_status;
+    }
+    int amt = read(m_fd, data, size);
+    CHECK_SIZE(amt, (int)size);
+    m_pos += size;
+    return NO_ERROR;
+}
+
+status_t
+BackupDataReader::ReadAppFooter(int* cookie)
+{
+    if (m_status != NO_ERROR) {
+        return m_status;
+    }
+    if (m_header.type != BACKUP_FOOTER_APP_V1) {
+        return EINVAL;
+    }
+    if (m_header.footer.entityCount != m_entityCount) {
+        LOGD("entity count mismatch actual=%d expected=%d", m_entityCount,
+                m_header.footer.entityCount);
+        m_status = EINVAL;
+        return m_status;
+    }
+    *cookie = m_header.footer.cookie;
+    return NO_ERROR;
+}
+
+status_t
+BackupDataReader::skip_padding()
+{
+    ssize_t amt;
+    ssize_t paddingSize;
+
+    paddingSize = padding_extra(m_pos);
+    if (paddingSize > 0) {
+        uint32_t padding;
+        amt = read(m_fd, &padding, paddingSize);
+        CHECK_SIZE(amt, paddingSize);
+        m_pos += amt;
+    }
+    return NO_ERROR;
+}
+
 
 } // namespace android

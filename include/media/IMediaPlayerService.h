@@ -18,8 +18,8 @@
 #define ANDROID_IMEDIAPLAYERSERVICE_H
 
 #include <utils/RefBase.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
 
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>

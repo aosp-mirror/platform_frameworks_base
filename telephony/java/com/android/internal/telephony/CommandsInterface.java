@@ -241,6 +241,24 @@ public interface CommandsInterface {
     void unregisterForRUIMReady(Handler h);
 
     /**
+     * Registers for the status of an OTASP/OTAPA session
+     */
+    void registerForOtaSessionStatus(Handler h, int what, Object obj);
+    void unregisterForOtaSessionStatus(Handler h);
+
+    /**
+      * register for Call waiting for CDMA
+      */
+    void registerForCdmaCallWaiting(Handler h, int what, Object obj);
+    void unregisterForCdmaCallWaiting(Handler h);
+
+    /**
+     * Registers for CDMA information records
+     */
+    void registerCdmaInformationRecord(Handler h, int what, Object obj);
+    void unregisterCdmaInformationRecord(Handler h);
+
+    /**
      * unlike the register* methods, there's only one new SMS handler
      * if you need to unregister, you should also tell the radio to stop
      * sending SMS's to you (via AT+CNMI)
@@ -326,6 +344,16 @@ public interface CommandsInterface {
     void unSetOnIccSmsFull(Handler h);
 
     /**
+     * Sets the handler for Emergency call-back Mode enter mesage.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void setEmergencyCallbackMode(Handler h, int what, Object obj);
+
+    /**
      * Sets the handler for SIM Refresh notifications.
      * Unlike the register* methods, there's only one notification handler
      *
@@ -348,12 +376,12 @@ public interface CommandsInterface {
     void unSetOnCallRing(Handler h);
 
     /**
-     * Sets the handler for RESTRICTED_STATE changed notification, 
+     * Sets the handler for RESTRICTED_STATE changed notification,
      * eg, for Domain Specific Access Control
      * unlike the register* methods, there's only one signal strength handler
-     * 
-     * AsyncResult.result is an int[1]     
-     * response.obj.result[0] is a bitmask of RIL_RESTRICTED_STATE_* values 
+     *
+     * AsyncResult.result is an int[1]
+     * response.obj.result[0] is a bitmask of RIL_RESTRICTED_STATE_* values
      */
 
     void setOnRestrictedStateChanged(Handler h, int what, Object obj);
@@ -516,7 +544,7 @@ public interface CommandsInterface {
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
-     *  ar.result contains a List of PDPContextState
+     *  ar.result contains a List of DataCallState
      *  @deprecated
      */
     void getPDPContextList(Message result);
@@ -526,7 +554,7 @@ public interface CommandsInterface {
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
-     *  ar.result contains a List of PDPContextState
+     *  ar.result contains a List of DataCallState
      */
     void getDataCallList(Message result);
 
@@ -767,6 +795,12 @@ public interface CommandsInterface {
      */
     void stopDtmf(Message result);
 
+    /**
+     *  ar.exception carries exception on failure
+     *  ar.userObject contains the orignal value of result.obj
+     *  ar.result is null on success and failure
+     */
+    void sendBurstDtmf(String dtmfString, Message result);
 
     /**
      * smscPDU is smsc address in PDU form GSM BCD format prefixed
@@ -1087,13 +1121,12 @@ public interface CommandsInterface {
     public void getDeviceIdentity(Message response);
 
     /**
-     * Request the device IMSI_M / MDN / AH_SID / H_SID / H_NID.
+     * Request the device MDN / H_SID / H_NID / MIN.
      * "response" is const char **
-     *   [0] is IMSI_M if CDMA subscription is available
-     *   [1] is MDN if CDMA subscription is available
-     *   [2] is AH_SID (Analog Home SID) if CDMA subscription
-     *   [3] is H_SID (Home SID) if CDMA subscription is available
-     *   [4] is H_NID (Home SID) if CDMA subscription is available
+     *   [0] is MDN if CDMA subscription is available
+     *   [1] is H_SID (Home SID) if CDMA subscription is available
+     *   [2] is H_NID (Home NID) if CDMA subscription is available
+     *   [3] is MIN (10 digits, MIN2+MIN1) if CDMA subscription is available
      */
     public void getCDMASubscription(Message response);
 
@@ -1133,7 +1166,7 @@ public interface CommandsInterface {
      * @param enable is true to enable, false to disable
      * @param response is callback message
      */
-    void setTTYModeEnabled(boolean enable, Message response);
+    void setTTYMode(int ttyMode, Message response);
 
     /**
      *  Query the TTY mode for the CDMA phone
@@ -1142,7 +1175,7 @@ public interface CommandsInterface {
      *
      * @param response is callback message
      */
-    void queryTTYModeEnabled(Message response);
+    void queryTTYMode(Message response);
 
     /**
      * Setup a packet data connection On successful completion, the result
@@ -1196,6 +1229,10 @@ public interface CommandsInterface {
      * @param result
      *            Callback message is empty on completion
      */
+    /**
+     * TODO(Teleca): configValuesArray is represented as a RIL_BroadcastSMSConfig
+     * so we think this should be a class with the appropriate parameters not an array?
+     */
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message result);
 
     /**
@@ -1205,4 +1242,10 @@ public interface CommandsInterface {
      *            Callback message contains the configuration from the modem on completion
      */
     public void getCdmaBroadcastConfig(Message result);
+
+    /**
+     * Requests the radio's system selection module to exit emergency callback mode.
+     * @param response callback message
+     */
+    public void exitEmergencyCallbackMode(Message response);
 }

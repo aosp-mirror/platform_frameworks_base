@@ -68,7 +68,12 @@ public final class RuimFileHandler extends IccFileHandler {
     }
 
     protected String getEFPath(int efid) {
-        // TODO(): Implement for CDMA EFs.
+        switch(efid) {
+        case EF_SMS:
+        case EF_CST:
+        case EF_RUIM_SPN:
+            return MF_SIM + DF_CDMA;
+        }
         return getCommonIccEFPath(efid);
     }
 

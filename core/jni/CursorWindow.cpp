@@ -18,7 +18,7 @@
 #define LOG_TAG "CursorWindow"
 
 #include <utils/Log.h>
-#include <utils/MemoryDealer.h>
+#include <binder/MemoryDealer.h>
 
 #include <assert.h>
 #include <string.h>

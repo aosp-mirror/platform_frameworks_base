@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 
 #include <media/IMediaPlayer.h>
 #include <ui/ISurface.h>

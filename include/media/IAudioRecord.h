@@ -22,8 +22,8 @@
 
 #include <utils/RefBase.h>
 #include <utils/Errors.h>
-#include <utils/IInterface.h>
-#include <utils/IMemory.h>
+#include <binder/IInterface.h>
+#include <binder/IMemory.h>
 
 
 namespace android {

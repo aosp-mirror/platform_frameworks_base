@@ -124,9 +124,9 @@ public class VCardComposer {
             mResult.append("ORG:").append(struct.company).append(mNewline);
         }
 
-        if (!isNull(struct.notes)) {
+        if (struct.notes.size() > 0 && !isNull(struct.notes.get(0))) {
             mResult.append("NOTE:").append(
-                    foldingString(struct.notes, vcardversion)).append(mNewline);
+                    foldingString(struct.notes.get(0), vcardversion)).append(mNewline);
         }
 
         if (!isNull(struct.title)) {
@@ -190,7 +190,7 @@ public class VCardComposer {
      */
     private void appendPhotoStr(byte[] bytes, String type, int version)
             throws VCardException {
-        String value, apptype, encodingStr;
+        String value, encodingStr;
         try {
             value = foldingString(new String(Base64.encodeBase64(bytes, true)),
                     version);
@@ -198,20 +198,23 @@ public class VCardComposer {
             throw new VCardException(e.getMessage());
         }
 
-        if (isNull(type)) {
-            type = "image/jpeg";
-        }
-        if (type.indexOf("jpeg") > 0) {
-            apptype = "JPEG";
-        } else if (type.indexOf("gif") > 0) {
-            apptype = "GIF";
-        } else if (type.indexOf("bmp") > 0) {
-            apptype = "BMP";
+        if (isNull(type) || type.toUpperCase().indexOf("JPEG") >= 0) {
+            type = "JPEG";
+        } else if (type.toUpperCase().indexOf("GIF") >= 0) {
+            type = "GIF";
+        } else if (type.toUpperCase().indexOf("BMP") >= 0) {
+            type = "BMP";
         } else {
-            apptype = type.substring(type.indexOf("/")).toUpperCase();
+            // Handle the string like "image/tiff".
+            int indexOfSlash = type.indexOf("/");
+            if (indexOfSlash >= 0) {
+                type = type.substring(indexOfSlash + 1).toUpperCase();
+            } else {
+                type = type.toUpperCase();
+            }
         }
 
-        mResult.append("LOGO;TYPE=").append(apptype);
+        mResult.append("LOGO;TYPE=").append(type);
         if (version == VERSION_VCARD21_INT) {
             encodingStr = ";ENCODING=BASE64:";
             value = value + mNewline;
@@ -281,7 +284,7 @@ public class VCardComposer {
 
     private String getPhoneTypeStr(PhoneData phone) {
 
-        int phoneType = Integer.parseInt(phone.type);
+        int phoneType = phone.type;
         String typeStr, label;
 
         if (phoneTypeMap.containsKey(phoneType)) {
@@ -308,7 +311,7 @@ public class VCardComposer {
         String joinMark = version == VERSION_VCARD21_INT ? ";" : ",";
         for (ContactStruct.ContactMethod contactMethod : contactMList) {
             // same with v2.1 and v3.0
-            switch (Integer.parseInt(contactMethod.kind)) {
+            switch (contactMethod.kind) {
             case Contacts.KIND_EMAIL:
                 String mailType = "INTERNET";
                 if (!isNull(contactMethod.data)) {

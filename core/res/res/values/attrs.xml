@@ -79,6 +79,9 @@
         <attr name="textColorPrimaryInverseNoDisable" format="reference|color" />
         <!-- Dim inverse text color. This does not differentiate the disabled state. -->
         <attr name="textColorSecondaryInverseNoDisable" format="reference|color" />
+        
+        <!-- Text color for urls in search suggestions, used by things like global search and the browser. @hide -->
+        <attr name="textColorSearchUrl" format="reference|color" />
 
         <!-- Text color, typeface, size, and style for "large" text. Defaults to primary text color. -->
         <attr name="textAppearanceLarge" format="reference" />
@@ -98,6 +101,7 @@
         <attr name="textAppearanceSearchResultTitle" format="reference" />	
         <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. @hide -->	
         <attr name="textAppearanceSearchResultSubtitle" format="reference" />
+
 
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
@@ -152,8 +156,8 @@
         <!-- The preferred list item height -->
         <attr name="listPreferredItemHeight" format="dimension" />
         <!-- The drawable for the list divider -->
-	<!-- The list item height for search results. @hide -->
-	<attr name="searchResultListItemHeight" format="dimension" />
+        <!-- The list item height for search results. @hide -->
+        <attr name="searchResultListItemHeight" format="dimension" />
         <attr name="listDivider" format="reference" />
         <!-- TextView style for list separators. -->
         <attr name="listSeparatorTextViewStyle" format="reference" />
@@ -663,9 +667,9 @@
     <attr name="x" format="dimension" />
     <!-- A coordinate in the Y dimension. -->
     <attr name="y" format="dimension" />
-
-    <!-- Specifies how to place an object, both
-         its x and y axis, within a larger containing object. -->
+          
+    <!-- Specifies how to place the content of an object, both
+         on the x and y axis, within the object itself. -->
     <attr name="gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
@@ -721,8 +725,7 @@
     <attr name="entries" format="reference" />
 
     <!-- Standard gravity constant that a child can supply to its parent.
-         Defines how to place an object, both
-         its x and y axis, within a larger containing object. -->
+         Defines how to place the view, both its x and y axis, within its parent view group. -->
     <attr name="layout_gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />

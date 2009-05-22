@@ -55,6 +55,7 @@ public:
                                 status_t *status=0);
 
     virtual AudioStreamIn* openInputStream(
+                                int inputSource,
                                 int format,
                                 int channelCount,
                                 uint32_t sampleRate,

@@ -65,7 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
     private static final int DATABASE_VERSION = 34;
-    
+
     private Context mContext;
 
     public DatabaseHelper(Context context) {
@@ -81,7 +81,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ");");
         db.execSQL("CREATE INDEX secureIndex1 ON secure (name);");
     }
-    
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE system (" +
@@ -134,7 +134,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
         Log.w(TAG, "Upgrading settings database from version " + oldVersion + " to "
                 + currentVersion);
-        
+
         int upgradeVersion = oldVersion;
 
         // Pattern for upgrade blocks:
@@ -143,7 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //        .. your upgrade logic..
         //        upgradeVersion = [the DATABASE_VERSION you set]
         //    }
-        
+
         if (upgradeVersion == 20) {
             /*
              * Version 21 is part of the volume control refresh. There is no
@@ -156,7 +156,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             upgradeVersion = 21;
         }
-        
+
         if (upgradeVersion < 22) {
             upgradeVersion = 22;
             // Upgrade the lock gesture storage location and format
@@ -186,7 +186,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 24;
         }
-        
+
         if (upgradeVersion == 24) {
             db.beginTransaction();
             try {
@@ -213,7 +213,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 26;
         }
-        
+
         if (upgradeVersion == 26) {
             // This introduces the new secure settings table.
             db.beginTransaction();
@@ -225,12 +225,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 27;
         }
-        
+
         if (upgradeVersion == 27) {
             // Copy settings values from 'system' to 'secure' and delete them from 'system'
             SQLiteStatement insertStmt = null;
             SQLiteStatement deleteStmt = null;
-            
+
             db.beginTransaction();
             try {
                 insertStmt =
@@ -271,11 +271,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Settings.Secure.WIFI_WATCHDOG_PING_DELAY_MS,
                     Settings.Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS,
                 };
-                
+
                 for (String setting : settingsToMove) {
                     insertStmt.bindString(1, setting);
                     insertStmt.execute();
-                    
+
                     deleteStmt.bindString(1, setting);
                     deleteStmt.execute();
                 }
@@ -291,7 +291,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 28;
         }
-        
+
         if (upgradeVersion == 28 || upgradeVersion == 29) {
             // Note: The upgrade to 28 was flawed since it didn't delete the old
             // setting first before inserting. Combining 28 and 29 with the
@@ -313,10 +313,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } finally {
                 db.endTransaction();
             }
-            
+
             upgradeVersion = 30;
         }
-        
+
         if (upgradeVersion == 30) {
             /*
              * Upgrade 31 clears the title for all quick launch shortcuts so the
@@ -373,7 +373,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 33;
         }
-        
+
         if (upgradeVersion == 33) {
             // Set the default zoom controls to: tap-twice to bring up +/-
             db.beginTransaction();
@@ -405,7 +405,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void upgradeLockPatternLocation(SQLiteDatabase db) {
-        Cursor c = db.query("system", new String[] {"_id", "value"}, "name='lock_pattern'", 
+        Cursor c = db.query("system", new String[] {"_id", "value"}, "name='lock_pattern'",
                 null, null, null, null);
         if (c.getCount() > 0) {
             c.moveToFirst();
@@ -414,7 +414,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Convert lock pattern
                 try {
                     LockPatternUtils lpu = new LockPatternUtils(mContext.getContentResolver());
-                    List<LockPatternView.Cell> cellPattern = 
+                    List<LockPatternView.Cell> cellPattern =
                             LockPatternUtils.stringToPattern(lockPattern);
                     lpu.saveLockPattern(cellPattern);
                 } catch (IllegalArgumentException e) {
@@ -542,12 +542,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 AudioManager.RINGER_MODE_NORMAL);
 
         loadVibrateSetting(db, false);
-        
+
         // By default, only the ring/notification and system streams are affected
         loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                 (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_NOTIFICATION) |
                 (1 << AudioManager.STREAM_SYSTEM));
-        
+
         loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioManager.STREAM_MUSIC) |
                  (1 << AudioManager.STREAM_RING) |
@@ -561,7 +561,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (deleteOld) {
             db.execSQL("DELETE FROM system WHERE name='" + Settings.System.VIBRATE_ON + "'");
         }
-        
+
         SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                 + " VALUES(?,?);");
 
@@ -576,79 +576,78 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private void loadSettings(SQLiteDatabase db) {
         loadSystemSettings(db);
-        loadSecureSettings(db);   
+        loadSecureSettings(db);
     }
-    
+
     private void loadSystemSettings(SQLiteDatabase db) {
         SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                 + " VALUES(?,?);");
-        
+
         Resources r = mContext.getResources();
-        loadSetting(stmt, Settings.Secure.CURRENT_ACTIVE_PHONE,
-                RILConstants.CDMA_PHONE);
+
         loadBooleanSetting(stmt, Settings.System.DIM_SCREEN,
                 R.bool.def_dim_screen);
-        loadSetting(stmt, Settings.System.STAY_ON_WHILE_PLUGGED_IN, 
+        loadSetting(stmt, Settings.System.STAY_ON_WHILE_PLUGGED_IN,
                 "1".equals(SystemProperties.get("ro.kernel.qemu")) ? 1 : 0);
         loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
                 R.integer.def_screen_off_timeout);
-        
+
         loadBooleanSetting(stmt, Settings.System.AIRPLANE_MODE_ON,
                 R.bool.def_airplane_mode_on);
-        
+
         loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_RADIOS,
                 R.string.def_airplane_mode_radios);
-        
+
         loadBooleanSetting(stmt, Settings.System.AUTO_TIME,
                 R.bool.def_auto_time); // Sync time to NITZ
-        
+
         loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
                 R.integer.def_screen_brightness);
-        
+
         loadDefaultAnimationSettings(stmt);
 
         loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
                 R.bool.def_accelerometer_rotation);
-        
+
         // Default date format based on build
         loadSetting(stmt, Settings.System.DATE_FORMAT,
-                SystemProperties.get("ro.com.android.dateformat", 
+                SystemProperties.get("ro.com.android.dateformat",
                         "MM-dd-yyyy"));
         stmt.close();
     }
-    
+
     private void loadDefaultAnimationSettings(SQLiteStatement stmt) {
         loadFractionSetting(stmt, Settings.System.WINDOW_ANIMATION_SCALE,
                 R.fraction.def_window_animation_scale, 1);
         loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
                 R.fraction.def_window_transition_scale, 1);
     }
-    
+
     private void loadSecureSettings(SQLiteDatabase db) {
         SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
                 + " VALUES(?,?);");
-        
+
         loadBooleanSetting(stmt, Settings.Secure.BLUETOOTH_ON,
                 R.bool.def_bluetooth_on);
-        
+
         // Data roaming default, based on build
-        loadSetting(stmt, Settings.Secure.DATA_ROAMING, 
+        loadSetting(stmt, Settings.Secure.DATA_ROAMING,
                 "true".equalsIgnoreCase(
-                        SystemProperties.get("ro.com.android.dataroaming", 
-                                "false")) ? 1 : 0);        
-        
+                        SystemProperties.get("ro.com.android.dataroaming",
+                                "false")) ? 1 : 0);
+
         loadBooleanSetting(stmt, Settings.Secure.INSTALL_NON_MARKET_APPS,
                 R.bool.def_install_non_market_apps);
-        
+
         loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                 R.string.def_location_providers_allowed);
-        
+
         loadIntegerSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
                 R.integer.def_network_preference);
-        
+
         loadBooleanSetting(stmt, Settings.Secure.USB_MASS_STORAGE_ENABLED,
                 R.bool.def_usb_mass_storage_enabled);
-        
+
         loadBooleanSetting(stmt, Settings.Secure.WIFI_ON,
                 R.bool.def_wifi_on);
         loadBooleanSetting(stmt, Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
@@ -660,25 +659,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         // Set the preferred network mode to 0 = Global, CDMA default
-        loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE, 
+        int type = SystemProperties.getInt("ro.telephony.default_network",
                 RILConstants.PREFERRED_NETWORK_MODE);
+        loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE, type);
 
         // Enable or disable Cell Broadcast SMS
         loadSetting(stmt, Settings.Secure.CDMA_CELL_BROADCAST_SMS,
                 RILConstants.CDMA_CELL_BROADCAST_SMS_DISABLED);
 
         // Set the preferred cdma subscription to 0 = Subscription from RUIM, when available
-        loadSetting(stmt, Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION, 
+        loadSetting(stmt, Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION,
                 RILConstants.PREFERRED_CDMA_SUBSCRIPTION);
 
         // Don't do this.  The SystemServer will initialize ADB_ENABLED from a
         // persistent system property instead.
         //loadSetting(stmt, Settings.Secure.ADB_ENABLED, 0);
-        
+
         // Allow mock locations default, based on build
-        loadSetting(stmt, Settings.Secure.ALLOW_MOCK_LOCATION, 
+        loadSetting(stmt, Settings.Secure.ALLOW_MOCK_LOCATION,
                 "1".equals(SystemProperties.get("ro.allow.mock.location")) ? 1 : 0);
-        
+
         stmt.close();
     }
 
@@ -687,24 +687,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         stmt.bindString(2, value.toString());
         stmt.execute();
     }
-    
+
     private void loadStringSetting(SQLiteStatement stmt, String key, int resid) {
         loadSetting(stmt, key, mContext.getResources().getString(resid));
     }
-    
+
     private void loadBooleanSetting(SQLiteStatement stmt, String key, int resid) {
         loadSetting(stmt, key,
                 mContext.getResources().getBoolean(resid) ? "1" : "0");
     }
-    
+
     private void loadIntegerSetting(SQLiteStatement stmt, String key, int resid) {
         loadSetting(stmt, key,
                 Integer.toString(mContext.getResources().getInteger(resid)));
     }
-    
+
     private void loadFractionSetting(SQLiteStatement stmt, String key, int resid, int base) {
         loadSetting(stmt, key,
                 Float.toString(mContext.getResources().getFraction(resid, base, base)));
     }
 }
-

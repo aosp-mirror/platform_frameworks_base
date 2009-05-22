@@ -96,8 +96,8 @@ public class WifiService extends IWifiManager.Stub {
     private int mScanLocksAcquired;
     private int mScanLocksReleased;
 
-    private final List<WifiMulticaster> mMulticasters =
-            new ArrayList<WifiMulticaster>();
+    private final List<Multicaster> mMulticasters =
+            new ArrayList<Multicaster>();
     private int mMulticastEnabled;
     private int mMulticastDisabled;
 
@@ -1449,10 +1449,12 @@ public class WifiService extends IWifiManager.Stub {
                     Settings.System.getInt(mContext.getContentResolver(),
                                            Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                Log.d(TAG, "ACTION_SCREEN_ON");
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                Log.d(TAG, "ACTION_SCREEN_OFF");
                 mScreenOff = true;
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
@@ -1461,12 +1463,20 @@ public class WifiService extends IWifiManager.Stub {
                  * or plugged in to AC).
                  */
                 if (!shouldWifiStayAwake(stayAwakeConditions, mPluggedType)) {
-                    long triggerTime = System.currentTimeMillis() + idleMillis;
-                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                    if (!mWifiStateTracker.hasIpAddress()) {
+                        // do not keep Wifi awake when screen is off if Wifi is not fully active
+                        mDeviceIdle = true;
+                        updateWifiState();
+                    } else {
+                        long triggerTime = System.currentTimeMillis() + idleMillis;
+                        Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
+                        mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                    }
                 }
                 /* we can return now -- there's nothing to do until we get the idle intent back */
                 return;
             } else if (action.equals(ACTION_DEVICE_IDLE)) {
+                Log.d(TAG, "got ACTION_DEVICE_IDLE");
                 mDeviceIdle = true;
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 /*
@@ -1477,9 +1487,11 @@ public class WifiService extends IWifiManager.Stub {
                  * the already-set timer.
                  */
                 int pluggedType = intent.getIntExtra("plugged", 0);
+                Log.d(TAG, "ACTION_BATTERY_CHANGED pluggedType: " + pluggedType);
                 if (mScreenOff && shouldWifiStayAwake(stayAwakeConditions, mPluggedType) &&
                         !shouldWifiStayAwake(stayAwakeConditions, pluggedType)) {
                     long triggerTime = System.currentTimeMillis() + idleMillis;
+                    Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                     mPluggedType = pluggedType;
                     return;
@@ -1732,7 +1744,7 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    private class WifiLock extends WifiDeathRecipient {
+    private class WifiLock extends DeathRecipient {
         WifiLock(int lockMode, String tag, IBinder binder) {
             super(lockMode, tag, binder);
         }
@@ -1875,13 +1887,13 @@ public class WifiService extends IWifiManager.Stub {
         return hadLock;
     }
 
-    private abstract class WifiDeathRecipient
+    private abstract class DeathRecipient
             implements IBinder.DeathRecipient {
         String mTag;
         int mMode;
         IBinder mBinder;
 
-        WifiDeathRecipient(int mode, String tag, IBinder binder) {
+        DeathRecipient(int mode, String tag, IBinder binder) {
             super();
             mTag = tag;
             mMode = mode;
@@ -1894,13 +1906,13 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    private class WifiMulticaster extends WifiDeathRecipient {
-        WifiMulticaster(String tag, IBinder binder) {
+    private class Multicaster extends DeathRecipient {
+        Multicaster(String tag, IBinder binder) {
             super(Binder.getCallingUid(), tag, binder);
         }
 
         public void binderDied() {
-            Log.e(TAG, "WifiMulticaster binderDied");
+            Log.e(TAG, "Multicaster binderDied");
             synchronized (mMulticasters) {
                 int i = mMulticasters.indexOf(this);
                 if (i != -1) {
@@ -1910,7 +1922,7 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         public String toString() {
-            return "WifiMulticaster{" + mTag + " binder=" + mBinder + "}";
+            return "Multicaster{" + mTag + " binder=" + mBinder + "}";
         }
 
         public int getUid() {
@@ -1918,12 +1930,12 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public void enableWifiMulticast(IBinder binder, String tag) {
+    public void enableMulticast(IBinder binder, String tag) {
         enforceChangePermission();
 
         synchronized (mMulticasters) {
             mMulticastEnabled++;
-            mMulticasters.add(new WifiMulticaster(tag, binder));
+            mMulticasters.add(new Multicaster(tag, binder));
             // Note that we could call stopPacketFiltering only when
             // our new size == 1 (first call), but this function won't
             // be called often and by making the stopPacket call each
@@ -1941,7 +1953,7 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public void disableWifiMulticast() {
+    public void disableMulticast() {
         enforceChangePermission();
 
         int uid = Binder.getCallingUid();
@@ -1949,7 +1961,7 @@ public class WifiService extends IWifiManager.Stub {
             mMulticastDisabled++;
             int size = mMulticasters.size();
             for (int i = size - 1; i >= 0; i--) {
-                WifiMulticaster m = mMulticasters.get(i);
+                Multicaster m = mMulticasters.get(i);
                 if ((m != null) && (m.getUid() == uid)) {
                     removeMulticasterLocked(i, uid);
                 }
@@ -1973,7 +1985,7 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public boolean isWifiMulticastEnabled() {
+    public boolean isMulticastEnabled() {
         enforceAccessPermission();
 
         synchronized (mMulticasters) {

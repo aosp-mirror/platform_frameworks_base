@@ -268,17 +268,19 @@ static String8 getAttribute(const ResXMLTree& tree, uint32_t attrRes, String8* o
     return str ? String8(str, len) : String8();
 }
 
-static int32_t getIntegerAttribute(const ResXMLTree& tree, uint32_t attrRes, String8* outError)
+static int32_t getIntegerAttribute(const ResXMLTree& tree, uint32_t attrRes,
+        String8* outError, int32_t defValue = -1)
 {
     ssize_t idx = indexOfAttribute(tree, attrRes);
     if (idx < 0) {
-        return -1;
+        return defValue;
     }
     Res_value value;
     if (tree.getAttributeValue(idx, &value) != NO_ERROR) {
-        if (value.dataType != Res_value::TYPE_INT_DEC) {
+        if (value.dataType < Res_value::TYPE_FIRST_INT
+                || value.dataType > Res_value::TYPE_LAST_INT) {
             if (outError != NULL) *outError = "attribute is not an integer value";
-            return -1;
+            return defValue;
         }
     }
     return value.data;
@@ -318,7 +320,15 @@ enum {
     VERSION_NAME_ATTR = 0x0101021c,
     LABEL_ATTR = 0x01010001,
     ICON_ATTR = 0x01010002,
-    MIN_SDK_VERSION_ATTR = 0x0101020c
+    MIN_SDK_VERSION_ATTR = 0x0101020c,
+    REQ_TOUCH_SCREEN_ATTR = 0x01010227,
+    REQ_KEYBOARD_TYPE_ATTR = 0x01010228,
+    REQ_HARD_KEYBOARD_ATTR = 0x01010229,
+    REQ_NAVIGATION_ATTR = 0x0101022a,
+    REQ_FIVE_WAY_NAV_ATTR = 0x01010232,
+    TARGET_SDK_VERSION_ATTR = 0x01010270,
+    TEST_ONLY_ATTR = 0x01010272,
+    DENSITY_ATTR = 0x0101026c,
 };
 
 const char *getComponentName(String8 &pkgName, String8 &componentName) {
@@ -357,7 +367,8 @@ int doDump(Bundle* bundle)
     const char* filename = bundle->getFileSpecEntry(1);
 
     AssetManager assets;
-    if (!assets.addAssetPath(String8(filename), NULL)) {
+    void* assetsCookie;
+    if (!assets.addAssetPath(String8(filename), &assetsCookie)) {
         fprintf(stderr, "ERROR: dump failed because assets could not be loaded\n");
         return 1;
     }
@@ -543,15 +554,77 @@ int doDump(Bundle* bundle)
                             goto bail;
                         }
                         printf("icon='%s'\n", icon.string());
-                    } else if (tag == "uses-sdk") {
-                        int32_t sdkVersion = getIntegerAttribute(tree, MIN_SDK_VERSION_ATTR, &error);
+                        int32_t testOnly = getIntegerAttribute(tree, TEST_ONLY_ATTR, &error, 0);
                         if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:minSdkVersion' attribute: %s\n", error.string());
+                            fprintf(stderr, "ERROR getting 'android:testOnly' attribute: %s\n", error.string());
                             goto bail;
                         }
-                        if (sdkVersion != -1) {
-                            printf("sdkVersion:'%d'\n", sdkVersion);
+                        if (testOnly != 0) {
+                            printf("testOnly='%d'\n", testOnly);
                         }
+                    } else if (tag == "uses-sdk") {
+                        int32_t code = getIntegerAttribute(tree, MIN_SDK_VERSION_ATTR, &error);
+                        if (error != "") {
+                            error = "";
+                            String8 name = getResolvedAttribute(&res, tree, MIN_SDK_VERSION_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:minSdkVersion' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
+                            printf("sdkVersion:'%s'\n", name.string());
+                        } else if (code != -1) {
+                            printf("sdkVersion:'%d'\n", code);
+                        }
+                        code = getIntegerAttribute(tree, TARGET_SDK_VERSION_ATTR, &error);
+                        if (error != "") {
+                            error = "";
+                            String8 name = getResolvedAttribute(&res, tree, TARGET_SDK_VERSION_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:targetSdkVersion' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
+                            printf("targetSdkVersion:'%s'\n", name.string());
+                        } else if (code != -1) {
+                            printf("targetSdkVersion:'%d'\n", code);
+                        }
+                    } else if (tag == "uses-configuration") {
+                        int32_t reqTouchScreen = getIntegerAttribute(tree,
+                                REQ_TOUCH_SCREEN_ATTR, NULL, 0);
+                        int32_t reqKeyboardType = getIntegerAttribute(tree,
+                                REQ_KEYBOARD_TYPE_ATTR, NULL, 0);
+                        int32_t reqHardKeyboard = getIntegerAttribute(tree,
+                                REQ_HARD_KEYBOARD_ATTR, NULL, 0);
+                        int32_t reqNavigation = getIntegerAttribute(tree,
+                                REQ_NAVIGATION_ATTR, NULL, 0);
+                        int32_t reqFiveWayNav = getIntegerAttribute(tree,
+                                REQ_FIVE_WAY_NAV_ATTR, NULL, 0);
+                        printf("uses-configuation:");
+                        if (reqTouchScreen != 0) {
+                            printf(" reqTouchScreen='%d'", reqTouchScreen);
+                        }
+                        if (reqKeyboardType != 0) {
+                            printf(" reqKeyboardType='%d'", reqKeyboardType);
+                        }
+                        if (reqHardKeyboard != 0) {
+                            printf(" reqHardKeyboard='%d'", reqHardKeyboard);
+                        }
+                        if (reqNavigation != 0) {
+                            printf(" reqNavigation='%d'", reqNavigation);
+                        }
+                        if (reqFiveWayNav != 0) {
+                            printf(" reqFiveWayNav='%d'", reqFiveWayNav);
+                        }
+                        printf("\n");
+                    } else if (tag == "supports-density") {
+                        int32_t dens = getIntegerAttribute(tree, DENSITY_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:density' attribute: %s\n",
+                                    error.string());
+                            goto bail;
+                        }
+                        printf("supports-density:'%d'\n", dens);
                     }
                 } else if (depth == 3 && withinApplication) {
                     withinActivity = false;
@@ -592,18 +665,18 @@ int doDump(Bundle* bundle)
                         }
                     }
                 } else if (depth == 5) {
-                        if (withinActivity) {
-                            if (tag == "action") {
-                                //printf("LOG: action tag\n");
-                                String8 action = getAttribute(tree, NAME_ATTR, &error);
-                                if (error != "") {
-                                    fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
-                                    goto bail;
-                                }
-                                if (action == "android.intent.action.MAIN") {
-                                    isMainActivity = true;
-                                    //printf("LOG: isMainActivity==true\n");
-                                }
+                    if (withinActivity) {
+                        if (tag == "action") {
+                            //printf("LOG: action tag\n");
+                            String8 action = getAttribute(tree, NAME_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
+                                goto bail;
+                            }
+                            if (action == "android.intent.action.MAIN") {
+                                isMainActivity = true;
+                                //printf("LOG: isMainActivity==true\n");
+                            }
                         } else if (tag == "category") {
                             String8 category = getAttribute(tree, NAME_ATTR, &error);
                             if (error != "") {
@@ -671,6 +744,17 @@ int doDump(Bundle* bundle)
                 printf(" '%s'", localeStr);
             }
             printf("\n");
+            AssetDir* dir = assets.openNonAssetDir(assetsCookie, "lib");
+            if (dir != NULL) {
+                if (dir->getFileCount() > 0) {
+                    printf("native-code:");
+                    for (size_t i=0; i<dir->getFileCount(); i++) {
+                        printf(" '%s'", dir->getFileName(i).string());
+                    }
+                    printf("\n");
+                }
+                delete dir;
+            }
         } else if (strcmp("configurations", option) == 0) {
             Vector<ResTable_config> configs;
             res.getConfigurations(&configs);

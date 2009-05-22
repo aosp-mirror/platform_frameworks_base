@@ -17,7 +17,7 @@
 #ifndef ANDROID_MEDIAPLAYER_H
 #define ANDROID_MEDIAPLAYER_H
 
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <ui/Surface.h>
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>

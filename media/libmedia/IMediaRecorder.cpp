@@ -18,7 +18,7 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "IMediaRecorder"
 #include <utils/Log.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <ui/ISurface.h>
 #include <ui/ICamera.h>
 #include <media/IMediaPlayerClient.h>

@@ -63,6 +63,7 @@ import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LatencyTimer;
 import android.os.LocalPowerManager;
 import android.os.Looper;
 import android.os.Message;
@@ -133,7 +134,9 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_REORDER = false;
     static final boolean SHOW_TRANSACTIONS = false;
-    
+    static final boolean MEASURE_LATENCY = false;
+    static private LatencyTimer lt;
+
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean BLUR = true;
     static final boolean localLOGV = DEBUG;
@@ -495,6 +498,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
     private WindowManagerService(Context context, PowerManagerService pm,
             boolean haveInputMethods) {
+        if (MEASURE_LATENCY) {
+            lt = new LatencyTimer(100, 1000);
+        }
+        
         mContext = context;
         mHaveInputMethods = haveInputMethods;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
@@ -1300,7 +1307,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     mKeyWaiter.handleNewWindowLocked(mCurrentFocus);
                 }
             }
-            
             if (localLOGV) Log.v(
                 TAG, "New client " + client.asBinder()
                 + ": window=" + win);
@@ -3715,7 +3721,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     private final void wakeupIfNeeded(WindowState targetWin, int eventType) {
         long curTime = SystemClock.uptimeMillis();
 
-        if (eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT) {
+        if (eventType == TOUCH_EVENT || eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT) {
             if (mLastTouchEventType == eventType &&
                     (curTime - mLastUserActivityCallTime) < MIN_TIME_BETWEEN_USERACTIVITIES) {
                 return;
@@ -3775,9 +3781,17 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         if (DEBUG_INPUT || WindowManagerPolicy.WATCH_POINTER) Log.v(TAG,
                 "dispatchPointer " + ev);
 
+        if (MEASURE_LATENCY) {
+            lt.sample("3 Wait for last dispatch ", System.nanoTime() - qev.whenNano);
+        }
+
         Object targetObj = mKeyWaiter.waitForNextEventTarget(null, qev,
                 ev, true, false);
         
+        if (MEASURE_LATENCY) {
+            lt.sample("3 Last dispatch finished ", System.nanoTime() - qev.whenNano);
+        }
+
         int action = ev.getAction();
         
         if (action == MotionEvent.ACTION_UP) {
@@ -3814,6 +3828,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         WindowState target = (WindowState)targetObj;
         
         final long eventTime = ev.getEventTime();
+        final long eventTimeNano = ev.getEventTimeNano();
         
         //Log.i(TAG, "Sending " + ev + " to " + target);
 
@@ -3832,6 +3847,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             }
         }
         
+        if (MEASURE_LATENCY) {
+            lt.sample("4 in dispatchPointer     ", System.nanoTime() - eventTimeNano);
+        }
+
         if ((target.mAttrs.flags & 
                         WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES) != 0) {
             //target wants to ignore fat touch events
@@ -3914,6 +3933,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             }
         }
 
+        if (MEASURE_LATENCY) {
+            lt.sample("5 in dispatchPointer     ", System.nanoTime() - eventTimeNano);
+        }
+
         synchronized(mWindowMap) {
             if (qev != null && action == MotionEvent.ACTION_MOVE) {
                 mKeyWaiter.bindTargetWindowLocked(target,
@@ -3951,7 +3974,16 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (DEBUG_INPUT || DEBUG_FOCUS || WindowManagerPolicy.WATCH_POINTER) {
                 Log.v(TAG, "Delivering pointer " + qev + " to " + target);
             }
+            
+            if (MEASURE_LATENCY) {
+                lt.sample("6 before svr->client ipc ", System.nanoTime() - eventTimeNano);
+            }
+
             target.mClient.dispatchPointer(ev, eventTime);
+
+            if (MEASURE_LATENCY) {
+                lt.sample("7 after  svr->client ipc ", System.nanoTime() - eventTimeNano);
+            }
             return true;
         } catch (android.os.RemoteException e) {
             Log.i(TAG, "WINDOW DIED during motion dispatch: " + target);
@@ -5072,7 +5104,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 }
             }
         }
-    };
+    }
 
     public boolean detectSafeMode() {
         mSafeMode = mPolicy.detectSafeMode();
@@ -5137,9 +5169,13 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 if (DEBUG_INPUT && ev != null) Log.v(
                         TAG, "Event: type=" + ev.classType + " data=" + ev.event);
 
+                if (MEASURE_LATENCY) {
+                    lt.sample("2 got event              ", System.nanoTime() - ev.whenNano);
+                }
+
                 try {
                     if (ev != null) {
-                        curTime = ev.when;
+                        curTime = SystemClock.uptimeMillis();
                         int eventType;
                         if (ev.classType == RawInputEvent.CLASS_TOUCHSCREEN) {
                             eventType = eventType((MotionEvent)ev.event);
@@ -5150,17 +5186,29 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                             eventType = LocalPowerManager.OTHER_EVENT;
                         }
                         try {
-                            long now = SystemClock.uptimeMillis();
-
-                            if ((now - mLastBatteryStatsCallTime)
+                            if ((curTime - mLastBatteryStatsCallTime)
                                     >= MIN_TIME_BETWEEN_USERACTIVITIES) {
-                                mLastBatteryStatsCallTime = now;
+                                mLastBatteryStatsCallTime = curTime;
                                 mBatteryStats.noteInputEvent();
                             }
                         } catch (RemoteException e) {
                             // Ignore
                         }
-                        mPowerManager.userActivity(curTime, false, eventType, false);
+
+                        if (eventType != TOUCH_EVENT
+                                && eventType != LONG_TOUCH_EVENT
+                                && eventType != CHEEK_EVENT) {
+                            mPowerManager.userActivity(curTime, false,
+                                    eventType, false);
+                        } else if (mLastTouchEventType != eventType
+                                || (curTime - mLastUserActivityCallTime)
+                                >= MIN_TIME_BETWEEN_USERACTIVITIES) {
+                            mLastUserActivityCallTime = curTime;
+                            mLastTouchEventType = eventType;
+                            mPowerManager.userActivity(curTime, false,
+                                    eventType, false);
+                        }
+
                         switch (ev.classType) {
                             case RawInputEvent.CLASS_KEYBOARD:
                                 KeyEvent ke = (KeyEvent)ev.event;
@@ -7732,7 +7780,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         int i;
 
         // FIRST LOOP: Perform a layout, if needed.
-        
         performLayoutLockedInner();
         
         if (mFxSession == null) {
@@ -7752,7 +7799,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         // SECOND LOOP: Execute animations and update visibility of windows.
-        
         boolean orientationChangeComplete = true;
         Session holdScreen = null;
         float screenBrightness = -1;

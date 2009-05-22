@@ -25,7 +25,7 @@
 #include <utils/threads.h>
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
-#include <utils/MemoryDealer.h>
+#include <binder/MemoryDealer.h>
 #include <utils/RefBase.h>
 
 #include <ui/PixelFormat.h>
@@ -36,7 +36,6 @@
 #include <private/ui/LayerState.h>
 
 #include "Barrier.h"
-#include "BootAnimation.h"
 #include "Layer.h"
 #include "Tokenizer.h"
 
@@ -318,7 +317,6 @@ private:
                 sp<IMemory>                 mServerCblkMemory;
                 surface_flinger_cblk_t*     mServerCblk;
                 GLuint                      mWormholeTexName;
-                sp<BootAnimation>           mBootAnimation;
                 nsecs_t                     mBootTime;
                 
                 // Can only accessed from the main thread, these members
@@ -337,7 +335,6 @@ private:
                 // don't use a lock for these, we don't care
                 int                         mDebugRegion;
                 int                         mDebugBackground;
-                int                         mDebugNoBootAnimation;
 
                 // these are thread safe
     mutable     Barrier                     mReadyToRunBarrier;

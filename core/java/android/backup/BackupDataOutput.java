@@ -22,24 +22,30 @@ import java.io.FileDescriptor;
 
 /** @hide */
 public class BackupDataOutput {
-    /* package */ FileDescriptor fd;
+    int mBackupWriter;
+    private Context mContext;
 
     public static final int OP_UPDATE = 1;
     public static final int OP_DELETE = 2;
 
     public BackupDataOutput(Context context, FileDescriptor fd) {
-        this.fd = fd;
+        mContext = context;
+        if (fd == null) throw new NullPointerException();
+        mBackupWriter = ctor(fd);
+        if (mBackupWriter == 0) {
+            throw new RuntimeException("Native initialization failed with fd=" + fd);
+        }
     }
 
-    public void close() {
-        // do we close the fd?
+    protected void finalize() throws Throwable {
+        try {
+            dtor(mBackupWriter);
+        } finally {
+            super.finalize();
+        }
     }
-    public native void flush();
-    public native void write(byte[] buffer);
-    public native void write(int oneByte);
-    public native void write(byte[] buffer, int offset, int count);
-
-    public native void writeOperation(int op);
-    public native void writeKey(String key);
+        
+    private native static int ctor(FileDescriptor fd);
+    private native static void dtor(int mBackupWriter);
 }
 

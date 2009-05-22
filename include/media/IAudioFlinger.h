@@ -23,7 +23,7 @@
 
 #include <utils/RefBase.h>
 #include <utils/Errors.h>
-#include <utils/IInterface.h>
+#include <binder/IInterface.h>
 #include <media/IAudioTrack.h>
 #include <media/IAudioRecord.h>
 #include <media/IAudioFlingerClient.h>

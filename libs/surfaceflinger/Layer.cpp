@@ -24,7 +24,6 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
-#include <utils/IMemory.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/Surface.h>

@@ -20,7 +20,6 @@
 #include <private/utils/Static.h>
 
 #include <utils/BufferedTextOutput.h>
-#include <utils/IPCThreadState.h>
 #include <utils/Log.h>
 
 namespace android {
@@ -86,35 +85,5 @@ static FdTextOutput gStderrTextOutput(STDERR_FILENO);
 TextOutput& alog(gLogTextOutput);
 TextOutput& aout(gStdoutTextOutput);
 TextOutput& aerr(gStderrTextOutput);
-
-#ifndef LIBUTILS_NATIVE
-
-// ------------ ProcessState.cpp
-
-Mutex gProcessMutex;
-sp<ProcessState> gProcess;
-
-class LibUtilsIPCtStatics
-{
-public:
-    LibUtilsIPCtStatics()
-    {
-    }
-    
-    ~LibUtilsIPCtStatics()
-    {
-        IPCThreadState::shutdown();
-    }
-};
-
-static LibUtilsIPCtStatics gIPCStatics;
-
-// ------------ ServiceManager.cpp
-
-Mutex gDefaultServiceManagerLock;
-sp<IServiceManager> gDefaultServiceManager;
-sp<IPermissionController> gPermissionController;
-
-#endif
 
 }   // namespace android

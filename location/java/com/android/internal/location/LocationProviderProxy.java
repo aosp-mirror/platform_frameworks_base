@@ -219,6 +219,14 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
         }
     }
 
+    public void updateLocation(Location location) {
+        try {
+            mProvider.updateLocation(location);
+        } catch (RemoteException e) {
+            Log.e(TAG, "updateLocation failed", e);
+        }
+    }
+
     public boolean sendExtraCommand(String command, Bundle extras) {
         try {
             return mProvider.sendExtraCommand(command, extras);

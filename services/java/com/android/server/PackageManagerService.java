@@ -1270,8 +1270,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             if (DEBUG_PREFERRED) intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
             List<PreferredActivity> prefs =
-                    mSettings.mPreferredActivities.queryIntent(null,
-                            intent, resolvedType,
+                    mSettings.mPreferredActivities.queryIntent(intent, resolvedType,
                             (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
             if (prefs != null && prefs.size() > 0) {
                 // First figure out how good the original match set is.
@@ -1348,7 +1347,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         synchronized (mPackages) {
             return (List<ResolveInfo>)mActivities.
-                queryIntent(null, intent, resolvedType, flags);
+                queryIntent(intent, resolvedType, flags);
         }
     }
 
@@ -1517,7 +1516,7 @@ class PackageManagerService extends IPackageManager.Stub {
             String resolvedType, int flags) {
         synchronized (mPackages) {
             return (List<ResolveInfo>)mReceivers.
-                queryIntent(null, intent, resolvedType, flags);
+                queryIntent(intent, resolvedType, flags);
         }
     }
 
@@ -1550,8 +1549,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         synchronized (mPackages) {
-            return (List<ResolveInfo>)mServices.
-                queryIntent(null, intent, resolvedType, flags);
+            return (List<ResolveInfo>)mServices.queryIntent(intent, resolvedType, flags);
         }
     }
     
@@ -2831,6 +2829,21 @@ class PackageManagerService extends IPackageManager.Stub {
                         // we can't add any new permissions to it.
                         if (!gp.loadedPermissions.contains(perm)) {
                             allowed = false;
+                            // Except...  if this is a permission that was added
+                            // to the platform (note: need to only do this when
+                            // updating the platform).
+                            final int NP = PackageParser.NEW_PERMISSIONS.length;
+                            for (int ip=0; ip<NP; ip++) {
+                                final PackageParser.NewPermissionInfo npi
+                                        = PackageParser.NEW_PERMISSIONS[ip];
+                                if (npi.name.equals(perm)
+                                        && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
+                                    allowed = true;
+                                    Log.i(TAG, "Auto-granting WRITE_SDCARD to old pkg "
+                                            + pkg.packageName);
+                                    break;
+                                }
+                            }
                         }
                     }
                     if (allowed) {
@@ -2869,17 +2882,14 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
-        public List queryIntent(ContentResolver resolver, Intent intent,
-                String resolvedType, boolean defaultOnly) {
+        public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(resolver, intent, resolvedType, defaultOnly);
+            return super.queryIntent(intent, resolvedType, defaultOnly);
         }
 
-        public List queryIntent(ContentResolver resolver, Intent intent,
-                String resolvedType, int flags) {
+        public List queryIntent(Intent intent, String resolvedType, int flags) {
             mFlags = flags;
-            return super.queryIntent(
-                resolver, intent, resolvedType,
+            return super.queryIntent(intent, resolvedType,
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
         }
 
@@ -2893,8 +2903,13 @@ class PackageManagerService extends IPackageManager.Stub {
             int N = packageActivities.size();
             ArrayList<ArrayList<PackageParser.ActivityIntentInfo>> listCut =
                 new ArrayList<ArrayList<PackageParser.ActivityIntentInfo>>(N);
+
+            ArrayList<PackageParser.ActivityIntentInfo> intentFilters;
             for (int i = 0; i < N; ++i) {
-                listCut.add(packageActivities.get(i).intents);
+                intentFilters = packageActivities.get(i).intents;
+                if (intentFilters != null && intentFilters.size() > 0) {
+                    listCut.add(intentFilters);
+                }
             }
             return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut);
         }
@@ -3013,17 +3028,14 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private final class ServiceIntentResolver
             extends IntentResolver<PackageParser.ServiceIntentInfo, ResolveInfo> {
-        public List queryIntent(ContentResolver resolver, Intent intent,
-                String resolvedType, boolean defaultOnly) {
+        public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(resolver, intent, resolvedType, defaultOnly);
+            return super.queryIntent(intent, resolvedType, defaultOnly);
         }
 
-        public List queryIntent(ContentResolver resolver, Intent intent,
-                String resolvedType, int flags) {
+        public List queryIntent(Intent intent, String resolvedType, int flags) {
             mFlags = flags;
-            return super.queryIntent(
-                resolver, intent, resolvedType,
+            return super.queryIntent(intent, resolvedType,
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
         }
 
@@ -3589,7 +3601,9 @@ class PackageManagerService extends IPackageManager.Stub {
         } else {
             // Re installation failed. Restore old information
             // Remove new pkg information
-            removePackageLI(newPackage, true);
+            if (newPackage != null) {
+                removePackageLI(newPackage, true);
+            }
             // Add back the old system package
             scanPackageLI(oldPkgSetting.codePath, oldPkgSetting.codePath, 
                     oldPkgSetting.resourcePath,

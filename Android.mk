@@ -138,7 +138,6 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \
-	location/java/android/location/ILocationCollector.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
 	location/java/android/location/ILocationProvider.aidl \

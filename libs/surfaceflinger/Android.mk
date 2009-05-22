@@ -5,7 +5,6 @@ LOCAL_SRC_FILES:= \
     clz.cpp.arm \
     DisplayHardware/DisplayHardware.cpp \
     DisplayHardware/DisplayHardwareBase.cpp \
-    BootAnimation.cpp \
     BlurFilter.cpp.arm \
     BufferAllocator.cpp \
     Layer.cpp \
@@ -32,6 +31,7 @@ endif
 LOCAL_SHARED_LIBRARIES := \
 	libhardware \
 	libutils \
+	libbinder \
 	libcutils \
 	libui \
 	libcorecg \

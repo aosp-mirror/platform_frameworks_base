@@ -71,6 +71,7 @@
                 android:layout_weight="1.0"
                 android:paddingLeft="8dip"
                 android:paddingRight="6dip"
+                android:drawablePadding="2dip"
                 android:singleLine="true"
                 android:inputType="text|textAutoComplete"
                 android:dropDownWidth="fill_parent"

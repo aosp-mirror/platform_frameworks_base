@@ -20,6 +20,7 @@ endif
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
+	libbinder \
     libvorbisidec \
     libsonivox \
     libopencore_player \

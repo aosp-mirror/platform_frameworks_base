@@ -20,7 +20,7 @@
 
 #include <utils/Errors.h>  // for status_t
 #include <utils/threads.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <media/IMediaMetadataRetriever.h>
 
 namespace android {

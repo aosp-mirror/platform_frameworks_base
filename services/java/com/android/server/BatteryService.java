@@ -271,6 +271,7 @@ class BatteryService extends Binder {
              * - is not plugged and battery level crosses the WARNING boundary (becomes < 15).
              */
             final boolean sendBatteryLow = !plugged
+                && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
                 && mBatteryLevel < BATTERY_LEVEL_WARNING
                 && (oldPlugged || mLastBatteryLevel >= BATTERY_LEVEL_WARNING);
             

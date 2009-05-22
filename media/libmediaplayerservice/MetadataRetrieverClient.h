@@ -20,7 +20,7 @@
 
 #include <utils.h>
 #include <utils/KeyedVector.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 
 #include <media/MediaMetadataRetrieverInterface.h>
 

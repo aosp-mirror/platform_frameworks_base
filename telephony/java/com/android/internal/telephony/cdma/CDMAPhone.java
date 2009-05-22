@@ -16,7 +16,9 @@
 
 package com.android.internal.telephony.cdma;
 
+import android.app.ActivityManagerNative;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
@@ -28,6 +30,7 @@ import android.provider.Settings;
 import android.telephony.CellLocation;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -48,6 +51,8 @@ import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.PhoneSubInfo;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,8 +76,13 @@ public class CDMAPhone extends PhoneBase {
     RuimPhoneBookInterfaceManager mRuimPhoneBookInterfaceManager;
     RuimSmsInterfaceManager mRuimSmsInterfaceManager;
     PhoneSubInfo mSubInfo;
+    EriManager mEriManager;
 
-    protected RegistrantList mNvLoadedRegistrants = new RegistrantList();
+    // mNvLoadedRegistrants are informed after the EVENT_NV_READY
+    private RegistrantList mNvLoadedRegistrants = new RegistrantList();
+
+    // mEriFileLoadedRegistrants are informed after the ERI text has been loaded
+    private RegistrantList mEriFileLoadedRegistrants = new RegistrantList();
     private String mEsn;
     private String mMeid;
 
@@ -102,6 +112,7 @@ public class CDMAPhone extends PhoneBase {
         mRuimPhoneBookInterfaceManager = new RuimPhoneBookInterfaceManager(this);
         mRuimSmsInterfaceManager = new RuimSmsInterfaceManager(this);
         mSubInfo = new PhoneSubInfo(this);
+        mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
 
         mCM.registerForAvailable(h, EVENT_RADIO_AVAILABLE, null);
         mRuimRecords.registerForRecordsLoaded(h, EVENT_RUIM_RECORDS_LOADED, null);
@@ -111,10 +122,13 @@ public class CDMAPhone extends PhoneBase {
         mCM.setOnCallRing(h, EVENT_CALL_RING, null);
         mSST.registerForNetworkAttach(h, EVENT_REGISTERED_TO_NETWORK, null);
         mCM.registerForNVReady(h, EVENT_NV_READY, null);
+        mCM.registerForCdmaCallWaiting(h,EVENT_CDMA_CALL_WAITING,null);
+        mCM.setEmergencyCallbackMode(h, EVENT_EMERGENCY_CALLBACK_MODE, null);
+
 
         //Change the system setting
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.CDMA_PHONE);
+        SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
+                new Integer(RILConstants.CDMA_PHONE).toString());
     }
 
     public void dispose() {
@@ -129,6 +143,7 @@ public class CDMAPhone extends PhoneBase {
             mSST.unregisterForNetworkAttach(h); //EVENT_REGISTERED_TO_NETWORK
             mCM.unSetOnSuppServiceNotification(h);
             mCM.unSetOnCallRing(h);
+            mCM.unregisterForCdmaCallWaiting(h);
 
             //Force all referenced classes to unregister their former registered events
             mCT.dispose();
@@ -141,6 +156,7 @@ public class CDMAPhone extends PhoneBase {
             mRuimPhoneBookInterfaceManager.dispose();
             mRuimSmsInterfaceManager.dispose();
             mSubInfo.dispose();
+            mEriManager.dispose();
         }
     }
 
@@ -155,6 +171,7 @@ public class CDMAPhone extends PhoneBase {
             this.mDataConnection = null;
             this.mCT = null;
             this.mSST = null;
+            this.mEriManager = null;
     }
 
     protected void finalize() {
@@ -229,6 +246,10 @@ public class CDMAPhone extends PhoneBase {
                 case DATAINANDOUT:
                     ret = DataActivityState.DATAINANDOUT;
                 break;
+
+                case DORMANT:
+                    ret = DataActivityState.DORMANT;
+                break;
             }
         }
         return ret;
@@ -261,9 +282,8 @@ public class CDMAPhone extends PhoneBase {
         }
     }
 
-
-    public int getSignalStrengthASU() {
-        return mSST.rssi == 99 ? -1 : mSST.rssi;
+    public SignalStrength getSignalStrength() {
+        return mSST.mSignalStrength;
     }
 
     public boolean
@@ -348,6 +368,10 @@ public class CDMAPhone extends PhoneBase {
 
     public String getLine1Number() {
         return mRuimRecords.getMdnNumber();
+    }
+
+    public String getMin() {
+        return mRuimRecords.getMin();
     }
 
     public void getCallWaiting(Message onComplete) {
@@ -476,10 +500,10 @@ public class CDMAPhone extends PhoneBase {
 
             ret = DataState.CONNECTED;
         } else if (mSST == null) {
-            // Radio Technology Change is ongoning, dispose() and removeReferences() have
-            // already been called
+             // Radio Technology Change is ongoning, dispose() and removeReferences() have
+             // already been called
 
-            ret = DataState.DISCONNECTED;
+             ret = DataState.DISCONNECTED;
         } else if (mSST.getCurrentCdmaDataConnectionState()
                 == ServiceState.RADIO_TECHNOLOGY_UNKNOWN) {
             // If we're out of service, open TCP sockets may still work
@@ -540,6 +564,21 @@ public class CDMAPhone extends PhoneBase {
     public void stopDtmf() {
         mCM.stopDtmf(null);
     }
+
+    public void sendBurstDtmf(String dtmfString) {
+        boolean check = true;
+        for (int itr = 0;itr < dtmfString.length(); itr++) {
+            if (!PhoneNumberUtils.is12Key(dtmfString.charAt(itr))) {
+                Log.e(LOG_TAG,
+                        "sendDtmf called with invalid character '" + dtmfString.charAt(itr)+ "'");
+                check = false;
+                break;
+            }
+        }
+        if ((mCT.state ==  Phone.State.OFFHOOK)&&(check)) {
+            mCM.sendBurstDtmf(dtmfString, null);
+        }
+     }
 
     public void getAvailableNetworks(Message response) {
         Log.e(LOG_TAG, "getAvailableNetworks: not possible in CDMA");
@@ -767,6 +806,12 @@ public class CDMAPhone extends PhoneBase {
                 }
                 break;
 
+                case EVENT_EMERGENCY_CALLBACK_MODE: {
+                    Log.d(LOG_TAG, "Event EVENT_EMERGENCY_CALLBACK_MODE Received");
+                    Intent intent =
+                        new Intent(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_ENTERED);
+                    ActivityManagerNative.broadcastStickyIntent(intent, null);
+                }
                 case EVENT_RUIM_RECORDS_LOADED:{
                     Log.d(LOG_TAG, "Event EVENT_RUIM_RECORDS_LOADED Received");
                 }
@@ -800,7 +845,18 @@ public class CDMAPhone extends PhoneBase {
                 case EVENT_NV_READY:{
                     Log.d(LOG_TAG, "Event EVENT_NV_READY Received");
                     //Inform the Service State Tracker
+                    mEriManager.loadEriFile();
                     mNvLoadedRegistrants.notifyRegistrants();
+                    if(mEriManager.isEriFileLoaded()) {
+                        // when the ERI file is loaded
+                        Log.d(LOG_TAG, "ERI read, notify registrants");
+                        mEriFileLoadedRegistrants.notifyRegistrants();
+                    }
+                }
+                break;
+
+                case EVENT_CDMA_CALL_WAITING:{
+                    Log.d(LOG_TAG, "Event EVENT_CDMA_CALL_WAITING Received");
                 }
                 break;
 
@@ -841,6 +897,15 @@ public class CDMAPhone extends PhoneBase {
         mNvLoadedRegistrants.remove(h);
     }
 
+    public void registerForEriFileLoaded(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mEriFileLoadedRegistrants.add(r);
+    }
+
+    public void unregisterForEriFileLoaded(Handler h) {
+        mEriFileLoadedRegistrants.remove(h);
+    }
+
      // override for allowing access from other classes of this package
      /**
       * {@inheritDoc}
@@ -866,15 +931,22 @@ public class CDMAPhone extends PhoneBase {
      /**
       * Set the TTY mode of the CDMAPhone
       */
-     public void setTTYModeEnabled(boolean enable, Message onComplete) {
-         this.mCM.setTTYModeEnabled(enable, onComplete);
+     public void setTTYMode(int ttyMode, Message onComplete) {
+         this.mCM.setTTYMode(ttyMode, onComplete);
 }
 
      /**
       * Queries the TTY mode of the CDMAPhone
       */
-     public void queryTTYModeEnabled(Message onComplete) {
-         this.mCM.queryTTYModeEnabled(onComplete);
+     public void queryTTYMode(Message onComplete) {
+         this.mCM.queryTTYMode(onComplete);
+     }
+
+     /**
+      * Sends Exit EmergencyCallbackMode Exit request on CDMAPhone
+      */
+     public void exitEmergencyCallbackMode(Message onComplete) {
+         this.mCM.exitEmergencyCallbackMode(onComplete);
      }
 
      /**
@@ -908,4 +980,244 @@ public class CDMAPhone extends PhoneBase {
      public void setCellBroadcastSmsConfig(int[] configValuesArray, Message response){
          mSMS.setCellBroadcastConfig(configValuesArray, response);
      }
+
+     public void registerForOtaSessionStatus(Handler h, int what, Object obj){
+         mCM.registerForOtaSessionStatus(h, what, obj);
+     }
+
+     public void unregisterForOtaSessionStatus(Handler h){
+         mCM.unregisterForOtaSessionStatus(h);
+     }
+
+/**
+ * TODO(Teleca): The code in getCdmaEriIconIndex, getCdmaEriIconMode & getCdmaEriText share a
+ * lot of logic, refactor.
+ */
+    /**
+     * Returns the CDMA ERI icon index to display,
+     * it returns 1, EriInfo.ROAMING_INDICATOR_OFF, in case there is no icon to display
+     */
+    @Override
+    public int getCdmaEriIconIndex() {
+        int roamInd = getServiceState().getCdmaRoamingIndicator();
+        int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
+        int ret = -1;
+
+        switch (roamInd) {
+            // Handling the standard roaming indicator (non-ERI)
+            case EriInfo.ROAMING_INDICATOR_ON:
+            case EriInfo.ROAMING_INDICATOR_OFF:
+            case EriInfo.ROAMING_INDICATOR_FLASH:
+                Log.d(LOG_TAG, "Using Standard Roaming Indicator (non-ERI): " + roamInd);
+                ret = roamInd;
+            break;
+
+            // Handling the Enhanced Roaming Indicator (roamInd > 2)
+            default:
+                if (!mEriManager.isEriFileLoaded()) {
+                    /**
+                     * TODO(Teleca): What is going on here? Conditionals on the variable being
+                     * switched? Seems unreasonably confusing... Especially since the above comment
+                     * indicates this should always be true... If we used explicit returns, the
+                     * switch could be used to filter specific cases for early bail, and the rest
+                     * could then be dealt with outside the switch...
+                     */
+
+                    if(defRoamInd > 2) {
+                        Log.d(LOG_TAG, "ERI File not loaded, using: "
+                                + EriInfo.ROAMING_INDICATOR_FLASH);
+                        ret = EriInfo.ROAMING_INDICATOR_FLASH;
+                    } else {
+                        Log.d(LOG_TAG, "ERI File not loaded, using: " + defRoamInd);
+                        ret = defRoamInd;
+                    }
+                } else if (mEriManager.getEriInfo(roamInd) == null) {
+                    if(mEriManager.getEriInfo(defRoamInd) == null) {
+/**
+ * TODO(Teleca): Why the redundant code? Especially since it results in this very strange looking
+ * almost-identical conditional... How about calling each version of mEriManager.getEriInfo just
+ * once, and conditionalizing on the results..
+ */
+                        Log.e(LOG_TAG, "Error: ERI entry: " + roamInd
+                                + " not present, defRoamInd: " + defRoamInd
+                                + " not defined in ERI file");
+                        ret = EriInfo.ROAMING_INDICATOR_ON;
+                    } else {
+                        int iconIndex = mEriManager.getEriInfo(defRoamInd).mIconIndex;
+                        Log.d(LOG_TAG, "ERI entry " + roamInd + " not present, using icon: "
+                                + iconIndex);
+                        ret = iconIndex;
+                    }
+                } else {
+                    int iconIndex = mEriManager.getEriInfo(roamInd).mIconIndex;
+                    Log.d(LOG_TAG, "Using ERI icon: " + iconIndex);
+                    ret = iconIndex;
+                }
+            break;
+        }
+        return ret;
+    }
+
+    /**
+     * Returns the CDMA ERI icon mode,
+     * 0 - ON
+     * 1 - FLASHING
+     */
+    @Override
+    public int getCdmaEriIconMode() {
+        int roamInd = getServiceState().getCdmaRoamingIndicator();
+        int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
+        int ret = -1;
+
+        switch (roamInd) {
+            // Handling the standard roaming indicator (non-ERI)
+            case EriInfo.ROAMING_INDICATOR_ON:
+            case EriInfo.ROAMING_INDICATOR_OFF:
+                Log.d(LOG_TAG, "Using Standard Roaming Indicator (non-ERI): normal");
+                ret = EriInfo.ROAMING_ICON_MODE_NORMAL;
+            break;
+
+            case EriInfo.ROAMING_INDICATOR_FLASH:
+                Log.d(LOG_TAG, "Using Standard Roaming Indicator (non-ERI): flashing");
+                ret = EriInfo.ROAMING_ICON_MODE_FLASH;
+            break;
+
+            // Handling the Enhanced Roaming Indicator (roamInd > 2)
+            default:
+                if (!mEriManager.isEriFileLoaded()) {
+                    if(defRoamInd > 2) {
+                        Log.d(LOG_TAG, "ERI File not loaded, defRoamInd > 2, flashing");
+                        ret = EriInfo.ROAMING_ICON_MODE_FLASH;
+                    } else {
+                        switch (defRoamInd) {
+                            // Handling the standard roaming indicator (non-ERI)
+                            case EriInfo.ROAMING_INDICATOR_ON:
+                            case EriInfo.ROAMING_INDICATOR_OFF:
+                                Log.d(LOG_TAG, "ERI File not loaded, normal");
+                                ret = EriInfo.ROAMING_ICON_MODE_NORMAL;
+                            break;
+
+                            case EriInfo.ROAMING_INDICATOR_FLASH:
+                                Log.d(LOG_TAG, "ERI File not loaded, normal");
+                                ret = EriInfo.ROAMING_ICON_MODE_FLASH;
+                            break;
+                        }
+                    }
+                } else if (mEriManager.getEriInfo(roamInd) == null) {
+                    if(mEriManager.getEriInfo(defRoamInd) == null) {
+                        Log.e(LOG_TAG, "Error: defRoamInd not defined in ERI file, normal");
+                        ret =  EriInfo.ROAMING_ICON_MODE_NORMAL;
+                    } else {
+                        int mode = mEriManager.getEriInfo(defRoamInd).mIconMode;
+                        Log.d(LOG_TAG, "ERI entry " + roamInd + " not present, icon  mode: "
+                                + mode);
+                        ret = mode;
+                    }
+                } else {
+                    int mode = mEriManager.getEriInfo(roamInd).mIconMode;
+                    Log.d(LOG_TAG, "Using ERI icon mode: " + mode);
+                    ret = mode;
+                }
+            break;
+        }
+        return ret;
+    }
+
+    /**
+     * Returns the CDMA ERI text,
+     */
+    @Override
+    public String getCdmaEriText() {
+        int roamInd = getServiceState().getCdmaRoamingIndicator();
+        int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
+        String ret = "ERI text";
+
+        switch (roamInd) {
+            // Handling the standard roaming indicator (non-ERI)
+            case EriInfo.ROAMING_INDICATOR_ON:
+                ret = EriInfo.ROAMING_TEXT_0;
+            break;
+            case EriInfo.ROAMING_INDICATOR_OFF:
+                ret = EriInfo.ROAMING_TEXT_1;
+            break;
+            case EriInfo.ROAMING_INDICATOR_FLASH:
+                ret = EriInfo.ROAMING_TEXT_2;
+            break;
+
+            // Handling the standard ERI
+            case 3:
+                ret = EriInfo.ROAMING_TEXT_3;
+            break;
+            case 4:
+                ret = EriInfo.ROAMING_TEXT_4;
+            break;
+            case 5:
+                ret = EriInfo.ROAMING_TEXT_5;
+            break;
+            case 6:
+                ret = EriInfo.ROAMING_TEXT_6;
+            break;
+            case 7:
+                ret = EriInfo.ROAMING_TEXT_7;
+            break;
+            case 8:
+                ret = EriInfo.ROAMING_TEXT_8;
+            break;
+            case 9:
+                ret = EriInfo.ROAMING_TEXT_9;
+            break;
+            case 10:
+                ret = EriInfo.ROAMING_TEXT_10;
+            break;
+            case 11:
+                ret = EriInfo.ROAMING_TEXT_11;
+            break;
+            case 12:
+                ret = EriInfo.ROAMING_TEXT_12;
+            break;
+
+            // Handling the non standard Enhanced Roaming Indicator (roamInd > 63)
+            default:
+                if (!mEriManager.isEriFileLoaded()) {
+                    if(defRoamInd > 2) {
+                        Log.d(LOG_TAG, "ERI File not loaded, defRoamInd > 2, " +
+                                EriInfo.ROAMING_TEXT_2);
+                        ret = EriInfo.ROAMING_TEXT_2;
+                    } else {
+                        switch (defRoamInd) {
+                            // Handling the standard roaming indicator (non-ERI)
+                            case EriInfo.ROAMING_INDICATOR_ON:
+                                Log.d(LOG_TAG, "ERI File not loaded, " + EriInfo.ROAMING_TEXT_0);
+                                ret = EriInfo.ROAMING_TEXT_0;
+                            break;
+                            case EriInfo.ROAMING_INDICATOR_OFF:
+                                Log.d(LOG_TAG, "ERI File not loaded, " + EriInfo.ROAMING_TEXT_1);
+                                ret = EriInfo.ROAMING_TEXT_1;
+                            break;
+                            case EriInfo.ROAMING_INDICATOR_FLASH:
+                                Log.d(LOG_TAG, "ERI File not loaded, " + EriInfo.ROAMING_TEXT_2);
+                                ret = EriInfo.ROAMING_TEXT_2;
+                            break;
+                        }
+                    }
+                } else if (mEriManager.getEriInfo(roamInd) == null) {
+                    if(mEriManager.getEriInfo(defRoamInd) == null) {
+                        Log.e(LOG_TAG, "Error: defRoamInd not defined in ERI file, "
+                                + EriInfo.ROAMING_TEXT_0);
+                        ret = EriInfo.ROAMING_TEXT_0;
+                    } else {
+                        String eriText = mEriManager.getEriInfo(defRoamInd).mEriText;
+                        Log.d(LOG_TAG, "ERI entry " + roamInd + " not present, eri text: "
+                                + eriText);
+                        ret = eriText;
+                    }
+                } else {
+                    String eriText = mEriManager.getEriInfo(roamInd).mEriText;
+                    Log.d(LOG_TAG, "Using ERI text: " + eriText);
+                    ret = eriText;
+                }
+            break;
+        }
+        return ret;
+    }
 }

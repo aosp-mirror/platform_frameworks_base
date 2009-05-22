@@ -21,8 +21,8 @@
 #include "FakeCamera.h"
 #include <utils/threads.h>
 #include <ui/CameraHardwareInterface.h>
-#include <utils/MemoryBase.h>
-#include <utils/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
+#include <binder/MemoryHeapBase.h>
 #include <utils/threads.h>
 
 namespace android {

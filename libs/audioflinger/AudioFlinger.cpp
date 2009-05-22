@@ -24,10 +24,10 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#include <utils/IServiceManager.h>
+#include <binder/IServiceManager.h>
 #include <utils/Log.h>
-#include <utils/Parcel.h>
-#include <utils/IPCThreadState.h>
+#include <binder/Parcel.h>
+#include <binder/IPCThreadState.h>
 #include <utils/String16.h>
 #include <utils/threads.h>
 
@@ -2414,7 +2414,9 @@ bool AudioFlinger::AudioRecordThread::threadLoop()
                
                 LOGV("AudioRecordThread: loop starting");
                 if (mRecordTrack != 0) {
-                    input = mAudioHardware->openInputStream(mRecordTrack->format(), 
+                    input = mAudioHardware->openInputStream(
+                                    mRecordTrack->type(),
+                                    mRecordTrack->format(), 
                                     mRecordTrack->channelCount(), 
                                     mRecordTrack->sampleRate(), 
                                     &mStartStatus,

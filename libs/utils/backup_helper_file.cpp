@@ -40,7 +40,7 @@ namespace android {
 #define MAGIC0 0x70616e53 // Snap
 #define MAGIC1 0x656c6946 // File
 
-#if TEST_BACKUP_HELPERS
+#if 0 // TEST_BACKUP_HELPERS
 #define LOGP(x...) printf(x)
 #else
 #define LOGP(x...) LOGD(x)
@@ -181,45 +181,105 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileState>& snapshot)
 }
 
 static int
-write_delete_file(const String8& key)
+write_delete_file(BackupDataWriter* dataStream, const String8& key)
 {
     LOGP("write_delete_file %s\n", key.string());
-    return 0;
+    return dataStream->WriteEntityHeader(key, -1);
 }
 
 static int
-write_update_file(const String8& realFilename, const String8& key)
+write_update_file(BackupDataWriter* dataStream, int fd, const String8& key,
+        const String8& realFilename)
 {
     LOGP("write_update_file %s (%s)\n", realFilename.string(), key.string());
-    return 0;
+
+    const int bufsize = 4*1024;
+    int err;
+    int amt;
+    int fileSize;
+    int bytesLeft;
+
+    char* buf = (char*)malloc(bufsize);
+    int crc = crc32(0L, Z_NULL, 0);
+
+
+    bytesLeft = fileSize = lseek(fd, 0, SEEK_END);
+    lseek(fd, 0, SEEK_SET);
+
+    err = dataStream->WriteEntityHeader(key, bytesLeft);
+    if (err != 0) {
+        return err;
+    }
+
+    while ((amt = read(fd, buf, bufsize)) != 0 && bytesLeft > 0) {
+        bytesLeft -= amt;
+        if (bytesLeft < 0) {
+            amt += bytesLeft; // Plus a negative is minus.  Don't write more than we promised.
+        }
+        err = dataStream->WriteEntityData(buf, amt);
+        if (err != 0) {
+            return err;
+        }
+    }
+    if (bytesLeft != 0) {
+        if (bytesLeft > 0) {
+            // Pad out the space we promised in the buffer.  We can't corrupt the buffer,
+            // even though the data we're sending is probably bad.
+            memset(buf, 0, bufsize);
+            while (bytesLeft > 0) {
+                amt = bytesLeft < bufsize ? bytesLeft : bufsize;
+                bytesLeft -= amt;
+                err = dataStream->WriteEntityData(buf, amt);
+                if (err != 0) {
+                    return err;
+                }
+            }
+        }
+        LOGE("write_update_file size mismatch for %s. expected=%d actual=%d."
+                " You aren't doing proper locking!",
+                realFilename.string(), fileSize, fileSize-bytesLeft);
+    }
+
+    free(buf);
+
+    return NO_ERROR;
 }
 
 static int
-compute_crc32(const String8& filename)
+write_update_file(BackupDataWriter* dataStream, const String8& key, const String8& realFilename)
+{
+    int err;
+    int fd = open(realFilename.string(), O_RDONLY);
+    if (fd == -1) {
+        return errno;
+    }
+    err = write_update_file(dataStream, fd, key, realFilename);
+    close(fd);
+    return err;
+}
+
+static int
+compute_crc32(int fd)
 {
     const int bufsize = 4*1024;
     int amt;
 
-    int fd = open(filename.string(), O_RDONLY);
-    if (fd == -1) {
-        return -1;
-    }
-
     char* buf = (char*)malloc(bufsize);
     int crc = crc32(0L, Z_NULL, 0);
+
+    lseek(fd, 0, SEEK_SET);
 
     while ((amt = read(fd, buf, bufsize)) != 0) {
         crc = crc32(crc, (Bytef*)buf, amt);
     }
 
-    close(fd);
     free(buf);
 
     return crc;
 }
 
 int
-back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
+back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD,
         char const* fileBase, char const* const* files, int fileCount)
 {
     int err;
@@ -252,7 +312,8 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
         s.modTime_nsec = 0; // workaround sim breakage
         //s.modTime_nsec = st.st_mtime_nsec;
         s.size = st.st_size;
-        s.crc32 = compute_crc32(realFilename);
+
+        // we compute the crc32 later down below, when we already have the file open.
 
         newSnapshot.add(name, s);
     }
@@ -270,30 +331,42 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
             String8 realFilename(base);
             realFilename.appendPath(q);
             LOGP("file added: %s\n", realFilename.string());
-            write_update_file(realFilename, q);
+            write_update_file(dataStream, q, realFilename);
             m++;
         }
         else if (cmp < 0) {
             // file removed
             LOGP("file removed: %s\n", p.string());
-            write_delete_file(p);
+            dataStream->WriteEntityHeader(p, -1);
             n++;
         }
         else {
+
             // both files exist, check them
             String8 realFilename(base);
             realFilename.appendPath(q);
             const FileState& f = oldSnapshot.valueAt(n);
-            const FileState& g = newSnapshot.valueAt(m);
+            FileState& g = newSnapshot.editValueAt(m);
 
-            LOGP("%s\n", q.string());
-            LOGP("  new: modTime=%d,%d size=%-3d crc32=0x%08x\n",
-                    f.modTime_sec, f.modTime_nsec, f.size, f.crc32);
-            LOGP("  old: modTime=%d,%d size=%-3d crc32=0x%08x\n",
-                    g.modTime_sec, g.modTime_nsec, g.size, g.crc32);
-            if (f.modTime_sec != g.modTime_sec || f.modTime_nsec != g.modTime_nsec
-                    || f.size != g.size || f.crc32 != g.crc32) {
-                write_update_file(realFilename, p);
+            int fd = open(realFilename.string(), O_RDONLY);
+            if (fd != -1) {
+                // We can't open the file.  Don't report it as a delete either.  Let the
+                // server keep the old version.  Maybe they'll be able to deal with it
+                // on restore.
+            } else {
+                g.crc32 = compute_crc32(fd);
+
+                LOGP("%s\n", q.string());
+                LOGP("  new: modTime=%d,%d size=%-3d crc32=0x%08x\n",
+                        f.modTime_sec, f.modTime_nsec, f.size, f.crc32);
+                LOGP("  old: modTime=%d,%d size=%-3d crc32=0x%08x\n",
+                        g.modTime_sec, g.modTime_nsec, g.size, g.crc32);
+                if (f.modTime_sec != g.modTime_sec || f.modTime_nsec != g.modTime_nsec
+                        || f.size != g.size || f.crc32 != g.crc32) {
+                    write_update_file(dataStream, fd, p, realFilename);
+                }
+
+                close(fd);
             }
             n++;
             m++;
@@ -302,7 +375,7 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
 
     // these were deleted
     while (n<N) {
-        write_delete_file(oldSnapshot.keyAt(n));
+        dataStream->WriteEntityHeader(oldSnapshot.keyAt(n), -1);
         n++;
     }
 
@@ -311,7 +384,7 @@ back_up_files(int oldSnapshotFD, int oldDataStream, int newSnapshotFD,
         const String8& q = newSnapshot.keyAt(m);
         String8 realFilename(base);
         realFilename.appendPath(q);
-        write_update_file(realFilename, q);
+        write_update_file(dataStream, q, realFilename);
         m++;
     }
 
@@ -599,13 +672,14 @@ backup_helper_test_four()
 // hexdump -v -e '"    " 8/1 " 0x%02x," "\n"' data_writer.data
 const unsigned char DATA_GOLDEN_FILE[] = {
      0x41, 0x70, 0x70, 0x31, 0x0b, 0x00, 0x00, 0x00,
-     0x6e, 0x6f, 0x5f, 0x70, 0x61, 0x64, 0x64, 0x69,
-     0x6e, 0x67, 0x5f, 0x00, 0x44, 0x61, 0x74, 0x61,
-     0x0b, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00,
-     0x6e, 0x6f, 0x5f, 0x70, 0x61, 0x64, 0x64, 0x69,
-     0x6e, 0x67, 0x5f, 0x00, 0x6e, 0x6f, 0x5f, 0x70,
+     0xdd, 0xcc, 0xbb, 0xaa, 0x6e, 0x6f, 0x5f, 0x70,
      0x61, 0x64, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x00,
-     0x41, 0x70, 0x70, 0x31, 0x0c, 0x00, 0x00, 0x00,
+     0x44, 0x61, 0x74, 0x61, 0x0b, 0x00, 0x00, 0x00,
+     0x0c, 0x00, 0x00, 0x00, 0x6e, 0x6f, 0x5f, 0x70,
+     0x61, 0x64, 0x64, 0x69, 0x6e, 0x67, 0x5f, 0x00,
+     0x6e, 0x6f, 0x5f, 0x70, 0x61, 0x64, 0x64, 0x69,
+     0x6e, 0x67, 0x5f, 0x00, 0x41, 0x70, 0x70, 0x31,
+     0x0c, 0x00, 0x00, 0x00, 0xdd, 0xcc, 0xbb, 0xaa,
      0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
      0x6f, 0x5f, 0x5f, 0x33, 0x00, 0xbc, 0xbc, 0xbc,
      0x44, 0x61, 0x74, 0x61, 0x0c, 0x00, 0x00, 0x00,
@@ -614,15 +688,16 @@ const unsigned char DATA_GOLDEN_FILE[] = {
      0x00, 0xbc, 0xbc, 0xbc, 0x70, 0x61, 0x64, 0x64,
      0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x5f, 0x33,
      0x00, 0xbc, 0xbc, 0xbc, 0x41, 0x70, 0x70, 0x31,
-     0x0d, 0x00, 0x00, 0x00, 0x70, 0x61, 0x64, 0x64,
+     0x0d, 0x00, 0x00, 0x00, 0xdd, 0xcc, 0xbb, 0xaa,
+     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
+     0x6f, 0x5f, 0x32, 0x5f, 0x5f, 0x00, 0xbc, 0xbc,
+     0x44, 0x61, 0x74, 0x61, 0x0d, 0x00, 0x00, 0x00,
+     0x0e, 0x00, 0x00, 0x00, 0x70, 0x61, 0x64, 0x64,
      0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x32, 0x5f,
-     0x5f, 0x00, 0xbc, 0xbc, 0x44, 0x61, 0x74, 0x61,
-     0x0d, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00,
-     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
-     0x6f, 0x5f, 0x32, 0x5f, 0x5f, 0x00, 0xbc, 0xbc,
-     0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
-     0x6f, 0x5f, 0x32, 0x5f, 0x5f, 0x00, 0xbc, 0xbc,
-     0x41, 0x70, 0x70, 0x31, 0x0a, 0x00, 0x00, 0x00,
+     0x5f, 0x00, 0xbc, 0xbc, 0x70, 0x61, 0x64, 0x64,
+     0x65, 0x64, 0x5f, 0x74, 0x6f, 0x5f, 0x32, 0x5f,
+     0x5f, 0x00, 0xbc, 0xbc, 0x41, 0x70, 0x70, 0x31,
+     0x0a, 0x00, 0x00, 0x00, 0xdd, 0xcc, 0xbb, 0xaa,
      0x70, 0x61, 0x64, 0x64, 0x65, 0x64, 0x5f, 0x74,
      0x6f, 0x31, 0x00, 0xbc, 0x44, 0x61, 0x74, 0x61,
      0x0a, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00,
@@ -630,6 +705,7 @@ const unsigned char DATA_GOLDEN_FILE[] = {
      0x6f, 0x31, 0x00, 0xbc, 0x70, 0x61, 0x64, 0x64,
      0x65, 0x64, 0x5f, 0x74, 0x6f, 0x31, 0x00, 0xbc,
      0x46, 0x6f, 0x6f, 0x74, 0x04, 0x00, 0x00, 0x00,
+     0x99, 0x99, 0x77, 0x77
 };
 const int DATA_GOLDEN_FILE_SIZE = sizeof(DATA_GOLDEN_FILE);
 
@@ -639,7 +715,7 @@ test_write_header_and_entity(BackupDataWriter& writer, const char* str)
     int err;
     String8 text(str);
 
-    err = writer.WriteAppHeader(text);
+    err = writer.WriteAppHeader(text, 0xaabbccdd);
     if (err != 0) {
         fprintf(stderr, "WriteAppHeader failed with %s\n", strerror(err));
         return err;
@@ -685,7 +761,7 @@ backup_helper_test_data_writer()
     err |= test_write_header_and_entity(writer, "padded_to_2__");
     err |= test_write_header_and_entity(writer, "padded_to1");
 
-    writer.WriteAppFooter();
+    writer.WriteAppFooter(0x77779999);
 
     close(fd);
 
@@ -693,6 +769,162 @@ backup_helper_test_data_writer()
     if (err != 0) {
         return err;
     }
+
+    return err;
+}
+
+int
+test_read_header_and_entity(BackupDataReader& reader, const char* str)
+{
+    int err;
+    int bufSize = strlen(str)+1;
+    char* buf = (char*)malloc(bufSize);
+    String8 string;
+    int cookie = 0x11111111;
+    size_t actualSize;
+
+    // printf("\n\n---------- test_read_header_and_entity -- %s\n\n", str);
+
+    err = reader.ReadNextHeader();
+    if (err != 0) {
+        fprintf(stderr, "ReadNextHeader (for app header) failed with %s\n", strerror(err));
+        goto done;
+    }
+
+    err = reader.ReadAppHeader(&string, &cookie);
+    if (err != 0) {
+        fprintf(stderr, "ReadAppHeader failed with %s\n", strerror(err));
+        goto done;
+    }
+    if (string != str) {
+        fprintf(stderr, "ReadAppHeader expected packageName '%s' got '%s'\n", str, string.string());
+        err = EINVAL;
+        goto done;
+    }
+    if (cookie != (int)0xaabbccdd) {
+        fprintf(stderr, "ReadAppHeader expected cookie 0x%08x got 0x%08x\n", 0xaabbccdd, cookie);
+        err = EINVAL;
+        goto done;
+    }
+
+    err = reader.ReadNextHeader();
+    if (err != 0) {
+        fprintf(stderr, "ReadNextHeader (for entity header) failed with %s\n", strerror(err));
+        goto done;
+    }
+
+    err = reader.ReadEntityHeader(&string, &actualSize);
+    if (err != 0) {
+        fprintf(stderr, "ReadEntityHeader failed with %s\n", strerror(err));
+        goto done;
+    }
+    if (string != str) {
+        fprintf(stderr, "ReadEntityHeader expected key '%s' got '%s'\n", str, string.string());
+        err = EINVAL;
+        goto done;
+    }
+    if ((int)actualSize != bufSize) {
+        fprintf(stderr, "ReadEntityHeader expected dataSize 0x%08x got 0x%08x\n", bufSize,
+                actualSize);
+        err = EINVAL;
+        goto done;
+    }
+
+    err = reader.ReadEntityData(buf, bufSize);
+    if (err != NO_ERROR) {
+        fprintf(stderr, "ReadEntityData failed with %s\n", strerror(err));
+        goto done;
+    }
+
+    if (0 != memcmp(buf, str, bufSize)) {
+        fprintf(stderr, "ReadEntityData expected '%s' but got something starting with "
+                "%02x %02x %02x %02x\n", str, buf[0], buf[1], buf[2], buf[3]);
+        err = EINVAL;
+        goto done;
+    }
+
+    // The next read will confirm whether it got the right amount of data.
+
+done:
+    if (err != NO_ERROR) {
+        fprintf(stderr, "test_read_header_and_entity failed with %s\n", strerror(err));
+    }
+    free(buf);
+    return err;
+}
+
+int
+backup_helper_test_data_reader()
+{
+    int err;
+    int fd;
+    const char* filename = SCRATCH_DIR "data_reader.data";
+
+    system("rm -r " SCRATCH_DIR);
+    mkdir(SCRATCH_DIR, 0777);
+    mkdir(SCRATCH_DIR "data", 0777);
+    
+    fd = creat(filename, 0666);
+    if (fd == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
+    err = write(fd, DATA_GOLDEN_FILE, DATA_GOLDEN_FILE_SIZE);
+    if (err != DATA_GOLDEN_FILE_SIZE) {
+        fprintf(stderr, "Error \"%s\" writing golden file %s\n", strerror(errno), filename);
+        return errno;
+    }
+
+    close(fd);
+
+    fd = open(filename, O_RDONLY);
+    if (fd == -1) {
+        fprintf(stderr, "Error \"%s\" opening golden file %s for read\n", strerror(errno),
+                filename);
+        return errno;
+    }
+
+    {
+        BackupDataReader reader(fd);
+
+        err = 0;
+
+        if (err == NO_ERROR) {
+            err = test_read_header_and_entity(reader, "no_padding_");
+        }
+
+        if (err == NO_ERROR) {
+            err = test_read_header_and_entity(reader, "padded_to__3");
+        }
+
+        if (err == NO_ERROR) {
+            err = test_read_header_and_entity(reader, "padded_to_2__");
+        }
+
+        if (err == NO_ERROR) {
+            err = test_read_header_and_entity(reader, "padded_to1");
+        }
+
+        if (err == NO_ERROR) {
+            err = reader.ReadNextHeader();
+            if (err != 0) {
+                fprintf(stderr, "ReadNextHeader (for app header) failed with %s\n", strerror(err));
+            }
+
+            if (err == NO_ERROR) {
+                int cookie;
+                err |= reader.ReadAppFooter(&cookie);
+                if (cookie != 0x77779999) {
+                    fprintf(stderr, "app footer cookie expected=0x%08x actual=0x%08x\n",
+                        0x77779999, cookie);
+                    err = EINVAL;
+                }
+            }
+        }
+    }
+
+    close(fd);
 
     return err;
 }
@@ -752,10 +984,14 @@ backup_helper_test_files()
         fprintf(stderr, "error creating: %s\n", strerror(errno));
         return errno;
     }
+
+    {
+        BackupDataWriter dataStream(dataStreamFD);
     
-    err = back_up_files(-1, dataStreamFD, newSnapshotFD, SCRATCH_DIR, files_before, 5);
-    if (err != 0) {
-        return err;
+        err = back_up_files(-1, &dataStream, newSnapshotFD, SCRATCH_DIR, files_before, 5);
+        if (err != 0) {
+            return err;
+        }
     }
 
     close(dataStreamFD);
@@ -809,10 +1045,15 @@ backup_helper_test_files()
         return errno;
     }
 
-    err = back_up_files(oldSnapshotFD, dataStreamFD, newSnapshotFD, SCRATCH_DIR, files_after, 6);
-    if (err != 0) {
-        return err;
-    }
+    {
+        BackupDataWriter dataStream(dataStreamFD);
+    
+        err = back_up_files(oldSnapshotFD, &dataStream, newSnapshotFD, SCRATCH_DIR,
+                files_after, 6);
+        if (err != 0) {
+            return err;
+        }
+}
 
     close(oldSnapshotFD);
     close(dataStreamFD);

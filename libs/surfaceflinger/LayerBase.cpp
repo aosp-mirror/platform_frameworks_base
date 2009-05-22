@@ -20,8 +20,8 @@
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>

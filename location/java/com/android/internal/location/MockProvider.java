@@ -172,6 +172,9 @@ public class MockProvider extends ILocationProvider.Stub {
     public void updateNetworkState(int state) {
     }
 
+    public void updateLocation(Location location) {
+    }
+
     public boolean sendExtraCommand(String command, Bundle extras) {
         return false;
     }

@@ -9,7 +9,7 @@
 
 #define LOG_TAG "sysproc"
 
-#include <utils/IPCThreadState.h>
+#include <binder/IPCThreadState.h>
 #include <utils/Log.h>
 
 #include <private/android_filesystem_config.h>

@@ -122,7 +122,7 @@ public abstract class SMSDispatcher extends Handler {
      * CONCATENATED_16_BIT_REFERENCE message set.  Should be
      * incremented for each set of concatenated messages.
      */
-    protected static int sConcatenatedRef;
+    private static int sConcatenatedRef;
 
     private SmsCounter mCounter;
 
@@ -131,6 +131,11 @@ public abstract class SMSDispatcher extends Handler {
     private static SmsMessage mSmsMessage;
     private static SmsMessageBase mSmsMessageBase;
     private SmsMessageBase.SubmitPduBase mSubmitPduBase;
+
+    protected static int getNextConcatenatedRef() {
+        sConcatenatedRef += 1;
+        return sConcatenatedRef;
+    }
 
     /**
      *  Implement the per-application based SMS control, which only allows
@@ -419,12 +424,15 @@ public abstract class SMSDispatcher extends Handler {
     /**
      * If this is the last part send the parts out to the application, otherwise
      * the part is stored for later processing.
+     *
+     * NOTE: concatRef (naturally) needs to be non-null, but portAddrs can be null.
      */
-    protected void processMessagePart(SmsMessageBase sms, int referenceNumber,
-            int sequence, int count, int destinationPort) {
+    protected void processMessagePart(SmsMessageBase sms,
+            SmsHeader.ConcatRef concatRef, SmsHeader.PortAddrs portAddrs) {
+
         // Lookup all other related parts
         StringBuilder where = new StringBuilder("reference_number =");
-        where.append(referenceNumber);
+        where.append(concatRef.refNumber);
         where.append(" AND address = ?");
         String[] whereArgs = new String[] {sms.getOriginatingAddress()};
 
@@ -433,20 +441,19 @@ public abstract class SMSDispatcher extends Handler {
         try {
             cursor = mResolver.query(mRawUri, RAW_PROJECTION, where.toString(), whereArgs, null);
             int cursorCount = cursor.getCount();
-            if (cursorCount != count - 1) {
+            if (cursorCount != concatRef.msgCount - 1) {
                 // We don't have all the parts yet, store this one away
                 ContentValues values = new ContentValues();
                 values.put("date", new Long(sms.getTimestampMillis()));
                 values.put("pdu", HexDump.toHexString(sms.getPdu()));
                 values.put("address", sms.getOriginatingAddress());
-                values.put("reference_number", referenceNumber);
-                values.put("count", count);
-                values.put("sequence", sequence);
-                if (destinationPort != -1) {
-                    values.put("destination_port", destinationPort);
+                values.put("reference_number", concatRef.refNumber);
+                values.put("count", concatRef.msgCount);
+                values.put("sequence", concatRef.seqNumber);
+                if (portAddrs != null) {
+                    values.put("destination_port", portAddrs.destPort);
                 }
                 mResolver.insert(mRawUri, values);
-
                 return;
             }
 
@@ -454,7 +461,7 @@ public abstract class SMSDispatcher extends Handler {
             int pduColumn = cursor.getColumnIndex("pdu");
             int sequenceColumn = cursor.getColumnIndex("sequence");
 
-            pdus = new byte[count][];
+            pdus = new byte[concatRef.msgCount][];
             for (int i = 0; i < cursorCount; i++) {
                 cursor.moveToNext();
                 int cursorSequence = (int)cursor.getLong(sequenceColumn);
@@ -462,7 +469,7 @@ public abstract class SMSDispatcher extends Handler {
                         cursor.getString(pduColumn));
             }
             // This one isn't in the DB, so add it
-            pdus[sequence - 1] = sms.getPdu();
+            pdus[concatRef.seqNumber - 1] = sms.getPdu();
 
             // Remove the parts from the database
             mResolver.delete(mRawUri, where.toString(), whereArgs);
@@ -473,31 +480,34 @@ public abstract class SMSDispatcher extends Handler {
             if (cursor != null) cursor.close();
         }
 
+        /**
+         * TODO(cleanup): The following code has duplicated logic with
+         * the radio-specific dispatchMessage code, which is fragile,
+         * in addition to being redundant.  Instead, if this method
+         * maybe returned the reassembled message (or just contents),
+         * the following code (which is not really related to
+         * reconstruction) could be better consolidated.
+         */
+
         // Dispatch the PDUs to applications
-        switch (destinationPort) {
-        case SmsHeader.PORT_WAP_PUSH: {
-            // Build up the data stream
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            for (int i = 0; i < count; i++) {
-                SmsMessage msg = SmsMessage.createFromPdu(pdus[i]);
-                byte[] data = msg.getUserData();
-                output.write(data, 0, data.length);
+        if (portAddrs != null) {
+            if (portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
+                // Build up the data stream
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                for (int i = 0; i < concatRef.msgCount; i++) {
+                    SmsMessage msg = SmsMessage.createFromPdu(pdus[i]);
+                    byte[] data = msg.getUserData();
+                    output.write(data, 0, data.length);
+                }
+                // Handle the PUSH
+                mWapPush.dispatchWapPdu(output.toByteArray());
+            } else {
+                // The messages were sent to a port, so concoct a URI for it
+                dispatchPortAddressedPdus(pdus, portAddrs.destPort);
             }
-
-            // Handle the PUSH
-            mWapPush.dispatchWapPdu(output.toByteArray());
-            break;
-        }
-
-        case -1:
+        } else {
             // The messages were not sent to a port
             dispatchPdus(pdus);
-            break;
-
-        default:
-            // The messages were sent to a port, so concoct a URI for it
-            dispatchPortAddressedPdus(pdus, destinationPort);
-            break;
         }
     }
 

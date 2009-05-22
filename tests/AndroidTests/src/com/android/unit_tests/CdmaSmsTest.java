@@ -136,6 +136,81 @@ public class CdmaSmsTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testUserDataHeaderConcatRefFeedback() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 55;
+        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+        concatRef.refNumber = 0xEE;
+        concatRef.msgCount = 2;
+        concatRef.seqNumber = 2;
+        concatRef.isEightBits = true;
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.concatRef = concatRef;
+        byte[] encodedHeader = SmsHeader.toByteArray(smsHeader);
+        SmsHeader decodedHeader = SmsHeader.fromByteArray(encodedHeader);
+        assertEquals(decodedHeader.concatRef.refNumber, concatRef.refNumber);
+        assertEquals(decodedHeader.concatRef.msgCount, concatRef.msgCount);
+        assertEquals(decodedHeader.concatRef.seqNumber, concatRef.seqNumber);
+        assertEquals(decodedHeader.concatRef.isEightBits, concatRef.isEightBits);
+        assertEquals(decodedHeader.portAddrs, null);
+        UserData userData = new UserData();
+        userData.payloadStr = "User Data Header (UDH) feedback test";
+        userData.userDataHeader = smsHeader;
+        bearerData.userData = userData;
+        byte[] encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        decodedHeader = revBearerData.userData.userDataHeader;
+        assertEquals(decodedHeader.concatRef.refNumber, concatRef.refNumber);
+        assertEquals(decodedHeader.concatRef.msgCount, concatRef.msgCount);
+        assertEquals(decodedHeader.concatRef.seqNumber, concatRef.seqNumber);
+        assertEquals(decodedHeader.concatRef.isEightBits, concatRef.isEightBits);
+        assertEquals(decodedHeader.portAddrs, null);
+    }
+
+    @SmallTest
+    public void testUserDataHeaderMixedFeedback() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 42;
+        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+        concatRef.refNumber = 0x34;
+        concatRef.msgCount = 5;
+        concatRef.seqNumber = 2;
+        concatRef.isEightBits = false;
+        SmsHeader.PortAddrs portAddrs = new SmsHeader.PortAddrs();
+        portAddrs.destPort = 88;
+        portAddrs.origPort = 66;
+        portAddrs.areEightBits = false;
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.concatRef = concatRef;
+        smsHeader.portAddrs = portAddrs;
+        byte[] encodedHeader = SmsHeader.toByteArray(smsHeader);
+        SmsHeader decodedHeader = SmsHeader.fromByteArray(encodedHeader);
+        assertEquals(decodedHeader.concatRef.refNumber, concatRef.refNumber);
+        assertEquals(decodedHeader.concatRef.msgCount, concatRef.msgCount);
+        assertEquals(decodedHeader.concatRef.seqNumber, concatRef.seqNumber);
+        assertEquals(decodedHeader.concatRef.isEightBits, concatRef.isEightBits);
+        assertEquals(decodedHeader.portAddrs.destPort, portAddrs.destPort);
+        assertEquals(decodedHeader.portAddrs.origPort, portAddrs.origPort);
+        assertEquals(decodedHeader.portAddrs.areEightBits, portAddrs.areEightBits);
+        UserData userData = new UserData();
+        userData.payloadStr = "User Data Header (UDH) feedback test";
+        userData.userDataHeader = smsHeader;
+        bearerData.userData = userData;
+        byte[] encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        decodedHeader = revBearerData.userData.userDataHeader;
+        assertEquals(decodedHeader.concatRef.refNumber, concatRef.refNumber);
+        assertEquals(decodedHeader.concatRef.msgCount, concatRef.msgCount);
+        assertEquals(decodedHeader.concatRef.seqNumber, concatRef.seqNumber);
+        assertEquals(decodedHeader.concatRef.isEightBits, concatRef.isEightBits);
+        assertEquals(decodedHeader.portAddrs.destPort, portAddrs.destPort);
+        assertEquals(decodedHeader.portAddrs.origPort, portAddrs.origPort);
+        assertEquals(decodedHeader.portAddrs.areEightBits, portAddrs.areEightBits);
+    }
+
+    @SmallTest
     public void testReplyOption() throws Exception {
         String pdu1 = "0003104090011648b6a794e0705476bf77bceae934fe5f6d94d87450080a0180";
         BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));

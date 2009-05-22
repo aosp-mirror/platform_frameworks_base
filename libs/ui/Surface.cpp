@@ -25,8 +25,8 @@
 
 #include <utils/Errors.h>
 #include <utils/threads.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IMemory.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IMemory.h>
 #include <utils/Log.h>
 
 #include <ui/DisplayInfo.h>

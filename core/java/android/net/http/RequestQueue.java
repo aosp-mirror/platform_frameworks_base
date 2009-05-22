@@ -52,10 +52,44 @@ public class RequestQueue implements RequestFeeder {
 
     private Context mContext;
 
+    private static class RequestSet {
+        private final LinkedList<Request> mHighPriority;
+        private final LinkedList<Request> mLowPriority;
+
+        RequestSet() {
+            mHighPriority = new LinkedList<Request>();
+            mLowPriority = new LinkedList<Request>();
+        }
+
+        void add(Request req, boolean head) {
+            LinkedList l = mLowPriority;
+            if (req.mHighPriority) {
+                l = mHighPriority;
+            }
+            if (head) {
+                l.addFirst(req);
+            } else {
+                l.add(req);
+            }
+        }
+
+        Request removeFirst() {
+            if (!mHighPriority.isEmpty()) {
+                return mHighPriority.removeFirst();
+            } else if (!mLowPriority.isEmpty()) {
+                return mLowPriority.removeFirst();
+            }
+            return null;
+        }
+
+        boolean isEmpty() {
+            return mHighPriority.isEmpty() && mLowPriority.isEmpty();
+        }
+    };
     /**
      * Requests, indexed by HttpHost (scheme, host, port)
      */
-    private LinkedHashMap<HttpHost, LinkedList<Request>> mPending;
+    private LinkedHashMap<HttpHost, RequestSet> mPending;
 
     /* Support for notifying a client when queue is empty */
     private boolean mClientWaiting = false;
@@ -344,7 +378,7 @@ public class RequestQueue implements RequestFeeder {
     public RequestQueue(Context context, int connectionCount) {
         mContext = context;
 
-        mPending = new LinkedHashMap<HttpHost, LinkedList<Request>>(32);
+        mPending = new LinkedHashMap<HttpHost, RequestSet>(32);
 
         mActivePool = new ActivePool(connectionCount);
         mActivePool.startup();
@@ -480,7 +514,7 @@ public class RequestQueue implements RequestFeeder {
         req = new Request(method, httpHost, mProxyHost, uri.mPath, bodyProvider,
                           bodyLength, eventHandler, headers, highPriority);
 
-        queueRequest(req, highPriority);
+        queueRequest(req, false);
 
         mActivePool.mTotalRequest++;
 
@@ -520,19 +554,24 @@ public class RequestQueue implements RequestFeeder {
         HttpLog.v("dump()");
         StringBuilder dump = new StringBuilder();
         int count = 0;
-        Iterator<Map.Entry<HttpHost, LinkedList<Request>>> iter;
+        Iterator<Map.Entry<HttpHost, RequestSet>> iter;
 
         // mActivePool.log(dump);
 
         if (!mPending.isEmpty()) {
             iter = mPending.entrySet().iterator();
             while (iter.hasNext()) {
-                Map.Entry<HttpHost, LinkedList<Request>> entry = iter.next();
+                Map.Entry<HttpHost, RequestSet> entry = iter.next();
                 String hostName = entry.getKey().getHostName();
                 StringBuilder line = new StringBuilder("p" + count++ + " " + hostName + " ");
 
-                LinkedList<Request> reqList = entry.getValue();
-                ListIterator reqIter = reqList.listIterator(0);
+                RequestSet reqList = entry.getValue();
+                ListIterator reqIter = reqList.mHighPriority.listIterator(0);
+                while (iter.hasNext()) {
+                    Request request = (Request)iter.next();
+                    line.append(request + " ");
+                }
+                reqIter = reqList.mLowPriority.listIterator(0);
                 while (iter.hasNext()) {
                     Request request = (Request)iter.next();
                     line.append(request + " ");
@@ -564,7 +603,7 @@ public class RequestQueue implements RequestFeeder {
         Request ret = null;
 
         if (mNetworkConnected && mPending.containsKey(host)) {
-            LinkedList<Request> reqList = mPending.get(host);
+            RequestSet reqList = mPending.get(host);
             ret = reqList.removeFirst();
             if (reqList.isEmpty()) {
                 mPending.remove(host);
@@ -597,18 +636,14 @@ public class RequestQueue implements RequestFeeder {
 
     protected synchronized void queueRequest(Request request, boolean head) {
         HttpHost host = request.mProxyHost == null ? request.mHost : request.mProxyHost;
-        LinkedList<Request> reqList;
+        RequestSet reqList;
         if (mPending.containsKey(host)) {
             reqList = mPending.get(host);
         } else {
-            reqList = new LinkedList<Request>();
+            reqList = new RequestSet();
             mPending.put(host, reqList);
         }
-        if (head) {
-            reqList.addFirst(request);
-        } else {
-            reqList.add(request);
-        }
+        reqList.add(request, head);
     }
 
 
@@ -621,12 +656,12 @@ public class RequestQueue implements RequestFeeder {
     }
 
     /* helper */
-    private Request removeFirst(LinkedHashMap<HttpHost, LinkedList<Request>> requestQueue) {
+    private Request removeFirst(LinkedHashMap<HttpHost, RequestSet> requestQueue) {
         Request ret = null;
-        Iterator<Map.Entry<HttpHost, LinkedList<Request>>> iter = requestQueue.entrySet().iterator();
+        Iterator<Map.Entry<HttpHost, RequestSet>> iter = requestQueue.entrySet().iterator();
         if (iter.hasNext()) {
-            Map.Entry<HttpHost, LinkedList<Request>> entry = iter.next();
-            LinkedList<Request> reqList = entry.getValue();
+            Map.Entry<HttpHost, RequestSet> entry = iter.next();
+            RequestSet reqList = entry.getValue();
             ret = reqList.removeFirst();
             if (reqList.isEmpty()) {
                 requestQueue.remove(entry.getKey());

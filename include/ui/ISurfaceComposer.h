@@ -22,7 +22,7 @@
 
 #include <utils/RefBase.h>
 #include <utils/Errors.h>
-#include <utils/IInterface.h>
+#include <binder/IInterface.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/ISurfaceFlingerClient.h>

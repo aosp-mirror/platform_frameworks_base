@@ -26,10 +26,10 @@
 
 #include <string.h>
 #include <cutils/atomic.h>
-#include <utils/MemoryDealer.h>
+#include <binder/MemoryDealer.h>
 #include <android_runtime/ActivityManager.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 #include <media/MediaMetadataRetrieverInterface.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/PVMetadataRetriever.h>

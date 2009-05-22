@@ -104,7 +104,6 @@ LOCAL_SRC_FILES:= \
 	android_util_FileObserver.cpp \
 	android/opengl/poly_clip.cpp.arm \
 	android/opengl/util.cpp.arm \
-	android_bluetooth_Database.cpp \
 	android_bluetooth_HeadsetBase.cpp \
 	android_bluetooth_common.cpp \
 	android_bluetooth_BluetoothAudioGateway.cpp \
@@ -118,6 +117,7 @@ LOCAL_SRC_FILES:= \
 	android_location_GpsLocationProvider.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
 	com_android_internal_graphics_NativeUtils.cpp \
+	android_backup_BackupDataOutput.cpp \
 	android_backup_FileBackupHelper.cpp
 
 LOCAL_C_INCLUDES += \
@@ -147,6 +147,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libcutils \
 	libutils \
+	libbinder \
 	libnetutils \
 	libui \
 	libskiagl \

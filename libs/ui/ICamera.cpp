@@ -20,7 +20,7 @@
 #include <utils/Log.h>
 #include <stdint.h>
 #include <sys/types.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <ui/ICamera.h>
 
 namespace android {

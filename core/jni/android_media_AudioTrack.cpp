@@ -30,8 +30,8 @@
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 
-#include <utils/MemoryHeapBase.h>
-#include <utils/MemoryBase.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
 
 
 // ----------------------------------------------------------------------------

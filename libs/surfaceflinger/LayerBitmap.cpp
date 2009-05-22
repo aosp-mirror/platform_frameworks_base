@@ -20,9 +20,9 @@
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
-#include <utils/MemoryDealer.h>
-#include <utils/MemoryBase.h>
-#include <utils/IMemory.h>
+#include <binder/MemoryDealer.h>
+#include <binder/MemoryBase.h>
+#include <binder/IMemory.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/Surface.h>

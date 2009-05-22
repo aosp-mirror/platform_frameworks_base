@@ -21,6 +21,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.PixelFormat;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Parcel;
@@ -133,6 +134,7 @@ public class ListView extends AbsListView {
 
     // used for temporary calculations.
     private final Rect mTempRect = new Rect();
+    private Paint mDividerPaint;
 
     // the single allocated result per list view; kinda cheesey but avoids
     // allocating these thingies too often.
@@ -2813,12 +2815,20 @@ public class ListView extends AbsListView {
      */
     @Override
     public boolean isOpaque() {
-        return (mCachingStarted && mIsCacheColorOpaque && mDividerIsOpaque) || super.isOpaque();
+        return (mCachingStarted && mIsCacheColorOpaque && mDividerIsOpaque &&
+                hasOpaqueScrollbars()) || super.isOpaque();
     }
 
     @Override
     public void setCacheColorHint(int color) {
-        mIsCacheColorOpaque = (color >>> 24) == 0xFF;
+        final boolean opaque = (color >>> 24) == 0xFF;
+        mIsCacheColorOpaque = opaque;
+        if (opaque) {
+            if (mDividerPaint == null) {
+                mDividerPaint = new Paint();
+            }
+            mDividerPaint.setColor(color);
+        }
         super.setCacheColorHint(color);
     }
 
@@ -2841,6 +2851,8 @@ public class ListView extends AbsListView {
             final int first = mFirstPosition;
             final boolean areAllItemsSelectable = mAreAllItemsSelectable;
             final ListAdapter adapter = mAdapter;
+            final boolean isOpaque = isOpaque();
+            final Paint paint = mDividerPaint;
 
             if (!mStackFromBottom) {
                 int bottom;
@@ -2852,12 +2864,18 @@ public class ListView extends AbsListView {
                         View child = getChildAt(i);
                         bottom = child.getBottom();
                         // Don't draw dividers next to items that are not enabled
-                        if (bottom < listBottom && (areAllItemsSelectable ||
-                                (adapter.isEnabled(first + i) && (i == count - 1 ||
-                                        adapter.isEnabled(first + i + 1))))) {
-                            bounds.top = bottom;
-                            bounds.bottom = bottom + dividerHeight;
-                            drawDivider(canvas, bounds, i);
+                        if (bottom < listBottom) {
+                            if ((areAllItemsSelectable ||
+                                    (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                            adapter.isEnabled(first + i + 1))))) {
+                                bounds.top = bottom;
+                                bounds.bottom = bottom + dividerHeight;
+                                drawDivider(canvas, bounds, i);
+                            } else if (isOpaque) {
+                                bounds.top = bottom;
+                                bounds.bottom = bottom + dividerHeight;
+                                canvas.drawRect(bounds, paint);
+                            }
                         }
                     }
                 }
@@ -2871,16 +2889,22 @@ public class ListView extends AbsListView {
                         View child = getChildAt(i);
                         top = child.getTop();
                         // Don't draw dividers next to items that are not enabled
-                        if (top > listTop && (areAllItemsSelectable ||
-                                (adapter.isEnabled(first + i) && (i == count - 1 ||
-                                        adapter.isEnabled(first + i + 1))))) {
-                            bounds.top = top - dividerHeight;
-                            bounds.bottom = top;
-                            // Give the method the child ABOVE the divider, so we
-                            // subtract one from our child
-                            // position. Give -1 when there is no child above the
-                            // divider.
-                            drawDivider(canvas, bounds, i - 1);
+                        if (top > listTop) {
+                            if ((areAllItemsSelectable ||
+                                    (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                            adapter.isEnabled(first + i + 1))))) {
+                                bounds.top = top - dividerHeight;
+                                bounds.bottom = top;
+                                // Give the method the child ABOVE the divider, so we
+                                // subtract one from our child
+                                // position. Give -1 when there is no child above the
+                                // divider.
+                                drawDivider(canvas, bounds, i - 1);
+                            } else if (isOpaque) {
+                                bounds.top = top - dividerHeight;
+                                bounds.bottom = top;
+                                canvas.drawRect(bounds, paint);
+                            }
                         }
                     }
                 }

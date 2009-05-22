@@ -101,6 +101,8 @@ public class SurfaceView extends View {
     static final int KEEP_SCREEN_ON_MSG = 1;
     static final int GET_NEW_SURFACE_MSG = 2;
     
+    int mWindowType = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+    
     boolean mIsCreating = false;
 
     final Handler mHandler = new Handler() {
@@ -286,6 +288,15 @@ public class SurfaceView extends View {
         super.dispatchDraw(canvas);
     }
 
+    /**
+     * Hack to allow special layering of windows.  The type is one of the
+     * types in WindowManager.LayoutParams.  This is a hack so:
+     * @hide
+     */
+    public void setWindowType(int type) {
+        mWindowType = type;
+    }
+    
     private void updateWindow(boolean force) {
         if (!mHaveFrame) {
             return;
@@ -343,7 +354,7 @@ public class SurfaceView extends View {
 
                 if (mWindow == null) {
                     mWindow = new MyWindow(this);
-                    mLayout.type = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+                    mLayout.type = mWindowType;
                     mLayout.gravity = Gravity.LEFT|Gravity.TOP;
                     mSession.add(mWindow, mLayout,
                             mVisible ? VISIBLE : GONE, mContentInsets);

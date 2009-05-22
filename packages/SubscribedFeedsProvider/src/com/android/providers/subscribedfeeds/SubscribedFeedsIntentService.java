@@ -60,7 +60,7 @@ public class SubscribedFeedsIntentService extends IntentService {
                     "android.intent.extra.from_trusted_server", false);
             if (fromTrustedServer) {
                 String accountName = intent.getStringExtra("account");
-                String token = intent.getStringExtra("message_token");
+                String token = intent.getStringExtra(Intent.EXTRA_REMOTE_INTENT_TOKEN);
 
                 if (TextUtils.isEmpty(accountName) || TextUtils.isEmpty(token)) {
                     if (Config.LOGD) {

@@ -69,11 +69,14 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
         TestShellActivity activity = (TestShellActivity) getActivity();
 
+        Log.v(LOGTAG, "About to run tests, calling gc first...");
+        Runtime.getRuntime().runFinalization();
+        Runtime.getRuntime().gc();
+        Runtime.getRuntime().gc();
+
         // Run tests
         runTestAndWaitUntilDone(activity, runner.mTestPath, runner.mTimeoutInMillis);
 
-        // TODO(fqian): let am instrumentation pass in the command line, currently
-        // am instrument does not allow spaces in the command.
         dumpMemoryInfo();
 
         // Kill activity
@@ -82,6 +85,11 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
     private void dumpMemoryInfo() {
         try {
+            Log.v(LOGTAG, "About to dump meminfo, calling gc first...");
+            Runtime.getRuntime().runFinalization();
+            Runtime.getRuntime().gc();
+            Runtime.getRuntime().gc();
+
             Log.v(LOGTAG, "Dumping memory information.");
 
             FileOutputStream out = new FileOutputStream(LOAD_TEST_RESULT, true);

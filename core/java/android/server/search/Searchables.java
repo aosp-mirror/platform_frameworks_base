@@ -24,6 +24,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,8 @@ import java.util.List;
  * This class maintains the information about all searchable activities. 
  */
 public class Searchables {
+
+    private static final String LOG_TAG = "Searchables";
 
     // static strings used for XML lookups, etc.
     // TODO how should these be documented for the developer, in a more structured way than 
@@ -184,7 +187,6 @@ public class Searchables {
      * TODO: sort the list somehow?  UI choice.
      */
     public void buildSearchableList() {
-        
         // These will become the new values at the end of the method
         HashMap<ComponentName, SearchableInfo> newSearchablesMap 
                                 = new HashMap<ComponentName, SearchableInfo>();
@@ -222,6 +224,11 @@ public class Searchables {
         Intent globalSearchIntent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
         ComponentName globalSearchActivity = globalSearchIntent.resolveActivity(pm);
         SearchableInfo newDefaultSearchable = newSearchablesMap.get(globalSearchActivity);
+
+        if (newDefaultSearchable == null) {
+            Log.w(LOG_TAG, "No searchable info found for new default searchable activity "
+                    + globalSearchActivity);
+        }
 
         // Store a consistent set of new values
         synchronized (this) {

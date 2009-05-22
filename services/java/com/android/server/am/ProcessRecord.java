@@ -107,6 +107,10 @@ class ProcessRecord implements Watchdog.PssRequestor {
     ActivityManager.ProcessErrorStateInfo crashingReport;
     ActivityManager.ProcessErrorStateInfo notRespondingReport;
 
+    // Who will be notified of the error. This is usually an activity in the
+    // app that installed the package.
+    ComponentName errorReportReceiver;
+
     void dump(PrintWriter pw, String prefix) {
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
@@ -157,7 +161,14 @@ class ProcessRecord implements Watchdog.PssRequestor {
                     pw.print(" "); pw.print(crashDialog);
                     pw.print(" notResponding="); pw.print(notResponding);
                     pw.print(" " ); pw.print(anrDialog);
-                    pw.print(" bad="); pw.println(bad);
+                    pw.print(" bad="); pw.print(bad);
+
+                    // crashing or notResponding is always set before errorReportReceiver
+                    if (errorReportReceiver != null) {
+                        pw.print(" errorReportReceiver=");
+                        pw.print(errorReportReceiver.flattenToShortString());
+                    }
+                    pw.println();
         }
         if (activities.size() > 0) {
             pw.print(prefix); pw.print("activities="); pw.println(activities);

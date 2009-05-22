@@ -23,6 +23,7 @@ import android.os.ParcelFormatException;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -54,7 +55,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 34;
+    private static final int VERSION = 35;
 
     private final File mFile;
     private final File mBackupFile;
@@ -982,14 +983,25 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
     
-    public void notePhoneSignalStrengthLocked(int asu) {
+    public void notePhoneSignalStrengthLocked(SignalStrength signalStrength) {
         // Bin the strength.
         int bin;
-        if (asu < 0 || asu >= 99) bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        else if (asu >= 16) bin = SIGNAL_STRENGTH_GREAT;
-        else if (asu >= 8)  bin = SIGNAL_STRENGTH_GOOD;
-        else if (asu >= 4)  bin = SIGNAL_STRENGTH_MODERATE;
-        else bin = SIGNAL_STRENGTH_POOR;
+
+        if (!signalStrength.isGsm()) {
+            int dBm = signalStrength.getCdmaDbm();
+            if (dBm >= -75) bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            else if (dBm >= -85) bin = SIGNAL_STRENGTH_GREAT;
+            else if (dBm >= -95)  bin = SIGNAL_STRENGTH_GOOD;
+            else if (dBm >= -100)  bin = SIGNAL_STRENGTH_MODERATE;
+            else bin = SIGNAL_STRENGTH_POOR;
+        } else {
+            int asu = signalStrength.getGsmSignalStrength();
+            if (asu < 0 || asu >= 99) bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            else if (asu >= 16) bin = SIGNAL_STRENGTH_GREAT;
+            else if (asu >= 8)  bin = SIGNAL_STRENGTH_GOOD;
+            else if (asu >= 4)  bin = SIGNAL_STRENGTH_MODERATE;
+            else bin = SIGNAL_STRENGTH_POOR;
+        }
         if (mPhoneSignalStrengthBin != bin) {
             if (mPhoneSignalStrengthBin >= 0) {
                 mPhoneSignalStrengthsTimer[mPhoneSignalStrengthBin].stopRunningLocked(this);

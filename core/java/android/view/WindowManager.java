@@ -210,6 +210,15 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW+3;
         
         /**
+         * Window type: window for showing overlays on top of media windows.
+         * These windows are displayed between TYPE_APPLICATION_MEDIA and the
+         * application window.  They should be translucent to be useful.  This
+         * is a big ugly hack so:
+         * @hide
+         */
+        public static final int TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW+4;
+    
+        /**
          * End of types of sub-windows.
          */
         public static final int LAST_SUB_WINDOW         = 1999;
@@ -466,6 +475,15 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_WATCH_OUTSIDE_TOUCH = 0x00040000;
         
+        /** Window flag: special flag to let windows be shown when the screen
+         * is locked. This will let application windows take precedence over
+         * key guard or any other lock screens. Can be used with
+         * {@link #FLAG_KEEP_SCREEN_ON} to turn screen on and display windows
+         * directly before showing the key guard window
+         *
+         * {@hide} */
+        public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
+
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.

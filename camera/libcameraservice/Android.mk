@@ -42,6 +42,7 @@ LOCAL_SRC_FILES:=               \
 LOCAL_SHARED_LIBRARIES:= \
     libui \
     libutils \
+    libbinder \
     libcutils \
     libmedia
 

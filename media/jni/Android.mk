@@ -18,6 +18,7 @@ LOCAL_SHARED_LIBRARIES := \
     libnativehelper \
     libcutils \
     libutils \
+    libbinder \
     libmedia \
     libsgl \
     libui

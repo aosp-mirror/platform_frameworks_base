@@ -21,7 +21,7 @@
 #include <sys/types.h>
 
 #include <utils/Vector.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 
 #include <ui/Rect.h>
 

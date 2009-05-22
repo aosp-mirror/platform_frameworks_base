@@ -18,8 +18,9 @@ package com.android.server;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.SystemClock;
+import android.os.LatencyTimer;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -73,14 +74,17 @@ public abstract class KeyInputQueue {
     public static final int FILTER_REMOVE = 0;
     public static final int FILTER_KEEP = 1;
     public static final int FILTER_ABORT = -1;
-    
+
+    private static final boolean MEASURE_LATENCY = false;
+    private LatencyTimer lt;
+
     public interface FilterCallback {
         int filterEvent(QueuedEvent ev);
     }
     
     static class QueuedEvent {
         InputDevice inputDevice;
-        long when;
+        long whenNano;
         int flags; // From the raw event
         int classType; // One of the class constants in InputEvent
         Object event;
@@ -88,7 +92,7 @@ public abstract class KeyInputQueue {
 
         void copyFrom(QueuedEvent that) {
             this.inputDevice = that.inputDevice;
-            this.when = that.when;
+            this.whenNano = that.whenNano;
             this.flags = that.flags;
             this.classType = that.classType;
             this.event = that.event;
@@ -107,6 +111,10 @@ public abstract class KeyInputQueue {
     }
 
     KeyInputQueue(Context context) {
+        if (MEASURE_LATENCY) {
+            lt = new LatencyTimer(100, 1000);
+        }
+
         PowerManager pm = (PowerManager)context.getSystemService(
                                                         Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -241,7 +249,7 @@ public abstract class KeyInputQueue {
                     
                     if (configChanged) {
                         synchronized (mFirst) {
-                            addLocked(di, SystemClock.uptimeMillis(), 0,
+                            addLocked(di, System.nanoTime(), 0,
                                     RawInputEvent.CLASS_CONFIGURATION_CHANGED,
                                     null);
                         }
@@ -256,6 +264,7 @@ public abstract class KeyInputQueue {
                         // timebase as SystemClock.uptimeMillis().
                         //curTime = gotOne ? ev.when : SystemClock.uptimeMillis();
                         final long curTime = SystemClock.uptimeMillis();
+                        final long curTimeNano = System.nanoTime();
                         //Log.i(TAG, "curTime=" + curTime + ", systemClock=" + SystemClock.uptimeMillis());
                         
                         final int classes = di.classes;
@@ -276,7 +285,7 @@ public abstract class KeyInputQueue {
                                 down = false;
                             }
                             int keycode = rotateKeyCodeLocked(ev.keycode);
-                            addLocked(di, curTime, ev.flags,
+                            addLocked(di, curTimeNano, ev.flags,
                                     RawInputEvent.CLASS_KEYBOARD,
                                     newKeyEvent(di, di.mDownTime, curTime, down,
                                             keycode, 0, scancode,
@@ -330,7 +339,7 @@ public abstract class KeyInputQueue {
                                 }
                                 
                                 MotionEvent me;
-                                me = di.mAbs.generateMotion(di, curTime, true,
+                                me = di.mAbs.generateMotion(di, curTime, curTimeNano, true,
                                         mDisplay, mOrientation, mGlobalMetaState);
                                 if (false) Log.v(TAG, "Absolute: x=" + di.mAbs.x
                                         + " y=" + di.mAbs.y + " ev=" + me);
@@ -338,15 +347,15 @@ public abstract class KeyInputQueue {
                                     if (WindowManagerPolicy.WATCH_POINTER) {
                                         Log.i(TAG, "Enqueueing: " + me);
                                     }
-                                    addLocked(di, curTime, ev.flags,
+                                    addLocked(di, curTimeNano, ev.flags,
                                             RawInputEvent.CLASS_TOUCHSCREEN, me);
                                 }
-                                me = di.mRel.generateMotion(di, curTime, false,
+                                me = di.mRel.generateMotion(di, curTime, curTimeNano, false,
                                         mDisplay, mOrientation, mGlobalMetaState);
                                 if (false) Log.v(TAG, "Relative: x=" + di.mRel.x
                                         + " y=" + di.mRel.y + " ev=" + me);
                                 if (me != null) {
-                                    addLocked(di, curTime, ev.flags,
+                                    addLocked(di, curTimeNano, ev.flags,
                                             RawInputEvent.CLASS_TRACKBALL, me);
                                 }
                             }
@@ -530,7 +539,7 @@ public abstract class KeyInputQueue {
         }
     }
     
-    private QueuedEvent obtainLocked(InputDevice device, long when,
+    private QueuedEvent obtainLocked(InputDevice device, long whenNano,
             int flags, int classType, Object event) {
         QueuedEvent ev;
         if (mCacheCount == 0) {
@@ -542,7 +551,7 @@ public abstract class KeyInputQueue {
             mCacheCount--;
         }
         ev.inputDevice = device;
-        ev.when = when;
+        ev.whenNano = whenNano;
         ev.flags = flags;
         ev.classType = classType;
         ev.event = event;
@@ -561,13 +570,13 @@ public abstract class KeyInputQueue {
         }
     }
 
-    private void addLocked(InputDevice device, long when, int flags,
+    private void addLocked(InputDevice device, long whenNano, int flags,
             int classType, Object event) {
         boolean poke = mFirst.next == mLast;
 
-        QueuedEvent ev = obtainLocked(device, when, flags, classType, event);
+        QueuedEvent ev = obtainLocked(device, whenNano, flags, classType, event);
         QueuedEvent p = mLast.prev;
-        while (p != mFirst && ev.when < p.when) {
+        while (p != mFirst && ev.whenNano < p.whenNano) {
             p = p.prev;
         }
 
@@ -578,8 +587,15 @@ public abstract class KeyInputQueue {
         ev.inQueue = true;
 
         if (poke) {
+            long time;
+            if (MEASURE_LATENCY) {
+                time = System.nanoTime();
+            }
             mFirst.notify();
             mWakeLock.acquire();
+            if (MEASURE_LATENCY) {
+                lt.sample("1 addLocked-queued event ", System.nanoTime() - time);
+            }
         }
     }
 

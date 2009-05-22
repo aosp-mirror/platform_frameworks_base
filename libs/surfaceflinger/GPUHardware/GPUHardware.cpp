@@ -30,12 +30,12 @@
 #include <cutils/log.h>
 #include <cutils/properties.h>
 
-#include <utils/IBinder.h>
-#include <utils/MemoryDealer.h>
-#include <utils/MemoryBase.h>
-#include <utils/MemoryHeapPmem.h>
-#include <utils/MemoryHeapBase.h>
-#include <utils/IPCThreadState.h>
+#include <binder/IBinder.h>
+#include <binder/MemoryDealer.h>
+#include <binder/MemoryBase.h>
+#include <binder/MemoryHeapPmem.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/IPCThreadState.h>
 #include <utils/StopWatch.h>
 
 #include <ui/ISurfaceComposer.h>

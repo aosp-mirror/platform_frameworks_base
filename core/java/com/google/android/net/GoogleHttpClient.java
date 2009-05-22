@@ -37,6 +37,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.LayeredSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.SocketFactory;
 import org.apache.http.impl.client.EntityEnclosingRequestWrapper;
 import org.apache.http.impl.client.RequestWrapper;
 import org.apache.http.params.HttpParams;
@@ -44,6 +48,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -66,25 +72,22 @@ public class GoogleHttpClient implements HttpClient {
 
     private final AndroidHttpClient mClient;
     private final ContentResolver mResolver;
-    private final String mUserAgent;
+    private final String mAppName, mUserAgent;
+    private final ThreadLocal<Boolean> mConnectionAllocated = new ThreadLocal<Boolean>();
 
     /**
-     * Create an HTTP client.  Normally one client is shared throughout an app.
-     * @param resolver to use for accessing URL rewriting rules.
-     * @param userAgent to report in your HTTP requests.
-     * @deprecated Use {@link #GoogleHttpClient(android.content.ContentResolver, String, boolean)}
+     * Create an HTTP client without SSL session persistence.
+     * @deprecated Use {@link #GoogleHttpClient(android.content.Context, String, boolean)}
      */
     public GoogleHttpClient(ContentResolver resolver, String userAgent) {
         mClient = AndroidHttpClient.newInstance(userAgent);
         mResolver = resolver;
-        mUserAgent = userAgent;
+        mUserAgent = mAppName = userAgent;
     }
 
     /**
-     * GoogleHttpClient(Context, String, boolean) - without SSL session
-     * persistence.
-     *
-     * @deprecated use Context instead of ContentResolver.
+     * Create an HTTP client without SSL session persistence.
+     * @deprecated Use {@link #GoogleHttpClient(android.content.Context, String, boolean)}
      */
     public GoogleHttpClient(ContentResolver resolver, String appAndVersion,
             boolean gzipCapable) {
@@ -111,21 +114,72 @@ public class GoogleHttpClient implements HttpClient {
      * headers.  Needed because Google servers require gzip in the User-Agent
      * in order to return gzip'd content.
      */
-    public GoogleHttpClient(Context context, String appAndVersion,
-        boolean gzipCapable) {
-        this(context.getContentResolver(), SSLClientSessionCacheFactory.getCache(context),
+    public GoogleHttpClient(Context context, String appAndVersion, boolean gzipCapable) {
+        this(context.getContentResolver(),
+                SSLClientSessionCacheFactory.getCache(context),
                 appAndVersion, gzipCapable);
     }
 
-    private GoogleHttpClient(ContentResolver resolver, SSLClientSessionCache cache,
+    private GoogleHttpClient(ContentResolver resolver,
+            SSLClientSessionCache cache,
             String appAndVersion, boolean gzipCapable) {
         String userAgent = appAndVersion + " (" + Build.DEVICE + " " + Build.ID + ")";
         if (gzipCapable) {
             userAgent = userAgent + "; gzip";
         }
+
         mClient = AndroidHttpClient.newInstance(userAgent, cache);
         mResolver = resolver;
+        mAppName = appAndVersion;
         mUserAgent = userAgent;
+
+        // Wrap all the socket factories with the appropriate wrapper.  (Apache
+        // HTTP, curse its black and stupid heart, inspects the SocketFactory to
+        // see if it's a LayeredSocketFactory, so we need two wrapper classes.)
+        SchemeRegistry registry = getConnectionManager().getSchemeRegistry();
+        for (String name : registry.getSchemeNames()) {
+            Scheme scheme = registry.unregister(name);
+            SocketFactory sf = scheme.getSocketFactory();
+            if (sf instanceof LayeredSocketFactory) {
+                sf = new WrappedLayeredSocketFactory((LayeredSocketFactory) sf);
+            } else {
+                sf = new WrappedSocketFactory(sf);
+            }
+            registry.register(new Scheme(name, sf, scheme.getDefaultPort()));
+        }
+    }
+
+    /**
+     * Delegating wrapper for SocketFactory records when sockets are connected.
+     * We use this to know whether a connection was created vs reused, to
+     * gather per-app statistics about connection reuse rates.
+     * (Note, we record only *connection*, not *creation* of sockets --
+     * what we care about is the network overhead of an actual TCP connect.)
+     */
+    private class WrappedSocketFactory implements SocketFactory {
+        private SocketFactory mDelegate;
+        private WrappedSocketFactory(SocketFactory delegate) { mDelegate = delegate; }
+        public final Socket createSocket() throws IOException { return mDelegate.createSocket(); }
+        public final boolean isSecure(Socket s) { return mDelegate.isSecure(s); }
+
+        public final Socket connectSocket(
+                Socket s, String h, int p,
+                InetAddress la, int lp, HttpParams params) throws IOException {
+            mConnectionAllocated.set(Boolean.TRUE);
+            return mDelegate.connectSocket(s, h, p, la, lp, params);
+        }
+    }
+
+    /** Like WrappedSocketFactory, but for the LayeredSocketFactory subclass. */
+    private class WrappedLayeredSocketFactory
+            extends WrappedSocketFactory implements LayeredSocketFactory {
+        private LayeredSocketFactory mDelegate;
+        private WrappedLayeredSocketFactory(LayeredSocketFactory sf) { super(sf); mDelegate = sf; }
+
+        public final Socket createSocket(Socket s, String host, int port, boolean autoClose)
+                throws IOException {
+            return mDelegate.createSocket(s, host, port, autoClose);
+        }
     }
 
     /**
@@ -140,24 +194,21 @@ public class GoogleHttpClient implements HttpClient {
     public HttpResponse executeWithoutRewriting(
             HttpUriRequest request, HttpContext context)
             throws IOException {
-        String code = "Error";
+        int code = -1;
         long start = SystemClock.elapsedRealtime();
         try {
             HttpResponse response;
-            // TODO: if we're logging network stats, and if the apache library is configured
-            // to follow redirects, count each redirect as an additional round trip.
+            mConnectionAllocated.set(null);
 
-            // see if we're logging network stats.
-            boolean logNetworkStats = NetworkStatsEntity.shouldLogNetworkStats();
+            if (NetworkStatsEntity.shouldLogNetworkStats()) {
+                // TODO: if we're logging network stats, and if the apache library is configured
+                // to follow redirects, count each redirect as an additional round trip.
 
-            if (logNetworkStats) {
                 int uid = android.os.Process.myUid();
                 long startTx = NetStat.getUidTxBytes(uid);
                 long startRx = NetStat.getUidRxBytes(uid);
 
                 response = mClient.execute(request, context);
-                code = Integer.toString(response.getStatusLine().getStatusCode());
-
                 HttpEntity origEntity = response == null ? null : response.getEntity();
                 if (origEntity != null) {
                     // yeah, we compute the same thing below.  we do need to compute this here
@@ -165,30 +216,39 @@ public class GoogleHttpClient implements HttpClient {
                     long now = SystemClock.elapsedRealtime();
                     long elapsed = now - start;
                     NetworkStatsEntity entity = new NetworkStatsEntity(origEntity,
-                            mUserAgent, uid, startTx, startRx,
+                            mAppName, uid, startTx, startRx,
                             elapsed /* response latency */, now /* processing start time */);
                     response.setEntity(entity);
                 }
             } else {
                 response = mClient.execute(request, context);
-                code = Integer.toString(response.getStatusLine().getStatusCode());
             }
 
+            code = response.getStatusLine().getStatusCode();
             return response;
-        } catch (IOException e) {
-            code = "IOException";
-            throw e;
         } finally {
             // Record some statistics to the checkin service about the outcome.
             // Note that this is only describing execute(), not body download.
+            // We assume the database writes are much faster than network I/O,
+            // and not worth running in a background thread or anything.
             try {
                 long elapsed = SystemClock.elapsedRealtime() - start;
                 ContentValues values = new ContentValues();
-                values.put(Checkin.Stats.TAG,
-                         Checkin.Stats.Tag.HTTP_STATUS + ":" +
-                         mUserAgent + ":" + code);
                 values.put(Checkin.Stats.COUNT, 1);
                 values.put(Checkin.Stats.SUM, elapsed / 1000.0);
+
+                values.put(Checkin.Stats.TAG, Checkin.Stats.Tag.HTTP_REQUEST + ":" + mAppName);
+                mResolver.insert(Checkin.Stats.CONTENT_URI, values);
+
+                // No sockets and no exceptions means we successfully reused a connection
+                if (mConnectionAllocated.get() == null && code >= 0) {
+                    values.put(Checkin.Stats.TAG, Checkin.Stats.Tag.HTTP_REUSED + ":" + mAppName);
+                    mResolver.insert(Checkin.Stats.CONTENT_URI, values);
+                }
+
+                String status = code < 0 ? "IOException" : Integer.toString(code);
+                values.put(Checkin.Stats.TAG,
+                         Checkin.Stats.Tag.HTTP_STATUS + ":" + mAppName + ":" + status);
                 mResolver.insert(Checkin.Stats.CONTENT_URI, values);
             } catch (Exception e) {
                 Log.e(TAG, "Error recording stats", e);

@@ -63,7 +63,7 @@ public class InputDevice {
             yMoveScale = my != 0 ? (1.0f/my) : 1.0f;
         }
         
-        MotionEvent generateMotion(InputDevice device, long curTime,
+        MotionEvent generateMotion(InputDevice device, long curTime, long curTimeNano,
                 boolean isAbs, Display display, int orientation,
                 int metaState) {
             if (!changed) {
@@ -167,7 +167,7 @@ public class InputDevice {
                 if (!isAbs) {
                     x = y = 0;
                 }
-                return MotionEvent.obtain(downTime, curTime, action,
+                return MotionEvent.obtainNano(downTime, curTime, curTimeNano, action,
                         scaledX, scaledY, scaledPressure, scaledSize, metaState,
                         xPrecision, yPrecision, device.id, edgeFlags);
             } else {
@@ -181,7 +181,7 @@ public class InputDevice {
                     }
                     return null;
                 }
-                MotionEvent me = MotionEvent.obtain(downTime, curTime,
+                MotionEvent me = MotionEvent.obtainNano(downTime, curTime, curTimeNano,
                         MotionEvent.ACTION_MOVE, scaledX, scaledY,
                         scaledPressure, scaledSize, metaState,
                         xPrecision, yPrecision, device.id, edgeFlags);

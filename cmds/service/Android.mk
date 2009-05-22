@@ -4,8 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
 	service.cpp
 
-LOCAL_SHARED_LIBRARIES := \
-	libutils
+LOCAL_SHARED_LIBRARIES := libutils libbinder
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX

@@ -18,8 +18,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
-#include <utils/IInterface.h>
+#include <binder/Parcel.h>
+#include <binder/IInterface.h>
 
 #include <ui/IOverlay.h>
 
