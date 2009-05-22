@@ -737,7 +737,7 @@ public final class MediaStore
                     name.endsWith(", a") || name.endsWith(",a")) {
                     name = name.substring(0, name.lastIndexOf(','));
                 }
-                name = name.replaceAll("[\\[\\]\\(\\)'.,?!]", "").trim();
+                name = name.replaceAll("[\\[\\]\\(\\)\"'.,?!]", "").trim();
                 if (name.length() > 0) {
                     // Insert a separator between the characters to avoid
                     // matches on a partial character. If we ever change
