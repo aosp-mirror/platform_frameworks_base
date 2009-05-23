@@ -37,10 +37,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -55,7 +53,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 35;
+    private static final int VERSION = 36;
 
     private final File mFile;
     private final File mBackupFile;
@@ -105,6 +103,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     boolean mPhoneOn;
     StopwatchTimer mPhoneOnTimer;
     
+    boolean mAudioOn;
+    StopwatchTimer mAudioOnTimer;
+    
+    boolean mVideoOn;
+    StopwatchTimer mVideoOnTimer;
+    
     int mPhoneSignalStrengthBin = -1;
     final StopwatchTimer[] mPhoneSignalStrengthsTimer = 
             new StopwatchTimer[NUM_SIGNAL_STRENGTH_BINS];
@@ -142,9 +146,9 @@ public final class BatteryStatsImpl extends BatteryStats {
      */
     int mDischargeStartLevel;
     int mDischargeCurrentLevel;
-    
+
     long mLastWriteTime = 0; // Milliseconds
-    
+
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
      */
@@ -320,6 +324,13 @@ public final class BatteryStatsImpl extends BatteryStats {
          */
         long mUnpluggedTime;
         
+        /**
+         * Constructs from a parcel.
+         * @param type
+         * @param unpluggables
+         * @param powerType
+         * @param in
+         */
         Timer(int type, ArrayList<Unpluggable> unpluggables, Parcel in) {
             mType = type;
             
@@ -632,7 +643,6 @@ public final class BatteryStatsImpl extends BatteryStats {
          * was actually held for an interesting duration.
          */
         long mAcquireTime;
-        
 
         StopwatchTimer(int type, ArrayList<StopwatchTimer> timerPool,
                 ArrayList<Unpluggable> unpluggables, Parcel in) {
@@ -1071,7 +1081,51 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiOnUid = -1;
         }
     }
+
+    public void noteAudioOnLocked(int uid) {
+        if (!mAudioOn) {
+            mAudioOn = true;
+            mAudioOnTimer.startRunningLocked(this);
+        }
+        Uid u = mUidStats.get(uid);
+        if (u != null) {
+            u.noteAudioTurnedOnLocked();
+        }
+    }
     
+    public void noteAudioOffLocked(int uid) {
+        if (mAudioOn) {
+            mAudioOn = false;
+            mAudioOnTimer.stopRunningLocked(this);
+        }
+        Uid u = mUidStats.get(uid);
+        if (u != null) {
+            u.noteAudioTurnedOffLocked();
+        }
+    }
+
+    public void noteVideoOnLocked(int uid) {
+        if (!mVideoOn) {
+            mVideoOn = true;
+            mVideoOnTimer.startRunningLocked(this);
+        }
+        Uid u = mUidStats.get(uid);
+        if (u != null) {
+            u.noteVideoTurnedOnLocked();
+        }
+    }
+    
+    public void noteVideoOffLocked(int uid) {
+        if (mVideoOn) {
+            mVideoOn = false;
+            mVideoOnTimer.stopRunningLocked(this);
+        }
+        Uid u = mUidStats.get(uid);
+        if (u != null) {
+            u.noteVideoTurnedOffLocked();
+        }
+    }
+
     public void noteWifiRunningLocked() {
         if (!mWifiRunning) {
             mWifiRunning = true;
@@ -1151,7 +1205,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mScreenBrightnessTimer[brightnessBin].getTotalTimeLocked(
                 batteryRealtime, which);
     }
-    
+
     @Override public int getInputEventCount(int which) {
         return mInputEventCounter.getCountLocked(which);
     }
@@ -1159,7 +1213,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     @Override public long getPhoneOnTime(long batteryRealtime, int which) {
         return mPhoneOnTimer.getTotalTimeLocked(batteryRealtime, which);
     }
-    
+
     @Override public long getPhoneSignalStrengthTime(int strengthBin,
             long batteryRealtime, int which) {
         return mPhoneSignalStrengthsTimer[strengthBin].getTotalTimeLocked(
@@ -1226,9 +1280,15 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         boolean mScanWifiLockOut;
         StopwatchTimer mScanWifiLockTimer;
-
+        
         boolean mWifiMulticastEnabled;
         StopwatchTimer mWifiMulticastTimer;
+        
+        boolean mAudioTurnedOn;
+        StopwatchTimer mAudioTurnedOnTimer;
+        
+        boolean mVideoTurnedOn;
+        StopwatchTimer mVideoTurnedOnTimer;
 
         Counter[] mUserActivityCounters;
         
@@ -1259,6 +1319,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mScanWifiLockTimer = new StopwatchTimer(SCAN_WIFI_LOCK, null, mUnpluggables);
             mWifiMulticastTimer = new StopwatchTimer(WIFI_MULTICAST_ENABLED,
                     null, mUnpluggables);
+            mAudioTurnedOnTimer = new StopwatchTimer(AUDIO_TURNED_ON, null, mUnpluggables);
+            mVideoTurnedOnTimer = new StopwatchTimer(VIDEO_TURNED_ON, null, mUnpluggables);
         }
 
         @Override
@@ -1343,6 +1405,38 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         
         @Override
+        public void noteVideoTurnedOnLocked() {
+            if (!mVideoTurnedOn) {
+                mVideoTurnedOn = true;
+                mVideoTurnedOnTimer.startRunningLocked(BatteryStatsImpl.this);
+            }
+        }
+
+        @Override
+        public void noteVideoTurnedOffLocked() {
+            if (mVideoTurnedOn) {
+                mVideoTurnedOn = false;
+                mVideoTurnedOnTimer.stopRunningLocked(BatteryStatsImpl.this);
+            }
+        }
+
+        @Override
+        public void noteAudioTurnedOnLocked() {
+            if (!mAudioTurnedOn) {
+                mAudioTurnedOn = true;
+                mAudioTurnedOnTimer.startRunningLocked(BatteryStatsImpl.this);
+            }
+        }
+
+        @Override
+        public void noteAudioTurnedOffLocked() {
+            if (mAudioTurnedOn) {
+                mAudioTurnedOn = false;
+                mAudioTurnedOnTimer.stopRunningLocked(BatteryStatsImpl.this);
+            }
+        }
+
+        @Override
         public void noteFullWifiLockReleasedLocked() {
             if (mFullWifiLockOut) {
                 mFullWifiLockOut = false;
@@ -1386,7 +1480,17 @@ public final class BatteryStatsImpl extends BatteryStats {
         public long getWifiTurnedOnTime(long batteryRealtime, int which) {
             return mWifiTurnedOnTimer.getTotalTimeLocked(batteryRealtime, which);
         }
-        
+
+        @Override 
+        public long getAudioTurnedOnTime(long batteryRealtime, int which) {
+            return mAudioTurnedOnTimer.getTotalTimeLocked(batteryRealtime, which);
+        }
+
+        @Override 
+        public long getVideoTurnedOnTime(long batteryRealtime, int which) {
+            return mVideoTurnedOnTimer.getTotalTimeLocked(batteryRealtime, which);
+        }
+
         @Override 
         public long getFullWifiLockTime(long batteryRealtime, int which) {
             return mFullWifiLockTimer.getTotalTimeLocked(batteryRealtime, which);
@@ -1437,7 +1541,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             return mCurrentTcpBytesSent + (mStartedTcpBytesSent >= 0
                     ? (NetStat.getUidTxBytes(mUid) - mStartedTcpBytesSent) : 0);
         }
-        
+
         void writeToParcelLocked(Parcel out, long batteryRealtime) {
             out.writeInt(mWakelockStats.size());
             for (Map.Entry<String, Uid.Wakelock> wakelockEntry : mWakelockStats.entrySet()) {
@@ -1475,6 +1579,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             out.writeLong(mTcpBytesSentAtLastUnplug);
             mWifiTurnedOnTimer.writeToParcel(out, batteryRealtime);
             mFullWifiLockTimer.writeToParcel(out, batteryRealtime);
+            mAudioTurnedOnTimer.writeToParcel(out, batteryRealtime);
+            mVideoTurnedOnTimer.writeToParcel(out, batteryRealtime);
             mScanWifiLockTimer.writeToParcel(out, batteryRealtime);
             mWifiMulticastTimer.writeToParcel(out, batteryRealtime);
             if (mUserActivityCounters == null) {
@@ -1534,6 +1640,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiTurnedOnTimer = new StopwatchTimer(WIFI_TURNED_ON, null, mUnpluggables, in);
             mFullWifiLockOut = false;
             mFullWifiLockTimer = new StopwatchTimer(FULL_WIFI_LOCK, null, mUnpluggables, in);
+            mAudioTurnedOn = false;
+            mAudioTurnedOnTimer = new StopwatchTimer(AUDIO_TURNED_ON, null, mUnpluggables, in);
+            mVideoTurnedOn = false;
+            mVideoTurnedOnTimer = new StopwatchTimer(VIDEO_TURNED_ON, null, mUnpluggables, in);
             mScanWifiLockOut = false;
             mScanWifiLockTimer = new StopwatchTimer(SCAN_WIFI_LOCK, null, mUnpluggables, in);
             mWifiMulticastEnabled = false;
@@ -2327,7 +2437,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             StopwatchTimer t = getSensorTimerLocked(Sensor.GPS, false);
             if (t != null) {
                 t.stopRunningLocked(BatteryStatsImpl.this);
-            }  
+            }
         }
 
         public BatteryStatsImpl getBatteryStats() {
@@ -2764,6 +2874,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             u.mWifiTurnedOnTimer.readSummaryFromParcelLocked(in);
             u.mFullWifiLockOut = false;
             u.mFullWifiLockTimer.readSummaryFromParcelLocked(in);
+            u.mAudioTurnedOn = false;
+            u.mAudioTurnedOnTimer.readSummaryFromParcelLocked(in);
+            u.mVideoTurnedOn = false;
+            u.mVideoTurnedOnTimer.readSummaryFromParcelLocked(in);
             u.mScanWifiLockOut = false;
             u.mScanWifiLockTimer.readSummaryFromParcelLocked(in);
             u.mWifiMulticastEnabled = false;
@@ -3063,6 +3177,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int ikw = 0; ikw < NKW; ikw++) {
             if (in.readInt() != 0) {
                 String wakelockName = in.readString();
+                in.readInt(); // Extra 0/1 written by Timer.writeTimerToParcel
                 SamplingTimer kwlt = new SamplingTimer(mUnpluggables, mOnBattery, in);
                 mKernelWakelockStats.put(wakelockName, kwlt);
             }
