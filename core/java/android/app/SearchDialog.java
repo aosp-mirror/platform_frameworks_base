@@ -49,6 +49,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -165,7 +166,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * @param context Application Context we can use for system acess
      */
     public SearchDialog(Context context) {
-        super(context, com.android.internal.R.style.Theme_SearchBar);
+        super(context, com.android.internal.R.style.Theme_GlobalSearchBar);
     }
 
     /**
@@ -392,6 +393,21 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 InputMethodManager inputManager = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                         inputManager.showSoftInputUnchecked(0, null);
+            }
+            
+            // The Dialog uses a ContextThemeWrapper for the context; use this to change the
+            // theme out from underneath us, between the global search theme and the in-app
+            // search theme. They are identical except that the global search theme does not
+            // dim the background of the window (because global search is full screen so it's
+            // not needed and this should save a little bit of time on global search invocation).
+            Object context = getContext();
+            if (context instanceof ContextThemeWrapper) {
+                ContextThemeWrapper wrapper = (ContextThemeWrapper) context;
+                if (globalSearch) {
+                    wrapper.setTheme(com.android.internal.R.style.Theme_GlobalSearchBar);
+                } else {
+                    wrapper.setTheme(com.android.internal.R.style.Theme_SearchBar);
+                }
             }
             show();
         }
