@@ -69,6 +69,20 @@ public abstract class BatteryStats implements Parcelable {
      public static final int WIFI_MULTICAST_ENABLED = 7;
 
     /**
+     * A constant indicating an audio turn on timer
+     *
+     * {@hide}
+     */
+    public static final int AUDIO_TURNED_ON = 7;
+
+    /**
+     * A constant indicating a video turn on timer
+     *
+     * {@hide}
+     */
+    public static final int VIDEO_TURNED_ON = 8;
+
+    /**
      * Include all of the data in the stats, including previously saved data.
      */
     public static final int STATS_TOTAL = 0;
@@ -164,7 +178,7 @@ public abstract class BatteryStats implements Parcelable {
          * @return a time in microseconds
          */
         public abstract long getTotalTimeLocked(long batteryRealtime, int which);
-        
+
         /**
          * Temporary for debugging.
          */
@@ -234,11 +248,17 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void noteScanWifiLockReleasedLocked();
         public abstract void noteWifiMulticastEnabledLocked();
         public abstract void noteWifiMulticastDisabledLocked();
+        public abstract void noteAudioTurnedOnLocked();
+        public abstract void noteAudioTurnedOffLocked();
+        public abstract void noteVideoTurnedOnLocked();
+        public abstract void noteVideoTurnedOffLocked();
         public abstract long getWifiTurnedOnTime(long batteryRealtime, int which);
         public abstract long getFullWifiLockTime(long batteryRealtime, int which);
         public abstract long getScanWifiLockTime(long batteryRealtime, int which);
         public abstract long getWifiMulticastTime(long batteryRealtime,
                                                   int which);
+        public abstract long getAudioTurnedOnTime(long batteryRealtime, int which);
+        public abstract long getVideoTurnedOnTime(long batteryRealtime, int which);
 
         /**
          * Note that these must match the constants in android.os.LocalPowerManager.
