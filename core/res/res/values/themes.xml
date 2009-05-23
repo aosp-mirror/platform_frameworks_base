@@ -368,6 +368,12 @@
         <item name="android:backgroundDimEnabled">true</item>
         <item name="windowContentOverlay">@null</item>        
     </style>
+    
+    <!-- Theme for the search input bar when doing global search. The only
+         difference from non-global search is that we do not dim the background. -->
+    <style name="Theme.GlobalSearchBar" parent="Theme.Panel">
+        <item name="windowContentOverlay">@null</item>
+    </style>
 
     <!-- Menu Themes -->
     <eat-comment />
