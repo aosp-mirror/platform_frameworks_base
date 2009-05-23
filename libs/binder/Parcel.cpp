@@ -441,9 +441,14 @@ status_t Parcel::writeInterfaceToken(const String16& interface)
     return writeString16(interface);
 }
 
+bool Parcel::checkInterface(IBinder* binder) const
+{
+    return enforceInterface(binder->getInterfaceDescriptor()); 
+}
+
 bool Parcel::enforceInterface(const String16& interface) const
 {
-    String16 str = readString16();
+    const String16 str(readString16());
     if (str == interface) {
         return true;
     } else {

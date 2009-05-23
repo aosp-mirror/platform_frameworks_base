@@ -108,15 +108,15 @@ namespace android {
  */
 class DurationTimer {
 public:
-    DurationTimer(void) {}
-    ~DurationTimer(void) {}
+    DurationTimer() {}
+    ~DurationTimer() {}
 
     // Start the timer.
-    void start(void);
+    void start();
     // Stop the timer.
-    void stop(void);
+    void stop();
     // Get the duration in microseconds.
-    long long durationUsecs(void) const;
+    long long durationUsecs() const;
 
     // Subtract two timevals.  Returns the difference (ptv1-ptv2) in
     // microseconds.

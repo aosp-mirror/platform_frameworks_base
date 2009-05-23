@@ -39,6 +39,10 @@ class HeapInterface : public virtual BnMemoryHeap
 public:
     // all values must be page-aligned
     virtual sp<IMemory> mapMemory(size_t offset, size_t size) = 0;
+
+    HeapInterface();
+protected:
+    virtual ~HeapInterface();
 };
 
 // ----------------------------------------------------------------------------
@@ -61,6 +65,10 @@ public:
     virtual void        dump(const char* what, uint32_t flags = 0) const = 0;
     virtual void        dump(String8& res,
             const char* what, uint32_t flags = 0) const = 0;
+
+    AllocatorInterface();
+protected:
+    virtual ~AllocatorInterface();
 };
 
 // ----------------------------------------------------------------------------
@@ -71,6 +79,7 @@ public:
 class SharedHeap : public HeapInterface, public MemoryHeapBase
 {
 public:
+                        SharedHeap();
                         SharedHeap(size_t size, uint32_t flags = 0, char const * name = NULL);
     virtual             ~SharedHeap();
     virtual sp<IMemory> mapMemory(size_t offset, size_t size);

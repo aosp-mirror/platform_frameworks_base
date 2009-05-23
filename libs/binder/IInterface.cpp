@@ -20,6 +20,13 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+IInterface::IInterface() 
+    : RefBase() {
+}
+
+IInterface::~IInterface() {
+}
+
 sp<IBinder> IInterface::asBinder()
 {
     return this ? onAsBinder() : NULL;

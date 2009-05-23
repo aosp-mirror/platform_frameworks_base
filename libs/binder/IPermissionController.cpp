@@ -55,12 +55,6 @@ IMPLEMENT_META_INTERFACE(PermissionController, "android.os.IPermissionController
 
 // ----------------------------------------------------------------------
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
-
 status_t BnPermissionController::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {

@@ -31,7 +31,7 @@ public:
 
     inline  int32_t     handle() const { return mHandle; }
 
-    virtual String16    getInterfaceDescriptor() const;
+    virtual const String16&    getInterfaceDescriptor() const;
     virtual bool        isBinderAlive() const;
     virtual status_t    pingBinder();
     virtual status_t    dump(int fd, const Vector<String16>& args);
@@ -106,6 +106,7 @@ private:
     };
 
             void                reportOneDeath(const Obituary& obit);
+            bool                isDescriptorCached() const;
 
     mutable Mutex               mLock;
             volatile int32_t    mAlive;
@@ -113,6 +114,7 @@ private:
             Vector<Obituary>*   mObituaries;
             ObjectManager       mObjects;
             Parcel*             mConstantData;
+    mutable String16            mDescriptorCache;
 };
 
 }; // namespace android

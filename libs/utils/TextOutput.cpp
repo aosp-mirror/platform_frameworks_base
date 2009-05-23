@@ -22,9 +22,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+namespace android {
+
 // ---------------------------------------------------------------------------
 
-namespace android {
+TextOutput::TextOutput() { 
+}
+
+TextOutput::~TextOutput() { 
+}
+
+// ---------------------------------------------------------------------------
 
 TextOutput& operator<<(TextOutput& to, bool val)
 {

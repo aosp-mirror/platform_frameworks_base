@@ -156,62 +156,61 @@ IMPLEMENT_META_INTERFACE(SurfaceComposer, "android.ui.ISurfaceComposer");
 
 // ----------------------------------------------------------------------
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
-
 status_t BnSurfaceComposer::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    status_t err = BnInterface<ISurfaceComposer>::onTransact(code, data, reply, flags);
-    if (err == NO_ERROR)
-        return err;
-
-    CHECK_INTERFACE(ISurfaceComposer, data, reply);
-
     switch(code) {
         case CREATE_CONNECTION: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             sp<IBinder> b = createConnection()->asBinder();
             reply->writeStrongBinder(b);
         } break;
         case OPEN_GLOBAL_TRANSACTION: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             openGlobalTransaction();
         } break;
         case CLOSE_GLOBAL_TRANSACTION: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             closeGlobalTransaction();
         } break;
         case SET_ORIENTATION: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             DisplayID dpy = data.readInt32();
             int orientation = data.readInt32();
             uint32_t flags = data.readInt32();
             reply->writeInt32( setOrientation(dpy, orientation, flags) );
         } break;
         case FREEZE_DISPLAY: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             DisplayID dpy = data.readInt32();
             uint32_t flags = data.readInt32();
             reply->writeInt32( freezeDisplay(dpy, flags) );
         } break;
         case UNFREEZE_DISPLAY: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             DisplayID dpy = data.readInt32();
             uint32_t flags = data.readInt32();
             reply->writeInt32( unfreezeDisplay(dpy, flags) );
         } break;
         case BOOT_FINISHED: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             bootFinished();
         } break;
         case REVOKE_GPU: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             reply->writeInt32( revokeGPU() );
         } break;
         case SIGNAL: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             signal();
         } break;
         case GET_CBLK: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             sp<IBinder> b = getCblk()->asBinder();
             reply->writeStrongBinder(b);
         } break;
         case REQUEST_GPU: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
             // TODO: this should be protected by a permission
             gpu_info_t info;
             sp<IGPUCallback> callback
@@ -232,7 +231,7 @@ status_t BnSurfaceComposer::onTransact(
             reply->writeInt32(res);
         } break;
         default:
-            return UNKNOWN_TRANSACTION;
+            return BBinder::onTransact(code, data, reply, flags);
     }
     return NO_ERROR;
 }
