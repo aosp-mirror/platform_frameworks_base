@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
+#include <sys/time.h>  // for utimes
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -607,14 +608,14 @@ backup_helper_test_four()
         0x11, 0x00, 0x00, 0x00,  0x62, 0x79, 0x74, 0x65,
         0x73, 0x5f, 0x6f, 0x66,  0x5f, 0x70, 0x61, 0x64,
         0x64, 0x69, 0x6e, 0x67,  0x33, 0xab, 0xab, 0xab,
-        
+
         // bytes of padding2
         0x44, 0x11, 0x22, 0x33,  0xef, 0xbe, 0xad, 0xde,
         0x44, 0x33, 0x22, 0x11,  0x34, 0x23, 0x12, 0x01,
         0x12, 0x00, 0x00, 0x00,  0x62, 0x79, 0x74, 0x65,
         0x73, 0x5f, 0x6f, 0x66,  0x5f, 0x70, 0x61, 0x64,
         0x64, 0x69, 0x6e, 0x67,  0x5f, 0x32, 0xab, 0xab,
-        
+
         // bytes of padding3
         0x44, 0x11, 0x22, 0x33,  0xef, 0xbe, 0xad, 0xde,
         0x44, 0x33, 0x22, 0x11,  0x34, 0x23, 0x12, 0x01,
@@ -627,7 +628,7 @@ backup_helper_test_four()
     if (err != 0) {
         return err;
     }
-    
+
     // read
     fd = open(filename, O_RDONLY);
     if (fd == -1) {
@@ -665,7 +666,7 @@ backup_helper_test_four()
             matched = false;
         }
     }
-    
+
     return matched ? 0 : 1;
 }
 
@@ -746,7 +747,7 @@ backup_helper_test_data_writer()
     system("rm -r " SCRATCH_DIR);
     mkdir(SCRATCH_DIR, 0777);
     mkdir(SCRATCH_DIR "data", 0777);
-    
+
     fd = creat(filename, 0666);
     if (fd == -1) {
         fprintf(stderr, "error creating: %s\n", strerror(errno));
@@ -863,7 +864,7 @@ backup_helper_test_data_reader()
     system("rm -r " SCRATCH_DIR);
     mkdir(SCRATCH_DIR, 0777);
     mkdir(SCRATCH_DIR "data", 0777);
-    
+
     fd = creat(filename, 0666);
     if (fd == -1) {
         fprintf(stderr, "error creating: %s\n", strerror(errno));
@@ -940,9 +941,23 @@ get_mod_time(const char* filename, struct timeval times[2])
         return errno;
     }
     times[0].tv_sec = st.st_atime;
-    times[0].tv_usec = st.st_atime_nsec / 1000;
     times[1].tv_sec = st.st_mtime;
+
+    // If st_atime is a macro then struct stat64 uses struct timespec
+    // to store the access and modif time values and typically
+    // st_*time_nsec is not defined. In glibc, this is controlled by
+    // __USE_MISC.
+#ifdef __USE_MISC
+#if !defined(st_atime) || defined(st_atime_nsec)
+#error "Check if this __USE_MISC conditional is still needed."
+#endif
+    times[0].tv_usec = st.st_atim.tv_nsec / 1000;
+    times[1].tv_usec = st.st_mtim.tv_nsec / 1000;
+#else
+    times[0].tv_usec = st.st_atime_nsec / 1000;
     times[1].tv_usec = st.st_mtime_nsec / 1000;
+#endif
+
     return 0;
 }
 
@@ -987,7 +1002,7 @@ backup_helper_test_files()
 
     {
         BackupDataWriter dataStream(dataStreamFD);
-    
+
         err = back_up_files(-1, &dataStream, newSnapshotFD, SCRATCH_DIR, files_before, 5);
         if (err != 0) {
             return err;
@@ -1017,7 +1032,7 @@ backup_helper_test_files()
     utimes(SCRATCH_DIR "data/e", e_times);
     write_text_file(SCRATCH_DIR "data/g", "g\ngg\n");
     unlink(SCRATCH_DIR "data/f");
-    
+
     char const* files_after[] = {
         "data/a", // added
         "data/b", // same
@@ -1047,7 +1062,7 @@ backup_helper_test_files()
 
     {
         BackupDataWriter dataStream(dataStreamFD);
-    
+
         err = back_up_files(oldSnapshotFD, &dataStream, newSnapshotFD, SCRATCH_DIR,
                 files_after, 6);
         if (err != 0) {
@@ -1058,7 +1073,7 @@ backup_helper_test_files()
     close(oldSnapshotFD);
     close(dataStreamFD);
     close(newSnapshotFD);
-    
+
     return 0;
 }
 
