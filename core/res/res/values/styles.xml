@@ -174,14 +174,18 @@
     <style name="Widget.GestureOverlayView">
         <item name="android:gestureStrokeWidth">12.0</item>
         <item name="android:gestureColor">#ffffff00</item>
-        <item name="android:uncertainGestureColor">#3cffff00</item>
-        <item name="android:fadeOffset">300</item>
-        <item name="android:fadeDuration">300</item>
+        <item name="android:uncertainGestureColor">#48ffff00</item>
+        <item name="android:fadeOffset">420</item>
+        <item name="android:fadeDuration">150</item>
+        <item name="android:gestureStrokeLengthThreshold">30.0</item>
+        <item name="android:gestureStrokeSquarenessThreshold">0.275</item>
+        <item name="android:gestureStrokeAngleThreshold">40.0</item>
+        <item name="android:eventsInterceptionEnabled">true</item>
     </style>
 
     <style name="Widget.GestureOverlayView.White">
         <item name="android:gestureColor">#ff00ff00</item>
-        <item name="android:uncertainGestureColor">#3c00ff00</item>
+        <item name="android:uncertainGestureColor">#4800ff00</item>
     </style>
 
     <style name="Widget.Button">

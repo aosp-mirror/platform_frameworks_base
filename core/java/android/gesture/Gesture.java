@@ -57,6 +57,11 @@ public class Gesture implements Parcelable {
         mGestureID = GESTURE_ID_BASE + sGestureCount++;
     }
 
+    void recycle() {
+        mStrokes.clear();
+        mBoundingBox.setEmpty();
+    }
+
     /**
      * @return all the strokes of the gesture
      */
@@ -109,6 +114,40 @@ public class Gesture implements Parcelable {
      */
     public RectF getBoundingBox() {
         return mBoundingBox;
+    }
+
+    public Path toPath() {
+        return toPath(null);
+    }
+
+    public Path toPath(Path path) {
+        if (path == null) path = new Path();
+
+        final ArrayList<GestureStroke> strokes = mStrokes;
+        final int count = strokes.size();
+
+        for (int i = 0; i < count; i++) {
+            path.addPath(strokes.get(i).getPath());
+        }
+
+        return path;
+    }
+
+    public Path toPath(int width, int height, int edge, int numSample) {
+        return toPath(null, width, height, edge, numSample);
+    }
+
+    public Path toPath(Path path, int width, int height, int edge, int numSample) {
+        if (path == null) path = new Path();
+
+        final ArrayList<GestureStroke> strokes = mStrokes;
+        final int count = strokes.size();
+
+        for (int i = 0; i < count; i++) {
+            path.addPath(strokes.get(i).toPath(width - 2 * edge, height - 2 * edge, numSample));
+        }
+
+        return path;
     }
 
     /**

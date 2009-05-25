@@ -1107,6 +1107,11 @@
   <public type="attr" name="fadeOffset" />
   <public type="attr" name="fadeDuration" />
   <public type="attr" name="gestures" />
+  <public type="attr" name="gestureStrokeType" />
+  <public type="attr" name="gestureStrokeLengthThreshold" />
+  <public type="attr" name="gestureStrokeSquarenessThreshold" />
+  <public type="attr" name="gestureStrokeAngleThreshold" />
+  <public type="attr" name="eventsInterceptionEnabled" />
 
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 

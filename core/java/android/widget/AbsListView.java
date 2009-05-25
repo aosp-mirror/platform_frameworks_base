@@ -49,7 +49,6 @@ import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.gesture.GestureOverlayView;
-import android.gesture.TouchThroughGestureListener;
 import android.gesture.Gesture;
 import android.gesture.LetterRecognizer;
 import android.gesture.Prediction;
@@ -472,7 +471,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private ViewTreeObserver.OnGlobalLayoutListener mGesturesLayoutListener;
     private boolean mGlobalLayoutListenerAddedGestures;
     private boolean mInstallGesturesOverlay;
-    private TouchThroughGestureListener mGesturesListener;
     private boolean mPreviousGesturing;
 
     private boolean mGlobalLayoutListenerAddedFilter;
@@ -736,10 +734,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mGesturesPopup = p;
 
             mGesturesOverlay.removeAllOnGestureListeners();
-            mGesturesListener = new TouchThroughGestureListener(null);
-            mGesturesListener.setGestureType(TouchThroughGestureListener.MULTIPLE_STROKE);
-            mGesturesListener.addOnGestureActionListener(new GesturesProcessor());
-            mGesturesOverlay.addOnGestureListener(mGesturesListener);
+            mGesturesOverlay.setGestureStrokeType(GestureOverlayView.GESTURE_STROKE_TYPE_MULTIPLE);
+            mGesturesOverlay.addOnGesturePerformedListener(new GesturesProcessor());
 
             mPreviousGesturing = false;            
         }
@@ -756,19 +752,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (mGestures != GESTURES_NONE) {
-            mGesturesOverlay.processEvent(ev);
+            if (ev.getAction() != MotionEvent.ACTION_DOWN || mFastScroller == null ||
+                    !mFastScroller.isPointInside(ev.getX(), ev.getY())) {
 
-            final boolean isGesturing = mGesturesListener.isGesturing();
+                mGesturesOverlay.dispatchTouchEvent(ev);
 
-            if (!isGesturing) {
-                mPreviousGesturing = isGesturing;
-                return super.dispatchTouchEvent(ev);                
-            } else if (!mPreviousGesturing){
-                mPreviousGesturing = isGesturing;
-                final MotionEvent event = MotionEvent.obtain(ev);
-                event.setAction(MotionEvent.ACTION_CANCEL);
-                super.dispatchTouchEvent(event);
-                return true;
+                final boolean isGesturing = mGesturesOverlay.isGesturing();
+
+                if (!isGesturing) {
+                    mPreviousGesturing = isGesturing;
+                    return super.dispatchTouchEvent(ev);
+                } else if (!mPreviousGesturing){
+                    mPreviousGesturing = isGesturing;
+                    final MotionEvent event = MotionEvent.obtain(ev);
+                    event.setAction(MotionEvent.ACTION_CANCEL);
+                    super.dispatchTouchEvent(event);
+                    return true;
+                }
             }
         }
 
@@ -2130,13 +2130,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onTouchEvent(ev);
             if (intercepted) {
                 return true;
             }            
         }
+
         final int action = ev.getAction();
         final int x = (int) ev.getX();
         final int y = (int) ev.getY();
@@ -3848,8 +3848,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
-    private class GesturesProcessor implements
-            TouchThroughGestureListener.OnGesturePerformedListener {
+    private class GesturesProcessor implements GestureOverlayView.OnGesturePerformedListener {
 
         private static final double SCORE_THRESHOLD = 0.1;
 
