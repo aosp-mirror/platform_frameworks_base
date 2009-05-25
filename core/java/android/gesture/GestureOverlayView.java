@@ -434,13 +434,6 @@ public class GestureOverlayView extends FrameLayout {
     private void touchStart(MotionEvent event) {
         mIsListeningForGestures = true;
 
-        // pass the event to handlers
-        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
-        final int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-            listeners.get(i).onGestureStarted(this, event);
-        }
-
         float x = event.getX();
         float y = event.getY();
 
@@ -480,6 +473,13 @@ public class GestureOverlayView extends FrameLayout {
 
         mCurveEndX = x;
         mCurveEndY = y;
+
+        // pass the event to handlers
+        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
+        final int count = listeners.size();
+        for (int i = 0; i < count; i++) {
+            listeners.get(i).onGestureStarted(this, event);
+        }        
     }
 
     private Rect touchMove(MotionEvent event) {
@@ -521,13 +521,6 @@ public class GestureOverlayView extends FrameLayout {
 
         mStrokeBuffer.add(new GesturePoint(x, y, event.getEventTime()));
 
-        // pass the event to handlers
-        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
-        final int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-            listeners.get(i).onGesture(this, event);
-        }
-
         if (mHandleGestureActions && !mIsGesturing) {
             mTotalLength += (float) Math.sqrt(dx * dx + dy * dy);
 
@@ -549,6 +542,13 @@ public class GestureOverlayView extends FrameLayout {
             }
         }
 
+        // pass the event to handlers
+        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
+        final int count = listeners.size();
+        for (int i = 0; i < count; i++) {
+            listeners.get(i).onGesture(this, event);
+        }        
+
         return areaToRefresh;
     }
 
@@ -557,6 +557,7 @@ public class GestureOverlayView extends FrameLayout {
 
         // add the stroke to the current gesture
         mCurrentGesture.addStroke(new GestureStroke(mStrokeBuffer));
+        mStrokeBuffer.clear();
 
         if (!cancel) {
             // pass the event to handlers
@@ -581,7 +582,6 @@ public class GestureOverlayView extends FrameLayout {
         }
 
         mIsGesturing = false;
-        mStrokeBuffer.clear();
     }
 
     private class FadeOutRunnable implements Runnable {
