@@ -123,7 +123,7 @@ public class WebSettings {
     private String          mSerifFontFamily = "serif";
     private String          mCursiveFontFamily = "cursive";
     private String          mFantasyFontFamily = "fantasy";
-    private String          mDefaultTextEncoding = "Latin-1";
+    private String          mDefaultTextEncoding;
     private String          mUserAgent;
     private boolean         mUseDefaultUserAgent;
     private String          mAcceptLanguage;
@@ -240,6 +240,8 @@ public class WebSettings {
     WebSettings(Context context) {   
         mEventHandler = new EventHandler();
         mContext = context;
+        mDefaultTextEncoding = context.getString(com.android.internal.
+                                                 R.string.default_text_encoding);
 
         if (sLockForLocaleSettings == null) {
             sLockForLocaleSettings = new Object();
