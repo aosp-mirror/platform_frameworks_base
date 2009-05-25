@@ -89,37 +89,49 @@ public class GestureStroke {
      */
     void draw(Canvas canvas, Paint paint) {
         if (mCachedPath == null) {
-            final float[] localPoints = points;
-            final int count = localPoints.length;
-
-            Path path = null;
-
-            float mX = 0;
-            float mY = 0;
-
-            for (int i = 0; i < count; i += 2) {
-                float x = localPoints[i];
-                float y = localPoints[i + 1];
-                if (path == null) {
-                    path = new Path();
-                    path.moveTo(x, y);
-                    mX = x;
-                    mY = y;
-                } else {
-                    float dx = Math.abs(x - mX);
-                    float dy = Math.abs(y - mY);
-                    if (dx >= 3 || dy >= 3) {
-                        path.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
-                        mX = x;
-                        mY = y;
-                    }
-                }
-            }
-
-            mCachedPath = path;
+            makePath();
         }
 
         canvas.drawPath(mCachedPath, paint);
+    }
+
+    public Path getPath() {
+        if (mCachedPath == null) {
+            makePath();
+        }
+
+        return mCachedPath;
+    }
+
+    private void makePath() {
+        final float[] localPoints = points;
+        final int count = localPoints.length;
+
+        Path path = null;
+
+        float mX = 0;
+        float mY = 0;
+
+        for (int i = 0; i < count; i += 2) {
+            float x = localPoints[i];
+            float y = localPoints[i + 1];
+            if (path == null) {
+                path = new Path();
+                path.moveTo(x, y);
+                mX = x;
+                mY = y;
+            } else {
+                float dx = Math.abs(x - mX);
+                float dy = Math.abs(y - mY);
+                if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+                    path.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+                    mX = x;
+                    mY = y;
+                }
+            }
+        }
+
+        mCachedPath = path;
     }
 
     /**
@@ -158,8 +170,7 @@ public class GestureStroke {
             } else {
                 float dx = Math.abs(x - mX);
                 float dy = Math.abs(y - mY);
-                if (dx >= TOUCH_TOLERANCE ||
-                        dy >= TOUCH_TOLERANCE) {
+                if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
                     path.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
                     mX = x;
                     mY = y;

@@ -17,7 +17,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="fill_parent">
     
     <Spinner 
         android:id="@+id/spinner"
@@ -30,7 +30,7 @@
         android:id="@+id/drawingpad"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
     <LinearLayout 
         android:orientation="horizontal"

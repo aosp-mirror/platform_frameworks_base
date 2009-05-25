@@ -388,7 +388,7 @@ final class GestureUtilities {
         } else { // -PI<alpha<PI
             angle = (float) Math.atan2(targetVector[1], targetVector[0]);
             angle = (float) (180 * angle / Math.PI);
-            android.graphics.Matrix trans = new android.graphics.Matrix();
+            Matrix trans = new Matrix();
             trans.setRotate(-angle);
             trans.mapPoints(points);
         }

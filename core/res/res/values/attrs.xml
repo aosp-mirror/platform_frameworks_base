@@ -2091,6 +2091,22 @@
         <!-- Duration, in milliseconds, of the fade out effect after the user is done
              drawing a gesture. -->
         <attr name="fadeDuration" format="integer" />
+        <!-- Defines the type of strokes that define a gesture. -->
+        <attr name="gestureStrokeType">
+            <!-- A gesture is made of only one stroke. -->
+            <enum name="single" value="0" />
+            <!-- A gesture is made of multiple strokes. -->
+            <enum name="multiple" value="1" />
+        </attr>
+        <!-- Minimum length of a stroke before it is recognized as a gesture. -->
+        <attr name="gestureStrokeLengthThreshold" format="float" />
+        <!-- Squareness threshold of a stroke before it is recognized as a gesture. -->
+        <attr name="gestureStrokeSquarenessThreshold" format="float" />
+        <!-- Minimum curve angle a stroke must contain before it is recognized as a gesture. -->
+        <attr name="gestureStrokeAngleThreshold" format="float" />
+        <!-- Defines whether the overlay should intercept the motion events when a gesture
+             is recognized. -->
+        <attr name="eventsInterceptionEnabled" format="boolean" />
     </declare-styleable>
 
     <!-- ======================================= -->

@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.provider.Contacts.People;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -34,16 +33,12 @@ import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
 import android.gesture.LetterRecognizer;
 import android.gesture.Prediction;
-import android.gesture.TouchThroughGestureListener;
 
 import java.util.ArrayList;
 
 public class ContactListGestureOverlay extends Activity {
-
-    private static final String LOGTAG = "ContactListGestureOverlay";
-    
+    private static final String LOG_TAG = "ContactListGestureOverlay";
     private static final String SORT_ORDER = People.DISPLAY_NAME + " COLLATE LOCALIZED ASC";
-
     private static final String[] CONTACTS_PROJECTION = new String[] {
             People._ID, // 0
             People.DISPLAY_NAME, // 1
@@ -51,11 +46,9 @@ public class ContactListGestureOverlay extends Activity {
 
     private ContactAdapter mContactAdapter;
 
-    private TouchThroughGestureListener mGestureProcessor;
-
-    private LetterRecognizer mRecognizer;
-
     private ListView mContactList;
+    private LetterRecognizer mRecognizer;
+    private GestureOverlayView mOverlay;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,10 +56,10 @@ public class ContactListGestureOverlay extends Activity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.overlaydemo);
 
-        setProgressBarIndeterminateVisibility(true);
-
         // create a letter recognizer
-        mRecognizer = LetterRecognizer.getLetterRecognizer(this, LetterRecognizer.RECOGNIZER_LATIN_LOWERCASE);
+        mRecognizer = LetterRecognizer.getLetterRecognizer(this,
+                LetterRecognizer.RECOGNIZER_LATIN_LOWERCASE);
+        mOverlay = (GestureOverlayView) findViewById(R.id.overlay);
 
         // load the contact list
         mContactList = (ListView) findViewById(R.id.list);
@@ -74,13 +67,14 @@ public class ContactListGestureOverlay extends Activity {
         mContactList.setTextFilterEnabled(true);
         mContactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                if (!mGestureProcessor.isGesturing()) {
+                if (!mOverlay.isGesturing()) {
                     Intent intent = new Intent(Intent.ACTION_VIEW, ContentUris.withAppendedId(
                             People.CONTENT_URI, id));
                     startActivity(intent);
                 }
             }
         });
+
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(People.CONTENT_URI, CONTACTS_PROJECTION, null, null,
                 SORT_ORDER);
@@ -91,21 +85,16 @@ public class ContactListGestureOverlay extends Activity {
         mContactAdapter = new ContactAdapter(this, list);
         mContactList.setAdapter(mContactAdapter);
 
-        setProgressBarIndeterminateVisibility(false);
-
-        // add a gesture overlay on top of the ListView
-        GestureOverlayView overlay = new GestureOverlayView(this);
-        mGestureProcessor = new TouchThroughGestureListener(mContactList);
-        mGestureProcessor.setGestureType(TouchThroughGestureListener.MULTIPLE_STROKE);
-        mGestureProcessor.addOnGestureActionListener(new TouchThroughGestureListener.OnGesturePerformedListener() {
+        mOverlay.setGestureStrokeType(GestureOverlayView.GESTURE_STROKE_TYPE_MULTIPLE);
+        mOverlay.addOnGesturePerformedListener(new GestureOverlayView.OnGesturePerformedListener() {
             public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
                 ArrayList<Prediction> predictions = mRecognizer.recognize(gesture);
                 if (!predictions.isEmpty()) {
-                    Log.v(LOGTAG, "1st Prediction : " + predictions.get(0).name +
+                    Log.v(LOG_TAG, "1st Prediction : " + predictions.get(0).name +
                             " @" + predictions.get(0).score);
-                    Log.v(LOGTAG, "2nd Prediction : " + predictions.get(1).name +
+                    Log.v(LOG_TAG, "2nd Prediction : " + predictions.get(1).name +
                             " @" + predictions.get(1).score);
-                    Log.v(LOGTAG, "3rd Prediction : " + predictions.get(2).name +
+                    Log.v(LOG_TAG, "3rd Prediction : " + predictions.get(2).name +
                             " @" + predictions.get(2).score);
                     int index = mContactAdapter.search(predictions.get(0).name);
                     if (index != -1) {
@@ -114,9 +103,5 @@ public class ContactListGestureOverlay extends Activity {
                 }
             }
         });
-        overlay.addOnGestureListener(mGestureProcessor);
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
-        this.addContentView(overlay, params);
     }
 }

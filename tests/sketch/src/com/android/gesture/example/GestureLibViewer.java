@@ -78,7 +78,7 @@ public class GestureLibViewer extends Activity {
                     mCurrentGestureIndex--;
                 }
                 gesture = mGestures.get(mCurrentGestureIndex);
-                mGesturePad.setCurrentGesture(gesture);
+                mGesturePad.setGesture(gesture);
                 mGesturePad.invalidate();
             }
         }
@@ -109,7 +109,7 @@ public class GestureLibViewer extends Activity {
             mGestures = mGesureLibrary.getGestures(list.get(0));
             mCurrentGestureIndex = 0;
             Gesture gesture = mGestures.get(mCurrentGestureIndex);
-            mGesturePad.setCurrentGesture(gesture);
+            mGesturePad.setGesture(gesture);
         }
 
         mGestureCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -118,7 +118,7 @@ public class GestureLibViewer extends Activity {
                 if (!mGestures.isEmpty()) {
                     mCurrentGestureIndex = 0;
                     Gesture gesture = mGestures.get(mCurrentGestureIndex);
-                    mGesturePad.setCurrentGesture(gesture);
+                    mGesturePad.setGesture(gesture);
                 }
                 mGesturePad.invalidate();
             }
@@ -139,7 +139,7 @@ public class GestureLibViewer extends Activity {
                 }
                 mCurrentGestureIndex++;
                 Gesture gesture = mGestures.get(mCurrentGestureIndex);
-                mGesturePad.setCurrentGesture(gesture);
+                mGesturePad.setGesture(gesture);
                 mGesturePad.invalidate();
             }
         });
@@ -150,7 +150,7 @@ public class GestureLibViewer extends Activity {
                 if (mCurrentGestureIndex >= 1 && !mGestures.isEmpty()) {
                     mCurrentGestureIndex--;
                     Gesture gesture = mGestures.get(mCurrentGestureIndex);
-                    mGesturePad.setCurrentGesture(gesture);
+                    mGesturePad.setGesture(gesture);
                     mGesturePad.invalidate();
                 }
             }
