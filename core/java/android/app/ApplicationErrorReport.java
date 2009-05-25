@@ -18,7 +18,6 @@ package android.app;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.Printer;
 
 /**
@@ -103,20 +102,7 @@ public class ApplicationErrorReport implements Parcelable {
      * a parcel.
      */
     ApplicationErrorReport(Parcel in) {
-        type = in.readInt();
-        packageName = in.readString();
-        installerPackageName = in.readString();
-        processName = in.readString();
-        time = in.readLong();
-
-        switch (type) {
-            case TYPE_CRASH:
-                crashInfo = new CrashInfo(in);
-                break;
-            case TYPE_ANR:
-                anrInfo = new AnrInfo(in);
-                break;
-        }
+        readFromParcel(in);
     }
 
     public void writeToParcel(Parcel dest, int flags) {
@@ -132,6 +118,25 @@ public class ApplicationErrorReport implements Parcelable {
                 break;
             case TYPE_ANR:
                 anrInfo.writeToParcel(dest, flags);
+                break;
+        }
+    }
+
+    protected void readFromParcel(Parcel in) {
+        type = in.readInt();
+        packageName = in.readString();
+        installerPackageName = in.readString();
+        processName = in.readString();
+        time = in.readLong();
+
+        switch (type) {
+            case TYPE_CRASH:
+                crashInfo = new CrashInfo(in);
+                anrInfo = null;
+                break;
+            case TYPE_ANR:
+                anrInfo = new AnrInfo(in);
+                crashInfo = null;
                 break;
         }
     }
