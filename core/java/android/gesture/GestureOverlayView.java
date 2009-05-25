@@ -53,6 +53,9 @@ public class GestureOverlayView extends FrameLayout {
     public static final int GESTURE_STROKE_TYPE_SINGLE = 0;
     public static final int GESTURE_STROKE_TYPE_MULTIPLE = 1;
 
+    public static final int ORIENTATION_HORIZONTAL = 0;
+    public static final int ORIENTATION_VERTICAL = 1;
+
     private static final int FADE_ANIMATION_RATE = 16;
     private static final boolean GESTURE_RENDERING_ANTIALIAS = true;
     private static final boolean DITHER_FLAG = true;
@@ -75,6 +78,8 @@ public class GestureOverlayView extends FrameLayout {
     private float mGestureStrokeLengthThreshold = 30.0f;
     private float mGestureStrokeSquarenessTreshold = 0.275f;
     private float mGestureStrokeAngleThreshold = 40.0f;
+
+    private int mOrientation = ORIENTATION_VERTICAL;
 
     private final Rect mInvalidRect = new Rect();
     private final Path mPath = new Path();
@@ -150,6 +155,7 @@ public class GestureOverlayView extends FrameLayout {
                 mInterceptEvents);
         mFadeEnabled = a.getBoolean(R.styleable.GestureOverlayView_fadeEnabled,
                 mFadeEnabled);
+        mOrientation = a.getInt(R.styleable.GestureOverlayView_orientation, mOrientation);
 
         a.recycle();
 
@@ -174,6 +180,14 @@ public class GestureOverlayView extends FrameLayout {
 
     public ArrayList<GesturePoint> getCurrentStroke() {
         return mStrokeBuffer;
+    }
+
+    public int getOrientation() {
+        return mOrientation;
+    }
+
+    public void setOrientation(int orientation) {
+        mOrientation = orientation;
     }
 
     public void setGestureColor(int color) {
@@ -415,7 +429,7 @@ public class GestureOverlayView extends FrameLayout {
     private boolean processEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                touchStart(event);
+                touchDown(event);
                 invalidate();
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -445,7 +459,7 @@ public class GestureOverlayView extends FrameLayout {
         return false;
     }
 
-    private void touchStart(MotionEvent event) {
+    private void touchDown(MotionEvent event) {
         mIsListeningForGestures = true;
 
         float x = event.getX();
@@ -548,7 +562,9 @@ public class GestureOverlayView extends FrameLayout {
                 }
 
                 if (box.squareness > mGestureStrokeSquarenessTreshold ||
-                        angle < mGestureStrokeAngleThreshold) {
+                        (mOrientation == ORIENTATION_VERTICAL ?
+                                angle < mGestureStrokeAngleThreshold :
+                                angle > mGestureStrokeAngleThreshold)) {
 
                     mIsGesturing = true;
                     setCurrentColor(mCertainGestureColor);
@@ -606,7 +622,7 @@ public class GestureOverlayView extends FrameLayout {
             actionListeners.get(i).onGesturePerformed(GestureOverlayView.this,
                     mCurrentGesture);
         }
-    }    
+    }
 
     private class FadeOutRunnable implements Runnable {
         boolean fireActionPerformed;

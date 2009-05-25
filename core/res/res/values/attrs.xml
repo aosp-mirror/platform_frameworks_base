@@ -2109,6 +2109,9 @@
         <attr name="eventsInterceptionEnabled" format="boolean" />
         <!-- Defines whether the gesture will automatically fade out after being recognized. -->
         <attr name="fadeEnabled" format="boolean" />
+        <!-- Indicates whether horizontal (when the orientation is vertical) or vertical
+             (when orientation is horizontal) strokes automatically define a gesture. -->
+        <attr name="orientation" />
     </declare-styleable>
 
     <!-- ======================================= -->
