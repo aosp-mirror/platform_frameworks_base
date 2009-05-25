@@ -2351,7 +2351,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
 
             // Check whether the child that requests the invalidate is fully opaque
-            final boolean isOpaque = child.isOpaque();
+            final boolean isOpaque = child.isOpaque() && !drawAnimation &&
+                    child.getAnimation() != null;
             // Mark the child as dirty, using the appropriate flag
             // Make sure we do not set both flags at the same time
             final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
