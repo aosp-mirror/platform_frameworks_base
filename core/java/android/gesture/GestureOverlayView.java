@@ -40,6 +40,7 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#GestureOverlayView_eventsInterceptionEnabled
  * @attr ref android.R.styleable#GestureOverlayView_fadeDuration
  * @attr ref android.R.styleable#GestureOverlayView_fadeOffset
+ * @attr ref android.R.styleable#GestureOverlayView_fadeEnabled
  * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeWidth
  * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeAngleThreshold
  * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeLengthThreshold
@@ -62,6 +63,7 @@ public class GestureOverlayView extends FrameLayout {
     private long mFadeOffset = 420;
     private long mFadingStart;
     private boolean mFadingHasStarted;
+    private boolean mFadeEnabled = true;
 
     private int mCurrentColor;
     private int mCertainGestureColor = 0xFFFFFF00;
@@ -146,6 +148,8 @@ public class GestureOverlayView extends FrameLayout {
                 mGestureStrokeSquarenessTreshold);
         mInterceptEvents = a.getBoolean(R.styleable.GestureOverlayView_eventsInterceptionEnabled,
                 mInterceptEvents);
+        mFadeEnabled = a.getBoolean(R.styleable.GestureOverlayView_fadeEnabled,
+                mFadeEnabled);
 
         a.recycle();
 
@@ -236,6 +240,14 @@ public class GestureOverlayView extends FrameLayout {
 
     public void setEventsInterceptionEnabled(boolean enabled) {
         mInterceptEvents = enabled;
+    }
+
+    public boolean isFadeEnabled() {
+        return mFadeEnabled;
+    }
+
+    public void setFadeEnabled(boolean fadeEnabled) {
+        mFadeEnabled = fadeEnabled;
     }
 
     public Gesture getGesture() {
@@ -329,12 +341,14 @@ public class GestureOverlayView extends FrameLayout {
     private void clear(boolean animated, boolean fireActionPerformed) {
         setPaintAlpha(255);
         if (animated && mCurrentGesture != null) {
-            mFadingAlpha = 1.0f;
-            mIsFadingOut = true;
-            mFadingHasStarted = false;
-            mFadingOut.fireActionPerformed = fireActionPerformed;
-            removeCallbacks(mFadingOut);
-            mFadingStart = AnimationUtils.currentAnimationTimeMillis() + mFadeOffset;
+            if (mFadeEnabled) {
+                mFadingAlpha = 1.0f;
+                mIsFadingOut = true;
+                mFadingHasStarted = false;
+                mFadingOut.fireActionPerformed = fireActionPerformed;
+                removeCallbacks(mFadingOut);
+                mFadingStart = AnimationUtils.currentAnimationTimeMillis() + mFadeOffset;
+            }
             postDelayed(mFadingOut, mFadeOffset);
         } else {
             mPath.rewind();
@@ -584,6 +598,16 @@ public class GestureOverlayView extends FrameLayout {
         mIsGesturing = false;
     }
 
+    private void fireOnGesturePerformed() {
+        final ArrayList<OnGesturePerformedListener> actionListeners =
+                mOnGesturePerformedListeners;
+        final int count = actionListeners.size();
+        for (int i = 0; i < count; i++) {
+            actionListeners.get(i).onGesturePerformed(GestureOverlayView.this,
+                    mCurrentGesture);
+        }
+    }    
+
     private class FadeOutRunnable implements Runnable {
         boolean fireActionPerformed;
 
@@ -594,13 +618,7 @@ public class GestureOverlayView extends FrameLayout {
 
                 if (duration > mFadeDuration) {
                     if (fireActionPerformed) {
-                        final ArrayList<OnGesturePerformedListener> actionListeners =
-                                mOnGesturePerformedListeners;
-                        final int count = actionListeners.size();
-                        for (int i = 0; i < count; i++) {
-                            actionListeners.get(i).onGesturePerformed(GestureOverlayView.this,
-                                    mCurrentGesture);
-                        }
+                        fireOnGesturePerformed();
                     }
 
                     mIsFadingOut = false;
@@ -618,6 +636,14 @@ public class GestureOverlayView extends FrameLayout {
                 }
 
                 invalidate();
+            } else if (!mFadeEnabled) {
+                fireOnGesturePerformed();
+
+                mIsFadingOut = false;
+                mFadingHasStarted = false;
+                mPath.rewind();
+                mCurrentGesture = null;
+                setPaintAlpha(255);
             }
         }
     }

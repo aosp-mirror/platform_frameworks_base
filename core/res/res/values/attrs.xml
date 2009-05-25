@@ -2107,6 +2107,8 @@
         <!-- Defines whether the overlay should intercept the motion events when a gesture
              is recognized. -->
         <attr name="eventsInterceptionEnabled" format="boolean" />
+        <!-- Defines whether the gesture will automatically fade out after being recognized. -->
+        <attr name="fadeEnabled" format="boolean" />
     </declare-styleable>
 
     <!-- ======================================= -->
