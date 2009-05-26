@@ -111,7 +111,10 @@ public class SmsHeader {
             /**
              * NOTE: as defined in the spec, ConcatRef and PortAddr
              * fields should not reoccur, but if they do the last
-             * occurrence is to be used.
+             * occurrence is to be used.  Also, for ConcatRef
+             * elements, if the count is zero, sequence is zero, or
+             * sequence is larger than count, the entire element is to
+             * be ignored.
              */
             int id = inStream.read();
             int length = inStream.read();
@@ -124,7 +127,10 @@ public class SmsHeader {
                 concatRef.msgCount = inStream.read();
                 concatRef.seqNumber = inStream.read();
                 concatRef.isEightBits = true;
-                smsHeader.concatRef = concatRef;
+                if (concatRef.msgCount != 0 && concatRef.seqNumber != 0 &&
+                        concatRef.seqNumber <= concatRef.msgCount) {
+                    smsHeader.concatRef = concatRef;
+                }
                 break;
             case ELT_ID_CONCATENATED_16_BIT_REFERENCE:
                 concatRef = new ConcatRef();
@@ -132,7 +138,10 @@ public class SmsHeader {
                 concatRef.msgCount = inStream.read();
                 concatRef.seqNumber = inStream.read();
                 concatRef.isEightBits = false;
-                smsHeader.concatRef = concatRef;
+                if (concatRef.msgCount != 0 && concatRef.seqNumber != 0 &&
+                        concatRef.seqNumber <= concatRef.msgCount) {
+                    smsHeader.concatRef = concatRef;
+                }
                 break;
             case ELT_ID_APPLICATION_PORT_ADDRESSING_8_BIT:
                 portAddrs = new PortAddrs();
