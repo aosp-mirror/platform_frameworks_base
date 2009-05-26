@@ -828,12 +828,10 @@ standard icons for the Android platform. You can load the template files into an
 compatible image-editing program, although your ability to work directly with the 
 layers and treatments may vary based on the program you are using.</p>
 
-The Templates Pack provides templates in Adobe Photoshop and Adobe Illustrator file formats, which preserves the layers and design treatments we used when creating the standard icons for the Android platform. 
-
 <p>You can obtain the Icon Templates Pack archive using the link below: </p>
 
 <p style="margin-left:2em"><a
-href={@docRoot}shareables/icon_templates-v1.0.zip">Download the Icon Templates
+href="{@docRoot}shareables/icon_templates-v1.0.zip">Download the Icon Templates
 Pack &raquo;</a>
 
 
@@ -1219,44 +1217,6 @@ or simply look at the image filename, which use the format
   <img src="{@docRoot}images/icon_design/stat_sys_data_connected_3g.png" title="stat_sys_data_connected_3g" alt="Android asset" />
   <div class="caption">3G</div></td>
 
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_battery_100.png" title="stat_sys_battery_100" alt="Android asset" />
-  <div class="caption">Battery 100%</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_battery_empty.png" title="stat_sys_battery_empty" alt="Android asset" />
-  <div class="caption">Battery empty</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_phone_call.png" title="stat_sys_phone_call" alt="Android asset" />
-  <div class="caption">Call</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_phone_call_forward.png" title="stat_sys_phone_call_forward" alt="Android asset" />
-  <div class="caption">Call forward</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_phone_call_on_hold.png" title="stat_sys_phone_call_on_hold" alt="Android asset" />
-  <div class="caption">Call on hold</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_gps_on.png" title="stat_sys_gps_on" alt="Android asset" />
-  <div class="caption">GPS on</div></td>
-
-</tr>
-<tr>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_missed_call.png" title="stat_notify_missed_call" alt="Android asset" />
-  <div class="caption">Missed call</div></td>
-
-
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/stat_sys_signal_flightmode.png" title="stat_sys_signal_flightmode" alt="Android asset" />
   <div class="caption">Airplane mode</div></td>
@@ -1400,10 +1360,46 @@ or simply look at the image filename, which use the format
 </tr>
 <tr>
 
-
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/stat_sys_wifi_unavailable.png" title="stat_sys_wifi_unavailable" alt="Android asset" />
   <div class="caption">WiFi unavailable</div></td>
+
+<td class="image-caption-i image-list">
+  <img src="{@docRoot}images/icon_design/stat_sys_battery_100.png" title="stat_sys_battery_100" alt="Android asset" />
+  <div class="caption">Battery 100%</div></td>
+
+
+<td class="image-caption-i image-list">
+  <img src="{@docRoot}images/icon_design/stat_sys_battery_empty.png" title="stat_sys_battery_empty" alt="Android asset" />
+  <div class="caption">Battery empty</div></td>
+
+
+<td class="image-caption-i image-list">
+  <img src="{@docRoot}images/icon_design/stat_sys_phone_call.png" title="stat_sys_phone_call" alt="Android asset" />
+  <div class="caption">Call</div></td>
+
+
+<td class="image-caption-i image-list">
+  <img src="{@docRoot}images/icon_design/stat_sys_phone_call_forward.png" title="stat_sys_phone_call_forward" alt="Android asset" />
+  <div class="caption">Call forward</div></td>
+
+
+<td class="image-caption-i image-list">
+  <img src="{@docRoot}images/icon_design/stat_sys_phone_call_on_hold.png" title="stat_sys_phone_call_on_hold" alt="Android asset" />
+  <div class="caption">Call on hold</div></td>
+
+
+<td class="image-caption-i image-list">
+  <img src="{@docRoot}images/icon_design/stat_sys_gps_on.png" title="stat_sys_gps_on" alt="Android asset" />
+  <div class="caption">GPS on</div></td>
+
+</tr>
+<tr>
+
+<td class="image-caption-i image-list">
+  <img src="{@docRoot}images/icon_design/stat_notify_missed_call.png" title="stat_notify_missed_call" alt="Android asset" />
+  <div class="caption">Missed call</div></td>
+
 </tr>
 </table>
 
