@@ -309,13 +309,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         Log.d(LOG_TAG, "setDataEnabled("+enable+") isEnabled=" + isEnabled);
         if (!isEnabled && enable) {
             setEnabled(EXTERNAL_NETWORK_DEFAULT_ID, true);
-            return trySetupData(Phone.REASON_DATA_ENABLED);
+            sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
         } else if (!enable) {
             setEnabled(EXTERNAL_NETWORK_DEFAULT_ID, false);
             cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
-            return true;
-        } else // isEnabled && enable
-
+        }
         return true;
     }
 
@@ -360,6 +358,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
         int psState = mCdmaPhone.mSST.getCurrentCdmaDataConnectionState();
         boolean roaming = phone.getServiceState().getRoaming();
+        boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
 
         if ((state == State.IDLE || state == State.SCANNING)
                 && (psState == ServiceState.RADIO_TECHNOLOGY_1xRTT ||
@@ -369,7 +368,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                         mCdmaPhone.mRuimRecords.getRecordsLoaded())
                 && (mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
                         phone.getState() == Phone.State.IDLE )
-                && isDataAllowed()) {
+                && isDataAllowed()
+                && desiredPowerState) {
 
             return setupData(reason);
 
@@ -384,7 +384,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     " phoneState=" + phone.getState() +
                     " dataEnabled=" + getAnyDataEnabled() +
                     " roaming=" + roaming +
-                    " dataOnRoamingEnable=" + getDataOnRoamingEnabled());
+                    " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
+                    " desiredPowerState=" + desiredPowerState);
             }
             return false;
         }
