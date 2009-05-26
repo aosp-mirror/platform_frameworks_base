@@ -478,7 +478,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             setEnabled(Phone.APN_TYPE_DEFAULT, true);
             // trySetupData() will be a no-op if we are currently
             // connected to the MMS APN
-            return trySetupData(Phone.REASON_DATA_ENABLED);
+            sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
+            return true;
         } else if (!enable) {
             setEnabled(Phone.APN_TYPE_DEFAULT, false);
             // Don't tear down if there is an active APN and it handles MMS or SUPL.
@@ -579,6 +580,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         int gprsState = ((GSMPhone) phone).mSST.getCurrentGprsState();
         boolean roaming = phone.getServiceState().getRoaming();
+        boolean desiredPowerState = ((GSMPhone) phone).mSST.getDesiredPowerState();
 
         if ((state == State.IDLE || state == State.SCANNING)
                 && (gprsState == ServiceState.STATE_IN_SERVICE || noAutoAttach)
@@ -586,7 +588,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 && ( ((GSMPhone) phone).mSST.isConcurrentVoiceAndData() ||
                      phone.getState() == Phone.State.IDLE )
                 && isDataAllowed()
-                && !mIsPsRestricted ) {
+                && !mIsPsRestricted
+                && desiredPowerState ) {
 
             if (state == State.IDLE) {
                 waitingApns = buildWaitingApns();
@@ -614,7 +617,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     " dataEnabled=" + getAnyDataEnabled() +
                     " roaming=" + roaming +
                     " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
-                    " ps restricted=" + mIsPsRestricted);
+                    " ps restricted=" + mIsPsRestricted +
+                    " desiredPowerState=" + desiredPowerState);
             return false;
         }
     }
