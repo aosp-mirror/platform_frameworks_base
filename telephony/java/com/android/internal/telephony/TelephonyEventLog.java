@@ -30,4 +30,6 @@ public final class TelephonyEventLog {
     public static final int EVENT_LOG_CGREG_FAIL = 50107;
     public static final int EVENT_LOG_DATA_STATE_RADIO_OFF = 50108;
     public static final int EVENT_LOG_PDP_NETWORK_DROP = 50109;
+    public static final int EVENT_LOG_CDMA_DATA_SETUP_FAILED = 50110;
+    public static final int EVENT_LOG_CDMA_DATA_DROP = 50111;
 }
