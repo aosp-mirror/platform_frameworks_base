@@ -755,19 +755,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (ev.getAction() != MotionEvent.ACTION_DOWN || mFastScroller == null ||
                     !mFastScroller.isPointInside(ev.getX(), ev.getY())) {
 
-                mGesturesOverlay.dispatchTouchEvent(ev);
+                if (mGesturesPopup.isShowing()) {
+                    mGesturesOverlay.dispatchTouchEvent(ev);
 
-                final boolean isGesturing = mGesturesOverlay.isGesturing();
+                    final boolean isGesturing = mGesturesOverlay.isGesturing();
 
-                if (!isGesturing) {
-                    mPreviousGesturing = isGesturing;
-                    return super.dispatchTouchEvent(ev);
-                } else if (!mPreviousGesturing){
-                    mPreviousGesturing = isGesturing;
-                    final MotionEvent event = MotionEvent.obtain(ev);
-                    event.setAction(MotionEvent.ACTION_CANCEL);
-                    super.dispatchTouchEvent(event);
-                    return true;
+                    if (!isGesturing) {
+                        mPreviousGesturing = isGesturing;
+                        return super.dispatchTouchEvent(ev);
+                    } else if (!mPreviousGesturing){
+                        mPreviousGesturing = isGesturing;
+                        final MotionEvent event = MotionEvent.obtain(ev);
+                        event.setAction(MotionEvent.ACTION_CANCEL);
+                        super.dispatchTouchEvent(event);
+                        return true;
+                    }
                 }
             }
         }
@@ -1927,6 +1929,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int longPressPosition, final long longPressId) {
         boolean handled = false;
 
+        dismissGesturesPopup();
+        
         if (mOnItemLongClickListener != null) {
             handled = mOnItemLongClickListener.onItemLongClick(AbsListView.this, child,
                     longPressPosition, longPressId);
