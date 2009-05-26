@@ -354,19 +354,28 @@ public class GestureOverlayView extends FrameLayout {
 
     private void clear(boolean animated, boolean fireActionPerformed) {
         setPaintAlpha(255);
+        removeCallbacks(mFadingOut);
+        mFadingOut.fireActionPerformed = fireActionPerformed;
+
         if (animated && mCurrentGesture != null) {
-            if (mFadeEnabled) {
-                mFadingAlpha = 1.0f;
-                mIsFadingOut = true;
-                mFadingHasStarted = false;
-                mFadingOut.fireActionPerformed = fireActionPerformed;
-                removeCallbacks(mFadingOut);
-                mFadingStart = AnimationUtils.currentAnimationTimeMillis() + mFadeOffset;
-            }
+            mFadingAlpha = 1.0f;
+            mIsFadingOut = true;
+            mFadingHasStarted = false;
+            mFadingStart = AnimationUtils.currentAnimationTimeMillis() + mFadeOffset;
+
             postDelayed(mFadingOut, mFadeOffset);
         } else {
-            mPath.rewind();
-            mCurrentGesture = null;
+            mFadingAlpha = 1.0f;
+            mIsFadingOut = false;
+            mFadingHasStarted = false;
+
+            if (fireActionPerformed) {
+                post(mFadingOut);
+            } else {
+                mCurrentGesture = null;
+                mPath.rewind();
+                invalidate();
+            }
         }
     }
 
@@ -598,7 +607,7 @@ public class GestureOverlayView extends FrameLayout {
             }
 
             if (mHandleGestureActions) {
-                clear(true, mIsGesturing);
+                clear(mFadeEnabled, mIsGesturing);
             }
         } else {
             // pass the event to handlers
@@ -650,17 +659,16 @@ public class GestureOverlayView extends FrameLayout {
                     setPaintAlpha((int) (255 * mFadingAlpha));
                     postDelayed(this, FADE_ANIMATION_RATE);
                 }
-
-                invalidate();
-            } else if (!mFadeEnabled) {
+            } else {
                 fireOnGesturePerformed();
 
-                mIsFadingOut = false;
                 mFadingHasStarted = false;
                 mPath.rewind();
                 mCurrentGesture = null;
                 setPaintAlpha(255);
             }
+
+            invalidate();            
         }
     }
 
