@@ -1553,7 +1553,6 @@ size_t AudioFlinger::MixerThread::getOutputFrameCount()
 AudioFlinger::MixerThread::TrackBase::TrackBase(
             const sp<MixerThread>& mixerThread,
             const sp<Client>& client,
-            int streamType,
             uint32_t sampleRate,
             int format,
             int channelCount,
@@ -1563,7 +1562,6 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
     :   RefBase(),
         mMixerThread(mixerThread),
         mClient(client),
-        mStreamType(streamType),
         mFrameCount(0),
         mState(IDLE),
         mClientTid(-1),
@@ -1713,12 +1711,13 @@ AudioFlinger::MixerThread::Track::Track(
             int channelCount,
             int frameCount,
             const sp<IMemory>& sharedBuffer)
-    :   TrackBase(mixerThread, client, streamType, sampleRate, format, channelCount, frameCount, 0, sharedBuffer)
+    :   TrackBase(mixerThread, client, sampleRate, format, channelCount, frameCount, 0, sharedBuffer)
 {
     mVolume[0] = 1.0f;
     mVolume[1] = 1.0f;
     mMute = false;
     mSharedBuffer = sharedBuffer;
+    mStreamType = streamType;
 }
 
 AudioFlinger::MixerThread::Track::~Track()
@@ -1902,15 +1901,15 @@ void AudioFlinger::MixerThread::Track::setVolume(float left, float right)
 AudioFlinger::MixerThread::RecordTrack::RecordTrack(
             const sp<MixerThread>& mixerThread,
             const sp<Client>& client,
-            int streamType,
+            int inputSource,
             uint32_t sampleRate,
             int format,
             int channelCount,
             int frameCount,
             uint32_t flags)
-    :   TrackBase(mixerThread, client, streamType, sampleRate, format,
+    :   TrackBase(mixerThread, client, sampleRate, format,
                   channelCount, frameCount, flags, 0),
-        mOverflow(false)
+        mOverflow(false), mInputSource(inputSource)
 {
 }
 
@@ -2235,7 +2234,7 @@ status_t AudioFlinger::TrackHandle::onTransact(
 
 sp<IAudioRecord> AudioFlinger::openRecord(
         pid_t pid,
-        int streamType,
+        int inputSource,
         uint32_t sampleRate,
         int format,
         int channelCount,
@@ -2258,7 +2257,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         goto Exit;
     }
 
-    if (uint32_t(streamType) >= AudioRecord::NUM_STREAM_TYPES) {
+    if (uint32_t(inputSource) >= AudioRecord::NUM_INPUT_SOURCES) {
         LOGE("invalid stream type");
         lStatus = BAD_VALUE;
         goto Exit;
@@ -2301,7 +2300,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         frameCount = ((frameCount - 1)/inFrameCount + 1) * inFrameCount;
     
         // create new record track. The record track uses one track in mHardwareMixerThread by convention.
-        recordTrack = new MixerThread::RecordTrack(mHardwareMixerThread, client, streamType, sampleRate,
+        recordTrack = new MixerThread::RecordTrack(mHardwareMixerThread, client, inputSource, sampleRate,
                                                    format, channelCount, frameCount, flags);
     }
     if (recordTrack->getCblk() == NULL) {
@@ -2408,7 +2407,7 @@ bool AudioFlinger::AudioRecordThread::threadLoop()
                 LOGV("AudioRecordThread: loop starting");
                 if (mRecordTrack != 0) {
                     input = mAudioHardware->openInputStream(
-                                    mRecordTrack->type(),
+                                    mRecordTrack->inputSource(),
                                     mRecordTrack->format(), 
                                     mRecordTrack->channelCount(), 
                                     mRecordTrack->sampleRate(), 

@@ -125,6 +125,15 @@ public class MediaRecorder
         public static final int DEFAULT = 0;
         /** Microphone audio source */
         public static final int MIC = 1;
+
+        /** Voice call uplink (Tx) audio source */
+        public static final int VOICE_UPLINK = 2;
+
+        /** Voice call downlink (Rx) audio source */
+        public static final int VOICE_DOWNLINK = 3;
+
+        /** Voice call uplink + downlink audio source */
+        public static final int VOICE_CALL = 4;
     }
 
     /**
@@ -201,6 +210,12 @@ public class MediaRecorder
      */
     public native void setAudioSource(int audio_source)
             throws IllegalStateException;
+
+    /**
+     * Gets the maximum value for audio sources.
+     * @see android.media.MediaRecorder.AudioSource
+     */
+    public static final int getAudioSourceMax() { return AudioSource.VOICE_CALL; }
 
     /**
      * Sets the video source to be used for recording. If this method is not
