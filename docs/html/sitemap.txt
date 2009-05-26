@@ -75,6 +75,7 @@ http://developer.android.com/guide/publishing/versioning.html
 http://developer.android.com/guide/publishing/preparing.html
 http://developer.android.com/guide/publishing/publishing.html
 http://developer.android.com/guide/practices/ui_guidelines/index.html
+http://developer.android.com/guide/practices/ui_guidelines/icon_design.html
 http://developer.android.com/guide/practices/ui_guidelines/widget_design.html
 http://developer.android.com/guide/practices/design/performance.html
 http://developer.android.com/guide/practices/design/responsiveness.html
