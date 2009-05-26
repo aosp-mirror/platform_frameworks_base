@@ -164,6 +164,7 @@ public:
     status_t setVolume(float leftVolume, float rightVolume)
     {
         Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         data.writeFloat(leftVolume);
         data.writeFloat(rightVolume);
         remote()->transact(SET_VOLUME, data, &reply);
@@ -261,6 +262,7 @@ status_t BnMediaPlayer::onTransact(
             return NO_ERROR;
         } break;
         case SET_VOLUME: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(setVolume(data.readFloat(), data.readFloat()));
             return NO_ERROR;
         } break;
