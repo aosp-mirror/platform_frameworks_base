@@ -4,7 +4,7 @@
 #ifndef ANDROID_SERVICE_MANAGER_H
 #define ANDROID_SERVICE_MANAGER_H
 
-#include <utils/IServiceManager.h>
+#include <binder/IServiceManager.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
 
