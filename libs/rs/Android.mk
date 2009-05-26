@@ -2,8 +2,8 @@
 ifeq ($(BUILD_RENDERSCRIPT),true)
 
 TOP_LOCAL_PATH:=$(call my-dir)
+include $(CLEAR_VARS)
 LOCAL_PATH:= $(TOP_LOCAL_PATH)
-
 
 # Build rsg-generator
 
@@ -50,7 +50,7 @@ GEN := $(addprefix $(intermediates)/, \
             rsgApiFuncDecl.h \
         )
 
-$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(LOCAL_PATH)/rs.spec
+$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(TOP_LOCAL_PATH)/rs.spec
 $(GEN) : $(RSG_GENERATOR) $(LOCAL_PATH)/rs.spec
 $(GEN): $(intermediates)/%.h : $(LOCAL_PATH)/%.h.rsg
 	$(transform-generated-source)
@@ -63,7 +63,7 @@ GEN := $(addprefix $(intermediates)/, \
             rsgApiReplay.cpp \
         )
         
-$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(LOCAL_PATH)/rs.spec
+$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(TOP_LOCAL_PATH)/rs.spec
 $(GEN) : $(RSG_GENERATOR) $(LOCAL_PATH)/rs.spec
 $(GEN): $(intermediates)/%.cpp : $(LOCAL_PATH)/%.cpp.rsg
 	$(transform-generated-source)
@@ -129,4 +129,5 @@ LOCAL_MODULE:= libRS_jni
 
 include $(BUILD_SHARED_LIBRARY)
 
+include $(call all-subdir-makefiles)
 endif # BUILD_RENDERSCRIPT
