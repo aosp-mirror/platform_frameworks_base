@@ -17,6 +17,7 @@
 #include "rsMatrix.h"
 
 #include "stdlib.h"
+#include "string.h"
 #include "math.h"
 
 #include <utils/Log.h>
