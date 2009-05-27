@@ -1003,6 +1003,7 @@ public class PhoneNumberUtils
      * as:
      *
      * <p><code>
+     * xxxxx
      * xxx-xxxx
      * xxx-xxx-xxxx
      * 1-xxx-xxx-xxxx
@@ -1016,7 +1017,11 @@ public class PhoneNumberUtils
         if (length > "+1-nnn-nnn-nnnn".length()) {
             // The string is too long to be formatted
             return;
+        } else if (length <= 5) {
+            // The string is either a shortcode or too short to be formatted
+            return;
         }
+
         CharSequence saved = text.subSequence(0, length);
 
         // Strip the dashes first, as we're going to add them back
