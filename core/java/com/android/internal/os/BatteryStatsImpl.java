@@ -53,7 +53,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 36;
+    private static final int VERSION = 37;
 
     private final File mFile;
     private final File mBackupFile;
@@ -3014,6 +3014,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             
             u.mWifiTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
             u.mFullWifiLockTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+            u.mAudioTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
+            u.mVideoTurnedOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
             u.mScanWifiLockTimer.writeSummaryFromParcelLocked(out, NOWREAL);
             u.mWifiMulticastTimer.writeSummaryFromParcelLocked(out, NOWREAL);
 
