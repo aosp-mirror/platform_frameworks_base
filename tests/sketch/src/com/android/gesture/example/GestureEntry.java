@@ -47,8 +47,9 @@ public class GestureEntry extends Activity {
 
     private static final String PARCEL_KEY = "gesture";
 
-    static final String GESTURE_FILE_NAME = Environment.getExternalStorageDirectory().getAbsolutePath()
-            + File.separator + "demo_library.gestures";
+    static final String GESTURE_FILE_NAME =
+            Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator +
+                    "demo_library.gestures";
 
     private static final int DIALOG_NEW_ENTRY = 1;
 
@@ -82,7 +83,7 @@ public class GestureEntry extends Activity {
                 // correct the recognition result by adding the new example
                 if (!mChangedByRecognizer) {
                     mGestureLibrary.addGesture(parent.getSelectedItem().toString(), mGesturePad
-                            .getCurrentGesture());
+                            .getGesture());
                 } else {
                     mChangedByRecognizer = false;
                 }
@@ -99,7 +100,7 @@ public class GestureEntry extends Activity {
         mGesturePad.setBackgroundColor(Color.BLACK);
         mGesturePad.addOnGestureListener(new GestureOverlayView.OnGestureListener() {
             public void onGestureEnded(GestureOverlayView overlay, MotionEvent event) {
-                recognize(overlay.getCurrentGesture());
+                recognize(overlay.getGesture());
             }
 
             public void onGesture(GestureOverlayView overlay, MotionEvent event) {
@@ -108,12 +109,15 @@ public class GestureEntry extends Activity {
             public void onGestureStarted(GestureOverlayView overlay, MotionEvent event) {
                 overlay.clear(false);
             }
+            
+            public void onGestureCancelled(GestureOverlayView overlay, MotionEvent event) {
+            }
         });
 
         if (savedInstanceState != null) {
             Gesture gesture = (Gesture) savedInstanceState.getParcelable(PARCEL_KEY);
             if (gesture != null) {
-                mGesturePad.setCurrentGesture(gesture);
+                mGesturePad.setGesture(gesture);
             }
         }
     }
@@ -130,7 +134,7 @@ public class GestureEntry extends Activity {
                                 .findViewById(R.id.gesturename_edit);
                         String text = edittext.getText().toString().trim();
                         if (text.length() > 0) {
-                            mGestureLibrary.addGesture(text, mGesturePad.getCurrentGesture());
+                            mGestureLibrary.addGesture(text, mGesturePad.getGesture());
                         }
                     }
                 }).setNegativeButton(R.string.newgesture_dialog_cancel,
@@ -154,7 +158,7 @@ public class GestureEntry extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case NEW_ID:
-                if (mGesturePad.getCurrentGesture() != null) {
+                if (mGesturePad.getGesture() != null) {
                     showDialog(DIALOG_NEW_ENTRY);
                 }
                 break;
@@ -187,7 +191,7 @@ public class GestureEntry extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Gesture gesture = mGesturePad.getCurrentGesture();
+        Gesture gesture = mGesturePad.getGesture();
         if (gesture != null) {
             outState.putParcelable(PARCEL_KEY, gesture);
         }

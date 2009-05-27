@@ -324,6 +324,8 @@
         <attr name="expandableListViewStyle" format="reference" />
         <!-- Default Gallery style. -->
         <attr name="galleryStyle" format="reference" />
+        <!-- Default GestureOverlayView style. -->
+        <attr name="gestureOverlayViewStyle" format="reference" />
         <!-- Default GridView style. -->
         <attr name="gridViewStyle" format="reference" />
         <!-- The style resource to use for an ImageButton -->
@@ -1379,6 +1381,19 @@
              will use only the number of items in the adapter and the number of items visible
              on screen to determine the scrollbar's properties. -->
         <attr name="smoothScrollbar" format="boolean" />
+        <!-- Defines the type of gesture to enable for the widget. -->
+        <attr name="gestures">
+            <!-- No gesture -->
+            <enum name="none" value="0" />
+            <!-- Gestures jump to a specific position in the content. This requires
+                  fast scroll to be enabled. If fast scroll is enabled from XML,
+                  jump gestures will be enabled automatically. -->
+            <enum name="jump" value="1" />
+            <!-- Gestures filter the content. This requires text filtering to be enabled.
+                 If text filtering is enabled from XML, filter gestures will be enabled
+                 automatically. -->
+            <enum name="filter" value="2" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
@@ -1581,7 +1596,7 @@
         <!-- Height of the divider. Will use the intrinsic height of the divider if this
              is not specified. -->
         <attr name="dividerHeight" format="dimension" />
-        <!-- Defines the choice behavior for the List. By default, Lists do not have
+        <!-- Defines the choice behavior for the ListView. By default, lists do not have
              any choice behavior. By setting the choiceMode to singleChoice, the List
              allows up to one item to be in a chosen state. By setting the choiceMode to
              multipleChoice, the list allows any number of items to be chosen. -->
@@ -2059,6 +2074,44 @@
         <!-- Indicates whether the drawer should be opened/closed with an animation
              when the user clicks the handle. Default is true. -->
         <attr name="animateOnClick" format="boolean" />
+    </declare-styleable>
+
+    <!-- GestureOverlayView specific attributes. These attributes are used to configure
+         a GestureOverlayView from XML. -->
+    <declare-styleable name="GestureOverlayView">
+        <!-- Width of the stroke used to draw the gesture. -->
+        <attr name="gestureStrokeWidth" format="float" />
+        <!-- Color used to draw a gesture. -->
+        <attr name="gestureColor" format="color" />
+        <!-- Color used to draw the user's strokes until we are sure it's a gesture. -->
+        <attr name="uncertainGestureColor" format="color" />
+        <!-- Time, in milliseconds, to wait before the gesture fades out after the user
+             is done drawing it. -->
+        <attr name="fadeOffset" format="integer" />
+        <!-- Duration, in milliseconds, of the fade out effect after the user is done
+             drawing a gesture. -->
+        <attr name="fadeDuration" format="integer" />
+        <!-- Defines the type of strokes that define a gesture. -->
+        <attr name="gestureStrokeType">
+            <!-- A gesture is made of only one stroke. -->
+            <enum name="single" value="0" />
+            <!-- A gesture is made of multiple strokes. -->
+            <enum name="multiple" value="1" />
+        </attr>
+        <!-- Minimum length of a stroke before it is recognized as a gesture. -->
+        <attr name="gestureStrokeLengthThreshold" format="float" />
+        <!-- Squareness threshold of a stroke before it is recognized as a gesture. -->
+        <attr name="gestureStrokeSquarenessThreshold" format="float" />
+        <!-- Minimum curve angle a stroke must contain before it is recognized as a gesture. -->
+        <attr name="gestureStrokeAngleThreshold" format="float" />
+        <!-- Defines whether the overlay should intercept the motion events when a gesture
+             is recognized. -->
+        <attr name="eventsInterceptionEnabled" format="boolean" />
+        <!-- Defines whether the gesture will automatically fade out after being recognized. -->
+        <attr name="fadeEnabled" format="boolean" />
+        <!-- Indicates whether horizontal (when the orientation is vertical) or vertical
+             (when orientation is horizontal) strokes automatically define a gesture. -->
+        <attr name="orientation" />
     </declare-styleable>
 
     <!-- ======================================= -->

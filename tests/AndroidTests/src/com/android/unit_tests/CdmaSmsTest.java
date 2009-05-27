@@ -169,6 +169,43 @@ public class CdmaSmsTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testUserDataHeaderIllegalConcatRef() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 55;
+        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+        concatRef.refNumber = 0x10;
+        concatRef.msgCount = 0;
+        concatRef.seqNumber = 2;
+        concatRef.isEightBits = true;
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.concatRef = concatRef;
+        byte[] encodedHeader = SmsHeader.toByteArray(smsHeader);
+        SmsHeader decodedHeader = SmsHeader.fromByteArray(encodedHeader);
+        assertEquals(decodedHeader.concatRef, null);
+        concatRef.isEightBits = false;
+        encodedHeader = SmsHeader.toByteArray(smsHeader);
+        decodedHeader = SmsHeader.fromByteArray(encodedHeader);
+        assertEquals(decodedHeader.concatRef, null);
+        concatRef.msgCount = 1;
+        concatRef.seqNumber = 2;
+        encodedHeader = SmsHeader.toByteArray(smsHeader);
+        decodedHeader = SmsHeader.fromByteArray(encodedHeader);
+        assertEquals(decodedHeader.concatRef, null);
+        concatRef.msgCount = 1;
+        concatRef.seqNumber = 0;
+        encodedHeader = SmsHeader.toByteArray(smsHeader);
+        decodedHeader = SmsHeader.fromByteArray(encodedHeader);
+        assertEquals(decodedHeader.concatRef, null);
+        concatRef.msgCount = 2;
+        concatRef.seqNumber = 1;
+        encodedHeader = SmsHeader.toByteArray(smsHeader);
+        decodedHeader = SmsHeader.fromByteArray(encodedHeader);
+        assertEquals(decodedHeader.concatRef.msgCount, 2);
+        assertEquals(decodedHeader.concatRef.seqNumber, 1);
+    }
+
+    @SmallTest
     public void testUserDataHeaderMixedFeedback() throws Exception {
         BearerData bearerData = new BearerData();
         bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;

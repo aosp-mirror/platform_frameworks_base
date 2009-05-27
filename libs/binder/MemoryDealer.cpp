@@ -38,7 +38,15 @@
 #include <sys/file.h>
 
 namespace android {
+// ----------------------------------------------------------------------------
 
+HeapInterface::HeapInterface() { }
+HeapInterface::~HeapInterface() { }
+
+// ----------------------------------------------------------------------------
+
+AllocatorInterface::AllocatorInterface() { }
+AllocatorInterface::~AllocatorInterface() { }
 
 // ----------------------------------------------------------------------------
 
@@ -107,7 +115,7 @@ sp<IMemory> MemoryDealer::allocate(size_t size, uint32_t flags)
         if (new_memory != 0) {
             memory = new Allocation(this, offset, size, new_memory);
         } else {
-            LOGE("couldn't map [%8x, %d]", offset, size);
+            LOGE("couldn't map [%8lx, %u]", offset, size);
             if (size) {
                 /* NOTE: it's VERY important to not free allocations of size 0
                  * because they're special as they don't have any record in the 
@@ -339,6 +347,10 @@ void SimpleBestFitAllocator::dump_l(String8& result,
         
 // ----------------------------------------------------------------------------
 
+SharedHeap::SharedHeap() 
+    : HeapInterface(), MemoryHeapBase() 
+{ 
+}
 
 SharedHeap::SharedHeap(size_t size, uint32_t flags, char const * name)
     : MemoryHeapBase(size, flags, name)

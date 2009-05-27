@@ -268,12 +268,6 @@ IMPLEMENT_META_INTERFACE(MediaRecorder, "android.hardware.IMediaRecorder");
 
 // ----------------------------------------------------------------------
 
-#define CHECK_INTERFACE(interface, data, reply) \
-    do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-        LOGW("Call incorrectly routed to " #interface); \
-        return PERMISSION_DENIED; \
-    } } while (0)
-
 status_t BnMediaRecorder::onTransact(
                                      uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {

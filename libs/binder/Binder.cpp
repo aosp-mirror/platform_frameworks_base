@@ -27,6 +27,17 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+IBinder::IBinder()
+    : RefBase()
+{
+}
+
+IBinder::~IBinder()
+{
+}
+
+// ---------------------------------------------------------------------------
+
 sp<IInterface>  IBinder::queryLocalInterface(const String16& descriptor)
 {
     return NULL;
@@ -58,6 +69,8 @@ public:
 
 // ---------------------------------------------------------------------------
 
+String16 BBinder::sEmptyDescriptor;
+
 BBinder::BBinder()
     : mExtras(NULL)
 {
@@ -73,10 +86,10 @@ status_t BBinder::pingBinder()
     return NO_ERROR;
 }
 
-String16 BBinder::getInterfaceDescriptor() const
+const String16& BBinder::getInterfaceDescriptor() const
 {
     LOGW("reached BBinder::getInterfaceDescriptor (this=%p)", this);
-    return String16();
+    return sEmptyDescriptor;
 }
 
 status_t BBinder::transact(

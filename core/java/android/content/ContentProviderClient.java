@@ -96,22 +96,18 @@ public class ContentProviderClient {
 
     /** see {@link ContentProvider#insertEntity} */
     public Uri insertEntity(Uri uri, Entity entity) throws RemoteException {
-        return mContentProvider.bulkInsertEntities(uri, new Entity[]{entity})[0];
-    }
-
-    /** see {@link ContentProvider#bulkInsertEntities} */
-    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) throws RemoteException {
-        return mContentProvider.bulkInsertEntities(uri, entities);
+        return mContentProvider.insertEntity(uri, entity);
     }
 
     /** see {@link ContentProvider#updateEntity} */
     public int updateEntity(Uri uri, Entity entity) throws RemoteException {
-        return mContentProvider.bulkUpdateEntities(uri, new Entity[]{entity})[0];
+        return mContentProvider.updateEntity(uri, entity);
     }
 
-    /** see {@link ContentProvider#bulkUpdateEntities} */
-    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) throws RemoteException {
-        return mContentProvider.bulkUpdateEntities(uri, entities);
+    /** see {@link ContentProvider#applyBatch} */
+    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+            throws RemoteException, OperationApplicationException {
+        return mContentProvider.applyBatch(operations);
     }
 
     /**

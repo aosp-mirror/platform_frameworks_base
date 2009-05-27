@@ -146,6 +146,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">UI Guidelines</a></div>
           <ul>
+            <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">Icon Design</a></li>
             <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">App Widget Design</a></li>
           </ul>
       </li>

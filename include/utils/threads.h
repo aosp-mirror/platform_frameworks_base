@@ -199,11 +199,11 @@ public:
     // constructed and released when Autolock goes out of scope.
     class Autolock {
     public:
-        inline Autolock(Mutex& mutex) : mpMutex(&mutex) { mutex.lock(); }
-        inline Autolock(Mutex* mutex) : mpMutex(mutex) { mutex->lock(); }
-        inline ~Autolock() { mpMutex->unlock(); }
+        inline Autolock(Mutex& mutex) : mLock(mutex)  { mLock.lock(); }
+        inline Autolock(Mutex* mutex) : mLock(*mutex) { mLock.lock(); }
+        inline ~Autolock() { mLock.unlock(); }
     private:
-        Mutex*  mpMutex;
+        Mutex& mLock;
     };
 
 private:
@@ -291,7 +291,7 @@ protected:
             bool        exitPending() const;
     
 private:
-    // Derived class must implemtent threadLoop(). The thread starts its life
+    // Derived class must implement threadLoop(). The thread starts its life
     // here. There are two ways of using the Thread object:
     // 1) loop: if threadLoop() returns true, it will be called again if
     //          requestExit() wasn't called.

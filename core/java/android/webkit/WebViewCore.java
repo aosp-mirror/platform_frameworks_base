@@ -580,7 +580,7 @@ final class WebViewCore {
             "GET_SELECTION", // = 129;
             "WEBKIT_DRAW", // = 130;
             "SYNC_SCROLL", // = 131;
-            "", // = 132;
+            "POST_URL", // = 132;
             "SPLIT_PICTURE_SET", // = 133;
             "CLEAR_CONTENT", // = 134;
             "SET_FINAL_FOCUS", // = 135;
@@ -627,6 +627,7 @@ final class WebViewCore {
         static final int GET_SELECTION = 129;
         static final int WEBKIT_DRAW = 130;
         static final int SYNC_SCROLL = 131;
+        static final int POST_URL = 132;
         static final int SPLIT_PICTURE_SET = 133;
         static final int CLEAR_CONTENT = 134;
         
@@ -714,6 +715,13 @@ final class WebViewCore {
                             loadUrl((String) msg.obj);
                             break;
 
+                        case POST_URL: {
+                            HashMap param = (HashMap) msg.obj;
+                            String url = (String) param.get("url");
+                            byte[] data = (byte[]) param.get("data");
+                            mBrowserFrame.postUrl(url, data);
+                            break;
+                        }
                         case LOAD_DATA:
                             HashMap loadParams = (HashMap) msg.obj;
                             String baseUrl = (String) loadParams.get("baseUrl");

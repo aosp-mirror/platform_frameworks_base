@@ -59,6 +59,10 @@ public:
             const Parcel& data,
             Parcel* reply,
             uint32_t flags = 0);
+    
+    BnMemoryHeap();
+protected:
+    virtual ~BnMemoryHeap();
 };
 
 // ----------------------------------------------------------------------------
@@ -85,6 +89,10 @@ public:
             const Parcel& data,
             Parcel* reply,
             uint32_t flags = 0);
+
+    BnMemory();
+protected:
+    virtual ~BnMemory();
 };
 
 // ----------------------------------------------------------------------------

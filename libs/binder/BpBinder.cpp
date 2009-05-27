@@ -98,16 +98,33 @@ BpBinder::BpBinder(int32_t handle)
     IPCThreadState::self()->incWeakHandle(handle);
 }
 
-String16 BpBinder::getInterfaceDescriptor() const
+bool BpBinder::isDescriptorCached() const {
+    Mutex::Autolock _l(mLock);
+    return mDescriptorCache.size() ? true : false;
+}
+
+const String16& BpBinder::getInterfaceDescriptor() const
 {
-    String16 res;
-    Parcel send, reply;
-    status_t err = const_cast<BpBinder*>(this)->transact(
-            INTERFACE_TRANSACTION, send, &reply);
-    if (err == NO_ERROR) {
-        res = reply.readString16();
+    if (isDescriptorCached() == false) {
+        Parcel send, reply;
+        // do the IPC without a lock held.
+        status_t err = const_cast<BpBinder*>(this)->transact(
+                INTERFACE_TRANSACTION, send, &reply);
+        if (err == NO_ERROR) {
+            String16 res(reply.readString16());
+            Mutex::Autolock _l(mLock);
+            // mDescriptorCache could have been assigned while the lock was
+            // released.
+            if (mDescriptorCache.size() == 0)
+                mDescriptorCache = res;
+        }
     }
-    return res;
+    
+    // we're returning a reference to a non-static object here. Usually this
+    // is not something smart to do, however, with binder objects it is 
+    // (usually) safe because they are reference-counted.
+    
+    return mDescriptorCache;
 }
 
 bool BpBinder::isBinderAlive() const

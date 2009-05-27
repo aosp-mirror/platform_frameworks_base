@@ -1052,12 +1052,6 @@ status_t CameraService::dump(int fd, const Vector<String16>& args)
 }
 
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
-
 status_t CameraService::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {

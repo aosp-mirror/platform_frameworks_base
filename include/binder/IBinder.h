@@ -56,7 +56,7 @@ public:
         FLAG_ONEWAY             = 0x00000001
     };
 
-    inline                  IBinder() { }
+                          IBinder();
 
     /**
      * Check if this IBinder implements the interface named by
@@ -69,7 +69,7 @@ public:
      * Return the canonical name of the interface provided by this IBinder
      * object.
      */
-    virtual String16        getInterfaceDescriptor() const = 0;
+    virtual const String16& getInterfaceDescriptor() const = 0;
 
     virtual bool            isBinderAlive() const = 0;
     virtual status_t        pingBinder() = 0;
@@ -147,7 +147,7 @@ public:
     virtual BpBinder*       remoteBinder();
 
 protected:
-    inline virtual          ~IBinder() { }
+    virtual          ~IBinder();
 
 private:
 };

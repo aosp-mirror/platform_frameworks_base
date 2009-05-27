@@ -21,11 +21,13 @@ import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.os.Registrant;
+import android.provider.Settings;
 import android.util.Log;
 import java.util.ArrayList;
 
@@ -513,6 +515,29 @@ public final class SIMRecords extends IccRecords {
         phone.setSystemLocale(language, country);
     }
 
+    /**
+     * If the number of allowed wifi channels has not been set, set it based on
+     * the MCC of the SIM.
+     * @param mcc Mobile Country Code of the SIM
+     */
+    private void setWifiChannelsFromMccIfNeeded(int mcc) {
+        int wifiChannels = MccTable.wifiChannelsForMcc(mcc);
+
+        if (wifiChannels != 0) {
+            Context context = phone.getContext();
+            // only set to this default if the user hasn't manually set it
+            try {
+                Settings.Secure.getInt(context.getContentResolver(),
+                        Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS);
+            } catch (Settings.SettingNotFoundException e) {
+                WifiManager wM = (WifiManager)
+                        context.getSystemService(Context.WIFI_SERVICE);
+                // don't persist
+                wM.setNumAllowedChannels(wifiChannels, false);
+            }
+        }
+    }
+
     //***** Overridden from Handler
     public void handleMessage(Message msg) {
         AsyncResult ar;
@@ -559,6 +584,7 @@ public final class SIMRecords extends IccRecords {
                 int mcc = Integer.parseInt(imsi.substring(0, 3));
                 setTimezoneFromMccIfNeeded(mcc);
                 setLocaleFromMccIfNeeded(mcc);
+                setWifiChannelsFromMccIfNeeded(mcc);
             break;
 
             case EVENT_GET_MBI_DONE:

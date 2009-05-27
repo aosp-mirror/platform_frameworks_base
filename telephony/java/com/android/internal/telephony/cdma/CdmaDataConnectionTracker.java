@@ -39,6 +39,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.telephony.cdma.CdmaCellLocation;
 import android.util.EventLog;
 import android.text.TextUtils;
 import android.util.Log;
@@ -55,10 +56,6 @@ import com.android.internal.telephony.TelephonyEventLog;
 import java.util.ArrayList;
 
 /**
- * WINK:TODO: In GsmDataConnectionTracker there are
- *            EventLog's used quite a few places maybe
- *            more need to be added in this file?
- *
  * {@hide}
  */
 public final class CdmaDataConnectionTracker extends DataConnectionTracker {
@@ -312,13 +309,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         Log.d(LOG_TAG, "setDataEnabled("+enable+") isEnabled=" + isEnabled);
         if (!isEnabled && enable) {
             setEnabled(EXTERNAL_NETWORK_DEFAULT_ID, true);
-            return trySetupData(Phone.REASON_DATA_ENABLED);
+            sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
         } else if (!enable) {
             setEnabled(EXTERNAL_NETWORK_DEFAULT_ID, false);
             cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
-            return true;
-        } else // isEnabled && enable
-
+        }
         return true;
     }
 
@@ -363,6 +358,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
         int psState = mCdmaPhone.mSST.getCurrentCdmaDataConnectionState();
         boolean roaming = phone.getServiceState().getRoaming();
+        boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
 
         if ((state == State.IDLE || state == State.SCANNING)
                 && (psState == ServiceState.RADIO_TECHNOLOGY_1xRTT ||
@@ -372,7 +368,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                         mCdmaPhone.mRuimRecords.getRecordsLoaded())
                 && (mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
                         phone.getState() == Phone.State.IDLE )
-                && isDataAllowed()) {
+                && isDataAllowed()
+                && desiredPowerState) {
 
             return setupData(reason);
 
@@ -387,7 +384,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     " phoneState=" + phone.getState() +
                     " dataEnabled=" + getAnyDataEnabled() +
                     " roaming=" + roaming +
-                    " dataOnRoamingEnable=" + getDataOnRoamingEnabled());
+                    " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
+                    " desiredPowerState=" + desiredPowerState);
             }
             return false;
         }
@@ -578,7 +576,14 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 }
 
                 if (sentSinceLastRecv >= NUMBER_SENT_PACKETS_OF_HANG) {
-                    // we already have NUMBER_SENT_PACKETS sent without ack
+                    // Packets sent without ack exceeded threshold.
+
+                    if (mNoRecvPollCount == 0) {
+                        EventLog.writeEvent(
+                                TelephonyEventLog.EVENT_LOG_RADIO_RESET_COUNTDOWN_TRIGGERED,
+                                sentSinceLastRecv);
+                    }
+
                     if (mNoRecvPollCount < NO_RECV_POLL_LIMIT) {
                         mNoRecvPollCount++;
                         // Slow down the poll interval to let things happen
@@ -590,6 +595,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                         netStatPollEnabled = false;
                         stopNetStatPoll();
                         restartRadio();
+                        EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_RESET,
+                                NO_RECV_POLL_LIMIT);
                     }
                 } else {
                     mNoRecvPollCount = 0;
@@ -845,6 +852,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             if (state == State.FAILED) {
                 cleanUpConnection(false, Phone.REASON_CDMA_DATA_DETACHED);
                 nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+
+                CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
+                int bsid = (loc != null) ? loc.getBaseStationId() : -1;
+
+                EventLog.List val = new EventLog.List(bsid,
+                        TelephonyManager.getDefault().getNetworkType());
+                EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_SETUP_FAILED, val);
             }
             trySetupData(Phone.REASON_CDMA_DATA_DETACHED);
         }
@@ -870,10 +884,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             }
         } else {
 
-            int cid = -1;
-            EventLog.List val = new EventLog.List(cid,
+            CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
+            int bsid = (loc != null) ? loc.getBaseStationId() : -1;
+            EventLog.List val = new EventLog.List(bsid,
                     TelephonyManager.getDefault().getNetworkType());
-            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_PDP_NETWORK_DROP, val);
+            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_DROP, val);
 
             cleanUpConnection(true, null);
         }

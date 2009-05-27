@@ -353,25 +353,24 @@ public class FrameLayout extends ViewGroup {
 
         if (mForeground != null) {
             final Drawable foreground = mForeground;
+
             if (mForegroundBoundsChanged) {
                 mForegroundBoundsChanged = false;
-                if (foreground != null) {
-                    final Rect selfBounds = mSelfBounds;
-                    final Rect overlayBounds = mOverlayBounds;
+                final Rect selfBounds = mSelfBounds;
+                final Rect overlayBounds = mOverlayBounds;
 
-                    final int w = mRight-mLeft;
-                    final int h = mBottom-mTop;
-                    
-                    if (mForegroundInPadding) {
-                        selfBounds.set(0, 0, w, h);
-                    } else {
-                        selfBounds.set(mPaddingLeft, mPaddingTop, w - mPaddingRight, h - mPaddingBottom);
-                    }
+                final int w = mRight-mLeft;
+                final int h = mBottom-mTop;
 
-                    Gravity.apply(mForegroundGravity, foreground.getIntrinsicWidth(),
-                            foreground.getIntrinsicHeight(), selfBounds, overlayBounds);
-                    foreground.setBounds(overlayBounds);
+                if (mForegroundInPadding) {
+                    selfBounds.set(0, 0, w, h);
+                } else {
+                    selfBounds.set(mPaddingLeft, mPaddingTop, w - mPaddingRight, h - mPaddingBottom);
                 }
+
+                Gravity.apply(mForegroundGravity, foreground.getIntrinsicWidth(),
+                        foreground.getIntrinsicHeight(), selfBounds, overlayBounds);
+                foreground.setBounds(overlayBounds);
             }
             
             foreground.draw(canvas);

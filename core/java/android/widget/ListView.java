@@ -2852,6 +2852,9 @@ public class ListView extends AbsListView {
             final boolean areAllItemsSelectable = mAreAllItemsSelectable;
             final ListAdapter adapter = mAdapter;
             final boolean isOpaque = isOpaque();
+            if (isOpaque && mDividerPaint == null) {
+                mDividerPaint = new Paint();
+            }
             final Paint paint = mDividerPaint;
 
             if (!mStackFromBottom) {

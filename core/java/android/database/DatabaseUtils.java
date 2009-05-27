@@ -20,6 +20,7 @@ import org.apache.commons.codec.binary.Hex;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.database.sqlite.SQLiteAbortException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
@@ -82,6 +83,8 @@ public class DatabaseUtils {
             code = 8;
         } else if (e instanceof SQLiteException) {
             code = 9;
+        } else if (e instanceof OperationApplicationException) {
+            code = 10;
         } else {
             reply.writeException(e);
             Log.e(TAG, "Writing exception to parcel", e);
@@ -118,6 +121,18 @@ public class DatabaseUtils {
         String msg = reply.readString();
         if (code == 1) {
             throw new FileNotFoundException(msg);
+        } else {
+            DatabaseUtils.readExceptionFromParcel(reply, msg, code);
+        }
+    }
+
+    public static void readExceptionWithOperationApplicationExceptionFromParcel(
+            Parcel reply) throws OperationApplicationException {
+        int code = reply.readInt();
+        if (code == 0) return;
+        String msg = reply.readString();
+        if (code == 10) {
+            throw new OperationApplicationException(msg);
         } else {
             DatabaseUtils.readExceptionFromParcel(reply, msg, code);
         }

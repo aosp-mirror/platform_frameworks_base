@@ -45,32 +45,27 @@ public class LetterRecognizer {
     
     private GestureLibrary mGestureLibrary;
 
+    private final Comparator<Prediction> mComparator = new PredictionComparator();
+
     private static class SigmoidUnit {
         final float[] mWeights;
-
-        private boolean mComputed;
-        private float mResult;
 
         SigmoidUnit(float[] weights) {
             mWeights = weights;
         }
 
         private float compute(float[] inputs) {
-            if (!mComputed) {
-                float sum = 0;
+            float sum = 0;
 
-                final int count = inputs.length;
-                final float[] weights = mWeights;
+            final int count = inputs.length;
+            final float[] weights = mWeights;
 
-                for (int i = 0; i < count; i++) {
-                    sum += inputs[i] * weights[i];
-                }
-                sum += weights[weights.length - 1];
-
-                mResult = 1.0f / (float) (1 + Math.exp(-sum));
-                mComputed = true;
+            for (int i = 0; i < count; i++) {
+                sum += inputs[i] * weights[i];
             }
-            return mResult;
+            sum += weights[weights.length - 1];
+
+            return 1.0f / (float) (1 + Math.exp(-sum));
         }
     }
 
@@ -91,16 +86,25 @@ public class LetterRecognizer {
     }
 
     public ArrayList<Prediction> recognize(Gesture gesture) {
+        return recognize(gesture, null);
+    }
+
+    public ArrayList<Prediction> recognize(Gesture gesture, ArrayList<Prediction> predictions) {
         float[] query = GestureUtilities.spatialSampling(gesture, mPatchSize);
-        ArrayList<Prediction> predictions = classify(query);
+        predictions = classify(query, predictions);
         adjustPrediction(gesture, predictions);
         return predictions;
     }
 
-    private ArrayList<Prediction> classify(float[] vector) {
+    private ArrayList<Prediction> classify(float[] vector, ArrayList<Prediction> predictions) {
+        if (predictions == null) {
+            predictions = new ArrayList<Prediction>();
+        } else {
+            predictions.clear();
+        }
+
         final float[] intermediateOutput = compute(mHiddenLayer, vector);
         final float[] output = compute(mOutputLayer, intermediateOutput);
-        final ArrayList<Prediction> predictions = new ArrayList<Prediction>();
 
         double sum = 0;
 
@@ -117,19 +121,8 @@ public class LetterRecognizer {
             predictions.get(i).score /= sum;
         }
 
-        Collections.sort(predictions, new Comparator<Prediction>() {
-            public int compare(Prediction object1, Prediction object2) {
-                double score1 = object1.score;
-                double score2 = object2.score;
-                if (score1 > score2) {
-                    return -1;
-                } else if (score1 < score2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
+        Collections.sort(predictions, mComparator);
+
         return predictions;
     }
 
@@ -159,6 +152,10 @@ public class LetterRecognizer {
             switch (version) {
                 case 1:
                     classifier = readV1(in);
+                    break;
+                default:
+                    Log.d(LOG_TAG, "Couldn't load handwriting data: version " + version +
+                            " not supported");
                     break;
             }
 
@@ -267,6 +264,20 @@ public class LetterRecognizer {
                     predictions.add(0, original);
                     topNList.remove(item.name);
                 }
+            }
+        }
+    }
+
+    private static class PredictionComparator implements Comparator<Prediction> {
+        public int compare(Prediction object1, Prediction object2) {
+            double score1 = object1.score;
+            double score2 = object2.score;
+            if (score1 > score2) {
+                return -1;
+            } else if (score1 < score2) {
+                return 1;
+            } else {
+                return 0;
             }
         }
     }

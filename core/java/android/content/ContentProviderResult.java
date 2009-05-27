@@ -17,12 +17,14 @@
 package android.content;
 
 import android.net.Uri;
+import android.os.Parcelable;
+import android.os.Parcel;
 
 /**
  * Contains the result of the application of a {@link ContentProviderOperation}. It is guaranteed
  * to have exactly one of {@link #uri} or {@link #count} set.
  */
-public class ContentProviderResult {
+public class ContentProviderResult implements Parcelable {
     public final Uri uri;
     public final Integer count;
 
@@ -36,4 +38,40 @@ public class ContentProviderResult {
         this.count = count;
         this.uri = null;
     }
+
+    public ContentProviderResult(Parcel source) {
+        int type = source.readInt();
+        if (type == 1) {
+            count = source.readInt();
+            uri = null;
+        } else {
+            count = null;
+            uri = Uri.CREATOR.createFromParcel(source);
+        }
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        if (uri == null) {
+            dest.writeInt(1);
+            dest.writeInt(count);
+        } else {
+            dest.writeInt(2);
+            uri.writeToParcel(dest, 0);
+        }
+    }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<ContentProviderResult> CREATOR =
+            new Creator<ContentProviderResult>() {
+        public ContentProviderResult createFromParcel(Parcel source) {
+            return new ContentProviderResult(source);
+        }
+
+        public ContentProviderResult[] newArray(int size) {
+            return new ContentProviderResult[size];
+        }
+    };
 }

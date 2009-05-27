@@ -227,7 +227,7 @@ public class SslErrorHandler extends Handler {
                 boolean hasKey = mSslPrefTable.containsKey(host);
                 if (!hasKey ||
                     primary > mSslPrefTable.getInt(host)) {
-                    mSslPrefTable.putInt(host, new Integer(primary));
+                    mSslPrefTable.putInt(host, primary);
                 }
             }
             loader.handleSslErrorResponse(proceed);

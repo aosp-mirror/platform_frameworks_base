@@ -154,37 +154,36 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     return true;
                 }
 
-                case BULK_INSERT_ENTITIES_TRANSACTION:
+                case INSERT_ENTITIES_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     Uri uri = Uri.CREATOR.createFromParcel(data);
-                    String className = data.readString();
-                    Class entityClass = Class.forName(className);
-                    int numEntities = data.readInt();
-                    Entity[] entities = new Entity[numEntities];
-                    for (int i = 0; i < numEntities; i++) {
-                        entities[i] = (Entity) data.readParcelable(entityClass.getClassLoader());
-                    }
-                    Uri[] uris = bulkInsertEntities(uri, entities);
+                    Entity entity = (Entity) data.readParcelable(null);
+                    Uri newUri = insertEntity(uri, entity);
                     reply.writeNoException();
-                    reply.writeTypedArray(uris, 0);
+                    Uri.writeToParcel(reply, newUri);
                     return true;
                 }
 
-                case BULK_UPDATE_ENTITIES_TRANSACTION:
+                case UPDATE_ENTITIES_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     Uri uri = Uri.CREATOR.createFromParcel(data);
-                    String className = data.readString();
-                    Class entityClass = Class.forName(className);
-                    int numEntities = data.readInt();
-                    Entity[] entities = new Entity[numEntities];
-                    for (int i = 0; i < numEntities; i++) {
-                        entities[i] = (Entity) data.readParcelable(entityClass.getClassLoader());
-                    }
-                    int[] counts = bulkUpdateEntities(uri, entities);
+                    Entity entity = (Entity) data.readParcelable(null);
+                    int count = updateEntity(uri, entity);
                     reply.writeNoException();
-                    reply.writeIntArray(counts);
+                    reply.writeInt(count);
+                    return true;
+                }
+
+                case APPLY_BATCH_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    final ContentProviderOperation[] operations =
+                            data.createTypedArray(ContentProviderOperation.CREATOR);
+                    final ContentProviderResult[] results = applyBatch(operations);
+                    reply.writeNoException();
+                    reply.writeTypedArray(results, 0);
                     return true;
                 }
 
@@ -472,23 +471,18 @@ final class ContentProviderProxy implements IContentProvider
         return count;
     }
 
-    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) throws RemoteException {
+    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+            throws RemoteException, OperationApplicationException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
 
         data.writeInterfaceToken(IContentProvider.descriptor);
-        uri.writeToParcel(data, 0);
-        data.writeString(entities[0].getClass().getName());
-        data.writeInt(entities.length);
-        for (Entity entity : entities) {
-            data.writeParcelable(entity, 0);
-        }
+        data.writeTypedArray(operations, 0);
+        mRemote.transact(IContentProvider.APPLY_BATCH_TRANSACTION, data, reply, 0);
 
-        mRemote.transact(IContentProvider.BULK_INSERT_ENTITIES_TRANSACTION, data, reply, 0);
-
-        DatabaseUtils.readExceptionFromParcel(reply);
-        Uri[] results = new Uri[entities.length];
-        reply.readTypedArray(results, Uri.CREATOR);
+        DatabaseUtils.readExceptionWithOperationApplicationExceptionFromParcel(reply);
+        final ContentProviderResult[] results =
+                reply.createTypedArray(ContentProviderResult.CREATOR);
 
         data.recycle();
         reply.recycle();
@@ -496,28 +490,42 @@ final class ContentProviderProxy implements IContentProvider
         return results;
     }
 
-    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) throws RemoteException {
+    public Uri insertEntity(Uri uri, Entity entity) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
 
-        data.writeInterfaceToken(IContentProvider.descriptor);
-        uri.writeToParcel(data, 0);
-        data.writeString(entities[0].getClass().getName());
-        data.writeInt(entities.length);
-        for (Entity entity : entities) {
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+            uri.writeToParcel(data, 0);
             data.writeParcelable(entity, 0);
+
+            mRemote.transact(IContentProvider.INSERT_ENTITIES_TRANSACTION, data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+            return Uri.CREATOR.createFromParcel(reply);
+        } finally {
+            data.recycle();
+            reply.recycle();
         }
+    }
 
-        mRemote.transact(IContentProvider.BULK_UPDATE_ENTITIES_TRANSACTION, data, reply, 0);
+    public int updateEntity(Uri uri, Entity entity) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
 
-        DatabaseUtils.readExceptionFromParcel(reply);
-        int[] results = new int[entities.length];
-        reply.readIntArray(results);
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+            uri.writeToParcel(data, 0);
+            data.writeParcelable(entity, 0);
 
-        data.recycle();
-        reply.recycle();
+            mRemote.transact(IContentProvider.UPDATE_ENTITIES_TRANSACTION, data, reply, 0);
 
-        return results;
+            DatabaseUtils.readExceptionFromParcel(reply);
+            return reply.readInt();
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
     }
 
     public int delete(Uri url, String selection, String[] selectionArgs)

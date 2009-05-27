@@ -409,12 +409,16 @@ status_t Parcel::appendFrom(Parcel *parcel, size_t offset, size_t len)
             mObjects[idx++] = off;
             mObjectsSize++;
 
-            const flat_binder_object* flat
+            flat_binder_object* flat
                 = reinterpret_cast<flat_binder_object*>(mData + off);
             acquire_object(proc, *flat, this);
 
-            // take note if the object is a file descriptor
             if (flat->type == BINDER_TYPE_FD) {
+                // If this is a file descriptor, we need to dup it so the
+                // new Parcel now owns its own fd, and can declare that we
+                // officially know we have fds.
+                flat->handle = dup(flat->handle);
+                flat->cookie = (void*)1;
                 mHasFds = mFdsKnown = true;
             }
         }
@@ -437,9 +441,14 @@ status_t Parcel::writeInterfaceToken(const String16& interface)
     return writeString16(interface);
 }
 
+bool Parcel::checkInterface(IBinder* binder) const
+{
+    return enforceInterface(binder->getInterfaceDescriptor()); 
+}
+
 bool Parcel::enforceInterface(const String16& interface) const
 {
-    String16 str = readString16();
+    const String16 str(readString16());
     if (str == interface) {
         return true;
     } else {

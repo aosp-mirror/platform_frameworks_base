@@ -210,7 +210,7 @@ public class WebView extends AbsoluteLayout
     static final boolean DEBUG = false;
     static final boolean LOGV_ENABLED = DEBUG;
 
-    private class ExtendedZoomControls extends FrameLayout {
+    private static class ExtendedZoomControls extends FrameLayout {
         public ExtendedZoomControls(Context context, AttributeSet attrs) {
             super(context, attrs);
             LayoutInflater inflater = (LayoutInflater)
@@ -564,7 +564,8 @@ public class WebView extends AbsoluteLayout
         public void onNewPicture(WebView view, Picture picture);
     }
 
-    public class HitTestResult {
+    // FIXME: Want to make this public, but need to change the API file.
+    public /*static*/ class HitTestResult {
         /**
          * Default HitTestResult, where the target is unknown
          */
@@ -1212,6 +1213,29 @@ public class WebView extends AbsoluteLayout
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.LOAD_URL, url);
         clearTextEntry();
+    }
+
+    /**
+     * Load the url with postData using "POST" method into the WebView. If url
+     * is not a network url, it will be loaded with {link
+     * {@link #loadUrl(String)} instead.
+     * 
+     * @param url The url of the resource to load.
+     * @param postData The data will be passed to "POST" request.
+     * 
+     * @hide pending API solidification
+     */
+    public void postUrl(String url, byte[] postData) {
+        if (URLUtil.isNetworkUrl(url)) {
+            switchOutDrawHistory();
+            HashMap arg = new HashMap();
+            arg.put("url", url);
+            arg.put("data", postData);
+            mWebViewCore.sendMessage(EventHub.POST_URL, arg);
+            clearTextEntry();
+        } else {
+            loadUrl(url);
+        }
     }
 
     /**
@@ -2859,7 +2883,7 @@ public class WebView extends AbsoluteLayout
     /**
      *  Class representing the node which is focused.
      */
-    private class FocusNode {
+    private static class FocusNode {
         public FocusNode() {
             mBounds = new Rect();
         }
@@ -4568,8 +4592,8 @@ public class WebView extends AbsoluteLayout
         HashMap arg = new HashMap();
         arg.put("focusData", new WebViewCore.FocusData(mFocusData));
         arg.put("replace", replace);
-        arg.put("start", new Integer(newStart));
-        arg.put("end", new Integer(newEnd));
+        arg.put("start", Integer.valueOf(newStart));
+        arg.put("end", Integer.valueOf(newEnd));
         mTextGeneration++;
         mWebViewCore.sendMessage(EventHub.REPLACE_TEXT, oldStart, oldEnd, arg);
     }
@@ -4888,10 +4912,6 @@ public class WebView extends AbsoluteLayout
 
     // Class used to use a dropdown for a <select> element
     private class InvokeListBox implements Runnable {
-        // Strings for the labels in the listbox.
-        private String[]    mArray;
-        // Array representing whether each item is enabled.
-        private boolean[]   mEnableArray;
         // Whether the listbox allows multiple selection.
         private boolean     mMultiple;
         // Passed in to a list with multiple selection to tell

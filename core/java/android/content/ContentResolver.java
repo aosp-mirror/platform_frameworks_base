@@ -166,35 +166,69 @@ public abstract class ContentResolver {
         }
     }
 
-    class EntityIteratorWrapper implements EntityIterator {
+    /**
+     * EntityIterator wrapper that releases the associated ContentProviderClient when the
+     * iterator is closed.
+     */
+    private class EntityIteratorWrapper implements EntityIterator {
         private final EntityIterator mInner;
         private final ContentProviderClient mClient;
+        private volatile boolean mClientReleased;
 
         EntityIteratorWrapper(EntityIterator inner, ContentProviderClient client) {
             mInner = inner;
             mClient = client;
+            mClientReleased = false;
         }
 
         public boolean hasNext() throws RemoteException {
+            if (mClientReleased) {
+                throw new IllegalStateException("this iterator is already closed");
+            }
             return mInner.hasNext();
         }
 
         public Entity next() throws RemoteException {
+            if (mClientReleased) {
+                throw new IllegalStateException("this iterator is already closed");
+            }
             return mInner.next();
         }
 
         public void close() {
             mClient.release();
             mInner.close();
+            mClientReleased = true;
         }
 
         protected void finalize() throws Throwable {
-            close();
+            if (!mClientReleased) {
+                mClient.release();
+            }
             super.finalize();
         }
     }
 
-    public final EntityIterator queryEntity(Uri uri,
+    /**
+     * Query the given URI, returning an {@link EntityIterator} over the result set.
+     *
+     * @param uri The URI, using the content:// scheme, for the content to
+     *         retrieve.
+     * @param selection A filter declaring which rows to return, formatted as an
+     *         SQL WHERE clause (excluding the WHERE itself). Passing null will
+     *         return all rows for the given URI.
+     * @param selectionArgs You may include ?s in selection, which will be
+     *         replaced by the values from selectionArgs, in the order that they
+     *         appear in the selection. The values will be bound as Strings.
+     * @param sortOrder How to order the rows, formatted as an SQL ORDER BY
+     *         clause (excluding the ORDER BY itself). Passing null will use the
+     *         default sort order, which may be unordered.
+     * @return An EntityIterator object
+     * @throws RemoteException thrown if a RemoteException is encountered while attempting
+     *   to communicate with a remote provider.
+     * @throws IllegalArgumentException thrown if there is no provider that matches the uri
+     */
+    public final EntityIterator queryEntities(Uri uri,
             String selection, String[] selectionArgs, String sortOrder) throws RemoteException {
         ContentProviderClient provider = acquireContentProviderClient(uri);
         if (provider == null) {
@@ -532,6 +566,16 @@ public abstract class ContentResolver {
         }
     }
 
+    /**
+     * Inserts an Entity at the given URL.
+     *
+     * @param uri The URL of the table to insert into.
+     * @param entity an Entity to insert at uri. This must be the same Entity subtype that the
+     *   matching content provider expects at that uri.
+     * @return the URL of the newly created row.
+     * @throws RemoteException thrown if a RemoteException is encountered while attempting
+     *   to communicate with a remote provider.
+     */
     public final Uri insertEntity(Uri uri, Entity entity) throws RemoteException {
         ContentProviderClient provider = acquireContentProviderClient(uri);
         if (provider == null) {
@@ -544,6 +588,16 @@ public abstract class ContentResolver {
         }
     }
 
+    /**
+     * Replaces the Entity at the given URL with the provided entity.
+     *
+     * @param uri The URL of the entity to update.
+     * @param entity the new version of the entity
+     * @return the number of rows that are updated. Will be 0 if an entity no longer exists
+     * at uri otherwise it will be 1.
+     * @throws RemoteException thrown if a RemoteException is encountered while attempting
+     *   to communicate with a remote provider.
+     */
     public final int updateEntity(Uri uri, Entity entity) throws RemoteException {
         ContentProviderClient provider = acquireContentProviderClient(uri);
         if (provider == null) {
@@ -556,27 +610,31 @@ public abstract class ContentResolver {
         }
     }
 
-    public final Uri[] bulkInsertEntities(Uri uri, Entity[] entities)
-            throws RemoteException {
-        ContentProviderClient provider = acquireContentProviderClient(uri);
+    /**
+     * Applies each of the {@link ContentProviderOperation} objects and returns an array
+     * of their results. Passes through OperationApplicationException, which may be thrown
+     * by the call to {@link ContentProviderOperation#apply}.
+     * If all the applications succeed then a {@link ContentProviderResult} array with the
+     * same number of elements as the operations will be returned. It is implementation-specific
+     * how many, if any, operations will have been successfully applied if a call to
+     * apply results in a {@link OperationApplicationException}.
+     * @param authority the authority of the ContentProvider to which this batch should be applied
+     * @param operations the operations to apply
+     * @return the results of the applications
+     * @throws OperationApplicationException thrown if an application fails.
+     * See {@link ContentProviderOperation#apply} for more information.
+     * @throws RemoteException thrown if a RemoteException is encountered while attempting
+     *   to communicate with a remote provider.
+     */
+    public ContentProviderResult[] applyBatch(String authority,
+            ContentProviderOperation[] operations)
+            throws RemoteException, OperationApplicationException {
+        ContentProviderClient provider = acquireContentProviderClient(authority);
         if (provider == null) {
-            throw new IllegalArgumentException("Unknown URL " + uri);
+            throw new IllegalArgumentException("Unknown authority " + authority);
         }
         try {
-            return provider.bulkInsertEntities(uri, entities);
-        } finally {
-            provider.release();
-        }
-    }
-
-    public final int[] bulkUpdateEntities(Uri uri, Entity[] entities)
-            throws RemoteException {
-        ContentProviderClient provider = acquireContentProviderClient(uri);
-        if (provider == null) {
-            throw new IllegalArgumentException("Unknown URL " + uri);
-        }
-        try {
-            return provider.bulkUpdateEntities(uri, entities);
+            return provider.applyBatch(operations);
         } finally {
             provider.release();
         }

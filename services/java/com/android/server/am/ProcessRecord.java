@@ -56,6 +56,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
+    int curSchedGroup;          // Currently desired scheduling class
+    int setSchedGroup;          // Last set to background scheduling class
     boolean isForeground;       // Is this app running the foreground UI?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
@@ -147,6 +149,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
                 pw.print(" setRaw="); pw.print(setRawAdj);
                 pw.print(" cur="); pw.print(curAdj);
                 pw.print(" set="); pw.println(setAdj);
+        pw.print(prefix); pw.print("curSchedGroup="); pw.print(curSchedGroup);
+                pw.print(" setSchedGroup="); pw.println(setSchedGroup);
         pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
                 pw.print(" setIsForeground="); pw.print(setIsForeground);
                 pw.print(" foregroundServices="); pw.print(foregroundServices);

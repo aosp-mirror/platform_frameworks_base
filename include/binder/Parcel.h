@@ -57,7 +57,8 @@ public:
 
     status_t            writeInterfaceToken(const String16& interface);
     bool                enforceInterface(const String16& interface) const;
-            
+    bool                checkInterface(IBinder*) const;    
+
     void                freeData();
 
     const size_t*       objects() const;
@@ -147,7 +148,7 @@ public:
                                             release_func relFunc, void* relCookie);
     
     void                print(TextOutput& to, uint32_t flags = 0) const;
-    
+        
 private:
                         Parcel(const Parcel& o);
     Parcel&             operator=(const Parcel& o);

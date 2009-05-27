@@ -183,6 +183,10 @@ public class WifiStateTracker extends NetworkStateTracker {
     private boolean mUseStaticIp = false;
     private int mReconnectCount;
 
+    // used to store the (non-persisted) num determined during device boot 
+    // (from mcc or other phone info) before the driver is started.
+    private int mNumAllowedChannels = 0;
+
     // Variables relating to the 'available networks' notification
     
     /**
@@ -571,9 +575,12 @@ public class WifiStateTracker extends NetworkStateTracker {
         try {
             return setNumAllowedChannels(
                     Settings.Secure.getInt(mContext.getContentResolver(),
-                                           Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
+                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
         } catch (Settings.SettingNotFoundException e) {
-            // if setting doesn't exist, stick with the driver default
+            if (mNumAllowedChannels != 0) {
+                WifiNative.setNumAllowedChannelsCommand(mNumAllowedChannels);
+            }
+            // otherwise, use the driver default
         }
         return true;
     }
@@ -587,6 +594,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * {@code numChannels} is outside the valid range.
      */
     public synchronized boolean setNumAllowedChannels(int numChannels) {
+        mNumAllowedChannels = numChannels;
         return WifiNative.setNumAllowedChannelsCommand(numChannels);
     }
 

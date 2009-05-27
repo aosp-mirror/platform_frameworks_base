@@ -50,7 +50,7 @@ AudioRecord::AudioRecord()
 }
 
 AudioRecord::AudioRecord(
-        int streamType,
+        int inputSource,
         uint32_t sampleRate,
         int format,
         int channelCount,
@@ -61,7 +61,7 @@ AudioRecord::AudioRecord(
         int notificationFrames)
     : mStatus(NO_INIT)
 {
-    mStatus = set(streamType, sampleRate, format, channelCount,
+    mStatus = set(inputSource, sampleRate, format, channelCount,
             frameCount, flags, cbf, user, notificationFrames);
 }
 
@@ -82,7 +82,7 @@ AudioRecord::~AudioRecord()
 }
 
 status_t AudioRecord::set(
-        int streamType,
+        int inputSource,
         uint32_t sampleRate,
         int format,
         int channelCount,
@@ -104,8 +104,8 @@ status_t AudioRecord::set(
         return NO_INIT;
     }
 
-    if (streamType == DEFAULT_INPUT) {
-        streamType = MIC_INPUT;
+    if (inputSource == DEFAULT_INPUT) {
+        inputSource = MIC_INPUT;
     }
 
     if (sampleRate == 0) {
@@ -157,7 +157,7 @@ status_t AudioRecord::set(
 
     // open record channel
     status_t status;
-    sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), streamType,
+    sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), inputSource,
                                                        sampleRate, format,
                                                        channelCount,
                                                        frameCount,
@@ -201,6 +201,7 @@ status_t AudioRecord::set(
     mMarkerReached = false;
     mNewPosition = 0;
     mUpdatePeriod = 0;
+    mInputSource = (uint8_t)inputSource;
 
     return NO_ERROR;
 }
@@ -240,6 +241,11 @@ uint32_t AudioRecord::frameCount() const
 int AudioRecord::frameSize() const
 {
     return channelCount()*((format() == AudioSystem::PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+}
+
+int AudioRecord::inputSource() const
+{
+    return (int)mInputSource;
 }
 
 // -------------------------------------------------------------------------

@@ -164,6 +164,7 @@ public:
     status_t setVolume(float leftVolume, float rightVolume)
     {
         Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         data.writeFloat(leftVolume);
         data.writeFloat(rightVolume);
         remote()->transact(SET_VOLUME, data, &reply);
@@ -174,12 +175,6 @@ public:
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.hardware.IMediaPlayer");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
 
 status_t BnMediaPlayer::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
@@ -261,6 +256,7 @@ status_t BnMediaPlayer::onTransact(
             return NO_ERROR;
         } break;
         case SET_VOLUME: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(setVolume(data.readFloat(), data.readFloat()));
             return NO_ERROR;
         } break;

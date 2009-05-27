@@ -53,6 +53,15 @@ import java.util.ArrayList;
  * <p>
  * Also see {@link LayoutParams} for layout attributes.
  * </p>
+ *
+ * @attr ref android.R.styleable#ViewGroup_clipChildren
+ * @attr ref android.R.styleable#ViewGroup_clipToPadding
+ * @attr ref android.R.styleable#ViewGroup_layoutAnimation
+ * @attr ref android.R.styleable#ViewGroup_animationCache
+ * @attr ref android.R.styleable#ViewGroup_persistentDrawingCache
+ * @attr ref android.R.styleable#ViewGroup_alwaysDrawnWithCache
+ * @attr ref android.R.styleable#ViewGroup_addStatesFromChildren
+ * @attr ref android.R.styleable#ViewGroup_descendantFocusability
  */
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
     private static final boolean DBG = false;
@@ -2342,7 +2351,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
 
             // Check whether the child that requests the invalidate is fully opaque
-            final boolean isOpaque = child.isOpaque();
+            final boolean isOpaque = child.isOpaque() && !drawAnimation &&
+                    child.getAnimation() != null;
             // Mark the child as dirty, using the appropriate flag
             // Make sure we do not set both flags at the same time
             final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;

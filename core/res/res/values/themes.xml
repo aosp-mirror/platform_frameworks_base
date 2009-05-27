@@ -142,7 +142,8 @@
         <item name="editTextStyle">@android:style/Widget.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.ExpandableListView</item>
         <item name="galleryStyle">@android:style/Widget.Gallery</item>
-        <item name="gridViewStyle">@android:style/Widget.GridView</item>        
+        <item name="gestureOverlayViewStyle">@android:style/Widget.GestureOverlayView</item>
+        <item name="gridViewStyle">@android:style/Widget.GridView</item>
         <item name="imageButtonStyle">@android:style/Widget.ImageButton</item>
         <item name="imageWellStyle">@android:style/Widget.ImageWell</item>
         <item name="listViewStyle">@android:style/Widget.ListView</item>
@@ -225,6 +226,7 @@
         <item name="textCheckMark">@android:drawable/indicator_check_mark_light</item>
         <item name="textCheckMarkInverse">@android:drawable/indicator_check_mark_dark</item>
 
+        <item name="gestureOverlayViewStyle">@android:style/Widget.GestureOverlayView.White</item>
         <item name="listViewStyle">@android:style/Widget.ListView.White</item>
         <item name="listDivider">@drawable/divider_horizontal_bright</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator.White</item>
@@ -365,6 +367,12 @@
     <style name="Theme.SearchBar" parent="Theme.Panel">
         <item name="android:backgroundDimEnabled">true</item>
         <item name="windowContentOverlay">@null</item>        
+    </style>
+    
+    <!-- Theme for the search input bar when doing global search. The only
+         difference from non-global search is that we do not dim the background. -->
+    <style name="Theme.GlobalSearchBar" parent="Theme.Panel">
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- Menu Themes -->

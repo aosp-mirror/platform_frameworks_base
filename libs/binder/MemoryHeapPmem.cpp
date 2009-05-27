@@ -108,7 +108,7 @@ void SubRegionMemory::revoke()
     // promote() it.
     
 #if HAVE_ANDROID_OS
-    if (mSize != NULL) {
+    if (mSize != 0) {
         const sp<MemoryHeapPmem>& heap(getHeap());
         int our_fd = heap->heapID();
         struct pmem_region sub;

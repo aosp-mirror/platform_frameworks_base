@@ -206,6 +206,34 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    public void noteStartAudio(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAudioOnLocked(uid);
+        }
+    }
+
+    public void noteStopAudio(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAudioOffLocked(uid);
+        }
+    }
+
+    public void noteStartVideo(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteVideoOnLocked(uid);
+        }
+    }
+
+    public void noteStopVideo(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteVideoOffLocked(uid);
+        }
+    }
+
     public void noteWifiRunning() {
         enforceCallingPermission();
         synchronized (mStats) {

@@ -146,6 +146,7 @@ public class Converter {
 
                     long start = System.nanoTime();
 
+                    in.readShort();
                     iCount = in.readInt();
                     hCount = in.readInt();
                     oCount = in.readInt();

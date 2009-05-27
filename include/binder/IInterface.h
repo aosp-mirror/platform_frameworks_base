@@ -27,10 +27,12 @@ namespace android {
 class IInterface : public virtual RefBase
 {
 public:
+            IInterface();
             sp<IBinder>         asBinder();
             sp<const IBinder>   asBinder() const;
-
+            
 protected:
+    virtual                     ~IInterface();
     virtual IBinder*            onAsBinder() = 0;
 };
 
@@ -49,7 +51,7 @@ class BnInterface : public INTERFACE, public BBinder
 {
 public:
     virtual sp<IInterface>      queryLocalInterface(const String16& _descriptor);
-    virtual String16            getInterfaceDescriptor() const;
+    virtual const String16&     getInterfaceDescriptor() const;
 
 protected:
     virtual IBinder*            onAsBinder();
@@ -72,11 +74,14 @@ protected:
 #define DECLARE_META_INTERFACE(INTERFACE)                               \
     static const String16 descriptor;                                   \
     static sp<I##INTERFACE> asInterface(const sp<IBinder>& obj);        \
-    virtual String16 getInterfaceDescriptor() const;                    \
+    virtual const String16& getInterfaceDescriptor() const;             \
+    I##INTERFACE();                                                     \
+    virtual ~I##INTERFACE();                                            \
+
 
 #define IMPLEMENT_META_INTERFACE(INTERFACE, NAME)                       \
     const String16 I##INTERFACE::descriptor(NAME);                      \
-    String16 I##INTERFACE::getInterfaceDescriptor() const {             \
+    const String16& I##INTERFACE::getInterfaceDescriptor() const {      \
         return I##INTERFACE::descriptor;                                \
     }                                                                   \
     sp<I##INTERFACE> I##INTERFACE::asInterface(const sp<IBinder>& obj)  \
@@ -92,9 +97,16 @@ protected:
         }                                                               \
         return intr;                                                    \
     }                                                                   \
+    I##INTERFACE::I##INTERFACE() { }                                    \
+    I##INTERFACE::~I##INTERFACE() { }                                   \
+
+
+#define CHECK_INTERFACE(interface, data, reply)                         \
+    if (!data.checkInterface(this)) { return PERMISSION_DENIED; }       \
+
 
 // ----------------------------------------------------------------------
-// No user-servicable parts after this...
+// No user-serviceable parts after this...
 
 template<typename INTERFACE>
 inline sp<IInterface> BnInterface<INTERFACE>::queryLocalInterface(
@@ -105,7 +117,7 @@ inline sp<IInterface> BnInterface<INTERFACE>::queryLocalInterface(
 }
 
 template<typename INTERFACE>
-inline String16 BnInterface<INTERFACE>::getInterfaceDescriptor() const
+inline const String16& BnInterface<INTERFACE>::getInterfaceDescriptor() const
 {
     return INTERFACE::getInterfaceDescriptor();
 }

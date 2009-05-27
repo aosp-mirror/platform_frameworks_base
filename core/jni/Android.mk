@@ -107,7 +107,7 @@ LOCAL_SRC_FILES:= \
 	android_bluetooth_HeadsetBase.cpp \
 	android_bluetooth_common.cpp \
 	android_bluetooth_BluetoothAudioGateway.cpp \
-	android_bluetooth_RfcommSocket.cpp \
+	android_bluetooth_BluetoothSocket.cpp \
 	android_bluetooth_ScoSocket.cpp \
 	android_server_BluetoothDeviceService.cpp \
 	android_server_BluetoothEventLoop.cpp \
@@ -166,8 +166,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libicui18n \
 	libicudata \
 	libmedia \
-	libwpa_client \
-	libemoji
+	libwpa_client
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \

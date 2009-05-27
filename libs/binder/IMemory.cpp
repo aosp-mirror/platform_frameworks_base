@@ -205,11 +205,11 @@ sp<IMemoryHeap> BpMemory::getMemory(ssize_t* offset, size_t* size) const
 
 IMPLEMENT_META_INTERFACE(Memory, "android.utils.IMemory");
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
+BnMemory::BnMemory() {
+}
+
+BnMemory::~BnMemory() { 
+}
 
 status_t BnMemory::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
@@ -299,11 +299,11 @@ void BpMemoryHeap::assertReallyMapped() const
         ssize_t size = reply.readInt32();
         uint32_t flags = reply.readInt32();
 
-        LOGE_IF(err, "binder=%p transaction failed fd=%d, size=%d, err=%d (%s)",
+        LOGE_IF(err, "binder=%p transaction failed fd=%d, size=%ld, err=%d (%s)",
                 asBinder().get(), parcel_fd, size, err, strerror(-err));
 
         int fd = dup( parcel_fd );
-        LOGE_IF(fd==-1, "cannot dup fd=%d, size=%d, err=%d (%s)",
+        LOGE_IF(fd==-1, "cannot dup fd=%d, size=%ld, err=%d (%s)",
                 parcel_fd, size, err, strerror(errno));
 
         int access = PROT_READ;
@@ -316,7 +316,7 @@ void BpMemoryHeap::assertReallyMapped() const
             mRealHeap = true;
             mBase = mmap(0, size, access, MAP_SHARED, fd, 0);
             if (mBase == MAP_FAILED) {
-                LOGE("cannot map BpMemoryHeap (binder=%p), size=%d, fd=%d (%s)",
+                LOGE("cannot map BpMemoryHeap (binder=%p), size=%ld, fd=%d (%s)",
                         asBinder().get(), size, fd, strerror(errno));
                 close(fd);
             } else {
@@ -357,8 +357,14 @@ uint32_t BpMemoryHeap::getFlags() const {
 
 IMPLEMENT_META_INTERFACE(MemoryHeap, "android.utils.IMemoryHeap");
 
+BnMemoryHeap::BnMemoryHeap() { 
+}
+
+BnMemoryHeap::~BnMemoryHeap() { 
+}
+
 status_t BnMemoryHeap::onTransact(
-    uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
+        uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     switch(code) {
        case HEAP_ID: {

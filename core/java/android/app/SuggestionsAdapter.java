@@ -240,6 +240,14 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             v.setVisibility(View.GONE);
         } else {
             v.setVisibility(View.VISIBLE);
+            
+            // This is a hack to get any animated drawables (like a 'working' spinner)
+            // to animate. You have to setVisible true on an AnimationDrawable to get
+            // it to start animating, but it must first have been false or else the
+            // call to setVisible will be ineffective. We need to clear up the story
+            // about animated drawables in the future, see http://b/1878430.
+            drawable.setVisible(false, false);
+            drawable.setVisible(true, false);
         }
     }
     

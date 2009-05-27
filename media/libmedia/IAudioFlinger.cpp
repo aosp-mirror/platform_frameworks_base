@@ -99,7 +99,7 @@ public:
 
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
-                                int streamType,
+                                int inputSource,
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
@@ -110,7 +110,7 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(pid);
-        data.writeInt32(streamType);
+        data.writeInt32(inputSource);
         data.writeInt32(sampleRate);
         data.writeInt32(format);
         data.writeInt32(channelCount);
@@ -353,12 +353,6 @@ IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
 
 // ----------------------------------------------------------------------
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
-
 status_t BnAudioFlinger::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
@@ -384,14 +378,14 @@ status_t BnAudioFlinger::onTransact(
         case OPEN_RECORD: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             pid_t pid = data.readInt32();
-            int streamType = data.readInt32();
+            int inputSource = data.readInt32();
             uint32_t sampleRate = data.readInt32();
             int format = data.readInt32();
             int channelCount = data.readInt32();
             size_t bufferCount = data.readInt32();
             uint32_t flags = data.readInt32();
             status_t status;
-            sp<IAudioRecord> record = openRecord(pid, streamType,
+            sp<IAudioRecord> record = openRecord(pid, inputSource,
                     sampleRate, format, channelCount, bufferCount, flags, &status);
             reply->writeInt32(status);
             reply->writeStrongBinder(record->asBinder());

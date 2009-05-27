@@ -30,35 +30,22 @@ public:
     int right;
     int bottom;
 
-    typedef int value_type;
-    
     // we don't provide copy-ctor and operator= on purpose
     // because we want the compiler generated versions
 
-    inline Rect()
-    {
+    inline Rect() {
     }
-
     inline Rect(int w, int h)
-        : left(0), top(0), right(w), bottom(h)
-    {
+        : left(0), top(0), right(w), bottom(h) {
     }
-
     inline Rect(int l, int t, int r, int b)
-        : left(l), top(t), right(r), bottom(b)
-    {
+        : left(l), top(t), right(r), bottom(b) {
     }
-
     inline Rect(const Point& lt, const Point& rb) 
-        : left(lt.x), top(lt.y), right(rb.x), bottom(rb.y)
-    {
+        : left(lt.x), top(lt.y), right(rb.x), bottom(rb.y) {
     }
 
     void makeInvalid();
-    
-    inline void clear() {
-        left = top = right = bottom = 0;
-    }
     
     // a valid rectangle has a non negative width and height
     inline bool isValid() const {
@@ -84,28 +71,28 @@ public:
         return bottom-top;
     }
 
-    // the following 4 functions return the 4 corners of the rect as Point
-    inline Point leftTop() const {
-        return Point(left, top);
-    }
-    inline Point rightBottom() const {
-        return Point(right, bottom);
-    }
-    inline Point rightTop() const {
-        return Point(right, top);
-    }
-    inline Point leftBottom() const {
-        return Point(left, bottom);
-    }
-    
-    inline void setLeftTop(const Point& p) {
-        left = p.x;
-        top  = p.y;
+    void setLeftTop(const Point& lt) {
+        left = lt.x;
+        top  = lt.y;
     }
 
-    inline void setRightBottom(const Point& p) {
-        right  = p.x;
-        bottom = p.y;
+    void setRightBottom(const Point& rb) {
+        right = rb.x;
+        bottom  = rb.y;
+    }
+    
+    // the following 4 functions return the 4 corners of the rect as Point
+    Point leftTop() const {
+        return Point(left, top);
+    }
+    Point rightBottom() const {
+        return Point(right, bottom);
+    }
+    Point rightTop() const {
+        return Point(right, top);
+    }
+    Point leftBottom() const {
+        return Point(left, bottom);
     }
 
     // comparisons
@@ -140,8 +127,8 @@ public:
     Rect& operator -= (const Point& rhs) {
         return offsetBy(-rhs.x, -rhs.y);
     }
-    Rect operator + (const Point& rhs) const;
-    Rect operator - (const Point& rhs) const;
+    const Rect operator + (const Point& rhs) const;
+    const Rect operator - (const Point& rhs) const;
 
     void translate(int dx, int dy) { // legacy, don't use.
         offsetBy(dx, dy);

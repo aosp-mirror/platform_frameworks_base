@@ -20,6 +20,9 @@ import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.content.Entity;
 import android.content.EntityIterator;
+import android.content.ContentProviderResult;
+import android.content.ContentProviderOperation;
+import android.content.OperationApplicationException;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.CursorWindow;
@@ -49,7 +52,7 @@ public class MockContentProvider implements IContentProvider {
         return 0;
     }
 
-    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) throws RemoteException {
+    public Uri insertEntity(Uri uri, Entity entities) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -87,7 +90,11 @@ public class MockContentProvider implements IContentProvider {
             throws FileNotFoundException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
-    
+
+    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations) throws RemoteException, OperationApplicationException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
     @SuppressWarnings("unused")
     public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) throws RemoteException {
@@ -105,7 +112,7 @@ public class MockContentProvider implements IContentProvider {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
-    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) throws RemoteException {
+    public int updateEntity(Uri uri, Entity entity) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 

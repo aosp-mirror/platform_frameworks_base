@@ -58,10 +58,10 @@ final class GestureUtilities {
         float sy = targetPatchSize / rect.height();
         float scale = sx < sy ? sx : sy;
 
-        Matrix trans = new Matrix();
-        trans.setScale(scale, scale);
-        trans.preTranslate(-rect.centerX(), -rect.centerY());
-        trans.postTranslate(targetPatchSize / 2, targetPatchSize / 2);
+        float preDx = -rect.centerX();
+        float preDy = -rect.centerY();
+        float postDx = targetPatchSize / 2;
+        float postDy = targetPatchSize / 2;
 
         final ArrayList<GestureStroke> strokes = gesture.getStrokes();
         final int count = strokes.size();
@@ -72,11 +72,16 @@ final class GestureUtilities {
 
         for (int index = 0; index < count; index++) {
             final GestureStroke stroke = strokes.get(index);
-            size = stroke.points.length;
+            float[] strokepoints = stroke.points;
+            size = strokepoints.length;
 
             final float[] pts = new float[size];
-
-            trans.mapPoints(pts, 0, stroke.points, 0, size / 2);
+             
+            for (int i = 0; i < size; i += 2) {
+                pts[i] = (strokepoints[i] + preDx) * scale + postDx;
+                pts[i + 1] = (strokepoints[i + 1] + preDy) * scale + postDy;
+            }
+        
             float segmentEndX = -1;
             float segmentEndY = -1;
             
@@ -388,7 +393,7 @@ final class GestureUtilities {
         } else { // -PI<alpha<PI
             angle = (float) Math.atan2(targetVector[1], targetVector[0]);
             angle = (float) (180 * angle / Math.PI);
-            android.graphics.Matrix trans = new android.graphics.Matrix();
+            Matrix trans = new Matrix();
             trans.setRotate(-angle);
             trans.mapPoints(points);
         }

@@ -151,9 +151,23 @@ public abstract class ContentProvider implements ComponentCallbacks {
             return ContentProvider.this.bulkInsert(uri, initialValues);
         }
 
-        public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) {
+        public Uri insertEntity(Uri uri, Entity entities) {
             checkWritePermission(uri);
-            return ContentProvider.this.bulkInsertEntities(uri, entities);
+            return ContentProvider.this.insertEntity(uri, entities);
+        }
+
+        public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+                throws OperationApplicationException {
+            for (ContentProviderOperation operation : operations) {
+                if (operation.isReadOperation()) {
+                    checkReadPermission(operation.getUri());
+                }
+
+                if (operation.isWriteOperation()) {
+                    checkWritePermission(operation.getUri());
+                }
+            }
+            return ContentProvider.this.applyBatch(operations);
         }
 
         public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -167,9 +181,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
             return ContentProvider.this.update(uri, values, selection, selectionArgs);
         }
 
-        public int[] bulkUpdateEntities(Uri uri, Entity[] entities) {
+        public int updateEntity(Uri uri, Entity entity) {
             checkWritePermission(uri);
-            return ContentProvider.this.bulkUpdateEntities(uri, entities);
+            return ContentProvider.this.updateEntity(uri, entity);
         }
 
         public ParcelFileDescriptor openFile(Uri uri, String mode)
@@ -403,14 +417,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
         throw new UnsupportedOperationException();
     }
 
-    public Uri[] bulkInsertEntities(Uri uri, Entity[] entities) {
-        Uri[] result = new Uri[entities.length];
-        for (int i = 0; i < entities.length; i++) {
-            result[i] = insertEntity(uri, entities[i]);
-        }
-        return result;
-    }
-
     /**
      * A request to delete one or more rows. The selection clause is applied when performing
      * the deletion, allowing the operation to affect multiple rows in a
@@ -457,14 +463,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
 
     public int updateEntity(Uri uri, Entity entity) {
         throw new UnsupportedOperationException();
-    }
-
-    public int[] bulkUpdateEntities(Uri uri, Entity[] entities) {
-        int[] result = new int[entities.length];
-        for (int i = 0; i < entities.length; i++) {
-            result[i] = updateEntity(uri, entities[i]);
-        }
-        return result;
     }
 
     /**
