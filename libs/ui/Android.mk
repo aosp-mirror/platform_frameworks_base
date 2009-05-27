@@ -20,7 +20,6 @@ LOCAL_SRC_FILES:= \
 	LayerState.cpp \
 	Overlay.cpp \
 	PixelFormat.cpp \
-	Point.cpp \
 	Rect.cpp \
 	Region.cpp \
 	Surface.cpp \
