@@ -3864,6 +3864,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         GesturesProcessor() {
             mRecognizer = LetterRecognizer.getLetterRecognizer(getContext(),
                     LetterRecognizer.RECOGNIZER_LATIN_LOWERCASE);
+            if (mRecognizer == null) {
+                dismissGesturesPopup();
+                mGestures = GESTURES_NONE;
+            }
             if (mGestures == GESTURES_FILTER) {
                 mKeyMap = KeyCharacterMap.load(KeyCharacterMap.BUILT_IN_KEYBOARD);
                 mHolder = new char[1];
