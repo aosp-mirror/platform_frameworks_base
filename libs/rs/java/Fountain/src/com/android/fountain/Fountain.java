@@ -34,14 +34,14 @@ import android.widget.ListView;
 
 import java.lang.Runtime;
 
-public class Calc extends Activity {
+public class Fountain extends Activity {
     //EventListener mListener = new EventListener();
 
     private static final String LOG_TAG = "libRS_jni";
     private static final boolean DEBUG  = false;
     private static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
 
-    private CalcView mView;
+    private FountainView mView;
 
     // get the current looper (from your Activity UI thread for instance
 
@@ -53,7 +53,7 @@ public class Calc extends Activity {
 
         // Create our Preview view and set it as the content of our
         // Activity
-        mView = new CalcView(this);
+        mView = new FountainView(this);
         setContentView(mView);
     }
 

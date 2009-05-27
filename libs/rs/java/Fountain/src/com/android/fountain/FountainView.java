@@ -28,12 +28,12 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.KeyEvent; 
-import android.view.MotionEvent; 
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 
-public class CalcView extends RSSurfaceView {
+public class FountainView extends RSSurfaceView {
 
-    public CalcView(Context context) {
+    public FountainView(Context context) {
         super(context);
 
         //setFocusable(true);
@@ -101,20 +101,20 @@ public class CalcView extends RSSurfaceView {
         initRS();
     }
 
-    @Override 
-    public boolean onKeyDown(int keyCode, KeyEvent event) 
-    { 
-        // break point at here 
-        // this method doesn't work when 'extends View' include 'extends ScrollView'. 
-        return super.onKeyDown(keyCode, event); 
-    } 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        // break point at here
+        // this method doesn't work when 'extends View' include 'extends ScrollView'.
+        return super.onKeyDown(keyCode, event);
+    }
 
     int mTouchAction;
 
-    @Override 
-    public boolean onTouchEvent(MotionEvent ev) 
-    { 
-        //Log.e("CalcView", ev.toString());
+    @Override
+    public boolean onTouchEvent(MotionEvent ev)
+    {
+        //Log.e("FountainView", ev.toString());
         boolean ret = true;
         int act = ev.getAction();
         mParams[1] = (int)ev.getX();
@@ -129,7 +129,7 @@ public class CalcView extends RSSurfaceView {
         mIntAlloc.subData1D(2, 3, mParams);
 
         return ret;
-    } 
+    }
 }
 
 

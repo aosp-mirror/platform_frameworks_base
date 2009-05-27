@@ -19,7 +19,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_PACKAGE_NAME := Calc
+LOCAL_PACKAGE_NAME := Fountain
 
 include $(BUILD_PACKAGE)
 ##################################################

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.calc">
-    <application android:label="Calc">
-        <activity android:name="Calc" 
+    <application android:label="Fountain">
+        <activity android:name="Fountain"
                   android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -10,4 +10,4 @@
             </intent-filter>
         </activity>
     </application>
-</manifest> 
+</manifest>

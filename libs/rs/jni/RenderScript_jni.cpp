@@ -33,6 +33,12 @@
 #include "../RenderScript.h"
 #include "../RenderScriptEnv.h"
 
+// #define USE_ACC
+
+#ifdef USE_ACC
+#include "acc/acc.h"
+#endif
+
 //#define LOG_API LOGE
 #define LOG_API(...)
 
@@ -40,6 +46,140 @@ using namespace android;
 
 extern "C" void test_script(void *con, const rsc_FunctionTable *ft, uint32_t launchID);
 
+#ifdef USE_ACC
+static const char* TEST_SCRIPT = ""
+        "// Fountain test script\n"
+        "\n"
+        "void main(con, ft, launchID) {\n"
+        "    int count, touch, x, y, rate, maxLife, lifeShift;\n"
+        "    int life;\n"
+        "    int ct, ct2;\n"
+        "    int newPart;\n"
+        "    int drawCount;\n"
+        "    int dx, dy, idx;\n"
+        "    int partPtr;\n"
+        "    int vertPtr;\n"
+        "    int posx,posy;\n"
+        "    int c;\n"
+        "\n"
+        "    count = loadEnvI32(con, 0, 1);\n"
+        "    touch = loadEnvI32(con, 0, 2);\n"
+        "    x = loadEnvI32(ft, con, 0, 3);\n"
+        "    y = 480 - loadEnvI32(con, 0, 4);\n"
+        "\n"
+        "    rate = 4;\n"
+        "    maxLife = (count / rate) - 1;\n"
+        "    lifeShift = 0;\n"
+        "    {\n"
+        "        life = maxLife;\n"
+        "        while (life > 255) {\n"
+        "            life >>= 1;\n"
+        "            lifeShift ++;\n"
+        "        }\n"
+        "    }\n"
+        "\n"
+        "    if (touch) {\n"
+        "        newPart = loadEnvI32(con, 2, 0);\n"
+        "        for (ct2=0; ct2<rate; ct2++) {\n"
+        "            dx = scriptRand(con, 0x10000) - 0x8000;\n"
+        "            dy = scriptRand(con, 0x10000) - 0x8000;\n"
+        "\n"
+        "            idx = newPart * 5 + 1;\n"
+        "            storeEnvI32(con, 2, idx, dx);\n"
+        "            storeEnvI32(con, 2, idx + 1, dy);\n"
+        "            storeEnvI32(con, 2, idx + 2, maxLife);\n"
+        "            storeEnvI32(con, 2, idx + 3, x << 16);\n"
+        "            storeEnvI32(con, 2, idx + 4, y << 16);\n"
+        "\n"
+        "            newPart++;\n"
+        "            if (newPart >= count) {\n"
+        "                newPart = 0;\n"
+        "            }\n"
+        "        }\n"
+        "        storeEnvI32(con, 2, 0, newPart);\n"
+        "    }\n"
+        "\n"
+        "    // Emulate intrinsic perf...\n"
+        "    partPtr = loadEnvVp(con, 2, 4);\n"
+        "    vertPtr = loadEnvVp(con, 1, 0);\n"
+        "\n"
+        "    drawCount = 0;\n"
+        "    for (ct=0; ct < count; ct++) {\n"
+        "        //int srcIdx = ct * 5 + 1;\n"
+        "        //int dstIdx = ct * 3 * 3;\n"
+        "\n"
+        "        dx = * (int* )(partPtr + 0); //loadEnvI32(con, 2, srcIdx);\n"
+        "        dy = * (int* )(partPtr + 4); //loadEnvI32(con, 2, srcIdx + 1);\n"
+        "        life = * (int* )(partPtr + 8); //loadEnvI32(con, 2, srcIdx + 2);\n"
+        "        posx = * (int* )(partPtr + 12); //loadEnvI32(con, 2, srcIdx + 3);\n"
+        "        posy = * (int* )(partPtr + 16); //loadEnvI32(con, 2, srcIdx + 4);\n"
+        "\n"
+        "        if (life) {\n"
+        "            if (posy > 0) {\n"
+        "                c = 0xffafcf | ((life >> lifeShift) << 24);\n"
+        "\n"
+        "                * (int* )(vertPtr) = c; //storeEnvU32(con, 1, dstIdx, c);\n"
+        "                * (int* )(vertPtr + 4) = posx; //storeEnvI32(con, 1, dstIdx + 1, posx);\n"
+        "                * (int* )(vertPtr + 8) = posy; //storeEnvI32(con, 1, dstIdx + 2, posy);\n"
+        "\n"
+        "                * (int* )(vertPtr + 12) = c; //storeEnvU32(con, 1, dstIdx + 3, c);\n"
+        "                * (int* )(vertPtr + 16) = posx + 0x10000; //storeEnvI32(con, 1, dstIdx + 4, posx + 0x10000);\n"
+        "                * (int* )(vertPtr + 20) = posy + dy * 4; //storeEnvI32(con, 1, dstIdx + 5, posy);\n"
+        "\n"
+        "                * (int* )(vertPtr + 24) = c; //storeEnvU32(con, 1, dstIdx + 6, c);\n"
+        "                * (int* )(vertPtr + 28) = posx - 0x10000; //storeEnvI32(con, 1, dstIdx + 7, posx + 0x0800);\n"
+        "                * (int* )(vertPtr + 32) = posy + dy * 4; //storeEnvI32(con, 1, dstIdx + 8, posy + 0x10000);\n"
+        "\n"
+        "                vertPtr += 36;\n"
+        "                drawCount ++;\n"
+        "            } else {\n"
+        "                if (dy < 0) {\n"
+        "                    dy = (-dy) >> 1;\n"
+        "                }\n"
+        "            }\n"
+        "\n"
+        "            posx += dx;\n"
+        "            posy += dy;\n"
+        "            dy -= 0x400;\n"
+        "            life --;\n"
+        "\n"
+        "            * (int* )(partPtr + 0) = dx; //storeEnvI32(con, 2, srcIdx, dx);\n"
+        "            * (int* )(partPtr + 4) = dy; //storeEnvI32(con, 2, srcIdx + 1, dy);\n"
+        "            * (int* )(partPtr + 8) = life; //storeEnvI32(con, 2, srcIdx + 2, life);\n"
+        "            * (int* )(partPtr + 12) = posx; //storeEnvI32(con, 2, srcIdx + 3, posx);\n"
+        "            * (int* )(partPtr + 16) = posy; //storeEnvI32(con, 2, srcIdx + 4, posy);\n"
+        "        }\n"
+        "\n"
+        "        partPtr += 20;\n"
+        "    }\n"
+        "\n"
+        "    drawTriangleArray(con, loadEnvI32(con, 0, 5), drawCount);\n"
+        "}\n"
+        "";
+
+typedef void (*ScriptEntry)(void *con, const rsc_FunctionTable *ft, uint32_t launchID);
+
+ACCscript* gScript;
+ScriptEntry gScriptEntry;
+
+void test_script(void *con, const rsc_FunctionTable *ft, uint32_t launchID)
+{
+    if (!gScript) {
+        gScript = accCreateScript();
+    }
+    if (!gScriptEntry) {
+        const char* scriptSource[] = { TEST_SCRIPT };
+        accScriptSource(gScript, 1, scriptSource, NULL);
+        accCompileScript(gScript);
+        accGetScriptLabel(gScript, "main", (ACCvoid**) &gScriptEntry);
+    }
+    if (gScriptEntry) {
+        gScriptEntry(con, ft, launchID);
+    }
+}
+
+
+#else
 void test_script(void *con, const rsc_FunctionTable *ft, uint32_t launchID)
 {
     int count = ft->loadEnvI32(con, 0, 1);
@@ -136,6 +276,7 @@ void test_script(void *con, const rsc_FunctionTable *ft, uint32_t launchID)
     ft->drawTriangleArray(con, (RsAllocation)ft->loadEnvI32(con, 0, 5), drawCount);
 }
 
+#endif
 
 // ---------------------------------------------------------------------------
 

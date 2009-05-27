@@ -31,81 +31,81 @@ ScriptC::~ScriptC()
 {
 }
 
-static void matrixLoadIdentity(void *con, rsc_Matrix *mat)
+extern "C" void matrixLoadIdentity(void *con, rsc_Matrix *mat)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->loadIdentity();
 }
 
-static void matrixLoadFloat(void *con, rsc_Matrix *mat, const float *f)
+extern "C" void matrixLoadFloat(void *con, rsc_Matrix *mat, const float *f)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->load(f);
 }
 
-static void matrixLoadMat(void *con, rsc_Matrix *mat, const rsc_Matrix *newmat)
+extern "C" void matrixLoadMat(void *con, rsc_Matrix *mat, const rsc_Matrix *newmat)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->load(reinterpret_cast<const Matrix *>(newmat));
 }
 
-static void matrixLoadRotate(void *con, rsc_Matrix *mat, float rot, float x, float y, float z)
+extern "C" void matrixLoadRotate(void *con, rsc_Matrix *mat, float rot, float x, float y, float z)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->loadRotate(rot, x, y, z);
 }
 
-static void matrixLoadScale(void *con, rsc_Matrix *mat, float x, float y, float z)
+extern "C" void matrixLoadScale(void *con, rsc_Matrix *mat, float x, float y, float z)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->loadScale(x, y, z);
 }
 
-static void matrixLoadTranslate(void *con, rsc_Matrix *mat, float x, float y, float z)
+extern "C" void matrixLoadTranslate(void *con, rsc_Matrix *mat, float x, float y, float z)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->loadTranslate(x, y, z);
 }
 
-static void matrixLoadMultiply(void *con, rsc_Matrix *mat, const rsc_Matrix *lhs, const rsc_Matrix *rhs)
+extern "C" void matrixLoadMultiply(void *con, rsc_Matrix *mat, const rsc_Matrix *lhs, const rsc_Matrix *rhs)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->loadMultiply(reinterpret_cast<const Matrix *>(lhs),
                     reinterpret_cast<const Matrix *>(rhs));
 }
 
-static void matrixMultiply(void *con, rsc_Matrix *mat, const rsc_Matrix *rhs)
+extern "C" void matrixMultiply(void *con, rsc_Matrix *mat, const rsc_Matrix *rhs)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->multiply(reinterpret_cast<const Matrix *>(rhs));
 }
 
-static void matrixRotate(void *con, rsc_Matrix *mat, float rot, float x, float y, float z)
+extern "C" void matrixRotate(void *con, rsc_Matrix *mat, float rot, float x, float y, float z)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->rotate(rot, x, y, z);
 }
 
-static void matrixScale(void *con, rsc_Matrix *mat, float x, float y, float z)
+extern "C" void matrixScale(void *con, rsc_Matrix *mat, float x, float y, float z)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->scale(x, y, z);
 }
 
-static void matrixTranslate(void *con, rsc_Matrix *mat, float x, float y, float z)
+extern "C" void matrixTranslate(void *con, rsc_Matrix *mat, float x, float y, float z)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);
     m->translate(x, y, z);
 }
 
 
-static const void * loadVp(void *vp, uint32_t bank, uint32_t offset)
+extern "C" const void * loadVp(void *vp, uint32_t bank, uint32_t offset)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     return &static_cast<const uint8_t *>(env->mScript->mSlots[bank]->getPtr())[offset];
 }
 
-static float loadF(void *vp, uint32_t bank, uint32_t offset)
+extern "C" float loadF(void *vp, uint32_t bank, uint32_t offset)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     //LOGE("bank %i, offset %i", bank, offset);
@@ -113,132 +113,132 @@ static float loadF(void *vp, uint32_t bank, uint32_t offset)
     return static_cast<const float *>(env->mScript->mSlots[bank]->getPtr())[offset];
 }
 
-static int32_t loadI32(void *vp, uint32_t bank, uint32_t offset)
+extern "C" int32_t loadI32(void *vp, uint32_t bank, uint32_t offset)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     return static_cast<const int32_t *>(env->mScript->mSlots[bank]->getPtr())[offset];
 }
 
-static uint32_t loadU32(void *vp, uint32_t bank, uint32_t offset)
+extern "C" uint32_t loadU32(void *vp, uint32_t bank, uint32_t offset)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     return static_cast<const uint32_t *>(env->mScript->mSlots[bank]->getPtr())[offset];
 }
 
-static void loadEnvVec4(void *vp, uint32_t bank, uint32_t offset, rsc_Vector4 *v)
+extern "C" void loadEnvVec4(void *vp, uint32_t bank, uint32_t offset, rsc_Vector4 *v)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     memcpy(v, &static_cast<const float *>(env->mScript->mSlots[bank]->getPtr())[offset], sizeof(rsc_Vector4));
 }
 
-static void loadEnvMatrix(void *vp, uint32_t bank, uint32_t offset, rsc_Matrix *m)
+extern "C" void loadEnvMatrix(void *vp, uint32_t bank, uint32_t offset, rsc_Matrix *m)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     memcpy(m, &static_cast<const float *>(env->mScript->mSlots[bank]->getPtr())[offset], sizeof(rsc_Matrix));
 }
 
 
-static void storeF(void *vp, uint32_t bank, uint32_t offset, float v)
+extern "C" void storeF(void *vp, uint32_t bank, uint32_t offset, float v)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     static_cast<float *>(env->mScript->mSlots[bank]->getPtr())[offset] = v;
 }
 
-static void storeI32(void *vp, uint32_t bank, uint32_t offset, int32_t v)
+extern "C" void storeI32(void *vp, uint32_t bank, uint32_t offset, int32_t v)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     static_cast<int32_t *>(env->mScript->mSlots[bank]->getPtr())[offset] = v;
 }
 
-static void storeU32(void *vp, uint32_t bank, uint32_t offset, uint32_t v)
+extern "C" void storeU32(void *vp, uint32_t bank, uint32_t offset, uint32_t v)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     static_cast<uint32_t *>(env->mScript->mSlots[bank]->getPtr())[offset] = v;
 }
 
-static void storeEnvVec4(void *vp, uint32_t bank, uint32_t offset, const rsc_Vector4 *v)
+extern "C" void storeEnvVec4(void *vp, uint32_t bank, uint32_t offset, const rsc_Vector4 *v)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     memcpy(&static_cast<float *>(env->mScript->mSlots[bank]->getPtr())[offset], v, sizeof(rsc_Vector4));
 }
 
-static void storeEnvMatrix(void *vp, uint32_t bank, uint32_t offset, const rsc_Matrix *m)
+extern "C" void storeEnvMatrix(void *vp, uint32_t bank, uint32_t offset, const rsc_Matrix *m)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     memcpy(&static_cast<float *>(env->mScript->mSlots[bank]->getPtr())[offset], m, sizeof(rsc_Matrix));
 }
 
 
-static void color(void *vp, float r, float g, float b, float a)
+extern "C" void color(void *vp, float r, float g, float b, float a)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     glColor4f(r, g, b, a);
 }
 
-static void renderTriangleMesh(void *vp, RsTriangleMesh mesh)
+extern "C" void renderTriangleMesh(void *vp, RsTriangleMesh mesh)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     rsi_TriangleMeshRender(env->mContext, mesh);
 }
 
-static void renderTriangleMeshRange(void *vp, RsTriangleMesh mesh, uint32_t start, uint32_t count)
+extern "C" void renderTriangleMeshRange(void *vp, RsTriangleMesh mesh, uint32_t start, uint32_t count)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     rsi_TriangleMeshRenderRange(env->mContext, mesh, start, count);
 }
 
-static void materialDiffuse(void *vp, float r, float g, float b, float a)
+extern "C" void materialDiffuse(void *vp, float r, float g, float b, float a)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     float v[] = {r, g, b, a};
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, v);
 }
 
-static void materialSpecular(void *vp, float r, float g, float b, float a)
+extern "C" void materialSpecular(void *vp, float r, float g, float b, float a)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     float v[] = {r, g, b, a};
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, v);
 }
 
-static void lightPosition(void *vp, float x, float y, float z, float w)
+extern "C" void lightPosition(void *vp, float x, float y, float z, float w)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     float v[] = {x, y, z, w};
     glLightfv(GL_LIGHT0, GL_POSITION, v);
 }
 
-static void materialShininess(void *vp, float s)
+extern "C" void materialShininess(void *vp, float s)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &s);
 }
 
-static void uploadToTexture(void *vp, RsAllocation va, uint32_t baseMipLevel)
+extern "C" void uploadToTexture(void *vp, RsAllocation va, uint32_t baseMipLevel)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     rsi_AllocationUploadToTexture(env->mContext, va, baseMipLevel);
 }
 
-static void enable(void *vp, uint32_t p)
+extern "C" void enable(void *vp, uint32_t p)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     glEnable(p);
 }
 
-static void disable(void *vp, uint32_t p)
+extern "C" void disable(void *vp, uint32_t p)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
     glDisable(p);
 }
 
-static uint32_t scriptRand(void *vp, uint32_t max)
+extern "C" uint32_t scriptRand(void *vp, uint32_t max)
 {
     return (uint32_t)(((float)rand()) * max / RAND_MAX);
 }
 
 // Assumes (GL_FIXED) x,y,z (GL_UNSIGNED_BYTE)r,g,b,a
-static void drawTriangleArray(void *vp, RsAllocation alloc, uint32_t count)
+extern "C" void drawTriangleArray(void *vp, RsAllocation alloc, uint32_t count)
 {
     const Allocation *a = (const Allocation *)alloc;
     const uint32_t *ptr = (const uint32_t *)a->getPtr();
@@ -261,28 +261,28 @@ static void drawTriangleArray(void *vp, RsAllocation alloc, uint32_t count)
     glDrawArrays(GL_TRIANGLES, 0, count * 3);
 }
 
-static void pfBindTexture(void *vp, RsProgramFragment vpf, uint32_t slot, RsAllocation va)
+extern "C" void pfBindTexture(void *vp, RsProgramFragment vpf, uint32_t slot, RsAllocation va)
 {
     //LOGE("pfBindTexture %p", vpf);
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
-    rsi_ProgramFragmentBindTexture(env->mContext, 
+    rsi_ProgramFragmentBindTexture(env->mContext,
                                    static_cast<ProgramFragment *>(vpf),
                                    slot,
                                    static_cast<Allocation *>(va));
 
 }
 
-static void pfBindSampler(void *vp, RsProgramFragment vpf, uint32_t slot, RsSampler vs)
+extern "C" void pfBindSampler(void *vp, RsProgramFragment vpf, uint32_t slot, RsSampler vs)
 {
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
-    rsi_ProgramFragmentBindSampler(env->mContext, 
+    rsi_ProgramFragmentBindSampler(env->mContext,
                                    static_cast<ProgramFragment *>(vpf),
                                    slot,
                                    static_cast<Sampler *>(vs));
 
 }
 
-static void contextBindProgramFragmentStore(void *vp, RsProgramFragmentStore pfs)
+extern "C" void contextBindProgramFragmentStore(void *vp, RsProgramFragmentStore pfs)
 {
     //LOGE("contextBindProgramFragmentStore %p", pfs);
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
@@ -290,7 +290,7 @@ static void contextBindProgramFragmentStore(void *vp, RsProgramFragmentStore pfs
 
 }
 
-static void contextBindProgramFragment(void *vp, RsProgramFragment pf)
+extern "C" void contextBindProgramFragment(void *vp, RsProgramFragment pf)
 {
     //LOGE("contextBindProgramFragment %p", pf);
     ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
