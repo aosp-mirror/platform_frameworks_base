@@ -384,17 +384,18 @@ jbyteArray dbus_returns_array_of_bytes(JNIEnv *env, DBusMessage *reply) {
     return byteArray;
 }
 
-void get_bdaddr(const char *str, bdaddr_t *ba) {
+int get_bdaddr(const char *str, bdaddr_t *ba) {
     char *d = ((char *)ba) + 5, *endp;
     int i;
     for(i = 0; i < 6; i++) {
         *d-- = strtol(str, &endp, 16);
         if (*endp != ':' && i != 5) {
             memset(ba, 0, sizeof(bdaddr_t));
-            return;
+            return -1;
         }
         str = endp + 1;
     }
+    return 0;
 }
 
 void get_bdaddr_as_string(const bdaddr_t *ba, char *str) {

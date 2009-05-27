@@ -135,7 +135,7 @@ jboolean dbus_returns_boolean(JNIEnv *env, DBusMessage *reply);
 jobjectArray dbus_returns_array_of_strings(JNIEnv *env, DBusMessage *reply);
 jbyteArray dbus_returns_array_of_bytes(JNIEnv *env, DBusMessage *reply);
 
-void get_bdaddr(const char *str, bdaddr_t *ba);
+int get_bdaddr(const char *str, bdaddr_t *ba);
 void get_bdaddr_as_string(const bdaddr_t *ba, char *str);
 
 bool debug_no_encrypt();
