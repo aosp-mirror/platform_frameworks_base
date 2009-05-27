@@ -54,6 +54,8 @@ $(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(TOP_LOCAL_PATH)/rs.spec
 $(GEN) : $(RSG_GENERATOR) $(LOCAL_PATH)/rs.spec
 $(GEN): $(intermediates)/%.h : $(LOCAL_PATH)/%.h.rsg
 	$(transform-generated-source)
+
+RS_GENERATED_SOURCES += $(GEN)
 LOCAL_GENERATED_SOURCES += $(GEN)
 
 # Generate custom source files
@@ -62,11 +64,13 @@ GEN := $(addprefix $(intermediates)/, \
             rsgApi.cpp \
             rsgApiReplay.cpp \
         )
-        
+
 $(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(TOP_LOCAL_PATH)/rs.spec
 $(GEN) : $(RSG_GENERATOR) $(LOCAL_PATH)/rs.spec
 $(GEN): $(intermediates)/%.cpp : $(LOCAL_PATH)/%.cpp.rsg
 	$(transform-generated-source)
+
+RS_GENERATED_SOURCES += $(GEN)
 LOCAL_GENERATED_SOURCES += $(GEN)
 
 LOCAL_SRC_FILES:= \
@@ -126,6 +130,8 @@ LOCAL_CFLAGS +=
 LOCAL_LDLIBS := -lpthread
 
 LOCAL_MODULE:= libRS_jni
+
+LOCAL_ADDITIONAL_DEPENDENCIES += $(RS_GENERATED_SOURCES)
 
 include $(BUILD_SHARED_LIBRARY)
 
