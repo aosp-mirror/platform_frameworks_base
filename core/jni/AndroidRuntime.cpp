@@ -144,7 +144,7 @@ extern int register_android_text_KeyCharacterMap(JNIEnv *env);
 extern int register_android_opengl_classes(JNIEnv *env);
 extern int register_android_bluetooth_HeadsetBase(JNIEnv* env);
 extern int register_android_bluetooth_BluetoothAudioGateway(JNIEnv* env);
-extern int register_android_bluetooth_RfcommSocket(JNIEnv *env);
+extern int register_android_bluetooth_BluetoothSocket(JNIEnv *env);
 extern int register_android_bluetooth_ScoSocket(JNIEnv *env);
 extern int register_android_server_BluetoothDeviceService(JNIEnv* env);
 extern int register_android_server_BluetoothEventLoop(JNIEnv *env);
@@ -1159,7 +1159,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_opengl_classes),
     REG_JNI(register_android_bluetooth_HeadsetBase),
     REG_JNI(register_android_bluetooth_BluetoothAudioGateway),
-    REG_JNI(register_android_bluetooth_RfcommSocket),
+    REG_JNI(register_android_bluetooth_BluetoothSocket),
     REG_JNI(register_android_bluetooth_ScoSocket),
     REG_JNI(register_android_server_BluetoothDeviceService),
     REG_JNI(register_android_server_BluetoothEventLoop),
