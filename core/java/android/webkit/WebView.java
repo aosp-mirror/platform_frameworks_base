@@ -370,6 +370,9 @@ public class WebView extends AbsoluteLayout
     // Whether or not to draw the focus ring.
     private boolean mDrawFocusRing = true;
 
+    // true if onPause has been called (and not onResume)
+    private boolean mIsPaused;
+
     /**
      * Customizable constant
      */
@@ -997,7 +1000,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * If platform notifications are enabled, this should be called
-     * from onPause() or onStop().
+     * from the Activity's onPause() or onStop().
      */
     public static void disablePlatformNotifications() {
         Network.disablePlatformNotifications();
@@ -1938,19 +1941,56 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Pause all layout, parsing, and javascript timers. This can be useful if
-     * the WebView is not visible or the application has been paused.
+     * Pause all layout, parsing, and javascript timers for all webviews. This
+     * is a global requests, not restricted to just this webview. This can be
+     * useful if the application has been paused.
      */
     public void pauseTimers() {
         mWebViewCore.sendMessage(EventHub.PAUSE_TIMERS);
     }
 
     /**
-     * Resume all layout, parsing, and javascript timers. This will resume
-     * dispatching all timers.
+     * Resume all layout, parsing, and javascript timers for all webviews.
+     * This will resume dispatching all timers.
      */
     public void resumeTimers() {
         mWebViewCore.sendMessage(EventHub.RESUME_TIMERS);
+    }
+
+    /**
+     * Call this to pause any extra processing associated with this view and
+     * its associated DOM/plugins/javascript/etc. For example, if the view is
+     * taken offscreen, this could be called to reduce unnecessary CPU and/or
+     * network traffic. When the view is again "active", call onResume().
+     *
+     * Note that this differs from pauseTimers(), which affects all views/DOMs
+     * @hide
+     */
+    public void onPause() {
+        if (!mIsPaused) {
+            mIsPaused = true;
+            mWebViewCore.sendMessage(EventHub.ON_PAUSE);
+        }
+    }
+
+    /**
+     * Call this to balanace a previous call to onPause()
+     * @hide
+     */
+    public void onResume() {
+        if (mIsPaused) {
+            mIsPaused = false;
+            mWebViewCore.sendMessage(EventHub.ON_RESUME);
+        }
+    }
+
+    /**
+     * Returns true if the view is paused, meaning onPause() was called. Calling
+     * onResume() sets the paused state back to false.
+     * @hide
+     */
+    public boolean isPaused() {
+        return mIsPaused;
     }
 
     /**
