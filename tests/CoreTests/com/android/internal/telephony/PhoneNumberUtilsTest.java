@@ -302,6 +302,11 @@ public class PhoneNumberUtilsTest extends TestCase {
         number.append("800-55512");
         PhoneNumberUtils.formatNanpNumber(number);
         assertEquals("800-555-12", number.toString());
+
+        number.clear();
+        number.append("46645");
+        PhoneNumberUtils.formatNanpNumber(number);
+        assertEquals("46645", number.toString());
     }
 
     @SmallTest
