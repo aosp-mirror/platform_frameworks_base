@@ -40,7 +40,7 @@ void ProgramFragment::setupGL()
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
         glActiveTexture(GL_TEXTURE0 + ct);
         if (!(mTextureEnableMask & (1 << ct)) ||
-            !mSamplers[ct].get() ||
+            //!mSamplers[ct].get() ||
             !mTextures[ct].get()) {
 
             glDisable(GL_TEXTURE_2D);
@@ -62,7 +62,14 @@ void ProgramFragment::setupGL()
             break;
         }
 
-        mSamplers[ct]->setupGL();
+//        if (mSamplers[ct].get()) {
+            //mSamplers[ct]->setupGL();
+//        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        //}
     }
     glActiveTexture(GL_TEXTURE0);
 }

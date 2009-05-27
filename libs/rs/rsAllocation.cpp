@@ -213,7 +213,104 @@ static void mip(const Adapter2D &out, const Adapter2D &in)
 }
 
 
-RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, const char *file, bool genMips)
+typedef void (*ElementConverter_t)(void *dst, const void *src, uint32_t count);
+
+static void elementConverter_cpy_16(void *dst, const void *src, uint32_t count)
+{
+    memcpy(dst, src, count * 2);
+}
+static void elementConverter_cpy_8(void *dst, const void *src, uint32_t count)
+{
+    memcpy(dst, src, count);
+}
+static void elementConverter_cpy_32(void *dst, const void *src, uint32_t count)
+{
+    memcpy(dst, src, count * 4);
+}
+
+
+static void elementConverter_888_to_565(void *dst, const void *src, uint32_t count)
+{
+    uint16_t *d = static_cast<uint16_t *>(dst);
+    const uint8_t *s = static_cast<const uint8_t *>(src);
+
+    while(count--) {
+        *d = rs888to565(s[0], s[1], s[2]);
+        d++;
+        s+= 3;
+    }
+}
+
+static void elementConverter_8888_to_565(void *dst, const void *src, uint32_t count)
+{
+    uint16_t *d = static_cast<uint16_t *>(dst);
+    const uint8_t *s = static_cast<const uint8_t *>(src);
+
+    while(count--) {
+        *d = rs888to565(s[0], s[1], s[2]);
+        d++;
+        s+= 4;
+    }
+}
+
+static ElementConverter_t pickConverter(RsElementPredefined dstFmt, RsElementPredefined srcFmt)
+{
+    if ((dstFmt == RS_ELEMENT_RGB_565) && 
+        (srcFmt == RS_ELEMENT_RGB_565)) {
+        return elementConverter_cpy_16;
+    }
+
+    if ((dstFmt == RS_ELEMENT_RGB_565) && 
+        (srcFmt == RS_ELEMENT_RGB_888)) {
+        return elementConverter_888_to_565;
+    }
+
+    if ((dstFmt == RS_ELEMENT_RGB_565) && 
+        (srcFmt == RS_ELEMENT_RGBA_8888)) {
+        return elementConverter_8888_to_565;
+    }
+
+
+    LOGE("pickConverter, unsuported combo");
+    return 0;
+}
+
+
+RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h, RsElementPredefined dstFmt, RsElementPredefined srcFmt,  bool genMips, const void *data)
+{
+    rsi_TypeBegin(rsc, rsi_ElementGetPredefined(rsc, RS_ELEMENT_RGB_565));
+    rsi_TypeAdd(rsc, RS_DIMENSION_X, w);
+    rsi_TypeAdd(rsc, RS_DIMENSION_Y, h);
+    if (genMips) {
+        rsi_TypeAdd(rsc, RS_DIMENSION_LOD, 1);
+    }
+    RsType type = rsi_TypeCreate(rsc);
+
+    RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, type);
+    Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
+    if (texAlloc == NULL) {
+        LOGE("Memory allocation failure");
+        return NULL;
+    }
+    texAlloc->incRef();
+
+    ElementConverter_t cvt = pickConverter(dstFmt, srcFmt);
+    cvt(texAlloc->getPtr(), data, w * h);
+
+    if (genMips) {
+        Adapter2D adapt(texAlloc);
+        Adapter2D adapt2(texAlloc);
+        for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+            adapt.setLOD(lod);
+            adapt2.setLOD(lod + 1);
+            mip(adapt2, adapt);
+        }
+    }
+
+    return texAlloc;
+}
+
+RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool genMips)
 {
     typedef struct _Win3xBitmapHeader
     {

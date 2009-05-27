@@ -195,6 +195,10 @@ void test_script(void *con, const rsc_FunctionTable *ft, uint32_t launchID)
         }
     }
 
+    ft->contextBindProgramFragment(con, (RsProgramFragment)ft->loadEnvI32(con, 0, 7));
+    ft->drawRect(con, 0, 256, 0, 512);
+    ft->contextBindProgramFragment(con, (RsProgramFragment)ft->loadEnvI32(con, 0, 6));
+
     if (touch) {
         int newPart = ft->loadEnvI32(con, 2, 0);
         for (int ct2=0; ct2<rate; ct2++) {
@@ -452,6 +456,21 @@ nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jint mip)
     LOG_API("nAllocationUploadToTexture, con(%p), a(%p), mip(%i)", con, (RsAllocation)a, mip);
     rsAllocationUploadToTexture((RsAllocation)a, mip);
 }
+
+static int
+nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint w, jint h, jint dstFmt, jint srcFmt, jboolean genMips, jintArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocationCreateFromBitmap, con(%p), w(%i), h(%i), dstFmt(%i), srcFmt(%i), mip(%i), len(%i)", con, w, h, dstFmt, srcFmt, genMips, len);
+
+    jint *ptr = _env->GetIntArrayElements(data, NULL);
+    jint id = (jint)rsAllocationCreateFromBitmap(w, h, (RsElementPredefined)dstFmt, (RsElementPredefined)srcFmt, genMips, ptr);
+    _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
+    return id;
+}
+
+
 
 static void
 nAllocationDestroy(JNIEnv *_env, jobject _this, jint a)
@@ -939,7 +958,7 @@ static JNINativeMethod methods[] = {
 {"nAllocationCreateTyped",         "(I)I",                                 (void*)nAllocationCreateTyped },
 {"nAllocationCreatePredefSized",   "(II)I",                                (void*)nAllocationCreatePredefSized },
 {"nAllocationCreateSized",         "(II)I",                                (void*)nAllocationCreateSized },
-//{"nAllocationCreateFromBitmap",    "(I)V",                                 (void*)nAllocationCreateFromBitmap },
+{"nAllocationCreateFromBitmap",    "(IIIIZ[I)I",                           (void*)nAllocationCreateFromBitmap },
 {"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
 {"nAllocationDestroy",             "(I)V",                                 (void*)nAllocationDestroy },
 {"nAllocationData",                "(I[I)V",                               (void*)nAllocationData_i },
