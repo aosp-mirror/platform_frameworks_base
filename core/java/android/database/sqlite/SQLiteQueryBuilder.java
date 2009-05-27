@@ -18,16 +18,15 @@ package android.database.sqlite;
 
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.Log;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 /**
  * This is a convience class that helps build SQL queries to be sent to
@@ -36,10 +35,12 @@ import java.util.Map.Entry;
 public class SQLiteQueryBuilder
 {
     private static final String TAG = "SQLiteQueryBuilder";
+    private static final Pattern sLimitPattern =
+            Pattern.compile("\\s*\\d+\\s*(,\\s*\\d+\\s*)?");
 
     private Map<String, String> mProjectionMap = null;
     private String mTables = "";
-    private StringBuilder mWhereClause = new StringBuilder(64);
+    private final StringBuilder mWhereClause = new StringBuilder(64);
     private boolean mDistinct;
     private SQLiteDatabase.CursorFactory mFactory;
 
@@ -169,6 +170,9 @@ public class SQLiteQueryBuilder
             throw new IllegalArgumentException(
                     "HAVING clauses are only permitted when using a groupBy clause");
         }
+        if (!TextUtils.isEmpty(limit) && !sLimitPattern.matcher(limit).matches()) {
+            throw new IllegalArgumentException("invalid LIMIT clauses:" + limit);
+        }
 
         StringBuilder query = new StringBuilder(120);
 
@@ -187,7 +191,7 @@ public class SQLiteQueryBuilder
         appendClause(query, " GROUP BY ", groupBy);
         appendClause(query, " HAVING ", having);
         appendClause(query, " ORDER BY ", orderBy);
-        appendClauseEscapeClause(query, " LIMIT ", limit);
+        appendClause(query, " LIMIT ", limit);
 
         return query.toString();
     }
