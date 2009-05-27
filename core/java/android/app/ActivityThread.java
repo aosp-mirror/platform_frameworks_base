@@ -1513,6 +1513,18 @@ public final class ActivityThread {
             queueOrSendMessage(H.PROFILER_CONTROL, path, start ? 1 : 0);
         }
 
+        public void setSchedulingGroup(int group) {
+            // Note: do this immediately, since going into the foreground
+            // should happen regardless of what pending work we have to do
+            // and the activity manager will wait for us to report back that
+            // we are done before sending us to the background.
+            try {
+                Process.setProcessGroup(Process.myPid(), group);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed setting process group to " + group, e);
+            }
+        }
+        
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
