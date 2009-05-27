@@ -4733,6 +4733,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         app.thread = thread;
         app.curAdj = app.setAdj = -100;
+        app.curSchedGroup = app.setSchedGroup = Process.THREAD_GROUP_DEFAULT;
         app.forcingToForeground = null;
         app.foregroundServices = false;
         app.debugging = false;
@@ -8802,9 +8803,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                       + " #" + i + ":");
                 r.dump(pw, prefix + "  ");
             } else if (inclOomAdj) {
-                pw.println(String.format("%s%s #%2d: oom_adj=%3d %s",
+                pw.println(String.format("%s%s #%2d: adj=%3d/%d %s",
                         prefix, (r.persistent ? persistentLabel : normalLabel),
-                        i, r.setAdj, r.toString()));
+                        i, r.setAdj, r.setSchedGroup, r.toString()));
             } else {
                 pw.println(String.format("%s%s #%2d: %s",
                         prefix, (r.persistent ? persistentLabel : normalLabel),
@@ -11830,7 +11831,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         app.curAdj = adj;
-
+        app.curSchedGroup = (adj > VISIBLE_APP_ADJ && !app.persistent)
+                ? Process.THREAD_GROUP_BG_NONINTERACTIVE
+                : Process.THREAD_GROUP_DEFAULT;
+        
         return adj;
     }
 
@@ -11973,6 +11977,28 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     app.setAdj = adj;
                 } else {
                     return false;
+                }
+            }
+            if (app.setSchedGroup != app.curSchedGroup) {
+                app.setSchedGroup = app.curSchedGroup;
+                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Log.v(TAG,
+                        "Setting process group of " + app.processName
+                        + " to " + app.curSchedGroup);
+                if (true) {
+                    try {
+                        Process.setProcessGroup(app.pid, app.curSchedGroup);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed setting process group of " + app.pid
+                                + " to " + app.curSchedGroup);
+                    }
+                }
+                if (false) {
+                    if (app.thread != null) {
+                        try {
+                            app.thread.setSchedulingGroup(app.curSchedGroup);
+                        } catch (RemoteException e) {
+                        }
+                    }
                 }
             }
         }

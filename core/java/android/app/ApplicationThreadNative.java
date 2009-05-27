@@ -331,6 +331,14 @@ public abstract class ApplicationThreadNative extends Binder
             profilerControl(start, path);
             return true;
         }
+        
+        case SET_SCHEDULING_GROUP_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            int group = data.readInt();
+            setSchedulingGroup(group);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -669,6 +677,15 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(start ? 1 : 0);
         data.writeString(path);
         mRemote.transact(PROFILER_CONTROL_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+    
+    public void setSchedulingGroup(int group) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeInt(group);
+        mRemote.transact(SET_SCHEDULING_GROUP_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
