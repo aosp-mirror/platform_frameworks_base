@@ -153,6 +153,10 @@ public class LetterRecognizer {
                 case 1:
                     classifier = readV1(in);
                     break;
+                default:
+                    Log.d(LOG_TAG, "Couldn't load handwriting data: version " + version +
+                            " not supported");
+                    break;
             }
 
         } catch (IOException e) {
