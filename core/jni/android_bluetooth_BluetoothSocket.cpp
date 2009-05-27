@@ -297,7 +297,7 @@ static void destroyNative(JNIEnv *env, jobject obj) {
 static JNINativeMethod sMethods[] = {
     {"initSocketNative", "()V",  (void*) initSocketNative},
     {"initSocketFromFdNative", "(I)V",  (void*) initSocketFromFdNative},
-    {"connectNative", "(Ljava/lang/String;II)", (void *) connectNative},
+    {"connectNative", "(Ljava/lang/String;II)V", (void *) connectNative},
     {"bindListenNative", "(I)V", (void *) bindListenNative},
     {"acceptNative", "(I)Landroid/bluetooth/BluetoothSocket;", (void *) acceptNative},
     {"availableNative", "()I",    (void *) availableNative},
