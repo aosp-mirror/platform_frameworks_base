@@ -122,7 +122,7 @@ public class ApplicationErrorReport implements Parcelable {
         }
     }
 
-    protected void readFromParcel(Parcel in) {
+    public void readFromParcel(Parcel in) {
         type = in.readInt();
         packageName = in.readString();
         installerPackageName = in.readString();
