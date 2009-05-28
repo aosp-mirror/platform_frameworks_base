@@ -72,8 +72,8 @@ interface IWifiManager
 
     boolean isMulticastEnabled();
 
-    void enableMulticast(IBinder binder, String tag);
+    void acquireMulticastLock(IBinder binder, String tag);
 
-    void disableMulticast();
+    void releaseMulticastLock();
 }
 
