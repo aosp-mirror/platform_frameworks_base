@@ -18,17 +18,23 @@
 #include "rsScriptC.h"
 #include "rsMatrix.h"
 
+#include "acc/acc.h"
+
 using namespace android;
 using namespace android::renderscript;
 
 
 ScriptC::ScriptC()
 {
+    mAccScript = NULL;
     mScript = NULL;
 }
 
 ScriptC::~ScriptC()
 {
+    if (mAccScript) {
+        accDeleteScript(mAccScript);
+    }
 }
 
 extern "C" void matrixLoadIdentity(void *con, rsc_Matrix *mat)
@@ -394,6 +400,9 @@ ScriptCState::ScriptCState()
 
 ScriptCState::~ScriptCState()
 {
+    if (mAccScript) {
+        accDeleteScript(mAccScript);
+    }
 }
 
 void ScriptCState::clear()
@@ -405,6 +414,7 @@ void ScriptCState::clear()
     mClearColor[3] = 1;
     mClearDepth = 1;
     mClearStencil = 0;
+    mAccScript = NULL;
     mScript = NULL;
     mIsRoot = false;
     mIsOrtho = true;
@@ -446,9 +456,10 @@ void rsi_ScriptCAddType(Context * rsc, RsType vt)
     ss->mConstantBufferTypes.add(static_cast<const Type *>(vt));
 }
 
-void rsi_ScriptCSetScript(Context * rsc, void *vp)
+void rsi_ScriptCSetScript(Context * rsc, void* accScript, void *vp)
 {
     ScriptCState *ss = &rsc->mScriptC;
+    ss->mAccScript = reinterpret_cast<ACCscript*>(accScript);
     ss->mScript = reinterpret_cast<rsc_RunScript>(vp);
 }
 
@@ -469,6 +480,8 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     ScriptCState *ss = &rsc->mScriptC;
 
     ScriptC *s = new ScriptC();
+    s->mAccScript = ss->mAccScript;
+    ss->mAccScript = NULL;
     s->mScript = ss->mScript;
     s->mClearColor[0] = ss->mClearColor[0];
     s->mClearColor[1] = ss->mClearColor[1];
