@@ -23,8 +23,12 @@
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #if !defined(__arm__)
 #define USE_SLOW_BINDING            1
@@ -76,11 +80,15 @@ enum {
 
 struct gl_hooks_t {
     struct gl_t {
-        #include "gl_entries.in"
-        #include "glext_entries.in"
+        #include "GLES_CM/gl_entries.in"
+        #include "GLES_CM/glext_entries.in"
     } gl;
+    struct gl2_t {
+        #include "GLES2/gl2_entries.in"
+        #include "GLES2/gl2ext_entries.in"
+    } gl2;
     struct egl_t {
-        #include "egl_entries.in"
+        #include "EGL/egl_entries.in"
     } egl;
     struct gl_ext_t {
         void (*extensions[MAX_NUMBER_OF_GL_EXTENSIONS])(void);

@@ -15,6 +15,13 @@
 # limitations under the License.
 
 ./glapigen ../../include/GLES/gl.h > ../GLES_CM/gl_api.in 
-./glentrygen ../../include/GLES/gl.h > ../gl_entries.in 
+./glentrygen ../../include/GLES/gl.h > ../GLES_CM/gl_entries.in 
+
 ./glapigen ../../include/GLES/glext.h > ../GLES_CM/glext_api.in 
-./glentrygen ../../include/GLES/glext.h > ../glext_entries.in 
+./glentrygen ../../include/GLES/glext.h > ../GLES_CM/glext_entries.in 
+
+./glapigen ../../include/GLES2/gl2.h > ../GLES2/gl2_api.in 
+./glentrygen ../../include/GLES2/gl2.h > ../GLES2/gl2_entries.in 
+
+./glapigen ../../include/GLES2/gl2ext.h > ../GLES2/gl2ext_api.in 
+./glentrygen ../../include/GLES2/gl2ext.h > ../GLES2/gl2ext_entries.in 

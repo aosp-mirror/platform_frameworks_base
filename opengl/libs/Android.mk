@@ -1,6 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 
-#
+###############################################################################
 # Build META EGL library
 #
 
@@ -30,14 +30,14 @@ include $(BUILD_SHARED_LIBRARY)
 
 
 
-#
-# Build the wrapper OpenGL ES library
+###############################################################################
+# Build the wrapper OpenGL ES 1.x library
 #
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= 	\
-	GLES_CM/gl.cpp.arm 		\
+LOCAL_SRC_FILES:= 		\
+	GLES_CM/gl.cpp.arm 	\
 #
 
 LOCAL_SHARED_LIBRARIES += libcutils libEGL
@@ -53,6 +53,35 @@ else
 endif
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libGLESv1\"
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
+LOCAL_CFLAGS += -fvisibility=hidden
+
+include $(BUILD_SHARED_LIBRARY)
+
+
+###############################################################################
+# Build the wrapper OpenGL ES 2.x library
+#
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:= 		\
+	GLES2/gl2.cpp.arm 	\
+#
+
+LOCAL_SHARED_LIBRARIES += libcutils libEGL
+LOCAL_LDLIBS := -lpthread -ldl
+LOCAL_MODULE:= libGLESv2
+
+# needed on sim build because of weird logging issues
+ifeq ($(TARGET_SIMULATOR),true)
+else
+    LOCAL_SHARED_LIBRARIES += libdl
+    # we need to access the Bionic private header <bionic_tls.h>
+    LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
+endif
+
+LOCAL_CFLAGS += -DLOG_TAG=\"libGLESv2\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 LOCAL_CFLAGS += -fvisibility=hidden
 
