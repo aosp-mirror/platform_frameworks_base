@@ -718,14 +718,6 @@ nContextBindRootScript(JNIEnv *_env, jobject _this, jint script)
 }
 
 static void
-nContextBindSampler(JNIEnv *_env, jobject _this, jint sampler, jint slot)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nContextBindSampler, con(%p), sampler(%p), slot(%i)", con, (RsSampler)sampler, slot);
-    rsContextBindSampler(slot, (RsSampler)sampler);
-}
-
-static void
 nContextBindProgramFragmentStore(JNIEnv *_env, jobject _this, jint pfs)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -739,6 +731,40 @@ nContextBindProgramFragment(JNIEnv *_env, jobject _this, jint pf)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindProgramFragment, con(%p), pf(%p)", con, (RsProgramFragment)pf);
     rsContextBindProgramFragment((RsProgramFragment)pf);
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+nSamplerDestroy(JNIEnv *_env, jobject _this, jint s)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nSamplerDestroy, con(%p), sampler(%p)", con, (RsSampler)s);
+    rsSamplerDestroy((RsSampler)s);
+}
+
+static void
+nSamplerBegin(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nSamplerBegin, con(%p)", con);
+    rsSamplerBegin();
+}
+
+static void
+nSamplerSet(JNIEnv *_env, jobject _this, jint p, jint v)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nSamplerSet, con(%p), param(%i), value(%i)", con, p, v);
+    rsSamplerSet((RsSamplerParam)p, (RsSamplerValue)v);
+}
+
+static jint
+nSamplerCreate(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nSamplerCreate, con(%p), script(%p)", con, (RsScript)script);
+    return (jint)rsSamplerCreate();
 }
 
 
@@ -825,9 +851,13 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
 
 {"nContextBindRootScript",         "(I)V",                                 (void*)nContextBindRootScript },
-//{"nContextBindSampler",          "(II)V",                                (void*)nContextBindSampler },
 {"nContextBindProgramFragmentStore","(I)V",                                (void*)nContextBindProgramFragmentStore },
 {"nContextBindProgramFragment",    "(I)V",                                 (void*)nContextBindProgramFragment },
+
+{"nSamplerDestroy",                "(I)V",                                 (void*)nSamplerDestroy },
+{"nSamplerBegin",                  "()V",                                  (void*)nSamplerBegin },
+{"nSamplerSet",                    "(II)V",                                (void*)nSamplerSet },
+{"nSamplerCreate",                 "()I",                                  (void*)nSamplerCreate },
 
 };
 

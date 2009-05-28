@@ -38,7 +38,7 @@ public class RenderScript {
 
 
 
-       /*
+     /*
      * We use a class initializer to allow the native code to cache some
      * field offsets.
      */
@@ -49,9 +49,7 @@ public class RenderScript {
         sInitialized = false;
         try {
             System.loadLibrary("RS_jni");
-            Log.e(LOG_TAG, "*** Renderscript INIT");
             _nInit();
-            Log.e(LOG_TAG, "*** Renderscript INIT 3");
             sInitialized = true;
         } catch (UnsatisfiedLinkError e) {
             Log.d(LOG_TAG, "RenderScript JNI library not found!");
@@ -126,6 +124,10 @@ public class RenderScript {
     native private void nScriptCSetScript(byte[] script, int offset, int length);
     native private int  nScriptCCreate();
 
+    native private void nSamplerDestroy(int sampler);
+    native private void nSamplerBegin();
+    native private void nSamplerSet(int param, int value);
+    native private int  nSamplerCreate();
 
     native private void nProgramFragmentStoreBegin(int in, int out);
     native private void nProgramFragmentStoreDepthFunc(int func);
@@ -306,6 +308,34 @@ public class RenderScript {
             mID = id;
         }
     }
+
+    public enum SamplerParam {
+        FILTER_MIN (0),
+        FILTER_MAG (1),
+        WRAP_MODE_S (2),
+        WRAP_MODE_T (3),
+        WRAP_MODE_R (4);
+
+        int mID;
+        SamplerParam(int id) {
+            mID = id;
+        }
+    }
+
+    public enum SamplerValue {
+        NEAREST (0),
+        LINEAR (1),
+        LINEAR_MIP_LINEAR (2),
+        WRAP (3),
+        CLAMP (4);
+
+        int mID;
+        SamplerValue(int id) {
+            mID = id;
+        }
+    }
+
+
 
     public class Element extends BaseObj {
         Element(int id) {
@@ -727,9 +757,9 @@ public class RenderScript {
             nProgramFragmentBindTexture(mID, slot, va.mID);
         }
 
-        //public void bindSampler(Sampler vs, int slot) {
-            //nProgramFragmentBindSampler(mID, slot, vs.mID);
-        //}
+        public void bindSampler(Sampler vs, int slot) {
+            nProgramFragmentBindSampler(mID, slot, vs.mID);
+        }
     }
 
     public void programFragmentBegin(Element in, Element out) {
@@ -759,6 +789,33 @@ public class RenderScript {
     public ProgramFragment programFragmentCreate() {
         int id = nProgramFragmentCreate();
         return new ProgramFragment(id);
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Sampler
+
+    public class Sampler extends BaseObj {
+        Sampler(int id) {
+            mID = id;
+        }
+
+        public void destroy() {
+            nSamplerDestroy(mID);
+            mID = 0;
+        }
+    }
+
+    public void samplerBegin() {
+        nSamplerBegin();
+    }
+
+    public void samplerSet(SamplerParam p, SamplerValue v) {
+        nSamplerSet(p.mID, v.mID);
+    }
+
+    public Sampler samplerCreate() {
+        int id = nSamplerCreate();
+        return new Sampler(id);
     }
 
 
