@@ -48,8 +48,6 @@ namespace android {
 //  SurfaceBuffer
 // ============================================================================
 
-ANDROID_SINGLETON_STATIC_INSTANCE( SurfaceBuffer )
-
 SurfaceBuffer::SurfaceBuffer() 
     : BASE(), mOwner(false), mBufferMapper(BufferMapper::get())
 {
