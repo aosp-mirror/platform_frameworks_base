@@ -1,10 +1,5 @@
 
 
-ContextBindSampler {
-	param uint32_t slot
-	param RsSampler sampler
-	}
-
 ContextBindRootScript {
 	param RsScript sampler
 	}
@@ -212,6 +207,9 @@ SamplerCreate {
 	ret RsSampler
 	}
 
+SamplerDestroy {
+	param RsSampler s
+	}
 
 TriangleMeshBegin {
 	param RsElement vertex

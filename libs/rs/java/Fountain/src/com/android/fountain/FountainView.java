@@ -52,6 +52,7 @@ public class FountainView extends RSSurfaceView {
     private RenderScript.ProgramFragment mPF;
     private RenderScript.ProgramFragment mPF2;
     private RenderScript.Allocation mTexture;
+    private RenderScript.Sampler mSampler;
 
     private Bitmap mBackground;
 
@@ -83,6 +84,12 @@ public class FountainView extends RSSurfaceView {
         mPFS = mRS.programFragmentStoreCreate();
         mRS.contextBindProgramFragmentStore(mPFS);
 
+        mRS.samplerBegin();
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG, RenderScript.SamplerValue.LINEAR);
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN, RenderScript.SamplerValue.LINEAR);
+        mSampler = mRS.samplerCreate();
+
+
         mRS.programFragmentBegin(null, null);
         mPF = mRS.programFragmentCreate();
         //mRS.contextBindProgramFragment(mPF);
@@ -92,6 +99,7 @@ public class FountainView extends RSSurfaceView {
         mPF2 = mRS.programFragmentCreate();
         mRS.contextBindProgramFragment(mPF2);
         mPF2.bindTexture(mTexture, 0);
+        mPF2.bindSampler(mSampler, 0);
 
         mParams[0] = 0;
         mParams[1] = partCount;
