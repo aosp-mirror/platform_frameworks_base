@@ -55,7 +55,6 @@ commonSources:= \
 #
 hostSources:= \
 	InetAddress.cpp \
-	Pipe.cpp \
 	Socket.cpp \
 	ZipEntry.cpp \
 	ZipFile.cpp
@@ -71,12 +70,7 @@ ifeq ($(HOST_OS),linux)
 # Use the futex based mutex and condition variable
 # implementation from android-arm because it's shared mem safe
 	LOCAL_SRC_FILES += \
-		futex_synchro.c \
-		executablepath_linux.cpp
-endif
-ifeq ($(HOST_OS),darwin)
-	LOCAL_SRC_FILES += \
-		executablepath_darwin.cpp
+		futex_synchro.c
 endif
 
 LOCAL_MODULE:= libutils
