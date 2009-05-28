@@ -934,7 +934,7 @@ nContextBindProgramFragment(JNIEnv *_env, jobject _this, jint pf)
 // ---------------------------------------------------------------------------
 
 
-static const char *classPathName = "com/android/calc/RenderScript";
+static const char *classPathName = "com/android/fountain/RenderScript";
 
 static JNINativeMethod methods[] = {
 {"_nInit",                         "()V",                                  (void*)_nInit },

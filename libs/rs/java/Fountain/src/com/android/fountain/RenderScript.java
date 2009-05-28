@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.calc;
+package com.android.fountain;
 
 import android.os.Bundle;
 import android.util.Log;
