@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.AlertDialog;
 import android.app.PendingIntent.CanceledException;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.provider.Settings;
@@ -128,6 +130,15 @@ public abstract class SMSDispatcher extends Handler {
 
     private SmsTracker mSTracker;
 
+    /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
+    private PowerManager.WakeLock mWakeLock;
+
+    /**
+     * Hold the wake lock for 5 seconds, which should be enough time for
+     * any receiver(s) to grab its own wake lock.
+     */
+    private final int WAKE_LOCK_TIMEOUT = 5000;
+
     private static SmsMessage mSmsMessage;
     private static SmsMessageBase mSmsMessageBase;
     private SmsMessageBase.SubmitPduBase mSubmitPduBase;
@@ -196,14 +207,16 @@ public abstract class SMSDispatcher extends Handler {
 
     protected SMSDispatcher(PhoneBase phone) {
         mPhone = phone;
-        mWapPush = new WapPushOverSms(phone);
+        mWapPush = new WapPushOverSms(phone, this);
         mContext = phone.getContext();
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
         mSTracker = null;
 
+        createWakelock();
+
         int check_period = Settings.Gservices.getInt(mResolver,
-                Settings.Gservices.SMS_OUTGOING_CEHCK_INTERVAL_MS,
+                Settings.Gservices.SMS_OUTGOING_CHECK_INTERVAL_MS,
                 DEFAULT_SMS_CHECK_PERIOD);
         int max_count = Settings.Gservices.getInt(mResolver,
                 Settings.Gservices.SMS_OUTGOING_CEHCK_MAX_COUNT,
@@ -257,16 +270,17 @@ public abstract class SMSDispatcher extends Handler {
 
             ar = (AsyncResult) msg.obj;
 
-                // FIXME only acknowledge on store
-            acknowledgeLastIncomingSms(true, null);
-
             if (ar.exception != null) {
                 Log.e(TAG, "Exception processing incoming SMS. Exception:" + ar.exception);
                 return;
             }
 
             sms = (SmsMessage) ar.result;
-            dispatchMessage(sms.mWrappedSmsMessage);
+            try {
+                dispatchMessage(sms.mWrappedSmsMessage);
+            } catch (RuntimeException ex) {
+                acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
+            }
 
             break;
 
@@ -310,6 +324,28 @@ public abstract class SMSDispatcher extends Handler {
         }
     }
 
+    private void createWakelock() {
+        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMSDispatcher");
+        mWakeLock.setReferenceCounted(true);
+    }
+
+    /**
+     * Grabs a wake lock and sends intent as an ordered broadcast.
+     * The resultReceiver will check for errors and ACK/NACK back
+     * to the RIL.
+     *
+     * @param intent intent to broadcast
+     * @param permission Receivers are required to have this permission
+     */
+    void dispatch(Intent intent, String permission) {
+        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
+        // receivers time to take their own wake locks.
+        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        mContext.sendOrderedBroadcast(intent, permission, mResultReceiver,
+                this, Activity.RESULT_OK, null, null);
+    }
+
     /**
      * Called when SIM_FULL message is received from the RIL.  Notifies interested
      * parties that SIM storage for SMS messages is full.
@@ -317,7 +353,8 @@ public abstract class SMSDispatcher extends Handler {
     private void handleIccFull(){
         // broadcast SIM_FULL intent
         Intent intent = new Intent(Intents.SIM_FULL_ACTION);
-        mPhone.getContext().sendBroadcast(intent, "android.permission.RECEIVE_SMS");
+        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        mContext.sendBroadcast(intent, "android.permission.RECEIVE_SMS");
     }
 
     /**
@@ -454,6 +491,7 @@ public abstract class SMSDispatcher extends Handler {
                     values.put("destination_port", portAddrs.destPort);
                 }
                 mResolver.insert(mRawUri, values);
+                acknowledgeLastIncomingSms(true, Intents.RESULT_SMS_HANDLED, null);
                 return;
             }
 
@@ -475,7 +513,9 @@ public abstract class SMSDispatcher extends Handler {
             mResolver.delete(mRawUri, where.toString(), whereArgs);
         } catch (SQLException e) {
             Log.e(TAG, "Can't access multipart SMS database", e);
-            return;  // TODO: NACK the message or something, don't just discard.
+            // TODO:  Would OUT_OF_MEMORY be more appropriate?
+            acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
+            return;
         } finally {
             if (cursor != null) cursor.close();
         }
@@ -519,8 +559,7 @@ public abstract class SMSDispatcher extends Handler {
     protected void dispatchPdus(byte[][] pdus) {
         Intent intent = new Intent(Intents.SMS_RECEIVED_ACTION);
         intent.putExtra("pdus", pdus);
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_SMS");
+        dispatch(intent, "android.permission.RECEIVE_SMS");
     }
 
     /**
@@ -533,8 +572,7 @@ public abstract class SMSDispatcher extends Handler {
         Uri uri = Uri.parse("sms://localhost:" + port);
         Intent intent = new Intent(Intents.DATA_SMS_RECEIVED_ACTION, uri);
         intent.putExtra("pdus", pdus);
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_SMS");
+        dispatch(intent, "android.permission.RECEIVE_SMS");
     }
 
 
@@ -698,9 +736,11 @@ public abstract class SMSDispatcher extends Handler {
     /**
      * Send an acknowledge message.
      * @param success indicates that last message was successfully received.
+     * @param result result code indicating any error
      * @param response callback message sent when operation completes.
      */
-    protected abstract void acknowledgeLastIncomingSms(boolean success, Message response);
+    protected abstract void acknowledgeLastIncomingSms(boolean success,
+            int result, Message response);
 
     /**
      * Check if a SmsTracker holds multi-part Sms
@@ -750,5 +790,18 @@ public abstract class SMSDispatcher extends Handler {
                     sendMessage(obtainMessage(EVENT_SEND_CONFIRMED_SMS));
                 }
             }
+        };
+
+        private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int rc = getResultCode();
+                boolean success = (rc == Activity.RESULT_OK) || (rc == Intents.RESULT_SMS_HANDLED);
+
+                // For a multi-part message, this only ACKs the last part.
+                // Previous parts were ACK'd as they were received.
+                acknowledgeLastIncomingSms(success, rc, null);
+            }
+
         };
 }

@@ -17,15 +17,18 @@
 package com.android.internal.telephony.cdma;
 
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.provider.Telephony.Sms.Intents;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SMSDispatcher;
@@ -330,10 +333,10 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
-    protected void acknowledgeLastIncomingSms(boolean success, Message response){
+    protected void acknowledgeLastIncomingSms(boolean success, int result, Message response){
         // FIXME unit test leaves cm == null. this should change
         if (mCm != null) {
-            mCm.acknowledgeLastIncomingCdmaSms(success, response);
+            mCm.acknowledgeLastIncomingCdmaSms(success, resultToCause(result), response);
         }
     }
 
@@ -352,4 +355,17 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         mCm.setCdmaBroadcastConfig(configValuesArray, response);
     }
 
+    private int resultToCause(int rc) {
+        switch (rc) {
+            case Activity.RESULT_OK:
+            case Intents.RESULT_SMS_HANDLED:
+                // Cause code is ignored on success.
+                return 0;
+            case Intents.RESULT_SMS_OUT_OF_MEMORY:
+                return CommandsInterface.CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE;
+            case Intents.RESULT_SMS_GENERIC_ERROR:
+            default:
+                return CommandsInterface.CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM;
+        }
+    }
 }
