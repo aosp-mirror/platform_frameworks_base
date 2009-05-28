@@ -65,14 +65,14 @@ public:
             Region&     subtractSelf(const Region& rhs);
 
             // boolean operators
-            Region      merge(const Rect& rhs) const;
-            Region      intersect(const Rect& rhs) const;
-            Region      subtract(const Rect& rhs) const;
+    const   Region      merge(const Rect& rhs) const;
+    const   Region      intersect(const Rect& rhs) const;
+    const   Region      subtract(const Rect& rhs) const;
 
             // boolean operators
-            Region      merge(const Region& rhs) const;
-            Region      intersect(const Region& rhs) const;
-            Region      subtract(const Region& rhs) const;
+    const   Region      merge(const Region& rhs) const;
+    const   Region      intersect(const Region& rhs) const;
+    const   Region      subtract(const Region& rhs) const;
 
             // these translate rhs first
             Region&     translateSelf(int dx, int dy);
@@ -81,16 +81,16 @@ public:
             Region&     subtractSelf(const Region& rhs, int dx, int dy);
 
             // these translate rhs first
-            Region      translate(int dx, int dy) const;
-            Region      merge(const Region& rhs, int dx, int dy) const;
-            Region      intersect(const Region& rhs, int dx, int dy) const;
-            Region      subtract(const Region& rhs, int dx, int dy) const;
+    const   Region      translate(int dx, int dy) const;
+    const   Region      merge(const Region& rhs, int dx, int dy) const;
+    const   Region      intersect(const Region& rhs, int dx, int dy) const;
+    const   Region      subtract(const Region& rhs, int dx, int dy) const;
 
     // convenience operators overloads
-    inline  Region      operator | (const Region& rhs) const;
-    inline  Region      operator & (const Region& rhs) const;
-    inline  Region      operator - (const Region& rhs) const;
-    inline  Region      operator + (const Point& pt) const;
+    inline  const Region      operator | (const Region& rhs) const;
+    inline  const Region      operator & (const Region& rhs) const;
+    inline  const Region      operator - (const Region& rhs) const;
+    inline  const Region      operator + (const Point& pt) const;
 
     inline  Region&     operator |= (const Region& rhs);
     inline  Region&     operator &= (const Region& rhs);
@@ -136,9 +136,9 @@ private:
     Region& operationSelf(const Rect& r, int op);
     Region& operationSelf(const Region& r, int op);
     Region& operationSelf(const Region& r, int dx, int dy, int op);
-    Region operation(const Rect& rhs, int op) const;
-    Region operation(const Region& rhs, int op) const;
-    Region operation(const Region& rhs, int dx, int dy, int op) const;
+    const Region operation(const Rect& rhs, int op) const;
+    const Region operation(const Region& rhs, int op) const;
+    const Region operation(const Region& rhs, int dx, int dy, int op) const;
 
     static void boolean_operation(int op, Region& dst,
             const Region& lhs, const Region& rhs, int dx, int dy);
@@ -160,16 +160,16 @@ private:
 };
 
 
-Region Region::operator | (const Region& rhs) const {
+const Region Region::operator | (const Region& rhs) const {
     return merge(rhs);
 }
-Region Region::operator & (const Region& rhs) const {
+const Region Region::operator & (const Region& rhs) const {
     return intersect(rhs);
 }
-Region Region::operator - (const Region& rhs) const {
+const Region Region::operator - (const Region& rhs) const {
     return subtract(rhs);
 }
-Region Region::operator + (const Point& pt) const {
+const Region Region::operator + (const Point& pt) const {
     return translate(pt.x, pt.y);
 }
 

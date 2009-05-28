@@ -156,16 +156,16 @@ Region& Region::translateSelf(int x, int y) {
 
 // ----------------------------------------------------------------------------
 
-Region Region::merge(const Rect& rhs) const {
+const Region Region::merge(const Rect& rhs) const {
     return operation(rhs, op_or);
 }
-Region Region::intersect(const Rect& rhs) const {
+const Region Region::intersect(const Rect& rhs) const {
     return operation(rhs, op_and);
 }
-Region Region::subtract(const Rect& rhs) const {
+const Region Region::subtract(const Rect& rhs) const {
     return operation(rhs, op_nand);
 }
-Region Region::operation(const Rect& rhs, int op) const {
+const Region Region::operation(const Rect& rhs, int op) const {
     Region result;
     boolean_operation(op, result, *this, rhs);
     return result;
@@ -173,22 +173,22 @@ Region Region::operation(const Rect& rhs, int op) const {
 
 // ----------------------------------------------------------------------------
 
-Region Region::merge(const Region& rhs) const {
+const Region Region::merge(const Region& rhs) const {
     return operation(rhs, op_or);
 }
-Region Region::intersect(const Region& rhs) const {
+const Region Region::intersect(const Region& rhs) const {
     return operation(rhs, op_and);
 }
-Region Region::subtract(const Region& rhs) const {
+const Region Region::subtract(const Region& rhs) const {
     return operation(rhs, op_nand);
 }
-Region Region::operation(const Region& rhs, int op) const {
+const Region Region::operation(const Region& rhs, int op) const {
     Region result;
     boolean_operation(op, result, *this, rhs);
     return result;
 }
 
-Region Region::translate(int x, int y) const {
+const Region Region::translate(int x, int y) const {
     Region result;
     translate(result, *this, x, y);
     return result;
@@ -213,16 +213,16 @@ Region& Region::operationSelf(const Region& rhs, int dx, int dy, int op) {
 
 // ----------------------------------------------------------------------------
 
-Region Region::merge(const Region& rhs, int dx, int dy) const {
+const Region Region::merge(const Region& rhs, int dx, int dy) const {
     return operation(rhs, dx, dy, op_or);
 }
-Region Region::intersect(const Region& rhs, int dx, int dy) const {
+const Region Region::intersect(const Region& rhs, int dx, int dy) const {
     return operation(rhs, dx, dy, op_and);
 }
-Region Region::subtract(const Region& rhs, int dx, int dy) const {
+const Region Region::subtract(const Region& rhs, int dx, int dy) const {
     return operation(rhs, dx, dy, op_nand);
 }
-Region Region::operation(const Region& rhs, int dx, int dy, int op) const {
+const Region Region::operation(const Region& rhs, int dx, int dy, int op) const {
     Region result;
     boolean_operation(op, result, *this, rhs, dx, dy);
     return result;
