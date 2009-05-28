@@ -136,7 +136,7 @@ public class GestureLibrary {
      * @return a list of predictions of possible entries for a given gesture
      */
     public ArrayList<Prediction> recognize(Gesture gesture) {
-        Instance instance = Instance.createInstance(mSequenceType, gesture, null);
+        Instance instance = Instance.createInstance(mSequenceType, mOrientationStyle, gesture, null);
         return mClassifier.classify(mSequenceType, instance.vector);
     }
 
@@ -156,7 +156,7 @@ public class GestureLibrary {
             mNamedGestures.put(entryName, gestures);
         }
         gestures.add(gesture);
-        mClassifier.addInstance(Instance.createInstance(mSequenceType, gesture, entryName));
+        mClassifier.addInstance(Instance.createInstance(mSequenceType, mOrientationStyle, gesture, entryName));
         mChanged = true;
     }
 
@@ -337,10 +337,14 @@ public class GestureLibrary {
             for (int j = 0; j < gestureCount; j++) {
                 final Gesture gesture = Gesture.deserialize(in);
                 gestures.add(gesture);
-                classifier.addInstance(Instance.createInstance(mSequenceType, gesture, name));
+                classifier.addInstance(Instance.createInstance(mSequenceType, mOrientationStyle, gesture, name));
             }
 
             namedGestures.put(name, gestures);
         }
+    }
+    
+    Learner getLearner() {
+        return mClassifier;
     }
 }
