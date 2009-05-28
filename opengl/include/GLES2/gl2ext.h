@@ -470,13 +470,13 @@ typedef void (GL_APIENTRYP PFNGLGETPERFMONITORCOUNTERDATAAMDPROC) (GLuint monito
 #ifndef GL_NV_fence
 #define GL_NV_fence 1
 #ifdef GL_GLEXT_PROTOTYPES
-GL_APICALL void GL_APIENTRY glDeleteFencesNV (GLsizei, const GLuint *);
-GL_APICALL void GL_APIENTRY glGenFencesNV (GLsizei, GLuint *);
-GL_APICALL GLboolean GL_APIENTRY glIsFenceNV (GLuint);
-GL_APICALL GLboolean GL_APIENTRY glTestFenceNV (GLuint);
-GL_APICALL void GL_APIENTRY glGetFenceivNV (GLuint, GLenum, GLint *);
-GL_APICALL void GL_APIENTRY glFinishFenceNV (GLuint);
-GL_APICALL void GL_APIENTRY glSetFenceNV (GLuint, GLenum);
+GL_APICALL void GL_APIENTRY glDeleteFencesNV (GLsizei n, const GLuint *fences);
+GL_APICALL void GL_APIENTRY glGenFencesNV (GLsizei n, GLuint *fences);
+GL_APICALL GLboolean GL_APIENTRY glIsFenceNV (GLuint fence);
+GL_APICALL GLboolean GL_APIENTRY glTestFenceNV (GLuint fence);
+GL_APICALL void GL_APIENTRY glGetFenceivNV (GLuint fence, GLenum pname, GLint *params);
+GL_APICALL void GL_APIENTRY glFinishFenceNV (GLuint fence);
+GL_APICALL void GL_APIENTRY glSetFenceNV (GLuint fence, GLenum condition);
 #endif
 typedef void (GL_APIENTRYP PFNGLDELETEFENCESNVPROC) (GLsizei n, const GLuint *fences);
 typedef void (GL_APIENTRYP PFNGLGENFENCESNVPROC) (GLsizei n, GLuint *fences);
