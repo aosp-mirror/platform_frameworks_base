@@ -111,7 +111,7 @@ public class FountainView extends RSSurfaceView {
 
         mRS.scriptCBegin();
         mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        mRS.scriptCSetScript("");
+        mRS.scriptCSetScript(getResources(), R.raw.fountain);
         mRS.scriptCSetRoot(true);
         mScript = mRS.scriptCCreate();
 

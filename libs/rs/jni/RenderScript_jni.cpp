@@ -33,255 +33,12 @@
 #include "../RenderScript.h"
 #include "../RenderScriptEnv.h"
 
-#define USE_ACC
-
-#ifdef USE_ACC
 #include "acc/acc.h"
-#endif
 
 //#define LOG_API LOGE
 #define LOG_API(...)
 
 using namespace android;
-
-extern "C" void test_script(void *con, const rsc_FunctionTable *ft, uint32_t launchID);
-
-#ifdef USE_ACC
-static const char* TEST_SCRIPT = ""
-        "// Fountain test script\n"
-        "\n"
-        "main(con, ft, launchID) {\n"
-        "    int count, touch, x, y, rate, maxLife, lifeShift;\n"
-        "    int life;\n"
-        "    int ct, ct2;\n"
-        "    int newPart;\n"
-        "    int drawCount;\n"
-        "    int dx, dy, idx;\n"
-        "    int partPtr;\n"
-        "    int vertPtr;\n"
-        "    int posx,posy;\n"
-        "    int c;\n"
-        "\n"
-        "    count = loadI32(con, 0, 1);\n"
-        "    touch = loadI32(con, 0, 2);\n"
-        "    x = loadI32(con, 0, 3);\n"
-        "    y = 480 - loadI32(con, 0, 4);\n"
-        "\n"
-        "    rate = 4;\n"
-        "    maxLife = (count / rate) - 1;\n"
-        "    lifeShift = 0;\n"
-        "    {\n"
-        "        life = maxLife;\n"
-        "        while (life > 255) {\n"
-        "            life = life >> 1;\n"
-        "            lifeShift ++;\n"
-        "        }\n"
-        "    }\n"
-        "\n"
-        "    contextBindProgramFragment(con, loadI32(con, 0, 7));\n"
-        "    drawRect(con, 0, 256, 0, 512);\n"
-        "    contextBindProgramFragment(con, loadI32(con, 0, 6));\n"
-        "\n"
-        "    if (touch) {\n"
-        "        newPart = loadI32(con, 2, 0);\n"
-        "        for (ct2=0; ct2<rate; ct2++) {\n"
-        "            dx = scriptRand(con, 0x10000) - 0x8000;\n"
-        "            dy = scriptRand(con, 0x10000) - 0x8000;\n"
-        "\n"
-        "            idx = newPart * 5 + 1;\n"
-        "            storeI32(con, 2, idx, dx);\n"
-        "            storeI32(con, 2, idx + 1, dy);\n"
-        "            storeI32(con, 2, idx + 2, maxLife);\n"
-        "            storeI32(con, 2, idx + 3, x << 16);\n"
-        "            storeI32(con, 2, idx + 4, y << 16);\n"
-        "\n"
-        "            newPart++;\n"
-        "            if (newPart >= count) {\n"
-        "                newPart = 0;\n"
-        "            }\n"
-        "        }\n"
-        "        storeI32(con, 2, 0, newPart);\n"
-        "    }\n"
-        "\n"
-        "    // Emulate intrinsic perf...\n"
-        "    partPtr = loadVp(con, 2, 4);\n"
-        "    vertPtr = loadVp(con, 1, 0);\n"
-        "\n"
-        "    drawCount = 0;\n"
-        "    for (ct=0; ct < count; ct++) {\n"
-        "        //int srcIdx = ct * 5 + 1;\n"
-        "        //int dstIdx = ct * 3 * 3;\n"
-        "\n"
-        "        dx = * (int* )(partPtr + 0); //loadEnvI32(con, 2, srcIdx);\n"
-        "        dy = * (int* )(partPtr + 4); //loadEnvI32(con, 2, srcIdx + 1);\n"
-        "        life = * (int* )(partPtr + 8); //loadEnvI32(con, 2, srcIdx + 2);\n"
-        "        posx = * (int* )(partPtr + 12); //loadEnvI32(con, 2, srcIdx + 3);\n"
-        "        posy = * (int* )(partPtr + 16); //loadEnvI32(con, 2, srcIdx + 4);\n"
-        "\n"
-        "        if (life) {\n"
-        "            if (posy > 0) {\n"
-        "                c = 0xffafcf | ((life >> lifeShift) << 24);\n"
-        "\n"
-        "                * (int* )(vertPtr) = c; //storeEnvU32(con, 1, dstIdx, c);\n"
-        "                * (int* )(vertPtr + 4) = posx; //storeEnvI32(con, 1, dstIdx + 1, posx);\n"
-        "                * (int* )(vertPtr + 8) = posy; //storeEnvI32(con, 1, dstIdx + 2, posy);\n"
-        "\n"
-        "                * (int* )(vertPtr + 12) = c; //storeEnvU32(con, 1, dstIdx + 3, c);\n"
-        "                * (int* )(vertPtr + 16) = posx + 0x10000; //storeEnvI32(con, 1, dstIdx + 4, posx + 0x10000);\n"
-        "                * (int* )(vertPtr + 20) = posy + dy * 4; //storeEnvI32(con, 1, dstIdx + 5, posy);\n"
-        "\n"
-        "                * (int* )(vertPtr + 24) = c; //storeEnvU32(con, 1, dstIdx + 6, c);\n"
-        "                * (int* )(vertPtr + 28) = posx - 0x10000; //storeEnvI32(con, 1, dstIdx + 7, posx + 0x0800);\n"
-        "                * (int* )(vertPtr + 32) = posy + dy * 4; //storeEnvI32(con, 1, dstIdx + 8, posy + 0x10000);\n"
-        "\n"
-        "                vertPtr = vertPtr + 36;\n"
-        "                drawCount ++;\n"
-        "            } else {\n"
-        "                if (dy < 0) {\n"
-        "                    dy = (-dy) >> 1;\n"
-        "                }\n"
-        "            }\n"
-        "\n"
-        "            posx = posx + dx;\n"
-        "            posy = posy + dy;\n"
-        "            dy = dy - 0x400;\n"
-        "            life --;\n"
-        "\n"
-        "            * (int* )(partPtr + 0) = dx; //storeEnvI32(con, 2, srcIdx, dx);\n"
-        "            * (int* )(partPtr + 4) = dy; //storeEnvI32(con, 2, srcIdx + 1, dy);\n"
-        "            * (int* )(partPtr + 8) = life; //storeEnvI32(con, 2, srcIdx + 2, life);\n"
-        "            * (int* )(partPtr + 12) = posx; //storeEnvI32(con, 2, srcIdx + 3, posx);\n"
-        "            * (int* )(partPtr + 16) = posy; //storeEnvI32(con, 2, srcIdx + 4, posy);\n"
-        "        }\n"
-        "\n"
-        "        partPtr = partPtr + 20;\n"
-        "    }\n"
-        "\n"
-        "    drawTriangleArray(con, loadI32(con, 0, 5), drawCount);\n"
-        "}\n";
-
-typedef void (*ScriptEntry)(void *con, const rsc_FunctionTable *ft, uint32_t launchID);
-
-ACCscript* gScript;
-ScriptEntry gScriptEntry;
-
-void test_script(void *con, const rsc_FunctionTable *ft, uint32_t launchID)
-{
-    if (!gScript) {
-        gScript = accCreateScript();
-        const char* scriptSource[] = { TEST_SCRIPT };
-        accScriptSource(gScript, 1, scriptSource, NULL);
-        accCompileScript(gScript);
-        accGetScriptLabel(gScript, "main", (ACCvoid**) &gScriptEntry);
-    }
-    if (gScriptEntry) {
-        gScriptEntry(con, ft, launchID);
-    }
-}
-
-
-#else
-void test_script(void *con, const rsc_FunctionTable *ft, uint32_t launchID)
-{
-    int count = ft->loadEnvI32(con, 0, 1);
-    int touch = ft->loadEnvI32(con, 0, 2);
-    int x = ft->loadEnvI32(con, 0, 3);
-    int y = 480 - ft->loadEnvI32(con, 0, 4);
-
-    int rate = 4;
-    int maxLife = (count / rate) - 1;
-    int lifeShift = 0;
-    {
-        int life = maxLife;
-        while (life > 255) {
-            life >>= 1;
-            lifeShift ++;
-        }
-    }
-
-    ft->contextBindProgramFragment(con, (RsProgramFragment)ft->loadEnvI32(con, 0, 7));
-    ft->drawRect(con, 0, 256, 0, 512);
-    ft->contextBindProgramFragment(con, (RsProgramFragment)ft->loadEnvI32(con, 0, 6));
-
-    if (touch) {
-        int newPart = ft->loadEnvI32(con, 2, 0);
-        for (int ct2=0; ct2<rate; ct2++) {
-            int dx = ft->rand(con, 0x10000) - 0x8000;
-            int dy = ft->rand(con, 0x10000) - 0x8000;
-
-            int idx = newPart * 5 + 1;
-            ft->storeEnvI32(con, 2, idx, dx);
-            ft->storeEnvI32(con, 2, idx + 1, dy);
-            ft->storeEnvI32(con, 2, idx + 2, maxLife);
-            ft->storeEnvI32(con, 2, idx + 3, x << 16);
-            ft->storeEnvI32(con, 2, idx + 4, y << 16);
-
-            newPart++;
-            if (newPart >= count) {
-                newPart = 0;
-            }
-        }
-        ft->storeEnvI32(con, 2, 0, newPart);
-    }
-
-    // Emulate intrinsic perf...
-    int32_t * partPtr = (int32_t *)ft->loadEnvVp(con, 2, 4);
-    int32_t * vertPtr = (int32_t *)ft->loadEnvVp(con, 1, 0);
-
-    int drawCount = 0;
-    for (int ct=0; ct < count; ct++) {
-        //int srcIdx = ct * 5 + 1;
-        //int dstIdx = ct * 3 * 3;
-
-        int dx = partPtr[0]; //ft->loadEnvI32(con, 2, srcIdx);
-        int dy = partPtr[1]; //ft->loadEnvI32(con, 2, srcIdx + 1);
-        int life = partPtr[2]; //ft->loadEnvI32(con, 2, srcIdx + 2);
-        int posx = partPtr[3]; //ft->loadEnvI32(con, 2, srcIdx + 3);
-        int posy = partPtr[4]; //ft->loadEnvI32(con, 2, srcIdx + 4);
-
-        if (life) {
-            if (posy > 0) {
-                uint32_t c = 0xffafcf | ((life >> lifeShift) << 24);
-
-                ((uint32_t *)vertPtr)[0] = c; //ft->storeEnvU32(con, 1, dstIdx, c);
-                vertPtr[1] = posx; //ft->storeEnvI32(con, 1, dstIdx + 1, posx);
-                vertPtr[2] = posy; //ft->storeEnvI32(con, 1, dstIdx + 2, posy);
-
-                ((uint32_t *)vertPtr)[3] = c; //ft->storeEnvU32(con, 1, dstIdx + 3, c);
-                vertPtr[4] = posx + 0x10000; //ft->storeEnvI32(con, 1, dstIdx + 4, posx + 0x10000);
-                vertPtr[5] = posy + dy * 4; //ft->storeEnvI32(con, 1, dstIdx + 5, posy);
-
-                ((uint32_t *)vertPtr)[6] = c; //ft->storeEnvU32(con, 1, dstIdx + 6, c);
-                vertPtr[7] = posx - 0x10000; //ft->storeEnvI32(con, 1, dstIdx + 7, posx + 0x0800);
-                vertPtr[8] = posy + dy * 4; //ft->storeEnvI32(con, 1, dstIdx + 8, posy + 0x10000);
-
-                vertPtr += 9;
-                drawCount ++;
-            } else {
-                if (dy < 0) {
-                    dy = (-dy) >> 1;
-                }
-            }
-
-            posx += dx;
-            posy += dy;
-            dy -= 0x400;
-            life --;
-
-            partPtr[0] = dx; //ft->storeEnvI32(con, 2, srcIdx, dx);
-            partPtr[1] = dy; //ft->storeEnvI32(con, 2, srcIdx + 1, dy);
-            partPtr[2] = life; //ft->storeEnvI32(con, 2, srcIdx + 2, life);
-            partPtr[3] = posx; //ft->storeEnvI32(con, 2, srcIdx + 3, posx);
-            partPtr[4] = posy; //ft->storeEnvI32(con, 2, srcIdx + 4, posy);
-        }
-
-        partPtr += 5;
-    }
-
-    ft->drawTriangleArray(con, (RsAllocation)ft->loadEnvI32(con, 0, 5), drawCount);
-}
-
-#endif
 
 // ---------------------------------------------------------------------------
 
@@ -767,12 +524,59 @@ nScriptCSetRoot(JNIEnv *_env, jobject _this, jboolean isRoot)
 }
 
 static void
-nScriptCSetScript(JNIEnv *_env, jobject _this, jboolean isRoot)
+nScriptCSetScript(JNIEnv *_env, jobject _this, jbyteArray scriptRef,
+                  jint offset, jint length)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("!!! nScriptCSetScript, con(%p)", con);
-    //nScriptCSetScript(isRoot);
-    rsScriptCSetScript((void *)test_script);
+    jint _exception = 0;
+    jint remaining;
+    jbyte* script_base = 0;
+    jbyte* script_ptr;
+    void* scriptEntry = 0;
+    if (!scriptRef) {
+        _exception = 1;
+        //_env->ThrowNew(IAEClass, "script == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        //_env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    if (length < 0) {
+        _exception = 1;
+        //_env->ThrowNew(IAEClass, "length < 0");
+        goto exit;
+    }
+    remaining = _env->GetArrayLength(scriptRef) - offset;
+    if (remaining < length) {
+        _exception = 1;
+        //_env->ThrowNew(IAEClass, "length > script.length - offset");
+        goto exit;
+    }
+    script_base = (jbyte *)
+        _env->GetPrimitiveArrayCritical(scriptRef, (jboolean *)0);
+    script_ptr = script_base + offset;
+
+    {
+        ACCscript* script = accCreateScript();
+        const char* scriptSource[] = {(const char*) script_ptr};
+        int scriptLength[] = {length} ;
+        accScriptSource(script, 1, scriptSource, scriptLength);
+        accCompileScript(script);
+        accGetScriptLabel(script, "main", (ACCvoid**) &scriptEntry);
+        // TBD: We currently leak the script object. We can't delete it until
+        // we are done with the scriptEntry.
+    }
+    if (scriptEntry) {
+        rsScriptCSetScript((void *)scriptEntry);
+    }
+exit:
+    if (script_base) {
+        _env->ReleasePrimitiveArrayCritical(scriptRef, script_base,
+                _exception ? JNI_ABORT: 0);
+    }
 }
 
 static jint
@@ -998,7 +802,7 @@ static JNINativeMethod methods[] = {
 {"nScriptCSetClearStencil",        "(I)V",                                 (void*)nScriptCSetClearStencil },
 {"nScriptCAddType",                "(I)V",                                 (void*)nScriptCAddType },
 {"nScriptCSetRoot",                "(Z)V",                                 (void*)nScriptCSetRoot },
-{"nScriptCSetScript",              "(Ljava/lang/String;)V",                (void*)nScriptCSetScript },
+{"nScriptCSetScript",              "([BII)V",                              (void*)nScriptCSetScript },
 {"nScriptCCreate",                 "()I",                                  (void*)nScriptCCreate },
 
 {"nProgramFragmentStoreBegin",     "(II)V",                                (void*)nProgramFragmentStoreBegin },

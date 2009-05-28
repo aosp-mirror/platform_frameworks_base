@@ -16,7 +16,11 @@
 
 package com.android.fountain;
 
+import java.io.InputStream;
+import java.io.IOException;
+
 import android.os.Bundle;
+import android.content.res.Resources;
 import android.util.Log;
 import android.util.Config;
 import android.view.Menu;
@@ -119,7 +123,7 @@ public class RenderScript {
     native private void nScriptCSetClearStencil(int stencil);
     native private void nScriptCAddType(int type);
     native private void nScriptCSetRoot(boolean isRoot);
-    native private void nScriptCSetScript(String s);
+    native private void nScriptCSetScript(byte[] script, int offset, int length);
     native private int  nScriptCCreate();
 
 
@@ -147,7 +151,7 @@ public class RenderScript {
 
 
     ///////////////////////////////////////////////////////////////////////////////////
-    // 
+    //
 
     RenderScript(Surface sur) {
         mSurface = sur;
@@ -164,14 +168,14 @@ public class RenderScript {
         protected void finalize() throws Throwable
         {
             if (mID != 0) {
-                Log.v(LOG_TAG, 
+                Log.v(LOG_TAG,
                       "Element finalized without having released the RS reference.");
             }
             super.finalize();
         }
     }
 
-    
+
     //////////////////////////////////////////////////////////////////////////////////
     // Element
 
@@ -470,8 +474,8 @@ public class RenderScript {
             break;
         default:
             Log.e(LOG_TAG, "allocationCreateFromBitmap, unknown bitmap format");
-        } 
-        */ 
+        }
+        */
 
         srcFmt = ElementPredefined.RGBA_8888.mID;
 
@@ -609,7 +613,52 @@ public class RenderScript {
     }
 
     public void scriptCSetScript(String s) {
-        nScriptCSetScript(s);
+        try {
+            scriptCSetScript(s.getBytes("UTF-8"));
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void scriptCSetScript(byte[] utf8Bytes) {
+        scriptCSetScript(utf8Bytes, 0, utf8Bytes.length);
+    }
+
+    public void scriptCSetScript(byte[] utf8Bytes, int offset, int length) {
+        nScriptCSetScript(utf8Bytes, offset, length);
+    }
+
+    public void scriptCSetScript(Resources resources, int id) {
+        InputStream is = resources.openRawResource(id);
+        try {
+            try {
+                scriptCSetScript(is);
+            } finally {
+                is.close();
+            }
+        } catch(IOException e) {
+            throw new Resources.NotFoundException();
+        }
+    }
+
+    public void  scriptCSetScript(InputStream is) throws IOException {
+        byte[] buf = new byte[1024];
+        int currentPos = 0;
+        while(true) {
+            int bytesLeft = buf.length - currentPos;
+            if (bytesLeft == 0) {
+                byte[] buf2 = new byte[buf.length * 2];
+                System.arraycopy(buf, 0, buf2, 0, buf.length);
+                buf = buf2;
+                bytesLeft = buf.length - currentPos;
+            }
+            int bytesRead = is.read(buf, currentPos, bytesLeft);
+            if (bytesRead <= 0) {
+                break;
+            }
+            currentPos += bytesRead;
+        }
+        nScriptCSetScript(buf, 0, currentPos);
     }
 
     public Script scriptCCreate() {
