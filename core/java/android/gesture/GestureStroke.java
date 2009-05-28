@@ -17,6 +17,7 @@
 package android.gesture;
 
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -146,12 +147,10 @@ public class GestureStroke {
         final float[] pts = GestureUtilities.temporalSampling(this, numSample);
         final RectF rect = boundingBox;
 
-        GestureUtilities.translate(pts, -rect.left, -rect.top);
-        
-        float sx = width / rect.width();
-        float sy = height / rect.height();
-        float scale = sx > sy ? sy : sx;
-        GestureUtilities.scale(pts, scale, scale);
+        final Matrix matrix = new Matrix();
+        matrix.setTranslate(-rect.left, -rect.top);
+        matrix.postScale(width / rect.width(), height / rect.height());
+        matrix.mapPoints(pts);
 
         float mX = 0;
         float mY = 0;
