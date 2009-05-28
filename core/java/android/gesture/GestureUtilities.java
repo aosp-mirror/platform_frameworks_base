@@ -17,6 +17,7 @@
 package android.gesture;
 
 import android.graphics.RectF;
+import android.graphics.Matrix;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -379,17 +380,22 @@ final class GestureUtilities {
     }
 
     static OrientedBoundingBox computeOrientedBoundingBox(float[] points, float[] centroid) {
-        translate(points, -centroid[0], -centroid[1]);
+        Matrix tr = new Matrix();
+        tr.setTranslate(-centroid[0], -centroid[1]);
+        tr.mapPoints(points);
 
         double[][] array = computeCoVariance(points);
         double[] targetVector = computeOrientation(array);
 
         float angle;
         if (targetVector[0] == 0 && targetVector[1] == 0) {
-            angle = (float) -Math.PI/2;
+            angle = -90;
         } else { // -PI<alpha<PI
             angle = (float) Math.atan2(targetVector[1], targetVector[0]);
-            rotate(points, -angle);
+            angle = (float) (180 * angle / Math.PI);
+            Matrix trans = new Matrix();
+            trans.setRotate(-angle);
+            trans.mapPoints(points);
         }
 
         float minx = Float.MAX_VALUE;
@@ -439,37 +445,5 @@ final class GestureUtilities {
             targetVector[1] = (lambda - covarianceMatrix[0][0]) / covarianceMatrix[0][1];
         }
         return targetVector;
-    }
-    
-    
-    static float[] rotate(float[] points, double angle) {
-        double cos = Math.cos(angle);
-        double sin = Math.sin(angle);
-        int size = points.length;
-        for (int i = 0; i < size; i += 2) {
-            float x = (float) (points[i] * cos - points[i + 1] * sin);
-            float y = (float) (points[i] * sin + points[i + 1] * cos);
-            points[i] = x;
-            points[i + 1] = y;
-        }
-        return points;
-    }
-    
-    static float[] translate(float[] points, float dx, float dy) {
-        int size = points.length;
-        for (int i = 0; i < size; i += 2) {
-            points[i] += dx;
-            points[i + 1] += dy;
-        }
-        return points;
-    }
-    
-    static float[] scale(float[] points, float sx, float sy) {
-        int size = points.length;
-        for (int i = 0; i < size; i += 2) {
-            points[i] *= sx;
-            points[i + 1] *= sy;
-        }
-        return points;
     }
 }
