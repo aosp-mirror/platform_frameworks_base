@@ -53,25 +53,20 @@ Sampler::~Sampler()
 
 void Sampler::setupGL()
 {
-    GLenum translate[] = {
+    GLenum trans[] = {
         GL_NEAREST, //RS_SAMPLER_NEAREST,
         GL_LINEAR, //RS_SAMPLER_LINEAR,
-        GL_LINEAR_MIP_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
-        GL_WRAP, //RS_SAMPLER_WRAP,
-        GL_CLAMP_TO_EDGS, //RS_SAMPLER_CLAMP
+        GL_LINEAR_MIPMAP_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
+        GL_REPEAT, //RS_SAMPLER_WRAP,
+        GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
 
-    }
+    };
 
 
-    //LOGE("setup gl");
-    switch(mMagFilter) {
-    case RS_SAMPLER_
-    }
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, trans[mWrapS]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, trans[mWrapT]);
 
 }
 
