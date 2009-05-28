@@ -16,9 +16,14 @@
 
 package android.gesture;
 
+import android.util.Config;
+import android.util.Log;
+import static android.gesture.GestureConstants.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.TreeMap;
 
 /**
@@ -27,7 +32,7 @@ import java.util.TreeMap;
 
 class InstanceLearner extends Learner {
     @Override
-    ArrayList<Prediction> classify(int sequenceType, float[] vector) {
+    ArrayList<Prediction> classify(int gestureType, float[] vector) {
         ArrayList<Prediction> predictions = new ArrayList<Prediction>();
         ArrayList<Instance> instances = getInstances();
         int count = instances.size();
@@ -38,7 +43,7 @@ class InstanceLearner extends Learner {
                 continue;
             }
             double distance;
-            if (sequenceType == GestureLibrary.SEQUENCE_SENSITIVE) {
+            if (gestureType == GestureLibrary.SEQUENCE_SENSITIVE) {
                 distance = GestureUtilities.cosineDistance(sample.vector, vector);
             } else {
                 distance = GestureUtilities.squaredEuclideanDistance(sample.vector, vector);
