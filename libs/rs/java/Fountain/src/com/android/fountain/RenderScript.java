@@ -614,18 +614,11 @@ public class RenderScript {
 
     public void scriptCSetScript(String s) {
         try {
-            scriptCSetScript(s.getBytes("UTF-8"));
+            byte[] bytes = s.getBytes("UTF-8");
+            nScriptCSetScript(bytes, 0, bytes.length);
         } catch (java.io.UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void scriptCSetScript(byte[] utf8Bytes) {
-        scriptCSetScript(utf8Bytes, 0, utf8Bytes.length);
-    }
-
-    public void scriptCSetScript(byte[] utf8Bytes, int offset, int length) {
-        nScriptCSetScript(utf8Bytes, offset, length);
     }
 
     public void scriptCSetScript(Resources resources, int id) {
