@@ -533,6 +533,7 @@ nScriptCSetScript(JNIEnv *_env, jobject _this, jbyteArray scriptRef,
     jint remaining;
     jbyte* script_base = 0;
     jbyte* script_ptr;
+    ACCscript* script = 0;
     void* scriptEntry = 0;
     if (!scriptRef) {
         _exception = 1;
@@ -560,19 +561,21 @@ nScriptCSetScript(JNIEnv *_env, jobject _this, jbyteArray scriptRef,
     script_ptr = script_base + offset;
 
     {
-        ACCscript* script = accCreateScript();
+        script = accCreateScript();
         const char* scriptSource[] = {(const char*) script_ptr};
         int scriptLength[] = {length} ;
         accScriptSource(script, 1, scriptSource, scriptLength);
         accCompileScript(script);
         accGetScriptLabel(script, "main", (ACCvoid**) &scriptEntry);
-        // TBD: We currently leak the script object. We can't delete it until
-        // we are done with the scriptEntry.
     }
     if (scriptEntry) {
-        rsScriptCSetScript((void *)scriptEntry);
+        rsScriptCSetScript((void*) script, (void *)scriptEntry);
+        script = 0;
     }
 exit:
+    if (script) {
+        accDeleteScript(script);
+    }
     if (script_base) {
         _env->ReleasePrimitiveArrayCritical(scriptRef, script_base,
                 _exception ? JNI_ABORT: 0);

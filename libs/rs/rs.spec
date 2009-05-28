@@ -288,7 +288,8 @@ ScriptCSetOrtho {
 	}
 
 ScriptCSetScript {
-	param void * ptr
+	param void * accScript
+	param void * codePtr
 	}
 
 ScriptCCreate {

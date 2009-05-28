@@ -94,7 +94,7 @@ LOCAL_SRC_FILES:= \
 	rsType.cpp \
 	rsTriangleMesh.cpp
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libui 
+LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libui libacc
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libRS
 
