@@ -57,6 +57,7 @@ private:
  */
 
 #define ANDROID_SINGLETON_STATIC_INSTANCE(TYPE)             \
+    template class Singleton< TYPE >;                       \
     template< class TYPE > Mutex Singleton< TYPE >::sLock;  \
     template<> TYPE* Singleton< TYPE >::sInstance(0);
 
