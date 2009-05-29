@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * A gesture stroke started on a touch down and ended on a touch up.
  */
 public class GestureStroke {
-    static final float TOUCH_TOLERANCE = 3;
+    static final float TOUCH_TOLERANCE = 8;
 
     public final RectF boundingBox;
 
