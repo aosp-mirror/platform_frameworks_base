@@ -413,7 +413,7 @@ final class GestureUtilities {
             }
         }
 
-        return new OrientedBoundingBox(angle, centroid[0], centroid[1], maxx - minx, maxy - miny);
+        return new OrientedBoundingBox((float) (angle * 180 / Math.PI), centroid[0], centroid[1], maxx - minx, maxy - miny);
     }
 
     private static double[] computeOrientation(double[][] covarianceMatrix) {
