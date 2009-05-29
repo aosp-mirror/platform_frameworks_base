@@ -118,7 +118,8 @@ import java.util.List;
  * <b>To generate EMMA code coverage:</b>
  * -e coverage true
  * Note: this requires an emma instrumented build. By default, the code coverage results file 
- * will be saved as /sdcard/coverage.ec, unless overridden by coverageFile flag (see below)
+ * will be saved in a /data/<app>/coverage.ec file, unless overridden by coverageFile flag (see
+ * below)
  * <p/>
  * <b> To specify EMMA code coverage results file path:</b>
  * -e coverageFile /sdcard/myFile.ec
@@ -218,6 +219,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      */
     private static final String REPORT_KEY_SUITE_ASSIGNMENT = "suiteassignment";
     /**
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
+     * identifies the path to the generated code coverage file.
+     */
+    private static final String REPORT_KEY_COVERAGE_PATH = "coverageFilePath";
+    /**
      * The test is starting.
      */
     public static final int REPORT_VALUE_RESULT_START = 1;
@@ -240,7 +246,8 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      */
     public static final String REPORT_KEY_STACK = "stack";
 
-    private static final String DEFAULT_COVERAGE_FILE_PATH = "/sdcard/coverage.ec";
+    // Default file name for code coverage
+    private static final String DEFAULT_COVERAGE_FILE_NAME = "coverage.ec";
     
     private static final String LOG_TAG = "InstrumentationTestRunner";
 
@@ -456,14 +463,20 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     private void generateCoverageReport() {
         // use reflection to call emma dump coverage method, to avoid
         // always statically compiling against emma jar
-        java.io.File coverageFile = new java.io.File(getCoverageFilePath());
+        String coverageFilePath = getCoverageFilePath();
+        java.io.File coverageFile = new java.io.File(coverageFilePath);
         try {
             Class emmaRTClass = Class.forName("com.vladium.emma.rt.RT");
             Method dumpCoverageMethod = emmaRTClass.getMethod("dumpCoverageData", 
                     coverageFile.getClass(), boolean.class, boolean.class);
             
             dumpCoverageMethod.invoke(null, coverageFile, false, false);
-
+            // output path to generated coverage file so it can be parsed by a test harness if
+            // needed
+            mResults.putString(REPORT_KEY_COVERAGE_PATH, coverageFilePath);
+            // also output a more user friendly msg
+            mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+                String.format("Generated code coverage data to %s", coverageFilePath));
         } catch (ClassNotFoundException e) {
             reportEmmaError("Is emma jar on classpath?", e);
         } catch (SecurityException e) {
@@ -481,8 +494,9 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
     private String getCoverageFilePath() {
         if (mCoverageFilePath == null) {
-            return DEFAULT_COVERAGE_FILE_PATH;
-        }
+            return getTargetContext().getFilesDir().getAbsolutePath() + File.separator +
+                    DEFAULT_COVERAGE_FILE_NAME;
+         }
         else {
             return mCoverageFilePath;
         }
