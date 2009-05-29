@@ -306,28 +306,12 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.unregisterForInCallVoicePrivacyOff(h);
     }
 
-    public void registerCdmaInformationRecord(Handler h, int what, Object obj) {
-        mActivePhone.registerCdmaInformationRecord(h,what,obj);
+    public void registerForCdmaOtaStatusChange(Handler h, int what, Object obj) {
+        mActivePhone.registerForCdmaOtaStatusChange(h,what,obj);
     }
 
-    public void unregisterCdmaInformationRecord(Handler h) {
-        mActivePhone.unregisterCdmaInformationRecord(h);
-    }
-
-    public void registerForOtaStatusChange(Handler h, int what, Object obj){
-        mActivePhone.registerForOtaStatusChange(h,what,obj);
-    }
-
-    public void unregisterForOtaStatusChange(Handler h){
-        mActivePhone.unregisterForOtaStatusChange(h);
-    }
-
-    public void registerForCdmaCallWaiting(Handler h, int what, Object obj){
-        mActivePhone.registerForCdmaCallWaiting(h,what,obj);
-    }
-
-    public void unregisterForCdmaCallWaiting(Handler h){
-        mActivePhone.unregisterForCdmaCallWaiting(h);
+    public void unregisterForCdmaOtaStatusChange(Handler h) {
+         mActivePhone.unregisterForCdmaOtaStatusChange(h);
     }
 
     public boolean getIccRecordsLoaded() {
@@ -414,10 +398,6 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.stopDtmf();
     }
 
-    public void sendBurstDtmf(String dtmfString) {
-        mActivePhone.sendBurstDtmf(dtmfString);
-    }
-
     public void setRadioPower(boolean power) {
         mActivePhone.setRadioPower(power);
     }
@@ -434,6 +414,10 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getLine1Number();
     }
 
+    public String getCdmaMin() {
+        return mActivePhone.getCdmaMin();
+    }
+
     public String getLine1AlphaTag() {
         return mActivePhone.getLine1AlphaTag();
     }
@@ -444,6 +428,11 @@ public class PhoneProxy extends Handler implements Phone {
 
     public String getVoiceMailNumber() {
         return mActivePhone.getVoiceMailNumber();
+    }
+
+     /** @hide */
+    public int getCountVoiceMessages(){
+        return mActivePhone.getCountVoiceMessages();
     }
 
     public String getVoiceMailAlphaTag() {
@@ -656,10 +645,6 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getIccSerialNumber();
     }
 
-    public String getMin() {
-        return mActivePhone.getMin();
-    }
-
     public String getEsn() {
         return mActivePhone.getEsn();
     }
@@ -686,10 +671,6 @@ public class PhoneProxy extends Handler implements Phone {
 
     public void queryTTYMode(Message onComplete) {
         mActivePhone.queryTTYMode(onComplete);
-    }
-
-    public void exitEmergencyCallbackMode(Message onComplete) {
-        mActivePhone.exitEmergencyCallbackMode(onComplete);
     }
 
     public void activateCellBroadcastSms(int activate, Message response) {
@@ -720,12 +701,55 @@ public class PhoneProxy extends Handler implements Phone {
          return mActivePhone.getCdmaEriIconIndex();
     }
 
+     public String getCdmaEriText() {
+         return mActivePhone.getCdmaEriText();
+     }
+
     public int getCdmaEriIconMode() {
          return mActivePhone.getCdmaEriIconMode();
     }
 
-    public String getCdmaEriText() {
-         return mActivePhone.getCdmaEriText();
+    public void sendBurstDtmf(String dtmfString, Message onComplete){
+        mActivePhone.sendBurstDtmf(dtmfString,onComplete);
+    }
+
+    public void exitEmergencyCallbackMode(){
+        mActivePhone.exitEmergencyCallbackMode();
+    }
+
+    public boolean isOtaSpNumber(String dialStr){
+        return mActivePhone.isOtaSpNumber(dialStr);
+    }
+
+    public void registerForCallWaiting(Handler h, int what, Object obj){
+        mActivePhone.registerForCallWaiting(h,what,obj);
+    }
+
+    public void unregisterForCallWaiting(Handler h){
+        mActivePhone.unregisterForCallWaiting(h);
+    }
+
+    public void registerForSignalInfo(Handler h, int what, Object obj) {
+        mActivePhone.registerForSignalInfo(h,what,obj);
+    }
+
+    public void unregisterForSignalInfo(Handler h) {
+        mActivePhone.unregisterForSignalInfo(h);
+    }
+
+    public void registerForDisplayInfo(Handler h, int what, Object obj) {
+        mActivePhone.registerForDisplayInfo(h,what,obj);
+    }
+
+    public void unregisterForDisplayInfo(Handler h) {
+        mActivePhone.unregisterForDisplayInfo(h);
+    }
+
+    public void setOnEcbModeExitResponse(Handler h, int what, Object obj){
+        mActivePhone.setOnEcbModeExitResponse(h,what,obj);
+    }
+
+    public void unsetOnEcbModeExitResponse(Handler h){
+        mActivePhone.unsetOnEcbModeExitResponse(h);
     }
 }
-

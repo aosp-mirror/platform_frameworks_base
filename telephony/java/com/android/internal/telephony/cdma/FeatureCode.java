@@ -84,7 +84,7 @@ public final class FeatureCode  extends Handler implements MmiCode {
 
     CDMAPhone phone;
     Context context;
-
+    CdmaConnection suppConn;
     String action;              // '*' in CDMA
     String sc;                  // Service Code
     String poundString;         // Entire Flash string
@@ -239,8 +239,15 @@ public final class FeatureCode  extends Handler implements MmiCode {
     /** Process a Flash Code...anything that isn't a dialing number */
     void processCode () {
         Log.d(LOG_TAG, "send feature code...");
-        phone.mCM.sendCDMAFeatureCode(this.poundString,
-                obtainMessage(EVENT_CDMA_FLASH_COMPLETED));
+        if (this.poundString != null) {
+            // TODO(Moto): Is suppConn going away?
+            suppConn = new CdmaConnection(phone.getContext(), this.poundString, phone.mCT, null);    
+            phone.mCM.sendCDMAFeatureCode(suppConn.address,
+                 obtainMessage(EVENT_CDMA_FLASH_COMPLETED));
+        } else {
+             phone.mCM.sendCDMAFeatureCode(this.poundString,
+                 obtainMessage(EVENT_CDMA_FLASH_COMPLETED));
+        }
     }
 
     /** Called from CDMAPhone.handleMessage; not a Handler subclass */
@@ -261,6 +268,7 @@ public final class FeatureCode  extends Handler implements MmiCode {
             } else {
                 state = State.COMPLETE;
                 message = context.getText(com.android.internal.R.string.fcComplete);
+                suppConn.processNextPostDialChar();
             }
             phone.onFeatureCodeDone(this);
             break;
