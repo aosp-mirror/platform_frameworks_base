@@ -817,19 +817,22 @@ void AudioFlinger::handleForcedSpeakerRoute(int command)
         {
             AutoMutex lock(mHardwareLock);
             if (mForcedSpeakerCount++ == 0) {
-                mRouteRestoreTime = 0;
-                mMusicMuteSaved = mHardwareMixerThread->streamMute(AudioSystem::MUSIC);
-                if (mForcedRoute == 0 && !(mSavedRoute & AudioSystem::ROUTE_SPEAKER)) {
-                    LOGV("Route forced to Speaker ON %08x", mSavedRoute | AudioSystem::ROUTE_SPEAKER);
-                    mHardwareMixerThread->setStreamMute(AudioSystem::MUSIC, true);
-                    usleep(mHardwareMixerThread->latency()*1000);
-                    mHardwareStatus = AUDIO_HW_SET_ROUTING;
-                    mAudioHardware->setRouting(AudioSystem::MODE_NORMAL, mSavedRoute | AudioSystem::ROUTE_SPEAKER);
-                    mHardwareStatus = AUDIO_HW_IDLE;
-                    // delay track start so that audio hardware has time to siwtch routes
-                    usleep(kStartSleepTime);
+                if (mForcedRoute == 0) {
+                    mMusicMuteSaved = mHardwareMixerThread->streamMute(AudioSystem::MUSIC);
+                    LOGV("++mForcedSpeakerCount == 0, mMusicMuteSaved = %d, mRouteRestoreTime = %d", mMusicMuteSaved, mRouteRestoreTime);
+                    if (!(mSavedRoute & AudioSystem::ROUTE_SPEAKER)) {
+                        LOGV("Route forced to Speaker ON %08x", mSavedRoute | AudioSystem::ROUTE_SPEAKER);
+                        mHardwareMixerThread->setStreamMute(AudioSystem::MUSIC, true);
+                        usleep(mHardwareMixerThread->latency()*1000);
+                        mHardwareStatus = AUDIO_HW_SET_ROUTING;
+                        mAudioHardware->setRouting(AudioSystem::MODE_NORMAL, mSavedRoute | AudioSystem::ROUTE_SPEAKER);
+                        mHardwareStatus = AUDIO_HW_IDLE;
+                        // delay track start so that audio hardware has time to siwtch routes
+                        usleep(kStartSleepTime);
+                    }
                 }
                 mForcedRoute = AudioSystem::ROUTE_SPEAKER;
+                mRouteRestoreTime = 0;
             }
             LOGV("mForcedSpeakerCount incremented to %d", mForcedSpeakerCount);
         }
