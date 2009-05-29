@@ -38,7 +38,7 @@
 
 #include "hooks.h"
 #include "egl_impl.h"
-
+#include "Loader.h"
 
 #define MAKE_CONFIG(_impl, _index)  ((EGLConfig)(((_impl)<<24) | (_index)))
 #define setError(_e, _r) setErrorEtc(__FUNCTION__, __LINE__, _e, _r)
@@ -139,38 +139,6 @@ struct tls_t
     EGLContext  ctx;
 };
 
-static void gl_unimplemented() {
-    LOGE("called unimplemented OpenGL ES API");
-}
-
-// ----------------------------------------------------------------------------
-// GL / EGL hooks
-// ----------------------------------------------------------------------------
-
-#undef GL_ENTRY
-#undef EGL_ENTRY
-#define GL_ENTRY(_r, _api, ...) #_api,
-#define EGL_ENTRY(_r, _api, ...) #_api,
-
-static char const * const gl_names[] = {
-    #include "GLES_CM/gl_entries.in"
-    #include "GLES_CM/glext_entries.in"
-    NULL
-};
-
-static char const * const gl2_names[] = {
-    #include "GLES2/gl2_entries.in"
-    #include "GLES2/gl2ext_entries.in"
-    NULL
-};
-
-static char const * const egl_names[] = {
-    #include "egl_entries.in"
-    NULL
-};
-
-#undef GL_ENTRY
-#undef EGL_ENTRY
 
 // ----------------------------------------------------------------------------
 
@@ -280,105 +248,6 @@ EGLContext getContext() {
 }
 
 /*****************************************************************************/
-
-typedef __eglMustCastToProperFunctionPointerType (*getProcAddressType)(
-        const char*);
-
-static __attribute__((noinline))
-void init_api(void* dso, 
-        char const * const * api, 
-        __eglMustCastToProperFunctionPointerType* curr, 
-        getProcAddressType getProcAddress) 
-{
-    char scrap[256];
-    while (*api) {
-        char const * name = *api;
-        __eglMustCastToProperFunctionPointerType f = 
-            (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
-        if (f == NULL) {
-            // couldn't find the entry-point, use eglGetProcAddress()
-            f = getProcAddress(name);
-        }
-        if (f == NULL) {
-            // Try without the OES postfix
-            ssize_t index = ssize_t(strlen(name)) - 3;
-            if ((index>0 && (index<255)) && (!strcmp(name+index, "OES"))) {
-                strncpy(scrap, name, index);
-                scrap[index] = 0;
-                f = (__eglMustCastToProperFunctionPointerType)dlsym(dso, scrap);
-                //LOGD_IF(f, "found <%s> instead", scrap);
-            }
-        }
-        if (f == NULL) {
-            // Try with the OES postfix
-            ssize_t index = ssize_t(strlen(name)) - 3;
-            if ((index>0 && (index<252)) && (strcmp(name+index, "OES"))) {
-                strncpy(scrap, name, index);
-                scrap[index] = 0;
-                strcat(scrap, "OES");
-                f = (__eglMustCastToProperFunctionPointerType)dlsym(dso, scrap);
-                //LOGD_IF(f, "found <%s> instead", scrap);
-            }
-        }
-        if (f == NULL) {
-            //LOGD("%s", name);
-            f = (__eglMustCastToProperFunctionPointerType)gl_unimplemented;
-        }
-        *curr++ = f;
-        api++;
-    }
-}
-
-static __attribute__((noinline))
-void *load_driver(const char* driver, gl_hooks_t* hooks)
-{
-    //LOGD("%s", driver);
-    void* dso = dlopen(driver, RTLD_NOW | RTLD_LOCAL);
-    LOGE_IF(!dso,
-            "couldn't load <%s> library (%s)",
-            driver, dlerror());
-
-    if (dso) {
-        // first find the symbol for eglGetProcAddress
-        
-        typedef __eglMustCastToProperFunctionPointerType (*getProcAddressType)(
-                const char*);
-        
-        getProcAddressType getProcAddress = 
-            (getProcAddressType)dlsym(dso, "eglGetProcAddress");
-        
-        LOGE_IF(!getProcAddress, 
-                "can't find eglGetProcAddress() in %s", driver);        
-
-        gl_hooks_t::egl_t* egl = &hooks->egl;
-        __eglMustCastToProperFunctionPointerType* curr =
-                (__eglMustCastToProperFunctionPointerType*)egl;
-        char const * const * api = egl_names;
-        while (*api) {
-            char const * name = *api;
-            __eglMustCastToProperFunctionPointerType f = 
-                (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);
-            if (f == NULL) {
-                // couldn't find the entry-point, use eglGetProcAddress()
-                f = getProcAddress(name);
-                if (f == NULL) {
-                    f = (__eglMustCastToProperFunctionPointerType)0;
-                }
-            }
-            *curr++ = f;
-            api++;
-        }
-        
-        init_api(dso, gl_names,  
-                (__eglMustCastToProperFunctionPointerType*)&hooks->gl, 
-                getProcAddress);
-        
-        init_api(dso, gl2_names, 
-                (__eglMustCastToProperFunctionPointerType*)&hooks->gl2, 
-                getProcAddress);
-    }
-    return dso;
-}
 
 template<typename T>
 static __attribute__((noinline))
@@ -605,12 +474,15 @@ EGLDisplay egl_init_displays(NativeDisplayType display)
     EGLDisplay dpy = EGLDisplay(uintptr_t(display) + 1LU);
     egl_display_t* d = &gDisplay[index];
 
+    // get our driver loader
+    Loader& loader(Loader::getInstance());    
+    
     // dynamically load all our EGL implementations for that display
     // and call into the real eglGetGisplay()
     egl_connection_t* cnx = &gEGLImpl[IMPL_SOFTWARE];
     if (cnx->dso == 0) {
         cnx->hooks = &gHooks[IMPL_SOFTWARE];
-        cnx->dso = load_driver("libagl.so", cnx->hooks);
+        cnx->dso = loader.open(display, 0, cnx->hooks);
     }
     if (cnx->dso && d->dpys[IMPL_SOFTWARE]==EGL_NO_DISPLAY) {
         d->dpys[IMPL_SOFTWARE] = cnx->hooks->egl.eglGetDisplay(display);
@@ -624,7 +496,7 @@ EGLDisplay egl_init_displays(NativeDisplayType display)
         property_get("debug.egl.hw", value, "1");
         if (atoi(value) != 0) {
             cnx->hooks = &gHooks[IMPL_HARDWARE];
-            cnx->dso = load_driver("libhgl2.so", cnx->hooks);
+            cnx->dso = loader.open(display, 1, cnx->hooks);
         } else {
             LOGD("3D hardware acceleration is disabled");
         }
@@ -656,7 +528,8 @@ EGLDisplay egl_init_displays(NativeDisplayType display)
         if (d->dpys[IMPL_HARDWARE] == EGL_NO_DISPLAY) {
             LOGE("h/w accelerated eglGetDisplay() failed (%s)",
                     egl_strerror(cnx->hooks->egl.eglGetError()));
-            dlclose((void*)cnx->dso);
+            
+            loader.close(cnx->dso);
             cnx->dso = 0;
             // in case of failure, we want to make sure we don't try again
             // as it's expensive.
@@ -768,6 +641,8 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
     if (android_atomic_dec(&dp->refs) != 1)
         return EGL_TRUE;
         
+    Loader& loader(Loader::getInstance());    
+
     EGLBoolean res = EGL_FALSE;
     for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
@@ -783,7 +658,8 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
             free((void*)dp->queryString[i].extensions);
             dp->numConfigs[i] = 0;
             dp->dpys[i] = EGL_NO_DISPLAY;
-            dlclose((void*)cnx->dso);
+
+            loader.close(cnx->dso);
             cnx->dso = 0;
             res = EGL_TRUE;
         }

@@ -21,12 +21,12 @@
 #include <string.h>
 #include <errno.h>
 
+#include <pthread.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -102,6 +102,13 @@ struct gl_hooks_t {
 
 extern gl_hooks_t gHooks[IMPL_NUM_IMPLEMENTATIONS];
 extern pthread_key_t gGLWrapperKey;
+extern "C" void gl_unimplemented();
+
+extern char const * const gl_names[];
+extern char const * const gl2_names[];
+extern char const * const egl_names[];
+
+// ----------------------------------------------------------------------------
 
 #if USE_FAST_TLS_KEY
 

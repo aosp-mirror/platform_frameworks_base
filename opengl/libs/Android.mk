@@ -8,9 +8,11 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= 	\
 	EGL/egl.cpp 	\
+	EGL/hooks.cpp 	\
+	EGL/Loader.cpp 	\
 #
 
-LOCAL_SHARED_LIBRARIES += libcutils
+LOCAL_SHARED_LIBRARIES += libcutils libutils
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libEGL
 
@@ -27,8 +29,24 @@ LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 LOCAL_CFLAGS += -fvisibility=hidden
 
 include $(BUILD_SHARED_LIBRARY)
+installed_libEGL := $(LOCAL_INSTALLED_MODULE)
 
 
+# OpenGL drivers config file
+ifneq ($(BOARD_EGL_CFG),)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := egl.cfg
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(TARGET_OUT)/lib/egl
+LOCAL_SRC_FILES := ../../../../$(BOARD_EGL_CFG)
+include $(BUILD_PREBUILT)
+
+# make sure we depend on egl.cfg, so it gets installed
+$(installed_libEGL): | egl.cfg
+
+endif
 
 ###############################################################################
 # Build the wrapper OpenGL ES 1.x library

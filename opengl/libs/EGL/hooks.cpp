@@ -1,5 +1,5 @@
 /* 
- ** Copyright 2007, The Android Open Source Project
+ ** Copyright 2009, The Android Open Source Project
  **
  ** Licensed under the Apache License, Version 2.0 (the "License"); 
  ** you may not use this file except in compliance with the License. 
@@ -14,34 +14,54 @@
  ** limitations under the License.
  */
 
-#ifndef ANDROID_EGL_IMPL_H
-#define ANDROID_EGL_IMPL_H
-
 #include <ctype.h>
+#include <stdlib.h>
+#include <errno.h>
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <EGL/eglplatform.h>
+#include <cutils/log.h>
+
+#include "hooks.h"
 
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
 
-struct gl_hooks_t;
+void gl_unimplemented() {
+    LOGE("called unimplemented OpenGL ES API");
+}
 
-struct egl_connection_t
-{
-    void *              dso;
-    gl_hooks_t *        hooks;
-    EGLint              major;
-    EGLint              minor;
-    int                 unavailable;
+
+// ----------------------------------------------------------------------------
+// GL / EGL hooks
+// ----------------------------------------------------------------------------
+
+#undef GL_ENTRY
+#undef EGL_ENTRY
+#define GL_ENTRY(_r, _api, ...) #_api,
+#define EGL_ENTRY(_r, _api, ...) #_api,
+
+char const * const gl_names[] = {
+    #include "GLES_CM/gl_entries.in"
+    #include "GLES_CM/glext_entries.in"
+    NULL
 };
 
-EGLAPI EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
+char const * const gl2_names[] = {
+    #include "GLES2/gl2_entries.in"
+    #include "GLES2/gl2ext_entries.in"
+    NULL
+};
+
+char const * const egl_names[] = {
+    #include "egl_entries.in"
+    NULL
+};
+
+#undef GL_ENTRY
+#undef EGL_ENTRY
+
 
 // ----------------------------------------------------------------------------
 }; // namespace android
 // ----------------------------------------------------------------------------
 
-#endif /* ANDROID_EGL_IMPL_H */

@@ -47,6 +47,8 @@ LOCAL_SHARED_LIBRARIES := libcutils libhardware libutils libpixelflinger
 LOCAL_CFLAGS += -fvisibility=hidden
 
 LOCAL_LDLIBS := -lpthread -ldl
-LOCAL_MODULE:= libagl
+
+LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/egl
+LOCAL_MODULE:= libGLES_android
 
 include $(BUILD_SHARED_LIBRARY)
