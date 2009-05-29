@@ -37,15 +37,15 @@ public class MemoryFile
     private static String TAG = "MemoryFile";
  
     // returns fd
-    private native int native_open(String name, int length);
+    private static native int native_open(String name, int length) throws IOException;
     // returns memory address for ashmem region
-    private native int native_mmap(int fd, int length);
-    private native void native_close(int fd);
-    private native int native_read(int fd, int address, byte[] buffer, 
-            int srcOffset, int destOffset, int count, boolean isUnpinned);
-    private native void native_write(int fd, int address, byte[] buffer, 
-            int srcOffset, int destOffset, int count, boolean isUnpinned);
-    private native void native_pin(int fd, boolean pin);
+    private static native int native_mmap(int fd, int length) throws IOException;
+    private static native void native_close(int fd);
+    private static native int native_read(int fd, int address, byte[] buffer,
+            int srcOffset, int destOffset, int count, boolean isUnpinned) throws IOException;
+    private static native void native_write(int fd, int address, byte[] buffer,
+            int srcOffset, int destOffset, int count, boolean isUnpinned) throws IOException;
+    private static native void native_pin(int fd, boolean pin) throws IOException;
 
     private int mFD;        // ashmem file descriptor
     private int mAddress;   // address of ashmem memory
@@ -57,8 +57,9 @@ public class MemoryFile
      *
      * @param name optional name for the file (can be null).
      * @param length of the memory file in bytes.
+     * @throws IOException if the memory file could not be created.
      */
-    public MemoryFile(String name, int length) {
+    public MemoryFile(String name, int length) throws IOException {
         mLength = length;
         mFD = native_open(name, length);
         mAddress = native_mmap(mFD, length);
