@@ -399,16 +399,16 @@ public final class ContactsContract {
             public static final String TYPE = "data1";
 
             /**
-             * The user defined label for the the contact method.
-             * <P>Type: TEXT</P>
-             */
-            public static final String LABEL = "data2";
-
-            /**
              * The data for the contact method.
              * <P>Type: TEXT</P>
              */
-            public static final String DATA = "data3";
+            public static final String DATA = "data2";
+
+            /**
+             * The user defined label for the the contact method.
+             * <P>Type: TEXT</P>
+             */
+            public static final String LABEL = "data3";
 
             /**
              * Whether this is the primary entry of its kind for the contact it belongs to
@@ -427,27 +427,28 @@ public final class ContactsContract {
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/name";
 
             /**
-             * The contact's honorific prefix, e.g. "Sir"
-             */
-            public static final String PREFIX = "data1";
-
-            /**
              * The given name for the contact.
              * <P>Type: TEXT</P>
              */
-            public static final String GIVEN_NAME = "data2";
-
-            /**
-             * The contact's middle name
-             * <P>Type: TEXT</P>
-             */
-            public static final String MIDDLE_NAME = "data3";
+            public static final String GIVEN_NAME = "data1";
 
             /**
              * The family name for the contact.
              * <P>Type: TEXT</P>
              */
-            public static final String FAMILY_NAME = "data4";
+            public static final String FAMILY_NAME = "data2";
+
+            /**
+             * The contact's honorific prefix, e.g. "Sir"
+             * <P>Type: TEXT</P>
+             */
+            public static final String PREFIX = "data3";
+
+            /**
+             * The contact's middle name
+             * <P>Type: TEXT</P>
+             */
+            public static final String MIDDLE_NAME = "data4";
 
             /**
              * The contact's honorific suffix, e.g. "Jr"
@@ -502,15 +503,15 @@ public final class ContactsContract {
             public static final int TYPE_INITIALS = 6;
 
             /**
+             * The name itself
+             */
+            public static final String NAME = "data2";
+
+            /**
              * The user provided label, only used if TYPE is {@link #TYPE_CUSTOM}.
              * <P>Type: TEXT</P>
              */
-            public static final String LABEL = "data2";
-
-            /**
-             * The name itself
-             */
-            public static final String NAME = "data3";
+            public static final String LABEL = "data3";
         }
 
         /**
@@ -535,8 +536,7 @@ public final class ContactsContract {
              * The phone number as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String NUMBER = "data3";
-
+            public static final String NUMBER = "data2";
         }
 
         /**
@@ -552,7 +552,6 @@ public final class ContactsContract {
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
-
         }
 
         /**
@@ -590,9 +589,11 @@ public final class ContactsContract {
              * The predefined IM protocol types. The protocol can either be non-present, one
              * of these types, or a free-form string. These cases are encoded in the PROTOCOL
              * column as:
-             *  - null
-             *  - pre:<an integer, one of the protocols below>
-             *  - custom:<a string>
+             * <ul>
+             * <li>null</li>
+             * <li>pre:&lt;an integer, one of the protocols below&gt;</li>
+             * <li>custom:&lt;a string&gt;</li>
+             * </ul>
              */
             public static final int PROTOCOL_AIM = 0;
             public static final int PROTOCOL_MSN = 1;
@@ -647,7 +648,6 @@ public final class ContactsContract {
              * <P>Type: INTEGER (if set, non-0 means true)</P>
              */
             public static final String ISPRIMARY = "data5";
-
         }
 
         /**
@@ -684,6 +684,9 @@ public final class ContactsContract {
             public static final String NOTE = "data1";
         }
 
+        /**
+         * Custom ringtone associated with the contact.
+         */
         public static final class CustomRingtone implements BaseCommonColumns {
             private CustomRingtone() {}
 
