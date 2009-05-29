@@ -36,9 +36,10 @@ import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.gesture.Gesture;
 
-import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.gesture.Prediction;
+import android.gesture.GestureLibraries;
+import android.gesture.GestureLibrary;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class GestureEntry extends Activity {
 
     private Spinner mRecognitionResult;
 
-    private GestureLibrary mGestureLibrary;
+    private GestureLibrary mGestureStore;
 
     private boolean mChangedByRecognizer = false;
 
@@ -71,8 +72,8 @@ public class GestureEntry extends Activity {
         setContentView(R.layout.demo);
 
         // init the gesture library
-        mGestureLibrary = new GestureLibrary(GESTURE_FILE_NAME);
-        mGestureLibrary.load();
+        mGestureStore = GestureLibraries.fromFile(GESTURE_FILE_NAME);
+        mGestureStore.load();
 
         // create the spinner for showing the recognition results
         // the spinner also allows a user to correct a prediction
@@ -82,7 +83,7 @@ public class GestureEntry extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // correct the recognition result by adding the new example
                 if (!mChangedByRecognizer) {
-                    mGestureLibrary.addGesture(parent.getSelectedItem().toString(), mGesturePad
+                    mGestureStore.addGesture(parent.getSelectedItem().toString(), mGesturePad
                             .getGesture());
                 } else {
                     mChangedByRecognizer = false;
@@ -109,7 +110,7 @@ public class GestureEntry extends Activity {
             public void onGestureStarted(GestureOverlayView overlay, MotionEvent event) {
                 overlay.clear(false);
             }
-            
+
             public void onGestureCancelled(GestureOverlayView overlay, MotionEvent event) {
             }
         });
@@ -134,7 +135,7 @@ public class GestureEntry extends Activity {
                                 .findViewById(R.id.gesturename_edit);
                         String text = edittext.getText().toString().trim();
                         if (text.length() > 0) {
-                            mGestureLibrary.addGesture(text, mGesturePad.getGesture());
+                            mGestureStore.addGesture(text, mGesturePad.getGesture());
                         }
                     }
                 }).setNegativeButton(R.string.newgesture_dialog_cancel,
@@ -173,14 +174,14 @@ public class GestureEntry extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mGestureLibrary.load();
+        mGestureStore.load();
         mGesturePad.clear(false);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mGestureLibrary.save();
+        mGestureStore.save();
     }
 
     @Override
@@ -195,12 +196,12 @@ public class GestureEntry extends Activity {
         if (gesture != null) {
             outState.putParcelable(PARCEL_KEY, gesture);
         }
-        mGestureLibrary.save();
+        mGestureStore.save();
     }
 
     private void recognize(Gesture gesture) {
         mChangedByRecognizer = true;
-        ArrayList<Prediction> predictions = mGestureLibrary.recognize(gesture);
+        ArrayList<Prediction> predictions = mGestureStore.recognize(gesture);
         ArrayAdapter<Prediction> adapter = new ArrayAdapter<Prediction>(this,
                 android.R.layout.simple_spinner_item, predictions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

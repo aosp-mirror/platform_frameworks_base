@@ -28,8 +28,9 @@ import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.gesture.Gesture;
 
-import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
+import android.gesture.GestureLibraries;
+import android.gesture.GestureLibrary;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +46,7 @@ public class GestureLibViewer extends Activity {
 
     private Spinner mGestureCategory;
 
-    private GestureLibrary mGesureLibrary;
+    private GestureLibrary mGesureStore;
 
     private ArrayList<Gesture> mGestures;
 
@@ -59,15 +60,15 @@ public class GestureLibViewer extends Activity {
 
             String name = (String) mGestureCategory.getSelectedItem();
             Gesture gesture = mGestures.get(mCurrentGestureIndex);
-            mGesureLibrary.removeGesture(name, gesture);
+            mGesureStore.removeGesture(name, gesture);
 
-            mGestures = mGesureLibrary.getGestures(name);
+            mGestures = mGesureStore.getGestures(name);
 
             if (mGestures == null) {
                 // delete the entire entry
                 mCurrentGestureIndex = 0;
                 ArrayList<String> list = new ArrayList<String>();
-                list.addAll(mGesureLibrary.getGestureEntries());
+                list.addAll(mGesureStore.getGestureEntries());
                 Collections.sort(list);
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(GestureLibViewer.this,
                         android.R.layout.simple_spinner_item, list);
@@ -83,7 +84,7 @@ public class GestureLibViewer extends Activity {
             }
         }
     }
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,19 +95,19 @@ public class GestureLibViewer extends Activity {
         mGesturePad.setEnabled(false);
 
         // init the gesture library
-        mGesureLibrary = new GestureLibrary(GestureEntry.GESTURE_FILE_NAME);
-        mGesureLibrary.load();
+        mGesureStore = GestureLibraries.fromFile(GestureEntry.GESTURE_FILE_NAME);
+        mGesureStore.load();
 
         mGestureCategory = (Spinner) findViewById(R.id.spinner);
         ArrayList<String> list = new ArrayList<String>();
-        if (!mGesureLibrary.getGestureEntries().isEmpty()) {
-            list.addAll(mGesureLibrary.getGestureEntries());
+        if (!mGesureStore.getGestureEntries().isEmpty()) {
+            list.addAll(mGesureStore.getGestureEntries());
             Collections.sort(list);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                     android.R.layout.simple_spinner_item, list);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mGestureCategory.setAdapter(adapter);
-            mGestures = mGesureLibrary.getGestures(list.get(0));
+            mGestures = mGesureStore.getGestures(list.get(0));
             mCurrentGestureIndex = 0;
             Gesture gesture = mGestures.get(mCurrentGestureIndex);
             mGesturePad.setGesture(gesture);
@@ -114,7 +115,7 @@ public class GestureLibViewer extends Activity {
 
         mGestureCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mGestures = mGesureLibrary.getGestures((String) mGestureCategory.getSelectedItem());
+                mGestures = mGesureStore.getGestures((String) mGestureCategory.getSelectedItem());
                 if (!mGestures.isEmpty()) {
                     mCurrentGestureIndex = 0;
                     Gesture gesture = mGestures.get(mCurrentGestureIndex);
@@ -160,7 +161,7 @@ public class GestureLibViewer extends Activity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            mGesureLibrary.save();
+            mGesureStore.save();
             setResult(RESULT_OK);
             finish();
             return true;
@@ -172,12 +173,12 @@ public class GestureLibViewer extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        mGesureLibrary.save();
+        mGesureStore.save();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mGesureLibrary.save();
+        mGesureStore.save();
     }
 }

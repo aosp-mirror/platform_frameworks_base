@@ -72,7 +72,7 @@ class Instance {
     static Instance createInstance(int sequenceType, int orientationType, Gesture gesture, String label) {
         float[] pts;
         Instance instance;
-        if (sequenceType == GestureLibrary.SEQUENCE_SENSITIVE) {
+        if (sequenceType == GestureStore.SEQUENCE_SENSITIVE) {
             pts = temporalSampler(orientationType, gesture);
             instance = new Instance(gesture.getID(), pts, label);
             instance.normalize();
@@ -94,7 +94,7 @@ class Instance {
         float orientation = (float)Math.atan2(pts[1] - center[1], pts[0] - center[0]);
 
         float adjustment = -orientation;
-        if (orientationType == GestureLibrary.ORIENTATION_SENSITIVE) {
+        if (orientationType == GestureStore.ORIENTATION_SENSITIVE) {
             int count = ORIENTATIONS.length;
             for (int i = 0; i < count; i++) {
                 float delta = ORIENTATIONS[i] - orientation;
