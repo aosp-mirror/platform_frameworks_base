@@ -1570,7 +1570,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mInstallGesturesOverlay) {
             installGesturesOverlay();
             positionGesturesPopup();
-        } else if (mGesturesPopup != null) {
+        } else if (mGesturesPopup != null && mGesturesPopup.isShowing()) {
             mGesturesPopup.update(w, h);
         }
     }
