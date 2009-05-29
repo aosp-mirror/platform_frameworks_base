@@ -177,7 +177,7 @@
         <item name="android:uncertainGestureColor">#48ffff00</item>
         <item name="android:fadeOffset">420</item>
         <item name="android:fadeDuration">150</item>
-        <item name="android:gestureStrokeLengthThreshold">30.0</item>
+        <item name="android:gestureStrokeLengthThreshold">50.0</item>
         <item name="android:gestureStrokeSquarenessThreshold">0.275</item>
         <item name="android:gestureStrokeAngleThreshold">40.0</item>
         <item name="android:eventsInterceptionEnabled">true</item>
