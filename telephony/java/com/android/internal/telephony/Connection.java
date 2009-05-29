@@ -73,6 +73,31 @@ public abstract class Connection {
     public abstract String getAddress();
 
     /**
+     * Gets cdma CNAP name  associated with connection
+     * @return cnap name or null if unavailable
+     */
+    public String getCnapName() {
+        return null;
+    }
+
+    /**
+     * Get orignal dial string
+     * @return orignal dial string or null if unavailable
+     */
+    public String getOrigDialString(){
+        return null;
+    }
+
+    /**
+     * Gets cdma CNAP presentation associated with connection
+     * @return cnap name or null if unavailable
+     */
+
+    public int getCnapNamePresentation() {
+       return 0;
+    };
+
+    /**
      * @return Call that owns this Connection, or null if none
      */
     public abstract Call getCall();
@@ -204,8 +229,14 @@ public abstract class Connection {
         WILD,           /* The post dial string playback is waiting for a
                            call to proceedAfterWildChar() */
         COMPLETE,       /* The post dial string playback is complete */
-        CANCELLED       /* The post dial string playback was cancelled
+        CANCELLED,       /* The post dial string playback was cancelled
                            with cancelPostDial() */
+        PAUSE           /* The post dial string playback is pausing for a 
+                           call to processNextPostDialChar*/
+    }
+
+    public void clearUserData(){
+        userData = null;
     }
 
     public abstract PostDialState getPostDialState();

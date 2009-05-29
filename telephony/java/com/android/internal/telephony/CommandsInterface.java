@@ -241,24 +241,6 @@ public interface CommandsInterface {
     void unregisterForRUIMReady(Handler h);
 
     /**
-     * Registers for the status of an OTASP/OTAPA session
-     */
-    void registerForOtaSessionStatus(Handler h, int what, Object obj);
-    void unregisterForOtaSessionStatus(Handler h);
-
-    /**
-      * register for Call waiting for CDMA
-      */
-    void registerForCdmaCallWaiting(Handler h, int what, Object obj);
-    void unregisterForCdmaCallWaiting(Handler h);
-
-    /**
-     * Registers for CDMA information records
-     */
-    void registerCdmaInformationRecord(Handler h, int what, Object obj);
-    void unregisterCdmaInformationRecord(Handler h);
-
-    /**
      * unlike the register* methods, there's only one new SMS handler
      * if you need to unregister, you should also tell the radio to stop
      * sending SMS's to you (via AT+CNMI)
@@ -342,16 +324,6 @@ public interface CommandsInterface {
      */
     void setOnIccSmsFull(Handler h, int what, Object obj);
     void unSetOnIccSmsFull(Handler h);
-
-    /**
-     * Sets the handler for Emergency call-back Mode enter mesage.
-     * Unlike the register* methods, there's only one notification handler
-     *
-     * @param h Handler for notification message.
-     * @param what User-defined message code.
-     * @param obj User object.
-     */
-    void setEmergencyCallbackMode(Handler h, int what, Object obj);
 
     /**
      * Sets the handler for SIM Refresh notifications.
@@ -452,6 +424,49 @@ public interface CommandsInterface {
     void setSuppServiceNotifications(boolean enable, Message result);
     //void unSetSuppServiceNotifications(Handler h);
 
+    /**
+     * Sets the handler for Event Notifications for CDMA Display Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForDisplayInfo(Handler h, int what, Object obj);
+    void unregisterForDisplayInfo(Handler h);
+
+    /**
+     * Sets the handler for Event Notifications for CallWaiting Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForCallWaitingInfo(Handler h, int what, Object obj);
+    void unregisterForCallWaitingInfo(Handler h);
+
+    /**
+     * Sets the handler for Event Notifications for Signal Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForSignalInfo(Handler h, int what, Object obj);
+    void unregisterForSignalInfo(Handler h);
+
+    /**
+     * Fires on if Modem enters Emergency Callback mode
+     */
+    void setEmergencyCallbackMode(Handler h, int what, Object obj);
+
+     /**
+      * Fires on any CDMA OTA provision status change
+      */
+     void registerForCdmaOtaProvision(Handler h,int what, Object obj);
+     void unregisterForCdmaOtaProvision(Handler h);
 
     /**
      * Returns current ICC status.
@@ -1244,7 +1259,9 @@ public interface CommandsInterface {
     public void getCdmaBroadcastConfig(Message result);
 
     /**
-     * Requests the radio's system selection module to exit emergency callback mode.
+     *  Requests the radio's system selection module to exit emergency callback mode.
+     *  This function should only be called from CDMAPHone.java.
+     *
      * @param response callback message
      */
     public void exitEmergencyCallbackMode(Message response);
