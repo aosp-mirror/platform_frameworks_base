@@ -75,7 +75,7 @@ public class GestureOverlayView extends FrameLayout {
     private int mInvalidateExtraBorder = 10;
 
     private int mGestureStrokeType = GESTURE_STROKE_TYPE_SINGLE;
-    private float mGestureStrokeLengthThreshold = 30.0f;
+    private float mGestureStrokeLengthThreshold = 50.0f;
     private float mGestureStrokeSquarenessTreshold = 0.275f;
     private float mGestureStrokeAngleThreshold = 40.0f;
 
@@ -554,39 +554,39 @@ public class GestureOverlayView extends FrameLayout {
 
             mX = x;
             mY = y;
-        }
 
-        mStrokeBuffer.add(new GesturePoint(x, y, event.getEventTime()));
+            mStrokeBuffer.add(new GesturePoint(x, y, event.getEventTime()));
 
-        if (mHandleGestureActions && !mIsGesturing) {
-            mTotalLength += (float) Math.sqrt(dx * dx + dy * dy);
+            if (mHandleGestureActions && !mIsGesturing) {
+                mTotalLength += (float) Math.sqrt(dx * dx + dy * dy);
 
-            if (mTotalLength > mGestureStrokeLengthThreshold) {
-                final OrientedBoundingBox box =
-                        GestureUtilities.computeOrientedBoundingBox(mStrokeBuffer);
+                if (mTotalLength > mGestureStrokeLengthThreshold) {
+                    final OrientedBoundingBox box =
+                            GestureUtilities.computeOrientedBoundingBox(mStrokeBuffer);
 
-                float angle = Math.abs(box.orientation);
-                if (angle > 90) {
-                    angle = 180 - angle;
-                }
+                    float angle = Math.abs(box.orientation);
+                    if (angle > 90) {
+                        angle = 180 - angle;
+                    }
 
-                if (box.squareness > mGestureStrokeSquarenessTreshold ||
-                        (mOrientation == ORIENTATION_VERTICAL ?
-                                angle < mGestureStrokeAngleThreshold :
-                                angle > mGestureStrokeAngleThreshold)) {
+                    if (box.squareness > mGestureStrokeSquarenessTreshold ||
+                            (mOrientation == ORIENTATION_VERTICAL ?
+                                    angle < mGestureStrokeAngleThreshold :
+                                    angle > mGestureStrokeAngleThreshold)) {
 
-                    mIsGesturing = true;
-                    setCurrentColor(mCertainGestureColor);
+                        mIsGesturing = true;
+                        setCurrentColor(mCertainGestureColor);
+                    }
                 }
             }
-        }
 
-        // pass the event to handlers
-        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
-        final int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-            listeners.get(i).onGesture(this, event);
-        }        
+            // pass the event to handlers
+            final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
+            final int count = listeners.size();
+            for (int i = 0; i < count; i++) {
+                listeners.get(i).onGesture(this, event);
+            }
+        }
 
         return areaToRefresh;
     }
@@ -594,33 +594,43 @@ public class GestureOverlayView extends FrameLayout {
     private void touchUp(MotionEvent event, boolean cancel) {
         mIsListeningForGestures = false;
 
-        // add the stroke to the current gesture
-        mCurrentGesture.addStroke(new GestureStroke(mStrokeBuffer));
-        mStrokeBuffer.clear();
+        // A gesture wasn't started or was cancelled
+        if (mCurrentGesture != null) {
+            // add the stroke to the current gesture
+            mCurrentGesture.addStroke(new GestureStroke(mStrokeBuffer));
 
-        if (!cancel) {
-            // pass the event to handlers
-            final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
-            int count = listeners.size();
-            for (int i = 0; i < count; i++) {
-                listeners.get(i).onGestureEnded(this, event);
-            }
+            if (!cancel) {
+                // pass the event to handlers
+                final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
+                int count = listeners.size();
+                for (int i = 0; i < count; i++) {
+                    listeners.get(i).onGestureEnded(this, event);
+                }
 
-            if (mHandleGestureActions) {
-                clear(mFadeEnabled, mIsGesturing);
+                if (mHandleGestureActions) {
+                    clear(mFadeEnabled, mIsGesturing);
+                }
+            } else {
+                cancelGesture(event);
+
             }
         } else {
-            // pass the event to handlers
-            final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
-            final int count = listeners.size();
-            for (int i = 0; i < count; i++) {
-                listeners.get(i).onGestureCancelled(this, event);
-            }
-
-            clear(false);
+            cancelGesture(event);
         }
 
+        mStrokeBuffer.clear();        
         mIsGesturing = false;
+    }
+
+    private void cancelGesture(MotionEvent event) {
+        // pass the event to handlers
+        final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
+        final int count = listeners.size();
+        for (int i = 0; i < count; i++) {
+            listeners.get(i).onGestureCancelled(this, event);
+        }
+
+        clear(false);
     }
 
     private void fireOnGesturePerformed() {
