@@ -17,16 +17,17 @@
 package com.android.unit_tests.os;
 
 import android.os.MemoryFile;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import junit.framework.TestCase;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import junit.framework.TestCase;
 
 public class MemoryFileTest extends TestCase {
 
@@ -92,6 +93,74 @@ public class MemoryFileTest extends TestCase {
         compareBuffers(testString, buffer, testString.length);
 
         file.close();
+    }
+
+    // Tests that close() is idempotent
+    @SmallTest
+    public void testCloseClose() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        byte[] data = new byte[512];
+        file.writeBytes(data, 0, 0, 128);
+        file.close();
+        file.close();
+    }
+
+    // Tests that we can't read from a closed memory file
+    @SmallTest
+    public void testCloseRead() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        file.close();
+
+        try {
+            byte[] data = new byte[512];
+            assertEquals(128, file.readBytes(data, 0, 0, 128));
+            fail("readBytes() after close() did not throw IOException.");
+        } catch (IOException e) {
+            // this is what should happen
+        }
+    }
+
+    // Tests that we can't write to a closed memory file
+    @SmallTest
+    public void testCloseWrite() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        file.close();
+
+        try {
+            byte[] data = new byte[512];
+            file.writeBytes(data, 0, 0, 128);
+            fail("writeBytes() after close() did not throw IOException.");
+        } catch (IOException e) {
+            // this is what should happen
+        }
+    }
+
+    // Tests that we can't call allowPurging() after close()
+    @SmallTest
+    public void testCloseAllowPurging() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        byte[] data = new byte[512];
+        file.writeBytes(data, 0, 0, 128);
+        file.close();
+
+        try {
+            file.allowPurging(true);
+            fail("allowPurging() after close() did not throw IOException.");
+        } catch (IOException e) {
+            // this is what should happen
+        }
+    }
+
+    // Tests that we don't leak file descriptors or mmap areas
+    @LargeTest
+    public void testCloseLeak() throws Exception {
+        // open enough memory files that we should run out of
+        // file descriptors or address space if we leak either.
+        for (int i = 0; i < 1025; i++) {
+            MemoryFile file = new MemoryFile("MemoryFileTest", 5000000);
+            file.writeBytes(testString, 0, 0, testString.length);
+            file.close();
+        }
     }
 
     private static final byte[] testString = new byte[] {
