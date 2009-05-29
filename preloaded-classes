@@ -503,12 +503,11 @@ android.webkit.WebSyncManager
 android.webkit.WebSyncManager$SyncHandler
 android.webkit.WebView
 android.webkit.WebView$ExtendedZoomControls
-android.webkit.WebView$FocusNode
 android.webkit.WebView$PrivateHandler
 android.webkit.WebViewCore
+android.webkit.WebViewCore$CursorData
 android.webkit.WebViewCore$EventHub
 android.webkit.WebViewCore$EventHub$1
-android.webkit.WebViewCore$FocusData
 android.webkit.WebViewCore$WebCoreThread
 android.webkit.WebViewCore$WebCoreThread$1
 android.webkit.WebViewDatabase

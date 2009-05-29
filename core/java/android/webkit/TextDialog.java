@@ -121,12 +121,30 @@ import java.util.ArrayList;
             if (isPopupShowing()) {
                 return super.dispatchKeyEvent(event);
             }
+            if (!mWebView.nativeCursorMatchesFocus()) {
+                return down ? mWebView.onKeyDown(keyCode, event) : mWebView
+                        .onKeyUp(keyCode, event);
+            }
             // Center key should be passed to a potential onClick
             if (!down) {
                 mWebView.shortPressOnTextField();
             }
             // Pass to super to handle longpress.
             return super.dispatchKeyEvent(event);
+        }
+        boolean isArrowKey = false;
+        switch(keyCode) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (!mWebView.nativeCursorMatchesFocus()) {
+                    return down ? mWebView.onKeyDown(keyCode, event) : mWebView
+                            .onKeyUp(keyCode, event);
+
+                }
+                isArrowKey = true;
+                break;
         }
 
         // Ensure there is a layout so arrow keys are handled properly.
@@ -157,22 +175,11 @@ import java.util.ArrayList;
             // so do not pass down to javascript, and instead
             // return true.  If it is an arrow key or a delete key, we can go
             // ahead and pass it down.
-            boolean isArrowKey;
-            switch(keyCode) {
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                case KeyEvent.KEYCODE_DPAD_UP:
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                    isArrowKey = true;
-                    break;
-                case KeyEvent.KEYCODE_ENTER:
-                    // For multi-line text boxes, newlines will
-                    // trigger onTextChanged for key down (which will send both
-                    // key up and key down) but not key up.
-                    mGotEnterDown = true;
-                default:
-                    isArrowKey = false;
-                    break;
+            if (KeyEvent.KEYCODE_ENTER == keyCode) {
+                // For multi-line text boxes, newlines will
+                // trigger onTextChanged for key down (which will send both
+                // key up and key down) but not key up.
+                mGotEnterDown = true;
             }
             if (maxedOut && !isArrowKey && keyCode != KeyEvent.KEYCODE_DEL) {
                 if (oldEnd == oldStart) {
@@ -216,10 +223,7 @@ import java.util.ArrayList;
             return true;
         }
         // if it is a navigation key, pass it to WebView
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
-                || keyCode == KeyEvent.KEYCODE_DPAD_UP
-                || keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+        if (isArrowKey) {
             // WebView check the trackballtime in onKeyDown to avoid calling
             // native from both trackball and key handling. As this is called 
             // from TextDialog, we always want WebView to check with native. 
@@ -332,6 +336,11 @@ import java.util.ArrayList;
         }
         if (event.getAction() != MotionEvent.ACTION_MOVE) {
             return false;
+        }
+        // If the Cursor is not on the text input, webview should handle the
+        // trackball
+        if (!mWebView.nativeCursorMatchesFocus()) {
+            return mWebView.onTrackballEvent(event);
         }
         Spannable text = (Spannable) getText();
         MovementMethod move = getMovementMethod();
