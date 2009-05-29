@@ -1018,6 +1018,10 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(result);
     }
 
+    public void reportSmsMemoryStatus(boolean available, Message result) {
+        unimplemented(result);
+    }
+
     private boolean isSimLocked() {
         if (mSimLockedState != SimLockState.NONE) {
             return true;
@@ -1041,11 +1045,11 @@ public final class SimulatedCommands extends BaseCommands
     }
 
 
-    public void acknowledgeLastIncomingSMS(boolean success, Message result) {
+    public void acknowledgeLastIncomingGsmSms(boolean success, int cause, Message result) {
         unimplemented(result);
     }
 
-    public void acknowledgeLastIncomingCdmaSms(boolean success, Message result) {
+    public void acknowledgeLastIncomingCdmaSms(boolean success, int cause, Message result) {
         unimplemented(result);
     }
 
