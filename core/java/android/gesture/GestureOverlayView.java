@@ -45,8 +45,9 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeAngleThreshold
  * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeLengthThreshold
  * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeSquarenessThreshold
- * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeType 
+ * @attr ref android.R.styleable#GestureOverlayView_gestureStrokeType
  * @attr ref android.R.styleable#GestureOverlayView_gestureColor
+ * @attr ref android.R.styleable#GestureOverlayView_orientation
  * @attr ref android.R.styleable#GestureOverlayView_uncertainGestureColor
  */
 public class GestureOverlayView extends FrameLayout {
@@ -86,7 +87,7 @@ public class GestureOverlayView extends FrameLayout {
 
     private float mX;
     private float mY;
-    
+
     private float mCurveEndX;
     private float mCurveEndY;
 
@@ -516,12 +517,12 @@ public class GestureOverlayView extends FrameLayout {
         final int count = listeners.size();
         for (int i = 0; i < count; i++) {
             listeners.get(i).onGestureStarted(this, event);
-        }        
+        }
     }
 
     private Rect touchMove(MotionEvent event) {
         Rect areaToRefresh = null;
-        
+
         final float x = event.getX();
         final float y = event.getY();
 
@@ -530,7 +531,7 @@ public class GestureOverlayView extends FrameLayout {
 
         final float dx = Math.abs(x - previousX);
         final float dy = Math.abs(y - previousY);
-        
+
         if (dx >= GestureStroke.TOUCH_TOLERANCE || dy >= GestureStroke.TOUCH_TOLERANCE) {
             areaToRefresh = mInvalidRect;
 
@@ -538,16 +539,16 @@ public class GestureOverlayView extends FrameLayout {
             final int border = mInvalidateExtraBorder;
             areaToRefresh.set((int) mCurveEndX - border, (int) mCurveEndY - border,
                     (int) mCurveEndX + border, (int) mCurveEndY + border);
-            
+
             float cX = mCurveEndX = (x + previousX) / 2;
             float cY = mCurveEndY = (y + previousY) / 2;
 
             mPath.quadTo(previousX, previousY, cX, cY);
-            
+
             // union with the control point of the new curve
             areaToRefresh.union((int) previousX - border, (int) previousY - border,
                     (int) previousX + border, (int) previousY + border);
-            
+
             // union with the end point of the new curve
             areaToRefresh.union((int) cX - border, (int) cY - border,
                     (int) cX + border, (int) cY + border);
@@ -618,7 +619,7 @@ public class GestureOverlayView extends FrameLayout {
             cancelGesture(event);
         }
 
-        mStrokeBuffer.clear();        
+        mStrokeBuffer.clear();
         mIsGesturing = false;
     }
 
@@ -678,7 +679,7 @@ public class GestureOverlayView extends FrameLayout {
                 setPaintAlpha(255);
             }
 
-            invalidate();            
+            invalidate();
         }
     }
 
