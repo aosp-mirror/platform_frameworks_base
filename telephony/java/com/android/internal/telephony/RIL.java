@@ -1339,28 +1339,32 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     }
 
     public void
-    acknowledgeLastIncomingSMS(boolean success, Message result) {
+    acknowledgeLastIncomingGsmSms(boolean success, int cause, Message result) {
         RILRequest rr
                 = RILRequest.obtain(RIL_REQUEST_SMS_ACKNOWLEDGE, result);
 
-        rr.mp.writeInt(1);
+        rr.mp.writeInt(2);
         rr.mp.writeInt(success ? 1 : 0);
+        rr.mp.writeInt(cause);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
+                + " " + success + " " + cause);
 
         send(rr);
     }
 
     public void
-    acknowledgeLastIncomingCdmaSms(boolean success, Message result) {
+    acknowledgeLastIncomingCdmaSms(boolean success, int cause, Message result) {
         RILRequest rr
                 = RILRequest.obtain(RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE, result);
 
+        rr.mp.writeInt(2);
         rr.mp.writeInt(success ? 0 : 1); //RIL_CDMA_SMS_ErrorClass
         // cause code according to X.S004-550E
-        rr.mp.writeInt(39); //39 means other terminal problem; is not interpreted for success.
+        rr.mp.writeInt(cause);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
+                + " " + success + " " + cause);
 
         send(rr);
     }
@@ -1808,6 +1812,20 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
                 + " : " + address);
+
+        send(rr);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void reportSmsMemoryStatus(boolean available, Message result) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_REPORT_SMS_MEMORY_STATUS, result);
+        rr.mp.writeInt(1);
+        rr.mp.writeInt(available ? 1 : 0);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> "
+                + requestToString(rr.mRequest) + ": " + available);
 
         send(rr);
     }

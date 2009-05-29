@@ -2838,12 +2838,12 @@ public final class Settings {
          * out without asking for use permit, to limit the un-authorized SMS
          * usage.
          */
-        public static final String SMS_OUTGOING_CEHCK_INTERVAL_MS =
+        public static final String SMS_OUTGOING_CHECK_INTERVAL_MS =
                 "sms_outgoing_check_interval_ms";
 
         /**
          * The number of outgoing SMS sent without asking for user permit
-         * (of {@link #SMS_OUTGOING_CEHCK_INTERVAL_MS}
+         * (of {@link #SMS_OUTGOING_CHECK_INTERVAL_MS}
          */
         public static final String SMS_OUTGOING_CEHCK_MAX_COUNT =
                 "sms_outgoing_check_max_count";
