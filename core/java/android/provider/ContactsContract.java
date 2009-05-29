@@ -18,8 +18,6 @@ package android.provider;
 
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.provider.BaseColumns;
-import android.provider.Im.ProviderNames;
 
 /**
  * The contract between the contacts provider and applications. Contains definitions
@@ -63,13 +61,13 @@ public final class ContactsContract {
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
         public static final String PRIMARY_PHONE_ID = "primary_phone_id";
-        
+
         /**
          * Reference to the row in the data table holding the primary email address.
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
         public static final String PRIMARY_EMAIL_ID = "primary_email_id";
-        
+
         /**
          * Reference to the row in the data table holding the photo.
          * <P>Type: INTEGER REFERENCES data(_id)</P>
@@ -151,7 +149,7 @@ public final class ContactsContract {
          * The content:// style URL for filtering people by email address. The
          * filter argument should be passed as an additional path segment after
          * this URI.
-         * 
+         *
          * @hide
          */
         public static final Uri CONTENT_FILTER_EMAIL_URI = Uri.withAppendedPath(CONTENT_URI, "filter_email");
@@ -197,7 +195,8 @@ public final class ContactsContract {
         public static final String MIMETYPE = "mimetype";
 
         /**
-         * A reference to the {@link Contacts#_ID} that this data belongs to.
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID}
+         * that this data belongs to.
          */
         public static final String CONTACT_ID = "contact_id";
 
@@ -293,7 +292,8 @@ public final class ContactsContract {
             public static final String MIMETYPE = "mimetype";
 
             /**
-             * A reference to the {@link Contacts#_ID} that this data belongs to.
+             * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} that this
+             * data belongs to.
              */
             public static final String CONTACT_ID = "contact_id";
         }
@@ -446,7 +446,7 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String NUMBER = "data3";
-            
+
         }
 
         /**
@@ -493,9 +493,9 @@ public final class ContactsContract {
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
-            
+
             public static final String PROTOCOL = "data5";
-            
+
             /**
              * The predefined IM protocol types. The protocol can either be non-present, one
              * of these types, or a free-form string. These cases are encoded in the PROTOCOL
@@ -557,7 +557,7 @@ public final class ContactsContract {
              * <P>Type: INTEGER (if set, non-0 means true)</P>
              */
             public static final String ISPRIMARY = "data5";
-            
+
         }
 
         /**
@@ -593,18 +593,18 @@ public final class ContactsContract {
              */
             public static final String NOTE = "data1";
         }
-        
+
         public static final class CustomRingtone implements BaseCommonColumns {
             private CustomRingtone() {}
-            
+
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/custom_ringtone";
-            
+
             /**
              * Whether to send the number to voicemail.
              * <P>Type: INTEGER (if set, non-0 means true)</P>
              */
             public static final String SEND_TO_VOICEMAIL = "data1";
-            
+
             /**
              * The ringtone uri.
              * <P>Type: TEXT</P>

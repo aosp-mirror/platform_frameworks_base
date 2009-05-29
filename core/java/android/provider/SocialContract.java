@@ -68,8 +68,8 @@ public class SocialContract {
         public static final String IN_REPLY_TO = "in_reply_to";
 
         /**
-         * Reference to the {@link Contacts#_ID} that authored this social
-         * activity. This field is analogous to the <code>atom:author</code>
+         * Reference to the {@link android.provider.ContactsContract.Contacts#_ID} that authored
+         * this social activity. This field is analogous to the <code>atom:author</code>
          * element defined in RFC 4287.
          * <p>
          * Type: INTEGER
@@ -77,8 +77,8 @@ public class SocialContract {
         public static final String AUTHOR_CONTACT_ID = "author_contact_id";
 
         /**
-         * Optional reference to the {@link Contacts#_ID} this social activity
-         * is targeted towards. If more than one direct target, this field may
+         * Optional reference to the {@link android.provider.ContactsContract.Contacts#_ID} this
+         * social activity is targeted towards. If more than one direct target, this field may
          * be left undefined. This field is analogous to the
          * <code>activity:target</code> element defined in the Atom Activity
          * Extensions Internet-Draft.
@@ -155,8 +155,8 @@ public class SocialContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "activities");
 
         /**
-         * The content:// style URI for this table filtered to the set of
-         * social activities authored by a specific {@link Contact#_ID}.
+         * The content:// style URI for this table filtered to the set of social activities
+         * authored by a specific {@link android.provider.ContactsContract.Contacts#_ID}.
          */
         public static final Uri CONTENT_AUTHORED_BY_URI =
             Uri.withAppendedPath(CONTENT_URI, "authored_by");
