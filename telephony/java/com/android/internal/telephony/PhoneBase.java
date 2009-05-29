@@ -100,8 +100,8 @@ public abstract class PhoneBase implements Phone {
     protected static final int EVENT_RUIM_RECORDS_LOADED            = 21;
     protected static final int EVENT_NV_READY                       = 22;
     protected static final int EVENT_SET_ENHANCED_VP                = 23;
-    protected static final int EVENT_CDMA_CALL_WAITING              = 24;
-    protected static final int EVENT_EMERGENCY_CALLBACK_MODE        = 25;
+    protected static final int EVENT_EMERGENCY_CALLBACK_MODE_ENTER  = 24;
+    protected static final int EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE = 25;
 
     // Key used to read/write current CLIR setting
     public static final String CLIR_KEY = "clir_key";
@@ -292,36 +292,6 @@ public abstract class PhoneBase implements Phone {
     // Inherited documentation suffices.
     public void unregisterForInCallVoicePrivacyOff(Handler h){
         mCM.unregisterForInCallVoicePrivacyOff(h);
-    }
-
-    // Inherited documentation suffices.
-    public void registerForOtaStatusChange(Handler h, int what, Object obj){
-        mCM.registerForOtaSessionStatus(h,what,obj);
-    }
-
-    // Inherited documentation suffices.
-    public void unregisterForOtaStatusChange(Handler h){
-        mCM.unregisterForOtaSessionStatus(h);
-    }
-
-    // Inherited documentation suffices.
-    public void registerCdmaInformationRecord(Handler h, int what, Object obj){
-        mCM.registerCdmaInformationRecord(h,what,obj);
-    }
-
-    // Inherited documentation suffices.
-    public void unregisterCdmaInformationRecord(Handler h){
-        mCM.unregisterCdmaInformationRecord(h);
-    }
-
-    // Inherited documentation suffices.
-    public void registerForCdmaCallWaiting(Handler h, int what, Object obj){
-        mCM.registerForCdmaCallWaiting(h,what,obj);
-    }
-
-    // Inherited documentation suffices.
-    public void unregisterForCdmaCallWaiting(Handler h){
-        mCM.unregisterForCdmaCallWaiting(h);
     }
 
     /**
@@ -631,14 +601,6 @@ public abstract class PhoneBase implements Phone {
     }
 
     /**
-     *  Send the exit emergency callback mode message
-     */
-    public void exitEmergencyCallbackMode(Message onComplete) {
-        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
-    }
-
-    /**
      * This should only be called in GSM mode.
      * Only here for some backward compatibility
      * issues concerning the GSMPhone class.
@@ -684,6 +646,11 @@ public abstract class PhoneBase implements Phone {
 
     public abstract String getPhoneName();
 
+    /** @hide */
+    public int getCountVoiceMessages(){
+        return 0;
+    }
+
     /**
      * Returns the CDMA ERI icon index to display
      */
@@ -710,4 +677,71 @@ public abstract class PhoneBase implements Phone {
         return "GSM nw, no ERI";
     }
 
+    public String getCdmaMin() {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        return null;
+    }
+
+    public void sendBurstDtmf(String dtmfString, Message onComplete) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void exitEmergencyCallbackMode() {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void registerForCdmaOtaStatusChange(Handler h, int what, Object obj) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void unregisterForCdmaOtaStatusChange(Handler h) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public  boolean isOtaSpNumber(String dialStr) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        return false;
+    }
+
+    public void registerForCallWaiting(Handler h, int what, Object obj){
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void unregisterForCallWaiting(Handler h){
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void registerForSignalInfo(Handler h, int what, Object obj) {
+        mCM.registerForSignalInfo(h, what, obj);
+    }
+
+    public void unregisterForSignalInfo(Handler h) {
+        mCM.unregisterForSignalInfo(h);
+    }
+
+    public void registerForDisplayInfo(Handler h, int what, Object obj) {
+        mCM.registerForDisplayInfo(h, what, obj);
+    }
+
+     public void unregisterForDisplayInfo(Handler h) {
+         mCM.unregisterForDisplayInfo(h);
+     }
+
+     public void setOnEcbModeExitResponse(Handler h, int what, Object obj){
+         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+     }
+
+     public void unsetOnEcbModeExitResponse(Handler h){
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+     }
 }

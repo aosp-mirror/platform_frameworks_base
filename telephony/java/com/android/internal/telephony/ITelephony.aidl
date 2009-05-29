@@ -238,5 +238,10 @@ interface ITelephony {
      */
     String getCdmaEriText();
 
+    /**
+      * Returns the unread count of voicemails
+      */
+    int getCountVoiceMessages();
+
 }
 

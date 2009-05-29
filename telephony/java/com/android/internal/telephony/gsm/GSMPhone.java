@@ -878,11 +878,6 @@ public class GSMPhone extends PhoneBase {
         return ret;
     }
 
-    public String getMin() {
-        Log.e(LOG_TAG, "[GSMPhone] getMin() is a CDMA method");
-        return "0";
-    }
-
     public String getDeviceId() {
         return mImei;
     }

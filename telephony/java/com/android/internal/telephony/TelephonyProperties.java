@@ -98,4 +98,7 @@ public interface TelephonyProperties
      */
     static String PROPERTY_DATA_NETWORK_TYPE = "gsm.network.type";
 
+    /** Indicate if phone is in emergency callback mode */
+    static final String PROPERTY_INECM_MODE = "ril.cdma.inecmmode";
+
 }

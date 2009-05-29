@@ -1137,7 +1137,7 @@ public final class SimulatedCommands extends BaseCommands
             String number, Message result) {unimplemented(result);}
 
     public void setNetworkSelectionModeAutomatic(Message result) {unimplemented(result);}
-
+    public void exitEmergencyCallbackMode(Message result) {unimplemented(result);}
     public void setNetworkSelectionModeManual(
             String operatorNumeric, Message result) {unimplemented(result);}
 
@@ -1458,10 +1458,6 @@ public final class SimulatedCommands extends BaseCommands
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message result) {
         // TODO Auto-generated method stub
 
-    }
-
-    public void exitEmergencyCallbackMode(Message response) {
-        // TODO method stub
     }
 
     public void forceDataDormancy(Message response) {

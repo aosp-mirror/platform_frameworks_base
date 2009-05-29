@@ -48,7 +48,7 @@ public class CdmaConnection extends Connection {
     String postDialString;      // outgoing calls only
     boolean isIncoming;
     boolean disconnected;
-
+    String cnapName;
     int index;          // index in CdmaCallTracker.connections[], -1 if unassigned
 
     /*
@@ -74,6 +74,8 @@ public class CdmaConnection extends Connection {
     DisconnectCause cause = DisconnectCause.NOT_DISCONNECTED;
     PostDialState postDialState = PostDialState.NOT_STARTED;
     int numberPresentation = Connection.PRESENTATION_ALLOWED;
+    int cnapNamePresentation  = Connection.PRESENTATION_ALLOWED;
+
 
     Handler h;
 
@@ -86,10 +88,19 @@ public class CdmaConnection extends Connection {
     static final int EVENT_WAKE_LOCK_TIMEOUT = 4;
 
     //***** Constants
-    static final int PAUSE_DELAY_FIRST_MILLIS = 100;
-    static final int PAUSE_DELAY_MILLIS = 3 * 1000;
     static final int WAKE_LOCK_TIMEOUT_MILLIS = 60*1000;
-
+    static final int PAUSE_DELAY_MILLIS = 2 * 1000;
+    
+    // TODO(Moto): These should be come from a resourse file
+    // at a minimum as different carriers may want to use
+    // different characters and our general default is "," & ";".
+    // Furthermore Android supports contacts that have phone
+    // numbers entered as strings so '1-800-164flowers' would not
+    // be handled as expected. Both issues need to be resolved.
+    static final char CUSTOMERIZED_WAIT_CHAR_UPPER ='W';
+    static final char CUSTOMERIZED_WAIT_CHAR_LOWER ='w';
+    static final char CUSTOMERIZED_PAUSE_CHAR_UPPER ='P';
+    static final char CUSTOMERIZED_PAUSE_CHAR_LOWER ='p';
     //***** Inner Classes
 
     class MyHandler extends Handler {
@@ -126,6 +137,8 @@ public class CdmaConnection extends Connection {
 
         isIncoming = dc.isMT;
         createTime = System.currentTimeMillis();
+        cnapName = dc.name;
+        cnapNamePresentation = dc.namePresentation;
         numberPresentation = dc.numberPresentation;
 
         this.index = index;
@@ -133,6 +146,16 @@ public class CdmaConnection extends Connection {
         parent = parentFromDCState (dc.state);
         parent.attach(this, dc);
     }
+
+    CdmaConnection () {
+        owner = null;
+        h = null;
+        address = null;
+        index = -1;
+        parent = null;
+        isIncoming = true;
+        createTime = System.currentTimeMillis();
+     }
 
     /** This is an MO call, created when dialing */
     /*package*/
@@ -144,6 +167,9 @@ public class CdmaConnection extends Connection {
         h = new MyHandler(owner.getLooper());
 
         this.dialString = dialString;
+        Log.d(LOG_TAG, "[CDMAConn] CdmaConnection: dialString=" + dialString);
+        dialString = formatDialString(dialString);
+        Log.d(LOG_TAG, "[CDMAConn] CdmaConnection:formated dialString=" + dialString);
 
         this.address = PhoneNumberUtils.extractNetworkPortion(dialString);
         this.postDialString = PhoneNumberUtils.extractPostDialPortion(dialString);
@@ -151,10 +177,15 @@ public class CdmaConnection extends Connection {
         index = -1;
 
         isIncoming = false;
+        cnapName = null;
+        cnapNamePresentation = 0;
+        numberPresentation = 0;
         createTime = System.currentTimeMillis();
 
-        this.parent = parent;
-        parent.attachFake(this, CdmaCall.State.DIALING);
+        if (parent != null) {
+            this.parent = parent;
+            parent.attachFake(this, CdmaCall.State.DIALING);
+        }
     }
 
     public void dispose() {
@@ -186,8 +217,20 @@ public class CdmaConnection extends Connection {
         return (isIncoming ? "incoming" : "outgoing");
     }
 
+    public String getOrigDialString(){
+        return dialString;
+    }
+
     public String getAddress() {
         return address;
+    }
+
+    public String getCnapName() {
+        return cnapName;
+    }
+
+    public int getCnapNamePresentation() {
+        return cnapNamePresentation;
     }
 
     public CdmaCall getCall() {
@@ -320,6 +363,16 @@ public class CdmaConnection extends Connection {
         }
     }
 
+    /**
+     * Used for 3way call only
+     */
+    void update (CdmaConnection c) {
+        address = c.address;
+        cnapName = c.cnapName;
+        cnapNamePresentation = c.cnapNamePresentation;
+        numberPresentation = c.numberPresentation;
+    }
+
     public void cancelPostDial() {
         setPostDialState(PostDialState.CANCELLED);
     }
@@ -355,7 +408,7 @@ public class CdmaConnection extends Connection {
             case CallFailCause.CDMA_LOCKED_UNTIL_POWER_CYCLE:
                 return DisconnectCause.CDMA_LOCKED_UNTIL_POWER_CYCLE;
             case CallFailCause.CDMA_DROP:
-                return DisconnectCause.CDMA_DROP;
+                return DisconnectCause.LOST_SIGNAL; // TODO(Moto): wink/dave changed from CDMA_DROP;
             case CallFailCause.CDMA_INTERCEPT:
                 return DisconnectCause.CDMA_INTERCEPT;
             case CallFailCause.CDMA_REORDER:
@@ -433,6 +486,20 @@ public class CdmaConnection extends Connection {
             address = dc.number;
             changed = true;
         }
+
+        // A null cnapName should be the same as ""
+        if (null != dc.name) {
+            if (cnapName != dc.name) {
+                cnapName = dc.name;
+                changed = true;
+            }
+        } else {
+            cnapName = "";
+            // TODO(Moto): Should changed = true if cnapName wasn't previously ""
+        }
+        log("--dssds----"+cnapName);
+        cnapNamePresentation = dc.namePresentation;
+        numberPresentation = dc.numberPresentation;
 
         if (newParent != parent) {
             if (parent != null) {
@@ -533,25 +600,13 @@ public class CdmaConnection extends Connection {
         if (PhoneNumberUtils.is12Key(c)) {
             owner.cm.sendDtmf(c, h.obtainMessage(EVENT_DTMF_DONE));
         } else if (c == PhoneNumberUtils.PAUSE) {
-            // From TS 22.101:
+            setPostDialState(PostDialState.PAUSE);
 
-            // "The first occurrence of the "DTMF Control Digits Separator"
-            //  shall be used by the ME to distinguish between the addressing
-            //  digits (i.e. the phone number) and the DTMF digits...."
-
-            if (nextPostDialChar == 1) {
-                // The first occurrence.
-                // We don't need to pause here, but wait for just a bit anyway
-                h.sendMessageDelayed(h.obtainMessage(EVENT_PAUSE_DONE),
-                                            PAUSE_DELAY_FIRST_MILLIS);
-            } else {
-                // It continues...
-                // "Upon subsequent occurrences of the separator, the UE shall
-                //  pause again for 3 seconds (\u00B1 20 %) before sending any
-                //  further DTMF digits."
-                h.sendMessageDelayed(h.obtainMessage(EVENT_PAUSE_DONE),
+            // Upon occurrences of the separator, the UE shall
+            // pause again for 2 seconds before sending any
+            // further DTMF digits.
+            h.sendMessageDelayed(h.obtainMessage(EVENT_PAUSE_DONE),
                                             PAUSE_DELAY_MILLIS);
-            }
         } else if (c == PhoneNumberUtils.WAIT) {
             setPostDialState(PostDialState.WAIT);
         } else if (c == PhoneNumberUtils.WILD) {
@@ -563,17 +618,40 @@ public class CdmaConnection extends Connection {
         return true;
     }
 
-    public String
-    getRemainingPostDialString() {
+    public String getRemainingPostDialString() {
         if (postDialState == PostDialState.CANCELLED
-            || postDialState == PostDialState.COMPLETE
-            || postDialString == null
-            || postDialString.length() <= nextPostDialChar
-        ) {
+                || postDialState == PostDialState.COMPLETE
+                || postDialString == null
+                || postDialString.length() <= nextPostDialChar) {
             return "";
         }
 
-        return postDialString.substring(nextPostDialChar);
+        String subStr = postDialString.substring(nextPostDialChar);
+        if (subStr != null) {
+            int wIndex = subStr.indexOf(PhoneNumberUtils.WAIT);
+            int pIndex = subStr.indexOf(PhoneNumberUtils.PAUSE);
+
+            // TODO(Moto): Courtesy of jsh; is this simpler expression equivalent?
+            //
+            //    if (wIndex > 0 && (wIndex < pIndex || pIndex <= 0)) {
+            //        subStr = subStr.substring(0, wIndex);
+            //    } else if (pIndex > 0) {
+            //        subStr = subStr.substring(0, pIndex);
+            //    }
+            
+            if (wIndex > 0 && pIndex > 0) {
+                if (wIndex > pIndex) {
+                    subStr = subStr.substring(0, pIndex);
+                } else {
+                    subStr = subStr.substring(0, wIndex);
+                }
+            } else if (wIndex > 0) {
+                subStr = subStr.substring(0, wIndex);
+            } else if (pIndex > 0) {
+                subStr = subStr.substring(0, pIndex);
+            }
+        }
+        return subStr;
     }
 
     @Override
@@ -591,8 +669,7 @@ public class CdmaConnection extends Connection {
         releaseWakeLock();
     }
 
-    private void
-    processNextPostDialChar() {
+    void processNextPostDialChar() {
         char c = 0;
         Registrant postDialHandler;
 
@@ -698,26 +775,136 @@ public class CdmaConnection extends Connection {
         postDialState = s;
     }
 
-    private void
-    createWakeLock(Context context) {
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+    private void createWakeLock(Context context) {
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG);
     }
 
-    private void
-    acquireWakeLock() {
+    private void acquireWakeLock() {
         log("acquireWakeLock");
         mPartialWakeLock.acquire();
     }
 
-    private void
-    releaseWakeLock() {
-        synchronized(mPartialWakeLock) {
+    private void releaseWakeLock() {
+        synchronized (mPartialWakeLock) {
             if (mPartialWakeLock.isHeld()) {
                 log("releaseWakeLock");
                 mPartialWakeLock.release();
             }
         }
+    }
+
+    private static boolean isPause(char c) {
+        if (c == CUSTOMERIZED_PAUSE_CHAR_UPPER || c == CUSTOMERIZED_PAUSE_CHAR_LOWER
+                || c == PhoneNumberUtils.PAUSE) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean isWait(char c) {
+        if (c == CUSTOMERIZED_WAIT_CHAR_LOWER || c == CUSTOMERIZED_WAIT_CHAR_UPPER
+                || c == PhoneNumberUtils.WAIT) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * format string
+     * convert "+" to "011"
+     * handle corner cases for PAUSE/WAIT
+     * If PAUSE/WAIT sequence at the end,ignore them
+     * If PAUSE/WAIT sequence in the middle, then if there is any WAIT
+     * in PAUSE/WAIT sequence, treat them like WAIT
+     * If PAUSE followed by WAIT or WAIT followed by PAUSE in the middle,
+     * treat them like just  PAUSE or WAIT
+     */
+    private static String formatDialString(String phoneNumber) {
+        if (phoneNumber == null) {
+            return null;
+        }
+        int length = phoneNumber.length();
+        StringBuilder ret = new StringBuilder();
+
+        // TODO(Moto): Modifying the for loop index is confusing, a
+        // while loop is probably better and overall this code is
+        // hard to follow. If this was routine was refactored and
+        // used several private methods with good names to make it
+        // easier to follow.
+        for (int i = 0; i < length; i++) {
+            char c = phoneNumber.charAt(i);
+
+            if (PhoneNumberUtils.isDialable(c)) {
+                if (c == '+') {
+                    // TODO(Moto): Is this valid for "all" countries????
+                    // should probably be pulled from a resource based
+                    // on current contry code (MCC).
+                    ret.append("011");
+                } else {
+                    ret.append(c);
+                }
+            } else if (isPause(c) || isWait(c)) {
+                if (i < length - 1) { // if PAUSE/WAIT not at the end
+                    int index = 0;
+                    boolean wMatched = false;
+                    for (index = i + 1; index < length; index++) {
+                        char cNext = phoneNumber.charAt(index);
+                        // if there is any W inside P/W sequence,mark it
+                        if (isWait(cNext)) {
+                            wMatched = true;
+                        }
+                        // if any characters other than P/W chars after P/W sequence
+                        // we break out the loop and append the correct
+                        if (!isWait(cNext) && !isPause(cNext)) {
+                            break;
+                        }
+                    }
+                    if (index == length) {
+                        // it means there is no dialable character after PAUSE/WAIT
+                        i = length - 1;
+                        break;
+                    } else {// means index <length
+                        if (isPause(c)) {
+                            c = PhoneNumberUtils.PAUSE;
+                        } else if (isWait(c)) {
+                            c = PhoneNumberUtils.WAIT;
+                        }
+
+                        if (index == i + 1) {
+                            ret.append(c);
+                        } else if (isWait(c)) {
+                            // for case like 123WP456 =123P456
+                            if ((index == i + 2) && isPause(phoneNumber.charAt(index - 1))) {
+                                // skip W,append P
+                                ret.append(PhoneNumberUtils.PAUSE);
+                            } else {
+                                // append W
+                                ret.append(c);
+                            }
+                            i = index - 1;
+                        } else if (isPause(c)) {
+
+                            // for case like 123PW456 =123W456, skip p, append W
+                            // or there is 1 W in between, treat the whole PW
+                            // sequence as W
+                            if (wMatched == true) {
+                                // skip P,append W
+                                ret.append(PhoneNumberUtils.WAIT);
+                                i = index - 1;
+                            } else {
+                                ret.append(c);
+                            }
+                        } // end of pause case
+                    } // end of index <length, it means dialable characters after P/W
+                }
+            } else { // if it's characters other than P/W
+                ret.append(c);
+            }
+        }
+        return ret.toString();
     }
 
     private void log(String msg) {

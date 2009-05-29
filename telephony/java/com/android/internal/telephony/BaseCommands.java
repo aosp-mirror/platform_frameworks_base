@@ -54,10 +54,11 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mIccStatusChangedRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOnRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOffRegistrants = new RegistrantList();
-    protected RegistrantList mOtaSessionRegistrants = new RegistrantList();
-    protected RegistrantList mCallWaitingRegistrants = new RegistrantList();
-    protected RegistrantList mInformationRecordsRegistrants = new RegistrantList();
     protected Registrant mUnsolOemHookRawRegistrant;
+    protected RegistrantList mOtaProvisionRegistrants = new RegistrantList();
+    protected RegistrantList mCallWaitingInfoRegistrants = new RegistrantList();
+    protected RegistrantList mDisplayInfoRegistrants = new RegistrantList();
+    protected RegistrantList mSignalInfoRegistrants = new RegistrantList();
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
     protected Registrant mSignalStrengthRegistrant;
@@ -464,6 +465,29 @@ public abstract class BaseCommands implements CommandsInterface {
         mRestrictedStateRegistrant.clear();
     }
 
+    public void registerForDisplayInfo(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mDisplayInfoRegistrants.add(r);
+    }
+
+    public void unregisterForDisplayInfo(Handler h) {
+        mDisplayInfoRegistrants.remove(h);
+    }
+
+    public void registerForCallWaitingInfo(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mCallWaitingInfoRegistrants.add(r);
+    }
+
+    public void unregisterForCallWaitingInfo(Handler h) {
+        mCallWaitingInfoRegistrants.remove(h);
+    }
+
+    public void registerForSignalInfo(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mSignalInfoRegistrants.add(r);
+    }
+
     public void setOnUnsolOemHookRaw(Handler h, int what, Object obj) {
         mUnsolOemHookRawRegistrant = new Registrant (h, what, obj);
     }
@@ -472,32 +496,19 @@ public abstract class BaseCommands implements CommandsInterface {
         mUnsolOemHookRawRegistrant.clear();
     }
 
-    public void registerForOtaSessionStatus(Handler h, int what, Object obj){
+    public void unregisterForSignalInfo(Handler h) {
+        mSignalInfoRegistrants.remove(h);
+    }
+   
+    public void registerForCdmaOtaProvision(Handler h,int what, Object obj){
         Registrant r = new Registrant (h, what, obj);
-        mOtaSessionRegistrants.add(r);
+        mOtaProvisionRegistrants.add(r); 
     }
 
-    public void unregisterForOtaSessionStatus(Handler h){
-        mOtaSessionRegistrants.remove(h);
+    public void unregisterForCdmaOtaProvision(Handler h){
+        mOtaProvisionRegistrants.remove(h);
     }
 
-    public void registerForCdmaCallWaiting(Handler h, int what, Object obj){
-        Registrant r = new Registrant (h, what, obj);
-        mCallWaitingRegistrants.add(r);
-    }
-
-    public void unregisterForCdmaCallWaiting(Handler h){
-        mCallWaitingRegistrants.remove(h);
-    }
-
-    public void registerCdmaInformationRecord(Handler h, int what, Object obj) {
-        Registrant r = new Registrant (h, what, obj);
-        mInformationRecordsRegistrants.add(r);
-    }
-
-    public void unregisterCdmaInformationRecord(Handler h) {
-        mInformationRecordsRegistrants.remove(h);
-    }
 
     //***** Protected Methods
     /**
