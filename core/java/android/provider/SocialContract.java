@@ -16,17 +16,14 @@
 
 package android.provider;
 
-import android.provider.ContactsContract.Contacts;
-
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.provider.BaseColumns;
 
 /**
  * The contract between the social provider and applications. Contains
  * definitions for the supported URIs and columns.
- * <p>
- * TODO: move to android.provider package
+ *
+ * @hide
  */
 public class SocialContract {
     /** The authority for the social provider */

@@ -23,7 +23,7 @@ import android.net.Uri;
  * The contract between the contacts provider and applications. Contains definitions
  * for the supported URIs and columns.
  *
- * TODO: move to android.provider
+ * @hide
  */
 public final class ContactsContract {
     /** The authority for the contacts provider */
