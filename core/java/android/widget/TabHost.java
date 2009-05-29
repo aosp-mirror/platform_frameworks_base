@@ -87,8 +87,9 @@ public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchMode
 
 
     /**
-      * <p>Call setup() before adding tabs if loading TabHost using findViewById(). <i><b>However</i></b>: You do
-      * not need to call setup() after getTabHost() in {@link android.app.TabActivity TabActivity}.
+      * <p>Call setup() before adding tabs if loading TabHost using findViewById().
+      * <i><b>However</i></b>: You do not need to call setup() after getTabHost()
+      * in {@link android.app.TabActivity TabActivity}.
       * Example:</p>
 <pre>mTabHost = (TabHost)findViewById(R.id.tabhost);
 mTabHost.setup();
@@ -363,14 +364,14 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
          * 
          * @param tag
          *            Which tab was selected.
-         * @return The view to distplay the contents of the selected tab.
+         * @return The view to display the contents of the selected tab.
          */
         View createTabContent(String tag);
     }
 
 
     /**
-     * A tab has a tab indictor, content, and a tag that is used to keep
+     * A tab has a tab indicator, content, and a tag that is used to keep
      * track of it.  This builder helps choose among these options.
      *
      * For the tab indicator, your choices are:
@@ -607,7 +608,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             }
             mLaunchedView = wd;
             
-            // XXX Set FOCUS_AFTER_DESCENDANTS on embedded activies for now so they can get
+            // XXX Set FOCUS_AFTER_DESCENDANTS on embedded activities for now so they can get
             // focus if none of their children have it. They need focus to be able to
             // display menu items.
             //
