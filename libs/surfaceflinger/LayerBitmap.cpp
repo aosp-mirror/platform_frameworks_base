@@ -114,7 +114,9 @@ status_t LayerBitmap::setBits(uint32_t w, uint32_t h, uint32_t alignment,
     }
 
     if (mBitsMemory==0 || mSurface.data==0) {
-        LOGE("not enough memory for layer bitmap size=%u", size);
+        LOGE("not enough memory for layer bitmap "
+             "size=%u (w=%d, h=%d, stride=%d, format=%d)",
+             size, int(w), int(h), int(stride), int(format));
         allocator->dump("LayerBitmap");
         mSurface.data = 0;
         mSize = -1U;
