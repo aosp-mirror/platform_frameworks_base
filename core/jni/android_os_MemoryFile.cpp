@@ -39,17 +39,17 @@ static jobject android_os_MemoryFile_open(JNIEnv* env, jobject clazz, jstring na
 
     if (result < 0) {
         jniThrowException(env, "java/io/IOException", "ashmem_create_region failed");
-	return NULL;
+        return NULL;
     }
 
     return jniCreateFileDescriptor(env, result);
 }
 
 static jint android_os_MemoryFile_mmap(JNIEnv* env, jobject clazz, jobject fileDescriptor,
-        jint length)
+        jint length, jint prot)
 {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    jint result = (jint)mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    jint result = (jint)mmap(NULL, length, prot, MAP_SHARED, fd, 0);
     if (!result)
         jniThrowException(env, "java/io/IOException", "mmap failed");
     return result;
@@ -118,14 +118,36 @@ static void android_os_MemoryFile_pin(JNIEnv* env, jobject clazz, jobject fileDe
     }
 }
 
+static jboolean android_os_MemoryFile_is_ashmem_region(JNIEnv* env, jobject clazz,
+        jobject fileDescriptor) {
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+    // Use ASHMEM_GET_SIZE to find out if the fd refers to an ashmem region.
+    // ASHMEM_GET_SIZE should succeed for all ashmem regions, and the kernel
+    // should return ENOTTY for all other valid file descriptors
+    int result = ashmem_get_size_region(fd);
+    if (result < 0) {
+        if (errno == ENOTTY) {
+            // ENOTTY means that the ioctl does not apply to this object,
+            // i.e., it is not an ashmem region.
+            return JNI_FALSE;
+        }
+        // Some other error, throw exception
+        jniThrowIOException(env, errno);
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
 static const JNINativeMethod methods[] = {
     {"native_open",  "(Ljava/lang/String;I)Ljava/io/FileDescriptor;", (void*)android_os_MemoryFile_open},
-    {"native_mmap",  "(Ljava/io/FileDescriptor;I)I", (void*)android_os_MemoryFile_mmap},
+    {"native_mmap",  "(Ljava/io/FileDescriptor;II)I", (void*)android_os_MemoryFile_mmap},
     {"native_munmap", "(II)V", (void*)android_os_MemoryFile_munmap},
     {"native_close", "(Ljava/io/FileDescriptor;)V", (void*)android_os_MemoryFile_close},
     {"native_read",  "(Ljava/io/FileDescriptor;I[BIIIZ)I", (void*)android_os_MemoryFile_read},
     {"native_write", "(Ljava/io/FileDescriptor;I[BIIIZ)V", (void*)android_os_MemoryFile_write},
     {"native_pin",   "(Ljava/io/FileDescriptor;Z)V", (void*)android_os_MemoryFile_pin},
+    {"native_is_ashmem_region", "(Ljava/io/FileDescriptor;)Z",
+            (void*)android_os_MemoryFile_is_ashmem_region}
 };
 
 static const char* const kClassPathName = "android/os/MemoryFile";
