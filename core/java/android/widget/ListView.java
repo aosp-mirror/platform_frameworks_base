@@ -2851,9 +2851,15 @@ public class ListView extends AbsListView {
             final int first = mFirstPosition;
             final boolean areAllItemsSelectable = mAreAllItemsSelectable;
             final ListAdapter adapter = mAdapter;
-            final boolean isOpaque = isOpaque();
-            if (isOpaque && mDividerPaint == null) {
+            // If the list is opaque *and* the background is not, we want to
+            // fill a rect where the dividers would be for non-selectable items
+            // If the list is opaque and the background is also opaque, we don't
+            // need to draw anything since the background will do it for us
+            final boolean fillForMissingDividers = isOpaque() && !super.isOpaque();
+
+            if (fillForMissingDividers && mDividerPaint == null && mIsCacheColorOpaque) {
                 mDividerPaint = new Paint();
+                mDividerPaint.setColor(getCacheColorHint());
             }
             final Paint paint = mDividerPaint;
 
@@ -2874,7 +2880,7 @@ public class ListView extends AbsListView {
                                 bounds.top = bottom;
                                 bounds.bottom = bottom + dividerHeight;
                                 drawDivider(canvas, bounds, i);
-                            } else if (isOpaque) {
+                            } else if (fillForMissingDividers) {
                                 bounds.top = bottom;
                                 bounds.bottom = bottom + dividerHeight;
                                 canvas.drawRect(bounds, paint);
@@ -2903,7 +2909,7 @@ public class ListView extends AbsListView {
                                 // position. Give -1 when there is no child above the
                                 // divider.
                                 drawDivider(canvas, bounds, i - 1);
-                            } else if (isOpaque) {
+                            } else if (fillForMissingDividers) {
                                 bounds.top = top - dividerHeight;
                                 bounds.bottom = top;
                                 canvas.drawRect(bounds, paint);
