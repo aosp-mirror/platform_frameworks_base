@@ -52,6 +52,7 @@ import android.gesture.GestureOverlayView;
 import android.gesture.Gesture;
 import android.gesture.LetterRecognizer;
 import android.gesture.Prediction;
+import android.gesture.LetterRecognizers;
 
 import com.android.internal.R;
 
@@ -94,7 +95,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public static final int TRANSCRIPT_MODE_NORMAL = 1;
     /**
      * The list will automatically scroll to the bottom, no matter what items
-     * are currently visible. 
+     * are currently visible.
      *
      * @see #setTranscriptMode(int)
      */
@@ -156,7 +157,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Indicates the view is in the process of being flung
      */
     static final int TOUCH_MODE_FLING = 4;
-    
+
     /**
      * Indicates that the user is currently dragging the fast scroll thumb
      */
@@ -349,7 +350,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * bitmap cache after scrolling.
      */
     boolean mScrollingCacheEnabled;
-    
+
     /**
      * Whether or not to enable the fast scroll feature on this list
      */
@@ -422,7 +423,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The last CheckForTap runnable we posted, if any
      */
     private Runnable mPendingCheckForTap;
-    
+
     /**
      * The last CheckForKeyLongPress runnable we posted, if any
      */
@@ -576,7 +577,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         int color = a.getColor(R.styleable.AbsListView_cacheColorHint, 0);
         setCacheColorHint(color);
-        
+
         boolean enableFastScroll = a.getBoolean(R.styleable.AbsListView_fastScrollEnabled, false);
         setFastScrollEnabled(enableFastScroll);
 
@@ -605,7 +606,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         mDensityScale = getContext().getResources().getDisplayMetrics().density;
     }
-    
+
     /**
      * <p>Sets the type of gestures to use with this list. When gestures are enabled,
      * that is if the <code>gestures</code> parameter is not {@link #GESTURES_NONE},
@@ -663,7 +664,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #GESTURES_NONE
      * @see #GESTURES_JUMP
      * @see #GESTURES_FILTER
-     * @see #setGestures(int) 
+     * @see #setGestures(int)
      */
     @ViewDebug.ExportedProperty(mapping = {
         @ViewDebug.IntToString(from = GESTURES_NONE, to = "NONE"),
@@ -737,7 +738,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mGesturesOverlay.setGestureStrokeType(GestureOverlayView.GESTURE_STROKE_TYPE_MULTIPLE);
             mGesturesOverlay.addOnGesturePerformedListener(new GesturesProcessor());
 
-            mPreviousGesturing = false;            
+            mPreviousGesturing = false;
         }
     }
 
@@ -778,10 +779,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Enables fast scrolling by letting the user quickly scroll through lists by 
-     * dragging the fast scroll thumb. The adapter attached to the list may want 
+     * Enables fast scrolling by letting the user quickly scroll through lists by
+     * dragging the fast scroll thumb. The adapter attached to the list may want
      * to implement {@link SectionIndexer} if it wishes to display alphabet preview and
-     * jump between sections of the list. 
+     * jump between sections of the list.
      * @see SectionIndexer
      * @see #isFastScrollEnabled()
      * @param enabled whether or not to enable fast scrolling
@@ -799,7 +800,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
     }
-    
+
     /**
      * Returns the current state of the fast scroll feature.
      * @see #setFastScrollEnabled(boolean)
@@ -809,10 +810,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean isFastScrollEnabled() {
         return mFastScrollEnabled;
     }
-    
+
     /**
      * If fast scroll is visible, then don't draw the vertical scrollbar.
-     * @hide 
+     * @hide
      */
     @Override
     protected boolean isVerticalScrollBarHidden() {
@@ -830,11 +831,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * When smooth scrollbar is disabled, the position and size of the scrollbar thumb
      * is based solely on the number of items in the adapter and the position of the
      * visible items inside the adapter. This provides a stable scrollbar as the user
-     * navigates through a list of items with varying heights. 
+     * navigates through a list of items with varying heights.
      *
      * @param enabled Whether or not to enable smooth scrollbar.
      *
-     * @see #setSmoothScrollbarEnabled(boolean) 
+     * @see #setSmoothScrollbarEnabled(boolean)
      * @attr ref android.R.styleable#AbsListView_smoothScrollbar
      */
     public void setSmoothScrollbarEnabled(boolean enabled) {
@@ -1142,7 +1143,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Sets the initial value for the text filter.
      * @param filterText The text to use for the filter.
-     * 
+     *
      * @see #setTextFilterEnabled
      */
     public void setFilterText(String filterText) {
@@ -1168,7 +1169,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Returns the list's text filter, if available. 
+     * Returns the list's text filter, if available.
      * @return the list's text filter or null if filtering isn't enabled
      */
     public CharSequence getTextFilter() {
@@ -1177,7 +1178,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         return null;
     }
-    
+
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
@@ -1740,7 +1741,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             System.arraycopy(state, enabledPos + 1, state, enabledPos,
                     state.length - enabledPos - 1);
         }
-        
+
         return state;
     }
 
@@ -1851,16 +1852,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     private class WindowRunnnable {
         private int mOriginalAttachCount;
-        
+
         public void rememberWindowAttachCount() {
             mOriginalAttachCount = getWindowAttachCount();
         }
-        
+
         public boolean sameWindow() {
             return hasWindowFocus() && getWindowAttachCount() == mOriginalAttachCount;
         }
     }
-    
+
     private class PerformClick extends WindowRunnnable implements Runnable {
         View mChild;
         int mClickMotionPosition;
@@ -1887,7 +1888,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final long longPressId = mAdapter.getItemId(mMotionPosition);
 
                 boolean handled = false;
-                if (sameWindow() && !mDataChanged) { 
+                if (sameWindow() && !mDataChanged) {
                     handled = performLongPress(child, longPressPosition, longPressId);
                 }
                 if (handled) {
@@ -1901,7 +1902,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
     }
-    
+
     private class CheckForKeyLongPress extends WindowRunnnable implements Runnable {
         public void run() {
             if (isPressed() && mSelectedPosition >= 0) {
@@ -1930,7 +1931,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean handled = false;
 
         dismissGesturesPopup();
-        
+
         if (mOnItemLongClickListener != null) {
             handled = mOnItemLongClickListener.onItemLongClick(AbsListView.this, child,
                     longPressPosition, longPressId);
@@ -2079,7 +2080,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             mTouchMode = TOUCH_MODE_DONE_WAITING;
                         }
                     } else {
-                        mTouchMode = TOUCH_MODE_DONE_WAITING;                        
+                        mTouchMode = TOUCH_MODE_DONE_WAITING;
                     }
                 }
             }
@@ -2138,7 +2139,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             boolean intercepted = mFastScroller.onTouchEvent(ev);
             if (intercepted) {
                 return true;
-            }            
+            }
         }
 
         final int action = ev.getAction();
@@ -2326,10 +2327,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             setPressed(false);
-            
+
             // Need to redraw since we probably aren't drawing the selector anymore
             invalidate();
-            
+
             final Handler handler = getHandler();
             if (handler != null) {
                 handler.removeCallbacks(mPendingCheckForLongPress);
@@ -2373,7 +2374,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         return true;
     }
-    
+
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
@@ -2388,14 +2389,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int x = (int) ev.getX();
         int y = (int) ev.getY();
         View v;
-        
+
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onInterceptTouchEvent(ev);
             if (intercepted) {
                 return true;
             }
         }
-        
+
         switch (action) {
         case MotionEvent.ACTION_DOWN: {
             int motionPosition = findMotionRow(y);
@@ -3245,7 +3246,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         return null;
     }
-    
+
     /**
      * For filtering we proxy an input connection to an internal text editor,
      * and this allows the proxying to happen.
@@ -3254,7 +3255,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean checkInputConnectionProxy(View view) {
         return view == mTextFilter;
     }
-    
+
     /**
      * Creates the window for the text filter and populates it with an EditText field;
      *
@@ -3647,7 +3648,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mCurrentScrap = scrapViews[0];
             mScrapViews = scrapViews;
         }
-        
+
         public boolean shouldRecycleViewType(int viewType) {
             return viewType >= 0;
         }
@@ -3862,8 +3863,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         private final char[] mHolder;
 
         GesturesProcessor() {
-            mRecognizer = LetterRecognizer.getLetterRecognizer(getContext(),
-                    LetterRecognizer.RECOGNIZER_LATIN_LOWERCASE);
+            mRecognizer = LetterRecognizers.fromType(getContext(),
+                    LetterRecognizers.RECOGNIZER_LATIN_LOWERCASE);
             if (mRecognizer == null) {
                 setGestures(GESTURES_NONE);
             }
