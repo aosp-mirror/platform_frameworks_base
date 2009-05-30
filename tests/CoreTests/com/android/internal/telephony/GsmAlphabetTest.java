@@ -41,7 +41,7 @@ public class GsmAlphabetTest extends TestCase {
                 SmsHeader.toByteArray(header));
         int septetCount = GsmAlphabet.countGsmSeptets(message, false);
         String parsedMessage = GsmAlphabet.gsm7BitPackedToString(
-                userData, SmsHeader.toByteArray(header).length+1, septetCount, 1);
+                userData, SmsHeader.toByteArray(header).length+2, septetCount, 1);
         assertEquals(message, parsedMessage);
     }
 
