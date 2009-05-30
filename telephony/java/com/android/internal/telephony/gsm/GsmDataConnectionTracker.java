@@ -585,8 +585,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if ((state == State.IDLE || state == State.SCANNING)
                 && (gprsState == ServiceState.STATE_IN_SERVICE || noAutoAttach)
                 && ((GSMPhone) phone).mSIMRecords.getRecordsLoaded()
-                && ( ((GSMPhone) phone).mSST.isConcurrentVoiceAndData() ||
-                     phone.getState() == Phone.State.IDLE )
+                && phone.getState() == Phone.State.IDLE
                 && isDataAllowed()
                 && !mIsPsRestricted
                 && desiredPowerState ) {
@@ -1221,7 +1220,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (state == State.FAILED) {
             cleanUpConnection(false, null);
         }
-        sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
+        sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA, Phone.REASON_SIM_LOADED));
     }
 
     protected void onEnableNewApn() {
@@ -1230,8 +1229,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         cleanUpConnection(true, Phone.REASON_APN_SWITCHED);
     }
 
-    protected void onTrySetupData() {
-        trySetupData(null);
+    protected void onTrySetupData(String reason) {
+        trySetupData(reason);
     }
 
     protected void onRestoreDefaultApn() {
@@ -1363,7 +1362,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 } else {
                     // we still have more apns to try
                     setState(State.SCANNING);
-                    trySetupData(reason);
+                    // Wait a bit before trying the next APN, so that
+                    // we're not tying up the RIL command channel
+                    sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
+                            RECONNECT_DELAY_INITIAL_MILLIS);
                 }
             } else {
                 startDelayedRetry(cause, reason);
