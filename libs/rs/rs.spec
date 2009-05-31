@@ -1,10 +1,5 @@
 
 
-ContextBindSampler {
-	param uint32_t slot
-	param RsSampler sampler
-	}
-
 ContextBindRootScript {
 	param RsScript sampler
 	}
@@ -83,11 +78,22 @@ AllocationCreateSized {
 	ret RsAllocation
 	}
 
-AllocationCreateFromBitmap {
+AllocationCreateFromFile {
 	param const char *file
 	param bool genMips
 	ret RsAllocation
 	}
+
+AllocationCreateFromBitmap {
+	param uint32_t width
+	param uint32_t height
+	param RsElementPredefined dstFmt
+	param RsElementPredefined srcFmt
+	param bool genMips
+	param const void * data
+	ret RsAllocation
+	}
+
 
 AllocationUploadToTexture {
 	param RsAllocation alloc
@@ -201,6 +207,9 @@ SamplerCreate {
 	ret RsSampler
 	}
 
+SamplerDestroy {
+	param RsSampler s
+	}
 
 TriangleMeshBegin {
 	param RsElement vertex
@@ -277,7 +286,8 @@ ScriptCSetOrtho {
 	}
 
 ScriptCSetScript {
-	param void * ptr
+	param void * accScript
+	param void * codePtr
 	}
 
 ScriptCCreate {

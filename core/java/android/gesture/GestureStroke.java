@@ -17,7 +17,6 @@
 package android.gesture;
 
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
  * A gesture stroke started on a touch down and ended on a touch up.
  */
 public class GestureStroke {
-    static final float TOUCH_TOLERANCE = 3;
+    static final float TOUCH_TOLERANCE = 8;
 
     public final RectF boundingBox;
 
@@ -147,10 +146,12 @@ public class GestureStroke {
         final float[] pts = GestureUtilities.temporalSampling(this, numSample);
         final RectF rect = boundingBox;
 
-        final Matrix matrix = new Matrix();
-        matrix.setTranslate(-rect.left, -rect.top);
-        matrix.postScale(width / rect.width(), height / rect.height());
-        matrix.mapPoints(pts);
+        GestureUtilities.translate(pts, -rect.left, -rect.top);
+        
+        float sx = width / rect.width();
+        float sy = height / rect.height();
+        float scale = sx > sy ? sy : sx;
+        GestureUtilities.scale(pts, scale, scale);
 
         float mX = 0;
         float mY = 0;

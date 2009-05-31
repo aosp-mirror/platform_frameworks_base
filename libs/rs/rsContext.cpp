@@ -74,7 +74,7 @@ void Context::runRootScript()
     if(mRootScript->mIsOrtho) {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrthof(0, 320,  0, 480,  0, 1);
+        glOrthof(0, 320,  480, 0,  0, 1);
         glMatrixMode(GL_MODELVIEW);
     } else {
         glMatrixMode(GL_PROJECTION);

@@ -39,6 +39,10 @@ import com.android.internal.telephony.IccRecords;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.PhoneProxy;
 
+import com.android.internal.telephony.TelephonyIntents;
+import android.app.ActivityManagerNative;
+import android.content.Intent;
+
 
 /**
  * {@hide}
@@ -47,6 +51,7 @@ public final class RuimRecords extends IccRecords {
     static final String LOG_TAG = "CDMA";
 
     private static final boolean DBG = true;
+    private boolean  m_ota_commited=false;
 
     //***** Instance Variables
 
@@ -73,6 +78,7 @@ public final class RuimRecords extends IccRecords {
     private static final int EVENT_GET_SMS_DONE = 22;
 
     private static final int EVENT_RUIM_REFRESH = 31;
+    private static final int EVENT_OTA_PROVISION_STATUS_CHANGE = 32;
 
     RuimRecords(CDMAPhone p) {
         super(p);
@@ -93,6 +99,7 @@ public final class RuimRecords extends IccRecords {
 
         // Start off by setting empty state
         onRadioOffOrNotAvailable();
+        p.mCM.registerForCdmaOtaProvision(this,EVENT_OTA_PROVISION_STATUS_CHANGE, null);
 
     }
 
@@ -101,6 +108,8 @@ public final class RuimRecords extends IccRecords {
         phone.mCM.unregisterForRUIMReady(this);
         phone.mCM.unregisterForOffOrNotAvailable( this);
         phone.mCM.unSetOnIccRefresh(this);
+        phone.mCM.unregisterForNVReady(this);
+        phone.mCM.unregisterForCdmaOtaProvision(this);
     }
 
     @Override
@@ -134,7 +143,7 @@ public final class RuimRecords extends IccRecords {
         return mMyMobileNumber;
     }
 
-    public String getMin() {
+    public String getCdmaMin() {
          return mMin2Min1;
     }
 
@@ -219,11 +228,21 @@ public final class RuimRecords extends IccRecords {
                 if (ar.exception != null) {
                     break;
                 }
-
+                if(m_ota_commited) {
+                    if(mMyMobileNumber != localTemp[0]) {
+                        Intent intent = new Intent(TelephonyIntents.ACTION_CDMA_OTA_MDN_CHANGED);
+                        intent.putExtra("mdn", localTemp[0]);
+                        Log.d(LOG_TAG,"Broadcasting intent MDN Change in OTA ");
+                        ActivityManagerNative.broadcastStickyIntent(intent, null);
+                    }
+                    m_ota_commited=false;
+                }
                 mMyMobileNumber = localTemp[0];
                 mSid = localTemp[1];
                 mNid = localTemp[2];
-                mMin2Min1 = localTemp[3];
+                if (localTemp.length >= 3) { // TODO(Moto): remove when new ril always returns min2_min1
+                   mMin2Min1 = localTemp[3];
+                }
 
                 Log.d(LOG_TAG, "MDN: " + mMyMobileNumber + " MIN: " + mMin2Min1);
 
@@ -271,6 +290,19 @@ public final class RuimRecords extends IccRecords {
                     handleRuimRefresh((int[])(ar.result));
                 }
                 break;
+
+            case EVENT_OTA_PROVISION_STATUS_CHANGE:
+                m_ota_commited=false;
+                ar = (AsyncResult)msg.obj;
+                if (ar.exception == null) {
+                    int[] ints = (int[]) ar.result;
+                    int otaStatus = ints[0];
+                    if (otaStatus== phone.CDMA_OTA_PROVISION_STATUS_COMMITTED) {
+                        m_ota_commited=true;
+                        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
+                    }
+                 }
+                 break;
 
         }}catch (RuntimeException exc) {
             // I don't want these exceptions to be fatal
@@ -374,17 +406,17 @@ public final class RuimRecords extends IccRecords {
 
         switch ((result[0])) {
             case CommandsInterface.SIM_REFRESH_FILE_UPDATED:
- 		        if (DBG) log("handleRuimRefresh with SIM_REFRESH_FILE_UPDATED");
+                if (DBG) log("handleRuimRefresh with SIM_REFRESH_FILE_UPDATED");
                 adnCache.reset();
                 fetchRuimRecords();
                 break;
             case CommandsInterface.SIM_REFRESH_INIT:
-		        if (DBG) log("handleRuimRefresh with SIM_REFRESH_INIT");
+                if (DBG) log("handleRuimRefresh with SIM_REFRESH_INIT");
                 // need to reload all files (that we care about)
                 fetchRuimRecords();
                 break;
             case CommandsInterface.SIM_REFRESH_RESET:
-		        if (DBG) log("handleRuimRefresh with SIM_REFRESH_RESET");
+                if (DBG) log("handleRuimRefresh with SIM_REFRESH_RESET");
                 phone.mCM.setRadioPower(false, null);
                 /* Note: no need to call setRadioPower(true).  Assuming the desired
                 * radio power state is still ON (as tracked by ServiceStateTracker),
@@ -396,7 +428,7 @@ public final class RuimRecords extends IccRecords {
                 break;
             default:
                 // unknown refresh operation
-		        if (DBG) log("handleRuimRefresh with unknown operation");
+                if (DBG) log("handleRuimRefresh with unknown operation");
                 break;
         }
     }

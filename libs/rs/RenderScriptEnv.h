@@ -58,12 +58,9 @@ typedef struct {
 
     void (*color)(void *con, float r, float g, float b, float a);
 
-    void (*renderTriangleMesh)(void *con, RsTriangleMesh);
-    void (*renderTriangleMeshRange)(void *con, RsTriangleMesh, uint32_t start, uint32_t count);
-
     void (*programFragmentBindTexture)(void *con, RsProgramFragment, uint32_t slot, RsAllocation);
     void (*programFragmentBindSampler)(void *con, RsProgramFragment, uint32_t slot, RsAllocation);
-    
+
     void (*materialDiffuse)(void *con, float r, float g, float b, float a);
     void (*materialSpecular)(void *con, float r, float g, float b, float a);
     void (*lightPosition)(void *con, float x, float y, float z, float w);
@@ -76,11 +73,18 @@ typedef struct {
 
     uint32_t (*rand)(void *con, uint32_t max);
 
+    void (*contextBindProgramFragment)(void *con, RsProgramFragment pf);
+    void (*contextBindProgramFragmentStore)(void *con, RsProgramFragmentStore pfs);
+
+
+    // Drawing funcs
+    void (*renderTriangleMesh)(void *con, RsTriangleMesh);
+    void (*renderTriangleMeshRange)(void *con, RsTriangleMesh, uint32_t start, uint32_t count);
+
     // Assumes (GL_FIXED) x,y,z (GL_UNSIGNED_BYTE)r,g,b,a
     void (*drawTriangleArray)(void *con, RsAllocation alloc, uint32_t count);
 
-    void (*contextBindProgramFragment)(void *con, RsProgramFragment pf);
-    void (*contextBindProgramFragmentStore)(void *con, RsProgramFragmentStore pfs);
+    void (*drawRect)(void *con, int32_t x1, int32_t x2, int32_t y1, int32_t y2);
 } rsc_FunctionTable;
 
 typedef void (*rsc_RunScript)(void *con, const rsc_FunctionTable *, uint32_t launchID);

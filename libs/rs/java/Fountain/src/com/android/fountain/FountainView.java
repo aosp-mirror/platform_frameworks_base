@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.calc;
+package com.android.fountain;
 
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -46,6 +50,11 @@ public class FountainView extends RSSurfaceView {
     private RenderScript.Script mScript;
     private RenderScript.ProgramFragmentStore mPFS;
     private RenderScript.ProgramFragment mPF;
+    private RenderScript.ProgramFragment mPF2;
+    private RenderScript.Allocation mTexture;
+    private RenderScript.Sampler mSampler;
+
+    private Bitmap mBackground;
 
     int mParams[] = new int[10];
 
@@ -58,15 +67,39 @@ public class FountainView extends RSSurfaceView {
         mPartAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 3 * 3);
         mVertAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 5 + 1);
 
+        {
+            Resources res = getResources();
+            Drawable d = res.getDrawable(R.drawable.gadgets_clock_mp3);
+            BitmapDrawable bd = (BitmapDrawable)d;
+            Bitmap b = bd.getBitmap();
+            mTexture = mRS.allocationCreateFromBitmap(b,
+                                                      RenderScript.ElementPredefined.RGB_565,
+                                                      true);
+            mTexture.uploadToTexture(0);
+        }
+
         mRS.programFragmentStoreBegin(null, null);
         mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA, RenderScript.BlendDstFunc.ONE);
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
         mPFS = mRS.programFragmentStoreCreate();
         mRS.contextBindProgramFragmentStore(mPFS);
 
+        mRS.samplerBegin();
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG, RenderScript.SamplerValue.LINEAR);
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN, RenderScript.SamplerValue.LINEAR);
+        mSampler = mRS.samplerCreate();
+
+
         mRS.programFragmentBegin(null, null);
         mPF = mRS.programFragmentCreate();
-        mRS.contextBindProgramFragment(mPF);
+        //mRS.contextBindProgramFragment(mPF);
+
+        mRS.programFragmentBegin(null, null);
+        mRS.programFragmentSetTexEnable(0, true);
+        mPF2 = mRS.programFragmentCreate();
+        mRS.contextBindProgramFragment(mPF2);
+        mPF2.bindTexture(mTexture, 0);
+        mPF2.bindSampler(mSampler, 0);
 
         mParams[0] = 0;
         mParams[1] = partCount;
@@ -74,6 +107,8 @@ public class FountainView extends RSSurfaceView {
         mParams[3] = 0;
         mParams[4] = 0;
         mParams[5] = mPartAlloc.mID;
+        mParams[6] = mPF.mID;
+        mParams[7] = mPF2.mID;
         mIntAlloc.data(mParams);
 
         int t2[] = new int[partCount * 4*3];
@@ -84,7 +119,7 @@ public class FountainView extends RSSurfaceView {
 
         mRS.scriptCBegin();
         mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        mRS.scriptCSetScript("");
+        mRS.scriptCSetScript(getResources(), R.raw.fountain);
         mRS.scriptCSetRoot(true);
         mScript = mRS.scriptCCreate();
 

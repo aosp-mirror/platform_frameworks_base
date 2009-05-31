@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.calc;
+package com.android.fountain;
+
+import java.io.InputStream;
+import java.io.IOException;
 
 import android.os.Bundle;
+import android.content.res.Resources;
 import android.util.Log;
 import android.util.Config;
 import android.view.Menu;
@@ -24,6 +28,8 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.View;
 import android.view.Surface;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 
 public class RenderScript {
     private static final String LOG_TAG = "libRS_jni";
@@ -32,7 +38,7 @@ public class RenderScript {
 
 
 
-       /*
+     /*
      * We use a class initializer to allow the native code to cache some
      * field offsets.
      */
@@ -43,9 +49,7 @@ public class RenderScript {
         sInitialized = false;
         try {
             System.loadLibrary("RS_jni");
-            Log.e(LOG_TAG, "*** Renderscript INIT");
             _nInit();
-            Log.e(LOG_TAG, "*** Renderscript INIT 3");
             sInitialized = true;
         } catch (UnsatisfiedLinkError e) {
             Log.d(LOG_TAG, "RenderScript JNI library not found!");
@@ -79,6 +83,8 @@ public class RenderScript {
     native private int  nAllocationCreateTyped(int type);
     native private int  nAllocationCreatePredefSized(int predef, int count);
     native private int  nAllocationCreateSized(int elem, int count);
+    native private int  nAllocationCreateFromBitmap(int w, int h, int dstFmt, int srcFmt, boolean genMips, int[] data);
+
     //native private int  nAllocationCreateFromBitmap(type.mID);
     native private void nAllocationUploadToTexture(int alloc, int baseMioLevel);
     native private void nAllocationDestroy(int alloc);
@@ -115,9 +121,13 @@ public class RenderScript {
     native private void nScriptCSetClearStencil(int stencil);
     native private void nScriptCAddType(int type);
     native private void nScriptCSetRoot(boolean isRoot);
-    native private void nScriptCSetScript(String s);
+    native private void nScriptCSetScript(byte[] script, int offset, int length);
     native private int  nScriptCCreate();
 
+    native private void nSamplerDestroy(int sampler);
+    native private void nSamplerBegin();
+    native private void nSamplerSet(int param, int value);
+    native private int  nSamplerCreate();
 
     native private void nProgramFragmentStoreBegin(int in, int out);
     native private void nProgramFragmentStoreDepthFunc(int func);
@@ -143,7 +153,7 @@ public class RenderScript {
 
 
     ///////////////////////////////////////////////////////////////////////////////////
-    // 
+    //
 
     RenderScript(Surface sur) {
         mSurface = sur;
@@ -160,14 +170,14 @@ public class RenderScript {
         protected void finalize() throws Throwable
         {
             if (mID != 0) {
-                Log.v(LOG_TAG, 
+                Log.v(LOG_TAG,
                       "Element finalized without having released the RS reference.");
             }
             super.finalize();
         }
     }
 
-    
+
     //////////////////////////////////////////////////////////////////////////////////
     // Element
 
@@ -180,20 +190,21 @@ public class RenderScript {
         USER_I32 (5),
         USER_FLOAT (6),
 
-        RGB_565 (7),
-        RGBA_5551 (8),
-        RGBA_4444 (9),
-        RGB_888 (10),
-        RGBA_8888 (11),
+        A_8 (7),
+        RGB_565 (8),
+        RGBA_5551 (9),
+        RGBA_4444 (10),
+        RGB_888 (11),
+        RGBA_8888 (12),
 
-        INDEX_16 (12),
-        INDEX_32 (13),
-        XY_F32 (14),
-        XYZ_F32 (15),
-        ST_XY_F32 (16),
-        ST_XYZ_F32 (17),
-        NORM_XYZ_F32 (18),
-        NORM_ST_XYZ_F32 (19);
+        INDEX_16 (13),
+        INDEX_32 (14),
+        XY_F32 (15),
+        XYZ_F32 (16),
+        ST_XY_F32 (17),
+        ST_XYZ_F32 (18),
+        NORM_XYZ_F32 (19),
+        NORM_ST_XYZ_F32 (20);
 
         int mID;
         ElementPredefined(int id) {
@@ -297,6 +308,34 @@ public class RenderScript {
             mID = id;
         }
     }
+
+    public enum SamplerParam {
+        FILTER_MIN (0),
+        FILTER_MAG (1),
+        WRAP_MODE_S (2),
+        WRAP_MODE_T (3),
+        WRAP_MODE_R (4);
+
+        int mID;
+        SamplerParam(int id) {
+            mID = id;
+        }
+    }
+
+    public enum SamplerValue {
+        NEAREST (0),
+        LINEAR (1),
+        LINEAR_MIP_LINEAR (2),
+        WRAP (3),
+        CLAMP (4);
+
+        int mID;
+        SamplerValue(int id) {
+            mID = id;
+        }
+    }
+
+
 
     public class Element extends BaseObj {
         Element(int id) {
@@ -435,10 +474,44 @@ public class RenderScript {
         return new Allocation(id);
     }
 
-    //public Allocation allocationCreateFromBitmap(string file, boolean genMips) {
-        //int id = nAllocationCreateTyped(type.mID);
-        //return new Allocation(id);
-    //}
+    public Allocation allocationCreateFromBitmap(Bitmap b, ElementPredefined dstFmt, boolean genMips) {
+        int w = b.getWidth();
+        int h = b.getHeight();
+        int[] data = new int[w * h];
+
+        int outPtr = 0;
+        for(int y=0; y < h; y++) {
+            for(int x=0; x < w; x++) {
+                data[outPtr] = b.getPixel(x, y);
+                outPtr++;
+            }
+        }
+
+        int srcFmt = 0;
+        /*
+        switch(b.getConfig()) {
+        case ALPHA_8:
+            srcFmt = ElementPredefined.A_8.mID;
+            break;
+        case ARGB_4444:
+            srcFmt = ElementPredefined.RGBA_4444.mID;
+            break;
+        case ARGB_8888:
+            srcFmt = ElementPredefined.RGBA_8888.mID;
+            break;
+        case RGB_565:
+            srcFmt = ElementPredefined.RGB_565.mID;
+            break;
+        default:
+            Log.e(LOG_TAG, "allocationCreateFromBitmap, unknown bitmap format");
+        }
+        */
+
+        srcFmt = ElementPredefined.RGBA_8888.mID;
+
+        int id = nAllocationCreateFromBitmap(w, h, dstFmt.mID, srcFmt, genMips, data);
+        return new Allocation(id);
+    }
 
     //////////////////////////////////////////////////////////////////////////////////
     // Adapter1D
@@ -570,7 +643,45 @@ public class RenderScript {
     }
 
     public void scriptCSetScript(String s) {
-        nScriptCSetScript(s);
+        try {
+            byte[] bytes = s.getBytes("UTF-8");
+            nScriptCSetScript(bytes, 0, bytes.length);
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void scriptCSetScript(Resources resources, int id) {
+        InputStream is = resources.openRawResource(id);
+        try {
+            try {
+                scriptCSetScript(is);
+            } finally {
+                is.close();
+            }
+        } catch(IOException e) {
+            throw new Resources.NotFoundException();
+        }
+    }
+
+    public void  scriptCSetScript(InputStream is) throws IOException {
+        byte[] buf = new byte[1024];
+        int currentPos = 0;
+        while(true) {
+            int bytesLeft = buf.length - currentPos;
+            if (bytesLeft == 0) {
+                byte[] buf2 = new byte[buf.length * 2];
+                System.arraycopy(buf, 0, buf2, 0, buf.length);
+                buf = buf2;
+                bytesLeft = buf.length - currentPos;
+            }
+            int bytesRead = is.read(buf, currentPos, bytesLeft);
+            if (bytesRead <= 0) {
+                break;
+            }
+            currentPos += bytesRead;
+        }
+        nScriptCSetScript(buf, 0, currentPos);
     }
 
     public Script scriptCCreate() {
@@ -646,9 +757,9 @@ public class RenderScript {
             nProgramFragmentBindTexture(mID, slot, va.mID);
         }
 
-        //public void bindSampler(Sampler vs, int slot) {
-            //nProgramFragmentBindSampler(mID, slot, vs.mID);
-        //}
+        public void bindSampler(Sampler vs, int slot) {
+            nProgramFragmentBindSampler(mID, slot, vs.mID);
+        }
     }
 
     public void programFragmentBegin(Element in, Element out) {
@@ -678,6 +789,33 @@ public class RenderScript {
     public ProgramFragment programFragmentCreate() {
         int id = nProgramFragmentCreate();
         return new ProgramFragment(id);
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Sampler
+
+    public class Sampler extends BaseObj {
+        Sampler(int id) {
+            mID = id;
+        }
+
+        public void destroy() {
+            nSamplerDestroy(mID);
+            mID = 0;
+        }
+    }
+
+    public void samplerBegin() {
+        nSamplerBegin();
+    }
+
+    public void samplerSet(SamplerParam p, SamplerValue v) {
+        nSamplerSet(p.mID, v.mID);
+    }
+
+    public Sampler samplerCreate() {
+        int id = nSamplerCreate();
+        return new Sampler(id);
     }
 
 

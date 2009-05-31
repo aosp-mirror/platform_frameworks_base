@@ -86,6 +86,7 @@ enum RsElementPredefined {
     RS_ELEMENT_USER_I32,
     RS_ELEMENT_USER_FLOAT, 
 
+    RS_ELEMENT_A_8, 
     RS_ELEMENT_RGB_565, 
     RS_ELEMENT_RGBA_5551, 
     RS_ELEMENT_RGBA_4444, 

@@ -18,17 +18,23 @@
 #include "rsScriptC.h"
 #include "rsMatrix.h"
 
+#include "acc/acc.h"
+
 using namespace android;
 using namespace android::renderscript;
 
 
 ScriptC::ScriptC()
 {
+    mAccScript = NULL;
     mScript = NULL;
 }
 
 ScriptC::~ScriptC()
 {
+    if (mAccScript) {
+        accDeleteScript(mAccScript);
+    }
 }
 
 extern "C" void matrixLoadIdentity(void *con, rsc_Matrix *mat)
@@ -261,6 +267,35 @@ extern "C" void drawTriangleArray(void *vp, RsAllocation alloc, uint32_t count)
     glDrawArrays(GL_TRIANGLES, 0, count * 3);
 }
 
+extern "C" void drawRect(void *vp, int32_t x1, int32_t x2, int32_t y1, int32_t y2)
+{
+    x1 = (x1 << 16);
+    x2 = (x2 << 16);
+    y1 = (y1 << 16);
+    y2 = (y2 << 16);
+
+    int32_t vtx[] = {x1,y1, x1,y2, x2,y1, x2,y2};
+    static const int32_t tex[] = {0,0, 0,0x10000, 0x10000,0, 0x10000,0x10000};
+
+
+    ScriptC::Env * env = static_cast<ScriptC::Env *>(vp);
+    env->mContext->setupCheck();
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    glVertexPointer(2, GL_FIXED, 8, vtx);
+    glTexCoordPointer(2, GL_FIXED, 8, tex);
+    //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
 extern "C" void pfBindTexture(void *vp, RsProgramFragment vpf, uint32_t slot, RsAllocation va)
 {
     //LOGE("pfBindTexture %p", vpf);
@@ -326,8 +361,6 @@ static rsc_FunctionTable scriptCPtrTable = {
     matrixTranslate,
 
     color,
-    renderTriangleMesh,
-    renderTriangleMeshRange,
 
     pfBindTexture,
     pfBindSampler,
@@ -341,9 +374,16 @@ static rsc_FunctionTable scriptCPtrTable = {
     disable,
 
     scriptRand,
-    drawTriangleArray,
     contextBindProgramFragment,
-    contextBindProgramFragmentStore
+    contextBindProgramFragmentStore,
+
+
+    renderTriangleMesh,
+    renderTriangleMeshRange,
+
+    drawTriangleArray,
+    drawRect
+
 };
 
 
@@ -360,6 +400,9 @@ ScriptCState::ScriptCState()
 
 ScriptCState::~ScriptCState()
 {
+    if (mAccScript) {
+        accDeleteScript(mAccScript);
+    }
 }
 
 void ScriptCState::clear()
@@ -371,6 +414,7 @@ void ScriptCState::clear()
     mClearColor[3] = 1;
     mClearDepth = 1;
     mClearStencil = 0;
+    mAccScript = NULL;
     mScript = NULL;
     mIsRoot = false;
     mIsOrtho = true;
@@ -412,9 +456,10 @@ void rsi_ScriptCAddType(Context * rsc, RsType vt)
     ss->mConstantBufferTypes.add(static_cast<const Type *>(vt));
 }
 
-void rsi_ScriptCSetScript(Context * rsc, void *vp)
+void rsi_ScriptCSetScript(Context * rsc, void* accScript, void *vp)
 {
     ScriptCState *ss = &rsc->mScriptC;
+    ss->mAccScript = reinterpret_cast<ACCscript*>(accScript);
     ss->mScript = reinterpret_cast<rsc_RunScript>(vp);
 }
 
@@ -435,6 +480,8 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     ScriptCState *ss = &rsc->mScriptC;
 
     ScriptC *s = new ScriptC();
+    s->mAccScript = ss->mAccScript;
+    ss->mAccScript = NULL;
     s->mScript = ss->mScript;
     s->mClearColor[0] = ss->mClearColor[0];
     s->mClearColor[1] = ss->mClearColor[1];

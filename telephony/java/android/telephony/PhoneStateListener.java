@@ -42,6 +42,9 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to the network signal strength (cellular).
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * <p>
      *
      * @see #onSignalStrengthChanged
@@ -52,6 +55,9 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to the message-waiting indicator.
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * <p>
      * Example: The status bar uses this to determine when to display the
      * voicemail icon.
@@ -62,7 +68,9 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to the call-forwarding indicator.
-     *
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * @see #onCallForwardingIndicatorChanged
      */
     public static final int LISTEN_CALL_FORWARDING_INDICATOR                = 0x00000008;
@@ -85,7 +93,9 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to the device call state.
-     *
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * @see #onCallStateChanged
      */
     public static final int LISTEN_CALL_STATE                               = 0x00000020;
@@ -100,7 +110,9 @@ public class PhoneStateListener {
     /**
      * Listen for changes to the direction of data traffic on the data
      * connection (cellular).
-     *
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * Example: The status bar uses this to display the appropriate
      * data-traffic icon.
      *

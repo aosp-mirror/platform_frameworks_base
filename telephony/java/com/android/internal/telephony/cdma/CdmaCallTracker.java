@@ -24,6 +24,7 @@ import android.os.RegistrantList;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
 import android.util.Log;
+import android.os.SystemProperties;
 
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CallTracker;
@@ -31,10 +32,11 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DriverCall;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneProxy;
+import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * {@hide}
@@ -69,11 +71,12 @@ public final class CdmaCallTracker extends CallTracker {
 
     CdmaConnection pendingMO;
     boolean hangupPendingMO;
-
+    boolean pendingCallInECM=false;
     CDMAPhone phone;
 
     boolean desiredMute = false;    // false = mute off
 
+    int pendingCallClirMode;
     Phone.State state = Phone.State.IDLE;
 
 
@@ -115,6 +118,7 @@ public final class CdmaCallTracker extends CallTracker {
 
     }
 
+    @Override
     protected void finalize() {
         Log.d(LOG_TAG, "CdmaCallTracker finalized");
     }
@@ -204,7 +208,15 @@ public final class CdmaCallTracker extends CallTracker {
             // Always unmute when initiating a new call
             setMute(false);
 
-            cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
+            String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+            if(inEcm.equals("false")) {
+                cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
+            } else {
+                phone.exitEmergencyCallbackMode();
+                phone.setOnEcbModeExitResponse(this,EVENT_EXIT_ECM_RESPONSE_CDMA, null);
+                pendingCallClirMode=clirMode;
+                pendingCallInECM=true;
+            }
         }
 
         updatePhoneState();
@@ -536,6 +548,9 @@ public final class CdmaCallTracker extends CallTracker {
             droppedDuringPoll.add(pendingMO);
             pendingMO = null;
             hangupPendingMO = false;
+            if( pendingCallInECM) {
+                pendingCallInECM = false;
+            }
         }
 
         if (newRinging != null) {
@@ -847,8 +862,17 @@ public final class CdmaCallTracker extends CallTracker {
                 handleRadioNotAvailable();
             break;
 
+            case EVENT_EXIT_ECM_RESPONSE_CDMA:
+               //no matter the result, we still do the same here
+               if (pendingCallInECM) {
+                   cm.dial(pendingMO.address, pendingCallClirMode, obtainCompleteMessage());
+                   pendingCallInECM = false;
+               }
+               phone.unsetOnEcbModeExitResponse(this);
+            break;
+
             default:{
-             throw new RuntimeException("unexpected event not handled");
+               throw new RuntimeException("unexpected event not handled");
             }
         }
     }

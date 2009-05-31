@@ -1018,6 +1018,10 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(result);
     }
 
+    public void reportSmsMemoryStatus(boolean available, Message result) {
+        unimplemented(result);
+    }
+
     private boolean isSimLocked() {
         if (mSimLockedState != SimLockState.NONE) {
             return true;
@@ -1041,11 +1045,11 @@ public final class SimulatedCommands extends BaseCommands
     }
 
 
-    public void acknowledgeLastIncomingSMS(boolean success, Message result) {
+    public void acknowledgeLastIncomingGsmSms(boolean success, int cause, Message result) {
         unimplemented(result);
     }
 
-    public void acknowledgeLastIncomingCdmaSms(boolean success, Message result) {
+    public void acknowledgeLastIncomingCdmaSms(boolean success, int cause, Message result) {
         unimplemented(result);
     }
 
@@ -1137,7 +1141,7 @@ public final class SimulatedCommands extends BaseCommands
             String number, Message result) {unimplemented(result);}
 
     public void setNetworkSelectionModeAutomatic(Message result) {unimplemented(result);}
-
+    public void exitEmergencyCallbackMode(Message result) {unimplemented(result);}
     public void setNetworkSelectionModeManual(
             String operatorNumeric, Message result) {unimplemented(result);}
 
@@ -1458,10 +1462,6 @@ public final class SimulatedCommands extends BaseCommands
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message result) {
         // TODO Auto-generated method stub
 
-    }
-
-    public void exitEmergencyCallbackMode(Message response) {
-        // TODO method stub
     }
 
     public void forceDataDormancy(Message response) {

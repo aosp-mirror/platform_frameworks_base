@@ -74,10 +74,12 @@ public class PackageParser {
      * added to older SDKs appearing before those added to newer SDKs.
      * @hide
      */
-    public static final PackageParser.NewPermissionInfo NEW_PERMISSIONS[] = new PackageParser.NewPermissionInfo[] {
-        new PackageParser.NewPermissionInfo(android.Manifest.permission.WRITE_SDCARD,
-                android.os.Build.VERSION_CODES.DONUT,
-                0)
+    public static final PackageParser.NewPermissionInfo NEW_PERMISSIONS[] =
+        new PackageParser.NewPermissionInfo[] {
+            new PackageParser.NewPermissionInfo(android.Manifest.permission.WRITE_SDCARD,
+                    android.os.Build.VERSION_CODES.DONUT, 0),
+            new PackageParser.NewPermissionInfo(android.Manifest.permission.READ_PHONE_STATE,
+                    android.os.Build.VERSION_CODES.DONUT, 0)
     };
 
     private String mArchiveSourcePath;

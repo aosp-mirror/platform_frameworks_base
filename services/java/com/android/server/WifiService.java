@@ -588,6 +588,12 @@ public class WifiService extends IWifiManager.Stub {
 
     }
 
+    private void enforceMulticastChangePermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
+                "WifiService");
+    }
+
     /**
      * see {@link WifiManager#getWifiState()}
      * @return One of {@link WifiManager#WIFI_STATE_DISABLED},
@@ -1935,8 +1941,8 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public void enableMulticast(IBinder binder, String tag) {
-        enforceChangePermission();
+    public void acquireMulticastLock(IBinder binder, String tag) {
+        enforceMulticastChangePermission();
 
         synchronized (mMulticasters) {
             mMulticastEnabled++;
@@ -1958,8 +1964,8 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public void disableMulticast() {
-        enforceChangePermission();
+    public void releaseMulticastLock() {
+        enforceMulticastChangePermission();
 
         int uid = Binder.getCallingUid();
         synchronized (mMulticasters) {

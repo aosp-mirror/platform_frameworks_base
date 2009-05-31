@@ -468,6 +468,11 @@ public class MediaPlayer
          */
         native_setup(new WeakReference<MediaPlayer>(this));
     }
+
+    /*
+     * Update the MediaPlayer ISurface. Call after updating mSurface.
+     */
+    private native void _setVideoSurface();
   
     /**
      * Sets the SurfaceHolder to use for displaying the video portion of the media.
@@ -478,7 +483,12 @@ public class MediaPlayer
      */
     public void setDisplay(SurfaceHolder sh) {
         mSurfaceHolder = sh;
-        mSurface = sh.getSurface();
+        if (sh != null) {
+            mSurface = sh.getSurface();
+        } else {
+            mSurface = null;
+        }
+        _setVideoSurface();
         updateSurfaceScreenOn();
     }
 

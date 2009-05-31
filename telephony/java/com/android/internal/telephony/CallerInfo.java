@@ -70,6 +70,12 @@ public class CallerInfo {
      */
     public String name;
     public String phoneNumber;
+
+    public String cnapName;
+    public int numberPresentation;
+    public int namePresentation;
+    public boolean contactExists;
+
     public String phoneLabel;
     /* Split up the phoneLabel into number type and label name */
     public int    numberType;
@@ -118,6 +124,7 @@ public class CallerInfo {
         info.numberLabel = null;
         info.cachedPhoto = null;
         info.isCachedPhotoCurrent = false;
+        info.contactExists = false;
         
         if (Config.LOGV) Log.v(TAG, "construct callerInfo from cursor");
         
@@ -176,6 +183,7 @@ public class CallerInfo {
                 columnIndex = cursor.getColumnIndex(People.SEND_TO_VOICEMAIL);
                 info.shouldSendToVoicemail = (columnIndex != -1) && 
                         ((cursor.getInt(columnIndex)) == 1);
+                info.contactExists = true;
             }
             cursor.close();
         }
@@ -303,4 +311,3 @@ public class CallerInfo {
         }
     }
 }    
-

@@ -56,6 +56,7 @@ public abstract class CallTracker extends Handler {
     protected static final int EVENT_CONFERENCE_RESULT    = 11;
     protected static final int EVENT_SEPARATE_RESULT      = 12;
     protected static final int EVENT_ECT_RESULT           = 13;
+    protected static final int EVENT_EXIT_ECM_RESPONSE_CDMA = 14;
 
 
     protected void pollCallsWhenSafe() {

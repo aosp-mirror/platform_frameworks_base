@@ -53,11 +53,20 @@ Sampler::~Sampler()
 
 void Sampler::setupGL()
 {
-    //LOGE("setup gl");
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    GLenum trans[] = {
+        GL_NEAREST, //RS_SAMPLER_NEAREST,
+        GL_LINEAR, //RS_SAMPLER_LINEAR,
+        GL_LINEAR_MIPMAP_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
+        GL_REPEAT, //RS_SAMPLER_WRAP,
+        GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
+
+    };
+
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, trans[mWrapS]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, trans[mWrapT]);
 
 }
 
@@ -76,7 +85,7 @@ void Sampler::unbindFromContext(SamplerState *ss)
 
 void SamplerState::setupGL()
 {
-    for (uint32_t ct=0; ct < 1/*RS_MAX_SAMPLER_SLOT*/; ct++) {
+    for (uint32_t ct=0; ct < RS_MAX_SAMPLER_SLOT; ct++) {
         Sampler *s = mSamplers[ct].get();
         if (s) {
             s->setupGL();
@@ -139,5 +148,13 @@ RsSampler rsi_SamplerCreate(Context *rsc)
                               ss->mWrapR);
     return s;
 }
+
+void rsi_SamplerDestroy(Context *rsc, RsSampler vs)
+{
+    Sampler * s = static_cast<Sampler *>(vs);
+    s->decRef();
+
+}
+
 
 }}

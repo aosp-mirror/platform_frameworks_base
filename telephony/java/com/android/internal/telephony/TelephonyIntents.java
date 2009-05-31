@@ -54,8 +54,10 @@ public class TelephonyIntents {
     public static final String ACTION_RADIO_TECHNOLOGY_CHANGED 
             = "android.intent.action.RADIO_TECHNOLOGY";
     /**
-     * <p>Broadcast Action: The emergency callback mode is entered.
-     *
+     * <p>Broadcast Action: The emergency callback mode is changed.
+     * <ul>
+     *   <li><em>phoneinECMState</em> - A boolean value,true=phone in ECM, false=ECM off</li>
+     * </ul>
      * <p class="note">
      * You can <em>not</em> receive this through components declared
      * in manifests, only by explicitly registering for it with
@@ -65,8 +67,8 @@ public class TelephonyIntents {
      * <p class="note">
      * Requires no permission.
      */
-    public static final String ACTION_EMERGENCY_CALLBACK_MODE_ENTERED
-            = "android.intent.action.EMERGENCY_CALLBACK_MODE";
+    public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED
+            = "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
     /**
      * Broadcast Action: The phone's signal strength has changed. The intent will have the
      * following extra values:</p>
@@ -179,4 +181,28 @@ public class TelephonyIntents {
      */
     public static final String ACTION_NETWORK_SET_TIMEZONE
             = "android.intent.action.NETWORK_SET_TIMEZONE";
+
+    /**
+     * <p>Broadcast Action: It indicates the Emergency callback mode blocks datacall/sms
+     * <p class="note">.
+     */
+    // TODO(Moto): What is the use case, who is interested in this?
+    public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
+            = "android.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
+
+     /**
+     * Broadcast Action: The MDN changed during the CDMA OTA Process
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li><em>mdn</em> - An Integer of the updated MDN number.</li>
+     * </ul>
+     *
+     * <p class="note">
+     */
+    // TODO(Moto): Generally broadcast intents are for use to allow entities which
+    // may not know about each other to "communicate". This seems quite specific
+    // and maybe using the registrant style would be better.
+    public static final String ACTION_CDMA_OTA_MDN_CHANGED
+            = "android.intent.action.ACTION_MDN_STATE_CHANGED";
+
 }

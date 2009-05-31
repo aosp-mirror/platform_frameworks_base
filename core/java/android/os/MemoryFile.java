@@ -18,6 +18,7 @@ package android.os;
 
 import android.util.Log;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,19 +36,19 @@ import java.io.OutputStream;
 public class MemoryFile
 {
     private static String TAG = "MemoryFile";
- 
-    // returns fd
-    private native int native_open(String name, int length);
-    // returns memory address for ashmem region
-    private native int native_mmap(int fd, int length);
-    private native void native_close(int fd);
-    private native int native_read(int fd, int address, byte[] buffer, 
-            int srcOffset, int destOffset, int count, boolean isUnpinned);
-    private native void native_write(int fd, int address, byte[] buffer, 
-            int srcOffset, int destOffset, int count, boolean isUnpinned);
-    private native void native_pin(int fd, boolean pin);
 
-    private int mFD;        // ashmem file descriptor
+    private static native FileDescriptor native_open(String name, int length) throws IOException;
+    // returns memory address for ashmem region
+    private static native int native_mmap(FileDescriptor fd, int length) throws IOException;
+    private static native void native_munmap(int addr, int length) throws IOException;
+    private static native void native_close(FileDescriptor fd);
+    private static native int native_read(FileDescriptor fd, int address, byte[] buffer,
+            int srcOffset, int destOffset, int count, boolean isUnpinned) throws IOException;
+    private static native void native_write(FileDescriptor fd, int address, byte[] buffer,
+            int srcOffset, int destOffset, int count, boolean isUnpinned) throws IOException;
+    private static native void native_pin(FileDescriptor fd, boolean pin) throws IOException;
+
+    private FileDescriptor mFD;        // ashmem file descriptor
     private int mAddress;   // address of ashmem memory
     private int mLength;    // total length of our ashmem region
     private boolean mAllowPurging = false;  // true if our ashmem region is unpinned
@@ -57,8 +58,9 @@ public class MemoryFile
      *
      * @param name optional name for the file (can be null).
      * @param length of the memory file in bytes.
+     * @throws IOException if the memory file could not be created.
      */
-    public MemoryFile(String name, int length) {
+    public MemoryFile(String name, int length) throws IOException {
         mLength = length;
         mFD = native_open(name, length);
         mAddress = native_mmap(mFD, length);
@@ -68,15 +70,40 @@ public class MemoryFile
      * Closes and releases all resources for the memory file.
      */
     public void close() {
-        if (mFD > 0) {
+        deactivate();
+        if (!isClosed()) {
             native_close(mFD);
-            mFD = 0;
         }
+    }
+
+    private void deactivate() {
+        if (!isDeactivated()) {
+            try {
+                native_munmap(mAddress, mLength);
+                mAddress = 0;
+            } catch (IOException ex) {
+                Log.e(TAG, ex.toString());
+            }
+        }
+    }
+
+    /**
+     * Checks whether the memory file has been deactivated.
+     */
+    private boolean isDeactivated() {
+        return mAddress == 0;
+    }
+
+    /**
+     * Checks whether the memory file has been closed.
+     */
+    private boolean isClosed() {
+        return !mFD.valid();
     }
 
     @Override
     protected void finalize() {
-        if (mFD > 0) {
+        if (!isClosed()) {
             Log.e(TAG, "MemoryFile.finalize() called while ashmem still open");
             close();
         }
@@ -131,7 +158,6 @@ public class MemoryFile
      @return OutputStream
      */
      public OutputStream getOutputStream() {
-
         return new MemoryOutputStream();
     }
 
@@ -144,9 +170,13 @@ public class MemoryFile
      * @param destOffset offset into the byte array buffer to read into.
      * @param count number of bytes to read.
      * @return number of bytes read.
+     * @throws IOException if the memory file has been purged or deactivated.
      */
     public int readBytes(byte[] buffer, int srcOffset, int destOffset, int count) 
             throws IOException {
+        if (isDeactivated()) {
+            throw new IOException("Can't read from deactivated memory file.");
+        }
         if (destOffset < 0 || destOffset > buffer.length || count < 0
                 || count > buffer.length - destOffset
                 || srcOffset < 0 || srcOffset > mLength
@@ -164,9 +194,13 @@ public class MemoryFile
      * @param srcOffset offset into the byte array buffer to write from.
      * @param destOffset offset  into the memory file to write to.
      * @param count number of bytes to write.
+     * @throws IOException if the memory file has been purged or deactivated.
      */
     public void writeBytes(byte[] buffer, int srcOffset, int destOffset, int count)
             throws IOException {
+        if (isDeactivated()) {
+            throw new IOException("Can't write to deactivated memory file.");
+        }
         if (srcOffset < 0 || srcOffset > buffer.length || count < 0
                 || count > buffer.length - srcOffset
                 || destOffset < 0 || destOffset > mLength

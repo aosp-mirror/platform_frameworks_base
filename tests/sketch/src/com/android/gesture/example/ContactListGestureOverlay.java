@@ -33,6 +33,7 @@ import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
 import android.gesture.LetterRecognizer;
 import android.gesture.Prediction;
+import android.gesture.LetterRecognizers;
 
 import java.util.ArrayList;
 
@@ -57,8 +58,8 @@ public class ContactListGestureOverlay extends Activity {
         setContentView(R.layout.overlaydemo);
 
         // create a letter recognizer
-        mRecognizer = LetterRecognizer.getLetterRecognizer(this,
-                LetterRecognizer.RECOGNIZER_LATIN_LOWERCASE);
+        mRecognizer = LetterRecognizers.fromType(this,
+                LetterRecognizers.RECOGNIZER_LATIN_LOWERCASE);
         mOverlay = (GestureOverlayView) findViewById(R.id.overlay);
 
         // load the contact list

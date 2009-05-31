@@ -21,11 +21,13 @@
 
 #include "RenderScriptEnv.h"
 
+struct ACCscript;
+
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
 
-    
+
 
 class ScriptC : public Script
 {
@@ -38,6 +40,7 @@ public:
     virtual void run(Context *, uint32_t launchID);
 
 
+    ACCscript*    mAccScript;
     rsc_RunScript mScript;
 
 
@@ -48,13 +51,13 @@ public:
 
 };
 
-class ScriptCState 
+class ScriptCState
 {
 public:
     ScriptCState();
     ~ScriptCState();
 
-
+    ACCscript*    mAccScript;
     rsc_RunScript mScript;
     float mClearColor[4];
     float mClearDepth;

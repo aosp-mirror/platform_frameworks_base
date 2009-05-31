@@ -91,6 +91,10 @@ void ElementState::initPredefined()
     e->setComponent(0, f_32);
     mPredefinedList.add(Predefined(RS_ELEMENT_USER_FLOAT, e));
 
+    e = new Element(1);
+    e->setComponent(0, a_8);
+    mPredefinedList.add(Predefined(RS_ELEMENT_A_8, e));
+
     e = new Element(3);
     e->setComponent(0, r_5);
     e->setComponent(1, g_6);

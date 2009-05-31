@@ -644,6 +644,13 @@
         android:description="@string/permdesc_changeWifiState"
         android:label="@string/permlab_changeWifiState" />
 
+    <!-- Allows applications to enter Wi-Fi Multicast mode -->
+    <permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_changeWifiMulticastState"
+        android:label="@string/permlab_changeWifiMulticastState" />
+
     <!-- Allows applications to discover and pair bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"

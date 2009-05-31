@@ -22,12 +22,14 @@ import android.app.PendingIntent.CanceledException;
 import android.content.Intent;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.provider.Telephony.Sms.Intents;
 import android.telephony.ServiceState;
 import android.util.Config;
 import android.util.Log;
 
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.gsm.SmsMessage;
+import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
@@ -78,7 +80,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         }
 
         if (mCm != null) {
-            mCm.acknowledgeLastIncomingSMS(true, null);
+            mCm.acknowledgeLastIncomingGsmSms(true, Intents.RESULT_SMS_HANDLED, null);
         }
     }
 
@@ -150,7 +152,13 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             concatRef.refNumber = refNumber;
             concatRef.seqNumber = i + 1;  // 1-based sequence
             concatRef.msgCount = msgCount;
-            concatRef.isEightBits = false;
+            // TODO: We currently set this to true since our messaging app will never
+            // send more than 255 parts (it converts the message to MMS well before that).
+            // However, we should support 3rd party messaging apps that might need 16-bit
+            // references
+            // Note:  It's not sufficient to just flip this bit to true; it will have
+            // ripple effects (several calculations assume 8-bit ref).
+            concatRef.isEightBits = true;
             SmsHeader smsHeader = new SmsHeader();
             smsHeader.concatRef = concatRef;
 
@@ -284,10 +292,10 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
-    protected void acknowledgeLastIncomingSms(boolean success, Message response){
+    protected void acknowledgeLastIncomingSms(boolean success, int result, Message response){
         // FIXME unit test leaves cm == null. this should change
         if (mCm != null) {
-            mCm.acknowledgeLastIncomingSMS(success, response);
+            mCm.acknowledgeLastIncomingGsmSms(success, resultToCause(result), response);
         }
     }
 
@@ -312,4 +320,17 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         response.recycle();
     }
 
+    private int resultToCause(int rc) {
+        switch (rc) {
+            case Activity.RESULT_OK:
+            case Intents.RESULT_SMS_HANDLED:
+                // Cause code is ignored on success.
+                return 0;
+            case Intents.RESULT_SMS_OUT_OF_MEMORY:
+                return CommandsInterface.GSM_SMS_FAIL_CAUSE_MEMORY_CAPACITY_EXCEEDED;
+            case Intents.RESULT_SMS_GENERIC_ERROR:
+            default:
+                return CommandsInterface.GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR;
+        }
+    }
 }

@@ -53,7 +53,8 @@ enum tts_result {
     TTS_FEATURE_UNSUPPORTED     = -2,
     TTS_VALUE_INVALID           = -3,
     TTS_PROPERTY_UNSUPPORTED    = -4,
-    TTS_PROPERTY_SIZE_TOO_SMALL = -5
+    TTS_PROPERTY_SIZE_TOO_SMALL = -5,
+    TTS_MISSING_RESOURCES       = -6
 };
 
 class TtsEngine

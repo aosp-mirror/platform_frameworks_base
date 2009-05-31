@@ -591,6 +591,8 @@ final class WebViewCore {
             "TOUCH_UP", // = 140;
             "TOUCH_EVENT", // = 141;
             "SET_ACTIVE", // = 142;
+            "ON_PAUSE",     // = 143
+            "ON_RESUME",    // = 144
         };
 
     class EventHub {
@@ -646,6 +648,11 @@ final class WebViewCore {
         // Used to tell the focus controller whether to draw the blinking cursor
         // or not, based on whether the WebView has focus.
         static final int SET_ACTIVE = 142;
+
+        // pause/resume activity for just this DOM (unlike pauseTimers, which
+        // is global)
+        static final int ON_PAUSE = 143;
+        static final int ON_RESUME = 144;
 
         // Network-based messaging
         static final int CLEAR_SSL_PREF_TABLE = 150;
@@ -839,6 +846,14 @@ final class WebViewCore {
                                         WebCoreThread.CACHE_TICKER),
                                         WebCoreThread.CACHE_TICKER_INTERVAL);
                             }
+                            break;
+
+                        case ON_PAUSE:
+                            nativePause();
+                            break;
+
+                        case ON_RESUME:
+                            nativeResume();
                             break;
 
                         case SET_NETWORK_STATE:
@@ -1750,4 +1765,7 @@ final class WebViewCore {
         }
         
     }
+
+    private native void nativePause();
+    private native void nativeResume();
 }

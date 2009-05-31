@@ -147,6 +147,14 @@ public interface CommandsInterface {
     static final int SIM_REFRESH_INIT           = 1;  // SIM initialized; reload all
     static final int SIM_REFRESH_RESET          = 2;  // SIM reset; may be locked
 
+    // GSM SMS fail cause for acknowledgeLastIncomingSMS. From TS 23.040, 9.2.3.22.
+    static final int GSM_SMS_FAIL_CAUSE_MEMORY_CAPACITY_EXCEEDED    = 0xD3;
+    static final int GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR           = 0xFF;
+
+    // CDMA SMS fail cause for acknowledgeLastIncomingCdmaSms.  From TS N.S00005, 6.5.2.125.
+    static final int CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE          = 35;
+    static final int CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM     = 39;
+
     //***** Methods
 
     RadioState getRadioState();
@@ -241,24 +249,6 @@ public interface CommandsInterface {
     void unregisterForRUIMReady(Handler h);
 
     /**
-     * Registers for the status of an OTASP/OTAPA session
-     */
-    void registerForOtaSessionStatus(Handler h, int what, Object obj);
-    void unregisterForOtaSessionStatus(Handler h);
-
-    /**
-      * register for Call waiting for CDMA
-      */
-    void registerForCdmaCallWaiting(Handler h, int what, Object obj);
-    void unregisterForCdmaCallWaiting(Handler h);
-
-    /**
-     * Registers for CDMA information records
-     */
-    void registerCdmaInformationRecord(Handler h, int what, Object obj);
-    void unregisterCdmaInformationRecord(Handler h);
-
-    /**
      * unlike the register* methods, there's only one new SMS handler
      * if you need to unregister, you should also tell the radio to stop
      * sending SMS's to you (via AT+CNMI)
@@ -342,16 +332,6 @@ public interface CommandsInterface {
      */
     void setOnIccSmsFull(Handler h, int what, Object obj);
     void unSetOnIccSmsFull(Handler h);
-
-    /**
-     * Sets the handler for Emergency call-back Mode enter mesage.
-     * Unlike the register* methods, there's only one notification handler
-     *
-     * @param h Handler for notification message.
-     * @param what User-defined message code.
-     * @param obj User object.
-     */
-    void setEmergencyCallbackMode(Handler h, int what, Object obj);
 
     /**
      * Sets the handler for SIM Refresh notifications.
@@ -452,6 +432,49 @@ public interface CommandsInterface {
     void setSuppServiceNotifications(boolean enable, Message result);
     //void unSetSuppServiceNotifications(Handler h);
 
+    /**
+     * Sets the handler for Event Notifications for CDMA Display Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForDisplayInfo(Handler h, int what, Object obj);
+    void unregisterForDisplayInfo(Handler h);
+
+    /**
+     * Sets the handler for Event Notifications for CallWaiting Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForCallWaitingInfo(Handler h, int what, Object obj);
+    void unregisterForCallWaitingInfo(Handler h);
+
+    /**
+     * Sets the handler for Event Notifications for Signal Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForSignalInfo(Handler h, int what, Object obj);
+    void unregisterForSignalInfo(Handler h);
+
+    /**
+     * Fires on if Modem enters Emergency Callback mode
+     */
+    void setEmergencyCallbackMode(Handler h, int what, Object obj);
+
+     /**
+      * Fires on any CDMA OTA provision status change
+      */
+     void registerForCdmaOtaProvision(Handler h,int what, Object obj);
+     void unregisterForCdmaOtaProvision(Handler h);
 
     /**
      * Returns current ICC status.
@@ -867,9 +890,9 @@ public interface CommandsInterface {
 
     void setRadioPower(boolean on, Message response);
 
-    void acknowledgeLastIncomingSMS(boolean success, Message response);
+    void acknowledgeLastIncomingGsmSms(boolean success, int cause, Message response);
 
-    void acknowledgeLastIncomingCdmaSms(boolean success, Message response);
+    void acknowledgeLastIncomingCdmaSms(boolean success, int cause, Message response);
 
     /**
      * parameters equivilient to 27.007 AT+CRSM command
@@ -1072,6 +1095,12 @@ public interface CommandsInterface {
      */
     void setSmscAddress(String address, Message result);
 
+    /**
+     * Indicates whether there is storage available for new SMS messages.
+     * @param available true if storage is available
+     * @param result callback message
+     */
+    void reportSmsMemoryStatus(boolean available, Message result);
 
     void invokeOemRilRequestRaw(byte[] data, Message response);
 
@@ -1244,7 +1273,9 @@ public interface CommandsInterface {
     public void getCdmaBroadcastConfig(Message result);
 
     /**
-     * Requests the radio's system selection module to exit emergency callback mode.
+     *  Requests the radio's system selection module to exit emergency callback mode.
+     *  This function should only be called from CDMAPHone.java.
+     *
      * @param response callback message
      */
     public void exitEmergencyCallbackMode(Message response);

@@ -18,7 +18,6 @@ package com.android.internal.telephony;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.PowerManager;
 import android.provider.Telephony.Sms.Intents;
 import android.util.Config;
 import android.util.Log;
@@ -34,7 +33,7 @@ public class WapPushOverSms {
 
     private final Context mContext;
     private WspTypeDecoder pduDecoder;
-    private PowerManager.WakeLock mWakeLock;
+    private SMSDispatcher mSmsDispatcher;
 
     /**
      * Hold the wake lock for 5 seconds, which should be enough time for 
@@ -42,10 +41,9 @@ public class WapPushOverSms {
      */
     private final int WAKE_LOCK_TIMEOUT = 5000;
 
-    public WapPushOverSms(Phone phone) {
-
+    public WapPushOverSms(Phone phone, SMSDispatcher smsDispatcher) {
+        mSmsDispatcher = smsDispatcher;
         mContext = phone.getContext();
-        createWakelock();
     }
 
     /**
@@ -184,7 +182,7 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", data);
 
-        sendBroadcast(intent, "android.permission.RECEIVE_WAP_PUSH");
+        mSmsDispatcher.dispatch(intent, "android.permission.RECEIVE_WAP_PUSH");
     }
 
     private void dispatchWapPdu_PushCO(byte[] pdu, int transactionId, int pduType) {
@@ -194,7 +192,7 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", pdu);
 
-        sendBroadcast(intent, "android.permission.RECEIVE_WAP_PUSH");
+        mSmsDispatcher.dispatch(intent, "android.permission.RECEIVE_WAP_PUSH");
     }
 
     private void dispatchWapPdu_MMS(byte[] pdu, int transactionId, int pduType, int dataIndex) {
@@ -209,20 +207,7 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", data);
 
-        sendBroadcast(intent, "android.permission.RECEIVE_MMS");
-    }
-
-    private void createWakelock() {
-        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WapPushOverSms");
-        mWakeLock.setReferenceCounted(true);
-    }
-
-    private void sendBroadcast(Intent intent, String permission) {
-        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
-        // receivers time to take their own wake locks.
-        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
-        mContext.sendBroadcast(intent, permission);
+        mSmsDispatcher.dispatch(intent, "android.permission.RECEIVE_MMS");
     }
 }
 

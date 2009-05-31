@@ -23,6 +23,7 @@ import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,10 +32,9 @@ import java.util.HashMap;
 import static android.gesture.GestureConstants.LOG_TAG;
 
 public class LetterRecognizer {
-    public final static int RECOGNIZER_LATIN_LOWERCASE = 0;
     static final String GESTURE_FILE_NAME = "letters.gestures";
 
-    private final static int ADJUST_RANGE = 3;    
+    private final static int ADJUST_RANGE = 3;
 
     private SigmoidUnit[] mHiddenLayer;
     private SigmoidUnit[] mOutputLayer;
@@ -42,8 +42,8 @@ public class LetterRecognizer {
     private final String[] mClasses;
 
     private final int mPatchSize;
-    
-    private GestureLibrary mGestureLibrary;
+
+    private GestureLibrary mGestureStore;
 
     private final Comparator<Prediction> mComparator = new PredictionComparator();
 
@@ -67,15 +67,6 @@ public class LetterRecognizer {
 
             return 1.0f / (float) (1 + Math.exp(-sum));
         }
-    }
-
-    public static LetterRecognizer getLetterRecognizer(Context context, int type) {
-        switch (type) {
-            case RECOGNIZER_LATIN_LOWERCASE: {
-                return createFromResource(context, com.android.internal.R.raw.latin_lowercase);
-            }
-        }
-        return null;
     }
 
     private LetterRecognizer(int numOfInput, int numOfHidden, String[] classes) {
@@ -137,14 +128,18 @@ public class LetterRecognizer {
         return output;
     }
 
-    private static LetterRecognizer createFromResource(Context context, int resourceID) {
+    static LetterRecognizer createFromResource(Context context, int resourceID) {
         final Resources resources = context.getResources();
+        final InputStream stream = resources.openRawResource(resourceID);
+        return createFromStream(stream);
+    }
 
+    static LetterRecognizer createFromStream(InputStream stream) {
         DataInputStream in = null;
         LetterRecognizer classifier = null;
 
         try {
-            in = new DataInputStream(new BufferedInputStream(resources.openRawResource(resourceID),
+            in = new DataInputStream(new BufferedInputStream(stream,
                     GestureConstants.IO_BUFFER_SIZE));
 
             final int version = in.readShort();
@@ -206,49 +201,49 @@ public class LetterRecognizer {
     }
 
     /**
-     * TODO: Publish this API once we figure out where we should save the personzlied
+     * TODO: Publish this API once we figure out where we should save the personalized
      * gestures, and how to do so across all apps
      *
      * @hide
      */
     public boolean save() {
-        if (mGestureLibrary != null) {
-            return mGestureLibrary.save();
+        if (mGestureStore != null) {
+            return mGestureStore.save();
         }
         return false;
     }
 
     /**
-     * TODO: Publish this API once we figure out where we should save the personzlied
+     * TODO: Publish this API once we figure out where we should save the personalized
      * gestures, and how to do so across all apps
      *
      * @hide
      */
     public void setPersonalizationEnabled(boolean enabled) {
         if (enabled) {
-            mGestureLibrary = new GestureLibrary(GESTURE_FILE_NAME);
-            mGestureLibrary.setSequenceType(GestureLibrary.SEQUENCE_INVARIANT);
-            mGestureLibrary.load();
+            mGestureStore = GestureLibraries.fromFile(GESTURE_FILE_NAME);
+            mGestureStore.setSequenceType(GestureStore.SEQUENCE_INVARIANT);
+            mGestureStore.load();
         } else {
-            mGestureLibrary = null;
+            mGestureStore = null;
         }
     }
 
     /**
-     * TODO: Publish this API once we figure out where we should save the personzlied
+     * TODO: Publish this API once we figure out where we should save the personalized
      * gestures, and how to do so across all apps
      *
      * @hide
      */
     public void addExample(String letter, Gesture example) {
-        if (mGestureLibrary != null) {
-            mGestureLibrary.addGesture(letter, example);
+        if (mGestureStore != null) {
+            mGestureStore.addGesture(letter, example);
         }
     }
-    
+
     private void adjustPrediction(Gesture query, ArrayList<Prediction> predictions) {
-        if (mGestureLibrary != null) {
-            final ArrayList<Prediction> results = mGestureLibrary.recognize(query);
+        if (mGestureStore != null) {
+            final ArrayList<Prediction> results = mGestureStore.recognize(query);
             final HashMap<String, Prediction> topNList = new HashMap<String, Prediction>();
 
             for (int j = 0; j < ADJUST_RANGE; j++) {

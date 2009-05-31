@@ -46,7 +46,7 @@ public class Gesture implements Parcelable {
 
     private static int sGestureCount = 0;
 
-    private RectF mBoundingBox;
+    private final RectF mBoundingBox = new RectF();
 
     // the same as its instance ID
     private long mGestureID;
@@ -83,12 +83,7 @@ public class Gesture implements Parcelable {
      */
     public void addStroke(GestureStroke stroke) {
         mStrokes.add(stroke);
-
-        if (mBoundingBox == null) {
-            mBoundingBox = new RectF(stroke.boundingBox);
-        } else {
-            mBoundingBox.union(stroke.boundingBox);
-        }
+        mBoundingBox.union(stroke.boundingBox);
     }
 
     /**
