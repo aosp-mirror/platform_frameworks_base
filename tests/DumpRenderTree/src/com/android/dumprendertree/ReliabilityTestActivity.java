@@ -243,7 +243,6 @@ public class ReliabilityTestActivity extends Activity {
             initialStartCount = pageStartCount;
         }
         
-        @Override
         public void run() {
             if (initialStartCount == pageStartCount) {
                 //perform cleanup
