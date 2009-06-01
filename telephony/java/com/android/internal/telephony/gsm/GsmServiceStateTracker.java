@@ -75,13 +75,6 @@ import java.util.TimeZone;
  */
 final class GsmServiceStateTracker extends ServiceStateTracker {
 
-    /**
-     * TODO(Teleca): John Huang asks: Will you be adding handling of
-     * "reason for registration denied in EVENT_POLL_STATE_REGISTRATION?
-     * I see some handling of this in CdmaServiceStateTracker, but as I
-     * understand it this field was added at the request of a GSM carrier.
-     */
-
     //***** Instance Variables
     GSMPhone phone;
     GsmCellLocation cellLoc;

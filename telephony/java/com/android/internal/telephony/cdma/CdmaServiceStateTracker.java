@@ -69,18 +69,11 @@ import java.util.TimeZone;
  * {@hide}
  */
 final class CdmaServiceStateTracker extends ServiceStateTracker {
+
     //***** Instance Variables
     CDMAPhone phone;
     CdmaCellLocation cellLoc;
     CdmaCellLocation newCellLoc;
-
-    /**
-     * TODO(Teleca): I don't think the initialization to -1 for all of these are
-     * really necessary, I don't seem them in GsmServiceStateTracker. Also,
-     * all of the other initialization is unnecessary as I believe Java guarantees
-     * 0, false & null, but if you think it's better than do all of them there are
-     * a few that aren't initialized.
-     */
 
     /**
      *  The access technology currently in use: DATA_ACCESS_
@@ -89,16 +82,13 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private int newNetworkType = 0;
 
     private boolean mCdmaRoaming = false;
-    private int mRoamingIndicator = -1;
-    private int mIsInPrl = -1;
-    private int mDefaultRoamingIndicator = -1;
+    private int mRoamingIndicator;
+    private boolean mIsInPrl;
+    private int mDefaultRoamingIndicator;
 
-    /**
-     * TODO(Teleca): Maybe these should be initialized to STATE_OUT_OF_SERVICE like gprsState
-     * in GsmServiceStateTracker and remove the comment.
-     */
-    private int cdmaDataConnectionState = -1; // Initially we assume no data connection
-    private int newCdmaDataConnectionState = -1; // Initially we assume no data connection
+    // Initially we assume no data connection
+    private int cdmaDataConnectionState = ServiceState.STATE_OUT_OF_SERVICE;
+    private int newCdmaDataConnectionState = ServiceState.STATE_OUT_OF_SERVICE;
     private int mRegistrationState = -1;
     private RegistrantList cdmaDataConnectionAttachedRegistrants = new RegistrantList();
     private RegistrantList cdmaDataConnectionDetachedRegistrants = new RegistrantList();
@@ -117,7 +107,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     // We can't register for SIM_RECORDS_LOADED immediately because the
     // SIMRecords object may not be instantiated yet.
-    private boolean mNeedToRegForRuimLoaded;
+    private boolean mNeedToRegForRuimLoaded = false;
 
     // Wake lock used while setting time of day.
     private PowerManager.WakeLock mWakeLock;
@@ -125,22 +115,20 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     // Keep track of SPN display rules, so we only broadcast intent if something changes.
     private String curSpn = null;
-    private String curEriText = null;
+    private String curPlmn = null; // it contains the name of the registered network in CDMA can
+                                   // be the ONS or ERI text
     private int curSpnRule = 0;
 
-    private String mMdn = null;
-    private int mHomeSystemId = -1;
-    private int mHomeNetworkId = -1;
-    private String mMin = null;
+    private String mMdn;
+    private int mHomeSystemId;
+    private int mHomeNetworkId;
+    private String mMin;
+
     private boolean isEriTextLoaded = false;
     private boolean isSubscriptionFromRuim = false;
 
-    /**
-     * TODO(Teleca): Is this purely for debugging purposes, or do we expect this string to be
-     * passed around (eg, to the UI)? If the latter, it would be better to pass around a
-     * reasonCode, and let the UI provide its own strings.
-     */
-    private String mRegistrationDeniedReason = null;
+    // Registration Denied Reason, General/Authentication Failure, used only for debugging purposes
+    private String mRegistrationDeniedReason;
 
     //***** Constants
     static final String LOG_TAG = "CDMA";
@@ -243,9 +231,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         Registrant r = new Registrant(h, what, obj);
         cdmaDataConnectionAttachedRegistrants.add(r);
 
-        if (cdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_1xRTT
-           || cdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_EVDO_0
-           || cdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_EVDO_A) {
+        if (cdmaDataConnectionState == ServiceState.STATE_IN_SERVICE) {
             r.notifyRegistrant();
         }
     }
@@ -264,9 +250,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         Registrant r = new Registrant(h, what, obj);
         cdmaDataConnectionDetachedRegistrants.add(r);
 
-        if (cdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_1xRTT
-           && cdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_EVDO_0
-           && cdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_EVDO_A) {
+        if (cdmaDataConnectionState != ServiceState.STATE_IN_SERVICE) {
             r.notifyRegistrant();
         }
     }
@@ -484,30 +468,40 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     }
 
     protected void updateSpnDisplay() {
+        String spn = "";
+        boolean showSpn = false;
+        String plmn = "";
+        boolean showPlmn = false;
+        int rule = 0;
+        if (cm.getRadioState().isRUIMReady()) {
+            // TODO RUIM SPN is not implemnted, EF_SPN has to be read and Display Condition
+            //   Character Encoding, Language Indicator and SPN has to be set
+            // rule = phone.mRuimRecords.getDisplayRule(ss.getOperatorNumeric());
+            // spn = phone.mSIMRecords.getServiceProvideName();
+            plmn = ss.getOperatorAlphaLong(); // mOperatorAlphaLong contains the ONS
+            // showSpn = (rule & ...
+            showPlmn = true; // showPlmn = (rule & ...
 
-        // TODO(Teleca): Check this method again, because it is not sure at the moment how
-        // the RUIM handles the SIM stuff. Please complete this function.
+        } else {
+            // In this case there is no SPN available from RUIM, we show the ERI text
+            plmn = ss.getOperatorAlphaLong(); // mOperatorAlphaLong contains the ERI text
+            showPlmn = true;
+        }
 
-        //int rule = phone.mRuimRecords.getDisplayRule(ss.getOperatorNumeric());
-        String spn = null; //phone.mRuimRecords.getServiceProviderName();
-        String eri = ss.getOperatorAlphaLong();
-
-        if (!TextUtils.equals(this.curEriText, eri)) {
-            //TODO  (rule & SIMRecords.SPN_RULE_SHOW_SPN) == SIMRecords.SPN_RULE_SHOW_SPN;
-            boolean showSpn = false;
-            //TODO  (rule & SIMRecords.SPN_RULE_SHOW_PLMN) == SIMRecords.SPN_RULE_SHOW_PLMN;
-            boolean showEri = true;
+        if (rule != curSpnRule
+                || !TextUtils.equals(spn, curSpn)
+                || !TextUtils.equals(plmn, curPlmn)) {
             Intent intent = new Intent(Intents.SPN_STRINGS_UPDATED_ACTION);
             intent.putExtra(Intents.EXTRA_SHOW_SPN, showSpn);
             intent.putExtra(Intents.EXTRA_SPN, spn);
-            intent.putExtra(Intents.EXTRA_SHOW_PLMN, showEri);
-            intent.putExtra(Intents.EXTRA_PLMN, eri);
+            intent.putExtra(Intents.EXTRA_SHOW_PLMN, showPlmn);
+            intent.putExtra(Intents.EXTRA_PLMN, plmn);
             phone.getContext().sendStickyBroadcast(intent);
         }
 
-        //curSpnRule = rule;
-        //curSpn = spn;
-        this.curEriText = eri;
+        curSpnRule = rule;
+        curSpn = spn;
+        curPlmn = plmn;
     }
 
     /**
@@ -549,54 +543,39 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             }
         } else try {
             switch (what) {
-            case EVENT_POLL_STATE_REGISTRATION_CDMA: // Handle RIL_REQUEST_REGISTRATION_STATE,
-                                                     // the offset is because we don't want the
-                                                     // first 3 values in the
-                                                     // responseValuesRegistrationState array.
-                final int offset = 3;
+            case EVENT_POLL_STATE_REGISTRATION_CDMA: // Handle RIL_REQUEST_REGISTRATION_STATE.
                 states = (String[])ar.result;
 
-                /**
-                 * TODO(Teleca): Change from array to a "Class" or local
-                 * variables so names instead of index's can be used.
-                 */
-                int responseValuesRegistrationState[] = {
-                        -1, //[0] radioTechnology
-                        -1, //[1] baseStationId
-                        -1, //[2] baseStationLatitude
-                        -1, //[3] baseStationLongitude
-                         0, //[4] cssIndicator; init with 0, because it is treated as a boolean
-                        -1, //[5] systemId
-                        -1, //[6] networkId
-                        -1, //[7] Roaming indicator
-                        -1, //[8] Indicates if current system is in PRL
-                        -1, //[9] Is default roaming indicator from PRL
-                        -1, //[10] If registration state is 3 this is reason for denial
-                };
+                int registrationState = 4;     //[0] registrationState
+                int radioTechnology = -1;      //[3] radioTechnology
+                int baseStationId = -1;        //[4] baseStationId
+                int baseStationLatitude = -1;  //[5] baseStationLatitude
+                int baseStationLongitude = -1; //[6] baseStationLongitude
+                int cssIndicator = 0;          //[7] init with 0, because it is treated as a boolean
+                int systemId = 0;              //[8] systemId
+                int networkId = 0;             //[9] networkId
+                int roamingIndicator = -1;     //[10] Roaming indicator
+                int systemIsInPrl = 0;         //[11] Indicates if current system is in PRL
+                int defaultRoamingIndicator = 0;  //[12] Is default roaming indicator from PRL
+                int reasonForDenial = 0;       //[13] Denial reason if registrationState = 3
 
                 if (states.length == 14) {
                     try {
-                        this.mRegistrationState = Integer.parseInt(states[0]);
-                    } catch (NumberFormatException ex) {
-                        Log.w(LOG_TAG, "error parsing RegistrationState: " + ex);
-                    }
-                    try {
-                        responseValuesRegistrationState[0] = Integer.parseInt(states[3]);
-                        responseValuesRegistrationState[1] = Integer.parseInt(states[4], 16);
-                        responseValuesRegistrationState[2] = Integer.parseInt(states[5], 16);
-                        responseValuesRegistrationState[3] = Integer.parseInt(states[6], 16);
-                        responseValuesRegistrationState[4] = Integer.parseInt(states[7]);
-                        responseValuesRegistrationState[5] = Integer.parseInt(states[8]);
-                        responseValuesRegistrationState[6] = Integer.parseInt(states[9]);
-                        responseValuesRegistrationState[7] = Integer.parseInt(states[10]);
-                        responseValuesRegistrationState[8] = Integer.parseInt(states[11]);
-                        responseValuesRegistrationState[9] = Integer.parseInt(states[12]);
-                        responseValuesRegistrationState[10] = Integer.parseInt(states[13]);
+                        registrationState = Integer.parseInt(states[0]);
+                        radioTechnology = Integer.parseInt(states[3]);
+                        baseStationId = Integer.parseInt(states[4], 16);
+                        baseStationLatitude = Integer.parseInt(states[5], 16);
+                        baseStationLongitude = Integer.parseInt(states[6], 16);
+                        cssIndicator = Integer.parseInt(states[7]);
+                        systemId = Integer.parseInt(states[8]);
+                        networkId = Integer.parseInt(states[9]);
+                        roamingIndicator = Integer.parseInt(states[10]);
+                        systemIsInPrl = Integer.parseInt(states[11]);
+                        defaultRoamingIndicator = Integer.parseInt(states[12]);
+                        reasonForDenial = Integer.parseInt(states[13]);
                     }
                     catch(NumberFormatException ex) {
-                        Log.w(LOG_TAG, "Warning! There is an unexpected value"
-                            + "returned as response from "
-                            + "RIL_REQUEST_REGISTRATION_STATE.");
+                        Log.w(LOG_TAG, "error parsing RegistrationState: " + ex);
                     }
                 } else {
                     throw new RuntimeException("Warning! Wrong number of parameters returned from "
@@ -604,29 +583,28 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                                          + states.length);
                 }
 
-                mCdmaRoaming = regCodeIsRoaming(this.mRegistrationState);
-                this.newCdmaDataConnectionState =
-                    radioTechnologyToServiceState(responseValuesRegistrationState[0]);
-                newSS.setState (regCodeToServiceState(this.mRegistrationState));
-                newSS.setRadioTechnology(responseValuesRegistrationState[0]);
-                newSS.setCssIndicator(responseValuesRegistrationState[4]);
-                newSS.setSystemAndNetworkId(responseValuesRegistrationState[5],
-                    responseValuesRegistrationState[6]);
+                mRegistrationState = registrationState;
+                mCdmaRoaming = regCodeIsRoaming(registrationState);
+                newSS.setState (regCodeToServiceState(registrationState));
 
-                mRoamingIndicator = responseValuesRegistrationState[7];
-                mIsInPrl = responseValuesRegistrationState[8];
-                mDefaultRoamingIndicator = responseValuesRegistrationState[9];
+                this.newCdmaDataConnectionState = radioTechnologyToDataServiceState(radioTechnology);
+                newSS.setRadioTechnology(radioTechnology);
+                newNetworkType = radioTechnology;
 
-                newNetworkType = responseValuesRegistrationState[0];
+                newSS.setCssIndicator(cssIndicator);
+                newSS.setSystemAndNetworkId(systemId, networkId);
+                mRoamingIndicator = roamingIndicator;
+                mIsInPrl = (systemIsInPrl == 0) ? false : true;
+                mDefaultRoamingIndicator = defaultRoamingIndicator;
+
 
                 // values are -1 if not available
-                newCellLoc.setCellLocationData(responseValuesRegistrationState[1],
-                                               responseValuesRegistrationState[2],
-                                               responseValuesRegistrationState[3]);
+                newCellLoc.setCellLocationData(baseStationId, baseStationLatitude,
+                        baseStationLongitude);
 
-                if (responseValuesRegistrationState[10] == 0) {
+                if (reasonForDenial == 0) {
                     mRegistrationDeniedReason = ServiceStateTracker.REGISTRATION_DENIED_GEN;
-                } else if (responseValuesRegistrationState[10] == 1) {
+                } else if (reasonForDenial == 1) {
                     mRegistrationDeniedReason = ServiceStateTracker.REGISTRATION_DENIED_AUTH;
                 } else {
                     mRegistrationDeniedReason = "";
@@ -641,9 +619,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 String opNames[] = (String[])ar.result;
 
                 if (opNames != null && opNames.length >= 3) {
-                    // TODO(Teleca): Is this necessary here and in the else clause?
-                    newSS.setOperatorName(opNames[0], opNames[1], opNames[2]);
-                    if (phone.mCM.getRadioState().isNVReady()) {
+                    if (cm.getRadioState().isNVReady()) {
                         // In CDMA in case on NV the ss.mOperatorAlphaLong is set later with the
                         // ERI text, so here is ignored what is coming from the modem
                         newSS.setOperatorName(null, opNames[1], opNames[2]);
@@ -695,28 +671,25 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 newSS.setRoaming(mCdmaRoaming);
             }
 
-            /**
-             * TODO(Teleca): This would be simpler if mIsInPrl was a "boolean" as the
-             * name implies rather than tri-state. Above I've suggested that the -1's
-             * might be able to be removed, if so please simplify this. Otherwise change
-             * the name to mPrlState or some such. Also the logic can be simplified
-             * by testing for "mIsInPrl" only once.
-             */
             // Setting SS CdmaRoamingIndicator and CdmaDefaultRoamingIndicator
-            // TODO(Teleca): use constants for the standard roaming indicators
-            if (mIsInPrl == 0 && mRegistrationState == 5) {
-                // System is acquired but prl not loaded or no prl match
-                newSS.setCdmaRoamingIndicator(2); //FLASHING
-            } else if (!namMatch && (mIsInPrl == 1)) {
-                // System is acquired, no nam match, prl match
-                newSS.setCdmaRoamingIndicator(mRoamingIndicator);
-            } else if (namMatch && (mIsInPrl == 1) && mRoamingIndicator <= 2) {
-                // System is acquired, nam match, prl match, mRoamingIndicator <= 2
-                newSS.setCdmaRoamingIndicator(1); //OFF
-            } else if (namMatch && (mIsInPrl == 1) && mRoamingIndicator > 2) {
-                // System is acquired, nam match, prl match, mRoamingIndicator > 2
-                newSS.setCdmaRoamingIndicator(mRoamingIndicator);
-            }
+            // TODO(Teleca): Validate this is correct.
+            if (mIsInPrl) {
+                if (namMatch && (mRoamingIndicator <= 2)) {
+                        // System is acquired, prl match, nam match and mRoamingIndicator <= 2
+                        newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_OFF);
+                } else {
+                    // System is acquired, prl match, no nam match  or mRoamingIndicator > 2
+                    newSS.setCdmaRoamingIndicator(mRoamingIndicator);                    
+                }
+            } else {
+                if (mRegistrationState == 5) {
+                    // System is acquired but prl not loaded or no prl match
+                    newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_FLASH);
+                } else {
+                    // Use the default indicator
+                }
+            }            
+            
             newSS.setCdmaDefaultRoamingIndicator(mDefaultRoamingIndicator);
 
             // NOTE: Some operator may require to override the mCdmaRoaming (set by the modem)
@@ -725,7 +698,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             if (DBG) {
                 log("Set CDMA Roaming Indicator to: " + newSS.getCdmaRoamingIndicator()
                     + ". mCdmaRoaming = " + mCdmaRoaming + ",  namMatch = " + namMatch
-                    + ", mIsInPrl= " + mIsInPrl + ", mRoamingIndicator = " + mRoamingIndicator
+                    + ", mIsInPrl = " + mIsInPrl + ", mRoamingIndicator = " + mRoamingIndicator
                     + ", mDefaultRoamingIndicator= " + mDefaultRoamingIndicator);
             }
             pollStateDone();
@@ -882,20 +855,12 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             && newSS.getState() != ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionAttached =
-            (this.cdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_1xRTT
-                    && this.cdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_EVDO_0
-                    && this.cdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_EVDO_A)
-                    && (this.newCdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_1xRTT
-                    || this.newCdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_EVDO_0
-                    || this.newCdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_EVDO_A);
+            this.cdmaDataConnectionState != ServiceState.STATE_IN_SERVICE
+            && this.newCdmaDataConnectionState == ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionDetached =
-            (this.cdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_1xRTT
-                    || this.cdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_EVDO_0
-                    || this.cdmaDataConnectionState == ServiceState.RADIO_TECHNOLOGY_EVDO_A)
-                    && (this.newCdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_1xRTT
-                    && this.newCdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_EVDO_0
-                    && this.newCdmaDataConnectionState != ServiceState.RADIO_TECHNOLOGY_EVDO_A);
+            this.cdmaDataConnectionState == ServiceState.STATE_IN_SERVICE
+            && this.newCdmaDataConnectionState != ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionChanged =
                        cdmaDataConnectionState != newCdmaDataConnectionState;
@@ -938,18 +903,16 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasChanged) {
-            if (phone.mCM.getRadioState().isNVReady()) {
+            if (cm.getRadioState().isNVReady()) {
                 String eriText;
                 // Now the CDMAPhone sees the new ServiceState so it can get the new ERI text
                 if (ss.getState() == ServiceState.STATE_IN_SERVICE) {
                     eriText = phone.getCdmaEriText();
                 } else {
-                    // Note that this is valid only for mRegistrationState 2,3,4, not 0!
-                    /**
-                     * TODO(Teleca): From the comment this apparently isn't always true
-                     * should there be additional logic with other strings?
-                     */
-                    eriText = EriInfo.SEARCHING_TEXT;
+                    // Note that ServiceState.STATE_OUT_OF_SERVICE is valid used for
+                    // mRegistrationState 0,2,3 and 4
+                    eriText = phone.getContext().getText(
+                            com.android.internal.R.string.roamingTextSearching).toString();
                 }
                 ss.setCdmaEriText(eriText);
             }
@@ -1047,6 +1010,12 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         return guess;
     }
 
+    /**
+     * TODO: This code is exactly the same as in GsmServiceStateTracker
+     * and has a TODO to not poll signal strength if screen is off.
+     * This code should probably be hoisted to the base class so
+     * the fix, when added, works for both.
+     */
     private void
     queueNextSignalStrengthPoll() {
         if (dontPollSignalStrength || (cm.getRadioState().isGsm())) {
@@ -1060,7 +1029,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         msg = obtainMessage();
         msg.what = EVENT_POLL_SIGNAL_STRENGTH;
 
-        // TODO(Teleca): Don't poll signal strength if screen is off
+        // TODO Don't poll signal strength if screen is off
         sendMessageDelayed(msg, POLL_PERIOD_MILLIS);
     }
 
@@ -1108,8 +1077,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     }
 
 
-    private int radioTechnologyToServiceState(int code) {
-        int retVal = ServiceState.RADIO_TECHNOLOGY_UNKNOWN;
+    private int radioTechnologyToDataServiceState(int code) {
+        int retVal = ServiceState.STATE_OUT_OF_SERVICE;
         switch(code) {
         case 0:
         case 1:
@@ -1118,14 +1087,10 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         case 4:
         case 5:
             break;
-        case 6:
-            retVal = ServiceState.RADIO_TECHNOLOGY_1xRTT;
-            break;
-        case 7:
-            retVal = ServiceState.RADIO_TECHNOLOGY_EVDO_0;
-            break;
-        case 8:
-            retVal = ServiceState.RADIO_TECHNOLOGY_EVDO_A;
+        case 6: // RADIO_TECHNOLOGY_1xRTT
+        case 7: // RADIO_TECHNOLOGY_EVDO_0
+        case 8: // RADIO_TECHNOLOGY_EVDO_A
+            retVal = ServiceState.STATE_IN_SERVICE;
             break;
         default:
             Log.e(LOG_TAG, "Wrong radioTechnology code.");
@@ -1433,6 +1398,14 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     protected void log(String s) {
         Log.d(LOG_TAG, "[CdmaServiceStateTracker] " + s);
+    }
+
+    public String getMdnNumber() {
+        return mMdn;
+    }
+
+    public String getCdmaMin() {
+         return mMin;
     }
 
 }

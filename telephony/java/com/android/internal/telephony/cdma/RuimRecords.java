@@ -55,11 +55,8 @@ public final class RuimRecords extends IccRecords {
 
     //***** Instance Variables
 
-    private String mImsi;       // TODO(Teleca): to be checked, if this should be removed!
-    private String mMyMobileNumber;
-    private String mSid;        // TODO(Teleca): Unused should this be removed
-    private String mNid;        // TODO(Teleca): Unused should this be removed
-    private String mMin2Min1;
+    String spn;
+    int spnDisplayCondition;
 
     //***** Event Constants
 
@@ -134,19 +131,6 @@ public final class RuimRecords extends IccRecords {
         recordsRequested = false;
     }
 
-    /** Returns null if RUIM is not yet ready */
-    public String getIMSI_M() {
-        return mImsi;
-    }
-
-    public String getMdnNumber() {
-        return mMyMobileNumber;
-    }
-
-    public String getCdmaMin() {
-         return mMin2Min1;
-    }
-
     @Override
     public void setVoiceMailNumber(String alphaTag, String voiceNumber, Message onComplete){
         // In CDMA this is Operator/OEM dependent
@@ -169,32 +153,6 @@ public final class RuimRecords extends IccRecords {
             // just re-fetch all RUIM records that we cache.
             fetchRuimRecords();
         }
-    }
-
-    /** 
-     * Returns the 5 or 6 digit MCC/MNC of the operator that
-     *  provided the RUIM card. Returns null of RUIM is not yet ready
-     */
-    public String getRUIMOperatorNumeric() {
-        if (mImsi == null) {
-            return null;
-        }
-
-        if (mncLength != 0) {
-            // Length = length of MCC + length of MNC
-            // TODO: change spec name
-            // length of mcc = 3 (3GPP2 C.S0005 - Section 2.3)
-            return mImsi.substring(0, 3 + mncLength);
-        }
-
-        // Guess the MNC length based on the MCC if we don't
-        // have a valid value in ef[ad]
-
-        int mcc;
-
-        mcc = Integer.parseInt(mImsi.substring(0,3));
-
-        return mImsi.substring(0, 3 + MccTable.smallestDigitsMccForMnc(mcc));
     }
 
     @Override
@@ -223,28 +181,35 @@ public final class RuimRecords extends IccRecords {
             /* IO events */
 
             case EVENT_GET_CDMA_SUBSCRIPTION_DONE:
+                // TODO(Moto):TODO(Teleca): This event was removed by Teleca/QCT
+                // I've left it as it's needed to complete EVENT_OTA_PROVISION_STATUS_CHANGE.
+                // But since various instance variables are removed I've commented
+                // out code that references them. I'm sure this is wrong so
+                // Moto/Teleca/QCT need to come to an agreement. Also see onRuimReady
+                // and onVnReady.
+
                 ar = (AsyncResult)msg.obj;
                 String localTemp[] = (String[])ar.result;
                 if (ar.exception != null) {
                     break;
                 }
                 if(m_ota_commited) {
-                    if(mMyMobileNumber != localTemp[0]) {
+                    //if(mMyMobileNumber != localTemp[0]) {
                         Intent intent = new Intent(TelephonyIntents.ACTION_CDMA_OTA_MDN_CHANGED);
                         intent.putExtra("mdn", localTemp[0]);
                         Log.d(LOG_TAG,"Broadcasting intent MDN Change in OTA ");
                         ActivityManagerNative.broadcastStickyIntent(intent, null);
-                    }
+                    //}
                     m_ota_commited=false;
                 }
-                mMyMobileNumber = localTemp[0];
-                mSid = localTemp[1];
-                mNid = localTemp[2];
-                if (localTemp.length >= 3) { // TODO(Moto): remove when new ril always returns min2_min1
-                   mMin2Min1 = localTemp[3];
-                }
+                //mMyMobileNumber = localTemp[0];
+                //mSid = localTemp[1];
+                //mNid = localTemp[2];
+                //if (localTemp.length >= 3) { // TODO(Moto): remove when new ril always returns min2_min1
+                //   mMin2Min1 = localTemp[3];
+                //}
 
-                Log.d(LOG_TAG, "MDN: " + mMyMobileNumber + " MIN: " + mMin2Min1);
+                //Log.d(LOG_TAG, "MDN: " + mMyMobileNumber + " MIN: " + mMin2Min1);
 
             break;
 
@@ -350,14 +315,14 @@ public final class RuimRecords extends IccRecords {
                 RuimCard.INTENT_VALUE_ICC_READY, null);
 
         fetchRuimRecords();
-
-        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
-
+        
+        // TODO(Moto): TODO(Teleca): Work out how to do CDMA subscription
+        // phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
     }
 
     private void onNvReady() {
-        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
-
+        // TODO(Moto): TODO(Teleca): Work out how to do CDMA subscription
+        // phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));        
     }
 
     private void fetchRuimRecords() {

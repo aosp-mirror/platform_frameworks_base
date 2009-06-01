@@ -361,9 +361,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
 
         if ((state == State.IDLE || state == State.SCANNING)
-                && (psState == ServiceState.RADIO_TECHNOLOGY_1xRTT ||
-                    psState == ServiceState.RADIO_TECHNOLOGY_EVDO_0 ||
-                    psState == ServiceState.RADIO_TECHNOLOGY_EVDO_A)
+                && (psState == ServiceState.STATE_IN_SERVICE)
                 && ((phone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY) ||
                         mCdmaPhone.mRuimRecords.getRecordsLoaded())
                 && (mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
