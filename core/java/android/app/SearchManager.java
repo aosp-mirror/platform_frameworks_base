@@ -1302,9 +1302,10 @@ public class SearchManager
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  This column allows suggestions
      *  to provide additional arbitrary data which will be included as an extra under the key
-     *  {@link #EXTRA_DATA_KEY}.
+     *  {@link #EXTRA_DATA_KEY}. For use by the global search system only - if other providers
+     *  attempt to use this column, the value will be overwritten by global search.
      * 
-     * @hide pending API council approval
+     * @hide
      */
     public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
     /**
