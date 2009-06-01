@@ -250,6 +250,12 @@ public class SmsMessage extends SmsMessageBase{
 
             // TP-Data-Coding-Scheme
             // Default encoding, uncompressed
+            // To test writing messages to the SIM card, change this value 0x00
+            // to 0x12, which means "bits 1 and 0 contain message class, and the
+            // class is 2". Note that this takes effect for the sender. In other
+            // words, messages sent by the phone with this change will end up on
+            // the receiver's SIM card. You can then send messages to yourself
+            // (on a phone with this change) and they'll end up on the SIM card.
             bo.write(0x00);
 
             // (no TP-Validity-Period)
@@ -558,9 +564,10 @@ public class SmsMessage extends SmsMessageBase{
             int offset = cur;
             int userDataLength = pdu[offset++] & 0xff;
             int headerSeptets = 0;
+            int userDataHeaderLength = 0;
 
             if (hasUserDataHeader) {
-                int userDataHeaderLength = pdu[offset++] & 0xff;
+                userDataHeaderLength = pdu[offset++] & 0xff;
 
                 byte[] udh = new byte[userDataHeaderLength];
                 System.arraycopy(pdu, offset, udh, 0, userDataHeaderLength);
@@ -573,19 +580,34 @@ public class SmsMessage extends SmsMessageBase{
                 mUserDataSeptetPadding = (headerSeptets * 7) - headerBits;
             }
 
-            /*
-             * Here we just create the user data length to be the remainder of
-             * the pdu minus the user data hearder. This is because the count
-             * could mean the number of uncompressed sepets if the userdata is
-             * encoded in 7-bit.
-             */
-            userData = new byte[pdu.length - offset];
+            int bufferLen;
+            if (dataInSeptets) {
+                /*
+                 * Here we just create the user data length to be the remainder of
+                 * the pdu minus the user data header, since userDataLength means
+                 * the number of uncompressed sepets.
+                 */
+                bufferLen = pdu.length - offset;
+            } else {
+                /*
+                 * userDataLength is the count of octets, so just subtract the
+                 * user data header.
+                 */
+                bufferLen = userDataLength - (hasUserDataHeader ? (userDataHeaderLength + 1) : 0);
+                if (bufferLen < 0) {
+                    bufferLen = 0;
+                }
+            }
+
+            userData = new byte[bufferLen];
             System.arraycopy(pdu, offset, userData, 0, userData.length);
             cur = offset;
 
             if (dataInSeptets) {
                 // Return the number of septets
-                return userDataLength - headerSeptets;
+                int count = userDataLength - headerSeptets;
+                // If count < 0, return 0 (means UDL was probably incorrect)
+                return count < 0 ? 0 : count;
             } else {
                 // Return the number of octets
                 return userData.length;
