@@ -382,8 +382,8 @@
         android:label="@string/permgrouplab_storage"
         android:description="@string/permgroupdesc_storage" />
 
-    <!-- Allows an application to write to the SD card -->
-    <permission android:name="android.permission.WRITE_SDCARD"
+    <!-- Allows an application to write to external storage -->
+    <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"

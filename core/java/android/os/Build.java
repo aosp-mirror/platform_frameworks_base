@@ -117,7 +117,7 @@ public class Build {
          * new changes in behavior:</p>
          * <ul>
          * <li> They must explicitly request the
-         * {@link android.Manifest.permission#WRITE_SDCARD} permission to be
+         * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission to be
          * able to modify the contents of the SD card.  (Apps targeting
          * earlier versions will always request the permission.)
          * </ul>
