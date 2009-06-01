@@ -80,6 +80,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             System.gc();
             System.gc();
         }
+        updateTestStatus(TEST_DONE);
         activity.finish();
         listReader.close();
     }
