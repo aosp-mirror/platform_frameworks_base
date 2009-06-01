@@ -7,7 +7,10 @@
 #define __BUNDLE_H
 
 #include <stdlib.h>
-#include <utils.h>      // android
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 

@@ -88,9 +88,6 @@ nsecs_t systemTime(int clock = SYSTEM_TIME_MONOTONIC);
 nsecs_t systemTime(int clock);
 #endif // def __cplusplus
 
-// return the system-time according to the specified clock
-int sleepForInterval(long interval, struct timeval* pNextTick);
-
 #ifdef __cplusplus
 } // extern "C"
 #endif

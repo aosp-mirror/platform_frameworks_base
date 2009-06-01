@@ -44,23 +44,27 @@ SoundPool::SoundPool(jobject soundPoolRef, int maxChannels, int streamType, int 
     LOGV("SoundPool constructor: maxChannels=%d, streamType=%d, srcQuality=%d",
             maxChannels, streamType, srcQuality);
 
-    if (maxChannels > 32) {
-        LOGW("App requested %d channels, capped at 32", maxChannels);
-        maxChannels = 32;
+    // check limits
+    mMaxChannels = maxChannels;
+    if (mMaxChannels < 1) {
+        mMaxChannels = 1;
     }
+    else if (mMaxChannels > 32) {
+        mMaxChannels = 32;
+    }
+    LOGW_IF(maxChannels != mMaxChannels, "App requested %d channels", maxChannels);
 
     mQuit = false;
     mSoundPoolRef = soundPoolRef;
     mDecodeThread = 0;
-    mMaxChannels = maxChannels;
     mStreamType = streamType;
     mSrcQuality = srcQuality;
     mAllocated = 0;
     mNextSampleID = 0;
     mNextChannelID = 0;
 
-    mChannelPool = new SoundChannel[maxChannels];
-    for (int i = 0; i < maxChannels; ++i) {
+    mChannelPool = new SoundChannel[mMaxChannels];
+    for (int i = 0; i < mMaxChannels; ++i) {
         mChannelPool[i].init(this);
         mChannels.push_back(&mChannelPool[i]);
     }

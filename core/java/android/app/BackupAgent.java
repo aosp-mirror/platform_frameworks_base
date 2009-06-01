@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app;
 
-import android.annotation.SdkConstant;
-import android.annotation.SdkConstant.SdkConstantType;
-import android.app.Service;
-import android.backup.IBackupService;
-import android.content.Intent;
+import android.app.IBackupAgent;
+import android.backup.BackupDataOutput;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -30,31 +29,18 @@ import android.util.Log;
  * This is the central interface between an application and Android's
  * settings backup mechanism.
  * 
- * In order to use the backup service, your application must implement a
- * subclass of BackupService, and declare an intent filter
- * in the application manifest specifying that your BackupService subclass
- * handles the {@link BackupService#SERVICE_ACTION} intent action.  For example:
- * 
- * <pre class="prettyprint">
- *      &lt;!-- Use the class "MyBackupService" to perform backups for my app --&gt;
- *      &lt;service android:name=".MyBackupService"&gt;
- *          &lt;intent-filter&gt;
- *              &lt;action android:name="android.backup.BackupService.SERVICE" /&gt;
- *          &lt;/intent-filter&gt;
- *      &lt;/service&gt;</pre>
- * 
  * @hide pending API solidification
  */
+public abstract class BackupAgent extends ContextWrapper {
+    public BackupAgent() {
+        super(null);
+    }
 
-public abstract class BackupService extends Service {
-    /**
-     * Service Action: Participate in the backup infrastructure.  Applications
-     * that wish to use the Android backup mechanism must provide an exported
-     * subclass of BackupService and give it an {@link android.content.IntentFilter
-     * IntentFilter} that accepts this action. 
-     */
-    @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String SERVICE_ACTION = "android.backup.BackupService.SERVICE";
+    public void onCreate() {
+    }
+
+    public void onDestroy() {
+    }
 
     /**
      * The application is being asked to write any data changed since the
@@ -91,7 +77,8 @@ public abstract class BackupService extends Service {
      *                 file.  The application should record the final backup state
      *                 here after restoring its data from dataFd.
      */
-    public abstract void onRestore(ParcelFileDescriptor /* TODO: BackupDataInput */ data, ParcelFileDescriptor newState);
+    public abstract void onRestore(ParcelFileDescriptor /* TODO: BackupDataInput */ data,
+            ParcelFileDescriptor newState);
 
 
     // ----- Core implementation -----
@@ -100,29 +87,33 @@ public abstract class BackupService extends Service {
      * Returns the private interface called by the backup system.  Applications will
      * not typically override this.
      */
-    public IBinder onBind(Intent intent) {
-        if (intent.getAction().equals(SERVICE_ACTION)) {
-            return mBinder;
-        }
-        return null;
+    public IBinder onBind() {
+        return mBinder;
     }
 
     private final IBinder mBinder = new BackupServiceBinder().asBinder();
 
+    /** @hide */
+    public void attach(Context context) {
+        attachBaseContext(context);
+    }
+
     // ----- IBackupService binder interface -----
-    private class BackupServiceBinder extends IBackupService.Stub {
+    private class BackupServiceBinder extends IBackupAgent.Stub {
+        private static final String TAG = "BackupServiceBinder";
+
         public void doBackup(ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
-            Log.v("BackupServiceBinder", "doBackup() invoked");
-            BackupDataOutput output = new BackupDataOutput(BackupService.this,
+            Log.v(TAG, "doBackup() invoked");
+            BackupDataOutput output = new BackupDataOutput(BackupAgent.this,
                     data.getFileDescriptor());
             try {
-                BackupService.this.onBackup(oldState, output, newState);
+                BackupAgent.this.onBackup(oldState, output, newState);
             } catch (RuntimeException ex) {
-                Log.d("BackupService", "onBackup ("
-                        + BackupService.this.getClass().getName() + ") threw", ex);
+                Log.d("BackupAgent", "onBackup ("
+                        + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             }
         }
@@ -130,8 +121,8 @@ public abstract class BackupService extends Service {
         public void doRestore(ParcelFileDescriptor data,
                 ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
-            Log.v("BackupServiceBinder", "doRestore() invoked");
-            BackupService.this.onRestore(data, newState);
+            Log.v(TAG, "doRestore() invoked");
+            BackupAgent.this.onRestore(data, newState);
         }
     }
 }

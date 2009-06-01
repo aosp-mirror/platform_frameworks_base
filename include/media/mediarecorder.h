@@ -18,7 +18,10 @@
 #ifndef ANDROID_MEDIARECORDER_H
 #define ANDROID_MEDIARECORDER_H
 
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <media/IMediaPlayerClient.h>
 
 namespace android {

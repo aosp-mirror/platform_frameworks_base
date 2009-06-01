@@ -21,6 +21,7 @@ import android.content.ContentProviderNative;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.ProviderInfo;
@@ -148,6 +149,11 @@ public interface IActivityManager extends IInterface {
     /* oneway */
     public void serviceDoneExecuting(IBinder token) throws RemoteException;
     public IBinder peekService(Intent service, String resolvedType) throws RemoteException;
+    
+    public boolean bindBackupAgent(ApplicationInfo appInfo, int backupRestoreMode)
+            throws RemoteException;
+    public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException;
+    public void unbindBackupAgent(ApplicationInfo appInfo) throws RemoteException;
     
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher)
@@ -397,4 +403,7 @@ public interface IActivityManager extends IInterface {
     int SHUTDOWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+86;
     int STOP_APP_SWITCHES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+87;
     int RESUME_APP_SWITCHES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+88;
+    int START_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+89;
+    int BACKUP_AGENT_CREATED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+90;
+    int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
 }

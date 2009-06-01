@@ -76,7 +76,7 @@ public class PackageParser {
      */
     public static final PackageParser.NewPermissionInfo NEW_PERMISSIONS[] =
         new PackageParser.NewPermissionInfo[] {
-            new PackageParser.NewPermissionInfo(android.Manifest.permission.WRITE_SDCARD,
+            new PackageParser.NewPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     android.os.Build.VERSION_CODES.DONUT, 0),
             new PackageParser.NewPermissionInfo(android.Manifest.permission.READ_PHONE_STATE,
                     android.os.Build.VERSION_CODES.DONUT, 0)
@@ -1176,6 +1176,19 @@ public class PackageParser {
                     outError);
         }
 
+        boolean allowBackup = sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_allowBackup, true);
+        if (allowBackup) {
+            ai.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+            String backupAgent = sa.getNonResourceString(
+                    com.android.internal.R.styleable.AndroidManifestApplication_backupAgent);
+            if (backupAgent != null) {
+                ai.backupAgentName = buildClassName(pkgName, backupAgent, outError);
+                Log.v(TAG, "android:backupAgent = " + ai.backupAgentName
+                        + " from " + pkgName + "+" + backupAgent);
+            }
+        }
+        
         TypedValue v = sa.peekValue(
                 com.android.internal.R.styleable.AndroidManifestApplication_label);
         if (v != null && (ai.labelRes=v.resourceId) == 0) {

@@ -16,15 +16,15 @@
 
 package com.android.backuptest;
 
-import android.backup.BackupService;
+import android.app.BackupAgent;
 import android.backup.BackupDataOutput;
 import android.backup.FileBackupHelper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-public class BackupTestService extends BackupService
+public class BackupTestAgent extends BackupAgent
 {
-    static final String TAG = "BackupTestService";
+    static final String TAG = "BackupTestAgent";
 
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,

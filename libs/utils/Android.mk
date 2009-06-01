@@ -35,14 +35,12 @@ commonSources:= \
 	SystemClock.cpp \
 	TextOutput.cpp \
 	Threads.cpp \
-	TimerProbe.cpp \
 	Timers.cpp \
 	VectorImpl.cpp \
     ZipFileCRO.cpp \
 	ZipFileRO.cpp \
 	ZipUtils.cpp \
 	misc.cpp \
-	ported.cpp \
 	LogSocket.cpp
 
 #

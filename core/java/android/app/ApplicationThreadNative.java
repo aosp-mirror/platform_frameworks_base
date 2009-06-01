@@ -230,11 +230,13 @@ public abstract class ApplicationThreadNative extends Binder
             IBinder binder = data.readStrongBinder();
             IInstrumentationWatcher testWatcher = IInstrumentationWatcher.Stub.asInterface(binder);
             int testMode = data.readInt();
+            boolean restrictedBackupMode = (data.readInt() != 0);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
             HashMap<String, IBinder> services = data.readHashMap(null);
             bindApplication(packageName, info,
                             providers, testName, profileName,
-                            testArgs, testWatcher, testMode, config, services);
+                            testArgs, testWatcher, testMode, restrictedBackupMode,
+                            config, services);
             return true;
         }
         
@@ -337,6 +339,15 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             int group = data.readInt();
             setSchedulingGroup(group);
+            return true;
+        }
+
+        case SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(data);
+            int backupMode = data.readInt();
+            scheduleCreateBackupAgent(appInfo, backupMode);
             return true;
         }
         }
@@ -492,6 +503,24 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
+    public final void scheduleCreateBackupAgent(ApplicationInfo app, int backupMode)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        app.writeToParcel(data, 0);
+        data.writeInt(backupMode);
+        mRemote.transact(SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION, data, null, 0);
+        data.recycle();
+    }
+
+    public final void scheduleDestroyBackupAgent(ApplicationInfo app) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        app.writeToParcel(data, 0);
+        mRemote.transact(SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION, data, null, 0);
+        data.recycle();
+    }
+    
     public final void scheduleCreateService(IBinder token, ServiceInfo info)
             throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -551,7 +580,8 @@ class ApplicationThreadProxy implements IApplicationThread {
     public final void bindApplication(String packageName, ApplicationInfo info,
             List<ProviderInfo> providers, ComponentName testName,
             String profileName, Bundle testArgs, IInstrumentationWatcher testWatcher, int debugMode,
-            Configuration config, Map<String, IBinder> services) throws RemoteException {
+            boolean restrictedBackupMode, Configuration config,
+            Map<String, IBinder> services) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(packageName);
@@ -567,6 +597,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeBundle(testArgs);
         data.writeStrongInterface(testWatcher);
         data.writeInt(debugMode);
+        data.writeInt(restrictedBackupMode ? 1 : 0);
         config.writeToParcel(data, 0);
         data.writeMap(services);
         mRemote.transact(BIND_APPLICATION_TRANSACTION, data, null,

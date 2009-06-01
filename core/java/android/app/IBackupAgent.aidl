@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.app;
 
 import android.os.ParcelFileDescriptor;
  
 /**
  * Interface presented by applications being asked to participate in the
  * backup & restore mechanism.  End user code does not typically implement
- * this interface; they subclass BackupService instead.
+ * this interface; they subclass BackupAgent instead.
  *
  * {@hide}
  */ 
-interface IBackupService {
+interface IBackupAgent {
     /**
      * Request that the app perform an incremental backup.
      *

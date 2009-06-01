@@ -6,7 +6,10 @@
 #include "Main.h"
 #include "Bundle.h"
 
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <utils/ZipFile.h>
 
 #include <stdlib.h>

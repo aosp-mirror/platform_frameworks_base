@@ -20,7 +20,10 @@
 
 #include <utils/String8.h>
 #include <utils/threads.h>
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 
 #include <linux/input.h>
 

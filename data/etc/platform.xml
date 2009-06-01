@@ -54,7 +54,7 @@
         <group gid="log" />
     </permission>
 
-    <permission name="android.permission.WRITE_SDCARD" >
+    <permission name="android.permission.WRITE_EXTERNAL_STORAGE" >
         <group gid="sdcard_rw" />
     </permission>
 
@@ -85,7 +85,7 @@
          interact with the system. -->
 
     <!-- Standard permissions granted to the shell. -->
-    <assign-permission name="android.permission.WRITE_SDCARD" uid="shell" />
+    <assign-permission name="android.permission.WRITE_EXTERNAL_STORAGE" uid="shell" />
     <assign-permission name="android.permission.SEND_SMS" uid="shell" />
     <assign-permission name="android.permission.CALL_PHONE" uid="shell" />
     <assign-permission name="android.permission.READ_CONTACTS" uid="shell" />

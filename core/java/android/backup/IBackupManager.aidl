@@ -34,8 +34,22 @@ interface IBackupManager {
     oneway void dataChanged(String packageName);
 
     /**
+     * Notifies the Backup Manager Service that an agent has become available.  This
+     * method is only invoked by the Activity Manager.
+     * !!! TODO: permission
+     */
+    oneway void agentConnected(String packageName, IBinder agent);
+
+    /**
+     * Notify the Backup Manager Service that an agent has unexpectedly gone away.
+     * This method is only invoked by the Activity Manager.
+     * !!! TODO: permission
+     */
+    oneway void agentDisconnected(String packageName);
+
+    /**
      * Schedule a full backup of the given package.
-     * !!! TODO: protect with a signature-or-system permission?
+     * !!! TODO: permission
      */
     oneway void scheduleFullBackup(String packageName);
 }

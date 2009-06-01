@@ -16,17 +16,16 @@
 
 package com.android.server;
 
-import android.backup.BackupService;
-import android.backup.IBackupService;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
+import android.app.IApplicationThread;
+import android.app.IBackupAgent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -49,6 +48,7 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 class BackupManagerService extends IBackupManager.Stub {
@@ -62,22 +62,28 @@ class BackupManagerService extends IBackupManager.Stub {
     
     private Context mContext;
     private PackageManager mPackageManager;
+    private final IActivityManager mActivityManager;
     private final BackupHandler mBackupHandler = new BackupHandler();
     // map UIDs to the set of backup client services within that UID's app set
-    private SparseArray<HashSet<ServiceInfo>> mBackupParticipants
-        = new SparseArray<HashSet<ServiceInfo>>();
+    private SparseArray<HashSet<ApplicationInfo>> mBackupParticipants
+        = new SparseArray<HashSet<ApplicationInfo>>();
     // set of backup services that have pending changes
     private class BackupRequest {
-        public ServiceInfo service;
+        public ApplicationInfo appInfo;
         public boolean fullBackup;
         
-        BackupRequest(ServiceInfo svc, boolean isFull) {
-            service = svc;
+        BackupRequest(ApplicationInfo app, boolean isFull) {
+            appInfo = app;
             fullBackup = isFull;
+        }
+
+        public String toString() {
+            return "BackupRequest{app=" + appInfo + " full=" + fullBackup + "}";
         }
     }
     // Backups that we haven't started yet.
-    private HashMap<ComponentName,BackupRequest> mPendingBackups = new HashMap();
+    private HashMap<ApplicationInfo,BackupRequest> mPendingBackups
+            = new HashMap<ApplicationInfo,BackupRequest>();
     // Backups that we have started.  These are separate to prevent starvation
     // if an app keeps re-enqueuing itself.
     private ArrayList<BackupRequest> mBackupQueue;
@@ -89,6 +95,7 @@ class BackupManagerService extends IBackupManager.Stub {
     public BackupManagerService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
+        mActivityManager = ActivityManagerNative.getDefault();
 
         // Set up our bookkeeping
         mStateDir = new File(Environment.getDataDirectory(), "backup");
@@ -151,7 +158,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Run the actual backup process asynchronously -----
 
-    private class BackupHandler extends Handler implements ServiceConnection {
+    private class BackupHandler extends Handler {
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
@@ -163,31 +170,20 @@ class BackupManagerService extends IBackupManager.Stub {
                         for (BackupRequest b: mPendingBackups.values()) {
                             mBackupQueue.add(b);
                         }
-                        mPendingBackups = new HashMap<ComponentName,BackupRequest>();
+                        mPendingBackups = new HashMap<ApplicationInfo,BackupRequest>();
                     }
                     // !!! TODO: start a new backup-queue journal file too
                     // WARNING: If we crash after this line, anything in mPendingBackups will
                     // be lost.  FIX THIS.
                 }
-                startOneService();
+                startOneAgent();
                 break;
             }
         }
-        
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "onServiceConnected name=" + name + " service=" + service);
-            IBackupService bs = IBackupService.Stub.asInterface(service);
-            processOneBackup(name, bs);
-        }
-
-        public void onServiceDisconnected(ComponentName name) {
-            // TODO: handle backup being interrupted
-        }
     }
 
-    void startOneService() {
+    void startOneAgent() {
         // Loop until we find someone to start or the queue empties out.
-        Intent intent = new Intent(BackupService.SERVICE_ACTION);
         while (true) {
             BackupRequest request;
             synchronized (mQueueLock) {
@@ -205,14 +201,19 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Take it off the queue when we're done.
             }
             
-            intent.setClassName(request.service.packageName, request.service.name);
-            Log.d(TAG, "binding to " + intent);
+            Log.d(TAG, "starting agent for " + request);
+            // !!! TODO: need to handle the restore case?
+            int mode = (request.fullBackup)
+                    ? IApplicationThread.BACKUP_MODE_FULL
+                    : IApplicationThread.BACKUP_MODE_INCREMENTAL;
             try {
-                if (mContext.bindService(intent, mBackupHandler, Context.BIND_AUTO_CREATE)) {
-                    Log.d(TAG, "awaiting service object for " + intent);
+                if (mActivityManager.bindBackupAgent(request.appInfo, mode)) {
+                    Log.d(TAG, "awaiting agent for " + request);
                     // success
                     return;
                 }
+            } catch (RemoteException e) {
+                // can't happen; activity manager is local
             } catch (SecurityException ex) {
                 // Try for the next one.
                 Log.d(TAG, "error in bind", ex);
@@ -220,23 +221,23 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    void processOneBackup(ComponentName name, IBackupService bs) {
-        try {
-            Log.d(TAG, "processOneBackup doBackup() on " + name);
+    void processOneBackup(String packageName, IBackupAgent bs) {
+        Log.d(TAG, "processOneBackup doBackup() on " + packageName);
 
-            BackupRequest request;
-            synchronized (mQueueLock) {
-                if (mBackupQueue == null) {
-                    Log.d(TAG, "mBackupQueue is null.  WHY?");
-                }
-                request = mBackupQueue.get(0);
+        BackupRequest request;
+        synchronized (mQueueLock) {
+            if (mBackupQueue == null) {
+                Log.d(TAG, "mBackupQueue is null.  WHY?");
             }
+            request = mBackupQueue.get(0);
+        }
 
+        try {
             // !!! TODO right now these naming schemes limit applications to
             // one backup service per package
-            File savedStateName = new File(mStateDir, request.service.packageName);
-            File backupDataName = new File(mDataDir, request.service.packageName + ".data");
-            File newStateName = new File(mStateDir, request.service.packageName + ".new");
+            File savedStateName = new File(mStateDir, request.appInfo.packageName);
+            File backupDataName = new File(mDataDir, request.appInfo.packageName + ".data");
+            File newStateName = new File(mStateDir, request.appInfo.packageName + ".new");
             
             // In a full backup, we pass a null ParcelFileDescriptor as
             // the saved-state "file"
@@ -280,7 +281,7 @@ class BackupManagerService extends IBackupManager.Stub {
             Log.d(TAG, "File not found on backup: ");
             fnf.printStackTrace();
         } catch (RemoteException e) {
-            Log.d(TAG, "Remote target " + name + " threw during backup:");
+            Log.d(TAG, "Remote target " + packageName + " threw during backup:");
             e.printStackTrace();
         } catch (Exception e) {
             Log.w(TAG, "Final exception guard in backup: ");
@@ -289,37 +290,45 @@ class BackupManagerService extends IBackupManager.Stub {
         synchronized (mQueueLock) {
             mBackupQueue.remove(0);
         }
-        mContext.unbindService(mBackupHandler);
+
+        if (request != null) {
+            try {
+                mActivityManager.unbindBackupAgent(request.appInfo);
+            } catch (RemoteException e) {
+                // can't happen
+            }
+        }
 
         // start the next one
-        startOneService();
+        startOneAgent();
     }
 
-    // Add the backup services in the given package to our set of known backup participants.
-    // If 'packageName' is null, adds all backup services in the system.
+    // Add the backup agents in the given package to our set of known backup participants.
+    // If 'packageName' is null, adds all backup agents in the whole system.
     void addPackageParticipantsLocked(String packageName) {
-        List<ResolveInfo> services = mPackageManager.queryIntentServices(
-                new Intent(BackupService.SERVICE_ACTION), 0);
-        addPackageParticipantsLockedInner(packageName, services);
+        // Look for apps that define the android:backupAgent attribute
+        List<ApplicationInfo> targetApps = allAgentApps();
+        addPackageParticipantsLockedInner(packageName, targetApps);
     }
 
-    private void addPackageParticipantsLockedInner(String packageName, List<ResolveInfo> services) {
-        for (ResolveInfo ri : services) {
-            if (packageName == null || ri.serviceInfo.packageName.equals(packageName)) {
-                int uid = ri.serviceInfo.applicationInfo.uid;
-                HashSet<ServiceInfo> set = mBackupParticipants.get(uid);
+    private void addPackageParticipantsLockedInner(String packageName,
+            List<ApplicationInfo> targetApps) {
+        if (DEBUG) {
+            Log.v(TAG, "Adding " + targetApps.size() + " backup participants:");
+            for (ApplicationInfo a : targetApps) {
+                Log.v(TAG, "    " + a + " agent=" + a.backupAgentName);
+            }
+        }
+
+        for (ApplicationInfo app : targetApps) {
+            if (packageName == null || app.packageName.equals(packageName)) {
+                int uid = app.uid;
+                HashSet<ApplicationInfo> set = mBackupParticipants.get(uid);
                 if (set == null) {
-                    set = new HashSet<ServiceInfo>();
+                    set = new HashSet<ApplicationInfo>();
                     mBackupParticipants.put(uid, set);
                 }
-                if (DEBUG) {
-                    Log.v(TAG, "Adding " + services.size() + " backup participants:");
-                    for (ResolveInfo svc : services) {
-                        Log.v(TAG, "    " + svc + " : " + svc.filter);
-                    }
-                }
-
-                set.add(ri.serviceInfo);
+                set.add(app);
             }
         }
     }
@@ -327,19 +336,30 @@ class BackupManagerService extends IBackupManager.Stub {
     // Remove the given package's backup services from our known active set.  If
     // 'packageName' is null, *all* backup services will be removed.
     void removePackageParticipantsLocked(String packageName) {
-        List<ResolveInfo> services = mPackageManager.queryIntentServices(
-                new Intent(BackupService.SERVICE_ACTION), 0);
-        removePackageParticipantsLockedInner(packageName, services);
+        List<ApplicationInfo> allApps = null;
+        if (packageName != null) {
+            allApps = new ArrayList<ApplicationInfo>();
+            try {
+                ApplicationInfo app = mPackageManager.getApplicationInfo(packageName, 0);
+                allApps.add(app);
+            } catch (Exception e) {
+                // just skip it
+            }
+        } else {
+            // all apps with agents
+            allApps = allAgentApps();
+        }
+        removePackageParticipantsLockedInner(packageName, allApps);
     }
 
     private void removePackageParticipantsLockedInner(String packageName,
-            List<ResolveInfo> services) {
-        for (ResolveInfo ri : services) {
-            if (packageName == null || ri.serviceInfo.packageName.equals(packageName)) {
-                int uid = ri.serviceInfo.applicationInfo.uid;
-                HashSet<ServiceInfo> set = mBackupParticipants.get(uid);
+            List<ApplicationInfo> agents) {
+        for (ApplicationInfo app : agents) {
+            if (packageName == null || app.packageName.equals(packageName)) {
+                int uid = app.uid;
+                HashSet<ApplicationInfo> set = mBackupParticipants.get(uid);
                 if (set != null) {
-                    set.remove(ri.serviceInfo);
+                    set.remove(app);
                     if (set.size() == 0) {
                         mBackupParticipants.put(uid, null);
                     }
@@ -348,6 +368,21 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // Returns the set of all applications that define an android:backupAgent attribute
+    private List<ApplicationInfo> allAgentApps() {
+        List<ApplicationInfo> allApps = mPackageManager.getInstalledApplications(0);
+        int N = allApps.size();
+        if (N > 0) {
+            for (int a = N-1; a >= 0; a--) {
+                ApplicationInfo app = allApps.get(a);
+                if (app.backupAgentName == null) {
+                    allApps.remove(a);
+                }
+            }
+        }
+        return allApps;
+    }
+    
     // Reset the given package's known backup participants.  Unlike add/remove, the update
     // action cannot be passed a null package name.
     void updatePackageParticipantsLocked(String packageName) {
@@ -357,10 +392,9 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         // brute force but small code size
-        List<ResolveInfo> services = mPackageManager.queryIntentServices(
-                new Intent(BackupService.SERVICE_ACTION), 0);
-        removePackageParticipantsLockedInner(packageName, services);
-        addPackageParticipantsLockedInner(packageName, services);
+        List<ApplicationInfo> allApps = allAgentApps();
+        removePackageParticipantsLockedInner(packageName, allApps);
+        addPackageParticipantsLockedInner(packageName, allApps);
     }
 
     // ----- IBackupManager binder interface -----
@@ -372,24 +406,29 @@ class BackupManagerService extends IBackupManager.Stub {
 
         Log.d(TAG, "dataChanged packageName=" + packageName);
         
-        HashSet<ServiceInfo> targets = mBackupParticipants.get(Binder.getCallingUid());
-        Log.d(TAG, "targets=" + targets);
+        HashSet<ApplicationInfo> targets = mBackupParticipants.get(Binder.getCallingUid());
         if (targets != null) {
             synchronized (mQueueLock) {
                 // Note that this client has made data changes that need to be backed up
-                for (ServiceInfo service : targets) {
+                for (ApplicationInfo app : targets) {
                     // validate the caller-supplied package name against the known set of
                     // packages associated with this uid
-                    if (service.packageName.equals(packageName)) {
+                    if (app.packageName.equals(packageName)) {
                         // Add the caller to the set of pending backups.  If there is
                         // one already there, then overwrite it, but no harm done.
-                        mPendingBackups.put(new ComponentName(service.packageName, service.name),
-                                new BackupRequest(service, true));
+                        BackupRequest req = new BackupRequest(app, false);
+                        mPendingBackups.put(app, req);
                         // !!! TODO: write to the pending-backup journal file in case of crash
                     }
                 }
 
-                Log.d(TAG, "Scheduling backup for " + mPendingBackups.size() + " participants");
+                if (DEBUG) {
+                    int numKeys = mPendingBackups.size();
+                    Log.d(TAG, "Scheduling backup for " + numKeys + " participants:");
+                    for (BackupRequest b : mPendingBackups.values()) {
+                        Log.d(TAG, "    + " + b + " agent=" + b.appInfo.backupAgentName);
+                    }
+                }
                 // Schedule a backup pass in a few minutes.  As backup-eligible data
                 // keeps changing, continue to defer the backup pass until things
                 // settle down, to avoid extra overhead.
@@ -402,21 +441,34 @@ class BackupManagerService extends IBackupManager.Stub {
     // that uid or package itself.
     public void scheduleFullBackup(String packageName) throws RemoteException {
         // !!! TODO: protect with a signature-or-system permission?
-        HashSet<ServiceInfo> targets = new HashSet<ServiceInfo>();
         synchronized (mQueueLock) {
             int numKeys = mBackupParticipants.size();
             for (int index = 0; index < numKeys; index++) {
                 int uid = mBackupParticipants.keyAt(index);
-                HashSet<ServiceInfo> servicesAtUid = mBackupParticipants.get(uid);
-                for (ServiceInfo service: servicesAtUid) {
-                    if (service.packageName.equals(packageName)) {
-                        mPendingBackups.put(new ComponentName(service.packageName, service.name),
-                                new BackupRequest(service, true));
+                HashSet<ApplicationInfo> servicesAtUid = mBackupParticipants.get(uid);
+                for (ApplicationInfo app: servicesAtUid) {
+                    if (app.packageName.equals(packageName)) {
+                        mPendingBackups.put(app, new BackupRequest(app, true));
                     }
                 }
             }
         }
     }
+
+    // Callback: a requested backup agent has been instantiated
+    public void agentConnected(String packageName, IBinder agentBinder) {
+        Log.d(TAG, "agentConnected pkg=" + packageName + " agent=" + agentBinder);
+        IBackupAgent bs = IBackupAgent.Stub.asInterface(agentBinder);
+        processOneBackup(packageName, bs);
+    }
+
+    // Callback: a backup agent has failed to come up, or has unexpectedly quit.
+    // If the agent failed to come up in the first place, the agentBinder argument
+    // will be null.
+    public void agentDisconnected(String packageName) {
+        // TODO: handle backup being interrupted
+    }
+    
 
     
     @Override
@@ -428,11 +480,17 @@ class BackupManagerService extends IBackupManager.Stub {
                 int uid = mBackupParticipants.keyAt(i);
                 pw.print("  uid: ");
                 pw.println(uid);
-                HashSet<ServiceInfo> services = mBackupParticipants.valueAt(i);
-                for (ServiceInfo s: services) {
+                HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
+                for (ApplicationInfo app: participants) {
                     pw.print("    ");
-                    pw.println(s.toString());
+                    pw.println(app.toString());
                 }
+            }
+            pw.println("Pending:");
+            Iterator<BackupRequest> br = mPendingBackups.values().iterator();
+            while (br.hasNext()) {
+                pw.print("    ");
+                pw.println(br);
             }
         }
     }

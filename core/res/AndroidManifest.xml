@@ -382,8 +382,8 @@
         android:label="@string/permgrouplab_storage"
         android:description="@string/permgroupdesc_storage" />
 
-    <!-- Allows an application to write to the SD card -->
-    <permission android:name="android.permission.WRITE_SDCARD"
+    <!-- Allows an application to write to external storage -->
+    <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
@@ -971,6 +971,13 @@
         android:label="@string/permlab_batteryStats"
         android:description="@string/permdesc_batteryStats"
         android:protectionLevel="normal" />
+
+    <!-- Allows an application to control the backup and restore process
+         @hide pending API council -->
+    <permission android:name="android.permission.BACKUP"
+        android:label="@string/permlab_backup"
+        android:description="@string/permdesc_backup"
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to tell the AppWidget service which application
          can access AppWidget's data.  The normal user flow is that a user
