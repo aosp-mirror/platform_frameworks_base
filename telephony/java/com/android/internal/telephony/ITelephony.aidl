@@ -241,7 +241,7 @@ interface ITelephony {
     /**
       * Returns the unread count of voicemails
       */
-    int getCountVoiceMessages();
+    int getVoiceMessageCount();
 
 }
 

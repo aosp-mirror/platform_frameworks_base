@@ -631,6 +631,11 @@ public abstract class PhoneBase implements Phone {
         mNotifier.notifyDataActivity(this);
     }
 
+    public void notifyMessageWaitingIndicator() {
+        // This function is added to send the notification to DefaultPhoneNotifier.
+        mNotifier.notifyMessageWaitingChanged(this);
+    }
+
     public void notifyDataConnection(String reason) {
         mNotifier.notifyDataConnection(this, reason);
     }
@@ -638,7 +643,7 @@ public abstract class PhoneBase implements Phone {
     public abstract String getPhoneName();
 
     /** @hide */
-    public int getCountVoiceMessages(){
+    public int getVoiceMessageCount(){
         return 0;
     }
 

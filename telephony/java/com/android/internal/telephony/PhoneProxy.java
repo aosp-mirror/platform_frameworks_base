@@ -435,8 +435,8 @@ public class PhoneProxy extends Handler implements Phone {
     }
 
      /** @hide */
-    public int getCountVoiceMessages(){
-        return mActivePhone.getCountVoiceMessages();
+    public int getVoiceMessageCount(){
+        return mActivePhone.getVoiceMessageCount();
     }
 
     public String getVoiceMailAlphaTag() {

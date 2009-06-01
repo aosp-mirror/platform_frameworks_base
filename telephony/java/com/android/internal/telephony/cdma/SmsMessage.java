@@ -773,6 +773,12 @@ public class SmsMessage extends SmsMessageBase {
         return asciiDigit;
     }
 
+    /** This function  shall be called to get the number of voicemails.
+     * @hide
+     */
+    /*package*/ int getNumOfVoicemails() {
+        return mBearerData.numberOfMessages;
+    }
 
 
 }
