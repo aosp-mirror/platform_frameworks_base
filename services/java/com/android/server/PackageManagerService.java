@@ -2843,7 +2843,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                 if (npi.name.equals(perm)
                                         && pkg.applicationInfo.targetSdkVersion < npi.sdkVersion) {
                                     allowed = true;
-                                    Log.i(TAG, "Auto-granting WRITE_SDCARD to old pkg "
+                                    Log.i(TAG, "Auto-granting WRITE_EXTERNAL_STORAGE to old pkg "
                                             + pkg.packageName);
                                     break;
                                 }
