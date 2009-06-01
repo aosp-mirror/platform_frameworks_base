@@ -1148,7 +1148,7 @@ public class SearchManager
      * @hide
      */
     public final static String SOURCE = "source";
-    
+
     /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getIntExtra content.Intent.getIntExtra()}
@@ -1162,10 +1162,44 @@ public class SearchManager
     /**
      * Intent extra data key: This key will be used for the extra populated by the
      * {@link #SUGGEST_COLUMN_INTENT_EXTRA_DATA} column.
+     *
      * {@hide}
      */
     public final static String EXTRA_DATA_KEY = "intent_extra_data_key";
-    
+
+
+    /**
+     * Used by the search dialog to ask the global search provider whether there are any pending
+     * sources that have yet to respond.  Specifically, the search dialog will call
+     * {@link Cursor#respond} with a bundle containing this extra as a key, and expect the same key
+     * to be in the response, with a boolean value indicating whether there are pending sources.
+     *
+     * {@hide}
+     */
+    public final static String RESPOND_EXTRA_PENDING_SOURCES = "respond_extra_pending_sources";
+
+    /**
+     * Used by the search dialog to tell the cursor that supplied suggestions which item was clicked
+     * before launching the intent.  The search dialog will call {@link Cursor#respond} with a
+     * bundle containing this extra as a key and the position that was clicked as the value.
+     *
+     * The response bundle will use {@link #RESPOND_EXTRA_POSITION_SELECTED} to return an int value
+     * of the index that should be selected, if applicable.
+     *
+     * {@hide}
+     */
+    public final static String RESPOND_EXTRA_POSITION_CLICKED = "respond_extra_position_clicked";
+
+    /**
+     * Used as a key in the response bundle from a call to {@link Cursor#respond} that sends the
+     * position that is clicked.
+     *
+     * @see #RESPOND_EXTRA_POSITION_CLICKED
+     *
+     * {@hide}
+     */
+    public final static String RESPOND_EXTRA_POSITION_SELECTED = "respond_extra_position_selected";
+
     /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getStringExtra content.Intent.getStringExtra()}
@@ -1304,7 +1338,7 @@ public class SearchManager
      *  to provide additional arbitrary data which will be included as an extra under the key
      *  {@link #EXTRA_DATA_KEY}. For use by the global search system only - if other providers
      *  attempt to use this column, the value will be overwritten by global search.
-     * 
+     *
      * @hide
      */
     public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
@@ -1363,21 +1397,7 @@ public class SearchManager
      */
     public final static String INTENT_ACTION_CHANGE_SEARCH_SOURCE 
             = "android.search.action.CHANGE_SEARCH_SOURCE";
-    
-    /**
-     * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
-     * the search dialog will call {@link Cursor#respond(Bundle)} when the
-     * suggestion is clicked. 
-     * 
-     * The {@link Bundle} argument will be constructed
-     * in the same way as the "extra" bundle included in an Intent constructed 
-     * from the suggestion.
-     * 
-     * @hide Pending API council approval.
-     */
-    public final static String INTENT_ACTION_CURSOR_RESPOND
-            = "android.search.action.CURSOR_RESPOND";
-    
+
     /**
      * Intent action for finding the global search activity.
      * The global search provider should handle this intent.
@@ -1395,6 +1415,14 @@ public class SearchManager
      */
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
             = "android.search.action.SEARCH_SETTINGS";
+
+    /**
+     * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
+     * the search dialog will take no action.
+     *
+     * @hide
+     */
+    public final static String INTENT_ACTION_NONE = "android.search.action.ZILCH";
     
     /**
      * Reference to the shared system search service.
@@ -1506,25 +1534,27 @@ public class SearchManager
     }
     
     /**
-     * See {@link #setOnDismissListener} for configuring your activity to monitor search UI state.
+     * See {@link SearchManager#setOnDismissListener} for configuring your activity to monitor
+     * search UI state.
      */
     public interface OnDismissListener {
         /**
-         * This method will be called when the search UI is dismissed. To make use if it, you must
-         * implement this method in your activity, and call {@link #setOnDismissListener} to 
-         * register it.
+         * This method will be called when the search UI is dismissed. To make use of it, you must
+         * implement this method in your activity, and call
+         * {@link SearchManager#setOnDismissListener} to register it.
          */
         public void onDismiss();
     }
     
     /**
-     * See {@link #setOnCancelListener} for configuring your activity to monitor search UI state.
+     * See {@link SearchManager#setOnCancelListener} for configuring your activity to monitor
+     * search UI state.
      */
     public interface OnCancelListener {
         /**
          * This method will be called when the search UI is canceled. To make use if it, you must
-         * implement this method in your activity, and call {@link #setOnCancelListener} to 
-         * register it.
+         * implement this method in your activity, and call
+         * {@link SearchManager#setOnCancelListener} to register it.
          */
         public void onCancel();
     }
