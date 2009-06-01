@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.res.Configuration;
@@ -1021,6 +1022,33 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeStrongBinder(binder);
             return true;
         }
+        
+        case START_BACKUP_AGENT_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            ApplicationInfo info = ApplicationInfo.CREATOR.createFromParcel(data);
+            int backupRestoreMode = data.readInt();
+            boolean success = bindBackupAgent(info, backupRestoreMode);
+            reply.writeNoException();
+            reply.writeInt(success ? 1 : 0);
+            return true;
+        }
+
+        case BACKUP_AGENT_CREATED_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String packageName = data.readString();
+            IBinder agent = data.readStrongBinder();
+            backupAgentCreated(packageName, agent);
+            reply.writeNoException();
+            return true;
+        }
+
+        case UNBIND_BACKUP_AGENT_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            ApplicationInfo info = ApplicationInfo.CREATOR.createFromParcel(data);
+            unbindBackupAgent(info);
+            reply.writeNoException();
+            return true;
+        }
         }
         
         return super.onTransact(code, data, reply, flags);
@@ -1679,6 +1707,43 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
         return binder;
+    }
+
+    public boolean bindBackupAgent(ApplicationInfo app, int backupRestoreMode)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        app.writeToParcel(data, 0);
+        data.writeInt(backupRestoreMode);
+        mRemote.transact(START_BACKUP_AGENT_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean success = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return success;
+    }
+
+    public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        data.writeStrongBinder(agent);
+        mRemote.transact(BACKUP_AGENT_CREATED_TRANSACTION, data, reply, 0);
+        reply.recycle();
+        data.recycle();
+    }
+
+    public void unbindBackupAgent(ApplicationInfo app) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        app.writeToParcel(data, 0);
+        mRemote.transact(UNBIND_BACKUP_AGENT_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
     }
 
     public boolean startInstrumentation(ComponentName className, String profileFile,

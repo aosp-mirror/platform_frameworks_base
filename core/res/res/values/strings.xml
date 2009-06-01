@@ -547,6 +547,11 @@
         collected battery statistics. Not for use by normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_backup">control system backup and restore</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_backup">Allows the application to control the system's backup and restore mechanism.  Not for use by normal applications.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_internalSystemWindow">display unauthorized windows</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_internalSystemWindow">Allows the creation of

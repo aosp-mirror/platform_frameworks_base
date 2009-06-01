@@ -59,6 +59,11 @@ public interface IApplicationThread extends IInterface {
             int configChanges) throws RemoteException;
     void scheduleReceiver(Intent intent, ActivityInfo info, int resultCode,
             String data, Bundle extras, boolean sync) throws RemoteException;
+    static final int BACKUP_MODE_INCREMENTAL = 0;
+    static final int BACKUP_MODE_FULL = 1;
+    static final int BACKUP_MODE_RESTORE = 2;
+    void scheduleCreateBackupAgent(ApplicationInfo app, int backupMode) throws RemoteException;
+    void scheduleDestroyBackupAgent(ApplicationInfo app) throws RemoteException;
     void scheduleCreateService(IBinder token, ServiceInfo info) throws RemoteException;
     void scheduleBindService(IBinder token,
             Intent intent, boolean rebind) throws RemoteException;
@@ -71,8 +76,8 @@ public interface IApplicationThread extends IInterface {
     static final int DEBUG_WAIT = 2;
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
             ComponentName testName, String profileName, Bundle testArguments, 
-            IInstrumentationWatcher testWatcher, int debugMode, Configuration config, Map<String,
-            IBinder> services) throws RemoteException;
+            IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
+            Configuration config, Map<String, IBinder> services) throws RemoteException;
     void scheduleExit() throws RemoteException;
     void requestThumbnail(IBinder token) throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
@@ -119,4 +124,6 @@ public interface IApplicationThread extends IInterface {
     int REQUEST_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+26;
     int PROFILER_CONTROL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+27;
     int SET_SCHEDULING_GROUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
+    int SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
+    int SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
 }

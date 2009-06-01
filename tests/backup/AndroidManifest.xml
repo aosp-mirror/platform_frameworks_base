@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.backuptest">
-    <application>
+    <application android:backupAgent="BackupTestAgent">
         <activity android:name="BackupTestActivity" android:label="_BackupTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -8,10 +8,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="BackupTestService">
-           <intent-filter>
-               <action android:name="android.backup.BackupService.SERVICE" />
-           </intent-filter>
-        </service>
     </application>
 </manifest>

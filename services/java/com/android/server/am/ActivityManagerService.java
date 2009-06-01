@@ -42,6 +42,7 @@ import android.app.IThumbnailReceiver;
 import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
+import android.backup.IBackupManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -131,6 +132,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_PROCESSES = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_RESULTS = localLOGV || false;
+    static final boolean DEBUG_BACKUP = localLOGV || true;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
     
@@ -631,6 +633,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     final ArrayList<ServiceRecord> mStoppingServices
             = new ArrayList<ServiceRecord>();
+
+    /**
+     * Backup/restore process management
+     */
+    String mBackupAppName = null;
+    BackupRecord mBackupTarget = null;
 
     /**
      * List of PendingThumbnailsRecord objects of clients who are still
@@ -4669,6 +4677,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 mPendingBroadcast = null;
                 scheduleBroadcastsLocked();
             }
+            if (mBackupTarget != null && mBackupTarget.app.pid == pid) {
+                Log.w(TAG, "Unattached app died before backup, skipping");
+                try {
+                    IBackupManager bm = IBackupManager.Stub.asInterface(
+                            ServiceManager.getService(Context.BACKUP_SERVICE));
+                    bm.agentDisconnected(app.info.packageName);
+                } catch (RemoteException e) {
+                    // Can't happen; the backup manager is local
+                }
+            }
         } else {
             Log.w(TAG, "Spurious process start timeout - pid not known for " + app);
         }
@@ -4757,11 +4775,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     mWaitForDebugger = mOrigWaitForDebugger;
                 }
             }
+            // If the app is being launched for restore or full backup, set it up specially
+            boolean isRestrictedBackupMode = false;
+            if (mBackupTarget != null && mBackupAppName.equals(processName)) {
+                isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
+                        || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
+            }
             thread.bindApplication(processName, app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
-                    mConfiguration, getCommonServicesLocked());
+                    isRestrictedBackupMode, mConfiguration, getCommonServicesLocked());
             updateLRUListLocked(app, false);
             app.lastRequestedGc = SystemClock.uptimeMillis();
         } catch (Exception e) {
@@ -4839,6 +4863,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 finishReceiverLocked(br.receiver, br.resultCode, br.resultData,
                         br.resultExtras, br.resultAbort, true);
                 scheduleBroadcastsLocked();
+            }
+        }
+
+        // Check whether the next backup agent is in this process...
+        if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.info.uid) {
+            if (DEBUG_BACKUP) Log.v(TAG, "New app is backup target, launching agent for " + app);
+            try {
+                thread.scheduleCreateBackupAgent(mBackupTarget.appInfo, mBackupTarget.backupMode);
+            } catch (Exception e) {
+                Log.w(TAG, "Exception scheduling backup agent creation: ");
+                e.printStackTrace();
             }
         }
 
@@ -9118,6 +9153,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             app.receivers.clear();
         }
         
+        // If the app is undergoing backup, tell the backup manager about it
+        if (mBackupTarget != null && app.pid == mBackupTarget.app.pid) {
+            if (DEBUG_BACKUP) Log.d(TAG, "App " + mBackupTarget.appInfo + " died during backup");
+            try {
+                IBackupManager bm = IBackupManager.Stub.asInterface(
+                        ServiceManager.getService(Context.BACKUP_SERVICE));
+                bm.agentDisconnected(app.info.packageName);
+            } catch (RemoteException e) {
+                // can't happen; backup manager is local
+            }
+        }
+
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
         if (restarting) {
@@ -10233,6 +10280,105 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
+    // =========================================================
+    // BACKUP AND RESTORE
+    // =========================================================
+    
+    // Cause the target app to be launched if necessary and its backup agent
+    // instantiated.  The backup agent will invoke backupAgentCreated() on the
+    // activity manager to announce its creation.
+    public boolean bindBackupAgent(ApplicationInfo app, int backupMode) {
+        if (DEBUG_BACKUP) Log.v(TAG, "startBackupAgent: app=" + app + " mode=" + backupMode);
+        enforceCallingPermission("android.permission.BACKUP", "startBackupAgent");
+
+        synchronized(this) {
+            // !!! TODO: currently no check here that we're already bound
+            BatteryStatsImpl.Uid.Pkg.Serv ss = null;
+            BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+            synchronized (stats) {
+                ss = stats.getServiceStatsLocked(app.uid, app.packageName, app.name);
+            }
+
+            BackupRecord r = new BackupRecord(ss, app, backupMode);
+            ComponentName hostingName = new ComponentName(app.packageName, app.backupAgentName);
+            // startProcessLocked() returns existing proc's record if it's already running
+            ProcessRecord proc = startProcessLocked(app.processName, app,
+                    false, 0, "backup", hostingName);
+            if (proc == null) {
+                Log.e(TAG, "Unable to start backup agent process " + r);
+                return false;
+            }
+
+            r.app = proc;
+            mBackupTarget = r;
+            mBackupAppName = app.packageName;
+
+            // If the process is already attached, schedule the creation of the backup agent now.
+            // If it is not yet live, this will be done when it attaches to the framework.
+            if (proc.thread != null) {
+                if (DEBUG_BACKUP) Log.v(TAG, "Agent proc already running: " + proc);
+                try {
+                    proc.thread.scheduleCreateBackupAgent(app, backupMode);
+                } catch (RemoteException e) {
+                    // !!! TODO: notify the backup manager that we crashed, or rely on
+                    // death notices, or...?
+                }
+            } else {
+                if (DEBUG_BACKUP) Log.v(TAG, "Agent proc not running, waiting for attach");
+            }
+            // Invariants: at this point, the target app process exists and the application
+            // is either already running or in the process of coming up.  mBackupTarget and
+            // mBackupAppName describe the app, so that when it binds back to the AM we
+            // know that it's scheduled for a backup-agent operation.
+        }
+        
+        return true;
+    }
+
+    // A backup agent has just come up                    
+    public void backupAgentCreated(String agentPackageName, IBinder agent) {
+        if (DEBUG_BACKUP) Log.v(TAG, "backupAgentCreated: " + agentPackageName
+                + " = " + agent);
+
+        synchronized(this) {
+            if (!agentPackageName.equals(mBackupAppName)) {
+                Log.e(TAG, "Backup agent created for " + agentPackageName + " but not requested!");
+                return;
+            }
+
+            try {
+                IBackupManager bm = IBackupManager.Stub.asInterface(
+                        ServiceManager.getService(Context.BACKUP_SERVICE));
+                bm.agentConnected(agentPackageName, agent);
+            } catch (RemoteException e) {
+                // can't happen; the backup manager service is local
+            } catch (Exception e) {
+                Log.w(TAG, "Exception trying to deliver BackupAgent binding: ");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // done with this agent
+    public void unbindBackupAgent(ApplicationInfo appInfo) {
+        if (DEBUG_BACKUP) Log.v(TAG, "unbindBackupAgent: " + appInfo);
+
+        synchronized(this) {
+            if (!mBackupAppName.equals(appInfo.packageName)) {
+                Log.e(TAG, "Unbind of " + appInfo + " but is not the current backup target");
+                return;
+            }
+
+            try {
+                mBackupTarget.app.thread.scheduleDestroyBackupAgent(appInfo);
+            } catch (Exception e) {
+                Log.e(TAG, "Exception when unbinding backup agent:");
+                e.printStackTrace();
+            }
+            mBackupTarget = null;
+            mBackupAppName = null;
+        }
+    }
     // =========================================================
     // BROADCASTS
     // =========================================================

@@ -570,6 +570,15 @@
     <!-- Application's requirement for five way navigation -->
     <attr name="reqFiveWayNav" format="boolean" />
 
+    <!-- The name of the class implementing <code>BackupAgent</code> to manage
+         backup and restore of the application's settings to external storage. -->
+    <attr name="backupAgent" format="string" />
+
+    <!-- Whether the application allows its data to be backed up at all.  This
+         attribute defaults to 'true':  unless the application opts out, the
+         user will be able to back up its data to desktop storage. -->
+    <attr name="allowBackup" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -643,6 +652,8 @@
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />
         <attr name="testOnly" />
+        <attr name="backupAgent" />
+        <attr name="allowBackup" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
