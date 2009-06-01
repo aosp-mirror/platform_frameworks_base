@@ -18,7 +18,10 @@
 #ifndef ANDROID_MEDIAPLAYERSERVICE_H
 #define ANDROID_MEDIAPLAYERSERVICE_H
 
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <ui/SurfaceComposerClient.h>
 

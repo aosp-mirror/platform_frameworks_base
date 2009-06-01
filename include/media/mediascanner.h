@@ -17,7 +17,10 @@
 #ifndef MEDIASCANNER_H
 #define MEDIASCANNER_H
 
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <pthread.h>
 
 namespace android {

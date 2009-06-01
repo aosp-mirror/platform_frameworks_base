@@ -21,7 +21,9 @@
 #include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/Timers.h>
-#include <utils.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 
 #include <stdlib.h>
 #include <stdio.h>

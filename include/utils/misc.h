@@ -21,7 +21,7 @@
 #define _LIBS_UTILS_MISC_H
 
 #include <sys/time.h>
-#include "utils/Endian.h"
+#include <utils/Endian.h>
 
 namespace android {
 
