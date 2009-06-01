@@ -42,7 +42,6 @@ commonSources:= \
 	ZipFileRO.cpp \
 	ZipUtils.cpp \
 	misc.cpp \
-	ported.cpp \
 	LogSocket.cpp
 
 #
