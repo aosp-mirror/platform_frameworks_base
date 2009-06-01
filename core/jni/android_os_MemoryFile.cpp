@@ -82,9 +82,7 @@ static jint android_os_MemoryFile_read(JNIEnv* env, jobject clazz,
         return -1;
     }
 
-    jbyte* bytes = env->GetByteArrayElements(buffer, 0);
-    memcpy(bytes + destOffset, (const char *)address + srcOffset, count);
-    env->ReleaseByteArrayElements(buffer, bytes, 0);
+    env->SetByteArrayRegion(buffer, destOffset, count, (const jbyte *)address + srcOffset);
 
     if (unpinned) {
         ashmem_unpin_region(fd, 0, 0);
@@ -103,9 +101,7 @@ static jint android_os_MemoryFile_write(JNIEnv* env, jobject clazz,
         return -1;
     }
 
-    jbyte* bytes = env->GetByteArrayElements(buffer, 0);
-    memcpy((char *)address + destOffset, bytes + srcOffset, count);
-    env->ReleaseByteArrayElements(buffer, bytes, 0);
+    env->GetByteArrayRegion(buffer, srcOffset, count, (jbyte *)address + destOffset);
 
     if (unpinned) {
         ashmem_unpin_region(fd, 0, 0);
