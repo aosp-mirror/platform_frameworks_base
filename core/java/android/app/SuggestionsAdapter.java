@@ -50,6 +50,11 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     // so we can correctly display (or not display) the 'working' spinner in the search dialog.
     public static final String IS_WORKING = "isWorking";
     
+    // The value used to tell a cursor to display the corpus selectors, if this is global
+    // search. Also returns the index of the more results item to allow the SearchDialog
+    // to tell the ListView to scroll to that list item.
+    public static final String SHOW_CORPUS_SELECTORS = "showCorpusSelectors";
+    
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
     
@@ -67,6 +72,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mIconName2Col;
     private int mIconBitmap1Col;
     private int mIconBitmap2Col;
+    
+    // This value is stored in SuggestionsAdapter by the SearchDialog to indicate whether
+    // a particular list item should be selected upon the next call to notifyDataSetChanged.
+    // This is used to indicate the index of the "More results..." list item so that when
+    // the data set changes after a click of "More results...", we can correctly tell the
+    // ListView to scroll to the right line item. It gets reset to -1 every time it is consumed.
+    private int mListItemToSelect = -1;
     
     public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
             WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
@@ -134,6 +146,19 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
         updateWorking();
+        if (mListItemToSelect != -1) {
+            mSearchDialog.setListSelection(mListItemToSelect);
+            mListItemToSelect = -1;
+        }
+    }
+    
+    /**
+     * Specifies the list item to select upon next call of {@link #notifyDataSetChanged()},
+     * in order to let us scroll the "More results..." list item to the top of the screen
+     * (or as close as it can get) when clicked.
+     */
+    public void setListItemToSelect(int index) {
+        mListItemToSelect = index;
     }
     
     /**

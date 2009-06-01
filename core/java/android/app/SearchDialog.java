@@ -1275,8 +1275,25 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private void handleCursorRespondIntent(Intent intent) {
         Cursor c = mSuggestionsAdapter.getCursor();
         if (c != null) {
-            c.respond(intent.getExtras());
+            Bundle response = c.respond(intent.getExtras());
+            
+            // The SHOW_CORPUS_SELECTORS command to the cursor also returns a value in
+            // its bundle, keyed by the same command string, which contains the index
+            // of the "More results..." list item, which we use to instruct the
+            // AutoCompleteTextView's list to scroll to that item when the item is
+            // clicked.
+            if (response.containsKey(SuggestionsAdapter.SHOW_CORPUS_SELECTORS)) {
+                int indexOfMore = response.getInt(SuggestionsAdapter.SHOW_CORPUS_SELECTORS);
+                mSuggestionsAdapter.setListItemToSelect(indexOfMore);
+            }
         }
+    }
+    
+    /**
+     * Sets the list item selection in the AutoCompleteTextView's ListView.
+     */
+    public void setListSelection(int index) {
+        mSearchAutoComplete.setListSelection(index);
     }
     
     /**
