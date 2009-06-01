@@ -675,7 +675,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         if (state == State.FAILED) {
             cleanUpConnection(false, null);
         }
-        sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
+        sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA, Phone.REASON_SIM_LOADED));
     }
 
     protected void onNVReady() {
@@ -688,8 +688,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
-    protected void onTrySetupData() {
-        trySetupData(null);
+    protected void onTrySetupData(String reason) {
+        trySetupData(reason);
     }
 
     /**
@@ -769,7 +769,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             }
 
             if (tryAgain(cause)) {
-                    trySetupData(reason);
+                // Wait a bit before trying again, so that
+                // we're not tying up the RIL command channel
+                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
+                        RECONNECT_DELAY_INITIAL_MILLIS);
             } else {
                 startDelayedRetry(cause, reason);
             }

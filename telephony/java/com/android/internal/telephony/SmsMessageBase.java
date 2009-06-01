@@ -312,7 +312,9 @@ public abstract class SmsMessageBase {
     }
 
     protected void parseMessageBody() {
-        if (originatingAddress.couldBeEmailGateway()) {
+        // originatingAddress could be null if this message is from a status
+        // report.
+        if (originatingAddress != null && originatingAddress.couldBeEmailGateway()) {
             extractEmailAddressFromMessageBody();
         }
     }

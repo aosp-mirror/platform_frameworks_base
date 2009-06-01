@@ -103,9 +103,9 @@ public abstract class DataConnectionTracker extends Handler {
     /** Slow poll when attempting connection recovery. */
     protected static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
     /** Default ping deadline, in seconds. */
-    protected final int DEFAULT_PING_DEADLINE = 5;
+    protected static final int DEFAULT_PING_DEADLINE = 5;
     /** Default max failure count before attempting to network re-registration. */
-    protected final int DEFAULT_MAX_PDP_RESET_FAIL = 3;
+    protected static final int DEFAULT_MAX_PDP_RESET_FAIL = 3;
 
     /**
      * After detecting a potential connection problem, this is the max number
@@ -217,7 +217,7 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     // abstract handler methods
-    protected abstract void onTrySetupData();
+    protected abstract void onTrySetupData(String reason);
     protected abstract void onRoamingOff();
     protected abstract void onRoamingOn();
     protected abstract void onRadioAvailable();
@@ -232,7 +232,11 @@ public abstract class DataConnectionTracker extends Handler {
         switch (msg.what) {
 
             case EVENT_TRY_SETUP_DATA:
-                onTrySetupData();
+                String reason = null;
+                if (msg.obj instanceof String) {
+                    reason = (String)msg.obj;
+                }
+                onTrySetupData(reason);
                 break;
 
             case EVENT_ROAMING_OFF:
