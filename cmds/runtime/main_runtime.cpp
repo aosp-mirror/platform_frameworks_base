@@ -7,7 +7,9 @@
 #include "ServiceManager.h"
 #include "SignalHandler.h"
 
-#include <utils.h>
+#include <utils/threads.h>
+#include <utils/Errors.h>
+
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <utils/Log.h>  

@@ -7,7 +7,10 @@
 #include "AaptAssets.h"
 #include "ResourceTable.h"
 
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <utils/ZipFile.h>
 
 #include <sys/types.h>
