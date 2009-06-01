@@ -97,6 +97,74 @@ public class MemoryFileTest extends AndroidTestCase {
         file.close();
     }
 
+    // Tests for the IndexOutOfBoundsException cases in read().
+
+    private void readIndexOutOfBoundsException(int offset, int count, String msg)
+            throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", testString.length);
+        try {
+            file.writeBytes(testString, 0, 0, testString.length);
+            InputStream is = file.getInputStream();
+            byte[] buffer = new byte[testString.length + 10];
+            try {
+                is.read(buffer, offset, count);
+                fail(msg);
+            } catch (IndexOutOfBoundsException ex) {
+                // this is what should happen
+            } finally {
+                is.close();
+            }
+        } finally {
+            file.close();
+        }
+    }
+
+    @SmallTest
+    public void testReadNegativeOffset() throws Exception {
+        readIndexOutOfBoundsException(-1, 5,
+                "read() with negative offset should throw IndexOutOfBoundsException");
+    }
+
+    @SmallTest
+    public void testReadNegativeCount() throws Exception {
+        readIndexOutOfBoundsException(5, -1,
+                "read() with negative length should throw IndexOutOfBoundsException");
+    }
+
+    @SmallTest
+    public void testReadOffsetOverflow() throws Exception {
+        readIndexOutOfBoundsException(testString.length + 10, 5,
+                "read() with offset outside buffer should throw IndexOutOfBoundsException");
+    }
+
+    @SmallTest
+    public void testReadOffsetCountOverflow() throws Exception {
+        readIndexOutOfBoundsException(testString.length, 11,
+                "read() with offset + count outside buffer should throw IndexOutOfBoundsException");
+    }
+
+    // Test behavior of read() at end of file
+    @SmallTest
+    public void testReadEOF() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", testString.length);
+        try {
+            file.writeBytes(testString, 0, 0, testString.length);
+            InputStream is = file.getInputStream();
+            try {
+                byte[] buffer = new byte[testString.length + 10];
+                // read() with count larger than data should succeed, and return # of bytes read
+                assertEquals(testString.length, is.read(buffer));
+                compareBuffers(testString, buffer, testString.length);
+                // Read at EOF should return -1
+                assertEquals(-1, is.read());
+            } finally {
+                is.close();
+            }
+        } finally {
+            file.close();
+        }
+    }
+
     // Tests that close() is idempotent
     @SmallTest
     public void testCloseClose() throws Exception {
@@ -194,6 +262,7 @@ public class MemoryFileTest extends AndroidTestCase {
         }
     }
 
+    @SmallTest
     public void testFileDescriptor() throws Exception {
         MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
         MemoryFile ref = new MemoryFile(file.getFileDescriptor(), file.length(), "r");
