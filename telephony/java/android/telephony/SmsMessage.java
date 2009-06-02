@@ -517,9 +517,14 @@ public class SmsMessage {
         return mWrappedSmsMessage.getUserData();
     }
 
-    /* Not part of the SDK interface and only needed by specific classes:
-       protected SmsHeader getUserDataHeader()
-    */
+    /**
+     * Return the user data header (UDH).
+     *
+     * @hide
+     */
+    public SmsHeader getUserDataHeader() {
+        return mWrappedSmsMessage.getUserDataHeader();
+    }
 
     /**
      * Returns the raw PDU for the message.
