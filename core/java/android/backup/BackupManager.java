@@ -42,6 +42,12 @@ public class BackupManager {
     private IBackupManager mService;
 
     /**
+     * Defined backup transports understood by {@link IBackupManager.selectBackupTransport}.
+     */
+    public static final int TRANSPORT_ADB = 1;
+    public static final int TRANSPORT_GOOGLE = 2;
+
+    /**
      * Constructs a BackupManager object through which the application can
      * communicate with the Android backup system.
      *

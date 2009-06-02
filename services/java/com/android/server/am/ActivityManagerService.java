@@ -10377,6 +10377,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
 
+            long oldIdent = Binder.clearCallingIdentity();
             try {
                 IBackupManager bm = IBackupManager.Stub.asInterface(
                         ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -10386,6 +10387,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } catch (Exception e) {
                 Log.w(TAG, "Exception trying to deliver BackupAgent binding: ");
                 e.printStackTrace();
+            } finally {
+                Binder.restoreCallingIdentity(oldIdent);
             }
         }
     }
