@@ -12,8 +12,12 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libmedia \
 	libutils \
-	libcutils \
+	libcutils
+
+ifneq ($(TARGET_SIMULATOR),true)
+LOCAL_SHARED_LIBRARIES += \
 	libdl
+endif
 
 
 LOCAL_MODULE:= libttssynthproxy
