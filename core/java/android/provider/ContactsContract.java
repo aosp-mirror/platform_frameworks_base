@@ -166,6 +166,13 @@ public final class ContactsContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "aggregates");
 
         /**
+         * The content:// style URI for this table joined with useful data from
+         * {@link Data} and {@link Presence}.
+         */
+        public static final Uri CONTENT_SUMMARY_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "aggregates_summary");
+
+        /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
@@ -367,7 +374,97 @@ public final class ContactsContract {
          * Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_URI, phoneNumber);
          * }
          */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "phone_lookup");
+        public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "phone_lookup");
+    }
+
+    /**
+     * Additional data mixed in with {@link Im.CommonPresenceColumns} to link
+     * back to specific {@link ContactsContract.Aggregates#_ID} entries.
+     */
+    private interface PresenceColumns {
+        /**
+         * Reference to the {@link Aggregates#_ID} this presence references.
+         */
+        public static final String AGGREGATE_ID = "aggregate_id";
+
+        /**
+         * Reference to the {@link Data#_ID} entry that owns this presence.
+         */
+        public static final String DATA_ID = "data_id";
+
+        /**
+         * The IM service the presence is coming from. Formatted using either
+         * {@link Contacts.ContactMethods#encodePredefinedImProtocol} or
+         * {@link Contacts.ContactMethods#encodeCustomImProtocol}.
+         * <p>
+         * Type: STRING
+         */
+        public static final String IM_PROTOCOL = "im_protocol";
+
+        /**
+         * The IM handle the presence item is for. The handle is scoped to the
+         * {@link #IM_PROTOCOL}.
+         * <p>
+         * Type: STRING
+         */
+        public static final String IM_HANDLE = "im_handle";
+
+        /**
+         * The IM account for the local user that the presence data came from.
+         * <p>
+         * Type: STRING
+         */
+        public static final String IM_ACCOUNT = "im_account";
+    }
+
+    public static final class Presence implements BaseColumns, PresenceColumns,
+            Im.CommonPresenceColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Presence() {
+        }
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "presence");
+
+        /**
+         * Gets the resource ID for the proper presence icon.
+         *
+         * @param status the status to get the icon for
+         * @return the resource ID for the proper presence icon
+         */
+        public static final int getPresenceIconResourceId(int status) {
+            switch (status) {
+                case AVAILABLE:
+                    return android.R.drawable.presence_online;
+                case IDLE:
+                case AWAY:
+                    return android.R.drawable.presence_away;
+                case DO_NOT_DISTURB:
+                    return android.R.drawable.presence_busy;
+                case INVISIBLE:
+                    return android.R.drawable.presence_invisible;
+                case OFFLINE:
+                default:
+                    return android.R.drawable.presence_offline;
+            }
+        }
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of
+         * presence details.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-presence";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
+         * presence detail.
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im-presence";
     }
 
     /**
