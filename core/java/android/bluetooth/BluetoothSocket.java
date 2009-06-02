@@ -169,8 +169,8 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ native void bindListenNative(int port) throws IOException;
     /*package*/ native BluetoothSocket acceptNative(int timeout) throws IOException;
     /*package*/ native int availableNative();
-    /*package*/ native int readNative();
-    /*package*/ native void writeNative(int data);
+    /*package*/ native int readNative(byte[] b, int offset, int length);
+    /*package*/ native int writeNative(byte[] b, int offset, int length);
     /*package*/ native void closeNative();
     private native void destroyNative();
 }
