@@ -392,6 +392,16 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
     
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public void replacePreferredActivity(IntentFilter filter,
+            int match, ComponentName[] set, ComponentName activity) {
+        throw new UnsupportedOperationException();
+    }
+
+
     @Override
     public void clearPackagePreferredActivities(String packageName) {
         throw new UnsupportedOperationException();

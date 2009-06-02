@@ -2425,6 +2425,16 @@ class ApplicationContext extends Context {
         }
         
         @Override
+        public void replacePreferredActivity(IntentFilter filter,
+                int match, ComponentName[] set, ComponentName activity) {
+            try {
+                mPM.replacePreferredActivity(filter, match, set, activity);
+            } catch (RemoteException e) {
+                // Should never happen!
+            }
+        }
+
+        @Override
         public void clearPackagePreferredActivities(String packageName) {
             try {
                 mPM.clearPackagePreferredActivities(packageName);
