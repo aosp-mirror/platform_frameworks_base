@@ -1174,7 +1174,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     protected void launchQuerySearch(int actionKey, String actionMsg)  {
         String query = mSearchAutoComplete.getText().toString();
-        Intent intent = createIntent(Intent.ACTION_SEARCH, null, query, null, 
+        Intent intent = createIntent(Intent.ACTION_SEARCH, null, query, null,
                 actionKey, actionMsg);
         launchIntent(intent);
     }
@@ -1202,13 +1202,26 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     protected boolean launchSuggestion(int position, int actionKey, String actionMsg) {
         Cursor c = mSuggestionsAdapter.getCursor();
         if ((c != null) && c.moveToPosition(position)) {
+            // let the cursor know which position was clicked
+            final Bundle clickResponse = new Bundle(1);
+            clickResponse.putInt(SearchManager.RESPOND_EXTRA_POSITION_CLICKED, position);
+            final Bundle response = c.respond(clickResponse);
+
+            // the convention is to send a position to select in response to a click (if applicable)
+            final int posToSelect = response.getInt(
+                    SearchManager.RESPOND_EXTRA_POSITION_SELECTED,
+                    SuggestionsAdapter.NO_ITEM_TO_SELECT);
+            mSuggestionsAdapter.setListItemToSelect(posToSelect);            
+
+            // launch the intent
             Intent intent = createIntentFromSuggestion(c, actionKey, actionMsg);
             launchIntent(intent);
+
             return true;
         }
         return false;
     }
-    
+
     /**
      * Launches an intent. Also dismisses the search dialog if not in global search mode.
      */
@@ -1234,9 +1247,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         String action = intent.getAction();
         if (SearchManager.INTENT_ACTION_CHANGE_SEARCH_SOURCE.equals(action)) {
             handleChangeSourceIntent(intent);
-            return true;
-        } else if (SearchManager.INTENT_ACTION_CURSOR_RESPOND.equals(action)) {
-            handleCursorRespondIntent(intent);
             return true;
         }
         return false;
@@ -1268,34 +1278,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         String query = intent.getStringExtra(SearchManager.QUERY);
         setUserQuery(query);
     }
-    
-    /**
-     * Handles {@link SearchManager#INTENT_ACTION_CURSOR_RESPOND}.
-     */
-    private void handleCursorRespondIntent(Intent intent) {
-        Cursor c = mSuggestionsAdapter.getCursor();
-        if (c != null) {
-            Bundle response = c.respond(intent.getExtras());
-            
-            // The SHOW_CORPUS_SELECTORS command to the cursor also returns a value in
-            // its bundle, keyed by the same command string, which contains the index
-            // of the "More results..." list item, which we use to instruct the
-            // AutoCompleteTextView's list to scroll to that item when the item is
-            // clicked.
-            if (response.containsKey(SuggestionsAdapter.SHOW_CORPUS_SELECTORS)) {
-                int indexOfMore = response.getInt(SuggestionsAdapter.SHOW_CORPUS_SELECTORS);
-                mSuggestionsAdapter.setListItemToSelect(indexOfMore);
-            }
-        }
-    }
-    
+
     /**
      * Sets the list item selection in the AutoCompleteTextView's ListView.
      */
     public void setListSelection(int index) {
         mSearchAutoComplete.setListSelection(index);
     }
-    
+
     /**
      * Saves the previous component that was searched, so that we can go
      * back to it.
@@ -1365,6 +1355,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         try {
             // use specific action if supplied, or default action if supplied, or fixed default
             String action = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_ACTION);
+
+            // some items are display only, or have effect via the cursor respond click reporting.
+            if (SearchManager.INTENT_ACTION_NONE.equals(action)) {
+                return null;
+            }
+
             if (action == null) {
                 action = mSearchable.getSuggestIntentAction();
             }
@@ -1387,7 +1383,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             Uri dataUri = (data == null) ? null : Uri.parse(data);
 
             String extraData = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
-            
+
             String query = getColumnString(c, SearchManager.SUGGEST_COLUMN_QUERY);
 
             return createIntent(action, dataUri, query, extraData, actionKey, actionMsg);

@@ -72,14 +72,16 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mIconName2Col;
     private int mIconBitmap1Col;
     private int mIconBitmap2Col;
-    
+
     // This value is stored in SuggestionsAdapter by the SearchDialog to indicate whether
     // a particular list item should be selected upon the next call to notifyDataSetChanged.
     // This is used to indicate the index of the "More results..." list item so that when
     // the data set changes after a click of "More results...", we can correctly tell the
-    // ListView to scroll to the right line item. It gets reset to -1 every time it is consumed.
-    private int mListItemToSelect = -1;
-    
+    // ListView to scroll to the right line item. It gets reset to NO_ITEM_TO_SELECT every time it
+    // is consumed.
+    private int mListItemToSelect = NO_ITEM_TO_SELECT;
+    static final int NO_ITEM_TO_SELECT = -1;
+
     public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
             WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
         super(context,
@@ -146,9 +148,9 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
         updateWorking();
-        if (mListItemToSelect != -1) {
+        if (mListItemToSelect != NO_ITEM_TO_SELECT) {
             mSearchDialog.setListSelection(mListItemToSelect);
-            mListItemToSelect = -1;
+            mListItemToSelect = NO_ITEM_TO_SELECT;
         }
     }
     
@@ -168,14 +170,12 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (!mGlobalSearchMode || mCursor == null) return;
         
         Bundle request = new Bundle();
-        request.putString(SearchManager.EXTRA_DATA_KEY, IS_WORKING);
+        request.putString(SearchManager.RESPOND_EXTRA_PENDING_SOURCES, "DUMMY");
         Bundle response = mCursor.respond(request);
-        if (response.containsKey(IS_WORKING)) {
-            boolean isWorking = response.getBoolean(IS_WORKING);
-            mSearchDialog.setWorking(isWorking);
-        }
+
+        mSearchDialog.setWorking(response.getBoolean(SearchManager.RESPOND_EXTRA_PENDING_SOURCES));
     }
-    
+
     /**
      * Tags the view with cached child view look-ups.
      */
@@ -408,7 +408,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     public static String getColumnString(Cursor cursor, String columnName) {
         int col = cursor.getColumnIndex(columnName);
-        if (col == -1) {
+        if (col == NO_ITEM_TO_SELECT) {
             return null;
         }
         return cursor.getString(col);
