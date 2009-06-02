@@ -15,7 +15,7 @@ main(con, ft, launchID) {
     count = loadI32(con, 0, 1);
     touch = loadI32(con, 0, 2);
     x = loadI32(con, 0, 3);
-    y = 480 - loadI32(con, 0, 4);
+    y = loadI32(con, 0, 4);
 
     rate = 4;
     maxLife = (count / rate) - 1;
@@ -69,7 +69,7 @@ main(con, ft, launchID) {
         posy = * (int* )(partPtr + 16); //loadEnvI32(con, 2, srcIdx + 4);
 
         if (life) {
-            if (posy > 0) {
+            if (posy < (480 << 16)) {
                 c = 0xffafcf | ((life >> lifeShift) << 24);
 
                 * (int* )(vertPtr) = c; //storeEnvU32(con, 1, dstIdx, c);
@@ -87,14 +87,14 @@ main(con, ft, launchID) {
                 vertPtr = vertPtr + 36;
                 drawCount ++;
             } else {
-                if (dy < 0) {
+                if (dy > 0) {
                     dy = (-dy) >> 1;
                 }
             }
 
             posx = posx + dx;
             posy = posy + dy;
-            dy = dy - 0x400;
+            dy = dy + 0x400;
             life --;
 
             * (int* )(partPtr + 0) = dx; //storeEnvI32(con, 2, srcIdx, dx);

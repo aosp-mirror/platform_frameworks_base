@@ -87,9 +87,9 @@ T rsLowerPow2(T v)
 static inline uint16_t rs888to565(uint32_t r, uint32_t g, uint32_t b)
 {
     uint16_t t = 0;
-    t |= r >> 3;
+    t |= b >> 3;
     t |= (g >> 2) << 5;
-    t |= (b >> 3) << 11;
+    t |= (r >> 3) << 11;
     return t;
 }
 
