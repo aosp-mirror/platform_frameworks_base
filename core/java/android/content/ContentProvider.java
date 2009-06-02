@@ -32,6 +32,7 @@ import android.os.ParcelFileDescriptor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * Content providers are one of the primary building blocks of Android applications, providing
@@ -156,7 +157,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
             return ContentProvider.this.insertEntity(uri, entities);
         }
 
-        public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+        public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
                 throws OperationApplicationException {
             for (ContentProviderOperation operation : operations) {
                 if (operation.isReadOperation()) {
@@ -641,11 +642,12 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * @throws OperationApplicationException thrown if an application fails.
      * See {@link ContentProviderOperation#apply} for more information.
      */
-    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws OperationApplicationException {
-        ContentProviderResult[] results = new ContentProviderResult[operations.length];
-        for (int i = 0; i < operations.length; i++) {
-            results[i] = operations[i].apply(this, results, i);
+        final int numOperations = operations.size();
+        final ContentProviderResult[] results = new ContentProviderResult[numOperations];
+        for (int i = 0; i < numOperations; i++) {
+            results[i] = operations.get(i).apply(this, results, i);
         }
         return results;
     }

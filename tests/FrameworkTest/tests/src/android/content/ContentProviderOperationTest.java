@@ -92,10 +92,6 @@ public class ContentProviderOperationTest extends TestCase {
     }
 
     public void testInsertWithBackRefs() throws OperationApplicationException {
-        ContentValues valuesBackRefs = new ContentValues();
-        valuesBackRefs.put("a1", 3);
-        valuesBackRefs.put("a2", 1);
-
         ContentProviderResult[] previousResults = new ContentProviderResult[4];
         previousResults[0] = new ContentProviderResult(100);
         previousResults[1] = new ContentProviderResult(101);
@@ -103,7 +99,8 @@ public class ContentProviderOperationTest extends TestCase {
         previousResults[3] = new ContentProviderResult(103);
         ContentProviderOperation op1 = ContentProviderOperation.newInsert(sTestUri1)
                 .withValues(sTestValues1)
-                .withValueBackReferences(valuesBackRefs)
+                .withValueBackReference("a1", 3)
+                .withValueBackReference("a2", 1)
                 .build();
         ContentProviderResult result = op1.apply(new TestContentProvider() {
             public Uri insert(Uri uri, ContentValues values) {
@@ -146,11 +143,6 @@ public class ContentProviderOperationTest extends TestCase {
         previousResults[2] = new ContentProviderResult(102);
         previousResults[3] = new ContentProviderResult(103);
 
-        ContentValues valuesBackRefs = new ContentValues();
-        valuesBackRefs.put("a1", 3); // a1 -> 103
-        valuesBackRefs.put("a2", 1); // a2 -> 101
-        valuesBackRefs.put("a3", 2); // a3 -> 102
-
         ContentValues expectedValues = new ContentValues(values);
         expectedValues.put("a1", "103");
         expectedValues.put("a2", "101");
@@ -158,18 +150,15 @@ public class ContentProviderOperationTest extends TestCase {
 
         ContentProviderOperation op1 = ContentProviderOperation.newInsert(sTestUri1)
                 .withValues(values)
-                .withValueBackReferences(valuesBackRefs)
+                .withValueBackReference("a1", 3)
+                .withValueBackReference("a2", 1)
+                .withValueBackReference("a3", 2)
                 .build();
         ContentValues v2 = op1.resolveValueBackReferences(previousResults, previousResults.length);
         assertEquals(expectedValues, v2);
     }
 
     public void testSelectionBackRefs() {
-        Map<Integer, Integer> selectionBackRefs = new Hashtable<Integer, Integer>();
-        selectionBackRefs.put(1, 3);
-        selectionBackRefs.put(2, 1);
-        selectionBackRefs.put(4, 2);
-
         ContentProviderResult[] previousResults = new ContentProviderResult[4];
         previousResults[0] = new ContentProviderResult(100);
         previousResults[1] = new ContentProviderResult(101);
@@ -179,7 +168,9 @@ public class ContentProviderOperationTest extends TestCase {
         String[] selectionArgs = new String[]{"a", null, null, "b", null};
 
         ContentProviderOperation op1 = ContentProviderOperation.newUpdate(sTestUri1)
-                .withSelectionBackReferences(selectionBackRefs)
+                .withSelectionBackReference(1, 3)
+                .withSelectionBackReference(2, 1)
+                .withSelectionBackReference(4, 2)
                 .withSelection("unused", selectionArgs)
                 .build();
         String[] s2 = op1.resolveSelectionArgsBackReferences(
@@ -209,7 +200,6 @@ public class ContentProviderOperationTest extends TestCase {
             ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
                     Uri.parse("content://goo/bar"));
 
-            builderSetEntity(builder, new TestEntity("blah"));
             builderSetExpectedCount(builder, 42);
             builderSetSelection(builder, "selection");
             builderSetSelectionArgs(builder, new String[]{"a", "b"});
@@ -224,7 +214,6 @@ public class ContentProviderOperationTest extends TestCase {
 
             assertEquals(1 /* ContentProviderOperation.TYPE_INSERT */, operationGetType(op2));
             assertEquals("content://goo/bar", operationGetUri(op2).toString());
-            assertEquals("blah", ((TestEntity) operationGetEntity(op2)).mValue);
             assertEquals(Integer.valueOf(42), operationGetExpectedCount(op2));
             assertEquals("selection", operationGetSelection(op2));
             assertEquals(2, operationGetSelectionArgs(op2).length);
@@ -420,35 +409,6 @@ public class ContentProviderOperationTest extends TestCase {
         final Field field = CLASS_OPERATION.getDeclaredField("mSelectionArgsBackReferences");
         field.setAccessible(true);
         return (Map<Integer, Integer>) field.get(operation);
-    }
-
-    public static class TestEntity extends Entity {
-        public final String mValue;
-        public TestEntity(String value) {
-            mValue = value;
-        }
-
-        public TestEntity(Parcel source) {
-            mValue = source.readString();
-        }
-
-        public int describeContents() {
-            return 0;
-        }
-
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(mValue);
-        }
-
-        public static final Creator<TestEntity> CREATOR = new Creator<TestEntity>() {
-            public TestEntity createFromParcel(Parcel source) {
-                return new TestEntity(source);
-            }
-
-            public TestEntity[] newArray(int size) {
-                return new TestEntity[size];
-            }
-        };
     }
 
     public void testParcelingResult() {

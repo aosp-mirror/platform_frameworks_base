@@ -24,8 +24,6 @@ import android.os.Parcel;
 import java.util.Map;
 import java.util.HashMap;
 
-import dalvik.system.VMStack;
-
 public class ContentProviderOperation implements Parcelable {
     private final static int TYPE_INSERT = 1;
     private final static int TYPE_UPDATE = 2;
@@ -37,7 +35,6 @@ public class ContentProviderOperation implements Parcelable {
     private final String mSelection;
     private final String[] mSelectionArgs;
     private final ContentValues mValues;
-    private final Entity mEntity;
     private final Integer mExpectedCount;
     private final ContentValues mValuesBackReferences;
     private final Map<Integer, Integer> mSelectionArgsBackReferences;
@@ -52,7 +49,6 @@ public class ContentProviderOperation implements Parcelable {
         mType = builder.mType;
         mUri = builder.mUri;
         mValues = builder.mValues;
-        mEntity = builder.mEntity;
         mSelection = builder.mSelection;
         mSelectionArgs = builder.mSelectionArgs;
         mExpectedCount = builder.mExpectedCount;
@@ -60,11 +56,10 @@ public class ContentProviderOperation implements Parcelable {
         mValuesBackReferences = builder.mValuesBackReferences;
     }
 
-    private ContentProviderOperation(Parcel source, ClassLoader classLoader) {
+    private ContentProviderOperation(Parcel source) {
         mType = source.readInt();
         mUri = Uri.CREATOR.createFromParcel(source);
         mValues = source.readInt() != 0 ? ContentValues.CREATOR.createFromParcel(source) : null;
-        mEntity = (Entity) source.readParcelable(classLoader);
         mSelection = source.readInt() != 0 ? source.readString() : null;
         mSelectionArgs = source.readInt() != 0 ? source.readStringArray() : null;
         mExpectedCount = source.readInt() != 0 ? source.readInt() : null;
@@ -92,7 +87,6 @@ public class ContentProviderOperation implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        dest.writeParcelable(mEntity, 0);
         if (mSelection != null) {
             dest.writeInt(1);
             dest.writeString(mSelection);
@@ -184,7 +178,7 @@ public class ContentProviderOperation implements Parcelable {
      * Applies this operation using the given provider. The backRefs array is used to resolve any
      * back references that were requested using
      * {@link Builder#withValueBackReferences(ContentValues)} and
-     * {@link Builder#withSelectionBackReferences(java.util.Map)}.
+     * {@link Builder#withSelectionBackReference}.
      * @param provider the {@link ContentProvider} on which this batch is applied
      * @param backRefs a {@link ContentProviderResult} array that will be consulted
      * to resolve any requested back references.
@@ -201,12 +195,7 @@ public class ContentProviderOperation implements Parcelable {
                 resolveSelectionArgsBackReferences(backRefs, numBackRefs);
 
         if (mType == TYPE_INSERT) {
-            Uri newUri;
-            if (mEntity != null) {
-                newUri = provider.insertEntity(mUri, mEntity);
-            } else {
-                newUri = provider.insert(mUri, values);
-            }
+            Uri newUri = provider.insert(mUri, values);
             if (newUri == null) {
                 throw new OperationApplicationException("insert failed");
             }
@@ -217,11 +206,7 @@ public class ContentProviderOperation implements Parcelable {
         if (mType == TYPE_DELETE) {
             numRows = provider.delete(mUri, mSelection, selectionArgs);
         } else if (mType == TYPE_UPDATE) {
-            if (mEntity != null) {
-                numRows = provider.updateEntity(mUri, mEntity);
-            } else {
-                numRows = provider.update(mUri, values, mSelection, selectionArgs);
-            }
+            numRows = provider.update(mUri, values, mSelection, selectionArgs);
         } else if (mType == TYPE_COUNT) {
             Cursor cursor = provider.query(mUri, COUNT_COLUMNS, mSelection, selectionArgs, null);
             try {
@@ -322,7 +307,7 @@ public class ContentProviderOperation implements Parcelable {
      */
     private static String backRefToValue(ContentProviderResult[] backRefs, int numBackRefs,
             Integer backRefIndex) {
-        if (backRefIndex > numBackRefs) {
+        if (backRefIndex >= numBackRefs) {
             throw new ArrayIndexOutOfBoundsException("asked for back ref " + backRefIndex
                     + " but there are only " + numBackRefs + " back refs");
         }
@@ -343,7 +328,7 @@ public class ContentProviderOperation implements Parcelable {
     public static final Creator<ContentProviderOperation> CREATOR =
             new Creator<ContentProviderOperation>() {
         public ContentProviderOperation createFromParcel(Parcel source) {
-            return new ContentProviderOperation(source, VMStack.getCallingClassLoader2());
+            return new ContentProviderOperation(source);
         }
 
         public ContentProviderOperation[] newArray(int size) {
@@ -368,7 +353,6 @@ public class ContentProviderOperation implements Parcelable {
         private String mSelection;
         private String[] mSelectionArgs;
         private ContentValues mValues;
-        private Entity mEntity;
         private Integer mExpectedCount;
         private ContentValues mValuesBackReferences;
         private Map<Integer, Integer> mSelectionArgsBackReferences;
@@ -384,14 +368,6 @@ public class ContentProviderOperation implements Parcelable {
 
         /** Create a ContentProviderOperation from this {@link Builder}. */
         public ContentProviderOperation build() {
-            if (mValues != null && mEntity != null) {
-                throw new IllegalArgumentException("you are not allowed to specify both an entity "
-                        + "and a values");
-            }
-            if (mEntity != null && mValuesBackReferences != null) {
-                throw new IllegalArgumentException("you are not allowed to specify both an entity "
-                        + "and a values backreference");
-            }
             return new ContentProviderOperation(this);
         }
 
@@ -414,19 +390,39 @@ public class ContentProviderOperation implements Parcelable {
         }
 
         /**
-         * Add a {@link Map} of back references. The integer key is the index of the selection arg
-         * to set and the integer value is the index of the previous result whose
-         * value should be used for the arg. If any value at that index of the selection arg
+         * Add a ContentValues back reference.
+         * A column value from the back references takes precedence over a value specified in
+         * {@link #withValues}.
+         * This can only be used with builders of type insert or update.
+         * @return this builder, to allow for chaining.
+         */
+        public Builder withValueBackReference(String key, int previousResult) {
+            if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
+                throw new IllegalArgumentException(
+                        "only inserts and updates can have value back-references");
+            }
+            if (mValuesBackReferences == null) {
+                mValuesBackReferences = new ContentValues();
+            }
+            mValuesBackReferences.put(key, previousResult);
+            return this;
+        }
+
+        /**
+         * Add a back references as a selection arg. Any value at that index of the selection arg
          * that was specified by {@link #withSelection} will be overwritten.
          * This can only be used with builders of type update, delete, or count query.
          * @return this builder, to allow for chaining.
          */
-        public Builder withSelectionBackReferences(Map<Integer, Integer> backReferences) {
+        public Builder withSelectionBackReference(int selectionArgIndex, int previousResult) {
             if (mType != TYPE_COUNT && mType != TYPE_UPDATE && mType != TYPE_DELETE) {
                 throw new IllegalArgumentException(
                         "only deletes, updates and counts can have selection back-references");
             }
-            mSelectionArgsBackReferences = backReferences;
+            if (mSelectionArgsBackReferences == null) {
+                mSelectionArgsBackReferences = new HashMap<Integer, Integer>();
+            }
+            mSelectionArgsBackReferences.put(selectionArgIndex, previousResult);
             return this;
         }
 
@@ -445,24 +441,10 @@ public class ContentProviderOperation implements Parcelable {
         }
 
         /**
-         * The ContentValues to use. This may be null. These values may be overwritten by
-         * the corresponding value specified by {@link #withValueBackReferences(ContentValues)}.
-         * This can only be used with builders of type insert or update.
-         * @return this builder, to allow for chaining.
-         */
-        public Builder withEntity(Entity entity) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
-                throw new IllegalArgumentException("only inserts and updates can have an entity");
-            }
-            mEntity = entity;
-            return this;
-        }
-
-        /**
          * The selection and arguments to use. An occurrence of '?' in the selection will be
          * replaced with the corresponding occurence of the selection argument. Any of the
          * selection arguments may be overwritten by a selection argument back reference as
-         * specified by {@link #withSelectionBackReferences}.
+         * specified by {@link #withSelectionBackReference}.
          * This can only be used with builders of type update, delete, or count query.
          * @return this builder, to allow for chaining.
          */

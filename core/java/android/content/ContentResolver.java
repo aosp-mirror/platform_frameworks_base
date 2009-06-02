@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.ArrayList;
 
 
 /**
@@ -567,50 +568,6 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Inserts an Entity at the given URL.
-     *
-     * @param uri The URL of the table to insert into.
-     * @param entity an Entity to insert at uri. This must be the same Entity subtype that the
-     *   matching content provider expects at that uri.
-     * @return the URL of the newly created row.
-     * @throws RemoteException thrown if a RemoteException is encountered while attempting
-     *   to communicate with a remote provider.
-     */
-    public final Uri insertEntity(Uri uri, Entity entity) throws RemoteException {
-        ContentProviderClient provider = acquireContentProviderClient(uri);
-        if (provider == null) {
-            throw new IllegalArgumentException("Unknown URL " + uri);
-        }
-        try {
-            return provider.insertEntity(uri, entity);
-        } finally {
-            provider.release();
-        }
-    }
-
-    /**
-     * Replaces the Entity at the given URL with the provided entity.
-     *
-     * @param uri The URL of the entity to update.
-     * @param entity the new version of the entity
-     * @return the number of rows that are updated. Will be 0 if an entity no longer exists
-     * at uri otherwise it will be 1.
-     * @throws RemoteException thrown if a RemoteException is encountered while attempting
-     *   to communicate with a remote provider.
-     */
-    public final int updateEntity(Uri uri, Entity entity) throws RemoteException {
-        ContentProviderClient provider = acquireContentProviderClient(uri);
-        if (provider == null) {
-            throw new IllegalArgumentException("Unknown URL " + uri);
-        }
-        try {
-            return provider.updateEntity(uri, entity);
-        } finally {
-            provider.release();
-        }
-    }
-
-    /**
      * Applies each of the {@link ContentProviderOperation} objects and returns an array
      * of their results. Passes through OperationApplicationException, which may be thrown
      * by the call to {@link ContentProviderOperation#apply}.
@@ -627,7 +584,7 @@ public abstract class ContentResolver {
      *   to communicate with a remote provider.
      */
     public ContentProviderResult[] applyBatch(String authority,
-            ContentProviderOperation[] operations)
+            ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException {
         ContentProviderClient provider = acquireContentProviderClient(authority);
         if (provider == null) {
