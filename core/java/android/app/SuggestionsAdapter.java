@@ -361,12 +361,16 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         
         // First, check the cache.
         Drawable drawable = mOutsideDrawablesCache.get(drawableId);
-        if (drawable != null) return drawable;
+        if (drawable != null) {
+            if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + drawableId);
+            return drawable;
+        }
 
         try {
             // Not cached, try using it as a plain resource ID in the provider's context.
             int resourceId = Integer.parseInt(drawableId);
             drawable = mProviderContext.getResources().getDrawable(resourceId);
+            if (DBG) Log.d(LOG_TAG, "Found icon by resource ID: " + drawableId);
         } catch (NumberFormatException nfe) {
             // The id was not an integer resource id.
             // Let the ContentResolver handle content, android.resource and file URIs.
@@ -375,7 +379,9 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 drawable = Drawable.createFromStream(
                         mProviderContext.getContentResolver().openInputStream(uri),
                         null);
+                if (DBG) Log.d(LOG_TAG, "Opened icon input stream: " + drawableId);
             } catch (FileNotFoundException fnfe) {
+                if (DBG) Log.d(LOG_TAG, "Icon stream not found: " + drawableId);
                 // drawable = null;
             }
                     
@@ -385,7 +391,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mOutsideDrawablesCache.put(drawableId, drawable);
             }
         } catch (NotFoundException nfe) {
-            // Resource could not be found
+            if (DBG) Log.d(LOG_TAG, "Icon resource not found: " + drawableId);
             // drawable = null;
         }
         
