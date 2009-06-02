@@ -30,8 +30,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
         super(PKG_NAME, ReliabilityTestActivity.class);
     }
     
-    @Override
-    protected void runTest() throws Throwable {
+    public void runReliabilityTest() throws Throwable {
         ReliabilityTestActivity activity = getActivity();
         LayoutTestsAutoRunner runner = (LayoutTestsAutoRunner)getInstrumentation();
         
