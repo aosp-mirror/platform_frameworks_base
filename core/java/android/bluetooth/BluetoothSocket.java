@@ -29,13 +29,19 @@ import java.io.OutputStream;
  * RFCOMM is a connection orientated, streaming transport over Bluetooth. It is
  * also known as the Serial Port Profile (SPP).
  *
- * TODO: Consider implementing SCO and L2CAP sockets.
+ * TODO: Consider exposing L2CAP sockets.
  * TODO: Clean up javadoc grammer and formatting.
  * TODO: Remove @hide
  * @hide
  */
 public final class BluetoothSocket implements Closeable {
-    private final int mPort;
+    /** Keep TYPE_RFCOMM etc in sync with BluetoothSocket.cpp */
+    /*package*/ static final int TYPE_RFCOMM = 1;
+    /*package*/ static final int TYPE_SCO = 2;
+    /*package*/ static final int TYPE_L2CAP = 3;
+
+    private final int mType;  /* one of TYPE_RFCOMM etc */
+    private final int mPort;  /* RFCOMM channel or L2CAP psm */
     private final String mAddress;    /* remote address */
     private final boolean mAuth;
     private final boolean mEncrypt;
@@ -57,7 +63,7 @@ public final class BluetoothSocket implements Closeable {
      */
     public static BluetoothSocket createRfcommSocket(String address, int port)
             throws IOException {
-        return new BluetoothSocket(-1, true, true, address, port);
+        return new BluetoothSocket(TYPE_RFCOMM, -1, true, true, address, port);
     }
 
     /**
@@ -74,11 +80,25 @@ public final class BluetoothSocket implements Closeable {
      */
     public static BluetoothSocket createInsecureRfcommSocket(String address, int port)
             throws IOException {
-        return new BluetoothSocket(-1, false, false, address, port);
+        return new BluetoothSocket(TYPE_RFCOMM, -1, false, false, address, port);
+    }
+
+    /**
+     * Construct a SCO socket ready to start an outgoing connection.
+     * Call #connect on the returned #BluetoothSocket to begin the connection.
+     * @param address remote Bluetooth address that this socket can connect to
+     * @return a SCO BluetoothSocket
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     */
+    public static BluetoothSocket createScoSocket(String address, int port)
+            throws IOException {
+        return new BluetoothSocket(TYPE_SCO, -1, true, true, address, port);
     }
 
     /**
      * Construct a Bluetooth.
+     * @param type    type of socket
      * @param fd      fd to use for connected socket, or -1 for a new socket
      * @param auth    require the remote device to be authenticated
      * @param encrypt require the connection to be encrypted
@@ -87,8 +107,9 @@ public final class BluetoothSocket implements Closeable {
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient priveleges
      */
-    /*package*/ BluetoothSocket(int fd, boolean auth, boolean encrypt, String address, int port)
-            throws IOException {
+    /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt, String address,
+            int port) throws IOException {
+        mType = type;
         mAuth = auth;
         mEncrypt = encrypt;
         mAddress = address;
@@ -120,7 +141,7 @@ public final class BluetoothSocket implements Closeable {
      * @throws IOException On error, for example connection failure
      */
     public void connect() throws IOException {
-        connectNative(mAddress, mPort, -1);
+        connectNative();
     }
 
     /**
@@ -163,14 +184,14 @@ public final class BluetoothSocket implements Closeable {
         return mOutputStream;
     }
 
-    private native void initSocketNative();
-    private native void initSocketFromFdNative(int fd);
-    private native void connectNative(String address, int port, int timeout);
-    /*package*/ native void bindListenNative(int port) throws IOException;
+    private native void initSocketNative() throws IOException;
+    private native void initSocketFromFdNative(int fd) throws IOException;
+    private native void connectNative() throws IOException;
+    /*package*/ native void bindListenNative() throws IOException;
     /*package*/ native BluetoothSocket acceptNative(int timeout) throws IOException;
-    /*package*/ native int availableNative();
-    /*package*/ native int readNative(byte[] b, int offset, int length);
-    /*package*/ native int writeNative(byte[] b, int offset, int length);
-    /*package*/ native void closeNative();
-    private native void destroyNative();
+    /*package*/ native int availableNative() throws IOException;
+    /*package*/ native int readNative(byte[] b, int offset, int length) throws IOException;
+    /*package*/ native int writeNative(byte[] b, int offset, int length) throws IOException;
+    /*package*/ native void closeNative() throws IOException;
+    private native void destroyNative() throws IOException;
 }
