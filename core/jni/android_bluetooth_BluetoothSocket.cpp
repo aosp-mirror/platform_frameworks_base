@@ -227,44 +227,72 @@ static jint availableNative(JNIEnv *env, jobject obj) {
     return -1;
 }
 
-static jint readNative(JNIEnv *env, jobject obj) {
+/** jb must not be null. offset and offset+length must be within array */
+static jint readNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
+        jint length) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
 
-    char buf;
+    int ret;
+    jbyte *b;
     struct asocket *s = get_socketData(env, obj);
 
     if (!s)
         return -1;
 
-    if (asocket_read(s, &buf, 1, -1) < 0) {
-        jniThrowIOException(env, errno);
+    b = env->GetByteArrayElements(jb, NULL);
+    if (b == NULL) {
+        jniThrowIOException(env, EINVAL);
         return -1;
     }
 
-    return (jint)buf;
+    ret = asocket_read(s, &b[offset], length, -1);
+    if (ret < 0) {
+        jniThrowIOException(env, errno);
+        env->ReleaseByteArrayElements(jb, b, JNI_ABORT);
+        return -1;
+    }
+
+    env->ReleaseByteArrayElements(jb, b, 0);
+    return (jint)ret;
 
 #endif
     jniThrowIOException(env, ENOSYS);
     return -1;
 }
 
-static void writeNative(JNIEnv *env, jobject obj, jint data) {
+/** jb must not be null. offset and offset+length must be within array */
+static jint writeNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
+        jint length) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
 
-    const char buf = (char)data;
+    int ret;
+    jbyte *b;
     struct asocket *s = get_socketData(env, obj);
 
     if (!s)
-        return;
+        return -1;
 
-    if (asocket_write(s, &buf, 1, -1) < 0)
+    b = env->GetByteArrayElements(jb, NULL);
+    if (b == NULL) {
+        jniThrowIOException(env, EINVAL);
+        return -1;
+    }
+
+    ret = asocket_write(s, &b[offset], length, -1);
+    if (ret < 0) {
         jniThrowIOException(env, errno);
+        env->ReleaseByteArrayElements(jb, b, JNI_ABORT);
+        return -1;
+    }
 
-    return;
+    env->ReleaseByteArrayElements(jb, b, JNI_ABORT);  // no need to commit
+    return (jint)ret;
+
 #endif
     jniThrowIOException(env, ENOSYS);
+    return -1;
 }
 
 static void closeNative(JNIEnv *env, jobject obj) {
@@ -301,8 +329,8 @@ static JNINativeMethod sMethods[] = {
     {"bindListenNative", "(I)V", (void *) bindListenNative},
     {"acceptNative", "(I)Landroid/bluetooth/BluetoothSocket;", (void *) acceptNative},
     {"availableNative", "()I",    (void *) availableNative},
-    {"readNative", "()I",    (void *) readNative},
-    {"writeNative", "(I)V",    (void *) writeNative},
+    {"readNative", "([BII)I",    (void *) readNative},
+    {"writeNative", "([BII)I",    (void *) writeNative},
     {"closeNative", "()V",    (void *) closeNative},
     {"destroyNative", "()V",    (void *) destroyNative},
 };
