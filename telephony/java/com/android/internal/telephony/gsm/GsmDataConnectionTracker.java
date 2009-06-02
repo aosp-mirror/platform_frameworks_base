@@ -151,7 +151,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private static final int POLL_PDP_MILLIS = 5 * 1000;
 
-    //WINK:TODO: Teleca, is this really gsm specific, what about CDMA?
     private static final String INTENT_RECONNECT_ALARM = "com.android.internal.telephony.gprs-reconnect";
     private static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
 

@@ -3302,10 +3302,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
-    /**
-     * TODO(Teleca): configValuesArray is represented as a RIL_BroadcastSMSConfig
-     * so we think this should be a class with the appropriate parameters not an array?
-     */
+    // TODO: Change the configValuesArray to a RIL_BroadcastSMSConfig
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message response) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG, response);
 

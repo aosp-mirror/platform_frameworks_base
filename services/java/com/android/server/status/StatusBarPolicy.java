@@ -819,30 +819,10 @@ public class StatusBarPolicy {
         updateDataIcon();
     }
 
-    // TODO(Teleca): I've add isCdma() to reduce some code duplication and simplify.
-    //               Please validate the correctness of these changes
     private boolean isCdma() {
-        // Is this equivalent, if so it seems simpler?
-//        return ((mPhone != null) && (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA));
-
-        if (mServiceState != null) {
-            switch(mServiceState.getRadioTechnology()) {
-                case ServiceState.RADIO_TECHNOLOGY_1xRTT:
-                case ServiceState.RADIO_TECHNOLOGY_EVDO_0:
-                case ServiceState.RADIO_TECHNOLOGY_EVDO_A:
-                case ServiceState.RADIO_TECHNOLOGY_IS95A:
-                case ServiceState.RADIO_TECHNOLOGY_IS95B:
-                  return true;
-                default:
-                  return false;
-            }
-        } else {
-            return false;
-        }
+        return ((mPhone != null) && (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA));
     }
 
-    // TODO(Teleca): I've add hasService() to reduce some code duplication and simplify.
-    //               Please validate the correctness of these changes.
     private boolean hasService() {
         if (mServiceState != null) {
             switch (mServiceState.getState()) {
@@ -1202,10 +1182,12 @@ public class StatusBarPolicy {
     private final void updateCdmaRoamingIcon() {
         if (!hasService()) {
             mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+            return;
         }
 
         if (!isCdma()) {
             mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
+            return;
         }
 
         int[] iconList = sRoamingIndicatorImages_cdma;
@@ -1235,8 +1217,10 @@ public class StatusBarPolicy {
                 mService.setIconVisibility(mCdmaRoamingIndicatorIcon, true);
                 break;
             case EriInfo.ROAMING_ICON_MODE_FLASH:
-                mCdmaRoamingIndicatorIconData.iconId = com.android.internal.R.drawable.stat_sys_roaming_cdma_flash;
+                mCdmaRoamingIndicatorIconData.iconId =
+                        com.android.internal.R.drawable.stat_sys_roaming_cdma_flash;
                 mService.updateIcon(mCdmaRoamingIndicatorIcon, mCdmaRoamingIndicatorIconData, null);
+                mService.setIconVisibility(mCdmaRoamingIndicatorIcon, true);
                 break;
 
         }

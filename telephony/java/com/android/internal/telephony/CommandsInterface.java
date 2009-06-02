@@ -1258,10 +1258,7 @@ public interface CommandsInterface {
      * @param result
      *            Callback message is empty on completion
      */
-    /**
-     * TODO(Teleca): configValuesArray is represented as a RIL_BroadcastSMSConfig
-     * so we think this should be a class with the appropriate parameters not an array?
-     */
+    // TODO: Change the configValuesArray to a RIL_BroadcastSMSConfig
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message result);
 
     /**
