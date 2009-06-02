@@ -33,7 +33,7 @@ import java.util.Iterator;
 import android.util.Log;
 
 public class CdmaSmsTest extends AndroidTestCase {
-    private final static String LOG_TAG = "Cdma_Sms_Test";
+    private final static String LOG_TAG = "CDMA";
 
     @SmallTest
     public void testUserData7bitGsm() throws Exception {
@@ -133,6 +133,100 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
         assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+    }
+
+    @SmallTest
+    public void testMonolithicOne() throws Exception {
+        String pdu = "0003200010010410168d2002010503060812011101590501c706069706180000000701c108" +
+                "01c00901800a01e00b01030c01c00d01070e05039acc13880f018011020566";
+        BearerData bearerData = BearerData.decode(HexDump.hexStringToByteArray(pdu));
+        assertEquals(bearerData.messageType, BearerData.MESSAGE_TYPE_SUBMIT);
+        assertEquals(bearerData.messageId, 1);
+        assertEquals(bearerData.priority, BearerData.PRIORITY_EMERGENCY);
+        assertEquals(bearerData.privacy, BearerData.PRIVACY_CONFIDENTIAL);
+        assertEquals(bearerData.userAckReq, true);
+        assertEquals(bearerData.readAckReq, true);
+        assertEquals(bearerData.deliveryAckReq, true);
+        assertEquals(bearerData.reportReq, false);
+        assertEquals(bearerData.numberOfMessages, 3);
+        assertEquals(bearerData.alert, BearerData.ALERT_HIGH_PRIO);
+        assertEquals(bearerData.language, BearerData.LANGUAGE_HEBREW);
+        assertEquals(bearerData.callbackNumber.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(bearerData.callbackNumber.numberMode,
+                     CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(bearerData.callbackNumber.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(bearerData.callbackNumber.numberPlan, CdmaSmsAddress.NUMBERING_PLAN_UNKNOWN);
+        assertEquals(bearerData.callbackNumber.numberOfDigits, 7);
+        assertEquals(bearerData.callbackNumber.address, "3598271");
+        assertEquals(bearerData.displayMode, BearerData.DISPLAY_MODE_USER);
+        assertEquals(bearerData.depositIndex, 1382);
+        assertEquals(bearerData.userResponseCode, 5);
+        assertEquals(bearerData.msgCenterTimeStamp.year, 2008);
+        assertEquals(bearerData.msgCenterTimeStamp.month, 11);
+        assertEquals(bearerData.msgCenterTimeStamp.monthDay, 1);
+        assertEquals(bearerData.msgCenterTimeStamp.hour, 11);
+        assertEquals(bearerData.msgCenterTimeStamp.minute, 1);
+        assertEquals(bearerData.msgCenterTimeStamp.second, 59);
+        assertEquals(bearerData.validityPeriodAbsolute, null);
+        assertEquals(bearerData.validityPeriodRelative, -63);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.year, 1997);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.month, 5);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.monthDay, 18);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.hour, 0);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.minute, 0);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.second, 0);
+        assertEquals(bearerData.deferredDeliveryTimeRelative, -57);
+        assertEquals(bearerData.hasUserDataHeader, false);
+        assertEquals(bearerData.userData.msgEncoding, UserData.ENCODING_7BIT_ASCII);
+        assertEquals(bearerData.userData.numFields, 2);
+        assertEquals(bearerData.userData.payloadStr, "hi");
+    }
+
+    @SmallTest
+    public void testMonolithicTwo() throws Exception {
+        String pdu = "0003200010010410168d200201050306081201110159050192060697061800000007013d0" +
+                "801c00901800a01e00b01030c01c00d01070e05039acc13880f018011020566";
+        BearerData bearerData = BearerData.decode(HexDump.hexStringToByteArray(pdu));
+        assertEquals(bearerData.messageType, BearerData.MESSAGE_TYPE_SUBMIT);
+        assertEquals(bearerData.messageId, 1);
+        assertEquals(bearerData.priority, BearerData.PRIORITY_EMERGENCY);
+        assertEquals(bearerData.privacy, BearerData.PRIVACY_CONFIDENTIAL);
+        assertEquals(bearerData.userAckReq, true);
+        assertEquals(bearerData.readAckReq, true);
+        assertEquals(bearerData.deliveryAckReq, true);
+        assertEquals(bearerData.reportReq, false);
+        assertEquals(bearerData.numberOfMessages, 3);
+        assertEquals(bearerData.alert, BearerData.ALERT_HIGH_PRIO);
+        assertEquals(bearerData.language, BearerData.LANGUAGE_HEBREW);
+        assertEquals(bearerData.callbackNumber.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(bearerData.callbackNumber.numberMode,
+                     CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(bearerData.callbackNumber.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(bearerData.callbackNumber.numberPlan, CdmaSmsAddress.NUMBERING_PLAN_UNKNOWN);
+        assertEquals(bearerData.callbackNumber.numberOfDigits, 7);
+        assertEquals(bearerData.callbackNumber.address, "3598271");
+        assertEquals(bearerData.displayMode, BearerData.DISPLAY_MODE_USER);
+        assertEquals(bearerData.depositIndex, 1382);
+        assertEquals(bearerData.userResponseCode, 5);
+        assertEquals(bearerData.msgCenterTimeStamp.year, 2008);
+        assertEquals(bearerData.msgCenterTimeStamp.month, 11);
+        assertEquals(bearerData.msgCenterTimeStamp.monthDay, 1);
+        assertEquals(bearerData.msgCenterTimeStamp.hour, 11);
+        assertEquals(bearerData.msgCenterTimeStamp.minute, 1);
+        assertEquals(bearerData.msgCenterTimeStamp.second, 59);
+        assertEquals(bearerData.validityPeriodAbsolute, null);
+        assertEquals(bearerData.validityPeriodRelative, 61);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.year, 1997);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.month, 5);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.monthDay, 18);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.hour, 0);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.minute, 0);
+        assertEquals(bearerData.deferredDeliveryTimeAbsolute.second, 0);
+        assertEquals(bearerData.deferredDeliveryTimeRelative, -110);
+        assertEquals(bearerData.hasUserDataHeader, false);
+        assertEquals(bearerData.userData.msgEncoding, UserData.ENCODING_7BIT_ASCII);
+        assertEquals(bearerData.userData.numFields, 2);
+        assertEquals(bearerData.userData.payloadStr, "hi");
     }
 
     @SmallTest
@@ -407,22 +501,6 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(addr.digitMode, revAddr.digitMode);
         assertEquals(addr.numberOfDigits, revAddr.numberOfDigits);
         assertEquals(addr.address, revAddr.address);
-    }
-
-    @SmallTest
-    public void testMsgCenterTimeStampFeedback() throws Exception {
-        BearerData bearerData = new BearerData();
-        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
-        bearerData.messageId = 0;
-        bearerData.hasUserDataHeader = false;
-        UserData userData = new UserData();
-        userData.payloadStr = "test message center timestamp";
-        bearerData.userData = userData;
-        bearerData.timeStamp = HexDump.hexStringToByteArray("112233445566");
-        byte []encodedSms = BearerData.encode(bearerData);
-        BearerData revBearerData = BearerData.decode(encodedSms);
-        assertEquals(HexDump.toHexString(bearerData.timeStamp),
-                     HexDump.toHexString(revBearerData.timeStamp));
     }
 
     @SmallTest
