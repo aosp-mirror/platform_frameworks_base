@@ -295,11 +295,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             /* Custom title feature is enabled and the user is trying to enable another feature */
             throw new AndroidRuntimeException("You cannot combine custom titles with other title features");
         }
-        /*  FEATURE_OPENGL disabled for 1.0
         if (featureId == FEATURE_OPENGL) {
             getAttributes().memoryType = WindowManager.LayoutParams.MEMORY_TYPE_GPU;
         }
-        */
         return super.requestFeature(featureId);
     }
 
