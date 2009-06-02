@@ -36,20 +36,28 @@ interface IBackupManager {
     /**
      * Notifies the Backup Manager Service that an agent has become available.  This
      * method is only invoked by the Activity Manager.
-     * !!! TODO: permission
      */
     oneway void agentConnected(String packageName, IBinder agent);
 
     /**
      * Notify the Backup Manager Service that an agent has unexpectedly gone away.
      * This method is only invoked by the Activity Manager.
-     * !!! TODO: permission
      */
     oneway void agentDisconnected(String packageName);
 
     /**
-     * Schedule a full backup of the given package.
-     * !!! TODO: permission
+     * Schedule a full backup of the given package.  Callers must hold the
+     * android.permission.BACKUP permission to use this method.
      */
     oneway void scheduleFullBackup(String packageName);
+
+    /**
+     * Specify a default backup transport.  Callers must hold the
+     * android.permission.BACKUP permission to use this method.
+     *
+     * @param transportID The ID of the transport to select.  This should be one
+     * of {@link BackupManager.TRANSPORT_GOOGLE} or {@link BackupManager.TRANSPORT_ADB}.
+     * @return The ID of the previously selected transport.
+     */
+    int selectBackupTransport(int transportID);
 }

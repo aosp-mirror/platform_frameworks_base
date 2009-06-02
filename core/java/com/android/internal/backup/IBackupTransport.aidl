@@ -16,6 +16,7 @@
 
 package com.android.internal.backup;
 
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
