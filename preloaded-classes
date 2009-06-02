@@ -485,7 +485,6 @@ android.webkit.HttpDateTime
 android.webkit.JWebCoreJavaBridge
 android.webkit.LoadListener
 android.webkit.MimeTypeMap
-android.webkit.TextDialog
 android.webkit.URLUtil
 android.webkit.WebBackForwardList
 android.webkit.WebHistoryItem
@@ -501,6 +500,7 @@ android.webkit.WebSettings$RenderPriority
 android.webkit.WebSettings$TextSize
 android.webkit.WebSyncManager
 android.webkit.WebSyncManager$SyncHandler
+android.webkit.WebTextView
 android.webkit.WebView
 android.webkit.WebView$ExtendedZoomControls
 android.webkit.WebView$PrivateHandler

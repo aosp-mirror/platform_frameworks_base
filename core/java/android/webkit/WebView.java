@@ -58,7 +58,7 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.TextDialog.AutoCompleteAdapter;
+import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
 import android.widget.AbsoluteLayout;
 import android.widget.Adapter;
@@ -300,7 +300,7 @@ public class WebView extends AbsoluteLayout
     private WebViewCore mWebViewCore;
     // Handler for dispatching UI messages.
     /* package */ final Handler mPrivateHandler = new PrivateHandler();
-    private TextDialog mTextEntry;
+    private WebTextView mWebTextView;
     // Used to ignore changes to webkit text that arrives to the UI side after
     // more key events.
     private int mTextGeneration;
@@ -363,9 +363,9 @@ public class WebView extends AbsoluteLayout
     // take control of touch events unless it says no for touch down event.
     private boolean mPreventDrag;
 
-    // If updateTextEntry gets called while we are out of focus, use this
+    // If rebuildWebTextView gets called while we are out of focus, use this
     // variable to remember to do it next time we gain focus.
-    private boolean mNeedsUpdateTextEntry = false;
+    private boolean mNeedsRebuildWebTextView = false;
 
     // Whether or not to draw the cursor ring.
     private boolean mDrawCursorRing = true;
@@ -430,45 +430,45 @@ public class WebView extends AbsoluteLayout
     /**
      * Private message ids
      */
-    private static final int REMEMBER_PASSWORD = 1;
-    private static final int NEVER_REMEMBER_PASSWORD = 2;
-    private static final int SWITCH_TO_SHORTPRESS = 3;
-    private static final int SWITCH_TO_LONGPRESS = 4;
-    private static final int UPDATE_TEXT_ENTRY_ADAPTER = 6;
-    private static final int SWITCH_TO_CLICK = 7;
-    private static final int RESUME_WEBCORE_UPDATE = 8;
+    private static final int REMEMBER_PASSWORD          = 1;
+    private static final int NEVER_REMEMBER_PASSWORD    = 2;
+    private static final int SWITCH_TO_SHORTPRESS       = 3;
+    private static final int SWITCH_TO_LONGPRESS        = 4;
+    private static final int REQUEST_FORM_DATA          = 6;
+    private static final int SWITCH_TO_CLICK            = 7;
+    private static final int RESUME_WEBCORE_UPDATE      = 8;
 
     //! arg1=x, arg2=y
-    static final int SCROLL_TO_MSG_ID               = 10;
-    static final int SCROLL_BY_MSG_ID               = 11;
+    static final int SCROLL_TO_MSG_ID                   = 10;
+    static final int SCROLL_BY_MSG_ID                   = 11;
     //! arg1=x, arg2=y
-    static final int SPAWN_SCROLL_TO_MSG_ID         = 12;
+    static final int SPAWN_SCROLL_TO_MSG_ID             = 12;
     //! arg1=x, arg2=y
-    static final int SYNC_SCROLL_TO_MSG_ID          = 13;
-    static final int NEW_PICTURE_MSG_ID             = 14;
-    static final int UPDATE_TEXT_ENTRY_MSG_ID       = 15;
-    static final int WEBCORE_INITIALIZED_MSG_ID     = 16;
-    static final int UPDATE_TEXTFIELD_TEXT_MSG_ID   = 17;
-    static final int DID_FIRST_LAYOUT_MSG_ID        = 18;
-    static final int RECOMPUTE_FOCUS_MSG_ID         = 19;
+    static final int SYNC_SCROLL_TO_MSG_ID              = 13;
+    static final int NEW_PICTURE_MSG_ID                 = 14;
+    static final int UPDATE_TEXT_ENTRY_MSG_ID           = 15;
+    static final int WEBCORE_INITIALIZED_MSG_ID         = 16;
+    static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
+    static final int DID_FIRST_LAYOUT_MSG_ID            = 18;
+    static final int RECOMPUTE_FOCUS_MSG_ID             = 19;
 
-    static final int MARK_NODE_INVALID_ID           = 21;
-    static final int UPDATE_CLIPBOARD               = 22;
-    static final int LONG_PRESS_ENTER               = 23;
-    static final int PREVENT_TOUCH_ID               = 24;
-    static final int WEBCORE_NEED_TOUCH_EVENTS      = 25;
+    static final int MARK_NODE_INVALID_ID               = 21;
+    static final int UPDATE_CLIPBOARD                   = 22;
+    static final int LONG_PRESS_ENTER                   = 23;
+    static final int PREVENT_TOUCH_ID                   = 24;
+    static final int WEBCORE_NEED_TOUCH_EVENTS          = 25;
     // obj=Rect in doc coordinates
-    static final int INVAL_RECT_MSG_ID              = 26;
+    static final int INVAL_RECT_MSG_ID                  = 26;
 
     static final String[] HandlerDebugString = {
-        "REMEMBER_PASSWORD", // = 1;
-        "NEVER_REMEMBER_PASSWORD", // = 2;
-        "SWITCH_TO_SHORTPRESS", // = 3;
-        "SWITCH_TO_LONGPRESS", // = 4;
+        "REMEMBER_PASSWORD", //              = 1;
+        "NEVER_REMEMBER_PASSWORD", //        = 2;
+        "SWITCH_TO_SHORTPRESS", //           = 3;
+        "SWITCH_TO_LONGPRESS", //            = 4;
         "5",
-        "UPDATE_TEXT_ENTRY_ADAPTER", // = 6;
-        "SWITCH_TO_CLICK", // = 7;
-        "RESUME_WEBCORE_UPDATE", // = 8;
+        "REQUEST_FORM_DATA", //              = 6;
+        "SWITCH_TO_CLICK", //                = 7;
+        "RESUME_WEBCORE_UPDATE", //          = 8;
         "9",
         "SCROLL_TO_MSG_ID", //               = 10;
         "SCROLL_BY_MSG_ID", //               = 11;
@@ -1482,13 +1482,13 @@ public class WebView extends AbsoluteLayout
      *  Return true if the browser is displaying a TextView for text input.
      */
     private boolean inEditingMode() {
-        return mTextEntry != null && mTextEntry.getParent() != null
-                && mTextEntry.hasFocus();
+        return mWebTextView != null && mWebTextView.getParent() != null
+                && mWebTextView.hasFocus();
     }
 
     private void clearTextEntry() {
         if (inEditingMode()) {
-            mTextEntry.remove();
+            mWebTextView.remove();
         }
     }
 
@@ -2004,7 +2004,7 @@ public class WebView extends AbsoluteLayout
     public void clearFormData() {
         if (inEditingMode()) {
             AutoCompleteAdapter adapter = null;
-            mTextEntry.setAdapterCustom(adapter);
+            mWebTextView.setAdapterCustom(adapter);
         }
     }
 
@@ -2435,7 +2435,7 @@ public class WebView extends AbsoluteLayout
     @Override
     public boolean performLongClick() {
         if (inEditingMode()) {
-            return mTextEntry.performLongClick();
+            return mWebTextView.performLongClick();
         } else {
             return super.performLongClick();
         }
@@ -2632,7 +2632,7 @@ public class WebView extends AbsoluteLayout
             if (mTouchMode == SCROLL_ZOOM_ANIMATION_IN) {
                 setHorizontalScrollBarEnabled(true);
                 setVerticalScrollBarEnabled(true);
-                updateTextEntry();
+                rebuildWebTextView();
                 scrollTo((int) (scrollFrame.centerX() * mActualScale)
                         - (width >> 1), (int) (scrollFrame.centerY()
                         * mActualScale) - (height >> 1));
@@ -2944,47 +2944,52 @@ public class WebView extends AbsoluteLayout
     private void displaySoftKeyboard() {
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(mTextEntry, 0);
-        mTextEntry.enableScrollOnScreen(true);
+        imm.showSoftInput(mWebTextView, 0);
+        mWebTextView.enableScrollOnScreen(true);
         // Now we need to fake a touch event to place the cursor where the
         // user touched.
         AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams)
-                mTextEntry.getLayoutParams();
+                mWebTextView.getLayoutParams();
         if (lp != null) {
             // Take the last touch and adjust for the location of the
-            // TextDialog.
+            // WebTextView.
             float x = mLastTouchX + (float) (mScrollX - lp.x);
             float y = mLastTouchY + (float) (mScrollY - lp.y);
-            mTextEntry.fakeTouchEvent(x, y);
+            mWebTextView.fakeTouchEvent(x, y);
         }
     }
 
-    private void updateTextEntry() {
+    /*
+     * This method checks the current focus and potentially rebuilds
+     * mWebTextView to have the appropriate properties, such as password,
+     * multiline, and what text it contains.  It also removes it if necessary.
+     */
+    private void rebuildWebTextView() {
         // If we do not have focus, do nothing until we gain focus.
-        if (!hasFocus() && (null == mTextEntry || !mTextEntry.hasFocus())
+        if (!hasFocus() && (null == mWebTextView || !mWebTextView.hasFocus())
                 || (mTouchMode >= FIRST_SCROLL_ZOOM
                 && mTouchMode <= LAST_SCROLL_ZOOM)) {
-            mNeedsUpdateTextEntry = true;
+            mNeedsRebuildWebTextView = true;
             return;
         }
         boolean alreadyThere = inEditingMode();
-        // inEditingMode can only return true if mTextEntry is non-null,
+        // inEditingMode can only return true if mWebTextView is non-null,
         // so we can safely call remove() if (alreadyThere)
         if (0 == mNativeClass || (!nativeFocusIsTextInput()
                 && !nativeCursorIsTextInput())) {
             if (alreadyThere) {
-                mTextEntry.remove();
+                mWebTextView.remove();
             }
             return;
         }
         // At this point, we know we have found an input field, so go ahead
-        // and create the TextDialog if necessary.
-        if (mTextEntry == null) {
-            mTextEntry = new TextDialog(mContext, WebView.this);
+        // and create the WebTextView if necessary.
+        if (mWebTextView == null) {
+            mWebTextView = new WebTextView(mContext, WebView.this);
             // Initialize our generation number.
             mTextGeneration = 0;
         }
-        mTextEntry.setTextSize(contentToView(nativeFocusTextSize()));
+        mWebTextView.setTextSize(contentToView(nativeFocusTextSize()));
         Rect visibleRect = sendOurVisibleRect();
         // Note that sendOurVisibleRect calls viewToContent, so the coordinates
         // should be in content coordinates.
@@ -2995,14 +3000,14 @@ public class WebView extends AbsoluteLayout
         }
         String text = nativeFocusText();
         int nodePointer = nativeFocusNodePointer();
-        if (alreadyThere && mTextEntry.isSameTextField(nodePointer)) {
+        if (alreadyThere && mWebTextView.isSameTextField(nodePointer)) {
             // It is possible that we have the same textfield, but it has moved,
             // i.e. In the case of opening/closing the screen.
             // In that case, we need to set the dimensions, but not the other
             // aspects.
             // We also need to restore the selection, which gets wrecked by
             // calling setTextEntryRect.
-            Spannable spannable = (Spannable) mTextEntry.getText();
+            Spannable spannable = (Spannable) mWebTextView.getText();
             int start = Selection.getSelectionStart(spannable);
             int end = Selection.getSelectionEnd(spannable);
             // If the text has been changed by webkit, update it.  However, if
@@ -3010,18 +3015,19 @@ public class WebView extends AbsoluteLayout
             // another update when that text is recognized.
             if (text != null && !text.equals(spannable.toString())
                     && nativeTextGeneration() == mTextGeneration) {
-                mTextEntry.setTextAndKeepSelection(text);
+                mWebTextView.setTextAndKeepSelection(text);
             } else {
                 Selection.setSelection(spannable, start, end);
             }
         } else {
             Rect vBox = contentToView(bounds);
-            mTextEntry.setRect(vBox.left, vBox.top, vBox.width(), vBox.height());
-            mTextEntry.setGravity(nativeFocusIsRtlText() ? Gravity.RIGHT :
+            mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
+                    vBox.height());
+            mWebTextView.setGravity(nativeFocusIsRtlText() ? Gravity.RIGHT :
                     Gravity.NO_GRAVITY);
             // this needs to be called before update adapter thread starts to
-            // ensure the mTextEntry has the same node pointer
-            mTextEntry.setNodePointer(nodePointer);
+            // ensure the mWebTextView has the same node pointer
+            mWebTextView.setNodePointer(nodePointer);
             int maxLength = -1;
             boolean isTextField = nativeFocusIsTextField();
             if (isTextField) {
@@ -3032,21 +3038,20 @@ public class WebView extends AbsoluteLayout
                     HashMap data = new HashMap();
                     data.put("text", text);
                     Message update = mPrivateHandler.obtainMessage(
-                            UPDATE_TEXT_ENTRY_ADAPTER, nodePointer, 0,
-                            data);
-                    UpdateTextEntryAdapter updater = new UpdateTextEntryAdapter(
-                            name, getUrl(), update);
+                            REQUEST_FORM_DATA, nodePointer, 0, data);
+                    RequestFormData updater = new RequestFormData(name,
+                            getUrl(), update);
                     Thread t = new Thread(updater);
                     t.start();
                 }
             }
-            mTextEntry.setMaxLength(maxLength);
+            mWebTextView.setMaxLength(maxLength);
             AutoCompleteAdapter adapter = null;
-            mTextEntry.setAdapterCustom(adapter);
-            mTextEntry.setSingleLine(isTextField);
-            mTextEntry.setInPassword(nativeFocusIsPassword());
+            mWebTextView.setAdapterCustom(adapter);
+            mWebTextView.setSingleLine(isTextField);
+            mWebTextView.setInPassword(nativeFocusIsPassword());
             if (null == text) {
-                mTextEntry.setText("", 0, 0);
+                mWebTextView.setText("", 0, 0);
             } else {
                 // Change to true to enable the old style behavior, where
                 // entering a textfield/textarea always set the selection to the
@@ -3057,24 +3062,29 @@ public class WebView extends AbsoluteLayout
                 // textarea.  Testing out a new behavior, where textfields set
                 // selection at the end, and textareas at the beginning.
                 if (false) {
-                    mTextEntry.setText(text, 0, text.length());
+                    mWebTextView.setText(text, 0, text.length());
                 } else if (isTextField) {
                     int length = text.length();
-                    mTextEntry.setText(text, length, length);
+                    mWebTextView.setText(text, length, length);
                 } else {
-                    mTextEntry.setText(text, 0, 0);
+                    mWebTextView.setText(text, 0, 0);
                 }
             }
-            mTextEntry.requestFocus();
+            mWebTextView.requestFocus();
         }
     }
 
-    private class UpdateTextEntryAdapter implements Runnable {
+    /*
+     * This class requests an Adapter for the WebTextView which shows past
+     * entries stored in the database.  It is a Runnable so that it can be done
+     * in its own thread, without slowing down the UI.
+     */
+    private class RequestFormData implements Runnable {
         private String mName;
         private String mUrl;
         private Message mUpdateMessage;
 
-        public UpdateTextEntryAdapter(String name, String url, Message msg) {
+        public RequestFormData(String name, String url, Message msg) {
             mName = name;
             mUrl = url;
             mUpdateMessage = msg;
@@ -3393,7 +3403,7 @@ public class WebView extends AbsoluteLayout
         if (child == this) {
             if (inEditingMode()) {
                 clearTextEntry();
-                mNeedsUpdateTextEntry = true;
+                mNeedsRebuildWebTextView = true;
             }
         }
     }
@@ -3417,8 +3427,8 @@ public class WebView extends AbsoluteLayout
                 // drawing the cursor ring, and restore the TextView if
                 // necessary.
                 mDrawCursorRing = true;
-                if (mNeedsUpdateTextEntry) {
-                    updateTextEntry();
+                if (mNeedsRebuildWebTextView) {
+                    rebuildWebTextView();
                 }
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
@@ -3476,15 +3486,15 @@ public class WebView extends AbsoluteLayout
             // the cursor ring, and add the TextView if necessary.
             if (hasWindowFocus()) {
                 mDrawCursorRing = true;
-                if (mNeedsUpdateTextEntry) {
-                    updateTextEntry();
-                    mNeedsUpdateTextEntry = false;
+                if (mNeedsRebuildWebTextView) {
+                    rebuildWebTextView();
+                    mNeedsRebuildWebTextView = false;
                 }
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
                 }
                 // FIXME: This is unnecessary if we are gaining focus from the
-                // TextDialog.  How can we tell if it was the last thing in
+                // WebTextView.  How can we tell if it was the last thing in
                 // focus?
                 setFocusControllerActive(true);
             //} else {
@@ -4380,7 +4390,7 @@ public class WebView extends AbsoluteLayout
 
     /*package*/ void shortPressOnTextField() {
         if (inEditingMode()) {
-            View v = mTextEntry;
+            View v = mWebTextView;
             int x = viewToContent((v.getLeft() + v.getRight()) >> 1);
             int y = viewToContent((v.getTop() + v.getBottom()) >> 1);
             nativeMotionUp(x, y, mNavSlop);
@@ -4416,7 +4426,8 @@ public class WebView extends AbsoluteLayout
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
         boolean result = false;
         if (inEditingMode()) {
-            result = mTextEntry.requestFocus(direction, previouslyFocusedRect);
+            result = mWebTextView.requestFocus(direction,
+                    previouslyFocusedRect);
         } else {
             result = super.requestFocus(direction, previouslyFocusedRect);
             if (mWebViewCore.getSettings().getNeedInitialFocus()) {
@@ -4620,7 +4631,7 @@ public class WebView extends AbsoluteLayout
                 case SWITCH_TO_LONGPRESS: {
                     mTouchMode = TOUCH_DONE_MODE;
                     performLongClick();
-                    updateTextEntry();
+                    rebuildWebTextView();
                     break;
                 }
                 case SWITCH_TO_CLICK:
@@ -4708,20 +4719,21 @@ public class WebView extends AbsoluteLayout
                     // Make sure that the textfield is currently focused
                     // and representing the same node as the pointer.
                     if (inEditingMode() &&
-                            mTextEntry.isSameTextField(msg.arg1)) {
+                            mWebTextView.isSameTextField(msg.arg1)) {
                         if (msg.getData().getBoolean("password")) {
-                            Spannable text = (Spannable) mTextEntry.getText();
+                            Spannable text = (Spannable) mWebTextView.getText();
                             int start = Selection.getSelectionStart(text);
                             int end = Selection.getSelectionEnd(text);
-                            mTextEntry.setInPassword(true);
+                            mWebTextView.setInPassword(true);
                             // Restore the selection, which may have been
                             // ruined by setInPassword.
-                            Spannable pword = (Spannable) mTextEntry.getText();
+                            Spannable pword =
+                                    (Spannable) mWebTextView.getText();
                             Selection.setSelection(pword, start, end);
                         // If the text entry has created more events, ignore
                         // this one.
                         } else if (msg.arg2 == mTextGeneration) {
-                            mTextEntry.setTextAndKeepSelection(
+                            mWebTextView.setTextAndKeepSelection(
                                     (String) msg.obj);
                         }
                     }
@@ -4791,9 +4803,9 @@ public class WebView extends AbsoluteLayout
                     // this is sent after finishing resize in WebViewCore. Make
                     // sure the text edit box is still on the  screen.
                     if (inEditingMode() && nativeCursorIsTextInput()) {
-                        mTextEntry.bringIntoView();
+                        mWebTextView.bringIntoView();
                     }
-                    updateTextEntry();
+                    rebuildWebTextView();
                     break;
                 case RECOMPUTE_FOCUS_MSG_ID:
                     if (mNativeClass != 0) {
@@ -4811,12 +4823,12 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 }
-                case UPDATE_TEXT_ENTRY_ADAPTER:
+                case REQUEST_FORM_DATA:
                     HashMap data = (HashMap) msg.obj;
-                    if (mTextEntry.isSameTextField(msg.arg1)) {
+                    if (mWebTextView.isSameTextField(msg.arg1)) {
                         AutoCompleteAdapter adapter =
                                 (AutoCompleteAdapter) data.get("adapter");
-                        mTextEntry.setAdapterCustom(adapter);
+                        mWebTextView.setAdapterCustom(adapter);
                     }
                     break;
                 case UPDATE_CLIPBOARD:
