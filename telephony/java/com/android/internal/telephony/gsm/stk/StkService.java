@@ -184,9 +184,6 @@ public class StkService extends Handler implements AppInterface {
         mCmdIf.unSetOnStkCallSetUp(this);
 
         this.removeCallbacksAndMessages(null);
-
-        //removing instance
-        sInstance = null;
     }
 
     protected void finalize() {
@@ -450,7 +447,7 @@ public class StkService extends Handler implements AppInterface {
     }
 
     /**
-     * Used for instantiating the Service from the GsmPhone constructor.
+     * Used for instantiating/updating the Service from the GsmPhone constructor.
      *
      * @param ci CommandsInterface object
      * @param sr SIMRecords object

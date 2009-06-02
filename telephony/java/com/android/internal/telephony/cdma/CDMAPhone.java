@@ -249,7 +249,7 @@ public class CDMAPhone extends PhoneBase {
     public DataActivityState getDataActivityState() {
         DataActivityState ret = DataActivityState.NONE;
 
-        if (mSST.getCurrentCdmaDataConnectionState() != ServiceState.RADIO_TECHNOLOGY_UNKNOWN) {
+        if (mSST.getCurrentCdmaDataConnectionState() == ServiceState.STATE_IN_SERVICE) {
 
             switch (mDataConnection.getActivity()) {
                 case DATAIN:
@@ -384,11 +384,11 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public String getLine1Number() {
-        return mRuimRecords.getMdnNumber();
+        return mSST.getMdnNumber();
     }
 
     public String getCdmaMIN() {
-        return mRuimRecords.getCdmaMin();
+        return mSST.getCdmaMin();
     }
 
     public void getCallWaiting(Message onComplete) {
@@ -545,8 +545,7 @@ public class CDMAPhone extends PhoneBase {
              // already been called
 
              ret = DataState.DISCONNECTED;
-        } else if (mSST.getCurrentCdmaDataConnectionState()
-                == ServiceState.RADIO_TECHNOLOGY_UNKNOWN) {
+        } else if (mSST.getCurrentCdmaDataConnectionState() != ServiceState.STATE_IN_SERVICE) {
             // If we're out of service, open TCP sockets may still work
             // but no data will flow
             ret = DataState.DISCONNECTED;
@@ -1159,61 +1158,7 @@ public class CDMAPhone extends PhoneBase {
     public int getCdmaEriIconIndex() {
         int roamInd = getServiceState().getCdmaRoamingIndicator();
         int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
-        int ret = -1;
-
-        switch (roamInd) {
-            // Handling the standard roaming indicator (non-ERI)
-            case EriInfo.ROAMING_INDICATOR_ON:
-            case EriInfo.ROAMING_INDICATOR_OFF:
-            case EriInfo.ROAMING_INDICATOR_FLASH:
-                Log.d(LOG_TAG, "Using Standard Roaming Indicator (non-ERI): " + roamInd);
-                ret = roamInd;
-            break;
-
-            // Handling the Enhanced Roaming Indicator (roamInd > 2)
-            default:
-                if (!mEriManager.isEriFileLoaded()) {
-                    /**
-                     * TODO(Teleca): What is going on here? Conditionals on the variable being
-                     * switched? Seems unreasonably confusing... Especially since the above comment
-                     * indicates this should always be true... If we used explicit returns, the
-                     * switch could be used to filter specific cases for early bail, and the rest
-                     * could then be dealt with outside the switch...
-                     */
-
-                    if(defRoamInd > 2) {
-                        Log.d(LOG_TAG, "ERI File not loaded, using: "
-                                + EriInfo.ROAMING_INDICATOR_FLASH);
-                        ret = EriInfo.ROAMING_INDICATOR_FLASH;
-                    } else {
-                        Log.d(LOG_TAG, "ERI File not loaded, using: " + defRoamInd);
-                        ret = defRoamInd;
-                    }
-                } else if (mEriManager.getEriInfo(roamInd) == null) {
-                    if(mEriManager.getEriInfo(defRoamInd) == null) {
-/**
- * TODO(Teleca): Why the redundant code? Especially since it results in this very strange looking
- * almost-identical conditional... How about calling each version of mEriManager.getEriInfo just
- * once, and conditionalizing on the results..
- */
-                        Log.e(LOG_TAG, "Error: ERI entry: " + roamInd
-                                + " not present, defRoamInd: " + defRoamInd
-                                + " not defined in ERI file");
-                        ret = EriInfo.ROAMING_INDICATOR_ON;
-                    } else {
-                        int iconIndex = mEriManager.getEriInfo(defRoamInd).mIconIndex;
-                        Log.d(LOG_TAG, "ERI entry " + roamInd + " not present, using icon: "
-                                + iconIndex);
-                        ret = iconIndex;
-                    }
-                } else {
-                    int iconIndex = mEriManager.getEriInfo(roamInd).mIconIndex;
-                    Log.d(LOG_TAG, "Using ERI icon: " + iconIndex);
-                    ret = iconIndex;
-                }
-            break;
-        }
-        return ret;
+        return mEriManager.getCdmaEriIconIndex(roamInd, defRoamInd);
     }
 
     /**
@@ -1225,60 +1170,7 @@ public class CDMAPhone extends PhoneBase {
     public int getCdmaEriIconMode() {
         int roamInd = getServiceState().getCdmaRoamingIndicator();
         int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
-        int ret = -1;
-
-        switch (roamInd) {
-            // Handling the standard roaming indicator (non-ERI)
-            case EriInfo.ROAMING_INDICATOR_ON:
-            case EriInfo.ROAMING_INDICATOR_OFF:
-                Log.d(LOG_TAG, "Using Standard Roaming Indicator (non-ERI): normal");
-                ret = EriInfo.ROAMING_ICON_MODE_NORMAL;
-            break;
-
-            case EriInfo.ROAMING_INDICATOR_FLASH:
-                Log.d(LOG_TAG, "Using Standard Roaming Indicator (non-ERI): flashing");
-                ret = EriInfo.ROAMING_ICON_MODE_FLASH;
-            break;
-
-            // Handling the Enhanced Roaming Indicator (roamInd > 2)
-            default:
-                if (!mEriManager.isEriFileLoaded()) {
-                    if(defRoamInd > 2) {
-                        Log.d(LOG_TAG, "ERI File not loaded, defRoamInd > 2, flashing");
-                        ret = EriInfo.ROAMING_ICON_MODE_FLASH;
-                    } else {
-                        switch (defRoamInd) {
-                            // Handling the standard roaming indicator (non-ERI)
-                            case EriInfo.ROAMING_INDICATOR_ON:
-                            case EriInfo.ROAMING_INDICATOR_OFF:
-                                Log.d(LOG_TAG, "ERI File not loaded, normal");
-                                ret = EriInfo.ROAMING_ICON_MODE_NORMAL;
-                            break;
-
-                            case EriInfo.ROAMING_INDICATOR_FLASH:
-                                Log.d(LOG_TAG, "ERI File not loaded, normal");
-                                ret = EriInfo.ROAMING_ICON_MODE_FLASH;
-                            break;
-                        }
-                    }
-                } else if (mEriManager.getEriInfo(roamInd) == null) {
-                    if(mEriManager.getEriInfo(defRoamInd) == null) {
-                        Log.e(LOG_TAG, "Error: defRoamInd not defined in ERI file, normal");
-                        ret =  EriInfo.ROAMING_ICON_MODE_NORMAL;
-                    } else {
-                        int mode = mEriManager.getEriInfo(defRoamInd).mIconMode;
-                        Log.d(LOG_TAG, "ERI entry " + roamInd + " not present, icon  mode: "
-                                + mode);
-                        ret = mode;
-                    }
-                } else {
-                    int mode = mEriManager.getEriInfo(roamInd).mIconMode;
-                    Log.d(LOG_TAG, "Using ERI icon mode: " + mode);
-                    ret = mode;
-                }
-            break;
-        }
-        return ret;
+        return mEriManager.getCdmaEriIconMode(roamInd, defRoamInd);
     }
 
     /**
@@ -1288,94 +1180,6 @@ public class CDMAPhone extends PhoneBase {
     public String getCdmaEriText() {
         int roamInd = getServiceState().getCdmaRoamingIndicator();
         int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
-        String ret = "ERI text";
-
-        switch (roamInd) {
-            // Handling the standard roaming indicator (non-ERI)
-            case EriInfo.ROAMING_INDICATOR_ON:
-                ret = EriInfo.ROAMING_TEXT_0;
-            break;
-            case EriInfo.ROAMING_INDICATOR_OFF:
-                ret = EriInfo.ROAMING_TEXT_1;
-            break;
-            case EriInfo.ROAMING_INDICATOR_FLASH:
-                ret = EriInfo.ROAMING_TEXT_2;
-            break;
-
-            // Handling the standard ERI
-            case 3:
-                ret = EriInfo.ROAMING_TEXT_3;
-            break;
-            case 4:
-                ret = EriInfo.ROAMING_TEXT_4;
-            break;
-            case 5:
-                ret = EriInfo.ROAMING_TEXT_5;
-            break;
-            case 6:
-                ret = EriInfo.ROAMING_TEXT_6;
-            break;
-            case 7:
-                ret = EriInfo.ROAMING_TEXT_7;
-            break;
-            case 8:
-                ret = EriInfo.ROAMING_TEXT_8;
-            break;
-            case 9:
-                ret = EriInfo.ROAMING_TEXT_9;
-            break;
-            case 10:
-                ret = EriInfo.ROAMING_TEXT_10;
-            break;
-            case 11:
-                ret = EriInfo.ROAMING_TEXT_11;
-            break;
-            case 12:
-                ret = EriInfo.ROAMING_TEXT_12;
-            break;
-
-            // Handling the non standard Enhanced Roaming Indicator (roamInd > 63)
-            default:
-                if (!mEriManager.isEriFileLoaded()) {
-                    if(defRoamInd > 2) {
-                        Log.d(LOG_TAG, "ERI File not loaded, defRoamInd > 2, " +
-                                EriInfo.ROAMING_TEXT_2);
-                        ret = EriInfo.ROAMING_TEXT_2;
-                    } else {
-                        switch (defRoamInd) {
-                            // Handling the standard roaming indicator (non-ERI)
-                            case EriInfo.ROAMING_INDICATOR_ON:
-                                Log.d(LOG_TAG, "ERI File not loaded, " + EriInfo.ROAMING_TEXT_0);
-                                ret = EriInfo.ROAMING_TEXT_0;
-                            break;
-                            case EriInfo.ROAMING_INDICATOR_OFF:
-                                Log.d(LOG_TAG, "ERI File not loaded, " + EriInfo.ROAMING_TEXT_1);
-                                ret = EriInfo.ROAMING_TEXT_1;
-                            break;
-                            case EriInfo.ROAMING_INDICATOR_FLASH:
-                                Log.d(LOG_TAG, "ERI File not loaded, " + EriInfo.ROAMING_TEXT_2);
-                                ret = EriInfo.ROAMING_TEXT_2;
-                            break;
-                        }
-                    }
-                } else if (mEriManager.getEriInfo(roamInd) == null) {
-                    if(mEriManager.getEriInfo(defRoamInd) == null) {
-                        Log.e(LOG_TAG, "Error: defRoamInd not defined in ERI file, "
-                                + EriInfo.ROAMING_TEXT_0);
-                        ret = EriInfo.ROAMING_TEXT_0;
-                    } else {
-                        String eriText = mEriManager.getEriInfo(defRoamInd).mEriText;
-                        Log.d(LOG_TAG, "ERI entry " + roamInd + " not present, eri text: "
-                                + eriText);
-                        ret = eriText;
-                    }
-                } else {
-                    String eriText = mEriManager.getEriInfo(roamInd).mEriText;
-                    Log.d(LOG_TAG, "Using ERI text: " + eriText);
-                    ret = eriText;
-                }
-            break;
-        }
-        return ret;
+        return mEriManager.getCdmaEriText(roamInd, defRoamInd);
     }
 }
