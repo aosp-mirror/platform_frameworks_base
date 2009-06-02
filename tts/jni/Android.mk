@@ -19,6 +19,10 @@ LOCAL_SHARED_LIBRARIES += \
 	libdl
 endif
 
+ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
+LOCAL_LDLIBS += -ldl
+endif
+
 
 LOCAL_MODULE:= libttssynthproxy
 
