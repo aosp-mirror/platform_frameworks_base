@@ -50,6 +50,14 @@ public class UserData {
         'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~'};
 
     /**
+     * Character to use when forced to encode otherwise unencodable
+     * characters, meaning those not in the respective ASCII or GSM
+     * 7-bit encoding tables.  Current choice is SPACE, which is 0x20
+     * in both the GSM-7bit and ASCII-7bit encodings.
+     */
+    static final byte UNENCODABLE_7_BIT_CHAR = 0x20;
+
+    /**
      * Only elements between these indices in the ASCII table are printable.
      */
     public static final int PRINTABLE_ASCII_MIN_INDEX = 0x20;
