@@ -20,9 +20,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -71,8 +68,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mText2Col;
     private int mIconName1Col;
     private int mIconName2Col;
-    private int mIconBitmap1Col;
-    private int mIconBitmap2Col;
 
     // This value is stored in SuggestionsAdapter by the SearchDialog to indicate whether
     // a particular list item should be selected upon the next call to notifyDataSetChanged.
@@ -139,8 +134,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mText2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
             mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
             mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
-            mIconBitmap1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1_BITMAP);
-            mIconBitmap2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2_BITMAP);
         }
         updateWorking();
     }
@@ -215,8 +208,8 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
         setViewText(cursor, views.mText1, mText1Col, isHtml);
         setViewText(cursor, views.mText2, mText2Col, isHtml);
-        setViewIcon(cursor, views.mIcon1, mIconBitmap1Col, mIconName1Col);
-        setViewIcon(cursor, views.mIcon2, mIconBitmap2Col, mIconName2Col);
+        setViewIcon(cursor, views.mIcon1, mIconName1Col);
+        setViewIcon(cursor, views.mIcon2, mIconName2Col);
     }
     
     private void setViewText(Cursor cursor, TextView v, int textCol, boolean isHtml) {
@@ -238,26 +231,15 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
     }
     
-    private void setViewIcon(Cursor cursor, ImageView v, int iconBitmapCol, int iconNameCol) {
+    private void setViewIcon(Cursor cursor, ImageView v, int iconNameCol) {
         if (v == null) {
             return;
         }
-        Drawable drawable = null;
-        // First try the bitmap column
-        if (iconBitmapCol >= 0) {
-            byte[] data = cursor.getBlob(iconBitmapCol);
-            if (data != null) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                if (bitmap != null) {
-                    drawable = new BitmapDrawable(bitmap);
-                }
-            }
+        if (iconNameCol < 0) {
+            return;
         }
-        // If there was no bitmap, try the icon resource column.
-        if (drawable == null && iconNameCol >= 0) {
-            String value = cursor.getString(iconNameCol);
-            drawable = getDrawableFromResourceValue(value);
-        }
+        String value = cursor.getString(iconNameCol);
+        Drawable drawable = getDrawableFromResourceValue(value);
         // Set the icon even if the drawable is null, since we need to clear any
         // previous icon.
         v.setImageDrawable(drawable);
