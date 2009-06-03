@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.os.*;
 
 
@@ -101,17 +103,46 @@ public class DisplayMetrics {
     }
 
     /**
-     * Set the display metrics' density and update parameters depend on it.
-     * @hide
+     * Update the display metrics based on the compatibility info and configuration.
+     * {@hide}
      */
-    public void updateDensity(float newDensity) {
-        float ratio = newDensity / density;
-        density = newDensity;
-        scaledDensity = density;
-        widthPixels *= ratio;
-        heightPixels *= ratio;
-        xdpi *= ratio;
-        ydpi *= ratio;
+    public void updateMetrics(CompatibilityInfo compatibilityInfo, Configuration configuration) {
+        if (compatibilityInfo.mScalingRequired) {
+            float invertedRatio = compatibilityInfo.mApplicationInvertedScale;
+            density *= invertedRatio;
+            scaledDensity *= invertedRatio;
+            xdpi *= invertedRatio;
+            ydpi *= invertedRatio;
+            widthPixels *= invertedRatio;
+            heightPixels *= invertedRatio;
+        }
+        if (!compatibilityInfo.mExpandable) {
+            // Note: this assume that configuration is updated before calling
+            // updateMetrics method.
+            int defaultWidth;
+            int defaultHeight;
+            switch (configuration.orientation) {
+                case Configuration.ORIENTATION_LANDSCAPE: {
+                    defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
+                    defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
+                    break;
+                }
+                case Configuration.ORIENTATION_UNDEFINED:
+                case Configuration.ORIENTATION_PORTRAIT:
+                case Configuration.ORIENTATION_SQUARE:
+                default: {
+                    defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
+                    defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
+                }
+            }
+            // adjust the size only when the device's screen is bigger.
+            if (defaultWidth < widthPixels) {
+                widthPixels = defaultWidth;
+            }
+            if (defaultHeight < heightPixels) {
+                heightPixels = defaultHeight;
+            }
+        }
     }
 
     public String toString() {

@@ -835,6 +835,26 @@ public class PackageParser {
                     + parser.getName();
                 mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return null;
+
+
+            } else if (tagName.equals("supports-density")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestSupportsDensity);
+
+                int density = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsDensity_density, -1);
+
+                sa.recycle();
+
+                if (density != -1 && !pkg.supportsDensityList.contains(density)) {
+                    pkg.supportsDensityList.add(density);
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+
+            } else if (tagName.equals("expandable")) {
+                pkg.expandable = true;
+                XmlUtils.skipCurrentTag(parser);
             } else {
                 Log.w(TAG, "Bad element under <manifest>: "
                       + parser.getName());
@@ -866,7 +886,8 @@ public class PackageParser {
             pkg.usesLibraryFiles = new String[pkg.usesLibraries.size()];
             pkg.usesLibraries.toArray(pkg.usesLibraryFiles);
         }
-
+        // TODO: enable all density & expandable if target sdk is higher than donut 
+        
         int size = pkg.supportsDensityList.size();
         if (size > 0) {
             int densities[] = pkg.supportsDensities = new int[size];
@@ -1341,21 +1362,6 @@ public class PackageParser {
 
                 if (lname != null && !owner.usesLibraries.contains(lname)) {
                     owner.usesLibraries.add(lname);
-                }
-
-                XmlUtils.skipCurrentTag(parser);
-
-            } else if (tagName.equals("supports-density")) {
-                sa = res.obtainAttributes(attrs,
-                        com.android.internal.R.styleable.AndroidManifestSupportsDensity);
-
-                int density = sa.getInteger(
-                        com.android.internal.R.styleable.AndroidManifestSupportsDensity_density, -1);
-
-                sa.recycle();
-
-                if (density != -1 && !owner.supportsDensityList.contains(density)) {
-                    owner.supportsDensityList.add(density);
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -2244,6 +2250,9 @@ public class PackageParser {
         public final ArrayList<Integer> supportsDensityList = new ArrayList<Integer>();
         public int[] supportsDensities = null;
 
+        // If the application's window is expandable.
+        public boolean expandable;
+        
         // If this is a 3rd party app, this is the path of the zip file.
         public String mPath;
 
@@ -2415,7 +2424,10 @@ public class PackageParser {
             return true;
         }
         if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0
-            && p.supportsDensities != null) {
+                && p.supportsDensities != null) {
+            return true;
+        }
+        if ((flags & PackageManager.GET_EXPANDABLE) != 0) {
             return true;
         }
         return false;
@@ -2437,6 +2449,9 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0) {
             ai.supportsDensities = p.supportsDensities;
+        }
+        if ((flags & PackageManager.GET_EXPANDABLE) != 0) {
+            ai.expandable = p.expandable;
         }
         return ai;
     }

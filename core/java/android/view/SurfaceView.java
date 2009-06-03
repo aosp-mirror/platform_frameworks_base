@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.content.res.CompatibilityInfo;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -137,28 +138,24 @@ public class SurfaceView extends View {
     int mFormat = -1;
     int mType = -1;
     final Rect mSurfaceFrame = new Rect();
-    private final float mAppScale;
-    private final float mAppScaleInverted;
+    private final CompatibilityInfo mCompatibilityInfo;
 
     public SurfaceView(Context context) {
         super(context);
         setWillNotDraw(true);
-        mAppScale = context.getApplicationScale();
-        mAppScaleInverted = 1.0f / mAppScale;
+        mCompatibilityInfo = context.getResources().getCompatibilityInfo();
     }
     
     public SurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(true);
-        mAppScale = context.getApplicationScale();
-        mAppScaleInverted = 1.0f / mAppScale;
+        mCompatibilityInfo = context.getResources().getCompatibilityInfo();
     }
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         setWillNotDraw(true);
-        mAppScale = context.getApplicationScale();
-        mAppScaleInverted = 1.0f / mAppScale;
+        mCompatibilityInfo = context.getResources().getCompatibilityInfo();
     }
     
     /**
@@ -261,9 +258,9 @@ public class SurfaceView extends View {
     public boolean dispatchTouchEvent(MotionEvent event) {
         // SurfaceView uses pre-scaled size unless fixed size is requested. This hook
         // scales the event back to the pre-scaled coordinates for such surface.
-        if (mRequestedWidth < 0 && mAppScale != 1.0f) {
+        if (mRequestedWidth < 0 && mCompatibilityInfo.mScalingRequired) {
             MotionEvent scaledBack = MotionEvent.obtain(event);
-            scaledBack.scale(mAppScale);
+            scaledBack.scale(mCompatibilityInfo.mApplicationScale);
             try {
                 return super.dispatchTouchEvent(scaledBack);
             } finally {
@@ -300,6 +297,7 @@ public class SurfaceView extends View {
         if (!mHaveFrame) {
             return;
         }
+        float appScale = mCompatibilityInfo.mApplicationScale;
         
         int myWidth = mRequestedWidth;
         if (myWidth <= 0) myWidth = getWidth();
@@ -307,9 +305,9 @@ public class SurfaceView extends View {
         if (myHeight <= 0) myHeight = getHeight();
 
         // Use original size for surface unless fixed size is requested.
-        if (mRequestedWidth <= 0) {
-            myWidth *= mAppScale;
-            myHeight *= mAppScale;
+        if (mRequestedWidth <= 0 && mCompatibilityInfo.mScalingRequired) {
+            myWidth *= appScale;
+            myHeight *= appScale;
         }
 
         getLocationInWindow(mLocation);
@@ -337,11 +335,11 @@ public class SurfaceView extends View {
                 mFormat = mRequestedFormat;
                 mType = mRequestedType;
 
-                // Scaling window's layout here beause mLayout is not used elsewhere.
-                mLayout.x = (int) (mLeft * mAppScale);
-                mLayout.y = (int) (mTop * mAppScale);
-                mLayout.width = (int) (getWidth() * mAppScale);
-                mLayout.height = (int) (getHeight() * mAppScale);
+                // Scaling window's layout here because mLayout is not used elsewhere.
+                mLayout.x = (int) (mLeft * appScale);
+                mLayout.y = (int) (mTop * appScale);
+                mLayout.width = (int) (getWidth() * appScale);
+                mLayout.height = (int) (getHeight() * appScale);
                 mLayout.format = mRequestedFormat;
                 mLayout.flags |=WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                               | WindowManager.LayoutParams.FLAG_SCALED
@@ -367,14 +365,18 @@ public class SurfaceView extends View {
                 
                 mSurfaceLock.lock();
                 mDrawingStopped = !visible;
+
                 final int relayoutResult = mSession.relayout(
                     mWindow, mLayout, mWidth, mHeight,
                         visible ? VISIBLE : GONE, false, mWinFrame, mContentInsets,
                         mVisibleInsets, mSurface);
 
-                mContentInsets.scale(mAppScaleInverted);
-                mVisibleInsets.scale(mAppScaleInverted);
-                mWinFrame.scale(mAppScaleInverted);
+                if (mCompatibilityInfo.mScalingRequired) {
+                    float invertedScale = mCompatibilityInfo.mApplicationInvertedScale;
+                    mContentInsets.scale(invertedScale);
+                    mVisibleInsets.scale(invertedScale);
+                    mWinFrame.scale(invertedScale);
+                }
 
                 if (localLOGV) Log.i(TAG, "New surface: " + mSurface
                         + ", vis=" + visible + ", frame=" + mWinFrame);
@@ -444,23 +446,23 @@ public class SurfaceView extends View {
 
     private static class MyWindow extends IWindow.Stub {
         private final WeakReference<SurfaceView> mSurfaceView;
-        private final float mAppScale;
-        private final float mAppScaleInverted;
+        private final CompatibilityInfo mCompatibilityInfo;
 
         public MyWindow(SurfaceView surfaceView) {
             mSurfaceView = new WeakReference<SurfaceView>(surfaceView);
-            mAppScale = surfaceView.getContext().getApplicationScale();
-            mAppScaleInverted = 1.0f / mAppScale;
+            mCompatibilityInfo = surfaceView.getContext().getResources().getCompatibilityInfo();
         }
 
         public void resized(int w, int h, Rect coveredInsets,
                 Rect visibleInsets, boolean reportDraw) {
             SurfaceView surfaceView = mSurfaceView.get();
-            float scale = mAppScaleInverted;
-            w *= scale;
-            h *= scale;
-            coveredInsets.scale(scale);
-            visibleInsets.scale(scale);
+            if (mCompatibilityInfo.mScalingRequired) {
+                float scale = mCompatibilityInfo.mApplicationInvertedScale;
+                w *= scale;
+                h *= scale;
+                coveredInsets.scale(scale);
+                visibleInsets.scale(scale);
+            }
 
             if (surfaceView != null) {
                 if (localLOGV) Log.v(
@@ -624,7 +626,9 @@ public class SurfaceView extends View {
             Canvas c = null;
             if (!mDrawingStopped && mWindow != null) {
                 Rect frame = dirty != null ? dirty : mSurfaceFrame;
-                frame.scale(mAppScale);
+                if (mCompatibilityInfo.mScalingRequired) {
+                    frame.scale(mCompatibilityInfo.mApplicationScale);
+                }
                 try {
                     c = mSurface.lockCanvas(frame);
                 } catch (Exception e) {
