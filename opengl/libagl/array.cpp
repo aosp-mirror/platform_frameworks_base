@@ -951,6 +951,8 @@ void compileElement__generic(ogles_context_t* c,
     v->index = first;
     first &= vertex_cache_t::INDEX_MASK;
     const GLubyte* vp = c->arrays.vertex.element(first);
+    v->obj.z = 0;
+    v->obj.w = 0x10000;
     c->arrays.vertex.fetch(c, v->obj.v, vp);
     c->arrays.mvp_transform(&c->transforms.mvp, &v->clip, &v->obj);
     c->arrays.perspective(c, v);
@@ -966,6 +968,8 @@ void compileElements__generic(ogles_context_t* c,
     do {
         v->flags = 0;
         v->index = first++;
+        v->obj.z = 0;
+        v->obj.w = 0x10000;
         c->arrays.vertex.fetch(c, v->obj.v, vp);
         c->arrays.mvp_transform(mvp, &v->clip, &v->obj);
         c->arrays.perspective(c, v);
