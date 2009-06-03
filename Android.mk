@@ -152,6 +152,7 @@ LOCAL_SRC_FILES += \
 	tts/java/android/tts/ITts.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl
+	vpn/java/android/net/vpn/IVpnService.aidl \
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
@@ -222,6 +223,7 @@ aidl_files := \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl
+	frameworks/base/vpn/java/android/net/vpn/IVpnService.aidl \
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
 $(gen): PRIVATE_SRC_FILES := $(aidl_files)
