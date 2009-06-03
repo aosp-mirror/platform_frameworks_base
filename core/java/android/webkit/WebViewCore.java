@@ -359,11 +359,10 @@ final class WebViewCore {
     private native int nativeGetContentMinPrefWidth();
 
     // Start: functions that deal with text editing
-    private native void nativeReplaceTextfieldText(int frame, int node, int x,
-            int y, int oldStart, int oldEnd, String replace, int newStart,
-            int newEnd);
+    private native void nativeReplaceTextfieldText(
+            int oldStart, int oldEnd, String replace, int newStart, int newEnd);
 
-    private native void passToJs(int frame, int node, int x, int y, int gen,
+    private native void passToJs(int gen,
             String currentText, int keyCode, int keyValue, boolean down,
             boolean cap, boolean fn, boolean sym);
 
@@ -409,8 +408,7 @@ final class WebViewCore {
      *  @param  start   Beginning of selection to delete.
      *  @param  end     End of selection to delete.
      */
-    private native void nativeDeleteSelection(int frame, int node, int x, int y,
-        int start, int end);
+    private native void nativeDeleteSelection(int start, int end);
 
     /**
      *  Set the selection to (start, end) in the focused textfield. If start and
@@ -418,8 +416,7 @@ final class WebViewCore {
      *  @param  start   Beginning of selection.
      *  @param  end     End of selection.
      */
-    private native void nativeSetSelection(int frame, int node, int x, int y,
-        int start, int end);
+    private native void nativeSetSelection(int start, int end);
 
     private native String nativeGetSelection(Region sel);
 
@@ -871,26 +868,22 @@ final class WebViewCore {
 
                         case REPLACE_TEXT:
                             HashMap jMap = (HashMap) msg.obj;
-                            CursorData fData = (CursorData) jMap.get("focusData");
                             String replace = (String) jMap.get("replace");
                             int newStart =
                                     ((Integer) jMap.get("start")).intValue();
                             int newEnd =
                                     ((Integer) jMap.get("end")).intValue();
-                            nativeReplaceTextfieldText(fData.mFrame,
-                                    fData.mNode, fData.mX, fData.mY, msg.arg1,
+                            nativeReplaceTextfieldText(msg.arg1,
                                     msg.arg2, replace, newStart, newEnd);
                             break;
 
                         case PASS_TO_JS: {
                             HashMap jsMap = (HashMap) msg.obj;
-                            CursorData fDat = (CursorData) jsMap.get("focusData");
                             KeyEvent evt = (KeyEvent) jsMap.get("event");
                             int keyCode = evt.getKeyCode();
                             int keyValue = evt.getUnicodeChar();
                             int generation = msg.arg1;
-                            passToJs(fDat.mFrame, fDat.mNode, fDat.mX, fDat.mY,
-                                    generation,
+                            passToJs(generation,
                                     (String) jsMap.get("currentText"),
                                     keyCode,
                                     keyValue,
@@ -999,17 +992,11 @@ final class WebViewCore {
                             break;
 
                         case DELETE_SELECTION:
-                            CursorData delData = (CursorData) msg.obj;
-                            nativeDeleteSelection(delData.mFrame,
-                                     delData.mNode, delData.mX,
-                                     delData.mY, msg.arg1, msg.arg2);
+                            nativeDeleteSelection(msg.arg1, msg.arg2);
                             break;
 
                         case SET_SELECTION:
-                            CursorData selData = (CursorData) msg.obj;
-                            nativeSetSelection(selData.mFrame,
-                                     selData.mNode, selData.mX,
-                                     selData.mY, msg.arg1, msg.arg2);
+                            nativeSetSelection(msg.arg1, msg.arg2);
                             break;
 
                         case LISTBOX_CHOICES:

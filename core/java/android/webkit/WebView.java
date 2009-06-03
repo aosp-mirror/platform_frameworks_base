@@ -205,7 +205,6 @@ public class WebView extends AbsoluteLayout
     // true means redraw the screen all-the-time. Only with AUTO_REDRAW_HACK
     private boolean mAutoRedraw;
 
-    // keep debugging parameters near the top of the file
     static final String LOGTAG = "webview";
 
     private static class ExtendedZoomControls extends FrameLayout {
@@ -2923,8 +2922,7 @@ public class WebView extends AbsoluteLayout
      */
     /* package */ void deleteSelection(int start, int end) {
         mTextGeneration++;
-        mWebViewCore.sendMessage(EventHub.DELETE_SELECTION, start, end,
-                cursorData());
+        mWebViewCore.sendMessage(EventHub.DELETE_SELECTION, start, end);
     }
 
     /**
@@ -2934,8 +2932,7 @@ public class WebView extends AbsoluteLayout
      *  @param  end     End of selection.
      */
     /* package */ void setSelection(int start, int end) {
-        mWebViewCore.sendMessage(EventHub.SET_SELECTION, start, end,
-                cursorData());
+        mWebViewCore.sendMessage(EventHub.SET_SELECTION, start, end);
     }
 
     // Called by JNI when a touch event puts a textfield into focus.
@@ -3133,7 +3130,7 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (mShiftIsPressed == false && nativeFocusNodeWantsKeyEvents() == false
+        if (mShiftIsPressed == false && nativeCursorWantsKeyEvents() == false
                 && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
             mExtendSelection = false;
@@ -3217,7 +3214,7 @@ public class WebView extends AbsoluteLayout
         }
 
         // TODO: should we pass all the keys to DOM or check the meta tag
-        if (nativeFocusNodeWantsKeyEvents() || true) {
+        if (nativeCursorWantsKeyEvents() || true) {
             // pass the key to DOM
             mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
             // return true as DOM handles the key
@@ -3326,7 +3323,7 @@ public class WebView extends AbsoluteLayout
         }
 
         // TODO: should we pass all the keys to DOM or check the meta tag
-        if (nativeFocusNodeWantsKeyEvents() || true) {
+        if (nativeCursorWantsKeyEvents() || true) {
             // pass the key to DOM
             mWebViewCore.sendMessage(EventHub.KEY_UP, event);
             // return true as DOM handles the key
@@ -4559,7 +4556,6 @@ public class WebView extends AbsoluteLayout
     /* package */ void replaceTextfieldText(int oldStart, int oldEnd,
             String replace, int newStart, int newEnd) {
         HashMap arg = new HashMap();
-        arg.put("focusData", cursorData());
         arg.put("replace", replace);
         arg.put("start", Integer.valueOf(newStart));
         arg.put("end", Integer.valueOf(newEnd));
@@ -4569,7 +4565,6 @@ public class WebView extends AbsoluteLayout
 
     /* package */ void passToJavaScript(String currentText, KeyEvent event) {
         HashMap arg = new HashMap();
-        arg.put("focusData", cursorData());
         arg.put("event", event);
         arg.put("currentText", currentText);
         // Increase our text generation number, and pass it to webcore thread
@@ -5269,6 +5264,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeCursorIsAnchor();
     private native boolean  nativeCursorIsTextInput();
     private native String   nativeCursorText();
+    private native boolean  nativeCursorWantsKeyEvents();
     private native void     nativeDebugDump();
     private native void     nativeDestroy();
     private native void     nativeDrawCursorRing(Canvas content);
@@ -5293,7 +5289,6 @@ public class WebView extends AbsoluteLayout
      * Returns true if the native focus nodes says it wants to handle key events
      * (ala plugins). This can only be called if mNativeClass is non-zero!
      */
-    private native boolean  nativeFocusNodeWantsKeyEvents();
     private native Rect     nativeGetCursorRingBounds();
     private native Region   nativeGetSelection();
     private native boolean  nativeHasCursorNode();
