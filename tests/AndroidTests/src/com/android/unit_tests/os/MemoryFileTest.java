@@ -17,19 +17,21 @@
 package com.android.unit_tests.os;
 
 import android.os.MemoryFile;
+import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
-public class MemoryFileTest extends TestCase {
+public class MemoryFileTest extends AndroidTestCase {
 
     private void compareBuffers(byte[] buffer1, byte[] buffer2, int length) throws Exception {
         for (int i = 0; i < length; i++) {
@@ -161,6 +163,50 @@ public class MemoryFileTest extends TestCase {
             file.writeBytes(testString, 0, 0, testString.length);
             file.close();
         }
+    }
+
+    @SmallTest
+    public void testIsMemoryFile() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        FileDescriptor fd = file.getFileDescriptor();
+        assertNotNull(fd);
+        assertTrue(fd.valid());
+        assertTrue(MemoryFile.isMemoryFile(fd));
+        file.close();
+
+        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.in));
+        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.out));
+        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.err));
+
+        File tempFile = File.createTempFile("MemoryFileTest",".tmp", getContext().getFilesDir());
+        assertNotNull(file);
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(tempFile);
+            FileDescriptor fileFd = out.getFD();
+            assertNotNull(fileFd);
+            assertFalse(MemoryFile.isMemoryFile(fileFd));
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+            tempFile.delete();
+        }
+    }
+
+    public void testFileDescriptor() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        MemoryFile ref = new MemoryFile(file.getFileDescriptor(), file.length(), "r");
+        byte[] buffer;
+
+        // write to original, read from reference
+        file.writeBytes(testString, 0, 2000, testString.length);
+        buffer = new byte[testString.length];
+        ref.readBytes(buffer, 2000, 0, testString.length);
+        compareBuffers(testString, buffer, testString.length);
+
+        file.close();
+        ref.close();  // Doesn't actually do anything, since the file descriptor is not dup(2):ed
     }
 
     private static final byte[] testString = new byte[] {
