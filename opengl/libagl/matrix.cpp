@@ -55,7 +55,7 @@ static void normal__nop(transform_t const*, vec4_t* c, vec4_t const* o);
 static void point2__generic(transform_t const*, vec4_t* c, vec4_t const* o);
 static void point3__generic(transform_t const*, vec4_t* c, vec4_t const* o);
 static void point4__generic(transform_t const*, vec4_t* c, vec4_t const* o);
-static void normal__generic(transform_t const*, vec4_t* c, vec4_t const* o);
+static void point4__mvui(transform_t const*, vec4_t* c, vec4_t const* o);
 
 // ----------------------------------------------------------------------------
 #if 0
@@ -209,7 +209,8 @@ void mvui_transform_t::picker()
 {
     flags = 0;
     ops = OP_ALL;
-    point3 = normal__generic;
+    point3 = point4__mvui;
+    point4 = point4__mvui;
 }
 
 void transform_t::dump(const char* what)
@@ -596,66 +597,19 @@ void transform_state_t::update_mvit()
 
 void transform_state_t::update_mvui()
 {
+    GLfloat r[16];
     const GLfloat* const mv = modelview.top().elements();
-
-    /*
-    When transforming normals, we can use the upper 3x3 matrix, see:
-    http://www.opengl.org/documentation/specs/version1.1/glspec1.1/node26.html
-    */
     
-    // Also note that:
-    //      l(obj) =  tr(M).l(eye) for infinite light
-    //      l(obj) = inv(M).l(eye) for local light
-
-    const uint32_t ops = modelview.top_ops() & ~OP_TRANSLATE;
-    if (ggl_likely((!(ops & ~OP_ROTATE)) ||
-        (rescaleNormals && modelview.isRigidBody()))) {
-        // if the modelview matrix is a rigid body transformation
-        // (translation, rotation, uniform scaling), then we can bypass
-        // the inverse by transposing the matrix.
-        GLfloat rescale = 1.0f;
-        if (rescaleNormals == GL_RESCALE_NORMAL) {
-            if (!(ops & ~OP_UNIFORM_SCALE)) {
-                rescale = reciprocalf(mv[I(0,0)]);
-            } else {
-                rescale = rsqrtf(
-                        sqrf(mv[I(2,0)]) + sqrf(mv[I(2,1)]) + sqrf(mv[I(2,2)]));
-            }
-        }
-        GLfixed* const x = mvui.matrix.m;
-        for (int i=0 ; i<3 ; i++) {
-            x[I(i,0)] = gglFloatToFixed(mv[I(0,i)] * rescale);
-            x[I(i,1)] = gglFloatToFixed(mv[I(1,i)] * rescale);
-            x[I(i,2)] = gglFloatToFixed(mv[I(2,i)] * rescale);
-        }
-        mvui.picker();
-        return;
-    }
-
-    GLfloat r[3][3];
-    r[0][0] = det22(mv[I(1,1)], mv[I(2,1)], mv[I(1,2)], mv[I(2,2)]);
-    r[0][1] =ndet22(mv[I(0,1)], mv[I(2,1)], mv[I(0,2)], mv[I(2,2)]);
-    r[0][2] = det22(mv[I(0,1)], mv[I(1,1)], mv[I(0,2)], mv[I(1,2)]);
-    r[1][0] =ndet22(mv[I(1,0)], mv[I(2,0)], mv[I(1,2)], mv[I(2,2)]);
-    r[1][1] = det22(mv[I(0,0)], mv[I(2,0)], mv[I(0,2)], mv[I(2,2)]);
-    r[1][2] =ndet22(mv[I(0,0)], mv[I(1,0)], mv[I(0,2)], mv[I(1,2)]);
-    r[2][0] = det22(mv[I(1,0)], mv[I(2,0)], mv[I(1,1)], mv[I(2,1)]);
-    r[2][1] =ndet22(mv[I(0,0)], mv[I(2,0)], mv[I(0,1)], mv[I(2,1)]);
-    r[2][2] = det22(mv[I(0,0)], mv[I(1,0)], mv[I(0,1)], mv[I(1,1)]);        
-
-    GLfloat rdet;
-    if (rescaleNormals == GL_RESCALE_NORMAL) {
-        rdet = rsqrtf(sqrf(r[0][2]) + sqrf(r[1][2]) + sqrf(r[2][2]));
-    } else {
-        rdet = reciprocalf( 
-            r[0][0]*mv[I(0,0)] + r[0][1]*mv[I(1,0)] + r[0][2]*mv[I(2,0)]);
-    }
+    // TODO: we need a faster invert, especially for when the modelview
+    // is a rigid-body matrix
+    invert(r, mv);
 
     GLfixed* const x = mvui.matrix.m;
-    for (int i=0 ; i<3 ; i++) {
-        x[I(i,0)] = gglFloatToFixed(r[i][0] * rdet);
-        x[I(i,1)] = gglFloatToFixed(r[i][1] * rdet);
-        x[I(i,2)] = gglFloatToFixed(r[i][2] * rdet);
+    for (int i=0 ; i<4 ; i++) {
+        x[I(i,0)] = gglFloatToFixed(r[I(i,0)]);
+        x[I(i,1)] = gglFloatToFixed(r[I(i,1)]);
+        x[I(i,2)] = gglFloatToFixed(r[I(i,2)]);
+        x[I(i,4)] = gglFloatToFixed(r[I(i,3)]);
     }
     mvui.picker();
 }
@@ -783,14 +737,19 @@ void point4__generic(transform_t const* mx, vec4_t* lhs, vec4_t const* rhs) {
     lhs->w = mla4(rx, m[ 3], ry, m[ 7], rz, m[11], rw, m[15]);
 }
 
-void normal__generic(transform_t const* mx, vec4_t* lhs, vec4_t const* rhs) {
+void point4__mvui(transform_t const* mx, vec4_t* lhs, vec4_t const* rhs) {
+    // this used for transforming light positions back to object space.
+    // Lights have 3 components positions, so w is always 1.
+    // however, it is used as a switch for directional lights, so we need
+    // to preserve it.
     const GLfixed* const m = mx->matrix.m;
     const GLfixed rx = rhs->x;
     const GLfixed ry = rhs->y;
     const GLfixed rz = rhs->z;
-    lhs->x = mla3(rx, m[ 0], ry, m[ 4], rz, m[ 8]); 
-    lhs->y = mla3(rx, m[ 1], ry, m[ 5], rz, m[ 9]);
-    lhs->z = mla3(rx, m[ 2], ry, m[ 6], rz, m[10]);
+    lhs->x = mla3a(rx, m[ 0], ry, m[ 4], rz, m[ 8], m[12]); 
+    lhs->y = mla3a(rx, m[ 1], ry, m[ 5], rz, m[ 9], m[13]);
+    lhs->z = mla3a(rx, m[ 2], ry, m[ 6], rz, m[10], m[14]);
+    lhs->w = rhs->w;
 }
 
 
