@@ -1292,28 +1292,6 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_ICON_2 = "suggest_icon_2";
     /**
-     * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
-     *  then all suggestions will be provided in a format that includes space for two small icons,
-     *  one at the left and one at the right of each suggestion.  The data in the column must
-     *  be a blob that contains a bitmap.
-     * 
-     * This column overrides any icon provided in the {@link #SUGGEST_COLUMN_ICON_1} column.
-     *
-     * @hide
-     */
-    public final static String SUGGEST_COLUMN_ICON_1_BITMAP = "suggest_icon_1_bitmap";
-    /**
-     * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
-     *  then all suggestions will be provided in a format that includes space for two small icons,
-     *  one at the left and one at the right of each suggestion.  The data in the column must
-     *  be a blob that contains a bitmap.
-     * 
-     * This column overrides any icon provided in the {@link #SUGGEST_COLUMN_ICON_2} column.
-     *
-     * @hide
-     */
-    public final static String SUGGEST_COLUMN_ICON_2_BITMAP = "suggest_icon_2_bitmap";
-    /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, this is the action that will be used when
      * forming the suggestion's intent.  If the element is not provided, the action will be taken
