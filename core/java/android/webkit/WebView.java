@@ -3310,9 +3310,7 @@ public class WebView extends AbsoluteLayout
             // coordinates should be in content coordinates.
             if (nativeCursorIntersects(visibleRect)) {
                 nativeSetFollowedLink(true);
-                mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE,
-                        EventHub.BLOCK_FOCUS_CHANGE_UNTIL_KEY_UP, 0,
-                        cursorData());
+                mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, cursorData());
                 playSoundEffect(SoundEffectConstants.CLICK);
                 return true;
             } else if (nativeHasCursorNode()) {

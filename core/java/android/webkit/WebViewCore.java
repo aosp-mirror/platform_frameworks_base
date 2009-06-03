@@ -658,10 +658,6 @@ final class WebViewCore {
         // private message ids
         private static final int DESTROY =     200;
 
-        // flag values passed to message SET_FINAL_FOCUS
-        static final int NO_FOCUS_CHANGE_BLOCK = 0;
-        static final int BLOCK_FOCUS_CHANGE_UNTIL_KEY_UP = 1;
-
         // Private handler for WebCore messages.
         private Handler mHandler;
         // Message queue for containing messages before the WebCore thread is
