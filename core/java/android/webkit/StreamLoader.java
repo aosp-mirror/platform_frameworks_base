@@ -113,7 +113,7 @@ abstract class StreamLoader extends Handler {
      * @see android.os.Handler#handleMessage(android.os.Message)
      */
     public void handleMessage(Message msg) {
-        if (WebView.DEBUG && mHandler.isSynchronous()) {
+        if (DebugFlags.STREAM_LOADER && mHandler.isSynchronous()) {
             throw new AssertionError();
         }
         if (mHandler.cancelled()) {

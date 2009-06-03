@@ -852,7 +852,7 @@ class CallbackProxy extends Handler {
             String password, Message resumeMsg) {
         // resumeMsg should be null at this point because we want to create it
         // within the CallbackProxy.
-        if (WebView.DEBUG) {
+        if (DebugFlags.CALLBACK_PROXY) {
             junit.framework.Assert.assertNull(resumeMsg);
         }
         resumeMsg = obtainMessage(NOTIFY);

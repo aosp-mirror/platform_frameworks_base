@@ -207,8 +207,6 @@ public class WebView extends AbsoluteLayout
 
     // keep debugging parameters near the top of the file
     static final String LOGTAG = "webview";
-    static final boolean DEBUG = false;
-    static final boolean LOGV_ENABLED = DEBUG;
 
     private static class ExtendedZoomControls extends FrameLayout {
         public ExtendedZoomControls(Context context, AttributeSet attrs) {
@@ -2643,7 +2641,7 @@ public class WebView extends AbsoluteLayout
         }
         float newX = scrollZoomX(scale);
         float newY = scrollZoomY(scale);
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "scrollZoomDraw scale=" + scale + " + (" + newX
                     + ", " + newY + ") mZoomScroll=(" + mZoomScrollX + ", "
                     + mZoomScrollY + ")" + " invScale=" + invScale + " scale="
@@ -2690,7 +2688,7 @@ public class WebView extends AbsoluteLayout
         }
         canvas.scale(halfScale, halfScale, mZoomScrollX + width * halfX
                 , mZoomScrollY + height * halfY);
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "scrollZoomDraw halfScale=" + halfScale + " w/h=("
                     + width + ", " + height + ") half=(" + halfX + ", "
                     + halfY + ")");
@@ -2719,7 +2717,7 @@ public class WebView extends AbsoluteLayout
                 , Math.max(0, (int) ((x - left) / scale)));
         mZoomScrollY = Math.min(mContentHeight - height
                 , Math.max(0, (int) ((y - top) / scale)));
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "zoomScrollTap scale=" + scale + " + (" + left
                     + ", " + top + ") mZoomScroll=(" + mZoomScrollX + ", "
                     + mZoomScrollY + ")" + " x=" + x + " y=" + y);
@@ -2736,7 +2734,7 @@ public class WebView extends AbsoluteLayout
         float y = (float) height / (float) mContentHeight;
         mZoomScrollLimit = Math.max(DEFAULT_MIN_ZOOM_SCALE, Math.min(x, y));
         mZoomScrollInvLimit = 1.0f / mZoomScrollLimit;
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "canZoomScrollOut"
                     + " mInvActualScale=" + mInvActualScale
                     + " mZoomScrollLimit=" + mZoomScrollLimit
@@ -2783,7 +2781,7 @@ public class WebView extends AbsoluteLayout
                 - (zoomFrame.height() >> 1));
         scrollTo(0, 0); // triggers inval, starts animation
         clearTextEntry();
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "startZoomScrollOut mZoomScroll=("
                     + mZoomScrollX + ", " + mZoomScrollY +")");
         }
@@ -2814,7 +2812,7 @@ public class WebView extends AbsoluteLayout
         if (maxZoomX > 0) {
             int maxScreenX = width - (int) Math.ceil(width
                     * mZoomScrollLimit) - SCROLL_ZOOM_FINGER_BUFFER;
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "moveZoomScrollWindow-X"
                         + " maxScreenX=" + maxScreenX + " width=" + width
                         + " mZoomScrollLimit=" + mZoomScrollLimit + " x=" + x);
@@ -2827,7 +2825,7 @@ public class WebView extends AbsoluteLayout
         if (maxZoomY > 0) {
             int maxScreenY = height - (int) Math.ceil(height
                     * mZoomScrollLimit) - SCROLL_ZOOM_FINGER_BUFFER;
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "moveZoomScrollWindow-Y"
                         + " maxScreenY=" + maxScreenY + " height=" + height
                         + " mZoomScrollLimit=" + mZoomScrollLimit + " y=" + y);
@@ -2839,7 +2837,7 @@ public class WebView extends AbsoluteLayout
         if (oldX != mZoomScrollX || oldY != mZoomScrollY) {
             invalidate();
         }
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "moveZoomScrollWindow"
                     + " scrollTo=(" + mZoomScrollX + ", " + mZoomScrollY + ")"
                     + " mLastTouch=(" + mLastTouchX + ", " + mLastTouchY + ")"
@@ -3107,7 +3105,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyDown at " + System.currentTimeMillis()
                     + ", " + event);
         }
@@ -3232,7 +3230,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyUp at " + System.currentTimeMillis()
                     + ", " + event);
         }
@@ -3299,7 +3297,7 @@ public class WebView extends AbsoluteLayout
                     if (mTouchMode == TOUCH_DOUBLECLICK_MODE) {
                         zoomScrollOut();
                     } else {
-                        if (LOGV_ENABLED) {
+                        if (DebugFlags.WEB_VIEW) {
                             Log.v(LOGTAG, "TOUCH_DOUBLECLICK_MODE");
                         }
                         mPrivateHandler.sendMessageDelayed(mPrivateHandler
@@ -3478,7 +3476,7 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onFocusChanged(boolean focused, int direction,
             Rect previouslyFocusedRect) {
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "MT focusChanged " + focused + ", " + direction);
         }
         if (focused) {
@@ -3586,7 +3584,7 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, ev + " at " + ev.getEventTime() + " mTouchMode="
                     + mTouchMode);
         }
@@ -3642,7 +3640,7 @@ public class WebView extends AbsoluteLayout
                     mSelectX = mScrollX + (int) x;
                     mSelectY = mScrollY + (int) y;
                     mTouchMode = TOUCH_SELECT_MODE;
-                    if (LOGV_ENABLED) {
+                    if (DebugFlags.WEB_VIEW) {
                         Log.v(LOGTAG, "select=" + mSelectX + "," + mSelectY);
                     }
                     nativeMoveSelection(viewToContent(mSelectX)
@@ -3687,7 +3685,7 @@ public class WebView extends AbsoluteLayout
                     if (mTouchMode == TOUCH_SELECT_MODE) {
                         mSelectX = mScrollX + (int) x;
                         mSelectY = mScrollY + (int) y;
-                        if (LOGV_ENABLED) {
+                        if (DebugFlags.WEB_VIEW) {
                             Log.v(LOGTAG, "xtend=" + mSelectX + "," + mSelectY);
                         }
                         nativeMoveSelection(viewToContent(mSelectX)
@@ -3839,7 +3837,7 @@ public class WebView extends AbsoluteLayout
                         // no action during scroll animation
                         break;
                     case SCROLL_ZOOM_OUT:
-                        if (LOGV_ENABLED) {
+                        if (DebugFlags.WEB_VIEW) {
                             Log.v(LOGTAG, "ACTION_UP SCROLL_ZOOM_OUT"
                                     + " eventTime - mLastTouchTime="
                                     + (eventTime - mLastTouchTime));
@@ -3961,7 +3959,7 @@ public class WebView extends AbsoluteLayout
                     && !mLastFocusBounds.equals(nativeGetCursorRingBounds())) {
                 nativeSelectBestAt(mLastFocusBounds);
             }
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "onTrackballEvent down ev=" + ev
                         + " time=" + time
                         + " mLastFocusTime=" + mLastFocusTime);
@@ -3981,7 +3979,7 @@ public class WebView extends AbsoluteLayout
                     mExtendSelection = true;
                 }
             }
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "onTrackballEvent up ev=" + ev
                         + " time=" + time
                 );
@@ -3989,26 +3987,26 @@ public class WebView extends AbsoluteLayout
             return false; // let common code in onKeyUp at it
         }
         if (mMapTrackballToArrowKeys && mShiftIsPressed == false) {
-            if (LOGV_ENABLED) Log.v(LOGTAG, "onTrackballEvent gmail quit");
+            if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent gmail quit");
             return false;
         }
         // no move if we're still waiting on SWITCH_TO_CLICK timeout
         if (mTouchMode == TOUCH_DOUBLECLICK_MODE) {
-            if (LOGV_ENABLED) Log.v(LOGTAG, "onTrackballEvent 2 click quit");
+            if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent 2 click quit");
             return true;
         }
         if (mTrackballDown) {
-            if (LOGV_ENABLED) Log.v(LOGTAG, "onTrackballEvent down quit");
+            if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent down quit");
             return true; // discard move if trackball is down
         }
         if (time - mTrackballUpTime < TRACKBALL_TIMEOUT) {
-            if (LOGV_ENABLED) Log.v(LOGTAG, "onTrackballEvent up timeout quit");
+            if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent up timeout quit");
             return true;
         }
         // TODO: alternatively we can do panning as touch does
         switchOutDrawHistory();
         if (time - mTrackballLastTime > TRACKBALL_TIMEOUT) {
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "onTrackballEvent time="
                         + time + " last=" + mTrackballLastTime);
             }
@@ -4016,7 +4014,7 @@ public class WebView extends AbsoluteLayout
             mTrackballXMove = mTrackballYMove = 0;
         }
         mTrackballLastTime = time;
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "onTrackballEvent ev=" + ev + " time=" + time);
         }
         mTrackballRemainsX += ev.getX();
@@ -4038,7 +4036,7 @@ public class WebView extends AbsoluteLayout
                 , mSelectX));
         mSelectY = Math.min(maxY, Math.max(mScrollY - SELECT_CURSOR_OFFSET
                 , mSelectY));
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "moveSelection"
                     + " mSelectX=" + mSelectX
                     + " mSelectY=" + mSelectY
@@ -4121,7 +4119,7 @@ public class WebView extends AbsoluteLayout
         float ax = Math.abs(xRate);
         float ay = Math.abs(yRate);
         float maxA = Math.max(ax, ay);
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "doTrackball elapsed=" + elapsed
                     + " xRate=" + xRate
                     + " yRate=" + yRate
@@ -4138,7 +4136,7 @@ public class WebView extends AbsoluteLayout
             int maxWH = Math.max(width, height);
             mZoomScrollX += scaleTrackballX(xRate, maxWH);
             mZoomScrollY += scaleTrackballY(yRate, maxWH);
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "doTrackball SCROLL_ZOOM_OUT"
                         + " mZoomScrollX=" + mZoomScrollX
                         + " mZoomScrollY=" + mZoomScrollY);
@@ -4163,7 +4161,7 @@ public class WebView extends AbsoluteLayout
                     mTrackballRemainsX < 0 ? KeyEvent.KEYCODE_DPAD_LEFT :
                     KeyEvent.KEYCODE_DPAD_RIGHT;
             count = Math.min(count, TRACKBALL_MOVE_COUNT);
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "doTrackball keyCode=" + selectKeyCode
                         + " count=" + count
                         + " mTrackballRemainsX=" + mTrackballRemainsX
@@ -4177,7 +4175,7 @@ public class WebView extends AbsoluteLayout
         if (count >= TRACKBALL_SCROLL_COUNT) {
             int xMove = scaleTrackballX(xRate, width);
             int yMove = scaleTrackballY(yRate, height);
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "doTrackball pinScrollBy"
                         + " count=" + count
                         + " xMove=" + xMove + " yMove=" + yMove
@@ -4601,7 +4599,7 @@ public class WebView extends AbsoluteLayout
     class PrivateHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            if (LOGV_ENABLED) {
+            if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what
                         > INVAL_RECT_MSG_ID ? Integer.toString(msg.what)
                         : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
@@ -4701,7 +4699,7 @@ public class WebView extends AbsoluteLayout
                             && viewSize.y == mLastHeightSent;
                     recordNewContentSize(draw.mWidthHeight.x,
                             draw.mWidthHeight.y, updateLayout);
-                    if (LOGV_ENABLED) {
+                    if (DebugFlags.WEB_VIEW) {
                         Rect b = draw.mInvalRegion.getBounds();
                         Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
                                 b.left+","+b.top+","+b.right+","+b.bottom+"}");
@@ -4833,7 +4831,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 case UPDATE_CLIPBOARD:
                     String str = (String) msg.obj;
-                    if (LOGV_ENABLED) {
+                    if (DebugFlags.WEB_VIEW) {
                         Log.v(LOGTAG, "UPDATE_CLIPBOARD " + str);
                     }
                     try {
@@ -5196,7 +5194,7 @@ public class WebView extends AbsoluteLayout
         mLastFocusTime = time;
         mLastFocusBounds = nativeGetCursorRingBounds();
         boolean keyHandled = nativeMoveFocus(keyCode, count, noScroll) == false;
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "navHandledKey mLastFocusBounds=" + mLastFocusBounds
                     + " mLastFocusTime=" + mLastFocusTime
                     + " handled=" + keyHandled);
@@ -5228,7 +5226,7 @@ public class WebView extends AbsoluteLayout
         }
         if (mLastFocusBounds.isEmpty()) return keyHandled;
         if (mLastFocusBounds.equals(contentFocus)) return keyHandled;
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "navHandledKey contentFocus=" + contentFocus);
         }
         requestRectangleOnScreen(viewFocus);

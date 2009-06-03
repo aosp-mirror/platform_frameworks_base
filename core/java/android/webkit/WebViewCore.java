@@ -41,8 +41,6 @@ import junit.framework.Assert;
 final class WebViewCore {
 
     private static final String LOGTAG = "webcore";
-    static final boolean DEBUG = false;
-    static final boolean LOGV_ENABLED = DEBUG;
 
     static {
         // Load libwebcore during static initialization. This happens in the
@@ -694,7 +692,7 @@ final class WebViewCore {
             mHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
-                    if (LOGV_ENABLED) {
+                    if (DebugFlags.WEB_VIEW_CORE) {
                         Log.v(LOGTAG, msg.what < LOAD_URL || msg.what
                                 > SET_ACTIVE ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what - LOAD_URL]);
@@ -1164,7 +1162,7 @@ final class WebViewCore {
     //-------------------------------------------------------------------------
 
     void stopLoading() {
-        if (LOGV_ENABLED) Log.v(LOGTAG, "CORE stopLoading");
+        if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "CORE stopLoading");
         if (mBrowserFrame != null) {
             mBrowserFrame.stopLoading();
         }
@@ -1240,12 +1238,12 @@ final class WebViewCore {
     //-------------------------------------------------------------------------
 
     private void loadUrl(String url) {
-        if (LOGV_ENABLED) Log.v(LOGTAG, " CORE loadUrl " + url);
+        if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, " CORE loadUrl " + url);
         mBrowserFrame.loadUrl(url);
     }
 
     private void key(KeyEvent evt, boolean isDown) {
-        if (LOGV_ENABLED) {
+        if (DebugFlags.WEB_VIEW_CORE) {
             Log.v(LOGTAG, "CORE key at " + System.currentTimeMillis() + ", "
                     + evt);
         }
@@ -1263,7 +1261,7 @@ final class WebViewCore {
 
     // notify webkit that our virtual view size changed size (after inv-zoom)
     private void viewSizeChanged(int w, int h, float scale) {
-        if (LOGV_ENABLED) Log.v(LOGTAG, "CORE onSizeChanged");
+        if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "CORE onSizeChanged");
         if (w == 0) {
             Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
             return;
@@ -1303,7 +1301,7 @@ final class WebViewCore {
         if (needInvalidate) {
             // ensure {@link #webkitDraw} is called as we were blocking in
             // {@link #contentDraw} when mCurrentViewWidth is 0
-            if (LOGV_ENABLED) Log.v(LOGTAG, "viewSizeChanged");
+            if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "viewSizeChanged");
             contentDraw();
         }
         mEventHub.sendMessage(Message.obtain(null,
@@ -1342,17 +1340,17 @@ final class WebViewCore {
     private void webkitDraw() {
         mDrawIsScheduled = false;
         DrawData draw = new DrawData();
-        if (LOGV_ENABLED) Log.v(LOGTAG, "webkitDraw start");
+        if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw start");
         if (nativeRecordContent(draw.mInvalRegion, draw.mWidthHeight)
                 == false) {
-            if (LOGV_ENABLED) Log.v(LOGTAG, "webkitDraw abort");
+            if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw abort");
             return;
         }
         if (mWebView != null) {
             // Send the native view size that was used during the most recent
             // layout.
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
-            if (LOGV_ENABLED) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
+            if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
                     WebView.NEW_PICTURE_MSG_ID, draw).sendToTarget();
             if (mWebkitScrollX != 0 || mWebkitScrollY != 0) {
@@ -1439,7 +1437,7 @@ final class WebViewCore {
             synchronized (core) {
                 core.mDrawIsScheduled = false;
                 core.mDrawIsPaused = false;
-                if (LOGV_ENABLED) Log.v(LOGTAG, "resumeUpdate");
+                if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "resumeUpdate");
                 core.contentDraw();
             }
         }

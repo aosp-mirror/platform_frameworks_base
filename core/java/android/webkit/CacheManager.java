@@ -320,7 +320,7 @@ public final class CacheManager {
             }
         }
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.CACHE_MANAGER) {
             Log.v(LOGTAG, "getCacheFile for url " + url);
         }
 
@@ -422,7 +422,7 @@ public final class CacheManager {
 
         mDataBase.addCache(url, cacheRet);
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.CACHE_MANAGER) {
             Log.v(LOGTAG, "saveCacheFile for url " + url);
         }
     }

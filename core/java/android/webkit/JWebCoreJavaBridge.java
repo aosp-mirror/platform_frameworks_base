@@ -190,7 +190,7 @@ final class JWebCoreJavaBridge extends Handler {
      * @param timemillis The relative time when the timer should fire
      */
     private void setSharedTimer(long timemillis) {
-        if (WebView.LOGV_ENABLED) Log.v(LOGTAG, "setSharedTimer " + timemillis);
+        if (DebugFlags.J_WEB_CORE_JAVA_BRIDGE) Log.v(LOGTAG, "setSharedTimer " + timemillis);
 
         if (timemillis <= 0) {
             // we don't accumulate the sharedTimer unless it is a delayed
@@ -214,7 +214,7 @@ final class JWebCoreJavaBridge extends Handler {
      * Stop the shared timer.
      */
     private void stopSharedTimer() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.J_WEB_CORE_JAVA_BRIDGE) {
             Log.v(LOGTAG, "stopSharedTimer removing all timers");
         }
         removeMessages(TIMER_MESSAGE);
