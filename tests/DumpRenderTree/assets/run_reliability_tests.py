@@ -75,6 +75,11 @@ def main(options, args):
   else:
     timedout_file = options.timeout_file
 
+  if not options.delay:
+    manual_delay = 0
+  else:
+    manual_delay = options.delay
+
   adb_cmd = "adb "
   if options.adb_options:
     adb_cmd += options.adb_options + " "
@@ -110,8 +115,8 @@ def main(options, args):
   # Call ReliabilityTestsAutoTest#startReliabilityTests
   test_cmd = (test_cmd_prefix + " -e class "
               "com.android.dumprendertree.ReliabilityTest#"
-              "runReliabilityTest -e timeout %s %s" %
-              (str(timeout_ms), test_cmd_postfix))
+              "runReliabilityTest -e timeout %s -e delay %s %s" %
+              (str(timeout_ms), str(manual_delay), test_cmd_postfix))
 
   adb_output = subprocess.Popen(test_cmd, shell=True,
                                 stdout=subprocess.PIPE,
@@ -153,20 +158,23 @@ def main(options, args):
 
 if "__main__" == __name__:
   option_parser = optparse.OptionParser()
-  option_parser.add_option("", "--time-out-ms",
+  option_parser.add_option("-t", "--time-out-ms",
                            default=60000,
                            help="set the timeout for each test")
-  option_parser.add_option("", "--verbose", action="store_true",
+  option_parser.add_option("-v", "--verbose", action="store_true",
                            default=False,
                            help="include debug-level logging")
-  option_parser.add_option("", "--adb-options",
+  option_parser.add_option("-a", "--adb-options",
                            default=None,
                            help="pass options to adb, such as -d -e, etc")
-  option_parser.add_option("", "--crash-file",
+  option_parser.add_option("-c", "--crash-file",
                            default="reliability_crashed_sites.txt",
                            help="the list of sites that cause browser to crash")
-  option_parser.add_option("", "--timeout-file",
+  option_parser.add_option("-f", "--timeout-file",
                            default="reliability_timedout_sites.txt",
                            help="the list of sites that timedout during test.")
+  option_parser.add_option("-d", "--delay",
+                           default=0,
+                           help="add a manual delay between pages (in ms)")
   opts, arguments = option_parser.parse_args()
   main(opts, arguments)

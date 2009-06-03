@@ -25,7 +25,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
     static final String RELIABILITY_TEST_RUNNER_FILES[] = {
         "run_reliability_tests.py"
     };
-
+    
     public ReliabilityTest() {
         super(PKG_NAME, ReliabilityTestActivity.class);
     }
@@ -51,6 +51,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
         Handler handler = null;
         boolean timeoutFlag = false;
         long start, elapsed;
+        
         //read from BufferedReader instead of populating a list in advance,
         //this will avoid excessive memory usage in case of a large list
         while((url = listReader.readLine()) != null) {
@@ -63,7 +64,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             handler = activity.getHandler();
             handler.sendMessage(handler.obtainMessage(
                     ReliabilityTestActivity.MSG_NAVIGATE, 
-                    runner.mTimeoutInMillis, 0, url));
+                    runner.mTimeoutInMillis, runner.mDelay, url));
             timeoutFlag = activity.waitUntilDone();
             elapsed = System.currentTimeMillis() - start;
             if(elapsed < 1000) {
