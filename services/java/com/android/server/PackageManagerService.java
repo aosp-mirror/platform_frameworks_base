@@ -4147,6 +4147,7 @@ class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         synchronized (mPackages) {
+            grantPermissionsLP(newPkg, true);
             mSettings.writeLP();
         }
         return true;
