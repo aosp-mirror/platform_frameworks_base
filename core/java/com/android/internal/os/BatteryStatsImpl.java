@@ -53,7 +53,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 37;
+    private static final int VERSION = 38;
 
     private final File mFile;
     private final File mBackupFile;
@@ -1342,11 +1342,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         public Map<String, ? extends BatteryStats.Uid.Pkg> getPackageStats() {
             return mPackageStats;
         }
-        
+
+        @Override
         public int getUid() {
             return mUid;
         }
-        
+
+        @Override
         public long getTcpBytesReceived(int which) {
             if (which == STATS_LAST) {
                 return mLoadedTcpBytesReceived;
@@ -1365,7 +1367,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             return mCurrentTcpBytesReceived + (mStartedTcpBytesReceived >= 0
                     ? (NetStat.getUidRxBytes(mUid) - mStartedTcpBytesReceived) : 0);
         }
-        
+
+        @Override
         public long getTcpBytesSent(int which) {
             if (which == STATS_LAST) {
                 return mLoadedTcpBytesSent;
@@ -1754,7 +1757,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             public Timer getSensorTime() {
                 return mTimer;
             }
-            
+
+            @Override
             public int getHandle() {
                 return mHandle;
             }
@@ -1780,6 +1784,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             int mStarts;
 
             /**
+             * Amount of time the process was running in the foreground.
+             */
+            long mForegroundTime;
+
+            /**
              * The amount of user time loaded from a previous save.
              */
             long mLoadedUserTime;
@@ -1793,6 +1802,11 @@ public final class BatteryStatsImpl extends BatteryStats {
              * The number of times the process has started from a previous save.
              */
             int mLoadedStarts;
+
+            /**
+             * The amount of foreground time loaded from a previous save.
+             */
+            long mLoadedForegroundTime;
 
             /**
              * The amount of user time loaded from the previous run.
@@ -1810,6 +1824,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             int mLastStarts;
 
             /**
+             * The amount of foreground time loaded from the previous run
+             */
+            long mLastForegroundTime;
+
+            /**
              * The amount of user time when last unplugged.
              */
             long mUnpluggedUserTime;
@@ -1824,6 +1843,11 @@ public final class BatteryStatsImpl extends BatteryStats {
              */
             int mUnpluggedStarts;
 
+            /**
+             * The amount of foreground time since unplugged.
+             */
+            long mUnpluggedForegroundTime;
+
             Proc() {
                 mUnpluggables.add(this);
             }
@@ -1832,6 +1856,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mUnpluggedUserTime = mUserTime;
                 mUnpluggedSystemTime = mSystemTime;
                 mUnpluggedStarts = mStarts;
+                mUnpluggedForegroundTime = mForegroundTime;
             }
 
             public void plug(long batteryUptime, long batteryRealtime) {
@@ -1843,30 +1868,38 @@ public final class BatteryStatsImpl extends BatteryStats {
                 
                 out.writeLong(mUserTime);
                 out.writeLong(mSystemTime);
+                out.writeLong(mForegroundTime);
                 out.writeInt(mStarts);
                 out.writeLong(mLoadedUserTime);
                 out.writeLong(mLoadedSystemTime);
+                out.writeLong(mLoadedForegroundTime);
                 out.writeInt(mLoadedStarts);
                 out.writeLong(mLastUserTime);
                 out.writeLong(mLastSystemTime);
+                out.writeLong(mLastForegroundTime);
                 out.writeInt(mLastStarts);
                 out.writeLong(mUnpluggedUserTime);
                 out.writeLong(mUnpluggedSystemTime);
+                out.writeLong(mUnpluggedForegroundTime);
                 out.writeInt(mUnpluggedStarts);
             }
 
             void readFromParcelLocked(Parcel in) {
                 mUserTime = in.readLong();
                 mSystemTime = in.readLong();
+                mForegroundTime = in.readLong();
                 mStarts = in.readInt();
                 mLoadedUserTime = in.readLong();
                 mLoadedSystemTime = in.readLong();
+                mLoadedForegroundTime = in.readLong();
                 mLoadedStarts = in.readInt();
                 mLastUserTime = in.readLong();
                 mLastSystemTime = in.readLong();
+                mLastForegroundTime = in.readLong();
                 mLastStarts = in.readInt();
                 mUnpluggedUserTime = in.readLong();
                 mUnpluggedSystemTime = in.readLong();
+                mUnpluggedForegroundTime = in.readLong();
                 mUnpluggedStarts = in.readInt();
             }
 
@@ -1877,6 +1910,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             public void addCpuTimeLocked(int utime, int stime) {
                 mUserTime += utime;
                 mSystemTime += stime;
+            }
+
+            public void addForegroundTimeLocked(long ttime) {
+                mForegroundTime += ttime;
             }
 
             public void incStartsLocked() {
@@ -1910,6 +1947,22 @@ public final class BatteryStatsImpl extends BatteryStats {
                         val -= mLoadedSystemTime;
                     } else if (which == STATS_UNPLUGGED) {
                         val -= mUnpluggedSystemTime;
+                    }
+                }
+                return val;
+            }
+
+            @Override
+            public long getForegroundTime(int which) {
+                long val;
+                if (which == STATS_LAST) {
+                    val = mLastForegroundTime;
+                } else {
+                    val = mForegroundTime;
+                    if (which == STATS_CURRENT) {
+                        val -= mLoadedForegroundTime;
+                    } else if (which == STATS_UNPLUGGED) {
+                        val -= mUnpluggedForegroundTime;
                     }
                 }
                 return val;

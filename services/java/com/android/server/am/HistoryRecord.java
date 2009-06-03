@@ -66,6 +66,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     int theme;              // resource identifier of activity's theme.
     TaskRecord task;        // the task this is in.
     long startTime;         // when we starting launching this activity
+    long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     Configuration configuration; // configuration activity was last running in
     HistoryRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
