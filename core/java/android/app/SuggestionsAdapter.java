@@ -32,12 +32,13 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.WeakHashMap;
 
 /**
@@ -376,9 +377,18 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             // Let the ContentResolver handle content, android.resource and file URIs.
             try {
                 Uri uri = Uri.parse(drawableId);
-                drawable = Drawable.createFromStream(
-                        mProviderContext.getContentResolver().openInputStream(uri),
-                        null);
+                InputStream stream = mProviderContext.getContentResolver().openInputStream(uri);
+                if (stream != null) {
+                    try {
+                        drawable = Drawable.createFromStream(stream, null);
+                    } finally {
+                        try {
+                            stream.close();
+                        } catch (IOException ex) {
+                            Log.e(LOG_TAG, "Error closing icon stream for " + uri, ex);
+                        }
+                    }
+                }
                 if (DBG) Log.d(LOG_TAG, "Opened icon input stream: " + drawableId);
             } catch (FileNotFoundException fnfe) {
                 if (DBG) Log.d(LOG_TAG, "Icon stream not found: " + drawableId);
