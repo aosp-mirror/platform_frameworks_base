@@ -318,6 +318,11 @@ void lightVertexMaterial(ogles_context_t* c, vertex_t* v)
         vmul3(l.implicitAmbient.v,  material.ambient.v,  l.ambient.v);
         vmul3(l.implicitDiffuse.v,  material.diffuse.v,  l.diffuse.v);
         vmul3(l.implicitSpecular.v, material.specular.v, l.specular.v);
+        // this is just a flag to tell if we have a specular component
+        l.implicitSpecular.v[3] =
+                l.implicitSpecular.r |
+                l.implicitSpecular.g |
+                l.implicitSpecular.b;
     }
     // emission and ambient for the whole scene
     vmla3(  c->lighting.implicitSceneEmissionAndAmbient.v,
