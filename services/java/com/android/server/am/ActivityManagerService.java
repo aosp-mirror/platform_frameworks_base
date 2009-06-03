@@ -62,6 +62,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -1438,7 +1439,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (mProcessStatsThread) {
             final long now = SystemClock.uptimeMillis();
             boolean haveNewCpuStats = false;
-            
+
             if (MONITOR_CPU_USAGE &&
                     mLastCpuTime < (now-MONITOR_CPU_MIN_TIME)) {
                 mLastCpuTime = now;
@@ -2063,6 +2064,25 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (prev != null) {
             prev.resumeKeyDispatchingLocked();
         }
+
+        if (prev.app != null && prev.cpuTimeAtResume > 0 && mBatteryStatsService.isOnBattery()) {
+            long diff = 0;
+            synchronized (mProcessStatsThread) {
+                diff = mProcessStats.getCpuTimeForPid(prev.app.pid) - prev.cpuTimeAtResume;
+            }
+            if (diff > 0) {
+                BatteryStatsImpl bsi = mBatteryStatsService.getActiveStatistics();
+                synchronized (bsi) {
+                    BatteryStatsImpl.Uid.Proc ps =
+                            bsi.getProcessStatsLocked(prev.info.applicationInfo.uid,
+                            prev.info.packageName);
+                    if (ps != null) {
+                        ps.addForegroundTimeLocked(diff);
+                    }
+                }
+            }
+        }
+        prev.cpuTimeAtResume = 0; // reset it
     }
 
     /**
@@ -2095,6 +2115,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         next.resumeKeyDispatchingLocked();
         ensureActivitiesVisibleLocked(null, 0);
         mWindowManager.executeAppTransition();
+
+        // Mark the point when the activity is resuming
+        // TODO: To be more accurate, the mark should be before the onCreate,
+        //       not after the onResume. But for subsequent starts, onResume is fine.
+        if (next.app != null) {
+            synchronized (mProcessStatsThread) {
+                next.cpuTimeAtResume = mProcessStats.getCpuTimeForPid(next.app.pid);
+            }
+        } else {
+            next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
+        }
     }
 
     /**

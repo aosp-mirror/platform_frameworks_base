@@ -22,7 +22,7 @@
   <item name="screen.on">30</item>
   <item name="bluetooth.active">103</item>
   <item name="bluetooth.on">5</item>
-  <item name="screen.full">144</item>
+  <item name="screen.full">114</item>
   <item name="wifi.on">23</item>
   <item name="wifi.active">200</item>
   <item name="wifi.scan">200</item>
@@ -33,4 +33,5 @@
   <item name="dsp.video">100</item>
   <item name="radio.on">3</item>
   <item name="radio.active">175</item>
+  <item name="gps.on">120</item>
 </device>

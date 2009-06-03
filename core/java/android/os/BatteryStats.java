@@ -307,6 +307,13 @@ public abstract class BatteryStats implements Parcelable {
              * @param which one of STATS_TOTAL, STATS_LAST, or STATS_CURRENT.
              */
             public abstract int getStarts(int which);
+
+            /**
+             * Returns the cpu time spent in microseconds while the process was in the foreground.
+             * @param which one of STATS_TOTAL, STATS_LAST, STATS_CURRENT or STATS_UNPLUGGED
+             * @return foreground cpu time in microseconds
+             */
+            public abstract long getForegroundTime(int which);
         }
 
         /**
@@ -364,7 +371,7 @@ public abstract class BatteryStats implements Parcelable {
     public abstract int getStartCount();
     
     /**
-     * Returns the time in milliseconds that the screen has been on while the device was
+     * Returns the time in microseconds that the screen has been on while the device was
      * running on battery.
      * 
      * {@hide}
@@ -384,7 +391,7 @@ public abstract class BatteryStats implements Parcelable {
     public static final int NUM_SCREEN_BRIGHTNESS_BINS = 5;
     
     /**
-     * Returns the time in milliseconds that the screen has been on with
+     * Returns the time in microseconds that the screen has been on with
      * the given brightness
      * 
      * {@hide}
@@ -395,7 +402,7 @@ public abstract class BatteryStats implements Parcelable {
     public abstract int getInputEventCount(int which);
     
     /**
-     * Returns the time in milliseconds that the phone has been on while the device was
+     * Returns the time in microseconds that the phone has been on while the device was
      * running on battery.
      * 
      * {@hide}
@@ -415,7 +422,7 @@ public abstract class BatteryStats implements Parcelable {
     public static final int NUM_SIGNAL_STRENGTH_BINS = 5;
     
     /**
-     * Returns the time in milliseconds that the phone has been running with
+     * Returns the time in microseconds that the phone has been running with
      * the given signal strength.
      * 
      * {@hide}
@@ -443,7 +450,7 @@ public abstract class BatteryStats implements Parcelable {
     public static final int NUM_DATA_CONNECTION_TYPES = 5;
     
     /**
-     * Returns the time in milliseconds that the phone has been running with
+     * Returns the time in microseconds that the phone has been running with
      * the given data connection.
      * 
      * {@hide}
@@ -460,7 +467,7 @@ public abstract class BatteryStats implements Parcelable {
     public abstract int getPhoneDataConnectionCount(int dataType, int which);
 
     /**
-     * Returns the time in milliseconds that wifi has been on while the device was
+     * Returns the time in microseconds that wifi has been on while the device was
      * running on battery.
      * 
      * {@hide}
@@ -468,7 +475,7 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getWifiOnTime(long batteryRealtime, int which);
 
     /**
-     * Returns the time in milliseconds that wifi has been on and the driver has
+     * Returns the time in microseconds that wifi has been on and the driver has
      * been in the running state while the device was running on battery.
      *
      * {@hide}
@@ -476,7 +483,7 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getWifiRunningTime(long batteryRealtime, int which);
 
     /**
-     * Returns the time in milliseconds that bluetooth has been on while the device was
+     * Returns the time in microseconds that bluetooth has been on while the device was
      * running on battery.
      * 
      * {@hide}
