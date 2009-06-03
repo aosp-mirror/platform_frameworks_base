@@ -110,8 +110,8 @@ def main(options, args):
   # Call ReliabilityTestsAutoTest#startReliabilityTests
   test_cmd = (test_cmd_prefix + " -e class "
               "com.android.dumprendertree.ReliabilityTest#"
-              "runTest -e timeout %d %s" %
-              (timeout_ms, test_cmd_postfix))
+              "runReliabilityTest -e timeout %s %s" %
+              (str(timeout_ms), test_cmd_postfix))
 
   adb_output = subprocess.Popen(test_cmd, shell=True,
                                 stdout=subprocess.PIPE,
@@ -125,10 +125,6 @@ def main(options, args):
     crashed_tests.append(crashed_test)
     logging.info("Resuming reliability test runner...")
 
-    test_cmd = (test_cmd_prefix + " -e class "
-                "com.android.dumprendertree.ReliabilityTest#"
-                "runTest -e timeout %d %s" %
-                (timeout_ms, test_cmd_postfix))
     adb_output = subprocess.Popen(test_cmd, shell=True, stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE).communicate()[0]
 
