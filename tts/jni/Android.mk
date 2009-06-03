@@ -14,13 +14,10 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libcutils
 
-ifneq ($(TARGET_SIMULATOR),true)
-LOCAL_SHARED_LIBRARIES += \
-	libdl
-endif
-
-ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-LOCAL_LDLIBS += -ldl
+ifeq ($(TARGET_SIMULATOR),true)
+ LOCAL_LDLIBS += -ldl
+else
+ LOCAL_SHARED_LIBRARIES += libdl
 endif
 
 
