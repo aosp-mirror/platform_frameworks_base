@@ -215,6 +215,12 @@ public class ReliabilityTestActivity extends Activity {
         }
         
         @Override
+        public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+            result.confirm();
+            return true;
+        }
+
+        @Override
         public boolean onJsPrompt(WebView view, String url, String message, String defaultValue,
                 JsPromptResult result) {
             result.confirm();
