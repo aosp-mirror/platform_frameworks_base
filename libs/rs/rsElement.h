@@ -36,6 +36,8 @@ public:
 
     void setComponent(uint32_t idx, Component *c);
 
+    uint32_t getGLType() const;
+    uint32_t getGLFormat() const;
 
 
     size_t getSizeBits() const;

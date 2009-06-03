@@ -74,6 +74,7 @@ uint32_t LocklessCommandFifo::getFreeSpace() const
         freeSpace = 0;
     }
     
+    //LOGE("free %i", freeSpace);
     return freeSpace;
 }
 
@@ -85,8 +86,8 @@ bool LocklessCommandFifo::isEmpty() const
 
 void * LocklessCommandFifo::reserve(uint32_t sizeInBytes)
 {
-    // Add space for command header;
-    sizeInBytes += 4;
+    // Add space for command header and loop token;
+    sizeInBytes += 8;
 
     //dumpState("reserve");
     if (getFreeSpace() < sizeInBytes) {
@@ -153,16 +154,17 @@ void LocklessCommandFifo::next()
 
 void LocklessCommandFifo::makeSpace(uint32_t bytes)
 {
+    //dumpState("make space");
     if ((mPut+bytes) > mEnd) {
         // Need to loop regardless of where get is.
-        while((mGet > mPut) && (mPut+4 >= mGet)) {
+        while((mGet > mPut) && (mBuffer+4 >= mGet)) {
             sleep(1);
         }
 
         // Toss in a reset then the normal wait for space will do the rest.
         reinterpret_cast<uint16_t *>(mPut)[0] = 0;
         reinterpret_cast<uint16_t *>(mPut)[1] = 0;
-        mPut += 4;
+        mPut = mBuffer;
     }
 
     // it will fit here so we just need to wait for space.
