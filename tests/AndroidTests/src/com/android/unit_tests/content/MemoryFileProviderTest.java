@@ -40,8 +40,7 @@ public class MemoryFileProviderTest extends AndroidTestCase {
         assertNotNull(in);
         int count = in.read(buf);
         assertEquals(buf.length, count);
-        // TODO: MemoryFile throws IndexOutOfBoundsException for this, http://b/issue?id=1881894
-        //assertEquals(-1, in.read());
+        assertEquals(-1, in.read());
         in.close();
         assertTrue(Arrays.equals(MemoryFileProvider.TEST_BLOB, buf));
     }
