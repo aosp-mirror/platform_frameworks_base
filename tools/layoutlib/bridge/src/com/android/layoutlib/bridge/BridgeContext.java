@@ -1145,12 +1145,4 @@ public final class BridgeContext extends Context {
     public Context getApplicationContext() {
         throw new UnsupportedOperationException();
     }
-
-    /**
-     * @hide
-     */
-    @Override
-    public float getApplicationScale() {
-        throw new UnsupportedOperationException();
-    }
 }

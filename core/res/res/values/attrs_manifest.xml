@@ -810,10 +810,17 @@
     <!-- The <code>supports-density</code> specifies a screen density that this
          package supports. Application can specify multiple densities it supports.
          <p>This appears as a child tag of the
-         {@link #AndroidManifestApplication application} tag. -->
-    <declare-styleable name="AndroidManifestSupportsDensity" parent="AndroidManifestApplication">
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestSupportsDensity" parent="AndroidManifest">
         <!-- Required value of the density in dip (device independent pixel). -->
         <attr name="density" format="integer" />
+    </declare-styleable>
+
+    <!-- The <code>expandable</code> specifies if this package supports screen metrics
+         other than 320x480 dip.
+         <p>This appears as a child tag of the
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestExpandable" parent="AndroidManifest">
     </declare-styleable>
 
     <!-- The <code>provider</code> tag declares a

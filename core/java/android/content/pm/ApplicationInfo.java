@@ -186,13 +186,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public int uid;
     
-
     /**
      * The list of densities in DPI that application supprots. This
      * field is only set if the {@link PackageManager#GET_SUPPORTS_DENSITIES} flag was
      * used when retrieving the structure.
      */
     public int[] supportsDensities;
+
+    /**
+     * True when the application's window can be expanded over default window
+     * size in target density (320x480 for 1.0 density, 480x720 for 1.5 density etc)
+     */
+    public boolean expandable = false;
 
     /**
      * The minimum SDK version this application targets.  It may run on earilier
@@ -228,6 +233,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
         pw.println(prefix + "description=0x"+Integer.toHexString(descriptionRes));
         pw.println(prefix + "supportsDensities=" + supportsDensities);
+        pw.println(prefix + "expandable=" + expandable);
         super.dumpBack(pw, prefix);
     }
     
@@ -275,6 +281,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         manageSpaceActivityName = orig.manageSpaceActivityName;
         descriptionRes = orig.descriptionRes;
         supportsDensities = orig.supportsDensities;
+        expandable = orig.expandable;
     }
 
 
@@ -307,6 +314,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(backupAgentName);
         dest.writeInt(descriptionRes);
         dest.writeIntArray(supportsDensities);
+        dest.writeInt(expandable ? 1 : 0);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -338,6 +346,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         backupAgentName = source.readString();
         descriptionRes = source.readInt();
         supportsDensities = source.createIntArray();
+        expandable = source.readInt() != 0;
     }
 
     /**

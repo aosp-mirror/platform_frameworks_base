@@ -30,6 +30,7 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.EventLog;
 import android.util.SparseArray;
@@ -40,6 +41,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.content.pm.PackageManager;
+import android.content.res.CompatibilityInfo;
 import android.content.Context;
 import android.app.ActivityManagerNative;
 import android.Manifest;
@@ -128,9 +130,8 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mHeight;
     Rect mDirty; // will be a graphics.Region soon
     boolean mIsAnimating;
-    // TODO: change these to scalar class.
-    private float mAppScale;
-    private float mAppScaleInverted; // = 1.0f / mAppScale
+    
+    private CompatibilityInfo mCompatibilityInfo;
     private int[] mWindowLayoutParamsBackup = null;
 
     final View.AttachInfo mAttachInfo;
@@ -393,12 +394,15 @@ public final class ViewRoot extends Handler implements ViewParent,
         synchronized (this) {
             if (mView == null) {
                 mView = view;
-                mAppScale = mView.getContext().getApplicationScale();
-                if (mAppScale != 1.0f) {
+                mWindowAttributes.copyFrom(attrs);
+                mCompatibilityInfo =
+                        mView.getContext().getResources().getCompatibilityInfo();
+                if (mCompatibilityInfo.mScalingRequired) {
                     mWindowLayoutParamsBackup = new int[4];
                 }
-                mAppScaleInverted = 1.0f / mAppScale;
-                mWindowAttributes.copyFrom(attrs);
+                if (!mCompatibilityInfo.mExpandable) {
+                    adjustWindowAttributesForCompatibleMode(mWindowAttributes);
+                }
                 mSoftInputMode = attrs.softInputMode;
                 mWindowAttributesChanged = true;
                 mAttachInfo.mRootView = view;
@@ -413,9 +417,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                 // manager, to make sure we do the relayout before receiving
                 // any other events from the system.
                 requestLayout();
-
                 try {
-                    res = sWindowSession.add(mWindow, attrs,
+                    res = sWindowSession.add(mWindow, mWindowAttributes,
                             getHostVisibility(), mAttachInfo.mContentInsets);
                 } catch (RemoteException e) {
                     mAdded = false;
@@ -424,7 +427,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                     unscheduleTraversals();
                     throw new RuntimeException("Adding window failed", e);
                 }
-                mAttachInfo.mContentInsets.scale(mAppScaleInverted);
+                if (mCompatibilityInfo.mScalingRequired) {
+                    mAttachInfo.mContentInsets.scale(
+                            mCompatibilityInfo.mApplicationInvertedScale);
+                }
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
                 if (Config.LOGV) Log.v("ViewRoot", "Added window " + mWindow);
@@ -536,13 +542,13 @@ public final class ViewRoot extends Handler implements ViewParent,
     public void invalidateChild(View child, Rect dirty) {
         checkThread();
         if (LOCAL_LOGV) Log.v(TAG, "Invalidate child: " + dirty);
-        if (mCurScrollY != 0 || mAppScale != 1.0f) {
+        if (mCurScrollY != 0 || mCompatibilityInfo.mScalingRequired) {
             mTempRect.set(dirty);
             if (mCurScrollY != 0) {
                mTempRect.offset(0, -mCurScrollY);
             }
-            if (mAppScale != 1.0f) {
-                mTempRect.scale(mAppScale);
+            if (mCompatibilityInfo.mScalingRequired) {
+                mTempRect.scale(mCompatibilityInfo.mApplicationScale);
             }
             dirty = mTempRect;
         }
@@ -622,6 +628,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         boolean viewVisibilityChanged = mViewVisibility != viewVisibility
                 || mNewSurfaceNeeded;
 
+        float appScale = mCompatibilityInfo.mApplicationScale;
+
         WindowManager.LayoutParams params = null;
         if (mWindowAttributesChanged) {
             mWindowAttributesChanged = false;
@@ -632,9 +640,10 @@ public final class ViewRoot extends Handler implements ViewParent,
             fullRedrawNeeded = true;
             mLayoutRequested = true;
 
-            Display d = new Display(0);
-            desiredWindowWidth = (int) (d.getWidth() * mAppScaleInverted);
-            desiredWindowHeight = (int) (d.getHeight() * mAppScaleInverted);
+            DisplayMetrics packageMetrics = 
+                mView.getContext().getResources().getDisplayMetrics();
+            desiredWindowWidth = packageMetrics.widthPixels;
+            desiredWindowHeight = packageMetrics.heightPixels;
 
             // For the very first time, tell the view hierarchy that it
             // is attached to the window.  Note that at this point the surface
@@ -703,9 +712,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     windowResizesToFitContent = true;
 
-                    Display d = new Display(0);
-                    desiredWindowWidth = (int) (d.getWidth() * mAppScaleInverted);
-                    desiredWindowHeight = (int) (d.getHeight() * mAppScaleInverted);
+                    DisplayMetrics packageMetrics = 
+                        mView.getContext().getResources().getDisplayMetrics();
+                    desiredWindowWidth = packageMetrics.widthPixels;
+                    desiredWindowHeight = packageMetrics.heightPixels;
                 }
             }
 
@@ -885,7 +895,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             mHeight = frame.height();
 
             if (initialized) {
-                mGlCanvas.setViewport((int) (mWidth * mAppScale), (int) (mHeight * mAppScale));
+                mGlCanvas.setViewport((int) (mWidth * appScale), (int) (mHeight * appScale));
             }
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
@@ -975,11 +985,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                         mTmpLocation[1] + host.mBottom - host.mTop);
 
                 host.gatherTransparentRegion(mTransparentRegion);
-
-                // TODO: scale the region, like:
-                // Region uses native methods. We probabl should have ScalableRegion class.
-
-                // Region does not have equals method ?
+                mTransparentRegion.scale(appScale);                
                 if (!mTransparentRegion.equals(mPreviousTransparentRegion)) {
                     mPreviousTransparentRegion.set(mTransparentRegion);
                     // reconfigure window manager
@@ -989,7 +995,6 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                 }
             }
-
 
             if (DBG) {
                 System.out.println("======================================");
@@ -1010,10 +1015,11 @@ public final class ViewRoot extends Handler implements ViewParent,
             givenContent.left = givenContent.top = givenContent.right
                     = givenContent.bottom = givenVisible.left = givenVisible.top
                     = givenVisible.right = givenVisible.bottom = 0;
-            insets.contentInsets.scale(mAppScale);
-            insets.visibleInsets.scale(mAppScale);
-
             attachInfo.mTreeObserver.dispatchOnComputeInternalInsets(insets);
+            if (mCompatibilityInfo.mScalingRequired) {
+                insets.contentInsets.scale(appScale);
+                insets.visibleInsets.scale(appScale);
+            }
             if (insetsPending || !mLastGivenInsets.equals(insets)) {
                 mLastGivenInsets.set(insets);
                 try {
@@ -1161,6 +1167,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             mCurScrollY = yoff;
             fullRedrawNeeded = true;
         }
+        float appScale = mCompatibilityInfo.mApplicationScale;
+        boolean scalingRequired = mCompatibilityInfo.mScalingRequired;
 
         Rect dirty = mDirty;
         if (mUseGL) {
@@ -1176,12 +1184,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                     mAttachInfo.mIgnoreDirtyState = true;
                     mView.mPrivateFlags |= View.DRAWN;
 
-                    float scale = mAppScale;
                     int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
                     try {
                         canvas.translate(0, -yoff);
-                        if (scale != 1.0f) {
-                            canvas.scale(scale, scale);
+                        if (scalingRequired) {
+                            canvas.scale(appScale, appScale);
                         }
                         mView.draw(canvas);
                         if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
@@ -1213,8 +1220,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         if (fullRedrawNeeded) {
-            mAttachInfo.mIgnoreDirtyState = true;            
-            dirty.union(0, 0, (int) (mWidth * mAppScale), (int) (mHeight * mAppScale));
+            mAttachInfo.mIgnoreDirtyState = true;
+            dirty.union(0, 0, (int) (mWidth * appScale), (int) (mHeight * appScale));
         }
 
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
@@ -1222,7 +1229,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                     + mWindowAttributes.getTitle()
                     + ": dirty={" + dirty.left + "," + dirty.top
                     + "," + dirty.right + "," + dirty.bottom + "} surface="
-                    + surface + " surface.isValid()=" + surface.isValid());
+                    + surface + " surface.isValid()=" + surface.isValid() + ", appScale:" +
+                    appScale + ", width=" + mWidth + ", height=" + mHeight);
         }
 
         Canvas canvas;
@@ -1279,18 +1287,16 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 mView.mPrivateFlags |= View.DRAWN;
 
-                float scale = mAppScale;
                 if (DEBUG_DRAW) {
                     Context cxt = mView.getContext();
                     Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
-                            ", appScale=" + mAppScale);
+                            ", metrics=" + mView.getContext().getResources().getDisplayMetrics());
                 }
-                int saveCount =  canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
                 try {
                     canvas.translate(0, -yoff);
-                    if (scale != 1.0f) {
-                        // re-scale this
-                        canvas.scale(scale, scale);
+                    if (scalingRequired) {
+                        canvas.scale(appScale, appScale);
                     }
                     mView.draw(canvas);
                 } finally {
@@ -1603,8 +1609,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             } else {
                 didFinish = event.getAction() == MotionEvent.ACTION_OUTSIDE;
             }
-            if (event != null) {
-                event.scale(mAppScaleInverted);
+            if (event != null && mCompatibilityInfo.mScalingRequired) {
+                event.scale(mCompatibilityInfo.mApplicationInvertedScale);
             }
 
             try {
@@ -1732,8 +1738,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                         if (mGlWanted && !mUseGL) {
                             initializeGL();
                             if (mGlCanvas != null) {
-                                mGlCanvas.setViewport((int) (mWidth * mAppScale),
-                                        (int) (mHeight * mAppScale));
+                                float appScale = mCompatibilityInfo.mApplicationScale;
+                                mGlCanvas.setViewport(
+                                        (int) (mWidth * appScale), (int) (mHeight * appScale));
                             }
                         }
                     }
@@ -1937,8 +1944,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         } else {
             didFinish = false;
         }
-        if (event != null) {
-            event.scale(mAppScaleInverted);
+        if (event != null && mCompatibilityInfo.mScalingRequired) {
+            event.scale(mCompatibilityInfo.mApplicationInvertedScale);
         }
 
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
@@ -2368,26 +2375,58 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
             boolean insetsPending) throws RemoteException {
-
         boolean restore = false;
-        if (params != null && mAppScale != 1.0f) {
+        float appScale = mCompatibilityInfo.mApplicationScale;
+        boolean scalingRequired = mCompatibilityInfo.mScalingRequired;
+        
+        if (params != null && !mCompatibilityInfo.mExpandable) {
+            adjustWindowAttributesForCompatibleMode(params);
+        }
+        if (params != null && scalingRequired) {
             restore = true;
-            params.scale(mAppScale, mWindowLayoutParamsBackup);
+            params.scale(appScale, mWindowLayoutParamsBackup);
         }
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
-                (int) (mView.mMeasuredWidth * mAppScale),
-                (int) (mView.mMeasuredHeight * mAppScale),
+                (int) (mView.mMeasuredWidth * appScale),
+                (int) (mView.mMeasuredHeight * appScale),
                 viewVisibility, insetsPending, mWinFrame,
                 mPendingContentInsets, mPendingVisibleInsets, mSurface);
         if (restore) {
             params.restore(mWindowLayoutParamsBackup);
         }
-
-        mPendingContentInsets.scale(mAppScaleInverted);
-        mPendingVisibleInsets.scale(mAppScaleInverted);
-        mWinFrame.scale(mAppScaleInverted);
+        if (scalingRequired) {
+            float invertedScale = mCompatibilityInfo.mApplicationInvertedScale;
+            mPendingContentInsets.scale(invertedScale);
+            mPendingVisibleInsets.scale(invertedScale);
+            mWinFrame.scale(invertedScale);
+        }
         return relayoutResult;
+    }
+    
+    /**
+     * Adjust the window's layout parameter for compatibility mode. It replaces FILL_PARENT
+     * with the default window size, and centers if the window wanted to fill
+     * horizontally.
+     * 
+     * @param attrs the window's layout params to adjust
+     */
+    private void adjustWindowAttributesForCompatibleMode(WindowManager.LayoutParams attrs) {
+        // fix app windows only
+        if (attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+            DisplayMetrics metrics = mView.getContext().getResources().getDisplayMetrics();
+            // TODO: improve gravity logic
+            if (attrs.width == ViewGroup.LayoutParams.FILL_PARENT) {
+                attrs.width = metrics.widthPixels;
+                attrs.gravity |= Gravity.CENTER_HORIZONTAL;
+            }
+            if (attrs.height == ViewGroup.LayoutParams.FILL_PARENT) {
+                attrs.height = metrics.heightPixels;
+            }
+            if (DEBUG_LAYOUT) {
+                Log.d(TAG, "Attributes fixed for compatibility : " + attrs);
+            }
+        }
     }
 
     /**
@@ -2493,11 +2532,16 @@ public final class ViewRoot extends Handler implements ViewParent,
                 + " visibleInsets=" + visibleInsets.toShortString()
                 + " reportDraw=" + reportDraw);
         Message msg = obtainMessage(reportDraw ? RESIZED_REPORT :RESIZED);
-
-        coveredInsets.scale(mAppScaleInverted);
-        visibleInsets.scale(mAppScaleInverted);
-        msg.arg1 = (int) (w * mAppScaleInverted);
-        msg.arg2 = (int) (h * mAppScaleInverted);
+        if (mCompatibilityInfo.mScalingRequired) {
+            float invertedScale = mCompatibilityInfo.mApplicationInvertedScale;
+            coveredInsets.scale(invertedScale);
+            visibleInsets.scale(invertedScale);
+            msg.arg1 = (int) (w * invertedScale);
+            msg.arg2 = (int) (h * invertedScale);
+        } else {
+            msg.arg1 = w;
+            msg.arg2 = h;
+        }
         msg.obj = new Rect[] { new Rect(coveredInsets), new Rect(visibleInsets) };
         sendMessage(msg);
     }

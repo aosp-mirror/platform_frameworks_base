@@ -183,7 +183,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     // The flags that are set for all calls we make to the package manager.
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES
-            | PackageManager.GET_SUPPORTS_DENSITIES;
+            | PackageManager.GET_SUPPORTS_DENSITIES | PackageManager.GET_EXPANDABLE;
     
     private static final String SYSTEM_SECURE = "ro.secure";
 

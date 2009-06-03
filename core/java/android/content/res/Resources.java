@@ -22,6 +22,8 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.app.ActivityThread.PackageInfo;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
@@ -84,7 +86,9 @@ public class Resources {
     private final Configuration mConfiguration = new Configuration();
     /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
     PluralRules mPluralRule;
-
+    
+    private final CompatibilityInfo mCompatibilityInfo;
+    
     private static final SparseArray<Object> EMPTY_ARRAY = new SparseArray<Object>() {
         @Override
         public void put(int k, Object o) {
@@ -126,23 +130,36 @@ public class Resources {
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
             Configuration config) {
-        this(assets, metrics, config, true);
+        this(assets, metrics, config, null);
     }
 
     /**
-     * Create a resource with an additional flag for preloaded
-     * drawable cache. Used by {@link ActivityThread}.
-     *
+     * Creates a new Resources object with ApplicationInfo.
+     * 
+     * @param assets Previously created AssetManager. 
+     * @param metrics Current display metrics to consider when 
+     *                selecting/computing resource values.
+     * @param config Desired device configuration to consider when 
+     *               selecting/computing resource values (optional).
+     * @param appInfo this resource's application info.
      * @hide
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
-        Configuration config, boolean usePreloadedCache) {
+            Configuration config, ApplicationInfo appInfo) {
         mAssets = assets;
         mConfiguration.setToDefaults();
         mMetrics.setToDefaults();
+        if (appInfo != null) {
+            mCompatibilityInfo = new CompatibilityInfo(appInfo);
+            if (DEBUG_CONFIG) {
+                Log.d(TAG, "compatibility for " + appInfo.packageName + " : " + mCompatibilityInfo);
+            }
+        } else {
+            mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+        }
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
-        if (usePreloadedCache) {
+        if (!mCompatibilityInfo.mScalingRequired) {
             mPreloadedDrawables = sPreloadedDrawables;
         } else {
             mPreloadedDrawables = emptySparseArray();
@@ -1251,6 +1268,7 @@ public class Resources {
             }
             if (metrics != null) {
                 mMetrics.setTo(metrics);
+                mMetrics.updateMetrics(mCompatibilityInfo, mConfiguration);
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
 
@@ -1355,6 +1373,17 @@ public class Resources {
      */
     public Configuration getConfiguration() {
         return mConfiguration;
+    }
+    
+    /**
+     * Return the compatibility mode information for the application.
+     * The returned object should be treated as read-only.
+     * 
+     * @return compatibility info. null if the app does not require compatibility mode.
+     * @hide
+     */
+    public CompatibilityInfo getCompatibilityInfo() {
+        return mCompatibilityInfo;
     }
 
     /**
@@ -1920,5 +1949,6 @@ public class Resources {
         updateConfiguration(null, null);
         mAssets.ensureStringBlocks();
         mPreloadedDrawables = sPreloadedDrawables;
+        mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     }
 }
