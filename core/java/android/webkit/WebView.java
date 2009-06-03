@@ -451,7 +451,7 @@ public class WebView extends AbsoluteLayout
 
     static final int MARK_NODE_INVALID_ID               = 21;
     static final int UPDATE_CLIPBOARD                   = 22;
-    static final int LONG_PRESS_ENTER                   = 23;
+    static final int LONG_PRESS_CENTER                  = 23;
     static final int PREVENT_TOUCH_ID                   = 24;
     static final int WEBCORE_NEED_TOUCH_EVENTS          = 25;
     // obj=Rect in doc coordinates
@@ -480,7 +480,7 @@ public class WebView extends AbsoluteLayout
         "20",
         "MARK_NODE_INVALID_ID", //           = 21;
         "UPDATE_CLIPBOARD", //               = 22;
-        "LONG_PRESS_ENTER", //               = 23;
+        "LONG_PRESS_CENTER", //              = 23;
         "PREVENT_TOUCH_ID", //               = 24;
         "WEBCORE_NEED_TOUCH_EVENTS", //      = 25;
         "INVAL_RECT_MSG_ID" //               = 26;
@@ -2411,7 +2411,7 @@ public class WebView extends AbsoluteLayout
             // need to check it again.
             nativeRecordButtons(hasFocus() && hasWindowFocus(),
                     mTouchMode == TOUCH_SHORTPRESS_START_MODE
-                    || mTrackballDown || mGotEnterDown, false);
+                    || mTrackballDown || mGotCenterDown, false);
             drawCoreAndCursorRing(canvas, mBackgroundColor, mDrawCursorRing);
         }
         canvas.restoreToCount(sc);
@@ -3096,9 +3096,9 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    // This is used to determine long press with the enter key, or
-    // a center key.  Does not affect long press with the trackball/touch.
-    private boolean mGotEnterDown = false;
+    // This is used to determine long press with the center key.  Does not
+    // affect long press with the trackball/touch.
+    private boolean mGotCenterDown = false;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -3160,13 +3160,12 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER
-                || keyCode == KeyEvent.KEYCODE_ENTER) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             switchOutDrawHistory();
             if (event.getRepeatCount() == 0) {
-                mGotEnterDown = true;
+                mGotCenterDown = true;
                 mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                        .obtainMessage(LONG_PRESS_ENTER), LONG_PRESS_TIMEOUT);
+                        .obtainMessage(LONG_PRESS_CENTER), LONG_PRESS_TIMEOUT);
                 // Already checked mNativeClass, so we do not need to check it
                 // again.
                 nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
@@ -3280,44 +3279,26 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER
-                || keyCode == KeyEvent.KEYCODE_ENTER) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             // remove the long press message first
-            mPrivateHandler.removeMessages(LONG_PRESS_ENTER);
-            mGotEnterDown = false;
+            mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
+            mGotCenterDown = false;
 
-            if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode) {
-                if (mShiftIsPressed) {
-                    return false;
-                }
-                if (getSettings().supportZoom()) {
-                    if (mTouchMode == TOUCH_DOUBLECLICK_MODE) {
-                        zoomScrollOut();
-                    } else {
-                        if (DebugFlags.WEB_VIEW) {
-                            Log.v(LOGTAG, "TOUCH_DOUBLECLICK_MODE");
-                        }
-                        mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                .obtainMessage(SWITCH_TO_CLICK), TAP_TIMEOUT);
-                        mTouchMode = TOUCH_DOUBLECLICK_MODE;
-                    }
-                    return true;
-                }
+            if (mShiftIsPressed) {
+                return false;
             }
-
-            Rect visibleRect = sendOurVisibleRect();
-            // Note that sendOurVisibleRect calls viewToContent, so the
-            // coordinates should be in content coordinates.
-            if (nativeCursorIntersects(visibleRect)) {
-                nativeSetFollowedLink(true);
-                mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, cursorData());
-                playSoundEffect(SoundEffectConstants.CLICK);
-                return true;
-            } else if (nativeHasCursorNode()) {
-                return true;
+            if (getSettings().supportZoom()
+                    && mTouchMode == TOUCH_DOUBLECLICK_MODE) {
+                zoomScrollOut();
+            } else {
+                mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                        .obtainMessage(SWITCH_TO_CLICK), TAP_TIMEOUT);
+                if (DebugFlags.WEB_VIEW) {
+                    Log.v(LOGTAG, "TOUCH_DOUBLECLICK_MODE");
+                }
+                mTouchMode = TOUCH_DOUBLECLICK_MODE;
             }
-            // Bubble up the key event as WebView doesn't handle it
-            return false;
+            return true;
         }
 
         // TODO: should we pass all the keys to DOM or check the meta tag
@@ -3963,8 +3944,8 @@ public class WebView extends AbsoluteLayout
             return false; // let common code in onKeyDown at it
         }
         if (ev.getAction() == MotionEvent.ACTION_UP) {
-            // LONG_PRESS_ENTER is set in common onKeyDown
-            mPrivateHandler.removeMessages(LONG_PRESS_ENTER);
+            // LONG_PRESS_CENTER is set in common onKeyDown
+            mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
             mTrackballDown = false;
             mTrackballUpTime = time;
             if (mShiftIsPressed) {
@@ -4839,12 +4820,12 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.resumeUpdate(mWebViewCore);
                     break;
 
-                case LONG_PRESS_ENTER:
+                case LONG_PRESS_CENTER:
                     // as this is shared by keydown and trackballdown, reset all
                     // the states
-                    mGotEnterDown = false;
+                    mGotCenterDown = false;
                     mTrackballDown = false;
-                    // LONG_PRESS_ENTER is sent as a delayed message. If we
+                    // LONG_PRESS_CENTER is sent as a delayed message. If we
                     // switch to windows overview, the WebView will be
                     // temporarily removed from the view system. In that case,
                     // do nothing.
