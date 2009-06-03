@@ -96,13 +96,19 @@ static inline uint16_t rs888to565(uint32_t r, uint32_t g, uint32_t b)
 static inline uint16_t rsBoxFilter565(uint16_t i1, uint16_t i2, uint16_t i3, uint16_t i4)
 {
     uint32_t r = ((i1 & 0x1f) + (i2 & 0x1f) + (i3 & 0x1f) + (i4 & 0x1f));
-    uint32_t g = ((i1 >> 5) & 0x3f) + ((i2 >> 5) & 0x3f) + ((i3 >> 5) & 0x3f) + ((i1 >> 5) & 0x3f);
+    uint32_t g = ((i1 >> 5) & 0x3f) + ((i2 >> 5) & 0x3f) + ((i3 >> 5) & 0x3f) + ((i4 >> 5) & 0x3f);
     uint32_t b = ((i1 >> 11) + (i2 >> 11) + (i3 >> 11) + (i4 >> 11));
     return (r >> 2) | ((g >> 2) << 5) | ((b >> 2) << 11);
 }
 
-
-
+static inline uint32_t rsBoxFilter8888(uint32_t i1, uint32_t i2, uint32_t i3, uint32_t i4)
+{
+    uint32_t r = (i1 & 0xff) +         (i2 & 0xff) +         (i3 & 0xff) +         (i4 & 0xff);
+    uint32_t g = ((i1 >> 8) & 0xff) +  ((i2 >> 8) & 0xff) +  ((i3 >> 8) & 0xff) +  ((i4 >> 8) & 0xff);
+    uint32_t b = ((i1 >> 16) & 0xff) + ((i2 >> 16) & 0xff) + ((i3 >> 16) & 0xff) + ((i4 >> 16) & 0xff);
+    uint32_t a = ((i1 >> 24) & 0xff) + ((i2 >> 24) & 0xff) + ((i3 >> 24) & 0xff) + ((i4 >> 24) & 0xff);
+    return (r >> 2) | ((g >> 2) << 8) | ((b >> 2) << 16) | ((a >> 2) << 24);
+}
 
 
 

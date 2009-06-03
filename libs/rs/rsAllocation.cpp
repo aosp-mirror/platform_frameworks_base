@@ -47,6 +47,7 @@ Allocation::Allocation(const Type *type)
 
 Allocation::~Allocation()
 {
+    LOGE("Allocation %p destryed", this);
 }
 
 void Allocation::setCpuWritable(bool)
@@ -77,6 +78,13 @@ void Allocation::uploadToTexture(uint32_t lodOffset)
 
     //LOGE("uploadToTexture  %i,  lod %i", mTextureID, lodOffset);
 
+    GLenum type = mType->getElement()->getGLType();
+    GLenum format = mType->getElement()->getGLFormat();
+
+    if (!type || !format) {
+        return;
+    }
+
     if (!mTextureID) {
         glGenTextures(1, &mTextureID);
     }
@@ -87,9 +95,9 @@ void Allocation::uploadToTexture(uint32_t lodOffset)
         adapt.setLOD(lod+lodOffset);
 
         uint16_t * ptr = static_cast<uint16_t *>(adapt.getElement(0,0));
-        glTexImage2D(GL_TEXTURE_2D, lod, GL_RGB, 
-                     adapt.getDimX(), adapt.getDimY(), 
-                     0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, ptr);
+        glTexImage2D(GL_TEXTURE_2D, lod, format,
+                     adapt.getDimX(), adapt.getDimY(),
+                     0, format, type, ptr);
     }
 }
 
@@ -121,7 +129,7 @@ void Allocation::subData(uint32_t xoff, uint32_t count, const void *data)
     memcpy(ptr, data, count * eSize);
 }
 
-void Allocation::subData(uint32_t xoff, uint32_t yoff, 
+void Allocation::subData(uint32_t xoff, uint32_t yoff,
              uint32_t w, uint32_t h, const void *data)
 {
     uint32_t eSize = mType->getElementSizeBytes();
@@ -147,7 +155,7 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
 
 
 /////////////////
-// 
+//
 
 
 namespace android {
@@ -192,7 +200,7 @@ void rsi_AllocationDestroy(Context *rsc, RsAllocation)
 {
 }
 
-static void mip(const Adapter2D &out, const Adapter2D &in)
+static void mip565(const Adapter2D &out, const Adapter2D &in)
 {
     uint32_t w = out.getDimX();
     uint32_t h = out.getDimY();
@@ -203,7 +211,26 @@ static void mip(const Adapter2D &out, const Adapter2D &in)
         const uint16_t *i2 = static_cast<uint16_t *>(in.getElement(0, y*2+1));
 
         for (uint32_t x=0; x < h; x++) {
-            *oPtr = rsBoxFilter565(i1[0], i1[2], i2[0], i2[1]);
+            *oPtr = rsBoxFilter565(i1[0], i1[1], i2[0], i2[1]);
+            oPtr ++;
+            i1 += 2;
+            i2 += 2;
+        }
+    }
+}
+
+static void mip8888(const Adapter2D &out, const Adapter2D &in)
+{
+    uint32_t w = out.getDimX();
+    uint32_t h = out.getDimY();
+
+    for (uint32_t y=0; y < w; y++) {
+        uint32_t *oPtr = static_cast<uint32_t *>(out.getElement(0, y));
+        const uint32_t *i1 = static_cast<uint32_t *>(in.getElement(0, y*2));
+        const uint32_t *i2 = static_cast<uint32_t *>(in.getElement(0, y*2+1));
+
+        for (uint32_t x=0; x < h; x++) {
+            *oPtr = rsBoxFilter8888(i1[0], i1[1], i2[0], i2[1]);
             oPtr ++;
             i1 += 2;
             i2 += 2;
@@ -255,21 +282,25 @@ static void elementConverter_8888_to_565(void *dst, const void *src, uint32_t co
 
 static ElementConverter_t pickConverter(RsElementPredefined dstFmt, RsElementPredefined srcFmt)
 {
-    if ((dstFmt == RS_ELEMENT_RGB_565) && 
+    if ((dstFmt == RS_ELEMENT_RGB_565) &&
         (srcFmt == RS_ELEMENT_RGB_565)) {
         return elementConverter_cpy_16;
     }
 
-    if ((dstFmt == RS_ELEMENT_RGB_565) && 
+    if ((dstFmt == RS_ELEMENT_RGB_565) &&
         (srcFmt == RS_ELEMENT_RGB_888)) {
         return elementConverter_888_to_565;
     }
 
-    if ((dstFmt == RS_ELEMENT_RGB_565) && 
+    if ((dstFmt == RS_ELEMENT_RGB_565) &&
         (srcFmt == RS_ELEMENT_RGBA_8888)) {
         return elementConverter_8888_to_565;
     }
 
+    if ((dstFmt == RS_ELEMENT_RGBA_8888) &&
+        (srcFmt == RS_ELEMENT_RGBA_8888)) {
+        return elementConverter_cpy_32;
+    }
 
     LOGE("pickConverter, unsuported combo");
     return 0;
@@ -303,7 +334,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
         for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
             adapt.setLOD(lod);
             adapt2.setLOD(lod + 1);
-            mip(adapt2, adapt);
+            mip565(adapt2, adapt);
         }
     }
 
@@ -312,6 +343,8 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
 
 RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool genMips)
 {
+    bool use32bpp = false;
+
     typedef struct _Win3xBitmapHeader
     {
        uint16_t type;
@@ -351,7 +384,11 @@ RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool g
     int32_t texWidth = rsHigherPow2(hdr.width);
     int32_t texHeight = rsHigherPow2(hdr.height);
 
-    rsi_TypeBegin(rsc, rsi_ElementGetPredefined(rsc, RS_ELEMENT_RGB_565));
+    if (use32bpp) {
+        rsi_TypeBegin(rsc, rsi_ElementGetPredefined(rsc, RS_ELEMENT_RGBA_8888));
+    } else {
+        rsi_TypeBegin(rsc, rsi_ElementGetPredefined(rsc, RS_ELEMENT_RGB_565));
+    }
     rsi_TypeAdd(rsc, RS_DIMENSION_X, texWidth);
     rsi_TypeAdd(rsc, RS_DIMENSION_Y, texHeight);
     if (genMips) {
@@ -372,14 +409,29 @@ RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool g
     Adapter2D adapt(texAlloc);
     uint8_t * fileInBuf = new uint8_t[texWidth * 3];
     uint32_t yOffset = (hdr.width - hdr.height) / 2;
-    uint16_t *tmp = static_cast<uint16_t *>(adapt.getElement(0, yOffset));
 
-    for (int y=0; y < hdr.height; y++) {
-        fseek(f, hdr.offset + (y*hdr.width*3), SEEK_SET);
-        fread(fileInBuf, 1, hdr.width * 3, f);
-        for(int x=0; x < hdr.width; x++) {
-            *tmp = rs888to565(fileInBuf[x*3], fileInBuf[x*3 + 1], fileInBuf[x*3 + 2]);
-            tmp++;
+    if (use32bpp) {
+        uint8_t *tmp = static_cast<uint8_t *>(adapt.getElement(0, yOffset));
+        for (int y=0; y < hdr.height; y++) {
+            fseek(f, hdr.offset + (y*hdr.width*3), SEEK_SET);
+            fread(fileInBuf, 1, hdr.width * 3, f);
+            for(int x=0; x < hdr.width; x++) {
+                tmp[0] = fileInBuf[x*3 + 2];
+                tmp[1] = fileInBuf[x*3 + 1];
+                tmp[2] = fileInBuf[x*3];
+                tmp[3] = 0xff;
+                tmp += 4;
+            }
+        }
+    } else {
+        uint16_t *tmp = static_cast<uint16_t *>(adapt.getElement(0, yOffset));
+        for (int y=0; y < hdr.height; y++) {
+            fseek(f, hdr.offset + (y*hdr.width*3), SEEK_SET);
+            fread(fileInBuf, 1, hdr.width * 3, f);
+            for(int x=0; x < hdr.width; x++) {
+                *tmp = rs888to565(fileInBuf[x*3 + 2], fileInBuf[x*3 + 1], fileInBuf[x*3]);
+                tmp++;
+            }
         }
     }
 
@@ -391,7 +443,11 @@ RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool g
         for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
             adapt.setLOD(lod);
             adapt2.setLOD(lod + 1);
-            mip(adapt2, adapt);
+            if (use32bpp) {
+                mip8888(adapt2, adapt);
+            } else {
+                mip565(adapt2, adapt);
+            }
         }
     }
 
