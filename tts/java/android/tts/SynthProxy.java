@@ -120,7 +120,7 @@ public class SynthProxy {
     }
 
     static {
-        System.loadLibrary("synthproxy");
+        System.loadLibrary("ttssynthproxy");
     }
 
     private final static String TAG = "SynthProxy";
