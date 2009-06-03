@@ -164,6 +164,7 @@ void DisplayHardware::init(uint32_t dpy)
             eglGetConfigAttrib(display, configs[i], EGL_ALPHA_SIZE, &a);
             if (fbSzA == a && fbSzR == r && fbSzG == g && fbSzB  == b) {
                 config = configs[i];
+                break;
             }
         }
     }
