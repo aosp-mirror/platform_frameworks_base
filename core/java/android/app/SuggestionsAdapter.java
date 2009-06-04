@@ -149,6 +149,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      * @param cursor The cursor to call.
      */
     private void callCursorPreClose(Cursor cursor) {
+        if (!mGlobalSearchMode) return;
         final Bundle request = new Bundle();
         request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.PRE_CLOSE);
         request.putInt(DialogCursorProtocol.PRE_CLOSE_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
@@ -178,6 +179,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      * @param cursor The cursor to call.
      */
     private void callCursorPostRefresh(Cursor cursor) {
+        if (!mGlobalSearchMode) return;
         final Bundle request = new Bundle();
         request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.POST_REFRESH);
         final Bundle response = cursor.respond(request);
@@ -197,6 +199,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      * @param position The position that was clicked.
      */
     void callCursorOnClick(Cursor cursor, int position) {
+        if (!mGlobalSearchMode) return;
         final Bundle request = new Bundle(1);
         request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.CLICK);
         request.putInt(DialogCursorProtocol.CLICK_SEND_POSITION, position);
@@ -244,7 +247,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
 
         // if the cursor wishes to be notified about this position, send it
-        if (mDisplayNotifyPos != NONE && pos == mDisplayNotifyPos) {
+        if (mGlobalSearchMode && mDisplayNotifyPos != NONE && pos == mDisplayNotifyPos) {
             final Bundle request = new Bundle();
             request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.THRESH_HIT);
             mCursor.respond(request);
