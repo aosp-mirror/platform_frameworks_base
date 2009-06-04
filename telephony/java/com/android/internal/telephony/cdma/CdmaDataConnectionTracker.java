@@ -263,14 +263,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
-     * Simply tear down data connections due to radio off
-     * and don't setup again.
-     */
-    public void cleanConnectionBeforeRadioOff() {
-        cleanUpConnection(true, Phone.REASON_RADIO_TURNED_OFF);
-    }
-
-    /**
      * The data connection is expected to be setup while device
      *  1. has ruim card or non-volatile data store
      *  2. registered to data connection service
@@ -819,6 +811,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED);
         }
+    }
+
+    /**
+     * @override com.android.internal.telephony.DataConnectionTracker
+     */
+    protected void onCleanUpConnection(boolean tearDown, String reason) {
+        cleanUpConnection(tearDown, reason);
     }
 
     private boolean tryAgain(FailCause cause) {
