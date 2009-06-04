@@ -721,7 +721,7 @@ public final class ContactsContract {
          * The content:// style URI for this table
          */
         public static final Uri CONTENT_URI =
-                Uri.withAppendedPath(AUTHORITY_URI, "aggregation_exception");
+                Uri.withAppendedPath(AUTHORITY_URI, "aggregation_exceptions");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of data.
