@@ -40,7 +40,7 @@ import java.util.HashMap;
 public final class SearchableInfo implements Parcelable {
 
     // general debugging support
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String LOG_TAG = "SearchableInfo";
 
     // static strings used for XML lookups.
