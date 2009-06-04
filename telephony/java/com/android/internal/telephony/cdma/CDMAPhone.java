@@ -38,6 +38,7 @@ import static com.android.internal.telephony.TelephonyProperties.PROPERTY_BASEBA
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_INECM_MODE;
 
 import com.android.internal.telephony.CallStateException;
+import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DataConnection;
@@ -525,8 +526,20 @@ public class CDMAPhone extends PhoneBase {
 
     public void
     getNeighboringCids(Message response) {
-        // WINK:TODO: implement after Cupcake merge
-        mCM.getNeighboringCids(response); // workaround.
+        /*
+         * This is currently not implemented.  At least as of June
+         * 2009, there is no neighbor cell information available for
+         * CDMA because some party is resisting making this
+         * information readily available.  Consequently, calling this
+         * function can have no useful effect.  This situation may
+         * (and hopefully will) change in the future.
+         */
+        if (response != null) {
+            CommandException ce = new CommandException(
+                    CommandException.Error.REQUEST_NOT_SUPPORTED);
+            AsyncResult.forMessage(response).exception = ce;
+            response.sendToTarget();
+        }
     }
 
     public DataState getDataConnectionState() {
