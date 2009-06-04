@@ -1167,38 +1167,50 @@ public class SearchManager
      */
     public final static String EXTRA_DATA_KEY = "intent_extra_data_key";
 
-
     /**
-     * Used by the search dialog to ask the global search provider whether there are any pending
-     * sources that have yet to respond.  Specifically, the search dialog will call
-     * {@link Cursor#respond} with a bundle containing this extra as a key, and expect the same key
-     * to be in the response, with a boolean value indicating whether there are pending sources.
+     * Defines the constants used in the communication between {@link android.app.SearchDialog} and
+     * the global search provider via {@link Cursor#respond(android.os.Bundle)}.
      *
-     * {@hide}
+     * @hide
      */
-    public final static String RESPOND_EXTRA_PENDING_SOURCES = "respond_extra_pending_sources";
+    public static class DialogCursorProtocol {
 
-    /**
-     * Used by the search dialog to tell the cursor that supplied suggestions which item was clicked
-     * before launching the intent.  The search dialog will call {@link Cursor#respond} with a
-     * bundle containing this extra as a key and the position that was clicked as the value.
-     *
-     * The response bundle will use {@link #RESPOND_EXTRA_POSITION_SELECTED} to return an int value
-     * of the index that should be selected, if applicable.
-     *
-     * {@hide}
-     */
-    public final static String RESPOND_EXTRA_POSITION_CLICKED = "respond_extra_position_clicked";
+        /**
+         * The sent bundle will contain this integer key, with a value set to one of the events
+         * below.
+         */
+        public final static String METHOD = "DialogCursorProtocol.method";
 
-    /**
-     * Used as a key in the response bundle from a call to {@link Cursor#respond} that sends the
-     * position that is clicked.
-     *
-     * @see #RESPOND_EXTRA_POSITION_CLICKED
-     *
-     * {@hide}
-     */
-    public final static String RESPOND_EXTRA_POSITION_SELECTED = "respond_extra_position_selected";
+        /**
+         * After data has been refreshed.
+         */
+        public final static int POST_REFRESH = 0;
+        public final static String POST_REFRESH_RECEIVE_ISPENDING
+                = "DialogCursorProtocol.POST_REFRESH.isPending";
+        public final static String POST_REFRESH_RECEIVE_DISPLAY_NOTIFY
+                = "DialogCursorProtocol.POST_REFRESH.displayNotify";
+
+        /**
+         * Just before closing the cursor.
+         */
+        public final static int PRE_CLOSE = 1;
+        public final static String PRE_CLOSE_SEND_MAX_DISPLAY_POS
+                = "DialogCursorProtocol.PRE_CLOSE.sendDisplayPosition";
+
+        /**
+         * When a position has been clicked.
+         */
+        public final static int CLICK = 2;
+        public final static String CLICK_SEND_POSITION
+                = "DialogCursorProtocol.CLICK.sendPosition";
+        public final static String CLICK_RECEIVE_SELECTED_POS
+                = "DialogCursorProtocol.CLICK.receiveSelectedPosition";
+
+        /**
+         * When the threshold received in {@link #POST_REFRESH_RECEIVE_DISPLAY_NOTIFY} is displayed.
+         */
+        public final static int THRESH_HIT = 3;
+    }
 
     /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and

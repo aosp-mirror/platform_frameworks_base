@@ -33,6 +33,8 @@ import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
+import static android.app.SearchManager.DialogCursorProtocol;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,15 +46,7 @@ import java.util.WeakHashMap;
  * @hide
  */
 class SuggestionsAdapter extends ResourceCursorAdapter {
-    // The value used to query a cursor whether it is still expecting more input,
-    // so we can correctly display (or not display) the 'working' spinner in the search dialog.
-    public static final String IS_WORKING = "isWorking";
-    
-    // The value used to tell a cursor to display the corpus selectors, if this is global
-    // search. Also returns the index of the more results item to allow the SearchDialog
-    // to tell the ListView to scroll to that list item.
-    public static final String SHOW_CORPUS_SELECTORS = "showCorpusSelectors";
-    
+
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
     
@@ -73,10 +67,16 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     // a particular list item should be selected upon the next call to notifyDataSetChanged.
     // This is used to indicate the index of the "More results..." list item so that when
     // the data set changes after a click of "More results...", we can correctly tell the
-    // ListView to scroll to the right line item. It gets reset to NO_ITEM_TO_SELECT every time it
+    // ListView to scroll to the right line item. It gets reset to NONE every time it
     // is consumed.
-    private int mListItemToSelect = NO_ITEM_TO_SELECT;
-    static final int NO_ITEM_TO_SELECT = -1;
+    private int mListItemToSelect = NONE;
+    static final int NONE = -1;
+
+    // holds the maximum position that has been displayed to the user
+    int mMaxDisplayed = NONE;
+
+    // holds the position that, when displayed, should result in notifying the cursor
+    int mDisplayNotifyPos = NONE;
 
     public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
             WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
@@ -127,6 +127,11 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     @Override
     public void changeCursor(Cursor c) {
         if (DBG) Log.d(LOG_TAG, "changeCursor(" + c + ")");
+
+        if (mCursor != null) {
+            callCursorPreClose(mCursor);
+        }
+
         super.changeCursor(c);
         if (c != null) {
             mFormatCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
@@ -135,39 +140,69 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
             mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
         }
-        updateWorking();
     }
-        
+
+    /**
+     * Handle sending and receiving information associated with
+     * {@link DialogCursorProtocol#PRE_CLOSE}.
+     *
+     * @param cursor The cursor to call.
+     */
+    private void callCursorPreClose(Cursor cursor) {
+        final Bundle request = new Bundle();
+        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.PRE_CLOSE);
+        request.putInt(DialogCursorProtocol.PRE_CLOSE_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
+        final Bundle response = cursor.respond(request);
+
+        mMaxDisplayed = -1;
+    }
+
     @Override
     public void notifyDataSetChanged() {
+        if (DBG) Log.d(LOG_TAG, "notifyDataSetChanged");
         super.notifyDataSetChanged();
-        updateWorking();
-        if (mListItemToSelect != NO_ITEM_TO_SELECT) {
+
+        callCursorPostRefresh(mCursor);
+
+        // look out for the pending item we are supposed to scroll to
+        if (mListItemToSelect != NONE) {
             mSearchDialog.setListSelection(mListItemToSelect);
-            mListItemToSelect = NO_ITEM_TO_SELECT;
+            mListItemToSelect = NONE;
         }
     }
-    
-    /**
-     * Specifies the list item to select upon next call of {@link #notifyDataSetChanged()},
-     * in order to let us scroll the "More results..." list item to the top of the screen
-     * (or as close as it can get) when clicked.
-     */
-    public void setListItemToSelect(int index) {
-        mListItemToSelect = index;
-    }
-    
-    /**
-     * Updates the search dialog according to the current working status of the cursor.
-     */
-    private void updateWorking() {
-        if (!mGlobalSearchMode || mCursor == null) return;
-        
-        Bundle request = new Bundle();
-        request.putString(SearchManager.RESPOND_EXTRA_PENDING_SOURCES, "DUMMY");
-        Bundle response = mCursor.respond(request);
 
-        mSearchDialog.setWorking(response.getBoolean(SearchManager.RESPOND_EXTRA_PENDING_SOURCES));
+    /**
+     * Handle sending and receiving information associated with
+     * {@link DialogCursorProtocol#POST_REFRESH}.
+     * 
+     * @param cursor The cursor to call.
+     */
+    private void callCursorPostRefresh(Cursor cursor) {
+        final Bundle request = new Bundle();
+        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.POST_REFRESH);
+        final Bundle response = cursor.respond(request);
+
+        mSearchDialog.setWorking(
+                response.getBoolean(DialogCursorProtocol.POST_REFRESH_RECEIVE_ISPENDING, false));
+
+        mDisplayNotifyPos =
+                response.getInt(DialogCursorProtocol.POST_REFRESH_RECEIVE_DISPLAY_NOTIFY, -1);
+    }
+
+    /**
+     * Tell the cursor which position was clicked, handling sending and receiving information
+     * associated with {@link DialogCursorProtocol#CLICK}.
+     *
+     * @param cursor The cursor
+     * @param position The position that was clicked.
+     */
+    void callCursorOnClick(Cursor cursor, int position) {
+        final Bundle request = new Bundle(1);
+        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.CLICK);
+        request.putInt(DialogCursorProtocol.CLICK_SEND_POSITION, position);
+        final Bundle response = cursor.respond(request);
+        mListItemToSelect = response.getInt(
+                DialogCursorProtocol.CLICK_RECEIVE_SELECTED_POS, SuggestionsAdapter.NONE);
     }
 
     /**
@@ -179,7 +214,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         v.setTag(new ChildViewCache(v));
         return v;
     }
-    
+
     /**
      * Cache of the child views of drop-drown list items, to avoid looking up the children
      * each time the contents of a list item are changed.
@@ -201,11 +236,22 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ChildViewCache views = (ChildViewCache) view.getTag();
-        boolean isHtml = false;
-        if (mFormatCol >= 0) {
-            String format = cursor.getString(mFormatCol);
-            isHtml = "html".equals(format);    
+        final int pos = cursor.getPosition();
+
+        // update the maximum position displayed since last refresh
+        if (pos > mMaxDisplayed) {
+            mMaxDisplayed = pos;
         }
+
+        // if the cursor wishes to be notified about this position, send it
+        if (mDisplayNotifyPos != NONE && pos == mDisplayNotifyPos) {
+            final Bundle request = new Bundle();
+            request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.THRESH_HIT);
+            mCursor.respond(request);
+            mDisplayNotifyPos = NONE;  // only notify the first time
+        }
+
+        final boolean isHtml = mFormatCol > 0 && "html".equals(cursor.getString(mFormatCol));
         setViewText(cursor, views.mText1, mText1Col, isHtml);
         setViewText(cursor, views.mText2, mText2Col, isHtml);
         setViewIcon(cursor, views.mIcon1, mIconName1Col);
@@ -400,7 +446,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     public static String getColumnString(Cursor cursor, String columnName) {
         int col = cursor.getColumnIndex(columnName);
-        if (col == NO_ITEM_TO_SELECT) {
+        if (col == NONE) {
             return null;
         }
         return cursor.getString(col);
