@@ -384,7 +384,7 @@ void egl_window_surface_v2_t::connect()
 
 void egl_window_surface_v2_t::disconnect() 
 {
-    if (buffer) {
+    if (buffer && bits) {
         bits = NULL;
         unlock(buffer);
     }
@@ -1681,10 +1681,12 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
                 egl_surface_t* d = (egl_surface_t*)c->draw;
                 egl_surface_t* r = (egl_surface_t*)c->read;
                 if (d) {
+                    c->draw = 0;
                     d->ctx = EGL_NO_CONTEXT;
                     d->disconnect();
                 }
                 if (r) {
+                    c->read = 0;
                     r->ctx = EGL_NO_CONTEXT;
                     // FIXME: unlock/disconnect the read surface too 
                 }
