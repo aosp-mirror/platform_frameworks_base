@@ -290,6 +290,19 @@ public final class ContactsContract {
          */
         public static final String CONTACT_ID = "contact_id";
 
+        /**
+         * Whether this is the primary entry of its kind for the contact it belongs to
+         * <P>Type: INTEGER (if set, non-0 means true)</P>
+         */
+        public static final String IS_PRIMARY = "is_primary";
+
+        /**
+         * Whether this is the primary entry of its kind for the aggregate it belongs to. Any data
+         * record that is "super primary" must also be "primary".
+         * <P>Type: INTEGER (if set, non-0 means true)</P>
+         */
+        public static final String IS_SUPER_PRIMARY = "is_super_primary";
+
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
         public static final String DATA1 = "data1";
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
@@ -409,12 +422,6 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String LABEL = "data3";
-
-            /**
-             * Whether this is the primary entry of its kind for the contact it belongs to
-             * <P>Type: INTEGER (if set, non-0 means true)</P>
-             */
-            public static final String ISPRIMARY = "data4";
         }
 
         /**
@@ -642,12 +649,6 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String TITLE = "data4";
-
-            /**
-             * Whether this is the primary organization
-             * <P>Type: INTEGER (if set, non-0 means true)</P>
-             */
-            public static final String ISPRIMARY = "data5";
         }
 
         /**
