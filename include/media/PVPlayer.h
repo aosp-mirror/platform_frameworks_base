@@ -62,6 +62,7 @@ private:
     static void         run_set_video_surface(status_t s, void *cookie, bool cancelled);
     static void         run_set_audio_output(status_t s, void *cookie, bool cancelled);
     static void         run_prepare(status_t s, void *cookie, bool cancelled);
+    static void         check_for_live_streaming(status_t s, void *cookie, bool cancelled);
 
     PlayerDriver*               mPlayerDriver;
     char *                      mDataSourcePath;
