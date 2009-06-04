@@ -179,7 +179,20 @@ Context::Context(Device *dev, Surface *sur)
     gCon = this;
 
     LOGE("CC 2");
-    int status = pthread_create(&mThreadId, NULL, threadProc, this);
+    int status;
+    pthread_attr_t threadAttr;
+
+    status = pthread_attr_init(&threadAttr);
+    if (status) {
+        LOGE("Failed to init thread attribute.");
+        return;
+    }
+
+    sched_param sparam;
+    sparam.sched_priority = ANDROID_PRIORITY_DISPLAY;
+    pthread_attr_setschedparam(&threadAttr, &sparam);
+
+    status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
     if (status) {
         LOGE("Failed to start rs context thread.");
     }
@@ -191,8 +204,7 @@ Context::Context(Device *dev, Surface *sur)
     }
     LOGE("CC 4");
 
-
-
+    pthread_attr_destroy(&threadAttr);
 }
 
 Context::~Context()
