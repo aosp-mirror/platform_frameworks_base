@@ -16,7 +16,7 @@
 
 #define LOG_TAG "backup_data"
 
-#include <utils/backup_helpers.h>
+#include <utils/BackupHelpers.h>
 #include <utils/ByteOrder.h>
 
 #include <stdio.h>
