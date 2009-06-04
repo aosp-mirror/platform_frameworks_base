@@ -104,7 +104,7 @@ Loader::Loader()
             int dpy;
             int impl;
             if (sscanf(line, "%u %u %s", &dpy, &impl, tag) == 3) {
-                LOGD(">>> %u %u %s", dpy, impl, tag);
+                //LOGD(">>> %u %u %s", dpy, impl, tag);
                 gConfig.add( entry_t(dpy, impl, tag) );
             }
         }
