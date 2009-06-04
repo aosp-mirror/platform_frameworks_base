@@ -165,7 +165,7 @@ void* Loader::open(EGLNativeDisplayType display, int impl, gl_hooks_t* hooks)
     }
 
     LOG_FATAL_IF(!index && !impl && !hnd, 
-            "couldn't't find the default OpenGL ES implementation "
+            "couldn't find the default OpenGL ES implementation "
             "for default display");
     
     return (void*)hnd;
@@ -226,9 +226,7 @@ void *Loader::load_driver(const char* driver, gl_hooks_t* hooks, uint32_t mask)
 {
     //LOGD("%s", driver);
     void* dso = dlopen(driver, RTLD_NOW | RTLD_LOCAL);
-    LOGE_IF(!dso,
-            "couldn't load <%s> library (%s)",
-            driver, dlerror());
+    LOGE_IF(!dso, "%s", dlerror());
     if (dso == 0)
         return 0;
 

@@ -20,8 +20,8 @@ LOCAL_MODULE:= libEGL
 ifeq ($(TARGET_SIMULATOR),true)
 else
     LOCAL_SHARED_LIBRARIES += libdl
-    # we need to access the Bionic private header <bionic_tls.h>
-    LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
+    # we need to access the private Bionic header <bionic_tls.h>
+    LOCAL_C_INCLUDES += bionic/libc/private
 endif
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libEGL\"
@@ -66,8 +66,8 @@ LOCAL_MODULE:= libGLESv1_CM
 ifeq ($(TARGET_SIMULATOR),true)
 else
     LOCAL_SHARED_LIBRARIES += libdl
-    # we need to access the Bionic private header <bionic_tls.h>
-    LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
+    # we need to access the private Bionic header <bionic_tls.h>
+    LOCAL_C_INCLUDES += bionic/libc/private
 endif
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libGLESv1\"
@@ -95,8 +95,8 @@ LOCAL_MODULE:= libGLESv2
 ifeq ($(TARGET_SIMULATOR),true)
 else
     LOCAL_SHARED_LIBRARIES += libdl
-    # we need to access the Bionic private header <bionic_tls.h>
-    LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
+    # we need to access the private Bionic header <bionic_tls.h>
+    LOCAL_C_INCLUDES += bionic/libc/private
 endif
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libGLESv2\"

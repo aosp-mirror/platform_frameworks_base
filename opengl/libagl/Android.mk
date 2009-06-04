@@ -32,12 +32,13 @@ endif
 
 ifneq ($(TARGET_SIMULATOR),true)
     # we need to access the private Bionic header <bionic_tls.h>
-    LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
+    LOCAL_C_INCLUDES += bionic/libc/private
 endif
 
 ifeq ($(LIBAGL_USE_GRALLOC_COPYBITS),1)
-    LOCAL_CFLAGS += -DLIBAGL_USE_GRALLOC_COPYBITS -I$(LOCAL_PATH)/../../../../hardware/libhardware/modules/gralloc
+    LOCAL_CFLAGS += -DLIBAGL_USE_GRALLOC_COPYBITS
     LOCAL_SRC_FILES += copybit.cpp
+    LOCAL_C_INCLUDES += hardware/libhardware/modules/gralloc
 endif
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libagl\"
