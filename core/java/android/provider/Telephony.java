@@ -146,7 +146,13 @@ public final class Telephony {
          * <P>Type: TEXT</P>
          */
         public static final String SERVICE_CENTER = "service_center";
-    }
+
+        /**
+         * Has the message been locked?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String LOCKED = "locked";
+}
 
     /**
      * Contains all text based SMS messages.
@@ -1008,6 +1014,12 @@ public final class Telephony {
          * <P>Type: INTEGER</P>
          */
         public static final String THREAD_ID = "thread_id";
+
+        /**
+         * Has the message been locked?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String LOCKED = "locked";
     }
 
     /**
