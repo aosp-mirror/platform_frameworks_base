@@ -1561,14 +1561,6 @@ final class WebViewCore {
         contentDraw();
     }
 
-    // called by JNI
-    private void sendRecomputeFocus() {
-        if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.RECOMPUTE_FOCUS_MSG_ID).sendToTarget();
-        }
-    }
-
     /*  Called by JNI. The coordinates are in doc coordinates, so they need to
         be scaled before they can be used by the view system, which happens
         in WebView since it (and its thread) know the current scale factor.

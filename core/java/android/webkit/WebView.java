@@ -447,7 +447,6 @@ public class WebView extends AbsoluteLayout
     static final int WEBCORE_INITIALIZED_MSG_ID         = 16;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
     static final int DID_FIRST_LAYOUT_MSG_ID            = 18;
-    static final int RECOMPUTE_FOCUS_MSG_ID             = 19;
 
     static final int MARK_NODE_INVALID_ID               = 21;
     static final int UPDATE_CLIPBOARD                   = 22;
@@ -476,7 +475,7 @@ public class WebView extends AbsoluteLayout
         "WEBCORE_INITIALIZED_MSG_ID", //     = 16;
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 17;
         "DID_FIRST_LAYOUT_MSG_ID", //        = 18;
-        "RECOMPUTE_FOCUS_MSG_ID", //         = 19;
+        "19",
         "20",
         "MARK_NODE_INVALID_ID", //           = 21;
         "UPDATE_CLIPBOARD", //               = 22;
@@ -2400,7 +2399,6 @@ public class WebView extends AbsoluteLayout
         if (mTouchMode >= FIRST_SCROLL_ZOOM && mTouchMode <= LAST_SCROLL_ZOOM) {
             scrollZoomDraw(canvas);
         } else {
-            nativeRecomputeFocus();
             // Update the buttons in the picture, so when we draw the picture
             // to the screen, they are in the correct state.
             // Tell the native side if user is a) touching the screen,
@@ -3211,8 +3209,13 @@ public class WebView extends AbsoluteLayout
             }
         }
 
+        if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
+            mWebViewCore.sendMessage(EventHub.CLICK);
+        }
+
         // TODO: should we pass all the keys to DOM or check the meta tag
         if (nativeCursorWantsKeyEvents() || true) {
+            mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 1);
             // pass the key to DOM
             mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
             // return true as DOM handles the key
@@ -3443,9 +3446,10 @@ public class WebView extends AbsoluteLayout
      * FocusController is "active" so that it will draw the blinking cursor.
      */
     private void setFocusControllerActive(boolean active) {
-        if (mWebViewCore != null) {
-            mWebViewCore.sendMessage(EventHub.SET_ACTIVE, active ? 1 : 0, 0);
-        }
+        if (mWebViewCore == null) return;
+        active &= nativeCursorMatchesFocus() || !nativeHasFocusNode()
+                || !nativeCursorWantsKeyEvents();
+        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, active ? 1 : 0, 0);
     }
 
     @Override
@@ -4771,11 +4775,6 @@ public class WebView extends AbsoluteLayout
                     }
                     rebuildWebTextView();
                     break;
-                case RECOMPUTE_FOCUS_MSG_ID:
-                    if (mNativeClass != 0) {
-                        nativeRecomputeFocus();
-                    }
-                    break;
                 case INVAL_RECT_MSG_ID: {
                     Rect r = (Rect)msg.obj;
                     if (r == null) {
@@ -5099,6 +5098,9 @@ public class WebView extends AbsoluteLayout
 
     // called by JNI
     private void sendMoveMouseIfLatest() {
+        if (!nativeCursorMatchesFocus() && nativeCursorWantsKeyEvents()) {
+            setFocusControllerActive(false);
+        }
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST, cursorData());
     }
 
@@ -5281,7 +5283,6 @@ public class WebView extends AbsoluteLayout
     private native int      nativeMoveGeneration();
     private native void     nativeMoveSelection(int x, int y,
             boolean extendSelection);
-    private native void     nativeRecomputeFocus();
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
     private native void     nativeRecordButtons(boolean focused,
