@@ -125,8 +125,6 @@ public class BitmapFactory {
          * false, then this field is ignored. If inPurgeable is true, then this
          * field determines whether the bitmap can share a reference to the
          * input data (inputstream, array, etc.) or if it must make a deep copy.
-         *
-         * @hide pending API council approval
          */
         public boolean inInputShareable;
 
