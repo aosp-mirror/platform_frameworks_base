@@ -27,14 +27,18 @@
 #include <unistd.h>
 
 #include <string.h>
+
 #include <cutils/atomic.h>
+#include <cutils/properties.h>
+
+#include <utils/misc.h>
 
 #include <android_runtime/ActivityManager.h>
+
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
-#include <cutils/properties.h>
 
 #include <media/MediaPlayerInterface.h>
 #include <media/mediarecorder.h>
