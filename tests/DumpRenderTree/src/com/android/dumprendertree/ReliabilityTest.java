@@ -55,6 +55,9 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
         //read from BufferedReader instead of populating a list in advance,
         //this will avoid excessive memory usage in case of a large list
         while((url = listReader.readLine()) != null) {
+            url = url.trim();
+            if(url.length() == 0)
+                continue;
             start = System.currentTimeMillis();
             Log.v(LOGTAG, "Testing URL: " + url);
             updateTestStatus(url);
