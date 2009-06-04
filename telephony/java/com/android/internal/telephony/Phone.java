@@ -229,7 +229,7 @@ public interface Phone {
     /**
      * Get the current DataState. No change notification exists at this
      * interface -- use
-     * {@link com.android.internal.telephony.PhoneStateIntentReceiver PhoneStateIntentReceiver}
+     * {@link com.android.telephony.PhoneStateListener PhoneStateListener}
      * instead.
      */
     DataState getDataConnectionState();
