@@ -197,51 +197,11 @@ class BackupManagerService extends IBackupManager.Stub {
                     // WARNING: If we crash after this line, anything in mPendingBackups will
                     // be lost.  FIX THIS.
                 }
-                //startOneAgent();
                 (new PerformBackupThread(mTransportId, mBackupQueue)).run();
                 break;
 
             case MSG_RUN_FULL_BACKUP:
                 break;
-            }
-        }
-    }
-
-    void startOneAgent() {
-        // Loop until we find someone to start or the queue empties out.
-        while (true) {
-            BackupRequest request;
-            synchronized (mQueueLock) {
-                int queueSize = mBackupQueue.size();
-                Log.d(TAG, "mBackupQueue.size=" + queueSize);
-                if (queueSize == 0) {
-                    mBackupQueue = null;
-                    // if there are pending backups, start those after a short delay
-                    if (mPendingBackups.size() > 0) {
-                        mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, COLLECTION_INTERVAL);
-                    }
-                    return;
-                }
-                request = mBackupQueue.get(0);
-                // Take it off the queue when we're done.
-            }
-            
-            Log.d(TAG, "starting agent for " + request);
-            // !!! TODO: need to handle the restore case?
-            int mode = (request.fullBackup)
-                    ? IApplicationThread.BACKUP_MODE_FULL
-                    : IApplicationThread.BACKUP_MODE_INCREMENTAL;
-            try {
-                if (mActivityManager.bindBackupAgent(request.appInfo, mode)) {
-                    Log.d(TAG, "awaiting agent for " + request);
-                    // success
-                    return;
-                }
-            } catch (RemoteException e) {
-                // can't happen; activity manager is local
-            } catch (SecurityException ex) {
-                // Try for the next one.
-                Log.d(TAG, "error in bind", ex);
             }
         }
     }
@@ -290,6 +250,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
             // Now propagate the newly-backed-up data to the transport
             if (success) {
+                if (DEBUG) Log.v(TAG, "doBackup() success; calling transport");
                 backupData =
                     ParcelFileDescriptor.open(backupDataName, ParcelFileDescriptor.MODE_READ_ONLY);
                 int error = transport.performBackup(packageName, backupData);
