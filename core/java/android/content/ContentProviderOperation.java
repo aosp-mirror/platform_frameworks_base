@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.database.Cursor;
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Debug;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -428,7 +429,8 @@ public class ContentProviderOperation implements Parcelable {
 
         /**
          * The ContentValues to use. This may be null. These values may be overwritten by
-         * the corresponding value specified by {@link #withValueBackReferences(ContentValues)}.
+         * the corresponding value specified by {@link #withValueBackReference} or by
+         * future calls to {@link #withValues} or {@link #withValue}.
          * This can only be used with builders of type insert or update.
          * @return this builder, to allow for chaining.
          */
@@ -436,10 +438,55 @@ public class ContentProviderOperation implements Parcelable {
             if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
                 throw new IllegalArgumentException("only inserts and updates can have values");
             }
-            mValues = values;
+            if (mValues == null) {
+                mValues = new ContentValues();
+            }
+            mValues.putAll(values);
             return this;
         }
 
+        /**
+         * A value to insert or update. This value may be overwritten by
+         * the corresponding value specified by {@link #withValueBackReference}.
+         * This can only be used with builders of type insert or update.
+         * @param key the name of this value
+         * @param value the value itself. the type must be acceptable for insertion by
+         * {@link ContentValues#put}
+         * @return this builder, to allow for chaining.
+         */
+        public Builder withValue(String key, Object value) {
+            if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
+                throw new IllegalArgumentException("only inserts and updates can have values");
+            }
+            if (mValues == null) {
+                mValues = new ContentValues();
+            }
+            if (value == null) {
+                mValues.putNull(key);
+            } else if (value instanceof String) {
+                mValues.put(key, (String) value);
+            } else if (value instanceof Byte) {
+                mValues.put(key, (Byte) value);
+            } else if (value instanceof Short) {
+                mValues.put(key, (Short) value);
+            } else if (value instanceof Integer) {
+                mValues.put(key, (Integer) value);
+            } else if (value instanceof Long) {
+                mValues.put(key, (Long) value);
+            } else if (value instanceof Float) {
+                mValues.put(key, (Float) value);
+            } else if (value instanceof Double) {
+                mValues.put(key, (Double) value);
+            } else if (value instanceof Boolean) {
+                mValues.put(key, (Boolean) value);
+            } else if (value instanceof byte[]) {
+                mValues.put(key, (byte[]) value);
+            } else {
+                throw new IllegalArgumentException("bad value type: " + value.getClass().getName());
+            }
+            return this;
+        }
+        
         /**
          * The selection and arguments to use. An occurrence of '?' in the selection will be
          * replaced with the corresponding occurence of the selection argument. Any of the

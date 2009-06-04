@@ -610,6 +610,31 @@ public final class ContactsContract {
             public static final int PROTOCOL_GOOGLE_TALK = 5;
             public static final int PROTOCOL_ICQ = 6;
             public static final int PROTOCOL_JABBER = 7;
+
+            public static String encodePredefinedImProtocol(int protocol) {
+               return "pre:" + protocol;
+            }
+
+            public static String encodeCustomImProtocol(String protocolString) {
+               return "custom:" + protocolString;
+            }
+
+            public static Object decodeImProtocol(String encodedString) {
+               if (encodedString == null) {
+                   return null;
+               }
+
+               if (encodedString.startsWith("pre:")) {
+                   return Integer.parseInt(encodedString.substring(4));
+               }
+
+               if (encodedString.startsWith("custom:")) {
+                   return encodedString.substring(7);
+               }
+
+               throw new IllegalArgumentException(
+                       "the value is not a valid encoded protocol, " + encodedString);
+            }
         }
 
         /**
@@ -705,49 +730,76 @@ public final class ContactsContract {
              */
             public static final String RINGTONE_URI = "data2";
         }
-    }
-
-    /**
-     * Constants for the contact aggregation exceptions table, which contains
-     * aggregation rules overriding those used by automatic aggregation.
-     */
-    public static final class AggregationExceptions {
-        /**
-         * This utility class cannot be instantiated
-         */
-        private AggregationExceptions() {}
 
         /**
-         * The content:// style URI for this table
+         * Constants for the contact aggregation exceptions table, which contains
+         * aggregation rules overriding those used by automatic aggregation.
          */
-        public static final Uri CONTENT_URI =
-                Uri.withAppendedPath(AUTHORITY_URI, "aggregation_exceptions");
+        public static final class AggregationExceptions {
+            /**
+             * This utility class cannot be instantiated
+             */
+            private AggregationExceptions() {}
+
+            /**
+             * The content:// style URI for this table
+             */
+            public static final Uri CONTENT_URI =
+                    Uri.withAppendedPath(AUTHORITY_URI, "aggregation_exceptions");
+
+            /**
+             * The MIME type of {@link #CONTENT_URI} providing a directory of data.
+             */
+            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/aggregation_exception";
+
+            /**
+             * The type of exception: {@link #TYPE_NEVER_MATCH} or {@link #TYPE_ALWAYS_MATCH}.
+             *
+             * <P>Type: INTEGER</P>
+             */
+            public static final String TYPE = "type";
+
+            public static final int TYPE_NEVER_MATCH = 0;
+            public static final int TYPE_ALWAYS_MATCH = 1;
+
+            /**
+             * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of one of
+             * the contacts that the rule applies to.
+             */
+            public static final String CONTACT_ID1 = "contact_id1";
+
+            /**
+             * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the other
+             * contact that the rule applies to.
+             */
+            public static final String CONTACT_ID2 = "contact_id2";
+        }
 
         /**
-         * The MIME type of {@link #CONTENT_URI} providing a directory of data.
+         * Group Membership.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/aggregation_exception";
+        public static final class GroupMembership implements BaseCommonColumns {
+            private GroupMembership() {}
 
-        /**
-         * The type of exception: {@link #TYPE_NEVER_MATCH} or {@link #TYPE_ALWAYS_MATCH}.
-         *
-         * <P>Type: INTEGER</P>
-         */
-        public static final String TYPE = "type";
+            /** Mime-type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE =
+                    "vnd.android.cursor.item/group_membership";
 
-        public static final int TYPE_NEVER_MATCH = 0;
-        public static final int TYPE_ALWAYS_MATCH = 1;
+            /**
+             * The row id of the group that this group membership refers to. Either this or the
+             * GROUP_SOURCE_ID must be set. If they are both set then they must refer to the same
+             * group.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String GROUP_ROW_ID = "data1";
 
-        /**
-         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of one of
-         * the contacts that the rule applies to.
-         */
-        public static final String CONTACT_ID1 = "contact_id1";
-
-        /**
-         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the other
-         * contact that the rule applies to.
-         */
-        public static final String CONTACT_ID2 = "contact_id2";
+            /**
+             * The source id of the group that this membership refers to. Either this or the
+             * GROUP_ROW_ID must be set. If they are both set then they must refer to the same
+             * group.
+             * <P>Type: STRING</P>
+             */
+            public static final String GROUP_SOURCE_ID = "data2";
+        }
     }
 }
