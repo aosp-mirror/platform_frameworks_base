@@ -449,7 +449,10 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                         (dcTracker.getAnyDataEnabled() ? 1 : 0) );
                 EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF, val);
             }
-            dcTracker.cleanConnectionBeforeRadioOff();
+            Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
+            msg.arg1 = 1; // tearDown is true
+            msg.obj = CDMAPhone.REASON_RADIO_TURNED_OFF;
+            sendMessage(msg);
 
             // Poll data state up to 15 times, with a 100ms delay
             // totaling 1.5 sec. Normal data disable action will finish in 100ms.
@@ -679,7 +682,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                         newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_OFF);
                 } else {
                     // System is acquired, prl match, no nam match  or mRoamingIndicator > 2
-                    newSS.setCdmaRoamingIndicator(mRoamingIndicator);                    
+                    newSS.setCdmaRoamingIndicator(mRoamingIndicator);
                 }
             } else {
                 if (mRegistrationState == 5) {
@@ -688,8 +691,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 } else {
                     // Use the default indicator
                 }
-            }            
-            
+            }
+
             newSS.setCdmaDefaultRoamingIndicator(mDefaultRoamingIndicator);
 
             // NOTE: Some operator may require to override the mCdmaRoaming (set by the modem)
