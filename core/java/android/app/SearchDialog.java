@@ -1202,16 +1202,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     protected boolean launchSuggestion(int position, int actionKey, String actionMsg) {
         Cursor c = mSuggestionsAdapter.getCursor();
         if ((c != null) && c.moveToPosition(position)) {
-            // let the cursor know which position was clicked
-            final Bundle clickResponse = new Bundle(1);
-            clickResponse.putInt(SearchManager.RESPOND_EXTRA_POSITION_CLICKED, position);
-            final Bundle response = c.respond(clickResponse);
-
-            // the convention is to send a position to select in response to a click (if applicable)
-            final int posToSelect = response.getInt(
-                    SearchManager.RESPOND_EXTRA_POSITION_SELECTED,
-                    SuggestionsAdapter.NO_ITEM_TO_SELECT);
-            mSuggestionsAdapter.setListItemToSelect(posToSelect);            
+            mSuggestionsAdapter.callCursorOnClick(c, position);
 
             // launch the intent
             Intent intent = createIntentFromSuggestion(c, actionKey, actionMsg);
