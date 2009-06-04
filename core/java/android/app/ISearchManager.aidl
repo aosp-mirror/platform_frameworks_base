@@ -23,4 +23,7 @@ import android.server.search.SearchableInfo;
 interface ISearchManager {
    SearchableInfo getSearchableInfo(in ComponentName launchActivity, boolean globalSearch);
    List<SearchableInfo> getSearchablesInGlobalSearch();
+   List<SearchableInfo> getSearchablesForWebSearch();
+   SearchableInfo getDefaultSearchableForWebSearch();
+   void setDefaultWebSearch(in ComponentName component);
 }

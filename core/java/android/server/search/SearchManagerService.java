@@ -23,12 +23,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.RemoteException;
 
 import java.util.List;
 
 /**
  * This is a simplified version of the Search Manager service.  It no longer handles
- * presentation (UI).  Its function is to maintain the map & list of "searchable" 
+ * presentation (UI).  Its function is to maintain the map & list of "searchable"
  * items, which provides a mapping from individual activities (where a user might have
  * invoked search) to specific searchable activities (where the search will be dispatched).
  */
@@ -43,19 +44,19 @@ public class SearchManagerService extends ISearchManager.Stub
     private final Handler mHandler;
     private boolean mSearchablesDirty;
     private Searchables mSearchables;
-    
+
     /**
      * Initializes the Search Manager service in the provided system context.
      * Only one instance of this object should be created!
      *
      * @param context to use for accessing DB, window manager, etc.
      */
-    public SearchManagerService(Context context)  {     
+    public SearchManagerService(Context context)  {
         mContext = context;
         mHandler = new Handler();
         mSearchablesDirty = true;
         mSearchables = new Searchables(context);
-        
+
         // Setup the infrastructure for updating and maintaining the list
         // of searchable activities.
         IntentFilter filter = new IntentFilter();
@@ -64,15 +65,15 @@ public class SearchManagerService extends ISearchManager.Stub
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
-        
+
         // After startup settles down, preload the searchables list,
         // which will reduce the delay when the search UI is invoked.
         mHandler.post(mRunUpdateSearchable);
     }
-    
+
     /**
      * Listens for intent broadcasts.
-     * 
+     *
      * The primary purpose here is to refresh the "searchables" list
      * if packages are added/removed.
      */
@@ -80,7 +81,7 @@ public class SearchManagerService extends ISearchManager.Stub
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            
+
             // First, test for intents that matter at any time
             if (action.equals(Intent.ACTION_PACKAGE_ADDED) ||
                 action.equals(Intent.ACTION_PACKAGE_REMOVED) ||
@@ -91,14 +92,14 @@ public class SearchManagerService extends ISearchManager.Stub
             }
         }
     };
-    
+
     /**
      * This runnable (for the main handler / UI thread) will update the searchables list.
      */
     private Runnable mRunUpdateSearchable = new Runnable() {
         public void run() {
             updateSearchablesIfDirty();
-        } 
+        }
     };
 
     /**
@@ -124,7 +125,7 @@ public class SearchManagerService extends ISearchManager.Stub
      *
      * @param launchActivity The activity from which we're launching this search.
      * @param globalSearch If false, this will only launch the search that has been specifically
-     * defined by the application (which is usually defined as a local search).  If no default 
+     * defined by the application (which is usually defined as a local search).  If no default
      * search is defined in the current application or activity, no search will be launched.
      * If true, this will always launch a platform-global (e.g. web-based) search instead.
      * @return Returns a SearchableInfo record describing the parameters of the search,
@@ -141,7 +142,7 @@ public class SearchManagerService extends ISearchManager.Stub
 
         return si;
     }
-    
+
     /**
      * Returns a list of the searchable activities that can be included in global search.
      */
@@ -150,4 +151,26 @@ public class SearchManagerService extends ISearchManager.Stub
         return mSearchables.getSearchablesInGlobalSearchList();
     }
 
+    /**
+     * Returns a list of the searchable activities that handle web searches.
+     */
+    public List<SearchableInfo> getSearchablesForWebSearch() {
+        updateSearchablesIfDirty();
+        return mSearchables.getSearchablesForWebSearchList();
+    }
+
+    /**
+     * Returns the default searchable activity for web searches.
+     */
+    public SearchableInfo getDefaultSearchableForWebSearch() {
+        updateSearchablesIfDirty();
+        return mSearchables.getDefaultSearchableForWebSearch();
+    }
+
+    /**
+     * Sets the default searchable activity for web searches.
+     */
+    public void setDefaultWebSearch(ComponentName component) {
+        mSearchables.setDefaultWebSearch(component);
+    }
 }
