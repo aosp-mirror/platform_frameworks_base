@@ -1415,6 +1415,16 @@ public class SearchManager
      */
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
             = "android.search.action.SEARCH_SETTINGS";
+    
+    /**
+     * Intent action for starting a web search provider's settings activity.
+     * Web search providers should handle this intent if they have provider-specific
+     * settings to implement.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_WEB_SEARCH_SETTINGS
+            = "android.search.action.WEB_SEARCH_SETTINGS";
 
     /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
