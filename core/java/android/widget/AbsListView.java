@@ -1056,11 +1056,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public Parcelable onSaveInstanceState() {
         /*
          * This doesn't really make sense as the place to dismiss the
-         * popup, but there don't seem to be any other useful hooks
+         * popups, but there don't seem to be any other useful hooks
          * that happen early enough to keep from getting complaints
          * about having leaked the window.
          */
         dismissPopup();
+        dismissGesturesPopup();
 
         Parcelable superState = super.onSaveInstanceState();
 
