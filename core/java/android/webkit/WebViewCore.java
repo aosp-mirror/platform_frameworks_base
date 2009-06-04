@@ -1230,10 +1230,13 @@ final class WebViewCore {
             Log.v(LOGTAG, "CORE key at " + System.currentTimeMillis() + ", "
                     + evt);
         }
-        if (!nativeKey(evt.getKeyCode(), evt.getUnicodeChar(),
+        int keyCode = evt.getKeyCode();
+        if (!nativeKey(keyCode, evt.getUnicodeChar(),
                 evt.getRepeatCount(), evt.isShiftPressed(), evt.isAltPressed(),
-                isDown)) {
+                isDown) && keyCode != KeyEvent.KEYCODE_ENTER) {
             // bubble up the event handling
+            // but do not bubble up the ENTER key, which would open the search
+            // bar without any text.
             mCallbackProxy.onUnhandledKeyEvent(evt);
         }
     }
