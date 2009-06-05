@@ -596,7 +596,8 @@
          {@link #AndroidManifestUsesPermission uses-permission},
          {@link #AndroidManifestUsesConfiguration uses-configuration},
          {@link #AndroidManifestApplication application},
-         {@link #AndroidManifestInstrumentation instrumentation}.  -->
+         {@link #AndroidManifestInstrumentation instrumentation},
+         {@link #AndroidManifestUsesFeature uses-feature}.  -->
     <declare-styleable name="AndroidManifest">
         <attr name="versionCode" />
         <attr name="versionName" />
@@ -763,6 +764,22 @@
         <attr name="reqHardKeyboard" />
         <attr name="reqNavigation" />
         <attr name="reqFiveWayNav" />
+    </declare-styleable>
+
+    <!-- The <code>uses-feature</code> tag specifies
+         a specific feature used by the application.
+         For example an application might specify that it requires
+         specific version of open gl. Multiple such attribute
+         values can be specified by the application.
+
+         <p>This appears as a child tag of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestUsesFeature" parent="AndroidManifest">
+        <!-- The GLES driver version number needed by an application.
+             The higher 16 bits represent the major number and the lower 16 bits
+             represent the minor number. For example for GL 1.2 referring to
+             0x00000102, the actual value should be set as 0x00010002. -->
+        <attr name="glEsVersion" format="integer"/>
     </declare-styleable>
 
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the
