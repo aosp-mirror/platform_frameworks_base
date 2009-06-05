@@ -10,8 +10,10 @@
 
 import logging
 import optparse
+import os
 import subprocess
 import sys
+import time
 
 TEST_LIST_FILE = "/sdcard/android/reliability_tests_list.txt"
 TEST_STATUS_FILE = "/sdcard/android/reliability_running_test.txt"
@@ -44,6 +46,20 @@ def RemoveDeviceFile(adb_cmd, file_name):
   subprocess.Popen(shell_cmd_str,
                    shell=True, stdout=subprocess.PIPE,
                    stderr=subprocess.PIPE).communicate()
+
+
+def Bugreport(url, bugreport_dir, adb_cmd):
+  """Pull a bugreport from the device."""
+  bugreport_filename = "%s/reliability_bugreport_%d.txt" % (bugreport_dir,
+                                                            int(time.time()))
+
+  # prepend the report with url
+  handle = open(bugreport_filename, "w")
+  handle.writelines("Bugreport for crash in url - %s\n\n" % url)
+  handle.close()
+
+  cmd = "%s bugreport >> %s" % (adb_cmd, bugreport_filename)
+  os.system(cmd)
 
 
 def main(options, args):
@@ -79,6 +95,16 @@ def main(options, args):
     manual_delay = 0
   else:
     manual_delay = options.delay
+
+  if not options.bugreport:
+    bugreport_dir = "."
+  else:
+    bugreport_dir = options.bugreport
+  if not os.path.exists(bugreport_dir):
+    os.makedirs(bugreport_dir)
+  if not os.path.isdir(bugreport_dir):
+    logging.error("Cannot create results dir: " + bugreport_dir)
+    sys.exit(1)
 
   adb_cmd = "adb "
   if options.adb_options:
@@ -128,6 +154,7 @@ def main(options, args):
                                     stdout=subprocess.PIPE).communicate()[0]
     logging.info(crashed_test + " CRASHED")
     crashed_tests.append(crashed_test)
+    Bugreport(crashed_test, bugreport_dir, adb_cmd)
     logging.info("Resuming reliability test runner...")
 
     adb_output = subprocess.Popen(test_cmd, shell=True, stdout=subprocess.PIPE,
@@ -172,9 +199,12 @@ if "__main__" == __name__:
                            help="the list of sites that cause browser to crash")
   option_parser.add_option("-f", "--timeout-file",
                            default="reliability_timedout_sites.txt",
-                           help="the list of sites that timedout during test.")
+                           help="the list of sites that timedout during test")
   option_parser.add_option("-d", "--delay",
                            default=0,
                            help="add a manual delay between pages (in ms)")
+  option_parser.add_option("-b", "--bugreport",
+                           default=".",
+                           help="the directory to store bugreport for crashes")
   opts, arguments = option_parser.parse_args()
   main(opts, arguments)
