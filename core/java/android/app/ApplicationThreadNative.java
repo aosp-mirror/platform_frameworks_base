@@ -350,6 +350,14 @@ public abstract class ApplicationThreadNative extends Binder
             scheduleCreateBackupAgent(appInfo, backupMode);
             return true;
         }
+
+        case SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(data);
+            scheduleDestroyBackupAgent(appInfo);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
