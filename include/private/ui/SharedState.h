@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <utils/Debug.h>
 #include <utils/threads.h>
 
 namespace android {
@@ -140,19 +141,11 @@ struct surface_flinger_cblk_t   // 4KB max
 
 // ---------------------------------------------------------------------------
 
-template<bool> struct CTA;
-template<> struct CTA<true> { };
+COMPILE_TIME_ASSERT(sizeof(layer_cblk_t) == 128)
+COMPILE_TIME_ASSERT(sizeof(per_client_cblk_t) <= 4096)
+COMPILE_TIME_ASSERT(sizeof(surface_flinger_cblk_t) <= 4096)
 
-// compile-time assertions. just to avoid catastrophes.
-inline void compile_time_asserts() {
-    CTA<sizeof(layer_cblk_t) == 128> sizeof__layer_cblk_t__eq_128;
-    (void)sizeof__layer_cblk_t__eq_128; // we don't want a warning
-    CTA<sizeof(per_client_cblk_t) <= 4096> sizeof__per_client_cblk_t__le_4096;
-    (void)sizeof__per_client_cblk_t__le_4096;  // we don't want a warning
-    CTA<sizeof(surface_flinger_cblk_t) <= 4096> sizeof__surface_flinger_cblk_t__le_4096;
-    (void)sizeof__surface_flinger_cblk_t__le_4096;  // we don't want a warning
-}
-
+// ---------------------------------------------------------------------------
 }; // namespace android
 
 #endif // ANDROID_UI_SHARED_STATE_H
