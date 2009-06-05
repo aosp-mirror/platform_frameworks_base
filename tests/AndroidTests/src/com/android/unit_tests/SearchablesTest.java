@@ -361,7 +361,8 @@ public class SearchablesTest extends AndroidTestCase {
         @Override 
         public List<ResolveInfo> queryIntentActivities(Intent intent, int flags) {
             assertNotNull(intent);
-            assertEquals(intent.getAction(), Intent.ACTION_SEARCH);
+            assertTrue(intent.getAction().equals(Intent.ACTION_SEARCH)
+                    || intent.getAction().equals(Intent.ACTION_WEB_SEARCH));
             switch (mSearchablesMode) {
             case SEARCHABLES_PASSTHROUGH:
                 return mRealPackageManager.queryIntentActivities(intent, flags);

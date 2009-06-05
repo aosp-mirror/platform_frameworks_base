@@ -1417,6 +1417,16 @@ public class SearchManager
             = "android.search.action.WEB_SEARCH_SETTINGS";
 
     /**
+     * Intent action broadcasted to inform that the searchables list or default have changed.
+     * Components should handle this intent if they cache any searchable data and wish to stay
+     * up to date on changes.
+     *
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_SEARCHABLES_CHANGED
+            = "android.search.action.SEARCHABLES_CHANGED";
+
+    /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
      * the search dialog will take no action.
      *
@@ -1742,6 +1752,50 @@ public class SearchManager
             return sService.getSearchablesInGlobalSearch();
         } catch (RemoteException e) {
             return null;
+        }
+    }
+
+    /**
+     * Returns a list of the searchable activities that handle web searches.
+     *
+     * @return a a list of all searchable activities that handle {@link SearchManager#ACTION_WEB_SEARCH}.
+     *
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static List<SearchableInfo> getSearchablesForWebSearch() {
+        try {
+            return sService.getSearchablesForWebSearch();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the default searchable activity for web searches.
+     *
+     * @return searchable information for the activity handling web searches by default.
+     *
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static SearchableInfo getDefaultSearchableForWebSearch() {
+        try {
+            return sService.getDefaultSearchableForWebSearch();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Sets the default searchable activity for web searches.
+     *
+     * @param component Name of the component to set as default activity for web searches.
+     *
+     * @hide
+     */
+    public static void setDefaultWebSearch(ComponentName component) {
+        try {
+            sService.setDefaultWebSearch(component);
+        } catch (RemoteException e) {
         }
     }
 }
