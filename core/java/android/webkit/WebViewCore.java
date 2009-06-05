@@ -395,8 +395,6 @@ final class WebViewCore {
 
     private native boolean nativeHandleTouchEvent(int action, int x, int y);
 
-    private native void nativeUnblockFocus();
-
     private native void nativeUpdateFrameCache();
 
     private native void nativeSetSnapAnchor(int x, int y);
@@ -574,7 +572,7 @@ final class WebViewCore {
             "SINGLE_LISTBOX_CHOICE", // = 124;
             "MESSAGE_RELAY", // = 125;
             "SET_BACKGROUND_COLOR", // = 126;
-            "UNBLOCK_FOCUS", // = 127;
+            "127", // = 127;
             "SAVE_DOCUMENT_STATE", // = 128;
             "GET_SELECTION", // = 129;
             "WEBKIT_DRAW", // = 130;
@@ -584,7 +582,7 @@ final class WebViewCore {
             "CLEAR_CONTENT", // = 134;
             "SET_MOVE_MOUSE", // = 135;
             "SET_MOVE_MOUSE_IF_LATEST", // = 136;
-            "REQUEST_FOCUS_HREF", // = 137;
+            "REQUEST_CURSOR_HREF", // = 137;
             "ADD_JS_INTERFACE", // = 138;
             "LOAD_DATA", // = 139;
             "TOUCH_UP", // = 140;
@@ -623,7 +621,6 @@ final class WebViewCore {
         static final int SINGLE_LISTBOX_CHOICE = 124;
         static final int MESSAGE_RELAY = 125;
         static final int SET_BACKGROUND_COLOR = 126;
-        static final int UNBLOCK_FOCUS = 127;
         static final int SAVE_DOCUMENT_STATE = 128;
         static final int GET_SELECTION = 129;
         static final int WEBKIT_DRAW = 130;
@@ -635,7 +632,7 @@ final class WebViewCore {
         // UI nav messages
         static final int SET_MOVE_MOUSE = 135;
         static final int SET_MOVE_MOUSE_IF_LATEST = 136;
-        static final int REQUEST_FOCUS_HREF = 137;
+        static final int REQUEST_CURSOR_HREF = 137;
         static final int ADD_JS_INTERFACE = 138;
         static final int LOAD_DATA = 139;
 
@@ -900,8 +897,8 @@ final class WebViewCore {
                         }
 
                         case SAVE_DOCUMENT_STATE: {
-                            CursorData fDat = (CursorData) msg.obj;
-                            nativeSaveDocumentState(fDat.mFrame);
+                            CursorData cDat = (CursorData) msg.obj;
+                            nativeSaveDocumentState(cDat.mFrame);
                             break;
                         }
 
@@ -951,25 +948,21 @@ final class WebViewCore {
                             break;
 
                         case SET_MOVE_MOUSE:
-                            CursorData finalData = (CursorData) msg.obj;
-                            nativeMoveMouse(finalData.mFrame,
-                                     finalData.mNode, finalData.mX,
-                                     finalData.mY);
-                            break;
-
-                        case UNBLOCK_FOCUS:
-                            nativeUnblockFocus();
+                            CursorData cursorData = (CursorData) msg.obj;
+                            nativeMoveMouse(cursorData.mFrame,
+                                     cursorData.mNode, cursorData.mX,
+                                     cursorData.mY);
                             break;
 
                         case SET_MOVE_MOUSE_IF_LATEST:
-                            CursorData focusData = (CursorData) msg.obj;
-                            nativeMoveMouseIfLatest(focusData.mMoveGeneration,
-                                    focusData.mFrame, focusData.mNode,
-                                    focusData.mX, focusData.mY,
-                                    focusData.mIgnoreNullFocus);
+                            CursorData cData = (CursorData) msg.obj;
+                            nativeMoveMouseIfLatest(cData.mMoveGeneration,
+                                    cData.mFrame, cData.mNode,
+                                    cData.mX, cData.mY,
+                                    cData.mIgnoreNullFocus);
                             break;
 
-                        case REQUEST_FOCUS_HREF: {
+                        case REQUEST_CURSOR_HREF: {
                             Message hrefMsg = (Message) msg.obj;
                             String res = nativeRetrieveHref(msg.arg1, msg.arg2);
                             hrefMsg.getData().putString("url", res);
