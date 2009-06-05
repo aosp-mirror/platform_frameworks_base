@@ -246,6 +246,9 @@ private:
 
             void        handleConsoleEvents();
             void        handleTransaction(uint32_t transactionFlags);
+            void        handleTransactionLocked(
+                            uint32_t transactionFlags, 
+                            Vector< sp<LayerBase> >& ditchedLayers);
 
             void        computeVisibleRegions(
                             LayerVector& currentLayers,

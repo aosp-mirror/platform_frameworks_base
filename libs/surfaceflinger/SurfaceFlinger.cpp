@@ -246,12 +246,12 @@ void SurfaceFlinger::destroyConnection(ClientID cid)
     Client* const client = mClientsMap.valueFor(cid);
     if (client) {
         // free all the layers this client owns
-        const Vector< wp<LayerBaseClient> >& layers = client->getLayers();
+        Vector< wp<LayerBaseClient> > layers(client->getLayers());
         const size_t count = layers.size();
         for (size_t i=0 ; i<count ; i++) {
             sp<LayerBaseClient> layer(layers[i].promote());
             if (layer != 0) {
-                removeLayer_l(layer);
+                purgatorizeLayer_l(layer);
             }
         }
 
@@ -551,9 +551,25 @@ void SurfaceFlinger::handleConsoleEvents()
 
 void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
 {
-    Mutex::Autolock _l(mStateLock);
+    Vector< sp<LayerBase> > ditchedLayers;
 
-    const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
+    { // scope for the lock
+        Mutex::Autolock _l(mStateLock);
+        handleTransactionLocked(transactionFlags, ditchedLayers);
+    }
+
+    // do this without lock held
+    const size_t count = ditchedLayers.size();
+    for (size_t i=0 ; i<count ; i++) {
+        //LOGD("ditching layer %p", ditchedLayers[i].get());
+        ditchedLayers[i]->ditch();
+    }
+}
+
+void SurfaceFlinger::handleTransactionLocked(
+        uint32_t transactionFlags, Vector< sp<LayerBase> >& ditchedLayers)
+{
+    const LayerVector& currentLayers(mCurrentState.layersSortedByZ);
     const size_t count = currentLayers.size();
 
     /*
@@ -628,14 +644,12 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
         if (mLayersRemoved) {
             mVisibleRegionsDirty = true;
             const LayerVector& previousLayers(mDrawingState.layersSortedByZ);
-            const ssize_t count = previousLayers.size();
-            for (ssize_t i=0 ; i<count ; i++) {
+            const size_t count = previousLayers.size();
+            for (size_t i=0 ; i<count ; i++) {
                 const sp<LayerBase>& layer(previousLayers[i]);
                 if (currentLayers.indexOf( layer ) < 0) {
                     // this layer is not visible anymore
-                    // FIXME: would be better to call without the lock held
-                    //LOGD("ditching layer %p", layer.get());
-                    layer->ditch();
+                    ditchedLayers.add(layer);
                 }
             }
         }
@@ -1012,9 +1026,10 @@ status_t SurfaceFlinger::addLayer(const sp<LayerBase>& layer)
 status_t SurfaceFlinger::removeLayer(const sp<LayerBase>& layer)
 {
     Mutex::Autolock _l(mStateLock);
-    removeLayer_l(layer);
-    setTransactionFlags(eTransactionNeeded);
-    return NO_ERROR;
+    status_t err = purgatorizeLayer_l(layer);
+    if (err == NO_ERROR)
+        setTransactionFlags(eTransactionNeeded);
+    return err;
 }
 
 status_t SurfaceFlinger::invalidateLayerVisibility(const sp<LayerBase>& layer)
@@ -1047,11 +1062,7 @@ status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
         }
         return NO_ERROR;
     }
-    // it's possible that we don't find a layer, because it might
-    // have been destroyed already -- this is not technically an error
-    // from the user because there is a race between BClient::destroySurface(),
-    // ~BClient() and destroySurface-from-a-transaction.
-    return (index == NAME_NOT_FOUND) ? status_t(NO_ERROR) : index;
+    return status_t(index);
 }
 
 status_t SurfaceFlinger::purgatorizeLayer_l(const sp<LayerBase>& layerBase)
@@ -1062,6 +1073,10 @@ status_t SurfaceFlinger::purgatorizeLayer_l(const sp<LayerBase>& layerBase)
     if (err >= 0) {
         mLayerPurgatory.add(layerBase);
     }
+    // it's possible that we don't find a layer, because it might
+    // have been destroyed already -- this is not technically an error
+    // from the user because there is a race between BClient::destroySurface(),
+    // ~BClient() and ~ISurface().
     return (err == NAME_NOT_FOUND) ? status_t(NO_ERROR) : err;
 }
 
@@ -1294,12 +1309,7 @@ status_t SurfaceFlinger::removeSurface(SurfaceID index)
 
 status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
 {
-    /*
-     * called by ~ISurface() when all references are gone
-     * 
-     * the surface must be removed from purgatory from the main thread
-     * since its dtor must run from there (b/c of OpenGL ES).
-     */
+    /* called by ~ISurface() when all references are gone */
     
     class MessageDestroySurface : public MessageBase {
         SurfaceFlinger* flinger;
@@ -1310,11 +1320,33 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
             : flinger(flinger), layer(layer) { }
         virtual bool handler() {
             Mutex::Autolock _l(flinger->mStateLock);
-            ssize_t idx = flinger->mLayerPurgatory.remove(layer);
-            LOGE_IF(idx<0, "layer=%p is not in the purgatory list", layer.get());
+            // remove the layer from the current list -- chances are that it's 
+            // not in the list anyway, because it should have been removed 
+            // already upon request of the client (eg: window manager). 
+            // However, a buggy client could have not done that.
+            // Since we know we don't have any more clients, we don't need
+            // to use the purgatory.
+            status_t err = flinger->removeLayer_l(layer);
+            if (err == NAME_NOT_FOUND) {
+                // The surface wasn't in the current list, which means it was
+                // removed already, which means it is in the purgatory, 
+                // and need to be removed from there.
+                // This needs to happen from the main thread since its dtor
+                // must run from there (b/c of OpenGL ES). Additionally, we
+                // can't really acquire our internal lock from 
+                // destroySurface() -- see postMessage() below.
+                ssize_t idx = flinger->mLayerPurgatory.remove(layer);
+                LOGE_IF(idx < 0,
+                        "layer=%p is not in the purgatory list", layer.get());
+            }
             return true;
         }
     };
+
+    // It's better to not acquire our internal lock here, because it's hard
+    // to predict that it's not going to be already taken when ~Surface()
+    // is called.
+
     mEventQueue.postMessage( new MessageDestroySurface(this, layer) );
     return NO_ERROR;
 }
@@ -1329,18 +1361,9 @@ status_t SurfaceFlinger::setClientState(
     cid <<= 16;
     for (int i=0 ; i<count ; i++) {
         const layer_state_t& s = states[i];
-        const sp<LayerBaseClient>& layer = getLayerUser_l(s.surface | cid);
+        sp<LayerBaseClient> layer(getLayerUser_l(s.surface | cid));
         if (layer != 0) {
             const uint32_t what = s.what;
-            // check if it has been destroyed first
-            if (what & eDestroyed) {
-                if (removeLayer_l(layer) == NO_ERROR) {
-                    flags |= eTransactionNeeded;
-                    // we skip everything else... well, no, not really
-                    // we skip ONLY that transaction.
-                    continue;
-                }
-            }
             if (what & ePositionChanged) {
                 if (layer->setPosition(s.x, s.y))
                     flags |= eTraversalNeeded;
@@ -1486,7 +1509,8 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 mFreezeDisplay?"yes":"no", mFreezeCount,
                 mCurrentState.orientation, hw.canDraw());
         result.append(buffer);
-
+        snprintf(buffer, SIZE, "  purgatory size: %d\n", mLayerPurgatory.size());
+        result.append(buffer);
         const BufferAllocator& alloc(BufferAllocator::get());
         alloc.dump(result);
     }

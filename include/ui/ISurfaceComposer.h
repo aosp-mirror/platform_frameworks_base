@@ -62,7 +62,6 @@ public:
         eTransparentRegionChanged   = 0x00000020,
         eVisibilityChanged          = 0x00000040,
         eFreezeTintChanged          = 0x00000080,
-        eDestroyed                  = 0x00000100
     };
 
     enum {
