@@ -20,6 +20,7 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
@@ -306,6 +307,14 @@ public class SearchablesTest extends AndroidTestCase {
                 throws PackageManager.NameNotFoundException {
             return mRealContext.createPackageContext(packageName, flags);
         }
+
+        /**
+         * Message broadcast.  Pass through for now.
+         */
+        @Override
+        public void sendBroadcast(Intent intent) {
+            mRealContext.sendBroadcast(intent);
+        }
     }
 
 /**
@@ -376,7 +385,8 @@ public class SearchablesTest extends AndroidTestCase {
         @Override
         public ResolveInfo resolveActivity(Intent intent, int flags) {
             assertNotNull(intent);
-            assertEquals(intent.getAction(), SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+            assertTrue(intent.getAction().equals(Intent.ACTION_WEB_SEARCH)
+                    || intent.getAction().equals(SearchManager.INTENT_ACTION_GLOBAL_SEARCH));
             switch (mSearchablesMode) {
             case SEARCHABLES_PASSTHROUGH:
                 return mRealPackageManager.resolveActivity(intent, flags);
@@ -435,6 +445,29 @@ public class SearchablesTest extends AndroidTestCase {
             case SEARCHABLES_PASSTHROUGH:
                 return mRealPackageManager.resolveContentProvider(name, flags);
             case SEARCHABLES_MOCK_ZERO:
+            default:
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        /**
+         * Get the activity information for a particular activity.
+         *
+         * @param name The name of the activity to find.
+         * @param flags Additional option flags.
+         *
+         * @return ActivityInfo Information about the activity, if found, else null.
+         */
+        @Override
+        public ActivityInfo getActivityInfo(ComponentName name, int flags)
+                throws NameNotFoundException {
+            assertNotNull(name);
+            MoreAsserts.assertNotEqual(name, "");
+            switch (mSearchablesMode) {
+            case SEARCHABLES_PASSTHROUGH:
+                return mRealPackageManager.getActivityInfo(name, flags);
+            case SEARCHABLES_MOCK_ZERO:
+                throw new NameNotFoundException();
             default:
                 throw new UnsupportedOperationException();
             }
