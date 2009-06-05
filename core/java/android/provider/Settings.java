@@ -1292,6 +1292,14 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
+        
+        /**
+         * Whether live web suggestions while the user types into search dialogs are
+         * enabled. Browsers and other search UIs should respect this, as it allows
+         * a user to avoid sending partial queries to a search engine, if it poses
+         * any privacy concern. The value is boolean (1 or 0).
+         */
+        public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
 
         // Settings moved to Settings.Secure
 
