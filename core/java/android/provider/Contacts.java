@@ -1523,6 +1523,15 @@ public class Contacts {
                 ContactsContract.Intents.EXTRA_CREATE_DESCRIPTION;
 
         /**
+         * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to specify a
+         * dialog location using screen coordinates. When not specified, the
+         * dialog will be centered.
+         *
+         * @hide pending API council review
+         */
+        public static final String EXTRA_TARGET_RECT = ContactsContract.Intents.EXTRA_TARGET_RECT;
+
+        /**
          * Intents related to the Contacts app UI.
          */
         public static final class UI {

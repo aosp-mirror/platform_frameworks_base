@@ -1375,6 +1375,13 @@ public final class ContactsContract {
             "com.android.contacts.action.CREATE_DESCRIPTION";
 
         /**
+         * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to specify a
+         * dialog location using screen coordinates. When not specified, the
+         * dialog will be centered.
+         */
+        public static final String EXTRA_TARGET_RECT = "target_rect";
+
+        /**
          * Intents related to the Contacts app UI.
          */
         public static final class UI {
