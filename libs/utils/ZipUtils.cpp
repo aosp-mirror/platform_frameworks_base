@@ -20,9 +20,9 @@
 
 #define LOG_TAG "ziputil"
 
-#include "utils/ZipUtils.h"
-#include "utils/ZipFileRO.h"
-#include "utils/Log.h"
+#include <utils/ZipUtils.h>
+#include <utils/ZipFileRO.h>
+#include <utils/Log.h>
 
 #include <stdlib.h>
 #include <string.h>
