@@ -350,10 +350,11 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
             FileState& g = newSnapshot.editValueAt(m);
 
             int fd = open(realFilename.string(), O_RDONLY);
-            if (fd != -1) {
+            if (fd < 0) {
                 // We can't open the file.  Don't report it as a delete either.  Let the
                 // server keep the old version.  Maybe they'll be able to deal with it
                 // on restore.
+                LOGP("Unable to open file %s - skipping", realFilename.string());
             } else {
                 g.crc32 = compute_crc32(fd);
 
