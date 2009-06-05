@@ -62,7 +62,9 @@ public class CompatibilityInfo {
     public final boolean mScalingRequired;
 
     public CompatibilityInfo(ApplicationInfo appInfo) {
-        mExpandable = appInfo.expandable;
+        // A temp workaround to fix rotation issue.
+        // mExpandable = appInfo.expandable;
+        mExpandable = true;
         float packageDensityScale = -1.0f;
         if (appInfo.supportsDensities != null) {
             int minDiff = Integer.MAX_VALUE;
