@@ -24,7 +24,7 @@
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <binder/Parcel.h>
-#include <utils/string_array.h>
+#include <utils/StringArray.h>
 #include <utils/threads.h>
 #include <cutils/properties.h>
 
