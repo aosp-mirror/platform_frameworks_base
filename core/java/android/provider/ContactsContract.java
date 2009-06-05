@@ -732,50 +732,6 @@ public final class ContactsContract {
         }
 
         /**
-         * Constants for the contact aggregation exceptions table, which contains
-         * aggregation rules overriding those used by automatic aggregation.
-         */
-        public static final class AggregationExceptions {
-            /**
-             * This utility class cannot be instantiated
-             */
-            private AggregationExceptions() {}
-
-            /**
-             * The content:// style URI for this table
-             */
-            public static final Uri CONTENT_URI =
-                    Uri.withAppendedPath(AUTHORITY_URI, "aggregation_exceptions");
-
-            /**
-             * The MIME type of {@link #CONTENT_URI} providing a directory of data.
-             */
-            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/aggregation_exception";
-
-            /**
-             * The type of exception: {@link #TYPE_NEVER_MATCH} or {@link #TYPE_ALWAYS_MATCH}.
-             *
-             * <P>Type: INTEGER</P>
-             */
-            public static final String TYPE = "type";
-
-            public static final int TYPE_NEVER_MATCH = 0;
-            public static final int TYPE_ALWAYS_MATCH = 1;
-
-            /**
-             * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of one of
-             * the contacts that the rule applies to.
-             */
-            public static final String CONTACT_ID1 = "contact_id1";
-
-            /**
-             * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the other
-             * contact that the rule applies to.
-             */
-            public static final String CONTACT_ID2 = "contact_id2";
-        }
-
-        /**
          * Group Membership.
          */
         public static final class GroupMembership implements BaseCommonColumns {
@@ -801,5 +757,49 @@ public final class ContactsContract {
              */
             public static final String GROUP_SOURCE_ID = "data2";
         }
+    }
+
+    /**
+     * Constants for the contact aggregation exceptions table, which contains
+     * aggregation rules overriding those used by automatic aggregation.
+     */
+    public static final class AggregationExceptions {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private AggregationExceptions() {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "aggregation_exceptions");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of data.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/aggregation_exception";
+
+        /**
+         * The type of exception: {@link #TYPE_NEVER_MATCH} or {@link #TYPE_ALWAYS_MATCH}.
+         *
+         * <P>Type: INTEGER</P>
+         */
+        public static final String TYPE = "type";
+
+        public static final int TYPE_NEVER_MATCH = 0;
+        public static final int TYPE_ALWAYS_MATCH = 1;
+
+        /**
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of one of
+         * the contacts that the rule applies to.
+         */
+        public static final String CONTACT_ID1 = "contact_id1";
+
+        /**
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the other
+         * contact that the rule applies to.
+         */
+        public static final String CONTACT_ID2 = "contact_id2";
     }
 }
