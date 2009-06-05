@@ -1807,7 +1807,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     public void setSmscAddress(String address, Message result) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_SET_SMSC_ADDRESS, result);
 
-        rr.mp.writeInt(1);
         rr.mp.writeString(address);
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
@@ -3122,6 +3121,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_GET_SMSC_ADDRESS: return "RIL_REQUEST_GET_SMSC_ADDRESS";
             case RIL_REQUEST_SET_SMSC_ADDRESS: return "RIL_REQUEST_SET_SMSC_ADDRESS";
             case RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: return "REQUEST_EXIT_EMERGENCY_CALLBACK_MODE";
+            case RIL_REQUEST_REPORT_SMS_MEMORY_STATUS: return "RIL_REQUEST_REPORT_SMS_MEMORY_STATUS";
             default: return "<unknown request>";
         }
     }
@@ -3290,7 +3290,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     sendCDMAFeatureCode(String FeatureCode, Message response) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_CDMA_FLASH, response);
 
-        rr.mp.writeInt(1);
         rr.mp.writeString(FeatureCode);
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
