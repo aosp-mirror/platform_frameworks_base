@@ -41,8 +41,7 @@ commonSources:= \
     ZipFileCRO.cpp \
 	ZipFileRO.cpp \
 	ZipUtils.cpp \
-	misc.cpp \
-	LogSocket.cpp
+	misc.cpp
 
 
 # For the host
