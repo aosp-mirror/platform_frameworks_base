@@ -37,19 +37,19 @@ import java.util.TreeSet;
  * A Layout where the positions of the children can be described in relation to each other or to the
  * parent. For the sake of efficiency, the relations between views are evaluated in one pass, so if
  * view Y is dependent on the position of view X, make sure the view X comes first in the layout.
- * 
+ *
  * <p>
  * Note that you cannot have a circular dependency between the size of the RelativeLayout and the
  * position of its children. For example, you cannot have a RelativeLayout whose height is set to
  * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT WRAP_CONTENT} and a child set to
  * {@link #ALIGN_PARENT_BOTTOM}.
  * </p>
- * 
+ *
  * <p>
  * Also see {@link android.widget.RelativeLayout.LayoutParams RelativeLayout.LayoutParams} for
  * layout attributes
  * </p>
- * 
+ *
  * @attr ref android.R.styleable#RelativeLayout_gravity
  * @attr ref android.R.styleable#RelativeLayout_ignoreGravity
  */
@@ -327,7 +327,7 @@ public class RelativeLayout extends ViewGroup {
         }
 
         if (widthMode != MeasureSpec.EXACTLY) {
-            // Width already has left padding in it since it was calculated by looking at 
+            // Width already has left padding in it since it was calculated by looking at
             // the right of each child view
             width += mPaddingRight;
 
@@ -339,7 +339,7 @@ public class RelativeLayout extends ViewGroup {
             width = resolveSize(width, widthMeasureSpec);
         }
         if (heightMode != MeasureSpec.EXACTLY) {
-            // Height already has top padding in it since it was calculated by looking at 
+            // Height already has top padding in it since it was calculated by looking at
             // the bottom of each child view
             height += mPaddingBottom;
 
@@ -881,7 +881,7 @@ public class RelativeLayout extends ViewGroup {
             @ViewDebug.IntToString(from = RIGHT_OF,            to = "rightOf")
         }, mapping = {
             @ViewDebug.IntToString(from = TRUE, to = "true"),
-            @ViewDebug.IntToString(from = 0,    to = "FALSE/NO_ID")
+            @ViewDebug.IntToString(from = 0,    to = "false/NO_ID")
         })
         private int[] mRules = new int[VERB_COUNT];
 
