@@ -15,7 +15,7 @@
 #include <utils/String8.h>
 #include <utils/Vector.h>
 #include <utils/RefBase.h>
-#include <utils/ZipFile.h>
+#include "ZipFile.h"
 
 #include "Bundle.h"
 #include "SourcePos.h"

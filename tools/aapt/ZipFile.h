@@ -21,10 +21,11 @@
 #ifndef __LIBS_ZIPFILE_H
 #define __LIBS_ZIPFILE_H
 
-#include "ZipEntry.h"
-#include "Vector.h"
-#include "Errors.h"
+#include <utils/Vector.h>
+#include <utils/Errors.h>
 #include <stdio.h>
+
+#include "ZipEntry.h"
 
 namespace android {
 

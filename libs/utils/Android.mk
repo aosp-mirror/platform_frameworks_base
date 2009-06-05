@@ -44,26 +44,13 @@ commonSources:= \
 	misc.cpp \
 	LogSocket.cpp
 
-#
-# The cpp files listed here do not belong in the device
-# build.  Consult with the swetland before even thinking about
-# putting them in commonSources.
-#
-# They're used by the simulator runtime and by host-side tools like
-# aapt and the simulator front-end.
-#
-hostSources:= \
-	InetAddress.cpp \
-	Socket.cpp \
-	ZipEntry.cpp \
-	ZipFile.cpp
 
 # For the host
 # =====================================================
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= $(commonSources) $(hostSources)
+LOCAL_SRC_FILES:= $(commonSources)
 
 ifeq ($(HOST_OS),linux)
 # Use the futex based mutex and condition variable
@@ -100,10 +87,6 @@ LOCAL_SRC_FILES:= \
     BackupData.cpp \
 	BackupHelpers.cpp
 
-ifeq ($(TARGET_SIMULATOR),true)
-LOCAL_SRC_FILES += $(hostSources)
-endif
-
 ifeq ($(TARGET_OS),linux)
 # Use the futex based mutex and condition variable
 # implementation from android-arm because it's shared mem safe
@@ -130,9 +113,5 @@ endif # linux-x86
 endif # sim
 
 LOCAL_MODULE:= libutils
-
-#LOCAL_CFLAGS+=
-#LOCAL_LDFLAGS:=
-
 include $(BUILD_SHARED_LIBRARY)
 

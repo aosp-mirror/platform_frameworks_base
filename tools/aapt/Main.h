@@ -12,7 +12,7 @@
 #include <utils/Errors.h>
 #include "Bundle.h"
 #include "AaptAssets.h"
-#include <utils/ZipFile.h>
+#include "ZipFile.h"
 
 extern int doVersion(Bundle* bundle);
 extern int doList(Bundle* bundle);
