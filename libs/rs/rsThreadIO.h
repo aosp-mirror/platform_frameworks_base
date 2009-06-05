@@ -35,7 +35,9 @@ public:
     ThreadIO();
     ~ThreadIO();
 
-    void playCoreCommands(Context *con);
+    // Plays back commands from the client.
+    // Returns true if any commands were processed.
+    bool playCoreCommands(Context *con);
 
 
     LocklessCommandFifo mToCore;

@@ -65,7 +65,7 @@ main(con, ft, launchID) {
 
         if (life) {
             if (posy < (480 << 16)) {
-                dstIdx = ct * 3 * 3;
+                dstIdx = drawCount * 9;
                 c = 0xffafcf | ((life >> lifeShift) << 24);
 
                 storeU32(con, 1, dstIdx, c);
@@ -79,8 +79,6 @@ main(con, ft, launchID) {
                 storeU32(con, 1, dstIdx + 6, c);
                 storeI32(con, 1, dstIdx + 7, posx - 0x10000);
                 storeI32(con, 1, dstIdx + 8, posy + dy * 4);
-
-                vertPtr = vertPtr + 36;
                 drawCount ++;
             } else {
                 if (dy > 0) {
@@ -102,4 +100,5 @@ main(con, ft, launchID) {
     }
 
     drawTriangleArray(con, loadI32(con, 0, 5), drawCount);
+    return 1;
 }
