@@ -57,17 +57,19 @@ void Context::initEGL()
 
      LOGE("EGL 5");
      mContext = eglCreateContext(mDisplay, mConfig, NULL, NULL);
-     eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);   
+     eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
      eglQuerySurface(mDisplay, mSurface, EGL_WIDTH, &mWidth);
      eglQuerySurface(mDisplay, mSurface, EGL_HEIGHT, &mHeight);
      LOGE("EGL 9");
 
 }
 
-void Context::runRootScript()
+bool Context::runRootScript()
 {
     rsAssert(mRootScript->mIsRoot);
 
+    glColor4f(1,1,1,1);
+    glEnable(GL_LIGHT0);
     glViewport(0, 0, 320, 480);
     float aspectH = 480.f / 320.f;
 
@@ -91,7 +93,7 @@ void Context::runRootScript()
     glDepthMask(GL_TRUE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    glClearColor(mRootScript->mClearColor[0], 
+    glClearColor(mRootScript->mClearColor[0],
                  mRootScript->mClearColor[1],
                  mRootScript->mClearColor[2],
                  mRootScript->mClearColor[3]);
@@ -99,8 +101,7 @@ void Context::runRootScript()
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    mRootScript->run(this, 0);
-
+    return mRootScript->run(this, 0);
 }
 
 void Context::setupCheck()
@@ -133,24 +134,19 @@ void * Context::threadProc(void *vrsc)
      LOGE("TP 2");
 
      rsc->mRunning = true;
+     bool mDraw = true;
      while (!rsc->mExit) {
-         gIO->playCoreCommands(rsc);
+         mDraw |= gIO->playCoreCommands(rsc);
 
-         if (!rsc->mRootScript.get()) {
+         if (!mDraw || !rsc->mRootScript.get()) {
+             usleep(10000);
              continue;
          }
 
-
-         glColor4f(1,1,1,1);
-         glEnable(GL_LIGHT0);
-
          if (rsc->mRootScript.get()) {
-             rsc->runRootScript();
+             mDraw = rsc->runRootScript();
+             eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
          }
-
-         eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
-
-         usleep(10000);
      }
 
      LOGE("TP 6");
@@ -158,9 +154,6 @@ void * Context::threadProc(void *vrsc)
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
      eglTerminate(rsc->mDisplay);
-
-     LOGE("TP 7");
-
      return NULL;
 }
 
@@ -257,7 +250,7 @@ void Context::setVertex(ProgramVertex *pv)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-// 
+//
 
 namespace android {
 namespace renderscript {

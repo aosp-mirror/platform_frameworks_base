@@ -37,7 +37,7 @@ public:
     virtual ~ScriptC();
 
 
-    virtual void run(Context *, uint32_t launchID);
+    virtual bool run(Context *, uint32_t launchID);
 
 
     ACCscript*    mAccScript;

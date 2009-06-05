@@ -387,10 +387,10 @@ static rsc_FunctionTable scriptCPtrTable = {
 };
 
 
-void ScriptC::run(Context *rsc, uint32_t launchID)
+bool ScriptC::run(Context *rsc, uint32_t launchID)
 {
     Env e = {rsc, this};
-    mScript(&e, &scriptCPtrTable, launchID);
+    return mScript(&e, &scriptCPtrTable, launchID) != 0;
 }
 
 ScriptCState::ScriptCState()

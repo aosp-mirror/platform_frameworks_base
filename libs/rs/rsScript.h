@@ -46,7 +46,7 @@ public:
 
     ObjectBaseRef<Allocation> mSlots[16];
 
-    virtual void run(Context *, uint32_t launchID) = 0;
+    virtual bool run(Context *, uint32_t launchID) = 0;
 };
 
 
