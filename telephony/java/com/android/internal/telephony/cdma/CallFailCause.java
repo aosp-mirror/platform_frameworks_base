@@ -29,21 +29,12 @@ public interface CallFailCause {
     // Busy Tone
     static final int USER_BUSY                      = 17;
 
-    // TODO(Teleca): Should we remove commented out values?
-//    // No Tone
-//    static final int NUMBER_CHANGED               = 22;
-//    static final int STATUS_ENQUIRY               = 30;
     static final int NORMAL_UNSPECIFIED             = 31;
-//
-//    // Congestion Tone
+
+    // Congestion Tone
     static final int NO_CIRCUIT_AVAIL               = 34;
-//    static final int TEMPORARY_FAILURE            = 41;
-//    static final int SWITCHING_CONGESTION         = 42;
-//    static final int CHANNEL_NOT_AVAIL            = 44;
-//    static final int QOS_NOT_AVAIL                = 49;
-//    static final int BEARER_NOT_AVAIL             = 58;
-//
-//    // others
+
+    // others
     static final int ACM_LIMIT_EXCEEDED             = 68;
     static final int CALL_BARRED                    = 240;
     static final int FDN_BLOCKED                    = 241;

@@ -419,12 +419,4 @@ public class ContextWrapper extends Context {
         throws PackageManager.NameNotFoundException {
         return mBase.createPackageContext(packageName, flags);
     }
-
-    /**
-     * @hide
-     */
-    @Override
-    public float getApplicationScale() {
-        return mBase.getApplicationScale();
-    }
 }

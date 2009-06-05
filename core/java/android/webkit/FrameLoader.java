@@ -120,7 +120,7 @@ class FrameLoader {
         } else if (handleLocalFile(url, mListener, mSettings)) {
             return true;
         }
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.FRAME_LOADER) {
             Log.v(LOGTAG, "FrameLoader.executeLoad: url protocol not supported:"
                     + mListener.url());
         }
@@ -180,7 +180,7 @@ class FrameLoader {
             return true;
         }
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.FRAME_LOADER) {
             Log.v(LOGTAG, "FrameLoader: http " + mMethod + " load for: "
                     + mListener.url());
         }
@@ -211,7 +211,7 @@ class FrameLoader {
      * setup a load from the byte stream in a CacheResult.
      */
     private void startCacheLoad(CacheResult result) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.FRAME_LOADER) {
             Log.v(LOGTAG, "FrameLoader: loading from cache: "
                   + mListener.url());
         }
@@ -285,7 +285,7 @@ class FrameLoader {
             // of it's state. If it is not in the cache, then go to the 
             // network.
             case WebSettings.LOAD_CACHE_ELSE_NETWORK: {
-                if (WebView.LOGV_ENABLED) {
+                if (DebugFlags.FRAME_LOADER) {
                     Log.v(LOGTAG, "FrameLoader: checking cache: "
                             + mListener.url());
                 }

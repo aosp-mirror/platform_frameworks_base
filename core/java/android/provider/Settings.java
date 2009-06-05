@@ -1292,6 +1292,14 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
+        
+        /**
+         * Whether live web suggestions while the user types into search dialogs are
+         * enabled. Browsers and other search UIs should respect this, as it allows
+         * a user to avoid sending partial queries to a search engine, if it poses
+         * any privacy concern. The value is boolean (1 or 0).
+         */
+        public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
 
         // Settings moved to Settings.Secure
 
@@ -2565,6 +2573,32 @@ public final class Settings {
          */
         public static final String GTALK_SERVICE_NOSYNC_HEARTBEAT_INTERVAL_MS =
                 "gtalk_nosync_heartbeat_ping_interval_ms";
+
+        /**
+         * The maximum heartbeat interval used while on the WIFI network. 
+         */
+        public static final String GTALK_SERVICE_WIFI_MAX_HEARTBEAT_INTERVAL_MS =
+                "gtalk_wifi_max_heartbeat_ping_interval_ms";
+
+        /**
+         * The minimum interval for how frequently we send heartbeat pings to the GTalk server.
+         */
+        public static final String GTALK_SERVICE_MIN_HEARTBEAT_INTERVAL_MS =
+                "gtalk_min_heartbeat_ping_interval_ms";
+
+        /**
+         * The scale down factor used by adaptive heartbeat logic (to scale down the heartbeat
+         * interval) when the previous interval fails to get a response from the server.
+         */
+        public static final String GTALK_SERVICE_ADAPTIVE_HEARTBEAT_SCALER =
+                "gtalk_adaptive_heartbeat_scaler";
+
+        /**
+         * The trigger for adaptively scaling down the heartbeat interval. This is the number of
+         * consecutive times we failed to get a server response for sending the heartbeat ping.
+         */
+        public static final String GTALK_SERVICE_ADAPTIVE_HEARTBEAT_TRIGGER =
+                "gtalk_adaptive_heartbeat_trigger";
 
         /**
          * How long we wait to receive a heartbeat ping acknowledgement (or another packet)

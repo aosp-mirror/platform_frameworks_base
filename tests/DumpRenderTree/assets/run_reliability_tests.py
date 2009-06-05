@@ -10,8 +10,10 @@
 
 import logging
 import optparse
+import os
 import subprocess
 import sys
+import time
 
 TEST_LIST_FILE = "/sdcard/android/reliability_tests_list.txt"
 TEST_STATUS_FILE = "/sdcard/android/reliability_running_test.txt"
@@ -46,6 +48,20 @@ def RemoveDeviceFile(adb_cmd, file_name):
                    stderr=subprocess.PIPE).communicate()
 
 
+def Bugreport(url, bugreport_dir, adb_cmd):
+  """Pull a bugreport from the device."""
+  bugreport_filename = "%s/reliability_bugreport_%d.txt" % (bugreport_dir,
+                                                            int(time.time()))
+
+  # prepend the report with url
+  handle = open(bugreport_filename, "w")
+  handle.writelines("Bugreport for crash in url - %s\n\n" % url)
+  handle.close()
+
+  cmd = "%s bugreport >> %s" % (adb_cmd, bugreport_filename)
+  os.system(cmd)
+
+
 def main(options, args):
   """Send the url list to device and start testing, restart if crashed."""
 
@@ -74,6 +90,21 @@ def main(options, args):
     sys.exit(1)
   else:
     timedout_file = options.timeout_file
+
+  if not options.delay:
+    manual_delay = 0
+  else:
+    manual_delay = options.delay
+
+  if not options.bugreport:
+    bugreport_dir = "."
+  else:
+    bugreport_dir = options.bugreport
+  if not os.path.exists(bugreport_dir):
+    os.makedirs(bugreport_dir)
+  if not os.path.isdir(bugreport_dir):
+    logging.error("Cannot create results dir: " + bugreport_dir)
+    sys.exit(1)
 
   adb_cmd = "adb "
   if options.adb_options:
@@ -110,8 +141,8 @@ def main(options, args):
   # Call ReliabilityTestsAutoTest#startReliabilityTests
   test_cmd = (test_cmd_prefix + " -e class "
               "com.android.dumprendertree.ReliabilityTest#"
-              "runTest -e timeout %d %s" %
-              (timeout_ms, test_cmd_postfix))
+              "runReliabilityTest -e timeout %s -e delay %s %s" %
+              (str(timeout_ms), str(manual_delay), test_cmd_postfix))
 
   adb_output = subprocess.Popen(test_cmd, shell=True,
                                 stdout=subprocess.PIPE,
@@ -123,12 +154,9 @@ def main(options, args):
                                     stdout=subprocess.PIPE).communicate()[0]
     logging.info(crashed_test + " CRASHED")
     crashed_tests.append(crashed_test)
+    Bugreport(crashed_test, bugreport_dir, adb_cmd)
     logging.info("Resuming reliability test runner...")
 
-    test_cmd = (test_cmd_prefix + " -e class "
-                "com.android.dumprendertree.ReliabilityTest#"
-                "runTest -e timeout %d %s" %
-                (timeout_ms, test_cmd_postfix))
     adb_output = subprocess.Popen(test_cmd, shell=True, stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE).communicate()[0]
 
@@ -157,20 +185,26 @@ def main(options, args):
 
 if "__main__" == __name__:
   option_parser = optparse.OptionParser()
-  option_parser.add_option("", "--time-out-ms",
+  option_parser.add_option("-t", "--time-out-ms",
                            default=60000,
                            help="set the timeout for each test")
-  option_parser.add_option("", "--verbose", action="store_true",
+  option_parser.add_option("-v", "--verbose", action="store_true",
                            default=False,
                            help="include debug-level logging")
-  option_parser.add_option("", "--adb-options",
+  option_parser.add_option("-a", "--adb-options",
                            default=None,
                            help="pass options to adb, such as -d -e, etc")
-  option_parser.add_option("", "--crash-file",
+  option_parser.add_option("-c", "--crash-file",
                            default="reliability_crashed_sites.txt",
                            help="the list of sites that cause browser to crash")
-  option_parser.add_option("", "--timeout-file",
+  option_parser.add_option("-f", "--timeout-file",
                            default="reliability_timedout_sites.txt",
-                           help="the list of sites that timedout during test.")
+                           help="the list of sites that timedout during test")
+  option_parser.add_option("-d", "--delay",
+                           default=0,
+                           help="add a manual delay between pages (in ms)")
+  option_parser.add_option("-b", "--bugreport",
+                           default=".",
+                           help="the directory to store bugreport for crashes")
   opts, arguments = option_parser.parse_args()
   main(opts, arguments)

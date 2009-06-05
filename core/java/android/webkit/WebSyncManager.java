@@ -47,7 +47,7 @@ abstract class WebSyncManager implements Runnable {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == SYNC_MESSAGE) {
-                if (WebView.LOGV_ENABLED) {
+                if (DebugFlags.WEB_SYNC_MANAGER) {
                     Log.v(LOGTAG, "*** WebSyncManager sync ***");
                 }
                 syncFromRamToFlash();
@@ -94,7 +94,7 @@ abstract class WebSyncManager implements Runnable {
      * sync() forces sync manager to sync now
      */
     public void sync() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.WEB_SYNC_MANAGER) {
             Log.v(LOGTAG, "*** WebSyncManager sync ***");
         }
         if (mHandler == null) {
@@ -109,7 +109,7 @@ abstract class WebSyncManager implements Runnable {
      * resetSync() resets sync manager's timer
      */
     public void resetSync() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.WEB_SYNC_MANAGER) {
             Log.v(LOGTAG, "*** WebSyncManager resetSync ***");
         }
         if (mHandler == null) {
@@ -124,7 +124,7 @@ abstract class WebSyncManager implements Runnable {
      * startSync() requests sync manager to start sync
      */
     public void startSync() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.WEB_SYNC_MANAGER) {
             Log.v(LOGTAG, "***  WebSyncManager startSync ***, Ref count:" + 
                     mStartSyncRefCount);
         }
@@ -142,7 +142,7 @@ abstract class WebSyncManager implements Runnable {
      * the queue to break the sync loop
      */
     public void stopSync() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.WEB_SYNC_MANAGER) {
             Log.v(LOGTAG, "*** WebSyncManager stopSync ***, Ref count:" + 
                     mStartSyncRefCount);
         }

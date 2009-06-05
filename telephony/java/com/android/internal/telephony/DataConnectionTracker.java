@@ -93,6 +93,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_NV_READY = 31;
     protected static final int EVENT_PS_RESTRICT_ENABLED = 32;
     protected static final int EVENT_PS_RESTRICT_DISABLED = 33;
+    public static final int EVENT_CLEAN_UP_CONNECTION = 34;
 
     //***** Constants
     protected static final int RECONNECT_DELAY_INITIAL_MILLIS = 5 * 1000;
@@ -149,7 +150,7 @@ public abstract class DataConnectionTracker extends Handler {
 
     /** Intent sent when the reconnect alarm fires. */
     protected PendingIntent mReconnectIntent = null;
-    
+
     /** CID of active data connection */
     protected int cidActive;
 
@@ -226,6 +227,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onDisconnectDone(AsyncResult ar);
     protected abstract void onVoiceCallStarted();
     protected abstract void onVoiceCallEnded();
+    protected abstract void onCleanUpConnection(boolean tearDown, String reason);
 
   //***** Overridden from Handler
     public void handleMessage (Message msg) {
@@ -272,17 +274,16 @@ public abstract class DataConnectionTracker extends Handler {
                 onVoiceCallEnded();
                 break;
 
+            case EVENT_CLEAN_UP_CONNECTION:
+                boolean tearDown = (msg.arg1 == 0) ? false : true;
+                onCleanUpConnection(tearDown, (String)msg.obj);
+                break;
+
             default:
                 Log.e("DATA", "Unidentified event = " + msg.what);
                 break;
         }
     }
-
-    /**
-     * Simply tear down data connections due to radio off 
-     * and don't setup again.
-     */
-    public abstract void cleanConnectionBeforeRadioOff();
 
     /**
      * Report the current state of data connectivity (enabled or disabled)

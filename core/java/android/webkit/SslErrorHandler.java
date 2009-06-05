@@ -120,7 +120,7 @@ public class SslErrorHandler extends Handler {
      * Handles SSL error(s) on the way up to the user.
      */
     /* package */ synchronized void handleSslErrorRequest(LoadListener loader) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.SSL_ERROR_HANDLER) {
             Log.v(LOGTAG, "SslErrorHandler.handleSslErrorRequest(): " +
                   "url=" + loader.url());
         }
@@ -157,14 +157,14 @@ public class SslErrorHandler extends Handler {
 
             SslError error = loader.sslError();
 
-            if (WebView.DEBUG) {
+            if (DebugFlags.SSL_ERROR_HANDLER) {
                 Assert.assertNotNull(error);
             }
 
             int primary = error.getPrimaryError();
             String host = loader.host();
 
-            if (WebView.DEBUG) {
+            if (DebugFlags.SSL_ERROR_HANDLER) {
                 Assert.assertTrue(host != null && primary != 0);
             }
 
@@ -205,11 +205,11 @@ public class SslErrorHandler extends Handler {
      */
     /* package */ synchronized void handleSslErrorResponse(boolean proceed) {
         LoadListener loader = mLoaderQueue.poll();
-        if (WebView.DEBUG) {
+        if (DebugFlags.SSL_ERROR_HANDLER) {
             Assert.assertNotNull(loader);
         }
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.SSL_ERROR_HANDLER) {
             Log.v(LOGTAG, "SslErrorHandler.handleSslErrorResponse():"
                   + " proceed: " + proceed
                   + " url:" + loader.url());
@@ -221,7 +221,7 @@ public class SslErrorHandler extends Handler {
                 int primary = loader.sslError().getPrimaryError();
                 String host = loader.host();
 
-                if (WebView.DEBUG) {
+                if (DebugFlags.SSL_ERROR_HANDLER) {
                     Assert.assertTrue(host != null && primary != 0);
                 }
                 boolean hasKey = mSslPrefTable.containsKey(host);

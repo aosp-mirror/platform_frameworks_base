@@ -20,9 +20,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,12 +29,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
+import static android.app.SearchManager.DialogCursorProtocol;
+
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.WeakHashMap;
 
 /**
@@ -46,15 +46,7 @@ import java.util.WeakHashMap;
  * @hide
  */
 class SuggestionsAdapter extends ResourceCursorAdapter {
-    // The value used to query a cursor whether it is still expecting more input,
-    // so we can correctly display (or not display) the 'working' spinner in the search dialog.
-    public static final String IS_WORKING = "isWorking";
-    
-    // The value used to tell a cursor to display the corpus selectors, if this is global
-    // search. Also returns the index of the more results item to allow the SearchDialog
-    // to tell the ListView to scroll to that list item.
-    public static final String SHOW_CORPUS_SELECTORS = "showCorpusSelectors";
-    
+
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
     
@@ -70,16 +62,22 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mText2Col;
     private int mIconName1Col;
     private int mIconName2Col;
-    private int mIconBitmap1Col;
-    private int mIconBitmap2Col;
-    
+
     // This value is stored in SuggestionsAdapter by the SearchDialog to indicate whether
     // a particular list item should be selected upon the next call to notifyDataSetChanged.
     // This is used to indicate the index of the "More results..." list item so that when
     // the data set changes after a click of "More results...", we can correctly tell the
-    // ListView to scroll to the right line item. It gets reset to -1 every time it is consumed.
-    private int mListItemToSelect = -1;
-    
+    // ListView to scroll to the right line item. It gets reset to NONE every time it
+    // is consumed.
+    private int mListItemToSelect = NONE;
+    static final int NONE = -1;
+
+    // holds the maximum position that has been displayed to the user
+    int mMaxDisplayed = NONE;
+
+    // holds the position that, when displayed, should result in notifying the cursor
+    int mDisplayNotifyPos = NONE;
+
     public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
             WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
         super(context,
@@ -129,6 +127,11 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     @Override
     public void changeCursor(Cursor c) {
         if (DBG) Log.d(LOG_TAG, "changeCursor(" + c + ")");
+
+        if (mCursor != null) {
+            callCursorPreClose(mCursor);
+        }
+
         super.changeCursor(c);
         if (c != null) {
             mFormatCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
@@ -136,46 +139,75 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mText2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
             mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
             mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
-            mIconBitmap1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1_BITMAP);
-            mIconBitmap2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2_BITMAP);
         }
-        updateWorking();
     }
-        
+
+    /**
+     * Handle sending and receiving information associated with
+     * {@link DialogCursorProtocol#PRE_CLOSE}.
+     *
+     * @param cursor The cursor to call.
+     */
+    private void callCursorPreClose(Cursor cursor) {
+        if (!mGlobalSearchMode) return;
+        final Bundle request = new Bundle();
+        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.PRE_CLOSE);
+        request.putInt(DialogCursorProtocol.PRE_CLOSE_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
+        final Bundle response = cursor.respond(request);
+
+        mMaxDisplayed = -1;
+    }
+
     @Override
     public void notifyDataSetChanged() {
+        if (DBG) Log.d(LOG_TAG, "notifyDataSetChanged");
         super.notifyDataSetChanged();
-        updateWorking();
-        if (mListItemToSelect != -1) {
+
+        callCursorPostRefresh(mCursor);
+
+        // look out for the pending item we are supposed to scroll to
+        if (mListItemToSelect != NONE) {
             mSearchDialog.setListSelection(mListItemToSelect);
-            mListItemToSelect = -1;
+            mListItemToSelect = NONE;
         }
     }
-    
+
     /**
-     * Specifies the list item to select upon next call of {@link #notifyDataSetChanged()},
-     * in order to let us scroll the "More results..." list item to the top of the screen
-     * (or as close as it can get) when clicked.
+     * Handle sending and receiving information associated with
+     * {@link DialogCursorProtocol#POST_REFRESH}.
+     * 
+     * @param cursor The cursor to call.
      */
-    public void setListItemToSelect(int index) {
-        mListItemToSelect = index;
+    private void callCursorPostRefresh(Cursor cursor) {
+        if (!mGlobalSearchMode) return;
+        final Bundle request = new Bundle();
+        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.POST_REFRESH);
+        final Bundle response = cursor.respond(request);
+
+        mSearchDialog.setWorking(
+                response.getBoolean(DialogCursorProtocol.POST_REFRESH_RECEIVE_ISPENDING, false));
+
+        mDisplayNotifyPos =
+                response.getInt(DialogCursorProtocol.POST_REFRESH_RECEIVE_DISPLAY_NOTIFY, -1);
     }
-    
+
     /**
-     * Updates the search dialog according to the current working status of the cursor.
+     * Tell the cursor which position was clicked, handling sending and receiving information
+     * associated with {@link DialogCursorProtocol#CLICK}.
+     *
+     * @param cursor The cursor
+     * @param position The position that was clicked.
      */
-    private void updateWorking() {
-        if (!mGlobalSearchMode || mCursor == null) return;
-        
-        Bundle request = new Bundle();
-        request.putString(SearchManager.EXTRA_DATA_KEY, IS_WORKING);
-        Bundle response = mCursor.respond(request);
-        if (response.containsKey(IS_WORKING)) {
-            boolean isWorking = response.getBoolean(IS_WORKING);
-            mSearchDialog.setWorking(isWorking);
-        }
+    void callCursorOnClick(Cursor cursor, int position) {
+        if (!mGlobalSearchMode) return;
+        final Bundle request = new Bundle(1);
+        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.CLICK);
+        request.putInt(DialogCursorProtocol.CLICK_SEND_POSITION, position);
+        final Bundle response = cursor.respond(request);
+        mListItemToSelect = response.getInt(
+                DialogCursorProtocol.CLICK_RECEIVE_SELECTED_POS, SuggestionsAdapter.NONE);
     }
-    
+
     /**
      * Tags the view with cached child view look-ups.
      */
@@ -185,7 +217,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         v.setTag(new ChildViewCache(v));
         return v;
     }
-    
+
     /**
      * Cache of the child views of drop-drown list items, to avoid looking up the children
      * each time the contents of a list item are changed.
@@ -207,15 +239,26 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ChildViewCache views = (ChildViewCache) view.getTag();
-        boolean isHtml = false;
-        if (mFormatCol >= 0) {
-            String format = cursor.getString(mFormatCol);
-            isHtml = "html".equals(format);    
+        final int pos = cursor.getPosition();
+
+        // update the maximum position displayed since last refresh
+        if (pos > mMaxDisplayed) {
+            mMaxDisplayed = pos;
         }
+
+        // if the cursor wishes to be notified about this position, send it
+        if (mGlobalSearchMode && mDisplayNotifyPos != NONE && pos == mDisplayNotifyPos) {
+            final Bundle request = new Bundle();
+            request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.THRESH_HIT);
+            mCursor.respond(request);
+            mDisplayNotifyPos = NONE;  // only notify the first time
+        }
+
+        final boolean isHtml = mFormatCol > 0 && "html".equals(cursor.getString(mFormatCol));
         setViewText(cursor, views.mText1, mText1Col, isHtml);
         setViewText(cursor, views.mText2, mText2Col, isHtml);
-        setViewIcon(cursor, views.mIcon1, mIconBitmap1Col, mIconName1Col);
-        setViewIcon(cursor, views.mIcon2, mIconBitmap2Col, mIconName2Col);
+        setViewIcon(cursor, views.mIcon1, mIconName1Col);
+        setViewIcon(cursor, views.mIcon2, mIconName2Col);
     }
     
     private void setViewText(Cursor cursor, TextView v, int textCol, boolean isHtml) {
@@ -237,26 +280,15 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
     }
     
-    private void setViewIcon(Cursor cursor, ImageView v, int iconBitmapCol, int iconNameCol) {
+    private void setViewIcon(Cursor cursor, ImageView v, int iconNameCol) {
         if (v == null) {
             return;
         }
-        Drawable drawable = null;
-        // First try the bitmap column
-        if (iconBitmapCol >= 0) {
-            byte[] data = cursor.getBlob(iconBitmapCol);
-            if (data != null) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                if (bitmap != null) {
-                    drawable = new BitmapDrawable(bitmap);
-                }
-            }
+        if (iconNameCol < 0) {
+            return;
         }
-        // If there was no bitmap, try the icon resource column.
-        if (drawable == null && iconNameCol >= 0) {
-            String value = cursor.getString(iconNameCol);
-            drawable = getDrawableFromResourceValue(value);
-        }
+        String value = cursor.getString(iconNameCol);
+        Drawable drawable = getDrawableFromResourceValue(value);
         // Set the icon even if the drawable is null, since we need to clear any
         // previous icon.
         v.setImageDrawable(drawable);
@@ -361,21 +393,36 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         
         // First, check the cache.
         Drawable drawable = mOutsideDrawablesCache.get(drawableId);
-        if (drawable != null) return drawable;
+        if (drawable != null) {
+            if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + drawableId);
+            return drawable;
+        }
 
         try {
             // Not cached, try using it as a plain resource ID in the provider's context.
             int resourceId = Integer.parseInt(drawableId);
             drawable = mProviderContext.getResources().getDrawable(resourceId);
+            if (DBG) Log.d(LOG_TAG, "Found icon by resource ID: " + drawableId);
         } catch (NumberFormatException nfe) {
             // The id was not an integer resource id.
             // Let the ContentResolver handle content, android.resource and file URIs.
             try {
                 Uri uri = Uri.parse(drawableId);
-                drawable = Drawable.createFromStream(
-                        mProviderContext.getContentResolver().openInputStream(uri),
-                        null);
+                InputStream stream = mProviderContext.getContentResolver().openInputStream(uri);
+                if (stream != null) {
+                    try {
+                        drawable = Drawable.createFromStream(stream, null);
+                    } finally {
+                        try {
+                            stream.close();
+                        } catch (IOException ex) {
+                            Log.e(LOG_TAG, "Error closing icon stream for " + uri, ex);
+                        }
+                    }
+                }
+                if (DBG) Log.d(LOG_TAG, "Opened icon input stream: " + drawableId);
             } catch (FileNotFoundException fnfe) {
+                if (DBG) Log.d(LOG_TAG, "Icon stream not found: " + drawableId);
                 // drawable = null;
             }
                     
@@ -385,7 +432,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mOutsideDrawablesCache.put(drawableId, drawable);
             }
         } catch (NotFoundException nfe) {
-            // Resource could not be found
+            if (DBG) Log.d(LOG_TAG, "Icon resource not found: " + drawableId);
             // drawable = null;
         }
         
@@ -402,7 +449,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     public static String getColumnString(Cursor cursor, String columnName) {
         int col = cursor.getColumnIndex(columnName);
-        if (col == -1) {
+        if (col == NONE) {
             return null;
         }
         return cursor.getString(col);

@@ -206,6 +206,12 @@
             <meta-data android:name="com.android.unit_tests.reference" android:resource="@xml/metadata" />
         </provider>
 
+        <!-- Application components used for content tests -->
+        <provider android:name=".content.MemoryFileProvider"
+                android:authorities="com.android.unit_tests.content.MemoryFileProvider"
+                android:process=":MemoryFileProvider">
+        </provider>
+
         <!-- Application components used for os tests -->
 
         <service android:name=".os.MessengerService"

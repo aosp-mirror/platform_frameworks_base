@@ -74,4 +74,11 @@ public class ContentProviderResult implements Parcelable {
             return new ContentProviderResult[size];
         }
     };
+
+    public String toString() {
+        if (uri != null) {
+            return "ContentProviderResult(uri=" + uri.toString() + ")";
+        }
+        return "ContentProviderResult(count=" + count + ")";
+    }
 }

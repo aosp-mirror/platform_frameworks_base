@@ -83,9 +83,8 @@ public class RenderScript {
     native private int  nAllocationCreateTyped(int type);
     native private int  nAllocationCreatePredefSized(int predef, int count);
     native private int  nAllocationCreateSized(int elem, int count);
-    native private int  nAllocationCreateFromBitmap(int w, int h, int dstFmt, int srcFmt, boolean genMips, int[] data);
+    native private int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
 
-    //native private int  nAllocationCreateFromBitmap(type.mID);
     native private void nAllocationUploadToTexture(int alloc, int baseMioLevel);
     native private void nAllocationDestroy(int alloc);
     native private void nAllocationData(int id, int[] d);
@@ -190,21 +189,19 @@ public class RenderScript {
         USER_I32 (5),
         USER_FLOAT (6),
 
-        A_8 (7),
-        RGB_565 (8),
-        RGBA_5551 (9),
-        RGBA_4444 (10),
-        RGB_888 (11),
-        RGBA_8888 (12),
+        A_8                (7),
+        RGB_565            (8),
+        RGB_888            (12),
+        RGBA_5551          (9),
+        RGBA_4444          (10),
+        RGBA_8888          (13),
 
-        INDEX_16 (13),
-        INDEX_32 (14),
-        XY_F32 (15),
-        XYZ_F32 (16),
-        ST_XY_F32 (17),
-        ST_XYZ_F32 (18),
-        NORM_XYZ_F32 (19),
-        NORM_ST_XYZ_F32 (20);
+        INDEX_16           (16),
+        INDEX_32           (17),
+        XY_F32             (18),
+        XYZ_F32            (19),
+        ST_XY_F32          (20),
+        ST_XYZ_F32         (21);
 
         int mID;
         ElementPredefined(int id) {
@@ -475,41 +472,7 @@ public class RenderScript {
     }
 
     public Allocation allocationCreateFromBitmap(Bitmap b, ElementPredefined dstFmt, boolean genMips) {
-        int w = b.getWidth();
-        int h = b.getHeight();
-        int[] data = new int[w * h];
-
-        int outPtr = 0;
-        for(int y=0; y < h; y++) {
-            for(int x=0; x < w; x++) {
-                data[outPtr] = b.getPixel(x, y);
-                outPtr++;
-            }
-        }
-
-        int srcFmt = 0;
-        /*
-        switch(b.getConfig()) {
-        case ALPHA_8:
-            srcFmt = ElementPredefined.A_8.mID;
-            break;
-        case ARGB_4444:
-            srcFmt = ElementPredefined.RGBA_4444.mID;
-            break;
-        case ARGB_8888:
-            srcFmt = ElementPredefined.RGBA_8888.mID;
-            break;
-        case RGB_565:
-            srcFmt = ElementPredefined.RGB_565.mID;
-            break;
-        default:
-            Log.e(LOG_TAG, "allocationCreateFromBitmap, unknown bitmap format");
-        }
-        */
-
-        srcFmt = ElementPredefined.RGBA_8888.mID;
-
-        int id = nAllocationCreateFromBitmap(w, h, dstFmt.mID, srcFmt, genMips, data);
+        int id = nAllocationCreateFromBitmap(dstFmt.mID, genMips, b); 
         return new Allocation(id);
     }
 

@@ -16,6 +16,8 @@
 
 #include "rsContext.h"
 
+#include <GLES/gl.h>
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -234,6 +236,108 @@ size_t Element::getComponentOffsetBits(uint32_t componentNumber) const
     }
     return offset;
 }
+
+uint32_t Element::getGLType() const
+{
+    int bits[4];
+
+    if (mComponentCount > 4) {
+        return 0;
+    }
+
+    for (uint32_t ct=0; ct < mComponentCount; ct++) {
+        bits[ct] = mComponents[ct]->getBits();
+        if (mComponents[ct]->getType() != Component::UNSIGNED) {
+            return 0;
+        }
+        if (!mComponents[ct]->getIsNormalized()) {
+            return 0;
+        }
+    }
+
+    switch(mComponentCount) {
+    case 1:
+        if (bits[0] == 8) {
+            return GL_UNSIGNED_BYTE;
+        }
+        return 0;
+    case 2:
+        if ((bits[0] == 8) &&
+            (bits[1] == 8)) {
+            return GL_UNSIGNED_BYTE;
+        }
+        return 0;
+    case 3:
+        if ((bits[0] == 8) &&
+            (bits[1] == 8) &&
+            (bits[2] == 8)) {
+            return GL_UNSIGNED_BYTE;
+        }
+        if ((bits[0] == 5) &&
+            (bits[1] == 6) &&
+            (bits[2] == 5)) {
+            return GL_UNSIGNED_SHORT_5_6_5;
+        }
+        return 0;
+    case 4:
+        if ((bits[0] == 8) &&
+            (bits[1] == 8) &&
+            (bits[2] == 8) &&
+            (bits[3] == 8)) {
+            return GL_UNSIGNED_BYTE;
+        }
+        if ((bits[0] == 4) &&
+            (bits[1] == 4) &&
+            (bits[2] == 4) &&
+            (bits[3] == 4)) {
+            return GL_UNSIGNED_SHORT_4_4_4_4;
+        }
+        if ((bits[0] == 5) &&
+            (bits[1] == 5) &&
+            (bits[2] == 5) &&
+            (bits[3] == 1)) {
+            return GL_UNSIGNED_SHORT_5_5_5_1;
+        }
+    }
+    return 0;
+}
+
+uint32_t Element::getGLFormat() const
+{
+    switch(mComponentCount) {
+    case 1:
+        if (mComponents[0]->getKind() == Component::ALPHA) {
+            return GL_ALPHA;
+        }
+        if (mComponents[0]->getKind() == Component::LUMINANCE) {
+            return GL_LUMINANCE;
+        }
+        break;
+    case 2:
+        if ((mComponents[0]->getKind() == Component::LUMINANCE) &&
+            (mComponents[1]->getKind() == Component::ALPHA)) {
+            return GL_LUMINANCE_ALPHA;
+        }
+        break;
+    case 3:
+        if ((mComponents[0]->getKind() == Component::RED) &&
+            (mComponents[1]->getKind() == Component::GREEN) &&
+            (mComponents[2]->getKind() == Component::BLUE)) {
+            return GL_RGB;
+        }
+        break;
+    case 4:
+        if ((mComponents[0]->getKind() == Component::RED) &&
+            (mComponents[1]->getKind() == Component::GREEN) &&
+            (mComponents[2]->getKind() == Component::BLUE) &&
+            (mComponents[3]->getKind() == Component::ALPHA)) {
+            return GL_RGBA;
+        }
+        break;
+    }
+    return 0;
+}
+
 
 ElementState::ElementState()
 {

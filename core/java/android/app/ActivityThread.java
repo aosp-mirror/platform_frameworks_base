@@ -162,7 +162,7 @@ public final class ActivityThread {
         return metrics;
     }
 
-    Resources getTopLevelResources(String appDir, float applicationScale) {
+    Resources getTopLevelResources(String appDir, PackageInfo pkgInfo) {
         synchronized (mPackages) {
             //Log.w(TAG, "getTopLevelResources: " + appDir);
             WeakReference<Resources> wr = mActiveResources.get(appDir);
@@ -181,23 +181,17 @@ public final class ActivityThread {
             if (assets.addAssetPath(appDir) == 0) {
                 return null;
             }
-            DisplayMetrics metrics = getDisplayMetricsLocked(false);
-            // density used to load resources
-            // scaledDensity is calculated in Resources constructor
-            //
-            boolean usePreloaded = true;
-
-            // TODO: use explicit flag to indicate the compatibility mode.
-            if (applicationScale != 1.0f) {
-                usePreloaded = false;
-                DisplayMetrics newMetrics = new DisplayMetrics();
-                newMetrics.setTo(metrics);
-                float newDensity = metrics.density / applicationScale;
-                newMetrics.updateDensity(newDensity);
-                metrics = newMetrics;
+            ApplicationInfo appInfo;
+            try {
+                appInfo = getPackageManager().getApplicationInfo(
+                        pkgInfo.getPackageName(),
+                        PackageManager.GET_SUPPORTS_DENSITIES | PackageManager.GET_EXPANDABLE);
+            } catch (RemoteException e) {
+                throw new AssertionError(e);
             }
             //Log.i(TAG, "Resource:" + appDir + ", display metrics=" + metrics);
-            r = new Resources(assets, metrics, getConfiguration(), usePreloaded);
+            DisplayMetrics metrics = getDisplayMetricsLocked(false);
+            r = new Resources(assets, metrics, getConfiguration(), appInfo);
             //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
             // XXX need to remove entries when weak references go away
             mActiveResources.put(appDir, new WeakReference<Resources>(r));
@@ -225,7 +219,6 @@ public final class ActivityThread {
         private Resources mResources;
         private ClassLoader mClassLoader;
         private Application mApplication;
-        private float mApplicationScale;
 
         private final HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
             = new HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>>();
@@ -268,8 +261,6 @@ public final class ActivityThread {
                 mClassLoader = mSystemContext.getClassLoader();
                 mResources = mSystemContext.getResources();
             }
-
-            mApplicationScale = -1.0f;
         }
 
         public PackageInfo(ActivityThread activityThread, String name,
@@ -288,7 +279,6 @@ public final class ActivityThread {
             mIncludeCode = true;
             mClassLoader = systemContext.getClassLoader();
             mResources = systemContext.getResources();
-            mApplicationScale = systemContext.getApplicationScale();
         }
 
         public String getPackageName() {
@@ -297,45 +287,6 @@ public final class ActivityThread {
 
         public boolean isSecurityViolation() {
             return mSecurityViolation;
-        }
-
-        public float getApplicationScale() {
-            if (mApplicationScale > 0.0f) {
-                return mApplicationScale;
-            }
-            DisplayMetrics metrics = mActivityThread.getDisplayMetricsLocked(false);
-            // Find out the density scale (relative to 160) of the supported density  that
-            // is closest to the system's density.
-            try {
-                ApplicationInfo ai = getPackageManager().getApplicationInfo(
-                        mPackageName, PackageManager.GET_SUPPORTS_DENSITIES);
-
-                float appScale = -1.0f;
-                if (ai.supportsDensities != null) {
-                    int minDiff = Integer.MAX_VALUE;
-                    for (int density : ai.supportsDensities) {
-                        int tmpDiff = (int) Math.abs(DisplayMetrics.DEVICE_DENSITY - density);
-                        if (tmpDiff == 0) {
-                            appScale = 1.0f;
-                            break;
-                        }
-                        // prefer higher density (appScale>1.0), unless that's only option.
-                        if (tmpDiff < minDiff && appScale < 1.0f) {
-                            appScale = DisplayMetrics.DEVICE_DENSITY / density;
-                            minDiff = tmpDiff;
-                        }
-                    }
-                }
-                if (appScale < 0.0f) {
-                    mApplicationScale = metrics.density;
-                } else {
-                    mApplicationScale = appScale;
-                }
-            } catch (RemoteException e) {
-                throw new AssertionError(e);
-            }
-            if (localLOGV) Log.v(TAG, "appScale=" + mApplicationScale + ", pkg=" + mPackageName);
-            return mApplicationScale;
         }
 
         /**
@@ -495,7 +446,7 @@ public final class ActivityThread {
 
         public Resources getResources(ActivityThread mainThread) {
             if (mResources == null) {
-                mResources = mainThread.getTopLevelResources(mResDir, getApplicationScale());
+                mResources = mainThread.getTopLevelResources(mResDir, this);
             }
             return mResources;
         }
@@ -3606,8 +3557,6 @@ public final class ActivityThread {
             }
             mConfiguration.updateFrom(config);
             DisplayMetrics dm = getDisplayMetricsLocked(true);
-            DisplayMetrics appDm = new DisplayMetrics();
-            appDm.setTo(dm);
 
             // set it for java, this also affects newly created Resources
             if (config.locale != null) {
@@ -3627,11 +3576,7 @@ public final class ActivityThread {
                     WeakReference<Resources> v = it.next();
                     Resources r = v.get();
                     if (r != null) {
-                        // keep the original density based on application cale.
-                        appDm.updateDensity(r.getDisplayMetrics().density);
-                        r.updateConfiguration(config, appDm);
-                        // reset
-                        appDm.setTo(dm);
+                        r.updateConfiguration(config, dm);
                         //Log.i(TAG, "Updated app resources " + v.getKey()
                         //        + " " + r + ": " + r.getConfiguration());
                     } else {

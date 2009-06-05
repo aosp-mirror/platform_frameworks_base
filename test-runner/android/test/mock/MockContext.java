@@ -386,12 +386,4 @@ public class MockContext extends Context {
             throws PackageManager.NameNotFoundException {
         throw new UnsupportedOperationException();
     }
-
-    /**
-     * @hide
-     */
-    @Override
-    public float getApplicationScale() {
-        throw new UnsupportedOperationException();
-    }
 }

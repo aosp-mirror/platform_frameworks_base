@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -34,11 +35,17 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 
 import android.backup.IBackupManager;
+import android.backup.BackupManager;
+
+import com.android.internal.backup.AdbTransport;
+import com.android.internal.backup.GoogleTransport;
+import com.android.internal.backup.IBackupTransport;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -59,6 +66,7 @@ class BackupManagerService extends IBackupManager.Stub {
     //private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
 
     private static final int MSG_RUN_BACKUP = 1;
+    private static final int MSG_RUN_FULL_BACKUP = 2;
     
     private Context mContext;
     private PackageManager mPackageManager;
@@ -89,6 +97,16 @@ class BackupManagerService extends IBackupManager.Stub {
     private ArrayList<BackupRequest> mBackupQueue;
     private final Object mQueueLock = new Object();
 
+    // The thread performing the sequence of queued backups binds to each app's agent
+    // in succession.  Bind notifications are asynchronously delivered through the
+    // Activity Manager; use this lock object to signal when a requested binding has
+    // completed.
+    private final Object mAgentConnectLock = new Object();
+    private IBackupAgent mConnectedAgent;
+    private volatile boolean mConnecting;
+
+    private int mTransportId;
+
     private File mStateDir;
     private File mDataDir;
     
@@ -101,6 +119,7 @@ class BackupManagerService extends IBackupManager.Stub {
         mStateDir = new File(Environment.getDataDirectory(), "backup");
         mStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
+        mTransportId = BackupManager.TRANSPORT_GOOGLE;
         
         // Build our mapping of uid to backup client services
         synchronized (mBackupParticipants) {
@@ -130,6 +149,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 return;
             }
 
+            // !!! TODO: this is buggy right now; we wind up with duplicate participant entries
+            // after using 'adb install -r' of a participating app
             String action = intent.getAction();
             if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
                 synchronized (mBackupParticipants) {
@@ -166,7 +187,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // snapshot the pending-backup set and work on that
                 synchronized (mQueueLock) {
                     if (mBackupQueue == null) {
-                        mBackupQueue = new ArrayList();
+                        mBackupQueue = new ArrayList<BackupRequest>();
                         for (BackupRequest b: mPendingBackups.values()) {
                             mBackupQueue.add(b);
                         }
@@ -176,68 +197,24 @@ class BackupManagerService extends IBackupManager.Stub {
                     // WARNING: If we crash after this line, anything in mPendingBackups will
                     // be lost.  FIX THIS.
                 }
-                startOneAgent();
+                (new PerformBackupThread(mTransportId, mBackupQueue)).run();
+                break;
+
+            case MSG_RUN_FULL_BACKUP:
                 break;
             }
         }
     }
 
-    void startOneAgent() {
-        // Loop until we find someone to start or the queue empties out.
-        while (true) {
-            BackupRequest request;
-            synchronized (mQueueLock) {
-                int queueSize = mBackupQueue.size();
-                Log.d(TAG, "mBackupQueue.size=" + queueSize);
-                if (queueSize == 0) {
-                    mBackupQueue = null;
-                    // if there are pending backups, start those after a short delay
-                    if (mPendingBackups.size() > 0) {
-                        mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, COLLECTION_INTERVAL);
-                    }
-                    return;
-                }
-                request = mBackupQueue.get(0);
-                // Take it off the queue when we're done.
-            }
-            
-            Log.d(TAG, "starting agent for " + request);
-            // !!! TODO: need to handle the restore case?
-            int mode = (request.fullBackup)
-                    ? IApplicationThread.BACKUP_MODE_FULL
-                    : IApplicationThread.BACKUP_MODE_INCREMENTAL;
-            try {
-                if (mActivityManager.bindBackupAgent(request.appInfo, mode)) {
-                    Log.d(TAG, "awaiting agent for " + request);
-                    // success
-                    return;
-                }
-            } catch (RemoteException e) {
-                // can't happen; activity manager is local
-            } catch (SecurityException ex) {
-                // Try for the next one.
-                Log.d(TAG, "error in bind", ex);
-            }
-        }
-    }
-
-    void processOneBackup(String packageName, IBackupAgent bs) {
+    void processOneBackup(BackupRequest request, IBackupAgent agent, IBackupTransport transport) {
+        final String packageName = request.appInfo.packageName;
         Log.d(TAG, "processOneBackup doBackup() on " + packageName);
 
-        BackupRequest request;
-        synchronized (mQueueLock) {
-            if (mBackupQueue == null) {
-                Log.d(TAG, "mBackupQueue is null.  WHY?");
-            }
-            request = mBackupQueue.get(0);
-        }
-
         try {
-            // !!! TODO right now these naming schemes limit applications to
-            // one backup service per package
-            File savedStateName = new File(mStateDir, request.appInfo.packageName);
-            File backupDataName = new File(mDataDir, request.appInfo.packageName + ".data");
-            File newStateName = new File(mStateDir, request.appInfo.packageName + ".new");
+            // !!! TODO: get the state file dir from the transport
+            File savedStateName = new File(mStateDir, packageName);
+            File backupDataName = new File(mDataDir, packageName + ".data");
+            File newStateName = new File(mStateDir, packageName + ".new");
             
             // In a full backup, we pass a null ParcelFileDescriptor as
             // the saved-state "file"
@@ -259,9 +236,10 @@ class BackupManagerService extends IBackupManager.Stub {
                             ParcelFileDescriptor.MODE_CREATE);
 
             // Run the target's backup pass
+            boolean success = false;
             try {
-                // TODO: Make this oneway
-                bs.doBackup(savedState, backupData, newState);
+                agent.doBackup(savedState, backupData, newState);
+                success = true;
             } finally {
                 if (savedState != null) {
                     savedState.close();
@@ -270,43 +248,35 @@ class BackupManagerService extends IBackupManager.Stub {
                 newState.close();
             }
 
-            // !!! TODO: Now propagate the newly-backed-up data to the transport
-            
-            // !!! TODO: After successful transport, delete the now-stale data
-            // and juggle the files so that next time the new state is passed
-            //backupDataName.delete();
-            newStateName.renameTo(savedStateName);
-            
+            // Now propagate the newly-backed-up data to the transport
+            if (success) {
+                if (DEBUG) Log.v(TAG, "doBackup() success; calling transport");
+                backupData =
+                    ParcelFileDescriptor.open(backupDataName, ParcelFileDescriptor.MODE_READ_ONLY);
+                int error = transport.performBackup(packageName, backupData);
+
+                // !!! TODO: After successful transport, delete the now-stale data
+                // and juggle the files so that next time the new state is passed
+                //backupDataName.delete();
+                newStateName.renameTo(savedStateName);
+            }
         } catch (FileNotFoundException fnf) {
             Log.d(TAG, "File not found on backup: ");
             fnf.printStackTrace();
         } catch (RemoteException e) {
-            Log.d(TAG, "Remote target " + packageName + " threw during backup:");
+            Log.d(TAG, "Remote target " + request.appInfo.packageName + " threw during backup:");
             e.printStackTrace();
         } catch (Exception e) {
             Log.w(TAG, "Final exception guard in backup: ");
             e.printStackTrace();
         }
-        synchronized (mQueueLock) {
-            mBackupQueue.remove(0);
-        }
-
-        if (request != null) {
-            try {
-                mActivityManager.unbindBackupAgent(request.appInfo);
-            } catch (RemoteException e) {
-                // can't happen
-            }
-        }
-
-        // start the next one
-        startOneAgent();
     }
 
     // Add the backup agents in the given package to our set of known backup participants.
     // If 'packageName' is null, adds all backup agents in the whole system.
     void addPackageParticipantsLocked(String packageName) {
         // Look for apps that define the android:backupAgent attribute
+        if (DEBUG) Log.v(TAG, "addPackageParticipantsLocked: " + packageName);
         List<ApplicationInfo> targetApps = allAgentApps();
         addPackageParticipantsLockedInner(packageName, targetApps);
     }
@@ -336,6 +306,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Remove the given package's backup services from our known active set.  If
     // 'packageName' is null, *all* backup services will be removed.
     void removePackageParticipantsLocked(String packageName) {
+        if (DEBUG) Log.v(TAG, "removePackageParticipantsLocked: " + packageName);
         List<ApplicationInfo> allApps = null;
         if (packageName != null) {
             allApps = new ArrayList<ApplicationInfo>();
@@ -354,6 +325,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
     private void removePackageParticipantsLockedInner(String packageName,
             List<ApplicationInfo> agents) {
+        if (DEBUG) {
+            Log.v(TAG, "removePackageParticipantsLockedInner (" + packageName
+                    + ") removing " + agents.size() + " entries");
+            for (ApplicationInfo a : agents) {
+                Log.v(TAG, "    - " + a);
+            }
+        }
         for (ApplicationInfo app : agents) {
             if (packageName == null || app.packageName.equals(packageName)) {
                 int uid = app.uid;
@@ -361,8 +339,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (set != null) {
                     set.remove(app);
                     if (set.size() == 0) {
-                        mBackupParticipants.put(uid, null);
-                    }
+                        mBackupParticipants.delete(uid);                    }
                 }
             }
         }
@@ -390,11 +367,134 @@ class BackupManagerService extends IBackupManager.Stub {
             Log.e(TAG, "updatePackageParticipants called with null package name");
             return;
         }
+        if (DEBUG) Log.v(TAG, "updatePackageParticipantsLocked: " + packageName);
 
         // brute force but small code size
         List<ApplicationInfo> allApps = allAgentApps();
         removePackageParticipantsLockedInner(packageName, allApps);
         addPackageParticipantsLockedInner(packageName, allApps);
+    }
+
+    // ----- Back up a set of applications via a worker thread -----
+
+    class PerformBackupThread extends Thread {
+        private static final String TAG = "PerformBackupThread";
+        int mTransport;
+        ArrayList<BackupRequest> mQueue;
+
+        public PerformBackupThread(int transportId, ArrayList<BackupRequest> queue) {
+            mTransport = transportId;
+            mQueue = queue;
+        }
+
+        @Override
+        public void run() {
+            /*
+             * 1. start up the current transport
+             * 2. for each item in the queue:
+             *      2a. bind the agent [wait for async attach]
+             *      2b. set up the files and call doBackup()
+             *      2c. unbind the agent
+             * 3. tear down the transport
+             * 4. done!
+             */
+            if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
+
+            // stand up the current transport
+            IBackupTransport transport = null;
+            switch (mTransport) {
+            case BackupManager.TRANSPORT_ADB:
+                if (DEBUG) Log.v(TAG, "Initializing adb transport");
+                transport = new AdbTransport();
+                break;
+
+            case BackupManager.TRANSPORT_GOOGLE:
+                if (DEBUG) Log.v(TAG, "Initializing Google transport");
+                //!!! TODO: stand up the google backup transport here
+                transport = new GoogleTransport();
+                break;
+
+            default:
+                Log.e(TAG, "Perform backup with unknown transport " + mTransport);
+                // !!! TODO: re-enqueue the backup queue for later?
+                return;
+            }
+
+            try {
+                transport.startSession();
+            } catch (Exception e) {
+                Log.e(TAG, "Error starting backup session");
+                e.printStackTrace();
+                // !!! TODO: re-enqueue the backup queue for later?
+                return;
+            }
+
+            // The transport is up and running; now run all the backups in our queue
+            doQueuedBackups(transport);
+
+            // Finally, tear down the transport
+            try {
+                transport.endSession();
+            } catch (Exception e) {
+                Log.e(TAG, "Error ending transport");
+                e.printStackTrace();
+            }
+        }
+
+        private void doQueuedBackups(IBackupTransport transport) {
+            for (BackupRequest request : mQueue) {
+                Log.d(TAG, "starting agent for " + request);
+                // !!! TODO: need to handle the restore case?
+
+                IBackupAgent agent = null;
+                int mode = (request.fullBackup)
+                        ? IApplicationThread.BACKUP_MODE_FULL
+                        : IApplicationThread.BACKUP_MODE_INCREMENTAL;
+                try {
+                    synchronized(mAgentConnectLock) {
+                        mConnecting = true;
+                        mConnectedAgent = null;
+                        if (mActivityManager.bindBackupAgent(request.appInfo, mode)) {
+                            Log.d(TAG, "awaiting agent for " + request);
+
+                            // success; wait for the agent to arrive
+                            while (mConnecting && mConnectedAgent == null) {
+                                try {
+                                    mAgentConnectLock.wait(10000);
+                                } catch (InterruptedException e) {
+                                    // just retry
+                                    continue;
+                                }
+                            }
+
+                            // if we timed out with no connect, abort and move on
+                            if (mConnecting == true) {
+                                Log.w(TAG, "Timeout waiting for agent " + request);
+                                continue;
+                            }
+                            agent = mConnectedAgent;
+                        }
+                    }
+                } catch (RemoteException e) {
+                    // can't happen; activity manager is local
+                } catch (SecurityException ex) {
+                    // Try for the next one.
+                    Log.d(TAG, "error in bind", ex);
+                }
+
+                // successful bind? run the backup for this agent
+                if (agent != null) {
+                    processOneBackup(request, agent, transport);
+                }
+
+                // send the unbind even on timeout, just in case
+                try {
+                    mActivityManager.unbindBackupAgent(request.appInfo);
+                } catch (RemoteException e) {
+                    // can't happen
+                }
+            }
+        }
     }
 
     // ----- IBackupManager binder interface -----
@@ -432,45 +532,75 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Schedule a backup pass in a few minutes.  As backup-eligible data
                 // keeps changing, continue to defer the backup pass until things
                 // settle down, to avoid extra overhead.
+                mBackupHandler.removeMessages(MSG_RUN_BACKUP);
                 mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, COLLECTION_INTERVAL);
             }
         }
     }
 
-    // Schedule a backup pass for a given package, even if the caller is not part of
-    // that uid or package itself.
+    // Schedule a backup pass for a given package.  This method will schedule a
+    // full backup even for apps that do not declare an android:backupAgent, so
+    // use with care.
     public void scheduleFullBackup(String packageName) throws RemoteException {
-        // !!! TODO: protect with a signature-or-system permission?
+        mContext.enforceCallingPermission("android.permission.BACKUP", "scheduleFullBackup");
+
+        if (DEBUG) Log.v(TAG, "Scheduling immediate full backup for " + packageName);
         synchronized (mQueueLock) {
-            int numKeys = mBackupParticipants.size();
-            for (int index = 0; index < numKeys; index++) {
-                int uid = mBackupParticipants.keyAt(index);
-                HashSet<ApplicationInfo> servicesAtUid = mBackupParticipants.get(uid);
-                for (ApplicationInfo app: servicesAtUid) {
-                    if (app.packageName.equals(packageName)) {
-                        mPendingBackups.put(app, new BackupRequest(app, true));
-                    }
-                }
+            try {
+                ApplicationInfo app = mPackageManager.getApplicationInfo(packageName, 0);
+                mPendingBackups.put(app, new BackupRequest(app, true));
+                mBackupHandler.sendEmptyMessage(MSG_RUN_FULL_BACKUP);
+            } catch (NameNotFoundException e) {
+                Log.w(TAG, "Could not find app for " + packageName + " to schedule full backup");
             }
         }
     }
 
-    // Callback: a requested backup agent has been instantiated
+    // Select which transport to use for the next backup operation
+    public int selectBackupTransport(int transportId) {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
+
+        int prevTransport = mTransportId;
+        mTransportId = transportId;
+        return prevTransport;
+    }
+
+    // Callback: a requested backup agent has been instantiated.  This should only
+    // be called from the Activity Manager.
     public void agentConnected(String packageName, IBinder agentBinder) {
-        Log.d(TAG, "agentConnected pkg=" + packageName + " agent=" + agentBinder);
-        IBackupAgent bs = IBackupAgent.Stub.asInterface(agentBinder);
-        processOneBackup(packageName, bs);
+        synchronized(mAgentConnectLock) {
+            if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+                Log.d(TAG, "agentConnected pkg=" + packageName + " agent=" + agentBinder);
+                IBackupAgent agent = IBackupAgent.Stub.asInterface(agentBinder);
+                mConnectedAgent = agent;
+                mConnecting = false;
+            } else {
+                Log.w(TAG, "Non-system process uid=" + Binder.getCallingUid()
+                        + " claiming agent connected");
+            }
+            mAgentConnectLock.notifyAll();
+        }
     }
 
     // Callback: a backup agent has failed to come up, or has unexpectedly quit.
     // If the agent failed to come up in the first place, the agentBinder argument
-    // will be null.
+    // will be null.  This should only be called from the Activity Manager.
     public void agentDisconnected(String packageName) {
         // TODO: handle backup being interrupted
+        synchronized(mAgentConnectLock) {
+            if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+                mConnectedAgent = null;
+                mConnecting = false;
+            } else {
+                Log.w(TAG, "Non-system process uid=" + Binder.getCallingUid()
+                        + " claiming agent disconnected");
+            }
+            mAgentConnectLock.notifyAll();
+        }
     }
-    
 
-    
+
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {

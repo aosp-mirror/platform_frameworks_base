@@ -356,39 +356,6 @@ public class SmsMessage extends SmsMessageBase {
         return privateGetSubmitPdu(destAddr, statusReportRequested, uData);
     }
 
-    static class PduParser {
-
-        PduParser() {
-        }
-
-        /**
-         * Parses an SC timestamp and returns a currentTimeMillis()-style
-         * timestamp
-         */
-        static long getSCTimestampMillis(byte[] timestamp) {
-            // TP-Service-Centre-Time-Stamp
-            int year = IccUtils.beBcdByteToInt(timestamp[0]);
-            int month = IccUtils.beBcdByteToInt(timestamp[1]);
-            int day = IccUtils.beBcdByteToInt(timestamp[2]);
-            int hour = IccUtils.beBcdByteToInt(timestamp[3]);
-            int minute = IccUtils.beBcdByteToInt(timestamp[4]);
-            int second = IccUtils.beBcdByteToInt(timestamp[5]);
-
-            Time time = new Time(Time.TIMEZONE_UTC);
-
-            // C.S0015-B v2.0, 4.5.4: range is 1996-2095
-            time.year = year >= 96 ? year + 1900 : year + 2000;
-            time.month = month - 1;
-            time.monthDay = day;
-            time.hour = hour;
-            time.minute = minute;
-            time.second = second;
-
-            return time.toMillis(true);
-        }
-
-    }
-
     /**
      * Note: This function is a GSM specific functionality which is not supported in CDMA mode.
      */
@@ -557,8 +524,8 @@ public class SmsMessage extends SmsMessageBase {
                     + originatingAddress.address);
         }
 
-        if (mBearerData.timeStamp != null) {
-                scTimeMillis = PduParser.getSCTimestampMillis(mBearerData.timeStamp);
+        if (mBearerData.msgCenterTimeStamp != null) {
+            scTimeMillis = mBearerData.msgCenterTimeStamp.toMillis(true);
         }
 
         if (Config.LOGD) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);

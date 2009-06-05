@@ -55,15 +55,6 @@ import java.util.Locale;
  *
  */
 
-/**
- * TODO(Teleca): This has a multitude of methods that are CDMA specific
- * , (registerForVoicePrivacy, registerCdmaInformationRecord, registerCdmaCallWaiting,
- * setCdmaRoamingPreference, setCdmaSubscription, getCdmaEriIcon, getCdmaEriText, ...) can
- * these type of calls be more abstract. For example CallWaiting is common between the GSM/CDMA
- * it would seem that doesn't need to be cdma specific. Also, should the application be directly
- * dealing with the CdmaInformationRecord's could they be abstracted to something more generic.
- */
-
 public abstract class PhoneBase implements Phone {
     private static final String LOG_TAG = "PHONE";
     private static final boolean LOCAL_DEBUG = true;

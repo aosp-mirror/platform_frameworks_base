@@ -11,7 +11,6 @@
 #include <utils/threads.h>
 #include <utils/List.h>
 #include <utils/Errors.h>
-#include <utils/ZipFile.h>
 
 #include <sys/types.h>
 #include <dirent.h>

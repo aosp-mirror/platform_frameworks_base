@@ -180,6 +180,12 @@ public abstract class PackageManager {
     public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
 
     /**
+     * {@link ApplicationInfo} flag: return the
+     * {link ApplicationInfo#expandable} boolean flag of the package.
+     */
+    public static final int GET_EXPANDABLE = 0x00020000;
+
+    /**
      * Permission check result: this is returned by {@link #checkPermission}
      * if the permission has been granted to the given package.
      */
@@ -1625,6 +1631,26 @@ public abstract class PackageManager {
      * preferred.
      */
     public abstract void addPreferredActivity(IntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity);
+
+    /**
+     * Replaces an existing preferred activity mapping to the system, and if that were not present
+     * adds a new preferred activity.  This will be used
+     * to automatically select the given activity component when
+     * {@link Context#startActivity(Intent) Context.startActivity()} finds
+     * multiple matching activities and also matches the given filter.
+     *
+     * @param filter The set of intents under which this activity will be
+     * made preferred.
+     * @param match The IntentFilter match category that this preference
+     * applies to.
+     * @param set The set of activities that the user was picking from when
+     * this preference was made.
+     * @param activity The component name of the activity that is to be
+     * preferred.
+     * @hide
+     */
+    public abstract void replacePreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity);
 
     /**

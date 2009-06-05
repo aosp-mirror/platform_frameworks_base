@@ -27,7 +27,7 @@ import java.io.IOException;
  * RFCOMM is a connection orientated, streaming transport over Bluetooth. It is
  * also known as the Serial Port Profile (SPP).
  *
- * TODO: Consider implementing SCO and L2CAP sockets.
+ * TODO: Consider exposing L2CAP sockets.
  * TODO: Clean up javadoc grammer and formatting.
  * TODO: Remove @hide
  * @hide
@@ -45,9 +45,10 @@ public final class BluetoothServerSocket implements Closeable {
      *                     insufficient permissions.
      */
     public static BluetoothServerSocket listenUsingRfcommOn(int port) throws IOException {
-        BluetoothServerSocket socket = new BluetoothServerSocket(true, true);
+        BluetoothServerSocket socket = new BluetoothServerSocket(
+                BluetoothSocket.TYPE_RFCOMM, true, true, port);
         try {
-            socket.mSocket.bindListenNative(port);
+            socket.mSocket.bindListenNative();
         } catch (IOException e) {
             try {
                 socket.close();
@@ -65,9 +66,31 @@ public final class BluetoothServerSocket implements Closeable {
      *                     insufficient permissions.
      */
     public static BluetoothServerSocket listenUsingInsecureRfcommOn(int port) throws IOException {
-        BluetoothServerSocket socket = new BluetoothServerSocket(false, false);
+        BluetoothServerSocket socket = new BluetoothServerSocket(
+                BluetoothSocket.TYPE_RFCOMM, false, false, port);
         try {
-            socket.mSocket.bindListenNative(port);
+            socket.mSocket.bindListenNative();
+        } catch (IOException e) {
+            try {
+                socket.close();
+            } catch (IOException e2) { }
+            throw e;
+        }
+        return socket;
+    }
+
+    /**
+     * Construct a SCO server socket.
+     * Call #accept to retrieve connections to this socket.
+     * @return A SCO BluetoothServerSocket
+     * @throws IOException On error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     */
+    public static BluetoothServerSocket listenUsingScoOn() throws IOException {
+        BluetoothServerSocket socket = new BluetoothServerSocket(
+                BluetoothSocket.TYPE_SCO, false, false, -1);
+        try {
+            socket.mSocket.bindListenNative();
         } catch (IOException e) {
             try {
                 socket.close();
@@ -79,13 +102,16 @@ public final class BluetoothServerSocket implements Closeable {
 
     /**
      * Construct a socket for incoming connections.
-     * @param auth    Require the remote device to be authenticated
-     * @param encrypt Require the connection to be encrypted
+     * @param type    type of socket
+     * @param auth    require the remote device to be authenticated
+     * @param encrypt require the connection to be encrypted
+     * @param port    remote port
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient priveleges
      */
-    private BluetoothServerSocket(boolean auth, boolean encrypt) throws IOException {
-        mSocket = new BluetoothSocket(-1, auth, encrypt, null, -1);
+    private BluetoothServerSocket(int type, boolean auth, boolean encrypt, int port)
+            throws IOException {
+        mSocket = new BluetoothSocket(type, -1, auth, encrypt, null, port);
     }
 
     /**

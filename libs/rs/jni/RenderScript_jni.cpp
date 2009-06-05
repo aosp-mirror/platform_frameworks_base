@@ -26,6 +26,8 @@
 #include <ui/EGLNativeWindowSurface.h>
 #include <ui/Surface.h>
 
+#include <core/SkBitmap.h>
+
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
@@ -48,12 +50,15 @@ static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
     env->ThrowNew(npeClazz, msg);
 }
 
-static jfieldID gContextId;
+static jfieldID gContextId = 0;
+static jfieldID gNativeBitmapID = 0;
 
 static void _nInit(JNIEnv *_env, jclass _this)
 {
-    LOGE("_nInit");
     gContextId             = _env->GetFieldID(_this, "mContext", "I");
+
+    jclass bitmapClass = _env->FindClass("android/graphics/Bitmap");
+    gNativeBitmapID = _env->GetFieldID(bitmapClass, "mNativeBitmap", "I");
 }
 
 
@@ -218,19 +223,48 @@ nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jint mip)
     rsAllocationUploadToTexture((RsAllocation)a, mip);
 }
 
-static int
-nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint w, jint h, jint dstFmt, jint srcFmt, jboolean genMips, jintArray data)
+static RsElementPredefined SkBitmapToPredefined(SkBitmap::Config cfg)
 {
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocationCreateFromBitmap, con(%p), w(%i), h(%i), dstFmt(%i), srcFmt(%i), mip(%i), len(%i)", con, w, h, dstFmt, srcFmt, genMips, len);
+    switch (cfg) {
+    case SkBitmap::kA8_Config:
+        return RS_ELEMENT_A_8;
+    case SkBitmap::kARGB_4444_Config:
+        return RS_ELEMENT_RGBA_4444;
+    case SkBitmap::kARGB_8888_Config:
+        return RS_ELEMENT_RGBA_8888;
+    case SkBitmap::kRGB_565_Config:
+        return RS_ELEMENT_RGB_565;
 
-    jint *ptr = _env->GetIntArrayElements(data, NULL);
-    jint id = (jint)rsAllocationCreateFromBitmap(w, h, (RsElementPredefined)dstFmt, (RsElementPredefined)srcFmt, genMips, ptr);
-    _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
-    return id;
+    default:
+        break;
+    }
+    // If we don't have a conversion mark it as a user type.
+    LOGE("Unsupported bitmap type");
+    return RS_ELEMENT_USER_U8;
 }
 
+static int
+nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint dstFmt, jboolean genMips, jobject jbitmap)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    SkBitmap const * nativeBitmap =
+            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+    const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap::Config config = bitmap.getConfig();
+
+    RsElementPredefined e = SkBitmapToPredefined(config);
+
+    if (e != RS_ELEMENT_USER_U8) {
+        bitmap.lockPixels();
+        const int w = bitmap.width();
+        const int h = bitmap.height();
+        const void* ptr = bitmap.getPixels();
+        jint id = (jint)rsAllocationCreateFromBitmap(w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
+        bitmap.unlockPixels();
+        return id;
+    }
+    return 0;
+}
 
 
 static void
@@ -795,7 +829,7 @@ static JNINativeMethod methods[] = {
 {"nAllocationCreateTyped",         "(I)I",                                 (void*)nAllocationCreateTyped },
 {"nAllocationCreatePredefSized",   "(II)I",                                (void*)nAllocationCreatePredefSized },
 {"nAllocationCreateSized",         "(II)I",                                (void*)nAllocationCreateSized },
-{"nAllocationCreateFromBitmap",    "(IIIIZ[I)I",                           (void*)nAllocationCreateFromBitmap },
+{"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
 {"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
 {"nAllocationDestroy",             "(I)V",                                 (void*)nAllocationDestroy },
 {"nAllocationData",                "(I[I)V",                               (void*)nAllocationData_i },

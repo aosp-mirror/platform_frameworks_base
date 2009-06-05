@@ -34,11 +34,11 @@ page.title=Activity and Task Design Guidelines
   <li><a href=#tips>Design Tips
     <ol>
       <li><a href=#activity_not_reused_tip>Don't specify intent filters in an activity that won't be re-used</a></li>
-      <li><a href=#others_to_reuse_tip>Don't define your own URI schemes</a></li>
-      <li><a href=#reusing_tip>Handle where a re-used activity is missing</a></li>
+      <!-- <li><a href=#others_to_reuse_tip>Don't define your own URI schemes</a></li> -->
+      <li><a href=#reusing_tip>Handle case where no activity matches</a></li>
       <li><a href=#activity_launching_tip>Consider how to launch your activities</a></li>
       <li><a href=#activities_added_to_task_tip>Allow activities to add to current task</a></li>
-      <li><a href=#notifications_return_tip>Notifications should be easy to return from</a></li>
+      <li><a href=#notifications_get_back_tip>Notifications should let user easily get back</li>
       <li><a href=#use_notification_tip>Use the notification system</a></li>
       <li><a href=#taking_over_back_key>Don't take over BACK key unless you absolutely need to</a></li>
     </ol>
@@ -49,7 +49,6 @@ page.title=Activity and Task Design Guidelines
 
 <ol>
   <li><a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a></li>
-  <li><a href="http://android-developers.blogspot.com/2009/05/activities-and-tasks.html">Activities and Tasks blog post</a></li>
 </ol>
 
 </div>
@@ -630,12 +629,12 @@ page.title=Activity and Task Design Guidelines
 <p>
   When the user takes an action on some data, such as touching a
   mailto:info@example.com link, they are actually initiating an Intent
-  object which then gets resolved to a particular component (we will
-  consider only activity components here). So, the result of a user
-  touching a mailto: link is an Intent object that the system tries to
-  match to an activity. If that Intent object was written explicitly
-  naming an activity (an <em>explicit intent</em>), then the system
-  immediately launches that activity in response to the user
+  object, or just an <em>intent</em>,  which then gets resolved to a
+  particular component (we consider only activity components here).
+  So, the result of a user touching a mailto: link is an Intent object 
+  that the system tries to match to an activity. If that Intent object was
+  written explicitly naming an activity (an <em>explicit intent</em>),
+  then the system immediately launches that activity in response to the user
   action. However, if that Intent object was written without naming an
   activity (an <em>implicit intent</em>), the system compares the Intent
   object to the <em>intent filters</em> of available activities. If more
@@ -872,12 +871,29 @@ page.title=Activity and Task Design Guidelines
 
 <p>
   Your applications can re-use activities made available from other
-  applications. In doing so, you cannot presume that external activity
-  will always be present &mdash; you must handle the case that the
-  external activity is not installed. Do this in the way you find most
-  appropriate, such as dimming the user control that accesses it (such
-  as a button or menu item), or displaying a message to the user that
-  sends them to the location to download it, such as the Market.
+  applications. In doing so, you cannot presume your intent will always
+  be resolved to a matching external activity &mdash; you must handle the case
+  where no application installed on the device can handle the intent.
+</p>
+
+<p>
+  You can either test that an activity matches the intent, which you can do
+  before starting the activity, or catch an exception if starting the
+  activity fails. Both approaches are descibed in the blog posting
+  <a href="http://android-developers.blogspot.com/2009/01/can-i-use-this-intent.html">Can
+  I use this Intent?</a>.
+</p>
+
+<p>
+  To test whether an intent can be resolved, your code can query the package manager.
+  The blog post provides an example in the isIntentAvailable() helper method.
+  You can perform this test when initializing the user interface.
+  For instance, you could disable the user control that initiates
+  the Intent object, or display a message to the user that lets them go
+  to a location, such as the Market, to download its application.
+  In this way, your code can start the activity (using either startActivity() 
+  or startActivityForResult()) only if the intent has tested to resolve
+  to an activity that is actually present.
 </p>
 
 <h3 id=activity_launching_tip>Consider how you want your activities to be launched or used by other applications</h3>
@@ -1054,15 +1070,14 @@ page.title=Activity and Task Design Guidelines
 </p>
 
     
-<h3 id="notifications_return_tip">Notifications should be easy for the user to return from</h3>
-
+<h3 id="notifications_get_back_tip">Notifications should let the user easily get back to the previous activity</h3>
 <p>
-  Applications that are in the background or haven't been run can
-  send out notifications to the user letting them know about events
-  of interest. For example, Calendar can send out notifications of
-  upcoming events, and Email can send out notifications when new
-  messages arrive. One of the user interface rules is that when the
-  user is in activity A and gets a notification for activity B and
+  Applications that are in the background or not running can have
+  services that send out notifications to the user letting them know about
+  events of interest. Two examples are Calendar, which can send out notifications of
+  upcoming events, and Email, which can send out notifications when new
+  messages arrive. One of the user interface guidelines is that when the
+  user is in activity A, gets a notification for activity B and
   picks that notification, when they press the BACK key, they should
   go back to activity A.&nbsp;
 </p>
@@ -1108,11 +1123,11 @@ Notifications generally happen primarily in one of two ways:
 
   <ul>
     <li>
-      <b>The application has a dedicated activity for
-      notification</b> - For example, when the user receives a
-      Calendar notification, the act of selecting that
+      <b>The chosen activity is dedicated for notification only</b> -
+      For example, when the user receives a
+      Calendar notification, choosing that
       notification starts a special activity that displays a list
-      of upcoming calendar events &mdash; a view available only
+      of upcoming calendar events &mdash; this view is available only
       from the notification, not through the Calendar's own user
       interface. After viewing this upcoming event, to ensure that
       the user pressing the BACK key will return to the activity
@@ -1140,25 +1155,25 @@ Notifications generally happen primarily in one of two ways:
     </li>
 
     <li>
-      <b>The user choosing the notification brings the activity to
+      <b>The chosen activity is not dedicated, but always comes to
       the foreground in its initial state</b> - For example, in
-      response to a notification, the Gmail application is brought
-      to the foreground presenting the list of conversations. You
-      do this by having the user's response to the notification
-      trigger an intent to launch the activity with the clear top
-      flag set. (That is, you put {@link
+      response to a notification, when the Gmail application comes
+      to the foreground, it always presents the list of conversations.
+      You can ensure this happens by setting a "clear top" flag in the
+      intent that the notification triggers.  This ensures that when the
+      activity is launched, it displays its initial activity, preventing
+      Gmail from coming to the foreground in whatever state the user last
+      happened to be viewing it. (To do this, you put {@link
       android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP
-      FLAG_ACTIVITY_CLEAR_TOP} in the intent you pass to
-      startActivity()). This prevents Gmail from coming to the
-      foreground in whatever state the user last happened to be
-      viewing it.
+      FLAG_ACTIVITY_CLEAR_TOP} in the intent you pass to startActivity()). 
     </li>
   </ul>
 
 <p>
   There are other ways to handle notifications, such as bringing the
-  activity to the foreground set to display specific data, such as the
-  ongoing text message thread of a particular person.
+  activity to the foreground, set to display specific data, such as
+  displaying the text message thread for the person who just sent a
+  new text message.
 </p>
 
 <p>

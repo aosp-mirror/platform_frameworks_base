@@ -106,6 +106,9 @@ public class GestureOverlayView extends FrameLayout {
     // TODO: Make this a list of WeakReferences
     private final ArrayList<OnGesturePerformedListener> mOnGesturePerformedListeners =
             new ArrayList<OnGesturePerformedListener>();
+    // TODO: Make this a list of WeakReferences
+    private final ArrayList<OnGesturingListener> mOnGesturingListeners =
+            new ArrayList<OnGesturingListener>();
 
     private boolean mHandleGestureActions;
 
@@ -319,6 +322,18 @@ public class GestureOverlayView extends FrameLayout {
         mHandleGestureActions = false;
     }
 
+    public void addOnGesturingListener(OnGesturingListener listener) {
+        mOnGesturingListeners.add(listener);
+    }
+
+    public void removeOnGesturingListener(OnGesturingListener listener) {
+        mOnGesturingListeners.remove(listener);
+    }
+
+    public void removeAllOnGesturingListeners() {
+        mOnGesturingListeners.clear();
+    }
+
     public boolean isGesturing() {
         return mIsGesturing;
     }
@@ -401,7 +416,7 @@ public class GestureOverlayView extends FrameLayout {
                 MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
 
         final ArrayList<OnGestureListener> listeners = mOnGestureListeners;
-        final int count = listeners.size();
+        int count = listeners.size();
         for (int i = 0; i < count; i++) {
             listeners.get(i).onGestureCancelled(this, event);
         }
@@ -411,6 +426,12 @@ public class GestureOverlayView extends FrameLayout {
         clear(false);
         mIsGesturing = false;
         mStrokeBuffer.clear();
+
+        final ArrayList<OnGesturingListener> otherListeners = mOnGesturingListeners;
+        count = otherListeners.size();
+        for (int i = 0; i < count; i++) {
+            otherListeners.get(i).onGesturingEnded(this);
+        }
     }
 
     @Override
@@ -577,6 +598,12 @@ public class GestureOverlayView extends FrameLayout {
 
                         mIsGesturing = true;
                         setCurrentColor(mCertainGestureColor);
+
+                        final ArrayList<OnGesturingListener> listeners = mOnGesturingListeners;
+                        int count = listeners.size();
+                        for (int i = 0; i < count; i++) {
+                            listeners.get(i).onGesturingStarted(this);
+                        }
                     }
                 }
             }
@@ -621,6 +648,12 @@ public class GestureOverlayView extends FrameLayout {
 
         mStrokeBuffer.clear();
         mIsGesturing = false;
+
+        final ArrayList<OnGesturingListener> listeners = mOnGesturingListeners;
+        int count = listeners.size();
+        for (int i = 0; i < count; i++) {
+            listeners.get(i).onGesturingEnded(this);
+        }
     }
 
     private void cancelGesture(MotionEvent event) {
@@ -635,12 +668,10 @@ public class GestureOverlayView extends FrameLayout {
     }
 
     private void fireOnGesturePerformed() {
-        final ArrayList<OnGesturePerformedListener> actionListeners =
-                mOnGesturePerformedListeners;
+        final ArrayList<OnGesturePerformedListener> actionListeners = mOnGesturePerformedListeners;
         final int count = actionListeners.size();
         for (int i = 0; i < count; i++) {
-            actionListeners.get(i).onGesturePerformed(GestureOverlayView.this,
-                    mCurrentGesture);
+            actionListeners.get(i).onGesturePerformed(GestureOverlayView.this, mCurrentGesture);
         }
     }
 
@@ -681,6 +712,12 @@ public class GestureOverlayView extends FrameLayout {
 
             invalidate();
         }
+    }
+
+    public static interface OnGesturingListener {
+        void onGesturingStarted(GestureOverlayView overlay);
+
+        void onGesturingEnded(GestureOverlayView overlay);
     }
 
     public static interface OnGestureListener {

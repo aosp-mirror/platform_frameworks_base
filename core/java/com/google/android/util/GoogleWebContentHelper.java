@@ -130,7 +130,14 @@ public class GoogleWebContentHelper {
         mWebView.loadUrl(mSecureUrl);
         return this;
     }
-    
+
+    public GoogleWebContentHelper loadDataWithFailUrl(String base, String data, 
+        String mimeType, String encoding, String failUrl) {
+        ensureViews();
+        mWebView.loadDataWithBaseURL(base, data, mimeType, encoding, failUrl);
+        return this;
+    }
+
     /**
      * Helper to handle the back key. Returns true if the back key was handled, 
      * otherwise returns false.

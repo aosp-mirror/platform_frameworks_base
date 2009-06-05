@@ -168,7 +168,12 @@ interface IPackageManager {
 
     void addPreferredActivity(in IntentFilter filter, int match,
             in ComponentName[] set, in ComponentName activity);
+
+    void replacePreferredActivity(in IntentFilter filter, int match,
+            in ComponentName[] set, in ComponentName activity);
+
     void clearPackagePreferredActivities(String packageName);
+
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
     

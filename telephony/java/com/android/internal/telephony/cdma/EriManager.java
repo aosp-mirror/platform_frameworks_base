@@ -28,17 +28,12 @@ import com.android.internal.util.XmlUtils;
 import java.util.HashMap;
 
 /**
- * TODO(Teleca): Please as some comments on how this class is to
- * be used. We've removed Handler as a base class and instead
- * recommend that child classes add a Handler as a member if its
- * needed.
+ * EriManager loads the ERI file definitions and manages the CDMA roaming information.
+ *
  */
-
-
 public final class EriManager {
 
     class EriFile {
-        public static final int MAX_ERI_ENTRIES = 30;
 
         public int mVersionNumber;                      // File version number
         public int mNumberOfEriEntries;                 // Number of entries
@@ -55,7 +50,30 @@ public final class EriManager {
             this.mCallPromptId = new String[] { "", "", "" };
             this.mRoamIndTable = new HashMap<Integer, EriInfo>();
         }
+    }
 
+    class EriDisplayInformation {
+        public int mEriIconIndex;
+        public int mEriIconMode;
+        public String mEriIconText;
+
+        public EriDisplayInformation(int eriIconIndex, int eriIconMode, String eriIconText) {
+            mEriIconIndex = eriIconIndex;
+            mEriIconMode = eriIconMode;
+            mEriIconText = eriIconText;
+        }
+
+//        public void setParameters(int eriIconIndex, int eriIconMode, String eriIconText){
+//            this.mEriIconIndex = eriIconIndex;
+//            this.mEriIconMode = eriIconMode;
+//            this.mEriIconText = eriIconText;
+//        }
+
+        @Override
+        public String toString() {
+            return "EriDisplayInformation: {" + " IconIndex: " + mEriIconIndex + " EriIconMode: "
+                    + mEriIconMode + " EriIconText: " + mEriIconText + " }";
+        }
     }
 
     static final String LOG_TAG = "CDMA";
@@ -67,7 +85,7 @@ public final class EriManager {
     private PhoneBase mPhone;
     private Context mContext;
     private int mEriFileSource = ERI_FROM_XML;
-    private boolean isEriFileLoaded = false;
+    private boolean isEriFileLoaded;
     private EriFile mEriFile;
 
     public EriManager(PhoneBase phone, Context context, int eriFileSource) {
@@ -214,11 +232,205 @@ public final class EriManager {
      * Returns the EriInfo record associated with roamingIndicator
      * or null if the entry is not found
      */
-    public EriInfo getEriInfo(int roamingIndicator) {
+    private EriInfo getEriInfo(int roamingIndicator) {
         if (mEriFile.mRoamIndTable.containsKey(roamingIndicator)) {
             return mEriFile.mRoamIndTable.get(roamingIndicator);
         } else {
             return null;
         }
+    }
+
+    private EriDisplayInformation getEriDisplayInformation(int roamInd, int defRoamInd){
+        //int iconIndex = -1;
+        //int iconMode = -1;
+        //String iconText = "ERI text";
+        EriDisplayInformation ret;
+
+        switch (roamInd) {
+        // Handling the standard roaming indicator (non-ERI)
+        case EriInfo.ROAMING_INDICATOR_ON:
+            ret = new EriDisplayInformation(
+                    EriInfo.ROAMING_INDICATOR_ON,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText0).toString());
+            break;
+        
+        case EriInfo.ROAMING_INDICATOR_OFF:
+            ret = new EriDisplayInformation(
+                    EriInfo.ROAMING_INDICATOR_OFF,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText1).toString());
+            break;
+
+        case EriInfo.ROAMING_INDICATOR_FLASH:
+            ret = new EriDisplayInformation(
+                    EriInfo.ROAMING_INDICATOR_FLASH,
+                    EriInfo.ROAMING_ICON_MODE_FLASH,
+                    mContext.getText(com.android.internal.R.string.roamingText2).toString());
+            break;
+
+
+        // Handling the standard ERI
+        case 3:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText3).toString());
+            break;
+
+        case 4:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText4).toString());
+            break;
+        
+        case 5:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText5).toString());
+            break;
+        
+        case 6:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText6).toString());
+            break;
+        
+        case 7:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText7).toString());
+            break;
+        
+        case 8:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText8).toString());
+            break;
+        
+        case 9:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText9).toString());
+            break;
+        
+        case 10:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText10).toString());
+            break;
+        
+        case 11:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText11).toString());
+            break;
+        
+        case 12:
+            ret = new EriDisplayInformation(
+                    roamInd,
+                    EriInfo.ROAMING_ICON_MODE_NORMAL,
+                    mContext.getText(com.android.internal.R.string.roamingText12).toString());
+            break;
+
+        // Handling the non standard Enhanced Roaming Indicator (roamInd > 63)
+        default:
+            if (!isEriFileLoaded) {
+                // ERI file NOT loaded
+                Log.d(LOG_TAG, "ERI File not loaded");
+                if(defRoamInd > 2) {
+                    Log.d(LOG_TAG, "ERI defRoamInd > 2 ...flashing");
+                    ret = new EriDisplayInformation(
+                            EriInfo.ROAMING_INDICATOR_FLASH,
+                            EriInfo.ROAMING_ICON_MODE_FLASH,
+                            mContext.getText(com.android.internal
+                                                            .R.string.roamingText2).toString());
+                } else {
+                    Log.d(LOG_TAG, "ERI defRoamInd <= 2");
+                    switch (defRoamInd) {
+                    case EriInfo.ROAMING_INDICATOR_ON:
+                        ret = new EriDisplayInformation(
+                                EriInfo.ROAMING_INDICATOR_ON,
+                                EriInfo.ROAMING_ICON_MODE_NORMAL,
+                                mContext.getText(com.android.internal
+                                                            .R.string.roamingText0).toString());
+                        break;
+                    
+                    case EriInfo.ROAMING_INDICATOR_OFF:
+                        ret = new EriDisplayInformation(
+                                EriInfo.ROAMING_INDICATOR_OFF,
+                                EriInfo.ROAMING_ICON_MODE_NORMAL,
+                                mContext.getText(com.android.internal
+                                                            .R.string.roamingText1).toString());
+                        break;
+                    
+                    case EriInfo.ROAMING_INDICATOR_FLASH:
+                        ret = new EriDisplayInformation(
+                                EriInfo.ROAMING_INDICATOR_FLASH,
+                                EriInfo.ROAMING_ICON_MODE_FLASH,
+                                mContext.getText(com.android.internal
+                                                            .R.string.roamingText2).toString());
+                        break;
+                        
+                    default:
+                        ret = new EriDisplayInformation(-1, -1, "ERI text");
+                    }
+                }
+            } else {
+                // ERI file loaded
+                Log.d(LOG_TAG, "ERI File loaded");
+                EriInfo eriInfo = getEriInfo(roamInd);
+                EriInfo defEriInfo = getEriInfo(defRoamInd);
+                if (eriInfo == null) {
+                    Log.d(LOG_TAG, "ERI roamInd " + roamInd
+                            + " not found in ERI file ...using defRoamInd " + defRoamInd);
+                    if(defEriInfo == null) {
+                        Log.e(LOG_TAG, "ERI defRoamInd " + defRoamInd
+                                + " not found in ERI file ...on");
+                        ret = new EriDisplayInformation(
+                                EriInfo.ROAMING_INDICATOR_ON,
+                                EriInfo.ROAMING_ICON_MODE_NORMAL,
+                                mContext.getText(com.android.internal
+                                                             .R.string.roamingText0).toString());
+
+                    } else {
+                        Log.d(LOG_TAG, "ERI defRoamInd " + defRoamInd + " found in ERI file");
+                        ret = new EriDisplayInformation(
+                                defEriInfo.mIconIndex,
+                                defEriInfo.mIconMode,
+                                defEriInfo.mEriText);
+                    }
+                } else {
+                    Log.d(LOG_TAG, "ERI roamInd " + roamInd + " found in ERI file");
+                    ret = new EriDisplayInformation(
+                            eriInfo.mIconIndex,
+                            eriInfo.mIconMode,
+                            eriInfo.mEriText);
+                }
+            }
+            break;
+        }
+        Log.d(LOG_TAG, "Displaying ERI " + ret.toString());
+        return ret;
+    }
+
+    public int getCdmaEriIconIndex(int roamInd, int defRoamInd){
+        return getEriDisplayInformation(roamInd, defRoamInd).mEriIconIndex;
+    }
+
+    public int getCdmaEriIconMode(int roamInd, int defRoamInd){
+        return getEriDisplayInformation(roamInd, defRoamInd).mEriIconMode;
+    }
+
+    public String getCdmaEriText(int roamInd, int defRoamInd){
+        return getEriDisplayInformation(roamInd, defRoamInd).mEriIconText;
     }
 }

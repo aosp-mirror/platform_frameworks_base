@@ -121,7 +121,7 @@ class BrowserFrame extends Handler {
         mDatabase = WebViewDatabase.getInstance(context);
         mWebViewCore = w;
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
         }
     }
@@ -343,7 +343,7 @@ class BrowserFrame extends Handler {
         switch (msg.what) {
             case FRAME_COMPLETED: {
                 if (mSettings.getSavePassword() && hasPasswordField()) {
-                    if (WebView.DEBUG) {
+                    if (DebugFlags.BROWSER_FRAME) {
                         Assert.assertNotNull(mCallbackProxy.getBackForwardList()
                                 .getCurrentItem());
                     }
@@ -492,7 +492,7 @@ class BrowserFrame extends Handler {
             }
             if (mSettings.getSavePassword() && hasPasswordField()) {
                 try {
-                    if (WebView.DEBUG) {
+                    if (DebugFlags.BROWSER_FRAME) {
                         Assert.assertNotNull(mCallbackProxy.getBackForwardList()
                                 .getCurrentItem());
                     }
@@ -540,7 +540,7 @@ class BrowserFrame extends Handler {
         // is this resource the main-frame top-level page?
         boolean isMainFramePage = mIsMainFrame;
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "startLoadingResource: url=" + url + ", method="
                     + method + ", postData=" + postData + ", isHighPriority="
                     + isHighPriority + ", isMainFramePage=" + isMainFramePage);

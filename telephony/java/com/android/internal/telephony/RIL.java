@@ -165,7 +165,7 @@ class RILRequest {
     }
 
     void
-    onError(int error) {
+    onError(int error, Object ret) {
         CommandException ex;
 
         ex = CommandException.fromRilErrno(error);
@@ -175,7 +175,7 @@ class RILRequest {
             + " error: " + ex);
 
         if (mResult != null) {
-            AsyncResult.forMessage(mResult, null, ex);
+            AsyncResult.forMessage(mResult, ret, ex);
             mResult.sendToTarget();
         }
 
@@ -290,7 +290,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                         s = mSocket;
 
                         if (s == null) {
-                            rr.onError(RADIO_NOT_AVAILABLE);
+                            rr.onError(RADIO_NOT_AVAILABLE, null);
                             rr.release();
                             mRequestMessagesPending--;
                             alreadySubtracted = true;
@@ -331,7 +331,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                         // make sure this request has not already been handled,
                         // eg, if RILReceiver cleared the list.
                         if (req != null || !alreadySubtracted) {
-                            rr.onError(RADIO_NOT_AVAILABLE);
+                            rr.onError(RADIO_NOT_AVAILABLE, null);
                             rr.release();
                         }
                     } catch (RuntimeException exc) {
@@ -340,7 +340,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                         // make sure this request has not already been handled,
                         // eg, if RILReceiver cleared the list.
                         if (req != null || !alreadySubtracted) {
-                            rr.onError(GENERIC_FAILURE);
+                            rr.onError(GENERIC_FAILURE, null);
                             rr.release();
                         }
                     }
@@ -545,7 +545,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 synchronized (mRequestsList) {
                     for (int i = 0, sz = mRequestsList.size() ; i < sz ; i++) {
                         RILRequest rr = mRequestsList.get(i);
-                        rr.onError(RADIO_NOT_AVAILABLE);
+                        rr.onError(RADIO_NOT_AVAILABLE, null);
                         rr.release();
                     }
 
@@ -1986,20 +1986,16 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             return;
         }
 
-        if (error != 0) {
-            rr.onError(error);
-            rr.release();
-            return;
-        }
+        Object ret = null;
 
-        Object ret;
-
-        try {switch (rr.mRequest) {
-/*
+        if (error == 0 || p.dataAvail() > 0) {
+            // either command succeeds or command fails but with data payload
+            try {switch (rr.mRequest) {
+            /*
  cat libs/telephony/ril_commands.h \
  | egrep "^ *{RIL_" \
  | sed -re 's/\{([^,]+),[^,]+,([^}]+).+/case \1: ret = \2(p); break;/'
-*/
+             */
             case RIL_REQUEST_GET_SIM_STATUS: ret =  responseIccCardStatus(p); break;
             case RIL_REQUEST_ENTER_SIM_PIN: ret =  responseVoid(p); break;
             case RIL_REQUEST_ENTER_SIM_PUK: ret =  responseVoid(p); break;
@@ -2104,17 +2100,24 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             default:
                 throw new RuntimeException("Unrecognized solicited response: " + rr.mRequest);
             //break;
-        }} catch (Throwable tr) {
-            // Exceptions here usually mean invalid RIL responses
+            }} catch (Throwable tr) {
+                // Exceptions here usually mean invalid RIL responses
 
-            Log.w(LOG_TAG, rr.serialString() + "< "
-                    + requestToString(rr.mRequest)
-                    + " exception, possible invalid RIL response", tr);
+                Log.w(LOG_TAG, rr.serialString() + "< "
+                        + requestToString(rr.mRequest)
+                        + " exception, possible invalid RIL response", tr);
 
-            if (rr.mResult != null) {
-                AsyncResult.forMessage(rr.mResult, null, tr);
-                rr.mResult.sendToTarget();
+                if (rr.mResult != null) {
+                    AsyncResult.forMessage(rr.mResult, null, tr);
+                    rr.mResult.sendToTarget();
+                }
+                rr.release();
+                return;
             }
+        }
+
+        if (error != 0) {
+            rr.onError(error, ret);
             rr.release();
             return;
         }
@@ -3302,10 +3305,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
-    /**
-     * TODO(Teleca): configValuesArray is represented as a RIL_BroadcastSMSConfig
-     * so we think this should be a class with the appropriate parameters not an array?
-     */
+    // TODO: Change the configValuesArray to a RIL_BroadcastSMSConfig
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message response) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG, response);
 

@@ -31,6 +31,75 @@ public final class ContactsContract {
     /** A content:// style uri to the authority for the contacts provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
+    public interface AccountsColumns {
+        /**
+         * The name of this account data
+         * <P>Type: TEXT</P>
+         */
+        public static final String NAME = "name";
+        /**
+         * The name of this account data
+         * <P>Type: TEXT</P>
+         */
+        public static final String TYPE = "type";
+        /**
+         * The name of this account data
+         * <P>Type: TEXT</P>
+         */
+        public static final String DATA1 = "data1";
+
+        /**
+         * The value for this account data
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA2 = "data2";
+
+        /**
+         * The value for this account data
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA3 = "data3";
+
+        /**
+         * The value for this account data
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA4 = "data4";
+
+        /**
+         * The value for this account data
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA5 = "data5";
+    }
+
+    /**
+     * Constants for the aggregates table, which contains a record per group
+     * of contact representing the same person.
+     */
+    public static final class Accounts implements BaseColumns, AccountsColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Accounts()  {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "accounts");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of
+         * account data.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contacts_account";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a account
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contacts_account";
+    }
+
     public interface AggregatesColumns {
         /**
          * The display name for the contact.
@@ -136,6 +205,11 @@ public final class ContactsContract {
         private Contacts()  {}
 
         /**
+         * A reference to the {@link Accounts#_ID} that this data belongs to.
+         */
+        public static final String ACCOUNTS_ID = "accounts_id";
+
+        /**
          * A reference to the {@link Aggregates#_ID} that this data belongs to.
          */
         public static final String AGGREGATE_ID = "aggregate_id";
@@ -165,6 +239,22 @@ public final class ContactsContract {
          * person.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/person";
+
+        /**
+         * A string that uniquely identifies this contact to its source, which is referred to
+         * by the {@link #ACCOUNTS_ID}
+         */
+        public static final String SOURCE_ID = "sourceid";
+
+        /**
+         * An integer that is updated whenever this contact or its data changes.
+         */
+        public static final String VERSION = "version";
+
+        /**
+         * Set to 1 whenever the version changes
+         */
+        public static final String DIRTY = "dirty";
 
         /**
          * A sub-directory of a single contact that contains all of their {@link Data} rows.
@@ -199,6 +289,19 @@ public final class ContactsContract {
          * that this data belongs to.
          */
         public static final String CONTACT_ID = "contact_id";
+
+        /**
+         * Whether this is the primary entry of its kind for the contact it belongs to
+         * <P>Type: INTEGER (if set, non-0 means true)</P>
+         */
+        public static final String IS_PRIMARY = "is_primary";
+
+        /**
+         * Whether this is the primary entry of its kind for the aggregate it belongs to. Any data
+         * record that is "super primary" must also be "primary".
+         * <P>Type: INTEGER (if set, non-0 means true)</P>
+         */
+        public static final String IS_SUPER_PRIMARY = "is_super_primary";
 
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
         public static final String DATA1 = "data1";
@@ -309,22 +412,16 @@ public final class ContactsContract {
             public static final String TYPE = "data1";
 
             /**
-             * The user defined label for the the contact method.
-             * <P>Type: TEXT</P>
-             */
-            public static final String LABEL = "data2";
-
-            /**
              * The data for the contact method.
              * <P>Type: TEXT</P>
              */
-            public static final String DATA = "data3";
+            public static final String DATA = "data2";
 
             /**
-             * Whether this is the primary entry of its kind for the contact it belongs to
-             * <P>Type: INTEGER (if set, non-0 means true)</P>
+             * The user defined label for the the contact method.
+             * <P>Type: TEXT</P>
              */
-            public static final String ISPRIMARY = "data4";
+            public static final String LABEL = "data3";
         }
 
         /**
@@ -337,27 +434,28 @@ public final class ContactsContract {
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/name";
 
             /**
-             * The contact's honorific prefix, e.g. "Sir"
-             */
-            public static final String PREFIX = "data1";
-
-            /**
              * The given name for the contact.
              * <P>Type: TEXT</P>
              */
-            public static final String GIVEN_NAME = "data2";
-
-            /**
-             * The contact's middle name
-             * <P>Type: TEXT</P>
-             */
-            public static final String MIDDLE_NAME = "data3";
+            public static final String GIVEN_NAME = "data1";
 
             /**
              * The family name for the contact.
              * <P>Type: TEXT</P>
              */
-            public static final String FAMILY_NAME = "data4";
+            public static final String FAMILY_NAME = "data2";
+
+            /**
+             * The contact's honorific prefix, e.g. "Sir"
+             * <P>Type: TEXT</P>
+             */
+            public static final String PREFIX = "data3";
+
+            /**
+             * The contact's middle name
+             * <P>Type: TEXT</P>
+             */
+            public static final String MIDDLE_NAME = "data4";
 
             /**
              * The contact's honorific suffix, e.g. "Jr"
@@ -412,15 +510,15 @@ public final class ContactsContract {
             public static final int TYPE_INITIALS = 6;
 
             /**
+             * The name itself
+             */
+            public static final String NAME = "data2";
+
+            /**
              * The user provided label, only used if TYPE is {@link #TYPE_CUSTOM}.
              * <P>Type: TEXT</P>
              */
-            public static final String LABEL = "data2";
-
-            /**
-             * The name itself
-             */
-            public static final String NAME = "data3";
+            public static final String LABEL = "data3";
         }
 
         /**
@@ -445,8 +543,7 @@ public final class ContactsContract {
              * The phone number as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String NUMBER = "data3";
-
+            public static final String NUMBER = "data2";
         }
 
         /**
@@ -462,7 +559,6 @@ public final class ContactsContract {
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
-
         }
 
         /**
@@ -500,9 +596,11 @@ public final class ContactsContract {
              * The predefined IM protocol types. The protocol can either be non-present, one
              * of these types, or a free-form string. These cases are encoded in the PROTOCOL
              * column as:
-             *  - null
-             *  - pre:<an integer, one of the protocols below>
-             *  - custom:<a string>
+             * <ul>
+             * <li>null</li>
+             * <li>pre:&lt;an integer, one of the protocols below&gt;</li>
+             * <li>custom:&lt;a string&gt;</li>
+             * </ul>
              */
             public static final int PROTOCOL_AIM = 0;
             public static final int PROTOCOL_MSN = 1;
@@ -512,6 +610,31 @@ public final class ContactsContract {
             public static final int PROTOCOL_GOOGLE_TALK = 5;
             public static final int PROTOCOL_ICQ = 6;
             public static final int PROTOCOL_JABBER = 7;
+
+            public static String encodePredefinedImProtocol(int protocol) {
+               return "pre:" + protocol;
+            }
+
+            public static String encodeCustomImProtocol(String protocolString) {
+               return "custom:" + protocolString;
+            }
+
+            public static Object decodeImProtocol(String encodedString) {
+               if (encodedString == null) {
+                   return null;
+               }
+
+               if (encodedString.startsWith("pre:")) {
+                   return Integer.parseInt(encodedString.substring(4));
+               }
+
+               if (encodedString.startsWith("custom:")) {
+                   return encodedString.substring(7);
+               }
+
+               throw new IllegalArgumentException(
+                       "the value is not a valid encoded protocol, " + encodedString);
+            }
         }
 
         /**
@@ -551,13 +674,6 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String TITLE = "data4";
-
-            /**
-             * Whether this is the primary organization
-             * <P>Type: INTEGER (if set, non-0 means true)</P>
-             */
-            public static final String ISPRIMARY = "data5";
-
         }
 
         /**
@@ -594,6 +710,9 @@ public final class ContactsContract {
             public static final String NOTE = "data1";
         }
 
+        /**
+         * Custom ringtone associated with the contact.
+         */
         public static final class CustomRingtone implements BaseCommonColumns {
             private CustomRingtone() {}
 
@@ -611,6 +730,76 @@ public final class ContactsContract {
              */
             public static final String RINGTONE_URI = "data2";
         }
+
+        /**
+         * Group Membership.
+         */
+        public static final class GroupMembership implements BaseCommonColumns {
+            private GroupMembership() {}
+
+            /** Mime-type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE =
+                    "vnd.android.cursor.item/group_membership";
+
+            /**
+             * The row id of the group that this group membership refers to. Either this or the
+             * GROUP_SOURCE_ID must be set. If they are both set then they must refer to the same
+             * group.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String GROUP_ROW_ID = "data1";
+
+            /**
+             * The source id of the group that this membership refers to. Either this or the
+             * GROUP_ROW_ID must be set. If they are both set then they must refer to the same
+             * group.
+             * <P>Type: STRING</P>
+             */
+            public static final String GROUP_SOURCE_ID = "data2";
+        }
     }
 
+    /**
+     * Constants for the contact aggregation exceptions table, which contains
+     * aggregation rules overriding those used by automatic aggregation.
+     */
+    public static final class AggregationExceptions {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private AggregationExceptions() {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "aggregation_exceptions");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of data.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/aggregation_exception";
+
+        /**
+         * The type of exception: {@link #TYPE_NEVER_MATCH} or {@link #TYPE_ALWAYS_MATCH}.
+         *
+         * <P>Type: INTEGER</P>
+         */
+        public static final String TYPE = "type";
+
+        public static final int TYPE_NEVER_MATCH = 0;
+        public static final int TYPE_ALWAYS_MATCH = 1;
+
+        /**
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of one of
+         * the contacts that the rule applies to.
+         */
+        public static final String CONTACT_ID1 = "contact_id1";
+
+        /**
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the other
+         * contact that the rule applies to.
+         */
+        public static final String CONTACT_ID2 = "contact_id2";
+    }
 }

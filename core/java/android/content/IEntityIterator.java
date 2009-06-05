@@ -21,6 +21,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.os.Parcelable;
 import android.util.Log;
 
 /**
@@ -93,7 +94,7 @@ public interface IEntityIterator extends IInterface {
                         return true;
                     }
                     reply.writeNoException();
-                    reply.writeParcelable(entity, 0);
+                    entity.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
                     return true;
                 }
 
@@ -149,7 +150,7 @@ public interface IEntityIterator extends IInterface {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     mRemote.transact(Stub.TRANSACTION_next, _data, _reply, 0);
                     _reply.readException();
-                    return (Entity) _reply.readParcelable(null /* classLoader */);
+                    return Entity.CREATOR.createFromParcel(_reply);
                 } finally {
                     _reply.recycle();
                     _data.recycle();

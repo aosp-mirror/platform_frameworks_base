@@ -34,12 +34,14 @@ ThreadIO::~ThreadIO()
 {
 }
 
-void ThreadIO::playCoreCommands(Context *con)
+bool ThreadIO::playCoreCommands(Context *con)
 {
     //LOGE("playCoreCommands 1");
     uint32_t cmdID = 0;
     uint32_t cmdSize = 0;
+    bool ret = false;
     while(!mToCore.isEmpty()) {
+        ret = true;
         //LOGE("playCoreCommands 2");
         const void * data = mToCore.get(&cmdID, &cmdSize);
         //LOGE("playCoreCommands 3 %i %i", cmdID, cmdSize);
@@ -50,6 +52,7 @@ void ThreadIO::playCoreCommands(Context *con)
         mToCore.next();
         //LOGE("playCoreCommands 5");
     }
+    return ret;
 }
 
 

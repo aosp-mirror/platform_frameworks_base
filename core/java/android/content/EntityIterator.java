@@ -18,7 +18,7 @@ package android.content;
 
 import android.os.RemoteException;
 
-public interface  EntityIterator {
+public interface EntityIterator {
     /**
      * Returns whether there are more elements to iterate, i.e. whether the
      * iterator is positioned in front of an element.

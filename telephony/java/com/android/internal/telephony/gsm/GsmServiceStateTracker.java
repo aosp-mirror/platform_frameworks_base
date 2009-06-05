@@ -16,7 +16,13 @@
 
 package com.android.internal.telephony.gsm;
 
-import com.android.internal.telephony.Phone;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISROAMING;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_NUMERIC;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -50,20 +56,10 @@ import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.IccCard;
-import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyEventLog;
 import com.android.internal.telephony.TelephonyIntents;
-
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ALPHA;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISROAMING;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_NUMERIC;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -74,13 +70,6 @@ import java.util.TimeZone;
  * {@hide}
  */
 final class GsmServiceStateTracker extends ServiceStateTracker {
-
-    /**
-     * TODO(Teleca): John Huang asks: Will you be adding handling of
-     * "reason for registration denied in EVENT_POLL_STATE_REGISTRATION?
-     * I see some handling of this in CdmaServiceStateTracker, but as I
-     * understand it this field was added at the request of a GSM carrier.
-     */
 
     //***** Instance Variables
     GSMPhone phone;
@@ -548,7 +537,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                         (dcTracker.getAnyDataEnabled() ? 1 : 0) );
                 EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF, val);
             }
-            dcTracker.cleanConnectionBeforeRadioOff();
+            Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
+            msg.arg1 = 1; // tearDown is true
+            msg.obj = GSMPhone.REASON_RADIO_TURNED_OFF;
+            sendMessage(msg);
 
             // poll data state up to 15 times, with a 100ms delay
             // totaling 1.5 sec. Normal data disable action will finish in 100ms.

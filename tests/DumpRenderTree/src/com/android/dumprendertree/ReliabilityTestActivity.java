@@ -39,6 +39,8 @@ public class ReliabilityTestActivity extends Activity {
     private boolean pageDone;
     private Object pageDoneLock;
     private int pageStartCount;
+    private int manualDelay;
+    private PageDoneRunner pageDoneRunner = new PageDoneRunner();
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +75,7 @@ public class ReliabilityTestActivity extends Activity {
                         handleTimeout();
                         return;
                     case MSG_NAVIGATE:
+                        manualDelay = msg.arg2;
                         navigate((String)msg.obj, msg.arg1);
                         return;
                 }
@@ -212,6 +215,12 @@ public class ReliabilityTestActivity extends Activity {
         }
         
         @Override
+        public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+            result.confirm();
+            return true;
+        }
+
+        @Override
         public boolean onJsPrompt(WebView view, String url, String message, String defaultValue,
                 JsPromptResult result) {
             result.confirm();
@@ -246,11 +255,18 @@ public class ReliabilityTestActivity extends Activity {
         public void run() {
             if (initialStartCount == pageStartCount) {
                 //perform cleanup
-                webView.stopLoading();
-                Log.v(LOGTAG, "Finishing URL: " + webView.getUrl());
                 handler.removeMessages(MSG_TIMEOUT);
-                setPageDone(true);
+                webView.stopLoading();
+                handler.postDelayed(pageDoneRunner, manualDelay);
             }
+        }
+    }
+    
+    class PageDoneRunner implements Runnable {
+        
+        public void run() {
+            Log.v(LOGTAG, "Finishing URL: " + webView.getUrl());
+            setPageDone(true);
         }
     }
 }

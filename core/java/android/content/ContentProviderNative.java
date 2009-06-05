@@ -33,6 +33,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * {@hide}
@@ -179,8 +180,12 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 case APPLY_BATCH_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
-                    final ContentProviderOperation[] operations =
-                            data.createTypedArray(ContentProviderOperation.CREATOR);
+                    final int numOperations = data.readInt();
+                    final ArrayList<ContentProviderOperation> operations =
+                            new ArrayList<ContentProviderOperation>(numOperations);
+                    for (int i = 0; i < numOperations; i++) {
+                        operations.add(i, ContentProviderOperation.CREATOR.createFromParcel(data));
+                    }
                     final ContentProviderResult[] results = applyBatch(operations);
                     reply.writeNoException();
                     reply.writeTypedArray(results, 0);
@@ -471,13 +476,16 @@ final class ContentProviderProxy implements IContentProvider
         return count;
     }
 
-    public ContentProviderResult[] applyBatch(ContentProviderOperation[] operations)
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
 
         data.writeInterfaceToken(IContentProvider.descriptor);
-        data.writeTypedArray(operations, 0);
+        data.writeInt(operations.size());
+        for (ContentProviderOperation operation : operations) {
+            operation.writeToParcel(data, 0);
+        }
         mRemote.transact(IContentProvider.APPLY_BATCH_TRANSACTION, data, reply, 0);
 
         DatabaseUtils.readExceptionWithOperationApplicationExceptionFromParcel(reply);

@@ -61,7 +61,7 @@ public final class URLUtil {
             webAddress = new WebAddress(inUrl);
         } catch (ParseException ex) {
 
-            if (WebView.LOGV_ENABLED) {
+            if (DebugFlags.URL_UTIL) {
                 Log.v(LOGTAG, "smartUrlFilter: failed to parse url = " + inUrl);
             }
             return retVal;

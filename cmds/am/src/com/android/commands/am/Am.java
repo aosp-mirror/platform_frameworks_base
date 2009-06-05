@@ -526,7 +526,7 @@ public class Am {
 
     private void showUsage() {
         System.err.println("usage: am [start|broadcast|instrument|profile]");
-        System.err.println("       am start -D INTENT");
+        System.err.println("       am start [-D] INTENT");
         System.err.println("       am broadcast INTENT");
         System.err.println("       am instrument [-r] [-e <ARG_NAME> <ARG_VALUE>] [-p <PROF_FILE>]");
         System.err.println("                [-w] <COMPONENT> ");

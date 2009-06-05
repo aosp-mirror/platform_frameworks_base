@@ -189,4 +189,15 @@ public class WebChromeClient {
     public boolean onJsTimeout() {
         return true;
     }
+
+    /**
+     * Add a JavaScript error message to the console. Clients should override
+     * this to process the log message as they see fit.
+     * @param message The error message to report.
+     * @param lineNumber The line number of the error.
+     * @param sourceID The name of the source file that caused the error.
+     * @hide pending API council.
+     */
+    public void addMessageToConsole(String message, int lineNumber, String sourceID) {
+    }
 }

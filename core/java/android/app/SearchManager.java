@@ -1148,7 +1148,7 @@ public class SearchManager
      * @hide
      */
     public final static String SOURCE = "source";
-    
+
     /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getIntExtra content.Intent.getIntExtra()}
@@ -1162,10 +1162,56 @@ public class SearchManager
     /**
      * Intent extra data key: This key will be used for the extra populated by the
      * {@link #SUGGEST_COLUMN_INTENT_EXTRA_DATA} column.
+     *
      * {@hide}
      */
     public final static String EXTRA_DATA_KEY = "intent_extra_data_key";
-    
+
+    /**
+     * Defines the constants used in the communication between {@link android.app.SearchDialog} and
+     * the global search provider via {@link Cursor#respond(android.os.Bundle)}.
+     *
+     * @hide
+     */
+    public static class DialogCursorProtocol {
+
+        /**
+         * The sent bundle will contain this integer key, with a value set to one of the events
+         * below.
+         */
+        public final static String METHOD = "DialogCursorProtocol.method";
+
+        /**
+         * After data has been refreshed.
+         */
+        public final static int POST_REFRESH = 0;
+        public final static String POST_REFRESH_RECEIVE_ISPENDING
+                = "DialogCursorProtocol.POST_REFRESH.isPending";
+        public final static String POST_REFRESH_RECEIVE_DISPLAY_NOTIFY
+                = "DialogCursorProtocol.POST_REFRESH.displayNotify";
+
+        /**
+         * Just before closing the cursor.
+         */
+        public final static int PRE_CLOSE = 1;
+        public final static String PRE_CLOSE_SEND_MAX_DISPLAY_POS
+                = "DialogCursorProtocol.PRE_CLOSE.sendDisplayPosition";
+
+        /**
+         * When a position has been clicked.
+         */
+        public final static int CLICK = 2;
+        public final static String CLICK_SEND_POSITION
+                = "DialogCursorProtocol.CLICK.sendPosition";
+        public final static String CLICK_RECEIVE_SELECTED_POS
+                = "DialogCursorProtocol.CLICK.receiveSelectedPosition";
+
+        /**
+         * When the threshold received in {@link #POST_REFRESH_RECEIVE_DISPLAY_NOTIFY} is displayed.
+         */
+        public final static int THRESH_HIT = 3;
+    }
+
     /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getStringExtra content.Intent.getStringExtra()}
@@ -1258,28 +1304,6 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_ICON_2 = "suggest_icon_2";
     /**
-     * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
-     *  then all suggestions will be provided in a format that includes space for two small icons,
-     *  one at the left and one at the right of each suggestion.  The data in the column must
-     *  be a blob that contains a bitmap.
-     * 
-     * This column overrides any icon provided in the {@link #SUGGEST_COLUMN_ICON_1} column.
-     *
-     * @hide
-     */
-    public final static String SUGGEST_COLUMN_ICON_1_BITMAP = "suggest_icon_1_bitmap";
-    /**
-     * Column name for suggestions cursor.  <i>Optional.</i>  If your cursor includes this column,
-     *  then all suggestions will be provided in a format that includes space for two small icons,
-     *  one at the left and one at the right of each suggestion.  The data in the column must
-     *  be a blob that contains a bitmap.
-     * 
-     * This column overrides any icon provided in the {@link #SUGGEST_COLUMN_ICON_2} column.
-     *
-     * @hide
-     */
-    public final static String SUGGEST_COLUMN_ICON_2_BITMAP = "suggest_icon_2_bitmap";
-    /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, this is the action that will be used when
      * forming the suggestion's intent.  If the element is not provided, the action will be taken
@@ -1302,9 +1326,10 @@ public class SearchManager
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  This column allows suggestions
      *  to provide additional arbitrary data which will be included as an extra under the key
-     *  {@link #EXTRA_DATA_KEY}.
-     * 
-     * @hide pending API council approval
+     *  {@link #EXTRA_DATA_KEY}. For use by the global search system only - if other providers
+     *  attempt to use this column, the value will be overwritten by global search.
+     *
+     * @hide
      */
     public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
     /**
@@ -1362,21 +1387,7 @@ public class SearchManager
      */
     public final static String INTENT_ACTION_CHANGE_SEARCH_SOURCE 
             = "android.search.action.CHANGE_SEARCH_SOURCE";
-    
-    /**
-     * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
-     * the search dialog will call {@link Cursor#respond(Bundle)} when the
-     * suggestion is clicked. 
-     * 
-     * The {@link Bundle} argument will be constructed
-     * in the same way as the "extra" bundle included in an Intent constructed 
-     * from the suggestion.
-     * 
-     * @hide Pending API council approval.
-     */
-    public final static String INTENT_ACTION_CURSOR_RESPOND
-            = "android.search.action.CURSOR_RESPOND";
-    
+
     /**
      * Intent action for finding the global search activity.
      * The global search provider should handle this intent.
@@ -1394,6 +1405,34 @@ public class SearchManager
      */
     public final static String INTENT_ACTION_SEARCH_SETTINGS 
             = "android.search.action.SEARCH_SETTINGS";
+    
+    /**
+     * Intent action for starting a web search provider's settings activity.
+     * Web search providers should handle this intent if they have provider-specific
+     * settings to implement.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_WEB_SEARCH_SETTINGS
+            = "android.search.action.WEB_SEARCH_SETTINGS";
+
+    /**
+     * Intent action broadcasted to inform that the searchables list or default have changed.
+     * Components should handle this intent if they cache any searchable data and wish to stay
+     * up to date on changes.
+     *
+     * @hide Pending API council approval.
+     */
+    public final static String INTENT_ACTION_SEARCHABLES_CHANGED
+            = "android.search.action.SEARCHABLES_CHANGED";
+
+    /**
+     * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
+     * the search dialog will take no action.
+     *
+     * @hide
+     */
+    public final static String INTENT_ACTION_NONE = "android.search.action.ZILCH";
     
     /**
      * Reference to the shared system search service.
@@ -1505,25 +1544,27 @@ public class SearchManager
     }
     
     /**
-     * See {@link #setOnDismissListener} for configuring your activity to monitor search UI state.
+     * See {@link SearchManager#setOnDismissListener} for configuring your activity to monitor
+     * search UI state.
      */
     public interface OnDismissListener {
         /**
-         * This method will be called when the search UI is dismissed. To make use if it, you must
-         * implement this method in your activity, and call {@link #setOnDismissListener} to 
-         * register it.
+         * This method will be called when the search UI is dismissed. To make use of it, you must
+         * implement this method in your activity, and call
+         * {@link SearchManager#setOnDismissListener} to register it.
          */
         public void onDismiss();
     }
     
     /**
-     * See {@link #setOnCancelListener} for configuring your activity to monitor search UI state.
+     * See {@link SearchManager#setOnCancelListener} for configuring your activity to monitor
+     * search UI state.
      */
     public interface OnCancelListener {
         /**
          * This method will be called when the search UI is canceled. To make use if it, you must
-         * implement this method in your activity, and call {@link #setOnCancelListener} to 
-         * register it.
+         * implement this method in your activity, and call
+         * {@link SearchManager#setOnCancelListener} to register it.
          */
         public void onCancel();
     }
@@ -1711,6 +1752,50 @@ public class SearchManager
             return sService.getSearchablesInGlobalSearch();
         } catch (RemoteException e) {
             return null;
+        }
+    }
+
+    /**
+     * Returns a list of the searchable activities that handle web searches.
+     *
+     * @return a a list of all searchable activities that handle {@link SearchManager#ACTION_WEB_SEARCH}.
+     *
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static List<SearchableInfo> getSearchablesForWebSearch() {
+        try {
+            return sService.getSearchablesForWebSearch();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the default searchable activity for web searches.
+     *
+     * @return searchable information for the activity handling web searches by default.
+     *
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public static SearchableInfo getDefaultSearchableForWebSearch() {
+        try {
+            return sService.getDefaultSearchableForWebSearch();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Sets the default searchable activity for web searches.
+     *
+     * @param component Name of the component to set as default activity for web searches.
+     *
+     * @hide
+     */
+    public static void setDefaultWebSearch(ComponentName component) {
+        try {
+            sService.setDefaultWebSearch(component);
+        } catch (RemoteException e) {
         }
     }
 }

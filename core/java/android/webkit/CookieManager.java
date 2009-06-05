@@ -262,7 +262,7 @@ public final class CookieManager {
         if (!mAcceptCookie || uri == null) {
             return;
         }
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.COOKIE_MANAGER) {
             Log.v(LOGTAG, "setCookie: uri: " + uri + " value: " + value);
         }
 
@@ -427,12 +427,12 @@ public final class CookieManager {
             }
         }
         if (ret.length() > 0) {
-            if (WebView.LOGV_ENABLED) {
+            if (DebugFlags.COOKIE_MANAGER) {
                 Log.v(LOGTAG, "getCookie: uri: " + uri + " value: " + ret);
             }
             return ret.toString();
         } else {
-            if (WebView.LOGV_ENABLED) {
+            if (DebugFlags.COOKIE_MANAGER) {
                 Log.v(LOGTAG, "getCookie: uri: " + uri
                         + " But can't find cookie.");
             }
@@ -588,7 +588,7 @@ public final class CookieManager {
             Iterator<ArrayList<Cookie>> listIter = cookieLists.iterator();
             while (listIter.hasNext() && count < MAX_RAM_COOKIES_COUNT) {
                 ArrayList<Cookie> list = listIter.next();
-                if (WebView.DEBUG) {
+                if (DebugFlags.COOKIE_MANAGER) {
                     Iterator<Cookie> iter = list.iterator();
                     while (iter.hasNext() && count < MAX_RAM_COOKIES_COUNT) {
                         Cookie cookie = iter.next();
@@ -608,7 +608,7 @@ public final class CookieManager {
 
         ArrayList<Cookie> retlist = new ArrayList<Cookie>();
         if (mapSize >= MAX_RAM_DOMAIN_COUNT || count >= MAX_RAM_COOKIES_COUNT) {
-            if (WebView.DEBUG) {
+            if (DebugFlags.COOKIE_MANAGER) {
                 Log.v(LOGTAG, count + " cookies used " + byteCount
                         + " bytes with " + mapSize + " domains");
             }
@@ -616,7 +616,7 @@ public final class CookieManager {
             int toGo = mapSize / 10 + 1;
             while (toGo-- > 0){
                 String domain = domains[toGo].toString();
-                if (WebView.LOGV_ENABLED) {
+                if (DebugFlags.COOKIE_MANAGER) {
                     Log.v(LOGTAG, "delete domain: " + domain
                             + " from RAM cache");
                 }

@@ -108,7 +108,7 @@ private:
 
     void initEGL();
 
-    void runRootScript();
+    bool runRootScript();
 
     static void * threadProc(void *);
 

@@ -32,6 +32,7 @@ commonSources:= \
 	StopWatch.cpp \
 	String8.cpp \
 	String16.cpp \
+	StringArray.cpp \
 	SystemClock.cpp \
 	TextOutput.cpp \
 	Threads.cpp \
@@ -40,29 +41,15 @@ commonSources:= \
     ZipFileCRO.cpp \
 	ZipFileRO.cpp \
 	ZipUtils.cpp \
-	misc.cpp \
-	LogSocket.cpp
+	misc.cpp
 
-#
-# The cpp files listed here do not belong in the device
-# build.  Consult with the swetland before even thinking about
-# putting them in commonSources.
-#
-# They're used by the simulator runtime and by host-side tools like
-# aapt and the simulator front-end.
-#
-hostSources:= \
-	InetAddress.cpp \
-	Socket.cpp \
-	ZipEntry.cpp \
-	ZipFile.cpp
 
 # For the host
 # =====================================================
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= $(commonSources) $(hostSources)
+LOCAL_SRC_FILES:= $(commonSources)
 
 ifeq ($(HOST_OS),linux)
 # Use the futex based mutex and condition variable
@@ -96,12 +83,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
 	$(commonSources) \
 	Unicode.cpp \
-    backup_data.cpp \
-	backup_helper_file.cpp
-
-ifeq ($(TARGET_SIMULATOR),true)
-LOCAL_SRC_FILES += $(hostSources)
-endif
+    BackupData.cpp \
+	BackupHelpers.cpp
 
 ifeq ($(TARGET_OS),linux)
 # Use the futex based mutex and condition variable
@@ -129,9 +112,5 @@ endif # linux-x86
 endif # sim
 
 LOCAL_MODULE:= libutils
-
-#LOCAL_CFLAGS+=
-#LOCAL_LDFLAGS:=
-
 include $(BUILD_SHARED_LIBRARY)
 

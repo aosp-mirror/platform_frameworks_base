@@ -23,28 +23,6 @@ public final class EriInfo {
     public static final int ROAMING_ICON_MODE_NORMAL    = 0;
     public static final int ROAMING_ICON_MODE_FLASH     = 1;
 
-    /**
-     * TODO(Teleca): These strings appear to be used by the UI
-     * hence they must be changed to resources so they can be
-     * translated to the appropriate language.
-     */
-    public static final String ROAMING_TEXT_0  = "Roaming Indicator On";
-    public static final String ROAMING_TEXT_1  = "Roaming Indicator Off";
-    public static final String ROAMING_TEXT_2  = "Roaming Indicator Flashing";
-    public static final String ROAMING_TEXT_3  = "Out of Neighborhood";
-    public static final String ROAMING_TEXT_4  = "Out of Building";
-    public static final String ROAMING_TEXT_5  = "Roaming - Preferred System";
-    public static final String ROAMING_TEXT_6  = "Roaming - Available System";
-    public static final String ROAMING_TEXT_7  = "Roaming - Alliance Partner";
-    public static final String ROAMING_TEXT_8  = "Roaming - Premium Partner";
-    public static final String ROAMING_TEXT_9  = "Roaming - Full Service Functionality";
-    public static final String ROAMING_TEXT_10 = "Roaming - Partial Service Functionality";
-    public static final String ROAMING_TEXT_11 = "Roaming Banner On";
-    public static final String ROAMING_TEXT_12 = "Roaming Banner Off";
-
-    public static final String SEARCHING_TEXT  = "Searching for Svc.";
-
-
     public int mRoamingIndicator;
     public int mIconIndex;
     public int mIconMode;

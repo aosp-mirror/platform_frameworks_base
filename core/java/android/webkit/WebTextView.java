@@ -39,11 +39,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 /**
- * TextDialog is a specialized version of EditText used by WebView
+ * WebTextView is a specialized version of EditText used by WebView
  * to overlay html textfields (and textareas) to use our standard
  * text editing.
  */
-/* package */ class TextDialog extends AutoCompleteTextView {
+/* package */ class WebTextView extends AutoCompleteTextView {
 
     private WebView         mWebView;
     private boolean         mSingle;
@@ -71,11 +71,11 @@ import java.util.ArrayList;
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
 
     /**
-     * Create a new TextDialog.
-     * @param   context The Context for this TextDialog.
+     * Create a new WebTextView.
+     * @param   context The Context for this WebTextView.
      * @param   webView The WebView that created this.
      */
-    /* package */ TextDialog(Context context, WebView webView) {
+    /* package */ WebTextView(Context context, WebView webView) {
         super(context);
         mWebView = webView;
         mMaxLength = -1;
@@ -95,7 +95,7 @@ import java.util.ArrayList;
         Spannable text = (Spannable) getText();
         int oldLength = text.length();
         // Normally the delete key's dom events are sent via onTextChanged.
-        // However, if the length is zero, the text did not change, so we 
+        // However, if the length is zero, the text did not change, so we
         // go ahead and pass the key down immediately.
         if (KeyEvent.KEYCODE_DEL == keyCode && 0 == oldLength) {
             sendDomEvent(event);
@@ -121,12 +121,30 @@ import java.util.ArrayList;
             if (isPopupShowing()) {
                 return super.dispatchKeyEvent(event);
             }
+            if (!mWebView.nativeCursorMatchesFocus()) {
+                return down ? mWebView.onKeyDown(keyCode, event) : mWebView
+                        .onKeyUp(keyCode, event);
+            }
             // Center key should be passed to a potential onClick
             if (!down) {
                 mWebView.shortPressOnTextField();
             }
             // Pass to super to handle longpress.
             return super.dispatchKeyEvent(event);
+        }
+        boolean isArrowKey = false;
+        switch(keyCode) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (!mWebView.nativeCursorMatchesFocus()) {
+                    return down ? mWebView.onKeyDown(keyCode, event) : mWebView
+                            .onKeyUp(keyCode, event);
+
+                }
+                isArrowKey = true;
+                break;
         }
 
         // Ensure there is a layout so arrow keys are handled properly.
@@ -147,7 +165,7 @@ import java.util.ArrayList;
             oldText = "";
         }
         if (super.dispatchKeyEvent(event)) {
-            // If the TextDialog handled the key it was either an alphanumeric
+            // If the WebTextView handled the key it was either an alphanumeric
             // key, a delete, or a movement within the text. All of those are
             // ok to pass to javascript.
 
@@ -157,22 +175,11 @@ import java.util.ArrayList;
             // so do not pass down to javascript, and instead
             // return true.  If it is an arrow key or a delete key, we can go
             // ahead and pass it down.
-            boolean isArrowKey;
-            switch(keyCode) {
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                case KeyEvent.KEYCODE_DPAD_UP:
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                    isArrowKey = true;
-                    break;
-                case KeyEvent.KEYCODE_ENTER:
-                    // For multi-line text boxes, newlines will
-                    // trigger onTextChanged for key down (which will send both
-                    // key up and key down) but not key up.
-                    mGotEnterDown = true;
-                default:
-                    isArrowKey = false;
-                    break;
+            if (KeyEvent.KEYCODE_ENTER == keyCode) {
+                // For multi-line text boxes, newlines will
+                // trigger onTextChanged for key down (which will send both
+                // key up and key down) but not key up.
+                mGotEnterDown = true;
             }
             if (maxedOut && !isArrowKey && keyCode != KeyEvent.KEYCODE_DEL) {
                 if (oldEnd == oldStart) {
@@ -216,13 +223,10 @@ import java.util.ArrayList;
             return true;
         }
         // if it is a navigation key, pass it to WebView
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
-                || keyCode == KeyEvent.KEYCODE_DPAD_UP
-                || keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+        if (isArrowKey) {
             // WebView check the trackballtime in onKeyDown to avoid calling
-            // native from both trackball and key handling. As this is called 
-            // from TextDialog, we always want WebView to check with native. 
+            // native from both trackball and key handling. As this is called
+            // from WebTextView, we always want WebView to check with native.
             // Reset trackballtime to ensure it.
             mWebView.resetTrackballTime();
             return down ? mWebView.onKeyDown(keyCode, event) : mWebView
@@ -232,9 +236,9 @@ import java.util.ArrayList;
     }
 
     /**
-     *  Create a fake touch up event at (x,y) with respect to this TextDialog.
+     *  Create a fake touch up event at (x,y) with respect to this WebTextView.
      *  This is used by WebView to act as though a touch event which happened
-     *  before we placed the TextDialog actually hit it, so that it can place
+     *  before we placed the WebTextView actually hit it, so that it can place
      *  the cursor accordingly.
      */
     /* package */ void fakeTouchEvent(float x, float y) {
@@ -251,10 +255,10 @@ import java.util.ArrayList;
     }
 
     /**
-     *  Determine whether this TextDialog currently represents the node
+     *  Determine whether this WebTextView currently represents the node
      *  represented by ptr.
      *  @param  ptr Pointer to a node to compare to.
-     *  @return boolean Whether this TextDialog already represents the node
+     *  @return boolean Whether this WebTextView already represents the node
      *          pointed to by ptr.
      */
     /* package */ boolean isSameTextField(int ptr) {
@@ -274,7 +278,7 @@ import java.util.ArrayList;
         String postChange = s.toString();
         // Prevent calls to setText from invoking onTextChanged (since this will
         // mean we are on a different textfield).  Also prevent the change when
-        // going from a textfield with a string of text to one with a smaller 
+        // going from a textfield with a string of text to one with a smaller
         // limit on text length from registering the onTextChanged event.
         if (mPreChange == null || mPreChange.equals(postChange) ||
                 (mMaxLength > -1 && mPreChange.length() > mMaxLength &&
@@ -282,8 +286,7 @@ import java.util.ArrayList;
             return;
         }
         mPreChange = postChange;
-        // This was simply a delete or a cut, so just delete the 
-        // selection.
+        // This was simply a delete or a cut, so just delete the selection.
         if (before > 0 && 0 == count) {
             mWebView.deleteSelection(start, start + before);
             // For this and all changes to the text, update our cache
@@ -308,7 +311,7 @@ import java.util.ArrayList;
                     start + count - charactersFromKeyEvents,
                     start + count - charactersFromKeyEvents);
         } else {
-            // This corrects the selection which may have been affected by the 
+            // This corrects the selection which may have been affected by the
             // trackball or auto-correct.
             mWebView.setSelection(start, start + before);
         }
@@ -324,7 +327,7 @@ import java.util.ArrayList;
         }
         updateCachedTextfield();
     }
-    
+
     @Override
     public boolean onTrackballEvent(MotionEvent event) {
         if (isPopupShowing()) {
@@ -332,6 +335,11 @@ import java.util.ArrayList;
         }
         if (event.getAction() != MotionEvent.ACTION_MOVE) {
             return false;
+        }
+        // If the Cursor is not on the text input, webview should handle the
+        // trackball
+        if (!mWebView.nativeCursorMatchesFocus()) {
+            return mWebView.onTrackballEvent(event);
         }
         Spannable text = (Spannable) getText();
         MovementMethod move = getMovementMethod();
@@ -350,7 +358,7 @@ import java.util.ArrayList;
     }
 
     /**
-     * Remove this TextDialog from its host WebView, and return
+     * Remove this WebTextView from its host WebView, and return
      * focus to the host.
      */
     /* package */ void remove() {
@@ -379,7 +387,7 @@ import java.util.ArrayList;
         }
         return false;
     }
-    
+
     /**
      *  Send the DOM events for the specified event.
      *  @param event    KeyEvent to be translated into a DOM event.
@@ -390,7 +398,7 @@ import java.util.ArrayList;
 
     /**
      *  Always use this instead of setAdapter, as this has features specific to
-     *  the TextDialog.
+     *  the WebTextView.
      */
     public void setAdapterCustom(AutoCompleteAdapter adapter) {
         if (adapter != null) {
@@ -456,16 +464,16 @@ import java.util.ArrayList;
 
     /**
      *  Set the pointer for this node so it can be determined which node this
-     *  TextDialog represents.
+     *  WebTextView represents.
      *  @param  ptr Integer representing the pointer to the node which this
-     *          TextDialog represents.
+     *          WebTextView represents.
      */
     /* package */ void setNodePointer(int ptr) {
         mNodePointer = ptr;
     }
 
     /**
-     * Determine the position and size of TextDialog, and add it to the
+     * Determine the position and size of WebTextView, and add it to the
      * WebView's view heirarchy.  All parameters are presumed to be in
      * view coordinates.  Also requests Focus and sets the cursor to not
      * request to be in view.
@@ -503,7 +511,8 @@ import java.util.ArrayList;
      * removing the password input type.
      */
     public void setSingleLine(boolean single) {
-        int inputType = EditorInfo.TYPE_CLASS_TEXT;
+        int inputType = EditorInfo.TYPE_CLASS_TEXT
+                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
         if (!single) {
             inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
                     | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
@@ -515,8 +524,8 @@ import java.util.ArrayList;
     }
 
     /**
-     * Set the text for this TextDialog, and set the selection to (start, end)
-     * @param   text    Text to go into this TextDialog.
+     * Set the text for this WebTextView, and set the selection to (start, end)
+     * @param   text    Text to go into this WebTextView.
      * @param   start   Beginning of the selection.
      * @param   end     End of the selection.
      */
@@ -547,7 +556,7 @@ import java.util.ArrayList;
         edit.replace(0, edit.length(), text);
         updateCachedTextfield();
     }
-    
+
     /**
      *  Update the cache to reflect the current text.
      */

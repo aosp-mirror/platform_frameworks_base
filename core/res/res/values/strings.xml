@@ -148,6 +148,24 @@
     <!-- Meaning: unknown.  Example: Service was enabled for: Voice, PAD -->
     <string name="serviceClassPAD">PAD</string>
 
+    <!-- CDMA Roaming Indicator Strings (non ERI)--> <skip />
+    <!-- Default roaming indicator text -->
+    <string name="roamingText0">Roaming Indicator On</string>
+    <string name="roamingText1">Roaming Indicator Off</string>
+    <string name="roamingText2">Roaming Indicator Flashing</string>
+    <string name="roamingText3">Out of Neighborhood</string>
+    <string name="roamingText4">Out of Building</string>
+    <string name="roamingText5">Roaming - Preferred System</string>
+    <string name="roamingText6">Roaming - Available System</string>
+    <string name="roamingText7">Roaming - Alliance Partner</string>
+    <string name="roamingText8">Roaming - Premium Partner</string>
+    <string name="roamingText9">Roaming - Full Service Functionality</string>
+    <string name="roamingText10">Roaming - Partial Service Functionality</string>
+    <string name="roamingText11">Roaming Banner On</string>
+    <string name="roamingText12">Roaming Banner Off</string>
+    <string name="roamingTextSearching">Searching for Service</string>
+
+
     <!--
         {0} is one of "bearerServiceCode*"
         {1} is dialing number

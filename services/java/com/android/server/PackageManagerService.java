@@ -19,6 +19,7 @@ package com.android.server;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.server.PackageManagerService.PreferredActivity;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -4149,6 +4150,7 @@ class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         synchronized (mPackages) {
+            grantPermissionsLP(newPkg, true);
             mSettings.writeLP();
         }
         return true;
@@ -4507,6 +4509,42 @@ class PackageManagerService extends IPackageManager.Stub {
             mSettings.mPreferredActivities.addFilter(
                     new PreferredActivity(filter, match, set, activity));
             mSettings.writeLP();
+        }
+    }
+
+    public void replacePreferredActivity(IntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        if (filter.countActions() != 1) {
+            throw new IllegalArgumentException(
+                    "replacePreferredActivity expects filter to have only 1 action.");
+        }
+        if (filter.countCategories() != 1) {
+            throw new IllegalArgumentException(
+                    "replacePreferredActivity expects filter to have only 1 category.");
+        }
+        if (filter.countDataAuthorities() != 0
+                || filter.countDataPaths() != 0
+                || filter.countDataSchemes() != 0
+                || filter.countDataTypes() != 0) {
+            throw new IllegalArgumentException(
+                    "replacePreferredActivity expects filter to have no data authorities, " +
+                    "paths, schemes or types.");
+        }
+        synchronized (mPackages) {
+            Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
+            String action = filter.getAction(0);
+            String category = filter.getCategory(0);
+            while (it.hasNext()) {
+                PreferredActivity pa = it.next();
+                if (pa.getAction(0).equals(action) && pa.getCategory(0).equals(category)) {
+                    it.remove();
+                    Log.i(TAG, "Removed preferred activity " + pa.mActivity + ":");
+                    filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                }
+            }
+            addPreferredActivity(filter, match, set, activity);
         }
     }
 
