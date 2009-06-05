@@ -1,6 +1,6 @@
 // Fountain test script
 
-main(con, ft, launchID) {
+int main(void* con, int ft, int launchID) {
     int count, touch, x, y, rate, maxLife, lifeShift;
     int life;
     int ct, ct2;
