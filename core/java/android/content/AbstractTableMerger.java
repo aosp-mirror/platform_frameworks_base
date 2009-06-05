@@ -61,8 +61,10 @@ public abstract class AbstractTableMerger
             _SYNC_ID +"=? and " + _SYNC_ACCOUNT + "=?";
     private static final String SELECT_BY_ID = BaseColumns._ID +"=?";
 
+    // The last clause rejects events with a null _SYNC_VERSION if they've already been synced
     private static final String SELECT_UNSYNCED = ""
-            + _SYNC_DIRTY + " > 0 and (" + _SYNC_ACCOUNT + "=? or " + _SYNC_ACCOUNT + " is null)";
+            + _SYNC_DIRTY + " > 0 and (" + _SYNC_ACCOUNT + "=? or " + _SYNC_ACCOUNT + " is null) "
+            + "and (" + _SYNC_VERSION + " is not null or " + _SYNC_ACCOUNT + " is null)";
 
     public AbstractTableMerger(SQLiteDatabase database,
             String table, Uri tableURL, String deletedTable,
@@ -365,26 +367,32 @@ public abstract class AbstractTableMerger
 
             if (!TextUtils.isEmpty(localSyncID)) {
                 // An existing server item has changed
-                boolean recordChanged = (localSyncVersion == null) ||
-                        !serverSyncVersion.equals(localSyncVersion);
-                if (recordChanged) {
-                    if (localSyncDirty) {
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                            Log.v(TAG, "remote record " + serverSyncId
-                                    + " conflicts with local _sync_id " + localSyncID
-                                    + ", local _id " + localRowId);
+                // If serverSyncVersion is null, there is no edit URL;
+                // server won't let this change be written.
+                // Just hold onto it, I guess, in case the server permissions
+                // change later.
+                if (serverSyncVersion != null) {
+                    boolean recordChanged = (localSyncVersion == null) ||
+                            !serverSyncVersion.equals(localSyncVersion);
+                    if (recordChanged) {
+                        if (localSyncDirty) {
+                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                                Log.v(TAG, "remote record " + serverSyncId
+                                        + " conflicts with local _sync_id " + localSyncID
+                                        + ", local _id " + localRowId);
+                            }
+                            conflict = true;
+                        } else {
+                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                                Log.v(TAG,
+                                        "remote record " +
+                                                serverSyncId +
+                                                " updates local _sync_id " +
+                                                localSyncID + ", local _id " +
+                                                localRowId);
+                            }
+                            update = true;
                         }
-                        conflict = true;
-                    } else {
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                             Log.v(TAG,
-                                     "remote record " +
-                                             serverSyncId +
-                                     " updates local _sync_id " +
-                                     localSyncID + ", local _id " +
-                                     localRowId);
-                         }
-                         update = true;
                     }
                 }
             } else {
