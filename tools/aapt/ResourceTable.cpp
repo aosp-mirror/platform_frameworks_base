@@ -729,6 +729,7 @@ status_t compileResourceFile(Bundle* bundle,
             String16 curType;
             int32_t curFormat = ResTable_map::TYPE_ANY;
             bool curIsBag = false;
+            bool curIsBagReplaceOnOverwrite = false;
             bool curIsStyled = false;
             bool curIsPseudolocalizable = false;
             bool localHasErrors = false;
@@ -1171,6 +1172,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curTag = &array16;
                 curType = array16;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
                 ssize_t formatIdx = block.indexOfAttribute(NULL, "format");
                 if (formatIdx >= 0) {
                     String16 formatStr = String16(block.getAttributeStringValue(
@@ -1189,12 +1191,14 @@ status_t compileResourceFile(Bundle* bundle,
                 curType = array16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
                 curIsPseudolocalizable = true;
             } else if (strcmp16(block.getElementName(&len), integer_array16.string()) == 0) {
                 curTag = &integer_array16;
                 curType = array16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_INTEGER;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
             } else {
                 SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                         "Found tag %s where item is expected\n",
@@ -1229,9 +1233,10 @@ status_t compileResourceFile(Bundle* bundle,
                 }
 
                 if (!localHasErrors) {
-                    err = outTable->startBag(SourcePos(in->getPrintableSource(), block.getLineNumber()),
-                                             myPackage, curType, ident, parentIdent, &curParams, 
-                                             overwrite);
+                    err = outTable->startBag(SourcePos(in->getPrintableSource(),
+                            block.getLineNumber()), myPackage, curType, ident,
+                            parentIdent, &curParams,
+                            overwrite, curIsBagReplaceOnOverwrite);
                     if (err != NO_ERROR) {
                         hasErrors = localHasErrors = true;
                     }
@@ -1529,6 +1534,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                                  const String16& name,
                                  const String16& bagParent,
                                  const ResTable_config* params,
+                                 bool overlay,
                                  bool replace, bool isId)
 {
     status_t result = NO_ERROR;
@@ -1549,7 +1555,12 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                sourcePos.file.striing(), sourcePos.line, String8(type).string());
     }
 #endif
-    
+    if (overlay && !hasBagOrEntry(package, type, name)) {
+        sourcePos.error("Can't add new bags in an overlay.  See '%s'\n",
+                        String8(name).string());
+        return UNKNOWN_ERROR;
+    }
+
     sp<Entry> e = getEntry(package, type, name, sourcePos, params);
     if (e == NULL) {
         return UNKNOWN_ERROR;
@@ -1571,7 +1582,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
         return result;
     }
 
-    if (replace) { 
+    if (overlay && replace) { 
         return e->emptyBag(sourcePos);
     }
     return result;

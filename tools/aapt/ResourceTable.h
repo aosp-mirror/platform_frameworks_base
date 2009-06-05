@@ -96,6 +96,7 @@ public:
                     const String16& name,
                     const String16& bagParent,
                     const ResTable_config* params = NULL,
+                    bool overlay = false,
                     bool replace = false,
                     bool isId = false);
     
