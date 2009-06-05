@@ -32,6 +32,7 @@ commonSources:= \
 	StopWatch.cpp \
 	String8.cpp \
 	String16.cpp \
+	StringArray.cpp \
 	SystemClock.cpp \
 	TextOutput.cpp \
 	Threads.cpp \
