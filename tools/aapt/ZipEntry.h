@@ -22,7 +22,7 @@
 #ifndef __LIBS_ZIPENTRY_H
 #define __LIBS_ZIPENTRY_H
 
-#include "Errors.h"
+#include <utils/Errors.h>
 
 #include <stdlib.h>
 #include <stdio.h>
