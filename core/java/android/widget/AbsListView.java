@@ -472,7 +472,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private ViewTreeObserver.OnGlobalLayoutListener mGesturesLayoutListener;
     private boolean mGlobalLayoutListenerAddedGestures;
     private boolean mInstallGesturesOverlay;
-    private boolean mPreviousGesturing;
 
     private boolean mGlobalLayoutListenerAddedFilter;
 
@@ -737,8 +736,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mGesturesOverlay.removeAllOnGestureListeners();
             mGesturesOverlay.setGestureStrokeType(GestureOverlayView.GESTURE_STROKE_TYPE_MULTIPLE);
             mGesturesOverlay.addOnGesturePerformedListener(new GesturesProcessor());
-
-            mPreviousGesturing = false;
         }
     }
 
@@ -753,25 +750,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (mGestures != GESTURES_NONE) {
-            if (ev.getAction() != MotionEvent.ACTION_DOWN || mFastScroller == null ||
-                    !mFastScroller.isPointInside(ev.getX(), ev.getY())) {
-
-                if (mGesturesPopup.isShowing()) {
-                    mGesturesOverlay.dispatchTouchEvent(ev);
-
-                    final boolean isGesturing = mGesturesOverlay.isGesturing();
-
-                    if (!isGesturing) {
-                        mPreviousGesturing = isGesturing;
-                        return super.dispatchTouchEvent(ev);
-                    } else if (!mPreviousGesturing){
-                        mPreviousGesturing = isGesturing;
-                        final MotionEvent event = MotionEvent.obtain(ev);
-                        event.setAction(MotionEvent.ACTION_CANCEL);
-                        super.dispatchTouchEvent(event);
-                        return true;
-                    }
-                }
+            if ((ev.getAction() != MotionEvent.ACTION_DOWN || mFastScroller == null ||
+                    !mFastScroller.isPointInside(ev.getX(), ev.getY())) &&
+                    mGesturesPopup.isShowing()) {
+                mGesturesOverlay.dispatchTouchEvent(ev);
             }
         }
 

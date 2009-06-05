@@ -93,6 +93,7 @@ public class GestureOverlayView extends FrameLayout {
 
     private float mTotalLength;
     private boolean mIsGesturing = false;
+    private boolean mPreviousWasGesturing = false;
     private boolean mInterceptEvents = true;
     private boolean mIsListeningForGestures;
 
@@ -425,6 +426,7 @@ public class GestureOverlayView extends FrameLayout {
 
         clear(false);
         mIsGesturing = false;
+        mPreviousWasGesturing = false;
         mStrokeBuffer.clear();
 
         final ArrayList<OnGesturingListener> otherListeners = mOnGesturingListeners;
@@ -442,8 +444,10 @@ public class GestureOverlayView extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (isEnabled()) {
-            boolean cancelDispatch = (mIsGesturing || (mCurrentGesture != null &&
-                    mCurrentGesture.getStrokesCount() > 0)) && mInterceptEvents;
+            final boolean cancelDispatch = (mIsGesturing || (mCurrentGesture != null &&
+                    mCurrentGesture.getStrokesCount() > 0 && mPreviousWasGesturing)) &&
+                    mInterceptEvents;
+
             processEvent(event);
 
             if (cancelDispatch) {
@@ -451,6 +455,7 @@ public class GestureOverlayView extends FrameLayout {
             }
 
             super.dispatchTouchEvent(event);
+
             return true;
         }
 
@@ -647,6 +652,7 @@ public class GestureOverlayView extends FrameLayout {
         }
 
         mStrokeBuffer.clear();
+        mPreviousWasGesturing = mIsGesturing;
         mIsGesturing = false;
 
         final ArrayList<OnGesturingListener> listeners = mOnGesturingListeners;
@@ -688,6 +694,7 @@ public class GestureOverlayView extends FrameLayout {
                         fireOnGesturePerformed();
                     }
 
+                    mPreviousWasGesturing = false;
                     mIsFadingOut = false;
                     mFadingHasStarted = false;
                     mPath.rewind();
@@ -707,6 +714,7 @@ public class GestureOverlayView extends FrameLayout {
                 mFadingHasStarted = false;
                 mPath.rewind();
                 mCurrentGesture = null;
+                mPreviousWasGesturing = false;
                 setPaintAlpha(255);
             }
 
