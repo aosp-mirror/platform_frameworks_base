@@ -32,6 +32,7 @@
 #define DEFAULT_TTS_RATE        16000
 #define DEFAULT_TTS_FORMAT      AudioSystem::PCM_16_BIT
 #define DEFAULT_TTS_NB_CHANNELS 1
+#define DEFAULT_TTS_BUFFERSIZE  1024
 
 #define USAGEMODE_PLAY_IMMEDIATELY 0
 #define USAGEMODE_WRITE_TO_FILE    1
@@ -64,6 +65,8 @@ class SynthProxyJniStorage {
         uint32_t                  mSampleRate;
         AudioSystem::audio_format mAudFormat;
         int                       mNbChannels;
+        int8_t *                  mBuffer;
+        size_t                    mBufferSize;
 
         SynthProxyJniStorage() {
             //tts_class = NULL;
@@ -73,6 +76,8 @@ class SynthProxyJniStorage {
             mSampleRate = DEFAULT_TTS_RATE;
             mAudFormat  = DEFAULT_TTS_FORMAT;
             mNbChannels = DEFAULT_TTS_NB_CHANNELS;
+            mBufferSize = DEFAULT_TTS_BUFFERSIZE;
+            mBuffer = new int8_t[mBufferSize];
         }
 
         ~SynthProxyJniStorage() {
@@ -81,6 +86,7 @@ class SynthProxyJniStorage {
                 mNativeSynthInterface->shutdown();
                 mNativeSynthInterface = NULL;
             }
+            delete mBuffer;
         }
 
         void killAudio() {
@@ -159,23 +165,27 @@ void prepAudioTrack(SynthProxyJniStorage* pJniData,
  * Callback from TTS engine.
  * Directly speaks using AudioTrack or write to file
  */
-static void ttsSynthDoneCB(void * userdata, uint32_t rate,
+static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
                            AudioSystem::audio_format format, int channel,
-                           int8_t *wav, size_t bufferSize) {
+                           int8_t *&wav, size_t &bufferSize, tts_synth_status status) {
     LOGI("ttsSynthDoneCallback: %d bytes", bufferSize);
 
+    if (userdata == NULL){
+        LOGE("userdata == NULL");
+        return TTS_CALLBACK_HALT;
+    }
     afterSynthData_t* pForAfter = (afterSynthData_t*)userdata;
+    SynthProxyJniStorage* pJniData = (SynthProxyJniStorage*)(pForAfter->jniStorage);
 
     if (pForAfter->usageMode == USAGEMODE_PLAY_IMMEDIATELY){
         LOGI("Direct speech");
 
         if (wav == NULL) {
+            delete pForAfter;
             LOGI("Null: speech has completed");
         }
 
         if (bufferSize > 0) {
-            SynthProxyJniStorage* pJniData =
-                    (SynthProxyJniStorage*)(pForAfter->jniStorage);
             prepAudioTrack(pJniData, rate, format, channel);
             if (pJniData->mAudioOut) {
                 pJniData->mAudioOut->write(wav, bufferSize);
@@ -187,6 +197,7 @@ static void ttsSynthDoneCB(void * userdata, uint32_t rate,
     } else  if (pForAfter->usageMode == USAGEMODE_WRITE_TO_FILE) {
         LOGI("Save to file");
         if (wav == NULL) {
+            delete pForAfter;
             LOGI("Null: speech has completed");
         }
         if (bufferSize > 0){
@@ -195,10 +206,17 @@ static void ttsSynthDoneCB(void * userdata, uint32_t rate,
     }
     // TODO update to call back into the SynthProxy class through the
     //      javaTTSFields.synthProxyMethodPost methode to notify
-    //      playback has completed
+    //      playback has completed if the synthesis is done, i.e.
+    //      if status == TTS_SYNTH_DONE
+    //delete pForAfter;
 
-    delete pForAfter;
-    return;
+    // we don't update the wav (output) parameter as we'll let the next callback
+    // write at the same location, we've consumed the data already, but we need
+    // to update bufferSize to let the TTS engine know how much it can write the
+    // next time it calls this function.
+    bufferSize = pJniData->mBufferSize;
+
+    return TTS_CALLBACK_CONTINUE;
 }
 
 
@@ -223,7 +241,9 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
     } else {
         TtsEngine *(*get_TtsEngine)() =
             reinterpret_cast<TtsEngine* (*)()>(dlsym(engine_lib_handle, "getTtsEngine"));
+
         pJniStorage->mNativeSynthInterface = (*get_TtsEngine)();
+
         if (pJniStorage->mNativeSynthInterface) {
             pJniStorage->mNativeSynthInterface->init(ttsSynthDoneCB);
         }
@@ -323,7 +343,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     // TODO check return codes
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
+        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer, pSynthData->mBufferSize,
                 (void *)pForAfter);
     }
 
@@ -395,7 +415,7 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 
     if (pSynthData->mNativeSynthInterface) {
         const char *textNativeString = env->GetStringUTFChars(textJavaString, 0);
-        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
+        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer, pSynthData->mBufferSize,
                 (void *)pForAfter);
         env->ReleaseStringUTFChars(textJavaString, textNativeString);
     }
@@ -442,6 +462,7 @@ static void
 android_tts_SynthProxy_playAudioBuffer(JNIEnv *env, jobject thiz, jint jniData,
         int bufferPointer, int bufferSize)
 {
+LOGI("android_tts_SynthProxy_playAudioBuffer");
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_playAudioBuffer(): invalid JNI data");
         return;
