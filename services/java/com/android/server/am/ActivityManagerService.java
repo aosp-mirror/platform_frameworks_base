@@ -289,6 +289,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // because the user interacts with it so much.
     final int HOME_APP_ADJ;
 
+    // This is a process currently hosting a backup operation.  Killing it
+    // is not entirely fatal but is generally a bad idea.
+    final int BACKUP_APP_ADJ;
+
     // This is a process holding a secondary server -- killing it will not
     // have much of an impact as far as the user is concerned. Value set in
     // system/rootdir/init.rc on startup.
@@ -317,6 +321,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     final int EMPTY_APP_MEM;
     final int HIDDEN_APP_MEM;
     final int HOME_APP_MEM;
+    final int BACKUP_APP_MEM;
     final int SECONDARY_SERVER_MEM;
     final int VISIBLE_APP_MEM;
     final int FOREGROUND_APP_MEM;
@@ -1358,6 +1363,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_ADJ"));
         SECONDARY_SERVER_ADJ =
             Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_ADJ"));
+        BACKUP_APP_ADJ =
+            Integer.valueOf(SystemProperties.get("ro.BACKUP_APP_ADJ"));
         HOME_APP_ADJ =
             Integer.valueOf(SystemProperties.get("ro.HOME_APP_ADJ"));
         HIDDEN_APP_MIN_ADJ =
@@ -1373,6 +1380,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_MEM"))*PAGE_SIZE;
         SECONDARY_SERVER_MEM =
             Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_MEM"))*PAGE_SIZE;
+        BACKUP_APP_MEM =
+            Integer.valueOf(SystemProperties.get("ro.BACKUP_APP_MEM"))*PAGE_SIZE;
         HOME_APP_MEM =
             Integer.valueOf(SystemProperties.get("ro.HOME_APP_MEM"))*PAGE_SIZE;
         HIDDEN_APP_MEM =
@@ -10344,6 +10353,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mBackupTarget = r;
             mBackupAppName = app.packageName;
 
+            // Try not to kill the process during backup
+            updateOomAdjLocked(proc);
+
             // If the process is already attached, schedule the creation of the backup agent now.
             // If it is not yet live, this will be done when it attaches to the framework.
             if (proc.thread != null) {
@@ -10403,14 +10415,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
 
+            ProcessRecord proc = mBackupTarget.app;
+            mBackupTarget = null;
+            mBackupAppName = null;
+
+            // Not backing this app up any more; reset its OOM adjustment
+            updateOomAdjLocked(proc);
+
             try {
-                mBackupTarget.app.thread.scheduleDestroyBackupAgent(appInfo);
+                proc.thread.scheduleDestroyBackupAgent(appInfo);
             } catch (Exception e) {
                 Log.e(TAG, "Exception when unbinding backup agent:");
                 e.printStackTrace();
             }
-            mBackupTarget = null;
-            mBackupAppName = null;
         }
     }
     // =========================================================
@@ -11884,6 +11901,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         app.adjSeq = mAdjSeq;
         app.curRawAdj = adj;
         app.curAdj = adj <= app.maxAdj ? adj : app.maxAdj;
+
+        if (mBackupTarget != null && app == mBackupTarget.app) {
+            // If possible we want to avoid killing apps while they're being backed up
+            if (adj > BACKUP_APP_ADJ) {
+                if (DEBUG_BACKUP) Log.v(TAG, "oom BACKUP_APP_ADJ for " + app);
+                adj = BACKUP_APP_ADJ;
+            }
+        }
 
         if (app.services.size() != 0 && adj > FOREGROUND_APP_ADJ) {
             // If this process has active services running in it, we would
