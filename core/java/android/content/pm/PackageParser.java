@@ -748,6 +748,18 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
+            } else if (tagName.equals("uses-feature")) {
+                ConfigurationInfo cPref = new ConfigurationInfo();
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature);
+                cPref.reqGlEsVersion = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,
+                        ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
+                sa.recycle();
+                pkg.configPreferences.add(cPref);
+
+                XmlUtils.skipCurrentTag(parser);
+
             } else if (tagName.equals("uses-sdk")) {
                 if (mSdkVersion > 0) {
                     sa = res.obtainAttributes(attrs,
