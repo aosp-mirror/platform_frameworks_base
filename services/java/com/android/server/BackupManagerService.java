@@ -337,7 +337,14 @@ class BackupManagerService extends IBackupManager.Stub {
                 int uid = app.uid;
                 HashSet<ApplicationInfo> set = mBackupParticipants.get(uid);
                 if (set != null) {
-                    set.remove(app);
+                    // Find the existing entry with the same package name, and remove it.
+                    // We can't just remove(app) because the instances are different.
+                    for (ApplicationInfo entry: set) {
+                        if (entry.packageName.equals(app.packageName)) {
+                            set.remove(entry);
+                            break;
+                        }
+                    }
                     if (set.size() == 0) {
                         mBackupParticipants.delete(uid);                    }
                 }
