@@ -25,24 +25,29 @@
 
 namespace android {
 
+enum tts_synth_status {
+    TTS_SYNTH_DONE              = 0,
+    TTS_SYNTH_PENDING           = 1
+};
+
+enum tts_callback_status {
+    TTS_CALLBACK_HALT           = 0,
+    TTS_CALLBACK_CONTINUE       = 1
+};
+
 // The callback is used by the implementation of this interface to notify its
 // client, the Android TTS service, that the last requested synthesis has been
-// completed.
+// completed. // TODO reword
 // The callback for synthesis completed takes:
-//    void *       - The userdata pointer set in the original synth call
-//    uint32_t     - Track sampling rate in Hz
-//    audio_format - The AudioSystem::audio_format enum
-//    int          - The number of channels
-//    int8_t *     - A buffer of audio data only valid during the execution of the callback
-//    size_t       - The size of the buffer
-// Note about memory management:
-//    The implementation of TtsEngine is responsible for the management of the memory
-//    it allocates to store the synthesized speech. After the execution of the callback
-//    to hand the synthesized data to the client of TtsEngine, the TTS engine is
-//    free to reuse or free the previously allocated memory.
-//    This implies that the implementation of the "synthDoneCB" callback cannot use
-//    the pointer to the buffer of audio samples outside of the callback itself.
-typedef void (synthDoneCB_t)(void *, uint32_t, AudioSystem::audio_format, int, int8_t *, size_t);
+//    [inout] void *&      - The userdata pointer set in the original synth call
+//    [in]    uint32_t     - Track sampling rate in Hz
+//    [in]    audio_format - The AudioSystem::audio_format enum
+//    [in]    int          - The number of channels
+//    [inout] int8_t *&     - A buffer of audio data only valid during the execution of the callback
+//    [inout] size_t  &     - The size of the buffer
+//    [in]    tts_synth_status  - Status of the synthesis; 0 for done, 1 for more data to be synthesized.
+// Returns the status of the consumer of the synthesis. 0 for stop, 1 for continue.
+typedef tts_callback_status (synthDoneCB_t)(void *&, uint32_t, AudioSystem::audio_format, int, int8_t *&, size_t&, tts_synth_status);
 
 class TtsEngine;
 extern "C" TtsEngine* getTtsEngine();
@@ -155,13 +160,13 @@ public:
     // @param text      the UTF-8 text to synthesize
     // @param userdata  pointer to be returned when the call is invoked
     // @return          TTS_SUCCESS or TTS_FAILURE
-    virtual tts_result synthesizeText(const char *text, void *userdata);
+    virtual tts_result synthesizeText(const char *text, int8_t *buffer, size_t bufferSize, void *userdata);
 
     // Synthesize IPA text. When synthesis completes, the engine must call the given callback to notify the TTS API.
     // @param ipa      the IPA data to synthesize
     // @param userdata  pointer to be returned when the call is invoked
     // @return TTS_FEATURE_UNSUPPORTED if IPA is not supported, otherwise TTS_SUCCESS or TTS_FAILURE
-    virtual tts_result synthesizeIpa(const char *ipa, void *userdata);
+    virtual tts_result synthesizeIpa(const char *ipa, int8_t *buffer, size_t bufferSize, void *userdata);
 };
 
 } // namespace android
