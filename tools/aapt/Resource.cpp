@@ -433,7 +433,7 @@ static void checkForIds(const String8& path, ResXMLParser& parser)
     }
 }
 
-static void applyFileOverlay(const sp<AaptAssets>& assets, 
+static bool applyFileOverlay(const sp<AaptAssets>& assets,
                              const sp<ResourceTypeSet>& baseSet,
                              const char *resType)
 {
@@ -441,7 +441,7 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
     // Also add any found only in the overlay.
     sp<AaptAssets> overlay = assets->getOverlay();
     String8 resTypeString(resType);
-    
+
     // work through the linked list of overlays
     while (overlay.get()) {
         KeyedVector<String8, sp<ResourceTypeSet> >* overlayRes = overlay->getResources();
@@ -456,7 +456,7 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
             size_t overlayCount = overlaySet->size();
             for (size_t overlayIndex=0; overlayIndex<overlayCount; overlayIndex++) {
                 size_t baseIndex = baseSet->indexOfKey(overlaySet->keyAt(overlayIndex));
-                if (baseIndex != UNKNOWN_ERROR) {
+                if (baseIndex < UNKNOWN_ERROR) {
                     // look for same flavor.  For a given file (strings.xml, for example)
                     // there may be a locale specific or other flavors - we want to match
                     // the same flavor.
@@ -482,9 +482,10 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
                     }
                 } else {
                     // this group doesn't exist (a file that's only in the overlay)
-                    // add it
-                    baseSet->add(overlaySet->keyAt(overlayIndex),
-                                 overlaySet->valueAt(overlayIndex));
+                    fprintf(stderr, "aapt: error: "
+                            "*** Resource file '%s' exists only in an overlay\n",
+                            overlaySet->keyAt(overlayIndex).string());
+                    return false;
                 }
             }
             // this overlay didn't have resources for this type
@@ -492,7 +493,7 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
         // try next overlay
         overlay = overlay->getOverlay();
     }
-    return;
+    return true;
 }
 
 void addTagAttribute(const sp<XMLNode>& node, const char* ns8,
@@ -618,13 +619,15 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         current = current->getOverlay();
     }
     // apply the overlay files to the base set
-    applyFileOverlay(assets, drawables, "drawable");
-    applyFileOverlay(assets, layouts, "layout");
-    applyFileOverlay(assets, anims, "anim");
-    applyFileOverlay(assets, xmls, "xml");
-    applyFileOverlay(assets, raws, "raw");
-    applyFileOverlay(assets, colors, "color");
-    applyFileOverlay(assets, menus, "menu");
+    if (!applyFileOverlay(assets, drawables, "drawable") ||
+            !applyFileOverlay(assets, layouts, "layout") ||
+            !applyFileOverlay(assets, anims, "anim") ||
+            !applyFileOverlay(assets, xmls, "xml") ||
+            !applyFileOverlay(assets, raws, "raw") ||
+            !applyFileOverlay(assets, colors, "color") ||
+            !applyFileOverlay(assets, menus, "menu")) {
+        return UNKNOWN_ERROR;
+    }
 
     bool hasErrors = false;
 
