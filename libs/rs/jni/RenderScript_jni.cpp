@@ -35,8 +35,6 @@
 #include "../RenderScript.h"
 #include "../RenderScriptEnv.h"
 
-#include "acc/acc.h"
-
 //#define LOG_API LOGE
 #define LOG_API(...)
 
@@ -567,8 +565,6 @@ nScriptCSetScript(JNIEnv *_env, jobject _this, jbyteArray scriptRef,
     jint remaining;
     jbyte* script_base = 0;
     jbyte* script_ptr;
-    ACCscript* script = 0;
-    void* scriptEntry = 0;
     if (!scriptRef) {
         _exception = 1;
         //_env->ThrowNew(IAEClass, "script == null");
@@ -594,22 +590,9 @@ nScriptCSetScript(JNIEnv *_env, jobject _this, jbyteArray scriptRef,
         _env->GetPrimitiveArrayCritical(scriptRef, (jboolean *)0);
     script_ptr = script_base + offset;
 
-    {
-        script = accCreateScript();
-        const char* scriptSource[] = {(const char*) script_ptr};
-        int scriptLength[] = {length} ;
-        accScriptSource(script, 1, scriptSource, scriptLength);
-        accCompileScript(script);
-        accGetScriptLabel(script, "main", (ACCvoid**) &scriptEntry);
-    }
-    if (scriptEntry) {
-        rsScriptCSetScript((void*) script, (void *)scriptEntry);
-        script = 0;
-    }
+    rsScriptCSetText((const char *)script_ptr, length);
+
 exit:
-    if (script) {
-        accDeleteScript(script);
-    }
     if (script_base) {
         _env->ReleasePrimitiveArrayCritical(scriptRef, script_base,
                 _exception ? JNI_ABORT: 0);

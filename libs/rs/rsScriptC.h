@@ -39,6 +39,8 @@ public:
 
     virtual bool run(Context *, uint32_t launchID);
 
+    const char * mScriptText;
+    uint32_t mScriptTextLength;
 
     ACCscript*    mAccScript;
     rsc_RunScript mScript;
@@ -57,7 +59,9 @@ public:
     ScriptCState();
     ~ScriptCState();
 
-    ACCscript*    mAccScript;
+    ACCscript* mAccScript;
+    const char * mScriptText;
+    uint32_t mScriptTextLength;
     rsc_RunScript mScript;
     float mClearColor[4];
     float mClearDepth;
@@ -68,6 +72,7 @@ public:
     Vector<const Type *> mConstantBufferTypes;
 
     void clear();
+    void runCompiler();
 };
 
 
