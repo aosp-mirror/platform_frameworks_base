@@ -28,6 +28,8 @@ ScriptC::ScriptC()
 {
     mAccScript = NULL;
     mScript = NULL;
+    mScriptText = NULL;
+    mScriptTextLength = 0;
 }
 
 ScriptC::~ScriptC()
@@ -418,6 +420,21 @@ void ScriptCState::clear()
     mScript = NULL;
     mIsRoot = false;
     mIsOrtho = true;
+    mScriptText = NULL;
+    mScriptTextLength = 0;
+}
+
+void ScriptCState::runCompiler()
+{
+    mAccScript = accCreateScript();
+
+    LOGE("Compiler 1");
+    const char* scriptSource[] = {mScriptText};
+    int scriptLength[] = {mScriptTextLength} ;
+    accScriptSource(mAccScript, 1, scriptSource, scriptLength);
+    accCompileScript(mAccScript);
+    accGetScriptLabel(mAccScript, "main", (ACCvoid**) &mScript);
+    LOGE("Compiler 1");
 }
 
 namespace android {
@@ -475,9 +492,19 @@ void rsi_ScriptCSetOrtho(Context * rsc, bool isOrtho)
     ss->mIsOrtho = isOrtho;
 }
 
+void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)
+{
+    ScriptCState *ss = &rsc->mScriptC;
+    ss->mScriptText = text;
+    ss->mScriptTextLength = len;
+}
+
+
 RsScript rsi_ScriptCCreate(Context * rsc)
 {
     ScriptCState *ss = &rsc->mScriptC;
+
+    ss->runCompiler();
 
     ScriptC *s = new ScriptC();
     s->mAccScript = ss->mAccScript;
@@ -491,7 +518,8 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     s->mClearStencil = ss->mClearStencil;
     s->mIsRoot = ss->mIsRoot;
     s->mIsOrtho = ss->mIsOrtho;
-
+    s->mScriptText = ss->mScriptText;
+    s->mScriptTextLength = ss->mScriptTextLength;
     return s;
 }
 
