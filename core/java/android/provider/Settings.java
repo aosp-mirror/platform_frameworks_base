@@ -1940,6 +1940,29 @@ public final class Settings {
             "enabled_accessibility_services";
 
         /**
+         * Setting to always use the default text-to-speech settings regardless
+         * of the application settings.
+         * 1 = override application settings,
+         * 0 = use application settings (if specified).
+         */
+        public static final String TTS_USE_DEFAULTS = "tts_use_defaults";
+
+        /**
+         * Default text-to-speech engine speech rate. 100 = 1x
+         */
+        public static final String TTS_DEFAULT_RATE = "tts_default_rate";
+
+        /**
+         * Default text-to-speech engine pitch. 100 = 1x
+         */
+        public static final String TTS_DEFAULT_PITCH = "tts_default_pitch";
+
+        /**
+         * Default text-to-speech engine.
+         */
+        public static final String TTS_DEFAULT_SYNTH = "tts_default_synth";
+
+        /**
          * Whether to notify the user of open networks.
          * <p>
          * If not connected and the scan results have an open network, we will
