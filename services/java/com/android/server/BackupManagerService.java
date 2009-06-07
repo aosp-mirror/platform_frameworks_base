@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
@@ -149,8 +150,6 @@ class BackupManagerService extends IBackupManager.Stub {
                 return;
             }
 
-            // !!! TODO: this is buggy right now; we wind up with duplicate participant entries
-            // after using 'adb install -r' of a participating app
             String action = intent.getAction();
             if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
                 synchronized (mBackupParticipants) {
@@ -211,6 +210,11 @@ class BackupManagerService extends IBackupManager.Stub {
         Log.d(TAG, "processOneBackup doBackup() on " + packageName);
 
         try {
+            // Look up the package info & signatures.  This is first so that if it
+            // throws an exception, there's no file setup yet that would need to
+            // be unraveled.
+            PackageInfo packInfo = mPackageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+
             // !!! TODO: get the state file dir from the transport
             File savedStateName = new File(mStateDir, packageName);
             File backupDataName = new File(mDataDir, packageName + ".data");
@@ -253,15 +257,17 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (DEBUG) Log.v(TAG, "doBackup() success; calling transport");
                 backupData =
                     ParcelFileDescriptor.open(backupDataName, ParcelFileDescriptor.MODE_READ_ONLY);
-                int error = transport.performBackup(packageName, backupData);
+                int error = transport.performBackup(packInfo, backupData);
 
                 // !!! TODO: After successful transport, delete the now-stale data
                 // and juggle the files so that next time the new state is passed
                 //backupDataName.delete();
                 newStateName.renameTo(savedStateName);
             }
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Package not found on backup: " + packageName);
         } catch (FileNotFoundException fnf) {
-            Log.d(TAG, "File not found on backup: ");
+            Log.w(TAG, "File not found on backup: ");
             fnf.printStackTrace();
         } catch (RemoteException e) {
             Log.d(TAG, "Remote target " + request.appInfo.packageName + " threw during backup:");
