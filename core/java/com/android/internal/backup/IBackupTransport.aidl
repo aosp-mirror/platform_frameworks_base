@@ -16,7 +16,7 @@
 
 package com.android.internal.backup;
 
-import android.os.Bundle;
+import android.content.pm.PackageInfo;
 import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
@@ -26,7 +26,7 @@ interface IBackupTransport {
     1. set up the connection to the destination
         - set up encryption
         - for Google cloud, log in using the user's gaia credential or whatever
-        - for sd, spin off the backup transport and establish communication with it
+        - for adb, just set up the all-in-one destination file
     2. send each app's backup transaction
         - parse the data file for key/value pointers etc
         - send key/blobsize set to the Google cloud, get back quota ok/rejected response
@@ -37,7 +37,7 @@ interface IBackupTransport {
         - sd target streams raw data into encryption envelope then to sd?
     3. shut down connection to destination
         - cloud: tear down connection etc
-        - sd: close the file and shut down the writer proxy
+        - adb: close the file
 */
     /**
      * Establish a connection to the back-end data repository, if necessary.  If the transport
@@ -51,13 +51,14 @@ interface IBackupTransport {
     /**
      * Send one application's data to the backup destination.
      *
-     * @param packageName The identity of the application whose data is being backed up.
+     * @param package The identity of the application whose data is being backed up.  This
+     *   specifically includes the signature list for the package.
      * @param data The data stream that resulted from invoking the application's
-     *        BackupService.doBackup() method.  This may be a pipe rather than a
-     *        file on persistent media, so it may not be seekable.
+     *   BackupService.doBackup() method.  This may be a pipe rather than a file on
+     *   persistent media, so it may not be seekable.
      * @return Zero on success; a nonzero error code on failure.
      */
-    int performBackup(String packageName, in ParcelFileDescriptor data);
+    int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor data);
 
     /**
      * Terminate the backup session, closing files, freeing memory, and cleaning up whatever
