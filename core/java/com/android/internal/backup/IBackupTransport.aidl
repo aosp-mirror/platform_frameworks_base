@@ -17,6 +17,7 @@
 package com.android.internal.backup;
 
 import android.content.pm.PackageInfo;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
@@ -51,14 +52,48 @@ interface IBackupTransport {
     /**
      * Send one application's data to the backup destination.
      *
-     * @param package The identity of the application whose data is being backed up.  This
-     *   specifically includes the signature list for the package.
+     * @param packageInfo The identity of the application whose data is being backed up.
+     *   This specifically includes the signature list for the package.
      * @param data The data stream that resulted from invoking the application's
      *   BackupService.doBackup() method.  This may be a pipe rather than a file on
      *   persistent media, so it may not be seekable.
      * @return Zero on success; a nonzero error code on failure.
      */
     int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor data);
+
+    /**
+     * Get the set of backups currently available over this transport.
+     *
+     * @return backups A bundle containing two elements:  an int array under the key
+     *   "tokens" whose entries are a transport-private identifier for each backup set;
+     *   and a String array under the key "names" whose entries are the user-meaningful
+     *   names corresponding to the backup sets at each index in the tokens array.
+     **/
+    Bundle getAvailableBackups();
+
+    /**
+     * Get the set of applications from a given backup image.
+     *
+     * @param token A backup token as returned by {@link availableBackups}.
+     * @return An array of PackageInfo objects describing all of the applications
+     *   available for restore from the given backup set.  This should include the list
+     *   of signatures for each package so that the Backup Manager can filter using that
+     *   information.
+     */
+    PackageInfo[] getAppSet(int token);
+
+    /**
+     * Retrieve one application's data from the backup destination.
+     *
+     * @param token The backup record from which a restore is being requested.
+     * @param packageInfo The identity of the application whose data is being restored.
+     *   This must include the signature list for the package; it is up to the transport
+     *   to verify that the requested app's signatures match the saved backup record
+     *   because the transport cannot necessarily trust the client device.
+     * @param data An open, writeable file into which the backup image should be stored.
+     * @return Zero on success; a nonzero error code on failure.
+     */
+    int getRestoreData(int token, in PackageInfo packageInfo, in ParcelFileDescriptor data);
 
     /**
      * Terminate the backup session, closing files, freeing memory, and cleaning up whatever
