@@ -134,6 +134,7 @@ public class ReliabilityTestActivity extends Activity {
         webView.stopLoading();
         Log.v(LOGTAG, "Page timeout triggered, progress = " + progress);
         timeoutFlag = true;
+        handler.postDelayed(pageDoneRunner, manualDelay);
     }
     
     public boolean waitUntilDone() {
@@ -181,7 +182,7 @@ public class ReliabilityTestActivity extends Activity {
         @Override
         public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host,
                 String realm) {
-            //cancel http auth request
+            // cancel http auth request
             handler.cancel();
         }
         
@@ -194,7 +195,9 @@ public class ReliabilityTestActivity extends Activity {
         @Override
         public void onPageFinished(WebView view, String url) {
             Log.v(LOGTAG, "onPageFinished: " + url);
-            handler.postDelayed(new WebViewStatusChecker(), 500);
+            // let handleTimeout take care of finishing the page
+            if(!timeoutFlag)
+                handler.postDelayed(new WebViewStatusChecker(), 500);
         }
     }
     
