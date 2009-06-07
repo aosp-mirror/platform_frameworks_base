@@ -19,8 +19,11 @@ package com.android.internal.telephony.cdma;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
+import android.database.SQLException;
+import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
@@ -32,6 +35,7 @@ import android.os.SystemProperties;
 import android.provider.Checkin;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.provider.Telephony;
 import android.provider.Telephony.Intents;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -134,6 +138,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     static final String LOG_TAG = "CDMA";
 
     private ContentResolver cr;
+    private String currentCarrier = null;
 
     private ContentObserver mAutoTimeObserver = new ContentObserver(new Handler()) {
         @Override
@@ -203,6 +208,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         cr.unregisterContentObserver(this.mAutoTimeObserver);
     }
 
+    @Override
     protected void finalize() {
         if (DBG) log("CdmaServiceStateTracker finalized");
     }
@@ -265,10 +271,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 EVENT_GET_LOC_DONE_CDMA, onComplete));
     }
 
-
-    //***** Overridden from ServiceStateTracker
-    public void
-    handleMessage (Message msg) {
+    @Override
+    public void handleMessage (Message msg) {
         AsyncResult ar;
         int[] ints;
         String[] strings;
@@ -434,8 +438,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     //***** Private Instance Methods
 
-    protected void setPowerStateToDesired()
-    {
+    @Override
+    protected void setPowerStateToDesired() {
         // If we want it on and it's off, turn it on
         if (mDesiredPowerState
             && cm.getRadioState() == CommandsInterface.RadioState.RADIO_OFF) {
@@ -470,6 +474,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         } // Otherwise, we're in the desired state
     }
 
+    @Override
     protected void updateSpnDisplay() {
         String spn = "";
         boolean showSpn = false;
@@ -511,8 +516,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
      * Handle the result of one of the pollState()-related requests
      */
 
-    protected void
-    handlePollStateResult (int what, AsyncResult ar) {
+    @Override
+    protected void handlePollStateResult (int what, AsyncResult ar) {
         int ints[];
         String states[];
 
@@ -624,10 +629,31 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 if (opNames != null && opNames.length >= 3) {
                     if (cm.getRadioState().isNVReady()) {
                         // In CDMA in case on NV the ss.mOperatorAlphaLong is set later with the
-                        // ERI text, so here is ignored what is coming from the modem
+                        // ERI text, so here it is ignored what is coming from the modem
                         newSS.setOperatorName(null, opNames[1], opNames[2]);
                     } else {
                         newSS.setOperatorName(opNames[0], opNames[1], opNames[2]);
+                    }
+
+                    if (!(opNames[2].equals(currentCarrier))) {
+                        // TODO(Moto): jsh asks, "This uses the MCC+MNC of the current registered
+                        // network to set the "current" entry in the APN table. But the correct
+                        // entry should be the MCC+MNC that matches the subscribed operator
+                        // (eg, phone issuer). These can be different when roaming."
+                        try {
+                            // Set the current field of the telephony provider according to
+                            // the CDMA's operator
+                            Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
+                            ContentValues map = new ContentValues();
+                            map.put(Telephony.Carriers.NUMERIC, opNames[2]);
+                            cr.insert(uri, map);
+                            // save current carrier for the next time check
+                            currentCarrier = opNames[2];
+                        } catch (SQLException e) {
+                            Log.e(LOG_TAG, "Can't store current operator", e);
+                        }
+                    } else {
+                        Log.i(LOG_TAG, "current carrier is not changed");
                     }
                 } else {
                     Log.w(LOG_TAG, "error parsing opNames");

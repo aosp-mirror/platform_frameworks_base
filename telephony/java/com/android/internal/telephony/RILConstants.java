@@ -78,9 +78,6 @@ public interface RILConstants {
     int CDM_TTY_HCO_MODE = 2;
     int CDM_TTY_VCO_MODE = 3;
 
-    byte CDMA_VOICE_PRIVACY = 0x70;           /* "p" value used in Ril_Call.isVoice if Privacy
-                                                 is active  */
-
 /*
 cat include/telephony/ril.h | \
    egrep '^#define' | \

@@ -74,13 +74,18 @@ public class SignalToneUtil {
     static private HashMap<Integer, Integer> hm = new HashMap<Integer, Integer>();
 
     private static Integer signalParamHash(int signalType, int alertPitch, int signal) {
-        // TODO(Moto): The input should get checked before usage
+        if ((signalType < 0) || (signalType > 256) || (alertPitch > 256) ||
+                (alertPitch < 0) || (signal > 256) || (signal < 0)) {
+            return new Integer(ToneGenerator.TONE_CDMA_INVALID);
+        }
         return new Integer(signalType * 256 * 256 + alertPitch * 256 + signal);
     }
 
     public static int getAudioToneFromSignalInfo(int signalType, int alertPitch, int signal) {
-        int result = ToneGenerator.TONE_CDMA_INVALID;
-        result = hm.get(signalParamHash(signalType, alertPitch, signal));
+        Integer result = hm.get(signalParamHash(signalType, alertPitch, signal));
+        if (result == null) {
+            return ToneGenerator.TONE_CDMA_INVALID;
+        }
         return result;
     }
 

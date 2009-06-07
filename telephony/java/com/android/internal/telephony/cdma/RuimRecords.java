@@ -16,19 +16,17 @@
 
 package com.android.internal.telephony.cdma;
 
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Registrant;
 import android.util.Log;
 
-import static com.android.internal.telephony.TelephonyProperties.*;
 import com.android.internal.telephony.AdnRecord;
 import com.android.internal.telephony.AdnRecordCache;
 import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.cdma.RuimCard;
 import com.android.internal.telephony.gsm.MccTable;
 
@@ -55,8 +53,13 @@ public final class RuimRecords extends IccRecords {
 
     //***** Instance Variables
 
-    String spn;
-    int spnDisplayCondition;
+    private String mImsi;
+    private String mMyMobileNumber;
+    private String mSid;
+    private String mNid;
+    private String mMin2Min1;
+
+    private String mPrlVersion;
 
     //***** Event Constants
 
@@ -122,13 +125,32 @@ public final class RuimRecords extends IccRecords {
 
         adnCache.reset();
 
-        phone.setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, null);
-        phone.setSystemProperty(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, null);
+        phone.setSystemProperty(TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, null);
+        phone.setSystemProperty(TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, null);
 
         // recordsRequested is set to false indicating that the SIM
         // read requests made so far are not valid. This is set to
         // true only when fresh set of read requests are made.
         recordsRequested = false;
+    }
+
+    /** Returns null if RUIM is not yet ready */
+    public String getIMSI_M() {
+        // TODO(Moto): mImsi is not initialized, fix.
+        return mImsi;
+    }
+
+    public String getMdnNumber() {
+        return mMyMobileNumber;
+    }
+
+    public String getCdmaMin() {
+         return mMin2Min1;
+    }
+
+    /** Returns null if RUIM is not yet ready */
+    public String getPrlVersion() {
+        return mPrlVersion;
     }
 
     @Override
@@ -153,6 +175,30 @@ public final class RuimRecords extends IccRecords {
             // just re-fetch all RUIM records that we cache.
             fetchRuimRecords();
         }
+    }
+
+    /**
+     * Returns the 5 or 6 digit MCC/MNC of the operator that
+     *  provided the RUIM card. Returns null of RUIM is not yet ready
+     */
+    public String getRUIMOperatorNumeric() {
+        if (mImsi == null) {
+            return null;
+        }
+
+        // TODO(Moto): mncLength is not set anywhere.
+        if (mncLength != 0) {
+            // Length = length of MCC + length of MNC
+            // TODO: change spec name
+            // length of mcc = 3 (3GPP2 C.S0005 - Section 2.3)
+            return mImsi.substring(0, 3 + mncLength);
+        }
+
+        // Guess the MNC length based on the MCC if we don't
+        // have a valid value in ef[ad]
+
+        int mcc = Integer.parseInt(mImsi.substring(0,3));
+        return mImsi.substring(0, 3 + MccTable.smallestDigitsMccForMnc(mcc));
     }
 
     @Override
@@ -181,35 +227,27 @@ public final class RuimRecords extends IccRecords {
             /* IO events */
 
             case EVENT_GET_CDMA_SUBSCRIPTION_DONE:
-                // TODO(Moto):TODO(Teleca): This event was removed by Teleca/QCT
-                // I've left it as it's needed to complete EVENT_OTA_PROVISION_STATUS_CHANGE.
-                // But since various instance variables are removed I've commented
-                // out code that references them. I'm sure this is wrong so
-                // Moto/Teleca/QCT need to come to an agreement. Also see onRuimReady
-                // and onVnReady.
-
                 ar = (AsyncResult)msg.obj;
                 String localTemp[] = (String[])ar.result;
                 if (ar.exception != null) {
                     break;
                 }
-                if(m_ota_commited) {
-                    //if(mMyMobileNumber != localTemp[0]) {
+                if (m_ota_commited) {
+                    if (mMyMobileNumber != localTemp[0]) {
                         Intent intent = new Intent(TelephonyIntents.ACTION_CDMA_OTA_MDN_CHANGED);
                         intent.putExtra("mdn", localTemp[0]);
                         Log.d(LOG_TAG,"Broadcasting intent MDN Change in OTA ");
                         ActivityManagerNative.broadcastStickyIntent(intent, null);
-                    //}
-                    m_ota_commited=false;
+                    }
+                    m_ota_commited = false;
                 }
-                //mMyMobileNumber = localTemp[0];
-                //mSid = localTemp[1];
-                //mNid = localTemp[2];
-                //if (localTemp.length >= 3) { // TODO(Moto): remove when new ril always returns min2_min1
-                //   mMin2Min1 = localTemp[3];
-                //}
+                mMyMobileNumber = localTemp[0];
+                mSid = localTemp[1];
+                mNid = localTemp[2];
+                mMin2Min1 = localTemp[3];
+                mPrlVersion = localTemp[4];
 
-                //Log.d(LOG_TAG, "MDN: " + mMyMobileNumber + " MIN: " + mMin2Min1);
+                Log.d(LOG_TAG, "MDN: " + mMyMobileNumber + " MIN: " + mMin2Min1);
 
             break;
 
@@ -262,8 +300,10 @@ public final class RuimRecords extends IccRecords {
                 if (ar.exception == null) {
                     int[] ints = (int[]) ar.result;
                     int otaStatus = ints[0];
-                    if (otaStatus== phone.CDMA_OTA_PROVISION_STATUS_COMMITTED) {
+                    if (otaStatus == phone.CDMA_OTA_PROVISION_STATUS_COMMITTED) {
                         m_ota_commited=true;
+                        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
+                    } else if (otaStatus == phone.CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED) {
                         phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
                     }
                  }
@@ -315,14 +355,14 @@ public final class RuimRecords extends IccRecords {
                 RuimCard.INTENT_VALUE_ICC_READY, null);
 
         fetchRuimRecords();
-        
-        // TODO(Moto): TODO(Teleca): Work out how to do CDMA subscription
-        // phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
+
+        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
+
     }
 
     private void onNvReady() {
-        // TODO(Moto): TODO(Teleca): Work out how to do CDMA subscription
-        // phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));        
+        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
+
     }
 
     private void fetchRuimRecords() {

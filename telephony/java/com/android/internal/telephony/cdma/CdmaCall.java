@@ -181,9 +181,7 @@ public final class CdmaCall extends Call {
      */
     void
     onHangupLocal() {
-        for (int i = 0, s = connections.size()
-                ; i < s; i++
-        ) {
+        for (int i = 0, s = connections.size(); i < s; i++) {
             CdmaConnection cn = (CdmaConnection)connections.get(i);
 
             cn.onHangupLocal();

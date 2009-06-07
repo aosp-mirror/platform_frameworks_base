@@ -674,6 +674,12 @@ public abstract class PhoneBase implements Phone {
         return null;
     }
 
+    public String getCdmaPrlVersion(){
+        //  This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        return null;
+    }
+
     public void sendBurstDtmf(String dtmfString, Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
@@ -725,6 +731,46 @@ public abstract class PhoneBase implements Phone {
      public void unregisterForDisplayInfo(Handler h) {
          mCM.unregisterForDisplayInfo(h);
      }
+
+    public void registerForNumberInfo(Handler h, int what, Object obj) {
+        mCM.registerForNumberInfo(h, what, obj);
+    }
+
+    public void unregisterForNumberInfo(Handler h) {
+        mCM.unregisterForNumberInfo(h);
+    }
+
+    public void registerForRedirectedNumberInfo(Handler h, int what, Object obj) {
+        mCM.registerForRedirectedNumberInfo(h, what, obj);
+    }
+
+    public void unregisterForRedirectedNumberInfo(Handler h) {
+        mCM.unregisterForRedirectedNumberInfo(h);
+    }
+
+    public void registerForLineControlInfo(Handler h, int what, Object obj) {
+        mCM.registerForLineControlInfo( h, what, obj);
+    }
+
+    public void unregisterForLineControlInfo(Handler h) {
+        mCM.unregisterForLineControlInfo(h);
+    }
+
+    public void registerFoT53ClirlInfo(Handler h, int what, Object obj) {
+        mCM.registerFoT53ClirlInfo(h, what, obj);
+    }
+
+    public void unregisterForT53ClirInfo(Handler h) {
+        mCM.unregisterForT53ClirInfo(h);
+    }
+
+    public void registerForT53AudioControlInfo(Handler h, int what, Object obj) {
+        mCM.registerForT53AudioControlInfo( h, what, obj);
+    }
+
+    public void unregisterForT53AudioControlInfo(Handler h) {
+        mCM.unregisterForT53AudioControlInfo(h);
+    }
 
      public void setOnEcbModeExitResponse(Handler h, int what, Object obj){
          // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
