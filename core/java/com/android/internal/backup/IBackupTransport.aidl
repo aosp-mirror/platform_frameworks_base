@@ -64,12 +64,12 @@ interface IBackupTransport {
     /**
      * Get the set of backups currently available over this transport.
      *
-     * @return backups A bundle containing two elements:  an int array under the key
+     * @return A bundle containing two elements:  an int array under the key
      *   "tokens" whose entries are a transport-private identifier for each backup set;
      *   and a String array under the key "names" whose entries are the user-meaningful
      *   names corresponding to the backup sets at each index in the tokens array.
      **/
-    Bundle getAvailableBackups();
+    Bundle getAvailableRestoreSets();
 
     /**
      * Get the set of applications from a given backup image.

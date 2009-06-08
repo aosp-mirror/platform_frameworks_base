@@ -42,6 +42,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import android.backup.IBackupManager;
+import android.backup.IRestoreSession;
 import android.backup.BackupManager;
 
 import com.android.internal.backup.AdbTransport;
@@ -388,6 +389,27 @@ class BackupManagerService extends IBackupManager.Stub {
         addPackageParticipantsLockedInner(packageName, allApps);
     }
 
+    // Instantiate the given transport
+    private IBackupTransport createTransport(int transportID) {
+        IBackupTransport transport = null;
+        switch (transportID) {
+        case BackupManager.TRANSPORT_ADB:
+            if (DEBUG) Log.v(TAG, "Initializing adb transport");
+            transport = new AdbTransport();
+            break;
+
+        case BackupManager.TRANSPORT_GOOGLE:
+            if (DEBUG) Log.v(TAG, "Initializing Google transport");
+            //!!! TODO: stand up the google backup transport for real here
+            transport = new GoogleTransport();
+            break;
+
+        default:
+            Log.e(TAG, "creating unknown transport " + transportID);
+        }
+        return transport;
+    }
+
     // ----- Back up a set of applications via a worker thread -----
 
     class PerformBackupThread extends Thread {
@@ -414,31 +436,8 @@ class BackupManagerService extends IBackupManager.Stub {
             if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
 
             // stand up the current transport
-            IBackupTransport transport = null;
-            switch (mTransport) {
-            case BackupManager.TRANSPORT_ADB:
-                if (DEBUG) Log.v(TAG, "Initializing adb transport");
-                transport = new AdbTransport();
-                break;
-
-            case BackupManager.TRANSPORT_GOOGLE:
-                if (DEBUG) Log.v(TAG, "Initializing Google transport");
-                //!!! TODO: stand up the google backup transport here
-                transport = new GoogleTransport();
-                break;
-
-            default:
-                Log.e(TAG, "Perform backup with unknown transport " + mTransport);
-                // !!! TODO: re-enqueue the backup queue for later?
-                return;
-            }
-
-            try {
-                transport.startSession();
-            } catch (Exception e) {
-                Log.e(TAG, "Error starting backup session");
-                e.printStackTrace();
-                // !!! TODO: re-enqueue the backup queue for later?
+            IBackupTransport transport = createTransport(mTransport);
+            if (transport == null) {
                 return;
             }
 
@@ -612,6 +611,11 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // Hand off a restore session
+    public IRestoreSession beginRestoreSession(int transportID) {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "beginRestoreSession");
+        return null;
+    }
 
 
     @Override
