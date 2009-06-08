@@ -36,15 +36,32 @@ public:
     ScriptC();
     virtual ~ScriptC();
 
+    struct Program_t {
+        const char * mScriptText;
+        uint32_t mScriptTextLength;
 
-    virtual bool run(Context *, uint32_t launchID);
+        bool useStateVertex;
+        bool useStateRaster;
+        bool useStateFragment;
+        bool useStateStore;
 
-    const char * mScriptText;
-    uint32_t mScriptTextLength;
+        rsc_RunScript mScript;
+    };
+
+    struct Enviroment_t {
+        bool mIsRoot;
+        bool mIsOrtho;
+        float mClearColor[4];
+        float mClearDepth;
+        uint32_t mClearStencil;
+    };
+
+    Program_t mProgram;
+    Enviroment_t mEnviroment;
 
     ACCscript*    mAccScript;
-    rsc_RunScript mScript;
 
+    virtual bool run(Context *, uint32_t launchID);
 
     struct Env {
         Context *mContext;
@@ -60,14 +77,9 @@ public:
     ~ScriptCState();
 
     ACCscript* mAccScript;
-    const char * mScriptText;
-    uint32_t mScriptTextLength;
-    rsc_RunScript mScript;
-    float mClearColor[4];
-    float mClearDepth;
-    uint32_t mClearStencil;
-    bool mIsRoot;
-    bool mIsOrtho;
+
+    ScriptC::Program_t mProgram;
+    ScriptC::Enviroment_t mEnviroment;
 
     Vector<const Type *> mConstantBufferTypes;
 
