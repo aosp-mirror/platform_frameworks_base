@@ -82,6 +82,10 @@
 
         <!-- Text color for urls in search suggestions, used by things like global search and the browser. @hide -->
         <attr name="textColorSearchUrl" format="reference|color" />
+        <!-- Search widget result item background. -->
+        <attr name="searchWidgetItemBackground" format="reference|color" />
+        <!-- Search widget expandable result item background. -->
+        <attr name="searchWidgetCorpusItemBackground" format="reference|color" />
 
         <!-- Text color, typeface, size, and style for "large" text. Defaults to primary text color. -->
         <attr name="textAppearanceLarge" format="reference" />

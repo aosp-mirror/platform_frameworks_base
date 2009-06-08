@@ -27,6 +27,7 @@ import android.server.search.SearchableInfo;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -42,26 +43,30 @@ import java.util.WeakHashMap;
 
 /**
  * Provides the contents for the suggestion drop-down list.in {@link SearchDialog}.
- * 
+ *
  * @hide
  */
 class SuggestionsAdapter extends ResourceCursorAdapter {
 
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
-    
+
     private SearchDialog mSearchDialog;
     private SearchableInfo mSearchable;
     private Context mProviderContext;
     private WeakHashMap<String, Drawable> mOutsideDrawablesCache;
     private boolean mGlobalSearchMode;
 
-    // Cached column indexes, updated when the cursor changes. 
+    // Cached column indexes, updated when the cursor changes.
     private int mFormatCol;
     private int mText1Col;
     private int mText2Col;
     private int mIconName1Col;
     private int mIconName2Col;
+    private int mBackgroundColorCol;
+
+    // Cached item background color.
+    private int mDefaultBackgroundColor;
 
     // This value is stored in SuggestionsAdapter by the SearchDialog to indicate whether
     // a particular list item should be selected upon the next call to notifyDataSetChanged.
@@ -86,15 +91,20 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 true);  // auto-requery
         mSearchDialog = searchDialog;
         mSearchable = searchable;
-        
+
         // set up provider resources (gives us icons, etc.)
         Context activityContext = mSearchable.getActivityContext(mContext);
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
-        
+
+        TypedValue colorValue = new TypedValue();
+        mProviderContext.getTheme().resolveAttribute(
+                com.android.internal.R.attr.searchWidgetItemBackground, colorValue, true);
+        mDefaultBackgroundColor = mProviderContext.getResources().getColor(colorValue.resourceId);
+
         mOutsideDrawablesCache = outsideDrawablesCache;
         mGlobalSearchMode = globalSearchMode;
     }
-    
+
     /**
      * Overridden to always return <code>false</code>, since we cannot be sure that
      * suggestion sources return stable IDs.
@@ -120,7 +130,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             return null;
         }
     }
-    
+
     /**
      * Cache columns.
      */
@@ -139,6 +149,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mText2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
             mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
             mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
+            mBackgroundColorCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_BACKGROUND_COLOR);
         }
     }
 
@@ -175,7 +186,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     /**
      * Handle sending and receiving information associated with
      * {@link DialogCursorProtocol#POST_REFRESH}.
-     * 
+     *
      * @param cursor The cursor to call.
      */
     private void callCursorPostRefresh(Cursor cursor) {
@@ -227,7 +238,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         public final TextView mText2;
         public final ImageView mIcon1;
         public final ImageView mIcon2;
-        
+
         public ChildViewCache(View v) {
             mText1 = (TextView) v.findViewById(com.android.internal.R.id.text1);
             mText2 = (TextView) v.findViewById(com.android.internal.R.id.text2);
@@ -235,7 +246,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mIcon2 = (ImageView) v.findViewById(com.android.internal.R.id.icon2);
         }
     }
-    
+
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ChildViewCache views = (ChildViewCache) view.getTag();
@@ -254,13 +265,22 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mDisplayNotifyPos = NONE;  // only notify the first time
         }
 
+        int backgroundColor = 0;
+        if (mBackgroundColorCol != -1) {
+            backgroundColor = cursor.getInt(mBackgroundColorCol);
+        }
+        if (backgroundColor == 0) {
+            backgroundColor = mDefaultBackgroundColor;
+        }
+        view.setBackgroundColor(backgroundColor);
+
         final boolean isHtml = mFormatCol > 0 && "html".equals(cursor.getString(mFormatCol));
         setViewText(cursor, views.mText1, mText1Col, isHtml);
         setViewText(cursor, views.mText2, mText2Col, isHtml);
         setViewIcon(cursor, views.mIcon1, mIconName1Col);
         setViewIcon(cursor, views.mIcon2, mIconName2Col);
     }
-    
+
     private void setViewText(Cursor cursor, TextView v, int textCol, boolean isHtml) {
         if (v == null) {
             return;
@@ -272,14 +292,14 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
         // Set the text even if it's null, since we need to clear any previous text.
         v.setText(text);
-        
+
         if (TextUtils.isEmpty(text)) {
             v.setVisibility(View.GONE);
         } else {
             v.setVisibility(View.VISIBLE);
         }
     }
-    
+
     private void setViewIcon(Cursor cursor, ImageView v, int iconNameCol) {
         if (v == null) {
             return;
@@ -292,12 +312,12 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         // Set the icon even if the drawable is null, since we need to clear any
         // previous icon.
         v.setImageDrawable(drawable);
-        
+
         if (drawable == null) {
             v.setVisibility(View.GONE);
         } else {
             v.setVisibility(View.VISIBLE);
-            
+
             // This is a hack to get any animated drawables (like a 'working' spinner)
             // to animate. You have to setVisible true on an AnimationDrawable to get
             // it to start animating, but it must first have been false or else the
@@ -307,11 +327,11 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             drawable.setVisible(true, false);
         }
     }
-    
+
     /**
      * Gets the text to show in the query field when a suggestion is selected.
-     * 
-     * @param cursor The Cursor to read the suggestion data from. The Cursor should already 
+     *
+     * @param cursor The Cursor to read the suggestion data from. The Cursor should already
      *        be moved to the suggestion that is to be read from.
      * @return The text to show, or <code>null</code> if the query should not be
      *         changed when selecting this suggestion.
@@ -321,36 +341,36 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (cursor == null) {
             return null;
         }
-        
+
         String query = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_QUERY);
         if (query != null) {
             return query;
         }
-        
+
         if (mSearchable.shouldRewriteQueryFromData()) {
             String data = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_INTENT_DATA);
             if (data != null) {
                 return data;
             }
         }
-        
+
         if (mSearchable.shouldRewriteQueryFromText()) {
             String text1 = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_TEXT_1);
             if (text1 != null) {
                 return text1;
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * This method is overridden purely to provide a bit of protection against
      * flaky content providers.
-     * 
+     *
      * @see android.widget.ListAdapter#getView(int, View, ViewGroup)
      */
-    @Override 
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         try {
             return super.getView(position, convertView, parent);
@@ -359,28 +379,28 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             // Put exception string in item title
             View v = newView(mContext, mCursor, parent);
             if (v != null) {
-                ChildViewCache views = (ChildViewCache) v.getTag(); 
+                ChildViewCache views = (ChildViewCache) v.getTag();
                 TextView tv = views.mText1;
                 tv.setText(e.toString());
             }
             return v;
         }
     }
-    
+
     /**
      * Gets a drawable given a value provided by a suggestion provider.
-     * 
+     *
      * This value could be just the string value of a resource id
      * (e.g., "2130837524"), in which case we will try to retrieve a drawable from
      * the provider's resources. If the value is not an integer, it is
-     * treated as a Uri and opened with  
+     * treated as a Uri and opened with
      * {@link ContentResolver#openOutputStream(android.net.Uri, String)}.
      *
      * All resources and URIs are read using the suggestion provider's context.
      *
      * If the string is not formatted as expected, or no drawable can be found for
      * the provided value, this method returns null.
-     * 
+     *
      * @param drawableId a string like "2130837524",
      *        "android.resource://com.android.alarmclock/2130837524",
      *        or "content://contacts/photos/253".
@@ -390,7 +410,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (drawableId == null || drawableId.length() == 0 || "0".equals(drawableId)) {
             return null;
         }
-        
+
         // First, check the cache.
         Drawable drawable = mOutsideDrawablesCache.get(drawableId);
         if (drawable != null) {
@@ -425,7 +445,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 if (DBG) Log.d(LOG_TAG, "Icon stream not found: " + drawableId);
                 // drawable = null;
             }
-                    
+
             // If we got a drawable for this resource id, then stick it in the
             // map so we don't do this lookup again.
             if (drawable != null) {
@@ -435,13 +455,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             if (DBG) Log.d(LOG_TAG, "Icon resource not found: " + drawableId);
             // drawable = null;
         }
-        
+
         return drawable;
     }
-    
+
     /**
      * Gets the value of a string column by name.
-     * 
+     *
      * @param cursor Cursor to read the value from.
      * @param columnName The name of the column to read.
      * @return The value of the given column, or <code>null</null>

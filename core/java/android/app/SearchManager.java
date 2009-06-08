@@ -1360,6 +1360,15 @@ public class SearchManager
     public final static String SUGGEST_COLUMN_SHORTCUT_ID = "suggest_shortcut_id";
 
     /**
+     * Column name for suggestions cursor. <i>Optional.</i>  This column is used to specify the
+     * cursor item's background color if it needs a non-default background color. A non-zero value
+     * indicates a valid background color to override the default.
+     *
+     * @hide For internal use, not part of the public API.
+     */
+    public final static String SUGGEST_COLUMN_BACKGROUND_COLOR = "suggest_background_color";
+
+    /**
      * Column value for suggestion column {@link #SUGGEST_COLUMN_SHORTCUT_ID} when a suggestion
      * should not be stored as a shortcut in global search.
      *
