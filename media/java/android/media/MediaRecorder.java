@@ -164,8 +164,19 @@ public class MediaRecorder
         public static final int THREE_GPP = 1;
         /** MPEG4 media file format*/
         public static final int MPEG_4 = 2;
-        /** Raw AMR file format */
+
+        /** The following formats are audio only .aac or .amr formats **/
+        /** @deprecated  Deprecated in favor of AMR_NB */
+        /** @todo change link when AMR_NB is exposed. Deprecated in favor of {@link MediaRecorder.OutputFormat#AMR_NB} */
         public static final int RAW_AMR = 3;
+        /** @hide AMR NB file format */
+        public static final int AMR_NB = 3;
+        /** @hide AMR WB file format */
+        public static final int AMR_WB = 4;
+        /** @hide AAC ADIF file format */
+        public static final int AAC_ADIF = 5;
+        /** @hide AAC ADTS file format */
+        public static final int AAC_ADTS = 6;
     };
 
     /**
@@ -180,7 +191,14 @@ public class MediaRecorder
         public static final int DEFAULT = 0;
         /** AMR (Narrowband) audio codec */
         public static final int AMR_NB = 1;
-        //public static final AAC = 2;  currently unsupported
+        /** @hide AMR (Wideband) audio codec */
+        public static final int AMR_WB = 2;
+        /** @hide AAC audio codec */
+        public static final int AAC = 3;
+        /** @hide enhanced AAC audio codec */
+        public static final int AAC_PLUS = 4;
+        /** @hide enhanced AAC plus audio codec */
+        public static final int EAAC_PLUS = 5;
     }
 
     /**
@@ -196,6 +214,46 @@ public class MediaRecorder
         public static final int H263 = 1;
         public static final int H264 = 2;
         public static final int MPEG_4_SP = 3;
+    }
+
+
+    /**
+     * @hide Defines the audio sampling rate. This must be set before
+     * setAudioEncoder() or it will be ignored.
+     * This parameter is used with
+     * {@link MediaRecorder#setParameters(String)}.
+     */
+    public final class AudioParamSamplingRate {
+      /* Do not change these values without updating their counterparts
+       * in include/media/mediarecorder.h!
+       */
+        private AudioParamSamplingRate() {}
+        public static final String AUDIO_PARAM_SAMPLING_RATE_KEY = "audio-param-sampling-rate=";
+    }
+
+     /**
+     * @hide Defines the audio number of channels. This must be set before
+     * setAudioEncoder() or it will be ignored.
+     * This parameter is used with
+     * {@link MediaRecorder#setParameters(String)}.
+     */
+    public final class AudioParamChannels {
+      /* Do not change these values without updating their counterparts
+       * in include/media/mediarecorder.h!
+       */
+        private AudioParamChannels() {}
+        public static final String AUDIO_PARAM_NUMBER_OF_CHANNELS = "audio-param-number-of-channels=";
+    }
+
+     /**
+     * @hide Defines the audio encoding bitrate. This must be set before
+     * setAudioEncoder() or it will be ignored.
+     * This parameter is used with
+     * {@link MediaRecorder#setParameters(String)}.
+     */
+    public final class AudioParamEncodingBitrate{
+        private AudioParamEncodingBitrate() {}
+        public static final String AUDIO_PARAM_ENCODING_BITRATE = "audio-param-encoding-bitrate=";
     }
 
     /**
@@ -332,6 +390,16 @@ public class MediaRecorder
             throws IllegalStateException;
 
     /**
+     * @hide Sets a parameter in the author engine.
+     *
+     * @param params the parameter to set.
+     * @see android.media.MediaRecorder.AudioParamSamplingRate
+     * @see android.media.MediaRecorder.AudioParamChannels
+     * @see android.media.MediaRecorder.AudioParamEncodingBitrate
+     */
+    public native void setParameters(String params);
+
+    /**
      * Pass in the file descriptor of the file to be written. Call this after
      * setOutputFormat() but before prepare().
      *
@@ -448,7 +516,7 @@ public class MediaRecorder
     {
         /**
          * Called when an error occurs while recording.
-         * 
+         *
          * @param mr the MediaRecorder that encountered the error
          * @param what    the type of error that has occurred:
          * <ul>
@@ -494,7 +562,7 @@ public class MediaRecorder
     {
         /**
          * Called when an error occurs while recording.
-         * 
+         *
          * @param mr the MediaRecorder that encountered the error
          * @param what    the type of error that has occurred:
          * <ul>
