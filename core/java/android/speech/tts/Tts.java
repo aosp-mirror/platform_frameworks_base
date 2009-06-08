@@ -13,7 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package android.tts;
+package android.speech.tts;
+
+import android.tts.ITts;
+import android.tts.ITtsCallback;
 
 import android.content.ComponentName;
 import android.content.Context;
