@@ -180,7 +180,7 @@ status_t MediaRecorder::setOutputFormat(int of)
         LOGE("setOutputFormat called in an invalid state: %d", mCurrentState);
         return INVALID_OPERATION;
     }
-    if (mIsVideoSourceSet && of >= OUTPUT_FORMAT_RAW_AMR) {
+    if (mIsVideoSourceSet && of >= OUTPUT_FORMAT_AUDIO_ONLY_START) { //first non-video output format
         LOGE("output format (%d) is meant for audio recording only and incompatible with video recording", of);
         return INVALID_OPERATION;
     }
@@ -345,7 +345,7 @@ status_t MediaRecorder::setVideoFrameRate(int frames_per_second)
     }
     if (!mIsVideoSourceSet) {
         LOGE("try to set video frame rate without setting video source first");
-        return INVALID_OPERATION; 
+        return INVALID_OPERATION;
     }
 
     status_t ret = mMediaRecorder->setVideoFrameRate(frames_per_second);
@@ -475,7 +475,7 @@ status_t MediaRecorder::stop()
         mCurrentState = MEDIA_RECORDER_ERROR;
         return ret;
     }
- 
+
     // FIXME:
     // stop and reset are semantically different.
     // We treat them the same for now, and will change this in the future.
@@ -492,7 +492,7 @@ status_t MediaRecorder::reset()
         LOGE("media recorder is not initialized yet");
         return INVALID_OPERATION;
     }
-    
+
     doCleanUp();
     status_t ret = UNKNOWN_ERROR;
     switch(mCurrentState) {
