@@ -1543,14 +1543,6 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void sendMarkNodeInvalid(int node) {
-        if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.MARK_NODE_INVALID_ID, node, 0).sendToTarget();
-        }
-    }
-
-    // called by JNI
     private void sendNotifyProgressFinished() {
         sendUpdateTextEntry();
         // as CacheManager can behave based on database transaction, we need to

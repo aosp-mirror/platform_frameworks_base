@@ -448,7 +448,6 @@ public class WebView extends AbsoluteLayout
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
     static final int DID_FIRST_LAYOUT_MSG_ID            = 18;
 
-    static final int MARK_NODE_INVALID_ID               = 21;
     static final int UPDATE_CLIPBOARD                   = 22;
     static final int LONG_PRESS_CENTER                  = 23;
     static final int PREVENT_TOUCH_ID                   = 24;
@@ -477,7 +476,7 @@ public class WebView extends AbsoluteLayout
         "DID_FIRST_LAYOUT_MSG_ID", //        = 18;
         "19",
         "20",
-        "MARK_NODE_INVALID_ID", //           = 21;
+        "21", //                             = 21;
         "UPDATE_CLIPBOARD", //               = 22;
         "LONG_PRESS_CENTER", //              = 23;
         "PREVENT_TOUCH_ID", //               = 24;
@@ -3446,7 +3445,9 @@ public class WebView extends AbsoluteLayout
      * FocusController is "active" so that it will draw the blinking cursor.
      */
     private void setFocusControllerActive(boolean active) {
-        if (mWebViewCore == null) return;
+        // Do not need to also check whether mWebViewCore is null, because
+        // mNativeClass is only set if mWebViewCore is non null
+        if (mNativeClass == 0) return;
         active &= nativeCursorMatchesFocus() || !nativeHasFocusNode()
                 || !nativeCursorWantsKeyEvents();
         mWebViewCore.sendMessage(EventHub.SET_ACTIVE, active ? 1 : 0, 0);
@@ -4764,9 +4765,6 @@ public class WebView extends AbsoluteLayout
                     }
                     setNewZoomScale(scale, false);
                     break;
-                case MARK_NODE_INVALID_ID:
-                    nativeMarkNodeInvalid(msg.arg1);
-                    break;
                 case UPDATE_TEXT_ENTRY_MSG_ID:
                     // this is sent after finishing resize in WebViewCore. Make
                     // sure the text edit box is still on the  screen.
@@ -5274,7 +5272,6 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeHasFocusNode();
     private native String   nativeImageURI(int x, int y);
     private native void     nativeInstrumentReport();
-    private native void     nativeMarkNodeInvalid(int node);
     // return true if the page has been scrolled
     private native boolean  nativeMotionUp(int x, int y, int slop);
     // returns false if it handled the key
