@@ -63,11 +63,10 @@ public abstract class AbstractTableMerger
             _SYNC_ID +"=? and " + _SYNC_ACCOUNT + "=? and " + _SYNC_ACCOUNT_TYPE + "=?";
     private static final String SELECT_BY_ID = BaseColumns._ID +"=?";
 
-    // The last clause rejects events with a null _SYNC_VERSION if they've already been synced
-    private static final String SELECT_UNSYNCED = ""
-            + _SYNC_DIRTY + " > 0 and ((" + _SYNC_ACCOUNT + "=? AND " + _SYNC_ACCOUNT_TYPE + "=?) "
-            + "or " + _SYNC_ACCOUNT + " is null) "
-            + "and (" + _SYNC_VERSION + " is not null or " + _SYNC_ACCOUNT + " is null)";
+    private static final String SELECT_UNSYNCED =
+            "(" + _SYNC_ACCOUNT + " IS NULL OR " + _SYNC_ACCOUNT + "=?) AND "
+            + "(" + _SYNC_ID + " IS NULL OR (" + _SYNC_DIRTY + " > 0 AND "
+                                              + _SYNC_VERSION + " IS NOT NULL))";
 
     public AbstractTableMerger(SQLiteDatabase database,
             String table, Uri tableURL, String deletedTable,
