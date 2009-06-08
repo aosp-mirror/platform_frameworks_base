@@ -101,4 +101,9 @@ public interface TelephonyProperties
     /** Indicate if phone is in emergency callback mode */
     static final String PROPERTY_INECM_MODE = "ril.cdma.inecmmode";
 
+    /** Indicate the timer value for exiting emergency callback mode */
+    static final String PROPERTY_ECM_EXIT_TIMER = "ro.cdma.ecmexittimer";
+
+    /** The international dialing prefix conversion string */
+    static final String PROPERTY_IDP_STRING = "ro.cdma.idpstring";
 }

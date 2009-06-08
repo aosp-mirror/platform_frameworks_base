@@ -1350,8 +1350,12 @@ public interface Phone {
     /**
      * Retrieves the MIN for CDMA phones.
      */
-    
     String getCdmaMin();
+
+    /**
+     *  Retrieves PRL Version for CDMA phones
+     */
+    String getCdmaPrlVersion();
 
     /**
      * Retrieves the ESN for CDMA phones.
@@ -1464,14 +1468,12 @@ public interface Phone {
      * @param what User-defined message code.
      * @param obj User object.
      */
-    // TODO(Moto) TODO: Remove when generic implemented
     void registerForCallWaiting(Handler h, int what, Object obj);
 
     /**
      * Unegister for notifications when CDMA Call waiting comes
      * @param h Handler to be removed from the registrant list.
      */
-    // TODO(Moto): Remove when generic implemented
     void unregisterForCallWaiting(Handler h);
 
 
@@ -1513,6 +1515,109 @@ public interface Phone {
      */
     void unregisterForDisplayInfo(Handler h) ;
 
+    /**
+     * Register for CDMA number information record notification from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaNumberInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForNumberInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for number information record notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForNumberInfo(Handler h);
+
+    /**
+     * Register for CDMA redirected number information record notification
+     * from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaRedirectingNumberInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForRedirectedNumberInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for redirected number information record notification.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForRedirectedNumberInfo(Handler h);
+
+    /**
+     * Register for CDMA line control information record notification
+     * from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaLineControlInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForLineControlInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for line control information notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForLineControlInfo(Handler h);
+
+    /**
+     * Register for CDMA T53 CLIR information record notifications
+     * from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaT53ClirInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerFoT53ClirlInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for T53 CLIR information record notification
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForT53ClirInfo(Handler h);
+
+    /**
+     * Register for CDMA T53 audio control information record notifications
+     * from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaT53AudioControlInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForT53AudioControlInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for T53 audio control information record notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForT53AudioControlInfo(Handler h);
 
     /**
      * registers for exit emergency call back mode request response

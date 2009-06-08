@@ -59,6 +59,12 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mCallWaitingInfoRegistrants = new RegistrantList();
     protected RegistrantList mDisplayInfoRegistrants = new RegistrantList();
     protected RegistrantList mSignalInfoRegistrants = new RegistrantList();
+    protected RegistrantList mNumberInfoRegistrants = new RegistrantList();
+    protected RegistrantList mRedirNumInfoRegistrants = new RegistrantList();
+    protected RegistrantList mLineControlInfoRegistrants = new RegistrantList();
+    protected RegistrantList mT53ClirInfoRegistrants = new RegistrantList();
+    protected RegistrantList mT53AudCntrlInfoRegistrants = new RegistrantList();
+
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
     protected Registrant mSignalStrengthRegistrant;
@@ -509,6 +515,50 @@ public abstract class BaseCommands implements CommandsInterface {
         mOtaProvisionRegistrants.remove(h);
     }
 
+    public void registerForNumberInfo(Handler h,int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mNumberInfoRegistrants.add(r);
+    }
+
+    public void unregisterForNumberInfo(Handler h){
+        mNumberInfoRegistrants.remove(h);
+    }
+
+     public void registerForRedirectedNumberInfo(Handler h,int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mRedirNumInfoRegistrants.add(r);
+    }
+
+    public void unregisterForRedirectedNumberInfo(Handler h) {
+        mRedirNumInfoRegistrants.remove(h);
+    }
+
+    public void registerForLineControlInfo(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mLineControlInfoRegistrants.add(r);
+    }
+
+    public void unregisterForLineControlInfo(Handler h) {
+        mLineControlInfoRegistrants.remove(h);
+    }
+
+    public void registerFoT53ClirlInfo(Handler h,int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mT53ClirInfoRegistrants.add(r);
+    }
+
+    public void unregisterForT53ClirInfo(Handler h) {
+        mT53ClirInfoRegistrants.remove(h);
+    }
+
+    public void registerForT53AudioControlInfo(Handler h,int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mT53AudCntrlInfoRegistrants.add(r);
+    }
+
+    public void unregisterForT53AudioControlInfo(Handler h) {
+        mT53AudCntrlInfoRegistrants.remove(h);
+    }
 
     //***** Protected Methods
     /**

@@ -466,6 +466,61 @@ public interface CommandsInterface {
     void unregisterForSignalInfo(Handler h);
 
     /**
+     * Registers the handler for CDMA number information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForNumberInfo(Handler h, int what, Object obj);
+    void unregisterForNumberInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA redirected number Information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForRedirectedNumberInfo(Handler h, int what, Object obj);
+    void unregisterForRedirectedNumberInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA line control information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForLineControlInfo(Handler h, int what, Object obj);
+    void unregisterForLineControlInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA T53 CLIR information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerFoT53ClirlInfo(Handler h, int what, Object obj);
+    void unregisterForT53ClirInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA T53 audio control information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForT53AudioControlInfo(Handler h, int what, Object obj);
+    void unregisterForT53AudioControlInfo(Handler h);
+
+    /**
      * Fires on if Modem enters Emergency Callback mode
      */
     void setEmergencyCallbackMode(Handler h, int what, Object obj);
