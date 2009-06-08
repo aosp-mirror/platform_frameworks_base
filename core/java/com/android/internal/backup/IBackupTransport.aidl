@@ -16,8 +16,8 @@
 
 package com.android.internal.backup;
 
+import android.backup.RestoreSet;
 import android.content.pm.PackageInfo;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
@@ -69,7 +69,7 @@ interface IBackupTransport {
      *   and a String array under the key "names" whose entries are the user-meaningful
      *   names corresponding to the backup sets at each index in the tokens array.
      **/
-    Bundle getAvailableRestoreSets();
+    RestoreSet[] getAvailableRestoreSets();
 
     /**
      * Get the set of applications from a given backup image.

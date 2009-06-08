@@ -44,6 +44,7 @@ import android.util.SparseArray;
 import android.backup.IBackupManager;
 import android.backup.IRestoreSession;
 import android.backup.BackupManager;
+import android.backup.RestoreSet;
 
 import com.android.internal.backup.AdbTransport;
 import com.android.internal.backup.GoogleTransport;
@@ -615,6 +616,36 @@ class BackupManagerService extends IBackupManager.Stub {
     public IRestoreSession beginRestoreSession(int transportID) {
         mContext.enforceCallingPermission("android.permission.BACKUP", "beginRestoreSession");
         return null;
+    }
+
+    // ----- Restore session -----
+
+    class RestoreSession extends IRestoreSession.Stub {
+        private IBackupTransport mRestoreTransport = null;
+        RestoreSet[] mRestoreSets = null;
+
+        RestoreSession(int transportID) {
+            mRestoreTransport = createTransport(transportID);
+        }
+
+        // --- Binder interface ---
+        public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
+            synchronized(this) {
+                if (mRestoreSets == null) {
+                    mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
+                }
+                return mRestoreSets;
+            }
+        }
+
+        public int performRestore(int token) throws android.os.RemoteException {
+            return -1;
+        }
+
+        public void endRestoreSession() throws android.os.RemoteException {
+            mRestoreTransport.endSession();
+            mRestoreTransport = null;
+        }
     }
 
 

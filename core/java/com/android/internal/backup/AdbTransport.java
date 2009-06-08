@@ -1,7 +1,7 @@
 package com.android.internal.backup;
 
+import android.backup.RestoreSet;
 import android.content.pm.PackageInfo;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
@@ -30,12 +30,12 @@ public class AdbTransport extends IBackupTransport.Stub {
     }
 
     // Restore handling
-    public Bundle getAvailableRestoreSets() throws android.os.RemoteException {
-        // !!! TODO: real implementation
-        Bundle b = new Bundle();
-        b.putIntArray("tokens", new int[0]);
-        b.putStringArray("names", new String[0]);
-        return b;
+    public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
+        RestoreSet[] set = new RestoreSet[1];
+        set[0].device = "USB";
+        set[0].name = "adb";
+        set[0].token = 0;
+        return set;
     }
 
     public PackageInfo[] getAppSet(int token) throws android.os.RemoteException {
