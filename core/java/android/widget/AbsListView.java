@@ -583,13 +583,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
         setSmoothScrollbarEnabled(smoothScrollbar);
 
-        int defaultGestures = GESTURES_NONE;
-        if (useTextFilter) {
-            defaultGestures = GESTURES_FILTER;
-        } else if (enableFastScroll) {
-            defaultGestures = GESTURES_JUMP;
-        }
-        int gestures = a.getInt(R.styleable.AbsListView_gestures, defaultGestures);
+        int gestures = a.getInt(R.styleable.AbsListView_gestures, GESTURES_NONE);
         setGestures(gestures);
 
         a.recycle();
