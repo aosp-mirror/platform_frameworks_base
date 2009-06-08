@@ -16,7 +16,7 @@
 
 package android.backup;
 
-import android.os.Bundle;
+import android.backup.RestoreSet;
 
 /**
  * Binder interface used by clients who wish to manage a restore operation.  Every
@@ -33,7 +33,7 @@ interface IRestoreSession {
      *   and a String array under the key "names" whose entries are the user-meaningful
      *   text corresponding to the backup sets at each index in the tokens array.
      */
-    Bundle getAvailableRestoreSets();
+    RestoreSet[] getAvailableRestoreSets();
 
     /**
      * Restore the given set onto the device, replacing the current data of any app

@@ -32,8 +32,9 @@ import android.os.ServiceManager;
  * until the backup operation actually occurs.
  *
  * <p>The backup operation itself begins with the system launching the
- * {@link BackupService} subclass declared in your manifest.  See the documentation
- * for {@link BackupService} for a detailed description of how the backup then proceeds.
+ * {@link android.app.BackupAgent} subclass declared in your manifest.  See the
+ * documentation for {@link android.app.BackupAgent} for a detailed description
+ * of how the backup then proceeds.
  *
  * @hide pending API solidification
  */
@@ -64,12 +65,28 @@ public class BackupManager {
     /**
      * Notifies the Android backup system that your application wishes to back up
      * new changes to its data.  A backup operation using your application's
-     * {@link BackupService} subclass will be scheduled when you call this method.
+     * {@link android.app.BackupAgent} subclass will be scheduled when you call this method.
      */
     public void dataChanged() {
         try {
             mService.dataChanged(mContext.getPackageName());
         } catch (RemoteException e) {
         }
+    }
+
+    /**
+     * Begin the process of restoring system data from backup.  This method requires
+     * that the application hold the "android.permission.BACKUP" permission, and is
+     * not public.
+     *
+     * {@hide}
+     */
+    public IRestoreSession beginRestoreSession(int transportID) {
+        IRestoreSession binder = null;
+        try {
+            binder = mService.beginRestoreSession(transportID);
+        } catch (RemoteException e) {
+        }
+        return binder;
     }
 }
