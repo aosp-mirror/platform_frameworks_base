@@ -1,7 +1,7 @@
 package com.android.internal.backup;
 
+import android.backup.RestoreSet;
 import android.content.pm.PackageInfo;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
@@ -28,12 +28,9 @@ public class GoogleTransport extends IBackupTransport.Stub {
     }
 
     // Restore handling
-    public Bundle getAvailableRestoreSets() throws android.os.RemoteException {
+    public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
         // !!! TODO: real implementation
-        Bundle b = new Bundle();
-        b.putIntArray("tokens", new int[0]);
-        b.putStringArray("names", new String[0]);
-        return b;
+        return null;
     }
 
     public PackageInfo[] getAppSet(int token) throws android.os.RemoteException {
