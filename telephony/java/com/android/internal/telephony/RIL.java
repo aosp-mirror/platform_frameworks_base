@@ -2233,7 +2233,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: ret = responseVoid(p); break;
             case RIL_UNSOL_CDMA_CALL_WAITING: ret = responseCdmaCallWaiting(p); break;
             case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: ret = responseInts(p); break;
-            case RIL_UNSOL_CDMA_INFO_REC: ret = responseCdmaInfoRec(p); break;
+            case RIL_UNSOL_CDMA_INFO_REC: ret = responseCdmaInformationRecord(p); break;
             case RIL_UNSOL_OEM_HOOK_RAW: ret = responseRaw(p); break;
 
             default:
@@ -2490,23 +2490,18 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 break;
 
             case RIL_UNSOL_CDMA_INFO_REC:
-                if (RILJ_LOGD) unsljLog(response);
+                ArrayList<CdmaInformationRecords> listInfoRecs;
 
-                CdmaInformationRecords infoRec = (CdmaInformationRecords) ret;
-                if (infoRec.isDispInfo) {
-                    if (mDisplayInfoRegistrants != null) {
-                        if (RILJ_LOGD) unsljLogRet(response, infoRec.cdmaDisplayInfoRecord);
-
-                        mDisplayInfoRegistrants.notifyRegistrants(
-                                new AsyncResult (null, infoRec.cdmaDisplayInfoRecord, null));
-                    }
+                try {
+                    listInfoRecs = (ArrayList<CdmaInformationRecords>)ret;
+                } catch (ClassCastException e) {
+                    Log.e(LOG_TAG, "Unexpected exception casting to listInfoRecs", e);
+                    break;
                 }
-                if (infoRec.isSignInfo) {
-                    if (mSignalInfoRegistrants != null) {
-                        if (RILJ_LOGD) unsljLogRet(response, infoRec.cdmaSignalInfoRecord);
-                        mSignalInfoRegistrants.notifyRegistrants(
-                                new AsyncResult (null, infoRec.cdmaSignalInfoRecord, null));
-                    }
+
+                for (CdmaInformationRecords rec : listInfoRecs) {
+                    if (RILJ_LOGD) unsljLogRet(response, rec);
+                    notifyRegistrantsCdmaInfoRec(rec);
                 }
                 break;
 
@@ -2764,30 +2759,24 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             dc.als = p.readInt();
             voiceSettings = p.readInt();
             dc.isVoice = (0 == voiceSettings) ? false : true;
-            int voicePrivacy = p.readInt();
-            dc.isVoicePrivacy = (0 != voicePrivacy);
+            dc.isVoicePrivacy = (0 != p.readInt());
             dc.number = p.readString();
             int np = p.readInt();
             dc.numberPresentation = DriverCall.presentationFromCLIP(np);
             dc.name = p.readString();
             dc.namePresentation = p.readInt();
 
-            // Make sure there's a leading + on addresses with a TOA
-            // of 145
-
-            dc.number = PhoneNumberUtils.stringFromStringAndTOA(
-                                    dc.number, dc.TOA);
+            // Make sure there's a leading + on addresses with a TOA of 145
+            dc.number = PhoneNumberUtils.stringFromStringAndTOA(dc.number, dc.TOA);
 
             response.add(dc);
 
-            if ( RILConstants.CDMA_VOICE_PRIVACY == voicePrivacy ) {
+            if (dc.isVoicePrivacy) {
                 mVoicePrivacyOnRegistrants.notifyRegistrants();
-                Log.d(LOG_TAG, "InCall VoicePrivacy is enabled: " +
-                        Integer.toString(voicePrivacy));
+                Log.d(LOG_TAG, "InCall VoicePrivacy is enabled");
             } else {
                 mVoicePrivacyOffRegistrants.notifyRegistrants();
-                Log.d(LOG_TAG, "InCall VoicePrivacy is disabled: " +
-                        Integer.toString(voicePrivacy));
+                Log.d(LOG_TAG, "InCall VoicePrivacy is disabled");
             }
         }
 
@@ -2880,15 +2869,19 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         numServiceCategories = p.readInt();
 
         if (numServiceCategories == 0) {
+            // TODO(Teleca) TODO(Moto): The logic of providing default
+            // values should not be done by this transport layer. And
+            // needs to be done by the vendor ril or application logic.
+            // TODO(Google): Remove ASAP
             int numInts;
             numInts = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES * CDMA_BSI_NO_OF_INTS_STRUCT + 1;
             response = new int[numInts];
 
-            // Indicate that a zero length table was received
-            response[0] = 0; // TODO(Moto): This is very strange, please explain why.
+            // Faking a default record for all possible records.
+            response[0] = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES;
 
             // Loop over CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES set 'english' as
-            // default language and selection status to false
+            // default language and selection status to false for all.
             for (int i = 1; i < numInts; i += CDMA_BSI_NO_OF_INTS_STRUCT ) {
                 response[i + 0] = i / CDMA_BSI_NO_OF_INTS_STRUCT;
                 response[i + 1] = 1;
@@ -2922,66 +2915,24 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         return response;
     }
 
-    private Object
-    responseCdmaInfoRec(Parcel p) {
-        int infoRecordName;
-        CdmaInformationRecords records = new CdmaInformationRecords();
+    private ArrayList<CdmaInformationRecords>
+    responseCdmaInformationRecord(Parcel p) {
+        int numberOfInfoRecs;
+        ArrayList<CdmaInformationRecords> response;
 
-        int numberOfInfoRecs = p.readInt();
+        /**
+         * Loop through all of the information records unmarshalling them
+         * and converting them to Java Objects.
+         */
+        numberOfInfoRecs = p.readInt();
+        response = new ArrayList<CdmaInformationRecords>(numberOfInfoRecs);
+
         for (int i = 0; i < numberOfInfoRecs; i++) {
-            infoRecordName = p.readInt();
-            switch(infoRecordName) {
-                case CdmaInformationRecords.RIL_CDMA_DISPLAY_INFO_REC:
-                case CdmaInformationRecords.RIL_CDMA_EXTENDED_DISPLAY_INFO_REC:
-                    records.setDispInfo(p.readString());
-                    break;
-                case CdmaInformationRecords.RIL_CDMA_SIGNAL_INFO_REC:
-                    records.setSignInfo(p.readInt(), p.readInt(), p.readInt(), p.readInt());
-                    break;
-                // InfoReocords with names as below aren't supported in AFW yet
-                case CdmaInformationRecords.RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC:
-                case CdmaInformationRecords.RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC:
-                case CdmaInformationRecords.RIL_CDMA_CONNECTED_NUMBER_INFO_REC:
-                    // TODO(Moto) implement
-                    p.readString(); // number
-                    p.readInt();    // number_type
-                    p.readInt();    // number_plan
-                    p.readInt();    // pi
-                    p.readInt();    // si
-                    break;
-                case CdmaInformationRecords.RIL_CDMA_REDIRECTING_NUMBER_INFO_REC:
-                    // TODO(Moto) implement
-                    p.readString(); // redirecting number
-                    p.readInt();    // number_type
-                    p.readInt();    // number_plan
-                    p.readInt();    // pi
-                    p.readInt();    // si
-                    p.readInt();    // reason
-                    break;
-                case CdmaInformationRecords.RIL_CDMA_LINE_CONTROL_INFO_REC:
-                    // TODO(Moto) implement
-                    p.readInt();    // PolarityIncluded
-                    p.readInt();    // Toggle
-                    p.readInt();    // Reverse
-                    p.readInt();    // PowerDenial
-                    break;
-                case CdmaInformationRecords.RIL_CDMA_T53_CLIR_INFO_REC:
-                    // TODO(Moto) implement
-                    p.readInt();    // Cause
-                    break;
-                case CdmaInformationRecords.RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC:
-                    // TODO(Moto) implement
-                    p.readInt();    // upLink
-                    p.readInt();    // downLink
-                    break;
-                case CdmaInformationRecords.RIL_CDMA_T53_RELEASE_INFO_REC:
-                    // TODO(Moto) implement unknown fall through
-                default:
-                    throw new RuntimeException("RIL_UNSOL_CDMA_INFO_REC: unsupported record. Got "
-                                                + records.recordToString(infoRecordName) + " ");
-            }
+            CdmaInformationRecords InfoRec = new CdmaInformationRecords(p);
+            response.add(InfoRec);
         }
-        return records;
+
+        return response;
     }
 
     private Object
@@ -3010,6 +2961,54 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         response[3] = (char) p.readInt();    // signal
 
         return response;
+    }
+
+    private void
+    notifyRegistrantsCdmaInfoRec(CdmaInformationRecords infoRec) {
+        int response = RIL_UNSOL_CDMA_INFO_REC;
+        if (infoRec.record instanceof CdmaInformationRecords.CdmaDisplayInfoRec) {
+            if (mDisplayInfoRegistrants != null) {
+                if (RILJ_LOGD) unsljLogRet(response, infoRec.record);
+                mDisplayInfoRegistrants.notifyRegistrants(
+                        new AsyncResult (null, infoRec.record, null));
+            }
+        } else if (infoRec.record instanceof CdmaInformationRecords.CdmaSignalInfoRec) {
+            if (mSignalInfoRegistrants != null) {
+                if (RILJ_LOGD) unsljLogRet(response, infoRec.record);
+                mSignalInfoRegistrants.notifyRegistrants(
+                        new AsyncResult (null, infoRec.record, null));
+            }
+        } else if (infoRec.record instanceof CdmaInformationRecords.CdmaNumberInfoRec) {
+            if (mNumberInfoRegistrants != null) {
+                if (RILJ_LOGD) unsljLogRet(response, infoRec.record);
+                mNumberInfoRegistrants.notifyRegistrants(
+                        new AsyncResult (null, infoRec.record, null));
+            }
+        } else if (infoRec.record instanceof CdmaInformationRecords.CdmaRedirectingNumberInfoRec) {
+            if (mRedirNumInfoRegistrants != null) {
+                if (RILJ_LOGD) unsljLogRet(response, infoRec.record);
+                mRedirNumInfoRegistrants.notifyRegistrants(
+                        new AsyncResult (null, infoRec.record, null));
+            }
+        } else if (infoRec.record instanceof CdmaInformationRecords.CdmaLineControlInfoRec) {
+            if (mLineControlInfoRegistrants != null) {
+                if (RILJ_LOGD) unsljLogRet(response, infoRec.record);
+                mLineControlInfoRegistrants.notifyRegistrants(
+                        new AsyncResult (null, infoRec.record, null));
+            }
+        } else if (infoRec.record instanceof CdmaInformationRecords.CdmaT53ClirInfoRec) {
+            if (mT53ClirInfoRegistrants != null) {
+                if (RILJ_LOGD) unsljLogRet(response, infoRec.record);
+                mT53ClirInfoRegistrants.notifyRegistrants(
+                        new AsyncResult (null, infoRec.record, null));
+            }
+        } else if (infoRec.record instanceof CdmaInformationRecords.CdmaT53AudioControlInfoRec) {
+            if (mT53AudCntrlInfoRegistrants != null) {
+               if (RILJ_LOGD) unsljLogRet(response, infoRec.record);
+               mT53AudCntrlInfoRegistrants.notifyRegistrants(
+                       new AsyncResult (null, infoRec.record, null));
+            }
+        }
     }
 
     static String
