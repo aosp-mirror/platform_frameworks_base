@@ -33,7 +33,7 @@ class ICamera;
 typedef void (*media_completion_f)(status_t status, void *cookie);
 
 /* Do not change these values without updating their counterparts
- * in java/android/android/media/MediaRecorder.java!
+ * in media/java/android/media/MediaRecorder.java!
  */
 enum audio_source {
     AUDIO_SOURCE_DEFAULT = 0,
@@ -41,26 +41,47 @@ enum audio_source {
     AUDIO_SOURCE_VOICE_UPLINK = 2,
     AUDIO_SOURCE_VOICE_DOWNLINK = 3,
     AUDIO_SOURCE_VOICE_CALL = 4,
-    AUDIO_SOURCE_MAX = AUDIO_SOURCE_VOICE_CALL
+    AUDIO_SOURCE_MAX = AUDIO_SOURCE_VOICE_CALL,
+
+    AUDIO_SOURCE_LIST_END  // must be last - used to validate audio source type
 };
 
 enum video_source {
     VIDEO_SOURCE_DEFAULT = 0,
     VIDEO_SOURCE_CAMERA = 1,
+
+    VIDEO_SOURCE_LIST_END  // must be last - used to validate audio source type
 };
 
-//Please update java/android/android/media/MediaRecorder.java if the following is updated.
+//Please update media/java/android/media/MediaRecorder.java if the following is updated.
 enum output_format {
     OUTPUT_FORMAT_DEFAULT = 0,
-    OUTPUT_FORMAT_THREE_GPP,
-    OUTPUT_FORMAT_MPEG_4,
-    OUTPUT_FORMAT_RAW_AMR,
+    OUTPUT_FORMAT_THREE_GPP = 1,
+    OUTPUT_FORMAT_MPEG_4 = 2,
+
+
+    OUTPUT_FORMAT_AUDIO_ONLY_START = 3, // Used in validating the output format.  Should be the
+                                        //  at the start of the audio only output formats.
+
+    /* These are audio only file formats */
+    OUTPUT_FORMAT_RAW_AMR = 3, //to be backward compatible
+    OUTPUT_FORMAT_AMR_NB = 3,
+    OUTPUT_FORMAT_AMR_WB = 4,
+    OUTPUT_FORMAT_AAC_ADIF = 5,
+    OUTPUT_FORMAT_AAC_ADTS = 6,
+
     OUTPUT_FORMAT_LIST_END // must be last - used to validate format type
 };
 
 enum audio_encoder {
     AUDIO_ENCODER_DEFAULT = 0,
     AUDIO_ENCODER_AMR_NB = 1,
+    AUDIO_ENCODER_AMR_WB = 2,
+    AUDIO_ENCODER_AAC = 3,
+    AUDIO_ENCODER_AAC_PLUS = 4,
+    AUDIO_ENCODER_EAAC_PLUS = 5,
+
+    AUDIO_ENCODER_LIST_END // must be the last - used to validate the audio encoder type
 };
 
 enum video_encoder {
@@ -68,7 +89,10 @@ enum video_encoder {
     VIDEO_ENCODER_H263 = 1,
     VIDEO_ENCODER_H264 = 2,
     VIDEO_ENCODER_MPEG_4_SP = 3,
+
+    VIDEO_ENCODER_LIST_END // must be the last - used to validate the video encoder type
 };
+
 
 // Maximum frames per second is 24
 #define MEDIA_RECORDER_MAX_FRAME_RATE         24
@@ -108,7 +132,7 @@ enum media_recorder_error_type {
 // The codes are distributed as follow:
 //   0xx: Reserved
 //   8xx: General info/warning
-// 
+//
 enum media_recorder_info_type {
     MEDIA_RECORDER_INFO_UNKNOWN                   = 1,
     MEDIA_RECORDER_INFO_MAX_DURATION_REACHED      = 800,
