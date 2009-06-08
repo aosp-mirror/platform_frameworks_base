@@ -16,6 +16,8 @@
 
 package android.backup;
 
+import android.backup.IRestoreSession;
+
 /**
  * Direct interface to the Backup Manager Service that applications invoke on.  The only
  * operation currently needed is a simple notification that the app has made changes to
@@ -60,4 +62,12 @@ interface IBackupManager {
      * @return The ID of the previously selected transport.
      */
     int selectBackupTransport(int transportID);
+
+    /**
+     * Begin a restore session with the given transport (which may differ from the
+     * currently-active backup transport).
+     *
+     * @return An interface to the restore session, or null on error.
+     */
+    IRestoreSession beginRestoreSession(int transportID);
 }

@@ -30,7 +30,7 @@ public class AdbTransport extends IBackupTransport.Stub {
     }
 
     // Restore handling
-    public Bundle getAvailableBackups() throws android.os.RemoteException {
+    public Bundle getAvailableRestoreSets() throws android.os.RemoteException {
         // !!! TODO: real implementation
         Bundle b = new Bundle();
         b.putIntArray("tokens", new int[0]);
