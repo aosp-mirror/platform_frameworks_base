@@ -26,6 +26,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -142,6 +143,7 @@ public abstract class SMSDispatcher extends Handler {
     private static SmsMessage mSmsMessage;
     private static SmsMessageBase mSmsMessageBase;
     private SmsMessageBase.SubmitPduBase mSubmitPduBase;
+    private boolean mStorageAvailable = true;
 
     protected static int getNextConcatenatedRef() {
         sConcatenatedRef += 1;
@@ -229,6 +231,15 @@ public abstract class SMSDispatcher extends Handler {
 
         // Don't always start message ref at 0.
         sConcatenatedRef = new Random().nextInt(256);
+
+        // Register for device storage intents.  Use these to notify the RIL
+        // that storage for SMS is or is not available.
+        // TODO: Revisit this for a later release.  Storage reporting should
+        // rely more on application indication.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_LOW);
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
+        mContext.registerReceiver(mResultReceiver, filter);
     }
 
     public void dispose() {
@@ -277,7 +288,11 @@ public abstract class SMSDispatcher extends Handler {
 
             sms = (SmsMessage) ar.result;
             try {
-                dispatchMessage(sms.mWrappedSmsMessage);
+                if (mStorageAvailable) {
+                    dispatchMessage(sms.mWrappedSmsMessage);
+                } else {
+                    acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_OUT_OF_MEMORY, null);
+                }
             } catch (RuntimeException ex) {
                 acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
             }
@@ -795,12 +810,23 @@ public abstract class SMSDispatcher extends Handler {
         private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                int rc = getResultCode();
-                boolean success = (rc == Activity.RESULT_OK) || (rc == Intents.RESULT_SMS_HANDLED);
+                if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_LOW)) {
+                    mStorageAvailable = false;
+                    mCm.reportSmsMemoryStatus(false, null);
+                } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_OK)) {
+                    mStorageAvailable = true;
+                    mCm.reportSmsMemoryStatus(true, null);
+                } else {
+                    // Assume the intent is one of the SMS receive intents that
+                    // was sent as an ordered broadcast.  Check result and ACK.
+                    int rc = getResultCode();
+                    boolean success = (rc == Activity.RESULT_OK)
+                                        || (rc == Intents.RESULT_SMS_HANDLED);
 
-                // For a multi-part message, this only ACKs the last part.
-                // Previous parts were ACK'd as they were received.
-                acknowledgeLastIncomingSms(success, rc, null);
+                    // For a multi-part message, this only ACKs the last part.
+                    // Previous parts were ACK'd as they were received.
+                    acknowledgeLastIncomingSms(success, rc, null);
+                }
             }
 
         };
