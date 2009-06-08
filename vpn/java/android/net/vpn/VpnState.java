@@ -24,8 +24,10 @@ package android.net.vpn;
  * {@link CONNECTED} if successful; back to {@link IDLE} if failed.
  * When the connection is about to be torn down, it goes to
  * {@link DISCONNECTING} and then {@link IDLE}.
+ * {@link CANCELLED} is a state when a VPN connection attempt is aborted, and
+ * is in transition to {@link IDLE}.
  * {@hide}
  */
 public enum VpnState {
-    CONNECTING, DISCONNECTING, CONNECTED, IDLE
+    CONNECTING, DISCONNECTING, CANCELLED, CONNECTED, IDLE
 }

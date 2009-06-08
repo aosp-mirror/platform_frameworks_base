@@ -39,8 +39,4 @@ public enum VpnType {
     public Class<? extends VpnProfile> getProfileClass() {
         return mClass;
     }
-
-    public String getServiceName() {
-        return this.toString();
-    }
 }
