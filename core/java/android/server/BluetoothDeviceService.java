@@ -372,6 +372,10 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                 mEventLoop.onModeChanged(getModeNative());
             }
 
+            if (mIsAirplaneSensitive && isAirplaneModeOn()) {
+                disable(false);
+            }
+
         }
     }
 
