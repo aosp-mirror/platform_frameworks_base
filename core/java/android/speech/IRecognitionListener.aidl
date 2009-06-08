@@ -45,10 +45,8 @@ interface IRecognitionListener {
     void onEndOfSpeech();
 
     /**
-     * A network or recognition error occurred.
-     * TODO: right now, the error code is given in voice search package
-     * (vendor/google/apps/src/com/google/android/voicesearch/speechservice/SpeechServiceListener.java)
-     * we need to find a place to define common error code.
+     * A network or recognition error occurred. The code is defined in
+     * {@link android.speech.RecognitionResult}
      */
     void onError(in int error);
 
