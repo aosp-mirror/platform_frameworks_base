@@ -37,13 +37,9 @@ void Context::initEGL()
          EGL_NONE
      };
 
-     LOGE("EGL 1");
      mDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-     LOGE("EGL 2  %p", mDisplay);
      eglInitialize(mDisplay, &mMajorVersion, &mMinorVersion);
-     LOGE("EGL 3  %i  %i", mMajorVersion, mMinorVersion);
      eglChooseConfig(mDisplay, s_configAttribs, &mConfig, 1, &mNumConfigs);
-     LOGE("EGL 4  %p", mConfig);
 
      if (mWndSurface) {
          mSurface = eglCreateWindowSurface(mDisplay, mConfig,
@@ -55,13 +51,10 @@ void Context::initEGL()
                  NULL);
      }
 
-     LOGE("EGL 5");
      mContext = eglCreateContext(mDisplay, mConfig, NULL, NULL);
      eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
      eglQuerySurface(mDisplay, mSurface, EGL_WIDTH, &mWidth);
      eglQuerySurface(mDisplay, mSurface, EGL_HEIGHT, &mHeight);
-     LOGE("EGL 9");
-
 }
 
 bool Context::runRootScript()
@@ -123,16 +116,11 @@ void * Context::threadProc(void *vrsc)
 {
      Context *rsc = static_cast<Context *>(vrsc);
 
-     LOGE("TP 1");
      gIO = new ThreadIO();
-
      rsc->mServerCommands.init(128);
      rsc->mServerReturns.init(128);
 
      rsc->initEGL();
-
-     LOGE("TP 2");
-
      rsc->mRunning = true;
      bool mDraw = true;
      while (!rsc->mExit) {
@@ -149,7 +137,6 @@ void * Context::threadProc(void *vrsc)
          }
      }
 
-     LOGE("TP 6");
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
@@ -159,7 +146,6 @@ void * Context::threadProc(void *vrsc)
 
 Context::Context(Device *dev, Surface *sur)
 {
-    LOGE("CC 1");
     dev->addContext(this);
     mDev = dev;
     mRunning = false;
@@ -171,7 +157,6 @@ Context::Context(Device *dev, Surface *sur)
     // see comment in header
     gCon = this;
 
-    LOGE("CC 2");
     int status;
     pthread_attr_t threadAttr;
 
@@ -185,17 +170,16 @@ Context::Context(Device *dev, Surface *sur)
     sparam.sched_priority = ANDROID_PRIORITY_DISPLAY;
     pthread_attr_setschedparam(&threadAttr, &sparam);
 
+    LOGE("RS Launching thread");
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
     if (status) {
         LOGE("Failed to start rs context thread.");
     }
 
-    LOGE("CC 3");
     mWndSurface = sur;
     while(!mRunning) {
         sleep(1);
     }
-    LOGE("CC 4");
 
     pthread_attr_destroy(&threadAttr);
 }
@@ -205,14 +189,11 @@ Context::~Context()
     mExit = true;
     void *res;
 
-    LOGE("DES 1");
     int status = pthread_join(mThreadId, &res);
-    LOGE("DES 2");
 
     if (mDev) {
         mDev->removeContext(this);
     }
-    LOGE("DES 3");
 }
 
 void Context::swapBuffers()
