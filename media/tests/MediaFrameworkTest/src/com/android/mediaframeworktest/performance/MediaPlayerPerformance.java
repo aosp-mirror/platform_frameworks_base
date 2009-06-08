@@ -347,6 +347,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
         File h263MemoryOut = new File(H263_VIDEO_PLAYBACK_MEMOUT);
         Writer output = new BufferedWriter(new FileWriter(h263MemoryOut));
+        getMemoryWriteToLog(output);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             mediaStressPlayback(MediaNames.VIDEO_HIGHRES_H263);
             getMemoryWriteToLog(output);
@@ -365,6 +366,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
         File h264MemoryOut = new File(H264_VIDEO_PLAYBACK_MEMOUT);
         Writer output = new BufferedWriter(new FileWriter(h264MemoryOut));
+        getMemoryWriteToLog(output);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             mediaStressPlayback(MediaNames.VIDEO_H264_AMR);
             getMemoryWriteToLog(output);
@@ -383,6 +385,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
         File wmvMemoryOut = new File(WMV_VIDEO_PLAYBACK_MEMOUT);
         Writer output = new BufferedWriter(new FileWriter(wmvMemoryOut));
+        getMemoryWriteToLog(output);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             mediaStressPlayback(MediaNames.VIDEO_WMV);
             getMemoryWriteToLog(output);
@@ -401,6 +404,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
         File videoH263RecordOnlyMemoryOut = new File(H263_VIDEO_ONLY_RECORD_MEMOUT);
         Writer output = new BufferedWriter(new FileWriter(videoH263RecordOnlyMemoryOut));
+        getMemoryWriteToLog(output);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.H263,
                     MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true);
@@ -420,6 +424,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
         File videoMp4RecordOnlyMemoryOut = new File(MP4_VIDEO_ONLY_RECORD_MEMOUT);
         Writer output = new BufferedWriter(new FileWriter(videoMp4RecordOnlyMemoryOut));
+        getMemoryWriteToLog(output);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.MPEG_4_SP,
                     MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true);
@@ -440,6 +445,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
         File videoRecordAudioMemoryOut = new File(H263_VIDEO_AUDIO_RECORD_MEMOUT);
         Writer output = new BufferedWriter(new FileWriter(videoRecordAudioMemoryOut));
+        getMemoryWriteToLog(output);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             stressVideoRecord(20, 352, 288, MediaRecorder.VideoEncoder.H263,
                     MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, false);
@@ -459,6 +465,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
         File audioOnlyMemoryOut = new File(AUDIO_ONLY_RECORD_MEMOUT);
         Writer output = new BufferedWriter(new FileWriter(audioOnlyMemoryOut));
+        getMemoryWriteToLog(output);
         for (int i = 0; i < NUM_STRESS_LOOP; i++) {
             stressAudioRecord(MediaNames.RECORDER_OUTPUT);
             getMemoryWriteToLog(output);
