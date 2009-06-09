@@ -21,11 +21,12 @@ using namespace android::renderscript;
 
 Script::Script()
 {
-    mClearColor[0] = 0;
-    mClearColor[1] = 0;
-    mClearColor[2] = 0;
-    mClearColor[3] = 1;
-    mClearDepth = 1;
+    memset(&mEnviroment, 0, sizeof(mEnviroment));
+    mEnviroment.mClearColor[0] = 0;
+    mEnviroment.mClearColor[1] = 0;
+    mEnviroment.mClearColor[2] = 0;
+    mEnviroment.mClearColor[3] = 1;
+    mEnviroment.mClearDepth = 1;
 }
 
 Script::~Script()

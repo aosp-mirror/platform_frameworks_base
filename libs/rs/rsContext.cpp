@@ -86,11 +86,11 @@ bool Context::runRootScript()
     glDepthMask(GL_TRUE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    glClearColor(mRootScript->mClearColor[0],
-                 mRootScript->mClearColor[1],
-                 mRootScript->mClearColor[2],
-                 mRootScript->mClearColor[3]);
-    glClearDepthf(mRootScript->mClearDepth);
+    glClearColor(mRootScript->mEnviroment.mClearColor[0],
+                 mRootScript->mEnviroment.mClearColor[1],
+                 mRootScript->mEnviroment.mClearColor[2],
+                 mRootScript->mEnviroment.mClearColor[3]);
+    glClearDepthf(mRootScript->mEnviroment.mClearDepth);
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
 
