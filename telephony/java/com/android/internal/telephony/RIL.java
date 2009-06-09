@@ -1829,6 +1829,17 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void reportStkServiceIsRunning(Message result) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING, result);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        send(rr);
+    }
+
     //***** Private Methods
 
     private void sendScreenState(boolean on) {
@@ -3121,6 +3132,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_SET_SMSC_ADDRESS: return "RIL_REQUEST_SET_SMSC_ADDRESS";
             case RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: return "REQUEST_EXIT_EMERGENCY_CALLBACK_MODE";
             case RIL_REQUEST_REPORT_SMS_MEMORY_STATUS: return "RIL_REQUEST_REPORT_SMS_MEMORY_STATUS";
+            case RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING: return "RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING";
             default: return "<unknown request>";
         }
     }
