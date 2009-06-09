@@ -41,18 +41,12 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.KeyCharacterMap;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.gesture.GestureOverlayView;
-import android.gesture.Gesture;
-import android.gesture.LetterRecognizer;
-import android.gesture.Prediction;
-import android.gesture.LetterRecognizers;
 
 import com.android.internal.R;
 
@@ -73,7 +67,6 @@ import java.util.List;
  * @attr ref android.R.styleable#AbsListView_cacheColorHint
  * @attr ref android.R.styleable#AbsListView_fastScrollEnabled
  * @attr ref android.R.styleable#AbsListView_smoothScrollbar
- * @attr ref android.R.styleable#AbsListView_gestures
  */
 public abstract class AbsListView extends AdapterView<ListAdapter> implements TextWatcher,
         ViewTreeObserver.OnGlobalLayoutListener, Filter.FilterListener,
@@ -100,31 +93,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setTranscriptMode(int)
      */
     public static final int TRANSCRIPT_MODE_ALWAYS_SCROLL = 2;
-
-    /**
-     * Disables gestures.
-     *
-     * @see #setGestures(int)
-     * @see #GESTURES_JUMP
-     * @see #GESTURES_FILTER
-     */
-    public static final int GESTURES_NONE = 0;
-    /**
-     * When a letter gesture is recognized the list jumps to a matching position.
-     *
-     * @see #setGestures(int)
-     * @see #GESTURES_NONE
-     * @see #GESTURES_FILTER
-     */
-    public static final int GESTURES_JUMP = 1;
-    /**
-     * When a letter gesture is recognized the letter is added to the filter.
-     *
-     * @see #setGestures(int)
-     * @see #GESTURES_NONE
-     * @see #GESTURES_JUMP
-     */
-    public static final int GESTURES_FILTER = 2;
 
     /**
      * Indicates that we are not in the middle of a touch gesture
@@ -461,18 +429,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     private FastScroller mFastScroller;
 
-    /**
-     * Indicates the type of gestures to use: GESTURES_NONE, GESTURES_FILTER or GESTURES_NONE
-     */
-    private int mGestures;
-
-    // Used to implement the gestures overlay
-    private GestureOverlayView mGesturesOverlay;
-    private PopupWindow mGesturesPopup;
-    private ViewTreeObserver.OnGlobalLayoutListener mGesturesLayoutListener;
-    private boolean mGlobalLayoutListenerAddedGestures;
-    private boolean mInstallGesturesOverlay;
-
     private boolean mGlobalLayoutListenerAddedFilter;
 
     private int mTouchSlop;
@@ -583,9 +539,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
         setSmoothScrollbarEnabled(smoothScrollbar);
 
-        int gestures = a.getInt(R.styleable.AbsListView_gestures, GESTURES_NONE);
-        setGestures(gestures);
-
         a.recycle();
     }
 
@@ -598,160 +551,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         mDensityScale = getContext().getResources().getDisplayMetrics().density;
-    }
-
-    /**
-     * <p>Sets the type of gestures to use with this list. When gestures are enabled,
-     * that is if the <code>gestures</code> parameter is not {@link #GESTURES_NONE},
-     * the user can draw characters on top of this view. When a character is
-     * recognized and matches a known character, the list will either:</p>
-     * <ul>
-     * <li>Jump to the appropriate position ({@link #GESTURES_JUMP})</li>
-     * <li>Add the character to the current filter ({@link #GESTURES_FILTER})</li>
-     * </ul>
-     * <p>Using {@link #GESTURES_JUMP} requires {@link #isFastScrollEnabled()} to
-     * be true. Using {@link #GESTURES_FILTER} requires {@link #isTextFilterEnabled()}
-     * to be true.</p>
-     *
-     * @param gestures The type of gestures to enable for this list:
-     *        {@link #GESTURES_NONE}, {@link #GESTURES_JUMP} or {@link #GESTURES_FILTER}
-     *
-     * @see #GESTURES_NONE
-     * @see #GESTURES_JUMP
-     * @see #GESTURES_FILTER
-     * @see #getGestures()
-     */
-    public void setGestures(int gestures) {
-        switch (gestures) {
-            case GESTURES_JUMP:
-                if (!mFastScrollEnabled) {
-                    throw new IllegalStateException("Jump gestures can only be used with "
-                            + "fast scroll enabled");
-                }
-                break;
-            case GESTURES_FILTER:
-                if (!mTextFilterEnabled) {
-                    throw new IllegalStateException("Filter gestures can only be used with "
-                            + "text filtering enabled");
-                }
-                break;
-        }
-
-        final int oldGestures = mGestures;
-        mGestures = gestures;
-
-        // Install overlay later
-        if (oldGestures == GESTURES_NONE && gestures != GESTURES_NONE) {
-            mInstallGesturesOverlay = true;
-        // Uninstall overlay
-        } else if (oldGestures != GESTURES_NONE && gestures == GESTURES_NONE) {
-            uninstallGesturesOverlay();
-        }
-    }
-
-    /**
-     * Indicates what gestures are enabled on this view.
-     *
-     * @return {@link #GESTURES_NONE}, {@link #GESTURES_JUMP} or {@link #GESTURES_FILTER}
-     *
-     * @see #GESTURES_NONE
-     * @see #GESTURES_JUMP
-     * @see #GESTURES_FILTER
-     * @see #setGestures(int)
-     */
-    @ViewDebug.ExportedProperty(mapping = {
-        @ViewDebug.IntToString(from = GESTURES_NONE, to = "NONE"),
-        @ViewDebug.IntToString(from = GESTURES_JUMP, to = "JUMP"),
-        @ViewDebug.IntToString(from = GESTURES_FILTER, to = "FILTER")
-    })
-    public int getGestures() {
-        return mGestures;
-    }
-
-    private void dismissGesturesPopup() {
-        if (mGesturesPopup != null) {
-            mGesturesPopup.dismiss();
-        }
-    }
-
-    private void showGesturesPopup() {
-        // Make sure we have a window before showing the popup
-        if (getWindowVisibility() == View.VISIBLE) {
-            installGesturesOverlay();
-            positionGesturesPopup();
-        }
-    }
-
-    private void positionGesturesPopup() {
-        final int[] xy = new int[2];
-        getLocationOnScreen(xy);
-        if (!mGesturesPopup.isShowing()) {
-            mGesturesPopup.showAtLocation(this, Gravity.LEFT | Gravity.TOP, xy[0], xy[1]);
-        } else {
-            mGesturesPopup.update(xy[0], xy[1], -1, -1);
-        }
-    }
-
-    private void installGesturesOverlay() {
-        mInstallGesturesOverlay = false;
-
-        if (mGesturesPopup == null) {
-            final Context c = getContext();
-            final LayoutInflater layoutInflater = (LayoutInflater)
-                    c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mGesturesOverlay = (GestureOverlayView)
-                    layoutInflater.inflate(R.layout.list_gestures_overlay, null);
-
-            final PopupWindow p = new PopupWindow(c);
-            p.setFocusable(false);
-            p.setTouchable(false);
-            p.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-            p.setContentView(mGesturesOverlay);
-            p.setWidth(getWidth());
-            p.setHeight(getHeight());
-            p.setBackgroundDrawable(null);
-
-            if (mGesturesLayoutListener == null) {
-                mGesturesLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
-                    public void onGlobalLayout() {
-                        if (isShown()) {
-                            showGesturesPopup();
-                        } else if (mGesturesPopup.isShowing()) {
-                            dismissGesturesPopup();
-                        }
-                    }
-                };
-            }
-            getViewTreeObserver().addOnGlobalLayoutListener(mGesturesLayoutListener);
-            mGlobalLayoutListenerAddedGestures = true;
-
-            mGesturesPopup = p;
-
-            mGesturesOverlay.removeAllOnGestureListeners();
-            mGesturesOverlay.setGestureStrokeType(GestureOverlayView.GESTURE_STROKE_TYPE_MULTIPLE);
-            mGesturesOverlay.addOnGesturePerformedListener(new GesturesProcessor());
-        }
-    }
-
-    private void uninstallGesturesOverlay() {
-        dismissGesturesPopup();
-        mGesturesPopup = null;
-        if (mGesturesLayoutListener != null) {
-            getViewTreeObserver().removeGlobalOnLayoutListener(mGesturesLayoutListener);
-        }
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (mGestures != GESTURES_NONE) {
-            if ((ev.getAction() != MotionEvent.ACTION_DOWN || mFastScroller == null ||
-                    !mFastScroller.isPointInside(ev.getX(), ev.getY())) &&
-                    mGesturesPopup.isShowing()) {
-                mGesturesOverlay.dispatchTouchEvent(ev);
-            }
-        }
-
-        return super.dispatchTouchEvent(ev);
     }
 
     /**
@@ -1037,7 +836,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          * about having leaked the window.
          */
         dismissPopup();
-        dismissGesturesPopup();
 
         Parcelable superState = super.onSaveInstanceState();
 
@@ -1325,11 +1123,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mFiltered && visible && mPopup != null && mPopup.isShowing()) {
                 positionPopup();
             }
-
-            if (mGestures != GESTURES_NONE && visible && mGesturesPopup != null &&
-                    mGesturesPopup.isShowing()) {
-                positionGesturesPopup();
-            }
         }
 
         return changed;
@@ -1544,13 +1337,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mFastScroller != null) {
             mFastScroller.onSizeChanged(w, h, oldw, oldh);
         }
-
-        if (mInstallGesturesOverlay) {
-            installGesturesOverlay();
-            positionGesturesPopup();
-        } else if (mGesturesPopup != null && mGesturesPopup.isShowing()) {
-            mGesturesPopup.update(w, h);
-        }
     }
 
     /**
@@ -1737,10 +1523,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mTextFilterEnabled && mPopup != null && !mGlobalLayoutListenerAddedFilter) {
                 treeObserver.addOnGlobalLayoutListener(this);
             }
-            if (mGestures != GESTURES_NONE && mGesturesPopup != null &&
-                    !mGlobalLayoutListenerAddedGestures) {
-                treeObserver.addOnGlobalLayoutListener(mGesturesLayoutListener);
-            }
         }
     }
 
@@ -1754,10 +1536,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mTextFilterEnabled && mPopup != null) {
                 treeObserver.removeGlobalOnLayoutListener(this);
                 mGlobalLayoutListenerAddedFilter = false;
-            }
-            if (mGesturesLayoutListener != null && mGesturesPopup != null) {
-                mGlobalLayoutListenerAddedGestures = false;
-                treeObserver.removeGlobalOnLayoutListener(mGesturesLayoutListener);
             }
         }
     }
@@ -1773,7 +1551,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             removeCallbacks(mFlingRunnable);
             // Always hide the type filter
             dismissPopup();
-            dismissGesturesPopup();
 
             if (touchMode == TOUCH_MODE_OFF) {
                 // Remember the last selected element
@@ -1783,9 +1560,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mFiltered) {
                 // Show the type filter only if a filter is in effect
                 showPopup();
-            }
-            if (mGestures != GESTURES_NONE) {
-                showGesturesPopup();
             }
 
             // If we changed touch mode since the last time we had focus
@@ -1906,8 +1680,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private boolean performLongPress(final View child,
             final int longPressPosition, final long longPressId) {
         boolean handled = false;
-
-        dismissGesturesPopup();
 
         if (mOnItemLongClickListener != null) {
             handled = mOnItemLongClickListener.onItemLongClick(AbsListView.this, child,
@@ -3825,81 +3597,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 for (int i = 0; i < viewTypeCount; ++i) {
                     final ArrayList<View> scrapPile = scrapViews[i];
                     views.addAll(scrapPile);
-                }
-            }
-        }
-    }
-
-    private class GesturesProcessor implements GestureOverlayView.OnGesturePerformedListener {
-
-        private static final double SCORE_THRESHOLD = 0.1;
-
-        private LetterRecognizer mRecognizer;
-        private ArrayList<Prediction> mPredictions;
-        private final KeyCharacterMap mKeyMap;
-        private final char[] mHolder;
-
-        GesturesProcessor() {
-            mRecognizer = LetterRecognizers.fromType(getContext(),
-                    LetterRecognizers.RECOGNIZER_LATIN_LOWERCASE);
-            if (mRecognizer == null) {
-                setGestures(GESTURES_NONE);
-            }
-            if (mGestures == GESTURES_FILTER) {
-                mKeyMap = KeyCharacterMap.load(KeyCharacterMap.BUILT_IN_KEYBOARD);
-                mHolder = new char[1];
-            } else {
-                mKeyMap = null;
-                mHolder = null;
-            }
-        }
-
-        public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
-            mPredictions = mRecognizer.recognize(gesture, mPredictions);
-            if (!mPredictions.isEmpty()) {
-                final Prediction prediction = mPredictions.get(0);
-                if (prediction.score > SCORE_THRESHOLD) {
-                    switch (mGestures) {
-                        case GESTURES_JUMP:
-                            processJump(prediction);
-                            break;
-                        case GESTURES_FILTER:
-                            processFilter(prediction);
-                            break;
-                    }
-                }
-            }
-        }
-
-        private void processJump(Prediction prediction) {
-            final Object[] sections = mFastScroller.getSections();
-            if (sections != null) {
-                final String name = prediction.name;
-                final int count = sections.length;
-
-                int index = -1;
-                for (int i = 0; i < count; i++) {
-                    if (name.equalsIgnoreCase((String) sections[i])) {
-                        index = i;
-                        break;
-                    }
-                }
-
-                if (index != -1) {
-                    final SectionIndexer indexer = mFastScroller.getSectionIndexer();
-                    final int position = indexer.getPositionForSection(index);
-                    setSelection(position);
-                }
-            }
-        }
-
-        private void processFilter(Prediction prediction) {
-            mHolder[0] = prediction.name.charAt(0);
-            final KeyEvent[] events = mKeyMap.getEvents(mHolder);
-            if (events != null) {
-                for (KeyEvent event : events) {
-                    sendToTextFilter(event.getKeyCode(), event.getRepeatCount(),
-                            event);
                 }
             }
         }

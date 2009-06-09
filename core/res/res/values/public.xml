@@ -1106,7 +1106,6 @@
   <public type="attr" name="uncertainGestureColor" />
   <public type="attr" name="fadeOffset" />
   <public type="attr" name="fadeDuration" />
-  <public type="attr" name="gestures" />
   <public type="attr" name="gestureStrokeType" />
   <public type="attr" name="gestureStrokeLengthThreshold" />
   <public type="attr" name="gestureStrokeSquarenessThreshold" />

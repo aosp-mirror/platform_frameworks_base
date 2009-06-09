@@ -1381,16 +1381,6 @@
              will use only the number of items in the adapter and the number of items visible
              on screen to determine the scrollbar's properties. -->
         <attr name="smoothScrollbar" format="boolean" />
-        <!-- Defines the type of gesture to enable for the widget. -->
-        <attr name="gestures">
-            <!-- No gesture -->
-            <enum name="none" value="0" />
-            <!-- Gestures jump to a specific position in the content. This requires
-                  fast scroll to be enabled. -->
-            <enum name="jump" value="1" />
-            <!-- Gestures filter the content. This requires text filtering to be enabled. -->
-            <enum name="filter" value="2" />
-        </attr>
     </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
