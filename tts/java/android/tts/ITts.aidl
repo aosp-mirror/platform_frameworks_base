@@ -27,10 +27,6 @@ import android.content.Intent;
  * {@hide}
  */
 interface ITts {
-    void setEngine(in String engineName, in String[] requestedLanguages, in int strictness);
-
-    void setEngineWithIntent(in Intent engineIntent);
-
     void setSpeechRate(in int speechRate);
 
     void speak(in String text, in int queueMode, in String[] params);
@@ -56,4 +52,6 @@ interface ITts {
     void registerCallback(ITtsCallback cb);
 
     void unregisterCallback(ITtsCallback cb);
+
+    void playSilence(in long duration, in int queueMode, in String[] params);
 }
