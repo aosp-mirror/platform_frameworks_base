@@ -121,7 +121,6 @@ public abstract class VpnProfile implements Parcelable {
 
     public static final Parcelable.Creator<VpnProfile> CREATOR =
             new Parcelable.Creator<VpnProfile>() {
-                @Override
                 public VpnProfile createFromParcel(Parcel in) {
                     VpnType type = Enum.valueOf(VpnType.class, in.readString());
                     boolean customized = in.readInt() > 0;
@@ -132,13 +131,11 @@ public abstract class VpnProfile implements Parcelable {
                     return p;
                 }
 
-                @Override
                 public VpnProfile[] newArray(int size) {
                     return new VpnProfile[size];
                 }
             };
 
-    @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(getType().toString());
         parcel.writeInt(mIsCustomized ? 1 : 0);
@@ -148,7 +145,6 @@ public abstract class VpnProfile implements Parcelable {
         parcel.writeString(mRouteList);
     }
 
-    @Override
     public int describeContents() {
         return 0;
     }
