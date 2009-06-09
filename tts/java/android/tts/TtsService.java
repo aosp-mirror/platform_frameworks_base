@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -106,7 +105,6 @@ public class TtsService extends Service implements OnCompletionListener {
     private final ReentrantLock speechQueueLock = new ReentrantLock();
     private final ReentrantLock synthesizerLock = new ReentrantLock();
 
-    // TODO support multiple SpeechSynthesis objects
     private SynthProxy nativeSynth;
 
     @Override
@@ -114,15 +112,21 @@ public class TtsService extends Service implements OnCompletionListener {
         super.onCreate();
         Log.i("TTS", "TTS starting");
 
-
         // TODO: Make this work when the settings are done in the main Settings
         // app.
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        // TODO: This should be changed to work by requesting the path
-        // from the default engine.
-        nativeSynth = new SynthProxy(prefs.getString("engine_pref", ""));
-
+        PackageManager pm = this.getPackageManager();
+        String soLibPath = "";
+        try {
+            soLibPath = pm.getApplicationInfo("com.svox.pico", 0).dataDir;
+        } catch (NameNotFoundException e) {
+            // This exception cannot actually happen as com.svox.pico is
+            // included with the system image.
+            e.printStackTrace();
+        }
+        soLibPath = soLibPath + "/lib/libttspico.so";
+        nativeSynth = new SynthProxy(soLibPath);
 
         mSelf = this;
         mIsSpeaking = false;
@@ -168,35 +172,6 @@ public class TtsService extends Service implements OnCompletionListener {
             lang = prefs.getString("lang_pref", "en-rUS");
         }
         nativeSynth.setLanguage(lang);
-    }
-
-    private void setEngine(String engineName, String[] requestedLanguages,
-            int strictness) {
-        // TODO: Implement engine selection code here.
-        Intent engineIntent = new Intent(
-        "android.intent.action.START_TTS_ENGINE");
-        if (engineName != null) {
-            engineIntent.addCategory("android.intent.action.tts_engine."
-                    + engineName);
-        }
-        for (int i = 0; i < requestedLanguages.length; i++) {
-            engineIntent.addCategory("android.intent.action.tts_lang."
-                    + requestedLanguages[i]);
-        }
-        ResolveInfo[] enginesArray = new ResolveInfo[0];
-        PackageManager pm = getPackageManager();
-        enginesArray = pm.queryIntentActivities(engineIntent, 0).toArray(
-                enginesArray);
-    }
-
-    private void setEngine(Intent engineIntent) {
-        // TODO: Implement engine selection code here.
-    }
-
-    private int getEngineStatus() {
-        // TODO: Proposal - add a sanity check method that
-        // TTS engine plugins must implement.
-        return 0;
     }
 
     /**
@@ -436,8 +411,7 @@ public class TtsService extends Service implements OnCompletionListener {
             if (sr == null) {
                 if (currentSpeechItem.mType == SpeechItem.SPEECH) {
                     // TODO: Split text up into smaller chunks before accepting
-                    // them
-                    // for processing.
+                    // them for processing.
                     speakInternalOnly(currentSpeechItem.mText,
                             currentSpeechItem.mParams);
                 } else {
@@ -576,30 +550,6 @@ public class TtsService extends Service implements OnCompletionListener {
         }
 
         /**
-         * Gives a hint about the type of engine that is preferred.
-         *
-         * @param selectedEngine
-         *            The TTS engine that should be used
-         */
-        public void setEngine(String engineName, String[] supportedLanguages,
-                int strictness) {
-            mSelf.setEngine(engineName, supportedLanguages, strictness);
-        }
-
-        /**
-         * Specifies exactly what the engine has to support. Will always be
-         * considered "strict"; can be used for implementing
-         * optional/experimental features that are not supported by all engines.
-         *
-         * @param engineIntent
-         *            An intent that specifies exactly what the engine has to
-         *            support.
-         */
-        public void setEngineWithIntent(Intent engineIntent) {
-            mSelf.setEngine(engineIntent);
-        }
-
-        /**
          * Speaks the given text using the specified queueing mode and
          * parameters.
          *
@@ -657,7 +607,6 @@ public class TtsService extends Service implements OnCompletionListener {
             }
             mSelf.playSilence(duration, queueMode, speakingParams);
         }
-
 
         /**
          * Stops all speech output and removes any utterances still in the
@@ -741,16 +690,18 @@ public class TtsService extends Service implements OnCompletionListener {
             mSelf.setSpeechRate(speechRate);
         }
 
-        // TODO: Fix comment about language
         /**
          * Sets the speech rate for the TTS. Note that this will only have an
          * effect on synthesized speech; it will not affect pre-recorded speech.
          *
          * @param language
-         *            The language to be used. The languages are specified by
-         *            their IETF language tags as defined by BCP 47. This is the
-         *            same standard used for the lang attribute in HTML. See:
-         *            http://en.wikipedia.org/wiki/IETF_language_tag
+         *            Language values are based on the Android conventions for
+         *            localization as described in the Android platform
+         *            documentation on internationalization. This implies that
+         *            language data is specified in the format xx-rYY, where xx
+         *            is a two letter ISO 639-1 language code in lowercase and
+         *            rYY is a two letter ISO 3166-1-alpha-2 language code in
+         *            uppercase preceded by a lowercase "r".
          */
         public void setLanguage(String language) {
             mSelf.setLanguage(language);
