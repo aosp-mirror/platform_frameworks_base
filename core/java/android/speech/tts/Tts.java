@@ -452,28 +452,6 @@ public class Tts {
 
 
     /**
-     * Sets the TTS engine to be used.
-     *
-     * @param selectedEngine
-     *            The TTS engine that should be used.
-     */
-    public void setEngine(String engineName, String[] requestedLanguages, int strictness) {
-        synchronized (startLock) {
-            if (!started) {
-                return;
-            }
-            try {
-                itts.setEngine(engineName, requestedLanguages, strictness);
-            } catch (RemoteException e) {
-                // TTS died; restart it.
-                started = false;
-                initTts();
-            }
-        }
-    }
-
-
-    /**
      * Sets the speech rate for the TTS engine.
      *
      * Note that the speech rate is not universally supported by all engines and
