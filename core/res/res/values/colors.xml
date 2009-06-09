@@ -75,6 +75,8 @@
     
     <!-- For search-related UIs -->
     <color name="search_url_text">#7fa87f</color>
+    <color name="search_widget_item_background">@android:color/white</color>
+    <color name="search_widget_corpus_item_background">@android:color/lighter_gray</color>
 
 </resources>
 
