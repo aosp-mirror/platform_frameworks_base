@@ -617,6 +617,7 @@ public class MediaPlayer
                 fd.close();
             }
         }
+        Log.d(TAG, "Couldn't open file on client side, trying server side");
         setDataSource(uri.toString());
         return;
     }
