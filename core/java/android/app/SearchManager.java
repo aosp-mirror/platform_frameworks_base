@@ -1256,6 +1256,41 @@ public class SearchManager
      */
     public final static String SHORTCUT_MIME_TYPE = 
             "vnd.android.cursor.item/vnd.android.search.suggest";
+
+
+    /**
+     * The authority of the provider to report clicks to when a click is detected after pivoting
+     * into a specific app's search from global search.
+     *
+     * In addition to the columns below, the suggestion columns are used to pass along the full
+     * suggestion so it can be shortcutted.
+     *
+     * @hide
+     */
+    public final static String SEARCH_CLICK_REPORT_AUTHORITY =
+            "com.android.globalsearch.stats";
+
+    /**
+     * The path the write goes to.
+     *
+     * @hide
+     */
+    public final static String SEARCH_CLICK_REPORT_URI_PATH = "click";
+
+    /**
+     * The column storing the query for the click.
+     *
+     * @hide
+     */
+    public final static String SEARCH_CLICK_REPORT_COLUMN_QUERY = "query";
+
+    /**
+     * The column storing the component name of the application that was pivoted into.
+     *
+     * @hide
+     */
+    public final static String SEARCH_CLICK_REPORT_COLUMN_COMPONENT = "component";
+
     /**
      * Column name for suggestions cursor.  <i>Unused - can be null or column can be omitted.</i>
      */
