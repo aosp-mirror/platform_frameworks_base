@@ -307,14 +307,15 @@ static jboolean android_net_wifi_stopPacketFiltering(JNIEnv* env, jobject clazz)
     return result;
 }
 
-static jint android_net_wifi_getRssiCommand(JNIEnv* env, jobject clazz)
+static jint android_net_wifi_getRssiHelper(const char *cmd)
 {
     char reply[256];
     int rssi = -200;
 
-    if (doCommand("DRIVER RSSI", reply, sizeof(reply)) != 0) {
+    if (doCommand(cmd, reply, sizeof(reply)) != 0) {
         return (jint)-1;
     }
+
     // reply comes back in the form "<SSID> rssi XX" where XX is the
     // number we're interested in.  if we're associating, it returns "OK".
     // beware - <SSID> can contain spaces.
@@ -326,6 +327,16 @@ static jint android_net_wifi_getRssiCommand(JNIEnv* env, jobject clazz)
         }
     }
     return (jint)rssi;
+}
+
+static jint android_net_wifi_getRssiCommand(JNIEnv* env, jobject clazz)
+{
+    return android_net_wifi_getRssiHelper("DRIVER RSSI");
+}
+
+static jint android_net_wifi_getRssiApproxCommand(JNIEnv* env, jobject clazz)
+{
+    return android_net_wifi_getRssiHelper("DRIVER RSSI-APPROX");
 }
 
 static jint android_net_wifi_getLinkSpeedCommand(JNIEnv* env, jobject clazz)
@@ -523,6 +534,8 @@ static JNINativeMethod gWifiMethods[] = {
     { "setBluetoothCoexistenceScanModeCommand", "(Z)Z",
     		(void*) android_net_wifi_setBluetoothCoexistenceScanModeCommand },
     { "getRssiCommand", "()I", (void*) android_net_wifi_getRssiCommand },
+    { "getRssiApproxCommand", "()I",
+            (void*) android_net_wifi_getRssiApproxCommand},
     { "getLinkSpeedCommand", "()I", (void*) android_net_wifi_getLinkSpeedCommand },
     { "getMacAddressCommand", "()Ljava/lang/String;", (void*) android_net_wifi_getMacAddressCommand },
     { "saveConfigCommand", "()Z", (void*) android_net_wifi_saveConfigCommand },
