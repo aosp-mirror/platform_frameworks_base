@@ -213,12 +213,14 @@ public class WebView extends AbsoluteLayout
             LayoutInflater inflater = (LayoutInflater)
                     context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             inflater.inflate(com.android.internal.R.layout.zoom_magnify, this, true);
-            mZoomControls = (ZoomControls) findViewById(com.android.internal.R.id.zoomControls);
+            mPlusMinusZoomControls = (ZoomControls) findViewById(
+                    com.android.internal.R.id.zoomControls);
             mZoomMagnify = (ImageView) findViewById(com.android.internal.R.id.zoomMagnify);
         }
 
         public void show(boolean showZoom, boolean canZoomOut) {
-            mZoomControls.setVisibility(showZoom ? View.VISIBLE : View.GONE);
+            mPlusMinusZoomControls.setVisibility(
+                    showZoom ? View.VISIBLE : View.GONE);
             mZoomMagnify.setVisibility(canZoomOut ? View.VISIBLE : View.GONE);
             fade(View.VISIBLE, 0.0f, 1.0f);
         }
@@ -239,23 +241,23 @@ public class WebView extends AbsoluteLayout
         }
 
         public boolean hasFocus() {
-            return mZoomControls.hasFocus() || mZoomMagnify.hasFocus();
+            return mPlusMinusZoomControls.hasFocus() || mZoomMagnify.hasFocus();
         }
 
         public void setOnZoomInClickListener(OnClickListener listener) {
-            mZoomControls.setOnZoomInClickListener(listener);
+            mPlusMinusZoomControls.setOnZoomInClickListener(listener);
         }
 
         public void setOnZoomOutClickListener(OnClickListener listener) {
-            mZoomControls.setOnZoomOutClickListener(listener);
+            mPlusMinusZoomControls.setOnZoomOutClickListener(listener);
         }
 
         public void setOnZoomMagnifyClickListener(OnClickListener listener) {
             mZoomMagnify.setOnClickListener(listener);
         }
 
-        ZoomControls mZoomControls;
-        ImageView mZoomMagnify;
+        ZoomControls    mPlusMinusZoomControls;
+        ImageView       mZoomMagnify;
     }
 
     /**
@@ -631,8 +633,6 @@ public class WebView extends AbsoluteLayout
     private Runnable mZoomControlRunnable;
 
     private ZoomButtonsController mZoomButtonsController;
-    private ImageView mZoomOverviewButton;
-    private ImageView mZoomFitPageButton;
 
     // These keep track of the center point of the zoom.  They are used to
     // determine the point around which we should zoom.
@@ -692,41 +692,8 @@ public class WebView extends AbsoluteLayout
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new Scroller(context);
 
-        initZoomController(context);
-    }
-
-    private void initZoomController(Context context) {
-        // Create the buttons controller
         mZoomButtonsController = new ZoomButtonsController(this);
         mZoomButtonsController.setOnZoomListener(mZoomListener);
-
-        // Create the accessory buttons
-        LayoutInflater inflater =
-                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewGroup container = mZoomButtonsController.getContainer();
-        inflater.inflate(com.android.internal.R.layout.zoom_browser_accessory_buttons, container);
-        mZoomOverviewButton =
-                (ImageView) container.findViewById(com.android.internal.R.id.zoom_page_overview);
-        mZoomOverviewButton.setOnClickListener(
-            new View.OnClickListener() {
-                public void onClick(View v) {
-                    mZoomButtonsController.setVisible(false);
-                    zoomScrollOut();
-                    if (mLogEvent) {
-                        Checkin.updateStats(mContext.getContentResolver(),
-                                Checkin.Stats.Tag.BROWSER_ZOOM_OVERVIEW, 1, 0.0);
-                    }
-                }
-            });
-        mZoomFitPageButton =
-                (ImageView) container.findViewById(com.android.internal.R.id.zoom_fit_page);
-        mZoomFitPageButton.setOnClickListener(
-            new View.OnClickListener() {
-                public void onClick(View v) {
-                    zoomWithPreview(1f);
-                    updateZoomButtonsEnabled();
-                }
-            });
     }
 
     private void updateZoomButtonsEnabled() {
@@ -736,20 +703,15 @@ public class WebView extends AbsoluteLayout
             // Hide the zoom in and out buttons, as well as the fit to page
             // button, if the page cannot zoom
             mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
-            mZoomFitPageButton.setVisibility(View.GONE);
         } else {
             // Bring back the hidden zoom controls.
             mZoomButtonsController.getZoomControls()
                     .setVisibility(View.VISIBLE);
-            mZoomFitPageButton.setVisibility(View.VISIBLE);
             // Set each one individually, as a page may be able to zoom in
             // or out.
             mZoomButtonsController.setZoomInEnabled(canZoomIn);
             mZoomButtonsController.setZoomOutEnabled(canZoomOut);
-            mZoomFitPageButton.setEnabled(mActualScale != 1);
         }
-        mZoomOverviewButton.setVisibility(canZoomScrollOut() ? View.VISIBLE:
-                View.GONE);
     }
 
     private void init() {
@@ -2720,7 +2682,10 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private boolean canZoomScrollOut() {
+    /**
+     * @hide
+     */
+    public boolean canZoomScrollOut() {
         if (mContentWidth == 0 || mContentHeight == 0) {
             return false;
         }
@@ -2783,7 +2748,10 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private void zoomScrollOut() {
+    /**
+     * @hide
+     */
+    public void zoomScrollOut() {
         if (canZoomScrollOut() == false) {
             mTouchMode = TOUCH_DONE_MODE;
             return;
