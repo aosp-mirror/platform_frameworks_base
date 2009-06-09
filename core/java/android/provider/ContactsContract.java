@@ -425,6 +425,17 @@ public final class ContactsContract {
         }
 
         /**
+         * The base types that all "Typed" data kinds support.
+         */
+        public interface BaseTypes {
+
+            /**
+             * A custom type. The custom label should be supplied by user.
+             */
+            public static int TYPE_CUSTOM = 0;
+        }
+
+        /**
          * Parts of the name.
          */
         public static final class StructuredName {
@@ -490,7 +501,7 @@ public final class ContactsContract {
         /**
          * A nickname.
          */
-        public static final class Nickname {
+        public static final class Nickname implements BaseTypes {
             private Nickname() {}
 
             /** Mime-type used when storing this in data table. */
@@ -502,12 +513,11 @@ public final class ContactsContract {
              */
             public static final String TYPE = "data1";
 
-            public static final int TYPE_CUSTOM = 1;
-            public static final int TYPE_DEFAULT = 2;
-            public static final int TYPE_OTHER_NAME = 3;
-            public static final int TYPE_MAINDEN_NAME = 4;
-            public static final int TYPE_SHORT_NAME = 5;
-            public static final int TYPE_INITIALS = 6;
+            public static final int TYPE_DEFAULT = 1;
+            public static final int TYPE_OTHER_NAME = 2;
+            public static final int TYPE_MAINDEN_NAME = 3;
+            public static final int TYPE_SHORT_NAME = 4;
+            public static final int TYPE_INITIALS = 5;
 
             /**
              * The name itself
@@ -524,13 +534,12 @@ public final class ContactsContract {
         /**
          * Common data definition for telephone numbers.
          */
-        public static final class Phone implements BaseCommonColumns, CommonColumns {
+        public static final class Phone implements BaseCommonColumns, CommonColumns, BaseTypes {
             private Phone() {}
 
             /** Mime-type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone";
 
-            public static final int TYPE_CUSTOM = 0;
             public static final int TYPE_HOME = 1;
             public static final int TYPE_MOBILE = 2;
             public static final int TYPE_WORK = 3;
@@ -549,13 +558,12 @@ public final class ContactsContract {
         /**
          * Common data definition for email addresses.
          */
-        public static final class Email implements BaseCommonColumns, CommonColumns {
+        public static final class Email implements BaseCommonColumns, CommonColumns, BaseTypes {
             private Email() {}
 
             /** Mime-type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/email";
 
-            public static final int TYPE_CUSTOM = 0;
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
@@ -564,13 +572,12 @@ public final class ContactsContract {
         /**
          * Common data definition for postal addresses.
          */
-        public static final class Postal implements BaseCommonColumns, CommonColumns {
+        public static final class Postal implements BaseCommonColumns, CommonColumns, BaseTypes {
             private Postal() {}
 
             /** Mime-type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/postal-address";
 
-            public static final int TYPE_CUSTOM = 0;
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
@@ -579,13 +586,12 @@ public final class ContactsContract {
        /**
         * Common data definition for IM addresses.
         */
-        public static final class Im implements BaseCommonColumns, CommonColumns {
+        public static final class Im implements BaseCommonColumns, CommonColumns, BaseTypes {
             private Im() {}
 
             /** Mime-type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im";
 
-            public static final int TYPE_CUSTOM = 0;
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
@@ -640,7 +646,7 @@ public final class ContactsContract {
         /**
          * Common data definition for organizations.
          */
-        public static final class Organization implements BaseCommonColumns {
+        public static final class Organization implements BaseCommonColumns, BaseTypes {
             private Organization() {}
 
             /** Mime-type used when storing this in data table. */
@@ -652,7 +658,6 @@ public final class ContactsContract {
              */
             public static final String TYPE = "data1";
 
-            public static final int TYPE_CUSTOM = 0;
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
