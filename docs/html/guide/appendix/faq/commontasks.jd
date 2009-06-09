@@ -427,7 +427,7 @@ user receiving new e-mail.</p>
         <td>Activity</td>
         <td>By setting the theme of an activity to
             {@link android.R.style#Theme_Dialog 
-            android:theme=&quot;android:style/Theme.Dialog&quot;}, 
+            android:theme=&quot;&#064;android:style/Theme.Dialog&quot;}, 
             your activity will take on
             the appearance of a normal dialog, floating on top of whatever was
             underneath it.  You usually set the theme through the
