@@ -19,19 +19,22 @@
 
 <device name="Android">
   <item name="none">0</item>
-  <item name="screen.on">30</item>
-  <item name="bluetooth.active">103</item>
-  <item name="bluetooth.on">5</item>
-  <item name="screen.full">114</item>
-  <item name="wifi.on">23</item>
-  <item name="wifi.active">200</item>
-  <item name="wifi.scan">200</item>
-  <item name="cpu.idle">1.6</item>
-  <item name="cpu.normal">100</item>
-  <item name="cpu.full">140</item>
-  <item name="dsp.audio">70</item>
-  <item name="dsp.video">100</item>
-  <item name="radio.on">3</item>
-  <item name="radio.active">175</item>
-  <item name="gps.on">120</item>
+  <item name="screen.on">0.1</item>
+  <item name="bluetooth.active">0.1</item>
+  <item name="bluetooth.on">0.1</item>
+  <item name="screen.full">0.1</item>
+  <item name="wifi.on">0.1</item>
+  <item name="wifi.active">0.1</item>
+  <item name="wifi.scan">0.1</item>
+  <item name="cpu.idle">0.1</item>
+  <item name="cpu.normal">0.2</item>
+  <item name="cpu.full">1</item>
+  <item name="dsp.audio">0.1</item>
+  <item name="dsp.video">0.1</item>
+  <item name="radio.active">1</item>
+  <item name="gps.on">1</item>
+  <array name="radio.on"> <!-- Strength 0 to BINS-1 -->
+      <value>1</value>
+      <value>0.1</value>
+  </array>
 </device>

@@ -30,9 +30,11 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -53,7 +55,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 38;
+    private static final int VERSION = 39;
 
     private final File mFile;
     private final File mBackupFile;
@@ -94,7 +96,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     boolean mScreenOn;
     StopwatchTimer mScreenOnTimer;
-    
+
     int mScreenBrightnessBin = -1;
     final StopwatchTimer[] mScreenBrightnessTimer = new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
     
@@ -137,10 +139,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     long mTrackBatteryUptimeStart;
     long mTrackBatteryPastRealtime;
     long mTrackBatteryRealtimeStart;
-    
+
     long mUnpluggedBatteryUptime;
     long mUnpluggedBatteryRealtime;
-    
+
     /*
      * These keep track of battery levels (1-100) at the last plug event and the last unplug event.
      */
@@ -148,6 +150,15 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mDischargeCurrentLevel;
 
     long mLastWriteTime = 0; // Milliseconds
+
+    // Mobile data transferred while on battery
+    private long[] mMobileDataTx = new long[4];
+    private long[] mMobileDataRx = new long[4];
+    private long[] mTotalDataTx = new long[4];
+    private long[] mTotalDataRx = new long[4];
+
+    private long mRadioDataUptime;
+    private long mRadioDataStart;
 
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
@@ -893,7 +904,40 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         return kwlt;
     }
-    
+
+    private void doDataPlug(long[] dataTransfer, long currentBytes) {
+        dataTransfer[STATS_LAST] = dataTransfer[STATS_UNPLUGGED];
+        dataTransfer[STATS_UNPLUGGED] = -1;
+    }
+
+    private void doDataUnplug(long[] dataTransfer, long currentBytes) {
+        dataTransfer[STATS_UNPLUGGED] = currentBytes;
+    }
+
+    private long getCurrentRadioDataUptimeMs() {
+        try {
+            File awakeTimeFile = new File("/sys/devices/virtual/net/rmnet0/awake_time_ms");
+            if (!awakeTimeFile.exists()) return 0;
+            BufferedReader br = new BufferedReader(new FileReader(awakeTimeFile));
+            String line = br.readLine();
+            br.close();
+            return Long.parseLong(line);
+        } catch (NumberFormatException nfe) {
+            // Nothing
+        } catch (IOException ioe) {
+            // Nothing
+        }
+        return 0;
+    }
+
+    public long getRadioDataUptimeMs() {
+        if (mRadioDataStart == -1) {
+            return mRadioDataUptime;
+        } else {
+            return getCurrentRadioDataUptimeMs() - mRadioDataStart;
+        }
+    }
+
     public void doUnplug(long batteryUptime, long batteryRealtime) {
         for (int iu = mUidStats.size() - 1; iu >= 0; iu--) {
             Uid u = mUidStats.valueAt(iu);
@@ -905,8 +949,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i = mUnpluggables.size() - 1; i >= 0; i--) {
             mUnpluggables.get(i).unplug(batteryUptime, batteryRealtime);
         }
+        // Track total mobile data
+        doDataUnplug(mMobileDataRx, NetStat.getMobileRxBytes());
+        doDataUnplug(mMobileDataTx, NetStat.getMobileTxBytes());
+        doDataUnplug(mTotalDataRx, NetStat.getTotalRxBytes());
+        doDataUnplug(mTotalDataTx, NetStat.getTotalTxBytes());
+        // Track radio awake time
+        mRadioDataStart = getCurrentRadioDataUptimeMs();
+        mRadioDataUptime = 0;
     }
-    
+
     public void doPlug(long batteryUptime, long batteryRealtime) {
         for (int iu = mUidStats.size() - 1; iu >= 0; iu--) {
             Uid u = mUidStats.valueAt(iu);
@@ -922,8 +974,15 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i = mUnpluggables.size() - 1; i >= 0; i--) {
             mUnpluggables.get(i).plug(batteryUptime, batteryRealtime);
         }
+        doDataPlug(mMobileDataRx, NetStat.getMobileRxBytes());
+        doDataPlug(mMobileDataTx, NetStat.getMobileTxBytes());
+        doDataPlug(mTotalDataRx, NetStat.getTotalRxBytes());
+        doDataPlug(mTotalDataTx, NetStat.getTotalTxBytes());
+        // Track radio awake time
+        mRadioDataUptime = getRadioDataUptimeMs();
+        mRadioDataStart = -1;
     }
-    
+
     public void noteStartGps(int uid) {
         mUidStats.get(uid).noteStartGps();
     }
@@ -931,7 +990,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteStopGps(int uid) {
         mUidStats.get(uid).noteStopGps();
     }
-    
+
     public void noteScreenOnLocked() {
         if (!mScreenOn) {
             mScreenOn = true;
@@ -1039,6 +1098,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     break;
             }
         }
+        if (DEBUG) Log.i(TAG, "Phone Data Connection -> " + dataType + " = " + hasData);
         if (mPhoneDataConnectionType != bin) {
             if (mPhoneDataConnectionType >= 0) {
                 mPhoneDataConnectionsTimer[mPhoneDataConnectionType].stopRunningLocked(this);
@@ -2701,7 +2761,44 @@ public final class BatteryStatsImpl extends BatteryStats {
     public long getBatteryRealtime(long curTime) {
         return getBatteryRealtimeLocked(curTime);
     }
-    
+
+    private long getTcpBytes(long current, long[] dataBytes, int which) {
+        if (which == STATS_LAST) {
+            return dataBytes[STATS_LAST];
+        } else {
+            if (which == STATS_UNPLUGGED) {
+                if (dataBytes[STATS_UNPLUGGED] < 0) {
+                    return dataBytes[STATS_LAST];
+                } else {
+                    return current - dataBytes[STATS_UNPLUGGED];
+                }
+            } else if (which == STATS_TOTAL) {
+                return (current - dataBytes[STATS_CURRENT]) + dataBytes[STATS_TOTAL];
+            }
+            return current - dataBytes[STATS_CURRENT];
+        }
+    }
+
+    /** Only STATS_UNPLUGGED works properly */
+    public long getMobileTcpBytesSent(int which) {
+        return getTcpBytes(NetStat.getMobileTxBytes(), mMobileDataTx, which);
+    }
+
+    /** Only STATS_UNPLUGGED works properly */
+    public long getMobileTcpBytesReceived(int which) {
+        return getTcpBytes(NetStat.getMobileRxBytes(), mMobileDataRx, which);
+    }
+
+    /** Only STATS_UNPLUGGED works properly */
+    public long getTotalTcpBytesSent(int which) {
+        return getTcpBytes(NetStat.getTotalTxBytes(), mTotalDataTx, which);
+    }
+
+    /** Only STATS_UNPLUGGED works properly */
+    public long getTotalTcpBytesReceived(int which) {
+        return getTcpBytes(NetStat.getTotalRxBytes(), mTotalDataRx, which);
+    }
+
     @Override
     public int getDischargeStartLevel() {
         synchronized(this) {
@@ -3227,6 +3324,18 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeCurrentLevel = in.readInt();
         mLastWriteTime = in.readLong();
 
+        mMobileDataRx[STATS_LAST] = in.readLong();
+        mMobileDataRx[STATS_UNPLUGGED] = -1;
+        mMobileDataTx[STATS_LAST] = in.readLong();
+        mMobileDataTx[STATS_UNPLUGGED] = -1;
+        mTotalDataRx[STATS_LAST] = in.readLong();
+        mTotalDataRx[STATS_UNPLUGGED] = -1;
+        mTotalDataTx[STATS_LAST] = in.readLong();
+        mTotalDataTx[STATS_UNPLUGGED] = -1;
+
+        mRadioDataUptime = in.readLong();
+        mRadioDataStart = -1;
+
         mKernelWakelockStats.clear();
         int NKW = in.readInt();
         for (int ikw = 0; ikw < NKW; ikw++) {
@@ -3300,6 +3409,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeStartLevel);
         out.writeInt(mDischargeCurrentLevel);
         out.writeLong(mLastWriteTime);
+
+        out.writeLong(getMobileTcpBytesReceived(STATS_UNPLUGGED));
+        out.writeLong(getMobileTcpBytesSent(STATS_UNPLUGGED));
+        out.writeLong(getTotalTcpBytesReceived(STATS_UNPLUGGED));
+        out.writeLong(getTotalTcpBytesSent(STATS_UNPLUGGED));
+
+        // Write radio uptime for data
+        out.writeLong(getRadioDataUptimeMs());
 
         out.writeInt(mKernelWakelockStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {

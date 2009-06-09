@@ -26,6 +26,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -118,26 +119,28 @@ public class PowerProfile {
      */
     public static final String POWER_VIDEO = "dsp.video";
 
-    static final HashMap<String, Double> sPowerMap = new HashMap<String, Double>();
+    static final HashMap<String, Object> sPowerMap = new HashMap<String, Object>();
 
     private static final String TAG_DEVICE = "device";
     private static final String TAG_ITEM = "item";
+    private static final String TAG_ARRAY = "array";
+    private static final String TAG_ARRAYITEM = "value";
     private static final String ATTR_NAME = "name";
 
-    public PowerProfile(Context context, CharSequence profile) {
+    public PowerProfile(Context context) {
         // Read the XML file for the given profile (normally only one per
         // device)
         if (sPowerMap.size() == 0) {
-            readPowerValuesFromXml(context, profile);
+            readPowerValuesFromXml(context);
         }
     }
 
-    private void readPowerValuesFromXml(Context context, CharSequence profile) {
-        // FIXME
-        //int id = context.getResources().getIdentifier(profile.toString(), "xml", 
-        //        "com.android.internal");
-        int id = com.android.internal.R.xml.power_profile_default;
+    private void readPowerValuesFromXml(Context context) {
+        int id = com.android.internal.R.xml.power_profile;
         XmlResourceParser parser = context.getResources().getXml(id);
+        boolean parsingArray = false;
+        ArrayList<Double> array = new ArrayList<Double>();
+        String arrayName = null;
 
         try {
             XmlUtils.beginDocument(parser, TAG_DEVICE);
@@ -145,21 +148,38 @@ public class PowerProfile {
             while (true) {
                 XmlUtils.nextElement(parser);
 
-                String element = parser.getName(); 
-                if (element == null || !(element.equals(TAG_ITEM))) {
-                    break;
+                String element = parser.getName();
+                if (element == null) break;
+                
+                if (parsingArray && !element.equals(TAG_ARRAYITEM)) {
+                    // Finish array
+                    sPowerMap.put(arrayName, array.toArray(new Double[array.size()]));
+                    parsingArray = false;
                 }
-
-                String name = parser.getAttributeValue(null, ATTR_NAME);
-                if (parser.next() == XmlPullParser.TEXT) {
-                    String power = parser.getText();
-                    double value = 0;
-                    try {
-                        value = Double.valueOf(power);
-                    } catch (NumberFormatException nfe) {
+                if (element.equals(TAG_ARRAY)) {
+                    parsingArray = true;
+                    array.clear();
+                    arrayName = parser.getAttributeValue(null, ATTR_NAME);
+                } else if (element.equals(TAG_ITEM) || element.equals(TAG_ARRAYITEM)) {
+                    String name = null;
+                    if (!parsingArray) name = parser.getAttributeValue(null, ATTR_NAME);
+                    if (parser.next() == XmlPullParser.TEXT) {
+                        String power = parser.getText();
+                        double value = 0;
+                        try {
+                            value = Double.valueOf(power);
+                        } catch (NumberFormatException nfe) {
+                        }
+                        if (element.equals(TAG_ITEM)) {
+                            sPowerMap.put(name, value);
+                        } else if (parsingArray) {
+                            array.add(value);
+                        }
                     }
-                    sPowerMap.put(name, value);
                 }
+            }
+            if (parsingArray) {
+                sPowerMap.put(arrayName, array.toArray(new Double[array.size()]));
             }
         } catch (XmlPullParserException e) {
             throw new RuntimeException(e);
@@ -177,7 +197,40 @@ public class PowerProfile {
      */
     public double getAveragePower(String type) {
         if (sPowerMap.containsKey(type)) {
-            return sPowerMap.get(type);
+            Object data = sPowerMap.get(type);
+            if (data instanceof Double[]) {
+                return ((Double[])data)[0];
+            } else {
+                return (Double) sPowerMap.get(type);
+            }
+        } else {
+            return 0;
+        }
+    }
+    
+    /**
+     * Returns the average current in mA consumed by the subsystem for the given level. 
+     * @param type the subsystem type
+     * @param level the level of power at which the subsystem is running. For instance, the
+     *  signal strength of the cell network between 0 and 4 (if there are 4 bars max.).
+     *  If there is no data for multiple levels, the level is ignored.
+     * @return the average current in milliAmps.
+     */
+    public double getAveragePower(String type, int level) {
+        if (sPowerMap.containsKey(type)) {
+            Object data = sPowerMap.get(type);
+            if (data instanceof double[]) {
+                final double[] values = (double[]) data;
+                if (values.length > level) {
+                    return values[level];
+                } else if (values.length < 0) {
+                    return values[0];
+                } else {
+                    return values[values.length - 1];
+                }
+            } else {
+                return (Double) data;
+            }
         } else {
             return 0;
         }
