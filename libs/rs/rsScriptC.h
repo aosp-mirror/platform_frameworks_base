@@ -40,24 +40,14 @@ public:
         const char * mScriptText;
         uint32_t mScriptTextLength;
 
-        bool useStateVertex;
-        bool useStateRaster;
-        bool useStateFragment;
-        bool useStateStore;
+
+        int mVersionMajor;
+        int mVersionMinor;
 
         rsc_RunScript mScript;
     };
 
-    struct Enviroment_t {
-        bool mIsRoot;
-        bool mIsOrtho;
-        float mClearColor[4];
-        float mClearDepth;
-        uint32_t mClearStencil;
-    };
-
     Program_t mProgram;
-    Enviroment_t mEnviroment;
 
     ACCscript*    mAccScript;
 
