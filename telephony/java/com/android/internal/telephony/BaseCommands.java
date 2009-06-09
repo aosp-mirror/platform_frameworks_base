@@ -505,10 +505,10 @@ public abstract class BaseCommands implements CommandsInterface {
     public void unregisterForSignalInfo(Handler h) {
         mSignalInfoRegistrants.remove(h);
     }
-   
+
     public void registerForCdmaOtaProvision(Handler h,int what, Object obj){
         Registrant r = new Registrant (h, what, obj);
-        mOtaProvisionRegistrants.add(r); 
+        mOtaProvisionRegistrants.add(r);
     }
 
     public void unregisterForCdmaOtaProvision(Handler h){

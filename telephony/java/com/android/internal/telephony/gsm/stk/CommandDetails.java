@@ -36,17 +36,17 @@ class CommandDetails extends ValueObject implements Parcelable {
     public ComprehensionTlvTag getTag() {
         return ComprehensionTlvTag.COMMAND_DETAILS;
     }
-    
+
     CommandDetails() {
     }
 
     public boolean compareTo(CommandDetails other) {
         return (this.compRequired == other.compRequired &&
                 this.commandNumber == other.commandNumber &&
-                this.commandQualifier == other.commandQualifier && 
+                this.commandQualifier == other.commandQualifier &&
                 this.typeOfCommand == other.typeOfCommand);
     }
-    
+
     public CommandDetails(Parcel in) {
         compRequired = true;
         commandNumber = in.readInt();
@@ -60,7 +60,7 @@ class CommandDetails extends ValueObject implements Parcelable {
         dest.writeInt(commandQualifier);
     }
 
-    public static final Parcelable.Creator<CommandDetails> CREATOR = 
+    public static final Parcelable.Creator<CommandDetails> CREATOR =
                                 new Parcelable.Creator<CommandDetails>() {
         public CommandDetails createFromParcel(Parcel in) {
             return new CommandDetails(in);
@@ -85,7 +85,7 @@ class DeviceIdentities extends ValueObject {
     }
 }
 
-// Container class to hold icon identifier value. 
+// Container class to hold icon identifier value.
 class IconId extends ValueObject {
     int recordNumber;
     boolean selfExplanatory;
@@ -95,7 +95,7 @@ class IconId extends ValueObject {
     }
 }
 
-// Container class to hold item icon identifier list value. 
+// Container class to hold item icon identifier list value.
 class ItemsIconId extends ValueObject {
     int [] recordNumbers;
     boolean selfExplanatory;

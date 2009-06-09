@@ -28,5 +28,5 @@ public final class IccVmNotSupportedException extends IccException {
     public IccVmNotSupportedException(String s)
     {
         super(s);
-    }    
+    }
 }

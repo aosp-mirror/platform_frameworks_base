@@ -28,5 +28,5 @@ public final class IccVmFixedException extends IccException {
     public IccVmFixedException(String s)
     {
         super(s);
-    }    
+    }
 }
