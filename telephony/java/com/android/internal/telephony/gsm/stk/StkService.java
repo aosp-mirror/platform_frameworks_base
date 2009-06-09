@@ -25,8 +25,6 @@ import android.os.Message;
 
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.CommandsInterface;
-import com.android.internal.telephony.EncodeException;
-import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.gsm.SimCard;
 import com.android.internal.telephony.gsm.SIMFileHandler;
 import com.android.internal.telephony.gsm.SIMRecords;
@@ -34,8 +32,6 @@ import com.android.internal.telephony.gsm.SIMRecords;
 import android.util.Config;
 
 import java.io.ByteArrayOutputStream;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Enumeration for representing the tag value of COMPREHENSION-TLV objects. If
@@ -174,6 +170,9 @@ public class StkService extends Handler implements AppInterface {
 
         // Register for SIM ready event.
         mSimRecords.registerForRecordsLoaded(this, MSG_ID_SIM_LOADED, null);
+
+        mCmdIf.reportStkServiceIsRunning(null);
+        StkLog.d(this, "StkService: is running");
     }
 
     public void dispose() {

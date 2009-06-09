@@ -1157,6 +1157,14 @@ public interface CommandsInterface {
      */
     void reportSmsMemoryStatus(boolean available, Message result);
 
+    /**
+     * Indicates to the vendor ril that StkService is running
+     * rand is eady to receive RIL_UNSOL_STK_XXXX commands.
+     *
+     * @param result callback message
+     */
+    void reportStkServiceIsRunning(Message result);
+
     void invokeOemRilRequestRaw(byte[] data, Message response);
 
     void invokeOemRilRequestStrings(String[] strings, Message response);

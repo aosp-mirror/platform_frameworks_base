@@ -1022,6 +1022,10 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(result);
     }
 
+    public void reportStkServiceIsRunning(Message result) {
+        resultSuccess(result, null);
+    }
+
     private boolean isSimLocked() {
         if (mSimLockedState != SimLockState.NONE) {
             return true;
