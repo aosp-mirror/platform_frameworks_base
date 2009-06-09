@@ -434,6 +434,136 @@ void ScriptCState::runCompiler()
     accScriptSource(mAccScript, 1, scriptSource, scriptLength);
     accCompileScript(mAccScript);
     accGetScriptLabel(mAccScript, "main", (ACCvoid**) &mProgram.mScript);
+    rsAssert(mProgram.mScript);
+
+    if (mProgram.mScript) {
+        const static int pragmaMax = 16;
+        ACCsizei pragmaCount;
+        ACCchar * str[pragmaMax];
+        accGetPragmas(mAccScript, &pragmaCount, pragmaMax, &str[0]);
+
+        // Start with defaults
+        mEnviroment.mStateVertex = 
+            Script::Enviroment_t::VTX_ORTHO_WINDOW;
+        mEnviroment.mStateRaster = 
+            Script::Enviroment_t::RASTER_FLAT;
+        mEnviroment.mStateFragment = 
+            Script::Enviroment_t::FRAGMENT_COLOR;
+        mEnviroment.mStateFragmentStore = 
+            Script::Enviroment_t::FRAGMENT_STORE_ALWAYS_REPLACE;
+
+        for (int ct=0; ct < pragmaCount; ct+=2) {
+            LOGE("pragma %i %s %s", ct, str[ct], str[ct+1]);
+
+            if (!strcmp(str[ct], "version")) {
+                continue;
+
+            }
+
+
+            if (!strcmp(str[ct], "stateVertex")) {
+                if (!strcmp(str[ct+1], "orthoWindow")) {
+                    mEnviroment.mStateVertex = 
+                        Script::Enviroment_t::VTX_ORTHO_WINDOW;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "orthoNormalized")) {
+                    mEnviroment.mStateVertex = 
+                        Script::Enviroment_t::VTX_ORTHO_NORMALIZED;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "projection")) {
+                    mEnviroment.mStateVertex = 
+                        Script::Enviroment_t::VTX_PROJECTION;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "parent")) {
+                    mEnviroment.mStateVertex = 
+                        Script::Enviroment_t::VTX_PARENT;
+                    continue;
+                }
+                LOGE("Unreconized value %s passed to stateVertex", str[ct+1]);
+            }
+
+            if (!strcmp(str[ct], "stateRaster")) {
+                if (!strcmp(str[ct+1], "flat")) {
+                    mEnviroment.mStateRaster = 
+                        Script::Enviroment_t::RASTER_FLAT;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "smooth")) {
+                    mEnviroment.mStateRaster = 
+                        Script::Enviroment_t::RASTER_SMOOTH;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "parent")) {
+                    mEnviroment.mStateRaster = 
+                        Script::Enviroment_t::RASTER_PARENT;
+                    continue;
+                }
+                LOGE("Unreconized value %s passed to stateRaster", str[ct+1]);
+            }
+
+            if (!strcmp(str[ct], "stateFragment")) {
+                if (!strcmp(str[ct+1], "color")) {
+                    mEnviroment.mStateFragment = 
+                        Script::Enviroment_t::FRAGMENT_COLOR;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "texReplace")) {
+                    mEnviroment.mStateFragment = 
+                        Script::Enviroment_t::FRAGMENT_TEX_REPLACE;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "texModulate")) {
+                    mEnviroment.mStateFragment = 
+                        Script::Enviroment_t::FRAGMENT_TEX_MODULATE;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "parent")) {
+                    mEnviroment.mStateFragment = 
+                        Script::Enviroment_t::FRAGMENT_PARENT;
+                    continue;
+                }
+                LOGE("Unreconized value %s passed to stateFragment", str[ct+1]);
+            }
+
+            if (!strcmp(str[ct], "stateFragmentStore")) {
+                if (!strcmp(str[ct+1], "alwaysReplace")) {
+                    mEnviroment.mStateFragmentStore = 
+                        Script::Enviroment_t::FRAGMENT_STORE_ALWAYS_REPLACE;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "alwaysBlend")) {
+                    mEnviroment.mStateFragmentStore = 
+                        Script::Enviroment_t::FRAGMENT_STORE_ALWAYS_BLEND;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "depthLessReplace")) {
+                    mEnviroment.mStateFragmentStore = 
+                        Script::Enviroment_t::FRAGMENT_STORE_DEPTH_LESS_REPLACE;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "depthLessBlend")) {
+                    mEnviroment.mStateFragmentStore = 
+                        Script::Enviroment_t::FRAGMENT_STORE_DEPTH_LESS_BLEND;
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "parent")) {
+                    mEnviroment.mStateFragmentStore = 
+                        Script::Enviroment_t::FRAGMENT_STORE_PARENT;
+                    continue;
+                }
+                LOGE("Unreconized value %s passed to stateFragmentStore", str[ct+1]);
+            }
+
+        }
+
+            
+    } else {
+        // Deal with an error.
+    }
+
 }
 
 namespace android {
@@ -511,6 +641,7 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     s->mEnviroment = ss->mEnviroment;
     s->mProgram = ss->mProgram;
     ss->clear();
+
     return s;
 }
 

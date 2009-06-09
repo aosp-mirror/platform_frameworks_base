@@ -1,5 +1,12 @@
 // Fountain test script
 
+#pragma version(1)
+#pragma stateVertex(orthoWindow)
+#pragma stateRaster(flat)
+#pragma stateFragment(color)
+#pragma stateStore(parent)
+
+
 int main(void* con, int ft, int launchID) {
     int count, touch, x, y, rate, maxLife, lifeShift;
     int life;
