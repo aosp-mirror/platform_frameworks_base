@@ -24,6 +24,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -1202,15 +1204,116 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     protected boolean launchSuggestion(int position, int actionKey, String actionMsg) {
         Cursor c = mSuggestionsAdapter.getCursor();
         if ((c != null) && c.moveToPosition(position)) {
-            mSuggestionsAdapter.callCursorOnClick(c, position);
+
+            Intent intent = createIntentFromSuggestion(c, actionKey, actionMsg);
+
+            // report back about the click
+            if (mGlobalSearchMode) {
+                // in global search mode, do it via cursor
+                mSuggestionsAdapter.callCursorOnClick(c, position);
+            } else if (intent != null
+                    && mPreviousComponents != null
+                    && !mPreviousComponents.isEmpty()) {
+                // in-app search (and we have pivoted in as told by mPreviousComponents,
+                // which is used for keeping track of what we pop back to when we are pivoting into
+                // in app search.)
+                reportInAppClickToGlobalSearch(c, intent);
+            }
 
             // launch the intent
-            Intent intent = createIntentFromSuggestion(c, actionKey, actionMsg);
             launchIntent(intent);
 
             return true;
         }
         return false;
+    }
+
+    /**
+     * Report a click from an in app search result back to global search for shortcutting porpoises.
+     *
+     * @param c The cursor that is pointing to the clicked position.
+     * @param intent The intent that will be launched for the click.
+     */
+    private void reportInAppClickToGlobalSearch(Cursor c, Intent intent) {
+        // for in app search, still tell global search via content provider
+        Uri uri = getClickReportingUri();
+        final ContentValues cv = new ContentValues();
+        cv.put(SearchManager.SEARCH_CLICK_REPORT_COLUMN_QUERY, mUserQuery);
+        final ComponentName source = mSearchable.getSearchActivity();
+        cv.put(SearchManager.SEARCH_CLICK_REPORT_COLUMN_COMPONENT, source.flattenToShortString());
+
+        // grab the intent columns from the intent we created since it has additional
+        // logic for falling back on the searchable default
+        cv.put(SearchManager.SUGGEST_COLUMN_INTENT_ACTION, intent.getAction());
+        cv.put(SearchManager.SUGGEST_COLUMN_INTENT_DATA, intent.getDataString());
+        cv.put(SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA,
+                        intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
+
+        // ensure the icons will work for global search
+        cv.put(SearchManager.SUGGEST_COLUMN_ICON_1,
+                        wrapIconForPackage(
+                                source,
+                                getColumnString(c, SearchManager.SUGGEST_COLUMN_ICON_1)));
+        cv.put(SearchManager.SUGGEST_COLUMN_ICON_2,
+                        wrapIconForPackage(
+                                source,
+                                getColumnString(c, SearchManager.SUGGEST_COLUMN_ICON_2)));
+
+        // the rest can be passed through directly
+        cv.put(SearchManager.SUGGEST_COLUMN_FORMAT,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_FORMAT));
+        cv.put(SearchManager.SUGGEST_COLUMN_TEXT_1,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_TEXT_1));
+        cv.put(SearchManager.SUGGEST_COLUMN_TEXT_2,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_TEXT_2));
+        cv.put(SearchManager.SUGGEST_COLUMN_QUERY,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_QUERY));
+        cv.put(SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_SHORTCUT_ID));
+        // note: deliberately omitting background color since it is only for global search
+        // "more results" entries
+        mContext.getContentResolver().insert(uri, cv);
+    }
+
+    /**
+     * @return A URI appropriate for reporting a click.
+     */
+    private Uri getClickReportingUri() {
+        Uri.Builder uriBuilder = new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(SearchManager.SEARCH_CLICK_REPORT_AUTHORITY);
+
+        uriBuilder.appendPath(SearchManager.SEARCH_CLICK_REPORT_URI_PATH);
+
+        return uriBuilder
+                .query("")     // TODO: Remove, workaround for a bug in Uri.writeToParcel()
+                .fragment("")  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
+                .build();
+    }
+
+    /**
+     * Wraps an icon for a particular package.  If the icon is a resource id, it is converted into
+     * an android.resource:// URI.
+     *
+     * @param source The source of the icon
+     * @param icon The icon retrieved from a suggestion column
+     * @return An icon string appropriate for the package.
+     */
+    private String wrapIconForPackage(ComponentName source, String icon) {
+        if (icon == null || icon.length() == 0 || "0".equals(icon)) {
+            // SearchManager specifies that null or zero can be returned to indicate
+            // no icon. We also allow empty string.
+            return null;
+        } else if (!Character.isDigit(icon.charAt(0))){
+            return icon;
+        } else {
+            String packageName = source.getPackageName();
+            return new Uri.Builder()
+                    .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                    .authority(packageName)
+                    .encodedPath(icon)
+                    .toString();
+        }
     }
 
     /**
@@ -1244,7 +1347,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
     
     /**
-     * Handles SearchManager#INTENT_ACTION_CHANGE_SOURCE.
+     * Handles {@link SearchManager#INTENT_ACTION_CHANGE_SEARCH_SOURCE}.
      */
     private void handleChangeSourceIntent(Intent intent) {
         Uri dataUri = intent.getData();
