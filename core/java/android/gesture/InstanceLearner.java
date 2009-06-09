@@ -26,6 +26,20 @@ import java.util.TreeMap;
  */
 
 class InstanceLearner extends Learner {
+    private static final Comparator<Prediction> sComparator = new Comparator<Prediction>() {
+        public int compare(Prediction object1, Prediction object2) {
+            double score1 = object1.score;
+            double score2 = object2.score;
+            if (score1 > score2) {
+                return -1;
+            } else if (score1 < score2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    };
+
     @Override
     ArrayList<Prediction> classify(int sequenceType, float[] vector) {
         ArrayList<Prediction> predictions = new ArrayList<Prediction>();
@@ -55,31 +69,19 @@ class InstanceLearner extends Learner {
             }
         }
 
-        double sum = 0;
+//        double sum = 0;
         for (String name : label2score.keySet()) {
             double score = label2score.get(name);
-            sum += score;
+//            sum += score;
             predictions.add(new Prediction(name, score));
         }
 
         // normalize
-        for (Prediction prediction : predictions) {
-            prediction.score /= sum;
-        }
+//        for (Prediction prediction : predictions) {
+//            prediction.score /= sum;
+//        }
 
-        Collections.sort(predictions, new Comparator<Prediction>() {
-            public int compare(Prediction object1, Prediction object2) {
-                double score1 = object1.score;
-                double score2 = object2.score;
-                if (score1 > score2) {
-                    return -1;
-                } else if (score1 < score2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
+        Collections.sort(predictions, sComparator);
 
         return predictions;
     }
