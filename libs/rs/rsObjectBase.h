@@ -47,6 +47,16 @@ public:
         mRef = NULL;
     }
 
+    ObjectBaseRef(const ObjectBaseRef &ref) {
+        mRef = ref.get();
+        mRef->incRef();
+    }
+
+    ObjectBaseRef(T *ref) {
+        mRef = ref;
+        ref->incRef();
+    }
+
     ~ObjectBaseRef() {
         clear();
     }
@@ -76,9 +86,6 @@ public:
 
 protected:
     T * mRef;
-
-private:
-    ObjectBaseRef(const ObjectBaseRef &) {};
 
 };
 

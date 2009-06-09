@@ -40,10 +40,38 @@ public:
         float mClearDepth;
         uint32_t mClearStencil;
 
-        bool mUseStateVertex;
-        bool mUseStateRaster;
-        bool mUseStateFragment;
-        bool mUseStateStore;
+        enum StateVertex {
+            VTX_ORTHO_WINDOW,
+            VTX_ORTHO_NORMALIZED,
+            VTX_PROJECTION,
+            VTX_PARENT
+        };
+        StateVertex mStateVertex;
+
+        enum StateRaster {
+            RASTER_FLAT,
+            RASTER_SMOOTH,
+            RASTER_PARENT
+        };
+        StateRaster mStateRaster;
+
+        enum StateFragment {
+            FRAGMENT_COLOR,
+            FRAGMENT_TEX_REPLACE,
+            FRAGMENT_TEX_MODULATE,
+            FRAGMENT_PARENT
+        };
+        StateFragment mStateFragment;
+
+        enum StateFragmentStore {
+            FRAGMENT_STORE_ALWAYS_REPLACE,
+            FRAGMENT_STORE_ALWAYS_BLEND,
+            FRAGMENT_STORE_DEPTH_LESS_REPLACE,
+            FRAGMENT_STORE_DEPTH_LESS_BLEND,
+            FRAGMENT_STORE_PARENT
+        };
+        StateFragmentStore mStateFragmentStore;
+
     };
     Enviroment_t mEnviroment;
 

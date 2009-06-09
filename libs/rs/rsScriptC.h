@@ -69,7 +69,7 @@ public:
     ACCscript* mAccScript;
 
     ScriptC::Program_t mProgram;
-    ScriptC::Enviroment_t mEnviroment;
+    Script::Enviroment_t mEnviroment;
 
     Vector<const Type *> mConstantBufferTypes;
 

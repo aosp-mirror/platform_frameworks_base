@@ -103,11 +103,16 @@ protected:
     ObjectBaseRef<ProgramVertex> mVertex;
     ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
 
+    ProgramFragment * mDefaultFragment;
+    ProgramVertex * mDefaultVertex;
+    ProgramFragmentStore * mDefaultFragmentStore;
+
 private:
     Context();
 
     void initEGL();
 
+    bool runScript(Script *s);
     bool runRootScript();
 
     static void * threadProc(void *);

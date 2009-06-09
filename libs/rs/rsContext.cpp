@@ -57,21 +57,34 @@ void Context::initEGL()
      eglQuerySurface(mDisplay, mSurface, EGL_HEIGHT, &mHeight);
 }
 
+bool Context::runScript(Script *s)
+{
+    ObjectBaseRef<ProgramFragment> frag(mFragment);
+    ObjectBaseRef<ProgramVertex> vtx(mVertex);
+    ObjectBaseRef<ProgramFragmentStore> store(mFragmentStore);
+
+
+
+    return true;
+
+}
+
+
 bool Context::runRootScript()
 {
-    rsAssert(mRootScript->mIsRoot);
+    rsAssert(mRootScript->mEnviroment.mIsRoot);
 
     glColor4f(1,1,1,1);
     glEnable(GL_LIGHT0);
-    glViewport(0, 0, 320, 480);
-    float aspectH = 480.f / 320.f;
+    glViewport(0, 0, mWidth, mHeight);
 
-    if(mRootScript->mIsOrtho) {
+    if(mRootScript->mEnviroment.mIsOrtho) {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrthof(0, 320,  480, 0,  0, 1);
+        glOrthof(0, mWidth,  mHeight, 0,  0, 1);
         glMatrixMode(GL_MODELVIEW);
     } else {
+        float aspectH = ((float)mWidth) / mHeight;
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glFrustumf(-1, 1,  -aspectH, aspectH,  1, 100);
