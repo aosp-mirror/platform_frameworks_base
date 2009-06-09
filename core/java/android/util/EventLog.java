@@ -192,17 +192,21 @@ public class EventLog {
             return decodeObject();
         }
 
+        public byte[] getRawData() {
+            return mBuffer.array();
+        }
+
         /** @return the loggable item at the current position in mBuffer. */
         private Object decodeObject() {
             if (mBuffer.remaining() < 1) return null;
             switch (mBuffer.get()) {
             case INT:
                 if (mBuffer.remaining() < 4) return null;
-                return mBuffer.getInt();
+                return (Integer) mBuffer.getInt();
 
             case LONG:
                 if (mBuffer.remaining() < 8) return null;
-                return mBuffer.getLong();
+                return (Long) mBuffer.getLong();
 
             case STRING:
                 try {
