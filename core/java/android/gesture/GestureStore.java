@@ -228,8 +228,8 @@ public class GestureStore {
 
             final HashMap<String, ArrayList<Gesture>> maps = mNamedGestures;
 
-            out = new DataOutputStream((stream instanceof BufferedOutputStream) ? out :
-                    new BufferedOutputStream(out, GestureConstants.IO_BUFFER_SIZE));
+            out = new DataOutputStream((stream instanceof BufferedOutputStream) ? stream :
+                    new BufferedOutputStream(stream, GestureConstants.IO_BUFFER_SIZE));
             // Write version number
             out.writeShort(FILE_FORMAT_VERSION);
             // Write number of entries
