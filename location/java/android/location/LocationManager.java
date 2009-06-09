@@ -66,7 +66,7 @@ public class LocationManager {
      * satellites. Depending on conditions, this provider may take a while to return
      * a location fix.
      *
-     * Requires the permission android.permissions.ACCESS_FINE_LOCATION.
+     * Requires the permission android.permission.ACCESS_FINE_LOCATION.
      *
      * <p> The extras Bundle for the GPS location provider can contain the
      * following key/value pairs:
