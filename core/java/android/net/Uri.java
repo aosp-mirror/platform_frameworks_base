@@ -371,7 +371,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     /**
      * Creates a Uri which parses the given encoded URI string.
      *
-     * @param uriString an RFC 3296-compliant, encoded URI
+     * @param uriString an RFC 2396-compliant, encoded URI
      * @throws NullPointerException if uriString is null
      * @return Uri for this given uri string
      */
