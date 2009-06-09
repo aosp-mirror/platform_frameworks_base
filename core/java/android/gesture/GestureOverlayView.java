@@ -352,6 +352,13 @@ public class GestureOverlayView extends FrameLayout {
         invalidate();
     }
 
+    /**
+     * @hide
+     */
+    public Paint getGesturePaint() {
+        return mGesturePaint;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
