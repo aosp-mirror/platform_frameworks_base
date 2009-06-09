@@ -61,17 +61,21 @@ public final class GestureLibraries {
         }
 
         public boolean save() {
-            final File file = mPath;
-            if (!file.canWrite()) return false;
+            if (!mStore.hasChanged()) return true;
 
-            if (!file.getParentFile().exists()) {
-                if (!file.getParentFile().mkdirs()) {
+            final File file = mPath;
+
+            final File parentFile = file.getParentFile();
+            if (!parentFile.exists()) {
+                if (!parentFile.mkdirs()) {
                     return false;
                 }
             }
 
             boolean result = false;
             try {
+                //noinspection ResultOfMethodCallIgnored
+                file.createNewFile();
                 mStore.save(new FileOutputStream(file), true);
                 result = true;
             } catch (FileNotFoundException e) {

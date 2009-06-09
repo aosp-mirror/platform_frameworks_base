@@ -287,8 +287,10 @@ public class GestureOverlayView extends FrameLayout {
         path.computeBounds(bounds, true);
 
         mPath.rewind();
-        mPath.addPath(path, (getWidth() - bounds.width()) / 2.0f,
-                (getHeight() - bounds.height()) / 2.0f);
+        mPath.addPath(path, -bounds.left + (getWidth() - bounds.width()) / 2.0f,
+                -bounds.top + (getHeight() - bounds.height()) / 2.0f);
+
+        mResetGesture = true;
 
         invalidate();
     }
@@ -367,10 +369,10 @@ public class GestureOverlayView extends FrameLayout {
     }
 
     public void clear(boolean animated) {
-        clear(animated, false);
+        clear(animated, false, true);
     }
 
-    private void clear(boolean animated, boolean fireActionPerformed) {
+    private void clear(boolean animated, boolean fireActionPerformed, boolean immediate) {
         setPaintAlpha(255);
         removeCallbacks(mFadingOut);
         mResetGesture = false;
@@ -389,15 +391,19 @@ public class GestureOverlayView extends FrameLayout {
             mIsFadingOut = false;
             mFadingHasStarted = false;
 
-            if (fireActionPerformed) {
-                postDelayed(mFadingOut, mFadeOffset);
-            } else if (mHandleGestureActions) {
+            if (immediate) {
                 mCurrentGesture = null;
                 mPath.rewind();
                 invalidate();
+            } else if (fireActionPerformed) {
+                postDelayed(mFadingOut, mFadeOffset);
             } else if (mGestureStrokeType == GESTURE_STROKE_TYPE_MULTIPLE) {
                 mFadingOut.resetMultipleStrokes = true;
                 postDelayed(mFadingOut, mFadeOffset);
+            } else {
+                mCurrentGesture = null;
+                mPath.rewind();
+                invalidate();
             }
         }
     }
@@ -647,7 +653,8 @@ public class GestureOverlayView extends FrameLayout {
                     listeners.get(i).onGestureEnded(this, event);
                 }
 
-                clear(mHandleGestureActions && mFadeEnabled, mHandleGestureActions && mIsGesturing);
+                clear(mHandleGestureActions && mFadeEnabled, mHandleGestureActions && mIsGesturing,
+                        false);
             } else {
                 cancelGesture(event);
 

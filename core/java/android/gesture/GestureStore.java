@@ -206,6 +206,10 @@ public class GestureStore {
         }
     }
 
+    public boolean hasChanged() {
+        return mChanged;
+    }
+
     /**
      * Save the gesture library
      */
@@ -214,10 +218,6 @@ public class GestureStore {
     }
 
     public void save(OutputStream stream, boolean closeStream) throws IOException {
-        if (!mChanged) {
-            return;
-        }
-
         DataOutputStream out = null;
 
         try {
