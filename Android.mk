@@ -228,7 +228,7 @@ aidl_files := \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
-	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl
+	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl \
 	frameworks/base/vpn/java/android/net/vpn/IVpnService.aidl \
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
