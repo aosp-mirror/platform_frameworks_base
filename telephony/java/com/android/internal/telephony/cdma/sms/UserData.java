@@ -40,12 +40,26 @@ public class UserData {
     public static final int ENCODING_GSM_DCS                    = 0x0A;
 
     /**
+     * IS-91 message types.
+     * (See TIA/EIS/IS-91-A-ENGL 1999, table 3.7.1.1-3)
+     */
+    public static final int IS91_MSG_TYPE_VOICEMAIL_STATUS   = 0x82;
+    public static final int IS91_MSG_TYPE_SHORT_MESSAGE_FULL = 0x83;
+    public static final int IS91_MSG_TYPE_CLI                = 0x84;
+    public static final int IS91_MSG_TYPE_SHORT_MESSAGE      = 0x85;
+
+    /**
      * IA5 data encoding character mappings.
      * (See CCITT Rec. T.50 Tables 1 and 3)
      *
      * Note this mapping is the the same as for printable ASCII
      * characters, with a 0x20 offset, meaning that the ASCII SPACE
      * character occurs with code 0x20.
+     *
+     * Note this mapping is also equivalent to that used by the IS-91
+     * protocol, except for the latter using only 6 bits, and hence
+     * mapping only entries up to the '_' character.
+     *
      */
     public static final char[] IA5_MAP = {
         ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
@@ -96,7 +110,6 @@ public class UserData {
     public int msgEncoding;
     public boolean msgEncodingSet = false;
 
-    // XXX needed when encoding is IS91 or DCS (not supported yet):
     public int msgType;
 
     /**
