@@ -1611,6 +1611,9 @@ public class Im {
         /** specifies whether or not to show mobile indicator to friends */
         public static final String SETTING_SHOW_MOBILE_INDICATOR = "mobile_indicator";
 
+        /** specifies whether or not to show as away when device is idle */
+        public static final String SETTING_SHOW_AWAY_ON_IDLE = "show_away_on_idle";
+
         /**
          * Used for reliable message queue (RMQ). This is for storing the last rmq id received
          * from the GTalk server
@@ -1819,6 +1822,17 @@ public class Im {
                     showMobileIndicator);
         }
 
+        /**
+         * A convenience method to set whether or not to show as away when device is idle.
+         *
+         * @param contentResolver The ContentResolver to use to access the setting table.
+         * @param showAway Whether or not to show as away when device is idle.
+         */
+        public static void setShowAwayOnIdle(ContentResolver contentResolver,
+                long providerId, boolean showAway) {
+            putBooleanValue(contentResolver, providerId, SETTING_SHOW_AWAY_ON_IDLE, showAway);
+        }
+
         public static class QueryMap extends ContentQueryMap {
             private ContentResolver mContentResolver;
             private long mProviderId;
@@ -1946,6 +1960,25 @@ public class Im {
             public boolean getShowMobileIndicator() {
                 return getBoolean(SETTING_SHOW_MOBILE_INDICATOR,
                         true /* by default show mobile indicator */);
+            }
+
+            /**
+             * Set whether or not to show as away when device is idle.
+             *
+             * @param showAway whether or not to show as away when device is idle.
+             */
+            public void setShowAwayOnIdle(boolean showAway) {
+                ProviderSettings.setShowAwayOnIdle(mContentResolver, mProviderId, showAway);
+            }
+
+            /**
+             * Get whether or not to show as away when device is idle.
+             *
+             * @return Whether or not to show as away when device is idle.
+             */
+            public boolean getShowAwayOnIdle() {
+                return getBoolean(SETTING_SHOW_AWAY_ON_IDLE,
+                        true /* by default show as away on idle*/);
             }
 
             /**
