@@ -60,7 +60,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     
     /**
      * The kind of keyboard attached to the device.
-     * One of: {@link #KEYBOARD_QWERTY}, {@link #KEYBOARD_12KEY}.
+     * One of: {@link #KEYBOARD_NOKEYS}, {@link #KEYBOARD_QWERTY},
+     * {@link #KEYBOARD_12KEY}.
      */
     public int keyboard;
     
@@ -99,8 +100,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     
     /**
      * The kind of navigation method available on the device.
-     * One of: {@link #NAVIGATION_DPAD}, {@link #NAVIGATION_TRACKBALL}, 
-     * {@link #NAVIGATION_WHEEL}. 
+     * One of: {@link #NAVIGATION_NONAV}, {@link #NAVIGATION_DPAD},
+     * {@link #NAVIGATION_TRACKBALL}, {@link #NAVIGATION_WHEEL}.
      */
     public int navigation;
     
