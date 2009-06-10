@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.fountain;
+package android.renderscript;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -167,6 +167,10 @@ public class RenderScript {
     private class BaseObj {
         BaseObj() {
             mID = 0;
+        }
+
+        public int getID() {
+            return mID;
         }
 
         int mID;

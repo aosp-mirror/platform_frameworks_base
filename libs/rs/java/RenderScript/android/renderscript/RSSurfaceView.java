@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.fountain;
+package android.renderscript;
 
 import java.io.Writer;
 import java.util.ArrayList;
