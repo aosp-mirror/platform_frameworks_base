@@ -118,12 +118,16 @@ static bool initializeNativeDataNative(JNIEnv* env, jobject object) {
 }
 
 static const char *get_adapter_path(JNIEnv* env, jobject object) {
+#ifdef HAVE_BLUETOOTH
     event_loop_native_data_t *event_nat =
         get_EventLoop_native_data(env, env->GetObjectField(object,
                                                            field_mEventLoop));
     if (event_nat == NULL)
         return NULL;
     return event_nat->adapter;
+#else
+    return NULL;
+#endif
 }
 
 // This function is called when the adapter is enabled.
