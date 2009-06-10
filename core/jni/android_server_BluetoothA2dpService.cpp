@@ -182,8 +182,8 @@ static jboolean disconnectSinkNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
-DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
 #ifdef HAVE_BLUETOOTH
+DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
     DBusError err;
 
     if (!nat) {
