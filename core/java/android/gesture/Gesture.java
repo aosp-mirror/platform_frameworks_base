@@ -216,15 +216,14 @@ public class Gesture implements Parcelable {
      * 
      * @param width
      * @param height
-     * @param edge
+     * @param inset
      * @param color
      * @return the bitmap
      */
-    public Bitmap toBitmap(int width, int height, int edge, int color) {
-        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    public Bitmap toBitmap(int width, int height, int inset, int color) {
+        final Bitmap bitmap = Bitmap.createBitmap(width, height,
+                Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(bitmap);
-
-        canvas.translate(edge, edge);
 
         final Paint paint = new Paint();
         paint.setAntiAlias(BITMAP_RENDERING_ANTIALIAS);
@@ -235,12 +234,22 @@ public class Gesture implements Parcelable {
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(BITMAP_RENDERING_WIDTH);
 
-        final ArrayList<GestureStroke> strokes = mStrokes;
-        final int count = strokes.size();
+        final Path path = toPath();
+        final RectF bounds = new RectF();
+        path.computeBounds(bounds, true);
 
-        for (int i = 0; i < count; i++) {
-            strokes.get(i).draw(canvas, paint);
-        }
+        final float sx = (width - 2 * inset) / bounds.width();
+        final float sy = (height - 2 * inset) / bounds.height();
+        final float scale = sx > sy ? sy : sx;
+        paint.setStrokeWidth(2.0f / scale);
+
+        path.offset(-bounds.left + (width - bounds.width() * scale) / 2.0f,
+                -bounds.top + (height - bounds.height() * scale) / 2.0f);
+
+        canvas.translate(inset, inset);
+        canvas.scale(scale, scale);
+
+        canvas.drawPath(path, paint);
 
         return bitmap;
     }
