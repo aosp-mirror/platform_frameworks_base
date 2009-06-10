@@ -544,6 +544,8 @@ final class WebViewCore {
             "WEBKIT_DRAW", // = 130;
             "SYNC_SCROLL", // = 131;
             "REFRESH_PLUGINS", // = 132;
+            // this will replace REFRESH_PLUGINS in the next release
+            "POST_URL", // = 142;
             "SPLIT_PICTURE_SET", // = 133;
             "CLEAR_CONTENT", // = 134;
             "SET_FINAL_FOCUS", // = 135;
@@ -589,6 +591,8 @@ final class WebViewCore {
         static final int WEBKIT_DRAW = 130;
         static final int SYNC_SCROLL = 131;
         static final int REFRESH_PLUGINS = 132;
+        // this will replace REFRESH_PLUGINS in the next release
+        static final int POST_URL = 142;
         static final int SPLIT_PICTURE_SET = 133;
         static final int CLEAR_CONTENT = 134;
         
@@ -672,6 +676,13 @@ final class WebViewCore {
                             loadUrl((String) msg.obj);
                             break;
 
+                        case POST_URL: {
+                            HashMap param = (HashMap) msg.obj;
+                            String url = (String) param.get("url");
+                            byte[] data = (byte[]) param.get("data");
+                            mBrowserFrame.postUrl(url, data);
+                            break;
+                        }
                         case LOAD_DATA:
                             HashMap loadParams = (HashMap) msg.obj;
                             String baseUrl = (String) loadParams.get("baseUrl");

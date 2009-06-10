@@ -1118,6 +1118,29 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Load the url with postData using "POST" method into the WebView. If url
+     * is not a network url, it will be loaded with {link
+     * {@link #loadUrl(String)} instead.
+     * 
+     * @param url The url of the resource to load.
+     * @param postData The data will be passed to "POST" request.
+     * 
+     * @hide pending API solidification
+     */
+    public void postUrl(String url, byte[] postData) {
+        if (URLUtil.isNetworkUrl(url)) {
+            switchOutDrawHistory();
+            HashMap arg = new HashMap();
+            arg.put("url", url);
+            arg.put("data", postData);
+            mWebViewCore.sendMessage(EventHub.POST_URL, arg);
+            clearTextEntry();
+        } else {
+            loadUrl(url);
+        }
+    }
+
+    /**
      * Load the given data into the WebView. This will load the data into
      * WebView using the data: scheme. Content loaded through this mechanism
      * does not have the ability to load content from the network.
