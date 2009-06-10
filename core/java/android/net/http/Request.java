@@ -260,6 +260,8 @@ class Request {
             // process gzip content encoding
             Header contentEncoding = entity.getContentEncoding();
             InputStream nis = null;
+            byte[] buf = null;
+            int count = 0;
             try {
                 if (contentEncoding != null &&
                     contentEncoding.getValue().equals("gzip")) {
@@ -270,9 +272,8 @@ class Request {
 
                 /* accumulate enough data to make it worth pushing it
                  * up the stack */
-                byte[] buf = mConnection.getBuf();
+                buf = mConnection.getBuf();
                 int len = 0;
-                int count = 0;
                 int lowWater = buf.length / 2;
                 while (len != -1) {
                     len = nis.read(buf, count, buf.length - count);
@@ -289,6 +290,10 @@ class Request {
                 /* InflaterInputStream throws an EOFException when the
                    server truncates gzipped content.  Handle this case
                    as we do truncated non-gzipped content: no error */
+                if (count > 0) {
+                    // if there is uncommited content, we should commit them
+                    mEventHandler.data(buf, count);
+                }
                 if (HttpLog.LOGV) HttpLog.v( "readResponse() handling " + e);
             } catch(IOException e) {
                 // don't throw if we have a non-OK status code
