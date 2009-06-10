@@ -177,7 +177,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             // leaving touch mode.. if nothing has focus, let's give it to
             // the indicator of the current tab
             if (!mCurrentView.hasFocus() || mCurrentView.isFocused()) {
-                mTabWidget.getChildAt(mCurrentTab).requestFocus();
+                mTabWidget.getChildTabViewAt(mCurrentTab).requestFocus();
             }
         }
     }
@@ -197,6 +197,12 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
         View tabIndicator = tabSpec.mIndicatorStrategy.createIndicatorView();
         tabIndicator.setOnKeyListener(mTabKeyListener);
+
+        // If this is a custom view, then do not draw the bottom strips for
+        // the tab indicators.
+        if (tabSpec.mIndicatorStrategy instanceof ViewIndicatorStrategy) {
+            mTabWidget.setDrawBottomStrips(false);
+        }
         mTabWidget.addView(tabIndicator);
         mTabSpecs.add(tabSpec);
 
@@ -235,7 +241,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
 
     public View getCurrentTabView() {
         if (mCurrentTab >= 0 && mCurrentTab < mTabSpecs.size()) {
-            return mTabWidget.getChildAt(mCurrentTab);
+            return mTabWidget.getChildTabViewAt(mCurrentTab);
         }
         return null;
     }
@@ -273,7 +279,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
                 && (mCurrentView.isRootNamespace())
                 && (mCurrentView.hasFocus())
                 && (mCurrentView.findFocus().focusSearch(View.FOCUS_UP) == null)) {
-            mTabWidget.getChildAt(mCurrentTab).requestFocus();
+            mTabWidget.getChildTabViewAt(mCurrentTab).requestFocus();
             playSoundEffect(SoundEffectConstants.NAVIGATION_UP);
             return true;
         }
@@ -411,6 +417,14 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
 
         /**
+         * Specify a view as the tab indicator.
+         */
+        public TabSpec setIndicator(View view) {
+            mIndicatorStrategy = new ViewIndicatorStrategy(view);
+            return this;
+        }
+
+        /**
          * Specify the id of the view that should be used as the content
          * of the tab.
          */
@@ -437,7 +451,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
 
 
-        String getTag() {
+        public String getTag() {
             return mTag;
         }
     }
@@ -522,6 +536,22 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             iconView.setImageDrawable(mIcon);
 
             return tabIndicator;
+        }
+    }
+
+    /**
+     * How to create a tab indicator by specifying a view.
+     */
+    private class ViewIndicatorStrategy implements IndicatorStrategy {
+
+        private final View mView;
+
+        private ViewIndicatorStrategy(View view) {
+            mView = view;
+        }
+
+        public View createIndicatorView() {
+            return mView;
         }
     }
 
