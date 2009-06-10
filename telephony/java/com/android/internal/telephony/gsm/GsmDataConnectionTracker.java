@@ -487,7 +487,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 (isApnTypeActive(Phone.APN_TYPE_SUPL) && isEnabled(Phone.APN_TYPE_SUPL))) {
                 return false;
             }
-            cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+            Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
+            msg.arg1 = 1; // tearDown is true
+            msg.obj = Phone.REASON_DATA_DISABLED;
+            sendMessage(msg);
             return true;
         } else {
             // isEnabled && enable
