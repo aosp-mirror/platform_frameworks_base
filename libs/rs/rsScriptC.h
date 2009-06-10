@@ -74,7 +74,7 @@ public:
     Vector<const Type *> mConstantBufferTypes;
 
     void clear();
-    void runCompiler();
+    void runCompiler(Context *rsc);
 };
 
 

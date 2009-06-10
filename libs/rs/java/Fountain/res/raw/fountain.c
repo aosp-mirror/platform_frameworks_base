@@ -3,8 +3,8 @@
 #pragma version(1)
 #pragma stateVertex(orthoWindow)
 #pragma stateRaster(flat)
-#pragma stateFragment(color)
-#pragma stateStore(parent)
+#pragma stateFragment(PgmFragBackground)
+#pragma stateFragmentStore(MyBlend)
 
 
 int main(void* con, int ft, int launchID) {
@@ -35,7 +35,7 @@ int main(void* con, int ft, int launchID) {
         }
     }
 
-    contextBindProgramFragment(con, loadI32(con, 0, 7));
+    //contextBindProgramFragment(con, loadI32(con, 0, 7));
     drawRect(con, 0, 256, 0, 512);
     contextBindProgramFragment(con, loadI32(con, 0, 6));
 

@@ -97,7 +97,6 @@ RsProgramVertex rsi_ProgramVertexCreate(Context *rsc)
     ProgramVertex *pv = rsc->mStateVertex.mPV;
     pv->incRef();
     rsc->mStateVertex.mPV = 0;
-
     return pv;
 }
 

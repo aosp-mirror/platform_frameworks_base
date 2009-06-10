@@ -68,6 +68,8 @@ public class RenderScript {
     native private void nContextBindProgramFragmentStore(int pfs);
     native private void nContextBindProgramFragment(int pf);
 
+    native private void nAssignName(int obj, byte[] name);
+
     native private void nElementBegin();
     native private void nElementAddPredefined(int predef);
     native private void nElementAdd(int kind, int type, int norm, int bits);
@@ -135,6 +137,7 @@ public class RenderScript {
     native private void nProgramFragmentStoreBlendFunc(int src, int dst);
     native private void nProgramFragmentStoreDither(boolean enable);
     native private int  nProgramFragmentStoreCreate();
+    native private void nProgramFragmentStoreDestroy(int pgm);
 
     native private void nProgramFragmentBegin(int in, int out);
     native private void nProgramFragmentBindTexture(int vpf, int slot, int a);
@@ -143,6 +146,7 @@ public class RenderScript {
     native private void nProgramFragmentSetEnvMode(int slot, int env);
     native private void nProgramFragmentSetTexEnable(int slot, boolean enable);
     native private int  nProgramFragmentCreate();
+    native private void nProgramFragmentDestroy(int pgm);
 
 
     private int     mDev;
@@ -166,6 +170,26 @@ public class RenderScript {
         }
 
         int mID;
+        String mName;
+
+        public void setName(String s) throws IllegalStateException, IllegalArgumentException
+        {
+            if(s.length() < 1) {
+                throw new IllegalArgumentException("setName does not accept a zero length string.");
+            }
+            if(mName != null) {
+                throw new IllegalArgumentException("setName object already has a name.");
+            }
+
+            try {
+                byte[] bytes = s.getBytes("UTF-8");
+                nAssignName(mID, bytes);
+                mName = s;
+            } catch (java.io.UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         protected void finalize() throws Throwable
         {
             if (mID != 0) {
@@ -661,7 +685,7 @@ public class RenderScript {
         }
 
         public void destroy() {
-            nScriptDestroy(mID);
+            nProgramFragmentStoreDestroy(mID);
             mID = 0;
         }
     }
@@ -712,7 +736,7 @@ public class RenderScript {
         }
 
         public void destroy() {
-            nScriptDestroy(mID);
+            nProgramFragmentDestroy(mID);
             mID = 0;
         }
 
