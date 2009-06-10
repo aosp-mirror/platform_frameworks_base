@@ -12190,11 +12190,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         "Setting process group of " + app.processName
                         + " to " + app.curSchedGroup);
                 if (true) {
+                    long oldId = Binder.clearCallingIdentity();
                     try {
                         Process.setProcessGroup(app.pid, app.curSchedGroup);
                     } catch (Exception e) {
                         Log.w(TAG, "Failed setting process group of " + app.pid
                                 + " to " + app.curSchedGroup);
+                        e.printStackTrace();
+                    } finally {
+                        Binder.restoreCallingIdentity(oldId);
                     }
                 }
                 if (false) {
