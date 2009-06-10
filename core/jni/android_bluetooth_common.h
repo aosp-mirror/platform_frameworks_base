@@ -68,6 +68,7 @@ jfieldID get_field(JNIEnv *env,
 
 struct event_loop_native_data_t {
     DBusConnection *conn;
+    const char *adapter;
 
     /* protects the thread */
     pthread_mutex_t thread_mutex;
@@ -88,6 +89,12 @@ struct event_loop_native_data_t {
     /* reference to our java self */
     jobject me;
 };
+
+struct _Properties {
+    char name[32];
+    int type;
+};
+typedef struct _Properties Properties;
 
 dbus_bool_t dbus_func_args_async(JNIEnv *env,
                                  DBusConnection *conn,
@@ -142,8 +149,18 @@ jint dbus_returns_uint32(JNIEnv *env, DBusMessage *reply);
 jstring dbus_returns_string(JNIEnv *env, DBusMessage *reply);
 jboolean dbus_returns_boolean(JNIEnv *env, DBusMessage *reply);
 jobjectArray dbus_returns_array_of_strings(JNIEnv *env, DBusMessage *reply);
+jobjectArray dbus_returns_array_of_object_path(JNIEnv *env, DBusMessage *reply);
 jbyteArray dbus_returns_array_of_bytes(JNIEnv *env, DBusMessage *reply);
 
+jobjectArray parse_properties(JNIEnv *env, DBusMessageIter *iter, Properties *properties,
+                              const int max_num_properties);
+jobjectArray parse_property_change(JNIEnv *env, DBusMessage *msg,
+                                   Properties *properties, int max_num_properties);
+jobjectArray parse_adapter_properties(JNIEnv *env, DBusMessageIter *iter);
+jobjectArray parse_remote_device_properties(JNIEnv *env, DBusMessageIter *iter);
+jobjectArray parse_remote_device_property_change(JNIEnv *env, DBusMessage *msg);
+jobjectArray parse_adapter_property_change(JNIEnv *env, DBusMessage *msg);
+void append_variant(DBusMessageIter *iter, int type, void *val);
 int get_bdaddr(const char *str, bdaddr_t *ba);
 void get_bdaddr_as_string(const bdaddr_t *ba, char *str);
 

@@ -51,8 +51,7 @@ ifeq ($(BOARD_HAVE_BLUETOOTH),true)
   LOCAL_SRC_FILES += A2dpAudioInterface.cpp
   LOCAL_SHARED_LIBRARIES += liba2dp
   LOCAL_CFLAGS += -DWITH_BLUETOOTH -DWITH_A2DP
-  LOCAL_C_INCLUDES += $(call include-path-for, bluez-libs)
-  LOCAL_C_INCLUDES += $(call include-path-for, bluez-utils)
+  LOCAL_C_INCLUDES += $(call include-path-for, bluez)
 endif
 
 include $(BUILD_SHARED_LIBRARY)

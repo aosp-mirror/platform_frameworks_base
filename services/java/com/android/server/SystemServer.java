@@ -173,7 +173,7 @@ class ServerThread extends Thread {
                 bluetooth = new BluetoothDeviceService(context);
                 bluetooth.init();
                 ServiceManager.addService(Context.BLUETOOTH_SERVICE, bluetooth);
-                bluetoothA2dp = new BluetoothA2dpService(context);
+                bluetoothA2dp = new BluetoothA2dpService(context, bluetooth);
                 ServiceManager.addService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE,
                                           bluetoothA2dp);
 
@@ -414,19 +414,19 @@ public class SystemServer
     public static final int FACTORY_TEST_OFF = 0;
     public static final int FACTORY_TEST_LOW_LEVEL = 1;
     public static final int FACTORY_TEST_HIGH_LEVEL = 2;
-    
-    /** 
-     * This method is called from Zygote to initialize the system. This will cause the native 
+
+    /**
+     * This method is called from Zygote to initialize the system. This will cause the native
      * services (SurfaceFlinger, AudioFlinger, etc..) to be started. After that it will call back
      * up into init2() to start the Android services.
-     */ 
+     */
     native public static void init1(String[] args);
 
     public static void main(String[] args) {
         // The system server has to run all of the time, so it needs to be
         // as efficient as possible with its memory usage.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
-        
+
         System.loadLibrary("android_servers");
         init1(args);
     }
