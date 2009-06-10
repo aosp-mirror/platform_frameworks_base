@@ -460,7 +460,9 @@ public class Notification implements Parcelable
                 sb.append(this.vibrate[i]);
                 sb.append(',');
             }
-            sb.append(this.vibrate[N]);
+	    if (N != -1) {
+        	sb.append(this.vibrate[N]);
+	    }
             sb.append("]");
         } else if ((this.defaults & DEFAULT_VIBRATE) != 0) {
             sb.append("default");
