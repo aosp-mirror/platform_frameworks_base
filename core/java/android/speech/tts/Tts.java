@@ -15,8 +15,8 @@
  */
 package android.speech.tts;
 
-import android.tts.ITts;
-import android.tts.ITtsCallback;
+import android.speech.tts.ITts;
+import android.speech.tts.ITtsCallback;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,7 +29,6 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * @hide
  *
  * Synthesizes speech from text. This abstracts away the complexities of using
  * the TTS service such as setting up the IBinder connection and handling
@@ -39,8 +38,10 @@ import android.util.Log;
  * necessary TTS apk installed, the behavior is that all calls to the TTS act as
  * no-ops.
  *
+ * {@hide}
  */
 //FIXME #TTS# review + complete javadoc
+//FIXME RENAME TO TextToSpeech.java
 public class Tts {
 
 

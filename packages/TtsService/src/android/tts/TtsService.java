@@ -15,7 +15,8 @@
  */
 package android.tts;
 
-import android.tts.ITts.Stub;
+import android.speech.tts.ITts.Stub;
+import android.speech.tts.ITtsCallback;
 
 import android.app.Service;
 import android.content.Context;
@@ -91,7 +92,7 @@ public class TtsService extends Service implements OnCompletionListener {
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
 
-    final RemoteCallbackList<ITtsCallback> mCallbacks = new RemoteCallbackList<ITtsCallback>();
+    final RemoteCallbackList<android.speech.tts.ITtsCallback> mCallbacks = new RemoteCallbackList<ITtsCallback>();
 
     private Boolean mIsSpeaking;
     private ArrayList<SpeechItem> mSpeechQueue;
@@ -537,7 +538,7 @@ public class TtsService extends Service implements OnCompletionListener {
         return null;
     }
 
-    private final ITts.Stub mBinder = new Stub() {
+    private final android.speech.tts.ITts.Stub mBinder = new Stub() {
 
         public void registerCallback(ITtsCallback cb) {
             if (cb != null)
