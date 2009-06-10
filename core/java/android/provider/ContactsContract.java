@@ -199,6 +199,31 @@ public final class ContactsContract {
              */
             public static final String CONTENT_DIRECTORY = "data";
         }
+
+        /**
+         * A sub-directory of a single contact aggregate that contains all aggregation suggestions
+         * (other aggregates).  The aggregation suggestions are computed based on approximate
+         * data matches with this aggregate.
+         */
+        public static final class AggregationSuggestions implements BaseColumns, AggregatesColumns {
+            /**
+             * No public constructor since this is a utility class
+             */
+            private AggregationSuggestions() {}
+
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "suggestions";
+
+            /**
+             * An optional query parameter that can be supplied to limit the number of returned
+             * suggestions.
+             * <p>
+             * Type: INTEGER
+             */
+            public static final String MAX_SUGGESTIONS = "max_suggestions";
+        }
     }
 
 
@@ -824,7 +849,8 @@ public final class ContactsContract {
         public static final class CustomRingtone implements BaseCommonColumns {
             private CustomRingtone() {}
 
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/custom_ringtone";
+            public static final String CONTENT_ITEM_TYPE =
+                    "vnd.android.cursor.item/custom_ringtone";
 
             /**
              * Whether to send the number to voicemail.
@@ -871,7 +897,7 @@ public final class ContactsContract {
      * Constants for the contact aggregation exceptions table, which contains
      * aggregation rules overriding those used by automatic aggregation.
      */
-    public static final class AggregationExceptions {
+    public static final class AggregationExceptions implements BaseColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -887,6 +913,12 @@ public final class ContactsContract {
          * The MIME type of {@link #CONTENT_URI} providing a directory of data.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/aggregation_exception";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of an aggregation exception
+         */
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/aggregation_exception";
 
         /**
          * The type of exception: {@link #TYPE_NEVER_MATCH} or {@link #TYPE_ALWAYS_MATCH}.
