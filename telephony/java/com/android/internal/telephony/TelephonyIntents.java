@@ -51,7 +51,7 @@ public class TelephonyIntents {
      * <p class="note">
      * Requires no permission.
      */
-    public static final String ACTION_RADIO_TECHNOLOGY_CHANGED 
+    public static final String ACTION_RADIO_TECHNOLOGY_CHANGED
             = "android.intent.action.RADIO_TECHNOLOGY";
     /**
      * <p>Broadcast Action: The emergency callback mode is changed.

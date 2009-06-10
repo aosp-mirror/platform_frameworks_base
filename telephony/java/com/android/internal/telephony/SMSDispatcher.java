@@ -116,7 +116,7 @@ public abstract class SMSDispatcher extends Handler {
     /** Maximum number of times to retry sending a failed SMS. */
     private static final int MAX_SEND_RETRIES = 3;
     /** Delay before next send attempt on a failed SMS, in milliseconds. */
-    private static final int SEND_RETRY_DELAY = 2000; 
+    private static final int SEND_RETRY_DELAY = 2000;
     /** single part SMS */
     private static final int SINGLE_PART_SMS = 1;
 
@@ -173,11 +173,11 @@ public abstract class SMSDispatcher extends Handler {
 
         /**
          * Check to see if an application allow to send new SMS messages
-         *  
+         *
          * @param appName is the application sending sms
          * @param smsWaiting is the number of new sms wants to be sent
-         * @return true if application is allowed to send the requested number 
-         *         of new sms messages 
+         * @return true if application is allowed to send the requested number
+         *         of new sms messages
          */
         boolean check(String appName, int smsWaiting) {
             if (!mSmsStamp.containsKey(appName)) {
@@ -196,7 +196,7 @@ public abstract class SMSDispatcher extends Handler {
                     sent.remove(0);
             }
 
-            
+
             if ( (sent.size() + smsWaiting) <= mMaxAllowed) {
                 for (int i = 0; i < smsWaiting; i++ ) {
                     sent.add(ct);
@@ -332,7 +332,7 @@ public abstract class SMSDispatcher extends Handler {
                     sendMultipartSms(mSTracker);
                 } else {
                     sendSms(mSTracker);
-                } 
+                }
                 mSTracker = null;
             }
             break;
@@ -712,7 +712,7 @@ public abstract class SMSDispatcher extends Handler {
 
     /**
      * Send the multi-part SMS based on multipart Sms tracker
-     * 
+     *
      * @param tracker holds the multipart Sms tracker ready to be sent
      */
     protected abstract void sendMultipartSms (SmsTracker tracker);
@@ -759,7 +759,7 @@ public abstract class SMSDispatcher extends Handler {
 
     /**
      * Check if a SmsTracker holds multi-part Sms
-     * 
+     *
      * @param tracker a SmsTracker could hold a multi-part Sms
      * @return true for tracker holds Multi-parts Sms
      */
@@ -790,7 +790,7 @@ public abstract class SMSDispatcher extends Handler {
             mRetryCount = 0;
         }
     }
-    
+
     protected SmsTracker SmsTrackerFactory(HashMap data, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
         return new SmsTracker(data, sentIntent, deliveryIntent);

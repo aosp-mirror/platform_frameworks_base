@@ -254,7 +254,7 @@ public final class EriManager {
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText0).toString());
             break;
-        
+
         case EriInfo.ROAMING_INDICATOR_OFF:
             ret = new EriDisplayInformation(
                     EriInfo.ROAMING_INDICATOR_OFF,
@@ -284,56 +284,56 @@ public final class EriManager {
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText4).toString());
             break;
-        
+
         case 5:
             ret = new EriDisplayInformation(
                     roamInd,
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText5).toString());
             break;
-        
+
         case 6:
             ret = new EriDisplayInformation(
                     roamInd,
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText6).toString());
             break;
-        
+
         case 7:
             ret = new EriDisplayInformation(
                     roamInd,
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText7).toString());
             break;
-        
+
         case 8:
             ret = new EriDisplayInformation(
                     roamInd,
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText8).toString());
             break;
-        
+
         case 9:
             ret = new EriDisplayInformation(
                     roamInd,
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText9).toString());
             break;
-        
+
         case 10:
             ret = new EriDisplayInformation(
                     roamInd,
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText10).toString());
             break;
-        
+
         case 11:
             ret = new EriDisplayInformation(
                     roamInd,
                     EriInfo.ROAMING_ICON_MODE_NORMAL,
                     mContext.getText(com.android.internal.R.string.roamingText11).toString());
             break;
-        
+
         case 12:
             ret = new EriDisplayInformation(
                     roamInd,
@@ -363,7 +363,7 @@ public final class EriManager {
                                 mContext.getText(com.android.internal
                                                             .R.string.roamingText0).toString());
                         break;
-                    
+
                     case EriInfo.ROAMING_INDICATOR_OFF:
                         ret = new EriDisplayInformation(
                                 EriInfo.ROAMING_INDICATOR_OFF,
@@ -371,7 +371,7 @@ public final class EriManager {
                                 mContext.getText(com.android.internal
                                                             .R.string.roamingText1).toString());
                         break;
-                    
+
                     case EriInfo.ROAMING_INDICATOR_FLASH:
                         ret = new EriDisplayInformation(
                                 EriInfo.ROAMING_INDICATOR_FLASH,
@@ -379,7 +379,7 @@ public final class EriManager {
                                 mContext.getText(com.android.internal
                                                             .R.string.roamingText2).toString());
                         break;
-                        
+
                     default:
                         ret = new EriDisplayInformation(-1, -1, "ERI text");
                     }
