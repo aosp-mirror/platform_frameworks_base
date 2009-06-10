@@ -304,7 +304,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
         } else if (!enable) {
             setEnabled(EXTERNAL_NETWORK_DEFAULT_ID, false);
-            cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+            Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
+            msg.arg1 = 1; // tearDown is true
+            msg.obj = Phone.REASON_DATA_DISABLED;
+            sendMessage(msg);
         }
         return true;
     }
