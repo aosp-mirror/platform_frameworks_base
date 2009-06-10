@@ -1516,8 +1516,9 @@ status_t ResourceTable::addEntry(const SourcePos& sourcePos,
                String8(value).string());
     }
 #endif
-    
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params, doSetIndex);
+
+    sp<Entry> e = getEntry(package, type, name, sourcePos, overwrite,
+                           params, doSetIndex);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -1560,8 +1561,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                         String8(name).string());
         return UNKNOWN_ERROR;
     }
-
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params);
+    sp<Entry> e = getEntry(package, type, name, sourcePos, overlay, params);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -1615,8 +1615,7 @@ status_t ResourceTable::addBag(const SourcePos& sourcePos,
                sourcePos.file.striing(), sourcePos.line, String8(type).string());
     }
 #endif
-    
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params);
+    sp<Entry> e = getEntry(package, type, name, sourcePos, replace, params);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -2899,7 +2898,7 @@ status_t ResourceTable::Entry::setItem(const SourcePos& sourcePos,
                         mItem.sourcePos.file.string(), mItem.sourcePos.line);
         return UNKNOWN_ERROR;
     }
-    
+
     mType = TYPE_ITEM;
     mItem = item;
     mItemFormat = format;
@@ -3219,11 +3218,17 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
 sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                                                        const SourcePos& sourcePos,
                                                        const ResTable_config* config,
-                                                       bool doSetIndex)
+                                                       bool doSetIndex,
+                                                       bool overlay)
 {
     int pos = -1;
     sp<ConfigList> c = mConfigs.valueFor(entry);
     if (c == NULL) {
+        if (overlay == true) {
+            sourcePos.error("Resource %s appears in overlay but not"
+                            " in the base package.\n", String8(entry).string());
+            return NULL;
+        }
         c = new ConfigList(entry, sourcePos);
         mConfigs.add(entry, c);
         pos = (int)mOrderedConfigs.size();
@@ -3522,6 +3527,7 @@ sp<ResourceTable::Entry> ResourceTable::getEntry(const String16& package,
                                                  const String16& type,
                                                  const String16& name,
                                                  const SourcePos& sourcePos,
+                                                 bool overlay,
                                                  const ResTable_config* config,
                                                  bool doSetIndex)
 {
@@ -3529,7 +3535,7 @@ sp<ResourceTable::Entry> ResourceTable::getEntry(const String16& package,
     if (t == NULL) {
         return NULL;
     }
-    return t->getEntry(name, sourcePos, config, doSetIndex);
+    return t->getEntry(name, sourcePos, config, doSetIndex, overlay);
 }
 
 sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,
