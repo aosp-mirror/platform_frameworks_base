@@ -145,6 +145,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_ALLOW_BACKUP = 1<<10;
     
     /**
+     * Indicates that the application supports any densities;
+     * {@hide}
+     */
+    public static final int ANY_DENSITY = -1;
+    private static final int[] ANY_DENSITIES_ARRAY = { ANY_DENSITY };
+
+    /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and
@@ -368,5 +375,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
         }
         return null;
+    }
+
+    /**
+     * Disable compatibility mode
+     * 
+     * @hide
+     */
+    public void disableCompatibilityMode() {
+        expandable = true;
+        supportsDensities = ANY_DENSITIES_ARRAY;
     }
 }

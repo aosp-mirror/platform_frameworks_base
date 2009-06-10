@@ -1025,6 +1025,14 @@ public final class Settings {
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
         /**
+         * If 0, the compatibility mode is off for all applications.
+         * If 1, older applications run under compatibility mode.
+         * TODO: remove this settings before code freeze (bug/1907571)
+         * @hide
+         */
+        public static final String COMPATIBILITY_MODE = "compatibility_mode";
+
+        /**
          * The screen backlight brightness between 0 and 255.
          */
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";

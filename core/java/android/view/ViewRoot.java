@@ -132,7 +132,6 @@ public final class ViewRoot extends Handler implements ViewParent,
     boolean mIsAnimating;
     
     private CompatibilityInfo mCompatibilityInfo;
-    private int[] mWindowLayoutParamsBackup = null;
 
     final View.AttachInfo mAttachInfo;
 
@@ -395,10 +394,11 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (mView == null) {
                 mView = view;
                 mWindowAttributes.copyFrom(attrs);
-                mCompatibilityInfo =
-                        mView.getContext().getResources().getCompatibilityInfo();
-                if (mCompatibilityInfo.mScalingRequired) {
-                    mWindowLayoutParamsBackup = new int[4];
+                mCompatibilityInfo = mView.getContext().getResources().getCompatibilityInfo();
+                boolean restore = false;
+                if (mCompatibilityInfo.mScalingRequired || !mCompatibilityInfo.mExpandable) {
+                    restore = true;
+                    mWindowAttributes.backup();
                 }
                 if (!mCompatibilityInfo.mExpandable) {
                     adjustWindowAttributesForCompatibleMode(mWindowAttributes);
@@ -427,6 +427,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                     unscheduleTraversals();
                     throw new RuntimeException("Adding window failed", e);
                 }
+
+                if (restore) {
+                    mWindowAttributes.restore();
+                }
+
                 if (mCompatibilityInfo.mScalingRequired) {
                     mAttachInfo.mContentInsets.scale(
                             mCompatibilityInfo.mApplicationInvertedScale);
@@ -1944,9 +1949,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         } else {
             didFinish = false;
         }
-        if (event != null && mCompatibilityInfo.mScalingRequired) {
-            event.scale(mCompatibilityInfo.mApplicationInvertedScale);
-        }
 
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
 
@@ -2378,13 +2380,15 @@ public final class ViewRoot extends Handler implements ViewParent,
         boolean restore = false;
         float appScale = mCompatibilityInfo.mApplicationScale;
         boolean scalingRequired = mCompatibilityInfo.mScalingRequired;
-        
         if (params != null && !mCompatibilityInfo.mExpandable) {
+            restore = true;
+            params.backup();
             adjustWindowAttributesForCompatibleMode(params);
         }
         if (params != null && scalingRequired) {
+            if (!restore) params.backup();
             restore = true;
-            params.scale(appScale, mWindowLayoutParamsBackup);
+            params.scale(appScale);
         }
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
@@ -2393,7 +2397,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 viewVisibility, insetsPending, mWinFrame,
                 mPendingContentInsets, mPendingVisibleInsets, mSurface);
         if (restore) {
-            params.restore(mWindowLayoutParamsBackup);
+            params.restore();
         }
         if (scalingRequired) {
             float invertedScale = mCompatibilityInfo.mApplicationInvertedScale;
@@ -2419,12 +2423,15 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (attrs.width == ViewGroup.LayoutParams.FILL_PARENT) {
                 attrs.width = metrics.widthPixels;
                 attrs.gravity |= Gravity.CENTER_HORIZONTAL;
+                mWindowAttributesChanged = attrs == mWindowAttributes;
             }
             if (attrs.height == ViewGroup.LayoutParams.FILL_PARENT) {
                 attrs.height = metrics.heightPixels;
+                attrs.gravity |= Gravity.TOP;
+                mWindowAttributesChanged = attrs == mWindowAttributes;
             }
             if (DEBUG_LAYOUT) {
-                Log.d(TAG, "Attributes fixed for compatibility : " + attrs);
+                Log.d(TAG, "Adjusted Attributes for compatibility : " + attrs);
             }
         }
     }
