@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.tts;
+package android.speech.tts;
 
 /**
  * AIDL for the callback from the TTS Service
