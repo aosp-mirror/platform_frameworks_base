@@ -49,10 +49,6 @@ public abstract class LoginFilter implements InputFilter {
      */
     public CharSequence filter(CharSequence source, int start, int end,
             Spanned dest, int dstart, int dend) {
-        char[] out = new char[end - start]; // reserve enough space for whole string
-        int outidx = 0;
-        boolean changed = false;
-        
         onStart();
         
         // Scan through beginning characters in dest, calling onInvalidCharacter() 
@@ -63,14 +59,26 @@ public abstract class LoginFilter implements InputFilter {
         }
 
         // Scan through changed characters rejecting disallowed chars
+        SpannableStringBuilder modification = null;
+        int modoff = 0;
+
         for (int i = start; i < end; i++) {
             char c = source.charAt(i);
             if (isAllowed(c)) {
-                // Character allowed. Add it to the sequence.
-                out[outidx++] = c;
+                // Character allowed.
+                modoff++;
             } else {
-                if (mAppendInvalid) out[outidx++] = c;
-                else changed = true; // we changed the original string
+                if (mAppendInvalid) {
+                    modoff++;
+                } else {
+                    if (modification == null) {
+                        modification = new SpannableStringBuilder(source, start, end);
+                        modoff = i - start;
+                    }
+
+                    modification.delete(modoff, modoff + 1);
+                }
+
                 onInvalidCharacter(c);
             }
         }
@@ -84,20 +92,9 @@ public abstract class LoginFilter implements InputFilter {
         
         onStop();
 
-        if (!changed) {
-            return null;
-        }
-        
-        String s = new String(out, 0, outidx);
-        
-        if (source instanceof Spanned) {
-            SpannableString sp = new SpannableString(s);
-            TextUtils.copySpansFrom((Spanned) source,
-                                    start, end, null, sp, 0);
-            return sp;
-        } else {
-            return s;
-        }
+        // Either returns null if we made no changes,
+        // or what we wanted to change it to if there were changes.
+        return modification;
     }
     
     /**
