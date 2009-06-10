@@ -274,6 +274,14 @@ public class GestureOverlayView extends FrameLayout {
         return mCurrentGesture;
     }
 
+    public long getFadeOffset() {
+        return mFadeOffset;
+    }
+
+    public void setFadeOffset(long fadeOffset) {
+        mFadeOffset = fadeOffset;
+    }
+
     public void setGesture(Gesture gesture) {
         if (mCurrentGesture != null) {
             clear(false);
