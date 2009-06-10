@@ -58,6 +58,8 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
+import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -259,6 +261,7 @@ class PackageManagerService extends IPackageManager.Stub {
     final ResolveInfo mResolveInfo = new ResolveInfo();
     ComponentName mResolveComponentName;
     PackageParser.Package mPlatformPackage;
+    private boolean mCompatibilityModeEnabled = true;
 
     public static final IPackageManager main(Context context, boolean factoryTest) {
         PackageManagerService m = new PackageManagerService(context, factoryTest);
@@ -509,7 +512,7 @@ class PackageManagerService extends IPackageManager.Stub {
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
     }
-    
+
     @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
             throws RemoteException {
@@ -885,7 +888,11 @@ class PackageManagerService extends IPackageManager.Stub {
                     + ": " + p);
             if (p != null) {
                 // Note: isEnabledLP() does not apply here - always return info
-                return PackageParser.generateApplicationInfo(p, flags);
+                ApplicationInfo appInfo = PackageParser.generateApplicationInfo(p, flags);
+                if (!mCompatibilityModeEnabled) {
+                    appInfo.disableCompatibilityMode();
+                }
+                return appInfo;
             }
             if ("android".equals(packageName)||"system".equals(packageName)) {
                 return mAndroidApplication;
@@ -952,10 +959,35 @@ class PackageManagerService extends IPackageManager.Stub {
     public ActivityInfo getActivityInfo(ComponentName component, int flags) {
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
-            if (Config.LOGV) Log.v(
-                TAG, "getActivityInfo " + component + ": " + a);
+
+            if (Config.LOGV) Log.v(TAG, "getActivityInfo " + component + ": " + a);
             if (a != null && mSettings.isEnabledLP(a.info, flags)) {
-                return PackageParser.generateActivityInfo(a, flags);
+                ActivityInfo ainfo = PackageParser.generateActivityInfo(a, flags);
+                if (ainfo != null && (flags & PackageManager.GET_EXPANDABLE) != 0) {
+                    ApplicationInfo appInfo = getApplicationInfo(component.getPackageName(),
+                            PackageManager.GET_EXPANDABLE | PackageManager.GET_SUPPORTS_DENSITIES); 
+                    if (appInfo != null && !appInfo.expandable) {
+                        // Check if the screen size is same as what the application expect.
+                        CompatibilityInfo info = new CompatibilityInfo(appInfo);
+                        DisplayMetrics metrics = new DisplayMetrics();
+                        metrics.setTo(mMetrics);
+                        int orientation = mMetrics.widthPixels > mMetrics.heightPixels ?
+                                Configuration.ORIENTATION_LANDSCAPE :
+                                Configuration.ORIENTATION_PORTRAIT;
+                        metrics.updateMetrics(info, orientation);
+                        if (!info.mExpandable) {
+                            // Don't allow an app that cannot expand to handle rotation.
+                            ainfo.configChanges &= ~ ActivityInfo.CONFIG_ORIENTATION;
+                        } else {
+                            appInfo.expandable = true;
+                        }
+                        if (DEBUG_SETTINGS) {
+                            Log.d(TAG, "component=" + component +
+                                    ", expandable:" + appInfo.expandable);
+                        }
+                    }
+                }
+                return ainfo;
             }
             if (mResolveComponentName.equals(component)) {
                 return mResolveActivity;
@@ -4709,6 +4741,14 @@ class PackageManagerService extends IPackageManager.Stub {
 
     public void systemReady() {
         mSystemReady = true;
+
+        // Read the compatibilty setting when the system is ready.
+        mCompatibilityModeEnabled = android.provider.Settings.System.getInt(
+                mContext.getContentResolver(),
+                android.provider.Settings.System.COMPATIBILITY_MODE, 1) == 1;
+        if (DEBUG_SETTINGS) {
+            Log.d(TAG, "compatibility mode:" + mCompatibilityModeEnabled);
+        }
     }
 
     public boolean isSafeMode() {
