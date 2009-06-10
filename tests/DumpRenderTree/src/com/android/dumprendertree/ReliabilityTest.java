@@ -1,6 +1,7 @@
 package com.android.dumprendertree;
 
 import android.os.Handler;
+import android.os.Message;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
@@ -15,43 +16,44 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class ReliabilityTest extends ActivityInstrumentationTestCase2<ReliabilityTestActivity> {
-    
+
     private static final String LOGTAG = "ReliabilityTest";
     private static final String PKG_NAME = "com.android.dumprendertree";
     private static final String TEST_LIST_FILE = "/sdcard/android/reliability_tests_list.txt";
     private static final String TEST_STATUS_FILE = "/sdcard/android/reliability_running_test.txt";
     private static final String TEST_TIMEOUT_FILE = "/sdcard/android/reliability_timeout_test.txt";
+    private static final String TEST_LOAD_TIME_FILE = "/sdcard/android/reliability_load_time.txt";
     private static final String TEST_DONE = "#DONE";
     static final String RELIABILITY_TEST_RUNNER_FILES[] = {
         "run_reliability_tests.py"
     };
-    
+
     public ReliabilityTest() {
         super(PKG_NAME, ReliabilityTestActivity.class);
     }
-    
+
     public void runReliabilityTest() throws Throwable {
         ReliabilityTestActivity activity = getActivity();
         LayoutTestsAutoRunner runner = (LayoutTestsAutoRunner)getInstrumentation();
-        
+
         File testListFile = new File(TEST_LIST_FILE);
         if(!testListFile.exists())
             throw new FileNotFoundException("test list file not found.");
-        
+
         BufferedReader listReader = new BufferedReader(
                 new FileReader(testListFile));
-        
+
         //always try to resume first, hence cleaning up status will be the
         //responsibility of driver scripts
         String lastUrl = readTestStatus();
         if(lastUrl != null && !TEST_DONE.equals(lastUrl))
             fastForward(listReader, lastUrl);
-        
+
         String url = null;
         Handler handler = null;
         boolean timeoutFlag = false;
         long start, elapsed;
-        
+
         //read from BufferedReader instead of populating a list in advance,
         //this will avoid excessive memory usage in case of a large list
         while((url = listReader.readLine()) != null) {
@@ -65,9 +67,13 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             //use message to send new URL to avoid interacting with
             //WebView in non-UI thread
             handler = activity.getHandler();
-            handler.sendMessage(handler.obtainMessage(
-                    ReliabilityTestActivity.MSG_NAVIGATE, 
-                    runner.mTimeoutInMillis, runner.mDelay, url));
+            Message msg = handler.obtainMessage(
+                    ReliabilityTestActivity.MSG_NAVIGATE,
+                    runner.mTimeoutInMillis, runner.mDelay);
+            msg.getData().putString(ReliabilityTestActivity.MSG_NAV_URL, url);
+            msg.getData().putBoolean(ReliabilityTestActivity.MSG_NAV_LOGTIME,
+                    runner.mLogtime);
+            handler.sendMessage(msg);
             timeoutFlag = activity.waitUntilDone();
             elapsed = System.currentTimeMillis() - start;
             if(elapsed < 1000) {
@@ -79,6 +85,9 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             if(timeoutFlag) {
                 writeTimeoutFile(url);
             }
+            if(runner.mLogtime) {
+                writeLoadTime(url, activity.getPageLoadTime());
+            }
             System.runFinalization();
             System.gc();
             System.gc();
@@ -87,7 +96,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
         activity.finish();
         listReader.close();
     }
-    
+
     public void copyRunnerAssetsToCache() {
         try {
             String out_dir = getActivity().getApplicationContext()
@@ -112,7 +121,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             Log.e(LOGTAG, "Cannot extract scripts for testing.", e);
         }
     }
-    
+
     private void updateTestStatus(String s) {
         // write last tested url into status file
         try {
@@ -124,7 +133,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             Log.e(LOGTAG, "Cannot update file " + TEST_STATUS_FILE, e);
         }
     }
-    
+
     private String readTestStatus() {
         // read out the test name it stopped last time.
         String status = null;
@@ -141,12 +150,12 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
         }
         return status;
     }
-    
+
     private void fastForward(BufferedReader testListReader, String lastUrl) {
         //fastforward the BufferedReader to the position right after last url
         if(lastUrl == null)
             return;
-        
+
         String line = null;
         try {
             while((line = testListReader.readLine()) != null) {
@@ -160,7 +169,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
     }
 
     private void writeTimeoutFile(String s) {
-        //append to the file containing the list of timeout urls 
+        //append to the file containing the list of timeout urls
         try {
             BufferedOutputStream bos = new BufferedOutputStream(
                     new FileOutputStream(TEST_TIMEOUT_FILE, true));
@@ -169,6 +178,18 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             bos.close();
         } catch (Exception e) {
             Log.e(LOGTAG, "Cannot update file " + TEST_TIMEOUT_FILE, e);
+        }
+    }
+
+    private void writeLoadTime(String s, long time) {
+        //append to the file containing the list of timeout urls
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(
+                    new FileOutputStream(TEST_LOAD_TIME_FILE, true));
+            bos.write((s + '|' + time + '\n').getBytes());
+            bos.close();
+        } catch (Exception e) {
+            Log.e(LOGTAG, "Cannot update file " + TEST_LOAD_TIME_FILE, e);
         }
     }
 }
