@@ -32,9 +32,9 @@ bool drawTrangleFanWithCopybit_impl(ogles_context_t* c, GLint first,
         GLsizei count);
 
 inline bool copybitQuickCheckContext(ogles_context_t* c) {
-        return  c->copybits.drawSurfaceFd >= 0
+        return  c->copybits.drawSurfaceBuffer != 0
             && c->rasterizer.state.enabled_tmu == 1
-            && c->textures.tmu[0].texture->copybits_fd >= 0;
+            && c->textures.tmu[0].texture->try_copybit;
 }
 
 /*

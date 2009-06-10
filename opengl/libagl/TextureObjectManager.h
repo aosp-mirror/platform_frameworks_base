@@ -80,7 +80,7 @@ public:
     GLint               generate_mipmap;
     GLint               direct;
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    int                 copybits_fd;
+    bool                try_copybit;
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
     android_native_buffer_t* buffer;
 };

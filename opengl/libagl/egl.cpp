@@ -551,20 +551,20 @@ EGLBoolean egl_window_surface_v2_t::bindDrawSurface(ogles_context_t* gl)
     gl->rasterizer.procs.colorBuffer(gl, &buffer);
     if (depth.data != gl->rasterizer.state.buffers.depth.data)
         gl->rasterizer.procs.depthBuffer(gl, &depth);
+
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    gl->copybits.drawSurfaceFd = -1;
+    gl->copybits.drawSurfaceBuffer = 0;
     if (supportedCopybitsDestinationFormat(buffer.format)) {
         buffer_handle_t handle = this->buffer->handle;
         if (handle != NULL) {
             private_handle_t* hand = private_handle_t::dynamicCast(handle);
-            if (hand != NULL) {
-                if (hand->usesPhysicallyContiguousMemory()) {
-                    gl->copybits.drawSurfaceFd = hand->fd;
-                }
+            if (hand != NULL && hand->usesPhysicallyContiguousMemory()) {
+                gl->copybits.drawSurfaceBuffer = handle;
             }
         }
     }
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
+
     return EGL_TRUE;
 }
 EGLBoolean egl_window_surface_v2_t::bindReadSurface(ogles_context_t* gl)

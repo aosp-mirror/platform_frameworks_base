@@ -56,7 +56,7 @@ void EGLTextureObject::init()
     generate_mipmap = GL_FALSE;
     direct = GL_FALSE;
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    copybits_fd = -1;
+    try_copybit = false;
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
     buffer = 0;
 }

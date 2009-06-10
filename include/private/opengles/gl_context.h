@@ -27,6 +27,7 @@
 
 #include <private/pixelflinger/ggl_context.h>
 #include <hardware/copybit.h>
+#include <hardware/gralloc.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -600,9 +601,7 @@ struct copybits_context_t {
     copybit_device_t*       blitEngine;
     int32_t                 minScale;
     int32_t                 maxScale;
-    // File descriptor of current drawing surface, if it's suitable for use as
-    // a copybits destination, else -1.
-    int                     drawSurfaceFd;
+    buffer_handle_t         drawSurfaceBuffer;
 };
 
 struct ogles_context_t {

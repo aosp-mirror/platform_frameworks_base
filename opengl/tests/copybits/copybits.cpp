@@ -96,13 +96,11 @@ private:
     status_t initSize(uint32_t w, uint32_t h);
 
     ssize_t                 mInitCheck;
-    uint32_t                mFlags;
-    uint32_t                mVStride;
     void*                   mData;
 };
 
 Buffer::Buffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t usage)
-    : SurfaceBuffer(), mInitCheck(NO_INIT), mVStride(0)
+    : SurfaceBuffer(), mInitCheck(NO_INIT)
 {
     this->usage = usage;
     this->format = format;
@@ -137,7 +135,6 @@ status_t Buffer::initSize(uint32_t w, uint32_t h)
         if (err == NO_ERROR) {
             width  = w;
             height = h;
-            mVStride = 0;
         }
     }
 
@@ -154,7 +151,6 @@ status_t Buffer::lock(GGLSurface* sur, uint32_t usage)
         sur->height = height;
         sur->stride = stride;
         sur->format = format;
-        sur->vstride = mVStride;
         sur->data = static_cast<GGLubyte*>(vaddr);
     }
     return res;
@@ -355,7 +351,7 @@ void init_scene(void)
 // #define USE_ALPHA_COLOR
 
 #define USE_GL_REPLACE
-// #define USE_GL_MODULATE
+//#define USE_GL_MODULATE
 
 // #define USE_BLEND
 
@@ -479,7 +475,7 @@ static const int SCALE_COUNT = 12;
 
 int scale(int base, int factor) {
     static const float kTable[SCALE_COUNT] = {
-            0.1f, 0.25f, 0.5f, 0.75f, 1.0f,
+            0.24f, 0.25f, 0.5f, 0.75f, 1.0f,
             1.5f, 2.0f, 2.5f, 3.0f, 3.5f, 4.0f, 5.0f
     };
     return base * kTable[factor];
@@ -570,10 +566,10 @@ int testStretch()
         return -1;
     }
     // Need to do a dummy eglSwapBuffers first. Don't know why.
-    glClearColor(0.4, 1.0, 0.4, 0.4);
+    glClearColor(0.4, 1.0, 0.4, 1.0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     eglSwapBuffers(eglDisplay, eglSurface);
-
+    
     int cropRect[4] = {0,HEIGHT,WIDTH,-HEIGHT}; // Left bottom width height. Width and Height can be neg to flip.
     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
 
@@ -592,6 +588,8 @@ int testStretch()
         }
 
         eglSwapBuffers(eglDisplay, eglSurface);
+        LOGD("wait 1s");
+        usleep(1000000);
     }
     return 0;
 }

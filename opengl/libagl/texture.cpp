@@ -1544,12 +1544,10 @@ void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
      *
      */
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    tex->copybits_fd = -1;
-    private_handle_t* hand;
-    if ((hand = private_handle_t::dynamicCast(native_buffer->handle)) != NULL) {
-        if (hand->usesPhysicallyContiguousMemory()) {
-            tex->copybits_fd = hand->fd;
-        }
+    tex->try_copybit = false;
+    private_handle_t* hnd = private_handle_t::dynamicCast(native_buffer->handle);
+    if (hnd && hnd->usesPhysicallyContiguousMemory()) {
+        tex->try_copybit = true;
     }
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
 }

@@ -27,23 +27,28 @@
 #include "primitives.h"
 #include "texture.h"
 #include "BufferObjectManager.h"
-
 #include "TextureObjectManager.h"
+
 #include <hardware/gralloc.h>
 #include <hardware/copybit.h>
+#include <private/ui/android_natives_priv.h>
 #include "gralloc_priv.h"
 
 // ----------------------------------------------------------------------------
 
 namespace android {
 
-static void textureToCopyBitImage(const GGLSurface* surface, int fd, copybit_image_t* img) {
+static void textureToCopyBitImage(
+        const GGLSurface* surface, buffer_handle_t buffer, copybit_image_t* img) 
+{
+    // we know private_handle_t is good here
+    private_handle_t* hnd = (private_handle_t*)buffer;
     img->w      = surface->stride;
     img->h      = surface->height;
     img->format = surface->format;
-    img->offset = 0;
+    img->offset = hnd->offset;
     img->base   = surface->data;
-    img->fd     = fd;
+    img->fd     = hnd->fd;
 }
 
 struct clipRectRegion : public copybit_region_t {
@@ -109,7 +114,7 @@ static inline int fixedToByte(GGLfixed val) {
 
 static bool checkContext(ogles_context_t* c) {
 
-	// By convenction copybitQuickCheckContext() has already returned true.
+	// By convention copybitQuickCheckContext() has already returned true.
 	// avoid checking the same information again.
 	
     if (c->copybits.blitEngine == NULL
@@ -118,7 +123,7 @@ static bool checkContext(ogles_context_t* c) {
         return false;
     }
 
-    // Note: The drawSurfaceFd is only set for destination
+    // Note: The drawSurfaceBuffer is only set for destination
     // surfaces types that are supported by the hardware and
     // do not have an alpha channel. So we don't have to re-check that here.
 
@@ -237,18 +242,20 @@ static bool copybit(GLint x, GLint y,
     // LOGW("calling copybits");
 
     copybit_device_t* copybit = c->copybits.blitEngine;
+
     copybit_image_t dst;
-    textureToCopyBitImage(&cbSurface, c->copybits.drawSurfaceFd, &dst);
+    buffer_handle_t target_hnd = c->copybits.drawSurfaceBuffer;
+    textureToCopyBitImage(&cbSurface, target_hnd, &dst);
     copybit_rect_t drect = {x, y, x+w, y+h};
 
+    // we know private_handle_t is good here
     copybit_image_t src;
-    textureToCopyBitImage(&textureObject->surface, textureObject->copybits_fd,
-            &src);
+    buffer_handle_t source_hnd = textureObject->buffer->handle;
+    textureToCopyBitImage(&textureObject->surface, source_hnd, &src);
     copybit_rect_t srect = { Ucr, Vcr + Hcr, Ucr + Wcr, Vcr };
 
     copybit->set_parameter(copybit, COPYBIT_TRANSFORM, transform);
     copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, planeAlpha);
-
     copybit->set_parameter(copybit, COPYBIT_DITHER,
             (enables & GGL_ENABLE_DITHER) ? COPYBIT_ENABLE : COPYBIT_DISABLE);
 

@@ -101,7 +101,7 @@ ogles_context_t *ogles_init(size_t extra)
     c->copybits.blitEngine = NULL;
     c->copybits.minScale = 0;
     c->copybits.maxScale = 0;
-    c->copybits.drawSurfaceFd = -1;
+    c->copybits.drawSurfaceBuffer = 0;
 
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
     hw_module_t const* module;
