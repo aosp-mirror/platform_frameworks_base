@@ -53,7 +53,7 @@ import android.content.Context;
  * Context.
  * You can create and inject alternative types of Contexts by calling 
  * {@link AndroidTestCase#setContext(Context) setContext()}.  You must do this <i>before</i> calling
- * startApplication().  The test framework provides a
+ * {@link #createApplication()}.  The test framework provides a
  * number of alternatives for Context, including {@link android.test.mock.MockContext MockContext}, 
  * {@link android.test.RenamingDelegatingContext RenamingDelegatingContext}, and 
  * {@link android.content.ContextWrapper ContextWrapper}.
