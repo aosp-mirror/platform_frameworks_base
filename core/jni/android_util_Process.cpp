@@ -50,7 +50,7 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-#define ENABLE_CGROUP_ERR_LOGGING 0
+#define ENABLE_CGROUP_DEBUG 0
 
 /*
  * List of cgroup names which map to ANDROID_TGROUP_ values in Thread.h
@@ -198,35 +198,39 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
 
 static int add_pid_to_cgroup(int pid, int grp)
 {
-    FILE *fp;
+    int fd;
     char path[255];
-    int rc;
+    char text[64];
 
-    sprintf(path, "/dev/cpuctl/%s/tasks", (cgroup_names[grp] ? cgroup_names[grp] : ""));
+    sprintf(path, "/dev/cpuctl/%s/tasks",
+           (cgroup_names[grp] ? cgroup_names[grp] : ""));
 
-    if (!(fp = fopen(path, "w"))) {
-#if ENABLE_CGROUP_ERR_LOGGING
-        LOGW("Unable to open %s (%s)\n", path, strerror(errno));
-#endif
-        return -errno;
+    if ((fd = open(path, O_WRONLY)) < 0) {
+        LOGE("Error opening '%s' (%s)", path, strerror(errno));
+        return -1;
     }
 
-    rc = fprintf(fp, "%d", pid);
-    fclose(fp);
-
-    if (rc < 0) {
-#if ENABLE_CGROUP_ERR_LOGGING
-        LOGW("Unable to move pid %d to cgroup %s (%s)\n", pid,
-             (cgroup_names[grp] ? cgroup_names[grp] : "<default>"),
-             strerror(errno));
-#endif
+    sprintf(text, "%d", pid);
+    if (write(fd, text, strlen(text)) < 0) {
+        LOGE("Error writing to '%s' (%s)", path, strerror(errno));
+        close(fd);
+        return -1;
     }
 
-    return (rc < 0) ? errno : 0;
+    close(fd);
+
+#if ENABLE_CGROUP_DEBUG
+    LOGD("Pid %d sucessfully added to '%s'", pid, path);
+#endif
+    return 0;
 }
 
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
+#if ENABLE_CGROUP_DEBUG
+    LOGD("android_os_Process_setThreadGroup(%d, %d)", pid, grp);
+#endif
+
     if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
         signalExceptionForGroupError(env, clazz, EINVAL);
         return;
@@ -242,6 +246,10 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     FILE *fp;
     char proc_path[255];
     struct dirent *de;
+
+#if ENABLE_CGROUP_DEBUG
+    LOGD("android_os_Process_setProcessGroup(%d, %d)", pid, grp);
+#endif
 
     if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
         signalExceptionForGroupError(env, clazz, EINVAL);
