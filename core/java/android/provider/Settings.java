@@ -1963,6 +1963,11 @@ public final class Settings {
         public static final String TTS_DEFAULT_SYNTH = "tts_default_synth";
 
         /**
+         * Default text-to-speech language.
+         */
+        public static final String TTS_DEFAULT_LANG = "tts_default_lang";
+
+        /**
          * Whether to notify the user of open networks.
          * <p>
          * If not connected and the scan results have an open network, we will
