@@ -590,6 +590,7 @@ final class WebViewCore {
             "SET_ACTIVE", // = 142;
             "ON_PAUSE",     // = 143
             "ON_RESUME",    // = 144
+            "FREE_MEMORY",  // = 145
         };
 
     class EventHub {
@@ -645,10 +646,11 @@ final class WebViewCore {
         // or not, based on whether the WebView has focus.
         static final int SET_ACTIVE = 142;
 
-        // pause/resume activity for just this DOM (unlike pauseTimers, which
+        // lifecycle activities for just this DOM (unlike pauseTimers, which
         // is global)
         static final int ON_PAUSE = 143;
         static final int ON_RESUME = 144;
+        static final int FREE_MEMORY = 145;
 
         // Network-based messaging
         static final int CLEAR_SSL_PREF_TABLE = 150;
@@ -848,6 +850,11 @@ final class WebViewCore {
                             nativeResume();
                             break;
 
+                        case FREE_MEMORY:
+                            clearCache(false);
+                            nativeFreeMemory();
+                            break;
+
                         case SET_NETWORK_STATE:
                             if (BrowserFrame.sJavaBridge == null) {
                                 throw new IllegalStateException("No WebView " +
@@ -858,10 +865,7 @@ final class WebViewCore {
                             break;
 
                         case CLEAR_CACHE:
-                            mBrowserFrame.clearCache();
-                            if (msg.arg1 == 1) {
-                                CacheManager.removeAllCacheFiles();
-                            }
+                            clearCache(msg.arg1 == 1);
                             break;
 
                         case CLEAR_HISTORY:
@@ -1222,6 +1226,13 @@ final class WebViewCore {
     //-------------------------------------------------------------------------
     // WebViewCore private methods
     //-------------------------------------------------------------------------
+
+    private void clearCache(boolean includeDiskFiles) {
+        mBrowserFrame.clearCache();
+        if (includeDiskFiles) {
+            CacheManager.removeAllCacheFiles();
+        }
+    }
 
     private void loadUrl(String url) {
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, " CORE loadUrl " + url);
@@ -1721,4 +1732,5 @@ final class WebViewCore {
 
     private native void nativePause();
     private native void nativeResume();
+    private native void nativeFreeMemory();
 }
