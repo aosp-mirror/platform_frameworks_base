@@ -836,8 +836,8 @@ public class LocationManagerService extends ILocationManager.Stub
                         } catch (PendingIntent.CanceledException e) {
                             if (deadReceivers == null) {
                                 deadReceivers = new ArrayList<Receiver>();
-                                deadReceivers.add(receiver);
                             }
+                            deadReceivers.add(receiver);
                         }
                     }
                 } catch (RemoteException e) {
