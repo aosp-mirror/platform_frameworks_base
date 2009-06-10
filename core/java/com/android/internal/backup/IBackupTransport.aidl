@@ -41,6 +41,16 @@ interface IBackupTransport {
         - adb: close the file
 */
     /**
+     * Verify that this is a suitable time for a backup pass.  This should return zero
+     * if a backup is reasonable right now, false otherwise.  This method will be called
+     * outside of the {@link #startSession}/{@link #endSession} pair.
+     *
+     * <p>If this is not a suitable time for a backup, the transport should suggest a
+     * backoff delay, in milliseconds, after which the Backup Manager should try again.
+     */
+    long requestBackupTime();
+
+    /**
      * Establish a connection to the back-end data repository, if necessary.  If the transport
      * needs to initialize state that is not tied to individual applications' backup operations,
      * this is where it should be done.
@@ -64,33 +74,30 @@ interface IBackupTransport {
     /**
      * Get the set of backups currently available over this transport.
      *
-     * @return A bundle containing two elements:  an int array under the key
-     *   "tokens" whose entries are a transport-private identifier for each backup set;
-     *   and a String array under the key "names" whose entries are the user-meaningful
-     *   names corresponding to the backup sets at each index in the tokens array.
+     * @return Descriptions of the set of restore images available for this device.
      **/
     RestoreSet[] getAvailableRestoreSets();
 
     /**
-     * Get the set of applications from a given backup image.
+     * Get the set of applications from a given restore image.
      *
-     * @param token A backup token as returned by {@link availableBackups}.
+     * @param token A backup token as returned by {@link #getAvailableRestoreSets}.
      * @return An array of PackageInfo objects describing all of the applications
-     *   available for restore from the given backup set.  This should include the list
+     *   available for restore from this restore image.  This should include the list
      *   of signatures for each package so that the Backup Manager can filter using that
      *   information.
      */
     PackageInfo[] getAppSet(int token);
 
     /**
-     * Retrieve one application's data from the backup destination.
+     * Retrieve one application's data from the backing store.
      *
      * @param token The backup record from which a restore is being requested.
      * @param packageInfo The identity of the application whose data is being restored.
      *   This must include the signature list for the package; it is up to the transport
      *   to verify that the requested app's signatures match the saved backup record
      *   because the transport cannot necessarily trust the client device.
-     * @param data An open, writeable file into which the backup image should be stored.
+     * @param data An open, writable file into which the backup image should be stored.
      * @return Zero on success; a nonzero error code on failure.
      */
     int getRestoreData(int token, in PackageInfo packageInfo, in ParcelFileDescriptor data);
