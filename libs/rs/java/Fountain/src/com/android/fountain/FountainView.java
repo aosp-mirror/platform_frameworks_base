@@ -82,6 +82,7 @@ public class FountainView extends RSSurfaceView {
         mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA, RenderScript.BlendDstFunc.ONE);
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
         mPFS = mRS.programFragmentStoreCreate();
+        mPFS.setName("MyBlend");
         mRS.contextBindProgramFragmentStore(mPFS);
 
         mRS.samplerBegin();
@@ -92,6 +93,7 @@ public class FountainView extends RSSurfaceView {
 
         mRS.programFragmentBegin(null, null);
         mPF = mRS.programFragmentCreate();
+        mPF.setName("PgmFragParts");
         //mRS.contextBindProgramFragment(mPF);
 
         mRS.programFragmentBegin(null, null);
@@ -100,6 +102,7 @@ public class FountainView extends RSSurfaceView {
         mRS.contextBindProgramFragment(mPF2);
         mPF2.bindTexture(mTexture, 0);
         mPF2.bindSampler(mSampler, 0);
+        mPF2.setName("PgmFragBackground");
 
         mParams[0] = 0;
         mParams[1] = partCount;

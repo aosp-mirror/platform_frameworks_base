@@ -62,6 +62,21 @@ static void _nInit(JNIEnv *_env, jclass _this)
 
 // ---------------------------------------------------------------------------
 
+static void
+nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAssignName, con(%p), obj(%p)", con, obj);
+
+    jint len = _env->GetArrayLength(str);
+    jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
+    rsAssignName((void *)obj, (const char *)cptr);
+    _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
+}
+
+
+// ---------------------------------------------------------------------------
+
 static jint
 nDeviceCreate(JNIEnv *_env, jobject _this)
 {
@@ -662,7 +677,16 @@ nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreCreate, con(%p)", con);
+
     return (jint)rsProgramFragmentStoreCreate();
+}
+
+static void
+nProgramFragmentStoreDestroy(JNIEnv *_env, jobject _this, jint pgm)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramFragmentStoreDestroy, con(%p), pgm(%i)", con, pgm);
+    rsProgramFragmentStoreDestroy((RsProgramFragmentStore)pgm);
 }
 
 // ---------------------------------------------------------------------------
@@ -721,6 +745,14 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentCreate, con(%p)", con);
     return (jint)rsProgramFragmentCreate();
+}
+
+static void
+nProgramFragmentDestroy(JNIEnv *_env, jobject _this, jint pgm)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramFragmentDestroy, con(%p), pgm(%i)", con, pgm);
+    rsProgramFragmentDestroy((RsProgramFragment)pgm);
 }
 
 
@@ -796,6 +828,7 @@ static JNINativeMethod methods[] = {
 {"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
 {"nContextCreate",                 "(ILandroid/view/Surface;I)I",          (void*)nContextCreate },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
+{"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
 
 {"nElementBegin",                  "()V",                                  (void*)nElementBegin },
 {"nElementAddPredefined",          "(I)V",                                 (void*)nElementAddPredefined },
@@ -858,6 +891,7 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentStoreBlendFunc", "(II)V",                                (void*)nProgramFragmentStoreBlendFunc },
 {"nProgramFragmentStoreDither",    "(Z)V",                                 (void*)nProgramFragmentStoreDither },
 {"nProgramFragmentStoreCreate",    "()I",                                  (void*)nProgramFragmentStoreCreate },
+{"nProgramFragmentStoreDestroy",   "(I)V",                                 (void*)nProgramFragmentStoreDestroy },
 
 {"nProgramFragmentBegin",          "(II)V",                                (void*)nProgramFragmentBegin },
 {"nProgramFragmentBindTexture",    "(III)V",                               (void*)nProgramFragmentBindTexture },
@@ -866,6 +900,7 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentSetEnvMode",     "(II)V",                                (void*)nProgramFragmentSetEnvMode },
 {"nProgramFragmentSetTexEnable",   "(IZ)V",                                (void*)nProgramFragmentSetTexEnable },
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
+{"nProgramFragmentDestroy",        "(I)V",                                 (void*)nProgramFragmentDestroy },
 
 {"nContextBindRootScript",         "(I)V",                                 (void*)nContextBindRootScript },
 {"nContextBindProgramFragmentStore","(I)V",                                (void*)nContextBindProgramFragmentStore },

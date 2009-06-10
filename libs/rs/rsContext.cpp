@@ -57,14 +57,17 @@ void Context::initEGL()
      eglQuerySurface(mDisplay, mSurface, EGL_HEIGHT, &mHeight);
 }
 
-bool Context::runScript(Script *s)
+bool Context::runScript(Script *s, uint32_t launchID)
 {
     ObjectBaseRef<ProgramFragment> frag(mFragment);
     ObjectBaseRef<ProgramVertex> vtx(mVertex);
     ObjectBaseRef<ProgramFragmentStore> store(mFragmentStore);
 
+    bool ret = s->run(this, launchID);
 
-
+    mFragment.set(frag);
+    mVertex.set(vtx);
+    mFragmentStore.set(store);
     return true;
 
 }
@@ -107,7 +110,7 @@ bool Context::runRootScript()
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    return mRootScript->run(this, 0);
+    return runScript(mRootScript.get(), 0);
 }
 
 void Context::setupCheck()
@@ -243,6 +246,33 @@ void Context::setVertex(ProgramVertex *pv)
     pv->setupGL();
 }
 
+void Context::assignName(ObjectBase *obj, const char *name)
+{
+    rsAssert(!obj->getName());
+    obj->setName(name);
+    mNames.add(obj);
+}
+
+void Context::removeName(ObjectBase *obj)
+{
+    for(size_t ct=0; ct < mNames.size(); ct++) {
+        if (obj == mNames[ct]) {
+            mNames.removeAt(ct);
+            return;
+        }
+    }
+}
+
+ObjectBase * Context::lookupName(const char *name) const
+{
+    for(size_t ct=0; ct < mNames.size(); ct++) {
+        if (!strcmp(name, mNames[ct]->getName())) {
+            return mNames[ct];
+        }
+    }
+    return NULL;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -286,6 +316,11 @@ void rsi_ContextBindProgramVertex(Context *rsc, RsProgramVertex vpv)
     rsc->setVertex(pv);
 }
 
+void rsi_AssignName(Context *rsc, void * obj, const char *name)
+{
+    ObjectBase *ob = static_cast<ObjectBase *>(obj);
+    rsc->assignName(ob, name);
+}
 
 
 }

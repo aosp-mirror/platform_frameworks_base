@@ -16,6 +16,10 @@ ContextBindProgramVertex {
 	param RsProgramVertex pgm
 	}
 
+AssignName {
+	param void *obj
+	param const char *name
+	}
 
 ElementBegin {
 }
@@ -332,6 +336,9 @@ ProgramFragmentStoreCreate {
 	ret RsProgramFragmentStore
 	}
 
+ProgramFragmentStoreDestroy {
+	param RsProgramFragmentStore pfs
+	}
 
 
 ProgramFragmentBegin {
@@ -370,6 +377,9 @@ ProgramFragmentCreate {
 	ret RsProgramFragment
 	}
 
+ProgramFragmentDestroy {
+	param RsProgramFragment pf
+	}
 
 
 ProgramVertexBegin {

@@ -19,11 +19,15 @@
 
 #include "rsAllocation.h"
 
+
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
 
-    
+class ProgramVertex;
+class ProgramFragment;
+class ProgramRaster;
+class ProgramFragmentStore;
 
 class Script : public ObjectBase
 {
@@ -40,37 +44,10 @@ public:
         float mClearDepth;
         uint32_t mClearStencil;
 
-        enum StateVertex {
-            VTX_ORTHO_WINDOW,
-            VTX_ORTHO_NORMALIZED,
-            VTX_PROJECTION,
-            VTX_PARENT
-        };
-        StateVertex mStateVertex;
-
-        enum StateRaster {
-            RASTER_FLAT,
-            RASTER_SMOOTH,
-            RASTER_PARENT
-        };
-        StateRaster mStateRaster;
-
-        enum StateFragment {
-            FRAGMENT_COLOR,
-            FRAGMENT_TEX_REPLACE,
-            FRAGMENT_TEX_MODULATE,
-            FRAGMENT_PARENT
-        };
-        StateFragment mStateFragment;
-
-        enum StateFragmentStore {
-            FRAGMENT_STORE_ALWAYS_REPLACE,
-            FRAGMENT_STORE_ALWAYS_BLEND,
-            FRAGMENT_STORE_DEPTH_LESS_REPLACE,
-            FRAGMENT_STORE_DEPTH_LESS_BLEND,
-            FRAGMENT_STORE_PARENT
-        };
-        StateFragmentStore mStateFragmentStore;
+        ObjectBaseRef<ProgramVertex> mVertex;
+        ObjectBaseRef<ProgramFragment> mFragment;
+        //ObjectBaseRef<ProgramRaster> mRaster;
+        ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
 
     };
     Enviroment_t mEnviroment;
