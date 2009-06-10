@@ -769,8 +769,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (!record.mReceiver.callProviderEnabledLocked(provider, enabled)) {
                     if (deadReceivers == null) {
                         deadReceivers = new ArrayList<Receiver>();
-                        deadReceivers.add(record.mReceiver);
                     }
+                    deadReceivers.add(record.mReceiver);
                 }
                 listeners++;
             }
