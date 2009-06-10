@@ -115,15 +115,13 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
 
     // make sure camera hardware is alive
     if (camera->getStatus() != NO_ERROR) {
-        jniThrowException(env, "java/io/IOException", "Camera initialization failed");
+        jniThrowException(env, "java/lang/RuntimeException", "Camera initialization failed");
         return;
     }
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
-        LOGE("Can't find android/hardware/Camera");
-        // XXX no idea what to throw here, can this even happen?
-        jniThrowException(env, "java/lang/Exception", NULL);
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/hardware/Camera");
         return;
     }
 
@@ -241,7 +239,7 @@ static void android_hardware_Camera_startPreview(JNIEnv *env, jobject thiz)
     if (camera == 0) return;
 
     if (camera->startPreview() != NO_ERROR) {
-        jniThrowException(env, "java/io/IOException", "startPreview failed");
+        jniThrowException(env, "java/lang/RuntimeException", "startPreview failed");
         return;
     }
 }
@@ -305,7 +303,7 @@ static void android_hardware_Camera_autoFocus(JNIEnv *env, jobject thiz)
 
     c->setAutoFocusCallback(autofocus_callback_impl, context);
     if (c->autoFocus() != NO_ERROR) {
-        jniThrowException(env, "java/io/IOException", "autoFocus failed");
+        jniThrowException(env, "java/lang/RuntimeException", "autoFocus failed");
     }
 }
 
@@ -398,7 +396,7 @@ static void android_hardware_Camera_takePicture(JNIEnv *env, jobject thiz)
     camera->setRawCallback(raw_callback, context);
     camera->setJpegCallback(jpeg_callback, context);
     if (camera->takePicture() != NO_ERROR) {
-        jniThrowException(env, "java/io/IOException", "takePicture failed");
+        jniThrowException(env, "java/lang/RuntimeException", "takePicture failed");
         return;
     }
 
@@ -418,7 +416,7 @@ static void android_hardware_Camera_setParameters(JNIEnv *env, jobject thiz, jst
         env->ReleaseStringCritical(params, str);
     }
     if (camera->setParameters(params8) != NO_ERROR) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", "setParameters failed");
+        jniThrowException(env, "java/lang/RuntimeException", "setParameters failed");
         return;
     }
 }
