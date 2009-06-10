@@ -13,6 +13,10 @@ import android.os.RemoteException;
 
 public class AdbTransport extends IBackupTransport.Stub {
 
+    public long requestBackupTime() throws RemoteException {
+        return 0;
+    }
+
     public int startSession() throws RemoteException {
         // TODO Auto-generated method stub
         return 0;

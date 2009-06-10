@@ -215,7 +215,8 @@ class BackupManagerService extends IBackupManager.Stub {
             // Look up the package info & signatures.  This is first so that if it
             // throws an exception, there's no file setup yet that would need to
             // be unraveled.
-            PackageInfo packInfo = mPackageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            PackageInfo packInfo = mPackageManager.getPackageInfo(packageName,
+                    PackageManager.GET_SIGNATURES);
 
             // !!! TODO: get the state file dir from the transport
             File savedStateName = new File(mStateDir, packageName);
@@ -367,7 +368,8 @@ class BackupManagerService extends IBackupManager.Stub {
         if (N > 0) {
             for (int a = N-1; a >= 0; a--) {
                 ApplicationInfo app = allApps.get(a);
-                if (app.backupAgentName == null) {
+                if (((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0)
+                        || app.backupAgentName == null) {
                     allApps.remove(a);
                 }
             }
@@ -411,6 +413,40 @@ class BackupManagerService extends IBackupManager.Stub {
         return transport;
     }
 
+    // fire off a backup agent, blocking until it attaches or times out
+    IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode) {
+        IBackupAgent agent = null;
+        synchronized(mAgentConnectLock) {
+            mConnecting = true;
+            mConnectedAgent = null;
+            try {
+                if (mActivityManager.bindBackupAgent(app, mode)) {
+                    Log.d(TAG, "awaiting agent for " + app);
+
+                    // success; wait for the agent to arrive
+                    while (mConnecting && mConnectedAgent == null) {
+                        try {
+                            mAgentConnectLock.wait(10000);
+                        } catch (InterruptedException e) {
+                            // just retry
+                            return null;
+                        }
+                    }
+
+                    // if we timed out with no connect, abort and move on
+                    if (mConnecting == true) {
+                        Log.w(TAG, "Timeout waiting for agent " + app);
+                        return null;
+                    }
+                    agent = mConnectedAgent;
+                }
+            } catch (RemoteException e) {
+                // can't happen
+            }
+        }
+        return agent;
+    }
+
     // ----- Back up a set of applications via a worker thread -----
 
     class PerformBackupThread extends Thread {
@@ -425,20 +461,20 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
-            /*
-             * 1. start up the current transport
-             * 2. for each item in the queue:
-             *      2a. bind the agent [wait for async attach]
-             *      2b. set up the files and call doBackup()
-             *      2c. unbind the agent
-             * 3. tear down the transport
-             * 4. done!
-             */
             if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
 
             // stand up the current transport
             IBackupTransport transport = createTransport(mTransport);
             if (transport == null) {
+                return;
+            }
+
+            // start up the transport
+            try {
+                transport.startSession();
+            } catch (Exception e) {
+                Log.e(TAG, "Error session transport");
+                e.printStackTrace();
                 return;
             }
 
@@ -456,62 +492,155 @@ class BackupManagerService extends IBackupManager.Stub {
 
         private void doQueuedBackups(IBackupTransport transport) {
             for (BackupRequest request : mQueue) {
-                Log.d(TAG, "starting agent for " + request);
-                // !!! TODO: need to handle the restore case?
+                Log.d(TAG, "starting agent for backup of " + request);
 
                 IBackupAgent agent = null;
                 int mode = (request.fullBackup)
                         ? IApplicationThread.BACKUP_MODE_FULL
                         : IApplicationThread.BACKUP_MODE_INCREMENTAL;
                 try {
-                    synchronized(mAgentConnectLock) {
-                        mConnecting = true;
-                        mConnectedAgent = null;
-                        if (mActivityManager.bindBackupAgent(request.appInfo, mode)) {
-                            Log.d(TAG, "awaiting agent for " + request);
-
-                            // success; wait for the agent to arrive
-                            while (mConnecting && mConnectedAgent == null) {
-                                try {
-                                    mAgentConnectLock.wait(10000);
-                                } catch (InterruptedException e) {
-                                    // just retry
-                                    continue;
-                                }
-                            }
-
-                            // if we timed out with no connect, abort and move on
-                            if (mConnecting == true) {
-                                Log.w(TAG, "Timeout waiting for agent " + request);
-                                continue;
-                            }
-                            agent = mConnectedAgent;
-                        }
+                    agent = bindToAgentSynchronous(request.appInfo, mode);
+                    if (agent != null) {
+                        processOneBackup(request, agent, transport);
                     }
-                } catch (RemoteException e) {
-                    // can't happen; activity manager is local
+
+                    // unbind even on timeout, just in case
+                    mActivityManager.unbindBackupAgent(request.appInfo);
                 } catch (SecurityException ex) {
                     // Try for the next one.
                     Log.d(TAG, "error in bind", ex);
-                }
-
-                // successful bind? run the backup for this agent
-                if (agent != null) {
-                    processOneBackup(request, agent, transport);
-                }
-
-                // send the unbind even on timeout, just in case
-                try {
-                    mActivityManager.unbindBackupAgent(request.appInfo);
                 } catch (RemoteException e) {
                     // can't happen
                 }
+
             }
         }
     }
 
+
+    // ----- Restore handling -----
+
+    // Is the given package restorable on this device?  Returns the on-device app's
+    // ApplicationInfo struct if it is; null if not.
+    //
+    // !!! TODO: also consider signatures
+    ApplicationInfo isRestorable(PackageInfo packageInfo) {
+        if (packageInfo.packageName != null) {
+            try {
+                ApplicationInfo app = mPackageManager.getApplicationInfo(packageInfo.packageName,
+                        PackageManager.GET_SIGNATURES);
+                if ((app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
+                    return app;
+                }
+            } catch (Exception e) {
+                // doesn't exist on this device, or other error -- just ignore it.
+            }
+        }
+        return null;
+    }
+
+    class PerformRestoreThread extends Thread {
+        private IBackupTransport mTransport;
+
+        PerformRestoreThread(IBackupTransport transport) {
+            mTransport = transport;
+        }
+
+        @Override
+        public void run() {
+            /**
+             * Restore sequence:
+             *
+             * 1. start up the transport session
+             * 2. get the restore set description for our identity
+             * 3. for each app in the restore set:
+             *    3.a. if it's restorable on this device, add it to the restore queue
+             * 4. for each app in the restore queue:
+             *    4.b. get the restore data for the app from the transport
+             *    4.c. launch the backup agent for the app
+             *    4.d. agent.doRestore() with the data from the server
+             *    4.e. unbind the agent [and kill the app?]
+             * 5. shut down the transport
+             */
+
+            int err = -1;
+            try {
+                err = mTransport.startSession();
+            } catch (Exception e) {
+                Log.e(TAG, "Error starting transport for restore");
+                e.printStackTrace();
+            }
+
+            if (err == 0) {
+                // build the set of apps to restore
+                try {
+                    RestoreSet[] images = mTransport.getAvailableRestoreSets();
+                    if (images.length > 0) {
+                        // !!! for now we always take the first set
+                        RestoreSet image = images[0];
+
+                        // build the set of apps we will attempt to restore
+                        PackageInfo[] packages = mTransport.getAppSet(image.token);
+                        HashSet<ApplicationInfo> appsToRestore = new HashSet<ApplicationInfo>();
+                        for (PackageInfo pkg: packages) {
+                            ApplicationInfo app = isRestorable(pkg);
+                            if (app != null) {
+                                appsToRestore.add(app);
+                            }
+                        }
+
+                        // now run the restore queue
+                        doQueuedRestores(appsToRestore);
+                    }
+                } catch (RemoteException e) {
+                    // can't happen; transports run locally
+                }
+
+                // done; shut down the transport
+                try {
+                    mTransport.endSession();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error ending transport for restore");
+                    e.printStackTrace();
+                }
+            }
+
+            // even if the initial session startup failed, report that we're done here
+        }
+
+        // restore each app in the queue
+        void doQueuedRestores(HashSet<ApplicationInfo> appsToRestore) {
+            for (ApplicationInfo app : appsToRestore) {
+                Log.d(TAG, "starting agent for restore of " + app);
+
+                IBackupAgent agent = null;
+                try {
+                    agent = bindToAgentSynchronous(app, IApplicationThread.BACKUP_MODE_RESTORE);
+                    if (agent != null) {
+                        processOneRestore(app, agent);
+                    }
+
+                    // unbind even on timeout, just in case
+                    mActivityManager.unbindBackupAgent(app);
+                } catch (SecurityException ex) {
+                    // Try for the next one.
+                    Log.d(TAG, "error in bind", ex);
+                } catch (RemoteException e) {
+                    // can't happen
+                }
+
+            }
+        }
+
+        // do the guts of a restore
+        void processOneRestore(ApplicationInfo app, IBackupAgent agent) {
+            // !!! TODO: actually run the restore through mTransport
+        }
+    }
+
+
     // ----- IBackupManager binder interface -----
-    
+
     public void dataChanged(String packageName) throws RemoteException {
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
@@ -548,6 +677,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 mBackupHandler.removeMessages(MSG_RUN_BACKUP);
                 mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, COLLECTION_INTERVAL);
             }
+        } else {
+            Log.w(TAG, "dataChanged but no participant pkg " + packageName);
         }
     }
 
