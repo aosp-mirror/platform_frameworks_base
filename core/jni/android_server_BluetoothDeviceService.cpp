@@ -603,20 +603,32 @@ static jboolean setAdapterPropertyNative(JNIEnv *env, jobject object, jstring ke
 
 static jboolean setAdapterPropertyStringNative(JNIEnv *env, jobject object, jstring key,
                                                jstring value) {
+#ifdef HAVE_BLUETOOTH
     const char *c_value = env->GetStringUTFChars(value, NULL);
     jboolean ret =  setAdapterPropertyNative(env, object, key, (void *)&c_value, DBUS_TYPE_STRING);
     env->ReleaseStringUTFChars(value, (char *)c_value);
     return ret;
+#else
+    return JNI_FALSE;
+#endif
 }
 
 static jboolean setAdapterPropertyIntegerNative(JNIEnv *env, jobject object, jstring key,
                                                jint value) {
+#ifdef HAVE_BLUETOOTH
     return setAdapterPropertyNative(env, object, key, (void *)&value, DBUS_TYPE_UINT32);
+#else
+    return JNI_FALSE;
+#endif
 }
 
 static jboolean setAdapterPropertyBooleanNative(JNIEnv *env, jobject object, jstring key,
                                                jint value) {
+#ifdef HAVE_BLUETOOTH
     return setAdapterPropertyNative(env, object, key, (void *)&value, DBUS_TYPE_BOOLEAN);
+#else
+    return JNI_FALSE;
+#endif
 }
 
 
