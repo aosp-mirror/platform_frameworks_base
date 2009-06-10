@@ -83,6 +83,9 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     // holds the position that, when displayed, should result in notifying the cursor
     int mDisplayNotifyPos = NONE;
 
+    private final Runnable mStartSpinnerRunnable;
+    private final Runnable mStopSpinnerRunnable;
+
     public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
             WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
         super(context,
@@ -103,6 +106,18 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
 
         mOutsideDrawablesCache = outsideDrawablesCache;
         mGlobalSearchMode = globalSearchMode;
+
+        mStartSpinnerRunnable = new Runnable() {
+                public void run() {
+                    mSearchDialog.setWorking(true);
+                }
+            };
+
+        mStopSpinnerRunnable = new Runnable() {
+            public void run() {
+                mSearchDialog.setWorking(false);
+            }
+        };
     }
 
     /**
@@ -123,11 +138,27 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
         if (DBG) Log.d(LOG_TAG, "runQueryOnBackgroundThread(" + constraint + ")");
         String query = (constraint == null) ? "" : constraint.toString();
+        if (!mGlobalSearchMode) {
+            /**
+             * for in app search we show the progress spinner until the cursor is returned with
+             * the results.  for global search we manage the progress bar using
+             * {@link DialogCursorProtocol#POST_REFRESH_RECEIVE_ISPENDING}.
+             */
+            mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
+        }
         try {
-            return SearchManager.getSuggestions(mContext, mSearchable, query);
+            final Cursor cursor = SearchManager.getSuggestions(mContext, mSearchable, query);
+            // trigger fill window so the spinner stays up until the results are copied over and
+            // closer to being ready
+            if (!mGlobalSearchMode) cursor.getCount();
+            return cursor;
         } catch (RuntimeException e) {
             Log.w(LOG_TAG, "Search suggestions query threw an exception.", e);
             return null;
+        } finally {
+            if (!mGlobalSearchMode) {
+                mSearchDialog.getWindow().getDecorView().post(mStopSpinnerRunnable);
+            }
         }
     }
 
