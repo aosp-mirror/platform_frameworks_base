@@ -950,6 +950,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * @param text the selected suggestion in the drop down list
      */
     protected void replaceText(CharSequence text) {
+        clearComposingText();
+
         setText(text);
         // make sure we keep the caret at the end of the text view
         Editable spannable = getText();
