@@ -91,8 +91,9 @@
     <string name="today">今天</string>
     <string name="tomorrow">明天</string>
 
+    <string name="hour_minute_24">%-k:%M</string>
     <string name="hour_minute_ampm">%p%-l:%M</string>
-    <string name="hour_minute_cap_ampm">%^p%-l:%M</string>
+    <string name="hour_minute_cap_ampm">%p%-l:%M</string>
     <string name="numeric_date">%Y-%-m-%-e</string>
     <string name="numeric_date_format">yyyy-M-d</string>
     <string name="month_day_year">%Y年%-m月%-e日</string>

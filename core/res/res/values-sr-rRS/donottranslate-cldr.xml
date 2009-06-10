@@ -91,8 +91,9 @@
     <string name="today">данас</string>
     <string name="tomorrow">сутра</string>
 
-    <string name="hour_minute_ampm">%H.%M</string>
-    <string name="hour_minute_cap_ampm">%H.%M</string>
+    <string name="hour_minute_24">%H.%M</string>
+    <string name="hour_minute_ampm">%-l:%M %p</string>
+    <string name="hour_minute_cap_ampm">%-l:%M %p</string>
     <string name="numeric_date">%-e.%-m.%Y.</string>
     <string name="numeric_date_format">d.M.yyyy.</string>
     <string name="month_day_year">%d. %B %Y.</string>
