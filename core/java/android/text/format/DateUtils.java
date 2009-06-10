@@ -147,6 +147,9 @@ public class DateUtils
     public static final long HOUR_IN_MILLIS = MINUTE_IN_MILLIS * 60;
     public static final long DAY_IN_MILLIS = HOUR_IN_MILLIS * 24;
     public static final long WEEK_IN_MILLIS = DAY_IN_MILLIS * 7;
+    /**
+     * This constant is actually the length of 364 days, not of a year!
+     */
     public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
 
     // The following FORMAT_* symbols are used for specifying the format of
@@ -176,6 +179,9 @@ public class DateUtils
 
     // Date and time format strings that are constant and don't need to be
     // translated.
+    /**
+     * This is not actually the preferred 24-hour date format in all locales.
+     */
     public static final String HOUR_MINUTE_24 = "%H:%M";
     public static final String MONTH_FORMAT = "%B";
     public static final String ABBREV_MONTH_FORMAT = "%b";
@@ -1106,7 +1112,9 @@ public class DateUtils
      * 
      * <p>
      * If FORMAT_CAP_AMPM is set and 12-hour time is used, then the "AM"
-     * and "PM" are capitalized.
+     * and "PM" are capitalized.  You should not use this flag
+     * because in some locales these terms cannot be capitalized, and in
+     * many others it doesn't make sense to do so even though it is possible.
      * 
      * <p>
      * If FORMAT_NO_NOON is set and 12-hour time is used, then "12pm" is
@@ -1114,15 +1122,19 @@ public class DateUtils
      * 
      * <p>
      * If FORMAT_CAP_NOON is set and 12-hour time is used, then "Noon" is
-     * shown instead of "noon".
+     * shown instead of "noon".  You should probably not use this flag
+     * because in many locales it will not make sense to capitalize
+     * the term.
      * 
      * <p>
      * If FORMAT_NO_MIDNIGHT is set and 12-hour time is used, then "12am" is
      * shown instead of "midnight".
      * 
      * <p>
-     * If FORMAT_CAP_NOON is set and 12-hour time is used, then "Midnight" is
-     * shown instead of "midnight".
+     * If FORMAT_CAP_MIDNIGHT is set and 12-hour time is used, then "Midnight"
+     * is shown instead of "midnight".  You should probably not use this
+     * flag because in many locales it will not make sense to capitalize
+     * the term.
      * 
      * <p>
      * If FORMAT_12HOUR is set and the time is shown, then the time is
@@ -1264,8 +1276,8 @@ public class DateUtils
                 use24Hour = DateFormat.is24HourFormat(context);
             }
             if (use24Hour) {
-                startTimeFormat = HOUR_MINUTE_24;
-                endTimeFormat = HOUR_MINUTE_24;
+                startTimeFormat = endTimeFormat =
+                    res.getString(com.android.internal.R.string.hour_minute_24);
             } else {
                 boolean abbrevTime = (flags & (FORMAT_ABBREV_TIME | FORMAT_ABBREV_ALL)) != 0;
                 boolean capAMPM = (flags & FORMAT_CAP_AMPM) != 0;
