@@ -93,7 +93,7 @@ public class CDMAPhone extends PhoneBase {
     private Registrant mECMExitRespRegistrant;
     private String mEsn;
     private String mMeid;
-    
+
     // A runnable which is used to automatically exit from ECM after a period of time.
     private Runnable mExitEcmRunnable = new Runnable() {
         public void run() {
@@ -854,7 +854,7 @@ public class CDMAPhone extends PhoneBase {
             // notify change
             sendEmergencyCallbackModeChange();
             setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE, "true");
-    
+
             // Post this runnable so we will automatically exit
             // if no one invokes exitEmergencyCallbackMode() directly.
             long delayInMillis = SystemProperties.getLong(

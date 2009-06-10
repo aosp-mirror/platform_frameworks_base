@@ -802,7 +802,7 @@ public class CdmaConnection extends Connection {
     // This function is to find the next PAUSE character index if
     // multiple pauses in a row. Otherwise it finds the next non PAUSE or
     // non WAIT character index.
-    private static int 
+    private static int
     findNextPCharOrNonPOrNonWCharIndex(String phoneNumber, int currIndex) {
         boolean wMatched = false;
         int index = currIndex + 1;
@@ -833,7 +833,7 @@ public class CdmaConnection extends Connection {
     // This function returns either PAUSE or WAIT character to append.
     // It is based on the next non PAUSE/WAIT character in the phoneNumber and the
     // index for the current PAUSE/WAIT character
-    private static char 
+    private static char
     findPOrWCharToAppend(String phoneNumber, int currPwIndex, int nextNonPwCharIndex) {
         char c = phoneNumber.charAt(currPwIndex);
         char ret;

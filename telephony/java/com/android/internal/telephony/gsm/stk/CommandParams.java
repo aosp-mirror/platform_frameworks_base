@@ -158,7 +158,7 @@ class GetInputParams extends CommandParams {
         this.input = input;
     }
 
-    boolean setIcon(Bitmap icon) { 
+    boolean setIcon(Bitmap icon) {
         if (icon != null && input != null) {
             input.icon = icon;
         }

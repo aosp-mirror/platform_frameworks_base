@@ -183,7 +183,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
      * Send a multi-part text based SMS which already passed SMS control check.
      *
      * It is the working function for sendMultipartText().
-     * 
+     *
      * @param destinationAddress the address to send the message to
      * @param scAddress is the service center address or null to use
      *   the current default SMSC
@@ -269,24 +269,24 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
     /**
      * Send the multi-part SMS based on multipart Sms tracker
-     * 
+     *
      * @param tracker holds the multipart Sms tracker ready to be sent
      */
     protected void sendMultipartSms (SmsTracker tracker) {
         ArrayList<String> parts;
         ArrayList<PendingIntent> sentIntents;
         ArrayList<PendingIntent> deliveryIntents;
-        
+
         HashMap map = tracker.mData;
-        
+
         String destinationAddress = (String) map.get("destination");
         String scAddress = (String) map.get("scaddress");
-        
+
         parts = (ArrayList<String>) map.get("parts");
         sentIntents = (ArrayList<PendingIntent>) map.get("sentIntents");
         deliveryIntents = (ArrayList<PendingIntent>) map.get("deliveryIntents");
-     
-        sendMultipartTextWithPermit(destinationAddress, 
+
+        sendMultipartTextWithPermit(destinationAddress,
                 scAddress, parts, sentIntents, deliveryIntents);
 
     }

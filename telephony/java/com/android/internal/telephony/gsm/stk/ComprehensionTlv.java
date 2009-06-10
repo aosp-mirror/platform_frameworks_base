@@ -33,7 +33,7 @@ class ComprehensionTlv {
     private int mLength;
     private int mValueIndex;
     private byte[] mRawValue;
-    
+
     /**
      * Constructor. Private on purpose. Use
      * {@link #decodeMany(byte[], int) decodeMany} or
@@ -165,9 +165,9 @@ class ComprehensionTlv {
             } else {
                 throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
             }
-            
+
             return new ComprehensionTlv(tag, cr, length, data, curIndex);
-            
+
         } catch (IndexOutOfBoundsException e) {
             throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
         }

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Container class for STK menu (SET UP MENU, SELECT ITEM) parameters. 
+ * Container class for STK menu (SET UP MENU, SELECT ITEM) parameters.
  *
  */
 public class Menu implements Parcelable {
