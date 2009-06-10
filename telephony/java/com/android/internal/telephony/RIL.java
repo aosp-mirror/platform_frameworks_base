@@ -1259,13 +1259,15 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         RILRequest rr
                 = RILRequest.obtain(RIL_REQUEST_SETUP_DATA_CALL, result);
 
-        rr.mp.writeInt(5);
+        rr.mp.writeInt(6);
 
         rr.mp.writeString(radioTechnology);
         rr.mp.writeString(profile);
         rr.mp.writeString(apn);
         rr.mp.writeString(user);
         rr.mp.writeString(password);
+        //TODO(): Add to the APN database, AuthType is set to CHAP/PAP
+        rr.mp.writeString("3");
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest) + " "
                 + apn);
@@ -2631,13 +2633,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     private Object
     responseSMS(Parcel p) {
-        int messageRef;
+        int messageRef, errorCode;
         String ackPDU;
 
         messageRef = p.readInt();
         ackPDU = p.readString();
+        errorCode = p.readInt();
 
-        SmsResponse response = new SmsResponse(messageRef, ackPDU);
+        SmsResponse response = new SmsResponse(messageRef, ackPDU, errorCode);
 
         return response;
     }

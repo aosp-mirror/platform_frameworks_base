@@ -26,9 +26,15 @@ public class SmsResponse {
     int messageRef;
     /** ackPdu for the just-sent SMS. */
     String ackPdu;
+    /**
+     * errorCode: See 3GPP 27.005, 3.2.5 for GSM/UMTS,
+     * 3GPP2 N.S0005 (IS-41C) Table 171 for CDMA, -1 if unknown or not applicable.
+     */
+    int errorCode;
 
-    public SmsResponse(int messageRef, String ackPdu) {
+    public SmsResponse(int messageRef, String ackPdu, int errorCode) {
         this.messageRef = messageRef;
         this.ackPdu = ackPdu;
+        this.errorCode = errorCode;
     }
 }
