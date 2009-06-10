@@ -1,4 +1,5 @@
 #
+# Copyright (C) 2008 Esmertec AG.
 # Copyright (C) 2008 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 LOCAL_PATH := $(call my-dir)
+
+# the library
+# ============================================================
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-LOCAL_STATIC_JAVA_LIBRARIES := android.renderscript
+LOCAL_SRC_FILES := \
+            $(call all-subdir-java-files) 
 
-LOCAL_PACKAGE_NAME := Fountain
+LOCAL_MODULE:= android.renderscript
 
-include $(BUILD_PACKAGE)
+include $(BUILD_STATIC_JAVA_LIBRARY)

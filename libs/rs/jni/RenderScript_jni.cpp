@@ -820,7 +820,7 @@ nSamplerCreate(JNIEnv *_env, jobject _this)
 // ---------------------------------------------------------------------------
 
 
-static const char *classPathName = "com/android/fountain/RenderScript";
+static const char *classPathName = "android/renderscript/RenderScript";
 
 static JNINativeMethod methods[] = {
 {"_nInit",                         "()V",                                  (void*)_nInit },

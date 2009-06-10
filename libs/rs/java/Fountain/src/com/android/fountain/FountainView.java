@@ -20,6 +20,9 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
+import android.renderscript.RSSurfaceView;
+import android.renderscript.RenderScript;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -109,9 +112,9 @@ public class FountainView extends RSSurfaceView {
         mParams[2] = 0;
         mParams[3] = 0;
         mParams[4] = 0;
-        mParams[5] = mPartAlloc.mID;
-        mParams[6] = mPF.mID;
-        mParams[7] = mPF2.mID;
+        mParams[5] = mPartAlloc.getID();
+        mParams[6] = mPF.getID();
+        mParams[7] = mPF2.getID();
         mIntAlloc.data(mParams);
 
         int t2[] = new int[partCount * 4*3];
