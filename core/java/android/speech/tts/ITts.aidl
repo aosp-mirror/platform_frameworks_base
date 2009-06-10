@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package android.tts;
+package android.speech.tts;
 
-import android.tts.ITtsCallback;
+import android.speech.tts.ITtsCallback;
 
 import android.content.Intent;
 
