@@ -2507,6 +2507,12 @@ public final class Settings {
         public static final String GMAIL_BUFFER_SERVER_RESPONSE = "gmail_buffer_server_response";
 
         /**
+         * The maximum size in bytes allowed for the provider to gzip a protocol buffer uploaded to
+         * the server.
+         */
+        public static final String GMAIL_MAX_GZIP_SIZE = "gmail_max_gzip_size_bytes";
+
+        /**
          * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
          * an integer where non-zero means true. Defaults to 1.
          */
