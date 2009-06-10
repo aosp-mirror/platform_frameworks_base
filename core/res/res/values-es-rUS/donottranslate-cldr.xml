@@ -91,6 +91,7 @@
     <string name="today">hoy</string>
     <string name="tomorrow">mañana</string>
 
+    <string name="hour_minute_24">%-k:%M</string>
     <string name="hour_minute_ampm">%-l:%M %p</string>
     <string name="hour_minute_cap_ampm">%-l:%M %^p</string>
     <string name="numeric_date">%-m/%-e/%Y</string>
