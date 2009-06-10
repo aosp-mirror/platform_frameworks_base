@@ -14,5 +14,5 @@ LOCAL_MODULE:= test-opengl-copybits
 
 LOCAL_MODULE_TAGS := tests
 
-##include $(BUILD_EXECUTABLE)
+include $(BUILD_EXECUTABLE)
 

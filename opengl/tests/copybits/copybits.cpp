@@ -17,7 +17,8 @@
 
 #include <utils/Atomic.h>
 
-#include <private/ui/SharedState.h>
+#include <private/ui/SurfaceBuffer.h>
+#include <pixelflinger/pixelflinger.h>
 
 #include <hardware/gralloc.h>
 #include <hardware/hardware.h>
@@ -53,70 +54,58 @@ int create_physical_texture();
 int readTimer();
 
 // ===========================================================================
-// Buffer and implementation of android_native_buffer_t
+// Buffer an implementation of android_native_buffer_t
 // ===========================================================================
 
 class NativeBuffer;
 
-class Buffer :  public android_native_buffer_t,
-                public LightRefBase<Buffer>
+class Buffer : public android::SurfaceBuffer
 {
 public:
-
     // creates w * h buffer
-    Buffer(uint32_t w, uint32_t h, PixelFormat format, int usage);
+    Buffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t usage);
 
     // return status
     status_t initCheck() const;
 
-
-    uint32_t getWidth() const           { return mWidth; }
-    uint32_t getHeight() const          { return mHeight; }
-    uint32_t getStride() const          { return mStride; }
-    uint32_t getUsage() const           { return mUsage; }
-    PixelFormat getPixelFormat() const  { return mFormat; }
-    buffer_handle_t getHandle() const   { return mBufferHandle; }
-
+    uint32_t getWidth() const           { return width; }
+    uint32_t getHeight() const          { return height; }
+    uint32_t getStride() const          { return stride; }
+    uint32_t getUsage() const           { return usage; }
+    PixelFormat getPixelFormat() const  { return format; }
+    
+    
     android_native_buffer_t* getNativeBuffer() const;
 
     void setPixel(int x, int y, int r, int g, int b, int a);
 
+    status_t lock(GGLSurface* surface, uint32_t usage);
+    void lock() {
+        GGLSurface s;
+        lock(&s, GRALLOC_USAGE_SW_WRITE_OFTEN);
+        mData = (void*)s.data;
+    }
+
 private:
     friend class LightRefBase<Buffer>;
     Buffer(const Buffer& rhs);
-    ~Buffer();
+    virtual ~Buffer();
     Buffer& operator = (const Buffer& rhs);
     const Buffer& operator = (const Buffer& rhs) const;
 
     status_t initSize(uint32_t w, uint32_t h);
 
-    static void incRef(android_native_base_t* buffer);
-    static void decRef(android_native_base_t* buffer);
-    static int getHandlePriv(android_native_buffer_t const * buffer,
-            buffer_handle_t* handle);
-
-    buffer_handle_t         mBufferHandle;
     ssize_t                 mInitCheck;
-
-    uint32_t                mWidth;
-    uint32_t                mHeight;
-    uint32_t                mStride;
+    uint32_t                mFlags;
     uint32_t                mVStride;
-    PixelFormat             mFormat;
     void*                   mData;
-    uint32_t                mUsage;
 };
 
-Buffer::Buffer(uint32_t w, uint32_t h, PixelFormat format, int usage)
-    : mBufferHandle(0), mInitCheck(NO_INIT),
-    mWidth(0), mHeight(0), mStride(0), mVStride(0), mFormat(format), mData(0),
-    mUsage(usage)
+Buffer::Buffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t usage)
+    : SurfaceBuffer(), mInitCheck(NO_INIT), mVStride(0)
 {
-    common.magic = ANDROID_NATIVE_BUFFER_MAGIC;
-    common.version = sizeof(android_native_buffer_t);
-    common.incRef = incRef;
-    common.decRef = decRef;
-    android_native_buffer_t::getHandle = getHandlePriv;
+    this->usage = usage;
+    this->format = format;
     if (w>0 && h>0) {
         mInitCheck = initSize(w, h);
     }
@@ -124,32 +113,9 @@ Buffer::Buffer(uint32_t w, uint32_t h, PixelFormat format, int usage)
 
 Buffer::~Buffer()
 {
-    if (mBufferHandle) {
-
-        gralloc_module_t* mod = (gralloc_module_t*)sAllocDev->common.module;
-        mod->unmap(mod, mBufferHandle);
-
-        sAllocDev->free(sAllocDev, mBufferHandle);
+    if (handle) {
+        sAllocDev->free(sAllocDev, handle);
     }
-}
-
-void Buffer::incRef(android_native_base_t* buffer) {
-    Buffer* self = static_cast<Buffer*>(
-            reinterpret_cast<android_native_buffer_t *>(buffer));
-    self->incStrong(self);
-}
-
-void Buffer::decRef(android_native_base_t* buffer) {
-    Buffer* self = static_cast<Buffer*>(
-            reinterpret_cast<android_native_buffer_t *>(buffer));
-    self->decStrong(self);
-}
-
-int Buffer::getHandlePriv(android_native_buffer_t const * buffer,
-        buffer_handle_t* handle) {
-    Buffer const * self = static_cast<Buffer const *>(buffer);
-    *handle = self->getHandle();
-    return 0;
 }
 
 status_t Buffer::initCheck() const {
@@ -158,32 +124,19 @@ status_t Buffer::initCheck() const {
 
 android_native_buffer_t* Buffer::getNativeBuffer() const
 {
-    Buffer* that = const_cast<Buffer*>(this);
-    that->android_native_buffer_t::width = mWidth;
-    that->android_native_buffer_t::height = mHeight;
-    that->android_native_buffer_t::stride = mStride;
-    that->android_native_buffer_t::format = mFormat;
-    that->android_native_buffer_t::usage = mUsage;
-    that->android_native_buffer_t::bits = mData;
-    return static_cast<android_native_buffer_t*>(that);
+    return static_cast<android_native_buffer_t*>(const_cast<Buffer*>(this));
 }
 
 status_t Buffer::initSize(uint32_t w, uint32_t h)
 {
     status_t err = NO_ERROR;
 
-    int32_t stride;
-    err = sAllocDev->alloc(sAllocDev, w, h, mFormat, mUsage, &mBufferHandle, &stride);
-
+    err = sAllocDev->alloc(sAllocDev, w, h, format, usage, &handle, &stride);
+    
     if (err == NO_ERROR) {
-        void* addr = 0;
-        gralloc_module_t* mod = (gralloc_module_t*)sAllocDev->common.module;
-        err = mod->map(mod, mBufferHandle, &addr);
         if (err == NO_ERROR) {
-            mData = addr;
-            mWidth  = w;
-            mHeight = h;
-            mStride = stride;
+            width  = w;
+            height = h;
             mVStride = 0;
         }
     }
@@ -191,14 +144,31 @@ status_t Buffer::initSize(uint32_t w, uint32_t h)
     return err;
 }
 
+status_t Buffer::lock(GGLSurface* sur, uint32_t usage) 
+{
+    void* vaddr;
+    status_t res = SurfaceBuffer::lock(usage, &vaddr);
+    if (res == NO_ERROR && sur) {
+        sur->version = sizeof(GGLSurface);
+        sur->width = width;
+        sur->height = height;
+        sur->stride = stride;
+        sur->format = format;
+        sur->vstride = mVStride;
+        sur->data = static_cast<GGLubyte*>(vaddr);
+    }
+    return res;
+}
+
+
 void Buffer::setPixel(int x, int y, int r, int g, int b, int a) {
-    if (x < 0 || (unsigned int) x >= mWidth
-            || y < 0 || (unsigned int) y >= mHeight) {
+    if (x < 0 || (unsigned int) x >= width
+            || y < 0 || (unsigned int) y >= height) {
         // clipped
         return;
     }
-    int index = mStride * y + x;
-    switch (mFormat) {
+    int index = stride * y + x;
+    switch (format) {
     case HAL_PIXEL_FORMAT_RGB_565: {
             unsigned short val = (unsigned short) (
                     ((0x1f & (r >> 3)) << 11)
@@ -340,6 +310,10 @@ int init_gl_surface(void)
         return 0;
     }
 
+#if EGL_ANDROID_swap_rectangle
+    eglSetSwapRectangleANDROID(eglDisplay, eglSurface, 0, 0, 320, 480);
+#endif
+    
     return 1;
 }
 
@@ -347,7 +321,7 @@ void free_gl_surface(void)
 {
     if (eglDisplay != EGL_NO_DISPLAY)
     {
-        eglMakeCurrent( EGL_NO_DISPLAY, EGL_NO_SURFACE,
+        eglMakeCurrent( eglDisplay, EGL_NO_SURFACE,
                 EGL_NO_SURFACE, EGL_NO_CONTEXT );
         eglDestroyContext( eglDisplay, eglContext );
         eglDestroySurface( eglDisplay, eglSurface );
@@ -465,14 +439,11 @@ int create_physical_texture(unsigned int w, unsigned int h)
         return -1;
     }
 
-    if (buffer->bits == NULL) {
-        printf("No bits allocated for image.\n");
-        return -2;
-    }
-
+    bufferObject->lock();
     setOrientedCheckerboard(bufferObject);
     // setSmoothGradient(bufferObject);
     // setSmoothAlphaGradient(bufferObject);
+    bufferObject->unlock();
 
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -658,6 +629,7 @@ int testRot90()
     glDisable(GL_CULL_FACE);
 
     for(int frame = 0; frame < 2; frame++) {
+        LOGD("frame = %d", frame);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         int baseX = 10;
         for (int x = 0; x < SCALE_COUNT; x++) {
@@ -708,7 +680,7 @@ int testRot90()
                 glVertexPointer(2, GL_FIXED, 0, vertices);
                 glTexCoordPointer(2, GL_FIXED, 0, texCoords);
 
-                LOGW("testRot90 %d, %d %d, %d", baseX, baseY, width, height);
+                LOGD("testRot90 %d, %d %d, %d", baseX, baseY, width, height);
                 glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
                 baseY += height + 10;
@@ -744,8 +716,8 @@ int main(int argc, char **argv)
 
     printf("Start test...\n");
     // testTime();
-    // testStretch();
-    testRot90();
+     testStretch();
+    //testRot90();
     free_gl_surface();
 
     return 0;

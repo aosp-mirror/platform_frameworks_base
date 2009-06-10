@@ -29,6 +29,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 class BufferMapper;
+class Parcel;
 class Rect;
 class Surface;
 class SurfaceBuffer;
