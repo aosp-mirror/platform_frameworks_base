@@ -28,7 +28,7 @@ import android.util.SparseIntArray;
  * invalidates the cache if changes occur in the cursor.
  * <p/>
  * Your adapter is responsible for updating the cursor by calling {@link #setCursor} if the
- * cursor changes. {@link #getPositionForSection} method does the binary search for the starting 
+ * cursor changes. {@link #getPositionForSection} method does the binary search for the starting
  * index of a given section (alphabet).
  */
 public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
@@ -37,33 +37,33 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
      * Cursor that is used by the adapter of the list view.
      */
     protected Cursor mDataCursor;
-    
+
     /**
      * The index of the cursor column that this list is sorted on.
      */
     protected int mColumnIndex;
-    
+
     /**
      * The string of characters that make up the indexing sections.
      */
     protected CharSequence mAlphabet;
-    
+
     /**
      * Cached length of the alphabet array.
      */
     private int mAlphabetLength;
-    
+
     /**
      * This contains a cache of the computed indices so far. It will get reset whenever
      * the dataset changes or the cursor changes.
      */
     private SparseIntArray mAlphaMap;
-    
+
     /**
      * Use a collator to compare strings in a localized manner.
      */
     private java.text.Collator mCollator;
-    
+
     /**
      * The section array converted from the alphabet string.
      */
@@ -72,9 +72,9 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
     /**
      * Constructs the indexer.
      * @param cursor the cursor containing the data set
-     * @param sortedColumnIndex the column number in the cursor that is sorted 
+     * @param sortedColumnIndex the column number in the cursor that is sorted
      *        alphabetically
-     * @param alphabet string containing the alphabet, with space as the first character. 
+     * @param alphabet string containing the alphabet, with space as the first character.
      *        For example, use the string " ABCDEFGHIJKLMNOPQRSTUVWXYZ" for English indexing.
      *        The characters must be uppercase and be sorted in ascii/unicode order. Basically
      *        characters in the alphabet will show up as preview letters.
@@ -104,7 +104,7 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
     public Object[] getSections() {
         return mAlphabetArray;
     }
-    
+
     /**
      * Sets a new cursor as the data set and resets the cache of indices.
      * @param cursor the new cursor to use as the data set
@@ -124,9 +124,16 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
      * Default implementation compares the first character of word with letter.
      */
     protected int compare(String word, String letter) {
-        return mCollator.compare(word.substring(0, 1), letter);
+        final String firstLetter;
+        if (word.length() == 0) {
+            firstLetter = " ";
+        } else {
+            firstLetter = word.substring(0, 1);
+        }
+
+        return mCollator.compare(firstLetter, letter);
     }
-    
+
     /**
      * Performs a binary search or cache lookup to find the first row that
      * matches a given section's starting letter.
@@ -143,7 +150,7 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
         if (cursor == null || mAlphabet == null) {
             return 0;
         }
-        
+
         // Check bounds
         if (sectionIndex <= 0) {
             return 0;
@@ -164,7 +171,7 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
         int key = letter;
         // Check map
         if (Integer.MIN_VALUE != (pos = alphaMap.get(key, Integer.MIN_VALUE))) {
-            // Is it approximate? Using negative value to indicate that it's 
+            // Is it approximate? Using negative value to indicate that it's
             // an approximation and positive value when it is the accurate
             // position.
             if (pos < 0) {
@@ -204,7 +211,7 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
             }
             int diff = compare(curName, targetLetter);
             if (diff != 0) {
-                // Commenting out approximation code because it doesn't work for certain 
+                // TODO: Commenting out approximation code because it doesn't work for certain
                 // lists with custom comparators
                 // Enter approximation in hash if a better solution doesn't exist
                 // String startingLetter = Character.toString(getFirstLetter(curName));
@@ -259,9 +266,9 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
                 return i;
             }
         }
-        return 0; // Don't recognize the letter - falls under zero'th section    
+        return 0; // Don't recognize the letter - falls under zero'th section
     }
-    
+
     /*
      * @hide
      */
