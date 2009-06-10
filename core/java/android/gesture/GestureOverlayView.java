@@ -294,6 +294,7 @@ public class GestureOverlayView extends FrameLayout {
         final RectF bounds = new RectF();
         path.computeBounds(bounds, true);
 
+        // TODO: The path should also be scaled to fit inside this view
         mPath.rewind();
         mPath.addPath(path, -bounds.left + (getWidth() - bounds.width()) / 2.0f,
                 -bounds.top + (getHeight() - bounds.height()) / 2.0f);
