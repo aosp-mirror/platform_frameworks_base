@@ -310,6 +310,12 @@ public final class ContactsContract {
          */
         public static final String IS_SUPER_PRIMARY = "is_super_primary";
 
+        /**
+         * Flag indicating that this data entry has been restricted by the owner
+         * {@link #PACKAGE}.
+         */
+        public static final String IS_RESTRICTED = "is_restricted";
+
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
         public static final String DATA1 = "data1";
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
@@ -903,5 +909,52 @@ public final class ContactsContract {
          * contact that the rule applies to.
          */
         public static final String CONTACT_ID2 = "contact_id2";
+    }
+
+    private interface RestrictionExceptionsColumns {
+        /**
+         * Package name of a specific data provider, which will be matched
+         * against {@link Data#PACKAGE}.
+         * <p>
+         * Type: STRING
+         */
+        public static final String PACKAGE_PROVIDER = "package_provider";
+
+        /**
+         * Package name of a specific data client, which will be matched against
+         * the incoming {@link android.os.Binder#getCallingUid()} to decide if
+         * the caller can access values with {@link Data#IS_RESTRICTED} flags.
+         * <p>
+         * Type: STRING
+         */
+        public static final String PACKAGE_CLIENT = "package_client";
+
+        /**
+         * Flag indicating if {@link #PACKAGE_PROVIDER} allows
+         * {@link #PACKAGE_CLIENT} to access restricted {@link Data} rows.
+         * <p>
+         * Type: INTEGER
+         */
+        public static final String ALLOW_ACCESS = "allow_access";
+    }
+
+    /**
+     * Constants for {@link Data} restriction exceptions. Sync adapters who
+     * insert restricted data can use this table to specify exceptions about
+     * which additional packages can access that restricted data.You can only
+     * modify rules for a {@link RestrictionExceptionsColumns#PACKAGE_PROVIDER}
+     * that your {@link android.os.Binder#getCallingUid()} owns.
+     */
+    public static final class RestrictionExceptions implements RestrictionExceptionsColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private RestrictionExceptions() {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "restriction_exceptions");
     }
 }
