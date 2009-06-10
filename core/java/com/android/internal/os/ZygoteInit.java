@@ -467,7 +467,7 @@ public class ZygoteInit {
             "--setuid=1000",
             "--setgid=1000",
             "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,3001,3002,3003",
-            "--capabilities=121715744,121715744",
+            "--capabilities=130104352,130104352",
             "--runtime-init",
             "--nice-name=system_server",
             "com.android.server.SystemServer",
