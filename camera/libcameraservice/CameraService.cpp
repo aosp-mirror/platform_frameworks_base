@@ -245,7 +245,7 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client)
         sp<ICameraClient> oldClient;
         {
             Mutex::Autolock _l(mLock);
-            if (mClientPid != 0) {
+            if (mClientPid != 0 && checkPid() != NO_ERROR) {
                 LOGW("Tried to connect to locked camera");
                 return -EBUSY;
             }
