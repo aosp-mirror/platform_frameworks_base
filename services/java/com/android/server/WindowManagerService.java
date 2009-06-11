@@ -3793,13 +3793,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
         Object targetObj = mKeyWaiter.waitForNextEventTarget(null, qev,
                 ev, true, false);
-<<<<<<< HEAD:services/java/com/android/server/WindowManagerService.java
         
         if (MEASURE_LATENCY) {
             lt.sample("3 Last dispatch finished ", System.nanoTime() - qev.whenNano);
         }
-=======
->>>>>>> f31cbb:services/java/com/android/server/WindowManagerService.java
 
         int action = ev.getAction();
 
@@ -3837,12 +3834,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         WindowState target = (WindowState)targetObj;
 
         final long eventTime = ev.getEventTime();
-<<<<<<< HEAD:services/java/com/android/server/WindowManagerService.java
         final long eventTimeNano = ev.getEventTimeNano();
         
-=======
-
->>>>>>> f31cbb:services/java/com/android/server/WindowManagerService.java
         //Log.i(TAG, "Sending " + ev + " to " + target);
 
         if (uid != 0 && uid != target.mSession.mUid) {
@@ -3859,17 +3852,12 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 return false;
             }
         }
-<<<<<<< HEAD:services/java/com/android/server/WindowManagerService.java
         
         if (MEASURE_LATENCY) {
             lt.sample("4 in dispatchPointer     ", System.nanoTime() - eventTimeNano);
         }
 
-        if ((target.mAttrs.flags & 
-=======
-
         if ((target.mAttrs.flags &
->>>>>>> f31cbb:services/java/com/android/server/WindowManagerService.java
                         WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES) != 0) {
             //target wants to ignore fat touch events
             boolean cheekPress = mPolicy.isCheekPressedAgainstScreen(ev);
