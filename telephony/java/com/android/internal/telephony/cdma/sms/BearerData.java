@@ -385,7 +385,17 @@ public final class BearerData{
         outStream.skip(3);
     }
 
-    private static byte[] encode7bitAscii(String msg)
+    private static class SeptetData {
+        byte data[];
+        int septetCount;
+
+        SeptetData(byte[] data, int septetCount) {
+            this.data = data;
+            this.septetCount = septetCount;
+        }
+    }
+
+    private static SeptetData encode7bitAscii(String msg, boolean force)
         throws CodingException
     {
         try {
@@ -396,15 +406,35 @@ public final class BearerData{
                 // Test ourselves for ASCII membership, since Java seems not to care.
                 if ((charCode < UserData.PRINTABLE_ASCII_MIN_INDEX) ||
                         (charCode > UserData.PRINTABLE_ASCII_MAX_INDEX)) {
-                    throw new CodingException("illegal ASCII code (" + charCode + ")");
+                    if (force) {
+                        outStream.write(7, UserData.UNENCODABLE_7_BIT_CHAR);
+                    } else {
+                        throw new CodingException("illegal ASCII code (" + charCode + ")");
+                    }
+                } else {
+                    outStream.write(7, expandedData[i]);
                 }
-                outStream.write(7, expandedData[i]);
             }
-            return outStream.toByteArray();
-        } catch  (java.io.UnsupportedEncodingException ex) {
+            return new SeptetData(outStream.toByteArray(), expandedData.length);
+        } catch (java.io.UnsupportedEncodingException ex) {
             throw new CodingException("7bit ASCII encode failed: " + ex);
-        } catch  (BitwiseOutputStream.AccessException ex) {
+        } catch (BitwiseOutputStream.AccessException ex) {
             throw new CodingException("7bit ASCII encode failed: " + ex);
+        }
+    }
+
+    /**
+     * Calculate the number of septets needed to encode the message.
+     *
+     * @param force ignore (but still count) illegal characters if true
+     * @return septet count, or -1 on failure
+     */
+    public static int calc7bitEncodedLength(String msg, boolean force) {
+        try {
+            SeptetData data = encode7bitAscii(msg, force);
+            return data.septetCount;
+        } catch (CodingException ex) {
+            return -1;
         }
     }
 
@@ -412,7 +442,7 @@ public final class BearerData{
         throws CodingException
     {
         try {
-            return msg.getBytes("utf-16be"); // XXX(do not submit) -- make sure decode matches
+            return msg.getBytes("utf-16be");
         } catch (java.io.UnsupportedEncodingException ex) {
             throw new CodingException("UTF-16 encode failed: " + ex);
         }
@@ -462,7 +492,8 @@ public final class BearerData{
                 if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
                     payloadData = encode7bitGsm(uData.payloadStr);
                 } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
-                    payloadData = encode7bitAscii(uData.payloadStr);
+                    SeptetData septetData = encode7bitAscii(uData.payloadStr, true);
+                    payloadData = septetData.data;
                 } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
                     payloadData = encodeUtf16(uData.payloadStr);
                 } else {
@@ -478,7 +509,8 @@ public final class BearerData{
                 uData.payloadStr = "";
             }
             try {
-                payloadData = encode7bitAscii(uData.payloadStr);
+                SeptetData septetData = encode7bitAscii(uData.payloadStr, false);
+                payloadData = septetData.data;
                 uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
             } catch (CodingException ex) {
                 payloadData = encodeUtf16(uData.payloadStr);

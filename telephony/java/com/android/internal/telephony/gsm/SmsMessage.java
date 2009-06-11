@@ -739,6 +739,22 @@ public class SmsMessage extends SmsMessageBase{
         }
     }
 
+    /**
+     * Calculate the number of septets needed to encode the message.
+     *
+     * @param messageBody the message to encode
+     * @param force ignore (but still count) illegal characters if true
+     * @return septet count, or -1 on failure
+     */
+    public static int calc7bitEncodedLength(CharSequence messageBody, boolean force) {
+        try {
+            return GsmAlphabet.countGsmSeptets(messageBody, !force);
+        } catch (EncodeException ex) {
+            /* Just fall through to the -1 error result below. */
+        }
+        return -1;
+    }
+
     /** {@inheritDoc} */
     public int getProtocolIdentifier() {
         return protocolIdentifier;
