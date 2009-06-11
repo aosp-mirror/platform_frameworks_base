@@ -8218,12 +8218,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 report.time = crashData.getTime();
                 report.crashInfo.stackTrace = throwData.toString();
 
-                // extract the source of the exception, useful for report
-                // clustering
+                // Extract the source of the exception, useful for report
+                // clustering. Also extract the "deepest" non-null exception
+                // message.
+                String exceptionMessage = throwData.getMessage();
                 while (throwData.getCause() != null) {
                     throwData = throwData.getCause();
+                    String msg = throwData.getMessage();
+                    if (msg != null && msg.length() > 0) {
+                       exceptionMessage = msg;
+                    }
                 }
                 StackTraceElementData trace = throwData.getStackTrace()[0];
+                report.crashInfo.exceptionMessage = exceptionMessage;
                 report.crashInfo.exceptionClassName = throwData.getType();
                 report.crashInfo.throwFileName = trace.getFileName();
                 report.crashInfo.throwClassName = trace.getClassName();
