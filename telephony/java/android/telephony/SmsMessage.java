@@ -224,25 +224,29 @@ public class SmsMessage {
 
     /**
      * Calculates the number of SMS's required to encode the message body and
-     * the number of characters remaining until the next message, given the
-     * current encoding.
+     * the number of characters remaining until the next message.
      *
-     * @param messageBody the message to encode
-     * @param use7bitOnly if true, characters that are not part of the GSM
-     *         alphabet are counted as a single space char.  If false, a
-     *         messageBody containing non-GSM alphabet characters is calculated
-     *         for 16-bit encoding.
+     * @param msgBody the message to encode
+     * @param use7bitOnly if true, characters that are not part of the
+     *         radio-specific 7-bit encoding are counted as single
+     *         space chars.  If false, and if the messageBody contains
+     *         non-7-bit encodable characters, length is calculated
+     *         using a 16-bit encoding.
      * @return an int[4] with int[0] being the number of SMS's required, int[1]
      *         the number of code units used, and int[2] is the number of code
      *         units remaining until the next message. int[3] is the encoding
      *         type that should be used for the message.
      */
-    public static int[] calculateLength(CharSequence messageBody, boolean use7bitOnly) {
+    public static int[] calculateLength(CharSequence msgBody, boolean use7bitOnly) {
+        int activePhone = TelephonyManager.getDefault().getPhoneType();
         int ret[] = new int[4];
 
-        try {
-            // Try GSM alphabet
-            int septets = GsmAlphabet.countGsmSeptets(messageBody, !use7bitOnly);
+        int septets = (PHONE_TYPE_CDMA == activePhone) ?
+                com.android.internal.telephony.cdma.SmsMessage.calc7bitEncodedLength(msgBody,
+                        use7bitOnly) :
+                com.android.internal.telephony.gsm.SmsMessage.calc7bitEncodedLength(msgBody,
+                        use7bitOnly);
+        if (septets != -1) {
             ret[1] = septets;
             if (septets > MAX_USER_DATA_SEPTETS) {
                 ret[0] = (septets / MAX_USER_DATA_SEPTETS_WITH_HEADER) + 1;
@@ -253,12 +257,10 @@ public class SmsMessage {
                 ret[2] = MAX_USER_DATA_SEPTETS - septets;
             }
             ret[3] = ENCODING_7BIT;
-        } catch (EncodeException ex) {
-            // fall back to UCS-2
-            int octets = messageBody.length() * 2;
-            ret[1] = messageBody.length();
+        } else {
+            int octets = msgBody.length() * 2;
+            ret[1] = msgBody.length();
             if (octets > MAX_USER_DATA_BYTES) {
-                // 6 is the size of the user data header
                 ret[0] = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
                 ret[2] = (MAX_USER_DATA_BYTES_WITH_HEADER
                             - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
