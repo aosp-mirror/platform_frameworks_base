@@ -254,10 +254,18 @@ public abstract class Context {
      * <p>Note: this is not generally useful for applications, since they should
      * not be directly accessing the file system.
      *
-     *
      * @return String Path to the code and assets.
      */
     public abstract String getPackageCodePath();
+
+    /**
+     * {@hide}
+     * Return the full path to the shared prefs file for the given prefs group name.
+     *
+     * <p>Note: this is not generally useful for applications, since they should
+     * not be directly accessing the file system.
+     */
+    public abstract File getSharedPrefsFile(String name);
 
     /**
      * Retrieve and hold the contents of the preferences file 'name', returning

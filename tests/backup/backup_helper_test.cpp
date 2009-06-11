@@ -38,6 +38,7 @@ Test TESTS[] = {
     { "backup_helper_test_empty", backup_helper_test_empty, 0, false },
     { "backup_helper_test_four", backup_helper_test_four, 0, false },
     { "backup_helper_test_files", backup_helper_test_files, 0, false },
+    { "backup_helper_test_null_base", backup_helper_test_null_base, 0, false },
     { "backup_helper_test_data_writer", backup_helper_test_data_writer, 0, false },
     { "backup_helper_test_data_reader", backup_helper_test_data_reader, 0, false },
     { 0, NULL, 0, false}

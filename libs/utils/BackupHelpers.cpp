@@ -41,8 +41,8 @@ namespace android {
 #define MAGIC0 0x70616e53 // Snap
 #define MAGIC1 0x656c6946 // File
 
-#if 0 // TEST_BACKUP_HELPERS
-#define LOGP(x...) printf(x)
+#if 1 // TEST_BACKUP_HELPERS
+#define LOGP(f, x...) printf(f "\n", x)
 #else
 #define LOGP(x...) LOGD(x)
 #endif
@@ -60,6 +60,11 @@ struct FileState {
     int size;
     int crc32;
     int nameLen;
+};
+
+struct FileRec {
+    char const* file; // this object does not own this string
+    FileState s;
 };
 
 const static int ROUND_UP[4] = { 0, 3, 2, 1 };
@@ -92,8 +97,8 @@ read_snapshot_file(int fd, KeyedVector<String8,FileState>* snapshot)
         FileState file;
         char filenameBuf[128];
 
-        amt = read(fd, &file, sizeof(file));
-        if (amt != sizeof(file)) {
+        amt = read(fd, &file, sizeof(FileState));
+        if (amt != sizeof(FileState)) {
             LOGW("read_snapshot_file FileState truncated/error with read at %d bytes\n", bytesRead);
             return 1;
         }
@@ -128,7 +133,7 @@ read_snapshot_file(int fd, KeyedVector<String8,FileState>* snapshot)
 }
 
 static int
-write_snapshot_file(int fd, const KeyedVector<String8,FileState>& snapshot)
+write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
 {
     int bytesWritten = sizeof(SnapshotHeader);
     // preflight size
@@ -151,11 +156,11 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileState>& snapshot)
 
     for (int i=0; i<header.fileCount; i++) {
         const String8& name = snapshot.keyAt(i);
-        FileState file = snapshot.valueAt(i);
-        int nameLen = file.nameLen = name.length();
+        FileRec r = snapshot.valueAt(i);
+        int nameLen = r.s.nameLen = name.length();
 
-        amt = write(fd, &file, sizeof(file));
-        if (amt != sizeof(file)) {
+        amt = write(fd, &r.s, sizeof(FileState));
+        if (amt != sizeof(FileState)) {
             LOGW("write_snapshot_file error writing header %s", strerror(errno));
             return 1;
         }
@@ -190,9 +195,9 @@ write_delete_file(BackupDataWriter* dataStream, const String8& key)
 
 static int
 write_update_file(BackupDataWriter* dataStream, int fd, const String8& key,
-        const String8& realFilename)
+        char const* realFilename)
 {
-    LOGP("write_update_file %s (%s)\n", realFilename.string(), key.string());
+    LOGP("write_update_file %s (%s)\n", realFilename, key.string());
 
     const int bufsize = 4*1024;
     int err;
@@ -237,8 +242,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, const String8& key,
             }
         }
         LOGE("write_update_file size mismatch for %s. expected=%d actual=%d."
-                " You aren't doing proper locking!",
-                realFilename.string(), fileSize, fileSize-bytesLeft);
+                " You aren't doing proper locking!", realFilename, fileSize, fileSize-bytesLeft);
     }
 
     free(buf);
@@ -247,10 +251,10 @@ write_update_file(BackupDataWriter* dataStream, int fd, const String8& key,
 }
 
 static int
-write_update_file(BackupDataWriter* dataStream, const String8& key, const String8& realFilename)
+write_update_file(BackupDataWriter* dataStream, const String8& key, char const* realFilename)
 {
     int err;
-    int fd = open(realFilename.string(), O_RDONLY);
+    int fd = open(realFilename, O_RDONLY);
     if (fd == -1) {
         return errno;
     }
@@ -281,12 +285,11 @@ compute_crc32(int fd)
 
 int
 back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD,
-        char const* fileBase, char const* const* files, int fileCount)
+        char const* const* files, char const* const* keys, int fileCount)
 {
     int err;
-    const String8 base(fileBase);
     KeyedVector<String8,FileState> oldSnapshot;
-    KeyedVector<String8,FileState> newSnapshot;
+    KeyedVector<String8,FileRec> newSnapshot;
 
     if (oldSnapshotFD != -1) {
         err = read_snapshot_file(oldSnapshotFD, &oldSnapshot);
@@ -297,26 +300,28 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
     }
 
     for (int i=0; i<fileCount; i++) {
-        String8 name(files[i]);
-        FileState s;
+        String8 key(keys[i]);
+        FileRec r;
+        char const* file = r.file = files[i];
         struct stat st;
-        String8 realFilename(base);
-        realFilename.appendPath(name);
 
-        err = stat(realFilename.string(), &st);
+        err = stat(file, &st);
         if (err != 0) {
-            LOGW("Error stating file %s", realFilename.string());
+            LOGW("Error stating file %s", file);
             continue;
         }
 
-        s.modTime_sec = st.st_mtime;
-        s.modTime_nsec = 0; // workaround sim breakage
-        //s.modTime_nsec = st.st_mtime_nsec;
-        s.size = st.st_size;
-
+        r.s.modTime_sec = st.st_mtime;
+        r.s.modTime_nsec = 0; // workaround sim breakage
+        //r.s.modTime_nsec = st.st_mtime_nsec;
+        r.s.size = st.st_size;
         // we compute the crc32 later down below, when we already have the file open.
-
-        newSnapshot.add(name, s);
+        
+        if (newSnapshot.indexOfKey(key) >= 0) {
+            LOGP("back_up_files key already in use '%s'", key.string());
+            return -1;
+        }
+        newSnapshot.add(key, r);
     }
 
     int n = 0;
@@ -329,43 +334,39 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
         int cmp = p.compare(q);
         if (cmp > 0) {
             // file added
-            String8 realFilename(base);
-            realFilename.appendPath(q);
-            LOGP("file added: %s\n", realFilename.string());
-            write_update_file(dataStream, q, realFilename);
+            const FileRec& g = newSnapshot.valueAt(m);
+            LOGP("file added: %s", g.file);
+            write_update_file(dataStream, q, g.file);
             m++;
         }
         else if (cmp < 0) {
             // file removed
-            LOGP("file removed: %s\n", p.string());
+            LOGP("file removed: %s", p.string());
             dataStream->WriteEntityHeader(p, -1);
             n++;
         }
         else {
-
             // both files exist, check them
-            String8 realFilename(base);
-            realFilename.appendPath(q);
             const FileState& f = oldSnapshot.valueAt(n);
-            FileState& g = newSnapshot.editValueAt(m);
+            FileRec& g = newSnapshot.editValueAt(m);
 
-            int fd = open(realFilename.string(), O_RDONLY);
+            int fd = open(g.file, O_RDONLY);
             if (fd < 0) {
                 // We can't open the file.  Don't report it as a delete either.  Let the
                 // server keep the old version.  Maybe they'll be able to deal with it
                 // on restore.
-                LOGP("Unable to open file %s - skipping", realFilename.string());
+                LOGP("Unable to open file %s - skipping", g.file);
             } else {
-                g.crc32 = compute_crc32(fd);
+                g.s.crc32 = compute_crc32(fd);
 
-                LOGP("%s\n", q.string());
-                LOGP("  new: modTime=%d,%d size=%-3d crc32=0x%08x\n",
+                LOGP("%s", q.string());
+                LOGP("  new: modTime=%d,%d size=%-3d crc32=0x%08x",
                         f.modTime_sec, f.modTime_nsec, f.size, f.crc32);
-                LOGP("  old: modTime=%d,%d size=%-3d crc32=0x%08x\n",
-                        g.modTime_sec, g.modTime_nsec, g.size, g.crc32);
-                if (f.modTime_sec != g.modTime_sec || f.modTime_nsec != g.modTime_nsec
-                        || f.size != g.size || f.crc32 != g.crc32) {
-                    write_update_file(dataStream, fd, p, realFilename);
+                LOGP("  old: modTime=%d,%d size=%-3d crc32=0x%08x",
+                        g.s.modTime_sec, g.s.modTime_nsec, g.s.size, g.s.crc32);
+                if (f.modTime_sec != g.s.modTime_sec || f.modTime_nsec != g.s.modTime_nsec
+                        || f.size != g.s.size || f.crc32 != g.s.crc32) {
+                    write_update_file(dataStream, fd, p, g.file);
                 }
 
                 close(fd);
@@ -384,9 +385,8 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
     // these were added
     while (m<fileCount) {
         const String8& q = newSnapshot.keyAt(m);
-        String8 realFilename(base);
-        realFilename.appendPath(q);
-        write_update_file(dataStream, q, realFilename);
+        FileRec& g = newSnapshot.editValueAt(m);
+        write_update_file(dataStream, q, g.file);
         m++;
     }
 
@@ -475,7 +475,7 @@ backup_helper_test_empty()
 {
     int err;
     int fd;
-    KeyedVector<String8,FileState> snapshot;
+    KeyedVector<String8,FileRec> snapshot;
     const char* filename = SCRATCH_DIR "backup_helper_test_empty.snap";
 
     system("rm -r " SCRATCH_DIR);
@@ -534,7 +534,7 @@ backup_helper_test_four()
 {
     int err;
     int fd;
-    KeyedVector<String8,FileState> snapshot;
+    KeyedVector<String8,FileRec> snapshot;
     const char* filename = SCRATCH_DIR "backup_helper_test_four.snap";
 
     system("rm -r " SCRATCH_DIR);
@@ -549,38 +549,44 @@ backup_helper_test_four()
 
     String8 filenames[4];
     FileState states[4];
+    FileRec r;
+    r.file = NULL;
 
     states[0].modTime_sec = 0xfedcba98;
     states[0].modTime_nsec = 0xdeadbeef;
     states[0].size = 0xababbcbc;
     states[0].crc32 = 0x12345678;
     states[0].nameLen = -12;
+    r.s = states[0];
     filenames[0] = String8("bytes_of_padding");
-    snapshot.add(filenames[0], states[0]);
+    snapshot.add(filenames[0], r);
 
     states[1].modTime_sec = 0x93400031;
     states[1].modTime_nsec = 0xdeadbeef;
     states[1].size = 0x88557766;
     states[1].crc32 = 0x22334422;
     states[1].nameLen = -1;
+    r.s = states[1];
     filenames[1] = String8("bytes_of_padding3");
-    snapshot.add(filenames[1], states[1]);
+    snapshot.add(filenames[1], r);
 
     states[2].modTime_sec = 0x33221144;
     states[2].modTime_nsec = 0xdeadbeef;
     states[2].size = 0x11223344;
     states[2].crc32 = 0x01122334;
     states[2].nameLen = 0;
+    r.s = states[2];
     filenames[2] = String8("bytes_of_padding_2");
-    snapshot.add(filenames[2], states[2]);
+    snapshot.add(filenames[2], r);
 
     states[3].modTime_sec = 0x33221144;
     states[3].modTime_nsec = 0xdeadbeef;
     states[3].size = 0x11223344;
     states[3].crc32 = 0x01122334;
     states[3].nameLen = 0;
+    r.s = states[3];
     filenames[3] = String8("bytes_of_padding__1");
-    snapshot.add(filenames[3], states[3]);
+    snapshot.add(filenames[3], r);
 
     err = write_snapshot_file(fd, snapshot);
 
@@ -982,6 +988,14 @@ backup_helper_test_files()
     write_text_file(SCRATCH_DIR "data/h", "h\nhh\n");
 
     char const* files_before[] = {
+        SCRATCH_DIR "data/b",
+        SCRATCH_DIR "data/c",
+        SCRATCH_DIR "data/d",
+        SCRATCH_DIR "data/e",
+        SCRATCH_DIR "data/f"
+    };
+
+    char const* keys_before[] = {
         "data/b",
         "data/c",
         "data/d",
@@ -1004,7 +1018,7 @@ backup_helper_test_files()
     {
         BackupDataWriter dataStream(dataStreamFD);
 
-        err = back_up_files(-1, &dataStream, newSnapshotFD, SCRATCH_DIR, files_before, 5);
+        err = back_up_files(-1, &dataStream, newSnapshotFD, files_before, keys_before, 5);
         if (err != 0) {
             return err;
         }
@@ -1035,6 +1049,15 @@ backup_helper_test_files()
     unlink(SCRATCH_DIR "data/f");
 
     char const* files_after[] = {
+        SCRATCH_DIR "data/a", // added
+        SCRATCH_DIR "data/b", // same
+        SCRATCH_DIR "data/c", // different mod time
+        SCRATCH_DIR "data/d", // different size (same mod time)
+        SCRATCH_DIR "data/e", // different contents (same mod time, same size)
+        SCRATCH_DIR "data/g"  // added
+    };
+
+    char const* keys_after[] = {
         "data/a", // added
         "data/b", // same
         "data/c", // different mod time
@@ -1064,8 +1087,7 @@ backup_helper_test_files()
     {
         BackupDataWriter dataStream(dataStreamFD);
 
-        err = back_up_files(oldSnapshotFD, &dataStream, newSnapshotFD, SCRATCH_DIR,
-                files_after, 6);
+        err = back_up_files(oldSnapshotFD, &dataStream, newSnapshotFD, files_after, keys_after, 6);
         if (err != 0) {
             return err;
         }
@@ -1077,6 +1099,56 @@ backup_helper_test_files()
 
     return 0;
 }
+
+int
+backup_helper_test_null_base()
+{
+    int err;
+    int oldSnapshotFD;
+    int dataStreamFD;
+    int newSnapshotFD;
+
+    system("rm -r " SCRATCH_DIR);
+    mkdir(SCRATCH_DIR, 0777);
+    mkdir(SCRATCH_DIR "data", 0777);
+
+    write_text_file(SCRATCH_DIR "data/a", "a\naa\n");
+
+    char const* files[] = {
+        SCRATCH_DIR "data/a",
+    };
+
+    char const* keys[] = {
+        "a",
+    };
+
+    dataStreamFD = creat(SCRATCH_DIR "null_base.data", 0666);
+    if (dataStreamFD == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
+    newSnapshotFD = creat(SCRATCH_DIR "null_base.snap", 0666);
+    if (newSnapshotFD == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
+    {
+        BackupDataWriter dataStream(dataStreamFD);
+
+        err = back_up_files(-1, &dataStream, newSnapshotFD, files, keys, 1);
+        if (err != 0) {
+            return err;
+        }
+    }
+
+    close(dataStreamFD);
+    close(newSnapshotFD);
+
+    return 0;
+}
+
 
 #endif // TEST_BACKUP_HELPERS
 
