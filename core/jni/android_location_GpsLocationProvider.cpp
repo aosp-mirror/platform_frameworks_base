@@ -270,6 +270,12 @@ static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobjec
     sGpsInterface->inject_time(time, timeReference, uncertainty);
 }
 
+static void android_location_GpsLocationProvider_inject_location(JNIEnv* env, jobject obj,
+        jdouble latitude, jdouble longitude, jfloat accuracy)
+{
+    sGpsInterface->inject_location(latitude, longitude, accuracy);
+}
+
 static jboolean android_location_GpsLocationProvider_supports_xtra(JNIEnv* env, jobject obj)
 {
     if (!sGpsXtraInterface) {
@@ -353,6 +359,7 @@ static JNINativeMethod sMethods[] = {
     {"native_wait_for_event", "()V", (void*)android_location_GpsLocationProvider_wait_for_event},
     {"native_read_sv_status", "([I[F[F[F[I)I", (void*)android_location_GpsLocationProvider_read_sv_status},
     {"native_inject_time", "(JJI)V", (void*)android_location_GpsLocationProvider_inject_time},
+    {"native_inject_location", "(DDF)V", (void*)android_location_GpsLocationProvider_inject_location},
     {"native_supports_xtra", "()Z", (void*)android_location_GpsLocationProvider_supports_xtra},
     {"native_inject_xtra_data", "([BI)V", (void*)android_location_GpsLocationProvider_inject_xtra_data},
     {"native_agps_data_conn_open", "(Ljava/lang/String;)V", (void*)android_location_GpsLocationProvider_agps_data_conn_open},
