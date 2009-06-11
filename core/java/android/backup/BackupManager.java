@@ -45,7 +45,7 @@ public class BackupManager {
     /**
      * Defined backup transports understood by {@link IBackupManager.selectBackupTransport}.
      */
-    public static final int TRANSPORT_ADB = 1;
+    public static final int TRANSPORT_LOCAL = 1;
     public static final int TRANSPORT_GOOGLE = 2;
 
     /**
