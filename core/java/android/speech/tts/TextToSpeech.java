@@ -28,21 +28,16 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.HashMap;
+
 /**
  *
- * Synthesizes speech from text. This abstracts away the complexities of using
- * the TTS service such as setting up the IBinder connection and handling
- * RemoteExceptions, etc.
- *
- * The TTS should always be safe the use; if the user does not have the
- * necessary TTS apk installed, the behavior is that all calls to the TTS act as
- * no-ops.
+ * Synthesizes speech from text.
  *
  * {@hide}
  */
-//FIXME #TTS# review + complete javadoc
-//FIXME RENAME TO TextToSpeech.java
-public class Tts {
+//TODO #TTS# review + complete javadoc
+public class TextToSpeech {
 
 
     /**
@@ -82,31 +77,6 @@ public class Tts {
     private OnSpeechCompletedListener speechCompletedCallback = null;
 
 
-    /**
-     * The constructor for the TTS.
-     *
-     * @param context
-     *            The context
-     * @param callback
-     *            The InitListener that should be called when the TTS has
-     *            initialized successfully.
-     * @param displayInstallMessage
-     *            Boolean indicating whether or not an installation prompt
-     *            should be displayed to users who do not have the TTS library.
-     *            If this is true, a generic alert asking the user to install
-     *            the TTS will be used. If you wish to specify the exact message
-     *            of that prompt, please use TTS(Context context, InitListener
-     *            callback, TTSVersionAlert alert) as the constructor instead.
-     */
-    public Tts(Context context, OnInitListener callback,
-                boolean displayInstallMessage) {
-        showInstaller = displayInstallMessage;
-        ctx = context;
-        cb = callback;
-        if (dataFilesCheck()) {
-            initTts();
-        }
-    }
 
     /**
      * The constructor for the TTS.
@@ -117,15 +87,13 @@ public class Tts {
      *            The InitListener that should be called when the TTS has
      *            initialized successfully.
      */
-    public Tts(Context context, OnInitListener callback) {
-        // FIXME #TTS# support TtsVersionAlert
+    public TextToSpeech(Context context, OnInitListener callback) {
+        // TODO #TTS# support TtsVersionAlert
         //     showInstaller = true;
         //     versionAlert = alert;
         ctx = context;
         cb = callback;
-        if (dataFilesCheck()) {
-            initTts();
-        }
+        initTts();
     }
 
 
@@ -136,9 +104,9 @@ public class Tts {
 
 
     private boolean dataFilesCheck() {
-        // FIXME #TTS# config manager will be in settings
+        // TODO #TTS# config manager will be in settings
         Log.i("TTS_FIXME", "FIXME in Tts: config manager will be in settings");
-        // FIXME #TTS# implement checking of the correct installation of
+        // TODO #TTS# implement checking of the correct installation of
         //             the data files.
 
         return true;
@@ -193,15 +161,9 @@ public class Tts {
 
         Intent intent = new Intent("android.intent.action.USE_TTS");
         intent.addCategory("android.intent.category.TTS");
-        // Binding will fail only if the TTS doesn't exist;
-        // the TTSVersionAlert will give users a chance to install
-        // the needed TTS.
-        if (!ctx.bindService(intent, serviceConnection,
-                Context.BIND_AUTO_CREATE)) {
-            if (showInstaller) {
-                // FIXME #TTS# show version alert
-            }
-        }
+        ctx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        // TODO handle case where the binding works (should always work) but
+        //      the plugin fails
     }
 
 
@@ -316,21 +278,18 @@ public class Tts {
      *            The queuing strategy to use. Use 0 for no queuing, and 1 for
      *            queuing.
      * @param params
-     *            The array of speech parameters to be used. Currently, only
-     *            params[0] is defined - it is for setting the type of voice if
-     *            the engine allows it. Possible values are "VOICE_MALE",
-     *            "VOICE_FEMALE", and "VOICE_ROBOT". Note that right now only
-     *            the pre-recorded voice has this support - this setting has no
-     *            effect on eSpeak.
+     *            The hashmap of speech parameters to be used.
      */
-    public void speak(String text, int queueMode, String[] params) {
+    public void speak(String text, int queueMode, HashMap<String,String> params)
+    {
         synchronized (startLock) {
             Log.i("TTS received: ", text);
             if (!started) {
                 return;
             }
             try {
-                itts.speak(text, queueMode, params);
+                // TODO support extra parameters, passing null for the moment
+                itts.speak(text, queueMode, null);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 started = false;
@@ -357,15 +316,17 @@ public class Tts {
      *            0 for no queue (interrupts all previous utterances), 1 for
      *            queued
      * @param params
-     *            An ArrayList of parameters.
+     *            The hashmap of parameters to be used.
      */
-    public void playEarcon(String earcon, int queueMode, String[] params) {
+    public void playEarcon(String earcon, int queueMode, 
+            HashMap<String,String> params) {
         synchronized (startLock) {
             if (!started) {
                 return;
             }
             try {
-                itts.playEarcon(earcon, queueMode, params);
+                // TODO support extra parameters, passing null for the moment
+                itts.playEarcon(earcon, queueMode, null);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 started = false;
@@ -380,6 +341,11 @@ public class Tts {
                 initTts();
             }
         }
+    }
+    
+    
+    public void playSilence(long durationInMs, int queueMode) {
+        // TODO implement, already present in TTS service
     }
 
 
@@ -439,17 +405,6 @@ public class Tts {
         }
     }
 
-
-    /**
-     * Returns the version number of the TTS library that the user has
-     * installed.
-     *
-     * @return The version number of the TTS library that the user has
-     *         installed.
-     */
-    public int getVersion() {
-        return version;
-    }
 
 
     /**
@@ -519,21 +474,21 @@ public class Tts {
      * @param text
      *            The String of text that should be synthesized
      * @param params
-     *            An ArrayList of parameters. The first element of this array
-     *            controls the type of voice to use.
+     *            A hashmap of parameters.
      * @param filename
      *            The string that gives the full output filename; it should be
      *            something like "/sdcard/myappsounds/mysound.wav".
      * @return A boolean that indicates if the synthesis succeeded
      */
-    public boolean synthesizeToFile(String text, String[] params,
+    public boolean synthesizeToFile(String text, HashMap<String,String> params,
             String filename) {
         synchronized (startLock) {
             if (!started) {
                 return false;
             }
             try {
-                return itts.synthesizeToFile(text, params, filename);
+                // TODO support extra parameters, passing null for the moment
+                return itts.synthesizeToFile(text, null, filename);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 started = false;
@@ -551,37 +506,5 @@ public class Tts {
         }
     }
 
-
-    /**
-     * Displays an alert that prompts users to install the TTS engine.
-     * This is useful if the application expects a newer version
-     * of the TTS than what the user has.
-     */
-    public void showVersionAlert() {
-        if (!started) {
-            return;
-        }
-        // FIXME #TTS# implement show version alert
-    }
-
-
-    /**
-     * Checks if the TTS service is installed or not
-     *
-     * @return A boolean that indicates whether the TTS service is installed
-     */
-    // TODO: TTS Service itself will always be installed. Factor this out
-    // (may need to add another method to see if there are any working
-    // TTS engines on the device).
-    public static boolean isInstalled(Context ctx) {
-        PackageManager pm = ctx.getPackageManager();
-        Intent intent = new Intent("android.intent.action.USE_TTS");
-        intent.addCategory("android.intent.category.TTS");
-        ResolveInfo info = pm.resolveService(intent, 0);
-        if (info == null) {
-            return false;
-        }
-        return true;
-    }
 
 }
