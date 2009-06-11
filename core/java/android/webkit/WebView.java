@@ -1367,7 +1367,7 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass == 0) {
             return false;
         }
-        nativeClearCursor(-1, -1);
+        nativeClearCursor(); // start next trackball movement from page edge
         if (top) {
             // go to the top of the document
             return pinScrollTo(mScrollX, 0, true, 0);
@@ -1394,7 +1394,7 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass == 0) {
             return false;
         }
-        nativeClearCursor(-1, -1);
+        nativeClearCursor(); // start next trackball movement from page edge
         if (bottom) {
             return pinScrollTo(mScrollX, mContentHeight, true, 0);
         }
@@ -3116,9 +3116,7 @@ public class WebView extends AbsoluteLayout
                 mSelectX = mScrollX + (int) mLastTouchX;
                 mSelectY = mScrollY + (int) mLastTouchY;
             }
-            int contentX = viewToContent((int) mLastTouchX + mScrollX);
-            int contentY = viewToContent((int) mLastTouchY + mScrollY);
-            nativeClearCursor(contentX, contentY);
+            nativeHideCursor();
        }
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
@@ -3297,9 +3295,7 @@ public class WebView extends AbsoluteLayout
     public void emulateShiftHeld() {
         mExtendSelection = false;
         mShiftIsPressed = true;
-        int contentX = viewToContent((int) mLastTouchX + mScrollX);
-        int contentY = viewToContent((int) mLastTouchY + mScrollY);
-        nativeClearCursor(contentX, contentY);
+        nativeHideCursor();
     }
 
     private boolean commitCopy() {
@@ -3675,9 +3671,7 @@ public class WebView extends AbsoluteLayout
 
                     mTouchMode = TOUCH_DRAG_MODE;
                     WebViewCore.pauseUpdate(mWebViewCore);
-                    int contentX = viewToContent((int) x + mScrollX);
-                    int contentY = viewToContent((int) y + mScrollY);
-                    nativeClearCursor(contentX, contentY);
+                    nativeHideCursor();
                     // remove the zoom anchor if there is any
                     if (mZoomScale != 0) {
                         mWebViewCore
@@ -3852,9 +3846,7 @@ public class WebView extends AbsoluteLayout
                 mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                 mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                 mTouchMode = TOUCH_DONE_MODE;
-                int contentX = viewToContent((int) mLastTouchX + mScrollX);
-                int contentY = viewToContent((int) mLastTouchY + mScrollY);
-                nativeClearCursor(contentX, contentY);
+                nativeHideCursor();
                 break;
             }
         }
@@ -5208,7 +5200,7 @@ public class WebView extends AbsoluteLayout
         nativeUpdateCachedTextfield(updatedText, mTextGeneration);
     }
 
-    private native void     nativeClearCursor(int x, int y);
+    private native void     nativeClearCursor();
     private native void     nativeCreate(int ptr);
     private native int      nativeCursorFramePointer();
     private native Rect     nativeCursorNodeBounds();
@@ -5247,6 +5239,7 @@ public class WebView extends AbsoluteLayout
     private native Region   nativeGetSelection();
     private native boolean  nativeHasCursorNode();
     private native boolean  nativeHasFocusNode();
+    private native void     nativeHideCursor();
     private native String   nativeImageURI(int x, int y);
     private native void     nativeInstrumentReport();
     // return true if the page has been scrolled
