@@ -40,7 +40,7 @@ static int list_files(const char *dir, char reply[REPLY_MAX]) {
     reply[0]=0;
     while ((de = readdir(d))) {
         if (de->d_type != DT_REG) continue;
-        strlcat(reply, " ", REPLY_MAX);
+        if (reply[0] != 0) strlcat(reply, " ", REPLY_MAX);
         if (strlcat(reply, de->d_name, REPLY_MAX) >= REPLY_MAX) {
             LOGE("reply is too long(too many files under '%s'\n", dir);
             return -1;
