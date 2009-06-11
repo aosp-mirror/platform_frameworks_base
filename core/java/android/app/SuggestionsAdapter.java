@@ -20,16 +20,19 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.server.search.SearchableInfo;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
@@ -255,7 +258,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View v = super.newView(context, cursor, parent);
+        View v = new SuggestionItemView(context, cursor);
         v.setTag(new ChildViewCache(v));
         return v;
     }
@@ -303,7 +306,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (backgroundColor == 0) {
             backgroundColor = mDefaultBackgroundColor;
         }
-        view.setBackgroundColor(backgroundColor);
+        ((SuggestionItemView)view).setColor(backgroundColor);
 
         final boolean isHtml = mFormatCol > 0 && "html".equals(cursor.getString(mFormatCol));
         setViewText(cursor, views.mText1, mText1Col, isHtml);
@@ -504,6 +507,70 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             return null;
         }
         return cursor.getString(col);
+    }
+
+    /**
+     * A parent viewgroup class which holds the actual suggestion item as a child.
+     *
+     * The sole purpose of this class is to draw the given background color when the item is in
+     * normal state and not draw the background color when it is pressed, so that when pressed the
+     * list view's selection highlight will be displayed properly (if we draw our background it
+     * draws on top of the list view selection highlight).
+     */
+    private class SuggestionItemView extends ViewGroup {
+        private int mBackgroundColor;  // the background color to draw in normal state.
+        private View mView;  // the suggestion item's view.
+
+        protected SuggestionItemView(Context context, Cursor cursor) {
+            // Initialize ourselves
+            super(context);
+
+            // For our layout use the default list item height from the current theme.
+            TypedValue lineHeight = new TypedValue();
+            context.getTheme().resolveAttribute(
+                    com.android.internal.R.attr.searchResultListItemHeight, lineHeight, true);
+            DisplayMetrics metrics = new DisplayMetrics();
+            metrics.setToDefaults();
+            AbsListView.LayoutParams layout = new AbsListView.LayoutParams(
+                    AbsListView.LayoutParams.FILL_PARENT,
+                    (int)lineHeight.getDimension(metrics));
+
+            setLayoutParams(layout);
+
+            // Initialize the child view
+            mView = SuggestionsAdapter.super.newView(context, cursor, this);
+            if (mView != null) {
+                addView(mView, layout.width, layout.height);
+                mView.setVisibility(View.VISIBLE);
+            }
+        }
+
+        public void setColor(int backgroundColor) {
+            mBackgroundColor = backgroundColor;
+        }
+
+        @Override
+        public void dispatchDraw(Canvas canvas) {
+            if (!isPressed()) {
+                canvas.drawColor(mBackgroundColor);
+            }
+            super.dispatchDraw(canvas);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            if (mView != null) {
+                mView.measure(widthMeasureSpec, heightMeasureSpec);
+            }
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+            if (mView != null) {
+                mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
+            }
+        }
     }
 
 }
