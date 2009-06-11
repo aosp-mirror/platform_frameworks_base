@@ -128,6 +128,7 @@ int backup_helper_test_empty();
 int backup_helper_test_four();
 int backup_helper_test_files();
 int backup_helper_test_null_base();
+int backup_helper_test_missing_file();
 int backup_helper_test_data_writer();
 int backup_helper_test_data_reader();
 #endif

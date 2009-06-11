@@ -64,6 +64,7 @@ struct FileState {
 
 struct FileRec {
     char const* file; // this object does not own this string
+    bool deleted;
     FileState s;
 };
 
@@ -135,18 +136,23 @@ read_snapshot_file(int fd, KeyedVector<String8,FileState>* snapshot)
 static int
 write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
 {
+    int fileCount = 0;
     int bytesWritten = sizeof(SnapshotHeader);
     // preflight size
     const int N = snapshot.size();
     for (int i=0; i<N; i++) {
-        const String8& name = snapshot.keyAt(i);
-        bytesWritten += sizeof(FileState) + round_up(name.length());
+        const FileRec& g = snapshot.valueAt(i);
+        if (!g.deleted) {
+            const String8& name = snapshot.keyAt(i);
+            bytesWritten += sizeof(FileState) + round_up(name.length());
+            fileCount++;
+        }
     }
 
     LOGP("write_snapshot_file fd=%d\n", fd);
 
     int amt;
-    SnapshotHeader header = { MAGIC0, N, MAGIC1, bytesWritten };
+    SnapshotHeader header = { MAGIC0, fileCount, MAGIC1, bytesWritten };
 
     amt = write(fd, &header, sizeof(header));
     if (amt != sizeof(header)) {
@@ -154,31 +160,33 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
         return errno;
     }
 
-    for (int i=0; i<header.fileCount; i++) {
-        const String8& name = snapshot.keyAt(i);
+    for (int i=0; i<N; i++) {
         FileRec r = snapshot.valueAt(i);
-        int nameLen = r.s.nameLen = name.length();
+        if (!r.deleted) {
+            const String8& name = snapshot.keyAt(i);
+            int nameLen = r.s.nameLen = name.length();
 
-        amt = write(fd, &r.s, sizeof(FileState));
-        if (amt != sizeof(FileState)) {
-            LOGW("write_snapshot_file error writing header %s", strerror(errno));
-            return 1;
-        }
-
-        // filename is not NULL terminated, but it is padded
-        amt = write(fd, name.string(), nameLen);
-        if (amt != nameLen) {
-            LOGW("write_snapshot_file error writing filename %s", strerror(errno));
-            return 1;
-        }
-        int paddingLen = ROUND_UP[nameLen % 4];
-        if (paddingLen != 0) {
-            int padding = 0xabababab;
-            amt = write(fd, &padding, paddingLen);
-            if (amt != paddingLen) {
-                LOGW("write_snapshot_file error writing %d bytes of filename padding %s",
-                        paddingLen, strerror(errno));
+            amt = write(fd, &r.s, sizeof(FileState));
+            if (amt != sizeof(FileState)) {
+                LOGW("write_snapshot_file error writing header %s", strerror(errno));
                 return 1;
+            }
+
+            // filename is not NULL terminated, but it is padded
+            amt = write(fd, name.string(), nameLen);
+            if (amt != nameLen) {
+                LOGW("write_snapshot_file error writing filename %s", strerror(errno));
+                return 1;
+            }
+            int paddingLen = ROUND_UP[nameLen % 4];
+            if (paddingLen != 0) {
+                int padding = 0xabababab;
+                amt = write(fd, &padding, paddingLen);
+                if (amt != paddingLen) {
+                    LOGW("write_snapshot_file error writing %d bytes of filename padding %s",
+                            paddingLen, strerror(errno));
+                    return 1;
+                }
             }
         }
     }
@@ -308,18 +316,19 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
         err = stat(file, &st);
         if (err != 0) {
             LOGW("Error stating file %s", file);
-            continue;
-        }
+            r.deleted = true;
+        } else {
+            r.deleted = false;
+            r.s.modTime_sec = st.st_mtime;
+            r.s.modTime_nsec = 0; // workaround sim breakage
+            //r.s.modTime_nsec = st.st_mtime_nsec;
+            r.s.size = st.st_size;
+            // we compute the crc32 later down below, when we already have the file open.
 
-        r.s.modTime_sec = st.st_mtime;
-        r.s.modTime_nsec = 0; // workaround sim breakage
-        //r.s.modTime_nsec = st.st_mtime_nsec;
-        r.s.size = st.st_size;
-        // we compute the crc32 later down below, when we already have the file open.
-        
-        if (newSnapshot.indexOfKey(key) >= 0) {
-            LOGP("back_up_files key already in use '%s'", key.string());
-            return -1;
+            if (newSnapshot.indexOfKey(key) >= 0) {
+                LOGP("back_up_files key already in use '%s'", key.string());
+                return -1;
+            }
         }
         newSnapshot.add(key, r);
     }
@@ -331,24 +340,24 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
     while (n<N && m<fileCount) {
         const String8& p = oldSnapshot.keyAt(n);
         const String8& q = newSnapshot.keyAt(m);
+        FileRec& g = newSnapshot.editValueAt(m);
         int cmp = p.compare(q);
-        if (cmp > 0) {
+        if (g.deleted || cmp < 0) {
+            // file removed
+            LOGP("file removed: %s", p.string());
+            g.deleted = true; // They didn't mention the file, but we noticed that it's gone.
+            dataStream->WriteEntityHeader(p, -1);
+            n++;
+        }
+        else if (cmp > 0) {
             // file added
-            const FileRec& g = newSnapshot.valueAt(m);
             LOGP("file added: %s", g.file);
             write_update_file(dataStream, q, g.file);
             m++;
         }
-        else if (cmp < 0) {
-            // file removed
-            LOGP("file removed: %s", p.string());
-            dataStream->WriteEntityHeader(p, -1);
-            n++;
-        }
         else {
             // both files exist, check them
             const FileState& f = oldSnapshot.valueAt(n);
-            FileRec& g = newSnapshot.editValueAt(m);
 
             int fd = open(g.file, O_RDONLY);
             if (fd < 0) {
@@ -550,6 +559,7 @@ backup_helper_test_four()
     String8 filenames[4];
     FileState states[4];
     FileRec r;
+    r.deleted = false;
     r.file = NULL;
 
     states[0].modTime_sec = 0xfedcba98;
@@ -1120,6 +1130,59 @@ backup_helper_test_null_base()
 
     char const* keys[] = {
         "a",
+    };
+
+    dataStreamFD = creat(SCRATCH_DIR "null_base.data", 0666);
+    if (dataStreamFD == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
+    newSnapshotFD = creat(SCRATCH_DIR "null_base.snap", 0666);
+    if (newSnapshotFD == -1) {
+        fprintf(stderr, "error creating: %s\n", strerror(errno));
+        return errno;
+    }
+
+    {
+        BackupDataWriter dataStream(dataStreamFD);
+
+        err = back_up_files(-1, &dataStream, newSnapshotFD, files, keys, 1);
+        if (err != 0) {
+            return err;
+        }
+    }
+
+    close(dataStreamFD);
+    close(newSnapshotFD);
+
+    return 0;
+}
+
+int
+backup_helper_test_missing_file()
+{
+    int err;
+    int oldSnapshotFD;
+    int dataStreamFD;
+    int newSnapshotFD;
+
+    system("rm -r " SCRATCH_DIR);
+    mkdir(SCRATCH_DIR, 0777);
+    mkdir(SCRATCH_DIR "data", 0777);
+
+    write_text_file(SCRATCH_DIR "data/b", "b\nbb\n");
+
+    char const* files[] = {
+        SCRATCH_DIR "data/a",
+        SCRATCH_DIR "data/b",
+        SCRATCH_DIR "data/c",
+    };
+
+    char const* keys[] = {
+        "a",
+        "b",
+        "c",
     };
 
     dataStreamFD = creat(SCRATCH_DIR "null_base.data", 0666);
