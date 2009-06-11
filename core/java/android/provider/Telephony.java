@@ -1498,6 +1498,14 @@ public final class Telephony {
 
         public static final Uri CONTENT_DRAFT_URI = Uri.parse(
                 "content://mms-sms/draft");
+        
+        /***
+         * Pass in a query parameter called "pattern" which is the text
+         * to search for.    
+         * The sort order is fixed to be thread_id ASC,date DESC.
+         */
+        public static final Uri SEARCH_URI = Uri.parse(
+                "content://mms-sms/search");
 
         // Constants for message protocol types.
         public static final int SMS_PROTO = 0;
