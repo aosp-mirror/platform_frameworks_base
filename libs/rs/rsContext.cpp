@@ -17,7 +17,7 @@
 #include "rsDevice.h"
 #include "rsContext.h"
 #include "rsThreadIO.h"
-
+#include "utils/String8.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -246,10 +246,10 @@ void Context::setVertex(ProgramVertex *pv)
     pv->setupGL();
 }
 
-void Context::assignName(ObjectBase *obj, const char *name)
+void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)
 {
     rsAssert(!obj->getName());
-    obj->setName(name);
+    obj->setName(name, len);
     mNames.add(obj);
 }
 
@@ -272,6 +272,19 @@ ObjectBase * Context::lookupName(const char *name) const
     }
     return NULL;
 }
+
+void Context::appendNameDefines(String8 *str) const
+{
+    char buf[256];
+    for (size_t ct=0; ct < mNames.size(); ct++) {
+        str->append("#define NAMED_");
+        str->append(mNames[ct]->getName());
+        str->append(" ");
+        sprintf(buf, "%i\n", (int)mNames[ct]);
+        str->append(buf);
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -316,10 +329,10 @@ void rsi_ContextBindProgramVertex(Context *rsc, RsProgramVertex vpv)
     rsc->setVertex(pv);
 }
 
-void rsi_AssignName(Context *rsc, void * obj, const char *name)
+void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len)
 {
     ObjectBase *ob = static_cast<ObjectBase *>(obj);
-    rsc->assignName(ob, name);
+    rsc->assignName(ob, name, len);
 }
 
 

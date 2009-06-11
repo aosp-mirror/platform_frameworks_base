@@ -37,6 +37,7 @@ public:
         return mName;
     }
     void setName(const char *);
+    void setName(const char *, uint32_t len);
 
 private:
     char * mName;

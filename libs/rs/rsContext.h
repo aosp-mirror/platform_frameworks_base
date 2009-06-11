@@ -76,9 +76,10 @@ public:
 
     void setupCheck();
 
-    void assignName(ObjectBase *obj, const char *name);
+    void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
     ObjectBase * lookupName(const char *name) const;
+    void appendNameDefines(String8 *str) const;
 
 protected:
     Device *mDev;

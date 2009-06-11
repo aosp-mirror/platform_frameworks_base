@@ -19,6 +19,7 @@
 #include "rsMatrix.h"
 
 #include "acc/acc.h"
+#include "utils/String8.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -433,16 +434,21 @@ void ScriptCState::clear()
 
 }
 
+
 void ScriptCState::runCompiler(Context *rsc)
 {
     mAccScript = accCreateScript();
+    String8 tmp;
 
-    const char* scriptSource[] = {mProgram.mScriptText};
-    int scriptLength[] = {mProgram.mScriptTextLength} ;
-    accScriptSource(mAccScript, 1, scriptSource, scriptLength);
+    rsc->appendNameDefines(&tmp);
+
+    const char* scriptSource[] = {tmp.string(), mProgram.mScriptText};
+    int scriptLength[] = {tmp.length(), mProgram.mScriptTextLength} ;
+    accScriptSource(mAccScript, sizeof(scriptLength) / sizeof(int), scriptSource, scriptLength);
     accCompileScript(mAccScript);
     accGetScriptLabel(mAccScript, "main", (ACCvoid**) &mProgram.mScript);
     rsAssert(mProgram.mScript);
+
 
     if (mProgram.mScript) {
         const static int pragmaMax = 16;
