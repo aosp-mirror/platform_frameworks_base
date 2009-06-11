@@ -487,10 +487,12 @@ public class CdmaConnection extends Connection {
         }
 
         // A null cnapName should be the same as ""
-        if (TextUtils.isEmpty(dc.name) && !TextUtils.isEmpty(cnapName)) {
-            changed = true;
-            cnapName = "";
-        } else if (dc.name.equals(cnapName) == false) {
+        if (TextUtils.isEmpty(dc.name)) {
+            if (!TextUtils.isEmpty(cnapName)) {
+                changed = true;
+                cnapName = "";
+            }
+        } else if (!dc.name.equals(cnapName)) {
             changed = true;
             cnapName = dc.name;
         }

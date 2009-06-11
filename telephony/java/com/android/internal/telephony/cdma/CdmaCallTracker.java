@@ -934,6 +934,7 @@ public final class CdmaCallTracker extends CallTracker {
                 droppedDuringPoll.clear();
             break;
 
+            case EVENT_REPOLL_AFTER_DELAY:
             case EVENT_CALL_STATE_CHANGE:
                 pollCallsWhenSafe();
             break;
