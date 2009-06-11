@@ -1115,6 +1115,7 @@
   <public type="attr" name="backupAgent" />
   <public type="attr" name="allowBackup" />
   <public type="attr" name="glEsVersion" />
+  <public type="attr" name="queryAfterZeroResults" />
   
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 
