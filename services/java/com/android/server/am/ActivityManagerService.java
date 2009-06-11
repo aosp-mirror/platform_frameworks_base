@@ -10422,11 +10422,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Not backing this app up any more; reset its OOM adjustment
             updateOomAdjLocked(proc);
 
-            try {
-                proc.thread.scheduleDestroyBackupAgent(appInfo);
-            } catch (Exception e) {
-                Log.e(TAG, "Exception when unbinding backup agent:");
-                e.printStackTrace();
+            // If the app crashed during backup, 'thread' will be null here
+            if (proc.thread != null) {
+                try {
+                    proc.thread.scheduleDestroyBackupAgent(appInfo);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception when unbinding backup agent:");
+                    e.printStackTrace();
+                }
             }
         }
     }
