@@ -5611,7 +5611,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Causes words in the text that are longer than the view is wide
      * to be ellipsized instead of broken in the middle.  You may also
      * want to {@link #setSingleLine} or {@link #setHorizontallyScrolling}
-     * to constrain the text toa single line.  Use <code>null</code>
+     * to constrain the text to a single line.  Use <code>null</code>
      * to turn off ellipsizing.
      *
      * @attr ref android.R.styleable#TextView_ellipsize
