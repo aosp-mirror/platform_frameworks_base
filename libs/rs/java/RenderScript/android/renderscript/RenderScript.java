@@ -148,6 +148,15 @@ public class RenderScript {
     native private int  nProgramFragmentCreate();
     native private void nProgramFragmentDestroy(int pgm);
 
+    native private void nProgramVertexDestroy(int pv);
+    native private void nProgramVertexBindAllocation(int pv, int slot, int mID);
+    native private void nProgramVertexBegin(int inID, int outID);
+    native private void nProgramVertexSetType(int slot, int mID);
+    native private void nProgramVertexSetCameraMode(boolean isOrtho);
+    native private void nProgramVertexSetTextureMatrixEnable(boolean enable);
+    native private void nProgramVertexSetModelMatrixEnable(boolean enable);
+    native private int  nProgramVertexCreate();
+
 
     private int     mDev;
     private int     mContext;
@@ -229,7 +238,9 @@ public class RenderScript {
         XY_F32             (18),
         XYZ_F32            (19),
         ST_XY_F32          (20),
-        ST_XYZ_F32         (21);
+        ST_XYZ_F32         (21),
+        NORM_XYZ_F32       (22),
+        NORM_ST_XYZ_F32    (23);
 
         int mID;
         ElementPredefined(int id) {
@@ -679,6 +690,59 @@ public class RenderScript {
         int id = nScriptCCreate();
         return new Script(id);
     }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // ProgramVertex
+
+    public class ProgramVertex extends BaseObj {
+        ProgramVertex(int id) {
+            mID = id;
+        }
+
+        public void destroy() {
+            nProgramVertexDestroy(mID);
+            mID = 0;
+        }
+
+        public void bindAllocation(int slot, Allocation va) {
+            nProgramVertexBindAllocation(mID, slot, va.mID);
+        }
+
+    }
+
+    public void programVertexBegin(Element in, Element out) {
+        int inID = 0;
+        int outID = 0;
+        if (in != null) {
+            inID = in.mID;
+        }
+        if (out != null) {
+            outID = out.mID;
+        }
+        nProgramVertexBegin(inID, outID);
+    }
+
+    public void programVertexSetType(int slot, Type t) {
+        nProgramVertexSetType(slot, t.mID);
+    }
+
+    public void programVertexSetCameraMode(boolean isOrtho) {
+        nProgramVertexSetCameraMode(isOrtho);
+    }
+
+    public void programVertexSetTextureMatrixEnable(boolean enable) {
+        nProgramVertexSetTextureMatrixEnable(enable);
+    }
+
+    public void programVertexSetModelMatrixEnable(boolean enable) {
+        nProgramVertexSetModelMatrixEnable(enable);
+    }
+
+    public ProgramVertex programVertexCreate() {
+        int id = nProgramVertexCreate();
+        return new ProgramVertex(id);
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////////
     // ProgramFragmentStore

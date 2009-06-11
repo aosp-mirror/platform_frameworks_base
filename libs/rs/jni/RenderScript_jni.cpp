@@ -755,6 +755,74 @@ nProgramFragmentDestroy(JNIEnv *_env, jobject _this, jint pgm)
     rsProgramFragmentDestroy((RsProgramFragment)pgm);
 }
 
+// ---------------------------------------------------------------------------
+
+static void
+nProgramVertexBegin(JNIEnv *_env, jobject _this, jint in, jint out)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
+    rsProgramVertexBegin((RsElement)in, (RsElement)out);
+}
+
+static void
+nProgramVertexBindAllocation(JNIEnv *_env, jobject _this, jint vpv, jint slot, jint a)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexBindAllocation, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsAllocation)a);
+    rsProgramVertexBindAllocation((RsProgramFragment)vpv, slot, (RsAllocation)a);
+}
+
+static void
+nProgramVertexSetType(JNIEnv *_env, jobject _this, jint slot, jint t)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetType, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsType)t);
+    rsProgramVertexSetType(slot, (RsType)t);
+}
+
+static void
+nProgramVertexSetCameraMode(JNIEnv *_env, jobject _this, jboolean isOrtho)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetCameraMode, con(%p), isOrtho(%i)", con, isOrtho);
+    rsProgramVertexSetCameraMode(isOrtho);
+}
+
+static void
+nProgramVertexSetTextureMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetTextureMatrixEnable, con(%p), enable(%i)", con, enable);
+    rsProgramVertexSetTextureMatrixEnable(enable);
+}
+
+static void
+nProgramVertexSetModelMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetModelMatrixEnable, con(%p), enable(%i)", con, enable);
+    rsProgramVertexSetModelMatrixEnable(enable);
+}
+
+static jint
+nProgramVertexCreate(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexCreate, con(%p)", con);
+    return (jint)rsProgramVertexCreate();
+}
+
+static void
+nProgramVertexDestroy(JNIEnv *_env, jobject _this, jint pgm)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramFragmentDestroy, con(%p), pgm(%i)", con, pgm);
+    rsProgramFragmentDestroy((RsProgramFragment)pgm);
+}
+
+
+
 
 // ---------------------------------------------------------------------------
 
@@ -901,6 +969,15 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentSetTexEnable",   "(IZ)V",                                (void*)nProgramFragmentSetTexEnable },
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
 {"nProgramFragmentDestroy",        "(I)V",                                 (void*)nProgramFragmentDestroy },
+
+{"nProgramVertexDestroy",          "(I)V",                                 (void*)nProgramVertexDestroy },
+{"nProgramVertexBindAllocation",   "(III)V",                               (void*)nProgramVertexBindAllocation },
+{"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
+{"nProgramVertexSetType",          "(II)V",                                (void*)nProgramVertexSetType },
+{"nProgramVertexSetCameraMode",    "(Z)V",                                 (void*)nProgramVertexSetCameraMode },
+{"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
+{"nProgramVertexSetModelMatrixEnable",  "(Z)V",                            (void*)nProgramVertexSetModelMatrixEnable },
+{"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
 
 {"nContextBindRootScript",         "(I)V",                                 (void*)nContextBindRootScript },
 {"nContextBindProgramFragmentStore","(I)V",                                (void*)nContextBindProgramFragmentStore },

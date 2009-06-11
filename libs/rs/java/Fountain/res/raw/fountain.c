@@ -35,7 +35,6 @@ int main(void* con, int ft, int launchID) {
         }
     }
 
-    //contextBindProgramFragment(con, loadI32(con, 0, 7));
     drawRect(con, 0, 256, 0, 512);
     contextBindProgramFragment(con, NAMED_PgmFragParts);
 
