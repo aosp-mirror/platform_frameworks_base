@@ -2849,6 +2849,14 @@
              The default value is <code>false</code>. <i>Optional attribute.</i>. -->
         <attr name="includeInGlobalSearch" format="boolean" />
 
+        <!-- If provided and <code>true</code>, this searchable activity will be invoked for all
+             queries in a particular session. If set to <code>false</code> and the activity
+             returned zero results for a query, it will not be invoked again in that session for
+             supersets of that zero-results query. For example, if the activity returned zero
+             results for "bo", it would not be queried again for "bob".
+             The default value is <code>false</code>. <i>Optional attribute.</i>. -->
+        <attr name="queryAfterZeroResults" format="boolean" />
+
     </declare-styleable>
 
     <!-- In order to process special action keys during search, you must define them using

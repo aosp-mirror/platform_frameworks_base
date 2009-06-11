@@ -66,6 +66,7 @@ public final class SearchableInfo implements Parcelable {
     private final int mSearchInputType;
     private final int mSearchImeOptions;
     private final boolean mIncludeInGlobalSearch;
+    private final boolean mQueryAfterZeroResults;
     private final String mSuggestAuthority;
     private final String mSuggestPath;
     private final String mSuggestSelection;
@@ -276,6 +277,8 @@ public final class SearchableInfo implements Parcelable {
                 EditorInfo.IME_ACTION_SEARCH);
         mIncludeInGlobalSearch = a.getBoolean(
                 com.android.internal.R.styleable.Searchable_includeInGlobalSearch, false);
+        mQueryAfterZeroResults = a.getBoolean(
+                com.android.internal.R.styleable.Searchable_queryAfterZeroResults, false);
 
         mSuggestAuthority = a.getString(
                 com.android.internal.R.styleable.Searchable_searchSuggestAuthority);
@@ -637,6 +640,17 @@ public final class SearchableInfo implements Parcelable {
     }
 
     /**
+     * Checks whether this searchable activity should be invoked after a query returned zero
+     * results.
+     *
+     * @return The value of the <code>queryAfterZeroResults</code> attribute,
+     *         or <code>false</code> if the attribute is not set.
+     */
+    public boolean queryAfterZeroResults() {
+        return mQueryAfterZeroResults;
+    }
+
+    /**
      * Support for parcelable and aidl operations.
      */
     public static final Parcelable.Creator<SearchableInfo> CREATOR
@@ -667,6 +681,7 @@ public final class SearchableInfo implements Parcelable {
         mSearchInputType = in.readInt();
         mSearchImeOptions = in.readInt();
         mIncludeInGlobalSearch = in.readInt() != 0;
+        mQueryAfterZeroResults = in.readInt() != 0;
 
         mSuggestAuthority = in.readString();
         mSuggestPath = in.readString();
@@ -702,6 +717,7 @@ public final class SearchableInfo implements Parcelable {
         dest.writeInt(mSearchInputType);
         dest.writeInt(mSearchImeOptions);
         dest.writeInt(mIncludeInGlobalSearch ? 1 : 0);
+        dest.writeInt(mQueryAfterZeroResults ? 1 : 0);
         
         dest.writeString(mSuggestAuthority);
         dest.writeString(mSuggestPath);
