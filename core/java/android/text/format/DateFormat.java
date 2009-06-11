@@ -242,12 +242,21 @@ public class DateFormat {
 
     /**
      * Returns a {@link java.text.DateFormat} object that can format the time according
-     * to the current locale. 
+     * to the current locale and the user's 12-/24-hour clock preference.
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that properly formats the time.
      */
     public static final java.text.DateFormat getTimeFormat(Context context) {
-        return java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT);
+        boolean b24 = is24HourFormat(context);
+        int res;
+
+        if (b24) {
+            res = R.string.twenty_four_hour_time_format;
+        } else {
+            res = R.string.twelve_hour_time_format;
+        }
+
+        return new java.text.SimpleDateFormat(context.getString(res));
     }
 
     /**
