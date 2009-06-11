@@ -694,6 +694,16 @@ public class WebView extends AbsoluteLayout
 
         mZoomButtonsController = new ZoomButtonsController(this);
         mZoomButtonsController.setOnZoomListener(mZoomListener);
+        // ZoomButtonsController positions the buttons at the bottom, but in
+        // the middle.  Change their layout parameters so they appear on the
+        // right.
+        View controls = mZoomButtonsController.getZoomControls();
+        ViewGroup.LayoutParams params = controls.getLayoutParams();
+        if (params instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams)
+                    params;
+            frameParams.gravity = Gravity.RIGHT;
+        }
     }
 
     private void updateZoomButtonsEnabled() {
