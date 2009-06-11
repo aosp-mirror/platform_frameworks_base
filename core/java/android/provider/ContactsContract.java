@@ -341,6 +341,14 @@ public final class ContactsContract {
          */
         public static final String IS_RESTRICTED = "is_restricted";
 
+        /**
+         * The version of this data record. This is a read-only value. The data column is
+         * guaranteed to not change without the version going up. This value is monotonically
+         * increasing.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA_VERSION = "data_version";
+
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
         public static final String DATA1 = "data1";
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
