@@ -50,7 +50,8 @@ GEN := $(addprefix $(intermediates)/, \
             rsgApiFuncDecl.h \
         )
 
-$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(LOCAL_PATH)/rs.spec
+$(GEN) : PRIVATE_PATH := $(LOCAL_PATH)
+$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(PRIVATE_PATH)/rs.spec
 $(GEN) : $(RSG_GENERATOR) $(LOCAL_PATH)/rs.spec
 $(GEN): $(intermediates)/%.h : $(LOCAL_PATH)/%.h.rsg
 	$(transform-generated-source)
@@ -66,13 +67,15 @@ GEN := $(addprefix $(intermediates)/, \
             rsgApiReplay.cpp \
         )
 
-$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(LOCAL_PATH)/rs.spec
+$(GEN) : PRIVATE_PATH := $(LOCAL_PATH)
+$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(PRIVATE_PATH)/rs.spec
 $(GEN) : $(RSG_GENERATOR) $(LOCAL_PATH)/rs.spec
 $(GEN): $(intermediates)/%.cpp : $(LOCAL_PATH)/%.cpp.rsg
 	$(transform-generated-source)
 
 # used in jni/Android.mk
 rs_generated_source += $(GEN)
+
 LOCAL_GENERATED_SOURCES += $(GEN)
 
 LOCAL_SRC_FILES:= \
@@ -104,7 +107,6 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
-
 
 # Include the subdirectories ====================
 include $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk,\
