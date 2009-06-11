@@ -42,6 +42,7 @@ import com.android.internal.telephony.CallForwardInfo;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.gsm.NetworkInfo;
+import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.IccCardApplication;
 import com.android.internal.telephony.IccCardStatus;
@@ -1842,6 +1843,59 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void getGsmBroadcastConfig(Message response) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_GSM_GET_BROADCAST_CONFIG, response);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        send(rr);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setGsmBroadcastConfig(SmsBroadcastConfigInfo[] config, Message response) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_GSM_SET_BROADCAST_CONFIG, response);
+
+        int numOfConfig = config.length;
+        rr.mp.writeInt(numOfConfig);
+
+        for(int i = 0; i < numOfConfig; i++) {
+            rr.mp.writeInt(config[i].getFromServiceId());
+            rr.mp.writeInt(config[i].getToServiceId());
+            rr.mp.writeInt(config[i].getFromCodeScheme());
+            rr.mp.writeInt(config[i].getToCodeScheme());
+            rr.mp.writeInt(config[i].isSelected() ? 1 : 0);
+        }
+
+        if (RILJ_LOGD) {
+            riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
+                    + " with " + numOfConfig + "configs : ");
+            for (int i = 0; i < numOfConfig; i++) {
+                riljLog(config[i].toString());
+            }
+        }
+
+        send(rr);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setGsmBroadcastActivation(boolean activate, Message response) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_GSM_BROADCAST_ACTIVATION, response);
+
+        rr.mp.writeInt(1);
+        rr.mp.writeInt(activate ? 0 : 1);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        send(rr);
+    }
+
     //***** Private Methods
 
     private void sendScreenState(boolean on) {
@@ -2095,13 +2149,13 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_CDMA_BURST_DTMF: ret =  responseVoid(p); break;
             case RIL_REQUEST_CDMA_SEND_SMS: ret =  responseSMS(p); break;
             case RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE: ret =  responseVoid(p); break;
-            case RIL_REQUEST_GET_BROADCAST_CONFIG: ret =  responseBR_SMS_CNF(p); break;
-            case RIL_REQUEST_SET_BROADCAST_CONFIG: ret =  responseVoid(p); break;
-            case RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: ret =  responseCDMA_BR_CNF(p); break;
+            case RIL_REQUEST_GSM_GET_BROADCAST_CONFIG: ret =  responseGmsBroadcastConfig(p); break;
+            case RIL_REQUEST_GSM_SET_BROADCAST_CONFIG: ret =  responseVoid(p); break;
+            case RIL_REQUEST_GSM_BROADCAST_ACTIVATION: ret =  responseVoid(p); break;
+            case RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: ret =  responseCdmaBroadcastConfig(p); break;
             case RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG: ret =  responseVoid(p); break;
-            case RIL_REQUEST_BROADCAST_ACTIVATION: ret =  responseVoid(p); break;
-            case RIL_REQUEST_CDMA_VALIDATE_AKEY: ret =  responseVoid(p); break;
             case RIL_REQUEST_CDMA_BROADCAST_ACTIVATION: ret =  responseVoid(p); break;
+            case RIL_REQUEST_CDMA_VALIDATE_AKEY: ret =  responseVoid(p); break;
             case RIL_REQUEST_CDMA_SUBSCRIPTION: ret =  responseStrings(p); break;
             case RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM: ret =  responseInts(p); break;
             case RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM: ret =  responseVoid(p); break;
@@ -2449,12 +2503,16 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 }
 
             case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:
+                if (RILJ_LOGD) unsljLog(response);
+
                 if (mIccStatusChangedRegistrants != null) {
                     mIccStatusChangedRegistrants.notifyRegistrants();
                 }
                 break;
 
             case RIL_UNSOL_RESPONSE_CDMA_NEW_SMS:
+                if (RILJ_LOGD) unsljLog(response);
+
                 SmsMessage sms = (SmsMessage) ret;
 
                 if (mSMSRegistrant != null) {
@@ -2464,13 +2522,16 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 break;
 
             case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS:
-                // TODO T: waiting for SMS BC feature
+                if (RILJ_LOGD) unsljLog(response);
+
+                if (mGsmBroadcastSmsRegistrant != null) {
+                    mGsmBroadcastSmsRegistrant
+                        .notifyRegistrant(new AsyncResult(null, ret, null));
+                }
                 break;
 
             case RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL:
-                if (Config.LOGD) {
-                    if (RILJ_LOGD) riljLog("[UNSL]< RUIM_SMS_STORAGE_FULL");
-                }
+                if (RILJ_LOGD) unsljLog(response);
 
                 if (mIccSmsFullRegistrant != null) {
                     mIccSmsFullRegistrant.notifyRegistrant();
@@ -2858,26 +2919,39 @@ public final class RIL extends BaseCommands implements CommandsInterface {
        response = new ArrayList<NeighboringCellInfo>(num);
 
        for (int i = 0 ; i < num ; i++) {
-           try {
-               int rssi = p.readInt();
-               int cid = Integer.valueOf(p.readString(), 16);
-               cell = new NeighboringCellInfo(rssi, cid);
-               response.add(cell);
-           } catch ( Exception e) {
-           }
+           int rssi = p.readInt();
+           int cid = Integer.valueOf(p.readString(), 16);
+           cell = new NeighboringCellInfo(rssi, cid);
+           response.add(cell);
        }
 
     return response;
     }
 
-    private Object
-    responseBR_SMS_CNF(Parcel p) {
-        // TODO
-        return null;
+    private Object responseGmsBroadcastConfig(Parcel p) {
+        int num;
+        ArrayList<SmsBroadcastConfigInfo> response;
+        SmsBroadcastConfigInfo info;
+
+        num = p.readInt();
+        response = new ArrayList<SmsBroadcastConfigInfo>(num);
+
+        for (int i = 0; i < num; i++) {
+            int fromId = p.readInt();
+            int toId = p.readInt();
+            int fromScheme = p.readInt();
+            int toScheme = p.readInt();
+            boolean selected = (p.readInt() == 1);
+
+            info = new SmsBroadcastConfigInfo(fromId, toId, fromScheme,
+                    toScheme, selected);
+            response.add(info);
+        }
+        return response;
     }
 
     private Object
-    responseCDMA_BR_CNF(Parcel p) {
+    responseCdmaBroadcastConfig(Parcel p) {
         int numServiceCategories;
         int response[];
 
@@ -3121,11 +3195,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_CDMA_BURST_DTMF: return "RIL_REQUEST_CDMA_BURST_DTMF";
             case RIL_REQUEST_CDMA_SEND_SMS: return "RIL_REQUEST_CDMA_SEND_SMS";
             case RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE: return "RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE";
-            case RIL_REQUEST_GET_BROADCAST_CONFIG: return "RIL_REQUEST_GET_BROADCAST_CONFIG";
-            case RIL_REQUEST_SET_BROADCAST_CONFIG: return "RIL_REQUEST_SET_BROADCAST_CONFIG";
+            case RIL_REQUEST_GSM_GET_BROADCAST_CONFIG: return "RIL_REQUEST_GSM_GET_BROADCAST_CONFIG";
+            case RIL_REQUEST_GSM_SET_BROADCAST_CONFIG: return "RIL_REQUEST_GSM_SET_BROADCAST_CONFIG";
             case RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: return "RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG";
             case RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG: return "RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG";
-            case RIL_REQUEST_BROADCAST_ACTIVATION: return "RIL_REQUEST_BROADCAST_ACTIVATION";
+            case RIL_REQUEST_GSM_BROADCAST_ACTIVATION: return "RIL_REQUEST_GSM_BROADCAST_ACTIVATION";
             case RIL_REQUEST_CDMA_VALIDATE_AKEY: return "RIL_REQUEST_CDMA_VALIDATE_AKEY";
             case RIL_REQUEST_CDMA_BROADCAST_ACTIVATION: return "RIL_REQUEST_CDMA_BROADCAST_ACTIVATION";
             case RIL_REQUEST_CDMA_SUBSCRIPTION: return "RIL_REQUEST_CDMA_SUBSCRIPTION";
@@ -3332,11 +3406,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
-    public void activateCdmaBroadcastSms(int activate, Message response) {
+    public void setCdmaBroadcastActivation(boolean activate, Message response) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_CDMA_BROADCAST_ACTIVATION, response);
 
         rr.mp.writeInt(1);
-        rr.mp.writeInt(activate);
+        rr.mp.writeInt(activate ? 0 :1);
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 

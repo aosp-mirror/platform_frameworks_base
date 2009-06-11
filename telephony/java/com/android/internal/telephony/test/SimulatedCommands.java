@@ -28,6 +28,7 @@ import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.gsm.CallFailCause;
+import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.Phone;
 
@@ -1453,22 +1454,36 @@ public final class SimulatedCommands extends BaseCommands
        Log.w(LOG_TAG, "CDMA not implemented in SimulatedCommands");
     }
 
-    public void activateCdmaBroadcastSms(int activate, Message result) {
-        // TODO Auto-generated method stub
+    public void setCdmaBroadcastActivation(boolean activate, Message response) {
+        unimplemented(response);
 
     }
 
-    public void getCdmaBroadcastConfig(Message result) {
-        // TODO Auto-generated method stub
+    public void getCdmaBroadcastConfig(Message response) {
+        unimplemented(response);
 
     }
 
-    public void setCdmaBroadcastConfig(int[] configValuesArray, Message result) {
-        // TODO Auto-generated method stub
+    public void setCdmaBroadcastConfig(int[] configValuesArray, Message response) {
+        unimplemented(response);
 
     }
 
     public void forceDataDormancy(Message response) {
-        // TODO method stub
+        unimplemented(response);
+    }
+
+
+    public void setGsmBroadcastActivation(boolean activate, Message response) {
+        unimplemented(response);
+    }
+
+
+    public void setGsmBroadcastConfig(SmsBroadcastConfigInfo[] config, Message response) {
+        unimplemented(response);
+    }
+
+    public void getGsmBroadcastConfig(Message response) {
+        unimplemented(response);
     }
 }
