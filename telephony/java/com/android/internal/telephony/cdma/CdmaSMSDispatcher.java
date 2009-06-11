@@ -342,7 +342,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
     /** {@inheritDoc} */
     protected void activateCellBroadcastSms(int activate, Message response) {
-        mCm.activateCdmaBroadcastSms(activate, response);
+        mCm.setCdmaBroadcastActivation((activate == 0), response);
     }
 
     /** {@inheritDoc} */
