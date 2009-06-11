@@ -47,7 +47,7 @@ import android.backup.IRestoreSession;
 import android.backup.BackupManager;
 import android.backup.RestoreSet;
 
-import com.android.internal.backup.AdbTransport;
+import com.android.internal.backup.LocalTransport;
 import com.android.internal.backup.GoogleTransport;
 import com.android.internal.backup.IBackupTransport;
 
@@ -72,6 +72,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
+    private static final int MSG_RUN_RESTORE = 3;
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -131,7 +132,9 @@ class BackupManagerService extends IBackupManager.Stub {
         mStateDir = new File(Environment.getDataDirectory(), "backup");
         mStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
-        mTransportId = BackupManager.TRANSPORT_GOOGLE;
+
+        //!!! TODO: default to cloud transport, not local
+        mTransportId = BackupManager.TRANSPORT_LOCAL;
         
         // Build our mapping of uid to backup client services
         synchronized (mBackupParticipants) {
@@ -212,6 +215,14 @@ class BackupManagerService extends IBackupManager.Stub {
 
             case MSG_RUN_FULL_BACKUP:
                 break;
+
+            case MSG_RUN_RESTORE:
+            {
+                int token = msg.arg1;
+                IBackupTransport transport = (IBackupTransport)msg.obj;
+                (new PerformRestoreThread(transport, token)).run();
+                break;
+            }
             }
         }
     }
@@ -331,9 +342,9 @@ class BackupManagerService extends IBackupManager.Stub {
     private IBackupTransport createTransport(int transportID) {
         IBackupTransport transport = null;
         switch (transportID) {
-        case BackupManager.TRANSPORT_ADB:
-            if (DEBUG) Log.v(TAG, "Initializing adb transport");
-            transport = new AdbTransport();
+        case BackupManager.TRANSPORT_LOCAL:
+            if (DEBUG) Log.v(TAG, "Initializing local transport");
+            transport = new LocalTransport(mContext);
             break;
 
         case BackupManager.TRANSPORT_GOOGLE:
@@ -585,10 +596,12 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class PerformRestoreThread extends Thread {
         private IBackupTransport mTransport;
+        private int mToken;
         private RestoreSet mImage;
 
-        PerformRestoreThread(IBackupTransport transport) {
+        PerformRestoreThread(IBackupTransport transport, int restoreSetToken) {
             mTransport = transport;
+            mToken = restoreSetToken;
         }
 
         @Override
@@ -622,7 +635,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 try {
                     RestoreSet[] images = mTransport.getAvailableRestoreSets();
                     if (images.length > 0) {
-                        // !!! for now we always take the first set
+                        // !!! TODO: pick out the set for this token
                         mImage = images[0];
 
                         // build the set of apps we will attempt to restore
@@ -870,6 +883,9 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // --- Binder interface ---
         public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
+            mContext.enforceCallingPermission("android.permission.BACKUP",
+                    "getAvailableRestoreSets");
+
             synchronized(this) {
                 if (mRestoreSets == null) {
                     mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
@@ -879,10 +895,26 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         public int performRestore(int token) throws android.os.RemoteException {
+            mContext.enforceCallingPermission("android.permission.BACKUP", "performRestore");
+
+            if (mRestoreSets != null) {
+                for (int i = 0; i < mRestoreSets.length; i++) {
+                    if (token == mRestoreSets[i].token) {
+                        Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE,
+                                mRestoreTransport);
+                        msg.arg1 = token;
+                        mBackupHandler.sendMessage(msg);
+                        return 0;
+                    }
+                }
+            }
             return -1;
         }
 
         public void endRestoreSession() throws android.os.RemoteException {
+            mContext.enforceCallingPermission("android.permission.BACKUP",
+                    "endRestoreSession");
+
             mRestoreTransport.endSession();
             mRestoreTransport = null;
         }
