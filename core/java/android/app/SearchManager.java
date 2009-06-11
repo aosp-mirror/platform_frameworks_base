@@ -1402,6 +1402,16 @@ public class SearchManager
      * @hide For internal use, not part of the public API.
      */
     public final static String SUGGEST_COLUMN_BACKGROUND_COLOR = "suggest_background_color";
+    
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i> This column is used to specify
+     * that a spinner should be shown in lieu of an icon2 while the shortcut of this suggestion
+     * is being refreshed.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING =
+            "suggest_spinner_while_refreshing";
 
     /**
      * Column value for suggestion column {@link #SUGGEST_COLUMN_SHORTCUT_ID} when a suggestion
