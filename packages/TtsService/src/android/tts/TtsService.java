@@ -117,16 +117,7 @@ public class TtsService extends Service implements OnCompletionListener {
         // app.
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        PackageManager pm = this.getPackageManager();
-        String soLibPath = "";
-        try {
-            soLibPath = pm.getApplicationInfo("com.svox.pico", 0).dataDir;
-        } catch (NameNotFoundException e) {
-            // This exception cannot actually happen as com.svox.pico is
-            // included with the system image.
-            e.printStackTrace();
-        }
-        soLibPath = soLibPath + "/lib/libttspico.so";
+        String soLibPath = "/system/lib/libttspico.so";
         nativeSynth = new SynthProxy(soLibPath);
 
         mSelf = this;
