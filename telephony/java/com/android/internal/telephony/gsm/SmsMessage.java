@@ -26,6 +26,7 @@ import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -742,17 +743,39 @@ public class SmsMessage extends SmsMessageBase{
     /**
      * Calculate the number of septets needed to encode the message.
      *
-     * @param messageBody the message to encode
-     * @param force ignore (but still count) illegal characters if true
-     * @return septet count, or -1 on failure
+     * @param msgBody the message to encode
+     * @param use7bitOnly ignore (but still count) illegal characters if true
+     * @return TextEncodingDetails
      */
-    public static int calc7bitEncodedLength(CharSequence messageBody, boolean force) {
+    public static TextEncodingDetails calculateLength(CharSequence msgBody,
+            boolean use7bitOnly) {
+        TextEncodingDetails ted = new TextEncodingDetails();
         try {
-            return GsmAlphabet.countGsmSeptets(messageBody, !force);
+            int septets = GsmAlphabet.countGsmSeptets(msgBody, !use7bitOnly);
+            ted.codeUnitCount = septets;
+            if (septets > MAX_USER_DATA_SEPTETS) {
+                ted.msgCount = (septets / MAX_USER_DATA_SEPTETS_WITH_HEADER) + 1;
+                ted.codeUnitsRemaining = MAX_USER_DATA_SEPTETS_WITH_HEADER
+                    - (septets % MAX_USER_DATA_SEPTETS_WITH_HEADER);
+            } else {
+                ted.msgCount = 1;
+                ted.codeUnitsRemaining = MAX_USER_DATA_SEPTETS - septets;
+            }
+            ted.codeUnitSize = ENCODING_7BIT;
         } catch (EncodeException ex) {
-            /* Just fall through to the -1 error result below. */
+            int octets = msgBody.length() * 2;
+            ted.codeUnitCount = msgBody.length();
+            if (octets > MAX_USER_DATA_BYTES) {
+                ted.msgCount = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
+                ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES_WITH_HEADER
+                          - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
+            } else {
+                ted.msgCount = 1;
+                ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES - octets)/2;
+            }
+            ted.codeUnitSize = ENCODING_16BIT;
         }
-        return -1;
+        return ted;
     }
 
     /** {@inheritDoc} */

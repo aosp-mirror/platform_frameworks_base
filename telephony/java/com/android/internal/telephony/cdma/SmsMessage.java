@@ -357,14 +357,18 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Calculate the number of septets needed to encode the message.
+     * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
      *
-     * @param messageBody the message to encode
-     * @param force ignore (but still count) illegal characters if true
-     * @return septet count, or -1 on failure
+     * @param destAddr the address of the destination for the message
+     * @param userDara the data for the message
+     * @param statusReportRequested Indicates whether a report is requested for this message.
+     * @return a <code>SubmitPdu</code> containing the encoded SC
+     *         address, if applicable, and the encoded message.
+     *         Returns null on encode error.
      */
-    public static int calc7bitEncodedLength(CharSequence msgBody, boolean force) {
-        return BearerData.calc7bitEncodedLength(msgBody.toString(), force);
+    public static SubmitPdu getSubmitPdu(String destAddr, UserData userData,
+            boolean statusReportRequested) {
+        return privateGetSubmitPdu(destAddr, statusReportRequested, userData);
     }
 
     /**
@@ -439,6 +443,18 @@ public class SmsMessage extends SmsMessageBase {
     public boolean isReplyPathPresent() {
         Log.w(LOG_TAG, "isReplyPathPresent: is not supported in CDMA mode.");
         return false;
+    }
+
+    /**
+     * Calculate the number of septets needed to encode the message.
+     *
+     * @param messageBody the message to encode
+     * @param use7bitOnly ignore (but still count) illegal characters if true
+     * @return TextEncodingDetails
+     */
+    public static TextEncodingDetails calculateLength(CharSequence messageBody,
+            boolean use7bitOnly) {
+        return BearerData.calcTextEncodingDetails(messageBody.toString(), use7bitOnly);
     }
 
     /**
@@ -627,12 +643,15 @@ public class SmsMessage extends SmsMessageBase {
         bearerData.userData = userData;
         bearerData.hasUserDataHeader = (userData.userDataHeader != null);
 
+        int teleservice = bearerData.hasUserDataHeader ?
+                SmsEnvelope.TELESERVICE_WEMT : SmsEnvelope.TELESERVICE_WMT;
+
         byte[] encodedBearerData = BearerData.encode(bearerData);
         if (encodedBearerData == null) return null;
 
         SmsEnvelope envelope = new SmsEnvelope();
         envelope.messageType = SmsEnvelope.MESSAGE_TYPE_POINT_TO_POINT;
-        envelope.teleService = SmsEnvelope.TELESERVICE_WMT;
+        envelope.teleService = teleservice;
         envelope.destAddress = destAddr;
         envelope.bearerReply = RETURN_ACK;
         envelope.bearerData = encodedBearerData;
