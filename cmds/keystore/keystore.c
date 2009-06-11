@@ -113,7 +113,7 @@ static int execute(int s, char cmd[BUFFER_MAX])
     unsigned i;
     unsigned n = 0;
     unsigned short count;
-    int ret = -1;
+    short ret = -1;
 
     /* default reply is "" */
     reply[0] = 0;
@@ -139,7 +139,7 @@ static int execute(int s, char cmd[BUFFER_MAX])
                 LOGE("%s requires %d arguments (%d given)\n",
                      cmds[i].name, cmds[i].numargs, n);
             } else {
-                ret = cmds[i].func(arg + 1, reply);
+                ret = (short) cmds[i].func(arg + 1, reply);
             }
             goto done;
         }
@@ -148,24 +148,26 @@ static int execute(int s, char cmd[BUFFER_MAX])
 
 done:
     if (reply[0]) {
-        n = snprintf(cmd, BUFFER_MAX, "%d %s", ret, reply);
+        strlcpy(cmd, reply, BUFFER_MAX);
+        count = strlen(cmd);
     } else {
-        n = snprintf(cmd, BUFFER_MAX, "%d", ret);
+        count = 0;
     }
-    if (n > BUFFER_MAX) n = BUFFER_MAX;
-    count = n;
-
-    if (writex(s, &count, sizeof(count))) return -1;
-    if (writex(s, cmd, count)) return -1;
+    if (writex(s, &ret, sizeof(ret))) return -1;
+    if (ret == 0) {
+        if (writex(s, &count, sizeof(count))) return -1;
+        if (writex(s, cmd, count)) return -1;
+    }
 
     return 0;
 }
 
 int shell_command(const int argc, const char **argv)
 {
-    int fd, i, r;
+    int fd, i;
+    short ret;
     unsigned short count;
-    char cmd[BUFFER_MAX]="";
+    char buf[BUFFER_MAX]="";
 
     fd = socket_local_client(SOCKET_PATH,
                              ANDROID_SOCKET_NAMESPACE_RESERVED,
@@ -175,19 +177,24 @@ int shell_command(const int argc, const char **argv)
         exit(1);
     }
     for(i = 0; i < argc; i++) {
-        if (i > 0) strlcat(cmd, " ", BUFFER_MAX);
-        if(strlcat(cmd, argv[i], BUFFER_MAX) >= BUFFER_MAX) {
+        if (i > 0) strlcat(buf, " ", BUFFER_MAX);
+        if(strlcat(buf, argv[i], BUFFER_MAX) >= BUFFER_MAX) {
             fprintf(stderr, "Arguments are too long\n");
             exit(1);
         }
     }
-    count = strlen(cmd);
+    count = strlen(buf);
     if (writex(fd, &count, sizeof(count))) return -1;
-    if (writex(fd, cmd, strlen(cmd))) return -1;
-    if (readx(fd, &count, sizeof(count))) return -1;
-    if (readx(fd, cmd, count)) return -1;
-    cmd[count]=0;
-    fprintf(stdout, "%s\n", cmd);
+    if (writex(fd, buf, strlen(buf))) return -1;
+    if (readx(fd, &ret, sizeof(ret))) return -1;
+    if (ret == 0) {
+        if (readx(fd, &count, sizeof(count))) return -1;
+        if (readx(fd, buf, count)) return -1;
+        buf[count]=0;
+        fprintf(stdout, "%s\n", buf);
+    } else {
+        fprintf(stderr, "Failed, please check log!\n");
+    }
     return 0;
 }
 
