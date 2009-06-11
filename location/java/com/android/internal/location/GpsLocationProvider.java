@@ -410,6 +410,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
      * Someday we might use this for network location injection to aid the GPS
      */
     public void updateLocation(Location location) {
+        if (location.hasAccuracy()) {
+            native_inject_location(location.getLatitude(), location.getLongitude(),
+                    location.getAccuracy());
+        }
     }
 
     /**
@@ -1210,7 +1214,8 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     // mask[0] is ephemeris mask and mask[1] is almanac mask
     private native int native_read_sv_status(int[] svs, float[] snrs,
             float[] elevations, float[] azimuths, int[] masks);
-    
+    private native void native_inject_location(double latitude, double longitude, float accuracy);
+
     // XTRA Support    
     private native void native_inject_time(long time, long timeReference, int uncertainty);
     private native boolean native_supports_xtra();
