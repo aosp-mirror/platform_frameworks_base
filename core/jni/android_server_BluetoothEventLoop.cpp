@@ -294,23 +294,25 @@ static void tearDownEventLoop(native_data_t *nat) {
                                            nat->adapter,
                                            "org.bluez.Adapter",
                                            "UnregisterAgent");
-        if (dbus_error_is_set(&err)) {
-            LOG_AND_FREE_DBUS_ERROR(&err);
-            dbus_error_free(&err);
+        if (msg != NULL) {
+            dbus_message_append_args(msg, DBUS_TYPE_OBJECT_PATH, &agent_path,
+                                     DBUS_TYPE_INVALID);
+            reply = dbus_connection_send_with_reply_and_block(nat->conn,
+                                                              msg, -1, &err);
+
+            if (!reply) {
+                if (dbus_error_is_set(&err)) {
+                    LOG_AND_FREE_DBUS_ERROR(&err);
+                    dbus_error_free(&err);
+                }
+            } else {
+                dbus_message_unref(reply);
+            }
+            dbus_message_unref(msg);
+        } else {
+             LOGE("%s: Can't create new method call!", __FUNCTION__);
         }
 
-        dbus_message_append_args(msg, DBUS_TYPE_OBJECT_PATH, &agent_path,
-                                 DBUS_TYPE_INVALID);
-        reply = dbus_connection_send_with_reply_and_block(nat->conn,
-                                                          msg, -1, &err);
-        dbus_message_unref(msg);
-
-        if (!reply && dbus_error_is_set(&err)) {
-            LOG_AND_FREE_DBUS_ERROR(&err);
-            dbus_error_free(&err);
-        }
-
-        dbus_message_unref(reply);
         dbus_connection_flush(nat->conn);
         dbus_connection_unregister_object_path(nat->conn, agent_path);
 
