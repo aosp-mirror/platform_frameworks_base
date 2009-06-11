@@ -68,6 +68,7 @@ public class FountainView extends RSSurfaceView {
 
         mIntAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, 10);
         mPartAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 3 * 3);
+        mPartAlloc.setName("PartBuffer");
         mVertAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 5 + 1);
 
         {
@@ -97,7 +98,6 @@ public class FountainView extends RSSurfaceView {
         mRS.programFragmentBegin(null, null);
         mPF = mRS.programFragmentCreate();
         mPF.setName("PgmFragParts");
-        //mRS.contextBindProgramFragment(mPF);
 
         mRS.programFragmentBegin(null, null);
         mRS.programFragmentSetTexEnable(0, true);
@@ -113,8 +113,6 @@ public class FountainView extends RSSurfaceView {
         mParams[3] = 0;
         mParams[4] = 0;
         mParams[5] = mPartAlloc.getID();
-        mParams[6] = mPF.getID();
-        mParams[7] = mPF2.getID();
         mIntAlloc.data(mParams);
 
         int t2[] = new int[partCount * 4*3];

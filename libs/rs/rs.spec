@@ -19,6 +19,7 @@ ContextBindProgramVertex {
 AssignName {
 	param void *obj
 	param const char *name
+	param size_t len
 	}
 
 ElementBegin {

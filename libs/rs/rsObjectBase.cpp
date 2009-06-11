@@ -56,3 +56,15 @@ void ObjectBase::setName(const char *name)
         strcpy(mName, name);
     }
 }
+
+void ObjectBase::setName(const char *name, uint32_t len)
+{
+    delete mName;
+    mName = NULL;
+    if (name) {
+        mName = new char[len + 1];
+        memcpy(mName, name, len);
+        mName[len] = 0;
+    }
+}
+

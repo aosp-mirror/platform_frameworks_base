@@ -70,7 +70,7 @@ nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
 
     jint len = _env->GetArrayLength(str);
     jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
-    rsAssignName((void *)obj, (const char *)cptr);
+    rsAssignName((void *)obj, (const char *)cptr, len);
     _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
 }
 
