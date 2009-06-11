@@ -39,17 +39,28 @@ import java.util.HashMap;
 //TODO #TTS# review + complete javadoc
 public class TextToSpeech {
 
+    /**
+     * Denotes a successful operation.
+     */
+    public static final int TTS_SUCCESS                = 0;
+    /**
+     * Denotes a generic operation failure.
+     */
+    public static final int TTS_ERROR                  = -1;
+    /**
+     * Denotes a failure due to a missing resource.
+     */
+    public static final int TTS_ERROR_MISSING_RESOURCE = -2;
+
 
     /**
      * Called when the TTS has initialized
      *
-     * The InitListener must implement the onInit function. onInit is passed the
-     * version number of the TTS library that the user has installed; since this
-     * is called when the TTS has started, it is a good time to make sure that
-     * the user's TTS library is up to date.
+     * The InitListener must implement the onInit function. onInit is passed a
+     * status code indicating the result of the TTS initialization.
      */
     public interface OnInitListener {
-        public void onInit(int version);
+        public void onInit(int status);
     }
 
     /**
@@ -66,15 +77,14 @@ public class TextToSpeech {
      */
     private ServiceConnection serviceConnection;
 
-    private ITts itts = null;
-    private Context ctx = null;
-    private OnInitListener cb = null;
-    private int version = -1;
-    private boolean started = false;
-    private final Object startLock = new Object();
-    private boolean showInstaller = false;
-    private ITtsCallback ittscallback;
-    private OnSpeechCompletedListener speechCompletedCallback = null;
+    private ITts mITts = null;
+    private Context mContext = null;
+    private OnInitListener mInitListener = null;
+    private boolean mStarted = false;
+    private final Object mStartLock = new Object();
+    private ITtsCallback mITtsCallback;
+    private OnSpeechCompletedListener mSpeechCompListener = null;
+    private final Object mSpeechCompListenerLock = new Object();
 
 
 
@@ -83,23 +93,22 @@ public class TextToSpeech {
      *
      * @param context
      *            The context
-     * @param callback
-     *            The InitListener that should be called when the TTS has
+     * @param listener
+     *            The InitListener that will be called when the TTS has
      *            initialized successfully.
      */
-    public TextToSpeech(Context context, OnInitListener callback) {
-        // TODO #TTS# support TtsVersionAlert
-        //     showInstaller = true;
-        //     versionAlert = alert;
-        ctx = context;
-        cb = callback;
+    public TextToSpeech(Context context, OnInitListener listener) {
+        mContext = context;
+        mInitListener = listener;
         initTts();
     }
 
 
     public void setOnSpeechCompletedListener(
             final OnSpeechCompletedListener listener) {
-        speechCompletedCallback = listener;
+        synchronized(mSpeechCompListenerLock) {
+            mSpeechCompListener = listener;
+        }
     }
 
 
@@ -114,54 +123,61 @@ public class TextToSpeech {
 
 
     private void initTts() {
-        started = false;
+        mStarted = false;
 
         // Initialize the TTS, run the callback after the binding is successful
         serviceConnection = new ServiceConnection() {
             public void onServiceConnected(ComponentName name, IBinder service) {
-                synchronized(startLock) {
-                    itts = ITts.Stub.asInterface(service);
+                synchronized(mStartLock) {
+                    mITts = ITts.Stub.asInterface(service);
                     try {
-                        ittscallback = new ITtsCallback.Stub() {
-                            //@Override
+                        mITtsCallback = new ITtsCallback.Stub() {
                             public void markReached(String mark)
                             throws RemoteException {
-                                if (speechCompletedCallback != null) {
-                                    speechCompletedCallback.onSpeechCompleted();
+                                // call the listener of that event, but not
+                                // while locked.
+                                OnSpeechCompletedListener listener = null;
+                                synchronized(mSpeechCompListenerLock) {
+                                    listener = mSpeechCompListener;
+                                }
+                                if (listener != null) {
+                                    listener.onSpeechCompleted();
                                 }
                             }
                         };
-                        itts.registerCallback(ittscallback);
+                        mITts.registerCallback(mITtsCallback);
 
                     } catch (RemoteException e) {
                         initTts();
                         return;
                     }
 
-                    started = true;
+                    mStarted = true;
                     // The callback can become null if the Android OS decides to
                     // restart the TTS process as well as whatever is using it.
                     // In such cases, do nothing - the error handling from the
                     // speaking calls will kick in and force a proper restart of
                     // the TTS.
-                    if (cb != null) {
-                        cb.onInit(version);
+                    if (mInitListener != null) {
+                        // TODO manage failures and missing resources
+                        mInitListener.onInit(TTS_SUCCESS);
                     }
                 }
             }
 
             public void onServiceDisconnected(ComponentName name) {
-                synchronized(startLock) {
-                    itts = null;
-                    cb = null;
-                    started = false;
+                synchronized(mStartLock) {
+                    mITts = null;
+                    mInitListener = null;
+                    mStarted = false;
                 }
             }
         };
 
         Intent intent = new Intent("android.intent.action.USE_TTS");
         intent.addCategory("android.intent.category.TTS");
-        ctx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        mContext.bindService(intent, serviceConnection,
+                Context.BIND_AUTO_CREATE);
         // TODO handle case where the binding works (should always work) but
         //      the plugin fails
     }
@@ -174,7 +190,7 @@ public class TextToSpeech {
      */
     public void shutdown() {
         try {
-            ctx.unbindService(serviceConnection);
+            mContext.unbindService(serviceConnection);
         } catch (IllegalArgumentException e) {
             // Do nothing and fail silently since an error here indicates that
             // binding never succeeded in the first place.
@@ -208,23 +224,23 @@ public class TextToSpeech {
      *            Example: <b><code>R.raw.south_south_east</code></b>
      */
     public void addSpeech(String text, String packagename, int resourceId) {
-        synchronized(startLock) {
-            if (!started) {
+        synchronized(mStartLock) {
+            if (!mStarted) {
                 return;
             }
             try {
-                itts.addSpeech(text, packagename, resourceId);
+                mITts.addSpeech(text, packagename, resourceId);
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (IllegalStateException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
         }
@@ -242,23 +258,23 @@ public class TextToSpeech {
      *            "/sdcard/mysounds/hello.wav")
      */
     public void addSpeech(String text, String filename) {
-        synchronized (startLock) {
-            if (!started) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
                 return;
             }
             try {
-                itts.addSpeechFile(text, filename);
+                mITts.addSpeechFile(text, filename);
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (IllegalStateException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
         }
@@ -282,25 +298,25 @@ public class TextToSpeech {
      */
     public void speak(String text, int queueMode, HashMap<String,String> params)
     {
-        synchronized (startLock) {
+        synchronized (mStartLock) {
             Log.i("TTS received: ", text);
-            if (!started) {
+            if (!mStarted) {
                 return;
             }
             try {
                 // TODO support extra parameters, passing null for the moment
-                itts.speak(text, queueMode, null);
+                mITts.speak(text, queueMode, null);
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (IllegalStateException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
         }
@@ -320,24 +336,24 @@ public class TextToSpeech {
      */
     public void playEarcon(String earcon, int queueMode, 
             HashMap<String,String> params) {
-        synchronized (startLock) {
-            if (!started) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
                 return;
             }
             try {
                 // TODO support extra parameters, passing null for the moment
-                itts.playEarcon(earcon, queueMode, null);
+                mITts.playEarcon(earcon, queueMode, null);
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (IllegalStateException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
         }
@@ -355,23 +371,23 @@ public class TextToSpeech {
      * @return Whether or not the TTS is busy speaking.
      */
     public boolean isSpeaking() {
-        synchronized (startLock) {
-            if (!started) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
                 return false;
             }
             try {
-                return itts.isSpeaking();
+                return mITts.isSpeaking();
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (IllegalStateException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
             return false;
@@ -383,23 +399,23 @@ public class TextToSpeech {
      * Stops speech from the TTS.
      */
     public void stop() {
-        synchronized (startLock) {
-            if (!started) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
                 return;
             }
             try {
-                itts.stop();
+                mITts.stop();
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (IllegalStateException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
         }
@@ -421,15 +437,15 @@ public class TextToSpeech {
      *            The speech rate for the TTS engine.
      */
     public void setSpeechRate(int speechRate) {
-        synchronized (startLock) {
-            if (!started) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
                 return;
             }
             try {
-                itts.setSpeechRate(speechRate);
+                mITts.setSpeechRate(speechRate);
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
         }
@@ -453,15 +469,15 @@ public class TextToSpeech {
      *            http://en.wikipedia.org/wiki/IETF_language_tag
      */
     public void setLanguage(String language) {
-        synchronized (startLock) {
-            if (!started) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
                 return;
             }
             try {
-                itts.setLanguage(language);
+                mITts.setLanguage(language);
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
         }
@@ -482,24 +498,24 @@ public class TextToSpeech {
      */
     public boolean synthesizeToFile(String text, HashMap<String,String> params,
             String filename) {
-        synchronized (startLock) {
-            if (!started) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
                 return false;
             }
             try {
                 // TODO support extra parameters, passing null for the moment
-                return itts.synthesizeToFile(text, null, filename);
+                return mITts.synthesizeToFile(text, null, filename);
             } catch (RemoteException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             } catch (IllegalStateException e) {
                 // TTS died; restart it.
-                started = false;
+                mStarted = false;
                 initTts();
             }
             return false;
