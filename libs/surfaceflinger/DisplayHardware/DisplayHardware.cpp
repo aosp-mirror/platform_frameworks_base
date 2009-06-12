@@ -199,7 +199,7 @@ void DisplayHardware::init(uint32_t dpy)
      */
 
     surface = eglCreateWindowSurface(display, config, mNativeWindow.get(), NULL);
-    checkEGLErrors("eglCreateDisplaySurfaceANDROID");
+    checkEGLErrors("eglCreateWindowSurface");
 
     if (eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &dummy) == EGL_TRUE) {
         if (dummy == EGL_BUFFER_PRESERVED) {
@@ -207,9 +207,11 @@ void DisplayHardware::init(uint32_t dpy)
         }
     }
 
+#ifdef EGL_ANDROID_swap_rectangle    
     if (strstr(egl_extensions, "EGL_ANDROID_swap_rectangle")) {
         mFlags |= SWAP_RECTANGLE;
     }
+#endif
 
     mDpiX = mNativeWindow->xdpi;
     mDpiX = mNativeWindow->ydpi;
@@ -309,6 +311,7 @@ void DisplayHardware::flip(const Region& dirty) const
     EGLDisplay dpy = mDisplay;
     EGLSurface surface = mSurface;
 
+#ifdef EGL_ANDROID_swap_rectangle    
     if (mFlags & SWAP_RECTANGLE) {
         Region newDirty(dirty);
         newDirty.andSelf(Rect(mWidth, mHeight));
@@ -316,7 +319,8 @@ void DisplayHardware::flip(const Region& dirty) const
         eglSetSwapRectangleANDROID(dpy, surface,
                 b.left, b.top, b.width(), b.height());
     } 
-
+#endif
+    
     if (mFlags & UPDATE_ON_DEMAND) {
         mNativeWindow->setUpdateRectangle(dirty.bounds());
     }
