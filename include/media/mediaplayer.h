@@ -82,7 +82,7 @@ enum media_error_type {
 //   0xx: Reserved
 //   7xx: Android Player info/warning (e.g player lagging behind.)
 //   8xx: Media info/warning (e.g media badly interleaved.)
-// 
+//
 enum media_info_type {
     // 0xx
     MEDIA_INFO_UNKNOWN = 1,
