@@ -327,7 +327,7 @@ BackupDataReader::ReadAppHeader(String8* packageName, int* cookie)
     }
     size_t size = m_header.app.packageLen;
     char* buf = packageName->lockBuffer(size);
-    if (packageName == NULL) {
+    if (buf == NULL) {
         packageName->unlockBuffer();
         m_status = ENOMEM;
         return m_status;
