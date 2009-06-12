@@ -404,6 +404,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             mReconnectIntent = null;
         }
 
+        setState(State.DISCONNECTING);
+
         for (DataConnection connBase : dataConnectionList) {
             CdmaDataConnection conn = (CdmaDataConnection) connBase;
 
@@ -419,24 +421,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
         stopNetStatPoll();
 
-        /*
-         * If we've been asked to tear down the connection,
-         * set the state to DISCONNECTING. However, there's
-         * a race that can occur if for some reason we were
-         * already in the IDLE state. In that case, the call
-         * to conn.disconnect() above will immediately post
-         * a message to the handler thread that the disconnect
-         * is done, and if the handler runs before the code
-         * below does, the handler will have set the state to
-         * IDLE before the code below runs. If we didn't check
-         * for that, future calls to trySetupData would fail,
-         * and we would never get out of the DISCONNECTING state.
-         */
         if (!tearDown) {
             setState(State.IDLE);
             phone.notifyDataConnection(reason);
-        } else if (state != State.IDLE) {
-            setState(State.DISCONNECTING);
         }
     }
 
@@ -811,6 +798,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 resetPollStats();
             }
         } else {
+            // reset reconnect timer
+            nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED);
         }
