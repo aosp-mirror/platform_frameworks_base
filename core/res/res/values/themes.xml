@@ -185,7 +185,6 @@
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
 
         <!-- Search widget styles -->
-        <item name="searchWidgetItemBackground">@android:color/search_widget_item_background</item>
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
     </style>
     
