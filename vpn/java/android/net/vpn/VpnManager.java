@@ -48,19 +48,8 @@ public class VpnManager {
     private static final String PACKAGE_PREFIX =
             VpnManager.class.getPackage().getName() + ".";
 
-    /** Action to start the activity of installing a new profile. */
-    public static final String ACTION_VPN_INSTALL_PROFILE =
-            PACKAGE_PREFIX + "INSTALL_PROFILE";
-    /**
-     * Key to the installation path in the intent of installing a new profile.
-     */
-    public static final String KEY_INSTALLATION_PATH = "install_path";
-    public static final String DEFAULT_INSTALLATION_PATH =
-            "/data/local/tmp/vpn";
-
-    // Action to start VPN installation monitor service
-    private static final String SERVICE_VPN_INSTALL_MONITOR =
-            PACKAGE_PREFIX + "INSTALLATION_MONITOR";
+    // Action to start VPN service
+    private static final String ACTION_VPN_SERVICE = PACKAGE_PREFIX + "SERVICE";
 
     // Action to start VPN settings
     private static final String ACTION_VPN_SETTINGS = PACKAGE_PREFIX + "SETTINGS";
@@ -112,53 +101,29 @@ public class VpnManager {
         }
     }
 
-    private String getServiceActionName(VpnType type) {
-        return PACKAGE_PREFIX + type.getServiceName();
+    /**
+     * Starts the VPN service to establish VPN connection.
+     */
+    public void startVpnService() {
+        mContext.startService(new Intent(ACTION_VPN_SERVICE));
     }
 
     /**
-     * Starts the VPN service of the specified type.
+     * Stops the VPN service.
      */
-    public boolean startService(VpnType type) {
-        String serviceAction = getServiceActionName(type);
-        if (serviceAction != null) {
-            Log.i(TAG, "start service: " + serviceAction);
-            mContext.startService(new Intent(serviceAction));
-            return true;
-        } else {
-            Log.w(TAG, "unknown vpn type to start service for: " + type);
-            return false;
-        }
+    public void stopVpnService() {
+        mContext.stopService(new Intent(ACTION_VPN_SERVICE));
     }
 
     /**
-     * Stops the VPN service of the specified type.
+     * Binds the specified ServiceConnection with the VPN service.
      */
-    public void stopService(VpnType type) {
-        String serviceAction = getServiceActionName(type);
-        if (serviceAction != null) {
-            Log.i(TAG, "stop service for: " + type);
-            mContext.stopService(new Intent(serviceAction));
-        } else {
-            Log.w(TAG, "unknown vpn type to stop service for: " + type);
-        }
-    }
-
-    /**
-     * Binds the specified ServiceConnection with the VPN service of the
-     * specified type.
-     */
-    public boolean bindService(VpnType type, ServiceConnection c) {
-        String serviceAction = getServiceActionName(type);
-        if (serviceAction == null) {
-            Log.w(TAG, "unknown vpn type to bind service for: " + type);
-            return false;
-        }
-        if (!mContext.bindService(new Intent(serviceAction), c, 0)) {
-            Log.w(TAG, "failed to connect to service: " + type);
+    public boolean bindVpnService(ServiceConnection c) {
+        if (!mContext.bindService(new Intent(ACTION_VPN_SERVICE), c, 0)) {
+            Log.w(TAG, "failed to connect to VPN service");
             return false;
         } else {
-            Log.v(TAG, "succeeded to connect to service: " + type);
+            Log.d(TAG, "succeeded to connect to VPN service");
             return true;
         }
     }
@@ -181,21 +146,6 @@ public class VpnManager {
         mContext.unregisterReceiver(r);
     }
 
-    /**
-     * Starts the installation monitor service.
-     * The service monitors the default installtion path (under /data/local/tmp)
-     * and automatically starts the activity to create a new profile when new
-     * configuration files appear in that path.
-     */
-    public void startInstallationMonitorService() {
-        mContext.startService(new Intent(SERVICE_VPN_INSTALL_MONITOR));
-    }
-
-    /** Stops the installation monitor service. */
-    public void stopInstallationMonitorService() {
-        mContext.stopService(new Intent(SERVICE_VPN_INSTALL_MONITOR));
-    }
-
     /** Starts the VPN settings activity. */
     public void startSettingsActivity() {
         Intent intent = new Intent(ACTION_VPN_SETTINGS);
@@ -203,14 +153,10 @@ public class VpnManager {
         mContext.startActivity(intent);
     }
 
-    /**
-     * Starts the activity to install a customized profile.
-     * @param installPath the path where all the configuration files are located
-     */
-    public void startInstallProfileActivity(String installPath) {
-        Intent intent = new Intent(ACTION_VPN_INSTALL_PROFILE);
-        intent.putExtra(KEY_INSTALLATION_PATH, installPath);
+    /** Creates an intent to start the VPN settings activity. */
+    public Intent createSettingsActivityIntent() {
+        Intent intent = new Intent(ACTION_VPN_SETTINGS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+        return intent;
     }
 }

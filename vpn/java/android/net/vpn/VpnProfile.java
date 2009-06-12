@@ -27,7 +27,8 @@ import java.io.Serializable;
  * A VPN profile.
  * {@hide}
  */
-public abstract class VpnProfile implements Parcelable {
+public abstract class VpnProfile implements Parcelable, Serializable {
+    private static final long serialVersionUID = 1L;
     private String mName; // unique display name
     private String mId; // unique identifier
     private String mDomainSuffices; // space separated list

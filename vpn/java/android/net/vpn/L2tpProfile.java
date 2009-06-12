@@ -21,6 +21,8 @@ package android.net.vpn;
  * {@hide}
  */
 public class L2tpProfile extends SingleServerProfile {
+    private static final long serialVersionUID = 1L;
+
     @Override
     public VpnType getType() {
         return VpnType.L2TP;
