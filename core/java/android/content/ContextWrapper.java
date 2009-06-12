@@ -130,6 +130,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public File getSharedPrefsFile(String name) {
+        return mBase.getSharedPrefsFile(name);
+    }
+
+    @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         return mBase.getSharedPreferences(name, mode);
     }

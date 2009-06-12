@@ -26,16 +26,14 @@ public class SharedPreferencesBackupHelper {
     public static void performBackup(Context context,
             ParcelFileDescriptor oldSnapshot, ParcelFileDescriptor newSnapshot,
             BackupDataOutput data, String[] prefGroups) {
-        String basePath = "/xxx"; //context.getPreferencesDir();
-
         // make filenames for the prefGroups
         final int N = prefGroups.length;
         String[] files = new String[N];
         for (int i=0; i<N; i++) {
-            files[i] = prefGroups[i] + ".xml";
+            files[i] = context.getSharedPrefsFile(prefGroups[i]).toString();
         }
 
-        FileBackupHelper.performBackup_checked(basePath, oldSnapshot, data, newSnapshot, files);
+        FileBackupHelper.performBackup_checked(oldSnapshot, data, newSnapshot, files, prefGroups);
     }
 }
 

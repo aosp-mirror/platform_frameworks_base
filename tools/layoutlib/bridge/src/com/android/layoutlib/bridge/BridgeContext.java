@@ -966,6 +966,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public File getSharedPrefsFile(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public SharedPreferences getSharedPreferences(String arg0, int arg1) {
         // TODO Auto-generated method stub
         return null;

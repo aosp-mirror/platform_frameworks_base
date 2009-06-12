@@ -303,10 +303,14 @@ class ApplicationContext extends Context {
         return new File(prefsFile.getPath() + ".bak");
     }
 
+    public File getSharedPrefsFile(String name) {
+        return makeFilename(getPreferencesDir(), name + ".xml");
+    }
+
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         SharedPreferencesImpl sp;
-        File f = makeFilename(getPreferencesDir(), name + ".xml");
+        File f = getSharedPrefsFile(name);
         synchronized (sSharedPrefs) {
             sp = sSharedPrefs.get(f);
             if (sp != null && !sp.hasFileChanged()) {

@@ -105,6 +105,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public File getSharedPrefsFile(String name) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getPackageCodePath() {
         throw new UnsupportedOperationException();
     }
