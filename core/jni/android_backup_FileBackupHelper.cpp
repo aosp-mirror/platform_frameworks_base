@@ -25,6 +25,7 @@
 namespace android
 {
 
+// java.io.FileDescriptor
 static jfieldID s_descriptorField = 0;
 
 static int
@@ -34,7 +35,6 @@ performBackup_native(JNIEnv* env, jobject clazz, jobject oldState, int data,
     int err;
 
     // all parameters have already been checked against null
-    LOGD("oldState=%p newState=%p data=%p\n", oldState, newState, data);
     int oldStateFD = oldState != NULL ? env->GetIntField(oldState, s_descriptorField) : -1;
     int newStateFD = env->GetIntField(newState, s_descriptorField);
     BackupDataWriter* dataStream = (BackupDataWriter*)data;
@@ -74,8 +74,6 @@ static const JNINativeMethod g_methods[] = {
 
 int register_android_backup_FileBackupHelper(JNIEnv* env)
 {
-    LOGD("register_android_backup_FileBackupHelper");
-
     jclass clazz;
 
     clazz = env->FindClass("java/io/FileDescriptor");

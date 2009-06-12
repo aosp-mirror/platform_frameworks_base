@@ -27,21 +27,56 @@ import java.io.FileDescriptor;
 public class FileBackupHelper {
     private static final String TAG = "FileBackupHelper";
 
+    Context mContext;
+    String mKeyPrefix;
+
+    public FileBackupHelper(Context context) {
+        mContext = context;
+    }
+
+    public FileBackupHelper(Context context, String keyPrefix) {
+        mContext = context;
+        mKeyPrefix = keyPrefix;
+    }
+
     /**
      * Based on oldState, determine which of the files from the application's data directory
      * need to be backed up, write them to the data stream, and fill in newState with the
      * state as it exists now.
      */
-    public static void performBackup(Context context,
-            ParcelFileDescriptor oldState, BackupDataOutput data,
+    public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState, String[] files) {
-        File base = context.getFilesDir();
+        // file names
+        File base = mContext.getFilesDir();
         final int N = files.length;
         String[] fullPaths = new String[N];
         for (int i=0; i<N; i++) {
             fullPaths[i] = (new File(base, files[i])).getAbsolutePath();
         }
-        performBackup_checked(oldState, data, newState, fullPaths, files);
+
+        // keys
+        String[] keys = makeKeys(mKeyPrefix, files);
+
+        // go
+        performBackup_checked(oldState, data, newState, fullPaths, keys);
+    }
+
+    /**
+     * If keyPrefix is not null, prepend it to each of the strings in <code>original</code>;
+     * otherwise, return original.
+     */
+    static String[] makeKeys(String keyPrefix, String[] original) {
+        if (keyPrefix != null) {
+            String[] keys;
+            final int N = original.length;
+            keys = new String[N];
+            for (int i=0; i<N; i++) {
+                keys[i] = keyPrefix + ':' + original[i];
+            }
+            return keys;
+        } else {
+            return original;
+        }
     }
 
     /**
