@@ -23,6 +23,8 @@ import android.os.Parcel;
  * {@hide}
  */
 public class L2tpIpsecProfile extends SingleServerProfile {
+    private static final long serialVersionUID = 1L;
+
     private String mUserCertificate;
     private String mCaCertificate;
     private String mUserkey;
