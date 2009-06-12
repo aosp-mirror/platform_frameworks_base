@@ -62,43 +62,54 @@ readNextHeader_native(JNIEnv* env, jobject clazz, int r, jobject entity)
         return err < 0 ? err : -1;
     }
 
-    while (reader->HasEntities()) {
-        int type;
+    int type = 0;
 
-        err = reader->ReadNextHeader(&type);
+    err = reader->ReadNextHeader(&type);
+    if (err == EIO) {
+        // Clean EOF with no footer block; just claim we're done
+        return 1;
+    }
+
+    if (err != 0) {
+        return err < 0 ? err : -1;
+    }
+
+    switch (type) {
+    case BACKUP_HEADER_APP_V1:
+    {
+        String8 packageName;
+        int cookie;
+        err = reader->ReadAppHeader(&packageName, &cookie);
         if (err != 0) {
+            LOGD("ReadAppHeader() returned %d; aborting", err);
             return err < 0 ? err : -1;
         }
-
-        switch (type) {
-        case BACKUP_HEADER_APP_V1:
-        {
-            String8 packageName;
-            int cookie;
-            err = reader->ReadAppHeader(&packageName, &cookie);
-            if (err != 0) {
-                return err < 0 ? err : -1;
-            }
-            break;
-        }
-        case BACKUP_HEADER_ENTITY_V1:
-        {
-            String8 key;
-            size_t dataSize;
-            err = reader->ReadEntityHeader(&key, &dataSize);
-            if (err != 0) {
-                return err < 0 ? err : -1;
-            }
-            // TODO: Set the fields in the entity object
-            return 0;
-        }
-        case BACKUP_FOOTER_APP_V1:
-            break;
-        default:
-            LOGD("Unknown header type: 0x%08x\n", type);
-            return -1;
-        }
+        break;
     }
+    case BACKUP_HEADER_ENTITY_V1:
+    {
+        String8 key;
+        size_t dataSize;
+        err = reader->ReadEntityHeader(&key, &dataSize);
+        if (err != 0) {
+            LOGD("ReadEntityHeader(); aborting", err);
+            return err < 0 ? err : -1;
+        }
+        // TODO: Set the fields in the entity object
+        jstring keyStr = env->NewStringUTF(key.string());
+        env->SetObjectField(entity, s_keyField, keyStr);
+        env->SetIntField(entity, s_dataSizeField, dataSize);
+        return 0;
+    }
+    case BACKUP_FOOTER_APP_V1:
+    {
+        break;
+    }
+    default:
+        LOGD("Unknown header type: 0x%08x\n", type);
+        return -1;
+    }
+
     // done
     return 1;
 }
@@ -109,17 +120,17 @@ readEntityData_native(JNIEnv* env, jobject clazz, int r, jbyteArray data, int si
     int err;
     BackupDataReader* reader = (BackupDataReader*)r;
 
-    if (env->GetArrayLength(data) > size) {
+    if (env->GetArrayLength(data) < size) {
         // size mismatch
         return -1;
     }
 
     jbyte* dataBytes = env->GetByteArrayElements(data, NULL);
     if (dataBytes == NULL) {
-        return -1;
+        return -2;
     }
 
-   err = reader->ReadEntityData(dataBytes, size);
+    err = reader->ReadEntityData(dataBytes, size);
 
     env->ReleaseByteArrayElements(data, dataBytes, 0);
 
@@ -136,7 +147,7 @@ static const JNINativeMethod g_methods[] = {
 
 int register_android_backup_BackupDataInput(JNIEnv* env)
 {
-    LOGD("register_android_backup_BackupDataInput");
+    //LOGD("register_android_backup_BackupDataInput");
 
     jclass clazz;
 
