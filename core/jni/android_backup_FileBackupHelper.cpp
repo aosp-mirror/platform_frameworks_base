@@ -28,8 +28,8 @@ namespace android
 static jfieldID s_descriptorField = 0;
 
 static int
-performBackup_native(JNIEnv* env, jobject clazz, jstring basePath, jobject oldState, int data,
-        jobject newState, jobjectArray files)
+performBackup_native(JNIEnv* env, jobject clazz, jobject oldState, int data,
+        jobject newState, jobjectArray files, jobjectArray keys)
 {
     int err;
 
@@ -39,29 +39,37 @@ performBackup_native(JNIEnv* env, jobject clazz, jstring basePath, jobject oldSt
     int newStateFD = env->GetIntField(newState, s_descriptorField);
     BackupDataWriter* dataStream = (BackupDataWriter*)data;
 
-    char const* basePathUTF = env->GetStringUTFChars(basePath, NULL);
-    LOGD("basePathUTF=\"%s\"\n", basePathUTF);
     const int fileCount = env->GetArrayLength(files);
     char const** filesUTF = (char const**)malloc(sizeof(char*)*fileCount);
     for (int i=0; i<fileCount; i++) {
         filesUTF[i] = env->GetStringUTFChars((jstring)env->GetObjectArrayElement(files, i), NULL);
     }
 
-    err = back_up_files(oldStateFD, dataStream, newStateFD, basePathUTF, filesUTF, fileCount);
+    const int keyCount = env->GetArrayLength(keys);
+    char const** keysUTF = (char const**)malloc(sizeof(char*)*keyCount);
+    for (int i=0; i<keyCount; i++) {
+        keysUTF[i] = env->GetStringUTFChars((jstring)env->GetObjectArrayElement(keys, i), NULL);
+    }
+
+    err = back_up_files(oldStateFD, dataStream, newStateFD, filesUTF, keysUTF, fileCount);
 
     for (int i=0; i<fileCount; i++) {
         env->ReleaseStringUTFChars((jstring)env->GetObjectArrayElement(files, i), filesUTF[i]);
     }
     free(filesUTF);
-    env->ReleaseStringUTFChars(basePath, basePathUTF);
+
+    for (int i=0; i<keyCount; i++) {
+        env->ReleaseStringUTFChars((jstring)env->GetObjectArrayElement(keys, i), keysUTF[i]);
+    }
+    free(keysUTF);
 
     return err;
 }
 
 static const JNINativeMethod g_methods[] = {
     { "performBackup_native",
-        "(Ljava/lang/String;Ljava/io/FileDescriptor;ILjava/io/FileDescriptor;[Ljava/lang/String;)I",
-        (void*)performBackup_native },
+       "(Ljava/io/FileDescriptor;ILjava/io/FileDescriptor;[Ljava/lang/String;[Ljava/lang/String;)I",
+       (void*)performBackup_native },
 };
 
 int register_android_backup_FileBackupHelper(JNIEnv* env)
