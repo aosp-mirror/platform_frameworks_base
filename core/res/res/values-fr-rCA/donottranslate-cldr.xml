@@ -98,6 +98,7 @@
     <string name="twenty_four_hour_time_format">H:mm</string>
     <string name="numeric_date">%Y-%m-%d</string>
     <string name="numeric_date_format">yyyy-MM-dd</string>
+    <string name="numeric_date_template">"%s-%s-%s"</string>
     <string name="month_day_year">%-e %B %Y</string>
     <string name="time_of_day">%H:%M:%S</string>
     <string name="date_and_time">%H:%M:%S %Y-%m-%d</string>
