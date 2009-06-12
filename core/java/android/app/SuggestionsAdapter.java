@@ -68,9 +68,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mIconName2Col;
     private int mBackgroundColorCol;
 
-    // Cached item background color.
-    private int mDefaultBackgroundColor;
-
     // This value is stored in SuggestionsAdapter by the SearchDialog to indicate whether
     // a particular list item should be selected upon the next call to notifyDataSetChanged.
     // This is used to indicate the index of the "More results..." list item so that when
@@ -101,11 +98,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         // set up provider resources (gives us icons, etc.)
         Context activityContext = mSearchable.getActivityContext(mContext);
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
-
-        TypedValue colorValue = new TypedValue();
-        mProviderContext.getTheme().resolveAttribute(
-                com.android.internal.R.attr.searchWidgetItemBackground, colorValue, true);
-        mDefaultBackgroundColor = mProviderContext.getResources().getColor(colorValue.resourceId);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
         mGlobalSearchMode = globalSearchMode;
@@ -302,9 +294,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         int backgroundColor = 0;
         if (mBackgroundColorCol != -1) {
             backgroundColor = cursor.getInt(mBackgroundColorCol);
-        }
-        if (backgroundColor == 0) {
-            backgroundColor = mDefaultBackgroundColor;
         }
         ((SuggestionItemView)view).setColor(backgroundColor);
 
@@ -524,6 +513,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         protected SuggestionItemView(Context context, Cursor cursor) {
             // Initialize ourselves
             super(context);
+            mBackgroundColor = 0;  // transparent by default.
 
             // For our layout use the default list item height from the current theme.
             TypedValue lineHeight = new TypedValue();
@@ -551,7 +541,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
 
         @Override
         public void dispatchDraw(Canvas canvas) {
-            if (!isPressed()) {
+            if (mBackgroundColor != 0 && !isPressed() && !isSelected()) {
                 canvas.drawColor(mBackgroundColor);
             }
             super.dispatchDraw(canvas);
