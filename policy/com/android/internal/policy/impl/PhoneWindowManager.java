@@ -160,7 +160,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     boolean mSafeMode;
     WindowState mStatusBar = null;
-    WindowState mSearchBar = null;
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
     GlobalActions mGlobalActions;
@@ -702,7 +701,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Currently enforces that three window types are singletons:
      * <ul>
      * <li>STATUS_BAR_TYPE</li>
-     * <li>SEARCH_BAR_TYPE</li>
      * <li>KEYGUARD_TYPE</li>
      * </ul>
      * 
@@ -719,12 +717,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mStatusBar = win;
                 break;
-            case TYPE_SEARCH_BAR:
-                if (mSearchBar != null) {
-                    return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
-                }
-                mSearchBar = win;
-                break;
             case TYPE_KEYGUARD:
                 if (mKeyguard != null) {
                     return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
@@ -739,9 +731,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void removeWindowLw(WindowState win) {
         if (mStatusBar == win) {
             mStatusBar = null;
-        }
-        else if (mSearchBar == win) {
-            mSearchBar = null;
         }
         else if (mKeyguard == win) {
             mKeyguard = null;
