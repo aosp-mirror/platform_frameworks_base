@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
+
 import android.os.Message;
 import android.os.Handler;
 
@@ -1200,6 +1202,31 @@ public interface CommandsInterface {
      */
     public void handleCallSetupRequestFromSim(boolean accept, Message response);
 
+    /**
+     * Activate or deactivate cell broadcast SMS for GSM.
+     *
+     * @param activate
+     *            true = activate, false = deactivate
+     * @param result Callback message is empty on completion
+     */
+    public void setGsmBroadcastActivation(boolean activate, Message result);
+
+    /**
+     * Configure cell broadcast SMS for GSM.
+     *
+     * @param response Callback message is empty on completion
+     */
+    public void setGsmBroadcastConfig(SmsBroadcastConfigInfo[] config, Message response);
+
+    /**
+     * Query the current configuration of cell broadcast SMS of GSM.
+     *
+     * @param response
+     *        Callback message contains the configuration from the modem
+     *        on completion
+     */
+    public void getGsmBroadcastConfig(Message response);
+
     //***** new Methods for CDMA support
 
     /**
@@ -1306,14 +1333,14 @@ public interface CommandsInterface {
     public void deactivateDataCall(int cid, Message result);
 
     /**
-     * Activate or deactivate cell broadcast SMS.
+     * Activate or deactivate cell broadcast SMS for CDMA.
      *
      * @param activate
-     *            0 = activate, 1 = deactivate
+     *            true = activate, false = deactivate
      * @param result
      *            Callback message is empty on completion
      */
-    public void activateCdmaBroadcastSms(int activate, Message result);
+    public void setCdmaBroadcastActivation(boolean activate, Message result);
 
     /**
      * Configure cdma cell broadcast SMS.
