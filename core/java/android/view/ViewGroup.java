@@ -1449,7 +1449,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
                 (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
             cache = child.getDrawingCache();
-            scalingRequired = mAttachInfo.mScalingRequired;
+            if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         }
 
         final boolean hasNoCache = cache == null;
@@ -1460,6 +1460,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         } else {
             canvas.translate(cl, ct);
             if (scalingRequired) {
+                // mAttachInfo cannot be null, otherwise scalingRequired == false
                 final float scale = 1.0f / mAttachInfo.mApplicationScale;
                 canvas.scale(scale, scale);
             }
