@@ -4525,6 +4525,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /* package */ void passToJavaScript(String currentText, KeyEvent event) {
+        if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
+            mWebViewCore.sendMessage(EventHub.CLICK);
+        }
         HashMap arg = new HashMap();
         arg.put("event", event);
         arg.put("currentText", currentText);
