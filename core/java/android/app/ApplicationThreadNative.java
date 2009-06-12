@@ -18,6 +18,7 @@ package android.app;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IIntentReceiver;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;

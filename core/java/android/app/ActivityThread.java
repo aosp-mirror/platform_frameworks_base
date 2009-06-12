@@ -23,6 +23,7 @@ import android.content.ContentProvider;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.Intent;
+import android.content.IIntentReceiver;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;

@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDeleteObserver;
@@ -338,6 +339,15 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void freeStorage(
             long idealStorageSize, PendingIntent onFinishedIntent) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public void freeStorageWithIntent(
+            long idealStorageSize, IntentSender pi) {
         throw new UnsupportedOperationException();
     }
 
