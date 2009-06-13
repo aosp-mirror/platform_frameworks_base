@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.os.RuntimeInit;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
 import com.android.server.ProcessStats;
@@ -2761,7 +2760,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // instance of the activity so a new fresh one can be started.
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE) {
                     if (!ret.finishing) {
-                        int index = indexOfTokenLocked(ret, false);
+                        int index = indexOfTokenLocked(ret);
                         if (index >= 0) {
                             finishActivityLocked(ret, 0, Activity.RESULT_CANCELED,
                                     null, "clear");
@@ -2854,7 +2853,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord sourceRecord = null;
         HistoryRecord resultRecord = null;
         if (resultTo != null) {
-            int index = indexOfTokenLocked(resultTo, false);
+            int index = indexOfTokenLocked(resultTo);
             if (DEBUG_RESULTS) Log.v(
                 TAG, "Sending result to " + resultTo + " (index " + index + ")");
             if (index >= 0) {
@@ -3420,7 +3419,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized (this) {
-            int index = indexOfTokenLocked(callingActivity, false);
+            int index = indexOfTokenLocked(callingActivity);
             if (index < 0) {
                 return false;
             }
@@ -3570,7 +3569,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public void setRequestedOrientation(IBinder token,
             int requestedOrientation) {
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -3592,7 +3591,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public int getRequestedOrientation(IBinder token) {
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
@@ -3648,7 +3647,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             TAG, "Finishing activity: token=" + token
             + ", result=" + resultCode + ", data=" + resultData);
 
-        int index = indexOfTokenLocked(token, false);
+        int index = indexOfTokenLocked(token);
         if (index < 0) {
             return false;
         }
@@ -3772,7 +3771,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final HistoryRecord finishCurrentActivityLocked(HistoryRecord r,
             int mode) {
-        final int index = indexOfTokenLocked(r, false);
+        final int index = indexOfTokenLocked(r);
         if (index < 0) {
             return null;
         }
@@ -3897,7 +3896,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public final void finishSubActivity(IBinder token, String resultWho,
             int requestCode) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -4447,7 +4446,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized(this) {
-            int index = indexOfTokenLocked(token, true);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -5012,7 +5011,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             // Get the activity record.
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
 
@@ -5166,7 +5165,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord r = null;
 
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (HistoryRecord)mHistory.get(index);
                 if (!timeout) {
@@ -5197,7 +5196,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         final long origId = Binder.clearCallingIdentity();
 
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (HistoryRecord)mHistory.get(index);
                 r.thumbnail = thumbnail;
@@ -5227,7 +5226,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (this) {
             mHandler.removeMessages(DESTROY_TIMEOUT_MSG, token);
             
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 if (r.state == ActivityState.DESTROYING) {
@@ -5254,7 +5253,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private HistoryRecord getCallingRecordLocked(IBinder token) {
-        int index = indexOfTokenLocked(token, true);
+        int index = indexOfTokenLocked(token);
         if (index >= 0) {
             HistoryRecord r = (HistoryRecord)mHistory.get(index);
             if (r != null) {
@@ -5266,7 +5265,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public ComponentName getActivityClassForToken(IBinder token) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 return r.intent.getComponent();
@@ -5277,7 +5276,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public String getPackageForToken(IBinder token) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 return r.packageName;
@@ -5316,7 +5315,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             HistoryRecord activity = null;
             if (type == INTENT_SENDER_ACTIVITY_RESULT) {
-                int index = indexOfTokenLocked(token, false);
+                int index = indexOfTokenLocked(token);
                 if (index < 0) {
                     return null;
                 }
@@ -6837,7 +6836,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         synchronized(this) {
             if (r == null) {
-                int index = indexOfTokenLocked(token, false);
+                int index = indexOfTokenLocked(token);
                 if (index < 0) {
                     return;
                 }
@@ -8943,7 +8942,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return false;
     }
 
-    private final int indexOfTokenLocked(IBinder token, boolean required) {
+    private final int indexOfTokenLocked(IBinder token) {
         int count = mHistory.size();
 
         // convert the token to an entry in the history.
@@ -8957,17 +8956,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 break;
             }
         }
-        if (index < 0 && required) {
-            RuntimeInit.crash(TAG, new InvalidTokenException(token));
-        }
 
         return index;
-    }
-
-    static class InvalidTokenException extends Exception {
-        InvalidTokenException(IBinder token) {
-            super("Bad activity token: " + token);
-        }
     }
 
     private final void killServicesLocked(ProcessRecord app,
@@ -9994,7 +9984,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             HistoryRecord activity = null;
             if (token != null) {
-                int aindex = indexOfTokenLocked(token, false);
+                int aindex = indexOfTokenLocked(token);
                 if (aindex < 0) {
                     Log.w(TAG, "Binding with unknown activity: " + token);
                     return 0;
