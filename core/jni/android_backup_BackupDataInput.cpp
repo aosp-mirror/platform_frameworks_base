@@ -151,7 +151,7 @@ int register_android_backup_BackupDataInput(JNIEnv* env)
     s_keyField = env->GetFieldID(clazz, "key", "Ljava/lang/String;");
     LOG_FATAL_IF(s_keyField == NULL,
             "Unable to find key field in android.backup.BackupDataInput.EntityHeader");
-    s_dataSizeField = env->GetFieldID(clazz, "dataSize", "Ljava/lang/String;");
+    s_dataSizeField = env->GetFieldID(clazz, "dataSize", "I");
     LOG_FATAL_IF(s_dataSizeField == NULL,
             "Unable to find dataSize field in android.backup.BackupDataInput.EntityHeader");
 
