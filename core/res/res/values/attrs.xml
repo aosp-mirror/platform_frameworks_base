@@ -574,7 +574,7 @@
         <flag name="time" value="0x00000024" />
     </attr>
 
-    <!-- Additional features you can enable in an IME associated with an editor,
+    <!-- Additional features you can enable in an IME associated with an editor
          to improve the integration with your application.  The constants
          here correspond to those defined by
          {@link android.view.inputmethod.EditorInfo#imeOptions}. -->
@@ -658,7 +658,7 @@
     <attr name="y" format="dimension" />
           
     <!-- Specifies how to place an object, both
-         its x and y axis, within a larger containing object. -->
+         its x- and y-axis, within a larger containing object. -->
     <attr name="gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
@@ -715,7 +715,7 @@
 
     <!-- Standard gravity constant that a child can supply to its parent.
          Defines how to place an object, both
-         its x and y axis, within a larger containing object. -->
+         its x- and y-axis, within a larger containing object. -->
     <attr name="layout_gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
@@ -1782,7 +1782,7 @@
         <attr name="minEms" format="integer" min="0" />
         <!-- Makes the TextView be at least this many pixels wide -->
         <attr name="minWidth" />
-        <!-- Specifies how to align the text by the view's x and/or y axis 
+        <!-- Specifies how to align the text by the view's x- and/or y-axis
              when the text is smaller than the view. -->
         <attr name="gravity" />
         <!-- Whether the text is allowed to be wider than the view (and
