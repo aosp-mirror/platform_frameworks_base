@@ -30,6 +30,8 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.List;
@@ -59,6 +61,10 @@ public class SearchManagerService extends ISearchManager.Stub
     final SearchDialog mSearchDialog;
     ISearchManagerCallback mCallback = null;
 
+    private final boolean mDisabledOnBoot;
+
+    private static final String DISABLE_SEARCH_PROPERTY = "dev.disablesearchdialog";
+
     /**
      * Initializes the Search Manager service in the provided system context.
      * Only one instance of this object should be created!
@@ -86,6 +92,9 @@ public class SearchManagerService extends ISearchManager.Stub
         // After startup settles down, preload the searchables list,
         // which will reduce the delay when the search UI is invoked.
         mHandler.post(mRunUpdateSearchable);
+
+        // allows disabling of search dialog for stress testing runs
+        mDisabledOnBoot = !TextUtils.isEmpty(SystemProperties.get(DISABLE_SEARCH_PROPERTY));
     }
 
     /**
@@ -207,6 +216,13 @@ public class SearchManagerService extends ISearchManager.Stub
             boolean globalSearch,
             ISearchManagerCallback searchManagerCallback) {
         if (DBG) debug("performStartSearch()");
+
+        if (mDisabledOnBoot) {
+            Log.d(TAG, "ignoring start search request because " + DISABLE_SEARCH_PROPERTY
+                    + " system property is set.");
+            return;
+        }
+
         mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                 globalSearch);
         if (searchManagerCallback != null) {
