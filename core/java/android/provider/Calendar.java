@@ -172,9 +172,6 @@ public final class Calendar {
         public static final Uri CONTENT_URI =
             Uri.parse("content://calendar/calendars");
 
-        public static final Uri LIVE_CONTENT_URI =
-            Uri.parse("content://calendar/calendars?update=1");
-
         /**
          * The default sort order for this table
          */
