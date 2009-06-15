@@ -745,9 +745,12 @@
         android:description="@string/permdesc_forceBack"
         android:protectionLevel="signature" />
 
-    <permission android:name="android.permission.FOTA_UPDATE"
-        android:label="@string/permlab_fotaUpdate"
-        android:description="@string/permdesc_fotaUpdate"
+    <!-- Allows an application to publish system-level services.  Such services
+         can only be published from processes that never go away, so this is
+         not something that any normal application can do. -->
+    <permission android:name="android.permission.ADD_SYSTEM_SERVICE"
+        android:label="@string/permlab_addSystemService"
+        android:description="@string/permdesc_addSystemService"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to update device statistics. Not for
