@@ -2067,13 +2067,13 @@ public final class RIL extends BaseCommands implements CommandsInterface {
  | sed -re 's/\{([^,]+),[^,]+,([^}]+).+/case \1: ret = \2(p); break;/'
              */
             case RIL_REQUEST_GET_SIM_STATUS: ret =  responseIccCardStatus(p); break;
-            case RIL_REQUEST_ENTER_SIM_PIN: ret =  responseVoid(p); break;
-            case RIL_REQUEST_ENTER_SIM_PUK: ret =  responseVoid(p); break;
-            case RIL_REQUEST_ENTER_SIM_PIN2: ret =  responseVoid(p); break;
-            case RIL_REQUEST_ENTER_SIM_PUK2: ret =  responseVoid(p); break;
-            case RIL_REQUEST_CHANGE_SIM_PIN: ret =  responseVoid(p); break;
-            case RIL_REQUEST_CHANGE_SIM_PIN2: ret =  responseVoid(p); break;
-            case RIL_REQUEST_ENTER_NETWORK_DEPERSONALIZATION: ret =  responseVoid(p); break;
+            case RIL_REQUEST_ENTER_SIM_PIN: ret =  responseInts(p); break;
+            case RIL_REQUEST_ENTER_SIM_PUK: ret =  responseInts(p); break;
+            case RIL_REQUEST_ENTER_SIM_PIN2: ret =  responseInts(p); break;
+            case RIL_REQUEST_ENTER_SIM_PUK2: ret =  responseInts(p); break;
+            case RIL_REQUEST_CHANGE_SIM_PIN: ret =  responseInts(p); break;
+            case RIL_REQUEST_CHANGE_SIM_PIN2: ret =  responseInts(p); break;
+            case RIL_REQUEST_ENTER_NETWORK_DEPERSONALIZATION: ret =  responseInts(p); break;
             case RIL_REQUEST_GET_CURRENT_CALLS: ret =  responseCallList(p); break;
             case RIL_REQUEST_DIAL: ret =  responseVoid(p); break;
             case RIL_REQUEST_GET_IMSI: ret =  responseString(p); break;
@@ -2108,7 +2108,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_ANSWER: ret =  responseVoid(p); break;
             case RIL_REQUEST_DEACTIVATE_DATA_CALL: ret =  responseVoid(p); break;
             case RIL_REQUEST_QUERY_FACILITY_LOCK: ret =  responseInts(p); break;
-            case RIL_REQUEST_SET_FACILITY_LOCK: ret =  responseVoid(p); break;
+            case RIL_REQUEST_SET_FACILITY_LOCK: ret =  responseInts(p); break;
             case RIL_REQUEST_CHANGE_BARRING_PASSWORD: ret =  responseVoid(p); break;
             case RIL_REQUEST_QUERY_NETWORK_SELECTION_MODE: ret =  responseInts(p); break;
             case RIL_REQUEST_SET_NETWORK_SELECTION_AUTOMATIC: ret =  responseVoid(p); break;
