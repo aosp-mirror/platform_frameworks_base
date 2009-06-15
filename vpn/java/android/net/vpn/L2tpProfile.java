@@ -20,7 +20,7 @@ package android.net.vpn;
  * The profile for L2TP type of VPN.
  * {@hide}
  */
-public class L2tpProfile extends SingleServerProfile {
+public class L2tpProfile extends VpnProfile {
     private static final long serialVersionUID = 1L;
 
     @Override
