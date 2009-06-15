@@ -20,8 +20,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.net.vpn.SingleServerProfile;
 import android.net.vpn.VpnManager;
+import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
 import android.os.FileObserver;
 import android.os.SystemProperties;
@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * The service base class for managing a type of VPN connection.
  */
-abstract class VpnService<E extends SingleServerProfile> {
+abstract class VpnService<E extends VpnProfile> {
     private static final int NOTIFICATION_ID = 1;
     private static final String PROFILES_ROOT = VpnManager.PROFILES_PATH + "/";
     public static final String DEFAULT_CONFIG_PATH = "/etc";

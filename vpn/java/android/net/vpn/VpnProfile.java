@@ -31,8 +31,10 @@ public abstract class VpnProfile implements Parcelable, Serializable {
     private static final long serialVersionUID = 1L;
     private String mName; // unique display name
     private String mId; // unique identifier
+    private String mServerName; // VPN server name
     private String mDomainSuffices; // space separated list
     private String mRouteList; // space separated list
+    private String mSavedUsername;
     private boolean mIsCustomized;
     private transient VpnState mState = VpnState.IDLE;
 
@@ -55,6 +57,17 @@ public abstract class VpnProfile implements Parcelable, Serializable {
 
     public String getId() {
         return mId;
+    }
+
+    /**
+     * Sets the name of the VPN server. Used for DNS lookup.
+     */
+    public void setServerName(String name) {
+        mServerName = name;
+    }
+
+    public String getServerName() {
+        return mServerName;
     }
 
     /**
@@ -82,6 +95,14 @@ public abstract class VpnProfile implements Parcelable, Serializable {
 
     public String getRouteList() {
         return mRouteList;
+    }
+
+    public void setSavedUsername(String name) {
+        mSavedUsername = name;
+    }
+
+    public String getSavedUsername() {
+        return mSavedUsername;
     }
 
     public void setState(VpnState state) {
@@ -116,8 +137,10 @@ public abstract class VpnProfile implements Parcelable, Serializable {
     protected void readFromParcel(Parcel in) {
         mName = in.readString();
         mId = in.readString();
+        mServerName = in.readString();
         mDomainSuffices = in.readString();
         mRouteList = in.readString();
+        mSavedUsername = in.readString();
     }
 
     public static final Parcelable.Creator<VpnProfile> CREATOR =
@@ -142,8 +165,10 @@ public abstract class VpnProfile implements Parcelable, Serializable {
         parcel.writeInt(mIsCustomized ? 1 : 0);
         parcel.writeString(mName);
         parcel.writeString(mId);
+        parcel.writeString(mServerName);
         parcel.writeString(mDomainSuffices);
         parcel.writeString(mRouteList);
+        parcel.writeString(mSavedUsername);
     }
 
     public int describeContents() {
