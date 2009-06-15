@@ -1,5 +1,6 @@
 package com.android.internal.backup;
 
+import android.backup.BackupDataInput;
 import android.backup.RestoreSet;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 
 public class LocalTransport extends IBackupTransport.Stub {
     private static final String TAG = "LocalTransport";
-    private static final String DATA_FILE_NAME = "data";
+    private static final boolean DEBUG = true;
 
     private Context mContext;
     private PackageManager mPackageManager;
@@ -37,6 +38,7 @@ public class LocalTransport extends IBackupTransport.Stub {
 
 
     public LocalTransport(Context context) {
+        if (DEBUG) Log.v(TAG, "Transport constructed");
         mContext = context;
         mPackageManager = context.getPackageManager();
     }
@@ -47,29 +49,63 @@ public class LocalTransport extends IBackupTransport.Stub {
     }
 
     public int startSession() throws RemoteException {
+        if (DEBUG) Log.v(TAG, "session started");
+        mDataDir.mkdirs();
         return 0;
     }
 
     public int endSession() throws RemoteException {
+        if (DEBUG) Log.v(TAG, "session ended");
         return 0;
     }
 
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data)
             throws RemoteException {
+        if (DEBUG) Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName);
+        int err = 0;
+
         File packageDir = new File(mDataDir, packageInfo.packageName);
-        File imageFileName = new File(packageDir, DATA_FILE_NAME);
+        packageDir.mkdirs();
 
-        //!!! TODO: process the (partial) update into the persistent restore set:
-        
-        // Parse out the existing image file into the key/value map
+        // Each 'record' in the restore set is kept in its own file, named by
+        // the record key.  Wind through the data file, extracting individual
+        // record operations and building a set of all the updates to apply
+        // in this update.
+        BackupDataInput changeSet = new BackupDataInput(data.getFileDescriptor());
+        try {
+            int bufSize = 512;
+            byte[] buf = new byte[bufSize];
+            while (changeSet.readNextHeader()) {
+                String key = changeSet.getKey();
+                int dataSize = changeSet.getDataSize();
+                if (DEBUG) Log.v(TAG, "Got change set key=" + key + " size=" + dataSize);
+                if (dataSize > bufSize) {
+                    bufSize = dataSize;
+                    buf = new byte[bufSize];
+                }
+                changeSet.readEntityData(buf, dataSize);
+                if (DEBUG) Log.v(TAG, "  + data size " + dataSize);
 
-        // Parse out the backup data into the key/value updates
+                File entityFile = new File(packageDir, key);
+                FileOutputStream entity = new FileOutputStream(entityFile);
+                try {
+                    entity.write(buf, 0, dataSize);
+                } catch (IOException e) {
+                    Log.e(TAG, "Unable to update key file "
+                            + entityFile.getAbsolutePath());
+                    err = -1;
+                } finally {
+                    entity.close();
+                }
+            }
+        } catch (IOException e) {
+            // oops, something went wrong.  abort the operation and return error.
+            Log.v(TAG, "Exception reading backup input:");
+            e.printStackTrace();
+            err = -1;
+        }
 
-        // Apply the backup key/value updates to the image
-
-        // Write out the image in the canonical format
-
-        return -1;
+        return err;
     }
 
     // Restore handling
@@ -83,6 +119,7 @@ public class LocalTransport extends IBackupTransport.Stub {
     }
 
     public PackageInfo[] getAppSet(int token) throws android.os.RemoteException {
+        if (DEBUG) Log.v(TAG, "getting app set " + token);
         // the available packages are the extant subdirs of mDatadir
         File[] packageDirs = mDataDir.listFiles(mDirFileFilter);
         ArrayList<PackageInfo> packages = new ArrayList<PackageInfo>();
@@ -99,9 +136,11 @@ public class LocalTransport extends IBackupTransport.Stub {
             }
         }
 
-        Log.v(TAG, "Built app set of " + packages.size() + " entries:");
-        for (PackageInfo p : packages) {
-            Log.v(TAG, "    + " + p.packageName);
+        if (DEBUG) {
+            Log.v(TAG, "Built app set of " + packages.size() + " entries:");
+            for (PackageInfo p : packages) {
+                Log.v(TAG, "    + " + p.packageName);
+            }
         }
 
         PackageInfo[] result = new PackageInfo[packages.size()];
@@ -110,16 +149,25 @@ public class LocalTransport extends IBackupTransport.Stub {
 
     public int getRestoreData(int token, PackageInfo packageInfo, ParcelFileDescriptor output)
             throws android.os.RemoteException {
+        if (DEBUG) Log.v(TAG, "getting restore data " + token + " : " + packageInfo.packageName);
         // we only support one hardcoded restore set
         if (token != 0) return -1;
 
         // the data for a given package is at a known location
         File packageDir = new File(mDataDir, packageInfo.packageName);
-        File imageFile = new File(packageDir, DATA_FILE_NAME);
 
-        // restore is relatively easy: we already maintain the full data set in
-        // the canonical form understandable to the BackupAgent
-        return copyFileToFD(imageFile, output);
+        // The restore set is the concatenation of the individual record blobs,
+        // each of which is a file in the package's directory
+        File[] blobs = packageDir.listFiles();
+        int err = 0;
+        if (blobs != null && blobs.length > 0) {
+            for (File f : blobs) {
+                err = copyFileToFD(f, output);
+                if (err != 0) break;
+            }
+        }
+
+        return err;
     }
 
     private int copyFileToFD(File source, ParcelFileDescriptor dest) {

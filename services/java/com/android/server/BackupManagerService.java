@@ -51,11 +51,13 @@ import com.android.internal.backup.LocalTransport;
 import com.android.internal.backup.GoogleTransport;
 import com.android.internal.backup.IBackupTransport;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,6 +124,9 @@ class BackupManagerService extends IBackupManager.Stub {
 
     private File mStateDir;
     private File mDataDir;
+    private File mJournalDir;
+    private File mJournal;
+    private RandomAccessFile mJournalStream;
     
     public BackupManagerService(Context context) {
         mContext = context;
@@ -133,6 +138,11 @@ class BackupManagerService extends IBackupManager.Stub {
         mStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
 
+        // Set up the backup-request journaling
+        mJournalDir = new File(mStateDir, "pending");
+        mJournalDir.mkdirs();
+        makeJournalLocked();    // okay because no other threads are running yet
+
         //!!! TODO: default to cloud transport, not local
         mTransportId = BackupManager.TRANSPORT_LOCAL;
         
@@ -141,6 +151,10 @@ class BackupManagerService extends IBackupManager.Stub {
             addPackageParticipantsLocked(null);
         }
 
+        // Now that we know about valid backup participants, parse any
+        // leftover journal files and schedule a new backup pass
+        parseLeftoverJournals();
+
         // Register for broadcasts about package install, etc., so we can
         // update the provider list.
         IntentFilter filter = new IntentFilter();
@@ -148,6 +162,46 @@ class BackupManagerService extends IBackupManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    private void makeJournalLocked() {
+        try {
+            mJournal = File.createTempFile("journal", null, mJournalDir);
+            mJournalStream = new RandomAccessFile(mJournal, "rwd");
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to write backup journals");
+            mJournal = null;
+            mJournalStream = null;
+        }
+    }
+
+    private void parseLeftoverJournals() {
+        if (mJournal != null) {
+            File[] allJournals = mJournalDir.listFiles();
+            for (File f : allJournals) {
+                if (f.compareTo(mJournal) != 0) {
+                    // This isn't the current journal, so it must be a leftover.  Read
+                    // out the package names mentioned there and schedule them for
+                    // backup.
+                    try {
+                        Log.i(TAG, "Found stale backup journal, scheduling:");
+                        RandomAccessFile in = new RandomAccessFile(f, "r");
+                        while (true) {
+                            String packageName = in.readUTF();
+                            Log.i(TAG, "    + " + packageName);
+                            dataChanged(packageName);
+                        }
+                    } catch (EOFException e) {
+                        // no more data; we're done
+                    } catch (Exception e) {
+                        // can't read it or other error; just skip it
+                    } finally {
+                        // close/delete the file
+                        f.delete();
+                    }
+                }
+            }
+        }
     }
 
     // ----- Track installation/removal of packages -----
@@ -198,6 +252,8 @@ class BackupManagerService extends IBackupManager.Stub {
             switch (msg.what) {
             case MSG_RUN_BACKUP:
                 // snapshot the pending-backup set and work on that
+                File oldJournal = mJournal;
+                RandomAccessFile oldJournalStream = mJournalStream;
                 synchronized (mQueueLock) {
                     if (mBackupQueue == null) {
                         mBackupQueue = new ArrayList<BackupRequest>();
@@ -207,10 +263,22 @@ class BackupManagerService extends IBackupManager.Stub {
                         mPendingBackups = new HashMap<ApplicationInfo,BackupRequest>();
                     }
                     // !!! TODO: start a new backup-queue journal file too
-                    // WARNING: If we crash after this line, anything in mPendingBackups will
-                    // be lost.  FIX THIS.
+                    if (mJournalStream != null) {
+                        try {
+                            mJournalStream.close();
+                        } catch (IOException e) {
+                            // don't need to do anything
+                        }
+                        makeJournalLocked();
+                    }
+
+                    // At this point, we have started a new journal file, and the old
+                    // file identity is being passed to the backup processing thread.
+                    // When it completes successfully, that old journal file will be
+                    // deleted.  If we crash prior to that, the old journal is parsed
+                    // at next boot and the journaled requests fulfilled.
                 }
-                (new PerformBackupThread(mTransportId, mBackupQueue)).run();
+                (new PerformBackupThread(mTransportId, mBackupQueue, oldJournal)).run();
                 break;
 
             case MSG_RUN_FULL_BACKUP:
@@ -433,10 +501,13 @@ class BackupManagerService extends IBackupManager.Stub {
         private static final String TAG = "PerformBackupThread";
         int mTransport;
         ArrayList<BackupRequest> mQueue;
+        File mJournal;
 
-        public PerformBackupThread(int transportId, ArrayList<BackupRequest> queue) {
+        public PerformBackupThread(int transportId, ArrayList<BackupRequest> queue,
+                File journal) {
             mTransport = transportId;
             mQueue = queue;
+            mJournal = journal;
         }
 
         @Override
@@ -467,6 +538,10 @@ class BackupManagerService extends IBackupManager.Stub {
             } catch (Exception e) {
                 Log.e(TAG, "Error ending transport");
                 e.printStackTrace();
+            }
+
+            if (!mJournal.delete()) {
+                Log.e(TAG, "Unable to remove backup journal file " + mJournal.getAbsolutePath());
             }
         }
 
@@ -782,7 +857,9 @@ class BackupManagerService extends IBackupManager.Stub {
                         // one already there, then overwrite it, but no harm done.
                         BackupRequest req = new BackupRequest(app, false);
                         mPendingBackups.put(app, req);
-                        // !!! TODO: write to the pending-backup journal file in case of crash
+
+                        // Journal this request in case of crash
+                        writeToJournalLocked(packageName);
                     }
                 }
 
@@ -801,6 +878,18 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         } else {
             Log.w(TAG, "dataChanged but no participant pkg " + packageName);
+        }
+    }
+
+    private void writeToJournalLocked(String str) {
+        if (mJournalStream != null) {
+            try {
+                mJournalStream.writeUTF(str);
+            } catch (IOException e) {
+                Log.e(TAG, "Error writing to backup journal");
+                mJournalStream = null;
+                mJournal = null;
+            }
         }
     }
 

@@ -28,7 +28,7 @@ namespace android
 static jfieldID s_descriptorField = 0;
 
 static int
-ctor_native(JNIEnv* env, jobject This, jobject fileDescriptor)
+ctor_native(JNIEnv* env, jobject clazz, jobject fileDescriptor)
 {
     int err;
 
@@ -41,19 +41,62 @@ ctor_native(JNIEnv* env, jobject This, jobject fileDescriptor)
 }
 
 static void
-dtor_native(JNIEnv* env, jobject This, int fd)
+dtor_native(JNIEnv* env, jobject clazz, int w)
 {
-    delete (BackupDataWriter*)fd;
+    delete (BackupDataWriter*)w;
+}
+
+static jint
+writeEntityHeader_native(JNIEnv* env, jobject clazz, int w, jstring key, int dataSize)
+{
+    int err;
+    BackupDataWriter* writer = (BackupDataWriter*)w;
+
+    const char* keyUTF = env->GetStringUTFChars(key, NULL);
+    if (keyUTF == NULL) {
+        return -1;
+    }
+
+    err = writer->WriteEntityHeader(String8(keyUTF), dataSize);
+
+    env->ReleaseStringUTFChars(key, keyUTF);
+
+    return err;
+}
+
+static jint
+writeEntityData_native(JNIEnv* env, jobject clazz, int w, jbyteArray data, int size)
+{
+    int err;
+    BackupDataWriter* writer = (BackupDataWriter*)w;
+
+    if (env->GetArrayLength(data) > size) {
+        // size mismatch
+        return -1;
+    }
+
+    jbyte* dataBytes = env->GetByteArrayElements(data, NULL);
+    if (dataBytes == NULL) {
+        return -1;
+    }
+
+    err = writer->WriteEntityData(dataBytes, size);
+
+    env->ReleaseByteArrayElements(data, dataBytes, JNI_ABORT);
+
+    return err;
 }
 
 static const JNINativeMethod g_methods[] = {
     { "ctor", "(Ljava/io/FileDescriptor;)I", (void*)ctor_native },
     { "dtor", "(I)V", (void*)dtor_native },
+    { "writeEntityHeader_native", "(ILjava/lang/String;I)I", (void*)writeEntityHeader_native },
+    { "writeEntityData_native", "(I[BI)I", (void*)writeEntityData_native },
 };
 
 int register_android_backup_BackupDataOutput(JNIEnv* env)
 {
-    LOGD("register_android_backup_BackupDataOutput");
+    //LOGD("register_android_backup_BackupDataOutput");
 
     jclass clazz;
 

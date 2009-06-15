@@ -30,7 +30,8 @@ public class BackupTestAgent extends BackupAgent
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
              ParcelFileDescriptor newState) {
         Log.d(TAG, "onBackup");
-        FileBackupHelper.performBackup(this, oldState, data, newState, new String[] {
+        FileBackupHelper helper = new FileBackupHelper(this);
+        helper.performBackup(oldState, data, newState, new String[] {
                     BackupTestActivity.FILE_NAME
                 });
     }
