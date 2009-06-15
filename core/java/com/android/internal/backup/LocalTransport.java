@@ -1,6 +1,7 @@
 package com.android.internal.backup;
 
 import android.backup.BackupDataInput;
+import android.backup.BackupDataOutput;
 import android.backup.RestoreSet;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -147,7 +148,7 @@ public class LocalTransport extends IBackupTransport.Stub {
         return packages.toArray(result);
     }
 
-    public int getRestoreData(int token, PackageInfo packageInfo, ParcelFileDescriptor output)
+    public int getRestoreData(int token, PackageInfo packageInfo, ParcelFileDescriptor outFd)
             throws android.os.RemoteException {
         if (DEBUG) Log.v(TAG, "getting restore data " + token + " : " + packageInfo.packageName);
         // we only support one hardcoded restore set
@@ -161,28 +162,21 @@ public class LocalTransport extends IBackupTransport.Stub {
         File[] blobs = packageDir.listFiles();
         int err = 0;
         if (blobs != null && blobs.length > 0) {
-            for (File f : blobs) {
-                err = copyFileToFD(f, output);
-                if (err != 0) break;
+            BackupDataOutput out = new BackupDataOutput(mContext, outFd.getFileDescriptor());
+            try {
+                for (File f : blobs) {
+                    FileInputStream in = new FileInputStream(f);
+                    int size = (int) f.length();
+                    byte[] buf = new byte[size];
+                    in.read(buf);
+                    out.writeEntityHeader(f.getName(), size);
+                    out.writeEntityData(buf, size);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to read backup records");
+                err = -1;
             }
         }
-
         return err;
-    }
-
-    private int copyFileToFD(File source, ParcelFileDescriptor dest) {
-        try {
-            FileInputStream in = new FileInputStream(source);
-            FileOutputStream out = new FileOutputStream(dest.getFileDescriptor());
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = in.read(buffer)) >= 0) {
-                out.write(buffer, 0, bytesRead);
-            }
-        } catch (IOException e) {
-            // something went wrong; claim failure
-            return -1;
-        }
-        return 0;
     }
 }
