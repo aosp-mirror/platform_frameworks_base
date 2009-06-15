@@ -1642,7 +1642,7 @@ class SyncManager implements OnAccountsUpdatedListener {
             // connect to the sync adapter
             SyncAdapterType syncAdapterType = new SyncAdapterType(syncOperation.authority,
                     syncOperation.account.mType);
-            RegisteredServicesCache.ServiceInfo syncAdapterInfo =
+            RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                     mSyncAdapters.getServiceInfo(syncAdapterType);
             if (syncAdapterInfo == null) {
                 if (Config.LOGD) {

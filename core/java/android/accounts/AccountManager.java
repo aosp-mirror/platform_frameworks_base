@@ -118,7 +118,7 @@ public class AccountManager {
         });
     }
 
-    public String[] blockingGetAuthenticatorTypes() {
+    public AuthenticatorDescription[] blockingGetAuthenticatorTypes() {
         ensureNotOnMainThread();
         try {
             return mService.getAuthenticatorTypes();
@@ -128,10 +128,10 @@ public class AccountManager {
         }
     }
 
-    public Future1<String[]> getAuthenticatorTypes(Future1Callback<String[]> callback,
-            Handler handler) {
-        return startAsFuture(callback, handler, new Callable<String[]>() {
-            public String[] call() throws Exception {
+    public Future1<AuthenticatorDescription[]> getAuthenticatorTypes(
+            Future1Callback<AuthenticatorDescription[]> callback, Handler handler) {
+        return startAsFuture(callback, handler, new Callable<AuthenticatorDescription[]>() {
+            public AuthenticatorDescription[] call() throws Exception {
                 return blockingGetAuthenticatorTypes();
             }
         });

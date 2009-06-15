@@ -215,14 +215,15 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    public String[] getAuthenticatorTypes() {
+    public AuthenticatorDescription[] getAuthenticatorTypes() {
         long identityToken = clearCallingIdentity();
         try {
-            Collection<AccountAuthenticatorCache.ServiceInfo<String>> authenticatorCollection =
-                    mAuthenticatorCache.getAllServices();
-            String[] types = new String[authenticatorCollection.size()];
+            Collection<AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription>>
+                    authenticatorCollection = mAuthenticatorCache.getAllServices();
+            AuthenticatorDescription[] types =
+                    new AuthenticatorDescription[authenticatorCollection.size()];
             int i = 0;
-            for (AccountAuthenticatorCache.ServiceInfo<String> authenticator
+            for (AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticator
                     : authenticatorCollection) {
                 types[i] = authenticator.type;
                 i++;
