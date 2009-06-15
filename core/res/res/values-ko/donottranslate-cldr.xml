@@ -86,6 +86,7 @@
     <string name="twenty_four_hour_time_format">H:mm</string>
     <string name="numeric_date">%Y. %-m. %-e.</string>
     <string name="numeric_date_format">yyyy. M. d.</string>
+    <string name="numeric_date_template">"%s. %s. %s."</string>
     <string name="month_day_year">%Y년 %-m월 %-e일</string>
     <string name="time_of_day">%p %-l:%M:%S</string>
     <string name="date_and_time">%p %-l:%M:%S %Y. %-m. %-e.</string>

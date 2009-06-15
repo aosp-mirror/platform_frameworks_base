@@ -98,6 +98,7 @@
     <string name="twenty_four_hour_time_format">H:mm</string>
     <string name="numeric_date">%d/%m/%Y</string>
     <string name="numeric_date_format">dd/MM/yyyy</string>
+    <string name="numeric_date_template">"%s/%s/%s"</string>
     <string name="month_day_year">%-e de %B de %Y</string>
     <string name="time_of_day">%-k:%M:%S</string>
     <string name="date_and_time">%-k:%M:%S %d/%m/%Y</string>
