@@ -99,14 +99,18 @@ public:
     // @param size  length of the language value
     // @return TTS_SUCCESS, or TTS_FAILURE
     virtual tts_result loadLanguage(const char *value, const size_t size);
-
-    // Signal the engine to use the specified language. This will force the
-    // language to be loaded if it wasn't loaded previously with loadLanguage().
-    // See loadLanguage for the specification of the language.
-    // @param value pointer to the language value
-    // @param size  length of the language value
+    
+    // Load the resources associated with the specified language, country and Locale variant.
+    // The loaded language will only be used once a call to setLanguageFromLocale() with the same
+    // language value is issued. Language and country values are coded according to the ISO three
+    // letter codes for languages and countries, as can be retrieved from a java.util.Locale
+    // instance. The variant value is encoded as the variant string retrieved from a
+    // java.util.Locale instance built with that variant data.
+    // @param lang pointer to the ISO three letter code for the language
+    // @param country pointer to the ISO three letter code for the country
+    // @param variant pointer to the variant code
     // @return TTS_SUCCESS, or TTS_FAILURE
-    virtual tts_result setLanguage(const char *value, const size_t size);
+    virtual tts_result setLanguage(const char *lang, const char *country, const char *variant);
 
     // Retrieve the currently set language, or an empty "value" if no language
     // has been set.
