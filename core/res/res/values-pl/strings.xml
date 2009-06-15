@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"Pozwala aplikacji zmieniać bieżącą konfigurację, na przykład lokalny lub globalny rozmiar czcionki."</string>
     <string name="permlab_restartPackages">"resetowanie innych aplikacji"</string>
     <string name="permdesc_restartPackages">"Pozwala aplikacji na wymuszenie ponownego uruchomienia innych aplikacji."</string>
-    <string name="permlab_setProcessForeground">"zapobieganie zatrzymaniu"</string>
-    <string name="permdesc_setProcessForeground">"Pozwala aplikacji na uruchamianie dowolnego procesu na pierwszym planie tak, że nie można go wyłączyć. Nigdy nie powinno być potrzebne normalnym aplikacjom."</string>
     <string name="permlab_forceBack">"wymuszanie zamknięcia aplikacji"</string>
     <string name="permdesc_forceBack">"Pozwala aplikacji na wymuszenie zamknięcia i cofnięcia dowolnej operacji działającej na pierwszym planie. Nigdy nie powinno być potrzebne normalnym aplikacjom."</string>
     <string name="permlab_dump">"pobieranie informacji o wewnętrznym stanie systemu"</string>
     <string name="permdesc_dump">"Pozwala aplikacjom na pobieranie informacji o wewnętrznym stanie systemu. Szkodliwe aplikacje mogą pobrać szeroką gamę osobistych i zabezpieczonych informacji, które normalnie nie powinny im być nigdy potrzebne."</string>
-    <string name="permlab_addSystemService">"publikowanie usług niskiego poziomu"</string>
-    <string name="permdesc_addSystemService">"Pozwala aplikacji na publikowanie własnych usług systemowych niskiego poziomu. Szkodliwe aplikacje mogą przejąć kontrolę nad systemem oraz wykraść lub uszkodzić znajdujące się w nim dane."</string>
     <string name="permlab_runSetActivityWatcher">"monitorowanie i kontrolowanie wszystkich uruchamianych aplikacji"</string>
     <string name="permdesc_runSetActivityWatcher">"Pozwala aplikacji na monitorowanie i kontrolowanie sposobu, w jaki w systemie uruchamiane są różne działania. Szkodliwe aplikacje mogą całkowicie przejąć system. Te uprawnienia potrzebne są tylko programistom, nigdy w przypadku normalnego wykorzystywania telefonu."</string>
     <string name="permlab_broadcastPackageRemoved">"wysyłanie transmisji informującej o usuniętym pakiecie"</string>

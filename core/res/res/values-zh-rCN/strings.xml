@@ -166,14 +166,10 @@
     <string name="permdesc_changeConfiguration">"允许应用程序更改当前配置，例如语言设置或整体的字体大小。"</string>
     <string name="permlab_restartPackages">"重新启动其他应用程序"</string>
     <string name="permdesc_restartPackages">"允许应用程序强制重新启动其他应用程序。"</string>
-    <string name="permlab_setProcessForeground">"防止停止"</string>
-    <string name="permdesc_setProcessForeground">"允许应用程序在前台运行任何进程，因此该进程不能被终止。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_forceBack">"强制应用程序关闭"</string>
     <string name="permdesc_forceBack">"允许应用程序强制前台的任何活动关闭和重新开始。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_dump">"检索系统内部状态"</string>
     <string name="permdesc_dump">"允许应用程序检索系统的内部状态。恶意应用程序可能会借此检索通常它们本不需要的各种私有和安全信息。"</string>
-    <string name="permlab_addSystemService">"发布低级服务"</string>
-    <string name="permdesc_addSystemService">"允许应用程序发布自己的低级系统服务。恶意应用程序可能会借此攻击系统，以及盗取或破坏系统中的任何数据。"</string>
     <string name="permlab_runSetActivityWatcher">"监视和控制所有应用程序启动"</string>
     <string name="permdesc_runSetActivityWatcher">"允许应用程序监视和控制系统启动活动的方式。恶意应用程序可能会借此彻底损坏系统。此权限仅在开发时才需要，普通的手机应用不需要。"</string>
     <string name="permlab_broadcastPackageRemoved">"发送包删除的广播"</string>
