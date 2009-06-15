@@ -461,13 +461,6 @@
         forcibly restart other applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setProcessForeground">keep from being stopped</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setProcessForeground">Allows an application to make
-        any process run in the foreground, so it can\'t be killed.
-        Should never be needed for normal applications.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_forceBack">force application to close</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_forceBack">Allows an application to force any
@@ -481,13 +474,6 @@
         internal state of the system. Malicious applications may retrieve
         a wide variety of private and secure information that they should
         never normally need.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_addSystemService">publish low-level services</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_addSystemService">Allows application to publish
-        its own low-level system services. Malicious applications may hijack
-        the system, and steal or corrupt any data on it.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_shutdown">partial shutdown</string>

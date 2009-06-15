@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"Hiermee kan een toepassing de huidige configuratie, zoals de landinstelling of de algemene lettergrootte, wijzigen."</string>
     <string name="permlab_restartPackages">"andere toepassingen opnieuw starten"</string>
     <string name="permdesc_restartPackages">"Hiermee kan een toepassing andere toepassingen opnieuw starten."</string>
-    <string name="permlab_setProcessForeground">"stoppen voorkomen"</string>
-    <string name="permdesc_setProcessForeground">"Hiermee kan een toepassing ervoor zorgen dat elk willekeurig proces op de voorgrond wordt uitgevoerd en dus niet kan worden afgesloten. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_forceBack">"toepassing nu sluiten"</string>
     <string name="permdesc_forceBack">"Hiermee kan een toepassing elke willekeurige activiteit die op de voorgrond wordt uitgevoerd, sluiten en naar de achtergrond verplaatsen. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_dump">"interne systeemstatus ophalen"</string>
     <string name="permdesc_dump">"Hiermee kan een toepassing de interne status van het systeem ophalen. Schadelijke toepassingen kunnen privé- of veiligheidsgegevens ophalen die ze normaal niet nodig hebben."</string>
-    <string name="permlab_addSystemService">"services op laag niveau publiceren"</string>
-    <string name="permdesc_addSystemService">"Hiermee kunnen toepassingen hun eigen systeemservices op laag niveau publiceren. Schadelijke toepassingen kunnen het systeem mogelijk kapen en willekeurige gegevens van het systeem stelen of beschadigen."</string>
     <string name="permlab_runSetActivityWatcher">"alle startende toepassingen bijhouden en beheren"</string>
     <string name="permdesc_runSetActivityWatcher">"Hiermee kan een toepassing de manier waarop het systeem activiteiten start, bijhouden en beheren. Schadelijke toepassingen kunnen het systeem volledig in gevaar brengen. Deze machtiging is alleen voor ontwikkeling vereist, nooit voor normaal telefoongebruik."</string>
     <string name="permlab_broadcastPackageRemoved">"melding verzenden dat pakket is verwijderd"</string>

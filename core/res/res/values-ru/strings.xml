@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"Позволяет приложению изменять текущую конфигурацию, например локаль и общий размер шрифта."</string>
     <string name="permlab_restartPackages">"перезапускать другие приложения"</string>
     <string name="permdesc_restartPackages">"Разрешает приложению принудительно перезапускать другие приложения."</string>
-    <string name="permlab_setProcessForeground">"предотвращать остановку"</string>
-    <string name="permdesc_setProcessForeground">"Разрешает приложению запускать любые процессы на переднем плане так, что их нельзя прекратить. Не требуется обычным приложениям."</string>
     <string name="permlab_forceBack">"принудительно закрывать приложения"</string>
     <string name="permdesc_forceBack">"Позволяет приложению принудительно закрывать и переводить в фоновый режим действия, работающие на переднем плане. Не требуется обычным приложениям."</string>
     <string name="permlab_dump">"получать внутреннее состояние системы"</string>
     <string name="permdesc_dump">"Разрешает приложениям получать внутреннее состояние системы. Вредоносное ПО может получать множество личной и защищенной информации, которая обычно не была бы им доступна."</string>
-    <string name="permlab_addSystemService">"публиковать службы низкого уровня"</string>
-    <string name="permdesc_addSystemService">"Разрешает приложению публиковать собственные системные службы низкого уровня. Вредоносное ПО может взломать систему и украсть или повредить данные в ней."</string>
     <string name="permlab_runSetActivityWatcher">"наблюдать и управлять запуском всех приложений"</string>
     <string name="permdesc_runSetActivityWatcher">"Разрешает приложению следить и управлять тем, как система запускает действия. Вредоносное ПО может полностью нарушить работу системы. Это разрешение нужно только для разработки, но не при обычном использовании телефона."</string>
     <string name="permlab_broadcastPackageRemoved">"отправлять оповещения об удалении пакетов"</string>
