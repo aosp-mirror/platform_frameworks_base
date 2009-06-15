@@ -177,8 +177,6 @@
     <string name="permdesc_setProcessLimit">"Hiermee kan een toepassing het maximum aantal processen bepalen dat wordt uitgevoerd. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_setAlwaysFinish">"alle achtergrondtoepassingen sluiten"</string>
     <string name="permdesc_setAlwaysFinish">"Hiermee kan een toepassing bepalen of activiteiten altijd worden afgesloten zodra deze naar de achtergrond gaan. Nooit nodig voor normale toepassingen."</string>
-    <string name="permlab_fotaUpdate">"systeemupdates automatisch installeren"</string>
-    <string name="permdesc_fotaUpdate">"Hiermee ontvangt een toepassing meldingen over beschikbare systeemupdates en kan hun installatie starten. Schadelijke toepassingen kunnen hiervan gebruik maken om het systeem met ongeautoriseerde updates te beschadigen of het updateproces in het algemeen te verstoren."</string>
     <string name="permlab_batteryStats">"accustatistieken aanpassen"</string>
     <string name="permdesc_batteryStats">"Hiermee kunnen verzamelde accustatistieken worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_internalSystemWindow">"niet-geautoriseerde vensters weergeven"</string>

@@ -177,8 +177,6 @@
     <string name="permdesc_setProcessLimit">"응용프로그램이 실행할 최대 프로세스 수를 제어할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
     <string name="permlab_setAlwaysFinish">"모든 백그라운드 응용프로그램이 닫히도록 하기"</string>
     <string name="permdesc_setAlwaysFinish">"응용프로그램이 백그라운드로 이동한 활동을 항상 바로 마칠지 여부를 제어할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
-    <string name="permlab_fotaUpdate">"시스템 업데이트 자동으로 설치"</string>
-    <string name="permdesc_fotaUpdate">"응용프로그램이 대기 중인 시스템 업데이트에 대한 알림을 받고 설치를 트리거할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 인증되지 않은 업데이트로 시스템을 손상시키거나 업데이트 절차를 방해할 수 있습니다."</string>
     <string name="permlab_batteryStats">"배터리 통계 수정"</string>
     <string name="permdesc_batteryStats">"수집된 배터리 통계를 수정할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
     <string name="permlab_internalSystemWindow">"인증되지 않은 창 표시"</string>
