@@ -23,25 +23,4 @@ import android.os.Parcel;
  * {@hide}
  */
 public abstract class SingleServerProfile extends VpnProfile {
-    private String mServerName;
-
-    public void setServerName(String name) {
-        mServerName = name;
-    }
-
-    public String getServerName() {
-        return mServerName;
-    }
-
-    @Override
-    protected void readFromParcel(Parcel in) {
-        super.readFromParcel(in);
-        mServerName = in.readString();
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        super.writeToParcel(parcel, flags);
-        parcel.writeString(mServerName);
-    }
 }
