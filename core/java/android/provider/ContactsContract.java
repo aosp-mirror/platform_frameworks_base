@@ -261,6 +261,19 @@ public final class ContactsContract {
         private Contacts()  {}
 
         /**
+         * The package name that owns this contact and all of its details. This
+         * package has control over the {@link #IS_RESTRICTED} flag, and can
+         * grant {@link RestrictionExceptions} to other packages.
+         */
+        public static final String PACKAGE = "package";
+
+        /**
+         * Flag indicating that this data entry has been restricted by the owner
+         * {@link #PACKAGE}.
+         */
+        public static final String IS_RESTRICTED = "is_restricted";
+
+        /**
          * A reference to the {@link Accounts#_ID} that this data belongs to.
          */
         public static final String ACCOUNTS_ID = "accounts_id";
@@ -332,11 +345,6 @@ public final class ContactsContract {
 
     private interface DataColumns {
         /**
-         * The package name that defines this type of data.
-         */
-        public static final String PACKAGE = "package";
-
-        /**
          * The mime-type of the item represented by this row.
          */
         public static final String MIMETYPE = "mimetype";
@@ -359,12 +367,6 @@ public final class ContactsContract {
          * <P>Type: INTEGER (if set, non-0 means true)</P>
          */
         public static final String IS_SUPER_PRIMARY = "is_super_primary";
-
-        /**
-         * Flag indicating that this data entry has been restricted by the owner
-         * {@link #PACKAGE}.
-         */
-        public static final String IS_RESTRICTED = "is_restricted";
 
         /**
          * The version of this data record. This is a read-only value. The data column is
