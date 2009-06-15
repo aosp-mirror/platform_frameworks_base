@@ -78,7 +78,14 @@ public class Browser {
      * @hide
      */
     public static final String EXTRA_INLINE_FAILURL ="com.android.browser.inline.failurl";
-    
+
+    /**
+     * The name of the extra data in the VIEW intent. If the Browser is handling
+     * the intent and the setting for USE_LOCATION_FOR_SERVICES is allow, the
+     * Browser will send the location in the POST data.
+     */
+    public static final String EXTRA_APPEND_LOCATION = "com.android.browser.append_location";
+
     /* if you change column order you must also change indices
        below */
     public static final String[] HISTORY_PROJECTION = new String[] {
