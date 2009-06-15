@@ -17,15 +17,25 @@
 package android.server.search;
 
 import android.app.ISearchManager;
+import android.app.ISearchManagerCallback;
+import android.app.SearchDialog;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * This is a simplified version of the Search Manager service.  It no longer handles
@@ -34,16 +44,20 @@ import java.util.List;
  * invoked search) to specific searchable activities (where the search will be dispatched).
  */
 public class SearchManagerService extends ISearchManager.Stub
+        implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener
 {
         // general debugging support
     private static final String TAG = "SearchManagerService";
-    private static final boolean DEBUG = false;
+    private static final boolean DBG = false;
 
         // class maintenance and general shared data
     private final Context mContext;
     private final Handler mHandler;
     private boolean mSearchablesDirty;
-    private Searchables mSearchables;
+    private final Searchables mSearchables;
+
+    final SearchDialog mSearchDialog;
+    ISearchManagerCallback mCallback = null;
 
     /**
      * Initializes the Search Manager service in the provided system context.
@@ -56,6 +70,9 @@ public class SearchManagerService extends ISearchManager.Stub
         mHandler = new Handler();
         mSearchablesDirty = true;
         mSearchables = new Searchables(context);
+        mSearchDialog = new SearchDialog(context);
+        mSearchDialog.setOnCancelListener(this);
+        mSearchDialog.setOnDismissListener(this);
 
         // Setup the infrastructure for updating and maintaining the list
         // of searchable activities.
@@ -107,6 +124,7 @@ public class SearchManagerService extends ISearchManager.Stub
      * a package add/remove broadcast message.
      */
     private void updateSearchables() {
+        if (DBG) debug("updateSearchables()");
         mSearchables.buildSearchableList();
         mSearchablesDirty = false;
     }
@@ -137,6 +155,10 @@ public class SearchManagerService extends ISearchManager.Stub
         if (globalSearch) {
             si = mSearchables.getDefaultSearchable();
         } else {
+            if (launchActivity == null) {
+                Log.e(TAG, "getSearchableInfo(), activity == null");
+                return null;
+            }
             si = mSearchables.getSearchableInfo(launchActivity);
         }
 
@@ -149,6 +171,145 @@ public class SearchManagerService extends ISearchManager.Stub
     public List<SearchableInfo> getSearchablesInGlobalSearch() {
         updateSearchablesIfDirty();
         return mSearchables.getSearchablesInGlobalSearchList();
+    }
+    /**
+     * Launches the search UI on the main thread of the service.
+     *
+     * @see SearchManager#startSearch(String, boolean, ComponentName, Bundle, boolean)
+     */
+    public void startSearch(final String initialQuery,
+            final boolean selectInitialQuery,
+            final ComponentName launchActivity,
+            final Bundle appSearchData,
+            final boolean globalSearch,
+            final ISearchManagerCallback searchManagerCallback) {
+        if (DBG) debug("startSearch()");
+        Runnable task = new Runnable() {
+            public void run() {
+                performStartSearch(initialQuery,
+                        selectInitialQuery,
+                        launchActivity,
+                        appSearchData,
+                        globalSearch,
+                        searchManagerCallback);
+            }
+        };
+        mHandler.post(task);
+    }
+
+    /**
+     * Actually launches the search. This must be called on the service UI thread.
+     */
+    /*package*/ void performStartSearch(String initialQuery,
+            boolean selectInitialQuery,
+            ComponentName launchActivity,
+            Bundle appSearchData,
+            boolean globalSearch,
+            ISearchManagerCallback searchManagerCallback) {
+        if (DBG) debug("performStartSearch()");
+        mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData,
+                globalSearch);
+        if (searchManagerCallback != null) {
+            mCallback = searchManagerCallback;
+        }
+    }
+
+    /**
+     * Cancels the search dialog. Can be called from any thread.
+     */
+    public void stopSearch() {
+        if (DBG) debug("stopSearch()");
+        mHandler.post(new Runnable() {
+            public void run() {
+                performStopSearch();
+            }
+        });
+    }
+
+    /**
+     * Cancels the search dialog. Must be called from the service UI thread.
+     */
+    /*package*/ void performStopSearch() {
+        if (DBG) debug("performStopSearch()");
+        mSearchDialog.cancel();
+    }
+
+    /**
+     * Determines if the Search UI is currently displayed.
+     *
+     * @see SearchManager#isVisible()
+     */
+    public boolean isVisible() {
+        return postAndWait(mIsShowing, false, "isShowing()");
+    }
+
+    private final Callable<Boolean> mIsShowing = new Callable<Boolean>() {
+        public Boolean call() {
+            return mSearchDialog.isShowing();
+        }
+    };
+
+    public Bundle onSaveInstanceState() {
+        return postAndWait(mOnSaveInstanceState, null, "onSaveInstanceState()");
+    }
+
+    private final Callable<Bundle> mOnSaveInstanceState = new Callable<Bundle>() {
+        public Bundle call() {
+            if (mSearchDialog.isShowing()) {
+                return mSearchDialog.onSaveInstanceState();
+            } else {
+                return null;
+            }
+        }
+    };
+
+    public void onRestoreInstanceState(final Bundle searchDialogState) {
+        if (searchDialogState != null) {
+            mHandler.post(new Runnable() {
+                public void run() {
+                    mSearchDialog.onRestoreInstanceState(searchDialogState);
+                }
+            });
+        }
+    }
+
+    public void onConfigurationChanged(final Configuration newConfig) {
+        mHandler.post(new Runnable() {
+            public void run() {
+                if (mSearchDialog.isShowing()) {
+                    mSearchDialog.onConfigurationChanged(newConfig);
+                }
+            }
+        });
+    }
+
+    /**
+     * Called by {@link SearchDialog} when it goes away.
+     */
+    public void onDismiss(DialogInterface dialog) {
+        if (DBG) debug("onDismiss()");
+        if (mCallback != null) {
+            try {
+                mCallback.onDismiss();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "onDismiss() failed: " + ex);
+            }
+        }
+    }
+
+    /**
+     * Called by {@link SearchDialog} when the user or activity cancels search.
+     * When this is called, {@link #onDismiss} is called too.
+     */
+    public void onCancel(DialogInterface dialog) {
+        if (DBG) debug("onCancel()");
+        if (mCallback != null) {
+            try {
+                mCallback.onCancel();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "onCancel() failed: " + ex);
+            }
+        }
     }
 
     /**
@@ -173,4 +334,34 @@ public class SearchManagerService extends ISearchManager.Stub
     public void setDefaultWebSearch(ComponentName component) {
         mSearchables.setDefaultWebSearch(component);
     }
+
+    /**
+     * Runs an operation on the handler for the service, blocks until it returns,
+     * and returns the value returned by the operation.
+     *
+     * @param <V> Return value type.
+     * @param callable Operation to run.
+     * @param errorResult Value to return if the operations throws an exception.
+     * @param name Operation name to include in error log messages.
+     * @return The value returned by the operation.
+     */
+    private <V> V postAndWait(Callable<V> callable, V errorResult, String name) {
+        FutureTask<V> task = new FutureTask<V>(callable);
+        mHandler.post(task);
+        try {
+            return task.get();
+        } catch (InterruptedException ex) {
+            Log.e(TAG, "Error calling " + name + ": " + ex);
+            return errorResult;
+        } catch (ExecutionException ex) {
+            Log.e(TAG, "Error calling " + name + ": " + ex);
+            return errorResult;
+        }
+    }
+
+    private static void debug(String msg) {
+        Thread thread = Thread.currentThread();
+        Log.d(TAG, msg + " (" + thread.getName() + "-" + thread.getId() + ")");
+    }
+
 }
