@@ -34,7 +34,6 @@ import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import junit.framework.Assert;
 
@@ -513,6 +512,14 @@ final class WebViewCore {
         }
     }
 
+    static class BaseUrlData {
+        String mBaseUrl;
+        String mData;
+        String mMimeType;
+        String mEncoding;
+        String mFailUrl;
+    }
+
     static class CursorData {
         CursorData() {}
         CursorData(int frame, int node, int x, int y) {
@@ -527,6 +534,27 @@ final class WebViewCore {
         int mX;
         int mY;
         boolean mIgnoreNullFocus;
+    }
+
+    static class JSInterfaceData {
+        Object mObject;
+        String mInterfaceName;
+    }
+
+    static class JSKeyData {
+        String mCurrentText;
+        KeyEvent mEvent;
+    }
+
+    static class PostUrlData {
+        String mUrl;
+        byte[] mPostData;
+    }
+
+    static class ReplaceTextData {
+        String mReplace;
+        int mNewStart;
+        int mNewEnd;
     }
 
     static class TouchUpData {
@@ -717,15 +745,13 @@ final class WebViewCore {
                             break;
 
                         case POST_URL: {
-                            HashMap param = (HashMap) msg.obj;
-                            String url = (String) param.get("url");
-                            byte[] data = (byte[]) param.get("data");
-                            mBrowserFrame.postUrl(url, data);
+                            PostUrlData param = (PostUrlData) msg.obj;
+                            mBrowserFrame.postUrl(param.mUrl, param.mPostData);
                             break;
                         }
                         case LOAD_DATA:
-                            HashMap loadParams = (HashMap) msg.obj;
-                            String baseUrl = (String) loadParams.get("baseUrl");
+                            BaseUrlData loadParams = (BaseUrlData) msg.obj;
+                            String baseUrl = loadParams.mBaseUrl;
                             if (baseUrl != null) {
                                 int i = baseUrl.indexOf(':');
                                 if (i > 0) {
@@ -749,10 +775,10 @@ final class WebViewCore {
                                 }
                             }
                             mBrowserFrame.loadData(baseUrl,
-                                    (String) loadParams.get("data"),
-                                    (String) loadParams.get("mimeType"),
-                                    (String) loadParams.get("encoding"),
-                                    (String) loadParams.get("failUrl"));
+                                    loadParams.mData,
+                                    loadParams.mMimeType,
+                                    loadParams.mEncoding,
+                                    loadParams.mFailUrl);
                             break;
 
                         case STOP_LOADING:
@@ -874,24 +900,19 @@ final class WebViewCore {
                             break;
 
                         case REPLACE_TEXT:
-                            HashMap jMap = (HashMap) msg.obj;
-                            String replace = (String) jMap.get("replace");
-                            int newStart =
-                                    ((Integer) jMap.get("start")).intValue();
-                            int newEnd =
-                                    ((Integer) jMap.get("end")).intValue();
-                            nativeReplaceTextfieldText(msg.arg1,
-                                    msg.arg2, replace, newStart, newEnd);
+                            ReplaceTextData rep = (ReplaceTextData) msg.obj;
+                            nativeReplaceTextfieldText(msg.arg1, msg.arg2,
+                                    rep.mReplace, rep.mNewStart, rep.mNewEnd);
                             break;
 
                         case PASS_TO_JS: {
-                            HashMap jsMap = (HashMap) msg.obj;
-                            KeyEvent evt = (KeyEvent) jsMap.get("event");
+                            JSKeyData jsData = (JSKeyData) msg.obj;
+                            KeyEvent evt = jsData.mEvent;
                             int keyCode = evt.getKeyCode();
                             int keyValue = evt.getUnicodeChar();
                             int generation = msg.arg1;
                             passToJs(generation,
-                                    (String) jsMap.get("currentText"),
+                                    jsData.mCurrentText,
                                     keyCode,
                                     keyValue,
                                     evt.isDown(),
@@ -934,12 +955,9 @@ final class WebViewCore {
                             break;
 
                         case ADD_JS_INTERFACE:
-                            HashMap map = (HashMap) msg.obj;
-                            Object obj = map.get("object");
-                            String interfaceName = (String)
-                                    map.get("interfaceName");
-                            mBrowserFrame.addJavascriptInterface(obj,
-                                    interfaceName);
+                            JSInterfaceData jsData = (JSInterfaceData) msg.obj;
+                            mBrowserFrame.addJavascriptInterface(jsData.mObject,
+                                    jsData.mInterfaceName);
                             break;
 
                         case REQUEST_EXT_REPRESENTATION:
@@ -1639,9 +1657,9 @@ final class WebViewCore {
 
         // now notify webview
         if (mWebView != null) {
-            HashMap scaleLimit = new HashMap();
-            scaleLimit.put("minScale", mViewportMinimumScale);
-            scaleLimit.put("maxScale", mViewportMaximumScale);
+            WebView.ScaleLimitData scaleLimit = new WebView.ScaleLimitData();
+            scaleLimit.mMinScale = mViewportMinimumScale;
+            scaleLimit.mMaxScale = mViewportMaximumScale;
 
             if (mRestoredScale > 0) {
                 Message.obtain(mWebView.mPrivateHandler,
