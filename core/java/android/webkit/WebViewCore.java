@@ -375,7 +375,7 @@ final class WebViewCore {
             String currentText, int keyCode, int keyValue, boolean down,
             boolean cap, boolean fn, boolean sym);
 
-    private native void nativeSetFocusControllerActive(boolean active);
+    private native void nativeSetFocusControllerInactive();
 
     private native void nativeSaveDocumentState(int frame);
 
@@ -615,7 +615,7 @@ final class WebViewCore {
             "LOAD_DATA", // = 139;
             "TOUCH_UP", // = 140;
             "TOUCH_EVENT", // = 141;
-            "SET_ACTIVE", // = 142;
+            "SET_INACTIVE", // = 142;
             "ON_PAUSE",     // = 143
             "ON_RESUME",    // = 144
             "FREE_MEMORY",  // = 145
@@ -670,9 +670,10 @@ final class WebViewCore {
         // message used to pass UI touch events to WebCore
         static final int TOUCH_EVENT = 141;
 
-        // Used to tell the focus controller whether to draw the blinking cursor
-        // or not, based on whether the WebView has focus.
-        static final int SET_ACTIVE = 142;
+        // Used to tell the focus controller not to draw the blinking cursor,
+        // based on whether the WebView has focus and whether the WebView's
+        // cursor matches the webpage's focus.
+        static final int SET_INACTIVE = 142;
 
         // lifecycle activities for just this DOM (unlike pauseTimers, which
         // is global)
@@ -724,7 +725,7 @@ final class WebViewCore {
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
                         Log.v(LOGTAG, msg.what < LOAD_URL || msg.what
-                                > SET_ACTIVE ? Integer.toString(msg.what)
+                                > SET_INACTIVE ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what - LOAD_URL]);
                     }
                     switch (msg.what) {
@@ -950,8 +951,8 @@ final class WebViewCore {
                             break;
                         }
 
-                        case SET_ACTIVE:
-                            nativeSetFocusControllerActive(msg.arg1 == 1);
+                        case SET_INACTIVE:
+                            nativeSetFocusControllerInactive();
                             break;
 
                         case ADD_JS_INTERFACE:

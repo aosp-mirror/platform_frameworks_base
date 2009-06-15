@@ -366,10 +366,6 @@ public class WebView extends AbsoluteLayout
     // take control of touch events unless it says no for touch down event.
     private boolean mPreventDrag;
 
-    // If rebuildWebTextView gets called while we are out of focus, use this
-    // variable to remember to do it next time we gain focus.
-    private boolean mNeedsRebuildWebTextView = false;
-
     // Whether or not to draw the cursor ring.
     private boolean mDrawCursorRing = true;
 
@@ -2951,7 +2947,6 @@ public class WebView extends AbsoluteLayout
         if (!hasFocus() && (null == mWebTextView || !mWebTextView.hasFocus())
                 || (mTouchMode >= FIRST_SCROLL_ZOOM
                 && mTouchMode <= LAST_SCROLL_ZOOM)) {
-            mNeedsRebuildWebTextView = true;
             return;
         }
         boolean alreadyThere = inEditingMode();
@@ -3200,7 +3195,6 @@ public class WebView extends AbsoluteLayout
 
         // TODO: should we pass all the keys to DOM or check the meta tag
         if (nativeCursorWantsKeyEvents() || true) {
-            mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 1);
             // pass the key to DOM
             mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
             // return true as DOM handles the key
@@ -3362,7 +3356,6 @@ public class WebView extends AbsoluteLayout
         if (child == this) {
             if (inEditingMode()) {
                 clearTextEntry();
-                mNeedsRebuildWebTextView = true;
             }
         }
     }
@@ -3383,16 +3376,11 @@ public class WebView extends AbsoluteLayout
         if (hasWindowFocus) {
             if (hasFocus()) {
                 // If our window regained focus, and we have focus, then begin
-                // drawing the cursor ring, and restore the TextView if
-                // necessary.
+                // drawing the cursor ring
                 mDrawCursorRing = true;
-                if (mNeedsRebuildWebTextView) {
-                    rebuildWebTextView();
-                }
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
                 }
-                setFocusControllerActive(true);
             } else {
                 // If our window gained focus, but we do not have it, do not
                 // draw the cursor ring.
@@ -3418,23 +3406,23 @@ public class WebView extends AbsoluteLayout
             if (mNativeClass != 0) {
                 nativeRecordButtons(false, false, true);
             }
-            setFocusControllerActive(false);
+            setFocusControllerInactive();
         }
         invalidate();
         super.onWindowFocusChanged(hasWindowFocus);
     }
 
     /*
-     * Pass a message to WebCore Thread, determining whether the WebCore::Page's
-     * FocusController is "active" so that it will draw the blinking cursor.
+     * Pass a message to WebCore Thread, telling the WebCore::Page's
+     * FocusController to be  "inactive" so that it will
+     * not draw the blinking cursor.  It gets set to "active" to draw the cursor
+     * in WebViewCore.cpp, when the WebCore thread receives key events/clicks.
      */
-    private void setFocusControllerActive(boolean active) {
+    private void setFocusControllerInactive() {
         // Do not need to also check whether mWebViewCore is null, because
         // mNativeClass is only set if mWebViewCore is non null
         if (mNativeClass == 0) return;
-        active &= nativeCursorMatchesFocus() || !nativeHasFocusNode()
-                || !nativeCursorWantsKeyEvents();
-        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, active ? 1 : 0, 0);
+        mWebViewCore.sendMessage(EventHub.SET_INACTIVE);
     }
 
     @Override
@@ -3445,20 +3433,12 @@ public class WebView extends AbsoluteLayout
         }
         if (focused) {
             // When we regain focus, if we have window focus, resume drawing
-            // the cursor ring, and add the TextView if necessary.
+            // the cursor ring
             if (hasWindowFocus()) {
                 mDrawCursorRing = true;
-                if (mNeedsRebuildWebTextView) {
-                    rebuildWebTextView();
-                    mNeedsRebuildWebTextView = false;
-                }
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
                 }
-                // FIXME: This is unnecessary if we are gaining focus from the
-                // WebTextView.  How can we tell if it was the last thing in
-                // focus?
-                setFocusControllerActive(true);
             //} else {
                 // The WebView has gained focus while we do not have
                 // windowfocus.  When our window lost focus, we should have
@@ -3472,7 +3452,7 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(false, false, true);
                 }
-                setFocusControllerActive(false);
+                setFocusControllerInactive();
             }
             mGotKeyDown = false;
         }
@@ -5076,9 +5056,9 @@ public class WebView extends AbsoluteLayout
     }
 
     // called by JNI
-    private void sendMoveMouseIfLatest() {
-        if (!nativeCursorMatchesFocus() && nativeCursorWantsKeyEvents()) {
-            setFocusControllerActive(false);
+    private void sendMoveMouseIfLatest(boolean setFocusControllerInactive) {
+        if (setFocusControllerInactive) {
+            setFocusControllerInactive();
         }
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST, cursorData());
     }
