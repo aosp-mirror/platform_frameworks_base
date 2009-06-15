@@ -163,6 +163,7 @@ public class WebSettings {
     private boolean         mDatabaseEnabled = false;
     private String          mAppCachePath = "";
     private boolean         mAppCacheEnabled = false;
+    private boolean         mDomStorageEnabled = false;
 
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
@@ -960,6 +961,28 @@ public class WebSettings {
            mDatabaseEnabled = flag;
            postSync();
        }
+    }
+
+    /**
+     * Set whether the DOM storage API is enabled.
+     * @param flag boolean True if the WebView should use the DOM storage
+     *     API.
+     * @hide pending API council.
+     */
+    public synchronized void setDomStorageEnabled(boolean flag) {
+       if (mDomStorageEnabled != flag) {
+           mDomStorageEnabled = flag;
+           postSync();
+       }
+    }
+
+    /**
+     * Returns true if the DOM Storage API's are enabled.
+     * @return True if the DOM Storage API's are enabled.
+     * @hide pending API council.
+     */
+    public synchronized boolean getDomStorageEnabled() {
+       return mDomStorageEnabled;
     }
 
     /**
