@@ -21,6 +21,7 @@
     <string name="gigabyteShort">"Go"</string>
     <string name="terabyteShort">"To"</string>
     <string name="petabyteShort">"Po"</string>
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="KB">%2$s</xliff:g></string>
     <string name="untitled">"&lt;sans titre&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(Aucun numéro de téléphone)"</string>
