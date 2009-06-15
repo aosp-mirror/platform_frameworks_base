@@ -80,7 +80,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -206,6 +205,11 @@ public class WebView extends AbsoluteLayout
     private boolean mAutoRedraw;
 
     static final String LOGTAG = "webview";
+
+    static class ScaleLimitData {
+        int mMinScale;
+        int mMaxScale;
+    }
 
     private static class ExtendedZoomControls extends FrameLayout {
         public ExtendedZoomControls(Context context, AttributeSet attrs) {
@@ -1190,9 +1194,9 @@ public class WebView extends AbsoluteLayout
     public void postUrl(String url, byte[] postData) {
         if (URLUtil.isNetworkUrl(url)) {
             switchOutDrawHistory();
-            HashMap arg = new HashMap();
-            arg.put("url", url);
-            arg.put("data", postData);
+            WebViewCore.PostUrlData arg = new WebViewCore.PostUrlData();
+            arg.mUrl = url;
+            arg.mPostData = postData;
             mWebViewCore.sendMessage(EventHub.POST_URL, arg);
             clearTextEntry();
         } else {
@@ -1243,12 +1247,12 @@ public class WebView extends AbsoluteLayout
             return;
         }
         switchOutDrawHistory();
-        HashMap arg = new HashMap();
-        arg.put("baseUrl", baseUrl);
-        arg.put("data", data);
-        arg.put("mimeType", mimeType);
-        arg.put("encoding", encoding);
-        arg.put("failUrl", failUrl);
+        WebViewCore.BaseUrlData arg = new WebViewCore.BaseUrlData();
+        arg.mBaseUrl = baseUrl;
+        arg.mData = data;
+        arg.mMimeType = mimeType;
+        arg.mEncoding = encoding;
+        arg.mFailUrl = failUrl;
         mWebViewCore.sendMessage(EventHub.LOAD_DATA, arg);
         clearTextEntry();
     }
@@ -2316,10 +2320,9 @@ public class WebView extends AbsoluteLayout
      * @param interfaceName The name to used to expose the class in Javascript
      */
     public void addJavascriptInterface(Object obj, String interfaceName) {
-        // Use Hashmap rather than Bundle as Bundles can't cope with Objects
-        HashMap arg = new HashMap();
-        arg.put("object", obj);
-        arg.put("interfaceName", interfaceName);
+        WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
+        arg.mObject = obj;
+        arg.mInterfaceName = interfaceName;
         mWebViewCore.sendMessage(EventHub.ADD_JS_INTERFACE, arg);
     }
 
@@ -3013,10 +3016,8 @@ public class WebView extends AbsoluteLayout
                 String name = nativeFocusCandidateName();
                 if (mWebViewCore.getSettings().getSaveFormData()
                         && name != null) {
-                    HashMap data = new HashMap();
-                    data.put("text", text);
                     Message update = mPrivateHandler.obtainMessage(
-                            REQUEST_FORM_DATA, nodePointer, 0, data);
+                            REQUEST_FORM_DATA, nodePointer);
                     RequestFormData updater = new RequestFormData(name,
                             getUrl(), update);
                     Thread t = new Thread(updater);
@@ -3073,7 +3074,7 @@ public class WebView extends AbsoluteLayout
             if (pastEntries.size() > 0) {
                 AutoCompleteAdapter adapter = new
                         AutoCompleteAdapter(mContext, pastEntries);
-                ((HashMap) mUpdateMessage.obj).put("adapter", adapter);
+                mUpdateMessage.obj = adapter;
                 mUpdateMessage.sendToTarget();
             }
         }
@@ -4516,10 +4517,10 @@ public class WebView extends AbsoluteLayout
 
     /* package */ void replaceTextfieldText(int oldStart, int oldEnd,
             String replace, int newStart, int newEnd) {
-        HashMap arg = new HashMap();
-        arg.put("replace", replace);
-        arg.put("start", Integer.valueOf(newStart));
-        arg.put("end", Integer.valueOf(newEnd));
+        WebViewCore.ReplaceTextData arg = new WebViewCore.ReplaceTextData();
+        arg.mReplace = replace;
+        arg.mNewStart = newStart;
+        arg.mNewEnd = newEnd;
         mTextGeneration++;
         mWebViewCore.sendMessage(EventHub.REPLACE_TEXT, oldStart, oldEnd, arg);
     }
@@ -4528,9 +4529,9 @@ public class WebView extends AbsoluteLayout
         if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
             mWebViewCore.sendMessage(EventHub.CLICK);
         }
-        HashMap arg = new HashMap();
-        arg.put("event", event);
-        arg.put("currentText", currentText);
+        WebViewCore.JSKeyData arg = new WebViewCore.JSKeyData();
+        arg.mEvent = event;
+        arg.mCurrentText = currentText;
         // Increase our text generation number, and pass it to webcore thread
         mTextGeneration++;
         mWebViewCore.sendMessage(EventHub.PASS_TO_JS, mTextGeneration, 0, arg);
@@ -4699,8 +4700,8 @@ public class WebView extends AbsoluteLayout
                     if (mNativeClass == 0) {
                         break;
                     }
-                    HashMap scaleLimit = (HashMap) msg.obj;
-                    int minScale = (Integer) scaleLimit.get("minScale");
+                    ScaleLimitData scaleLimit = (ScaleLimitData) msg.obj;
+                    int minScale = scaleLimit.mMinScale;
                     if (minScale == 0) {
                         mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
                         mMinZoomScaleFixed = false;
@@ -4708,7 +4709,7 @@ public class WebView extends AbsoluteLayout
                         mMinZoomScale = (float) (minScale / 100.0);
                         mMinZoomScaleFixed = true;
                     }
-                    int maxScale = (Integer) scaleLimit.get("maxScale");
+                    int maxScale = scaleLimit.mMaxScale;
                     if (maxScale == 0) {
                         mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
                     } else {
@@ -4767,10 +4768,8 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case REQUEST_FORM_DATA:
-                    HashMap data = (HashMap) msg.obj;
+                    AutoCompleteAdapter adapter = (AutoCompleteAdapter) msg.obj;
                     if (mWebTextView.isSameTextField(msg.arg1)) {
-                        AutoCompleteAdapter adapter =
-                                (AutoCompleteAdapter) data.get("adapter");
                         mWebTextView.setAdapterCustom(adapter);
                     }
                     break;
