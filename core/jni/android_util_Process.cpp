@@ -50,8 +50,6 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-#define ENABLE_CGROUP_DEBUG 0
-
 /*
  * List of cgroup names which map to ANDROID_TGROUP_ values in Thread.h
  * and Process.java
@@ -205,39 +203,31 @@ static int add_pid_to_cgroup(int pid, int grp)
     sprintf(path, "/dev/cpuctl/%s/tasks",
            (cgroup_names[grp] ? cgroup_names[grp] : ""));
 
-    if ((fd = open(path, O_WRONLY)) < 0) {
-        LOGE("Error opening '%s' (%s)", path, strerror(errno));
+    if ((fd = open(path, O_WRONLY)) < 0)
         return -1;
-    }
 
     sprintf(text, "%d", pid);
     if (write(fd, text, strlen(text)) < 0) {
-        LOGE("Error writing to '%s' (%s)", path, strerror(errno));
         close(fd);
         return -1;
     }
 
     close(fd);
-
-#if ENABLE_CGROUP_DEBUG
-    LOGD("Pid %d sucessfully added to '%s'", pid, path);
-#endif
     return 0;
 }
 
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
-#if ENABLE_CGROUP_DEBUG
-    LOGD("android_os_Process_setThreadGroup(%d, %d)", pid, grp);
-#endif
-
     if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
         signalExceptionForGroupError(env, clazz, EINVAL);
         return;
     }
 
-    if (add_pid_to_cgroup(pid, grp))
-        signalExceptionForGroupError(env, clazz, errno);
+    if (add_pid_to_cgroup(pid, grp)) {
+        // If the thread exited on us, don't generate an exception
+        if (errno != ESRCH && errno != ENOENT)
+            signalExceptionForGroupError(env, clazz, errno);
+    }
 }
 
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp) 
@@ -247,10 +237,6 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     char proc_path[255];
     struct dirent *de;
 
-#if ENABLE_CGROUP_DEBUG
-    LOGD("android_os_Process_setProcessGroup(%d, %d)", pid, grp);
-#endif
-
     if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
         signalExceptionForGroupError(env, clazz, EINVAL);
         return;
@@ -258,17 +244,23 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
 
     sprintf(proc_path, "/proc/%d/task", pid);
     if (!(d = opendir(proc_path))) {
-        signalExceptionForGroupError(env, clazz, errno);
+        // If the process exited on us, don't generate an exception
+        if (errno != ENOENT)
+            signalExceptionForGroupError(env, clazz, errno);
         return;
     }
 
     while ((de = readdir(d))) {
         if (de->d_name[0] == '.')
             continue;
+
         if (add_pid_to_cgroup(atoi(de->d_name), grp)) {
-            signalExceptionForGroupError(env, clazz, errno);
-            closedir(d);
-            return;
+            // If the thread exited on us, ignore it and keep going
+            if (errno != ESRCH && errno != ENOENT) {
+                signalExceptionForGroupError(env, clazz, errno);
+                closedir(d);
+                return;
+            }
         }
     }
     closedir(d);
