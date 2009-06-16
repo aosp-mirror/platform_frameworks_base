@@ -668,7 +668,7 @@ public class AudioService extends IAudioService.Stub {
                         mSpeakerIsOn = true;
                         mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_SPEAKER;
                         incallMask = AudioSystem.ROUTE_ALL;
-                    } else if (mSpeakerIsOn) {
+                    } else if (routes == 0 && mSpeakerIsOn) {
                         mSpeakerIsOn = false;
                         if (mBluetoothScoIsConnected) {
                             mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_BLUETOOTH_SCO;
@@ -695,7 +695,7 @@ public class AudioService extends IAudioService.Stub {
                         // should not affect A2DP routing
                         ringtoneMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
                         normalMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
-                    } else if (mBluetoothScoIsConnected) {
+                    } else if (routes == 0 && mBluetoothScoIsConnected) {
                         mBluetoothScoIsConnected = false;
                         if (mHeadsetIsConnected) {
                             mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_HEADSET;
@@ -739,7 +739,7 @@ public class AudioService extends IAudioService.Stub {
                             ringtoneMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
                             normalMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
                         }
-                    } else if (mHeadsetIsConnected) {
+                    } else if (routes == 0 && mHeadsetIsConnected) {
                         mHeadsetIsConnected = false;
                         // do not act upon headset disconnection if bluetooth SCO is connected to match phone app behavior
                         if (!mBluetoothScoIsConnected) {
@@ -772,7 +772,7 @@ public class AudioService extends IAudioService.Stub {
                         // so there is no need to disable other routes.
                         ringtoneMask = AudioSystem.ROUTE_BLUETOOTH_A2DP;
                         normalMask = AudioSystem.ROUTE_BLUETOOTH_A2DP;
-                    } else if (mBluetoothA2dpIsConnected) {
+                    } else if (routes == 0 && mBluetoothA2dpIsConnected) {
                         mBluetoothA2dpIsConnected = false;
                         mRoutes[AudioSystem.MODE_RINGTONE] &= ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
                         mRoutes[AudioSystem.MODE_NORMAL] &= ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
