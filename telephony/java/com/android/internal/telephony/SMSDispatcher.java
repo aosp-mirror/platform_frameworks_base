@@ -78,6 +78,7 @@ public abstract class SMSDispatcher extends Handler {
     protected static final String[] RAW_PROJECTION = new String[] {
         "pdu",
         "sequence",
+        "destination_port",
     };
 
     static final int MAIL_SEND_SMS = 1;
