@@ -49,11 +49,7 @@ static void dumpstate(int full) {
         PRINT("------ VIRTUAL MEMORY STATS ------");
         DUMP("/proc/vmstat");
         PRINT("------ SLAB INFO ------");
-#if 0
         DUMP("/proc/slabinfo");
-#else
-        PRINT("temporarily disabled to avoid kernel crasher");
-#endif
         PRINT("------ ZONEINFO ------");
         DUMP("/proc/zoneinfo");
         PRINT("------ SYSTEM LOG ------");
