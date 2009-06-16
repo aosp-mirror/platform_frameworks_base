@@ -31,6 +31,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageParser.Component;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -3286,10 +3287,10 @@ public final class ActivityThread {
                 throw e;
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
+                    ComponentName component = r.intent.getComponent();
+                    String name = component == null ? "[Unknown]" : component.toShortString();
                     throw new RuntimeException(
-                            "Unable to destroy activity "
-                            + r.intent.getComponent().toShortString()
-                            + ": " + e.toString(), e);
+                            "Unable to destroy activity " + name + ": " + e.toString(), e);
                 }
             }
         }
