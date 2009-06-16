@@ -85,6 +85,9 @@ public class Browser {
      * If the Browser is handling the intent and the setting for
      * USE_LOCATION_FOR_SERVICES is allow, the Browser will send the location in
      * the POST data if this extra data is presented and it is true.
+     * <p>
+     * pending api approval
+     * @hide
      */
     public static final String EXTRA_APPEND_LOCATION = "com.android.browser.append_location";
 
