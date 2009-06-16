@@ -67,6 +67,7 @@ public class RenderScript {
     native private void nContextBindSampler(int sampler, int slot);
     native private void nContextBindProgramFragmentStore(int pfs);
     native private void nContextBindProgramFragment(int pf);
+    native private void nContextBindProgramVertex(int pf);
 
     native private void nAssignName(int obj, byte[] name);
 
@@ -102,6 +103,7 @@ public class RenderScript {
     native private void nTriangleMeshAddVertex_XYZ (float x, float y, float z);
     native private void nTriangleMeshAddVertex_XY_ST (float x, float y, float s, float t);
     native private void nTriangleMeshAddVertex_XYZ_ST (float x, float y, float z, float s, float t);
+    native private void nTriangleMeshAddVertex_XYZ_ST_NORM (float x, float y, float z, float s, float t, float nx, float ny, float nz);
     native private void nTriangleMeshAddTriangle(int i1, int i2, int i3);
     native private int  nTriangleMeshCreate();
 
@@ -155,6 +157,7 @@ public class RenderScript {
     native private void nProgramVertexSetCameraMode(boolean isOrtho);
     native private void nProgramVertexSetTextureMatrixEnable(boolean enable);
     native private void nProgramVertexSetModelMatrixEnable(boolean enable);
+    native private void nProgramVertexSetProjectionMatrixEnable(boolean enable);
     native private int  nProgramVertexCreate();
 
 
@@ -228,19 +231,19 @@ public class RenderScript {
 
         A_8                (7),
         RGB_565            (8),
-        RGB_888            (12),
+        RGB_888            (11),
         RGBA_5551          (9),
         RGBA_4444          (10),
-        RGBA_8888          (13),
+        RGBA_8888          (12),
 
-        INDEX_16           (16),
-        INDEX_32           (17),
-        XY_F32             (18),
-        XYZ_F32            (19),
-        ST_XY_F32          (20),
-        ST_XYZ_F32         (21),
-        NORM_XYZ_F32       (22),
-        NORM_ST_XYZ_F32    (23);
+        INDEX_16           (13),
+        INDEX_32           (14),
+        XY_F32             (15),
+        XYZ_F32            (16),
+        ST_XY_F32          (17),
+        ST_XYZ_F32         (18),
+        NORM_XYZ_F32       (19),
+        NORM_ST_XYZ_F32    (20);
 
         int mID;
         ElementPredefined(int id) {
@@ -593,6 +596,10 @@ public class RenderScript {
         nTriangleMeshAddVertex_XYZ_ST(x, y, z, s, t);
     }
 
+    public void triangleMeshAddVertex_XYZ_ST_NORM(float x, float y, float z, float s, float t, float nx, float ny, float nz) {
+        nTriangleMeshAddVertex_XYZ_ST_NORM(x, y, z, s, t, nx, ny, nz);
+    }
+
     public void triangleMeshAddTriangle(int i1, int i2, int i3) {
         nTriangleMeshAddTriangle(i1, i2, i3);
     }
@@ -736,6 +743,10 @@ public class RenderScript {
 
     public void programVertexSetModelMatrixEnable(boolean enable) {
         nProgramVertexSetModelMatrixEnable(enable);
+    }
+
+    public void programVertexSetProjectionMatrixEnable(boolean enable) {
+        nProgramVertexSetProjectionMatrixEnable(enable);
     }
 
     public ProgramVertex programVertexCreate() {
@@ -891,6 +902,10 @@ public class RenderScript {
 
     public void contextBindProgramFragment(ProgramFragment pf) {
         nContextBindProgramFragment(pf.mID);
+    }
+
+    public void contextBindProgramVertex(ProgramVertex pf) {
+        nContextBindProgramVertex(pf.mID);
     }
 
 /*

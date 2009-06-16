@@ -411,6 +411,15 @@ nTriangleMeshAddVertex_XYZ_ST(JNIEnv *_env, jobject _this, jfloat x, jfloat y, j
 }
 
 static void
+nTriangleMeshAddVertex_XYZ_ST_NORM(JNIEnv *_env, jobject _this, jfloat x, jfloat y, jfloat z, jfloat s, jfloat t, jfloat nx, jfloat ny, jfloat nz)
+{
+    float v[] = {nx, ny, nz, s, t, x, y, z};
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nTriangleMeshAddVertex_XYZ_ST, con(%p), x(%f), y(%f), z(%f), s(%f), t(%f)", con, x, y, z, s, t);
+    rsTriangleMeshAddVertex(v);
+}
+
+static void
 nTriangleMeshAddTriangle(JNIEnv *_env, jobject _this, jint i1, jint i2, jint i3)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -805,6 +814,14 @@ nProgramVertexSetModelMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
     rsProgramVertexSetModelMatrixEnable(enable);
 }
 
+static void
+nProgramVertexSetProjectionMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetProjectionMatrixEnable, con(%p), enable(%i)", con, enable);
+    rsProgramVertexSetProjectionMatrixEnable(enable);
+}
+
 static jint
 nProgramVertexCreate(JNIEnv *_env, jobject _this)
 {
@@ -848,6 +865,14 @@ nContextBindProgramFragment(JNIEnv *_env, jobject _this, jint pf)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindProgramFragment, con(%p), pf(%p)", con, (RsProgramFragment)pf);
     rsContextBindProgramFragment((RsProgramFragment)pf);
+}
+
+static void
+nContextBindProgramVertex(JNIEnv *_env, jobject _this, jint pf)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextBindProgramVertex, con(%p), pf(%p)", con, (RsProgramVertex)pf);
+    rsContextBindProgramVertex((RsProgramVertex)pf);
 }
 
 // ---------------------------------------------------------------------------
@@ -929,6 +954,7 @@ static JNINativeMethod methods[] = {
 {"nTriangleMeshAddVertex_XYZ",     "(FFF)V",                               (void*)nTriangleMeshAddVertex_XYZ },
 {"nTriangleMeshAddVertex_XY_ST",   "(FFFF)V",                              (void*)nTriangleMeshAddVertex_XY_ST },
 {"nTriangleMeshAddVertex_XYZ_ST",  "(FFFFF)V",                             (void*)nTriangleMeshAddVertex_XYZ_ST },
+{"nTriangleMeshAddVertex_XYZ_ST_NORM",  "(FFFFFFFF)V",                     (void*)nTriangleMeshAddVertex_XYZ_ST_NORM },
 {"nTriangleMeshAddTriangle",       "(III)V",                               (void*)nTriangleMeshAddTriangle },
 {"nTriangleMeshCreate",            "()I",                                  (void*)nTriangleMeshCreate },
 
@@ -977,11 +1003,13 @@ static JNINativeMethod methods[] = {
 {"nProgramVertexSetCameraMode",    "(Z)V",                                 (void*)nProgramVertexSetCameraMode },
 {"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
 {"nProgramVertexSetModelMatrixEnable",  "(Z)V",                            (void*)nProgramVertexSetModelMatrixEnable },
+{"nProgramVertexSetProjectionMatrixEnable",  "(Z)V",                       (void*)nProgramVertexSetProjectionMatrixEnable },
 {"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
 
 {"nContextBindRootScript",         "(I)V",                                 (void*)nContextBindRootScript },
 {"nContextBindProgramFragmentStore","(I)V",                                (void*)nContextBindProgramFragmentStore },
 {"nContextBindProgramFragment",    "(I)V",                                 (void*)nContextBindProgramFragment },
+{"nContextBindProgramVertex",      "(I)V",                                 (void*)nContextBindProgramVertex },
 
 {"nSamplerDestroy",                "(I)V",                                 (void*)nSamplerDestroy },
 {"nSamplerBegin",                  "()V",                                  (void*)nSamplerBegin },

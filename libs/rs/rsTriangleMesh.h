@@ -35,7 +35,7 @@ namespace renderscript {
 
 
 // An element is a group of Components that occupies one cell in a structure.
-class TriangleMesh
+class TriangleMesh : public ObjectBase
 {
 public:
     TriangleMesh();

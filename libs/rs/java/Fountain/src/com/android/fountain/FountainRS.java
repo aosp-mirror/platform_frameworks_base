@@ -18,15 +18,12 @@ package com.android.fountain;
 
 import java.io.Writer;
 
-import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScript;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.AttributeSet;
 import android.util.Log;
 
 public class FountainRS {
