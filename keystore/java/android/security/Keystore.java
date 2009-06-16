@@ -48,8 +48,16 @@ public abstract class Keystore {
 
     public abstract String[] getSupportedKeyStrenghs();
 
-    public abstract String generateKeyPair(String keyStrength, String challenge,
-            String organizations) throws UnsupportedKeyStrengthException;
+    /**
+     * Generates a key pair and returns the certificate request.
+     * @param keyStrengthIndex index to the array of supported key strengths
+     * @param challenge the challenge message in the keygen tag
+     * @param organizations the organization string, e.g.,
+     *      "/C=US/ST={state}/L={city}/O={company}/OU={app}/CN={hostname}"
+     * @return the certificate request
+     */
+    public abstract String generateKeyPair(
+            int keyStrengthIndex, String challenge, String organizations);
 
     public abstract void addCertificate(String cert);
 
@@ -114,8 +122,8 @@ public abstract class Keystore {
         }
 
         @Override
-        public String generateKeyPair(String keyStrength, String challenge,
-                String organizations) throws UnsupportedKeyStrengthException {
+        public String generateKeyPair(int keyStrengthIndex, String challenge,
+                String organizations) {
             // TODO: real implementation
             return "-----BEGIN CERTIFICATE REQUEST-----"
                     + "\nMIICzjCCAbYCAQAwgYgxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlh"
