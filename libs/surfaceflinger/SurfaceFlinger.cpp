@@ -175,6 +175,9 @@ SurfaceFlinger::SurfaceFlinger()
         mTransactionCount(0),
         mLayersRemoved(false),
         mBootTime(systemTime()),
+        mHardwareTest("android.permission.HARDWARE_TEST"),
+        mAccessSurfaceFlinger("android.permission.ACCESS_SURFACE_FLINGER"),
+        mDump("android.permission.DUMP"),
         mLastScheduledBroadcast(NULL),
         mVisibleRegionsDirty(false),
         mDeferReleaseConsole(false),
@@ -1430,9 +1433,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
     const size_t SIZE = 1024;
     char buffer[SIZE];
     String8 result;
-    if (checkCallingPermission(
-            String16("android.permission.DUMP")) == false)
-    { // not allowed
+    if (!mDump.checkCalling()) {
         snprintf(buffer, SIZE, "Permission Denial: "
                 "can't dump SurfaceFlinger from pid=%d, uid=%d\n",
                 IPCThreadState::self()->getCallingPid(),
@@ -1534,29 +1535,21 @@ status_t SurfaceFlinger::onTransact(
             IPCThreadState* ipc = IPCThreadState::self();
             const int pid = ipc->getCallingPid();
             const int uid = ipc->getCallingUid();
-            const int self_pid = getpid();
-            if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS)) {
-                // we're called from a different process, do the real check
-                if (!checkCallingPermission(
-                        String16("android.permission.ACCESS_SURFACE_FLINGER")))
-                {
-                    LOGE("Permission Denial: "
-                            "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
-                    return PERMISSION_DENIED;
-                }
+            if ((uid != AID_GRAPHICS) && !mAccessSurfaceFlinger.check(pid, uid)) {
+                LOGE("Permission Denial: "
+                        "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
+                return PERMISSION_DENIED;
             }
         }
     }
-
     status_t err = BnSurfaceComposer::onTransact(code, data, reply, flags);
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {
-        // HARDWARE_TEST stuff...
-        if (UNLIKELY(checkCallingPermission(
-                String16("android.permission.HARDWARE_TEST")) == false))
-        { // not allowed
-            LOGE("Permission Denial: pid=%d, uid=%d\n",
-                    IPCThreadState::self()->getCallingPid(),
-                    IPCThreadState::self()->getCallingUid());
+        if (UNLIKELY(!mHardwareTest.checkCalling())) {
+            IPCThreadState* ipc = IPCThreadState::self();
+            const int pid = ipc->getCallingPid();
+            const int uid = ipc->getCallingUid();
+            LOGE("Permission Denial: "
+                    "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
             return PERMISSION_DENIED;
         }
         int n;

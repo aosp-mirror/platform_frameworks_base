@@ -25,8 +25,10 @@
 #include <utils/threads.h>
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
-#include <binder/MemoryDealer.h>
 #include <utils/RefBase.h>
+
+#include <binder/MemoryDealer.h>
+#include <binder/Permission.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/ISurfaceComposer.h>
@@ -321,6 +323,9 @@ private:
                 surface_flinger_cblk_t*     mServerCblk;
                 GLuint                      mWormholeTexName;
                 nsecs_t                     mBootTime;
+                Permission                  mHardwareTest;
+                Permission                  mAccessSurfaceFlinger;
+                Permission                  mDump;
                 
                 // Can only accessed from the main thread, these members
                 // don't need synchronization

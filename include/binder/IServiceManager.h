@@ -78,6 +78,8 @@ status_t getService(const String16& name, sp<INTERFACE>* outService)
 bool checkCallingPermission(const String16& permission);
 bool checkCallingPermission(const String16& permission,
                             int32_t* outPid, int32_t* outUid);
+bool checkPermission(const String16& permission, pid_t pid, uid_t uid);
+
 
 // ----------------------------------------------------------------------
 

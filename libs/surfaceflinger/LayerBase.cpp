@@ -729,27 +729,20 @@ void LayerBaseClient::Surface::getSurfaceData(
 }
 
 status_t LayerBaseClient::Surface::onTransact(
-    uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
+        uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     switch (code) {
         case REGISTER_BUFFERS:
         case UNREGISTER_BUFFERS:
         case CREATE_OVERLAY:
         {
-            // codes that require permission check
-            IPCThreadState* ipc = IPCThreadState::self();
-            const int pid = ipc->getCallingPid();
-            const int self_pid = getpid();
-            if (LIKELY(pid != self_pid)) {
-                // we're called from a different process, do the real check
-                if (!checkCallingPermission(
-                        String16("android.permission.ACCESS_SURFACE_FLINGER")))
-                {
-                    const int uid = ipc->getCallingUid();
-                    LOGE("Permission Denial: "
-                            "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
-                    return PERMISSION_DENIED;
-                }
+            if (!mFlinger->mAccessSurfaceFlinger.checkCalling()) {
+                IPCThreadState* ipc = IPCThreadState::self();
+                const int pid = ipc->getCallingPid();
+                const int uid = ipc->getCallingUid();
+                LOGE("Permission Denial: "
+                        "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
+                return PERMISSION_DENIED;
             }
         }
     }

@@ -19,8 +19,8 @@
 #include <binder/IServiceManager.h>
 
 #include <utils/Debug.h>
-#include <binder/IPCThreadState.h>
 #include <utils/Log.h>
+#include <binder/IPCThreadState.h>
 #include <binder/Parcel.h>
 #include <utils/String8.h>
 #include <utils/SystemClock.h>
@@ -53,14 +53,19 @@ bool checkCallingPermission(const String16& permission)
 
 static String16 _permission("permission");
 
+
 bool checkCallingPermission(const String16& permission, int32_t* outPid, int32_t* outUid)
 {
     IPCThreadState* ipcState = IPCThreadState::self();
-    int32_t pid = ipcState->getCallingPid();
-    int32_t uid = ipcState->getCallingUid();
+    pid_t pid = ipcState->getCallingPid();
+    uid_t uid = ipcState->getCallingUid();
     if (outPid) *outPid = pid;
-    if (outUid) *outUid= uid;
-    
+    if (outUid) *outUid = uid;
+    return checkPermission(permission, pid, uid);
+}
+
+bool checkPermission(const String16& permission, pid_t pid, uid_t uid)
+{
     sp<IPermissionController> pc;
     gDefaultServiceManagerLock.lock();
     pc = gPermissionController;
