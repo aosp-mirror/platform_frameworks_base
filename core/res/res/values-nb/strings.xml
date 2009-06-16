@@ -182,8 +182,6 @@
     <string name="permdesc_setProcessLimit">"Lar applikasjonen kontrollere maksimalt antall kjørende prosesser. Behøves aldri for vanlige applikasjoner."</string>
     <string name="permlab_setAlwaysFinish">"få alle bakgrunnsapplikasjoner til å lukkes"</string>
     <string name="permdesc_setAlwaysFinish">"Lar applikasjonen kontrollere om aktiviteter alltid avsluttes når de sendes til bakgrunnen. Behøves aldri for vanlige applikasjoner."</string>
-    <string name="permlab_fotaUpdate">"installere systemoppdateringer automatisk"</string>
-    <string name="permdesc_fotaUpdate">"Lar applikasjonen motta meldinger om pågående systemoppdateringer, og starte installeringen av dem. Ondsinnede applikasjoner kan bruke dette for å skade systemet med uautoriserte oppdateringer, eller generelt forstyrre oppdateringsprosessen."</string>
     <string name="permlab_batteryStats">"endre batteristatistikk"</string>
     <string name="permdesc_batteryStats">"Lar applikasjonen endre på innsamlet batteristatistikk. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_internalSystemWindow">"vis uautoriserte vinduer"</string>

@@ -534,15 +534,6 @@
         go to the background. Never needed for normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fotaUpdate">automatically install system updates</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fotaUpdate">Allows an application to receive
-        notifications about pending system updates and trigger their
-        installation. Malicious applications may use this to corrupt the system
-        with unauthorized updates, or generally interfere with the update
-        process.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_batteryStats">modify battery statistics</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_batteryStats">Allows the modification of

@@ -242,8 +242,6 @@
     <string name="permdesc_setProcessLimit">"Permite que um aplicativo controle o número máximo de processos que serão executados. Nunca é necessário para aplicativos normais."</string>
     <string name="permlab_setAlwaysFinish">"fazer todos os aplicativos em segundo plano fechar"</string>
     <string name="permdesc_setAlwaysFinish">"Permite que um aplicativo controle se as atividades são sempre concluídas assim que vão para o segundo plano. Nunca é necessário para aplicativos normais."</string>
-    <string name="permlab_fotaUpdate">"instalar automaticamente atualizações do sistema"</string>
-    <string name="permdesc_fotaUpdate">"Permite que um aplicativo receba notificações sobre atualizações pendentes do sistema e dispare suas instalações. Aplicativos maliciosos podem usar isso para corromper o sistema com atualizações não autorizadas ou normalmente interferem com o processo de atualização."</string>
     <string name="permlab_batteryStats">"Modificar as estatísticas da bateria"</string>
     <string name="permdesc_batteryStats">"Permite a modificação das estatísticas coletadas sobre a bateria. Não deve ser usado em aplicativos normais."</string>
     <!-- no translation found for permlab_backup (470013022865453920) -->

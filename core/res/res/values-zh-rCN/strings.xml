@@ -182,8 +182,6 @@
     <string name="permdesc_setProcessLimit">"允许应用程序控制运行的进程数上限。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_setAlwaysFinish">"关闭所有后台应用程序"</string>
     <string name="permdesc_setAlwaysFinish">"允许应用程序控制活动是否始终是一转至后台就完成。普通应用程序从不需要使用此权限。"</string>
-    <string name="permlab_fotaUpdate">"自动安装系统更新"</string>
-    <string name="permdesc_fotaUpdate">"允许应用程序接收有关未决系统更新的通知并安装这些更新。恶意应用程序可能会借此通过未经授权的更新破坏系统，通常情况下，它们会干扰更新过程。"</string>
     <string name="permlab_batteryStats">"修改电池统计信息"</string>
     <string name="permdesc_batteryStats">"允许修改收集的电池统计信息。普通应用程序不能使用此权限。"</string>
     <string name="permlab_internalSystemWindow">"显示未授权的窗口"</string>

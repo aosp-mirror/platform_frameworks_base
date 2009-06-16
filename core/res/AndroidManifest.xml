@@ -745,14 +745,6 @@
         android:description="@string/permdesc_forceBack"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to publish system-level services.  Such services
-         can only be published from processes that never go away, so this is
-         not something that any normal application can do. -->
-    <permission android:name="android.permission.ADD_SYSTEM_SERVICE"
-        android:label="@string/permlab_addSystemService"
-        android:description="@string/permdesc_addSystemService"
-        android:protectionLevel="signature" />
-
     <!-- Allows an application to update device statistics. Not for
          use by third party apps. -->
     <permission android:name="android.permission.UPDATE_DEVICE_STATS"
