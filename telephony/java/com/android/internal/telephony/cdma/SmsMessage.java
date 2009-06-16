@@ -357,6 +357,17 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
+     * Calculate the number of septets needed to encode the message.
+     *
+     * @param messageBody the message to encode
+     * @param force ignore (but still count) illegal characters if true
+     * @return septet count, or -1 on failure
+     */
+    public static int calc7bitEncodedLength(CharSequence msgBody, boolean force) {
+        return BearerData.calc7bitEncodedLength(msgBody.toString(), force);
+    }
+
+    /**
      * Note: This function is a GSM specific functionality which is not supported in CDMA mode.
      */
     public int getProtocolIdentifier() {

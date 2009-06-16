@@ -14,10 +14,12 @@ import os
 import subprocess
 import sys
 import time
+from Numeric import *
 
 TEST_LIST_FILE = "/sdcard/android/reliability_tests_list.txt"
 TEST_STATUS_FILE = "/sdcard/android/reliability_running_test.txt"
 TEST_TIMEOUT_FILE = "/sdcard/android/reliability_timeout_test.txt"
+TEST_LOAD_TIME_FILE = "/sdcard/android/reliability_load_time.txt"
 HTTP_URL_FILE = "urllist_http"
 HTTPS_URL_FILE = "urllist_https"
 NUM_URLS = 25
@@ -60,6 +62,43 @@ def Bugreport(url, bugreport_dir, adb_cmd):
 
   cmd = "%s bugreport >> %s" % (adb_cmd, bugreport_filename)
   os.system(cmd)
+
+
+def ProcessPageLoadTime(raw_log):
+  """Processes the raw page load time logged by test app."""
+  log_handle = open(raw_log, "r")
+  load_times = {}
+
+  for line in log_handle:
+    line = line.strip()
+    pair = line.split("|")
+    if len(pair) != 2:
+      logging.info("Line has more than one '|': " + line)
+      continue
+    if pair[0] not in load_times:
+      load_times[pair[0]] = []
+    try:
+      pair[1] = int(pair[1])
+    except ValueError:
+      logging.info("Lins has non-numeric load time: " + line)
+      continue
+    load_times[pair[0]].append(pair[1])
+
+  log_handle.close()
+
+  # rewrite the average time to file
+  log_handle = open(raw_log, "w")
+  for url, times in load_times.iteritems():
+    # calculate std
+    arr = array(times)
+    avg = average(arr)
+    d = arr - avg
+    std = sqrt(sum(d * d) / len(arr))
+    output = ("%-70s%-10d%-10d%-12.2f%-12.2f%s\n" %
+              (url, min(arr), max(arr), avg, std,
+               array2string(arr)))
+    log_handle.write(output)
+  log_handle.close()
 
 
 def main(options, args):
@@ -125,6 +164,7 @@ def main(options, args):
   # clean up previous results
   RemoveDeviceFile(adb_cmd, TEST_STATUS_FILE)
   RemoveDeviceFile(adb_cmd, TEST_TIMEOUT_FILE)
+  RemoveDeviceFile(adb_cmd, TEST_LOAD_TIME_FILE)
 
   logging.info("Running the test ...")
 
@@ -141,8 +181,13 @@ def main(options, args):
   # Call ReliabilityTestsAutoTest#startReliabilityTests
   test_cmd = (test_cmd_prefix + " -e class "
               "com.android.dumprendertree.ReliabilityTest#"
-              "runReliabilityTest -e timeout %s -e delay %s %s" %
-              (str(timeout_ms), str(manual_delay), test_cmd_postfix))
+              "runReliabilityTest -e timeout %s -e delay %s" %
+              (str(timeout_ms), str(manual_delay)))
+
+  if options.logtime:
+    test_cmd += " -e logtime true"
+
+  test_cmd += test_cmd_postfix
 
   adb_output = subprocess.Popen(test_cmd, shell=True,
                                 stdout=subprocess.PIPE,
@@ -176,11 +221,19 @@ def main(options, args):
   else:
     logging.info("No crash found.")
 
+  # get timeout file from sdcard
   test_cmd = (adb_cmd + "pull \"" + TEST_TIMEOUT_FILE + "\" \""
               + timedout_file +  "\"")
-
   subprocess.Popen(test_cmd, shell=True, stdout=subprocess.PIPE,
                    stderr=subprocess.PIPE).communicate()
+
+  if options.logtime:
+    # get logged page load times from sdcard
+    test_cmd = (adb_cmd + "pull \"" + TEST_LOAD_TIME_FILE + "\" \""
+                + options.logtime +  "\"")
+    subprocess.Popen(test_cmd, shell=True, stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE).communicate()
+    ProcessPageLoadTime(options.logtime)
 
 
 if "__main__" == __name__:
@@ -206,5 +259,8 @@ if "__main__" == __name__:
   option_parser.add_option("-b", "--bugreport",
                            default=".",
                            help="the directory to store bugreport for crashes")
+  option_parser.add_option("-l", "--logtime",
+                           default=None,
+                           help="Logs page load time for each url to the file")
   opts, arguments = option_parser.parse_args()
   main(opts, arguments)

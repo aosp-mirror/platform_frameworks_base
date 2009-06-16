@@ -51,10 +51,17 @@ public class CompatibilityInfo {
     public final float mApplicationInvertedScale;
     
     /**
-     * 
      * A boolean flag to indicates that the application can expand over the original size.
+     * The flag is set to true if
+     * 1) Application declares its expandable in manifest file using <expandable /> or
+     * 2) The screen size is same as (320 x 480) * density. 
      */
-    public final boolean mExpandable;
+    public boolean mExpandable;
+
+    /**
+     * A expandable flag in the configuration.
+     */
+    public final boolean mConfiguredExpandable;
     
     /**
      * A boolean flag to tell if the application needs scaling (when mApplicationScale != 1.0f)
@@ -62,13 +69,16 @@ public class CompatibilityInfo {
     public final boolean mScalingRequired;
 
     public CompatibilityInfo(ApplicationInfo appInfo) {
-        // A temp workaround to fix rotation issue.
-        // mExpandable = appInfo.expandable;
-        mExpandable = true;
+        mExpandable = mConfiguredExpandable = appInfo.expandable;
+        
         float packageDensityScale = -1.0f;
         if (appInfo.supportsDensities != null) {
             int minDiff = Integer.MAX_VALUE;
             for (int density : appInfo.supportsDensities) {
+                if (density == ApplicationInfo.ANY_DENSITY) { 
+                    packageDensityScale = 1.0f;
+                    break;
+                }
                 int tmpDiff = Math.abs(DisplayMetrics.DEVICE_DENSITY - density);
                 if (tmpDiff == 0) {
                     packageDensityScale = 1.0f;
@@ -92,7 +102,7 @@ public class CompatibilityInfo {
 
     private CompatibilityInfo() {
         mApplicationScale = mApplicationInvertedScale = 1.0f;
-        mExpandable = true;
+        mExpandable = mConfiguredExpandable = true;
         mScalingRequired = false;
     }
 

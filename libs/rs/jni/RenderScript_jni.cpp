@@ -35,8 +35,6 @@
 #include "../RenderScript.h"
 #include "../RenderScriptEnv.h"
 
-#include "acc/acc.h"
-
 //#define LOG_API LOGE
 #define LOG_API(...)
 
@@ -59,6 +57,21 @@ static void _nInit(JNIEnv *_env, jclass _this)
 
     jclass bitmapClass = _env->FindClass("android/graphics/Bitmap");
     gNativeBitmapID = _env->GetFieldID(bitmapClass, "mNativeBitmap", "I");
+}
+
+
+// ---------------------------------------------------------------------------
+
+static void
+nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAssignName, con(%p), obj(%p)", con, obj);
+
+    jint len = _env->GetArrayLength(str);
+    jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
+    rsAssignName((void *)obj, (const char *)cptr, len);
+    _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
 }
 
 
@@ -398,6 +411,15 @@ nTriangleMeshAddVertex_XYZ_ST(JNIEnv *_env, jobject _this, jfloat x, jfloat y, j
 }
 
 static void
+nTriangleMeshAddVertex_XYZ_ST_NORM(JNIEnv *_env, jobject _this, jfloat x, jfloat y, jfloat z, jfloat s, jfloat t, jfloat nx, jfloat ny, jfloat nz)
+{
+    float v[] = {nx, ny, nz, s, t, x, y, z};
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nTriangleMeshAddVertex_XYZ_ST, con(%p), x(%f), y(%f), z(%f), s(%f), t(%f)", con, x, y, z, s, t);
+    rsTriangleMeshAddVertex(v);
+}
+
+static void
 nTriangleMeshAddTriangle(JNIEnv *_env, jobject _this, jint i1, jint i2, jint i3)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -567,8 +589,6 @@ nScriptCSetScript(JNIEnv *_env, jobject _this, jbyteArray scriptRef,
     jint remaining;
     jbyte* script_base = 0;
     jbyte* script_ptr;
-    ACCscript* script = 0;
-    void* scriptEntry = 0;
     if (!scriptRef) {
         _exception = 1;
         //_env->ThrowNew(IAEClass, "script == null");
@@ -594,22 +614,9 @@ nScriptCSetScript(JNIEnv *_env, jobject _this, jbyteArray scriptRef,
         _env->GetPrimitiveArrayCritical(scriptRef, (jboolean *)0);
     script_ptr = script_base + offset;
 
-    {
-        script = accCreateScript();
-        const char* scriptSource[] = {(const char*) script_ptr};
-        int scriptLength[] = {length} ;
-        accScriptSource(script, 1, scriptSource, scriptLength);
-        accCompileScript(script);
-        accGetScriptLabel(script, "main", (ACCvoid**) &scriptEntry);
-    }
-    if (scriptEntry) {
-        rsScriptCSetScript((void*) script, (void *)scriptEntry);
-        script = 0;
-    }
+    rsScriptCSetText((const char *)script_ptr, length);
+
 exit:
-    if (script) {
-        accDeleteScript(script);
-    }
     if (script_base) {
         _env->ReleasePrimitiveArrayCritical(scriptRef, script_base,
                 _exception ? JNI_ABORT: 0);
@@ -679,7 +686,16 @@ nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreCreate, con(%p)", con);
+
     return (jint)rsProgramFragmentStoreCreate();
+}
+
+static void
+nProgramFragmentStoreDestroy(JNIEnv *_env, jobject _this, jint pgm)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramFragmentStoreDestroy, con(%p), pgm(%i)", con, pgm);
+    rsProgramFragmentStoreDestroy((RsProgramFragmentStore)pgm);
 }
 
 // ---------------------------------------------------------------------------
@@ -740,6 +756,90 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
     return (jint)rsProgramFragmentCreate();
 }
 
+static void
+nProgramFragmentDestroy(JNIEnv *_env, jobject _this, jint pgm)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramFragmentDestroy, con(%p), pgm(%i)", con, pgm);
+    rsProgramFragmentDestroy((RsProgramFragment)pgm);
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+nProgramVertexBegin(JNIEnv *_env, jobject _this, jint in, jint out)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
+    rsProgramVertexBegin((RsElement)in, (RsElement)out);
+}
+
+static void
+nProgramVertexBindAllocation(JNIEnv *_env, jobject _this, jint vpv, jint slot, jint a)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexBindAllocation, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsAllocation)a);
+    rsProgramVertexBindAllocation((RsProgramFragment)vpv, slot, (RsAllocation)a);
+}
+
+static void
+nProgramVertexSetType(JNIEnv *_env, jobject _this, jint slot, jint t)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetType, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsType)t);
+    rsProgramVertexSetType(slot, (RsType)t);
+}
+
+static void
+nProgramVertexSetCameraMode(JNIEnv *_env, jobject _this, jboolean isOrtho)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetCameraMode, con(%p), isOrtho(%i)", con, isOrtho);
+    rsProgramVertexSetCameraMode(isOrtho);
+}
+
+static void
+nProgramVertexSetTextureMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetTextureMatrixEnable, con(%p), enable(%i)", con, enable);
+    rsProgramVertexSetTextureMatrixEnable(enable);
+}
+
+static void
+nProgramVertexSetModelMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetModelMatrixEnable, con(%p), enable(%i)", con, enable);
+    rsProgramVertexSetModelMatrixEnable(enable);
+}
+
+static void
+nProgramVertexSetProjectionMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexSetProjectionMatrixEnable, con(%p), enable(%i)", con, enable);
+    rsProgramVertexSetProjectionMatrixEnable(enable);
+}
+
+static jint
+nProgramVertexCreate(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexCreate, con(%p)", con);
+    return (jint)rsProgramVertexCreate();
+}
+
+static void
+nProgramVertexDestroy(JNIEnv *_env, jobject _this, jint pgm)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramFragmentDestroy, con(%p), pgm(%i)", con, pgm);
+    rsProgramFragmentDestroy((RsProgramFragment)pgm);
+}
+
+
+
 
 // ---------------------------------------------------------------------------
 
@@ -765,6 +865,14 @@ nContextBindProgramFragment(JNIEnv *_env, jobject _this, jint pf)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindProgramFragment, con(%p), pf(%p)", con, (RsProgramFragment)pf);
     rsContextBindProgramFragment((RsProgramFragment)pf);
+}
+
+static void
+nContextBindProgramVertex(JNIEnv *_env, jobject _this, jint pf)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextBindProgramVertex, con(%p), pf(%p)", con, (RsProgramVertex)pf);
+    rsContextBindProgramVertex((RsProgramVertex)pf);
 }
 
 // ---------------------------------------------------------------------------
@@ -805,7 +913,7 @@ nSamplerCreate(JNIEnv *_env, jobject _this)
 // ---------------------------------------------------------------------------
 
 
-static const char *classPathName = "com/android/fountain/RenderScript";
+static const char *classPathName = "android/renderscript/RenderScript";
 
 static JNINativeMethod methods[] = {
 {"_nInit",                         "()V",                                  (void*)_nInit },
@@ -813,6 +921,7 @@ static JNINativeMethod methods[] = {
 {"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
 {"nContextCreate",                 "(ILandroid/view/Surface;I)I",          (void*)nContextCreate },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
+{"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
 
 {"nElementBegin",                  "()V",                                  (void*)nElementBegin },
 {"nElementAddPredefined",          "(I)V",                                 (void*)nElementAddPredefined },
@@ -845,6 +954,7 @@ static JNINativeMethod methods[] = {
 {"nTriangleMeshAddVertex_XYZ",     "(FFF)V",                               (void*)nTriangleMeshAddVertex_XYZ },
 {"nTriangleMeshAddVertex_XY_ST",   "(FFFF)V",                              (void*)nTriangleMeshAddVertex_XY_ST },
 {"nTriangleMeshAddVertex_XYZ_ST",  "(FFFFF)V",                             (void*)nTriangleMeshAddVertex_XYZ_ST },
+{"nTriangleMeshAddVertex_XYZ_ST_NORM",  "(FFFFFFFF)V",                     (void*)nTriangleMeshAddVertex_XYZ_ST_NORM },
 {"nTriangleMeshAddTriangle",       "(III)V",                               (void*)nTriangleMeshAddTriangle },
 {"nTriangleMeshCreate",            "()I",                                  (void*)nTriangleMeshCreate },
 
@@ -875,6 +985,7 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentStoreBlendFunc", "(II)V",                                (void*)nProgramFragmentStoreBlendFunc },
 {"nProgramFragmentStoreDither",    "(Z)V",                                 (void*)nProgramFragmentStoreDither },
 {"nProgramFragmentStoreCreate",    "()I",                                  (void*)nProgramFragmentStoreCreate },
+{"nProgramFragmentStoreDestroy",   "(I)V",                                 (void*)nProgramFragmentStoreDestroy },
 
 {"nProgramFragmentBegin",          "(II)V",                                (void*)nProgramFragmentBegin },
 {"nProgramFragmentBindTexture",    "(III)V",                               (void*)nProgramFragmentBindTexture },
@@ -883,10 +994,22 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentSetEnvMode",     "(II)V",                                (void*)nProgramFragmentSetEnvMode },
 {"nProgramFragmentSetTexEnable",   "(IZ)V",                                (void*)nProgramFragmentSetTexEnable },
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
+{"nProgramFragmentDestroy",        "(I)V",                                 (void*)nProgramFragmentDestroy },
+
+{"nProgramVertexDestroy",          "(I)V",                                 (void*)nProgramVertexDestroy },
+{"nProgramVertexBindAllocation",   "(III)V",                               (void*)nProgramVertexBindAllocation },
+{"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
+{"nProgramVertexSetType",          "(II)V",                                (void*)nProgramVertexSetType },
+{"nProgramVertexSetCameraMode",    "(Z)V",                                 (void*)nProgramVertexSetCameraMode },
+{"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
+{"nProgramVertexSetModelMatrixEnable",  "(Z)V",                            (void*)nProgramVertexSetModelMatrixEnable },
+{"nProgramVertexSetProjectionMatrixEnable",  "(Z)V",                       (void*)nProgramVertexSetProjectionMatrixEnable },
+{"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
 
 {"nContextBindRootScript",         "(I)V",                                 (void*)nContextBindRootScript },
 {"nContextBindProgramFragmentStore","(I)V",                                (void*)nContextBindProgramFragmentStore },
 {"nContextBindProgramFragment",    "(I)V",                                 (void*)nContextBindProgramFragment },
+{"nContextBindProgramVertex",      "(I)V",                                 (void*)nContextBindProgramVertex },
 
 {"nSamplerDestroy",                "(I)V",                                 (void*)nSamplerDestroy },
 {"nSamplerBegin",                  "()V",                                  (void*)nSamplerBegin },

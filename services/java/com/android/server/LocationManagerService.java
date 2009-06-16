@@ -65,15 +65,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Config;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
-import android.util.SparseIntArray;
 
 import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.LocationProviderProxy;
 import com.android.internal.location.MockProvider;
-import com.android.server.am.BatteryStatsService;
 
 /**
  * The service class that manages LocationProviders and issues location
@@ -772,8 +769,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (!record.mReceiver.callProviderEnabledLocked(provider, enabled)) {
                     if (deadReceivers == null) {
                         deadReceivers = new ArrayList<Receiver>();
-                        deadReceivers.add(record.mReceiver);
                     }
+                    deadReceivers.add(record.mReceiver);
                 }
                 listeners++;
             }

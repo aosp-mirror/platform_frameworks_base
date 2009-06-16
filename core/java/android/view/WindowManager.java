@@ -818,6 +818,9 @@ public interface WindowManager extends ViewManager {
         public static final int SCREEN_ORIENTATION_CHANGED = 1<<10;
         public static final int SCREEN_BRIGHTNESS_CHANGED = 1<<11;
     
+        // internal buffer to backup/restore parameters under compatibility mode.
+        private int[] mCompatibilityParamsBackup = null;
+        
         public final int copyFrom(LayoutParams o) {
             int changes = 0;
     
@@ -975,37 +978,47 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Scale the layout params' coordinates and size.
-         * Returns the original info as a backup so that the caller can
-         * restore the layout params;
          */
-        void scale(float scale, int[] backup) {
-            if (scale != 1.0f) {
-                backup[0] = x;
-                backup[1] = y;
-                x *= scale;
-                y *= scale;
-                if (width > 0) {
-                    backup[2] = width;
-                    width *= scale;
-                }
-                if (height > 0) {
-                    backup[3] = height;
-                    height *= scale;
-                }
+        void scale(float scale) {
+            x *= scale;
+            y *= scale;
+            if (width > 0) {
+                width *= scale;
+            }
+            if (height > 0) {
+                height *= scale;
             }
         }
 
         /**
-         * Restore the layout params' coordinates and size.
+         * Backup the layout parameters used in compatibility mode.
+         * @see LayoutParams#restore()
          */
-        void restore(int[] backup) {
-            x = backup[0];
-            y = backup[1];
-            if (width > 0) {
-                width = backup[2];
+        void backup() {
+            int[] backup = mCompatibilityParamsBackup;
+            if (backup == null) {
+                // we backup 5 elements, x, y, width, height and gravity.
+                backup = mCompatibilityParamsBackup = new int[5];
             }
-            if (height > 0) {
+            backup[0] = x;
+            backup[1] = y;
+            backup[2] = width;
+            backup[3] = height;
+            backup[4] = gravity;
+        }
+
+        /**
+         * Restore the layout params' coordinates, size and gravity
+         * @see LayoutParams#backup()
+         */
+        void restore() {
+            int[] backup = mCompatibilityParamsBackup;
+            if (backup != null) {
+                x = backup[0];
+                y = backup[1];
+                width = backup[2];
                 height = backup[3];
+                gravity = backup[4];
             }
         }
 

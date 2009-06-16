@@ -19,11 +19,15 @@
 
 #include "rsAllocation.h"
 
+
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
 
-    
+class ProgramVertex;
+class ProgramFragment;
+class ProgramRaster;
+class ProgramFragmentStore;
 
 class Script : public ObjectBase
 {
@@ -33,13 +37,20 @@ public:
     virtual ~Script();
 
 
-    bool mIsRoot;
-    bool mIsOrtho;
+    struct Enviroment_t {
+        bool mIsRoot;
+        bool mIsOrtho;
+        float mClearColor[4];
+        float mClearDepth;
+        uint32_t mClearStencil;
 
-    float mClearColor[4];
-    float mClearDepth;
-    uint32_t mClearStencil;
+        ObjectBaseRef<ProgramVertex> mVertex;
+        ObjectBaseRef<ProgramFragment> mFragment;
+        //ObjectBaseRef<ProgramRaster> mRaster;
+        ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
 
+    };
+    Enviroment_t mEnviroment;
 
     const Type * mConstantBufferTypes;
     uint32_t mCounstantBufferCount;

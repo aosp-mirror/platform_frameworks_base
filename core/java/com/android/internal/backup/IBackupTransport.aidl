@@ -16,7 +16,8 @@
 
 package com.android.internal.backup;
 
-import android.os.Bundle;
+import android.backup.RestoreSet;
+import android.content.pm.PackageInfo;
 import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
@@ -26,7 +27,7 @@ interface IBackupTransport {
     1. set up the connection to the destination
         - set up encryption
         - for Google cloud, log in using the user's gaia credential or whatever
-        - for sd, spin off the backup transport and establish communication with it
+        - for adb, just set up the all-in-one destination file
     2. send each app's backup transaction
         - parse the data file for key/value pointers etc
         - send key/blobsize set to the Google cloud, get back quota ok/rejected response
@@ -37,8 +38,18 @@ interface IBackupTransport {
         - sd target streams raw data into encryption envelope then to sd?
     3. shut down connection to destination
         - cloud: tear down connection etc
-        - sd: close the file and shut down the writer proxy
+        - adb: close the file
 */
+    /**
+     * Verify that this is a suitable time for a backup pass.  This should return zero
+     * if a backup is reasonable right now, false otherwise.  This method will be called
+     * outside of the {@link #startSession}/{@link #endSession} pair.
+     *
+     * <p>If this is not a suitable time for a backup, the transport should suggest a
+     * backoff delay, in milliseconds, after which the Backup Manager should try again.
+     */
+    long requestBackupTime();
+
     /**
      * Establish a connection to the back-end data repository, if necessary.  If the transport
      * needs to initialize state that is not tied to individual applications' backup operations,
@@ -51,13 +62,45 @@ interface IBackupTransport {
     /**
      * Send one application's data to the backup destination.
      *
-     * @param packageName The identity of the application whose data is being backed up.
+     * @param packageInfo The identity of the application whose data is being backed up.
+     *   This specifically includes the signature list for the package.
      * @param data The data stream that resulted from invoking the application's
-     *        BackupService.doBackup() method.  This may be a pipe rather than a
-     *        file on persistent media, so it may not be seekable.
+     *   BackupService.doBackup() method.  This may be a pipe rather than a file on
+     *   persistent media, so it may not be seekable.
      * @return Zero on success; a nonzero error code on failure.
      */
-    int performBackup(String packageName, in ParcelFileDescriptor data);
+    int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor data);
+
+    /**
+     * Get the set of backups currently available over this transport.
+     *
+     * @return Descriptions of the set of restore images available for this device.
+     **/
+    RestoreSet[] getAvailableRestoreSets();
+
+    /**
+     * Get the set of applications from a given restore image.
+     *
+     * @param token A backup token as returned by {@link #getAvailableRestoreSets}.
+     * @return An array of PackageInfo objects describing all of the applications
+     *   available for restore from this restore image.  This should include the list
+     *   of signatures for each package so that the Backup Manager can filter using that
+     *   information.
+     */
+    PackageInfo[] getAppSet(int token);
+
+    /**
+     * Retrieve one application's data from the backing store.
+     *
+     * @param token The backup record from which a restore is being requested.
+     * @param packageInfo The identity of the application whose data is being restored.
+     *   This must include the signature list for the package; it is up to the transport
+     *   to verify that the requested app's signatures match the saved backup record
+     *   because the transport cannot necessarily trust the client device.
+     * @param data An open, writable file into which the backup image should be stored.
+     * @return Zero on success; a nonzero error code on failure.
+     */
+    int getRestoreData(int token, in PackageInfo packageInfo, in ParcelFileDescriptor data);
 
     /**
      * Terminate the backup session, closing files, freeing memory, and cleaning up whatever

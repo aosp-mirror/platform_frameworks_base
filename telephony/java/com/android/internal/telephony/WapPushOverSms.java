@@ -36,7 +36,7 @@ public class WapPushOverSms {
     private SMSDispatcher mSmsDispatcher;
 
     /**
-     * Hold the wake lock for 5 seconds, which should be enough time for 
+     * Hold the wake lock for 5 seconds, which should be enough time for
      * any receiver(s) to grab its own wake lock.
      */
     private final int WAKE_LOCK_TIMEOUT = 5000;

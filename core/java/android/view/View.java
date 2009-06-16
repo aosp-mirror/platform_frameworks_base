@@ -75,17 +75,17 @@ import java.util.WeakHashMap;
  * This class represents the basic building block for user interface components. A View
  * occupies a rectangular area on the screen and is responsible for drawing and
  * event handling. View is the base class for <em>widgets</em>, which are
- * used to create interactive UI components (buttons, text fields, etc.). The 
+ * used to create interactive UI components (buttons, text fields, etc.). The
  * {@link android.view.ViewGroup} subclass is the base class for <em>layouts</em>, which
  * are invisible containers that hold other Views (or other ViewGroups) and define
  * their layout properties.
  * </p>
  *
  * <div class="special">
- * <p>For an introduction to using this class to develop your 
- * application's user interface, read the Developer Guide documentation on 
+ * <p>For an introduction to using this class to develop your
+ * application's user interface, read the Developer Guide documentation on
  * <strong><a href="{@docRoot}guide/topics/ui/index.html">User Interface</a></strong>. Special topics
- * include: 
+ * include:
  * <br/><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a>
  * <br/><a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>
  * <br/><a href="{@docRoot}guide/topics/ui/layout-objects.html">Common Layout Objects</a>
@@ -96,7 +96,7 @@ import java.util.WeakHashMap;
  * <br/><a href="{@docRoot}guide/topics/ui/how-android-draws.html">How Android Draws Views</a>.
  * </p>
  * </div>
- * 
+ *
  * <a name="Using"></a>
  * <h3>Using Views</h3>
  * <p>
@@ -422,7 +422,7 @@ import java.util.WeakHashMap;
  * </p>
  *
  * <p>
- * Note that the framework will not draw views that are not in the invalid region. 
+ * Note that the framework will not draw views that are not in the invalid region.
  * </p>
  *
  * <p>
@@ -1830,7 +1830,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         int viewFlagMasks = 0;
 
         boolean setScrollContainer = false;
-        
+
         int x = 0;
         int y = 0;
 
@@ -2464,7 +2464,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (!(parent instanceof View)) {
                 break;
             }
-            
+
             child = (View) parent;
             parent = child.getParent();
         }
@@ -2556,7 +2556,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * and previouslyFocusedRect provide insight into where the focus is coming from.
      * When overriding, be sure to call up through to the super class so that
      * the standard focus handling will occur.
-     * 
+     *
      * @param gainFocus True if the View has focus; false otherwise.
      * @param direction The direction focus has moved when requestFocus()
      *                  is called to give this view focus. Values are
@@ -2587,7 +2587,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 && mAttachInfo.mHasWindowFocus) {
             imm.focusIn(this);
         }
-        
+
         invalidate();
         if (mOnFocusChangeListener != null) {
             mOnFocusChangeListener.onFocusChange(this, gainFocus);
@@ -2676,7 +2676,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Subclasses of View overriding this method should always call super.onFocusLost().
      *
      * @see #onFocusChanged(boolean, int, android.graphics.Rect)
-     * @see #onWindowFocusChanged(boolean) 
+     * @see #onWindowFocusChanged(boolean)
      *
      * @hide pending API council approval
      */
@@ -3578,14 +3578,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void onStartTemporaryDetach() {
     }
-    
+
     /**
      * Called after {@link #onStartTemporaryDetach} when the container is done
      * changing the view.
      */
     public void onFinishTemporaryDetach() {
     }
-    
+
     /**
      * capture information of this view for later analysis: developement only
      * check dynamic switch to make sure we only dump view
@@ -3970,25 +3970,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * a call on that method would return a non-null InputConnection, and
      * they are really a first-class editor that the user would normally
      * start typing on when the go into a window containing your view.
-     * 
+     *
      * <p>The default implementation always returns false.  This does
      * <em>not</em> mean that its {@link #onCreateInputConnection(EditorInfo)}
      * will not be called or the user can not otherwise perform edits on your
      * view; it is just a hint to the system that this is not the primary
      * purpose of this view.
-     * 
+     *
      * @return Returns true if this view is a text editor, else false.
      */
     public boolean onCheckIsTextEditor() {
         return false;
     }
-    
+
     /**
      * Create a new InputConnection for an InputMethod to interact
      * with the view.  The default implementation returns null, since it doesn't
      * support input methods.  You can override this to implement such support.
      * This is only needed for views that take focus and text input.
-     * 
+     *
      * <p>When implementing this, you probably also want to implement
      * {@link #onCheckIsTextEditor()} to indicate you will return a
      * non-null InputConnection.
@@ -4012,7 +4012,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public boolean checkInputConnectionProxy(View view) {
         return false;
     }
-    
+
     /**
      * Show the context menu for this view. It is not safe to hold on to the
      * menu after returning from this method.
@@ -4743,7 +4743,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * whether an instance is opaque. Opaque Views are treated in a special way by
      * the View hierarchy, possibly allowing it to perform optimizations during
      * invalidate/draw passes.
-     * 
+     *
      * @return True if this View is guaranteed to be fully opaque, false otherwise.
      *
      * @hide Pending API council approval
@@ -5343,9 +5343,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             }
         }
     }
-    
+
     /**
-     * Override this if the vertical scrollbar needs to be hidden in a subclass, like when 
+     * Override this if the vertical scrollbar needs to be hidden in a subclass, like when
      * FastScroller is visible.
      * @return whether to temporarily hide the vertical scrollbar
      * @hide
@@ -5868,8 +5868,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 EventLog.writeEvent(60002, hashCode());
             }
 
-            final int width = mRight - mLeft;
-            final int height = mBottom - mTop;
+            int width = mRight - mLeft;
+            int height = mBottom - mTop;
+
+            final AttachInfo attachInfo = mAttachInfo;
+            if (attachInfo != null) {
+                final boolean scalingRequired = attachInfo.mScalingRequired;
+                if (scalingRequired) {
+                    width = (int) ((width * attachInfo.mApplicationScale) + 0.5f);
+                    height = (int) ((height * attachInfo.mApplicationScale) + 0.5f);
+                }
+            }
 
             final int drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
             final boolean opaque = drawingCacheBackgroundColor != 0 ||
@@ -5925,11 +5934,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             }
 
             Canvas canvas;
-            final AttachInfo attachInfo = mAttachInfo;
             if (attachInfo != null) {
                 canvas = attachInfo.mCanvas;
                 if (canvas == null) {
                     canvas = new Canvas();
+
+                    // NOTE: This should have to happen only once since compatibility
+                    //       mode should not change at runtime
+                    if (attachInfo.mScalingRequired) {
+                        final float scale = attachInfo.mApplicationScale;
+                        canvas.scale(scale, scale);
+                    }
                 }
                 canvas.setBitmap(bitmap);
                 // Temporarily clobber the cached Canvas in case one of our children
@@ -6031,7 +6046,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             // Restore the cached Canvas for our siblings
             attachInfo.mCanvas = canvas;
         }
-        
+
         return bitmap;
     }
 
@@ -6971,7 +6986,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mUserPaddingBottom = bottom;
 
         final int viewFlags = mViewFlags;
-        
+
         // Common case is there are no scroll bars.
         if ((viewFlags & (SCROLLBARS_VERTICAL|SCROLLBARS_HORIZONTAL)) != 0) {
             // TODO: Deal with RTL languages to adjust left padding instead of right.
@@ -6984,7 +6999,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         ? 0 : getHorizontalScrollbarHeight();
             }
         }
-        
+
         if (mPaddingLeft != left) {
             changed = true;
             mPaddingLeft = left;
@@ -7121,7 +7136,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 return v;
             }
         }
-        
+
         View parent = this;
 
         while (parent.mParent != null && parent.mParent instanceof View) {
@@ -7169,7 +7184,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             location[1] += view.mTop - view.mScrollY;
             viewParent = view.mParent;
         }
-        
+
         if (viewParent instanceof ViewRoot) {
             // *cough*
             final ViewRoot vr = (ViewRoot)viewParent;
@@ -7320,7 +7335,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return the Object stored in this view as a tag
      *
      * @see #setTag(int, Object)
-     * @see #getTag() 
+     * @see #getTag()
      */
     public Object getTag(int key) {
         SparseArray<Object> tags = null;
@@ -7376,7 +7391,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     + "resource id.");
         }
 
-        setTagInternal(this, key, tag);        
+        setTagInternal(this, key, tag);
     }
 
     private static void setTagInternal(View view, int key, Object tag) {
@@ -7411,7 +7426,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Method that subclasses should implement to check their consistency. The type of
      * consistency check is indicated by the bit field passed as a parameter.
-     * 
+     *
      * @param consistency The type of consistency. See ViewDebug for more information.
      *
      * @throws IllegalStateException if the view is in an inconsistent state.
@@ -7966,7 +7981,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * BZZZTT!!1!
-     * 
+     *
      * <p>Provide haptic feedback to the user for this view.
      *
      * <p>The framework will provide haptic feedback for some built in actions,
@@ -7985,7 +8000,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * BZZZTT!!1!
-     * 
+     *
      * <p>Like {@link #performHapticFeedback(int)}, with additional options.
      *
      * @param feedbackConstant One of the constants defined in
@@ -8448,9 +8463,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * The top view of the hierarchy.
          */
         View mRootView;
-        
+
         IBinder mPanelParentWindowToken;
         Surface mSurface;
+
+        /**
+         * Scale factor used by the compatibility mode
+         */
+        float mApplicationScale;
+
+        /**
+         * Indicates whether the application is in compatibility mode
+         */
+        boolean mScalingRequired;
 
         /**
          * Left position of this view's window
@@ -8639,18 +8664,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             // use use a height of 1, and then wack the matrix each time we
             // actually use it.
             shader = new LinearGradient(0, 0, 0, 1, 0xFF000000, 0, Shader.TileMode.CLAMP);
-            
+
             paint.setShader(shader);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
         }
-        
+
         public void setFadeColor(int color) {
             if (color != 0 && color != mLastColor) {
                 mLastColor = color;
                 color |= 0xFF000000;
-                
+
                 shader = new LinearGradient(0, 0, 0, 1, color, 0, Shader.TileMode.CLAMP);
-                
+
                 paint.setShader(shader);
                 // Restore the default transfer mode (src_over)
                 paint.setXfermode(null);

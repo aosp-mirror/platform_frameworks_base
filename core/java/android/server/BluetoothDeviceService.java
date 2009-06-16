@@ -30,7 +30,6 @@ import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
 import android.bluetooth.IBluetoothDevice;
-import android.bluetooth.IBluetoothDeviceCallback;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -38,13 +37,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemService;
 import android.provider.Settings;
 import android.util.Log;
+
+import com.android.internal.app.IBatteryStats;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -54,8 +54,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.android.internal.app.IBatteryStats;
 
 public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private static final String TAG = "BluetoothDeviceService";
@@ -80,10 +78,12 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private static final int MESSAGE_REGISTER_SDP_RECORDS = 1;
     private static final int MESSAGE_FINISH_DISABLE = 2;
 
+    private Map<String, String> mProperties;
+    private HashMap <String, Map<String, String>> mRemoteDeviceProperties;
+
     static {
         classInitNative();
     }
-    private native static void classInitNative();
 
     public BluetoothDeviceService(Context context) {
         mContext = context;
@@ -109,8 +109,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         mIsDiscovering = false;
         mEventLoop = new BluetoothEventLoop(mContext, this);
         registerForAirplaneMode();
+        mProperties = new HashMap<String, String>();
+        mRemoteDeviceProperties = new HashMap<String, Map<String,String>>();
     }
-    private native void initializeNativeDataNative();
 
     @Override
     protected void finalize() throws Throwable {
@@ -123,13 +124,11 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             super.finalize();
         }
     }
-    private native void cleanupNativeDataNative();
 
     public boolean isEnabled() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return mBluetoothState == BluetoothDevice.BLUETOOTH_STATE_ON;
     }
-    private native int isEnabledNative();
 
     public int getBluetoothState() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
@@ -150,8 +149,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      * @param saveSetting If true, disable BT in settings
      */
     public synchronized boolean disable(boolean saveSetting) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
 
         switch (mBluetoothState) {
         case BluetoothDevice.BLUETOOTH_STATE_OFF:
@@ -180,6 +178,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             return;
         }
         mEventLoop.stop();
+        tearDownNativeDataNative();
         disableNative();
 
         // mark in progress bondings as cancelled
@@ -188,25 +187,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                                     BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
         }
 
-        // Remove remoteServiceChannelCallbacks
-        HashMap<String, IBluetoothDeviceCallback> callbacksMap =
-            mEventLoop.getRemoteServiceChannelCallbacks();
-
-        for (Iterator<String> i = callbacksMap.keySet().iterator(); i.hasNext();) {
-            String address = i.next();
-            IBluetoothDeviceCallback callback = callbacksMap.get(address);
-            try {
-                callback.onGetRemoteServiceChannelResult(address, BluetoothError.ERROR_DISABLED);
-            } catch (RemoteException e) {}
-            i.remove();
-        }
-
         // update mode
         Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
         intent.putExtra(BluetoothIntent.SCAN_MODE, BluetoothDevice.SCAN_MODE_NONE);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         mIsDiscovering = false;
+        mProperties.clear();
 
         if (saveSetting) {
             persistBluetoothOnSetting(false);
@@ -270,7 +257,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         if (!disable(false)) {
             mRestart = false;
         }
-    }   
+    }
 
     private synchronized void setBluetoothState(int state) {
         if (state == mBluetoothState) {
@@ -343,6 +330,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
 
             if (res) {
+                if (!setupNativeDataNative()) {
+                    return;
+                }
                 if (mSaveSetting) {
                     persistBluetoothOnSetting(true);
                 }
@@ -369,7 +359,12 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
             if (res) {
                 // Update mode
-                mEventLoop.onModeChanged(getModeNative());
+                String[] propVal = {"Pairable", getProperty("Pairable")};
+                mEventLoop.onPropertyChanged(propVal);
+            }
+
+            if (mIsAirplaneSensitive && isAirplaneModeOn()) {
+                disable(false);
             }
 
         }
@@ -381,9 +376,6 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                 bluetoothOn ? 1 : 0);
         Binder.restoreCallingIdentity(origCallerIdentityToken);
     }
-
-    private native int enableNative();
-    private native int disableNative();
 
     /* package */ BondState getBondState() {
         return mBondState;
@@ -419,14 +411,19 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             if (mBluetoothState != BluetoothDevice.BLUETOOTH_STATE_TURNING_ON) {
                 return;
             }
-            String[] bonds = listBondingsNative();
+            String []bonds = null;
+            String val = getProperty("Devices");
+            if (val != null) {
+                bonds = val.split(",");
+            }
             if (bonds == null) {
                 return;
             }
             mState.clear();
             if (DBG) log("found " + bonds.length + " bonded devices");
-            for (String address : bonds) {
-                mState.put(address.toUpperCase(), BluetoothDevice.BOND_BONDED);
+            for (String device : bonds) {
+                mState.put(getAddressFromObjectPath(device).toUpperCase(),
+                        BluetoothDevice.BOND_BONDED);
             }
         }
 
@@ -524,7 +521,6 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         }
 
     }
-    private native String[] listBondingsNative();
 
     private static String toBondStateString(int bondState) {
         switch (bondState) {
@@ -539,17 +535,36 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         }
     }
 
-    public synchronized String getAddress() {
+    /*package*/synchronized void getAllProperties() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getAddressNative();
-    }
-    private native String getAddressNative();
+        mProperties.clear();
 
-    public synchronized String getName() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getNameNative();
+        String properties[] = (String [])getAdapterPropertiesNative();
+        // The String Array consists of key-value pairs.
+        if (properties == null) {
+            Log.e(TAG, "*Error*: GetAdapterProperties returned NULL");
+            return;
+        }
+        for (int i = 0; i < properties.length; i+=2) {
+            String value = null;
+            if (mProperties.containsKey(properties[i])) {
+                value = mProperties.get(properties[i]);
+                value = value + ',' + properties[i+1];
+            } else
+                value = properties[i+1];
+
+            mProperties.put(properties[i], value);
+        }
+
+        // Add adapter object path property.
+        String adapterPath = getAdapterPathNative();
+        if (adapterPath != null)
+            mProperties.put("ObjectPath", adapterPath + "/dev_");
     }
-    private native String getNameNative();
+
+    /* package */ synchronized void setProperty(String name, String value) {
+        mProperties.put(name, value);
+    }
 
     public synchronized boolean setName(String name) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
@@ -557,74 +572,27 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         if (name == null) {
             return false;
         }
-        // hcid handles persistance of the bluetooth name
-        return setNameNative(name);
+        return setPropertyString("Name", name);
     }
-    private native boolean setNameNative(String name);
 
-    /**
-     * Returns the user-friendly name of a remote device.  This value is
-     * retrned from our local cache, which is updated during device discovery.
-     * Do not expect to retrieve the updated remote name immediately after
-     * changing the name on the remote device.
-     *
-     * @param address Bluetooth address of remote device.
-     *
-     * @return The user-friendly name of the specified remote device.
-     */
-    public synchronized String getRemoteName(String address) {
+    //TODO(): setPropertyString, setPropertyInteger, setPropertyBoolean
+    // Either have a single property function with Object as the parameter
+    // or have a function for each property and then obfuscate in the JNI layer.
+    // The following looks dirty.
+    private boolean setPropertyString(String key, String value) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
-        }
-        return getRemoteNameNative(address);
+        return setAdapterPropertyStringNative(key, value);
     }
-    private native String getRemoteNameNative(String address);
 
-    /* pacakge */ native String getAdapterPathNative();
-
-    public synchronized boolean startDiscovery(boolean resolveNames) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
-        return startDiscoveryNative(resolveNames);
-    }
-    private native boolean startDiscoveryNative(boolean resolveNames);
-
-    public synchronized boolean cancelDiscovery() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
-        return cancelDiscoveryNative();
-    }
-    private native boolean cancelDiscoveryNative();
-
-    public synchronized boolean isDiscovering() {
+    private boolean setPropertyInteger(String key, int value) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mIsDiscovering;
+        return setAdapterPropertyIntegerNative(key, value);
     }
 
-    /* package */ void setIsDiscovering(boolean isDiscovering) {
-        mIsDiscovering = isDiscovering;
-    }
-
-    public synchronized boolean startPeriodicDiscovery() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
-        return startPeriodicDiscoveryNative();
-    }
-    private native boolean startPeriodicDiscoveryNative();
-
-    public synchronized boolean stopPeriodicDiscovery() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
-        return stopPeriodicDiscoveryNative();
-    }
-    private native boolean stopPeriodicDiscoveryNative();
-
-    public synchronized boolean isPeriodicDiscovery() {
+    private boolean setPropertyBoolean(String key, boolean value) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return isPeriodicDiscoveryNative();
+        return setAdapterPropertyBooleanNative(key, value ? 1 : 0);
     }
-    private native boolean isPeriodicDiscoveryNative();
 
     /**
      * Set the discoverability window for the device.  A timeout of zero
@@ -638,9 +606,67 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     public synchronized boolean setDiscoverableTimeout(int timeout) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        return setDiscoverableTimeoutNative(timeout);
+        return setPropertyInteger("DiscoverableTimeout", timeout);
     }
-    private native boolean setDiscoverableTimeoutNative(int timeout_s);
+
+    public synchronized boolean setScanMode(int mode) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        boolean pairable = false, discoverable = false;
+        String modeString = scanModeToBluezString(mode);
+        if (modeString.equals("off")) {
+            pairable = false;
+            discoverable = false;
+        } else if (modeString.equals("pariable")) {
+            pairable = true;
+            discoverable = false;
+        } else if (modeString.equals("discoverable")) {
+            pairable = true;
+            discoverable = true;
+        }
+        setPropertyBoolean("Pairable", pairable);
+        setPropertyBoolean("Discoverable", discoverable);
+
+        return true;
+    }
+
+    /*package*/ synchronized String getProperty (String name) {
+        if (!mProperties.isEmpty())
+            return mProperties.get(name);
+        getAllProperties();
+        return mProperties.get(name);
+    }
+
+    public synchronized String getAddress() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return getProperty("Address");
+    }
+
+    public synchronized String getName() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return getProperty("Name");
+    }
+
+    /**
+     * Returns the user-friendly name of a remote device.  This value is
+     * returned from our local cache, which is updated when onPropertyChange
+     * event is received.
+     * Do not expect to retrieve the updated remote name immediately after
+     * changing the name on the remote device.
+     *
+     * @param address Bluetooth address of remote device.
+     *
+     * @return The user-friendly name of the specified remote device.
+     */
+    public synchronized String getRemoteName(String address) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+            return null;
+        }
+        Map <String, String> properties = mRemoteDeviceProperties.get(address);
+        if (properties != null) return properties.get("Name");
+        return null;
+    }
 
     /**
      * Get the discoverability window for the device.  A timeout of zero
@@ -652,45 +678,46 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      */
     public synchronized int getDiscoverableTimeout() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getDiscoverableTimeoutNative();
+        String timeout = getProperty("DiscoverableTimeout");
+        if (timeout != null)
+           return Integer.valueOf(timeout);
+        else
+            return -1;
     }
-    private native int getDiscoverableTimeoutNative();
-
-    public synchronized boolean isAclConnected(String address) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return false;
-        }
-        return isConnectedNative(address);
-    }
-    private native boolean isConnectedNative(String address);
 
     public synchronized int getScanMode() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return bluezStringToScanMode(getModeNative());
-    }
-    private native String getModeNative();
+        if (!isEnabled())
+            return BluetoothError.ERROR;
 
-    public synchronized boolean setScanMode(int mode) {
+        boolean pairable = getProperty("Pairable").equals("true");
+        boolean discoverable = getProperty("Discoverable").equals("true");
+        return bluezStringToScanMode (pairable, discoverable);
+    }
+
+    public synchronized boolean startDiscovery() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        String bluezMode = scanModeToBluezString(mode);
-        if (bluezMode != null) {
-            return setModeNative(bluezMode);
-        }
-        return false;
-    }
-    private native boolean setModeNative(String mode);
-
-    public synchronized boolean disconnectRemoteDeviceAcl(String address) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!isEnabled()) {
             return false;
         }
-        return disconnectRemoteDeviceNative(address);
+        return startDiscoveryNative();
     }
-    private native boolean disconnectRemoteDeviceNative(String address);
+
+    public synchronized boolean cancelDiscovery() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        return stopDiscoveryNative();
+    }
+
+    public synchronized boolean isDiscovering() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mIsDiscovering;
+    }
+
+    /* package */ void setIsDiscovering(boolean isDiscovering) {
+        mIsDiscovering = isDiscovering;
+    }
 
     public synchronized boolean createBond(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
@@ -715,14 +742,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             return false;
         }
 
-        if (!createBondingNative(address, 60000 /* 1 minute */)) {
+        if (!createPairedDeviceNative(address, 60000 /* 1 minute */)) {
             return false;
         }
 
         mBondState.setBondState(address, BluetoothDevice.BOND_BONDING);
         return true;
     }
-    private native boolean createBondingNative(String address, int timeout_ms);
 
     public synchronized boolean cancelBondProcess(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
@@ -737,10 +763,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
         mBondState.setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
                                 BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
-        cancelBondingProcessNative(address);
+        cancelDeviceCreationNative(address);
         return true;
     }
-    private native boolean cancelBondingProcessNative(String address);
 
     public synchronized boolean removeBond(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
@@ -748,9 +773,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
-        return removeBondingNative(address);
+        return removeDeviceNative(getObjectPathFromAddress(address));
     }
-    private native boolean removeBondingNative(String address);
 
     public synchronized String[] listBonds() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
@@ -765,198 +789,57 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         return mBondState.getBondState(address.toUpperCase());
     }
 
-    public synchronized String[] listAclConnections() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return listConnectionsNative();
-    }
-    private native String[] listConnectionsNative();
-
-    /**
-     * This method lists all remote devices that this adapter is aware of.
-     * This is a list not only of all most-recently discovered devices, but of
-     * all devices discovered by this adapter up to some point in the past.
-     * Note that many of these devices may not be in the neighborhood anymore,
-     * and attempting to connect to them will result in an error.
-     *
-     * @return An array of strings representing the Bluetooth addresses of all
-     *         remote devices that this adapter is aware of.
-     */
-    public synchronized String[] listRemoteDevices() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return listRemoteDevicesNative();
-    }
-    private native String[] listRemoteDevicesNative();
-
-    /**
-     * Returns the version of the Bluetooth chip. This version is compiled from
-     * the LMP version. In case of EDR the features attribute must be checked.
-     * Example: "Bluetooth 2.0 + EDR".
-     *
-     * @return a String representation of the this Adapter's underlying
-     *         Bluetooth-chip version.
-     */
-    public synchronized String getVersion() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getVersionNative();
-    }
-    private native String getVersionNative();
-
-    /**
-     * Returns the revision of the Bluetooth chip. This is a vendor-specific
-     * value and in most cases it represents the firmware version. This might
-     * derive from the HCI revision and LMP subversion values or via extra
-     * vendord specific commands.
-     * In case the revision of a chip is not available. This method should
-     * return the LMP subversion value as a string.
-     * Example: "HCI 19.2"
-     *
-     * @return The HCI revision of this adapter.
-     */
-    public synchronized String getRevision() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getRevisionNative();
-    }
-    private native String getRevisionNative();
-
-    /**
-     * Returns the manufacturer of the Bluetooth chip. If the company id is not
-     * known the sting "Company ID %d" where %d should be replaced with the
-     * numeric value from the manufacturer field.
-     * Example: "Cambridge Silicon Radio"
-     *
-     * @return Manufacturer name.
-     */
-    public synchronized String getManufacturer() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getManufacturerNative();
-    }
-    private native String getManufacturerNative();
-
-    /**
-     * Returns the company name from the OUI database of the Bluetooth device
-     * address. This function will need a valid and up-to-date oui.txt from
-     * the IEEE. This value will be different from the manufacturer string in
-     * the most cases.
-     * If the oui.txt file is not present or the OUI part of the Bluetooth
-     * address is not listed, it should return the string "OUI %s" where %s is
-     * the actual OUI.
-     *
-     * Example: "Apple Computer"
-     *
-     * @return company name
-     */
-    public synchronized String getCompany() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getCompanyNative();
-    }
-    private native String getCompanyNative();
-
-    /**
-     * Like getVersion(), but for a remote device.
-     *
-     * @param address The Bluetooth address of the remote device.
-     *
-     * @return remote-device Bluetooth version
-     *
-     * @see #getVersion
-     */
-    public synchronized String getRemoteVersion(String address) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
+    /*package*/ synchronized String getRemoteDeviceProperty(String address, String property) {
+        Map<String, String> properties = mRemoteDeviceProperties.get(address);
+        if (properties != null) {
+            return properties.get(property);
+        } else {
+            // Query for remote device properties, again.
+            // We will need to reload the cache when we switch Bluetooth on / off
+            // or if we crash.
+            String objectPath = getObjectPathFromAddress(address);
+            String propValues[] = (String [])getDevicePropertiesNative(objectPath);
+            if (propValues != null) {
+                addRemoteDeviceProperties(address, propValues);
+                return getRemoteDeviceProperty(address, property);
+            }
         }
-        return getRemoteVersionNative(address);
+        Log.e(TAG, "getRemoteDeviceProperty: " + property + "not present:" + address);
+        return null;
     }
-    private native String getRemoteVersionNative(String address);
 
-    /**
-     * Like getRevision(), but for a remote device.
-     *
-     * @param address The Bluetooth address of the remote device.
-     *
-     * @return remote-device HCI revision
-     *
-     * @see #getRevision
-     */
-    public synchronized String getRemoteRevision(String address) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
+    /* package */ synchronized void addRemoteDeviceProperties(String address, String[] properties) {
+        Map<String, String> propertyValues = new HashMap<String, String>();
+        for (int i = 0; i < properties.length; i+=2) {
+            String value = null;
+            if (propertyValues.containsKey(properties[i])) {
+                value = propertyValues.get(properties[i]);
+                value = value + ',' + properties[i+1];
+            } else {
+                value = properties[i+1];
+            }
+            propertyValues.put(properties[i], value);
         }
-        return getRemoteRevisionNative(address);
+        mRemoteDeviceProperties.put(address, propertyValues);
     }
-    private native String getRemoteRevisionNative(String address);
 
-    /**
-     * Like getManufacturer(), but for a remote device.
-     *
-     * @param address The Bluetooth address of the remote device.
-     *
-     * @return remote-device Bluetooth chip manufacturer
-     *
-     * @see #getManufacturer
-     */
-    public synchronized String getRemoteManufacturer(String address) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
+    /* package */ void removeRemoteDeviceProperties(String address) {
+        mRemoteDeviceProperties.remove(address);
+    }
+
+    /* package */ synchronized void setRemoteDeviceProperty(String address, String name,
+                                                              String value) {
+        Map <String, String> propVal = mRemoteDeviceProperties.get(address);
+        if (propVal != null) {
+            propVal.put(name, value);
+            mRemoteDeviceProperties.put(address, propVal);
+        } else {
+            Log.e(TAG, "setRemoteDeviceProperty for a device not in cache:" + address);
         }
-        return getRemoteManufacturerNative(address);
     }
-    private native String getRemoteManufacturerNative(String address);
 
     /**
-     * Like getCompany(), but for a remote device.
-     *
-     * @param address The Bluetooth address of the remote device.
-     *
-     * @return remote-device company
-     *
-     * @see #getCompany
-     */
-    public synchronized String getRemoteCompany(String address) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
-        }
-        return getRemoteCompanyNative(address);
-    }
-    private native String getRemoteCompanyNative(String address);
-
-    /**
-     * Returns the date and time when the specified remote device has been seen
-     * by a discover procedure.
-     * Example: "2006-02-08 12:00:00 GMT"
-     *
-     * @return a String with the timestamp.
-     */
-    public synchronized String lastSeen(String address) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
-        }
-        return lastSeenNative(address);
-    }
-    private native String lastSeenNative(String address);
-
-    /**
-     * Returns the date and time when the specified remote device has last been
-     * connected to
-     * Example: "2006-02-08 12:00:00 GMT"
-     *
-     * @return a String with the timestamp.
-     */
-    public synchronized String lastUsed(String address) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
-        }
-        return lastUsedNative(address);
-    }
-    private native String lastUsedNative(String address);
-
-    /**
-     * Gets the remote major, minor, and service classes encoded as a 32-bit
+     * Gets the remote major, minor classes encoded as a 32-bit
      * integer.
      *
      * Note: this value is retrieved from cache, because we get it during
@@ -964,120 +847,56 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
      *
      * @return 32-bit integer encoding the remote major, minor, and service
      *         classes.
-     *
-     * @see #getRemoteMajorClass
-     * @see #getRemoteMinorClass
-     * @see #getRemoteServiceClasses
      */
     public synchronized int getRemoteClass(String address) {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
             return BluetoothClass.ERROR;
         }
-        return getRemoteClassNative(address);
+        String val = getRemoteDeviceProperty(address, "Class");
+        if (val == null)
+            return BluetoothClass.ERROR;
+        else {
+            return Integer.valueOf(val);
+        }
     }
-    private native int getRemoteClassNative(String address);
+
 
     /**
      * Gets the remote features encoded as bit mask.
      *
      * Note: This method may be obsoleted soon.
      *
-     * @return byte array of features.
+     * @return String array of 128bit UUIDs
      */
-    public synchronized byte[] getRemoteFeatures(String address) {
+    public synchronized String[] getRemoteUuids(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
-        return getRemoteFeaturesNative(address);
+        String value = getRemoteDeviceProperty(address, "UUIDs");
+        String[] uuids = null;
+        // The UUIDs are stored as a "," separated string.
+        if (value != null)
+             uuids = value.split(",");
+        return uuids;
     }
-    private native byte[] getRemoteFeaturesNative(String address);
 
     /**
-     * This method and {@link #getRemoteServiceRecord} query the SDP service
-     * on a remote device.  They do not interpret the data, but simply return
-     * it raw to the user.  To read more about SDP service handles and records,
-     * consult the Bluetooth core documentation (www.bluetooth.com).
+     * Gets the rfcomm channel associated with the UUID.
      *
-     * @param address Bluetooth address of remote device.
-     * @param match a String match to narrow down the service-handle search.
-     *        The only supported value currently is "hsp" for the headset
-     *        profile.  To retrieve all service handles, simply pass an empty
-     *        match string.
+     * @param address Address of the remote device
+     * @param uuid UUID of the service attribute
      *
-     * @return all service handles corresponding to the string match.
-     *
-     * @see #getRemoteServiceRecord
+     * @return rfcomm channel associated with the service attribute
      */
-    public synchronized int[] getRemoteServiceHandles(String address, String match) {
+    public int getRemoteServiceChannel(String address, String uuid) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
+            return BluetoothError.ERROR_IPC;
         }
-        if (match == null) {
-            match = "";
-        }
-        return getRemoteServiceHandlesNative(address, match);
+        return getDeviceServiceChannelNative(getObjectPathFromAddress(address), uuid, 0x0004);
     }
-    private native int[] getRemoteServiceHandlesNative(String address, String match);
-
-    /**
-     * This method retrieves the service records corresponding to a given
-     * service handle (method {@link #getRemoteServiceHandles} retrieves the
-     * service handles.)
-     *
-     * This method and {@link #getRemoteServiceHandles} do not interpret their
-     * data, but simply return it raw to the user.  To read more about SDP
-     * service handles and records, consult the Bluetooth core documentation
-     * (www.bluetooth.com).
-     *
-     * @param address Bluetooth address of remote device.
-     * @param handle Service handle returned by {@link #getRemoteServiceHandles}
-     *
-     * @return a byte array of all service records corresponding to the
-     *         specified service handle.
-     *
-     * @see #getRemoteServiceHandles
-     */
-    public synchronized byte[] getRemoteServiceRecord(String address, int handle) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return null;
-        }
-        return getRemoteServiceRecordNative(address, handle);
-    }
-    private native byte[] getRemoteServiceRecordNative(String address, int handle);
-
-    private static final int MAX_OUTSTANDING_ASYNC = 32;
-
-    // AIDL does not yet support short's
-    public synchronized boolean getRemoteServiceChannel(String address, int uuid16,
-            IBluetoothDeviceCallback callback) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return false;
-        }
-        HashMap<String, IBluetoothDeviceCallback> callbacks =
-            mEventLoop.getRemoteServiceChannelCallbacks();
-        if (callbacks.containsKey(address)) {
-            Log.w(TAG, "SDP request already in progress for " + address);
-            return false;
-        }
-        // Protect from malicious clients - only allow 32 bonding requests per minute.
-        if (callbacks.size() > MAX_OUTSTANDING_ASYNC) {
-            Log.w(TAG, "Too many outstanding SDP requests, dropping request for " + address);
-            return false;
-        }
-        callbacks.put(address, callback);
-
-        if (!getRemoteServiceChannelNative(address, (short)uuid16)) {
-            callbacks.remove(address);
-            return false;
-        }
-        return true;
-    }
-    private native boolean getRemoteServiceChannelNative(String address, short uuid16);
 
     public synchronized boolean setPin(String address, byte[] pin) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
@@ -1104,7 +923,6 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         }
         return setPinNative(address, pinString, data.intValue());
     }
-    private native boolean setPinNative(String address, String pin, int nativeData);
 
     public synchronized boolean cancelPin(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
@@ -1122,7 +940,6 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         }
         return cancelPinNative(address, data.intValue());
     }
-    private native boolean cancelPinNative(String address, int natveiData);
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -1186,20 +1003,22 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
         BluetoothHeadset headset = new BluetoothHeadset(mContext, null);
 
-        String[] addresses = listRemoteDevices();
-
         pw.println("\n--Known devices--");
-        for (String address : addresses) {
+        for (String address : mRemoteDeviceProperties.keySet()) {
             pw.printf("%s %10s (%d) %s\n", address,
                        toBondStateString(mBondState.getBondState(address)),
                        mBondState.getAttempt(address),
                        getRemoteName(address));
         }
 
-        addresses = listAclConnections();
+        String value = getProperty("Devices");
+        String []devicesObjectPath = null;
+        if (value != null) {
+            devicesObjectPath = value.split(",");
+        }
         pw.println("\n--ACL connected devices--");
-        for (String address : addresses) {
-            pw.println(address);
+        for (String device : devicesObjectPath) {
+            pw.println(getAddressFromObjectPath(device));
         }
 
         // Rather not do this from here, but no-where else and I need this
@@ -1223,20 +1042,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         headset.close();
     }
 
-    /* package */ static int bluezStringToScanMode(String mode) {
-        if (mode == null) {
-            return BluetoothError.ERROR;
-        }
-        mode = mode.toLowerCase();
-        if (mode.equals("off")) {
-            return BluetoothDevice.SCAN_MODE_NONE;
-        } else if (mode.equals("connectable")) {
-            return BluetoothDevice.SCAN_MODE_CONNECTABLE;
-        } else if (mode.equals("discoverable")) {
+    /* package */ static int bluezStringToScanMode(boolean pairable, boolean discoverable) {
+        if (pairable && discoverable)
             return BluetoothDevice.SCAN_MODE_CONNECTABLE_DISCOVERABLE;
-        } else {
-            return BluetoothError.ERROR;
-        }
+        else if (pairable && !discoverable)
+            return BluetoothDevice.SCAN_MODE_CONNECTABLE;
+        else
+            return BluetoothDevice.SCAN_MODE_NONE;
     }
 
     /* package */ static String scanModeToBluezString(int mode) {
@@ -1251,7 +1063,67 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         return null;
     }
 
+    /*package*/ String getAddressFromObjectPath(String objectPath) {
+        String adapterObjectPath = getProperty("ObjectPath");
+        if (adapterObjectPath == null || objectPath == null) {
+            Log.e(TAG, "getAddressFromObjectPath: AdpaterObjectPath:" + adapterObjectPath +
+                    "  or deviceObjectPath:" + objectPath + " is null");
+            return null;
+        }
+        if (!objectPath.startsWith(adapterObjectPath)) {
+            Log.e(TAG, "getAddressFromObjectPath: AdpaterObjectPath:" + adapterObjectPath +
+                    "  is not a prefix of deviceObjectPath:" + objectPath +
+                    "bluetoothd crashed ?");
+            return null;
+        }
+        String address = objectPath.substring(adapterObjectPath.length());
+        if (address != null) return address.replace('_', ':');
+
+        Log.e(TAG, "getAddressFromObjectPath: Address being returned is null");
+        return null;
+    }
+
+    /*package*/ String getObjectPathFromAddress(String address) {
+        String path = getProperty("ObjectPath");
+        if (path == null) {
+            Log.e(TAG, "Error: Object Path is null");
+            return null;
+        }
+        path = path + address.replace(":", "_");
+        return path;
+    }
+
     private static void log(String msg) {
         Log.d(TAG, msg);
     }
+
+    private native static void classInitNative();
+    private native void initializeNativeDataNative();
+    private native boolean setupNativeDataNative();
+    private native boolean tearDownNativeDataNative();
+    private native void cleanupNativeDataNative();
+    private native String getAdapterPathNative();
+
+    private native int isEnabledNative();
+    private native int enableNative();
+    private native int disableNative();
+
+    private native Object[] getAdapterPropertiesNative();
+    private native Object[] getDevicePropertiesNative(String objectPath);
+    private native boolean setAdapterPropertyStringNative(String key, String value);
+    private native boolean setAdapterPropertyIntegerNative(String key, int value);
+    private native boolean setAdapterPropertyBooleanNative(String key, int value);
+
+    private native boolean startDiscoveryNative();
+    private native boolean stopDiscoveryNative();
+
+    private native boolean createPairedDeviceNative(String address, int timeout_ms);
+    private native boolean cancelDeviceCreationNative(String address);
+    private native boolean removeDeviceNative(String objectPath);
+    private native int getDeviceServiceChannelNative(String objectPath, String uuid,
+            int attributeId);
+
+    private native boolean cancelPinNative(String address, int nativeData);
+    private native boolean setPinNative(String address, String pin, int nativeData);
+
 }

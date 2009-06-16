@@ -34,9 +34,6 @@ import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_BASEBAND_VERSION;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_INECM_MODE;
-
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
@@ -66,6 +63,9 @@ public class CDMAPhone extends PhoneBase {
     static final String LOG_TAG = "CDMA";
     private static final boolean LOCAL_DEBUG = true;
 
+    // Default Emergency Callback Mode exit timer
+    private static final int DEFAULT_ECM_EXIT_TIMER_VALUE = 30000;
+
     //***** Instance Variables
     CdmaCallTracker mCT;
     CdmaSMSDispatcher mSMS;
@@ -93,7 +93,7 @@ public class CDMAPhone extends PhoneBase {
     private Registrant mECMExitRespRegistrant;
     private String mEsn;
     private String mMeid;
-    
+
     // A runnable which is used to automatically exit from ECM after a period of time.
     private Runnable mExitEcmRunnable = new Runnable() {
         public void run() {
@@ -144,8 +144,8 @@ public class CDMAPhone extends PhoneBase {
         SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
                 new Integer(RILConstants.CDMA_PHONE).toString());
 
-        // TODO(Moto): Is this needed to handle phone crashes and/or power cycling?
-        String inEcm=SystemProperties.get(PROPERTY_INECM_MODE, "false");
+        // This is needed to handle phone process crashes
+        String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
         mIsPhoneInECMState = inEcm.equals("true");
     }
 
@@ -288,16 +288,10 @@ public class CDMAPhone extends PhoneBase {
             if (fc != null) {
                 //mMmiRegistrants.notifyRegistrants(new AsyncResult(null, fc, null));
                 fc.processCode();
-            } else {
-                FeatureCode digits = new FeatureCode(this);
-                // use dial number as poundString
-                digits.poundString = newDialString;
-                digits.processCode();
+                return null;
             }
-            return null;
-        } else {
-            return mCT.dial(newDialString);
         }
+        return mCT.dial(newDialString);
     }
 
     public SignalStrength getSignalStrength() {
@@ -388,6 +382,10 @@ public class CDMAPhone extends PhoneBase {
         return mSST.getMdnNumber();
     }
 
+    public String getCdmaPrlVersion(){
+        return mRuimRecords.getPrlVersion();
+    }
+
     public String getCdmaMIN() {
         return mSST.getCdmaMin();
     }
@@ -420,8 +418,13 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public String getSubscriberId() {
-        Log.e(LOG_TAG, "method getSubscriberId for IMSI is NOT supported in CDMA!");
-        return null;
+        // Subscriber ID is the combination of MCC+MNC+MIN as CDMA IMSI
+        // TODO(Moto): Replace with call to mRuimRecords.getIMSI_M() when implemented.
+        if ((getServiceState().getOperatorNumeric() != null) && (getCdmaMIN() != null)) {
+            return (getServiceState().getOperatorNumeric() + getCdmaMIN());
+        } else {
+            return null;
+        }
     }
 
     public boolean canConference() {
@@ -513,11 +516,11 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public void registerForCallWaiting(Handler h, int what, Object obj) {
-        Log.e(LOG_TAG, "method registerForCallWaiting is NOT yet supported in CDMA");
+        mCT.registerForCallWaiting(h, what, obj);
     }
 
     public void unregisterForCallWaiting(Handler h) {
-        Log.e(LOG_TAG, "method unregisterForCallWaiting is NOT yet supported in CDMA");
+        mCT.unregisterForCallWaiting(h);
     }
 
     public String getIpAddress(String apnType) {
@@ -850,12 +853,12 @@ public class CDMAPhone extends PhoneBase {
             mIsPhoneInECMState = true;
             // notify change
             sendEmergencyCallbackModeChange();
-            setSystemProperty(PROPERTY_INECM_MODE, "true");
-    
+            setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE, "true");
+
             // Post this runnable so we will automatically exit
             // if no one invokes exitEmergencyCallbackMode() directly.
-            // TODO(Moto): Get the delay a property so it can be adjusted
-            long delayInMillis = 300000; // 30,000 millis == 5 minutes
+            long delayInMillis = SystemProperties.getLong(
+                    TelephonyProperties.PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE);
             h.postDelayed(mExitEcmRunnable, delayInMillis);
         }
     }
@@ -874,7 +877,7 @@ public class CDMAPhone extends PhoneBase {
         if (ar.exception == null) {
             if (mIsPhoneInECMState) {
                 mIsPhoneInECMState = false;
-                setSystemProperty(PROPERTY_INECM_MODE, "false");
+                setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE, "false");
             }
             // send an Intent
             sendEmergencyCallbackModeChange();
@@ -911,7 +914,7 @@ public class CDMAPhone extends PhoneBase {
                     }
 
                     if (LOCAL_DEBUG) Log.d(LOG_TAG, "Baseband version: " + ar.result);
-                    setSystemProperty(PROPERTY_BASEBAND_VERSION, (String)ar.result);
+                    setSystemProperty(TelephonyProperties.PROPERTY_BASEBAND_VERSION, (String)ar.result);
                 }
                 break;
 
@@ -977,7 +980,7 @@ public class CDMAPhone extends PhoneBase {
                         Log.d(LOG_TAG, "ERI read, notify registrants");
                         mEriFileLoadedRegistrants.notifyRegistrants();
                     }
-                    setSystemProperty(PROPERTY_INECM_MODE,"false");
+                    setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE,"false");
                 }
                 break;
 

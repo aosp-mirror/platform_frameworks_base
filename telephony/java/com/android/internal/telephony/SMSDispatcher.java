@@ -26,6 +26,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -115,7 +116,7 @@ public abstract class SMSDispatcher extends Handler {
     /** Maximum number of times to retry sending a failed SMS. */
     private static final int MAX_SEND_RETRIES = 3;
     /** Delay before next send attempt on a failed SMS, in milliseconds. */
-    private static final int SEND_RETRY_DELAY = 2000; 
+    private static final int SEND_RETRY_DELAY = 2000;
     /** single part SMS */
     private static final int SINGLE_PART_SMS = 1;
 
@@ -142,6 +143,7 @@ public abstract class SMSDispatcher extends Handler {
     private static SmsMessage mSmsMessage;
     private static SmsMessageBase mSmsMessageBase;
     private SmsMessageBase.SubmitPduBase mSubmitPduBase;
+    private boolean mStorageAvailable = true;
 
     protected static int getNextConcatenatedRef() {
         sConcatenatedRef += 1;
@@ -171,11 +173,11 @@ public abstract class SMSDispatcher extends Handler {
 
         /**
          * Check to see if an application allow to send new SMS messages
-         *  
+         *
          * @param appName is the application sending sms
          * @param smsWaiting is the number of new sms wants to be sent
-         * @return true if application is allowed to send the requested number 
-         *         of new sms messages 
+         * @return true if application is allowed to send the requested number
+         *         of new sms messages
          */
         boolean check(String appName, int smsWaiting) {
             if (!mSmsStamp.containsKey(appName)) {
@@ -194,7 +196,7 @@ public abstract class SMSDispatcher extends Handler {
                     sent.remove(0);
             }
 
-            
+
             if ( (sent.size() + smsWaiting) <= mMaxAllowed) {
                 for (int i = 0; i < smsWaiting; i++ ) {
                     sent.add(ct);
@@ -229,6 +231,15 @@ public abstract class SMSDispatcher extends Handler {
 
         // Don't always start message ref at 0.
         sConcatenatedRef = new Random().nextInt(256);
+
+        // Register for device storage intents.  Use these to notify the RIL
+        // that storage for SMS is or is not available.
+        // TODO: Revisit this for a later release.  Storage reporting should
+        // rely more on application indication.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_LOW);
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
+        mContext.registerReceiver(mResultReceiver, filter);
     }
 
     public void dispose() {
@@ -277,7 +288,11 @@ public abstract class SMSDispatcher extends Handler {
 
             sms = (SmsMessage) ar.result;
             try {
-                dispatchMessage(sms.mWrappedSmsMessage);
+                if (mStorageAvailable) {
+                    dispatchMessage(sms.mWrappedSmsMessage);
+                } else {
+                    acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_OUT_OF_MEMORY, null);
+                }
             } catch (RuntimeException ex) {
                 acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
             }
@@ -317,7 +332,7 @@ public abstract class SMSDispatcher extends Handler {
                     sendMultipartSms(mSTracker);
                 } else {
                     sendSms(mSTracker);
-                } 
+                }
                 mSTracker = null;
             }
             break;
@@ -697,7 +712,7 @@ public abstract class SMSDispatcher extends Handler {
 
     /**
      * Send the multi-part SMS based on multipart Sms tracker
-     * 
+     *
      * @param tracker holds the multipart Sms tracker ready to be sent
      */
     protected abstract void sendMultipartSms (SmsTracker tracker);
@@ -744,7 +759,7 @@ public abstract class SMSDispatcher extends Handler {
 
     /**
      * Check if a SmsTracker holds multi-part Sms
-     * 
+     *
      * @param tracker a SmsTracker could hold a multi-part Sms
      * @return true for tracker holds Multi-parts Sms
      */
@@ -775,7 +790,7 @@ public abstract class SMSDispatcher extends Handler {
             mRetryCount = 0;
         }
     }
-    
+
     protected SmsTracker SmsTrackerFactory(HashMap data, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
         return new SmsTracker(data, sentIntent, deliveryIntent);
@@ -795,12 +810,23 @@ public abstract class SMSDispatcher extends Handler {
         private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                int rc = getResultCode();
-                boolean success = (rc == Activity.RESULT_OK) || (rc == Intents.RESULT_SMS_HANDLED);
+                if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_LOW)) {
+                    mStorageAvailable = false;
+                    mCm.reportSmsMemoryStatus(false, null);
+                } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_OK)) {
+                    mStorageAvailable = true;
+                    mCm.reportSmsMemoryStatus(true, null);
+                } else {
+                    // Assume the intent is one of the SMS receive intents that
+                    // was sent as an ordered broadcast.  Check result and ACK.
+                    int rc = getResultCode();
+                    boolean success = (rc == Activity.RESULT_OK)
+                                        || (rc == Intents.RESULT_SMS_HANDLED);
 
-                // For a multi-part message, this only ACKs the last part.
-                // Previous parts were ACK'd as they were received.
-                acknowledgeLastIncomingSms(success, rc, null);
+                    // For a multi-part message, this only ACKs the last part.
+                    // Previous parts were ACK'd as they were received.
+                    acknowledgeLastIncomingSms(success, rc, null);
+                }
             }
 
         };

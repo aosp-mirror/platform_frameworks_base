@@ -17,31 +17,10 @@
 package android.accounts;
 
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.pm.RegisteredServicesCache;
-import android.content.res.XmlResourceParser;
 import android.content.res.TypedArray;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.util.Log;
 import android.util.AttributeSet;
-import android.util.Xml;
-
-import java.io.IOException;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import com.google.android.collect.Maps;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParser;
 
 /**
  * A cache of services that export the {@link IAccountAuthenticator} interface. This cache
@@ -50,7 +29,8 @@ import org.xmlpull.v1.XmlPullParser;
  * are made available via the {@link RegisteredServicesCache#getServiceInfo} method.
  * @hide
  */
-/* package private */ class AccountAuthenticatorCache extends RegisteredServicesCache<String> {
+/* package private */ class AccountAuthenticatorCache
+        extends RegisteredServicesCache<AuthenticatorDescription> {
     private static final String TAG = "Account";
 
     private static final String SERVICE_INTERFACE = "android.accounts.AccountAuthenticator";
@@ -61,11 +41,17 @@ import org.xmlpull.v1.XmlPullParser;
         super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME);
     }
 
-    public String parseServiceAttributes(AttributeSet attrs) {
+    public AuthenticatorDescription parseServiceAttributes(String packageName, AttributeSet attrs) {
         TypedArray sa = mContext.getResources().obtainAttributes(attrs,
                 com.android.internal.R.styleable.AccountAuthenticator);
         try {
-            return sa.getString(com.android.internal.R.styleable.AccountAuthenticator_accountType);
+            final String accountType =
+                    sa.getString(com.android.internal.R.styleable.AccountAuthenticator_accountType);
+            final int labelId = sa.getResourceId(
+                    com.android.internal.R.styleable.AccountAuthenticator_label, 0);
+            final int iconId = sa.getResourceId(
+                    com.android.internal.R.styleable.AccountAuthenticator_icon, 0);
+            return new AuthenticatorDescription(accountType, packageName, labelId, iconId);
         } finally {
             sa.recycle();
         }

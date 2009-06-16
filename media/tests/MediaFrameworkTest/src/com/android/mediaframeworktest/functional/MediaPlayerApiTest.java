@@ -80,7 +80,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI getDuration", duratoinWithinTolerence);  
     }
     
-    @Suppress
     @MediumTest
     public void testWMA9GetDuration() throws Exception {
       int duration = CodecTest.getDuration(MediaNames.WMA9); 
@@ -122,7 +121,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI GetCurrentPosition", currentPosition);  
     }
     
-    @Suppress
     @LargeTest
     public void testWMA9GetCurrentPosition() throws Exception {
       boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.WMA9);  
@@ -160,7 +158,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI Pause", isPaused);  
     }
    
-    @Suppress
     @LargeTest
     public void testWMA9Pause() throws Exception {
       boolean isPaused = CodecTest.pause(MediaNames.WMA9);  
@@ -232,7 +229,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI setLooping", isLoop);  
     }
     
-    @Suppress
     @LargeTest
     public void testWMA9SetLooping() throws Exception {
       boolean isLoop = CodecTest.setLooping(MediaNames.WMA9);  
@@ -271,7 +267,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("MIDI seekTo", isLoop);  
     }
     
-    @Suppress
     @LargeTest
     public void testWMA9SeekTo() throws Exception {
       boolean isLoop = CodecTest.seekTo(MediaNames.WMA9);  
@@ -310,7 +305,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isEnd = CodecTest.seekToEnd(MediaNames.MIDI);  
       assertTrue("MIDI seekToEnd", isEnd);  
     }
-    
+
     @Suppress
     @LargeTest
     public void testWMA9SeekToEnd() throws Exception {
@@ -388,7 +383,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       assertTrue("H264AMR SeekTo", isSeek);         
     }
    
-    @Suppress
     @LargeTest
     public void testVideoWMVSeekTo() throws Exception {
       boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_WMV);

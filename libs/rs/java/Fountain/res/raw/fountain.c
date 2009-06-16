@@ -1,5 +1,12 @@
 // Fountain test script
 
+#pragma version(1)
+#pragma stateVertex(orthoWindow)
+#pragma stateRaster(flat)
+#pragma stateFragment(PgmFragBackground)
+#pragma stateFragmentStore(MyBlend)
+
+
 int main(void* con, int ft, int launchID) {
     int count, touch, x, y, rate, maxLife, lifeShift;
     int life;
@@ -28,9 +35,8 @@ int main(void* con, int ft, int launchID) {
         }
     }
 
-    contextBindProgramFragment(con, loadI32(con, 0, 7));
     drawRect(con, 0, 256, 0, 512);
-    contextBindProgramFragment(con, loadI32(con, 0, 6));
+    contextBindProgramFragment(con, NAMED_PgmFragParts);
 
     if (touch) {
         newPart = loadI32(con, 2, 0);
@@ -99,6 +105,6 @@ int main(void* con, int ft, int launchID) {
         }
     }
 
-    drawTriangleArray(con, loadI32(con, 0, 5), drawCount);
+    drawTriangleArray(con, NAMED_PartBuffer, drawCount);
     return 1;
 }

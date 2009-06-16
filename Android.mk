@@ -79,6 +79,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IIntentSender.aidl \
 	core/java/android/app/INotificationManager.aidl \
 	core/java/android/app/ISearchManager.aidl \
+	core/java/android/app/ISearchManagerCallback.aidl \
 	core/java/android/app/IServiceConnection.aidl \
 	core/java/android/app/IStatusBar.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
@@ -86,9 +87,9 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IWallpaperService.aidl \
 	core/java/android/app/IWallpaperServiceCallback.aidl \
 	core/java/android/backup/IBackupManager.aidl \
+	core/java/android/backup/IRestoreSession.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
-	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
         core/java/android/content/IContentService.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
@@ -121,6 +122,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IWindowSession.aidl \
 	core/java/android/speech/IRecognitionListener.aidl \
 	core/java/android/speech/IRecognitionService.aidl \
+	core/java/android/speech/tts/ITts.aidl \
+	core/java/android/speech/tts/ITtsCallback.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IUsageStats.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
@@ -150,10 +153,9 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
 	telephony/java/com/android/internal/telephony/IIccPhoneBook.aidl \
 	telephony/java/com/android/internal/telephony/ISms.aidl \
-	tts/java/android/tts/ITtsCallback.aidl \
-	tts/java/android/tts/ITts.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
-	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl
+	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl \
+	vpn/java/android/net/vpn/IVpnService.aidl \
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
@@ -226,7 +228,8 @@ aidl_files := \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
-	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl
+	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl \
+	frameworks/base/vpn/java/android/net/vpn/IVpnService.aidl \
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
 $(gen): PRIVATE_SRC_FILES := $(aidl_files)
@@ -478,5 +481,3 @@ include $(BUILD_JAVA_LIBRARY)
 ifeq (,$(ONE_SHOT_MAKEFILE))
 include $(call first-makefiles-under,$(LOCAL_PATH))
 endif
-
-

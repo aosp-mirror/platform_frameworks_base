@@ -17,7 +17,7 @@
 #include "rsDevice.h"
 #include "rsContext.h"
 #include "rsThreadIO.h"
-
+#include "utils/String8.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -37,13 +37,9 @@ void Context::initEGL()
          EGL_NONE
      };
 
-     LOGE("EGL 1");
      mDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-     LOGE("EGL 2  %p", mDisplay);
      eglInitialize(mDisplay, &mMajorVersion, &mMinorVersion);
-     LOGE("EGL 3  %i  %i", mMajorVersion, mMinorVersion);
      eglChooseConfig(mDisplay, s_configAttribs, &mConfig, 1, &mNumConfigs);
-     LOGE("EGL 4  %p", mConfig);
 
      if (mWndSurface) {
          mSurface = eglCreateWindowSurface(mDisplay, mConfig,
@@ -55,30 +51,43 @@ void Context::initEGL()
                  NULL);
      }
 
-     LOGE("EGL 5");
      mContext = eglCreateContext(mDisplay, mConfig, NULL, NULL);
      eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
      eglQuerySurface(mDisplay, mSurface, EGL_WIDTH, &mWidth);
      eglQuerySurface(mDisplay, mSurface, EGL_HEIGHT, &mHeight);
-     LOGE("EGL 9");
+}
+
+bool Context::runScript(Script *s, uint32_t launchID)
+{
+    ObjectBaseRef<ProgramFragment> frag(mFragment);
+    ObjectBaseRef<ProgramVertex> vtx(mVertex);
+    ObjectBaseRef<ProgramFragmentStore> store(mFragmentStore);
+
+    bool ret = s->run(this, launchID);
+
+    mFragment.set(frag);
+    mVertex.set(vtx);
+    mFragmentStore.set(store);
+    return true;
 
 }
 
+
 bool Context::runRootScript()
 {
-    rsAssert(mRootScript->mIsRoot);
+    rsAssert(mRootScript->mEnviroment.mIsRoot);
 
     glColor4f(1,1,1,1);
     glEnable(GL_LIGHT0);
-    glViewport(0, 0, 320, 480);
-    float aspectH = 480.f / 320.f;
+    glViewport(0, 0, mWidth, mHeight);
 
-    if(mRootScript->mIsOrtho) {
+    if(mRootScript->mEnviroment.mIsOrtho) {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrthof(0, 320,  480, 0,  0, 1);
+        glOrthof(0, mWidth,  mHeight, 0,  0, 1);
         glMatrixMode(GL_MODELVIEW);
     } else {
+        float aspectH = ((float)mWidth) / mHeight;
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glFrustumf(-1, 1,  -aspectH, aspectH,  1, 100);
@@ -93,15 +102,15 @@ bool Context::runRootScript()
     glDepthMask(GL_TRUE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    glClearColor(mRootScript->mClearColor[0],
-                 mRootScript->mClearColor[1],
-                 mRootScript->mClearColor[2],
-                 mRootScript->mClearColor[3]);
-    glClearDepthf(mRootScript->mClearDepth);
+    glClearColor(mRootScript->mEnviroment.mClearColor[0],
+                 mRootScript->mEnviroment.mClearColor[1],
+                 mRootScript->mEnviroment.mClearColor[2],
+                 mRootScript->mEnviroment.mClearColor[3]);
+    glClearDepthf(mRootScript->mEnviroment.mClearDepth);
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    return mRootScript->run(this, 0);
+    return runScript(mRootScript.get(), 0);
 }
 
 void Context::setupCheck()
@@ -123,16 +132,11 @@ void * Context::threadProc(void *vrsc)
 {
      Context *rsc = static_cast<Context *>(vrsc);
 
-     LOGE("TP 1");
      gIO = new ThreadIO();
-
      rsc->mServerCommands.init(128);
      rsc->mServerReturns.init(128);
 
      rsc->initEGL();
-
-     LOGE("TP 2");
-
      rsc->mRunning = true;
      bool mDraw = true;
      while (!rsc->mExit) {
@@ -149,7 +153,6 @@ void * Context::threadProc(void *vrsc)
          }
      }
 
-     LOGE("TP 6");
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
@@ -159,7 +162,6 @@ void * Context::threadProc(void *vrsc)
 
 Context::Context(Device *dev, Surface *sur)
 {
-    LOGE("CC 1");
     dev->addContext(this);
     mDev = dev;
     mRunning = false;
@@ -171,7 +173,6 @@ Context::Context(Device *dev, Surface *sur)
     // see comment in header
     gCon = this;
 
-    LOGE("CC 2");
     int status;
     pthread_attr_t threadAttr;
 
@@ -185,17 +186,16 @@ Context::Context(Device *dev, Surface *sur)
     sparam.sched_priority = ANDROID_PRIORITY_DISPLAY;
     pthread_attr_setschedparam(&threadAttr, &sparam);
 
+    LOGE("RS Launching thread");
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
     if (status) {
         LOGE("Failed to start rs context thread.");
     }
 
-    LOGE("CC 3");
     mWndSurface = sur;
     while(!mRunning) {
         sleep(1);
     }
-    LOGE("CC 4");
 
     pthread_attr_destroy(&threadAttr);
 }
@@ -205,14 +205,11 @@ Context::~Context()
     mExit = true;
     void *res;
 
-    LOGE("DES 1");
     int status = pthread_join(mThreadId, &res);
-    LOGE("DES 2");
 
     if (mDev) {
         mDev->removeContext(this);
     }
-    LOGE("DES 3");
 }
 
 void Context::swapBuffers()
@@ -248,6 +245,46 @@ void Context::setVertex(ProgramVertex *pv)
     mVertex.set(pv);
     pv->setupGL();
 }
+
+void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)
+{
+    rsAssert(!obj->getName());
+    obj->setName(name, len);
+    mNames.add(obj);
+}
+
+void Context::removeName(ObjectBase *obj)
+{
+    for(size_t ct=0; ct < mNames.size(); ct++) {
+        if (obj == mNames[ct]) {
+            mNames.removeAt(ct);
+            return;
+        }
+    }
+}
+
+ObjectBase * Context::lookupName(const char *name) const
+{
+    for(size_t ct=0; ct < mNames.size(); ct++) {
+        if (!strcmp(name, mNames[ct]->getName())) {
+            return mNames[ct];
+        }
+    }
+    return NULL;
+}
+
+void Context::appendNameDefines(String8 *str) const
+{
+    char buf[256];
+    for (size_t ct=0; ct < mNames.size(); ct++) {
+        str->append("#define NAMED_");
+        str->append(mNames[ct]->getName());
+        str->append(" ");
+        sprintf(buf, "%i\n", (int)mNames[ct]);
+        str->append(buf);
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -292,6 +329,11 @@ void rsi_ContextBindProgramVertex(Context *rsc, RsProgramVertex vpv)
     rsc->setVertex(pv);
 }
 
+void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len)
+{
+    ObjectBase *ob = static_cast<ObjectBase *>(obj);
+    rsc->assignName(ob, name, len);
+}
 
 
 }

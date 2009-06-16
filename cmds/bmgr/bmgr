@@ -1,0 +1,7 @@
+# Script to start "bmgr" on the device, which has a very rudimentary
+# shell.
+#
+base=/system
+export CLASSPATH=$base/framework/bmgr.jar
+exec app_process $base/bin com.android.commands.bmgr.Bmgr "$@"
+

@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.os.RuntimeInit;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
 import com.android.server.ProcessStats;
@@ -289,6 +288,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // because the user interacts with it so much.
     final int HOME_APP_ADJ;
 
+    // This is a process currently hosting a backup operation.  Killing it
+    // is not entirely fatal but is generally a bad idea.
+    final int BACKUP_APP_ADJ;
+
     // This is a process holding a secondary server -- killing it will not
     // have much of an impact as far as the user is concerned. Value set in
     // system/rootdir/init.rc on startup.
@@ -317,6 +320,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     final int EMPTY_APP_MEM;
     final int HIDDEN_APP_MEM;
     final int HOME_APP_MEM;
+    final int BACKUP_APP_MEM;
     final int SECONDARY_SERVER_MEM;
     final int VISIBLE_APP_MEM;
     final int FOREGROUND_APP_MEM;
@@ -1358,6 +1362,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_ADJ"));
         SECONDARY_SERVER_ADJ =
             Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_ADJ"));
+        BACKUP_APP_ADJ =
+            Integer.valueOf(SystemProperties.get("ro.BACKUP_APP_ADJ"));
         HOME_APP_ADJ =
             Integer.valueOf(SystemProperties.get("ro.HOME_APP_ADJ"));
         HIDDEN_APP_MIN_ADJ =
@@ -1373,6 +1379,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_MEM"))*PAGE_SIZE;
         SECONDARY_SERVER_MEM =
             Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_MEM"))*PAGE_SIZE;
+        BACKUP_APP_MEM =
+            Integer.valueOf(SystemProperties.get("ro.BACKUP_APP_MEM"))*PAGE_SIZE;
         HOME_APP_MEM =
             Integer.valueOf(SystemProperties.get("ro.HOME_APP_MEM"))*PAGE_SIZE;
         HIDDEN_APP_MEM =
@@ -2752,7 +2760,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // instance of the activity so a new fresh one can be started.
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE) {
                     if (!ret.finishing) {
-                        int index = indexOfTokenLocked(ret, false);
+                        int index = indexOfTokenLocked(ret);
                         if (index >= 0) {
                             finishActivityLocked(ret, 0, Activity.RESULT_CANCELED,
                                     null, "clear");
@@ -2845,7 +2853,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord sourceRecord = null;
         HistoryRecord resultRecord = null;
         if (resultTo != null) {
-            int index = indexOfTokenLocked(resultTo, false);
+            int index = indexOfTokenLocked(resultTo);
             if (DEBUG_RESULTS) Log.v(
                 TAG, "Sending result to " + resultTo + " (index " + index + ")");
             if (index >= 0) {
@@ -3411,7 +3419,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized (this) {
-            int index = indexOfTokenLocked(callingActivity, false);
+            int index = indexOfTokenLocked(callingActivity);
             if (index < 0) {
                 return false;
             }
@@ -3561,7 +3569,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public void setRequestedOrientation(IBinder token,
             int requestedOrientation) {
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -3583,7 +3591,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public int getRequestedOrientation(IBinder token) {
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
@@ -3639,7 +3647,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             TAG, "Finishing activity: token=" + token
             + ", result=" + resultCode + ", data=" + resultData);
 
-        int index = indexOfTokenLocked(token, false);
+        int index = indexOfTokenLocked(token);
         if (index < 0) {
             return false;
         }
@@ -3763,7 +3771,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final HistoryRecord finishCurrentActivityLocked(HistoryRecord r,
             int mode) {
-        final int index = indexOfTokenLocked(r, false);
+        final int index = indexOfTokenLocked(r);
         if (index < 0) {
             return null;
         }
@@ -3888,7 +3896,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public final void finishSubActivity(IBinder token, String resultWho,
             int requestCode) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -4438,7 +4446,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized(this) {
-            int index = indexOfTokenLocked(token, true);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -5003,7 +5011,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             // Get the activity record.
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
 
@@ -5157,7 +5165,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord r = null;
 
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (HistoryRecord)mHistory.get(index);
                 if (!timeout) {
@@ -5188,7 +5196,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         final long origId = Binder.clearCallingIdentity();
 
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (HistoryRecord)mHistory.get(index);
                 r.thumbnail = thumbnail;
@@ -5218,7 +5226,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (this) {
             mHandler.removeMessages(DESTROY_TIMEOUT_MSG, token);
             
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 if (r.state == ActivityState.DESTROYING) {
@@ -5245,7 +5253,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private HistoryRecord getCallingRecordLocked(IBinder token) {
-        int index = indexOfTokenLocked(token, true);
+        int index = indexOfTokenLocked(token);
         if (index >= 0) {
             HistoryRecord r = (HistoryRecord)mHistory.get(index);
             if (r != null) {
@@ -5257,7 +5265,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public ComponentName getActivityClassForToken(IBinder token) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 return r.intent.getComponent();
@@ -5268,7 +5276,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public String getPackageForToken(IBinder token) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 return r.packageName;
@@ -5307,7 +5315,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             HistoryRecord activity = null;
             if (type == INTENT_SENDER_ACTIVITY_RESULT) {
-                int index = indexOfTokenLocked(token, false);
+                int index = indexOfTokenLocked(token);
                 if (index < 0) {
                     return null;
                 }
@@ -6828,7 +6836,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         synchronized(this) {
             if (r == null) {
-                int index = indexOfTokenLocked(token, false);
+                int index = indexOfTokenLocked(token);
                 if (index < 0) {
                     return;
                 }
@@ -8934,7 +8942,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return false;
     }
 
-    private final int indexOfTokenLocked(IBinder token, boolean required) {
+    private final int indexOfTokenLocked(IBinder token) {
         int count = mHistory.size();
 
         // convert the token to an entry in the history.
@@ -8948,17 +8956,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 break;
             }
         }
-        if (index < 0 && required) {
-            RuntimeInit.crash(TAG, new InvalidTokenException(token));
-        }
 
         return index;
-    }
-
-    static class InvalidTokenException extends Exception {
-        InvalidTokenException(IBinder token) {
-            super("Bad activity token: " + token);
-        }
     }
 
     private final void killServicesLocked(ProcessRecord app,
@@ -9985,7 +9984,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             HistoryRecord activity = null;
             if (token != null) {
-                int aindex = indexOfTokenLocked(token, false);
+                int aindex = indexOfTokenLocked(token);
                 if (aindex < 0) {
                     Log.w(TAG, "Binding with unknown activity: " + token);
                     return 0;
@@ -10344,6 +10343,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mBackupTarget = r;
             mBackupAppName = app.packageName;
 
+            // Try not to kill the process during backup
+            updateOomAdjLocked(proc);
+
             // If the process is already attached, schedule the creation of the backup agent now.
             // If it is not yet live, this will be done when it attaches to the framework.
             if (proc.thread != null) {
@@ -10403,14 +10405,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 return;
             }
 
-            try {
-                mBackupTarget.app.thread.scheduleDestroyBackupAgent(appInfo);
-            } catch (Exception e) {
-                Log.e(TAG, "Exception when unbinding backup agent:");
-                e.printStackTrace();
-            }
+            ProcessRecord proc = mBackupTarget.app;
             mBackupTarget = null;
             mBackupAppName = null;
+
+            // Not backing this app up any more; reset its OOM adjustment
+            updateOomAdjLocked(proc);
+
+            // If the app crashed during backup, 'thread' will be null here
+            if (proc.thread != null) {
+                try {
+                    proc.thread.scheduleDestroyBackupAgent(appInfo);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception when unbinding backup agent:");
+                    e.printStackTrace();
+                }
+            }
         }
     }
     // =========================================================
@@ -11885,6 +11895,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         app.curRawAdj = adj;
         app.curAdj = adj <= app.maxAdj ? adj : app.maxAdj;
 
+        if (mBackupTarget != null && app == mBackupTarget.app) {
+            // If possible we want to avoid killing apps while they're being backed up
+            if (adj > BACKUP_APP_ADJ) {
+                if (DEBUG_BACKUP) Log.v(TAG, "oom BACKUP_APP_ADJ for " + app);
+                adj = BACKUP_APP_ADJ;
+            }
+        }
+
         if (app.services.size() != 0 && adj > FOREGROUND_APP_ADJ) {
             // If this process has active services running in it, we would
             // like to avoid killing it unless it would prevent the current
@@ -12165,11 +12183,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         "Setting process group of " + app.processName
                         + " to " + app.curSchedGroup);
                 if (true) {
+                    long oldId = Binder.clearCallingIdentity();
                     try {
                         Process.setProcessGroup(app.pid, app.curSchedGroup);
                     } catch (Exception e) {
                         Log.w(TAG, "Failed setting process group of " + app.pid
                                 + " to " + app.curSchedGroup);
+                        e.printStackTrace();
+                    } finally {
+                        Binder.restoreCallingIdentity(oldId);
                     }
                 }
                 if (false) {

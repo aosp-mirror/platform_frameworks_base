@@ -42,7 +42,6 @@
 namespace android {
 namespace renderscript {
 
-
 class Context 
 {
 public:
@@ -77,6 +76,11 @@ public:
 
     void setupCheck();
 
+    void assignName(ObjectBase *obj, const char *name, uint32_t len);
+    void removeName(ObjectBase *obj);
+    ObjectBase * lookupName(const char *name) const;
+    void appendNameDefines(String8 *str) const;
+
 protected:
     Device *mDev;
 
@@ -103,11 +107,16 @@ protected:
     ObjectBaseRef<ProgramVertex> mVertex;
     ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
 
+    ProgramFragment * mDefaultFragment;
+    ProgramVertex * mDefaultVertex;
+    ProgramFragmentStore * mDefaultFragmentStore;
+
 private:
     Context();
 
     void initEGL();
 
+    bool runScript(Script *s, uint32_t launchID);
     bool runRootScript();
 
     static void * threadProc(void *);
@@ -115,6 +124,8 @@ private:
     // todo: put in TLS
     static Context *gCon;
     Surface *mWndSurface;
+
+    Vector<ObjectBase *> mNames;
 };
 
 

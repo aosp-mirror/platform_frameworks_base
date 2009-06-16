@@ -1,5 +1,7 @@
 package com.android.internal.backup;
 
+import android.backup.RestoreSet;
+import android.content.pm.PackageInfo;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
@@ -9,15 +11,8 @@ import android.os.RemoteException;
 
 public class GoogleTransport extends IBackupTransport.Stub {
 
-    public int endSession() throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public int performBackup(String packageName, ParcelFileDescriptor data)
-            throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
+    public long requestBackupTime() throws RemoteException {
+        return 0;       // !!! TODO: implement real backoff policy
     }
 
     public int startSession() throws RemoteException {
@@ -25,4 +20,31 @@ public class GoogleTransport extends IBackupTransport.Stub {
         return 0;
     }
 
+    public int endSession() throws RemoteException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data)
+            throws RemoteException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    // Restore handling
+    public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
+        // !!! TODO: real implementation
+        return null;
+    }
+
+    public PackageInfo[] getAppSet(int token) throws android.os.RemoteException {
+        // !!! TODO: real implementation
+        return new PackageInfo[0];
+    }
+
+    public int getRestoreData(int token, PackageInfo packageInfo, ParcelFileDescriptor data)
+            throws android.os.RemoteException {
+        // !!! TODO: real implementation
+        return 0;
+    }
 }

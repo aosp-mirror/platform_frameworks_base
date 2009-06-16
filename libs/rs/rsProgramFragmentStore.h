@@ -76,8 +76,6 @@ public:
     ~ProgramFragmentStoreState();
 
     ProgramFragmentStore *mPFS;
-
-
 };
 
 

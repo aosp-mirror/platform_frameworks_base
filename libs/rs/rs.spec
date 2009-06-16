@@ -16,6 +16,11 @@ ContextBindProgramVertex {
 	param RsProgramVertex pgm
 	}
 
+AssignName {
+	param void *obj
+	param const char *name
+	param size_t len
+	}
 
 ElementBegin {
 }
@@ -286,8 +291,12 @@ ScriptCSetOrtho {
 	}
 
 ScriptCSetScript {
-	param void * accScript
 	param void * codePtr
+	}
+
+ScriptCSetText {
+	param const char * text
+	param uint32_t length
 	}
 
 ScriptCCreate {
@@ -328,6 +337,9 @@ ProgramFragmentStoreCreate {
 	ret RsProgramFragmentStore
 	}
 
+ProgramFragmentStoreDestroy {
+	param RsProgramFragmentStore pfs
+	}
 
 
 ProgramFragmentBegin {
@@ -366,6 +378,9 @@ ProgramFragmentCreate {
 	ret RsProgramFragment
 	}
 
+ProgramFragmentDestroy {
+	param RsProgramFragment pf
+	}
 
 
 ProgramVertexBegin {
@@ -397,6 +412,10 @@ ProgramVertexSetTextureMatrixEnable {
 	}
 
 ProgramVertexSetModelMatrixEnable {
+	param bool enable
+	}
+
+ProgramVertexSetProjectionMatrixEnable {
 	param bool enable
 	}
 

@@ -95,8 +95,9 @@ public class AuthenticatorBindHelper {
 
             // otherwise find the component name for the authenticator and initiate a bind
             // if no authenticator or the bind fails then return false, otherwise return true
-            AccountAuthenticatorCache.ServiceInfo authenticatorInfo =
-                    mAuthenticatorCache.getServiceInfo(authenticatorType);
+            AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
+                    mAuthenticatorCache.getServiceInfo(
+                            AuthenticatorDescription.newKey(authenticatorType));
             if (authenticatorInfo == null) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "there is no authenticator for " + authenticatorType

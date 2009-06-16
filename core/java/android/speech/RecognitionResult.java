@@ -27,6 +27,17 @@ import android.os.Parcelable;
  * {@hide}
  */
 public class RecognitionResult implements Parcelable {
+    /**
+     * Status of the recognize request.
+     */
+    public static final int NETWORK_TIMEOUT = 1;  // Network operation timed out.
+    public static final int NETWORK_ERROR = 2;  // Other networkrelated errors.
+    public static final int AUDIO_ERROR = 3;  // Audio recording error.
+    public static final int SERVER_ERROR = 4;  // Server sends error status.
+    public static final int CLIENT_ERROR = 5;  // Other client side errors.
+    public static final int SPEECH_TIMEOUT = 6;  // No speech input
+    public static final int NO_MATCH = 7;  // No recognition result matched.
+    public static final int SERVICE_BUSY = 8;  // RecognitionService busy.
 
     /**
      * Type of the recognition results. 

@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.server.search.SearchableInfo;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import java.util.List;
@@ -1108,6 +1109,10 @@ import java.util.List;
 public class SearchManager 
         implements DialogInterface.OnDismissListener, DialogInterface.OnCancelListener
 {
+
+    private static final boolean DBG = false;
+    private static final String TAG = "SearchManager";
+
     /**
      * This is a shortcut definition for the default menu key to use for invoking search.
      * 
@@ -1256,6 +1261,41 @@ public class SearchManager
      */
     public final static String SHORTCUT_MIME_TYPE = 
             "vnd.android.cursor.item/vnd.android.search.suggest";
+
+
+    /**
+     * The authority of the provider to report clicks to when a click is detected after pivoting
+     * into a specific app's search from global search.
+     *
+     * In addition to the columns below, the suggestion columns are used to pass along the full
+     * suggestion so it can be shortcutted.
+     *
+     * @hide
+     */
+    public final static String SEARCH_CLICK_REPORT_AUTHORITY =
+            "com.android.globalsearch.stats";
+
+    /**
+     * The path the write goes to.
+     *
+     * @hide
+     */
+    public final static String SEARCH_CLICK_REPORT_URI_PATH = "click";
+
+    /**
+     * The column storing the query for the click.
+     *
+     * @hide
+     */
+    public final static String SEARCH_CLICK_REPORT_COLUMN_QUERY = "query";
+
+    /**
+     * The column storing the component name of the application that was pivoted into.
+     *
+     * @hide
+     */
+    public final static String SEARCH_CLICK_REPORT_COLUMN_COMPONENT = "component";
+
     /**
      * Column name for suggestions cursor.  <i>Unused - can be null or column can be omitted.</i>
      */
@@ -1360,6 +1400,25 @@ public class SearchManager
     public final static String SUGGEST_COLUMN_SHORTCUT_ID = "suggest_shortcut_id";
 
     /**
+     * Column name for suggestions cursor. <i>Optional.</i>  This column is used to specify the
+     * cursor item's background color if it needs a non-default background color. A non-zero value
+     * indicates a valid background color to override the default.
+     *
+     * @hide For internal use, not part of the public API.
+     */
+    public final static String SUGGEST_COLUMN_BACKGROUND_COLOR = "suggest_background_color";
+    
+    /**
+     * Column name for suggestions cursor. <i>Optional.</i> This column is used to specify
+     * that a spinner should be shown in lieu of an icon2 while the shortcut of this suggestion
+     * is being refreshed.
+     * 
+     * @hide Pending API council approval.
+     */
+    public final static String SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING =
+            "suggest_spinner_while_refreshing";
+
+    /**
      * Column value for suggestion column {@link #SUGGEST_COLUMN_SHORTCUT_ID} when a suggestion
      * should not be stored as a shortcut in global search.
      *
@@ -1440,12 +1499,14 @@ public class SearchManager
     private static ISearchManager sService = getSearchManagerService();
 
     private final Context mContext;
-    private final Handler mHandler;
-    
-    private SearchDialog mSearchDialog;
-    
-    private OnDismissListener mDismissListener = null;
-    private OnCancelListener mCancelListener = null;
+
+    // package private since they are used by the inner class SearchManagerCallback
+    /* package */ boolean mIsShowing = false;
+    /* package */ final Handler mHandler;
+    /* package */ OnDismissListener mDismissListener = null;
+    /* package */ OnCancelListener mCancelListener = null;
+
+    private final SearchManagerCallback mSearchManagerCallback = new SearchManagerCallback();
 
     /*package*/ SearchManager(Context context, Handler handler)  {
         mContext = context;
@@ -1497,17 +1558,16 @@ public class SearchManager
                             ComponentName launchActivity,
                             Bundle appSearchData,
                             boolean globalSearch) {
-        
-        if (mSearchDialog == null) {
-            mSearchDialog = new SearchDialog(mContext);
+        if (DBG) debug("startSearch(), mIsShowing=" + mIsShowing);
+        if (mIsShowing) return;
+        try {
+            mIsShowing = true;
+            // activate the search manager and start it up!
+            sService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
+                    globalSearch, mSearchManagerCallback);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "startSearch() failed: " + ex);
         }
-
-        // activate the search manager and start it up!
-        mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData, 
-                globalSearch);
-        
-        mSearchDialog.setOnCancelListener(this);
-        mSearchDialog.setOnDismissListener(this);
     }
 
     /**
@@ -1521,9 +1581,16 @@ public class SearchManager
      *
      * @see #startSearch
      */
-    public void stopSearch()  {
-        if (mSearchDialog != null) {
-            mSearchDialog.cancel();
+    public void stopSearch() {
+        if (DBG) debug("stopSearch(), mIsShowing=" + mIsShowing);
+        if (!mIsShowing) return;
+        try {
+            sService.stopSearch();
+            // onDismiss will also clear this, but we do it here too since onDismiss() is
+            // called asynchronously.
+            mIsShowing = false;
+        } catch (RemoteException ex) {
+            Log.e(TAG, "stopSearch() failed: " + ex);
         }
     }
 
@@ -1536,13 +1603,11 @@ public class SearchManager
      * 
      * @hide
      */
-    public boolean isVisible()  {
-        if (mSearchDialog != null) {
-            return mSearchDialog.isShowing();
-        }
-        return false;
+    public boolean isVisible() {
+        if (DBG) debug("isVisible(), mIsShowing=" + mIsShowing);
+        return mIsShowing;
     }
-    
+
     /**
      * See {@link SearchManager#setOnDismissListener} for configuring your activity to monitor
      * search UI state.
@@ -1577,79 +1642,112 @@ public class SearchManager
     public void setOnDismissListener(final OnDismissListener listener) {
         mDismissListener = listener;
     }
-    
-    /**
-     * The callback from the search dialog when dismissed
-     * @hide
-     */
-    public void onDismiss(DialogInterface dialog) {
-        if (dialog == mSearchDialog) {
-            if (mDismissListener != null) {
-                mDismissListener.onDismiss();
-            }
-        }
-    }
 
     /**
      * Set or clear the callback that will be invoked whenever the search UI is canceled.
      * 
      * @param listener The {@link OnCancelListener} to use, or null.
      */
-    public void setOnCancelListener(final OnCancelListener listener) {
+    public void setOnCancelListener(OnCancelListener listener) {
         mCancelListener = listener;
     }
-    
-    
-    /**
-     * The callback from the search dialog when canceled
-     * @hide
-     */
+
+    private class SearchManagerCallback extends ISearchManagerCallback.Stub {
+
+        private final Runnable mFireOnDismiss = new Runnable() {
+            public void run() {
+                if (DBG) debug("mFireOnDismiss");
+                mIsShowing = false;
+                if (mDismissListener != null) {
+                    mDismissListener.onDismiss();
+                }
+            }
+        };
+
+        private final Runnable mFireOnCancel = new Runnable() {
+            public void run() {
+                if (DBG) debug("mFireOnCancel");
+                // doesn't need to clear mIsShowing since onDismiss() always gets called too
+                if (mCancelListener != null) {
+                    mCancelListener.onCancel();
+                }
+            }
+        };
+
+        public void onDismiss() {
+            if (DBG) debug("onDismiss()");
+            mHandler.post(mFireOnDismiss);
+        }
+
+        public void onCancel() {
+            if (DBG) debug("onCancel()");
+            mHandler.post(mFireOnCancel);
+        }
+
+    }
+
+    // TODO: remove the DialogInterface interfaces from SearchManager.
+    // This changes the public API, so I'll do it in a separate change.
     public void onCancel(DialogInterface dialog) {
-        if (dialog == mSearchDialog) {
-            if (mCancelListener != null) {
-                mCancelListener.onCancel();
-            }
+        throw new UnsupportedOperationException();
+    }
+    public void onDismiss(DialogInterface dialog) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Saves the state of the search UI.
+     *
+     * @return A Bundle containing the state of the search dialog, or {@code null}
+     *         if the search UI is not visible.
+     *
+     * @hide
+     */
+    public Bundle saveSearchDialog() {
+        if (DBG) debug("saveSearchDialog(), mIsShowing=" + mIsShowing);
+        if (!mIsShowing) return null;
+        try {
+            return sService.onSaveInstanceState();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "onSaveInstanceState() failed: " + ex);
+            return null;
         }
     }
 
     /**
-     * Save instance state so we can recreate after a rotation.
-     * 
+     * Restores the state of the search dialog.
+     *
+     * @param searchDialogState Bundle to read the state from.
+     *
      * @hide
      */
-    void saveSearchDialog(Bundle outState, String key) {
-        if (mSearchDialog != null && mSearchDialog.isShowing()) {
-            Bundle searchDialogState = mSearchDialog.onSaveInstanceState();
-            outState.putBundle(key, searchDialogState);
+    public void restoreSearchDialog(Bundle searchDialogState) {
+        if (DBG) debug("restoreSearchDialog(" + searchDialogState + ")");
+        if (searchDialogState == null) return;
+        try {
+            sService.onRestoreInstanceState(searchDialogState);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "onRestoreInstanceState() failed: " + ex);
         }
     }
 
     /**
-     * Restore instance state after a rotation.
-     * 
+     * Update the search dialog after a configuration change.
+     *
+     * @param newConfig The new configuration.
+     *
      * @hide
      */
-    void restoreSearchDialog(Bundle inState, String key) {        
-        Bundle searchDialogState = inState.getBundle(key);
-        if (searchDialogState != null) {
-            if (mSearchDialog == null) {
-                mSearchDialog = new SearchDialog(mContext);
-            }
-            mSearchDialog.onRestoreInstanceState(searchDialogState);
+    public void onConfigurationChanged(Configuration newConfig) {
+        if (DBG) debug("onConfigurationChanged(" + newConfig + "), mIsShowing=" + mIsShowing);
+        if (!mIsShowing) return;
+        try {
+            sService.onConfigurationChanged(newConfig);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "onConfigurationChanged() failed:" + ex);
         }
     }
-    
-    /**
-     * Hook for updating layout on a rotation
-     * 
-     * @hide
-     */
-    void onConfigurationChanged(Configuration newConfig) {
-        if (mSearchDialog != null && mSearchDialog.isShowing()) {
-            mSearchDialog.onConfigurationChanged(newConfig);
-        }
-    }
-    
+
     private static ISearchManager getSearchManagerService() {
         return ISearchManager.Stub.asInterface(
             ServiceManager.getService(Context.SEARCH_SERVICE));
@@ -1670,7 +1768,8 @@ public class SearchManager
             boolean globalSearch) {
         try {
             return sService.getSearchableInfo(componentName, globalSearch);
-        } catch (RemoteException e) {
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getSearchableInfo() failed: " + ex);
             return null;
         }
     }
@@ -1751,6 +1850,7 @@ public class SearchManager
         try {
             return sService.getSearchablesInGlobalSearch();
         } catch (RemoteException e) {
+            Log.e(TAG, "getSearchablesInGlobalSearch() failed: " + e);
             return null;
         }
     }
@@ -1758,7 +1858,8 @@ public class SearchManager
     /**
      * Returns a list of the searchable activities that handle web searches.
      *
-     * @return a a list of all searchable activities that handle {@link SearchManager#ACTION_WEB_SEARCH}.
+     * @return a list of all searchable activities that handle
+     *         {@link android.content.Intent#ACTION_WEB_SEARCH}.
      *
      * @hide because SearchableInfo is not part of the API.
      */
@@ -1766,6 +1867,7 @@ public class SearchManager
         try {
             return sService.getSearchablesForWebSearch();
         } catch (RemoteException e) {
+            Log.e(TAG, "getSearchablesForWebSearch() failed: " + e);
             return null;
         }
     }
@@ -1781,6 +1883,7 @@ public class SearchManager
         try {
             return sService.getDefaultSearchableForWebSearch();
         } catch (RemoteException e) {
+            Log.e(TAG, "getDefaultSearchableForWebSearch() failed: " + e);
             return null;
         }
     }
@@ -1796,6 +1899,12 @@ public class SearchManager
         try {
             sService.setDefaultWebSearch(component);
         } catch (RemoteException e) {
+            Log.e(TAG, "setDefaultWebSearch() failed: " + e);
         }
+    }
+
+    private static void debug(String msg) {
+        Thread thread = Thread.currentThread();
+        Log.d(TAG, msg + " (" + thread.getName() + "-" + thread.getId() + ")");
     }
 }

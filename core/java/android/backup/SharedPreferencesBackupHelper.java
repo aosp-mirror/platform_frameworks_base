@@ -23,19 +23,34 @@ import java.io.FileDescriptor;
 
 /** @hide */
 public class SharedPreferencesBackupHelper {
-    public static void performBackup(Context context,
-            ParcelFileDescriptor oldSnapshot, ParcelFileDescriptor newSnapshot,
-            BackupDataOutput data, String[] prefGroups) {
-        String basePath = "/xxx"; //context.getPreferencesDir();
+    private Context mContext;
+    private String mKeyPrefix;
 
+    public SharedPreferencesBackupHelper(Context context) {
+        mContext = context;
+    }
+
+    public SharedPreferencesBackupHelper(Context context, String keyPrefix) {
+        mContext = context;
+        mKeyPrefix = keyPrefix;
+    }
+    
+    public void performBackup(ParcelFileDescriptor oldSnapshot, ParcelFileDescriptor newSnapshot,
+            BackupDataOutput data, String[] prefGroups) {
+        Context context = mContext;
+        
         // make filenames for the prefGroups
         final int N = prefGroups.length;
         String[] files = new String[N];
         for (int i=0; i<N; i++) {
-            files[i] = prefGroups[i] + ".xml";
+            files[i] = context.getSharedPrefsFile(prefGroups[i]).getAbsolutePath();
         }
 
-        FileBackupHelper.performBackup_checked(basePath, oldSnapshot, data, newSnapshot, files);
+        // make keys if necessary
+        String[] keys = FileBackupHelper.makeKeys(mKeyPrefix, prefGroups);
+
+        // go
+        FileBackupHelper.performBackup_checked(oldSnapshot, data, newSnapshot, files, prefGroups);
     }
 }
 

@@ -24,6 +24,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -74,8 +76,8 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * In-application-process implementation of Search Bar.  This is still controlled by the 
- * SearchManager, but it runs in the current activity's process to keep things lighter weight.
+ * System search dialog. This is controlled by the 
+ * SearchManagerService and runs in the system process.
  * 
  * @hide
  */
@@ -177,17 +179,17 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Window theWindow = getWindow();
-        theWindow.setGravity(Gravity.TOP|Gravity.FILL_HORIZONTAL);
-
         setContentView(com.android.internal.R.layout.search_bar);
 
-        theWindow.setLayout(ViewGroup.LayoutParams.FILL_PARENT,
-                // taking up the whole window (even when transparent) is less than ideal,
-                // but necessary to show the popup window until the window manager supports
-                // having windows anchored by their parent but not clipped by them.
-                ViewGroup.LayoutParams.FILL_PARENT);
+        Window theWindow = getWindow();
         WindowManager.LayoutParams lp = theWindow.getAttributes();
+        lp.type = WindowManager.LayoutParams.TYPE_SEARCH_BAR;
+        lp.width = ViewGroup.LayoutParams.FILL_PARENT;
+        // taking up the whole window (even when transparent) is less than ideal,
+        // but necessary to show the popup window until the window manager supports
+        // having windows anchored by their parent but not clipped by them.
+        lp.height = ViewGroup.LayoutParams.FILL_PARENT;
+        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         theWindow.setAttributes(lp);
 
@@ -232,10 +234,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         // Save voice intent for later queries/launching
         mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        mVoiceWebSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mVoiceWebSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
         
         mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         
         mLocationManager =
                 (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
@@ -276,12 +280,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     public boolean show(String initialQuery, boolean selectInitialQuery,
             ComponentName componentName, Bundle appSearchData, boolean globalSearch) {
-        if (isShowing()) {
-            // race condition - already showing but not handling events yet.
-            // in this case, just discard the "show" request
-            return true;
-        }
-        
+
         // Reset any stored values from last time dialog was shown.
         mStoredComponentName = null;
         mStoredAppSearchData = null;
@@ -439,11 +438,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         super.onStop();
         
         stopLocationUpdates();
-        
-        // TODO: Removing the listeners means that they never get called, since 
-        // Dialog.dismissDialog() calls onStop() before sendDismissMessage().
-        setOnCancelListener(null);
-        setOnDismissListener(null);
         
         // stop receiving broadcasts (throws exception if none registered)
         try {
@@ -652,15 +646,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         mSearchAutoComplete.setDropDownAnimationStyle(0); // no animation
         mSearchAutoComplete.setThreshold(mSearchable.getSuggestThreshold());
+        // we dismiss the entire dialog instead
+        mSearchAutoComplete.setDropDownDismissedOnCompletion(false);
 
         if (mGlobalSearchMode) {
             mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in
-            mSearchAutoComplete.setDropDownDismissedOnCompletion(false);
             mSearchAutoComplete.setDropDownBackgroundResource(
                     com.android.internal.R.drawable.search_dropdown_background);
         } else {
             mSearchAutoComplete.setDropDownAlwaysVisible(false);
-            mSearchAutoComplete.setDropDownDismissedOnCompletion(true);
             mSearchAutoComplete.setDropDownBackgroundResource(
                     com.android.internal.R.drawable.search_dropdown_background_apps);
         }
@@ -1202,10 +1196,23 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     protected boolean launchSuggestion(int position, int actionKey, String actionMsg) {
         Cursor c = mSuggestionsAdapter.getCursor();
         if ((c != null) && c.moveToPosition(position)) {
-            mSuggestionsAdapter.callCursorOnClick(c, position);
+
+            Intent intent = createIntentFromSuggestion(c, actionKey, actionMsg);
+
+            // report back about the click
+            if (mGlobalSearchMode) {
+                // in global search mode, do it via cursor
+                mSuggestionsAdapter.callCursorOnClick(c, position);
+            } else if (intent != null
+                    && mPreviousComponents != null
+                    && !mPreviousComponents.isEmpty()) {
+                // in-app search (and we have pivoted in as told by mPreviousComponents,
+                // which is used for keeping track of what we pop back to when we are pivoting into
+                // in app search.)
+                reportInAppClickToGlobalSearch(c, intent);
+            }
 
             // launch the intent
-            Intent intent = createIntentFromSuggestion(c, actionKey, actionMsg);
             launchIntent(intent);
 
             return true;
@@ -1214,7 +1221,96 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
 
     /**
-     * Launches an intent. Also dismisses the search dialog if not in global search mode.
+     * Report a click from an in app search result back to global search for shortcutting porpoises.
+     *
+     * @param c The cursor that is pointing to the clicked position.
+     * @param intent The intent that will be launched for the click.
+     */
+    private void reportInAppClickToGlobalSearch(Cursor c, Intent intent) {
+        // for in app search, still tell global search via content provider
+        Uri uri = getClickReportingUri();
+        final ContentValues cv = new ContentValues();
+        cv.put(SearchManager.SEARCH_CLICK_REPORT_COLUMN_QUERY, mUserQuery);
+        final ComponentName source = mSearchable.getSearchActivity();
+        cv.put(SearchManager.SEARCH_CLICK_REPORT_COLUMN_COMPONENT, source.flattenToShortString());
+
+        // grab the intent columns from the intent we created since it has additional
+        // logic for falling back on the searchable default
+        cv.put(SearchManager.SUGGEST_COLUMN_INTENT_ACTION, intent.getAction());
+        cv.put(SearchManager.SUGGEST_COLUMN_INTENT_DATA, intent.getDataString());
+        cv.put(SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA,
+                        intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
+
+        // ensure the icons will work for global search
+        cv.put(SearchManager.SUGGEST_COLUMN_ICON_1,
+                        wrapIconForPackage(
+                                source,
+                                getColumnString(c, SearchManager.SUGGEST_COLUMN_ICON_1)));
+        cv.put(SearchManager.SUGGEST_COLUMN_ICON_2,
+                        wrapIconForPackage(
+                                source,
+                                getColumnString(c, SearchManager.SUGGEST_COLUMN_ICON_2)));
+
+        // the rest can be passed through directly
+        cv.put(SearchManager.SUGGEST_COLUMN_FORMAT,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_FORMAT));
+        cv.put(SearchManager.SUGGEST_COLUMN_TEXT_1,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_TEXT_1));
+        cv.put(SearchManager.SUGGEST_COLUMN_TEXT_2,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_TEXT_2));
+        cv.put(SearchManager.SUGGEST_COLUMN_QUERY,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_QUERY));
+        cv.put(SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
+                getColumnString(c, SearchManager.SUGGEST_COLUMN_SHORTCUT_ID));
+        // note: deliberately omitting background color since it is only for global search
+        // "more results" entries
+        mContext.getContentResolver().insert(uri, cv);
+    }
+
+    /**
+     * @return A URI appropriate for reporting a click.
+     */
+    private Uri getClickReportingUri() {
+        Uri.Builder uriBuilder = new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(SearchManager.SEARCH_CLICK_REPORT_AUTHORITY);
+
+        uriBuilder.appendPath(SearchManager.SEARCH_CLICK_REPORT_URI_PATH);
+
+        return uriBuilder
+                .query("")     // TODO: Remove, workaround for a bug in Uri.writeToParcel()
+                .fragment("")  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
+                .build();
+    }
+
+    /**
+     * Wraps an icon for a particular package.  If the icon is a resource id, it is converted into
+     * an android.resource:// URI.
+     *
+     * @param source The source of the icon
+     * @param icon The icon retrieved from a suggestion column
+     * @return An icon string appropriate for the package.
+     */
+    private String wrapIconForPackage(ComponentName source, String icon) {
+        if (icon == null || icon.length() == 0 || "0".equals(icon)) {
+            // SearchManager specifies that null or zero can be returned to indicate
+            // no icon. We also allow empty string.
+            return null;
+        } else if (!Character.isDigit(icon.charAt(0))){
+            return icon;
+        } else {
+            String packageName = source.getPackageName();
+            return new Uri.Builder()
+                    .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                    .authority(packageName)
+                    .encodedPath(icon)
+                    .toString();
+        }
+    }
+
+    /**
+     * Launches an intent and dismisses the search dialog (unless the intent
+     * is one of the special intents that modifies the state of the search dialog).
      */
     private void launchIntent(Intent intent) {
         if (intent == null) {
@@ -1223,9 +1319,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (handleSpecialIntent(intent)){
             return;
         }
-        if (!mGlobalSearchMode) {
-            dismiss();
-        }
+        dismiss();
         getContext().startActivity(intent);
     }
     
@@ -1244,7 +1338,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
     
     /**
-     * Handles SearchManager#INTENT_ACTION_CHANGE_SOURCE.
+     * Handles {@link SearchManager#INTENT_ACTION_CHANGE_SEARCH_SOURCE}.
      */
     private void handleChangeSourceIntent(Intent intent) {
         Uri dataUri = intent.getData();
@@ -1408,6 +1502,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             int actionKey, String actionMsg) {
         // Now build the Intent
         Intent intent = new Intent(action);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (data != null) {
             intent.setData(data);
         }
@@ -1492,14 +1587,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         private boolean isEmpty() {
             return TextUtils.getTrimmedLength(getText()) == 0;
         }
-        
-        /**
-         * Clears the entered text.
-         */
-        private void clear() {
-            setText("");
-        }
-        
+
         /**
          * We override this method to avoid replacing the query box text
          * when a suggestion is clicked.

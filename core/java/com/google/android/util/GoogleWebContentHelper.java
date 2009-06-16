@@ -131,6 +131,10 @@ public class GoogleWebContentHelper {
         return this;
     }
 
+    /**
+     * Loads data into the webview and also provides a failback url
+     * @return This {@link GoogleWebContentHelper} so methods can be chained.
+     */
     public GoogleWebContentHelper loadDataWithFailUrl(String base, String data, 
         String mimeType, String encoding, String failUrl) {
         ensureViews();

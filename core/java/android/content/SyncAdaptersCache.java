@@ -16,32 +16,10 @@
 
 package android.content;
 
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.pm.RegisteredServicesCache;
-import android.content.res.XmlResourceParser;
 import android.content.res.TypedArray;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.util.Log;
 import android.util.AttributeSet;
-import android.util.Xml;
-
-import java.io.IOException;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import com.google.android.collect.Maps;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParser;
 
 /**
  * A cache of services that export the {@link android.content.ISyncAdapter} interface.
@@ -58,7 +36,7 @@ import org.xmlpull.v1.XmlPullParser;
         super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME);
     }
 
-    public SyncAdapterType parseServiceAttributes(AttributeSet attrs) {
+    public SyncAdapterType parseServiceAttributes(String packageName, AttributeSet attrs) {
         TypedArray sa = mContext.getResources().obtainAttributes(attrs,
                 com.android.internal.R.styleable.SyncAdapter);
         try {

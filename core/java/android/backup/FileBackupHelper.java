@@ -20,36 +20,84 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileDescriptor;
 
 /** @hide */
 public class FileBackupHelper {
     private static final String TAG = "FileBackupHelper";
 
+    Context mContext;
+    String mKeyPrefix;
+
+    public FileBackupHelper(Context context) {
+        mContext = context;
+    }
+
+    public FileBackupHelper(Context context, String keyPrefix) {
+        mContext = context;
+        mKeyPrefix = keyPrefix;
+    }
+
     /**
      * Based on oldState, determine which of the files from the application's data directory
      * need to be backed up, write them to the data stream, and fill in newState with the
      * state as it exists now.
      */
-    public static void performBackup(Context context,
-            ParcelFileDescriptor oldState, BackupDataOutput data,
+    public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState, String[] files) {
-        String basePath = context.getFilesDir().getAbsolutePath();
-        performBackup_checked(basePath, oldState, data, newState, files);
+        // file names
+        File base = mContext.getFilesDir();
+        final int N = files.length;
+        String[] fullPaths = new String[N];
+        for (int i=0; i<N; i++) {
+            fullPaths[i] = (new File(base, files[i])).getAbsolutePath();
+        }
+
+        // keys
+        String[] keys = makeKeys(mKeyPrefix, files);
+
+        // go
+        performBackup_checked(oldState, data, newState, fullPaths, keys);
+    }
+
+    /**
+     * If keyPrefix is not null, prepend it to each of the strings in <code>original</code>;
+     * otherwise, return original.
+     */
+    static String[] makeKeys(String keyPrefix, String[] original) {
+        if (keyPrefix != null) {
+            String[] keys;
+            final int N = original.length;
+            keys = new String[N];
+            for (int i=0; i<N; i++) {
+                keys[i] = keyPrefix + ':' + original[i];
+            }
+            return keys;
+        } else {
+            return original;
+        }
     }
 
     /**
      * Check the parameters so the native code doens't have to throw all the exceptions
      * since it's easier to do that from java.
      */
-    static void performBackup_checked(String basePath,
-            ParcelFileDescriptor oldState, BackupDataOutput data,
-            ParcelFileDescriptor newState, String[] files) {
+    static void performBackup_checked(ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState, String[] files, String[] keys) {
         if (files.length == 0) {
             return;
         }
-        if (basePath == null) {
-            throw new NullPointerException();
+        // files must be all absolute paths
+        for (String f: files) {
+            if (f.charAt(0) != '/') {
+                throw new RuntimeException("files must have all absolute paths: " + f);
+            }
+        }
+        // the length of files and keys must be the same
+        if (files.length != keys.length) {
+            throw new RuntimeException("files.length=" + files.length
+                    + " keys.length=" + keys.length);
         }
         // oldStateFd can be null
         FileDescriptor oldStateFd = oldState != null ? oldState.getFileDescriptor() : null;
@@ -58,13 +106,14 @@ public class FileBackupHelper {
             throw new NullPointerException();
         }
 
-        int err = performBackup_native(basePath, oldStateFd, data.mBackupWriter, newStateFd, files);
+        int err = performBackup_native(oldStateFd, data.mBackupWriter, newStateFd, files, keys);
 
         if (err != 0) {
-            throw new RuntimeException("Backup failed"); // TODO: more here
+            // TODO: more here
+            throw new RuntimeException("Backup failed 0x" + Integer.toHexString(err));
         }
     }
 
-    native private static int performBackup_native(String basePath, FileDescriptor oldState,
-            int data, FileDescriptor newState, String[] files);
+    native private static int performBackup_native(FileDescriptor oldState,
+            int data, FileDescriptor newState, String[] files, String[] keys);
 }

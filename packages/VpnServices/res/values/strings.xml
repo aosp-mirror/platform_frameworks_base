@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">%s VPN %s</string>
+    <string name="vpn_notification_connected">connected</string>
+    <string name="vpn_notification_disconnected">disconnected</string>
+    <string name="vpn_notification_connected_message">Up time: %s</string>
+</resources>
+

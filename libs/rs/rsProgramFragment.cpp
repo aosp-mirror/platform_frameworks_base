@@ -212,6 +212,14 @@ RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc)
     return pf;
 }
 
+void rsi_ProgramFragmentDestroy(Context *rsc, RsProgramFragment vpf)
+{
+    ProgramFragment *pf = (ProgramFragment *)vpf;
+    if (pf->getName()) {
+        rsc->removeName(pf);
+    }
+    pf->decRef();
+}
 
 
 }

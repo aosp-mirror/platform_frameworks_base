@@ -34,6 +34,12 @@ public class Browser {
         Uri.parse("content://browser/bookmarks");
 
     /**
+     * The inline scheme to show embedded content in a browser.
+     * @hide
+     */
+    public static final Uri INLINE_URI = Uri.parse("inline:");
+
+    /**
      * The name of extra data when starting Browser with ACTION_VIEW or
      * ACTION_SEARCH intent.
      * <p>
@@ -53,7 +59,37 @@ public class Browser {
      * identifier.
      */
     public static final String EXTRA_APPLICATION_ID =
-            "com.android.browser.application_id";
+        "com.android.browser.application_id";
+
+    /**
+     * The content to be rendered when url's scheme is inline.
+     * @hide
+     */
+    public static final String EXTRA_INLINE_CONTENT ="com.android.browser.inline.content";
+
+    /**
+     * The encoding of the inlined content for inline scheme.
+     * @hide
+     */
+    public static final String EXTRA_INLINE_ENCODING ="com.android.browser.inline.encoding";
+
+    /**
+     * The url used when the inline content is falied to render.
+     * @hide
+     */
+    public static final String EXTRA_INLINE_FAILURL ="com.android.browser.inline.failurl";
+
+    /**
+     * The name of the extra data in the VIEW intent. The data is in boolean.
+     * <p>
+     * If the Browser is handling the intent and the setting for
+     * USE_LOCATION_FOR_SERVICES is allow, the Browser will send the location in
+     * the POST data if this extra data is presented and it is true.
+     * <p>
+     * pending api approval
+     * @hide
+     */
+    public static final String EXTRA_APPEND_LOCATION = "com.android.browser.append_location";
 
     /* if you change column order you must also change indices
        below */

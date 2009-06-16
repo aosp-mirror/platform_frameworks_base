@@ -93,8 +93,10 @@ public class GestureOverlayView extends FrameLayout {
 
     private float mTotalLength;
     private boolean mIsGesturing = false;
+    private boolean mPreviousWasGesturing = false;
     private boolean mInterceptEvents = true;
     private boolean mIsListeningForGestures;
+    private boolean mResetGesture;
 
     // current gesture
     private Gesture mCurrentGesture;
@@ -272,6 +274,14 @@ public class GestureOverlayView extends FrameLayout {
         return mCurrentGesture;
     }
 
+    public long getFadeOffset() {
+        return mFadeOffset;
+    }
+
+    public void setFadeOffset(long fadeOffset) {
+        mFadeOffset = fadeOffset;
+    }
+
     public void setGesture(Gesture gesture) {
         if (mCurrentGesture != null) {
             clear(false);
@@ -284,9 +294,12 @@ public class GestureOverlayView extends FrameLayout {
         final RectF bounds = new RectF();
         path.computeBounds(bounds, true);
 
+        // TODO: The path should also be scaled to fit inside this view
         mPath.rewind();
-        mPath.addPath(path, (getWidth() - bounds.width()) / 2.0f,
-                (getHeight() - bounds.height()) / 2.0f);
+        mPath.addPath(path, -bounds.left + (getWidth() - bounds.width()) / 2.0f,
+                -bounds.top + (getHeight() - bounds.height()) / 2.0f);
+
+        mResetGesture = true;
 
         invalidate();
     }
@@ -348,6 +361,13 @@ public class GestureOverlayView extends FrameLayout {
         invalidate();
     }
 
+    /**
+     * @hide
+     */
+    public Paint getGesturePaint() {
+        return mGesturePaint;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
@@ -365,13 +385,15 @@ public class GestureOverlayView extends FrameLayout {
     }
 
     public void clear(boolean animated) {
-        clear(animated, false);
+        clear(animated, false, true);
     }
 
-    private void clear(boolean animated, boolean fireActionPerformed) {
+    private void clear(boolean animated, boolean fireActionPerformed, boolean immediate) {
         setPaintAlpha(255);
         removeCallbacks(mFadingOut);
+        mResetGesture = false;
         mFadingOut.fireActionPerformed = fireActionPerformed;
+        mFadingOut.resetMultipleStrokes = false;
 
         if (animated && mCurrentGesture != null) {
             mFadingAlpha = 1.0f;
@@ -385,8 +407,15 @@ public class GestureOverlayView extends FrameLayout {
             mIsFadingOut = false;
             mFadingHasStarted = false;
 
-            if (fireActionPerformed) {
-                post(mFadingOut);
+            if (immediate) {
+                mCurrentGesture = null;
+                mPath.rewind();
+                invalidate();
+            } else if (fireActionPerformed) {
+                postDelayed(mFadingOut, mFadeOffset);
+            } else if (mGestureStrokeType == GESTURE_STROKE_TYPE_MULTIPLE) {
+                mFadingOut.resetMultipleStrokes = true;
+                postDelayed(mFadingOut, mFadeOffset);
             } else {
                 mCurrentGesture = null;
                 mPath.rewind();
@@ -425,6 +454,7 @@ public class GestureOverlayView extends FrameLayout {
 
         clear(false);
         mIsGesturing = false;
+        mPreviousWasGesturing = false;
         mStrokeBuffer.clear();
 
         final ArrayList<OnGesturingListener> otherListeners = mOnGesturingListeners;
@@ -442,8 +472,10 @@ public class GestureOverlayView extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (isEnabled()) {
-            boolean cancelDispatch = (mIsGesturing || (mCurrentGesture != null &&
-                    mCurrentGesture.getStrokesCount() > 0)) && mInterceptEvents;
+            final boolean cancelDispatch = (mIsGesturing || (mCurrentGesture != null &&
+                    mCurrentGesture.getStrokesCount() > 0 && mPreviousWasGesturing)) &&
+                    mInterceptEvents;
+
             processEvent(event);
 
             if (cancelDispatch) {
@@ -451,6 +483,7 @@ public class GestureOverlayView extends FrameLayout {
             }
 
             super.dispatchTouchEvent(event);
+
             return true;
         }
 
@@ -502,8 +535,9 @@ public class GestureOverlayView extends FrameLayout {
         mTotalLength = 0;
         mIsGesturing = false;
 
-        if (mGestureStrokeType == GESTURE_STROKE_TYPE_SINGLE) {
+        if (mGestureStrokeType == GESTURE_STROKE_TYPE_SINGLE || mResetGesture) {
             if (mHandleGestureActions) setCurrentColor(mUncertainGestureColor);
+            mResetGesture = false;
             mCurrentGesture = null;
             mPath.rewind();
         } else if (mCurrentGesture == null || mCurrentGesture.getStrokesCount() == 0) {
@@ -635,9 +669,8 @@ public class GestureOverlayView extends FrameLayout {
                     listeners.get(i).onGestureEnded(this, event);
                 }
 
-                if (mHandleGestureActions) {
-                    clear(mFadeEnabled, mIsGesturing);
-                }
+                clear(mHandleGestureActions && mFadeEnabled, mHandleGestureActions && mIsGesturing,
+                        false);
             } else {
                 cancelGesture(event);
 
@@ -647,6 +680,7 @@ public class GestureOverlayView extends FrameLayout {
         }
 
         mStrokeBuffer.clear();
+        mPreviousWasGesturing = mIsGesturing;
         mIsGesturing = false;
 
         final ArrayList<OnGesturingListener> listeners = mOnGesturingListeners;
@@ -677,6 +711,7 @@ public class GestureOverlayView extends FrameLayout {
 
     private class FadeOutRunnable implements Runnable {
         boolean fireActionPerformed;
+        boolean resetMultipleStrokes;
 
         public void run() {
             if (mIsFadingOut) {
@@ -688,6 +723,7 @@ public class GestureOverlayView extends FrameLayout {
                         fireOnGesturePerformed();
                     }
 
+                    mPreviousWasGesturing = false;
                     mIsFadingOut = false;
                     mFadingHasStarted = false;
                     mPath.rewind();
@@ -701,12 +737,15 @@ public class GestureOverlayView extends FrameLayout {
                     setPaintAlpha((int) (255 * mFadingAlpha));
                     postDelayed(this, FADE_ANIMATION_RATE);
                 }
+            } else if (resetMultipleStrokes) {
+                mResetGesture = true;
             } else {
                 fireOnGesturePerformed();
 
                 mFadingHasStarted = false;
                 mPath.rewind();
                 mCurrentGesture = null;
+                mPreviousWasGesturing = false;
                 setPaintAlpha(255);
             }
 

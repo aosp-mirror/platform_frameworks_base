@@ -729,6 +729,7 @@ status_t compileResourceFile(Bundle* bundle,
             String16 curType;
             int32_t curFormat = ResTable_map::TYPE_ANY;
             bool curIsBag = false;
+            bool curIsBagReplaceOnOverwrite = false;
             bool curIsStyled = false;
             bool curIsPseudolocalizable = false;
             bool localHasErrors = false;
@@ -1171,6 +1172,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curTag = &array16;
                 curType = array16;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
                 ssize_t formatIdx = block.indexOfAttribute(NULL, "format");
                 if (formatIdx >= 0) {
                     String16 formatStr = String16(block.getAttributeStringValue(
@@ -1189,12 +1191,14 @@ status_t compileResourceFile(Bundle* bundle,
                 curType = array16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
                 curIsPseudolocalizable = true;
             } else if (strcmp16(block.getElementName(&len), integer_array16.string()) == 0) {
                 curTag = &integer_array16;
                 curType = array16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_INTEGER;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
             } else {
                 SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                         "Found tag %s where item is expected\n",
@@ -1229,9 +1233,10 @@ status_t compileResourceFile(Bundle* bundle,
                 }
 
                 if (!localHasErrors) {
-                    err = outTable->startBag(SourcePos(in->getPrintableSource(), block.getLineNumber()),
-                                             myPackage, curType, ident, parentIdent, &curParams, 
-                                             overwrite);
+                    err = outTable->startBag(SourcePos(in->getPrintableSource(),
+                            block.getLineNumber()), myPackage, curType, ident,
+                            parentIdent, &curParams,
+                            overwrite, curIsBagReplaceOnOverwrite);
                     if (err != NO_ERROR) {
                         hasErrors = localHasErrors = true;
                     }
@@ -1511,8 +1516,9 @@ status_t ResourceTable::addEntry(const SourcePos& sourcePos,
                String8(value).string());
     }
 #endif
-    
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params, doSetIndex);
+
+    sp<Entry> e = getEntry(package, type, name, sourcePos, overwrite,
+                           params, doSetIndex);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -1529,6 +1535,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                                  const String16& name,
                                  const String16& bagParent,
                                  const ResTable_config* params,
+                                 bool overlay,
                                  bool replace, bool isId)
 {
     status_t result = NO_ERROR;
@@ -1549,8 +1556,12 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                sourcePos.file.striing(), sourcePos.line, String8(type).string());
     }
 #endif
-    
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params);
+    if (overlay && !hasBagOrEntry(package, type, name)) {
+        sourcePos.error("Can't add new bags in an overlay.  See '%s'\n",
+                        String8(name).string());
+        return UNKNOWN_ERROR;
+    }
+    sp<Entry> e = getEntry(package, type, name, sourcePos, overlay, params);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -1571,7 +1582,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
         return result;
     }
 
-    if (replace) { 
+    if (overlay && replace) { 
         return e->emptyBag(sourcePos);
     }
     return result;
@@ -1604,8 +1615,7 @@ status_t ResourceTable::addBag(const SourcePos& sourcePos,
                sourcePos.file.striing(), sourcePos.line, String8(type).string());
     }
 #endif
-    
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params);
+    sp<Entry> e = getEntry(package, type, name, sourcePos, replace, params);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -2888,7 +2898,7 @@ status_t ResourceTable::Entry::setItem(const SourcePos& sourcePos,
                         mItem.sourcePos.file.string(), mItem.sourcePos.line);
         return UNKNOWN_ERROR;
     }
-    
+
     mType = TYPE_ITEM;
     mItem = item;
     mItemFormat = format;
@@ -3208,11 +3218,17 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
 sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                                                        const SourcePos& sourcePos,
                                                        const ResTable_config* config,
-                                                       bool doSetIndex)
+                                                       bool doSetIndex,
+                                                       bool overlay)
 {
     int pos = -1;
     sp<ConfigList> c = mConfigs.valueFor(entry);
     if (c == NULL) {
+        if (overlay == true) {
+            sourcePos.error("Resource %s appears in overlay but not"
+                            " in the base package.\n", String8(entry).string());
+            return NULL;
+        }
         c = new ConfigList(entry, sourcePos);
         mConfigs.add(entry, c);
         pos = (int)mOrderedConfigs.size();
@@ -3511,6 +3527,7 @@ sp<ResourceTable::Entry> ResourceTable::getEntry(const String16& package,
                                                  const String16& type,
                                                  const String16& name,
                                                  const SourcePos& sourcePos,
+                                                 bool overlay,
                                                  const ResTable_config* config,
                                                  bool doSetIndex)
 {
@@ -3518,7 +3535,7 @@ sp<ResourceTable::Entry> ResourceTable::getEntry(const String16& package,
     if (t == NULL) {
         return NULL;
     }
-    return t->getEntry(name, sourcePos, config, doSetIndex);
+    return t->getEntry(name, sourcePos, config, doSetIndex, overlay);
 }
 
 sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,

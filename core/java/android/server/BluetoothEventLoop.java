@@ -21,15 +21,15 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothIntent;
-import android.bluetooth.IBluetoothDeviceCallback;
+import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * TODO: Move this to
@@ -47,7 +47,6 @@ class BluetoothEventLoop {
     private boolean mStarted;
     private boolean mInterrupted;
     private final HashMap<String, Integer> mPasskeyAgentRequestData;
-    private final HashMap<String, IBluetoothDeviceCallback> mGetRemoteServiceChannelCallbacks;
     private final BluetoothDeviceService mBluetoothService;
     private final Context mContext;
 
@@ -89,10 +88,8 @@ class BluetoothEventLoop {
         mBluetoothService = bluetoothService;
         mContext = context;
         mPasskeyAgentRequestData = new HashMap();
-        mGetRemoteServiceChannelCallbacks = new HashMap();
         initializeNativeDataNative();
     }
-    private native void initializeNativeDataNative();
 
     protected void finalize() throws Throwable {
         try {
@@ -101,19 +98,10 @@ class BluetoothEventLoop {
             super.finalize();
         }
     }
-    private native void cleanupNativeDataNative();
 
-    /* pacakge */ HashMap<String, IBluetoothDeviceCallback> getRemoteServiceChannelCallbacks() {
-        return mGetRemoteServiceChannelCallbacks;
-    }
-
-    /* pacakge */ HashMap<String, Integer> getPasskeyAgentRequestData() {
+    /* package */ HashMap<String, Integer> getPasskeyAgentRequestData() {
         return mPasskeyAgentRequestData;
     }
-
-    private native void startEventLoopNative();
-    private native void stopEventLoopNative();
-    private native boolean isEventLoopRunningNative();
 
     /* package */ void start() {
 
@@ -134,79 +122,37 @@ class BluetoothEventLoop {
         return isEventLoopRunningNative();
     }
 
-    /*package*/ void onModeChanged(String bluezMode) {
-        int mode = BluetoothDeviceService.bluezStringToScanMode(bluezMode);
-        if (mode >= 0) {
-            Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
-            intent.putExtra(BluetoothIntent.SCAN_MODE, mode);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+    private void onDeviceFound(String address, String[] properties) {
+        if (properties == null) {
+            Log.e(TAG, "ERROR: Remote device properties are null");
+            return;
+        }
+        mBluetoothService.addRemoteDeviceProperties(address, properties);
+        String rssi = mBluetoothService.getRemoteDeviceProperty(address, "RSSI");
+        String classValue = mBluetoothService.getRemoteDeviceProperty(address, "Class");
+
+        if (rssi != null && classValue != null) {
+            Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_FOUND_ACTION);
+            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.CLASS, classValue);
+            intent.putExtra(BluetoothIntent.RSSI, (short)Integer.valueOf(rssi).intValue());
+
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+        } else {
+            log ("RSSI: " + rssi + " or ClassValue: " + classValue +
+                    " for remote device: " + address + " is null");
         }
     }
 
-    private void onDiscoveryStarted() {
-        mBluetoothService.setIsDiscovering(true);
-        Intent intent = new Intent(BluetoothIntent.DISCOVERY_STARTED_ACTION);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    private void onDiscoveryCompleted() {
-        mBluetoothService.setIsDiscovering(false);
-        Intent intent = new Intent(BluetoothIntent.DISCOVERY_COMPLETED_ACTION);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
+    private void onDeviceDisappeared(String address) {
+        mBluetoothService.removeRemoteDeviceProperties(address);
 
-    private void onRemoteDeviceFound(String address, int deviceClass, short rssi) {
-        Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_FOUND_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        intent.putExtra(BluetoothIntent.CLASS, deviceClass);
-        intent.putExtra(BluetoothIntent.RSSI, rssi);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    private void onRemoteDeviceDisappeared(String address) {
         Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_DISAPPEARED_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
     }
-    private void onRemoteClassUpdated(String address, int deviceClass) {
-        Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_CLASS_UPDATED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        intent.putExtra(BluetoothIntent.CLASS, deviceClass);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    private void onRemoteDeviceConnected(String address) {
-        Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    private void onRemoteDeviceDisconnectRequested(String address) {
-        Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_DISCONNECT_REQUESTED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    private void onRemoteDeviceDisconnected(String address) {
-        Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_DISCONNECTED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    private void onRemoteNameUpdated(String address, String name) {
-        Intent intent = new Intent(BluetoothIntent.REMOTE_NAME_UPDATED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        intent.putExtra(BluetoothIntent.NAME, name);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    private void onRemoteNameFailed(String address) {
-        Intent intent = new Intent(BluetoothIntent.REMOTE_NAME_FAILED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
-    private void onRemoteNameChanged(String address, String name) {
-        Intent intent = new Intent(BluetoothIntent.REMOTE_NAME_UPDATED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        intent.putExtra(BluetoothIntent.NAME, name);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-    }
 
-    private void onCreateBondingResult(String address, int result) {
+    private void onCreatePairedDeviceResult(String address, int result) {
         address = address.toUpperCase();
         if (result == BluetoothError.SUCCESS) {
             mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDED);
@@ -259,23 +205,118 @@ class BluetoothEventLoop {
         mBluetoothService.getBondState().attempt(address);
     }
 
-    private void onBondingCreated(String address) {
-        mBluetoothService.getBondState().setBondState(address.toUpperCase(),
-                                                      BluetoothDevice.BOND_BONDED);
+    private void onDeviceCreated(String deviceObjectPath) {
+        // do nothing.
+        return;
     }
 
-    private void onBondingRemoved(String address) {
-        mBluetoothService.getBondState().setBondState(address.toUpperCase(),
-                BluetoothDevice.BOND_NOT_BONDED, BluetoothDevice.UNBOND_REASON_REMOVED);
+    private void onDeviceRemoved(String deviceObjectPath) {
+        String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
+        if (address != null)
+            mBluetoothService.getBondState().setBondState(address.toUpperCase(),
+                    BluetoothDevice.BOND_NOT_BONDED, BluetoothDevice.UNBOND_REASON_REMOVED);
     }
 
-    private void onNameChanged(String name) {
-        Intent intent = new Intent(BluetoothIntent.NAME_CHANGED_ACTION);
-        intent.putExtra(BluetoothIntent.NAME, name);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+    /*package*/ void onPropertyChanged(String[] propValues) {
+        String name = propValues[0];
+        if (name.equals("Name")) {
+            Intent intent = new Intent(BluetoothIntent.NAME_CHANGED_ACTION);
+            intent.putExtra(BluetoothIntent.NAME, propValues[1]);
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+            mBluetoothService.setProperty(name, propValues[1]);
+        } else if (name.equals("Pairable") || name.equals("Discoverable")) {
+            String pairable = name.equals("Pairable") ? propValues[1] :
+                mBluetoothService.getProperty("Pairable");
+            String discoverable = name.equals("Discoverable") ? propValues[1] :
+                mBluetoothService.getProperty("Discoverable");
+
+            // This shouldn't happen, unless Adapter Properties are null.
+            if (pairable == null || discoverable == null)
+                return;
+
+            int mode = BluetoothDeviceService.bluezStringToScanMode(
+                    pairable.equals("true"),
+                    discoverable.equals("true"));
+            if (mode >= 0) {
+                Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
+                intent.putExtra(BluetoothIntent.SCAN_MODE, mode);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+            }
+            mBluetoothService.setProperty(name, propValues[1]);
+        } else if (name.equals("Discovering")) {
+            Intent intent;
+            if (propValues[1].equals("true")) {
+                mBluetoothService.setIsDiscovering(true);
+                intent = new Intent(BluetoothIntent.DISCOVERY_STARTED_ACTION);
+            } else {
+                // Stop the discovery.
+                mBluetoothService.cancelDiscovery();
+                mBluetoothService.setIsDiscovering(false);
+                intent = new Intent(BluetoothIntent.DISCOVERY_COMPLETED_ACTION);
+            }
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+            mBluetoothService.setProperty(name, propValues[1]);
+        } else if (name.equals("Devices")) {
+            String value = "";
+            for (int i = 1; i < propValues.length; i++) {
+                value = value + propValues[i] + ',';
+            }
+            mBluetoothService.setProperty(name, value.equals("") ? null : value);
+        } else if (name.equals("Powered")) {
+            // bluetoothd has restarted, re-read all our properties.
+            // Note: bluez only sends this property change when it restarts.
+            if (propValues[1].equals("true"))
+                onRestartRequired();
+        }
     }
 
-    private void onPasskeyAgentRequest(String address, int nativeData) {
+    private void onDevicePropertyChanged(String deviceObjectPath, String[] propValues) {
+        String name = propValues[0];
+        String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
+        if (address == null) {
+            Log.e(TAG, "onDevicePropertyChanged: Address of the remote device in null");
+            return;
+        }
+        if (name.equals("Name")) {
+            Intent intent = new Intent(BluetoothIntent.REMOTE_NAME_UPDATED_ACTION);
+            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.NAME, propValues[1]);
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
+        } else if (name.equals("Class")) {
+            Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_CLASS_UPDATED_ACTION);
+            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.CLASS, propValues[1]);
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
+        } else if (name.equals("Connected")) {
+            Intent intent = null;
+            if (propValues[1].equals("true")) {
+                intent = new Intent(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION);
+            } else {
+                intent = new Intent(BluetoothIntent.REMOTE_DEVICE_DISCONNECTED_ACTION);
+            }
+            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
+        } else if (name.equals("UUIDs")) {
+            String uuid = "" ;
+            for (int i = 1; i < propValues.length; i++) {
+                uuid = uuid + propValues[i] + ",";
+            }
+            mBluetoothService.setRemoteDeviceProperty(address, name,
+                                                        uuid.equals("") ? null : uuid);
+        }
+
+    }
+
+    private void onRequestPinCode(String objectPath, int nativeData) {
+        String address = mBluetoothService.getAddressFromObjectPath(objectPath);
+        if (address == null) {
+            Log.e(TAG, "Unable to get device address in onRequestPinCode, returning null");
+            return;
+        }
         address = address.toUpperCase();
         mPasskeyAgentRequestData.put(address, new Integer(nativeData));
 
@@ -309,21 +350,21 @@ class BluetoothEventLoop {
         Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        return;
     }
 
-    private void onPasskeyAgentCancel(String address) {
-        address = address.toUpperCase();
-        mBluetoothService.cancelPin(address);
-        Intent intent = new Intent(BluetoothIntent.PAIRING_CANCEL_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
-        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-        mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
-                                                      BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
-    }
+    private boolean onAgentAuthorize(String objectPath, String deviceUuid) {
+        String address = mBluetoothService.getAddressFromObjectPath(objectPath);
+        if (address == null) {
+            Log.e(TAG, "Unable to get device address in onAuthAgentAuthorize");
+            return false;
+        }
 
-    private boolean onAuthAgentAuthorize(String address, String service, String uuid) {
         boolean authorized = false;
-        if (mBluetoothService.isEnabled() && service.endsWith("service_audio")) {
+        UUID uuid = UUID.fromString(deviceUuid);
+        if (mBluetoothService.isEnabled() && (BluetoothUuid.isAudioSink(uuid) ||
+                                              BluetoothUuid.isAudioSource(uuid) ||
+                                              BluetoothUuid.isAdvAudioDist(uuid))) {
             BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
             authorized = a2dp.getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
@@ -332,30 +373,21 @@ class BluetoothEventLoop {
                 Log.i(TAG, "Rejecting incoming A2DP connection from " + address);
             }
         } else {
-            Log.i(TAG, "Rejecting incoming " + service + " connection from " + address);
+            Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);
         }
         return authorized;
     }
 
-    private void onAuthAgentCancel(String address, String service, String uuid) {
+    private void onAgentCancel() {
         // We immediately response to DBUS Authorize() so this should not
         // usually happen
-        log("onAuthAgentCancel(" + address + ", " + service + ", " + uuid + ")");
-    }
-
-    private void onGetRemoteServiceChannelResult(String address, int channel) {
-        IBluetoothDeviceCallback callback = mGetRemoteServiceChannelCallbacks.get(address);
-        if (callback != null) {
-            mGetRemoteServiceChannelCallbacks.remove(address);
-            try {
-                callback.onGetRemoteServiceChannelResult(address, channel);
-            } catch (RemoteException e) {}
-        }
+        log("onAgentCancel");
     }
 
     private void onRestartRequired() {
         if (mBluetoothService.isEnabled()) {
-            Log.e(TAG, "*** A serious error occured (did hcid crash?) - restarting Bluetooth ***");
+            Log.e(TAG, "*** A serious error occured (did bluetoothd crash?) - " +
+                       "restarting Bluetooth ***");
             mHandler.sendEmptyMessage(EVENT_RESTART_BLUETOOTH);
         }
     }
@@ -363,4 +395,10 @@ class BluetoothEventLoop {
     private static void log(String msg) {
         Log.d(TAG, msg);
     }
+
+    private native void initializeNativeDataNative();
+    private native void startEventLoopNative();
+    private native void stopEventLoopNative();
+    private native boolean isEventLoopRunningNative();
+    private native void cleanupNativeDataNative();
 }

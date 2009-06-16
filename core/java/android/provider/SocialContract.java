@@ -18,6 +18,8 @@ package android.provider;
 
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.ContactsContract.Aggregates;
+import android.provider.ContactsContract.Data;
 
 /**
  * The contract between the social provider and applications. Contains
@@ -152,11 +154,19 @@ public class SocialContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "activities");
 
         /**
-         * The content:// style URI for this table filtered to the set of social activities
+         * The content:// URI for this table filtered to the set of social activities
          * authored by a specific {@link android.provider.ContactsContract.Contacts#_ID}.
          */
         public static final Uri CONTENT_AUTHORED_BY_URI =
             Uri.withAppendedPath(CONTENT_URI, "authored_by");
+
+        /**
+         * The {@link Uri} for the latest social activity performed by any
+         * contact aggregated under the specified {@link Aggregates#_ID}. Will
+         * also join with most-present {@link Presence} for this aggregate.
+         */
+        public static final Uri CONTENT_AGGREGATE_STATUS_URI =
+            Uri.withAppendedPath(AUTHORITY_URI, "aggregate_status");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of social

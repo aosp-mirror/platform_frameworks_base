@@ -30,6 +30,11 @@
     <string name="terabyteShort">TB</string>
     <!-- Suffix added to a number to signify size in petabytes. -->
     <string name="petabyteShort">PB</string>
+    <!-- Format string used to add a suffix like "KB" or "MB" to a number
+         to display a size in kilobytes, megabytes, or other size units.
+         Some languages (like French) will want to add a space between
+         the placeholders. -->
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g><xliff:g id="unit" example="KB">%2$s</xliff:g></string>
 
     <!-- Used in Contacts for a field that has no label and in Note Pad
          for a note with no name. -->
@@ -463,13 +468,6 @@
         forcibly restart other applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setProcessForeground">keep from being stopped</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setProcessForeground">Allows an application to make
-        any process run in the foreground, so it can\'t be killed.
-        Should never be needed for normal applications.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_forceBack">force application to close</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_forceBack">Allows an application to force any
@@ -483,13 +481,6 @@
         internal state of the system. Malicious applications may retrieve
         a wide variety of private and secure information that they should
         never normally need.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_addSystemService">publish low-level services</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_addSystemService">Allows application to publish
-        its own low-level system services. Malicious applications may hijack
-        the system, and steal or corrupt any data on it.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_shutdown">partial shutdown</string>
@@ -548,15 +539,6 @@
     <string name="permdesc_setAlwaysFinish">Allows an application
         to control whether activities are always finished as soon as they
         go to the background. Never needed for normal applications.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fotaUpdate">automatically install system updates</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fotaUpdate">Allows an application to receive
-        notifications about pending system updates and trigger their
-        installation. Malicious applications may use this to corrupt the system
-        with unauthorized updates, or generally interfere with the update
-        process.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_batteryStats">modify battery statistics</string>
@@ -1538,49 +1520,12 @@
     <string name="VideoView_error_button">OK</string>
 
 
-    <!-- Format indicating a range of time, from a time on one day to a time on another day. 
-         Example: "Mon, Dec 31, 2007, 8am - Tue, Jan 1, 2008, 5pm" -->
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="weekday1" example="Monday">%1$s</xliff:g>, <xliff:g id="date1" example="December 31, 2007">%2$s</xliff:g>, <xliff:g id="time1" example="8am">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Tuesday">%4$s</xliff:g>, <xliff:g id="date2" example="January 1, 2008">%5$s</xliff:g>, <xliff:g id="time2" example="5pm">%6$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of dates, from one date to another.
-         Example: "Mon, Dec 31, 2007 - Tue, Jan 1, 2008" -->
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="weekday1" example="Monday">%1$s</xliff:g>, <xliff:g id="date1" example="Dec 31, 2007">%2$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Thursday">%4$s</xliff:g>, <xliff:g id="date2" example="Jan 1, 2008">%5$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time, from a time on one day to a time on another day.
-         Example: "Dec 31, 2007, 8am - Jan 1, 2008, 5pm" -->
-    <string name="date1_time1_date2_time2">"<xliff:g id="date1" example="Dec 31, 2007">%2$s</xliff:g>, <xliff:g id="time1" example="8am">%3$s</xliff:g> \u2013 <xliff:g id="date2" example="Jan 1, 2008">%5$s</xliff:g>, <xliff:g id="time2" example="5pm">%6$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates, from one date to another.
-         Example: "Dec 31, 2007 - Jan 1, 2008" -->
-    <string name="date1_date2">"<xliff:g id="date1" example="Dec 31, 2007">%2$s</xliff:g> \u2013 <xliff:g id="date2" example="Jan 1, 2008">%5$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of times, from one time to another.
-         Example: "10:00 - 11:00 am" -->
-    <string name="time1_time2">"<xliff:g id="time1" example="10:00">%1$s</xliff:g> \u2013 <xliff:g id="time2" example="11:00">%2$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of times on a particular date.
-         Example: "8:00 - 11:00 am, Mon, Dec 31, 2007" -->
-    <string name="time_wday_date">"<xliff:g id="time_range" example="8:00 - 11:00 am">%1$s</xliff:g>, <xliff:g id="weekday" example="Mon">%2$s</xliff:g>, <xliff:g id="date" example="Dec 31, 2007">%3$s</xliff:g>"</string>
-
-    <!-- Format indicating a weekday and date.
-         Example: "Mon, Dec 31, 2007" -->
-    <string name="wday_date">"<xliff:g id="weekday" example="Monday">%2$s</xliff:g>, <xliff:g id="date" example="Dec 31, 2007">%3$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of times on a particular date.
-         Example: "8:00 - 11:00 am, Dec 31, 2007" -->
-    <string name="time_date">"<xliff:g id="time_range" example="8:00 - 11:00 am">%1$s</xliff:g>, <xliff:g id="date" example="Dec 31, 2007">%3$s</xliff:g>"</string>
-
-    <!-- Format indicating a specific date and time.
-         Example: "Dec 31, 2007, 11:00 am" -->
-    <string name="date_time">"<xliff:g id="date" example="Dec 31, 2007">%1$s</xliff:g>, <xliff:g id="time" example="11:00 am">%2$s</xliff:g>"</string>
 
     <!-- Format indicating a relative expression and time.
          Example: "4 hours ago, 11:00 am" -->
     <string name="relative_time">"<xliff:g id="date" example="4 hours ago">%1$s</xliff:g>, <xliff:g id="time" example="11:00 am">%2$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of times on a particular day of the week.
-         Example: "8:00 - 11:00 am, Mon" -->
-    <string name="time_wday">"<xliff:g id="time_range" example="8:00 - 11:00 am">%1$s</xliff:g>, <xliff:g id="weekday" example="Mon">%2$s</xliff:g>"</string>
 
     <!-- Quoted name for 12pm, lowercase -->
     <string name="noon">"noon"</string>
@@ -1591,103 +1536,13 @@
     <!-- Quoted name for 12am, uppercase first letter -->
     <string name="Midnight">"Midnight"</string>
 
-    <!-- Format indicating a range of dates in the same year.
-         Example: "Oct 31 - Nov 3" -->
-    <string name="same_year_md1_md2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates in the same year, with weekday.
-         Example: "Wed, Oct 31 - Sat, Nov 3" -->
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates in the same year.
-         Example: "Oct 31 - Nov 3, 2007" -->
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates in the same year, with weekdays.
-         Example: "Wed, Oct 31 - Sat, Nov 3, 2007" -->
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time from a time on one day to a time on another.
-         Example: "Oct 31, 8:00am - Nov 3, 5:00pm" -->
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time from a time on one day to a time on another, with weekdays.
-         Example: "Wed, Oct 31, 8:00am - Sat, Nov 3, 5:00pm" -->
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id ="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time from a time on one day to a time on another, with years and weekdays.
-         Example: "Oct 31, 2007, 8:00am - Nov 3, 2007, 5:00pm" -->
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time from a time on one day to a time on another.
-     Example: "Wed, Oct 31, 2007, 8:00am - Sat, Nov 3, 2007, 5:00pm" -->
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
 
 
-    <!-- Format indicating a range of (numeric) dates.
-          Example: "10/31 - 11/3" -->
-    <string name="numeric_md1_md2">"<xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates.
-          Example: "Wed, 10/31 - Sat, 11/3" -->
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates.
-          Example: "10/31/2007 - 11/3/2007" -->
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>/<xliff:g id="year1" example="2007">%4$s</xliff:g> \u2013 <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>/<xliff:g id="year2" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates.
-          Example: "Wed, 10/31/2007 - Sat, 11/3/2007" -->
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>/<xliff:g id="year1" example="2007">%4$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>/<xliff:g id="year2" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates and times.
-          Example: "10/31, 8:00am - 11/3, 5:00pm" -->
-    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates and times.
-          Example: "Wed, 10/31, 8:00am - Sat, 11/3, 5:00pm" -->
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates and times.
-          Example: "10/31/2007, 8:00am - 11/3/2007, 5:00pm"  -->
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>/<xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>/<xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates and times.
-          Example: "Wed, 10/31/2007, 8:00am - Sat, 11/3/2007, 5:00pm" -->
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>/<xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>/<xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
 
 
-    <!-- Format indicating a range of dates.
-          Example: "Oct 9 - 10" -->
-    <string name="same_month_md1_md2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="day2" example="3">%8$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of dates.
-          Example: "Tue, Oct 9 - Wed, Oct 10"  -->
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of dates.
-          Example: "Oct 9 - 10, 2007" -->
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of dates.
-          Example: "Tue, Oct 9, 2007 - Wed, Oct 10, 2007"  -->
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates and times.
-          Example: "Oct 9, 8:00am - Oct 10, 5:00pm"  -->
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates and times.
-          Example: "Tue, Oct 9, 8:00am - Wed, Oct 10, 5:00pm"  -->
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates and times.
-          Example: "Oct 9, 2007, 8:00am - Oct 10, 2007, 5:00pm"  -->
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates and times.
-          Example: "Tue, Oct 9, 2007, 8:00am - Wed, Oct 10, 2007, 5:00pm" -->
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
 
 
 

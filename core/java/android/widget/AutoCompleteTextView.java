@@ -123,10 +123,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private AutoCompleteTextView.ListSelectorHider mHideSelector;
 
-    // Indicates whether this AutoCompleteTextView is attached to a window or not
-    // The widget is attached to a window when mAttachCount > 0
-    private int mAttachCount;
-    
     private AutoCompleteTextView.PassThroughClickListener mPassThroughClickListener;
 
     public AutoCompleteTextView(Context context) {
@@ -936,6 +932,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * @param text the selected suggestion in the drop down list
      */
     protected void replaceText(CharSequence text) {
+        clearComposingText();
+
         setText(text);
         // make sure we keep the caret at the end of the text view
         Editable spannable = getText();
@@ -944,7 +942,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     /** {@inheritDoc} */
     public void onFilterComplete(int count) {
-        if (mAttachCount <= 0) return;
+        // Not attached to window, don't update drop-down
+        if (getWindowVisibility() == View.GONE) return;
 
         /*
          * This checks enoughToFilter() again because filtering requests
@@ -983,13 +982,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mAttachCount++;
     }
 
     @Override
     protected void onDetachedFromWindow() {
         dismissDropDown();
-        mAttachCount--;
         super.onDetachedFromWindow();
     }
 

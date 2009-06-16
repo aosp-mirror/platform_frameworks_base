@@ -40,6 +40,7 @@ public:
     void setTextureMatrixEnable(bool e) {mTextureMatrixEnable = e;}
     void setProjectionEnabled(bool e) {mProjectionEnable = e;}
     void setTransformEnable(bool e) {mTransformEnable = e;}
+    void setProjectionEnable(bool e) {mProjectionEnable = e;}
 
 protected:
     bool mDirty;

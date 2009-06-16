@@ -72,19 +72,19 @@ public class SearchablesTest extends AndroidTestCase {
      * TODO:  The metadata source needs to be mocked out because adding
      * searchability metadata via this test is causing it to leak into the
      * real system.  So for now I'm just going to test for existence of the
-     * GoogleSearch app (which is searchable).
+     * GlobalSearch app (which is searchable).
      */
-    public void testSearchableGoogleSearch() {
+    public void testSearchableGlobalSearch() {
         // test basic array & hashmap
         Searchables searchables = new Searchables(mContext);
         searchables.buildSearchableList();
 
         // test linkage from another activity
         // TODO inject this via mocking into the package manager.
-        // TODO for now, just check for searchable GoogleSearch app (this isn't really a unit test)
+        // TODO for now, just check for searchable GlobalSearch app (this isn't really a unit test)
         ComponentName thisActivity = new ComponentName(
-                "com.android.googlesearch", 
-                "com.android.googlesearch.GoogleSearch");
+                "com.android.globalsearch",
+                "com.android.globalsearch.GlobalSearch");
 
         SearchableInfo si = searchables.getSearchableInfo(thisActivity);
         assertNotNull(si);
@@ -93,7 +93,7 @@ public class SearchablesTest extends AndroidTestCase {
         Context appContext = si.getActivityContext(mContext);
         assertNotNull(appContext);
         MoreAsserts.assertNotEqual(appContext, mContext);
-        assertEquals("Google Search", appContext.getString(si.getHintId()));
+        assertEquals("Android Search", appContext.getString(si.getHintId()));
         assertEquals("Google", appContext.getString(si.getLabelId()));
     }
     

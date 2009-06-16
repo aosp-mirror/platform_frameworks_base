@@ -19,6 +19,7 @@
 #include "rsMatrix.h"
 
 #include "acc/acc.h"
+#include "utils/String8.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -27,7 +28,7 @@ using namespace android::renderscript;
 ScriptC::ScriptC()
 {
     mAccScript = NULL;
-    mScript = NULL;
+    memset(&mProgram, 0, sizeof(mProgram));
 }
 
 ScriptC::~ScriptC()
@@ -390,7 +391,15 @@ static rsc_FunctionTable scriptCPtrTable = {
 bool ScriptC::run(Context *rsc, uint32_t launchID)
 {
     Env e = {rsc, this};
-    return mScript(&e, &scriptCPtrTable, launchID) != 0;
+
+    if (mEnviroment.mFragmentStore.get()) {
+        rsc->setFragmentStore(mEnviroment.mFragmentStore.get());
+    }
+    if (mEnviroment.mFragment.get()) {
+        rsc->setFragment(mEnviroment.mFragment.get());
+    }
+
+    return mProgram.mScript(&e, &scriptCPtrTable, launchID) != 0;
 }
 
 ScriptCState::ScriptCState()
@@ -407,17 +416,96 @@ ScriptCState::~ScriptCState()
 
 void ScriptCState::clear()
 {
+    memset(&mProgram, 0, sizeof(mProgram));
+
     mConstantBufferTypes.clear();
-    mClearColor[0] = 0;
-    mClearColor[1] = 0;
-    mClearColor[2] = 0;
-    mClearColor[3] = 1;
-    mClearDepth = 1;
-    mClearStencil = 0;
+
+    memset(&mEnviroment, 0, sizeof(mEnviroment));
+    mEnviroment.mClearColor[0] = 0;
+    mEnviroment.mClearColor[1] = 0;
+    mEnviroment.mClearColor[2] = 0;
+    mEnviroment.mClearColor[3] = 1;
+    mEnviroment.mClearDepth = 1;
+    mEnviroment.mClearStencil = 0;
+    mEnviroment.mIsRoot = false;
+    mEnviroment.mIsOrtho = true;
+
     mAccScript = NULL;
-    mScript = NULL;
-    mIsRoot = false;
-    mIsOrtho = true;
+
+}
+
+
+void ScriptCState::runCompiler(Context *rsc)
+{
+    mAccScript = accCreateScript();
+    String8 tmp;
+
+    rsc->appendNameDefines(&tmp);
+
+    const char* scriptSource[] = {tmp.string(), mProgram.mScriptText};
+    int scriptLength[] = {tmp.length(), mProgram.mScriptTextLength} ;
+    accScriptSource(mAccScript, sizeof(scriptLength) / sizeof(int), scriptSource, scriptLength);
+    accCompileScript(mAccScript);
+    accGetScriptLabel(mAccScript, "main", (ACCvoid**) &mProgram.mScript);
+    rsAssert(mProgram.mScript);
+
+
+    if (mProgram.mScript) {
+        const static int pragmaMax = 16;
+        ACCsizei pragmaCount;
+        ACCchar * str[pragmaMax];
+        accGetPragmas(mAccScript, &pragmaCount, pragmaMax, &str[0]);
+
+        for (int ct=0; ct < pragmaCount; ct+=2) {
+            LOGE("pragma %i %s %s", ct, str[ct], str[ct+1]);
+
+            if (!strcmp(str[ct], "version")) {
+                continue;
+
+            }
+
+
+            if (!strcmp(str[ct], "stateVertex")) {
+                LOGE("Unreconized value %s passed to stateVertex", str[ct+1]);
+            }
+
+            if (!strcmp(str[ct], "stateRaster")) {
+                LOGE("Unreconized value %s passed to stateRaster", str[ct+1]);
+            }
+
+            if (!strcmp(str[ct], "stateFragment")) {
+                ProgramFragment * pf = 
+                    (ProgramFragment *)rsc->lookupName(str[ct+1]);
+                if (pf != NULL) {
+                    mEnviroment.mFragment.set(pf);
+                    continue;
+                }
+                LOGE("Unreconized value %s passed to stateFragment", str[ct+1]);
+            }
+
+            if (!strcmp(str[ct], "stateFragmentStore")) {
+                ProgramFragmentStore * pfs = 
+                    (ProgramFragmentStore *)rsc->lookupName(str[ct+1]);
+                if (pfs != NULL) {
+                    mEnviroment.mFragmentStore.set(pfs);
+                    continue;
+                }
+
+                if (!strcmp(str[ct+1], "parent")) {
+                    //mEnviroment.mStateFragmentStore = 
+                        //Script::Enviroment_t::FRAGMENT_STORE_PARENT;
+                    continue;
+                }
+                LOGE("Unreconized value %s passed to stateFragmentStore", str[ct+1]);
+            }
+
+        }
+
+            
+    } else {
+        // Deal with an error.
+    }
+
 }
 
 namespace android {
@@ -432,22 +520,22 @@ void rsi_ScriptCBegin(Context * rsc)
 void rsi_ScriptCSetClearColor(Context * rsc, float r, float g, float b, float a)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mClearColor[0] = r;
-    ss->mClearColor[1] = g;
-    ss->mClearColor[2] = b;
-    ss->mClearColor[3] = a;
+    ss->mEnviroment.mClearColor[0] = r;
+    ss->mEnviroment.mClearColor[1] = g;
+    ss->mEnviroment.mClearColor[2] = b;
+    ss->mEnviroment.mClearColor[3] = a;
 }
 
 void rsi_ScriptCSetClearDepth(Context * rsc, float v)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mClearDepth = v;
+    ss->mEnviroment.mClearDepth = v;
 }
 
 void rsi_ScriptCSetClearStencil(Context * rsc, uint32_t v)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mClearStencil = v;
+    ss->mEnviroment.mClearStencil = v;
 }
 
 void rsi_ScriptCAddType(Context * rsc, RsType vt)
@@ -456,41 +544,45 @@ void rsi_ScriptCAddType(Context * rsc, RsType vt)
     ss->mConstantBufferTypes.add(static_cast<const Type *>(vt));
 }
 
-void rsi_ScriptCSetScript(Context * rsc, void* accScript, void *vp)
+void rsi_ScriptCSetScript(Context * rsc, void *vp)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mAccScript = reinterpret_cast<ACCscript*>(accScript);
-    ss->mScript = reinterpret_cast<rsc_RunScript>(vp);
+    ss->mProgram.mScript = reinterpret_cast<rsc_RunScript>(vp);
 }
 
 void rsi_ScriptCSetRoot(Context * rsc, bool isRoot)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mIsRoot = isRoot;
+    ss->mEnviroment.mIsRoot = isRoot;
 }
 
 void rsi_ScriptCSetOrtho(Context * rsc, bool isOrtho)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mIsOrtho = isOrtho;
+    ss->mEnviroment.mIsOrtho = isOrtho;
 }
+
+void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)
+{
+    ScriptCState *ss = &rsc->mScriptC;
+    ss->mProgram.mScriptText = text;
+    ss->mProgram.mScriptTextLength = len;
+}
+
 
 RsScript rsi_ScriptCCreate(Context * rsc)
 {
     ScriptCState *ss = &rsc->mScriptC;
 
+    ss->runCompiler(rsc);
+
     ScriptC *s = new ScriptC();
+    s->incRef();
     s->mAccScript = ss->mAccScript;
     ss->mAccScript = NULL;
-    s->mScript = ss->mScript;
-    s->mClearColor[0] = ss->mClearColor[0];
-    s->mClearColor[1] = ss->mClearColor[1];
-    s->mClearColor[2] = ss->mClearColor[2];
-    s->mClearColor[3] = ss->mClearColor[3];
-    s->mClearDepth = ss->mClearDepth;
-    s->mClearStencil = ss->mClearStencil;
-    s->mIsRoot = ss->mIsRoot;
-    s->mIsOrtho = ss->mIsOrtho;
+    s->mEnviroment = ss->mEnviroment;
+    s->mProgram = ss->mProgram;
+    ss->clear();
 
     return s;
 }

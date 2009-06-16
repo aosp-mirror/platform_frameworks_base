@@ -26,14 +26,13 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothIntent;
+import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothA2dp;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.media.AudioManager;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
@@ -44,6 +43,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private static final String TAG = "BluetoothA2dpService";
@@ -58,57 +58,22 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private static final String BLUETOOTH_ENABLED = "bluetooth_enabled";
 
     private static final int MESSAGE_CONNECT_TO = 1;
-    private static final int MESSAGE_DISCONNECT = 2;
+
+    private static final String PROPERTY_STATE = "State";
+
+    private static final String SINK_STATE_DISCONNECTED = "disconnected";
+    private static final String SINK_STATE_CONNECTING = "connecting";
+    private static final String SINK_STATE_CONNECTED = "connected";
+    private static final String SINK_STATE_PLAYING = "playing";
+
+    private static int mSinkCount;
+
 
     private final Context mContext;
     private final IntentFilter mIntentFilter;
-    private HashMap<String, SinkState> mAudioDevices;
+    private HashMap<String, Integer> mAudioDevices;
     private final AudioManager mAudioManager;
-    private final BluetoothDevice mBluetooth;
-
-    // list of disconnected sinks to process after a delay
-    private final ArrayList<String> mPendingDisconnects = new ArrayList<String>();
-    // number of active sinks
-    private int mSinkCount = 0; 
-
-    private class SinkState {
-        public String address;
-        public int state;
-        public SinkState(String a, int s) {address = a; state = s;}
-    }
-
-    public BluetoothA2dpService(Context context) {
-        mContext = context;
-
-        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-
-        mBluetooth = (BluetoothDevice) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-        if (mBluetooth == null) {
-            throw new RuntimeException("Platform does not support Bluetooth");
-        }
-
-        if (!initNative()) {
-            throw new RuntimeException("Could not init BluetoothA2dpService");
-        }
-
-        mIntentFilter = new IntentFilter(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION);
-        mContext.registerReceiver(mReceiver, mIntentFilter);
-
-        if (mBluetooth.isEnabled()) {
-            onBluetoothEnable();
-        }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            cleanupNative();
-        } finally {
-            super.finalize();
-        }
-    }
+    private final BluetoothDeviceService mBluetoothService;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -151,6 +116,40 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         }
     };
 
+    public BluetoothA2dpService(Context context, BluetoothDeviceService bluetoothService) {
+        mContext = context;
+
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
+        mBluetoothService = bluetoothService;
+        if (mBluetoothService == null) {
+            throw new RuntimeException("Platform does not support Bluetooth");
+        }
+
+        if (!initNative()) {
+            throw new RuntimeException("Could not init BluetoothA2dpService");
+        }
+
+        mIntentFilter = new IntentFilter(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION);
+        mContext.registerReceiver(mReceiver, mIntentFilter);
+
+        mAudioDevices = new HashMap<String, Integer>();
+
+        if (mBluetoothService.isEnabled())
+            onBluetoothEnable();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            cleanupNative();
+        } finally {
+            super.finalize();
+        }
+    }
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -159,7 +158,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 String address = (String)msg.obj;
                 // check bluetooth is still on, device is still preferred, and
                 // nothing is currently connected
-                if (mBluetooth.isEnabled() &&
+                if (mBluetoothService.isEnabled() &&
                         getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF &&
                         lookupSinksMatchingStates(new int[] {
                             BluetoothA2dp.STATE_CONNECTING,
@@ -170,45 +169,85 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                     connectSink(address);
                 }
                 break;
-            case MESSAGE_DISCONNECT:
-                handleDeferredDisconnect((String)msg.obj);
-                break;
             }
         }
     };
 
+    private int convertBluezSinkStringtoState(String value) {
+        if (value.equalsIgnoreCase("disconnected"))
+            return BluetoothA2dp.STATE_DISCONNECTED;
+        if (value.equalsIgnoreCase("connecting"))
+            return BluetoothA2dp.STATE_CONNECTING;
+        if (value.equalsIgnoreCase("connected"))
+            return BluetoothA2dp.STATE_CONNECTED;
+        if (value.equalsIgnoreCase("playing"))
+            return BluetoothA2dp.STATE_PLAYING;
+        return -1;
+    }
+
+    private synchronized boolean addAudioSink (String address) {
+        String path = mBluetoothService.getObjectPathFromAddress(address);
+        String propValues[] = (String []) getSinkPropertiesNative(path);
+        if (propValues == null) {
+            Log.e(TAG, "Error while getting AudioSink properties for device: " + address);
+            return false;
+        }
+        Integer state = null;
+        // Properties are name-value pairs
+        for (int i = 0; i < propValues.length; i+=2) {
+            if (propValues[i].equals(PROPERTY_STATE)) {
+                state = new Integer(convertBluezSinkStringtoState(propValues[i+1]));
+                break;
+            }
+        }
+        mAudioDevices.put(address, state);
+        handleSinkStateChange(address, BluetoothA2dp.STATE_DISCONNECTED, state);
+        return true;
+    }
+
     private synchronized void onBluetoothEnable() {
-        mAudioDevices = new HashMap<String, SinkState>();
-        String[] paths = (String[])listHeadsetsNative();
-        if (paths != null) {
-            for (String path : paths) {
-                mAudioDevices.put(path, new SinkState(getAddressNative(path),
-                        isSinkConnectedNative(path) ? BluetoothA2dp.STATE_CONNECTED :
-                                                      BluetoothA2dp.STATE_DISCONNECTED));
+        String devices = mBluetoothService.getProperty("Devices");
+        mSinkCount = 0;
+        if (devices != null) {
+            String [] paths = devices.split(",");
+            for (String path: paths) {
+                String address = mBluetoothService.getAddressFromObjectPath(path);
+                String []uuids = mBluetoothService.getRemoteUuids(address);
+                if (uuids != null)
+                    for (String uuid: uuids) {
+                        UUID remoteUuid = UUID.fromString(uuid);
+                        if (BluetoothUuid.isAudioSink(remoteUuid) ||
+                            BluetoothUuid.isAudioSource(remoteUuid) ||
+                            BluetoothUuid.isAdvAudioDist(remoteUuid)) {
+                            addAudioSink(address);
+                            break;
+                        }
+                    }
             }
         }
         mAudioManager.setParameter(BLUETOOTH_ENABLED, "true");
     }
 
     private synchronized void onBluetoothDisable() {
-        if (mAudioDevices != null) {
-            // copy to allow modification during iteration
-            String[] paths = new String[mAudioDevices.size()];
-            paths = mAudioDevices.keySet().toArray(paths);
-            for (String path : paths) {
-                switch (mAudioDevices.get(path).state) {
+        if (!mAudioDevices.isEmpty()) {
+            String [] addresses = new String[mAudioDevices.size()];
+            addresses = mAudioDevices.keySet().toArray(addresses);
+            for (String address : addresses) {
+                int state = getSinkState(address);
+                switch (state) {
                     case BluetoothA2dp.STATE_CONNECTING:
                     case BluetoothA2dp.STATE_CONNECTED:
                     case BluetoothA2dp.STATE_PLAYING:
-                        disconnectSinkNative(path);
-                        updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
+                        disconnectSinkNative(mBluetoothService.getObjectPathFromAddress(address));
+                        handleSinkStateChange(address,state, BluetoothA2dp.STATE_DISCONNECTED);
                         break;
                     case BluetoothA2dp.STATE_DISCONNECTING:
-                        updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
+                        handleSinkStateChange(address, BluetoothA2dp.STATE_DISCONNECTING,
+                                                BluetoothA2dp.STATE_DISCONNECTED);
                         break;
                 }
             }
-            mAudioDevices = null;
+            mAudioDevices.clear();
         }
         mAudioManager.setBluetoothA2dpOn(false);
         mAudioManager.setParameter(BLUETOOTH_ENABLED, "false");
@@ -221,9 +260,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return BluetoothError.ERROR;
         }
-        if (mAudioDevices == null) {
-            return BluetoothError.ERROR;
-        }
+
         // ignore if there are any active sinks
         if (lookupSinksMatchingStates(new int[] {
                 BluetoothA2dp.STATE_CONNECTING,
@@ -233,20 +270,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return BluetoothError.ERROR;
         }
 
-        String path = lookupPath(address);
-        if (path == null) {
-            path = createHeadsetNative(address);
-            if (DBG) log("new bluez sink: " + address + " (" + path + ")");
-        }
-        if (path == null) {
+        if (mAudioDevices.get(address) == null && !addAudioSink(address))
             return BluetoothError.ERROR;
-        }
 
-        SinkState sink = mAudioDevices.get(path);
-        int state = BluetoothA2dp.STATE_DISCONNECTED;
-        if (sink != null) {
-            state = sink.state;
-        }
+        int state = mAudioDevices.get(address);
+
         switch (state) {
         case BluetoothA2dp.STATE_CONNECTED:
         case BluetoothA2dp.STATE_PLAYING:
@@ -256,11 +284,14 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return BluetoothError.SUCCESS;
         }
 
+        String path = mBluetoothService.getObjectPathFromAddress(address);
+        if (path == null)
+            return BluetoothError.ERROR;
+
         // State is DISCONNECTED
         if (!connectSinkNative(path)) {
             return BluetoothError.ERROR;
         }
-        updateState(path, BluetoothA2dp.STATE_CONNECTING);
         return BluetoothError.SUCCESS;
     }
 
@@ -271,14 +302,12 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return BluetoothError.ERROR;
         }
-        if (mAudioDevices == null) {
-            return BluetoothError.ERROR;
-        }
-        String path = lookupPath(address);
+        String path = mBluetoothService.getObjectPathFromAddress(address);
         if (path == null) {
             return BluetoothError.ERROR;
         }
-        switch (mAudioDevices.get(path).state) {
+
+        switch (getSinkState(address)) {
         case BluetoothA2dp.STATE_DISCONNECTED:
             return BluetoothError.ERROR;
         case BluetoothA2dp.STATE_DISCONNECTING:
@@ -289,7 +318,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (!disconnectSinkNative(path)) {
             return BluetoothError.ERROR;
         } else {
-            updateState(path, BluetoothA2dp.STATE_DISCONNECTING);
             return BluetoothError.SUCCESS;
         }
     }
@@ -305,15 +333,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return BluetoothError.ERROR;
         }
-        if (mAudioDevices == null) {
+        Integer state = mAudioDevices.get(address);
+        if (state == null)
             return BluetoothA2dp.STATE_DISCONNECTED;
-        }
-        for (SinkState sink : mAudioDevices.values()) {
-            if (address.equals(sink.address)) {
-                return sink.state;
-            }
-        }
-        return BluetoothA2dp.STATE_DISCONNECTED;
+        return state;
     }
 
     public synchronized int getSinkPriority(String address) {
@@ -337,135 +360,42 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 BluetoothError.SUCCESS : BluetoothError.ERROR;
     }
 
-    private synchronized void onHeadsetCreated(String path) {
-        updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
-    }
-
-    private synchronized void onHeadsetRemoved(String path) {
-        if (mAudioDevices == null) return;
-        mAudioDevices.remove(path);
-    }
-
-    private synchronized void onSinkConnected(String path) {
-        // if we are reconnected, do not process previous disconnect event.
-        mPendingDisconnects.remove(path);
-
-        if (mAudioDevices == null) return;
-        // bluez 3.36 quietly disconnects the previous sink when a new sink
-        // is connected, so we need to mark all previously connected sinks as
-        // disconnected
-
-        // copy to allow modification during iteration
-        String[] paths = new String[mAudioDevices.size()];
-        paths = mAudioDevices.keySet().toArray(paths);
-        for (String oldPath : paths) {
-            if (path.equals(oldPath)) {
-                continue;
-            }
-            int state = mAudioDevices.get(oldPath).state;
-            if (state == BluetoothA2dp.STATE_CONNECTED || state == BluetoothA2dp.STATE_PLAYING) {
-                updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
-            }
+    private synchronized void onSinkPropertyChanged(String path, String []propValues) {
+        String name = propValues[0];
+        String address = mBluetoothService.getAddressFromObjectPath(path);
+        if (address == null) {
+            Log.e(TAG, "onSinkPropertyChanged: Address of the remote device in null");
+            return;
         }
 
-        updateState(path, BluetoothA2dp.STATE_CONNECTING);
-        mAudioManager.setParameter(A2DP_SINK_ADDRESS, lookupAddress(path));
-        mAudioManager.setBluetoothA2dpOn(true);
-        updateState(path, BluetoothA2dp.STATE_CONNECTED);
-    }
-
-    private synchronized void onSinkDisconnected(String path) {
-        // This is to work around a problem in bluez that results 
-        // sink disconnect events being sent, immediately followed by a reconnect.
-        // To avoid unnecessary audio routing changes, we defer handling
-        // sink disconnects until after a short delay.
-        mPendingDisconnects.add(path);
-        Message msg = Message.obtain(mHandler, MESSAGE_DISCONNECT, path);
-        mHandler.sendMessageDelayed(msg, 2000);
-    }
-
-    private synchronized void handleDeferredDisconnect(String path) {
-        if (mPendingDisconnects.contains(path)) {
-            mPendingDisconnects.remove(path);
-            if (mSinkCount == 1) {
-                mAudioManager.setBluetoothA2dpOn(false);
-            }
-            updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
+        if (mAudioDevices.get(address) == null) {
+            // Ignore this state change, since it means we have got it after
+            // bluetooth has been disabled.
+            return;
+        }
+        if (name.equals(PROPERTY_STATE)) {
+            int state = convertBluezSinkStringtoState(propValues[1]);
+            int prevState = mAudioDevices.get(address);
+            handleSinkStateChange(address, prevState, state);
         }
     }
 
-    private synchronized void onSinkPlaying(String path) {
-        updateState(path, BluetoothA2dp.STATE_PLAYING);
-    }
-
-    private synchronized void onSinkStopped(String path) {
-        updateState(path, BluetoothA2dp.STATE_CONNECTED);
-    }
-
-    private synchronized final String lookupAddress(String path) {
-        if (mAudioDevices == null) return null;
-        SinkState sink = mAudioDevices.get(path);
-        if (sink == null) {
-            Log.w(TAG, "lookupAddress() called for unknown device " + path);
-            updateState(path, BluetoothA2dp.STATE_DISCONNECTED);
-        }
-        String address = mAudioDevices.get(path).address;
-        if (address == null) Log.e(TAG, "Can't find address for " + path);
-        return address;
-    }
-
-    private synchronized final String lookupPath(String address) {
-        if (mAudioDevices == null) return null;
-
-        for (String path : mAudioDevices.keySet()) {
-            if (address.equals(mAudioDevices.get(path).address)) {
-                return path;
-            }
-        }
-        return null;
-    }
-
-    private synchronized List<String> lookupSinksMatchingStates(int[] states) {
-        List<String> sinks = new ArrayList<String>();
-        if (mAudioDevices == null) {
-            return sinks;
-        }
-        for (SinkState sink : mAudioDevices.values()) {
-            for (int state : states) {
-                if (sink.state == state) {
-                    sinks.add(sink.address);
-                    break;
-                }
-            }
-        }
-        return sinks;
-    }
-
-    private synchronized void updateState(String path, int state) {
-        if (mAudioDevices == null) return;
-
-        SinkState s = mAudioDevices.get(path);
-        int prevState;
-        String address;
-        if (s == null) {
-            address = getAddressNative(path);
-            mAudioDevices.put(path, new SinkState(address, state));
-            prevState = BluetoothA2dp.STATE_DISCONNECTED;
-        } else {
-            address = lookupAddress(path);
-            prevState = s.state;
-            s.state = state;
-        }
-
+    private void handleSinkStateChange(String address, int prevState, int state) {
         if (state != prevState) {
-            if (DBG) log("state " + address + " (" + path + ") " + prevState + "->" + state);
-            
-            // keep track of the number of active sinks
-            if (prevState == BluetoothA2dp.STATE_DISCONNECTED) {
-                mSinkCount++;
-            } else if (state == BluetoothA2dp.STATE_DISCONNECTED) {
-                mSinkCount--;
+            if (state == BluetoothA2dp.STATE_DISCONNECTED ||
+                    state == BluetoothA2dp.STATE_DISCONNECTING) {
+                if (prevState == BluetoothA2dp.STATE_CONNECTED ||
+                        prevState == BluetoothA2dp.STATE_PLAYING) {
+                   // disconnecting or disconnected
+                   Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+                   mContext.sendBroadcast(intent);
+                }
+                if (--mSinkCount == 0)
+                    mAudioManager.setBluetoothA2dpOn(false);
+            } else if (state == BluetoothA2dp.STATE_CONNECTED) {
+                mSinkCount ++;
             }
+            mAudioDevices.put(address, state);
 
             Intent intent = new Intent(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
             intent.putExtra(BluetoothIntent.ADDRESS, address);
@@ -473,25 +403,40 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             intent.putExtra(BluetoothA2dp.SINK_STATE, state);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
-            if ((prevState == BluetoothA2dp.STATE_CONNECTED ||
-                 prevState == BluetoothA2dp.STATE_PLAYING) &&
-                    (state != BluetoothA2dp.STATE_CONNECTING &&
-                     state != BluetoothA2dp.STATE_CONNECTED &&
-                     state != BluetoothA2dp.STATE_PLAYING)) {
-                // disconnected
-                intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-                mContext.sendBroadcast(intent);
+            if (DBG) log("A2DP state : address: " + address + " State:" + prevState + "->" + state);
+
+            if (state == BluetoothA2dp.STATE_CONNECTED) {
+                mAudioManager.setParameter(A2DP_SINK_ADDRESS, address);
+                mAudioManager.setBluetoothA2dpOn(true);
             }
         }
     }
 
+    private synchronized List<String> lookupSinksMatchingStates(int[] states) {
+        List<String> sinks = new ArrayList<String>();
+        if (mAudioDevices.isEmpty()) {
+            return sinks;
+        }
+        for (String path: mAudioDevices.keySet()) {
+            int sinkState = getSinkState(path);
+            for (int state : states) {
+                if (state == sinkState) {
+                    sinks.add(path);
+                    break;
+                }
+            }
+        }
+        return sinks;
+    }
+
+
     @Override
     protected synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mAudioDevices == null) return;
+        if (mAudioDevices.isEmpty()) return;
         pw.println("Cached audio devices:");
-        for (String path : mAudioDevices.keySet()) {
-            SinkState sink = mAudioDevices.get(path);
-            pw.println(path + " " + sink.address + " " + BluetoothA2dp.stateToString(sink.state));
+        for (String address : mAudioDevices.keySet()) {
+            int state = mAudioDevices.get(address);
+            pw.println(address + " " + BluetoothA2dp.stateToString(state));
         }
     }
 
@@ -501,11 +446,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
     private native boolean initNative();
     private native void cleanupNative();
-    private synchronized native String[] listHeadsetsNative();
-    private synchronized native String createHeadsetNative(String address);
-    private synchronized native boolean removeHeadsetNative(String path);
-    private synchronized native String getAddressNative(String path);
     private synchronized native boolean connectSinkNative(String path);
     private synchronized native boolean disconnectSinkNative(String path);
-    private synchronized native boolean isSinkConnectedNative(String path);
+    private synchronized native Object []getSinkPropertiesNative(String path);
 }

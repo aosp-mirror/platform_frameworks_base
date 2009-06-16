@@ -79,9 +79,11 @@
         <attr name="textColorPrimaryInverseNoDisable" format="reference|color" />
         <!-- Dim inverse text color. This does not differentiate the disabled state. -->
         <attr name="textColorSecondaryInverseNoDisable" format="reference|color" />
-        
+
         <!-- Text color for urls in search suggestions, used by things like global search and the browser. @hide -->
         <attr name="textColorSearchUrl" format="reference|color" />
+        <!-- Search widget more corpus result item background. -->
+        <attr name="searchWidgetCorpusItemBackground" format="reference|color" />
 
         <!-- Text color, typeface, size, and style for "large" text. Defaults to primary text color. -->
         <attr name="textAppearanceLarge" format="reference" />
@@ -97,9 +99,9 @@
         <!-- Text color, typeface, size, and style for "small" inverse text. Defaults to secondary inverse text color. -->
         <attr name="textAppearanceSmallInverse" format="reference" />
 
-        <!-- Text color, typeface, size, and style for system search result title. Defaults to primary inverse text color. @hide -->	
-        <attr name="textAppearanceSearchResultTitle" format="reference" />	
-        <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. @hide -->	
+        <!-- Text color, typeface, size, and style for system search result title. Defaults to primary inverse text color. @hide -->
+        <attr name="textAppearanceSearchResultTitle" format="reference" />
+        <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. @hide -->
         <attr name="textAppearanceSearchResultSubtitle" format="reference" />
 
 
@@ -669,7 +671,7 @@
     <attr name="x" format="dimension" />
     <!-- A coordinate in the Y dimension. -->
     <attr name="y" format="dimension" />
-          
+
     <!-- Specifies how to place the content of an object, both
          on the x and y axis, within the object itself. -->
     <attr name="gravity">
@@ -1381,19 +1383,6 @@
              will use only the number of items in the adapter and the number of items visible
              on screen to determine the scrollbar's properties. -->
         <attr name="smoothScrollbar" format="boolean" />
-        <!-- Defines the type of gesture to enable for the widget. -->
-        <attr name="gestures">
-            <!-- No gesture -->
-            <enum name="none" value="0" />
-            <!-- Gestures jump to a specific position in the content. This requires
-                  fast scroll to be enabled. If fast scroll is enabled from XML,
-                  jump gestures will be enabled automatically. -->
-            <enum name="jump" value="1" />
-            <!-- Gestures filter the content. This requires text filtering to be enabled.
-                 If text filtering is enabled from XML, filter gestures will be enabled
-                 automatically. -->
-            <enum name="filter" value="2" />
-        </attr>
     </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
@@ -2848,16 +2837,24 @@
             string will be placed in the data field of the {@link android.content.Intent Intent}
             when the user clicks a suggestion.  <i>Optional attribute.</i> -->
         <attr name="searchSuggestIntentData" format="string" />
-        
+
         <!-- If provided, this is the minimum number of characters needed to trigger
              search suggestions. The default value is 0. <i>Optional attribute.</i> -->
         <attr name="searchSuggestThreshold" format="integer" />
-        
+
         <!-- If provided and <code>true</code>, this searchable activity will be
              included in any global lists of search targets.
              The default value is <code>false</code>. <i>Optional attribute.</i>. -->
         <attr name="includeInGlobalSearch" format="boolean" />
-        
+
+        <!-- If provided and <code>true</code>, this searchable activity will be invoked for all
+             queries in a particular session. If set to <code>false</code> and the activity
+             returned zero results for a query, it will not be invoked again in that session for
+             supersets of that zero-results query. For example, if the activity returned zero
+             results for "bo", it would not be queried again for "bob".
+             The default value is <code>false</code>. <i>Optional attribute.</i>. -->
+        <attr name="queryAfterZeroResults" format="boolean" />
+
     </declare-styleable>
 
     <!-- In order to process special action keys during search, you must define them using
@@ -3290,7 +3287,6 @@
         <attr name="configure" format="string" />
     </declare-styleable>
 
-
     <!-- =============================== -->
     <!-- Accounts package class attributes -->
     <!-- =============================== -->
@@ -3301,6 +3297,10 @@
     <declare-styleable name="AccountAuthenticator">
         <!-- the account type this authenticator handles. -->
         <attr name="accountType" format="string"/>
+        <!-- the user-visible name of the authenticator. -->
+        <attr name="label"/>
+        <!-- the icon of the authenticator. -->
+        <attr name="icon"/>
     </declare-styleable>
 
     <!-- =============================== -->
@@ -3315,7 +3315,6 @@
         <attr name="contentAuthority" format="string"/>
         <attr name="accountType"/>
     </declare-styleable>
-
 
 </resources>
 

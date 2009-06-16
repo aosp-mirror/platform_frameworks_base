@@ -34,7 +34,6 @@ import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import junit.framework.Assert;
 
@@ -376,7 +375,7 @@ final class WebViewCore {
             String currentText, int keyCode, int keyValue, boolean down,
             boolean cap, boolean fn, boolean sym);
 
-    private native void nativeSetFocusControllerActive(boolean active);
+    private native void nativeSetFocusControllerInactive();
 
     private native void nativeSaveDocumentState(int frame);
 
@@ -394,8 +393,6 @@ final class WebViewCore {
             int size);
 
     private native boolean nativeHandleTouchEvent(int action, int x, int y);
-
-    private native void nativeUnblockFocus();
 
     private native void nativeUpdateFrameCache();
 
@@ -515,6 +512,14 @@ final class WebViewCore {
         }
     }
 
+    static class BaseUrlData {
+        String mBaseUrl;
+        String mData;
+        String mMimeType;
+        String mEncoding;
+        String mFailUrl;
+    }
+
     static class CursorData {
         CursorData() {}
         CursorData(int frame, int node, int x, int y) {
@@ -529,6 +534,27 @@ final class WebViewCore {
         int mX;
         int mY;
         boolean mIgnoreNullFocus;
+    }
+
+    static class JSInterfaceData {
+        Object mObject;
+        String mInterfaceName;
+    }
+
+    static class JSKeyData {
+        String mCurrentText;
+        KeyEvent mEvent;
+    }
+
+    static class PostUrlData {
+        String mUrl;
+        byte[] mPostData;
+    }
+
+    static class ReplaceTextData {
+        String mReplace;
+        int mNewStart;
+        int mNewEnd;
     }
 
     static class TouchUpData {
@@ -574,7 +600,7 @@ final class WebViewCore {
             "SINGLE_LISTBOX_CHOICE", // = 124;
             "MESSAGE_RELAY", // = 125;
             "SET_BACKGROUND_COLOR", // = 126;
-            "UNBLOCK_FOCUS", // = 127;
+            "127", // = 127;
             "SAVE_DOCUMENT_STATE", // = 128;
             "GET_SELECTION", // = 129;
             "WEBKIT_DRAW", // = 130;
@@ -584,14 +610,15 @@ final class WebViewCore {
             "CLEAR_CONTENT", // = 134;
             "SET_MOVE_MOUSE", // = 135;
             "SET_MOVE_MOUSE_IF_LATEST", // = 136;
-            "REQUEST_FOCUS_HREF", // = 137;
+            "REQUEST_CURSOR_HREF", // = 137;
             "ADD_JS_INTERFACE", // = 138;
             "LOAD_DATA", // = 139;
             "TOUCH_UP", // = 140;
             "TOUCH_EVENT", // = 141;
-            "SET_ACTIVE", // = 142;
+            "SET_INACTIVE", // = 142;
             "ON_PAUSE",     // = 143
             "ON_RESUME",    // = 144
+            "FREE_MEMORY",  // = 145
         };
 
     class EventHub {
@@ -623,7 +650,6 @@ final class WebViewCore {
         static final int SINGLE_LISTBOX_CHOICE = 124;
         static final int MESSAGE_RELAY = 125;
         static final int SET_BACKGROUND_COLOR = 126;
-        static final int UNBLOCK_FOCUS = 127;
         static final int SAVE_DOCUMENT_STATE = 128;
         static final int GET_SELECTION = 129;
         static final int WEBKIT_DRAW = 130;
@@ -635,7 +661,7 @@ final class WebViewCore {
         // UI nav messages
         static final int SET_MOVE_MOUSE = 135;
         static final int SET_MOVE_MOUSE_IF_LATEST = 136;
-        static final int REQUEST_FOCUS_HREF = 137;
+        static final int REQUEST_CURSOR_HREF = 137;
         static final int ADD_JS_INTERFACE = 138;
         static final int LOAD_DATA = 139;
 
@@ -644,14 +670,16 @@ final class WebViewCore {
         // message used to pass UI touch events to WebCore
         static final int TOUCH_EVENT = 141;
 
-        // Used to tell the focus controller whether to draw the blinking cursor
-        // or not, based on whether the WebView has focus.
-        static final int SET_ACTIVE = 142;
+        // Used to tell the focus controller not to draw the blinking cursor,
+        // based on whether the WebView has focus and whether the WebView's
+        // cursor matches the webpage's focus.
+        static final int SET_INACTIVE = 142;
 
-        // pause/resume activity for just this DOM (unlike pauseTimers, which
+        // lifecycle activities for just this DOM (unlike pauseTimers, which
         // is global)
         static final int ON_PAUSE = 143;
         static final int ON_RESUME = 144;
+        static final int FREE_MEMORY = 145;
 
         // Network-based messaging
         static final int CLEAR_SSL_PREF_TABLE = 150;
@@ -697,7 +725,7 @@ final class WebViewCore {
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
                         Log.v(LOGTAG, msg.what < LOAD_URL || msg.what
-                                > SET_ACTIVE ? Integer.toString(msg.what)
+                                > SET_INACTIVE ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what - LOAD_URL]);
                     }
                     switch (msg.what) {
@@ -718,15 +746,13 @@ final class WebViewCore {
                             break;
 
                         case POST_URL: {
-                            HashMap param = (HashMap) msg.obj;
-                            String url = (String) param.get("url");
-                            byte[] data = (byte[]) param.get("data");
-                            mBrowserFrame.postUrl(url, data);
+                            PostUrlData param = (PostUrlData) msg.obj;
+                            mBrowserFrame.postUrl(param.mUrl, param.mPostData);
                             break;
                         }
                         case LOAD_DATA:
-                            HashMap loadParams = (HashMap) msg.obj;
-                            String baseUrl = (String) loadParams.get("baseUrl");
+                            BaseUrlData loadParams = (BaseUrlData) msg.obj;
+                            String baseUrl = loadParams.mBaseUrl;
                             if (baseUrl != null) {
                                 int i = baseUrl.indexOf(':');
                                 if (i > 0) {
@@ -750,10 +776,10 @@ final class WebViewCore {
                                 }
                             }
                             mBrowserFrame.loadData(baseUrl,
-                                    (String) loadParams.get("data"),
-                                    (String) loadParams.get("mimeType"),
-                                    (String) loadParams.get("encoding"),
-                                    (String) loadParams.get("failUrl"));
+                                    loadParams.mData,
+                                    loadParams.mMimeType,
+                                    loadParams.mEncoding,
+                                    loadParams.mFailUrl);
                             break;
 
                         case STOP_LOADING:
@@ -851,6 +877,11 @@ final class WebViewCore {
                             nativeResume();
                             break;
 
+                        case FREE_MEMORY:
+                            clearCache(false);
+                            nativeFreeMemory();
+                            break;
+
                         case SET_NETWORK_STATE:
                             if (BrowserFrame.sJavaBridge == null) {
                                 throw new IllegalStateException("No WebView " +
@@ -861,10 +892,7 @@ final class WebViewCore {
                             break;
 
                         case CLEAR_CACHE:
-                            mBrowserFrame.clearCache();
-                            if (msg.arg1 == 1) {
-                                CacheManager.removeAllCacheFiles();
-                            }
+                            clearCache(msg.arg1 == 1);
                             break;
 
                         case CLEAR_HISTORY:
@@ -873,24 +901,19 @@ final class WebViewCore {
                             break;
 
                         case REPLACE_TEXT:
-                            HashMap jMap = (HashMap) msg.obj;
-                            String replace = (String) jMap.get("replace");
-                            int newStart =
-                                    ((Integer) jMap.get("start")).intValue();
-                            int newEnd =
-                                    ((Integer) jMap.get("end")).intValue();
-                            nativeReplaceTextfieldText(msg.arg1,
-                                    msg.arg2, replace, newStart, newEnd);
+                            ReplaceTextData rep = (ReplaceTextData) msg.obj;
+                            nativeReplaceTextfieldText(msg.arg1, msg.arg2,
+                                    rep.mReplace, rep.mNewStart, rep.mNewEnd);
                             break;
 
                         case PASS_TO_JS: {
-                            HashMap jsMap = (HashMap) msg.obj;
-                            KeyEvent evt = (KeyEvent) jsMap.get("event");
+                            JSKeyData jsData = (JSKeyData) msg.obj;
+                            KeyEvent evt = jsData.mEvent;
                             int keyCode = evt.getKeyCode();
                             int keyValue = evt.getUnicodeChar();
                             int generation = msg.arg1;
                             passToJs(generation,
-                                    (String) jsMap.get("currentText"),
+                                    jsData.mCurrentText,
                                     keyCode,
                                     keyValue,
                                     evt.isDown(),
@@ -900,8 +923,8 @@ final class WebViewCore {
                         }
 
                         case SAVE_DOCUMENT_STATE: {
-                            CursorData fDat = (CursorData) msg.obj;
-                            nativeSaveDocumentState(fDat.mFrame);
+                            CursorData cDat = (CursorData) msg.obj;
+                            nativeSaveDocumentState(cDat.mFrame);
                             break;
                         }
 
@@ -928,17 +951,14 @@ final class WebViewCore {
                             break;
                         }
 
-                        case SET_ACTIVE:
-                            nativeSetFocusControllerActive(msg.arg1 == 1);
+                        case SET_INACTIVE:
+                            nativeSetFocusControllerInactive();
                             break;
 
                         case ADD_JS_INTERFACE:
-                            HashMap map = (HashMap) msg.obj;
-                            Object obj = map.get("object");
-                            String interfaceName = (String)
-                                    map.get("interfaceName");
-                            mBrowserFrame.addJavascriptInterface(obj,
-                                    interfaceName);
+                            JSInterfaceData jsData = (JSInterfaceData) msg.obj;
+                            mBrowserFrame.addJavascriptInterface(jsData.mObject,
+                                    jsData.mInterfaceName);
                             break;
 
                         case REQUEST_EXT_REPRESENTATION:
@@ -951,25 +971,21 @@ final class WebViewCore {
                             break;
 
                         case SET_MOVE_MOUSE:
-                            CursorData finalData = (CursorData) msg.obj;
-                            nativeMoveMouse(finalData.mFrame,
-                                     finalData.mNode, finalData.mX,
-                                     finalData.mY);
-                            break;
-
-                        case UNBLOCK_FOCUS:
-                            nativeUnblockFocus();
+                            CursorData cursorData = (CursorData) msg.obj;
+                            nativeMoveMouse(cursorData.mFrame,
+                                     cursorData.mNode, cursorData.mX,
+                                     cursorData.mY);
                             break;
 
                         case SET_MOVE_MOUSE_IF_LATEST:
-                            CursorData focusData = (CursorData) msg.obj;
-                            nativeMoveMouseIfLatest(focusData.mMoveGeneration,
-                                    focusData.mFrame, focusData.mNode,
-                                    focusData.mX, focusData.mY,
-                                    focusData.mIgnoreNullFocus);
+                            CursorData cData = (CursorData) msg.obj;
+                            nativeMoveMouseIfLatest(cData.mMoveGeneration,
+                                    cData.mFrame, cData.mNode,
+                                    cData.mX, cData.mY,
+                                    cData.mIgnoreNullFocus);
                             break;
 
-                        case REQUEST_FOCUS_HREF: {
+                        case REQUEST_CURSOR_HREF: {
                             Message hrefMsg = (Message) msg.obj;
                             String res = nativeRetrieveHref(msg.arg1, msg.arg2);
                             hrefMsg.getData().putString("url", res);
@@ -1229,6 +1245,13 @@ final class WebViewCore {
     //-------------------------------------------------------------------------
     // WebViewCore private methods
     //-------------------------------------------------------------------------
+
+    private void clearCache(boolean includeDiskFiles) {
+        mBrowserFrame.clearCache();
+        if (includeDiskFiles) {
+            CacheManager.removeAllCacheFiles();
+        }
+    }
 
     private void loadUrl(String url) {
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, " CORE loadUrl " + url);
@@ -1550,14 +1573,6 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void sendMarkNodeInvalid(int node) {
-        if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.MARK_NODE_INVALID_ID, node, 0).sendToTarget();
-        }
-    }
-
-    // called by JNI
     private void sendNotifyProgressFinished() {
         sendUpdateTextEntry();
         // as CacheManager can behave based on database transaction, we need to
@@ -1566,14 +1581,6 @@ final class WebViewCore {
         sWebCoreHandler.sendMessage(sWebCoreHandler
                 .obtainMessage(WebCoreThread.CACHE_TICKER));
         contentDraw();
-    }
-
-    // called by JNI
-    private void sendRecomputeFocus() {
-        if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.RECOMPUTE_FOCUS_MSG_ID).sendToTarget();
-        }
     }
 
     /*  Called by JNI. The coordinates are in doc coordinates, so they need to
@@ -1651,9 +1658,9 @@ final class WebViewCore {
 
         // now notify webview
         if (mWebView != null) {
-            HashMap scaleLimit = new HashMap();
-            scaleLimit.put("minScale", mViewportMinimumScale);
-            scaleLimit.put("maxScale", mViewportMaximumScale);
+            WebView.ScaleLimitData scaleLimit = new WebView.ScaleLimitData();
+            scaleLimit.mMinScale = mViewportMinimumScale;
+            scaleLimit.mMaxScale = mViewportMaximumScale;
 
             if (mRestoredScale > 0) {
                 Message.obtain(mWebView.mPrivateHandler,
@@ -1744,4 +1751,5 @@ final class WebViewCore {
 
     private native void nativePause();
     private native void nativeResume();
+    private native void nativeFreeMemory();
 }

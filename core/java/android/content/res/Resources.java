@@ -88,7 +88,7 @@ public class Resources {
     PluralRules mPluralRule;
     
     private final CompatibilityInfo mCompatibilityInfo;
-    
+
     private static final SparseArray<Object> EMPTY_ARRAY = new SparseArray<Object>() {
         @Override
         public void put(int k, Object o) {
@@ -1255,7 +1255,7 @@ public class Resources {
 
         return array;
     }
-    
+
     /**
      * Store the newly updated configuration.
      */
@@ -1268,7 +1268,7 @@ public class Resources {
             }
             if (metrics != null) {
                 mMetrics.setTo(metrics);
-                mMetrics.updateMetrics(mCompatibilityInfo, mConfiguration);
+                mMetrics.updateMetrics(mCompatibilityInfo, mConfiguration.orientation);
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
 

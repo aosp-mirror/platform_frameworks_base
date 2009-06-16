@@ -222,6 +222,21 @@ final class JWebCoreJavaBridge extends Handler {
         mHasDeferredTimers = false;
     }
 
+    private String[] getKeyStrengthList() {
+        // FIXME: fake the list for now
+        String[] list = new String[2];
+        list[0] = "1024";
+        list[1] = "512";
+        return list;
+    }
+
+    private String getSignedPublicKey(int index, String challenge, String url) {
+        // FIXME: do nothing for now
+        Log.w(LOGTAG, "getSignedPublicKey for " + index + " and challenge="
+                + challenge + " and url=" + url);
+        return "";
+    }
+
     private native void nativeConstructor();
     private native void nativeFinalize();
     private native void sharedTimerFired();

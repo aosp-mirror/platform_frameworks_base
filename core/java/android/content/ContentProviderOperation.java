@@ -369,6 +369,12 @@ public class ContentProviderOperation implements Parcelable {
 
         /** Create a ContentProviderOperation from this {@link Builder}. */
         public ContentProviderOperation build() {
+            if (mType == TYPE_UPDATE) {
+                if ((mValues == null || mValues.size() == 0)
+                        && (mValuesBackReferences == null || mValuesBackReferences.size() == 0)) {
+                    throw new IllegalArgumentException("Empty values");
+                }
+            }
             return new ContentProviderOperation(this);
         }
 

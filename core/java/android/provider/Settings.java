@@ -1025,6 +1025,14 @@ public final class Settings {
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
         /**
+         * If 0, the compatibility mode is off for all applications.
+         * If 1, older applications run under compatibility mode.
+         * TODO: remove this settings before code freeze (bug/1907571)
+         * @hide
+         */
+        public static final String COMPATIBILITY_MODE = "compatibility_mode";
+
+        /**
          * The screen backlight brightness between 0 and 255.
          */
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
@@ -1940,6 +1948,34 @@ public final class Settings {
             "enabled_accessibility_services";
 
         /**
+         * Setting to always use the default text-to-speech settings regardless
+         * of the application settings.
+         * 1 = override application settings,
+         * 0 = use application settings (if specified).
+         */
+        public static final String TTS_USE_DEFAULTS = "tts_use_defaults";
+
+        /**
+         * Default text-to-speech engine speech rate. 100 = 1x
+         */
+        public static final String TTS_DEFAULT_RATE = "tts_default_rate";
+
+        /**
+         * Default text-to-speech engine pitch. 100 = 1x
+         */
+        public static final String TTS_DEFAULT_PITCH = "tts_default_pitch";
+
+        /**
+         * Default text-to-speech engine.
+         */
+        public static final String TTS_DEFAULT_SYNTH = "tts_default_synth";
+
+        /**
+         * Default text-to-speech language.
+         */
+        public static final String TTS_DEFAULT_LANG = "tts_default_lang";
+
+        /**
          * Whether to notify the user of open networks.
          * <p>
          * If not connected and the scan results have an open network, we will
@@ -2477,6 +2513,12 @@ public final class Settings {
          * (including not set) disable buffering.
          */
         public static final String GMAIL_BUFFER_SERVER_RESPONSE = "gmail_buffer_server_response";
+
+        /**
+         * The maximum size in bytes allowed for the provider to gzip a protocol buffer uploaded to
+         * the server.
+         */
+        public static final String GMAIL_MAX_GZIP_SIZE = "gmail_max_gzip_size_bytes";
 
         /**
          * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
@@ -3047,6 +3089,13 @@ public final class Settings {
          * An email address that anr bugreports should be sent to.
          */
         public static final String ANR_BUGREPORT_RECIPIENT = "anr_bugreport_recipient";
+
+        /**
+         * Flag for allowing service provider to use location information to improve products and
+         * services.
+         * Type: int ( 0 = disallow, 1 = allow )
+         */
+        public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
         /**
          * @deprecated

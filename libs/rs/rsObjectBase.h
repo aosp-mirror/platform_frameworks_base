@@ -33,7 +33,14 @@ public:
     void incRef() const;
     void decRef() const;
 
+    const char * getName() const {
+        return mName;
+    }
+    void setName(const char *);
+    void setName(const char *, uint32_t len);
+
 private:
+    char * mName;
     mutable int32_t mRefCount;
 
 
@@ -47,6 +54,20 @@ public:
         mRef = NULL;
     }
 
+    ObjectBaseRef(const ObjectBaseRef &ref) {
+        mRef = ref.get();
+        if (mRef) {
+            mRef->incRef();
+        }
+    }
+
+    ObjectBaseRef(T *ref) {
+        mRef = ref;
+        if (mRef) {
+            ref->incRef();
+        }
+    }
+
     ~ObjectBaseRef() {
         clear();
     }
@@ -55,8 +76,14 @@ public:
         if (mRef != ref) {
             clear();
             mRef = ref;
-            ref->incRef();
+            if (mRef) {
+                ref->incRef();
+            }
         }
+    }
+
+    void set(const ObjectBaseRef &ref) {
+        set(ref.mRef);
     }
 
     void clear() {
@@ -76,9 +103,6 @@ public:
 
 protected:
     T * mRef;
-
-private:
-    ObjectBaseRef(const ObjectBaseRef &) {};
 
 };
 

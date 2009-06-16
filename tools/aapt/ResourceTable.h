@@ -96,6 +96,7 @@ public:
                     const String16& name,
                     const String16& bagParent,
                     const ResTable_config* params = NULL,
+                    bool overlay = false,
                     bool replace = false,
                     bool isId = false);
     
@@ -417,7 +418,8 @@ public:
         sp<Entry> getEntry(const String16& entry,
                            const SourcePos& pos,
                            const ResTable_config* config = NULL,
-                           bool doSetIndex = false);
+                           bool doSetIndex = false,
+                           bool overlay = false);
 
         const SourcePos& getFirstPublicSourcePos() const { return *mFirstPublicSourcePos; }
 
@@ -501,6 +503,7 @@ private:
                        const String16& type,
                        const String16& name,
                        const SourcePos& pos,
+                       bool overlay,
                        const ResTable_config* config = NULL,
                        bool doSetIndex = false);
     sp<const Entry> getEntry(uint32_t resID,

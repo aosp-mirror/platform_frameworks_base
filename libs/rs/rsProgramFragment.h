@@ -85,7 +85,7 @@ public:
 
     ObjectBaseRef<Type> mTextureTypes[ProgramFragment::MAX_TEXTURE];
 
-
+    Vector<ProgramFragment *> mPrograms;
 };
 
 

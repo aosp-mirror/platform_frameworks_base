@@ -418,6 +418,10 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getCdmaMin();
     }
 
+    public String getCdmaPrlVersion() {
+        return mActivePhone.getCdmaPrlVersion();
+    }
+
     public String getLine1AlphaTag() {
         return mActivePhone.getLine1AlphaTag();
     }
@@ -743,6 +747,46 @@ public class PhoneProxy extends Handler implements Phone {
 
     public void unregisterForDisplayInfo(Handler h) {
         mActivePhone.unregisterForDisplayInfo(h);
+    }
+
+    public void registerForNumberInfo(Handler h, int what, Object obj) {
+        mActivePhone.registerForNumberInfo(h, what, obj);
+    }
+
+    public void unregisterForNumberInfo(Handler h) {
+        mActivePhone.unregisterForNumberInfo(h);
+    }
+
+    public void registerForRedirectedNumberInfo(Handler h, int what, Object obj) {
+        mActivePhone.registerForRedirectedNumberInfo(h, what, obj);
+    }
+
+    public void unregisterForRedirectedNumberInfo(Handler h) {
+        mActivePhone.unregisterForRedirectedNumberInfo(h);
+    }
+
+    public void registerForLineControlInfo(Handler h, int what, Object obj) {
+        mActivePhone.registerForLineControlInfo( h, what, obj);
+    }
+
+    public void unregisterForLineControlInfo(Handler h) {
+        mActivePhone.unregisterForLineControlInfo(h);
+    }
+
+    public void registerFoT53ClirlInfo(Handler h, int what, Object obj) {
+        mActivePhone.registerFoT53ClirlInfo(h, what, obj);
+    }
+
+    public void unregisterForT53ClirInfo(Handler h) {
+        mActivePhone.unregisterForT53ClirInfo(h);
+    }
+
+    public void registerForT53AudioControlInfo(Handler h, int what, Object obj) {
+        mActivePhone.registerForT53AudioControlInfo( h, what, obj);
+    }
+
+    public void unregisterForT53AudioControlInfo(Handler h) {
+        mActivePhone.unregisterForT53AudioControlInfo(h);
     }
 
     public void setOnEcbModeExitResponse(Handler h, int what, Object obj){

@@ -78,9 +78,6 @@ public interface RILConstants {
     int CDM_TTY_HCO_MODE = 2;
     int CDM_TTY_VCO_MODE = 3;
 
-    byte CDMA_VOICE_PRIVACY = 0x70;           /* "p" value used in Ril_Call.isVoice if Privacy
-                                                 is active  */
-
 /*
 cat include/telephony/ril.h | \
    egrep '^#define' | \
@@ -209,9 +206,9 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_CDMA_VALIDATE_AKEY = 86;
     int RIL_REQUEST_CDMA_SEND_SMS = 87;
     int RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE = 88;
-    int RIL_REQUEST_GET_BROADCAST_CONFIG = 89;
-    int RIL_REQUEST_SET_BROADCAST_CONFIG = 90;
-    int RIL_REQUEST_BROADCAST_ACTIVATION = 91;
+    int RIL_REQUEST_GSM_GET_BROADCAST_CONFIG = 89;
+    int RIL_REQUEST_GSM_SET_BROADCAST_CONFIG = 90;
+    int RIL_REQUEST_GSM_BROADCAST_ACTIVATION = 91;
     int RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG = 92;
     int RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG = 93;
     int RIL_REQUEST_CDMA_BROADCAST_ACTIVATION = 94;
@@ -223,6 +220,7 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_GET_SMSC_ADDRESS = 100;
     int RIL_REQUEST_SET_SMSC_ADDRESS = 101;
     int RIL_REQUEST_REPORT_SMS_MEMORY_STATUS = 102;
+    int RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING = 103;
     int RIL_UNSOL_RESPONSE_BASE = 1000;
     int RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
     int RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED = 1001;

@@ -103,10 +103,10 @@ public class DisplayMetrics {
     }
 
     /**
-     * Update the display metrics based on the compatibility info and configuration.
+     * Update the display metrics based on the compatibility info and orientation
      * {@hide}
      */
-    public void updateMetrics(CompatibilityInfo compatibilityInfo, Configuration configuration) {
+    public void updateMetrics(CompatibilityInfo compatibilityInfo, int orientation) {
         if (compatibilityInfo.mScalingRequired) {
             float invertedRatio = compatibilityInfo.mApplicationInvertedScale;
             density *= invertedRatio;
@@ -116,31 +116,42 @@ public class DisplayMetrics {
             widthPixels *= invertedRatio;
             heightPixels *= invertedRatio;
         }
-        if (!compatibilityInfo.mExpandable) {
+        if (!compatibilityInfo.mConfiguredExpandable) {
             // Note: this assume that configuration is updated before calling
             // updateMetrics method.
             int defaultWidth;
             int defaultHeight;
-            switch (configuration.orientation) {
+            switch (orientation) {
                 case Configuration.ORIENTATION_LANDSCAPE: {
                     defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
                     defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
                     break;
                 }
-                case Configuration.ORIENTATION_UNDEFINED:
                 case Configuration.ORIENTATION_PORTRAIT:
                 case Configuration.ORIENTATION_SQUARE:
                 default: {
                     defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
                     defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
+                    break;
+                }
+                case Configuration.ORIENTATION_UNDEFINED: {
+                    // don't change
+                    return;
                 }
             }
-            // adjust the size only when the device's screen is bigger.
-            if (defaultWidth < widthPixels) {
-                widthPixels = defaultWidth;
-            }
-            if (defaultHeight < heightPixels) {
-                heightPixels = defaultHeight;
+            
+            if (defaultWidth == widthPixels && defaultHeight == heightPixels) {
+                // the screen size is same as expected size. make it expandable
+                compatibilityInfo.mExpandable = true;
+            } else {
+                compatibilityInfo.mExpandable = false;
+                // adjust the size only when the device's screen is bigger.
+                if (defaultWidth < widthPixels) {
+                    widthPixels = defaultWidth;
+                }
+                if (defaultHeight < heightPixels) {
+                    heightPixels = defaultHeight;
+                }
             }
         }
     }

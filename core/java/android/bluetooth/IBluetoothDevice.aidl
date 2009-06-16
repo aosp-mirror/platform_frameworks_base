@@ -16,8 +16,6 @@
 
 package android.bluetooth;
 
-import android.bluetooth.IBluetoothDeviceCallback;
-
 /**
  * System private API for talking with the Bluetooth service.
  *
@@ -33,10 +31,6 @@ interface IBluetoothDevice
     String getAddress();
     String getName();
     boolean setName(in String name);
-    String getVersion();
-    String getRevision();
-    String getManufacturer();
-    String getCompany();
 
     int getScanMode();
     boolean setScanMode(int mode);
@@ -44,17 +38,9 @@ interface IBluetoothDevice
     int getDiscoverableTimeout();
     boolean setDiscoverableTimeout(int timeout);
 
-    boolean startDiscovery(boolean resolveNames);
+    boolean startDiscovery();
     boolean cancelDiscovery();
     boolean isDiscovering();
-    boolean startPeriodicDiscovery();
-    boolean stopPeriodicDiscovery();
-    boolean isPeriodicDiscovery();
-    String[] listRemoteDevices();
-
-    String[] listAclConnections();
-    boolean isAclConnected(in String address);
-    boolean disconnectRemoteDeviceAcl(in String address);
 
     boolean createBond(in String address);
     boolean cancelBondProcess(in String address);
@@ -63,15 +49,9 @@ interface IBluetoothDevice
     int getBondState(in String address);
 
     String getRemoteName(in String address);
-    String getRemoteVersion(in String address);
-    String getRemoteRevision(in String address);
     int getRemoteClass(in String address);
-    String getRemoteManufacturer(in String address);
-    String getRemoteCompany(in String address);
-    boolean getRemoteServiceChannel(in String address, int uuid16, in IBluetoothDeviceCallback callback);
-    byte[] getRemoteFeatures(in String adddress);
-    String lastSeen(in String address);
-    String lastUsed(in String address);
+    String[] getRemoteUuids(in String address);
+    int getRemoteServiceChannel(in String address, String uuid);
 
     boolean setPin(in String address, in byte[] pin);
     boolean cancelPin(in String address);

@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
+
 import android.os.Message;
 import android.os.Handler;
 
@@ -464,6 +466,61 @@ public interface CommandsInterface {
      */
     void registerForSignalInfo(Handler h, int what, Object obj);
     void unregisterForSignalInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA number information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForNumberInfo(Handler h, int what, Object obj);
+    void unregisterForNumberInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA redirected number Information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForRedirectedNumberInfo(Handler h, int what, Object obj);
+    void unregisterForRedirectedNumberInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA line control information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForLineControlInfo(Handler h, int what, Object obj);
+    void unregisterForLineControlInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA T53 CLIR information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerFoT53ClirlInfo(Handler h, int what, Object obj);
+    void unregisterForT53ClirInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA T53 audio control information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForT53AudioControlInfo(Handler h, int what, Object obj);
+    void unregisterForT53AudioControlInfo(Handler h);
 
     /**
      * Fires on if Modem enters Emergency Callback mode
@@ -1102,6 +1159,14 @@ public interface CommandsInterface {
      */
     void reportSmsMemoryStatus(boolean available, Message result);
 
+    /**
+     * Indicates to the vendor ril that StkService is running
+     * rand is eady to receive RIL_UNSOL_STK_XXXX commands.
+     *
+     * @param result callback message
+     */
+    void reportStkServiceIsRunning(Message result);
+
     void invokeOemRilRequestRaw(byte[] data, Message response);
 
     void invokeOemRilRequestStrings(String[] strings, Message response);
@@ -1136,6 +1201,31 @@ public interface CommandsInterface {
      * @param response Callback message
      */
     public void handleCallSetupRequestFromSim(boolean accept, Message response);
+
+    /**
+     * Activate or deactivate cell broadcast SMS for GSM.
+     *
+     * @param activate
+     *            true = activate, false = deactivate
+     * @param result Callback message is empty on completion
+     */
+    public void setGsmBroadcastActivation(boolean activate, Message result);
+
+    /**
+     * Configure cell broadcast SMS for GSM.
+     *
+     * @param response Callback message is empty on completion
+     */
+    public void setGsmBroadcastConfig(SmsBroadcastConfigInfo[] config, Message response);
+
+    /**
+     * Query the current configuration of cell broadcast SMS of GSM.
+     *
+     * @param response
+     *        Callback message contains the configuration from the modem
+     *        on completion
+     */
+    public void getGsmBroadcastConfig(Message response);
 
     //***** new Methods for CDMA support
 
@@ -1243,14 +1333,14 @@ public interface CommandsInterface {
     public void deactivateDataCall(int cid, Message result);
 
     /**
-     * Activate or deactivate cell broadcast SMS.
+     * Activate or deactivate cell broadcast SMS for CDMA.
      *
      * @param activate
-     *            0 = activate, 1 = deactivate
+     *            true = activate, false = deactivate
      * @param result
      *            Callback message is empty on completion
      */
-    public void activateCdmaBroadcastSms(int activate, Message result);
+    public void setCdmaBroadcastActivation(boolean activate, Message result);
 
     /**
      * Configure cdma cell broadcast SMS.

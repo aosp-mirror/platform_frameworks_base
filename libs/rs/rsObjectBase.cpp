@@ -23,6 +23,7 @@ using namespace android::renderscript;
 ObjectBase::ObjectBase()
 {
     mRefCount = 0;
+    mName = NULL;
 }
 
 ObjectBase::~ObjectBase()
@@ -43,6 +44,27 @@ void ObjectBase::decRef() const
     //LOGE("ObjectBase %p dec ref %i", this, mRefCount);
     if (!mRefCount) {
         delete this;
+    }
+}
+
+void ObjectBase::setName(const char *name)
+{
+    delete mName;
+    mName = NULL;
+    if (name) {
+        mName = new char[strlen(name) +1];
+        strcpy(mName, name);
+    }
+}
+
+void ObjectBase::setName(const char *name, uint32_t len)
+{
+    delete mName;
+    mName = NULL;
+    if (name) {
+        mName = new char[len + 1];
+        memcpy(mName, name, len);
+        mName[len] = 0;
     }
 }
 

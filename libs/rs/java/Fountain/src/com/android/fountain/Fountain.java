@@ -16,6 +16,9 @@
 
 package com.android.fountain;
 
+import android.renderscript.RSSurfaceView;
+import android.renderscript.RenderScript;
+
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
