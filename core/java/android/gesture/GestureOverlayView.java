@@ -84,6 +84,7 @@ public class GestureOverlayView extends FrameLayout {
 
     private final Rect mInvalidRect = new Rect();
     private final Path mPath = new Path();
+    private boolean mGestureVisible;
 
     private float mX;
     private float mY;
@@ -274,14 +275,6 @@ public class GestureOverlayView extends FrameLayout {
         return mCurrentGesture;
     }
 
-    public long getFadeOffset() {
-        return mFadeOffset;
-    }
-
-    public void setFadeOffset(long fadeOffset) {
-        mFadeOffset = fadeOffset;
-    }
-
     public void setGesture(Gesture gesture) {
         if (mCurrentGesture != null) {
             clear(false);
@@ -302,6 +295,31 @@ public class GestureOverlayView extends FrameLayout {
         mResetGesture = true;
 
         invalidate();
+    }
+
+    public Path getGesturePath() {
+        return mPath;
+    }
+
+    public Path getGesturePath(Path path) {
+        path.set(mPath);
+        return path;
+    }
+
+    public boolean isGestureVisible() {
+        return mGestureVisible;
+    }
+
+    public void setGestureVisible(boolean visible) {
+        mGestureVisible = visible;
+    }
+
+    public long getFadeOffset() {
+        return mFadeOffset;
+    }
+
+    public void setFadeOffset(long fadeOffset) {
+        mFadeOffset = fadeOffset;
     }
 
     public void addOnGestureListener(OnGestureListener listener) {
@@ -372,7 +390,7 @@ public class GestureOverlayView extends FrameLayout {
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-        if (mCurrentGesture != null) {
+        if (mCurrentGesture != null && mGestureVisible) {
             canvas.drawPath(mPath, mGesturePaint);
         }
     }
