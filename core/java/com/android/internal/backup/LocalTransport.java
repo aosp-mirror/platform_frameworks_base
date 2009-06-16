@@ -112,11 +112,9 @@ public class LocalTransport extends IBackupTransport.Stub {
     // Restore handling
     public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
         // one hardcoded restore set
-        RestoreSet[] set = new RestoreSet[1];
-        set[0].device = "flash";
-        set[0].name = "Local disk image";
-        set[0].token = 0;
-        return set;
+        RestoreSet set = new RestoreSet("Local disk image", "flash", 0);
+        RestoreSet[] array = { set };
+        return array;
     }
 
     public PackageInfo[] getAppSet(int token) throws android.os.RemoteException {

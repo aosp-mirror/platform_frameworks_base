@@ -121,6 +121,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private volatile boolean mClearingData;
 
     private int mTransportId;
+    private RestoreSession mActiveRestoreSession;
 
     private File mStateDir;
     private File mDataDir;
@@ -427,7 +428,7 @@ class BackupManagerService extends IBackupManager.Stub {
             break;
 
         default:
-            Log.e(TAG, "creating unknown transport " + transportID);
+            Log.e(TAG, "Asked for unknown transport " + transportID);
         }
         return transport;
     }
@@ -495,7 +496,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 throws android.os.RemoteException {
             synchronized(mClearDataLock) {
                 mClearingData = false;
-                notifyAll();
+                mClearDataLock.notifyAll();
             }
         }
     }
@@ -962,12 +963,22 @@ class BackupManagerService extends IBackupManager.Stub {
     // Hand off a restore session
     public IRestoreSession beginRestoreSession(int transportID) {
         mContext.enforceCallingPermission("android.permission.BACKUP", "beginRestoreSession");
-        return null;
+
+        synchronized(this) {
+            if (mActiveRestoreSession != null) {
+                Log.d(TAG, "Restore session requested but one already active");
+                return null;
+            }
+            mActiveRestoreSession = new RestoreSession(transportID);
+        }
+        return mActiveRestoreSession;
     }
 
     // ----- Restore session -----
 
     class RestoreSession extends IRestoreSession.Stub {
+        private static final String TAG = "RestoreSession";
+
         private IBackupTransport mRestoreTransport = null;
         RestoreSet[] mRestoreSets = null;
 
@@ -980,11 +991,17 @@ class BackupManagerService extends IBackupManager.Stub {
             mContext.enforceCallingPermission("android.permission.BACKUP",
                     "getAvailableRestoreSets");
 
+            try {
             synchronized(this) {
                 if (mRestoreSets == null) {
                     mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
                 }
                 return mRestoreSets;
+            }
+            } catch (RuntimeException e) {
+                Log.d(TAG, "getAvailableRestoreSets exception");
+                e.printStackTrace();
+                throw e;
             }
         }
 
@@ -1001,6 +1018,8 @@ class BackupManagerService extends IBackupManager.Stub {
                         return 0;
                     }
                 }
+            } else {
+                if (DEBUG) Log.v(TAG, "No current restore set, not doing restore");
             }
             return -1;
         }
@@ -1011,6 +1030,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
             mRestoreTransport.endSession();
             mRestoreTransport = null;
+            synchronized(BackupManagerService.this) {
+                if (BackupManagerService.this.mActiveRestoreSession == this) {
+                    BackupManagerService.this.mActiveRestoreSession = null;
+                } else {
+                    Log.e(TAG, "ending non-current restore session");
+                }
+            }
         }
     }
 
