@@ -415,3 +415,7 @@ ProgramVertexSetModelMatrixEnable {
 	param bool enable
 	}
 
+ProgramVertexSetProjectionMatrixEnable {
+	param bool enable
+	}
+

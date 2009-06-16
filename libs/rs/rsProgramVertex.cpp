@@ -47,7 +47,7 @@ void ProgramVertex::setupGL()
 
     glMatrixMode(GL_PROJECTION);
     if (mProjectionEnable) {
-        //glLoadMatrixf(&f[OFFSET_PROJECTION]);
+        glLoadMatrixf(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
     } else {
     }
 
@@ -57,7 +57,6 @@ void ProgramVertex::setupGL()
     } else {
         glLoadIdentity();
     }
-
 }
 
 void ProgramVertex::setConstantType(uint32_t slot, const Type *t)
@@ -124,6 +123,11 @@ void rsi_ProgramVertexSetTextureMatrixEnable(Context *rsc, bool enable)
 void rsi_ProgramVertexSetModelMatrixEnable(Context *rsc, bool enable)
 {
     rsc->mStateVertex.mPV->setTransformEnable(enable);
+}
+
+void rsi_ProgramVertexSetProjectionMatrixEnable(Context *rsc, bool enable)
+{
+    rsc->mStateVertex.mPV->setProjectionEnable(enable);
 }
 
 
