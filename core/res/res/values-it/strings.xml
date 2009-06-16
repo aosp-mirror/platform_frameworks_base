@@ -177,8 +177,6 @@
     <string name="permdesc_setProcessLimit">"Consente a un\'applicazione di stabilire il numero massimo di processi in esecuzione. Mai necessario per le normali applicazioni."</string>
     <string name="permlab_setAlwaysFinish">"chiusura applicazioni in background"</string>
     <string name="permdesc_setAlwaysFinish">"Consente a un\'applicazione di controllare se le attività sono sempre completate quando vengono messe in secondo piano. Mai necessario per le normali applicazioni."</string>
-    <string name="permlab_fotaUpdate">"installazione autom. aggiornamenti di sistema"</string>
-    <string name="permdesc_fotaUpdate">"Consente a un\'applicazione di ricevere notifiche sugli aggiornamenti del sistema in sospeso e di attivarne l\'installazione. Le applicazioni dannose possono sfruttare questa possibilità per danneggiare il sistema con aggiornamenti non autorizzati, o interferire con il processo di aggiornamento."</string>
     <string name="permlab_batteryStats">"modifica statistiche batteria"</string>
     <string name="permdesc_batteryStats">"Consente la modifica delle statistiche sulla batteria raccolte. Da non usare per normali applicazioni."</string>
     <string name="permlab_internalSystemWindow">"visualizzazione finestre non autorizzate"</string>

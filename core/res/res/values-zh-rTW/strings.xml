@@ -177,8 +177,6 @@
     <string name="permdesc_setProcessLimit">"允許應用程式控制可使用的最大執行緒。一般應用程式不需要此功能。"</string>
     <string name="permlab_setAlwaysFinish">"關閉所有背景程式"</string>
     <string name="permdesc_setAlwaysFinish">"允許應用程式控制哪些活動在被移到背景執行時，儘速結束。一般應用程式不需要此功能。"</string>
-    <string name="permlab_fotaUpdate">"自動安裝系統更新"</string>
-    <string name="permdesc_fotaUpdate">"允許應用程式接收可安裝系統更新的通知，並啟動安裝。請注意：惡意程式可能透過未授權的更新竄改系統，或干擾更新程序。"</string>
     <string name="permlab_batteryStats">"編輯電池狀態"</string>
     <string name="permdesc_batteryStats">"允許修改電池狀態。一般應用程式不會使用此功能。"</string>
     <string name="permlab_internalSystemWindow">"顯示未授權視窗"</string>

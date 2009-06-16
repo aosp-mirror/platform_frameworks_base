@@ -177,8 +177,6 @@
     <string name="permdesc_setProcessLimit">"Umožňuje aplikaci řídit maximální počet spuštěných procesů. Běžné aplikace toto nastavení nikdy nevyužívají."</string>
     <string name="permlab_setAlwaysFinish">"zavření všech aplikací na pozadí"</string>
     <string name="permdesc_setAlwaysFinish">"Umožňuje aplikaci ovládat, zda jsou činnosti vždy dokončeny po přesunutí do pozadí. Běžné aplikace toto nastavení nikdy nevyužívají."</string>
-    <string name="permlab_fotaUpdate">"automatická instalace aktualizací systému"</string>
-    <string name="permdesc_fotaUpdate">"Umožňuje aplikaci přijímat oznámení o čekajících aktualizacích systému a spouštět jejich instalaci. Škodlivé aplikace mohou díky tomuto nastavení poškodit systém pomocí neoprávněných aktualizací nebo celkově narušovat proces aktualizace."</string>
     <string name="permlab_batteryStats">"změna statistických údajů o baterii"</string>
     <string name="permdesc_batteryStats">"Umožňuje změnu shromážděných statistických údajů o baterii. Není určeno pro běžné aplikace."</string>
     <string name="permlab_internalSystemWindow">"zobrazení nepovolených oken"</string>
