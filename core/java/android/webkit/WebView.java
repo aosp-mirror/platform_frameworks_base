@@ -4582,6 +4582,9 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_CLICK:
+                    // The user clicked with the trackball, and did not click a
+                    // second time, so perform the action of a trackball single
+                    // click
                     mTouchMode = TOUCH_DONE_MODE;
                     Rect visibleRect = sendOurVisibleRect();
                     // Note that sendOurVisibleRect calls viewToContent, so the
@@ -4593,8 +4596,13 @@ public class WebView extends AbsoluteLayout
                     mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE,
                             cursorData());
                     playSoundEffect(SoundEffectConstants.CLICK);
-                    if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
+                    boolean isTextInput = nativeCursorIsTextInput();
+                    if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(
+                                nativeCursorText())) {
                         mWebViewCore.sendMessage(EventHub.CLICK);
+                    }
+                    if (isTextInput) {
+                        rebuildWebTextView();
                     }
                     break;
                 case SCROLL_BY_MSG_ID:
