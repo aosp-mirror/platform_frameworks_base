@@ -233,7 +233,7 @@ public class CdmaDataConnection extends DataConnection {
 
         switch (rilCause) {
             case PS_NET_DOWN_REASON_OPERATOR_DETERMINED_BARRING:
-                cause = FailCause.BARRED;
+                cause = FailCause.OPERATOR_BARRED;
                 break;
             case PS_NET_DOWN_REASON_AUTH_FAILED:
                 cause = FailCause.USER_AUTHENTICATION;
