@@ -253,8 +253,12 @@ class BackupManagerService extends IBackupManager.Stub {
             case MSG_RUN_BACKUP:
                 // snapshot the pending-backup set and work on that
                 File oldJournal = mJournal;
-                RandomAccessFile oldJournalStream = mJournalStream;
                 synchronized (mQueueLock) {
+                    if (mPendingBackups.size() == 0) {
+                        Log.v(TAG, "Backup requested but nothing pending");
+                        break;
+                    }
+
                     if (mBackupQueue == null) {
                         mBackupQueue = new ArrayList<BackupRequest>();
                         for (BackupRequest b: mPendingBackups.values()) {
@@ -262,7 +266,8 @@ class BackupManagerService extends IBackupManager.Stub {
                         }
                         mPendingBackups = new HashMap<ApplicationInfo,BackupRequest>();
                     }
-                    // !!! TODO: start a new backup-queue journal file too
+
+                    // Start a new backup-queue journal file too
                     if (mJournalStream != null) {
                         try {
                             mJournalStream.close();
@@ -893,22 +898,22 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    // Schedule a backup pass for a given package.  This method will schedule a
-    // full backup even for apps that do not declare an android:backupAgent, so
-    // use with care.
-    public void scheduleFullBackup(String packageName) throws RemoteException {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "scheduleFullBackup");
+    // Run a backup pass immediately for any applications that have declared
+    // that they have pending updates.
+    public void backupNow() throws RemoteException {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "tryBackupNow");
 
-        if (DEBUG) Log.v(TAG, "Scheduling immediate full backup for " + packageName);
+        if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
         synchronized (mQueueLock) {
-            try {
-                ApplicationInfo app = mPackageManager.getApplicationInfo(packageName, 0);
-                mPendingBackups.put(app, new BackupRequest(app, true));
-                mBackupHandler.sendEmptyMessage(MSG_RUN_FULL_BACKUP);
-            } catch (NameNotFoundException e) {
-                Log.w(TAG, "Could not find app for " + packageName + " to schedule full backup");
-            }
+            mBackupHandler.removeMessages(MSG_RUN_BACKUP);
+            mBackupHandler.sendEmptyMessage(MSG_RUN_BACKUP);
         }
+    }
+
+    // Report the currently active transport
+    public int getCurrentTransport() {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
+        return mTransportId;
     }
 
     // Select which transport to use for the next backup operation

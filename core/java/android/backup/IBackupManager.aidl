@@ -48,10 +48,22 @@ interface IBackupManager {
     oneway void agentDisconnected(String packageName);
 
     /**
-     * Schedule a full backup of the given package.  Callers must hold the
+     * Schedule an immediate backup attempt for all pending updates.  This is
+     * primarily intended for transports to use when they detect a suitable
+     * opportunity for doing a backup pass.  If there are no pending updates to
+     * be sent, no action will be taken.  Even if some updates are pending, the
+     * transport will still be asked to confirm via the usual requestBackupTime()
+     * method.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    oneway void backupNow();
+
+    /**
+     * Identify the currently selected transport.  Callers must hold the
      * android.permission.BACKUP permission to use this method.
      */
-    oneway void scheduleFullBackup(String packageName);
+    int getCurrentTransport();
 
     /**
      * Specify a default backup transport.  Callers must hold the
