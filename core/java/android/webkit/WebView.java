@@ -3190,7 +3190,16 @@ public class WebView extends AbsoluteLayout
         }
 
         if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
+            // This message will put the node in focus, for the DOM's notion
+            // of focus
             mWebViewCore.sendMessage(EventHub.CLICK);
+            if (nativeCursorIsTextInput()) {
+                // This will bring up the WebTextView and put it in focus, for
+                // our view system's notion of focus
+                rebuildWebTextView();
+                // Now we need to pass the event to it
+                return mWebTextView.onKeyDown(keyCode, event);
+            }
         }
 
         // TODO: should we pass all the keys to DOM or check the meta tag
