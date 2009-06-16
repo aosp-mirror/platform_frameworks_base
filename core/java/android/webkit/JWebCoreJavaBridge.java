@@ -135,10 +135,9 @@ final class JWebCoreJavaBridge extends Handler {
     /**
      * Store a cookie string associated with a url.
      * @param url The url to be used as a key for the cookie.
-     * @param docUrl The policy base url used by WebCore.
      * @param value The cookie string to be stored.
      */
-    private void setCookies(String url, String docUrl, String value) {
+    private void setCookies(String url, String value) {
         if (value.contains("\r") || value.contains("\n")) {
             // for security reason, filter out '\r' and '\n' from the cookie
             int size = value.length();
