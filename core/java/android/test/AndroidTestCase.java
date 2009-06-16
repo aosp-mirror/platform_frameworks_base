@@ -16,11 +16,13 @@
 
 package android.test;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
-
-import junit.framework.TestCase;
 
 /**
  * Extend this if you need to access Resources or other things that depend on Activity Context.
@@ -50,6 +52,72 @@ public class AndroidTestCase extends TestCase {
 
     public Context getContext() {
         return mContext;
+    }
+
+    /**
+     * Asserts that launching a given activity is protected by a particular permission by
+     * attempting to start the activity and validating that a {@link SecurityException}
+     * is thrown that mentions the permission in its error message.
+     *
+     * Note that an instrumentation isn't needed because all we are looking for is a security error
+     * and we don't need to wait for the activity to launch and get a handle to the activity.
+     *
+     * @param packageName The package name of the activity to launch.
+     * @param className The class of the activity to launch.
+     * @param permission The name of the permission.
+     */
+    public void assertActivityRequiresPermission(
+            String packageName, String className, String permission) {
+        final Intent intent = new Intent();
+        intent.setClassName(packageName, className);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        try {
+            getContext().startActivity(intent);
+            fail("expected security exception for " + permission);
+        } catch (SecurityException expected) {
+            assertNotNull("security exception's error message.", expected.getMessage());
+            assertTrue("error message should contain " + permission + ".",
+                    expected.getMessage().contains(permission));
+        }
+    }
+
+
+    /**
+     * Asserts that reading from the content uri requires a particular permission by querying the
+     * uri and ensuring a {@link SecurityException} is thrown mentioning the particular permission.
+     *
+     * @param uri The uri that requires a permission to query.
+     * @param permission The permission that should be required.
+     */
+    public void assertReadingContentUriRequiresPermission(Uri uri, String permission) {
+        try {
+            getContext().getContentResolver().query(uri, null, null, null, null);
+            fail("expected SecurityException requiring " + permission);
+        } catch (SecurityException expected) {
+            assertNotNull("security exception's error message.", expected.getMessage());
+            assertTrue("error message should contain " + permission + ".",
+                    expected.getMessage().contains(permission));
+        }
+    }
+
+    /**
+     * Asserts that writing to the content uri requires a particular permission by inserting into
+     * the uri and ensuring a {@link SecurityException} is thrown mentioning the particular
+     * permission.
+     *
+     * @param uri The uri that requires a permission to query.
+     * @param permission The permission that should be required.
+     */
+    public void assertWritingContentUriRequiresPermission(Uri uri, String permission) {
+        try {
+            getContext().getContentResolver().insert(uri, new ContentValues());
+            fail("expected SecurityException requiring " + permission);
+        } catch (SecurityException expected) {
+            assertNotNull("security exception's error message.", expected.getMessage());
+            assertTrue("error message should contain " + permission + ".",
+                    expected.getMessage().contains(permission));
+        }
     }
 
     /**
