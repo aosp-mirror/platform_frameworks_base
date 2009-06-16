@@ -177,6 +177,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      */
     static final int DIM_DURATION_MULTIPLIER = 6;
 
+    static final int INJECT_FAILED = 0;
+    static final int INJECT_SUCCEEDED = 1;
+    static final int INJECT_NO_PERMISSION = -1;
+    
     static final int UPDATE_FOCUS_NORMAL = 0;
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
@@ -1324,7 +1328,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             // Update Orientation after adding a window, only if the window needs to be
             // displayed right away
             if (win.isVisibleOrAdding()) {
-                if (updateOrientationFromAppTokens(null, null) != null) {
+                if (updateOrientationFromAppTokensUnchecked(null, null) != null) {
                     sendNewConfiguration();
                 }
             }
@@ -1963,7 +1967,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void addWindowToken(IBinder token, int type) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addWindowToken()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -1981,7 +1985,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void removeWindowToken(IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "removeWindowToken()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         final long origId = Binder.clearCallingIdentity();
@@ -2034,7 +2038,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             int groupId, int requestedOrientation, boolean fullscreen) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2063,7 +2067,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void setAppGroupId(IBinder token, int groupId) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppStartingIcon()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2161,8 +2165,22 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
     public Configuration updateOrientationFromAppTokens(
             Configuration currentConfig, IBinder freezeThisOneIfNeeded) {
+        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
+                "updateOrientationFromAppTokens()")) {
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+        }
+        
         Configuration config;
         long ident = Binder.clearCallingIdentity();
+        config = updateOrientationFromAppTokensUnchecked(currentConfig,
+                freezeThisOneIfNeeded);
+        Binder.restoreCallingIdentity(ident);
+        return config;
+    }
+
+    Configuration updateOrientationFromAppTokensUnchecked(
+            Configuration currentConfig, IBinder freezeThisOneIfNeeded) {
+        Configuration config;
         synchronized(mWindowMap) {
             config = updateOrientationFromAppTokensLocked(currentConfig, freezeThisOneIfNeeded);
         }
@@ -2170,7 +2188,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             mLayoutNeeded = true;
             performLayoutAndPlaceSurfacesLocked();
         }
-        Binder.restoreCallingIdentity(ident);
         return config;
     }
 
@@ -2242,7 +2259,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void setAppOrientation(IApplicationToken token, int requestedOrientation) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppOrientation()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2270,7 +2287,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void setFocusedApp(IBinder token, boolean moveFocusNow) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setFocusedApp()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2303,7 +2320,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void prepareAppTransition(int transit) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "prepareAppTransition()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2332,7 +2349,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void executeAppTransition() {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "executeAppTransition()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2352,7 +2369,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             IBinder transferFrom, boolean createIfNeeded) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppStartingIcon()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2486,7 +2503,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void setAppWillBeHidden(IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppWillBeHidden()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         AppWindowToken wtoken;
@@ -2597,7 +2614,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void setAppVisibility(IBinder token, boolean visible) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppVisibility()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         AppWindowToken wtoken;
@@ -2727,7 +2744,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void startAppFreezingScreen(IBinder token, int configChanges) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppFreezingScreen()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2750,7 +2767,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void stopAppFreezingScreen(IBinder token, boolean force) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppFreezingScreen()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -2769,7 +2786,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void removeAppToken(IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "removeAppToken()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         AppWindowToken wtoken = null;
@@ -2937,7 +2954,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void moveAppToken(int index, IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "moveAppToken()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
@@ -3019,7 +3036,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void moveAppTokensToTop(List<IBinder> tokens) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "moveAppTokensToTop()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         final long origId = Binder.clearCallingIdentity();
@@ -3040,7 +3057,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void moveAppTokensToBottom(List<IBinder> tokens) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "moveAppTokensToBottom()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         final long origId = Binder.clearCallingIdentity();
@@ -3127,7 +3144,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void setAnimationScale(int which, float scale) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ANIMATION_SCALE,
                 "setAnimationScale()")) {
-            return;
+            throw new SecurityException("Requires SET_ANIMATION_SCALE permission");
         }
 
         if (scale < 0) scale = 0;
@@ -3145,7 +3162,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void setAnimationScales(float[] scales) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ANIMATION_SCALE,
                 "setAnimationScale()")) {
-            return;
+            throw new SecurityException("Requires SET_ANIMATION_SCALE permission");
         }
 
         if (scales != null) {
@@ -3176,7 +3193,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public int getSwitchState(int sw) {
         if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
                 "getSwitchState()")) {
-            return -1;
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
         return KeyInputQueue.getSwitchState(sw);
     }
@@ -3184,7 +3201,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public int getSwitchStateForDevice(int devid, int sw) {
         if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
                 "getSwitchStateForDevice()")) {
-            return -1;
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
         return KeyInputQueue.getSwitchState(devid, sw);
     }
@@ -3192,7 +3209,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public int getScancodeState(int sw) {
         if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
                 "getScancodeState()")) {
-            return -1;
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
         return KeyInputQueue.getScancodeState(sw);
     }
@@ -3200,7 +3217,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public int getScancodeStateForDevice(int devid, int sw) {
         if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
                 "getScancodeStateForDevice()")) {
-            return -1;
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
         return KeyInputQueue.getScancodeState(devid, sw);
     }
@@ -3208,7 +3225,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public int getKeycodeState(int sw) {
         if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
                 "getKeycodeState()")) {
-            return -1;
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
         return KeyInputQueue.getKeycodeState(sw);
     }
@@ -3216,7 +3233,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public int getKeycodeStateForDevice(int devid, int sw) {
         if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
                 "getKeycodeStateForDevice()")) {
-            return -1;
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
         return KeyInputQueue.getKeycodeState(devid, sw);
     }
@@ -3305,7 +3322,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             boolean alwaysSendConfiguration, int animFlags) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "setRotation()")) {
-            return;
+            throw new SecurityException("Requires SET_ORIENTATION permission");
         }
 
         setRotationUnchecked(rotation, alwaysSendConfiguration, animFlags);
@@ -3783,7 +3800,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     /**
      * @return Returns true if event was dispatched, false if it was dropped for any reason
      */
-    private boolean dispatchPointer(QueuedEvent qev, MotionEvent ev, int pid, int uid) {
+    private int dispatchPointer(QueuedEvent qev, MotionEvent ev, int pid, int uid) {
         if (DEBUG_INPUT || WindowManagerPolicy.WATCH_POINTER) Log.v(TAG,
                 "dispatchPointer " + ev);
 
@@ -3821,14 +3838,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 mQueue.recycleEvent(qev);
             }
             ev.recycle();
-            return false;
+            return INJECT_FAILED;
         }
         if (targetObj == mKeyWaiter.CONSUMED_EVENT_TOKEN) {
             if (qev != null) {
                 mQueue.recycleEvent(qev);
             }
             ev.recycle();
-            return true;
+            return INJECT_SUCCEEDED;
         }
 
         WindowState target = (WindowState)targetObj;
@@ -3849,7 +3866,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     mQueue.recycleEvent(qev);
                 }
                 ev.recycle();
-                return false;
+                return INJECT_NO_PERMISSION;
             }
         }
         
@@ -3903,7 +3920,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     mQueue.recycleEvent(qev);
                 }
                 ev.recycle();
-                return false;
+                return INJECT_FAILED;
             }
         } //end if target
 
@@ -3990,7 +4007,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (MEASURE_LATENCY) {
                 lt.sample("7 after  svr->client ipc ", System.nanoTime() - eventTimeNano);
             }
-            return true;
+            return INJECT_SUCCEEDED;
         } catch (android.os.RemoteException e) {
             Log.i(TAG, "WINDOW DIED during motion dispatch: " + target);
             mKeyWaiter.mMotionTarget = null;
@@ -4001,13 +4018,13 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 // removed.
             }
         }
-        return false;
+        return INJECT_FAILED;
     }
 
     /**
      * @return Returns true if event was dispatched, false if it was dropped for any reason
      */
-    private boolean dispatchTrackball(QueuedEvent qev, MotionEvent ev, int pid, int uid) {
+    private int dispatchTrackball(QueuedEvent qev, MotionEvent ev, int pid, int uid) {
         if (DEBUG_INPUT) Log.v(
                 TAG, "dispatchTrackball [" + ev.getAction() +"] <" + ev.getX() + ", " + ev.getY() + ">");
 
@@ -4019,14 +4036,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 mQueue.recycleEvent(qev);
             }
             ev.recycle();
-            return false;
+            return INJECT_FAILED;
         }
         if (focusObj == mKeyWaiter.CONSUMED_EVENT_TOKEN) {
             if (qev != null) {
                 mQueue.recycleEvent(qev);
             }
             ev.recycle();
-            return true;
+            return INJECT_SUCCEEDED;
         }
 
         WindowState focus = (WindowState)focusObj;
@@ -4042,7 +4059,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     mQueue.recycleEvent(qev);
                 }
                 ev.recycle();
-                return false;
+                return INJECT_NO_PERMISSION;
             }
         }
 
@@ -4062,7 +4079,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
         try {
             focus.mClient.dispatchTrackball(ev, eventTime);
-            return true;
+            return INJECT_SUCCEEDED;
         } catch (android.os.RemoteException e) {
             Log.i(TAG, "WINDOW DIED during key dispatch: " + focus);
             try {
@@ -4073,23 +4090,23 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             }
         }
 
-        return false;
+        return INJECT_FAILED;
     }
 
     /**
      * @return Returns true if event was dispatched, false if it was dropped for any reason
      */
-    private boolean dispatchKey(KeyEvent event, int pid, int uid) {
+    private int dispatchKey(KeyEvent event, int pid, int uid) {
         if (DEBUG_INPUT) Log.v(TAG, "Dispatch key: " + event);
 
         Object focusObj = mKeyWaiter.waitForNextEventTarget(event, null,
                 null, false, false);
         if (focusObj == null) {
             Log.w(TAG, "No focus window, dropping: " + event);
-            return false;
+            return INJECT_FAILED;
         }
         if (focusObj == mKeyWaiter.CONSUMED_EVENT_TOKEN) {
-            return true;
+            return INJECT_SUCCEEDED;
         }
 
         WindowState focus = (WindowState)focusObj;
@@ -4104,7 +4121,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 Log.w(TAG, "Permission denied: injecting key event from pid "
                         + pid + " uid " + uid + " to window " + focus
                         + " owned by uid " + focus.mSession.mUid);
-                return false;
+                return INJECT_NO_PERMISSION;
             }
         }
 
@@ -4122,7 +4139,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         + " to " + focus);
             }
             focus.mClient.dispatchKey(event);
-            return true;
+            return INJECT_SUCCEEDED;
         } catch (android.os.RemoteException e) {
             Log.i(TAG, "WINDOW DIED during key dispatch: " + focus);
             try {
@@ -4133,13 +4150,13 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             }
         }
 
-        return false;
+        return INJECT_FAILED;
     }
 
     public void pauseKeyDispatching(IBinder _token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "pauseKeyDispatching()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized (mWindowMap) {
@@ -4153,7 +4170,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void resumeKeyDispatching(IBinder _token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "resumeKeyDispatching()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized (mWindowMap) {
@@ -4167,7 +4184,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     public void setEventDispatching(boolean enabled) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "resumeKeyDispatching()")) {
-            return;
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized (mWindowMap) {
@@ -4200,11 +4217,18 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
                 deviceId, scancode, KeyEvent.FLAG_FROM_SYSTEM);
 
-        boolean result = dispatchKey(newEvent, Binder.getCallingPid(), Binder.getCallingUid());
+        int result = dispatchKey(newEvent, Binder.getCallingPid(), Binder.getCallingUid());
         if (sync) {
             mKeyWaiter.waitForNextEventTarget(null, null, null, false, true);
         }
-        return result;
+        switch (result) {
+            case INJECT_NO_PERMISSION:
+                throw new SecurityException(
+                        "Injecting to another application requires INJECT_EVENT permission");
+            case INJECT_SUCCEEDED:
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -4217,11 +4241,18 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * @return Returns true if event was dispatched, false if it was dropped for any reason
      */
     public boolean injectPointerEvent(MotionEvent ev, boolean sync) {
-        boolean result = dispatchPointer(null, ev, Binder.getCallingPid(), Binder.getCallingUid());
+        int result = dispatchPointer(null, ev, Binder.getCallingPid(), Binder.getCallingUid());
         if (sync) {
             mKeyWaiter.waitForNextEventTarget(null, null, null, false, true);
         }
-        return result;
+        switch (result) {
+            case INJECT_NO_PERMISSION:
+                throw new SecurityException(
+                        "Injecting to another application requires INJECT_EVENT permission");
+            case INJECT_SUCCEEDED:
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -4234,11 +4265,18 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * @return Returns true if event was dispatched, false if it was dropped for any reason
      */
     public boolean injectTrackballEvent(MotionEvent ev, boolean sync) {
-        boolean result = dispatchTrackball(null, ev, Binder.getCallingPid(), Binder.getCallingUid());
+        int result = dispatchTrackball(null, ev, Binder.getCallingPid(), Binder.getCallingUid());
         if (sync) {
             mKeyWaiter.waitForNextEventTarget(null, null, null, false, true);
         }
-        return result;
+        switch (result) {
+            case INJECT_NO_PERMISSION:
+                throw new SecurityException(
+                        "Injecting to another application requires INJECT_EVENT permission");
+            case INJECT_SUCCEEDED:
+                return true;
+        }
+        return false;
     }
 
     private WindowState getFocusedWindow() {
@@ -7541,7 +7579,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 }
 
                 case COMPUTE_AND_SEND_NEW_CONFIGURATION: {
-                    if (updateOrientationFromAppTokens(null, null) != null) {
+                    if (updateOrientationFromAppTokensUnchecked(null, null) != null) {
                         sendNewConfiguration();
                     }
                     break;
