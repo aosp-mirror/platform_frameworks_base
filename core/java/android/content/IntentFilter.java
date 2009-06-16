@@ -366,6 +366,7 @@ public class IntentFilter implements Parcelable {
         throws MalformedMimeTypeException {
         mPriority = 0;
         mActions = new ArrayList<String>();
+        addAction(action);
         addDataType(dataType);
     }
 
