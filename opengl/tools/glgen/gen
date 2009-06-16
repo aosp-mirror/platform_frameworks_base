@@ -4,13 +4,30 @@ set -e
 rm -rf out generated
 
 mkdir out
+
+# Create dummy Java files for Android APIs that are used by the code we generate.
+# This allows us to test the generated code without building the rest of Android.
+
 mkdir -p out/javax/microedition/khronos/opengles
 mkdir -p out/com/google/android/gles_jni
+mkdir -p out/android/app
 mkdir -p out/android/graphics
 mkdir -p out/android/opengl
+mkdir -p out/android/content
+mkdir -p out/android/content/pm
+mkdir -p out/android/os
+mkdir -p out/android/util
 
 echo "package android.graphics;" > out/android/graphics/Canvas.java
 echo "public interface Canvas {}" >> out/android/graphics/Canvas.java
+
+echo "package android.app; import android.content.pm.IPackageManager; public class ActivityThread { public static final ActivityThread currentActivityThread() { return null; } public static final String currentPackageName(){ return null; } public static IPackageManager getPackageManager() { return null;} }" > out/android/app/ActivityThread.java
+# echo "package android.content; import android.content.pm.PackageManager; public interface Context { public PackageManager getPackageManager(); }" > out/android/content/Context.java
+echo "package android.content.pm; public class ApplicationInfo {public int targetSdkVersion;}" > out/android/content/pm/ApplicationInfo.java
+echo "package android.content.pm; public interface IPackageManager {ApplicationInfo getApplicationInfo(java.lang.String packageName, int flags) throws android.os.RemoteException;}" > out/android/content/pm/IPackageManager.java
+echo "package android.os; public class Build {public static class VERSION_CODES { public static final int CUPCAKE = 3;};	}" > out/android/os/Build.java
+echo "package android.os; public class RemoteException extends Exception {}" > out/android/os/RemoteException.java
+echo "package android.util; public class Log {public static void w(String a, String b) {} public static void e(String a, String b) {}}" > out/android/util/Log.java
 
 GLFILE=out/javax/microedition/khronos/opengles/GL.java
 cp stubs/jsr239/GLHeader.java-if $GLFILE
