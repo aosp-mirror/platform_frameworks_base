@@ -16,8 +16,16 @@
 
 package android.backup;
 
+import java.io.InputStream;
+
 /** @hide */
 public interface RestoreHelper {
-    public void performRestore();
+    /**
+     * Called by RestoreHelperDispatcher to dispatch one entity of data.
+     * <p class=note>
+     * Do not close the <code>data</code> stream.  Do not read more than
+     * <code>dataSize</code> bytes from <code>data</code>.
+     */
+    public void performRestore(BackupDataInputStream data);
 }
 

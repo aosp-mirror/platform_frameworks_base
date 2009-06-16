@@ -82,11 +82,24 @@ public class BackupDataInput {
         }
     }
 
-    public int readEntityData(byte[] data, int size) throws IOException {
+    public int readEntityData(byte[] data, int offset, int size) throws IOException {
         if (mHeaderReady) {
-            int result = readEntityData_native(mBackupReader, data, size);
+            int result = readEntityData_native(mBackupReader, data, offset, size);
             if (result >= 0) {
                 return result;
+            } else {
+                throw new IOException("result=0x" + Integer.toHexString(result));
+            }
+        } else {
+            throw new IllegalStateException("mHeaderReady=false");
+        }
+    }
+
+    public void skipEntityData() throws IOException {
+        if (mHeaderReady) {
+            int result = skipEntityData_native(mBackupReader);
+            if (result >= 0) {
+                return;
             } else {
                 throw new IOException("result=0x" + Integer.toHexString(result));
             }
@@ -99,5 +112,6 @@ public class BackupDataInput {
     private native static void dtor(int mBackupReader);
 
     private native int readNextHeader_native(int mBackupReader, EntityHeader entity);
-    private native int readEntityData_native(int mBackupReader, byte[] data, int size);
+    private native int readEntityData_native(int mBackupReader, byte[] data, int offset, int size);
+    private native int skipEntityData_native(int mBackupReader);
 }

@@ -55,18 +55,13 @@ static jint
 readNextHeader_native(JNIEnv* env, jobject clazz, int r, jobject entity)
 {
     int err;
+    bool done;
     BackupDataReader* reader = (BackupDataReader*)r;
-
-    err = reader->Status();
-    if (err != 0) {
-        return err < 0 ? err : -1;
-    }
 
     int type = 0;
 
-    err = reader->ReadNextHeader(&type);
-    if (err == EIO) {
-        // Clean EOF with no footer block; just claim we're done
+    err = reader->ReadNextHeader(&done, &type);
+    if (done) {
         return 1;
     }
 
@@ -75,24 +70,12 @@ readNextHeader_native(JNIEnv* env, jobject clazz, int r, jobject entity)
     }
 
     switch (type) {
-    case BACKUP_HEADER_APP_V1:
-    {
-        String8 packageName;
-        int cookie;
-        err = reader->ReadAppHeader(&packageName, &cookie);
-        if (err != 0) {
-            LOGD("ReadAppHeader() returned %d; aborting", err);
-            return err < 0 ? err : -1;
-        }
-        break;
-    }
     case BACKUP_HEADER_ENTITY_V1:
     {
         String8 key;
         size_t dataSize;
         err = reader->ReadEntityHeader(&key, &dataSize);
         if (err != 0) {
-            LOGD("ReadEntityHeader(); aborting", err);
             return err < 0 ? err : -1;
         }
         // TODO: Set the fields in the entity object
@@ -100,10 +83,6 @@ readNextHeader_native(JNIEnv* env, jobject clazz, int r, jobject entity)
         env->SetObjectField(entity, s_keyField, keyStr);
         env->SetIntField(entity, s_dataSizeField, dataSize);
         return 0;
-    }
-    case BACKUP_FOOTER_APP_V1:
-    {
-        break;
     }
     default:
         LOGD("Unknown header type: 0x%08x\n", type);
@@ -115,12 +94,12 @@ readNextHeader_native(JNIEnv* env, jobject clazz, int r, jobject entity)
 }
 
 static jint
-readEntityData_native(JNIEnv* env, jobject clazz, int r, jbyteArray data, int size)
+readEntityData_native(JNIEnv* env, jobject clazz, int r, jbyteArray data, int offset, int size)
 {
     int err;
     BackupDataReader* reader = (BackupDataReader*)r;
 
-    if (env->GetArrayLength(data) < size) {
+    if (env->GetArrayLength(data) < (size+offset)) {
         // size mismatch
         return -1;
     }
@@ -130,9 +109,20 @@ readEntityData_native(JNIEnv* env, jobject clazz, int r, jbyteArray data, int si
         return -2;
     }
 
-    err = reader->ReadEntityData(dataBytes, size);
+    err = reader->ReadEntityData(dataBytes+offset, size);
 
     env->ReleaseByteArrayElements(data, dataBytes, 0);
+
+    return err;
+}
+
+static jint
+skipEntityData_native(JNIEnv* env, jobject clazz, int r)
+{
+    int err;
+    BackupDataReader* reader = (BackupDataReader*)r;
+
+    err = reader->SkipEntityData();
 
     return err;
 }
@@ -142,7 +132,8 @@ static const JNINativeMethod g_methods[] = {
     { "dtor", "(I)V", (void*)dtor_native },
     { "readNextHeader_native", "(ILandroid/backup/BackupDataInput$EntityHeader;)I",
             (void*)readNextHeader_native },
-    { "readEntityData_native", "(I[BI)I", (void*)readEntityData_native },
+    { "readEntityData_native", "(I[BII)I", (void*)readEntityData_native },
+    { "skipEntityData_native", "(I)I", (void*)skipEntityData_native },
 };
 
 int register_android_backup_BackupDataInput(JNIEnv* env)

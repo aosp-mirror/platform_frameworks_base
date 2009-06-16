@@ -64,22 +64,14 @@ perform_list(const char* filename)
     }
 
     BackupDataReader reader(fd);
+    bool done;
     int type;
 
-    while (reader.ReadNextHeader(&type) == 0) {
+    while (reader.ReadNextHeader(&done, &type) == 0) {
+        if (done) {
+            break;
+        }
         switch (type) {
-            case BACKUP_HEADER_APP_V1:
-            {
-                String8 packageName;
-                int cookie;
-                err = reader.ReadAppHeader(&packageName, &cookie);
-                if (err == 0) {
-                    printf("App header: %s 0x%08x (%d)\n", packageName.string(), cookie, cookie);
-                } else {
-                    printf("Error reading app header\n");
-                }
-                break;
-            }
             case BACKUP_HEADER_ENTITY_V1:
             {
                 String8 key;
@@ -87,17 +79,6 @@ perform_list(const char* filename)
                 err = reader.ReadEntityHeader(&key, &dataSize);
                 if (err == 0) {
                     printf("   entity: %s (%d bytes)\n", key.string(), dataSize);
-                } else {
-                    printf("   Error reading entity header\n");
-                }
-                break;
-            }
-            case BACKUP_FOOTER_APP_V1:
-            {
-                int cookie;
-                err = reader.ReadAppFooter(&cookie);
-                if (err == 0) {
-                    printf("   App footer: 0x%08x (%d)\n", cookie, cookie);
                 } else {
                     printf("   Error reading entity header\n");
                 }
