@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"응용프로그램이 로케일 또는 전체 글꼴 크기 같은 현재 구성을 변경할 수 있습니다."</string>
     <string name="permlab_restartPackages">"다른 응용프로그램 다시 시작"</string>
     <string name="permdesc_restartPackages">"응용프로그램이 다른 응용프로그램을 강제로 다시 시작할 수 있습니다."</string>
-    <string name="permlab_setProcessForeground">"중지되지 않도록 하기"</string>
-    <string name="permdesc_setProcessForeground">"응용프로그램이 프로세스를 포그라운드에서 실행되도록 하여 프로세스를 중지할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
     <string name="permlab_forceBack">"강제로 응용프로그램 닫기"</string>
     <string name="permdesc_forceBack">"응용프로그램이 포그라운드에 있는 활동을 강제로 닫을 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
     <string name="permlab_dump">"시스템 내부 상태 검색"</string>
     <string name="permdesc_dump">"응용프로그램이 시스템의 내부 상태를 검색할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인 정보와 보안 정보를 검색할 수 있습니다."</string>
-    <string name="permlab_addSystemService">"하위 수준 서비스 게시"</string>
-    <string name="permdesc_addSystemService">"응용프로그램이 자체 하위 수준 시스템 서비스를 게시할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 시스템을 하이재킹하거나 시스템의 데이터를 도용 또는 손상시킬 수 있습니다."</string>
     <string name="permlab_runSetActivityWatcher">"실행 중인 모든 응용프로그램 모니터링 및 제어"</string>
     <string name="permdesc_runSetActivityWatcher">"응용프로그램이 시스템에서 활동이 시작되는 방식을 모니터링하고 제어할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 시스템을 완전히 손상시킬 수 있습니다. 이 권한은 개발 과정에만 필요하며 일반 전화기 사용 시에는 필요하지 않습니다."</string>
     <string name="permlab_broadcastPackageRemoved">"패키지 제거 브로드캐스트 보내기"</string>

@@ -218,14 +218,10 @@
     <string name="permdesc_changeConfiguration">"Permite que um aplicativo mude a configuração atual, como a localidade ou o tamanho geral de fonte."</string>
     <string name="permlab_restartPackages">"reiniciar outros aplicativos"</string>
     <string name="permdesc_restartPackages">"Permite que um aplicativo reinicie outros aplicativos forçosamente."</string>
-    <string name="permlab_setProcessForeground">"impedir a interrupção"</string>
-    <string name="permdesc_setProcessForeground">"Permite que um aplicativo faça qualquer processo executar em primeiro plano, não podendo ser encerrado. Normalmente não é necessário para aplicativos normais."</string>
     <string name="permlab_forceBack">"forçar fechamento do aplicativo"</string>
     <string name="permdesc_forceBack">"Permite que um aplicativo force qualquer atividade que esteja em primeiro plano a fechar e voltar. Normalmente não é necessário para aplicativos normais."</string>
     <string name="permlab_dump">"recuperar estado interno do sistema"</string>
     <string name="permdesc_dump">"Permite que um aplicativo recupere o estado interno do sistema. Aplicativos maliciosos podem recuperar um ampla variedade de informações privadas e seguras, as quais não deveriam precisar normalmente."</string>
-    <string name="permlab_addSystemService">"publicar serviços de nível inferior"</string>
-    <string name="permdesc_addSystemService">"Permite que o aplicativo publique seus próprios serviços do sistema de nível  inferior. Aplicativos maliciosos podem seqüestrar o sistema e roubar ou corromper quaisquer dados contidos nele."</string>
     <!-- no translation found for permlab_shutdown (7185747824038909016) -->
     <skip />
     <!-- no translation found for permdesc_shutdown (7046500838746291775) -->

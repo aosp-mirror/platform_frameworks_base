@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"地域/言語やフォントのサイズなど、現在の設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_restartPackages">"他のアプリケーションの再起動"</string>
     <string name="permdesc_restartPackages">"他のアプリケーションの強制的な再起動をアプリケーションに許可します。"</string>
-    <string name="permlab_setProcessForeground">"停止の阻止"</string>
-    <string name="permdesc_setProcessForeground">"フォアグラウンドでプロセスを実行して、強制終了できないようにすることをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_forceBack">"アプリケーションの強制終了"</string>
     <string name="permdesc_forceBack">"フォアグラウンドで実行されている操作を強制終了して戻ることをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_dump">"システムの内部状態の取得"</string>
     <string name="permdesc_dump">"システムの内部状態の取得をアプリケーションに許可します。悪意のあるアプリケーションが、通常は必要としない広範囲にわたる非公開の機密情報を取得する恐れがあります。"</string>
-    <string name="permlab_addSystemService">"低レベルサービスの公開"</string>
-    <string name="permdesc_addSystemService">"独自の低レベルのシステムサービスを公開することをアプリケーションに許可します。悪意のあるアプリケーションがシステムを乗っ取って、データの盗用や破壊をする恐れがあります。"</string>
     <string name="permlab_runSetActivityWatcher">"起動中のすべてのアプリケーションの監視と制御"</string>
     <string name="permdesc_runSetActivityWatcher">"システムが起動する操作の監視と制御をアプリケーションに許可します。悪意のあるアプリケーションがシステムを完全に破壊する恐れがあります。この許可は開発にのみ必要で、携帯電話の通常の使用にはまったく必要ありません。"</string>
     <string name="permlab_broadcastPackageRemoved">"パッケージ削除ブロードキャストの送信"</string>

@@ -738,26 +738,11 @@
         android:description="@string/permdesc_statusBar"
         android:protectionLevel="signatureOrSystem" />
 
-    <!-- Allows an application to force any currently running process to be
-         in the foreground. -->
-    <permission android:name="android.permission.SET_PROCESS_FOREGROUND"
-        android:label="@string/permlab_setProcessForeground"
-        android:description="@string/permdesc_setProcessForeground"
-        android:protectionLevel="signature" />
-
     <!-- Allows an application to force a BACK operation on whatever is the
          top activity. -->
     <permission android:name="android.permission.FORCE_BACK"
         android:label="@string/permlab_forceBack"
         android:description="@string/permdesc_forceBack"
-        android:protectionLevel="signature" />
-
-    <!-- Allows an application to publish system-level services.  Such services
-         can only be published from processes that never go away, so this is
-         not something that any normal application can do. -->
-    <permission android:name="android.permission.ADD_SYSTEM_SERVICE"
-        android:label="@string/permlab_addSystemService"
-        android:description="@string/permdesc_addSystemService"
         android:protectionLevel="signature" />
 
     <permission android:name="android.permission.FOTA_UPDATE"

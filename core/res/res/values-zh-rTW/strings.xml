@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"允許應用程式變更目前設定，例如：地區設定或字型大小。"</string>
     <string name="permlab_restartPackages">"重新啟動其他應用程式"</string>
     <string name="permdesc_restartPackages">"允許應用程式強制重新啟動其他應用程式。"</string>
-    <string name="permlab_setProcessForeground">"保持已停止狀態"</string>
-    <string name="permdesc_setProcessForeground">"允許應用程式在前端執行任何程序 (無法中止)。一般應用程式不需要此功能。"</string>
     <string name="permlab_forceBack">"強制關閉應用程式"</string>
     <string name="permdesc_forceBack">"允許應用程式強制關閉在前端運作的活動並返回。一般應用程式不需要此功能。"</string>
     <string name="permlab_dump">"接收系統內部狀態"</string>
     <string name="permdesc_dump">"允許應用程式取得系統內部狀態。請注意：惡意程式可能利用此功能，不當取得私人或安全性資料。"</string>
-    <string name="permlab_addSystemService">"發行低階服務"</string>
-    <string name="permdesc_addSystemService">"允許應用程式發行自有低階系統服務。請注意：惡意程式可能利用此功能綁架系統或偷取、竄改資料內容。"</string>
     <string name="permlab_runSetActivityWatcher">"監視控制所有應用程式啟動狀態。"</string>
     <string name="permdesc_runSetActivityWatcher">"允許應用程式監控管理系統啟動活動。請注意：惡意程式可能因此癱瘓整個系統。此權限只在開發時需要，一般手機使用不需要此權限。"</string>
     <string name="permlab_broadcastPackageRemoved">"傳送程式已移除廣播"</string>

@@ -162,14 +162,10 @@
     <string name="permdesc_changeConfiguration">"Permet à une application de modifier la configuration actuelle (par ex. : la taille de la police générale ou des paramètres régionaux)."</string>
     <string name="permlab_restartPackages">"Démarrage d\'autres applications"</string>
     <string name="permdesc_restartPackages">"Permet à une application de forcer le lancement d\'autres applications."</string>
-    <string name="permlab_setProcessForeground">"Non-possibilité d\'interruption"</string>
-    <string name="permdesc_setProcessForeground">"Permet à une application d\'exécuter tout processus au premier plan afin qu\'il ne puisse pas être interrompu. Les applications normales ne devraient jamais nécessiter cette fonctionnalité."</string>
     <string name="permlab_forceBack">"Fermeture forcée de l\'application"</string>
     <string name="permdesc_forceBack">"Permet à une application de forcer une autre application exécutée au premier plan à se fermer et à passer en arrière-plan. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_dump">"Vérification de l\'état interne du système"</string>
     <string name="permdesc_dump">"Permet à l\'application de récupérer l\'état interne du système. Des applications malveillantes peuvent obtenir de nombreuses informations personnelles et sécurisées auxquelles elles ne devraient pas avoir accès."</string>
-    <string name="permlab_addSystemService">"Éditer des services à faible niveau"</string>
-    <string name="permdesc_addSystemService">"Permet à l\'application de publier ses propres services de système de niveau inférieur. Des applications malveillantes peuvent prendre le contrôle du système et subtiliser ou endommager ses données."</string>
     <string name="permlab_runSetActivityWatcher">"Contrôle du lancement des applications"</string>
     <string name="permdesc_runSetActivityWatcher">"Permet à une application de suivre et de contrôler la façon dont le système lance des activités. Des applications malveillantes peuvent entièrement déstabiliser le système. Cette autorisation est uniquement nécessaire au développement et non pour l\'utilisation normale du téléphone."</string>
     <string name="permlab_broadcastPackageRemoved">"Envoyer une diffusion sans paquet"</string>
