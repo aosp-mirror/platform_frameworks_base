@@ -269,7 +269,7 @@ android_tts_SynthProxy_native_finalize(JNIEnv *env, jobject thiz, jint jniData)
     }
 }
 
-
+// TODO update to use language, country, variant
 static void
 android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
         jstring language)
@@ -283,8 +283,10 @@ android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
     const char *langNativeString = env->GetStringUTFChars(language, 0);
     // TODO check return codes
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->setLanguage(langNativeString,
-                strlen(langNativeString));
+        // TODO update to use language, country, variant
+        //      commented out to not break the build
+        //pSynthData->mNativeSynthInterface->setLanguage(langNativeString,
+        //        strlen(langNativeString));
     }
     env->ReleaseStringUTFChars(language, langNativeString);
 }
