@@ -103,6 +103,9 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
         assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "More @ testing\nis great^|^~woohoo";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
     }
 
     @SmallTest
