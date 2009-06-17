@@ -35,11 +35,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -153,15 +148,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private final WeakHashMap<String, Drawable> mOutsideDrawablesCache =
             new WeakHashMap<String, Drawable>();
     
-    // Objects we keep around for requesting location updates when the dialog is started
-    // (and canceling them when the dialog is stopped). We don't actually make use of the
-    // updates ourselves here, so the LocationListener is just a dummy which doesn't do
-    // anything. We only do this here so that other suggest providers which wish to provide
-    // location-based suggestions are more likely to get a good fresh location.
-    private LocationManager mLocationManager;
-    private LocationProvider mLocationProvider;
-    private LocationListener mDummyLocationListener;
-    
     /**
      * Constructor - fires it up and makes it look like the search UI.
      * 
@@ -240,37 +226,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        
-        mLocationManager =
-                (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-        
-        if (mLocationManager != null) {
-            Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-    
-            String providerName = mLocationManager.getBestProvider(criteria, true);
-    
-            if (providerName != null) {
-                mLocationProvider = mLocationManager.getProvider(providerName);
-            }
-            
-            // Just a dumb listener that doesn't do anything - requesting location updates here
-            // is only intended to give location-based suggestion providers the best chance
-            // of getting a good fresh location.
-            mDummyLocationListener = new LocationListener() {
-                public void onLocationChanged(Location location) {                    
-                }
-
-                public void onProviderDisabled(String provider) {
-                }
-
-                public void onProviderEnabled(String provider) {
-                }
-
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                }
-            };
-        }
     }
 
     /**
@@ -423,8 +378,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // receive broadcasts
         getContext().registerReceiver(mBroadcastReceiver, mCloseDialogsFilter);
         getContext().registerReceiver(mBroadcastReceiver, mPackageFilter);
-        
-        startLocationUpdates();
     }
 
     /**
@@ -436,8 +389,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     @Override
     public void onStop() {
         super.onStop();
-        
-        stopLocationUpdates();
         
         // stop receiving broadcasts (throws exception if none registered)
         try {
@@ -456,26 +407,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mUserQuery = null;
         mPreviousComponents = null;
     }
-    
-    /**
-     * Asks the LocationManager for location updates so that it goes and gets a fresh location
-     * if needed.
-     */
-    private void startLocationUpdates() {
-        if (mLocationManager != null && mLocationProvider != null) {
-            mLocationManager.requestLocationUpdates(mLocationProvider.getName(),
-                    0, 0, mDummyLocationListener, getContext().getMainLooper());
-        }
 
-    }
-    
-    /**
-     * Makes sure to stop listening for location updates to save battery.
-     */
-    private void stopLocationUpdates() {
-        mLocationManager.removeUpdates(mDummyLocationListener);
-    }
-    
     /**
      * Sets the search dialog to the 'working' state, which shows a working spinner in the
      * right hand size of the text field.
