@@ -30,6 +30,7 @@ public abstract class Keystore {
         return new FileKeystore();
     }
 
+    // for compatiblity, start from here
     /**
      */
     public abstract String getUserkey(String key);
@@ -46,6 +47,34 @@ public abstract class Keystore {
      */
     public abstract String[] getAllUserkeyKeys();
 
+    // to here
+
+    /**
+     */
+    public abstract String getCaCertificate(String key);
+
+    /**
+     */
+    public abstract String getUserCertificate(String key);
+
+    /**
+     */
+    public abstract String getUserPrivateKey(String key);
+
+    /**
+     * Returns the array of the certificate keynames in keystore if successful.
+     * Or return an empty array if error.
+     *
+     * @return array of the certificate keynames
+     */
+    public abstract String[] getAllUserCertificateKeys();
+
+    /**
+     */
+    public abstract String[] getAllCaCertificateKeys();
+
+    /**
+     */
     public abstract String[] getSupportedKeyStrenghs();
 
     /**
@@ -63,13 +92,25 @@ public abstract class Keystore {
 
     private static class FileKeystore extends Keystore {
         private static final String SERVICE_NAME = "keystore";
+        private static final String LIST_CA_CERTIFICATES = "listcacerts";
+        private static final String LIST_USER_CERTIFICATES = "listusercerts";
+        private static final String GET_CA_CERTIFICATE = "getcacert";
+        private static final String GET_USER_CERTIFICATE = "getusercert";
+        private static final String GET_USER_KEY = "getuserkey";
+        private static final String ADD_CA_CERTIFICATE = "addcacert";
+        private static final String ADD_USER_CERTIFICATE = "addusercert";
+        private static final String ADD_USER_KEY = "adduserkey";
+        private static final String COMMAND_DELIMITER = "\t";
+        private static final ServiceCommand mServiceCommand =
+                new ServiceCommand(SERVICE_NAME);
+
+        // for compatiblity, start from here
+
         private static final String LIST_CERTIFICATES = "listcerts";
         private static final String LIST_USERKEYS = "listuserkeys";
         private static final String PATH = "/data/misc/keystore/";
         private static final String USERKEY_PATH = PATH + "userkeys/";
         private static final String CERT_PATH = PATH + "certs/";
-        private static final ServiceCommand mServiceCommand =
-                new ServiceCommand(SERVICE_NAME);
 
         @Override
         public String getUserkey(String key) {
@@ -81,12 +122,6 @@ public abstract class Keystore {
             return CERT_PATH + key;
         }
 
-        /**
-         * Returns the array of the certificate names in keystore if successful.
-         * Or return an empty array if error.
-         *
-         * @return array of the certificates
-         */
         @Override
         public String[] getAllCertificateKeys() {
             try {
@@ -98,16 +133,52 @@ public abstract class Keystore {
             }
         }
 
-        /**
-         * Returns the array of the names of private keys in keystore if successful.
-         * Or return an empty array if errors.
-         *
-         * @return array of the user keys
-         */
         @Override
         public String[] getAllUserkeyKeys() {
             try {
                 String result = mServiceCommand.execute(LIST_USERKEYS);
+                if (result != null) return result.split("\\s+");
+                return NOTFOUND;
+            } catch (NumberFormatException ex) {
+                return NOTFOUND;
+            }
+        }
+
+        // to here
+
+        @Override
+        public String getUserPrivateKey(String key) {
+            return mServiceCommand.execute(
+                    GET_USER_KEY + COMMAND_DELIMITER + key);
+        }
+
+        @Override
+        public String getUserCertificate(String key) {
+            return mServiceCommand.execute(
+                    GET_USER_CERTIFICATE + COMMAND_DELIMITER + key);
+        }
+
+        @Override
+        public String getCaCertificate(String key) {
+            return mServiceCommand.execute(
+                    GET_CA_CERTIFICATE + COMMAND_DELIMITER + key);
+        }
+
+        @Override
+        public String[] getAllUserCertificateKeys() {
+            try {
+                String result = mServiceCommand.execute(LIST_USER_CERTIFICATES);
+                if (result != null) return result.split("\\s+");
+                return NOTFOUND;
+            } catch (NumberFormatException ex) {
+                return NOTFOUND;
+            }
+        }
+
+        @Override
+        public String[] getAllCaCertificateKeys() {
+            try {
+                String result = mServiceCommand.execute(LIST_CA_CERTIFICATES);
                 if (result != null) return result.split("\\s+");
                 return NOTFOUND;
             } catch (NumberFormatException ex) {
@@ -149,5 +220,26 @@ public abstract class Keystore {
         public void addCertificate(String cert) {
             // TODO: real implementation
         }
+
+        private boolean addUserCertificate(String key, String certificate,
+                String privateKey) {
+            if(mServiceCommand.execute(ADD_USER_CERTIFICATE + COMMAND_DELIMITER
+                    + key + COMMAND_DELIMITER + certificate) != null) {
+                if (mServiceCommand.execute(ADD_USER_KEY + COMMAND_DELIMITER
+                        + key + COMMAND_DELIMITER + privateKey) != null) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean addCaCertificate(String key, String content) {
+            if (mServiceCommand.execute(ADD_CA_CERTIFICATE + COMMAND_DELIMITER
+                    + key + COMMAND_DELIMITER + content) != null) {
+                return true;
+            }
+            return false;
+        }
+
     }
 }

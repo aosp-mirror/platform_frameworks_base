@@ -16,36 +16,88 @@
 
 #include "keystore.h"
 
-
-static int do_list_certs(char **arg, char reply[REPLY_MAX])
+static inline int has_whitespace(char *name)
 {
-    return list_certs(reply);
+    if((strrchr(name, ' ') != NULL)) {
+        LOGE("'%s' contains whitespace character\n", name);
+        return 1;
+    }
+    return 0;
 }
 
-static int do_list_userkeys(char **arg, char reply[REPLY_MAX])
+static int do_list_user_certs(char **arg, char reply[REPLY_MAX])
 {
-    return list_userkeys(reply);
+    return list_user_certs(reply);
 }
 
-static int do_install_cert(char **arg, char reply[REPLY_MAX])
+static int do_list_ca_certs(char **arg, char reply[REPLY_MAX])
 {
-    return install_cert(arg[0]); /* move the certificate to keystore */
+    return list_ca_certs(reply);
 }
 
-static int do_remove_cert(char **arg, char reply[REPLY_MAX])
+static int do_install_user_cert(char **arg, char reply[REPLY_MAX])
 {
-    return remove_cert(arg[0]); /* certificate */
+    if (has_whitespace(arg[0])) return -1;
+    /* copy the certificate and key to keystore */
+    return install_user_cert(arg[0], arg[1], arg[2]);
 }
 
-static int do_install_userkey(char **arg, char reply[REPLY_MAX])
+static int do_install_p12_cert(char **arg, char reply[REPLY_MAX])
 {
-    return install_userkey(arg[0]); /* move the certificate to keystore */
+    if (has_whitespace(arg[0])) return -1;
+    return install_p12_cert(arg[0], arg[1]);
 }
 
-static int do_remove_userkey(char **arg, char reply[REPLY_MAX])
+static int do_install_ca_cert(char **arg, char reply[REPLY_MAX])
 {
-    return remove_userkey(arg[0]); /* userkey */
+    if (has_whitespace(arg[0])) return -1;
+    /* copy the certificate and key to keystore */
+    return install_ca_cert(arg[0], arg[1]);
 }
+
+static int do_add_ca_cert(char **arg, char reply[REPLY_MAX])
+{
+    if (has_whitespace(arg[0])) return -1;
+    return add_ca_cert(arg[0], arg[1]);
+}
+
+static int do_add_user_cert(char **arg, char reply[REPLY_MAX])
+{
+    if (has_whitespace(arg[0])) return -1;
+    return add_user_cert(arg[0], arg[1]);
+}
+
+static int do_add_user_key(char **arg, char reply[REPLY_MAX])
+{
+    if (has_whitespace(arg[0])) return -1;
+    return add_user_key(arg[0], arg[1]);
+}
+
+static int do_get_ca_cert(char **arg, char reply[REPLY_MAX])
+{
+    return get_ca_cert(arg[0], reply);
+}
+
+static int do_get_user_cert(char **arg, char reply[REPLY_MAX])
+{
+    return get_user_cert(arg[0], reply);
+}
+
+static int do_get_user_key(char **arg, char reply[REPLY_MAX])
+{
+    return get_user_key(arg[0], reply);
+}
+
+static int do_remove_user_cert(char **arg, char reply[REPLY_MAX])
+{
+    return remove_user_cert(arg[0]);
+}
+
+static int do_remove_ca_cert(char **arg, char reply[REPLY_MAX])
+{
+    return remove_ca_cert(arg[0]);
+}
+
 
 struct cmdinfo {
     const char *name;
@@ -55,12 +107,19 @@ struct cmdinfo {
 
 
 struct cmdinfo cmds[] = {
-    { "listcerts",            0, do_list_certs },
-    { "listuserkeys",         0, do_list_userkeys },
-    { "installcert",          1, do_install_cert },
-    { "removecert",           1, do_remove_cert },
-    { "installuserkey",       1, do_install_userkey },
-    { "removeuserkey",        1, do_remove_userkey },
+    { "listcacerts",        0, do_list_ca_certs },
+    { "listusercerts",      0, do_list_user_certs },
+    { "installusercert",    3, do_install_user_cert },
+    { "installcacert",      2, do_install_ca_cert },
+    { "installp12cert",     2, do_install_p12_cert },
+    { "addusercert",        2, do_add_user_cert },
+    { "adduserkey",         2, do_add_user_key },
+    { "addcacert",          2, do_add_ca_cert },
+    { "getusercert",        1, do_get_user_cert },
+    { "getuserkey",         1, do_get_user_key },
+    { "getcacert",          1, do_get_ca_cert },
+    { "removecacert",       1, do_remove_ca_cert },
+    { "removeusercert",     1, do_remove_user_cert },
 };
 
 static int readx(int s, void *_buf, int count)
@@ -121,7 +180,7 @@ static int execute(int s, char cmd[BUFFER_MAX])
     /* n is number of args (not counting arg[0]) */
     arg[0] = cmd;
     while (*cmd) {
-        if (isspace(*cmd)) {
+        if (*cmd == CMD_DELIMITER) {
             *cmd++ = 0;
             n++;
             arg[n] = cmd;
@@ -167,6 +226,7 @@ int shell_command(const int argc, const char **argv)
     int fd, i;
     short ret;
     unsigned short count;
+    char delimiter[2] = { CMD_DELIMITER, 0 };
     char buf[BUFFER_MAX]="";
 
     fd = socket_local_client(SOCKET_PATH,
@@ -177,7 +237,7 @@ int shell_command(const int argc, const char **argv)
         exit(1);
     }
     for(i = 0; i < argc; i++) {
-        if (i > 0) strlcat(buf, " ", BUFFER_MAX);
+        if (i > 0) strlcat(buf, delimiter, BUFFER_MAX);
         if(strlcat(buf, argv[i], BUFFER_MAX) >= BUFFER_MAX) {
             fprintf(stderr, "Arguments are too long\n");
             exit(1);

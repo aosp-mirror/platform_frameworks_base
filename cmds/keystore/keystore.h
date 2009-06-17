@@ -40,18 +40,35 @@
 /* path of the keystore */
 
 #define KEYSTORE_DIR_PREFIX "/data/misc/keystore"
-#define CERTS_DIR           KEYSTORE_DIR_PREFIX "/certs"
-#define USERKEYS_DIR         KEYSTORE_DIR_PREFIX "/userkeys"
+#define CERTS_DIR           KEYSTORE_DIR_PREFIX "/keys"
+#define CACERTS_DIR         KEYSTORE_DIR_PREFIX "/cacerts"
+#define CA_CERTIFICATE      "ca.crt"
+#define USER_CERTIFICATE    "user.crt"
+#define USER_P12_CERT       "user.p12"
+#define USER_KEY            "user.key"
+#define DOT                 "."
+#define DOTDOT              ".."
 
-#define BUFFER_MAX      1024  /* input buffer for commands */
+#define BUFFER_MAX      4096  /* input buffer for commands */
 #define TOKEN_MAX       8     /* max number of arguments in buffer */
-#define REPLY_MAX       1024  /* largest reply allowed */
+#define REPLY_MAX       4096  /* largest reply allowed */
+#define CMD_DELIMITER   '\t'
 #define KEYNAME_LENGTH  128
+#define IS_CONTENT      0
+#define IS_FILE         1
+
 
 /* commands.c */
-int list_certs(char reply[REPLY_MAX]);
-int list_userkeys(char reply[REPLY_MAX]);
-int install_cert(const char *certfile);
-int install_userkey(const char *keyfile);
-int remove_cert(const char *certfile);
-int remove_userkey(const char *keyfile);
+int list_ca_certs(char reply[REPLY_MAX]);
+int list_user_certs(char reply[REPLY_MAX]);
+int install_user_cert(const char *certname, const char *cert, const char *key);
+int install_ca_cert(const char *certname, const char *cert);
+int install_p12_cert(const char *certname, const char *cert);
+int add_ca_cert(const char *certname, const char *content);
+int add_user_cert(const char *certname, const char *content);
+int add_user_key(const char *keyname, const char *content);
+int get_ca_cert(const char *keyname, char reply[REPLY_MAX]);
+int get_user_cert(const char *keyname, char reply[REPLY_MAX]);
+int get_user_key(const char *keyname, char reply[REPLY_MAX]);
+int remove_user_cert(const char *certname);
+int remove_ca_cert(const char *certname);
