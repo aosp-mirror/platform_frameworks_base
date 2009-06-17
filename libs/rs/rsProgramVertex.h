@@ -57,6 +57,11 @@ public:
     ProgramVertexState();
     ~ProgramVertexState();
 
+    void init(Context *rsc, int32_t w, int32_t h);
+
+    ObjectBaseRef<ProgramVertex> mDefault;
+    ObjectBaseRef<Allocation> mDefaultAlloc;
+
     ProgramVertex *mPV;
 
     //ObjectBaseRef<Type> mTextureTypes[ProgramFragment::MAX_TEXTURE];

@@ -148,6 +148,11 @@ ProgramFragmentState::~ProgramFragmentState()
 
 }
 
+void ProgramFragmentState::init(Context *rsc, int32_t w, int32_t h)
+{
+    ProgramFragment *pf = new ProgramFragment(NULL, NULL);
+    mDefault.set(pf);
+}
 
 
 namespace android {

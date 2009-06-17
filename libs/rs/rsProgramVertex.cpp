@@ -81,6 +81,23 @@ ProgramVertexState::~ProgramVertexState()
     delete mPV;
 }
 
+void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
+{
+    ProgramVertex *pv = new ProgramVertex(NULL, NULL);
+    Allocation *alloc = (Allocation *)
+        rsi_AllocationCreatePredefSized(rsc, RS_ELEMENT_USER_FLOAT, 48);
+    mDefaultAlloc.set(alloc);
+    mDefault.set(pv);
+
+    pv->bindAllocation(0, alloc);
+    
+    Matrix m;
+    m.loadOrtho(0,w, h,0, -1,1);
+    alloc->subData(RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0]);
+
+    m.loadIdentity();
+    alloc->subData(RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, 16, &m.m[0]);
+}
 
 
 namespace android {

@@ -398,6 +398,9 @@ bool ScriptC::run(Context *rsc, uint32_t launchID)
     if (mEnviroment.mFragment.get()) {
         rsc->setFragment(mEnviroment.mFragment.get());
     }
+    if (mEnviroment.mVertex.get()) {
+        rsc->setVertex(mEnviroment.mVertex.get());
+    }
 
     return mProgram.mScript(&e, &scriptCPtrTable, launchID) != 0;
 }
@@ -448,6 +451,9 @@ void ScriptCState::runCompiler(Context *rsc)
     accGetScriptLabel(mAccScript, "main", (ACCvoid**) &mProgram.mScript);
     rsAssert(mProgram.mScript);
 
+    mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
+    mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
+    mEnviroment.mFragmentStore.set(rsc->getDefaultProgramFragmentStore());
 
     if (mProgram.mScript) {
         const static int pragmaMax = 16;
@@ -465,6 +471,18 @@ void ScriptCState::runCompiler(Context *rsc)
 
 
             if (!strcmp(str[ct], "stateVertex")) {
+                if (!strcmp(str[ct+1], "default")) {
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "parent")) {
+                    mEnviroment.mVertex.clear();
+                    continue;
+                }
+                ProgramVertex * pv = (ProgramVertex *)rsc->lookupName(str[ct+1]);
+                if (pv != NULL) {
+                    mEnviroment.mVertex.set(pv);
+                    continue;
+                }
                 LOGE("Unreconized value %s passed to stateVertex", str[ct+1]);
             }
 
@@ -473,8 +491,14 @@ void ScriptCState::runCompiler(Context *rsc)
             }
 
             if (!strcmp(str[ct], "stateFragment")) {
-                ProgramFragment * pf = 
-                    (ProgramFragment *)rsc->lookupName(str[ct+1]);
+                if (!strcmp(str[ct+1], "default")) {
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "parent")) {
+                    mEnviroment.mFragment.clear();
+                    continue;
+                }
+                ProgramFragment * pf = (ProgramFragment *)rsc->lookupName(str[ct+1]);
                 if (pf != NULL) {
                     mEnviroment.mFragment.set(pf);
                     continue;
@@ -483,16 +507,17 @@ void ScriptCState::runCompiler(Context *rsc)
             }
 
             if (!strcmp(str[ct], "stateFragmentStore")) {
+                if (!strcmp(str[ct+1], "default")) {
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "parent")) {
+                    mEnviroment.mFragmentStore.clear();
+                    continue;
+                }
                 ProgramFragmentStore * pfs = 
                     (ProgramFragmentStore *)rsc->lookupName(str[ct+1]);
                 if (pfs != NULL) {
                     mEnviroment.mFragmentStore.set(pfs);
-                    continue;
-                }
-
-                if (!strcmp(str[ct+1], "parent")) {
-                    //mEnviroment.mStateFragmentStore = 
-                        //Script::Enviroment_t::FRAGMENT_STORE_PARENT;
                     continue;
                 }
                 LOGE("Unreconized value %s passed to stateFragmentStore", str[ct+1]);
