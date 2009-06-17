@@ -42,11 +42,14 @@ interface IBackupTransport {
 */
     /**
      * Verify that this is a suitable time for a backup pass.  This should return zero
-     * if a backup is reasonable right now, false otherwise.  This method will be called
-     * outside of the {@link #startSession}/{@link #endSession} pair.
+     * if a backup is reasonable right now, some positive value otherwise.  This method
+     * will be called outside of the {@link #startSession}/{@link #endSession} pair.
      *
-     * <p>If this is not a suitable time for a backup, the transport should suggest a
+     * <p>If this is not a suitable time for a backup, the transport should return a
      * backoff delay, in milliseconds, after which the Backup Manager should try again.
+     *
+     * @return Zero if this is a suitable time for a backup pass, or a positive time delay
+     *   in milliseconds to suggest deferring the backup pass for a while.
      */
     long requestBackupTime();
 
