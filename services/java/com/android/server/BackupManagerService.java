@@ -68,7 +68,7 @@ import java.util.List;
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
-    
+
     private static final long COLLECTION_INTERVAL = 1000;
     //private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
 
@@ -90,7 +90,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private class BackupRequest {
         public ApplicationInfo appInfo;
         public boolean fullBackup;
-        
+
         BackupRequest(ApplicationInfo app, boolean isFull) {
             appInfo = app;
             fullBackup = isFull;
@@ -120,7 +120,9 @@ class BackupManagerService extends IBackupManager.Stub {
     private final Object mClearDataLock = new Object();
     private volatile boolean mClearingData;
 
+    // Current active transport & restore session
     private int mTransportId;
+    private IBackupTransport mTransport;
     private RestoreSession mActiveRestoreSession;
 
     private File mStateDir;
@@ -128,7 +130,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private File mJournalDir;
     private File mJournal;
     private RandomAccessFile mJournalStream;
-    
+
     public BackupManagerService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
@@ -144,13 +146,15 @@ class BackupManagerService extends IBackupManager.Stub {
         mJournalDir.mkdirs();
         makeJournalLocked();    // okay because no other threads are running yet
 
-        //!!! TODO: default to cloud transport, not local
-        mTransportId = BackupManager.TRANSPORT_LOCAL;
-        
         // Build our mapping of uid to backup client services
         synchronized (mBackupParticipants) {
             addPackageParticipantsLocked(null);
         }
+
+        // Stand up our default transport
+        //!!! TODO: default to cloud transport, not local
+        mTransportId = BackupManager.TRANSPORT_LOCAL;
+        mTransport = createTransport(mTransportId);
 
         // Now that we know about valid backup participants, parse any
         // leftover journal files and schedule a new backup pass
@@ -284,7 +288,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // deleted.  If we crash prior to that, the old journal is parsed
                     // at next boot and the journaled requests fulfilled.
                 }
-                (new PerformBackupThread(mTransportId, mBackupQueue, oldJournal)).run();
+                (new PerformBackupThread(mTransport, mBackupQueue, oldJournal)).run();
                 break;
 
             case MSG_RUN_FULL_BACKUP:
@@ -396,7 +400,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
         return allApps;
     }
-    
+
     // Reset the given package's known backup participants.  Unlike add/remove, the update
     // action cannot be passed a null package name.
     void updatePackageParticipantsLocked(String packageName) {
@@ -505,13 +509,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class PerformBackupThread extends Thread {
         private static final String TAG = "PerformBackupThread";
-        int mTransport;
+        IBackupTransport mTransport;
         ArrayList<BackupRequest> mQueue;
         File mJournal;
 
-        public PerformBackupThread(int transportId, ArrayList<BackupRequest> queue,
+        public PerformBackupThread(IBackupTransport transport, ArrayList<BackupRequest> queue,
                 File journal) {
-            mTransport = transportId;
+            mTransport = transport;
             mQueue = queue;
             mJournal = journal;
         }
@@ -520,15 +524,9 @@ class BackupManagerService extends IBackupManager.Stub {
         public void run() {
             if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
 
-            // stand up the current transport
-            IBackupTransport transport = createTransport(mTransport);
-            if (transport == null) {
-                return;
-            }
-
             // start up the transport
             try {
-                transport.startSession();
+                mTransport.startSession();
             } catch (Exception e) {
                 Log.e(TAG, "Error session transport");
                 e.printStackTrace();
@@ -536,11 +534,11 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             // The transport is up and running; now run all the backups in our queue
-            doQueuedBackups(transport);
+            doQueuedBackups(mTransport);
 
             // Finally, tear down the transport
             try {
-                transport.endSession();
+                mTransport.endSession();
             } catch (Exception e) {
                 Log.e(TAG, "Error ending transport");
                 e.printStackTrace();
@@ -939,8 +937,14 @@ class BackupManagerService extends IBackupManager.Stub {
     public int selectBackupTransport(int transportId) {
         mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
 
-        int prevTransport = mTransportId;
-        mTransportId = transportId;
+        int prevTransport = -1;
+        IBackupTransport newTransport = createTransport(transportId);
+        if (newTransport != null) {
+            // !!! TODO: a method on the old transport that says it's being deactivated?
+            mTransport = newTransport;
+            prevTransport = mTransportId;
+            mTransportId = transportId;
+        }
         return prevTransport;
     }
 
