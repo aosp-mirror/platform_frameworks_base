@@ -3,7 +3,7 @@
         package="com.android.server.vpn"
         android:sharedUserId="android.uid.system"
         >
-    <application android:label="VPN Services">
+    <application android:label="@string/app_label">
 
         <service android:name=".VpnServiceBinder" android:process=":remote">
             <intent-filter>
