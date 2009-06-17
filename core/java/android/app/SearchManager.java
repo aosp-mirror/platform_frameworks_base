@@ -1165,6 +1165,14 @@ public class SearchManager
     public final static String ACTION_KEY = "action_key";
     
     /**
+     * Intent component name key: This key will be used for the extra populated by the
+     * {@link #SUGGEST_COLUMN_INTENT_COMPONENT_NAME} column.
+     *
+     * {@hide}
+     */
+    public final static String COMPONENT_NAME_KEY = "intent_component_name_key";
+
+    /**
      * Intent extra data key: This key will be used for the extra populated by the
      * {@link #SUGGEST_COLUMN_INTENT_EXTRA_DATA} column.
      *
@@ -1364,14 +1372,24 @@ public class SearchManager
      */
     public final static String SUGGEST_COLUMN_INTENT_DATA = "suggest_intent_data";
     /**
+     * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
+     * this element exists at the given row, this is the data that will be used when
+     * forming the suggestion's intent. If not provided, the Intent's extra data field will be null.
+     * This column allows suggestions to provide additional arbitrary data which will be included as
+     * an extra under the key EXTRA_DATA_KEY.
+     *
+     * @hide Pending API council approval.
+     */
+    public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
+    /**
      * Column name for suggestions cursor.  <i>Optional.</i>  This column allows suggestions
      *  to provide additional arbitrary data which will be included as an extra under the key
-     *  {@link #EXTRA_DATA_KEY}. For use by the global search system only - if other providers
+     *  {@link #COMPONENT_NAME_KEY}. For use by the global search system only - if other providers
      *  attempt to use this column, the value will be overwritten by global search.
      *
      * @hide
      */
-    public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
+    public final static String SUGGEST_COLUMN_INTENT_COMPONENT_NAME = "suggest_intent_component";
     /**
      * Column name for suggestions cursor.  <i>Optional.</i>  If this column exists <i>and</i>
      * this element exists at the given row, then "/" and this value will be appended to the data
