@@ -16,13 +16,32 @@
 
 package android.backup;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 /** @hide */
-public class RestoreHelperDistributor {
+public class RestoreHelperDispatcher {
     HashMap<String,RestoreHelper> mHelpers;
 
     public void addHelper(String keyPrefix, RestoreHelper helper) {
         mHelpers.put(keyPrefix, helper);
+    }
+
+    public void dispatch(BackupDataInput input) throws IOException {
+        BackupDataInputStream stream = new BackupDataInputStream(input);
+        while (input.readNextHeader()) {
+            String rawKey = input.getKey();
+            int pos = rawKey.indexOf(':');
+            if (pos > 0) {
+                String prefix = rawKey.substring(0, pos);
+                RestoreHelper helper = mHelpers.get(prefix);
+                if (helper != null) {
+                    stream.dataSize = input.getDataSize();
+                    stream.key = rawKey.substring(pos+1);
+                    helper.performRestore(stream);
+                }
+            }
+            input.skipEntityData(); // In case they didn't consume the data.
+        }
     }
 }

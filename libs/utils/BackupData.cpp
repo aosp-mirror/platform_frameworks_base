@@ -86,46 +86,6 @@ BackupDataWriter::write_padding_for(int n)
 }
 
 status_t
-BackupDataWriter::WriteAppHeader(const String8& packageName, int cookie)
-{
-    if (m_status != NO_ERROR) {
-        return m_status;
-    }
-
-    ssize_t amt;
-
-    amt = write_padding_for(m_pos);
-    if (amt != 0) {
-        return amt;
-    }
-
-    app_header_v1 header;
-    ssize_t nameLen;
-
-    nameLen = packageName.length();
-
-    header.type = tolel(BACKUP_HEADER_APP_V1);
-    header.packageLen = tolel(nameLen);
-    header.cookie = cookie;
-
-    amt = write(m_fd, &header, sizeof(app_header_v1));
-    if (amt != sizeof(app_header_v1)) {
-        m_status = errno;
-        return m_status;
-    }
-    m_pos += amt;
-
-    amt = write(m_fd, packageName.string(), nameLen+1);
-    if (amt != nameLen+1) {
-        m_status = errno;
-        return m_status;
-    }
-    m_pos += amt;
-
-    return NO_ERROR;
-}
-
-status_t
 BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
 {
     if (m_status != NO_ERROR) {
@@ -188,40 +148,11 @@ BackupDataWriter::WriteEntityData(const void* data, size_t size)
     return NO_ERROR;
 }
 
-status_t
-BackupDataWriter::WriteAppFooter(int cookie)
-{
-    if (m_status != NO_ERROR) {
-        return m_status;
-    }
-
-    ssize_t amt;
-
-    amt = write_padding_for(m_pos);
-    if (amt != 0) {
-        return amt;
-    }
-
-    app_footer_v1 footer;
-    ssize_t nameLen;
-
-    footer.type = tolel(BACKUP_FOOTER_APP_V1);
-    footer.entityCount = tolel(m_entityCount);
-    footer.cookie = cookie;
-
-    amt = write(m_fd, &footer, sizeof(app_footer_v1));
-    if (amt != sizeof(app_footer_v1)) {
-        m_status = errno;
-        return m_status;
-    }
-    m_pos += amt;
-
-    return NO_ERROR;
-}
 
 
 BackupDataReader::BackupDataReader(int fd)
     :m_fd(fd),
+     m_done(false),
      m_status(NO_ERROR),
      m_pos(0),
      m_entityCount(0)
@@ -260,31 +191,25 @@ BackupDataReader::Status()
     } while(0)
 
 status_t
-BackupDataReader::ReadNextHeader(int* type)
+BackupDataReader::ReadNextHeader(bool* done, int* type)
 {
+    *done = m_done;
     if (m_status != NO_ERROR) {
         return m_status;
     }
 
     int amt;
 
-    SKIP_PADDING();
+    // No error checking here, in case we're at the end of the stream.  Just let read() fail.
+    skip_padding();
     amt = read(m_fd, &m_header, sizeof(m_header));
+    *done = m_done = (amt == 0);
     CHECK_SIZE(amt, sizeof(m_header));
 
     // validate and fix up the fields.
     m_header.type = fromlel(m_header.type);
     switch (m_header.type)
     {
-        case BACKUP_HEADER_APP_V1:
-            m_header.app.packageLen = fromlel(m_header.app.packageLen);
-            if (m_header.app.packageLen < 0) {
-                LOGD("App header at %d has packageLen<0: 0x%08x\n", (int)m_pos,
-                    (int)m_header.app.packageLen);
-                m_status = EINVAL;
-            }
-            m_header.app.cookie = m_header.app.cookie;
-            break;
         case BACKUP_HEADER_ENTITY_V1:
             m_header.entity.keyLen = fromlel(m_header.entity.keyLen);
             if (m_header.entity.keyLen <= 0) {
@@ -294,15 +219,6 @@ BackupDataReader::ReadNextHeader(int* type)
             }
             m_header.entity.dataSize = fromlel(m_header.entity.dataSize);
             m_entityCount++;
-            break;
-        case BACKUP_FOOTER_APP_V1:
-            m_header.footer.entityCount = fromlel(m_header.footer.entityCount);
-            if (m_header.footer.entityCount < 0) {
-                LOGD("Entity header at %d has entityCount<0: 0x%08x\n", (int)m_pos,
-                        (int)m_header.footer.entityCount);
-                m_status = EINVAL;
-            }
-            m_header.footer.cookie = m_header.footer.cookie;
             break;
         default:
             LOGD("Chunk header at %d has invalid type: 0x%08x", (int)m_pos, (int)m_header.type);
@@ -314,30 +230,6 @@ BackupDataReader::ReadNextHeader(int* type)
     }
     
     return m_status;
-}
-
-status_t
-BackupDataReader::ReadAppHeader(String8* packageName, int* cookie)
-{
-    if (m_status != NO_ERROR) {
-        return m_status;
-    }
-    if (m_header.type != BACKUP_HEADER_APP_V1) {
-        return EINVAL;
-    }
-    size_t size = m_header.app.packageLen;
-    char* buf = packageName->lockBuffer(size);
-    if (buf == NULL) {
-        packageName->unlockBuffer();
-        m_status = ENOMEM;
-        return m_status;
-    }
-    int amt = read(m_fd, buf, size+1);
-    CHECK_SIZE(amt, (int)size+1);
-    packageName->unlockBuffer(size);
-    m_pos += size+1;
-    *cookie = m_header.app.cookie;
-    return NO_ERROR;
 }
 
 bool
@@ -368,6 +260,7 @@ BackupDataReader::ReadEntityHeader(String8* key, size_t* dataSize)
     m_pos += size+1;
     *dataSize = m_header.entity.dataSize;
     SKIP_PADDING();
+    m_dataEndPos = m_pos + *dataSize;
     return NO_ERROR;
 }
 
@@ -381,7 +274,7 @@ BackupDataReader::SkipEntityData()
         return EINVAL;
     }
     if (m_header.entity.dataSize > 0) {
-        int pos = lseek(m_fd, m_header.entity.dataSize, SEEK_CUR);
+        int pos = lseek(m_fd, m_dataEndPos, SEEK_SET);
         return pos == -1 ? (int)errno : (int)NO_ERROR;
     } else {
         return NO_ERROR;
@@ -394,28 +287,18 @@ BackupDataReader::ReadEntityData(void* data, size_t size)
     if (m_status != NO_ERROR) {
         return m_status;
     }
+    int remaining = m_dataEndPos - m_pos;
+    if (size > remaining) {
+        printf("size=%d m_pos=0x%x m_dataEndPos=0x%x remaining=%d\n",
+                size, m_pos, m_dataEndPos, remaining);
+        size = remaining;
+    }
+    if (remaining <= 0) {
+        return 0;
+    }
     int amt = read(m_fd, data, size);
     CHECK_SIZE(amt, (int)size);
     m_pos += size;
-    return NO_ERROR;
-}
-
-status_t
-BackupDataReader::ReadAppFooter(int* cookie)
-{
-    if (m_status != NO_ERROR) {
-        return m_status;
-    }
-    if (m_header.type != BACKUP_FOOTER_APP_V1) {
-        return EINVAL;
-    }
-    if (m_header.footer.entityCount != m_entityCount) {
-        LOGD("entity count mismatch actual=%d expected=%d", m_entityCount,
-                m_header.footer.entityCount);
-        m_status = EINVAL;
-        return m_status;
-    }
-    *cookie = m_header.footer.cookie;
     return NO_ERROR;
 }
 

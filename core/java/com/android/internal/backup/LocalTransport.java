@@ -84,7 +84,7 @@ public class LocalTransport extends IBackupTransport.Stub {
                     bufSize = dataSize;
                     buf = new byte[bufSize];
                 }
-                changeSet.readEntityData(buf, dataSize);
+                changeSet.readEntityData(buf, 0, dataSize);
                 if (DEBUG) Log.v(TAG, "  + data size " + dataSize);
 
                 File entityFile = new File(packageDir, key);
