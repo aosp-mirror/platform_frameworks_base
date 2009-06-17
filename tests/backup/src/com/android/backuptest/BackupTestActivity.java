@@ -17,14 +17,17 @@
 package com.android.backuptest;
 
 import android.app.ListActivity;
+import android.backup.BackupDataInput;
+import android.backup.BackupDataOutput;
 import android.backup.BackupManager;
+import android.backup.FileBackupHelper;
+import android.backup.FileRestoreHelper;
+import android.backup.RestoreHelperDispatcher;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
-import android.os.SystemClock;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -32,6 +35,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -123,6 +130,44 @@ public class BackupTestActivity extends ListActivity
                 BackupManager bm = new BackupManager(BackupTestActivity.this);
                 bm.dataChanged();
             }
+        },
+        new Test("Backup Helpers") {
+            void run() {
+                try {
+                    writeFile("a", "a\naa", MODE_PRIVATE);
+                    writeFile("empty", "", MODE_PRIVATE);
+
+                    ParcelFileDescriptor state = ParcelFileDescriptor.open(
+                            new File(getFilesDir(), "state"),
+                            ParcelFileDescriptor.MODE_READ_WRITE|ParcelFileDescriptor.MODE_CREATE|
+                            ParcelFileDescriptor.MODE_TRUNCATE);
+                    FileBackupHelper h = new FileBackupHelper(BackupTestActivity.this,
+                            "FileBackupHelper");
+                    FileOutputStream dataFile = openFileOutput("backup_test", MODE_WORLD_READABLE);
+                    BackupDataOutput data = new BackupDataOutput(BackupTestActivity.this,
+                            dataFile.getFD());
+                    h.performBackup(null, data, state, new String[] { "a", "empty" });
+                    dataFile.close();
+                    state.close();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        },
+        new Test("Restore Helpers") {
+            void run() {
+                try {
+                    RestoreHelperDispatcher dispatch = new RestoreHelperDispatcher();
+                    dispatch.addHelper("FileBackupHelper",
+                            new FileRestoreHelper(BackupTestActivity.this));
+                    FileInputStream dataFile = openFileInput("backup_test");
+                    BackupDataInput data = new BackupDataInput(dataFile.getFD());
+                    dispatch.dispatch(data);
+                    dataFile.close();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
         }
     };
 
@@ -154,5 +199,14 @@ public class BackupTestActivity extends ListActivity
         t.run();
     }
     
+    void writeFile(String name, String contents, int mode) {
+        try {
+            PrintStream out = new PrintStream(openFileOutput(name, mode));
+            out.print(contents);
+            out.close();
+        } catch (FileNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 }
 

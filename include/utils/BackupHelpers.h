@@ -78,7 +78,7 @@ public:
     bool HasEntities();
     status_t ReadEntityHeader(String8* key, size_t* dataSize);
     status_t SkipEntityData(); // must be called with the pointer at the begining of the data.
-    status_t ReadEntityData(void* data, size_t size);
+    ssize_t ReadEntityData(void* data, size_t size);
 
 private:
     explicit BackupDataReader();

@@ -281,16 +281,16 @@ BackupDataReader::SkipEntityData()
     }
 }
 
-status_t
+ssize_t
 BackupDataReader::ReadEntityData(void* data, size_t size)
 {
     if (m_status != NO_ERROR) {
         return m_status;
     }
     int remaining = m_dataEndPos - m_pos;
+    //LOGD("ReadEntityData size=%d m_pos=0x%x m_dataEndPos=0x%x remaining=%d\n",
+    //        size, m_pos, m_dataEndPos, remaining);
     if (size > remaining) {
-        printf("size=%d m_pos=0x%x m_dataEndPos=0x%x remaining=%d\n",
-                size, m_pos, m_dataEndPos, remaining);
         size = remaining;
     }
     if (remaining <= 0) {
@@ -299,7 +299,7 @@ BackupDataReader::ReadEntityData(void* data, size_t size)
     int amt = read(m_fd, data, size);
     CHECK_SIZE(amt, (int)size);
     m_pos += size;
-    return NO_ERROR;
+    return amt;
 }
 
 status_t

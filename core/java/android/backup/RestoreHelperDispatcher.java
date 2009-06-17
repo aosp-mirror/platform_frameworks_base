@@ -21,7 +21,7 @@ import java.util.HashMap;
 
 /** @hide */
 public class RestoreHelperDispatcher {
-    HashMap<String,RestoreHelper> mHelpers;
+    HashMap<String,RestoreHelper> mHelpers = new HashMap<String,RestoreHelper>();
 
     public void addHelper(String keyPrefix, RestoreHelper helper) {
         mHelpers.put(keyPrefix, helper);
@@ -38,7 +38,7 @@ public class RestoreHelperDispatcher {
                 if (helper != null) {
                     stream.dataSize = input.getDataSize();
                     stream.key = rawKey.substring(pos+1);
-                    helper.performRestore(stream);
+                    helper.restoreEntity(stream);
                 }
             }
             input.skipEntityData(); // In case they didn't consume the data.

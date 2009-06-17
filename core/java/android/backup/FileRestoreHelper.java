@@ -16,16 +16,26 @@
 
 package android.backup;
 
-import java.io.InputStream;
+import android.content.Context;
+import android.util.Log;
+
+import java.io.File;
 
 /** @hide */
-public interface RestoreHelper {
-    /**
-     * Called by RestoreHelperDispatcher to dispatch one entity of data.
-     * <p class=note>
-     * Do not close the <code>data</code> stream.  Do not read more than
-     * <code>dataSize</code> bytes from <code>data</code>.
-     */
-    public void restoreEntity(BackupDataInputStream data);
+public class FileRestoreHelper extends RestoreHelperBase implements RestoreHelper {
+    private static final String TAG = "FileRestoreHelper";
+
+    File mFilesDir;
+
+    public FileRestoreHelper(Context context) {
+        super(context);
+        mFilesDir = context.getFilesDir();
+    }
+
+    public void restoreEntity(BackupDataInputStream data) {
+        Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size()); // TODO: turn this off before ship
+        File f = new File(mFilesDir, data.getKey());
+        writeFile(f, data);
+    }
 }
 
