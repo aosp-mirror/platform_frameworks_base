@@ -47,6 +47,7 @@ import com.android.internal.telephony.ITelephony;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
@@ -210,6 +211,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int DEFAULT_ENDCALL_BEHAVIOR = ENDCALL_SLEEPS;
     int mEndcallBehavior;
     
+    int mLandscapeRotation = -1;
+    int mPortraitRotation = -1;
+
     // Nothing to see here, move along...
     int mFancyRotationAnimation;
 
@@ -450,6 +454,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public int checkAddPermission(WindowManager.LayoutParams attrs) {
         int type = attrs.type;
+        
         if (type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
                 || type > WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
             return WindowManagerImpl.ADD_OKAY;
@@ -1714,14 +1719,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public int rotationForOrientationLw(int orientation, int lastRotation,
             boolean displayEnabled) {
+
+        if (mPortraitRotation < 0) {
+            // Initialize the rotation angles for each orientation once.
+            Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
+                    .getDefaultDisplay();
+            if (d.getWidth() > d.getHeight()) {
+                mPortraitRotation = Surface.ROTATION_90;
+                mLandscapeRotation = Surface.ROTATION_0;
+            } else {
+                mPortraitRotation = Surface.ROTATION_0;
+                mLandscapeRotation = Surface.ROTATION_90;
+            }
+        }
+
         synchronized (mLock) {
             switch (orientation) {
                 case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
                     //always return landscape if orientation set to landscape
-                    return Surface.ROTATION_90;
+                    return mLandscapeRotation;
                 case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
                     //always return portrait if orientation set to portrait
-                    return Surface.ROTATION_0;
+                    return mPortraitRotation;
             }
             // case for nosensor meaning ignore sensor and consider only lid
             // or orientation sensor disabled
