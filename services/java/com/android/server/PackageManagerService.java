@@ -26,8 +26,6 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -936,33 +934,7 @@ class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
-    public void freeStorage(final long freeStorageSize, final PendingIntent opFinishedIntent) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CLEAR_APP_CACHE, null);
-        // Queue up an async operation since clearing cache may take a little while.
-        mHandler.post(new Runnable() {
-            public void run() {
-                mHandler.removeCallbacks(this);
-                int retCode = -1;
-                if (mInstaller != null) {
-                    retCode = mInstaller.freeCache(freeStorageSize);
-                    if (retCode < 0) {
-                        Log.w(TAG, "Couldn't clear application caches");
-                    }
-                }
-                if(opFinishedIntent != null) {
-                    try {
-                        // Callback via pending intent
-                        opFinishedIntent.send((retCode >= 0) ? 1 : 0);
-                    } catch (CanceledException e1) {
-                        Log.i(TAG, "Failed to send pending intent");
-                    }
-                }
-            }
-        });
-    }
-
-    public void freeStorageWithIntent(final long freeStorageSize, final IntentSender pi) {
+    public void freeStorage(final long freeStorageSize, final IntentSender pi) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
         // Queue up an async operation since clearing cache may take a little while.
