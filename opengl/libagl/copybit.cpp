@@ -52,28 +52,25 @@ static void textureToCopyBitImage(
 }
 
 struct clipRectRegion : public copybit_region_t {
-    clipRectRegion(ogles_context_t* c) {
-        next = iterate;
-        int x = c->viewport.scissor.x;
-        int y = c->viewport.scissor.y;
-        r.l = x;
-        r.t = y;
-        r.r = x + c->viewport.scissor.w;
-        r.b = y + c->viewport.scissor.h;
-        firstTime = true;
+    clipRectRegion(ogles_context_t* c) 
+    {
+        scissor_t const* scissor = &c->rasterizer.state.scissor;
+        r.l = scissor->left;
+        r.t = scissor->top;
+        r.r = scissor->right;
+        r.b = scissor->bottom;
+        next = iterate; 
     }
 private:
     static int iterate(copybit_region_t const * self, copybit_rect_t* rect) {
-        clipRectRegion* myself = (clipRectRegion*) self;
-        if (myself->firstTime) {
-            myself->firstTime = false;
-            *rect = myself->r;
-            return 1;
-        }
+        *rect = static_cast<clipRectRegion const*>(self)->r;
+        const_cast<copybit_region_t *>(self)->next = iterate_done;
+        return 1;
+    }
+    static int iterate_done(copybit_region_t const *, copybit_rect_t*) {
         return 0;
     }
-    mutable copybit_rect_t r;
-    mutable bool firstTime;
+    copybit_rect_t r;
 };
 
 static bool supportedCopybitsFormat(int format) {
