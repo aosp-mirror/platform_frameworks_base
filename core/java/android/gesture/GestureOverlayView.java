@@ -84,7 +84,7 @@ public class GestureOverlayView extends FrameLayout {
 
     private final Rect mInvalidRect = new Rect();
     private final Path mPath = new Path();
-    private boolean mGestureVisible;
+    private boolean mGestureVisible = true;
 
     private float mX;
     private float mY;
