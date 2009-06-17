@@ -129,7 +129,9 @@ public class TtsService extends Service implements OnCompletionListener {
         mSpeechQueue = new ArrayList<SpeechItem>();
         mPlayer = null;
 
-        setLanguage(prefs.getString("lang_pref", "en-rUS"));
+        // TODO set default settings
+        //setLanguage(prefs.getString("lang_pref", "en-rUS"));
+        setLanguage("eng", "USA", "");
         setSpeechRate(Integer.parseInt(prefs.getString("rate_pref", "140")));
     }
 
@@ -155,7 +157,7 @@ public class TtsService extends Service implements OnCompletionListener {
         nativeSynth.setSpeechRate(rate);
     }
 
-    private void setLanguage(String lang) {
+    private void setLanguage(String lang, String country, String variant) {
         if (prefs.getBoolean("override_pref", false)) {
             // This is set to the default here so that the preview in the prefs
             // activity will show the change without a restart, even if apps are
@@ -163,7 +165,8 @@ public class TtsService extends Service implements OnCompletionListener {
             // allowed to change the defaults.
             lang = prefs.getString("lang_pref", "en-rUS");
         }
-        nativeSynth.setLanguage(lang);
+        Log.v("TTS", "TtsService.setLanguage("+lang+", "+country+", "+variant+")");
+        nativeSynth.setLanguage(lang, country, variant);
     }
 
     /**
@@ -683,20 +686,14 @@ public class TtsService extends Service implements OnCompletionListener {
         }
 
         /**
-         * Sets the speech rate for the TTS. Note that this will only have an
-         * effect on synthesized speech; it will not affect pre-recorded speech.
+         * Sets the speech rate for the TTS, which affects the synthesized voice.
          *
-         * @param language
-         *            Language values are based on the Android conventions for
-         *            localization as described in the Android platform
-         *            documentation on internationalization. This implies that
-         *            language data is specified in the format xx-rYY, where xx
-         *            is a two letter ISO 639-1 language code in lowercase and
-         *            rYY is a two letter ISO 3166-1-alpha-2 language code in
-         *            uppercase preceded by a lowercase "r".
+         * @param lang  the three letter ISO language code.
+         * @param country  the three letter ISO country code.
+         * @param variant  the variant code associated with the country and language pair.
          */
-        public void setLanguage(String language) {
-            mSelf.setLanguage(language);
+        public void setLanguage(String lang, String country, String variant) {
+            mSelf.setLanguage(lang, country, variant);
         }
 
         /**
