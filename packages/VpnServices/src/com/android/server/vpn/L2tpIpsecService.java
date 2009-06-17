@@ -50,16 +50,17 @@ class L2tpIpsecService extends VpnService<L2tpIpsecProfile> {
     }
 
     private String getCaCertPath() {
-        return Keystore.getInstance().getCertificate(
+        return Keystore.getInstance().getCaCertificate(
                 getProfile().getCaCertificate());
     }
 
     private String getUserCertPath() {
-        return Keystore.getInstance().getCertificate(
+        return Keystore.getInstance().getUserCertificate(
                 getProfile().getUserCertificate());
     }
 
     private String getUserkeyPath() {
-        return Keystore.getInstance().getUserkey(getProfile().getUserkey());
+        return Keystore.getInstance().getUserPrivateKey(
+                getProfile().getUserCertificate());
     }
 }
