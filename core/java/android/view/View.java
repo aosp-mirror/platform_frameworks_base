@@ -7157,8 +7157,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         getLocationInWindow(location);
 
         final AttachInfo info = mAttachInfo;
-        location[0] += info.mWindowLeft;
-        location[1] += info.mWindowTop;
+        if (info != null) {
+            location[0] += info.mWindowLeft;
+            location[1] += info.mWindowTop;
+        }
     }
 
     /**
