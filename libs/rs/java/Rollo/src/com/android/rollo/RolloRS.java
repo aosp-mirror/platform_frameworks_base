@@ -74,8 +74,8 @@ public class RolloRS {
     //private float[] mBufferPV;
 
     private void initNamed() {
-        //mMeshTab = RolloMesh.createTab(mRS);
-        //mMeshTab.setName("MeshTab");
+        mMeshTab = RolloMesh.createTab(mRS);
+        mMeshTab.setName("MeshTab");
         mMeshCard = RolloMesh.createCard(mRS);
         mMeshCard.setName("MeshCard");
         Log.e("rs", "Done loading strips");
@@ -117,10 +117,7 @@ public class RolloRS {
 
         mPVAlloc = new ProgramVertexAlloc(mRS);
         mRS.programVertexBegin(null, null);
-        mRS.programVertexSetCameraMode(true);
         mRS.programVertexSetTextureMatrixEnable(true);
-        mRS.programVertexSetModelMatrixEnable(true);
-        mRS.programVertexSetProjectionMatrixEnable(true);
         mPV = mRS.programVertexCreate();
         mPV.setName("PV");
         mPV.bindAllocation(0, mPVAlloc.mAlloc);

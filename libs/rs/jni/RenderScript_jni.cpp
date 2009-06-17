@@ -791,35 +791,11 @@ nProgramVertexSetType(JNIEnv *_env, jobject _this, jint slot, jint t)
 }
 
 static void
-nProgramVertexSetCameraMode(JNIEnv *_env, jobject _this, jboolean isOrtho)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexSetCameraMode, con(%p), isOrtho(%i)", con, isOrtho);
-    rsProgramVertexSetCameraMode(isOrtho);
-}
-
-static void
 nProgramVertexSetTextureMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramVertexSetTextureMatrixEnable, con(%p), enable(%i)", con, enable);
     rsProgramVertexSetTextureMatrixEnable(enable);
-}
-
-static void
-nProgramVertexSetModelMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexSetModelMatrixEnable, con(%p), enable(%i)", con, enable);
-    rsProgramVertexSetModelMatrixEnable(enable);
-}
-
-static void
-nProgramVertexSetProjectionMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexSetProjectionMatrixEnable, con(%p), enable(%i)", con, enable);
-    rsProgramVertexSetProjectionMatrixEnable(enable);
 }
 
 static jint
@@ -1000,10 +976,7 @@ static JNINativeMethod methods[] = {
 {"nProgramVertexBindAllocation",   "(III)V",                               (void*)nProgramVertexBindAllocation },
 {"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
 {"nProgramVertexSetType",          "(II)V",                                (void*)nProgramVertexSetType },
-{"nProgramVertexSetCameraMode",    "(Z)V",                                 (void*)nProgramVertexSetCameraMode },
 {"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
-{"nProgramVertexSetModelMatrixEnable",  "(Z)V",                            (void*)nProgramVertexSetModelMatrixEnable },
-{"nProgramVertexSetProjectionMatrixEnable",  "(Z)V",                       (void*)nProgramVertexSetProjectionMatrixEnable },
 {"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
 
 {"nContextBindRootScript",         "(I)V",                                 (void*)nContextBindRootScript },

@@ -8,6 +8,7 @@ int main(void* con, int ft, int launchID)
     int x;
 
     renderTriangleMesh(con, NAMED_MeshCard);
+    renderTriangleMesh(con, NAMED_MeshTab);
     return 1;
 }
 

@@ -38,9 +38,6 @@ public:
     void setConstantType(uint32_t slot, const Type *);
     void bindAllocation(uint32_t slot, Allocation *);
     void setTextureMatrixEnable(bool e) {mTextureMatrixEnable = e;}
-    void setProjectionEnabled(bool e) {mProjectionEnable = e;}
-    void setTransformEnable(bool e) {mTransformEnable = e;}
-    void setProjectionEnable(bool e) {mProjectionEnable = e;}
 
 protected:
     bool mDirty;
@@ -50,8 +47,6 @@ protected:
 
     // Hacks to create a program for now
     bool mTextureMatrixEnable;
-    bool mProjectionEnable;
-    bool mTransformEnable;
 
 };
 

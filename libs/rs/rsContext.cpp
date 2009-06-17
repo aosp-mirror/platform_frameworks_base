@@ -81,24 +81,6 @@ bool Context::runRootScript()
     glEnable(GL_LIGHT0);
     glViewport(0, 0, mWidth, mHeight);
 
-    if(mRootScript->mEnviroment.mIsOrtho) {
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrthof(0, mWidth,  mHeight, 0,  0, 1);
-        glMatrixMode(GL_MODELVIEW);
-    } else {
-        float aspectH = ((float)mWidth) / mHeight;
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glFrustumf(-1, 1,  -aspectH, aspectH,  1, 100);
-        glRotatef(-90, 0,0,1);
-        glTranslatef(0,  0,  -3);
-        glMatrixMode(GL_MODELVIEW);
-    }
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
     glDepthMask(GL_TRUE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 

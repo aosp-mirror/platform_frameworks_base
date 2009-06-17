@@ -428,7 +428,6 @@ void ScriptCState::clear()
     mEnviroment.mClearDepth = 1;
     mEnviroment.mClearStencil = 0;
     mEnviroment.mIsRoot = false;
-    mEnviroment.mIsOrtho = true;
 
     mAccScript = NULL;
 
@@ -554,12 +553,6 @@ void rsi_ScriptCSetRoot(Context * rsc, bool isRoot)
 {
     ScriptCState *ss = &rsc->mScriptC;
     ss->mEnviroment.mIsRoot = isRoot;
-}
-
-void rsi_ScriptCSetOrtho(Context * rsc, bool isOrtho)
-{
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->mEnviroment.mIsOrtho = isOrtho;
 }
 
 void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)

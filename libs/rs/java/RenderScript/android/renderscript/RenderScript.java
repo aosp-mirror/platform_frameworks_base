@@ -154,10 +154,7 @@ public class RenderScript {
     native private void nProgramVertexBindAllocation(int pv, int slot, int mID);
     native private void nProgramVertexBegin(int inID, int outID);
     native private void nProgramVertexSetType(int slot, int mID);
-    native private void nProgramVertexSetCameraMode(boolean isOrtho);
     native private void nProgramVertexSetTextureMatrixEnable(boolean enable);
-    native private void nProgramVertexSetModelMatrixEnable(boolean enable);
-    native private void nProgramVertexSetProjectionMatrixEnable(boolean enable);
     native private int  nProgramVertexCreate();
 
 
@@ -733,20 +730,8 @@ public class RenderScript {
         nProgramVertexSetType(slot, t.mID);
     }
 
-    public void programVertexSetCameraMode(boolean isOrtho) {
-        nProgramVertexSetCameraMode(isOrtho);
-    }
-
     public void programVertexSetTextureMatrixEnable(boolean enable) {
         nProgramVertexSetTextureMatrixEnable(enable);
-    }
-
-    public void programVertexSetModelMatrixEnable(boolean enable) {
-        nProgramVertexSetModelMatrixEnable(enable);
-    }
-
-    public void programVertexSetProjectionMatrixEnable(boolean enable) {
-        nProgramVertexSetProjectionMatrixEnable(enable);
     }
 
     public ProgramVertex programVertexCreate() {
