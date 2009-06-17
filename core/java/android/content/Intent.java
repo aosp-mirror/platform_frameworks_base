@@ -240,35 +240,35 @@ import java.util.Set;
  *
  *         &lt;activity class=".NotesList" android:label="@string/title_notes_list"&gt;
  *             &lt;intent-filter&gt;
- *                 &lt;action android:value="android.intent.action.MAIN" /&gt;
- *                 &lt;category android:value="android.intent.category.LAUNCHER" /&gt;
+ *                 &lt;action android:name="android.intent.action.MAIN" /&gt;
+ *                 &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
  *             &lt;/intent-filter&gt;
  *             &lt;intent-filter&gt;
- *                 &lt;action android:value="android.intent.action.VIEW" /&gt;
- *                 &lt;action android:value="android.intent.action.EDIT" /&gt;
- *                 &lt;action android:value="android.intent.action.PICK" /&gt;
- *                 &lt;category android:value="android.intent.category.DEFAULT" /&gt;
- *                 &lt;type android:value="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
+ *                 &lt;action android:name="android.intent.action.VIEW" /&gt;
+ *                 &lt;action android:name="android.intent.action.EDIT" /&gt;
+ *                 &lt;action android:name="android.intent.action.PICK" /&gt;
+ *                 &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+ *                 &lt;data android:mimeType="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
  *             &lt;/intent-filter&gt;
  *             &lt;intent-filter&gt;
- *                 &lt;action android:value="android.intent.action.GET_CONTENT" /&gt;
- *                 &lt;category android:value="android.intent.category.DEFAULT" /&gt;
- *                 &lt;type android:value="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
+ *                 &lt;action android:name="android.intent.action.GET_CONTENT" /&gt;
+ *                 &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+ *                 &lt;data android:mimeType="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
  *             &lt;/intent-filter&gt;
  *         &lt;/activity&gt;
  *
  *         &lt;activity class=".NoteEditor" android:label="@string/title_note"&gt;
  *             &lt;intent-filter android:label="@string/resolve_edit"&gt;
- *                 &lt;action android:value="android.intent.action.VIEW" /&gt;
- *                 &lt;action android:value="android.intent.action.EDIT" /&gt;
- *                 &lt;category android:value="android.intent.category.DEFAULT" /&gt;
- *                 &lt;type android:value="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
+ *                 &lt;action android:name="android.intent.action.VIEW" /&gt;
+ *                 &lt;action android:name="android.intent.action.EDIT" /&gt;
+ *                 &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+ *                 &lt;data android:mimeType="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
  *             &lt;/intent-filter&gt;
  *
  *             &lt;intent-filter&gt;
- *                 &lt;action android:value="android.intent.action.INSERT" /&gt;
- *                 &lt;category android:value="android.intent.category.DEFAULT" /&gt;
- *                 &lt;type android:value="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
+ *                 &lt;action android:name="android.intent.action.INSERT" /&gt;
+ *                 &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+ *                 &lt;data android:mimeType="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
  *             &lt;/intent-filter&gt;
  *
  *         &lt;/activity&gt;
@@ -276,11 +276,11 @@ import java.util.Set;
  *         &lt;activity class=".TitleEditor" android:label="@string/title_edit_title"
  *                 android:theme="@android:style/Theme.Dialog"&gt;
  *             &lt;intent-filter android:label="@string/resolve_title"&gt;
- *                 &lt;action android:value="<i>com.android.notepad.action.EDIT_TITLE</i>" /&gt;
- *                 &lt;category android:value="android.intent.category.DEFAULT" /&gt;
- *                 &lt;category android:value="android.intent.category.ALTERNATIVE" /&gt;
- *                 &lt;category android:value="android.intent.category.SELECTED_ALTERNATIVE" /&gt;
- *                 &lt;type android:value="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
+ *                 &lt;action android:name="<i>com.android.notepad.action.EDIT_TITLE</i>" /&gt;
+ *                 &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+ *                 &lt;category android:name="android.intent.category.ALTERNATIVE" /&gt;
+ *                 &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" /&gt;
+ *                 &lt;data android:mimeType="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
  *             &lt;/intent-filter&gt;
  *         &lt;/activity&gt;
  *
@@ -294,8 +294,8 @@ import java.util.Set;
  * <ol>
  * <li><pre>
  * &lt;intent-filter&gt;
- *     &lt;action android:value="{@link #ACTION_MAIN android.intent.action.MAIN}" /&gt;
- *     &lt;category android:value="{@link #CATEGORY_LAUNCHER android.intent.category.LAUNCHER}" /&gt;
+ *     &lt;action android:name="{@link #ACTION_MAIN android.intent.action.MAIN}" /&gt;
+ *     &lt;category android:name="{@link #CATEGORY_LAUNCHER android.intent.category.LAUNCHER}" /&gt;
  * &lt;/intent-filter&gt;</pre>
  * <p>This provides a top-level entry into the NotePad application: the standard
  * MAIN action is a main entry point (not requiring any other information in
@@ -303,11 +303,11 @@ import java.util.Set;
  * listed in the application launcher.</p>
  * <li><pre>
  * &lt;intent-filter&gt;
- *     &lt;action android:value="{@link #ACTION_VIEW android.intent.action.VIEW}" /&gt;
- *     &lt;action android:value="{@link #ACTION_EDIT android.intent.action.EDIT}" /&gt;
- *     &lt;action android:value="{@link #ACTION_PICK android.intent.action.PICK}" /&gt;
- *     &lt;category android:value="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
- *     &lt;type android:value="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
+ *     &lt;action android:name="{@link #ACTION_VIEW android.intent.action.VIEW}" /&gt;
+ *     &lt;action android:name="{@link #ACTION_EDIT android.intent.action.EDIT}" /&gt;
+ *     &lt;action android:name="{@link #ACTION_PICK android.intent.action.PICK}" /&gt;
+ *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
+ *     &lt;data mimeType:name="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
  * <p>This declares the things that the activity can do on a directory of
  * notes.  The type being supported is given with the &lt;type&gt; tag, where
@@ -322,9 +322,9 @@ import java.util.Set;
  * activity when its component name is not explicitly specified.</p>
  * <li><pre>
  * &lt;intent-filter&gt;
- *     &lt;action android:value="{@link #ACTION_GET_CONTENT android.intent.action.GET_CONTENT}" /&gt;
- *     &lt;category android:value="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
- *     &lt;type android:value="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
+ *     &lt;action android:name="{@link #ACTION_GET_CONTENT android.intent.action.GET_CONTENT}" /&gt;
+ *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
+ *     &lt;data android:mimeType="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
  * <p>This filter describes the ability return to the caller a note selected by
  * the user without needing to know where it came from.  The data type
@@ -371,10 +371,10 @@ import java.util.Set;
  * <ol>
  * <li><pre>
  * &lt;intent-filter android:label="@string/resolve_edit"&gt;
- *     &lt;action android:value="{@link #ACTION_VIEW android.intent.action.VIEW}" /&gt;
- *     &lt;action android:value="{@link #ACTION_EDIT android.intent.action.EDIT}" /&gt;
- *     &lt;category android:value="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
- *     &lt;type android:value="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
+ *     &lt;action android:name="{@link #ACTION_VIEW android.intent.action.VIEW}" /&gt;
+ *     &lt;action android:name="{@link #ACTION_EDIT android.intent.action.EDIT}" /&gt;
+ *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
+ *     &lt;data android:mimeType="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
  * <p>The first, primary, purpose of this activity is to let the user interact
  * with a single note, as decribed by the MIME type
@@ -384,9 +384,9 @@ import java.util.Set;
  * specifying its component.</p>
  * <li><pre>
  * &lt;intent-filter&gt;
- *     &lt;action android:value="{@link #ACTION_INSERT android.intent.action.INSERT}" /&gt;
- *     &lt;category android:value="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
- *     &lt;type android:value="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
+ *     &lt;action android:name="{@link #ACTION_INSERT android.intent.action.INSERT}" /&gt;
+ *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
+ *     &lt;data android:mimeType="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
  * <p>The secondary use of this activity is to insert a new note entry into
  * an existing directory of notes.  This is used when the user creates a new
@@ -422,11 +422,11 @@ import java.util.Set;
  *
  * <pre>
  * &lt;intent-filter android:label="@string/resolve_title"&gt;
- *     &lt;action android:value="<i>com.android.notepad.action.EDIT_TITLE</i>" /&gt;
- *     &lt;category android:value="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
- *     &lt;category android:value="{@link #CATEGORY_ALTERNATIVE android.intent.category.ALTERNATIVE}" /&gt;
- *     &lt;category android:value="{@link #CATEGORY_SELECTED_ALTERNATIVE android.intent.category.SELECTED_ALTERNATIVE}" /&gt;
- *     &lt;type android:value="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
+ *     &lt;action android:name="<i>com.android.notepad.action.EDIT_TITLE</i>" /&gt;
+ *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
+ *     &lt;category android:name="{@link #CATEGORY_ALTERNATIVE android.intent.category.ALTERNATIVE}" /&gt;
+ *     &lt;category android:name="{@link #CATEGORY_SELECTED_ALTERNATIVE android.intent.category.SELECTED_ALTERNATIVE}" /&gt;
+ *     &lt;data android:mimeType="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
  *
  * <p>In the single intent template here, we
@@ -509,8 +509,8 @@ import java.util.Set;
  *     <li> {@link #ACTION_UID_REMOVED}
  *     <li> {@link #ACTION_BATTERY_CHANGED}
  *     <li> {@link #ACTION_POWER_CONNECTED}
- *     <li> {@link #ACTION_POWER_DISCONNECTED} 
- *     <li> {@link #ACTION_SHUTDOWN} 
+ *     <li> {@link #ACTION_POWER_DISCONNECTED}
+ *     <li> {@link #ACTION_SHUTDOWN}
  * </ul>
  *
  * <h3>Standard Categories</h3>
@@ -1277,10 +1277,10 @@ public class Intent implements Parcelable {
      * This is intended for applications that wish to register specifically to this notification.
      * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
      * stay active to receive this notification.  This action can be used to implement actions
-     * that wait until power is available to trigger. 
+     * that wait until power is available to trigger.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";    
+    public static final String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";
     /**
      * Broadcast Action:  Device is shutting down.
      * This is broadcast when the device is being shut down (completely turned
@@ -1289,7 +1289,7 @@ public class Intent implements Parcelable {
      * to handle this, since the forground activity will be paused as well.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";    
+    public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";
     /**
      * Broadcast Action:  Indicates low memory condition on the device
      */
@@ -1791,23 +1791,23 @@ public class Intent implements Parcelable {
      * delivered.
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
-    
+
     /**
      * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
      * the bug report.
-     * 
+     *
      * @hide
      */
     public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
 
     /**
-     * Used as a string extra field when sending an intent to PackageInstaller to install a 
+     * Used as a string extra field when sending an intent to PackageInstaller to install a
      * package. Specifies the installer package name; this package will receive the
      * {@link #ACTION_APP_ERROR} intent.
-     * 
+     *
      * @hide
      */
-    public static final String EXTRA_INSTALLER_PACKAGE_NAME 
+    public static final String EXTRA_INSTALLER_PACKAGE_NAME
             = "android.intent.extra.INSTALLER_PACKAGE_NAME";
 
     // ---------------------------------------------------------------------
@@ -3239,7 +3239,7 @@ public class Intent implements Parcelable {
      * only specify a type and not data, for example to indicate the type of
      * data to return.  This method automatically clears any data that was
      * previously set by {@link #setData}.
-     * 
+     *
      * <p><em>Note: MIME type matching in the Android framework is
      * case-sensitive, unlike formal RFC MIME types.  As a result,
      * you should always write your MIME types with lower case letters,
@@ -4444,7 +4444,7 @@ public class Intent implements Parcelable {
         toShortString(b, comp, extras);
         return b.toString();
     }
-    
+
     /** @hide */
     public void toShortString(StringBuilder b, boolean comp, boolean extras) {
         boolean first = true;
