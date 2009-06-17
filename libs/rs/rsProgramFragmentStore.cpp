@@ -201,6 +201,12 @@ ProgramFragmentStoreState::~ProgramFragmentStoreState()
 
 }
 
+void ProgramFragmentStoreState::init(Context *rsc, int32_t w, int32_t h)
+{
+    ProgramFragmentStore *pfs = new ProgramFragmentStore(NULL, NULL);
+    mDefault.set(pfs);
+}
+
 
 namespace android {
 namespace renderscript {

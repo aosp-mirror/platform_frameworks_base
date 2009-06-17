@@ -1,10 +1,9 @@
 // Fountain test script
 
 #pragma version(1)
-#pragma stateVertex(orthoWindow)
-#pragma stateRaster(flat)
+#pragma stateVertex(default)
 #pragma stateFragment(PgmFragBackground)
-#pragma stateFragmentStore(MyBlend)
+#pragma stateFragmentStore(parent)
 
 
 int main(void* con, int ft, int launchID) {

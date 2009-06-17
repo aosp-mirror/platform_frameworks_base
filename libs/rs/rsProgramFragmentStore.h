@@ -74,7 +74,9 @@ class ProgramFragmentStoreState
 public:
     ProgramFragmentStoreState();
     ~ProgramFragmentStoreState();
+    void init(Context *rsc, int32_t w, int32_t h);
 
+    ObjectBaseRef<ProgramFragmentStore> mDefault;
     ProgramFragmentStore *mPFS;
 };
 

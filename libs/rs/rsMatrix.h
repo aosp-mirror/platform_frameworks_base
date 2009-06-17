@@ -44,6 +44,9 @@ struct Matrix
     void loadTranslate(float x, float y, float z);
     void loadMultiply(const Matrix *lhs, const Matrix *rhs);
 
+    void loadOrtho(float l, float r, float b, float t, float n, float f);
+    void loadFrustum(float l, float r, float b, float t, float n, float f);
+
     void multiply(const Matrix *rhs) {
         Matrix tmp;
         tmp.loadMultiply(this, rhs);

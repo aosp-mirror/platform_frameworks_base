@@ -58,10 +58,8 @@ public class FountainRS {
     private RenderScript.ProgramFragmentStore mPFS;
     private RenderScript.ProgramFragment mPF;
     private RenderScript.ProgramFragment mPF2;
-    private RenderScript.ProgramVertex mPV;
     private RenderScript.Allocation mTexture;
     private RenderScript.Sampler mSampler;
-    private ProgramVertexAlloc mPVA;
 
     private Bitmap mBackground;
 
@@ -109,15 +107,6 @@ public class FountainRS {
         mPF2.bindTexture(mTexture, 0);
         mPF2.bindSampler(mSampler, 0);
         mPF2.setName("PgmFragBackground");
-
-        mRS.programVertexBegin(null, null);
-        mPV = mRS.programVertexCreate();
-        mPVA = new ProgramVertexAlloc(mRS);
-        mPV.bindAllocation(0, mPVA.mAlloc);
-        mPVA.setupOrthoWindow(320, 480);
-        mRS.contextBindProgramVertex(mPV);
-
-
 
 
         mParams[0] = 0;
