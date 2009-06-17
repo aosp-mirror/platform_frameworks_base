@@ -109,6 +109,7 @@ static bool initializeNativeDataNative(JNIEnv* env, jobject object) {
         dbus_error_free(&err);
         return false;
     }
+    dbus_connection_set_exit_on_disconnect(nat->conn, FALSE);
 
     nat->adapter = BLUEZ_ADAPTER_OBJECT_NAME;
 #endif  /*HAVE_BLUETOOTH*/
