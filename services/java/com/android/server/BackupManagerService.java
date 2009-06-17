@@ -850,8 +850,26 @@ class BackupManagerService extends IBackupManager.Stub {
         // a backup pass for each of them.
 
         Log.d(TAG, "dataChanged packageName=" + packageName);
-        
-        HashSet<ApplicationInfo> targets = mBackupParticipants.get(Binder.getCallingUid());
+
+        // If the caller does not hold the BACKUP permission, it can only request a
+        // backup of its own data.
+        HashSet<ApplicationInfo> targets;
+        if ((mContext.checkPermission("android.permission.BACKUP", Binder.getCallingPid(),
+                Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
+            targets = mBackupParticipants.get(Binder.getCallingUid());
+        } else {
+            // a caller with full permission can ask to back up any participating app
+            // !!! TODO: allow backup of ANY app?
+            if (DEBUG) Log.v(TAG, "Privileged caller, allowing backup of other apps");
+            targets = new HashSet<ApplicationInfo>();
+            int N = mBackupParticipants.size();
+            for (int i = 0; i < N; i++) {
+                HashSet<ApplicationInfo> s = mBackupParticipants.valueAt(i);
+                if (s != null) {
+                    targets.addAll(s);
+                }
+            }
+        }
         if (targets != null) {
             synchronized (mQueueLock) {
                 // Note that this client has made data changes that need to be backed up
