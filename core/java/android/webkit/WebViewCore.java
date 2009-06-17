@@ -309,7 +309,7 @@ final class WebViewCore {
     // JNI methods
     //-------------------------------------------------------------------------
 
-    static native String nativeFindAddress(String addr);
+    static native String nativeFindAddress(String addr, boolean caseInsensitive);
 
     /**
      * Empty the picture set.
