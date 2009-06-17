@@ -2623,26 +2623,6 @@ public final class Settings {
                 "gtalk_wifi_max_heartbeat_ping_interval_ms";
 
         /**
-         * The minimum interval for how frequently we send heartbeat pings to the GTalk server.
-         */
-        public static final String GTALK_SERVICE_MIN_HEARTBEAT_INTERVAL_MS =
-                "gtalk_min_heartbeat_ping_interval_ms";
-
-        /**
-         * The scale down factor used by adaptive heartbeat logic (to scale down the heartbeat
-         * interval) when the previous interval fails to get a response from the server.
-         */
-        public static final String GTALK_SERVICE_ADAPTIVE_HEARTBEAT_SCALER =
-                "gtalk_adaptive_heartbeat_scaler";
-
-        /**
-         * The trigger for adaptively scaling down the heartbeat interval. This is the number of
-         * consecutive times we failed to get a server response for sending the heartbeat ping.
-         */
-        public static final String GTALK_SERVICE_ADAPTIVE_HEARTBEAT_TRIGGER =
-                "gtalk_adaptive_heartbeat_trigger";
-
-        /**
          * How long we wait to receive a heartbeat ping acknowledgement (or another packet)
          * from the GTalk server, before deeming the connection dead.
          */
