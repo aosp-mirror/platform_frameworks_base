@@ -21,14 +21,16 @@ import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IBackupAgent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -48,7 +50,6 @@ import android.backup.BackupManager;
 import android.backup.RestoreSet;
 
 import com.android.internal.backup.LocalTransport;
-import com.android.internal.backup.GoogleTransport;
 import com.android.internal.backup.IBackupTransport;
 
 import java.io.EOFException;
@@ -122,7 +123,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Current active transport & restore session
     private int mTransportId;
-    private IBackupTransport mTransport;
+    private IBackupTransport mLocalTransport, mGoogleTransport;
     private RestoreSession mActiveRestoreSession;
 
     private File mStateDir;
@@ -151,10 +152,18 @@ class BackupManagerService extends IBackupManager.Stub {
             addPackageParticipantsLocked(null);
         }
 
-        // Stand up our default transport
-        //!!! TODO: default to cloud transport, not local
-        mTransportId = BackupManager.TRANSPORT_LOCAL;
-        mTransport = createTransport(mTransportId);
+        // Set up our transport options and initialize the default transport
+        // TODO: Have transports register themselves somehow?
+        // TODO: Don't create transports that we don't need to?
+        mTransportId = BackupManager.TRANSPORT_GOOGLE;
+        mLocalTransport = new LocalTransport(context);  // This is actually pretty cheap
+        mGoogleTransport = null;
+
+        // Attach to the Google backup transport.
+        Intent intent = new Intent().setComponent(new ComponentName(
+                "com.google.android.backup",
+                "com.google.android.backup.BackupTransportService"));
+        context.bindService(intent, mGoogleConnection, Context.BIND_AUTO_CREATE);
 
         // Now that we know about valid backup participants, parse any
         // leftover journal files and schedule a new backup pass
@@ -249,6 +258,19 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     };
 
+    // ----- Track connection to GoogleBackupTransport service -----
+    ServiceConnection mGoogleConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG) Log.v(TAG, "Connected to Google transport");
+            mGoogleTransport = IBackupTransport.Stub.asInterface(service);
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG) Log.v(TAG, "Disconnected from Google transport");
+            mGoogleTransport = null;
+        }
+    };
+
     // ----- Run the actual backup process asynchronously -----
 
     private class BackupHandler extends Handler {
@@ -256,6 +278,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
             switch (msg.what) {
             case MSG_RUN_BACKUP:
+            {
+                IBackupTransport transport = getTransport(mTransportId);
+                if (transport == null) {
+                    Log.v(TAG, "Backup requested but no transport available");
+                    break;
+                }
+
                 // snapshot the pending-backup set and work on that
                 File oldJournal = mJournal;
                 synchronized (mQueueLock) {
@@ -288,8 +317,10 @@ class BackupManagerService extends IBackupManager.Stub {
                     // deleted.  If we crash prior to that, the old journal is parsed
                     // at next boot and the journaled requests fulfilled.
                 }
-                (new PerformBackupThread(mTransport, mBackupQueue, oldJournal)).run();
+
+                (new PerformBackupThread(transport, mBackupQueue, oldJournal)).start();
                 break;
+            }
 
             case MSG_RUN_FULL_BACKUP:
                 break;
@@ -298,7 +329,7 @@ class BackupManagerService extends IBackupManager.Stub {
             {
                 int token = msg.arg1;
                 IBackupTransport transport = (IBackupTransport)msg.obj;
-                (new PerformRestoreThread(transport, token)).run();
+                (new PerformRestoreThread(transport, token)).start();
                 break;
             }
             }
@@ -416,25 +447,19 @@ class BackupManagerService extends IBackupManager.Stub {
         addPackageParticipantsLockedInner(packageName, allApps);
     }
 
-    // Instantiate the given transport
-    private IBackupTransport createTransport(int transportID) {
-        IBackupTransport transport = null;
+    // Return the given transport
+    private IBackupTransport getTransport(int transportID) {
         switch (transportID) {
         case BackupManager.TRANSPORT_LOCAL:
-            if (DEBUG) Log.v(TAG, "Initializing local transport");
-            transport = new LocalTransport(mContext);
-            break;
+            return mLocalTransport;
 
         case BackupManager.TRANSPORT_GOOGLE:
-            if (DEBUG) Log.v(TAG, "Initializing Google transport");
-            //!!! TODO: stand up the google backup transport for real here
-            transport = new GoogleTransport();
-            break;
+            return mGoogleTransport;
 
         default:
             Log.e(TAG, "Asked for unknown transport " + transportID);
+            return null;
         }
-        return transport;
     }
 
     // fire off a backup agent, blocking until it attaches or times out
@@ -937,14 +962,8 @@ class BackupManagerService extends IBackupManager.Stub {
     public int selectBackupTransport(int transportId) {
         mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
 
-        int prevTransport = -1;
-        IBackupTransport newTransport = createTransport(transportId);
-        if (newTransport != null) {
-            // !!! TODO: a method on the old transport that says it's being deactivated?
-            mTransport = newTransport;
-            prevTransport = mTransportId;
-            mTransportId = transportId;
-        }
+        int prevTransport = mTransportId;
+        mTransportId = transportId;
         return prevTransport;
     }
 
@@ -1005,7 +1024,7 @@ class BackupManagerService extends IBackupManager.Stub {
         RestoreSet[] mRestoreSets = null;
 
         RestoreSession(int transportID) {
-            mRestoreTransport = createTransport(transportID);
+            mRestoreTransport = getTransport(transportID);
         }
 
         // --- Binder interface ---
