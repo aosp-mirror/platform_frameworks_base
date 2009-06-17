@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import android.app.IIntentReceiver;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;

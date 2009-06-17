@@ -34,6 +34,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -949,6 +951,34 @@ class PackageManagerService extends IPackageManager.Stub {
                         // Callback via pending intent
                         opFinishedIntent.send((retCode >= 0) ? 1 : 0);
                     } catch (CanceledException e1) {
+                        Log.i(TAG, "Failed to send pending intent");
+                    }
+                }
+            }
+        });
+    }
+
+    public void freeStorageWithIntent(final long freeStorageSize, final IntentSender pi) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CLEAR_APP_CACHE, null);
+        // Queue up an async operation since clearing cache may take a little while.
+        mHandler.post(new Runnable() {
+            public void run() {
+                mHandler.removeCallbacks(this);
+                int retCode = -1;
+                if (mInstaller != null) {
+                    retCode = mInstaller.freeCache(freeStorageSize);
+                    if (retCode < 0) {
+                        Log.w(TAG, "Couldn't clear application caches");
+                    }
+                }
+                if(pi != null) {
+                    try {
+                        // Callback via pending intent
+                        int code = (retCode >= 0) ? 1 : 0;
+                        pi.sendIntent(null, code, null,
+                                null, null);
+                    } catch (SendIntentException e1) {
                         Log.i(TAG, "Failed to send pending intent");
                     }
                 }
