@@ -3217,7 +3217,7 @@ public final class ActivityThread {
                             r.activity.getComponentName().getClassName());
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(
-                            "Activity " + r.intent.getComponent().toShortString()
+                            "Activity " + safeToComponentShortString(r.intent)
                             + " did not call through to super.onPause()");
                     }
                 } catch (SuperNotCalledException e) {
@@ -3226,7 +3226,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to pause activity "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3241,7 +3241,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to stop activity "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3266,7 +3266,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to retain child activities "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3277,7 +3277,7 @@ public final class ActivityThread {
                 r.activity.onDestroy();
                 if (!r.activity.mCalled) {
                     throw new SuperNotCalledException(
-                        "Activity " + r.intent.getComponent().toShortString() +
+                        "Activity " + safeToComponentShortString(r.intent) +
                         " did not call through to super.onDestroy()");
                 }
                 if (r.window != null) {
@@ -3287,16 +3287,20 @@ public final class ActivityThread {
                 throw e;
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
-                    ComponentName component = r.intent.getComponent();
-                    String name = component == null ? "[Unknown]" : component.toShortString();
                     throw new RuntimeException(
-                            "Unable to destroy activity " + name + ": " + e.toString(), e);
+                            "Unable to destroy activity " + safeToComponentShortString(r.intent)
+                            + ": " + e.toString(), e);
                 }
             }
         }
         mActivities.remove(token);
 
         return r;
+    }
+
+    private static String safeToComponentShortString(Intent intent) {
+        ComponentName component = intent.getComponent();
+        return component == null ? "[Unknown]" : component.toShortString();
     }
 
     private final void handleDestroyActivity(IBinder token, boolean finishing,
