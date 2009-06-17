@@ -61,7 +61,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -88,7 +87,6 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.util.PrintWriterPrinter;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -127,6 +125,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_OOM_ADJ = localLOGV || false;
     static final boolean DEBUG_TRANSITION = localLOGV || false;
     static final boolean DEBUG_BROADCAST = localLOGV || false;
+    static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
     static final boolean DEBUG_SERVICE = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
@@ -10596,7 +10595,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             boolean ordered, boolean sticky, int callingPid, int callingUid) {
         intent = new Intent(intent);
 
-        if (DEBUG_BROADCAST) Log.v(
+        if (DEBUG_BROADCAST_LIGHT) Log.v(
             TAG, (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
             + " ordered=" + ordered);
         if ((resultTo != null) && !ordered) {
@@ -11088,7 +11087,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         boolean started = false;
         try {
-            if (DEBUG_BROADCAST) Log.v(TAG,
+            if (DEBUG_BROADCAST_LIGHT) Log.v(TAG,
                     "Delivering to component " + r.curComponent
                     + ": " + r);
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
@@ -11158,12 +11157,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 r.curFilter = filter;
                 filter.receiverList.curBroadcast = r;
                 r.state = BroadcastRecord.CALL_IN_RECEIVE;
+                if (filter.receiverList.app != null) {
+                    // Bump hosting application to no longer be in background
+                    // scheduling class.  Note that we can't do that if there
+                    // isn't an app...  but we can only be in that case for
+                    // things that directly call the IActivityManager API, which
+                    // are already core system stuff so don't matter for this.
+                    r.curApp = filter.receiverList.app;
+                    filter.receiverList.app.curReceiver = r;
+                    updateOomAdjLocked();
+                }
             }
             try {
-                if (DEBUG_BROADCAST) {
+                if (DEBUG_BROADCAST_LIGHT) {
                     int seq = r.intent.getIntExtra("seq", -1);
-                    Log.i(TAG, "Sending broadcast " + r.intent.getAction() + " seq=" + seq
-                            + " app=" + filter.receiverList.app);
+                    Log.i(TAG, "Delivering to " + filter.receiverList.app
+                            + " (seq=" + seq + "): " + r);
                 }
                 performReceive(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode,
@@ -11177,6 +11186,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     r.receiver = null;
                     r.curFilter = null;
                     filter.receiverList.curBroadcast = null;
+                    if (filter.receiverList.app != null) {
+                        filter.receiverList.app.curReceiver = null;
+                    }
                 }
             }
         }
@@ -11200,6 +11212,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             while (mParallelBroadcasts.size() > 0) {
                 r = mParallelBroadcasts.remove(0);
                 final int N = r.receivers.size();
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing parallel broadcast "
+                        + r);
                 for (int i=0; i<N; i++) {
                     Object target = r.receivers.get(i);
                     if (DEBUG_BROADCAST)  Log.v(TAG,
@@ -11207,6 +11221,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + target + ": " + r);
                     deliverToRegisteredReceiver(r, (BroadcastFilter)target, false);
                 }
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Done with parallel broadcast "
+                        + r);
             }
 
             // Now take care of the next serialized one...
@@ -11232,10 +11248,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
 
+            boolean looped = false;
+            
             do {
                 if (mOrderedBroadcasts.size() == 0) {
                     // No more broadcasts pending, so all done!
                     scheduleAppGcsLocked();
+                    if (looped) {
+                        // If we had finished the last ordered broadcast, then
+                        // make sure all processes have correct oom and sched
+                        // adjustments.
+                        updateOomAdjLocked();
+                    }
                     return;
                 }
                 r = mOrderedBroadcasts.get(0);
@@ -11292,9 +11316,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (DEBUG_BROADCAST) Log.v(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");
                     mHandler.removeMessages(BROADCAST_TIMEOUT_MSG);
 
+                    if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Finished with ordered broadcast "
+                            + r);
+                    
                     // ... and on to the next...
                     mOrderedBroadcasts.remove(0);
                     r = null;
+                    looped = true;
                     continue;
                 }
             } while (r == null);
@@ -11308,6 +11336,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (recIdx == 0) {
                 r.dispatchTime = r.startTime;
 
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing ordered broadcast "
+                        + r);
                 if (DEBUG_BROADCAST) Log.v(TAG,
                         "Submitting BROADCAST_TIMEOUT_MSG for "
                         + (r.startTime + BROADCAST_TIMEOUT));
