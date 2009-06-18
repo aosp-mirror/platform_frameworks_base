@@ -175,21 +175,24 @@ static bool copybit(GLint x, GLint y,
         return false;
     }
 
-    /*
+    // copybit doesn't say anything about filtering, so we can't
+    // discriminate. On msm7k, copybit will always filter.
+    // the code below handles min/mag filters, we keep it as a reference.
+    
+#ifdef MIN_MAG_FILTER
     int32_t texelArea = gglMulx(dtdy, dsdx);
     if (texelArea < FIXED_ONE && textureObject->mag_filter != GL_LINEAR) {
         // Non-linear filtering on a texture enlargement.
         LOGD_IF(DEBUG_COPYBIT, "mag filter is not GL_LINEAR");
         return false;
     }
-
     if (texelArea > FIXED_ONE && textureObject->min_filter != GL_LINEAR) {
         // Non-linear filtering on an texture shrink.
         LOGD_IF(DEBUG_COPYBIT, "min filter is not GL_LINEAR");
         return false;
     }
-    */
-
+#endif
+    
     const uint32_t enables = c->rasterizer.state.enables;
     int planeAlpha = 255;
     static const int tmu = 0;
@@ -294,6 +297,11 @@ bool drawTriangleFanWithCopybit_impl(ogles_context_t* c, GLint first, GLsizei co
 
     // we detect if we're dealing with a rectangle, by comparing the
     // rectangles {v0,v2} and {v1,v3} which should be identical.
+    
+    // NOTE: we should check that the rectangle is window aligned, however
+    // if we do that, the optimization won't be taken in a lot of cases.
+    // Since this code is intended to be used with SurfaceFlinger only,
+    // so it's okay...
     
     const vec4_t& v0 = c->vc.vBuffer[0].window;
     const vec4_t& v1 = c->vc.vBuffer[1].window;
