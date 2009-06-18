@@ -19,12 +19,12 @@ package com.android.server;
 import android.util.Log;
 
 import java.io.Closeable;
+import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.RandomAccessFile;
 
 /**
  * A 4k block of random {@code byte}s.
@@ -63,17 +63,27 @@ class RandomBlock {
 
     void toFile(String filename) throws IOException {
         Log.v(TAG, "writing to file " + filename);
-        OutputStream out = null;
+        RandomAccessFile out = null;
         try {
-            // TODO: Investigate using RandomAccessFile
-            out = new FileOutputStream(filename);
-            toStream(out);
+            out = new RandomAccessFile(filename, "rws");
+            toDataOut(out);
+            truncateIfPossible(out);
         } finally {
             close(out);
         }
     }
 
-    private void toStream(OutputStream out) throws IOException {
+    private static void truncateIfPossible(RandomAccessFile f) {
+        try {
+            f.setLength(BLOCK_SIZE);
+        } catch (IOException e) {
+            // ignore this exception.  Sometimes, the file we're trying to
+            // write is a character device, such as /dev/urandom, and
+            // these character devices do not support setting the length.
+        }
+    }
+
+    private void toDataOut(DataOutput out) throws IOException {
         out.write(block);
     }
 
