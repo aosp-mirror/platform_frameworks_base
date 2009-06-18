@@ -379,12 +379,10 @@ final class WebViewCore {
 
     private native void nativeSaveDocumentState(int frame);
 
-    private native void nativeMoveMouse(int framePtr, int nodePtr, int x,
-            int y);
+    private native void nativeMoveMouse(int framePtr, int x, int y);
 
     private native void nativeMoveMouseIfLatest(int moveGeneration,
-            int framePtr, int nodePtr, int x, int y,
-            boolean ignoreNullFocus);
+            int framePtr, int x, int y);
 
     private native String nativeRetrieveHref(int framePtr, int nodePtr);
 
@@ -524,16 +522,13 @@ final class WebViewCore {
         CursorData() {}
         CursorData(int frame, int node, int x, int y) {
             mFrame = frame;
-            mNode = node;
             mX = x;
             mY = y;
         }
         int mMoveGeneration;
         int mFrame;
-        int mNode;
         int mX;
         int mY;
-        boolean mIgnoreNullFocus;
     }
 
     static class JSInterfaceData {
@@ -725,7 +720,7 @@ final class WebViewCore {
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
                         Log.v(LOGTAG, msg.what < LOAD_URL || msg.what
-                                > SET_INACTIVE ? Integer.toString(msg.what)
+                                > FREE_MEMORY ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what - LOAD_URL]);
                     }
                     switch (msg.what) {
@@ -819,7 +814,8 @@ final class WebViewCore {
                         case SET_SCROLL_OFFSET:
                             // note: these are in document coordinates
                             // (inv-zoom)
-                            nativeSetScrollOffset(msg.arg1, msg.arg2);
+                            Point pt = (Point) msg.obj;
+                            nativeSetScrollOffset(msg.arg1, pt.x, pt.y);
                             break;
 
                         case SET_GLOBAL_BOUNDS:
@@ -973,16 +969,14 @@ final class WebViewCore {
                         case SET_MOVE_MOUSE:
                             CursorData cursorData = (CursorData) msg.obj;
                             nativeMoveMouse(cursorData.mFrame,
-                                     cursorData.mNode, cursorData.mX,
-                                     cursorData.mY);
+                                     cursorData.mX, cursorData.mY);
                             break;
 
                         case SET_MOVE_MOUSE_IF_LATEST:
                             CursorData cData = (CursorData) msg.obj;
                             nativeMoveMouseIfLatest(cData.mMoveGeneration,
-                                    cData.mFrame, cData.mNode,
-                                    cData.mX, cData.mY,
-                                    cData.mIgnoreNullFocus);
+                                    cData.mFrame,
+                                    cData.mX, cData.mY);
                             break;
 
                         case REQUEST_CURSOR_HREF: {
@@ -1728,7 +1722,7 @@ final class WebViewCore {
     }
 
     // these must be in document space (i.e. not scaled/zoomed).
-    private native void nativeSetScrollOffset(int dx, int dy);
+    private native void nativeSetScrollOffset(int gen, int dx, int dy);
 
     private native void nativeSetGlobalBounds(int x, int y, int w, int h);
 

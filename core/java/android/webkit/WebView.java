@@ -1750,8 +1750,9 @@ public class WebView extends AbsoluteLayout
         }
         // Rect.equals() checks for null input.
         if (!rect.equals(mLastVisibleRectSent)) {
+            Point pos = new Point(rect.left, rect.top);
             mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
-                                     rect.left, rect.top);
+                    nativeMoveGeneration(), 0, pos);
             mLastVisibleRectSent = rect;
         }
         Rect globalRect = new Rect();
@@ -2915,10 +2916,9 @@ public class WebView extends AbsoluteLayout
         WebViewCore.CursorData result = new WebViewCore.CursorData();
         result.mMoveGeneration = nativeMoveGeneration();
         result.mFrame = nativeCursorFramePointer();
-        result.mNode = nativeCursorNodePointer();
-        Rect bounds = nativeCursorNodeBounds();
-        result.mX = bounds.centerX();
-        result.mY = bounds.centerY();
+        Point position = nativeCursorPosition();
+        result.mX = position.x;
+        result.mY = position.y;
         return result;
     }
 
@@ -5244,6 +5244,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
     private native boolean  nativeCursorIsTextInput();
+    private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
     /**
      * Returns true if the native cursor node says it wants to handle key events
