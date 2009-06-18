@@ -16,6 +16,8 @@
 
 package android.backup;
 
+import android.util.Log;
+
 import java.io.InputStream;
 import java.io.IOException;
 
