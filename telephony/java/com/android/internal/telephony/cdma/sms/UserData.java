@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import android.util.SparseIntArray;
+
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.util.HexDump;
 
@@ -40,6 +42,10 @@ public class UserData {
     /**
      * IA5 data encoding character mappings.
      * (See CCITT Rec. T.50 Tables 1 and 3)
+     *
+     * Note this mapping is the the same as for printable ASCII
+     * characters, with a 0x20 offset, meaning that the ASCII SPACE
+     * character occurs with code 0x20.
      */
     public static final char[] IA5_MAP = {
         ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
@@ -61,7 +67,16 @@ public class UserData {
      * Only elements between these indices in the ASCII table are printable.
      */
     public static final int PRINTABLE_ASCII_MIN_INDEX = 0x20;
-    public static final int PRINTABLE_ASCII_MAX_INDEX = 0x7F;
+    public static final int ASCII_LF_INDEX = 0x0A;
+    public static final int ASCII_CR_INDEX = 0x0D;
+    public static final SparseIntArray charToAscii = new SparseIntArray();
+    static {
+        for (int i = 0; i < IA5_MAP.length; i++) {
+            charToAscii.put(IA5_MAP[i], PRINTABLE_ASCII_MIN_INDEX + i);
+        }
+        charToAscii.put('\r', ASCII_LF_INDEX);
+        charToAscii.put('\n', ASCII_CR_INDEX);
+    }
 
     /**
      * Mapping for IA5 values less than 32 are flow control signals
