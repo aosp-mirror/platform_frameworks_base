@@ -986,23 +986,6 @@ public abstract class PackageManager {
     public abstract ResolveInfo resolveActivity(Intent intent, int flags);
 
     /**
-     * Resolve the intent restricted to a package.
-     * {@see #resolveActivity}
-     *
-     * @param intent An intent containing all of the desired specification
-     *               (action, data, type, category, and/or component).
-     * @param flags Additional option flags.  The most important is
-     *                    MATCH_DEFAULT_ONLY, to limit the resolution to only
-     *                    those activities that support the CATEGORY_DEFAULT.
-     * @param packageName Restrict the intent resolution to this package.
-     *
-     * @return Returns a ResolveInfo containing the final activity intent that
-     *         was determined to be the best action.  Returns null if no
-     *         matching activity was found.
-     */
-    public abstract ResolveInfo resolveActivity(Intent intent, int flags, String packageName);
-
-    /**
      * Retrieve all activities that can be performed for the given intent.
      *
      * @param intent The desired intent as per resolveActivity().
