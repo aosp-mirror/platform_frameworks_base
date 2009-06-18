@@ -81,6 +81,28 @@ public class TextToSpeech {
     }
 
     /**
+     * Internal constants for the TTS functionality
+     *
+     * {@hide}
+     */
+    public class Engine {
+        // default values for a TTS engine when settings are not found in the provider
+        public static final int FALLBACK_TTS_DEFAULT_RATE = 100; // 1x
+        public static final int FALLBACK_TTS_DEFAULT_PITCH = 100;// 1x
+        public static final int FALLBACK_TTS_USE_DEFAULTS = 0; // false
+        public static final String FALLBACK_TTS_DEFAULT_LANG = "eng";
+        public static final String FALLBACK_TTS_DEFAULT_COUNTRY = "";
+        public static final String FALLBACK_TTS_DEFAULT_VARIANT = "";
+
+        // return codes for a TTS engine's check data activity
+        public static final int CHECK_VOICE_DATA_PASS = 1;
+        public static final int CHECK_VOICE_DATA_FAIL = 0;
+        public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
+        public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
+        public static final int CHECK_VOICE_DATA_MISSING_DATA_NO_SDCARD = -3;
+    }
+
+    /**
      * Connection needed for the TTS.
      */
     private ServiceConnection mServiceConnection;
