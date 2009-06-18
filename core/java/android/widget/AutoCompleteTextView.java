@@ -619,15 +619,19 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                         mDropDownList.getAdapter().getCount() - 1)) {
                     // When the selection is at the top, we block the key
                     // event to prevent focus from moving.
-                    mDropDownList.hideSelector();
-                    mDropDownList.requestLayout();
+                    clearListSelection();
                     mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
                     mPopup.update();
                     return true;
+                } else {
+                    // WARNING: Please read the comment where mListSelectionHidden
+                    //          is declared
+                    mDropDownList.mListSelectionHidden = false;
                 }
+
                 consumed = mDropDownList.onKeyDown(keyCode, event);
-                if (DEBUG) Log.v(TAG, "Key down: code=" + keyCode + " list consumed="
-                        + consumed);
+                if (DEBUG) Log.v(TAG, "Key down: code=" + keyCode + " list consumed=" + consumed);
+
                 if (consumed) {
                     // If it handled the key event, then the user is
                     // navigating in the list, so we should put it in front.
@@ -770,9 +774,12 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * it back.
      */
     public void clearListSelection() {
-        if (mDropDownList != null) {
-            mDropDownList.hideSelector();
-            mDropDownList.requestLayout();
+        final DropDownListView list = mDropDownList;
+        if (list != null) {
+            // WARNING: Please read the comment where mListSelectionHidden is declared
+            list.mListSelectionHidden = true;
+            list.hideSelector();
+            list.requestLayout();
         }
     }
     
@@ -1062,8 +1069,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             mPopup.showAsDropDown(getDropDownAnchorView(),
                     mDropDownHorizontalOffset, mDropDownVerticalOffset);
             mDropDownList.setSelection(ListView.INVALID_POSITION);
-            mDropDownList.hideSelector();
-            mDropDownList.requestFocus();
+            clearListSelection();
             post(mHideSelector);
         }
     }
@@ -1106,6 +1112,18 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             mDropDownList.setOnItemClickListener(mDropDownItemClickListener);
             mDropDownList.setFocusable(true);
             mDropDownList.setFocusableInTouchMode(true);
+            mDropDownList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(AdapterView<?> parent, View view,
+                        int position, long id) {
+
+                    if (position != -1) {
+                        mDropDownList.mListSelectionHidden = false;
+                    }
+                }
+
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
 
             if (mItemSelectedListener != null) {
                 mDropDownList.setOnItemSelectedListener(mItemSelectedListener);
@@ -1229,10 +1247,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private class ListSelectorHider implements Runnable {
         public void run() {
-            if (mDropDownList != null) {
-                mDropDownList.hideSelector();
-                mDropDownList.requestLayout();
-            }
+            clearListSelection();
         }
     }
 
@@ -1259,6 +1274,36 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * passed to the drop down; the list only looks focused.</p>
      */
     private static class DropDownListView extends ListView {
+        /*
+         * WARNING: This is a workaround for a touch mode issue.
+         *
+         * Touch mode is propagated lazily to windows. This causes problems in
+         * the following scenario:
+         * - Type something in the AutoCompleteTextView and get some results
+         * - Move down with the d-pad to select an item in the list
+         * - Move up with the d-pad until the selection disappears
+         * - Type more text in the AutoCompleteTextView *using the soft keyboard*
+         *   and get new results; you are now in touch mode
+         * - The selection comes back on the first item in the list, even though
+         *   the list is supposed to be in touch mode
+         *
+         * Using the soft keyboard triggers the touch mode change but that change
+         * is propagated to our window only after the first list layout, therefore
+         * after the list attempts to resurrect the selection.
+         *
+         * The trick to work around this issue is to pretend the list is in touch
+         * mode when we know that the selection should not appear, that is when
+         * we know the user moved the selection away from the list.
+         *
+         * This boolean is set to true whenever we explicitely hide the list's
+         * selection and reset to false whenver we know the user moved the
+         * selection back to the list.
+         *
+         * When this boolean is true, isInTouchMode() returns true, otherwise it
+         * returns super.isInTouchMode().
+         */
+        private boolean mListSelectionHidden;
+
         /**
          * <p>Creates a new list view wrapper.</p>
          *
@@ -1302,6 +1347,12 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
          */
         public int getSelectionPaddingBottom() {
             return mSelectionBottomPadding;
+        }
+
+        @Override
+        public boolean isInTouchMode() {
+            // WARNING: Please read the comment where mListSelectionHidden is declared
+            return mListSelectionHidden || super.isInTouchMode();
         }
 
         /**
