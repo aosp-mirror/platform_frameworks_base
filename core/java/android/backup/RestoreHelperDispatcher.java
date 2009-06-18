@@ -16,11 +16,15 @@
 
 package android.backup;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.util.HashMap;
 
 /** @hide */
 public class RestoreHelperDispatcher {
+    private static final String TAG = "RestoreHelperDispatcher";
+
     HashMap<String,RestoreHelper> mHelpers = new HashMap<String,RestoreHelper>();
 
     public void addHelper(String keyPrefix, RestoreHelper helper) {
@@ -28,8 +32,11 @@ public class RestoreHelperDispatcher {
     }
 
     public void dispatch(BackupDataInput input) throws IOException {
+        boolean alreadyComplained = false;
+
         BackupDataInputStream stream = new BackupDataInputStream(input);
         while (input.readNextHeader()) {
+
             String rawKey = input.getKey();
             int pos = rawKey.indexOf(':');
             if (pos > 0) {
@@ -39,6 +46,16 @@ public class RestoreHelperDispatcher {
                     stream.dataSize = input.getDataSize();
                     stream.key = rawKey.substring(pos+1);
                     helper.restoreEntity(stream);
+                } else {
+                    if (!alreadyComplained) {
+                        Log.w(TAG, "Couldn't find helper for: '" + rawKey + "'");
+                        alreadyComplained = true;
+                    }
+                }
+            } else {
+                if (!alreadyComplained) {
+                    Log.w(TAG, "Entity with no prefix: '" + rawKey + "'");
+                    alreadyComplained = true;
                 }
             }
             input.skipEntityData(); // In case they didn't consume the data.

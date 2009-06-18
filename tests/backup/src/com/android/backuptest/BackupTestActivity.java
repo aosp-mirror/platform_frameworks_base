@@ -144,8 +144,7 @@ public class BackupTestActivity extends ListActivity
                     FileBackupHelper h = new FileBackupHelper(BackupTestActivity.this,
                             "FileBackupHelper");
                     FileOutputStream dataFile = openFileOutput("backup_test", MODE_WORLD_READABLE);
-                    BackupDataOutput data = new BackupDataOutput(BackupTestActivity.this,
-                            dataFile.getFD());
+                    BackupDataOutput data = new BackupDataOutput(dataFile.getFD());
                     h.performBackup(null, data, state, new String[] { "a", "empty" });
                     dataFile.close();
                     state.close();

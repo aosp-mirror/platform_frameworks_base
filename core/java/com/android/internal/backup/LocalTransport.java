@@ -160,7 +160,7 @@ public class LocalTransport extends IBackupTransport.Stub {
         File[] blobs = packageDir.listFiles();
         int err = 0;
         if (blobs != null && blobs.length > 0) {
-            BackupDataOutput out = new BackupDataOutput(mContext, outFd.getFileDescriptor());
+            BackupDataOutput out = new BackupDataOutput(outFd.getFileDescriptor());
             try {
                 for (File f : blobs) {
                     FileInputStream in = new FileInputStream(f);
