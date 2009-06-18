@@ -106,6 +106,9 @@ public class Browser {
     public static final int HISTORY_PROJECTION_BOOKMARK_INDEX = 4;
     public static final int HISTORY_PROJECTION_TITLE_INDEX = 5;
     public static final int HISTORY_PROJECTION_FAVICON_INDEX = 6;
+    /*
+     * @hide
+     */
     public static final int HISTORY_PROJECTION_THUMBNAIL_INDEX = 7;
 
     /* columns needed to determine whether to truncate history */
@@ -487,6 +490,9 @@ public class Browser {
         public static final String TITLE = "title";
         public static final String CREATED = "created";
         public static final String FAVICON = "favicon";
+        /*
+         * @hide
+         */
         public static final String THUMBNAIL = "thumbnail";
     }
 
