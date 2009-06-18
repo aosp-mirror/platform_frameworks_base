@@ -34,6 +34,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -955,6 +957,34 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         });
     }
+
+    public void freeStorageWithIntent(final long freeStorageSize, final IntentSender pi) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CLEAR_APP_CACHE, null);
+        // Queue up an async operation since clearing cache may take a little while.
+        mHandler.post(new Runnable() {
+            public void run() {
+                mHandler.removeCallbacks(this);
+                int retCode = -1;
+                if (mInstaller != null) {
+                    retCode = mInstaller.freeCache(freeStorageSize);
+                    if (retCode < 0) {
+                        Log.w(TAG, "Couldn't clear application caches");
+                    }
+                }
+                if(pi != null) {
+                    try {
+                        // Callback via pending intent
+                        int code = (retCode >= 0) ? 1 : 0;
+                        pi.sendIntent(null, code, null,
+                                null, null);
+                    } catch (SendIntentException e1) {
+                        Log.i(TAG, "Failed to send pending intent");
+                    }
+                }
+            }
+        });
+    }
     
     public ActivityInfo getActivityInfo(ComponentName component, int flags) {
         synchronized (mPackages) {
@@ -1239,28 +1269,6 @@ class PackageManagerService extends IPackageManager.Stub {
         return chooseBestActivity(intent, resolvedType, flags, query);
     }
 
-    public ResolveInfo resolveIntentForPackage(Intent intent, String resolvedType,
-                                               int flags, String packageName) {
-        ComponentName comp = intent.getComponent();
-        if (comp != null) {
-            // if this is an explicit intent, it must have the same the packageName
-            if (packageName.equals(comp.getPackageName())) {
-                return resolveIntent(intent, resolvedType, flags);
-            }
-            return null;
-        } else {
-            List<ResolveInfo> query = null;
-            synchronized (mPackages) {
-                PackageParser.Package pkg = mPackages.get(packageName);
-                if (pkg != null) {
-                    query = (List<ResolveInfo>) mActivities.
-                        queryIntentForPackage(intent, resolvedType, flags, pkg.activities);
-                }
-            }
-            return chooseBestActivity(intent, resolvedType, flags, query);
-        }
-    }
-
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
                                            int flags, List<ResolveInfo> query) {
         if (query != null) {
@@ -1379,8 +1387,17 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         synchronized (mPackages) {
-            return (List<ResolveInfo>)mActivities.
-                queryIntent(intent, resolvedType, flags);
+            String pkgName = intent.getPackage();
+            if (pkgName == null) {
+                return (List<ResolveInfo>)mActivities.queryIntent(intent,
+                        resolvedType, flags);
+            }
+            PackageParser.Package pkg = mPackages.get(pkgName);
+            if (pkg != null) {
+                return (List<ResolveInfo>) mActivities.queryIntentForPackage(intent,
+                        resolvedType, flags, pkg.activities);
+            }
+            return null;
         }
     }
 
@@ -1547,9 +1564,30 @@ class PackageManagerService extends IPackageManager.Stub {
 
     public List<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, int flags) {
+        ComponentName comp = intent.getComponent();
+        if (comp != null) {
+            List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
+            ActivityInfo ai = getReceiverInfo(comp, flags);
+            if (ai != null) {
+                ResolveInfo ri = new ResolveInfo();
+                ri.activityInfo = ai;
+                list.add(ri);
+            }
+            return list;
+        }
+        
         synchronized (mPackages) {
-            return (List<ResolveInfo>)mReceivers.
-                queryIntent(intent, resolvedType, flags);
+            String pkgName = intent.getPackage();
+            if (pkgName == null) {
+                return (List<ResolveInfo>)mReceivers.queryIntent(intent,
+                        resolvedType, flags);
+            }
+            PackageParser.Package pkg = mPackages.get(pkgName);
+            if (pkg != null) {
+                return (List<ResolveInfo>) mReceivers.queryIntentForPackage(intent,
+                        resolvedType, flags, pkg.receivers);
+            }
+            return null;
         }
     }
 
@@ -1582,7 +1620,17 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         synchronized (mPackages) {
-            return (List<ResolveInfo>)mServices.queryIntent(intent, resolvedType, flags);
+            String pkgName = intent.getPackage();
+            if (pkgName == null) {
+                return (List<ResolveInfo>)mServices.queryIntent(intent,
+                        resolvedType, flags);
+            }
+            PackageParser.Package pkg = mPackages.get(pkgName);
+            if (pkg != null) {
+                return (List<ResolveInfo>)mServices.queryIntentForPackage(intent,
+                        resolvedType, flags, pkg.services);
+            }
+            return null;
         }
     }
     
@@ -3077,6 +3125,27 @@ class PackageManagerService extends IPackageManager.Stub {
             mFlags = flags;
             return super.queryIntent(intent, resolvedType,
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
+        }
+
+        public List queryIntentForPackage(Intent intent, String resolvedType, int flags,
+                                          ArrayList<PackageParser.Service> packageServices) {
+            if (packageServices == null) {
+                return null;
+            }
+            mFlags = flags;
+            final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
+            int N = packageServices.size();
+            ArrayList<ArrayList<PackageParser.ServiceIntentInfo>> listCut =
+                new ArrayList<ArrayList<PackageParser.ServiceIntentInfo>>(N);
+
+            ArrayList<PackageParser.ServiceIntentInfo> intentFilters;
+            for (int i = 0; i < N; ++i) {
+                intentFilters = packageServices.get(i).intents;
+                if (intentFilters != null && intentFilters.size() > 0) {
+                    listCut.add(intentFilters);
+                }
+            }
+            return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut);
         }
 
         public final void addService(PackageParser.Service s) {

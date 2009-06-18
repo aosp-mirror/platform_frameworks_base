@@ -113,6 +113,7 @@ static bool initializeNativeDataNative(JNIEnv* env, jobject object) {
         dbus_error_free(&err);
         return false;
     }
+    dbus_connection_set_exit_on_disconnect(nat->conn, FALSE);
 #endif  /*HAVE_BLUETOOTH*/
     return true;
 }

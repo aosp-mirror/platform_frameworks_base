@@ -3091,6 +3091,13 @@ public final class Settings {
         public static final String ANR_BUGREPORT_RECIPIENT = "anr_bugreport_recipient";
 
         /**
+         * Flag for allowing service provider to use location information to improve products and
+         * services.
+         * Type: int ( 0 = disallow, 1 = allow )
+         */
+        public static final String USE_LOCATION_FOR_SERVICES = "use_location";
+
+        /**
          * @deprecated
          * @hide
          */

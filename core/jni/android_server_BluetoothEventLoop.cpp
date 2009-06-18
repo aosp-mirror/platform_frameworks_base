@@ -117,6 +117,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
             LOGE("%s: Could not get onto the system bus!", __FUNCTION__);
             dbus_error_free(&err);
         }
+        dbus_connection_set_exit_on_disconnect(nat->conn, FALSE);
     }
 #endif
 }

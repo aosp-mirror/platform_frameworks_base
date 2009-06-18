@@ -609,10 +609,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
                 R.bool.def_accelerometer_rotation);
 
-        // Default date format based on build
-        loadSetting(stmt, Settings.System.DATE_FORMAT,
-                SystemProperties.get("ro.com.android.dateformat",
-                        "MM-dd-yyyy"));
         stmt.close();
     }
 

@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"Consente a un\'applicazione di modificare la configurazione corrente, come le dimensioni dei caratteri locali o complessive."</string>
     <string name="permlab_restartPackages">"riavvio altre applicazioni"</string>
     <string name="permdesc_restartPackages">"Consente a un\'applicazione di riavviare forzatamente altre applicazioni."</string>
-    <string name="permlab_setProcessForeground">"impedire l\'interruzione"</string>
-    <string name="permdesc_setProcessForeground">"Consente a un\'applicazione di eseguire i processi in primo piano in modo che non possano essere interrotti. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_forceBack">"chiusura forzata dell\'applicazione"</string>
     <string name="permdesc_forceBack">"Consente a un\'applicazione di forzare la chiusura di attività in primo piano. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_dump">"recupero stato interno del sistema"</string>
     <string name="permdesc_dump">"Consente all\'applicazione di recuperare lo stato interno del sistema. Le applicazioni dannose potrebbero recuperare molte informazioni riservate e protette di cui non dovrebbero avere mai bisogno."</string>
-    <string name="permlab_addSystemService">"pubblicaz. servizi di basso livello"</string>
-    <string name="permdesc_addSystemService">"Consente a un\'applicazione di pubblicare i suoi servizi di sistema di basso livello. Le applicazioni dannose potrebbero assumere il controllo del sistema e impossessarsi di dati o danneggiarli."</string>
     <string name="permlab_runSetActivityWatcher">"monitoraggio e controllo avvio applicazioni"</string>
     <string name="permdesc_runSetActivityWatcher">"Consente a un\'applicazione di monitorare e controllare la modalità di avvio delle attività nel sistema. Le applicazioni dannose potrebbero compromettere totalmente il sistema. Questa autorizzazione è necessaria soltanto per lo sviluppo, mai per il normale utilizzo del telefono."</string>
     <string name="permlab_broadcastPackageRemoved">"invio broadcast rimossi dal pacchetto"</string>
@@ -181,8 +177,6 @@
     <string name="permdesc_setProcessLimit">"Consente a un\'applicazione di stabilire il numero massimo di processi in esecuzione. Mai necessario per le normali applicazioni."</string>
     <string name="permlab_setAlwaysFinish">"chiusura applicazioni in background"</string>
     <string name="permdesc_setAlwaysFinish">"Consente a un\'applicazione di controllare se le attività sono sempre completate quando vengono messe in secondo piano. Mai necessario per le normali applicazioni."</string>
-    <string name="permlab_fotaUpdate">"installazione autom. aggiornamenti di sistema"</string>
-    <string name="permdesc_fotaUpdate">"Consente a un\'applicazione di ricevere notifiche sugli aggiornamenti del sistema in sospeso e di attivarne l\'installazione. Le applicazioni dannose possono sfruttare questa possibilità per danneggiare il sistema con aggiornamenti non autorizzati, o interferire con il processo di aggiornamento."</string>
     <string name="permlab_batteryStats">"modifica statistiche batteria"</string>
     <string name="permdesc_batteryStats">"Consente la modifica delle statistiche sulla batteria raccolte. Da non usare per normali applicazioni."</string>
     <string name="permlab_internalSystemWindow">"visualizzazione finestre non autorizzate"</string>

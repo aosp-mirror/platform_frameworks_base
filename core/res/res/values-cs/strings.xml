@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"Umožňuje aplikaci změnit aktuální konfiguraci, např. národní prostředí či obecnou velikost písma."</string>
     <string name="permlab_restartPackages">"restartování ostatních aplikací"</string>
     <string name="permdesc_restartPackages">"Umožňuje aplikaci vynutit restartování jiných aplikací."</string>
-    <string name="permlab_setProcessForeground">"zamezení zastavení aplikace"</string>
-    <string name="permdesc_setProcessForeground">"Umožňuje aplikaci spustit jakýkoli proces v popředí tak, že ho nelze ukončit. Běžné aplikace by toto nastavení nikdy neměly používat."</string>
     <string name="permlab_forceBack">"vynucení zavření aplikace"</string>
     <string name="permdesc_forceBack">"Umožňuje aplikaci vynutit zavření a přesunutí libovolné činnosti v popředí na pozadí. Běžné aplikace by toto nastavení neměly nikdy využívat."</string>
     <string name="permlab_dump">"načtení interního stavu systému"</string>
     <string name="permdesc_dump">"Umožňuje aplikaci načíst interní stav systému. Škodlivé aplikace mohou načíst řádu soukromých a zabezpečených informací, které by nikdy neměly potřebovat."</string>
-    <string name="permlab_addSystemService">"zveřejnění nízkoúrovňových služeb"</string>
-    <string name="permdesc_addSystemService">"Umožňuje aplikaci zveřejnit své vlastní nízkoúrovňové systémové služby. Škodlivé aplikace mohou převzít kontrolu nad systémem a získat či poškodit jakákoli data v něm obsažená."</string>
     <string name="permlab_runSetActivityWatcher">"sledování a řízení spouštění všech aplikací"</string>
     <string name="permdesc_runSetActivityWatcher">"Umožňuje aplikaci sledovat a řídit spouštění činností systémem. Škodlivé aplikace mohou zcela ovládnout systém. Toto oprávnění je zapotřebí pouze pro účely vývoje, nikdy pro běžné použití telefonu."</string>
     <string name="permlab_broadcastPackageRemoved">"odeslání vysílání o odstranění balíčku"</string>
@@ -181,8 +177,6 @@
     <string name="permdesc_setProcessLimit">"Umožňuje aplikaci řídit maximální počet spuštěných procesů. Běžné aplikace toto nastavení nikdy nevyužívají."</string>
     <string name="permlab_setAlwaysFinish">"zavření všech aplikací na pozadí"</string>
     <string name="permdesc_setAlwaysFinish">"Umožňuje aplikaci ovládat, zda jsou činnosti vždy dokončeny po přesunutí do pozadí. Běžné aplikace toto nastavení nikdy nevyužívají."</string>
-    <string name="permlab_fotaUpdate">"automatická instalace aktualizací systému"</string>
-    <string name="permdesc_fotaUpdate">"Umožňuje aplikaci přijímat oznámení o čekajících aktualizacích systému a spouštět jejich instalaci. Škodlivé aplikace mohou díky tomuto nastavení poškodit systém pomocí neoprávněných aktualizací nebo celkově narušovat proces aktualizace."</string>
     <string name="permlab_batteryStats">"změna statistických údajů o baterii"</string>
     <string name="permdesc_batteryStats">"Umožňuje změnu shromážděných statistických údajů o baterii. Není určeno pro běžné aplikace."</string>
     <string name="permlab_internalSystemWindow">"zobrazení nepovolených oken"</string>

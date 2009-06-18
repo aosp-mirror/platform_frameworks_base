@@ -21,14 +21,16 @@ import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IBackupAgent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -48,14 +50,15 @@ import android.backup.BackupManager;
 import android.backup.RestoreSet;
 
 import com.android.internal.backup.LocalTransport;
-import com.android.internal.backup.GoogleTransport;
 import com.android.internal.backup.IBackupTransport;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +69,7 @@ import java.util.List;
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
-    
+
     private static final long COLLECTION_INTERVAL = 1000;
     //private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
 
@@ -88,7 +91,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private class BackupRequest {
         public ApplicationInfo appInfo;
         public boolean fullBackup;
-        
+
         BackupRequest(ApplicationInfo app, boolean isFull) {
             appInfo = app;
             fullBackup = isFull;
@@ -118,11 +121,17 @@ class BackupManagerService extends IBackupManager.Stub {
     private final Object mClearDataLock = new Object();
     private volatile boolean mClearingData;
 
+    // Current active transport & restore session
     private int mTransportId;
+    private IBackupTransport mLocalTransport, mGoogleTransport;
+    private RestoreSession mActiveRestoreSession;
 
     private File mStateDir;
     private File mDataDir;
-    
+    private File mJournalDir;
+    private File mJournal;
+    private RandomAccessFile mJournalStream;
+
     public BackupManagerService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
@@ -133,13 +142,32 @@ class BackupManagerService extends IBackupManager.Stub {
         mStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
 
-        //!!! TODO: default to cloud transport, not local
-        mTransportId = BackupManager.TRANSPORT_LOCAL;
-        
+        // Set up the backup-request journaling
+        mJournalDir = new File(mStateDir, "pending");
+        mJournalDir.mkdirs();
+        makeJournalLocked();    // okay because no other threads are running yet
+
         // Build our mapping of uid to backup client services
         synchronized (mBackupParticipants) {
             addPackageParticipantsLocked(null);
         }
+
+        // Set up our transport options and initialize the default transport
+        // TODO: Have transports register themselves somehow?
+        // TODO: Don't create transports that we don't need to?
+        mTransportId = BackupManager.TRANSPORT_GOOGLE;
+        mLocalTransport = new LocalTransport(context);  // This is actually pretty cheap
+        mGoogleTransport = null;
+
+        // Attach to the Google backup transport.
+        Intent intent = new Intent().setComponent(new ComponentName(
+                "com.google.android.backup",
+                "com.google.android.backup.BackupTransportService"));
+        context.bindService(intent, mGoogleConnection, Context.BIND_AUTO_CREATE);
+
+        // Now that we know about valid backup participants, parse any
+        // leftover journal files and schedule a new backup pass
+        parseLeftoverJournals();
 
         // Register for broadcasts about package install, etc., so we can
         // update the provider list.
@@ -148,6 +176,46 @@ class BackupManagerService extends IBackupManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    private void makeJournalLocked() {
+        try {
+            mJournal = File.createTempFile("journal", null, mJournalDir);
+            mJournalStream = new RandomAccessFile(mJournal, "rwd");
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to write backup journals");
+            mJournal = null;
+            mJournalStream = null;
+        }
+    }
+
+    private void parseLeftoverJournals() {
+        if (mJournal != null) {
+            File[] allJournals = mJournalDir.listFiles();
+            for (File f : allJournals) {
+                if (f.compareTo(mJournal) != 0) {
+                    // This isn't the current journal, so it must be a leftover.  Read
+                    // out the package names mentioned there and schedule them for
+                    // backup.
+                    try {
+                        Log.i(TAG, "Found stale backup journal, scheduling:");
+                        RandomAccessFile in = new RandomAccessFile(f, "r");
+                        while (true) {
+                            String packageName = in.readUTF();
+                            Log.i(TAG, "    + " + packageName);
+                            dataChanged(packageName);
+                        }
+                    } catch (EOFException e) {
+                        // no more data; we're done
+                    } catch (Exception e) {
+                        // can't read it or other error; just skip it
+                    } finally {
+                        // close/delete the file
+                        f.delete();
+                    }
+                }
+            }
+        }
     }
 
     // ----- Track installation/removal of packages -----
@@ -190,6 +258,19 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     };
 
+    // ----- Track connection to GoogleBackupTransport service -----
+    ServiceConnection mGoogleConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG) Log.v(TAG, "Connected to Google transport");
+            mGoogleTransport = IBackupTransport.Stub.asInterface(service);
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG) Log.v(TAG, "Disconnected from Google transport");
+            mGoogleTransport = null;
+        }
+    };
+
     // ----- Run the actual backup process asynchronously -----
 
     private class BackupHandler extends Handler {
@@ -197,8 +278,21 @@ class BackupManagerService extends IBackupManager.Stub {
 
             switch (msg.what) {
             case MSG_RUN_BACKUP:
+            {
+                IBackupTransport transport = getTransport(mTransportId);
+                if (transport == null) {
+                    Log.v(TAG, "Backup requested but no transport available");
+                    break;
+                }
+
                 // snapshot the pending-backup set and work on that
+                File oldJournal = mJournal;
                 synchronized (mQueueLock) {
+                    if (mPendingBackups.size() == 0) {
+                        Log.v(TAG, "Backup requested but nothing pending");
+                        break;
+                    }
+
                     if (mBackupQueue == null) {
                         mBackupQueue = new ArrayList<BackupRequest>();
                         for (BackupRequest b: mPendingBackups.values()) {
@@ -206,12 +300,27 @@ class BackupManagerService extends IBackupManager.Stub {
                         }
                         mPendingBackups = new HashMap<ApplicationInfo,BackupRequest>();
                     }
-                    // !!! TODO: start a new backup-queue journal file too
-                    // WARNING: If we crash after this line, anything in mPendingBackups will
-                    // be lost.  FIX THIS.
+
+                    // Start a new backup-queue journal file too
+                    if (mJournalStream != null) {
+                        try {
+                            mJournalStream.close();
+                        } catch (IOException e) {
+                            // don't need to do anything
+                        }
+                        makeJournalLocked();
+                    }
+
+                    // At this point, we have started a new journal file, and the old
+                    // file identity is being passed to the backup processing thread.
+                    // When it completes successfully, that old journal file will be
+                    // deleted.  If we crash prior to that, the old journal is parsed
+                    // at next boot and the journaled requests fulfilled.
                 }
-                (new PerformBackupThread(mTransportId, mBackupQueue)).run();
+
+                (new PerformBackupThread(transport, mBackupQueue, oldJournal)).start();
                 break;
+            }
 
             case MSG_RUN_FULL_BACKUP:
                 break;
@@ -220,7 +329,7 @@ class BackupManagerService extends IBackupManager.Stub {
             {
                 int token = msg.arg1;
                 IBackupTransport transport = (IBackupTransport)msg.obj;
-                (new PerformRestoreThread(transport, token)).run();
+                (new PerformRestoreThread(transport, token)).start();
                 break;
             }
             }
@@ -322,7 +431,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
         return allApps;
     }
-    
+
     // Reset the given package's known backup participants.  Unlike add/remove, the update
     // action cannot be passed a null package name.
     void updatePackageParticipantsLocked(String packageName) {
@@ -338,25 +447,19 @@ class BackupManagerService extends IBackupManager.Stub {
         addPackageParticipantsLockedInner(packageName, allApps);
     }
 
-    // Instantiate the given transport
-    private IBackupTransport createTransport(int transportID) {
-        IBackupTransport transport = null;
+    // Return the given transport
+    private IBackupTransport getTransport(int transportID) {
         switch (transportID) {
         case BackupManager.TRANSPORT_LOCAL:
-            if (DEBUG) Log.v(TAG, "Initializing local transport");
-            transport = new LocalTransport(mContext);
-            break;
+            return mLocalTransport;
 
         case BackupManager.TRANSPORT_GOOGLE:
-            if (DEBUG) Log.v(TAG, "Initializing Google transport");
-            //!!! TODO: stand up the google backup transport for real here
-            transport = new GoogleTransport();
-            break;
+            return mGoogleTransport;
 
         default:
-            Log.e(TAG, "creating unknown transport " + transportID);
+            Log.e(TAG, "Asked for unknown transport " + transportID);
+            return null;
         }
-        return transport;
     }
 
     // fire off a backup agent, blocking until it attaches or times out
@@ -422,7 +525,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 throws android.os.RemoteException {
             synchronized(mClearDataLock) {
                 mClearingData = false;
-                notifyAll();
+                mClearDataLock.notifyAll();
             }
         }
     }
@@ -431,27 +534,24 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class PerformBackupThread extends Thread {
         private static final String TAG = "PerformBackupThread";
-        int mTransport;
+        IBackupTransport mTransport;
         ArrayList<BackupRequest> mQueue;
+        File mJournal;
 
-        public PerformBackupThread(int transportId, ArrayList<BackupRequest> queue) {
-            mTransport = transportId;
+        public PerformBackupThread(IBackupTransport transport, ArrayList<BackupRequest> queue,
+                File journal) {
+            mTransport = transport;
             mQueue = queue;
+            mJournal = journal;
         }
 
         @Override
         public void run() {
             if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
 
-            // stand up the current transport
-            IBackupTransport transport = createTransport(mTransport);
-            if (transport == null) {
-                return;
-            }
-
             // start up the transport
             try {
-                transport.startSession();
+                mTransport.startSession();
             } catch (Exception e) {
                 Log.e(TAG, "Error session transport");
                 e.printStackTrace();
@@ -459,14 +559,18 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             // The transport is up and running; now run all the backups in our queue
-            doQueuedBackups(transport);
+            doQueuedBackups(mTransport);
 
             // Finally, tear down the transport
             try {
-                transport.endSession();
+                mTransport.endSession();
             } catch (Exception e) {
                 Log.e(TAG, "Error ending transport");
                 e.printStackTrace();
+            }
+
+            if (!mJournal.delete()) {
+                Log.e(TAG, "Unable to remove backup journal file " + mJournal.getAbsolutePath());
             }
         }
 
@@ -769,8 +873,26 @@ class BackupManagerService extends IBackupManager.Stub {
         // a backup pass for each of them.
 
         Log.d(TAG, "dataChanged packageName=" + packageName);
-        
-        HashSet<ApplicationInfo> targets = mBackupParticipants.get(Binder.getCallingUid());
+
+        // If the caller does not hold the BACKUP permission, it can only request a
+        // backup of its own data.
+        HashSet<ApplicationInfo> targets;
+        if ((mContext.checkPermission("android.permission.BACKUP", Binder.getCallingPid(),
+                Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
+            targets = mBackupParticipants.get(Binder.getCallingUid());
+        } else {
+            // a caller with full permission can ask to back up any participating app
+            // !!! TODO: allow backup of ANY app?
+            if (DEBUG) Log.v(TAG, "Privileged caller, allowing backup of other apps");
+            targets = new HashSet<ApplicationInfo>();
+            int N = mBackupParticipants.size();
+            for (int i = 0; i < N; i++) {
+                HashSet<ApplicationInfo> s = mBackupParticipants.valueAt(i);
+                if (s != null) {
+                    targets.addAll(s);
+                }
+            }
+        }
         if (targets != null) {
             synchronized (mQueueLock) {
                 // Note that this client has made data changes that need to be backed up
@@ -782,7 +904,9 @@ class BackupManagerService extends IBackupManager.Stub {
                         // one already there, then overwrite it, but no harm done.
                         BackupRequest req = new BackupRequest(app, false);
                         mPendingBackups.put(app, req);
-                        // !!! TODO: write to the pending-backup journal file in case of crash
+
+                        // Journal this request in case of crash
+                        writeToJournalLocked(packageName);
                     }
                 }
 
@@ -804,22 +928,34 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    // Schedule a backup pass for a given package.  This method will schedule a
-    // full backup even for apps that do not declare an android:backupAgent, so
-    // use with care.
-    public void scheduleFullBackup(String packageName) throws RemoteException {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "scheduleFullBackup");
-
-        if (DEBUG) Log.v(TAG, "Scheduling immediate full backup for " + packageName);
-        synchronized (mQueueLock) {
+    private void writeToJournalLocked(String str) {
+        if (mJournalStream != null) {
             try {
-                ApplicationInfo app = mPackageManager.getApplicationInfo(packageName, 0);
-                mPendingBackups.put(app, new BackupRequest(app, true));
-                mBackupHandler.sendEmptyMessage(MSG_RUN_FULL_BACKUP);
-            } catch (NameNotFoundException e) {
-                Log.w(TAG, "Could not find app for " + packageName + " to schedule full backup");
+                mJournalStream.writeUTF(str);
+            } catch (IOException e) {
+                Log.e(TAG, "Error writing to backup journal");
+                mJournalStream = null;
+                mJournal = null;
             }
         }
+    }
+
+    // Run a backup pass immediately for any applications that have declared
+    // that they have pending updates.
+    public void backupNow() throws RemoteException {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "tryBackupNow");
+
+        if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
+        synchronized (mQueueLock) {
+            mBackupHandler.removeMessages(MSG_RUN_BACKUP);
+            mBackupHandler.sendEmptyMessage(MSG_RUN_BACKUP);
+        }
+    }
+
+    // Report the currently active transport
+    public int getCurrentTransport() {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
+        return mTransportId;
     }
 
     // Select which transport to use for the next backup operation
@@ -868,17 +1004,27 @@ class BackupManagerService extends IBackupManager.Stub {
     // Hand off a restore session
     public IRestoreSession beginRestoreSession(int transportID) {
         mContext.enforceCallingPermission("android.permission.BACKUP", "beginRestoreSession");
-        return null;
+
+        synchronized(this) {
+            if (mActiveRestoreSession != null) {
+                Log.d(TAG, "Restore session requested but one already active");
+                return null;
+            }
+            mActiveRestoreSession = new RestoreSession(transportID);
+        }
+        return mActiveRestoreSession;
     }
 
     // ----- Restore session -----
 
     class RestoreSession extends IRestoreSession.Stub {
+        private static final String TAG = "RestoreSession";
+
         private IBackupTransport mRestoreTransport = null;
         RestoreSet[] mRestoreSets = null;
 
         RestoreSession(int transportID) {
-            mRestoreTransport = createTransport(transportID);
+            mRestoreTransport = getTransport(transportID);
         }
 
         // --- Binder interface ---
@@ -886,11 +1032,17 @@ class BackupManagerService extends IBackupManager.Stub {
             mContext.enforceCallingPermission("android.permission.BACKUP",
                     "getAvailableRestoreSets");
 
+            try {
             synchronized(this) {
                 if (mRestoreSets == null) {
                     mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
                 }
                 return mRestoreSets;
+            }
+            } catch (RuntimeException e) {
+                Log.d(TAG, "getAvailableRestoreSets exception");
+                e.printStackTrace();
+                throw e;
             }
         }
 
@@ -907,6 +1059,8 @@ class BackupManagerService extends IBackupManager.Stub {
                         return 0;
                     }
                 }
+            } else {
+                if (DEBUG) Log.v(TAG, "No current restore set, not doing restore");
             }
             return -1;
         }
@@ -917,6 +1071,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
             mRestoreTransport.endSession();
             mRestoreTransport = null;
+            synchronized(BackupManagerService.this) {
+                if (BackupManagerService.this.mActiveRestoreSession == this) {
+                    BackupManagerService.this.mActiveRestoreSession = null;
+                } else {
+                    Log.e(TAG, "ending non-current restore session");
+                }
+            }
         }
     }
 

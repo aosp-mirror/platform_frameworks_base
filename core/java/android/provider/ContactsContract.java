@@ -171,6 +171,14 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_SUMMARY_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "aggregates_summary");
+        /**
+         * The content:// style URI used for "type-to-filter" functionality on the
+         * {@link CONTENT_SUMMARY_URI} URI. The filter string will be used to match
+         * various parts of the aggregate name. The filter argument should be passed
+         * as an additional path segment after this URI.
+         */
+        public static final Uri CONTENT_SUMMARY_FILTER_URI = Uri.withAppendedPath(
+                CONTENT_SUMMARY_URI, "filter");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
@@ -676,6 +684,29 @@ public final class ContactsContract {
             /** Mime-type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone";
 
+            /**
+             * The MIME type of {@link #CONTENT_URI} providing a directory of
+             * phones.
+             */
+            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/phone";
+
+            /**
+             * The content:// style URI for all data records of the
+             * {@link Phone.CONTENT_ITEM_TYPE} mimetype, combined with the associated contact
+             * and aggregate data.
+             */
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
+                    "phones");
+
+            /**
+             * The content:// style URI for filtering data records of the
+             * {@link Phone.CONTENT_ITEM_TYPE} mimetype, combined with the associated contact
+             * and aggregate data. The filter argument should be passed
+             * as an additional path segment after this URI.
+             */
+            public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
+                    "filter");
+
             public static final int TYPE_HOME = 1;
             public static final int TYPE_MOBILE = 2;
             public static final int TYPE_WORK = 3;
@@ -713,6 +744,20 @@ public final class ContactsContract {
 
             /** Mime-type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/postal-address";
+
+            /**
+             * The MIME type of {@link #CONTENT_URI} providing a directory of
+             * postal addresses.
+             */
+            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/postal-address";
+
+            /**
+             * The content:// style URI for all data records of the
+             * {@link Postal.CONTENT_ITEM_TYPE} mimetype, combined with the associated contact
+             * and aggregate data.
+             */
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
+                    "postals");
 
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
@@ -903,7 +948,8 @@ public final class ContactsContract {
 
     /**
      * Constants for the contact aggregation exceptions table, which contains
-     * aggregation rules overriding those used by automatic aggregation.
+     * aggregation rules overriding those used by automatic aggregation.  This type only
+     * supports query and update. Neither insert nor delete are supported.
      */
     public static final class AggregationExceptions implements BaseColumns {
         /**
@@ -929,26 +975,39 @@ public final class ContactsContract {
                 "vnd.android.cursor.item/aggregation_exception";
 
         /**
-         * The type of exception: {@link #TYPE_NEVER_MATCH} or {@link #TYPE_ALWAYS_MATCH}.
+         * The type of exception: {@link #TYPE_KEEP_IN}, {@link #TYPE_KEEP_OUT} or
+         * {@link #TYPE_AUTOMATIC}.
          *
          * <P>Type: INTEGER</P>
          */
         public static final String TYPE = "type";
 
-        public static final int TYPE_NEVER_MATCH = 0;
-        public static final int TYPE_ALWAYS_MATCH = 1;
-
         /**
-         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of one of
-         * the contacts that the rule applies to.
+         * Allows the provider to automatically decide whether the aggregate should include
+         * a particular contact or not.
          */
-        public static final String CONTACT_ID1 = "contact_id1";
+        public static final int TYPE_AUTOMATIC = 0;
 
         /**
-         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the other
+         * Makes sure that the specified contact is included in the specified aggregate.
+         */
+        public static final int TYPE_KEEP_IN = 1;
+
+        /**
+         * Makes sure that the specified contact is NOT included in the specified aggregate.
+         */
+        public static final int TYPE_KEEP_OUT = 2;
+
+        /**
+         * A reference to the {@link Aggregates#_ID} of the aggregate that the rule applies to.
+         */
+        public static final String AGGREGATE_ID = "aggregate_id";
+
+        /**
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the
          * contact that the rule applies to.
          */
-        public static final String CONTACT_ID2 = "contact_id2";
+        public static final String CONTACT_ID = "contact_id";
     }
 
     private interface RestrictionExceptionsColumns {

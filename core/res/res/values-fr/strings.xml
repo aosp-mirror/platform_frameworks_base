@@ -21,6 +21,7 @@
     <string name="gigabyteShort">"Go"</string>
     <string name="terabyteShort">"To"</string>
     <string name="petabyteShort">"Po"</string>
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="KB">%2$s</xliff:g></string>
     <string name="untitled">"&lt;sans titre&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(Aucun numéro de téléphone)"</string>
@@ -161,14 +162,10 @@
     <string name="permdesc_changeConfiguration">"Permet à une application de modifier la configuration actuelle (par ex. : la taille de la police générale ou des paramètres régionaux)."</string>
     <string name="permlab_restartPackages">"Démarrage d\'autres applications"</string>
     <string name="permdesc_restartPackages">"Permet à une application de forcer le lancement d\'autres applications."</string>
-    <string name="permlab_setProcessForeground">"Non-possibilité d\'interruption"</string>
-    <string name="permdesc_setProcessForeground">"Permet à une application d\'exécuter tout processus au premier plan afin qu\'il ne puisse pas être interrompu. Les applications normales ne devraient jamais nécessiter cette fonctionnalité."</string>
     <string name="permlab_forceBack">"Fermeture forcée de l\'application"</string>
     <string name="permdesc_forceBack">"Permet à une application de forcer une autre application exécutée au premier plan à se fermer et à passer en arrière-plan. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_dump">"Vérification de l\'état interne du système"</string>
     <string name="permdesc_dump">"Permet à l\'application de récupérer l\'état interne du système. Des applications malveillantes peuvent obtenir de nombreuses informations personnelles et sécurisées auxquelles elles ne devraient pas avoir accès."</string>
-    <string name="permlab_addSystemService">"Éditer des services à faible niveau"</string>
-    <string name="permdesc_addSystemService">"Permet à l\'application de publier ses propres services de système de niveau inférieur. Des applications malveillantes peuvent prendre le contrôle du système et subtiliser ou endommager ses données."</string>
     <string name="permlab_runSetActivityWatcher">"Contrôle du lancement des applications"</string>
     <string name="permdesc_runSetActivityWatcher">"Permet à une application de suivre et de contrôler la façon dont le système lance des activités. Des applications malveillantes peuvent entièrement déstabiliser le système. Cette autorisation est uniquement nécessaire au développement et non pour l\'utilisation normale du téléphone."</string>
     <string name="permlab_broadcastPackageRemoved">"Envoyer une diffusion sans paquet"</string>
@@ -181,8 +178,6 @@
     <string name="permdesc_setProcessLimit">"Permet à une application de contrôler le nombre de processus maximal exécutés en même temps. Les applications normales n\'ont jamais recours à cette fonctionnalité."</string>
     <string name="permlab_setAlwaysFinish">"Fermeture de toutes les applications en tâche de fond"</string>
     <string name="permdesc_setAlwaysFinish">"Permet à une application de vérifier si des activités sont systématiquement interrompues lorsqu\'elles sont placées en tâche de fond. Cette fonctionnalité n\'est jamais utilisée par les applications normales."</string>
-    <string name="permlab_fotaUpdate">"Installation des mises à jour du système"</string>
-    <string name="permdesc_fotaUpdate">"Permet à une application de recevoir des notifications sur des mises à jour système en cours et de lancer leur installation. Des applications malveillantes peuvent utiliser cette fonctionnalité pour endommager le système avec des mises à jour non autorisées ou interférer avec le processus de mise à jour."</string>
     <string name="permlab_batteryStats">"Modification des statistiques de la batterie"</string>
     <string name="permdesc_batteryStats">"Autoriser la modification des statistiques de la batterie. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
     <string name="permlab_internalSystemWindow">"Affichage de fenêtres non autorisées"</string>

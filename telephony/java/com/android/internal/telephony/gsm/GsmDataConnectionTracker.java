@@ -588,7 +588,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 waitingApns = buildWaitingApns();
                 if (waitingApns.isEmpty()) {
                     if (DBG) log("No APN found");
-                    notifyNoData(PdpConnection.FailCause.BAD_APN);
+                    notifyNoData(PdpConnection.FailCause.MISSING_UKNOWN_APN);
                     return false;
                 } else {
                     log ("Create from allApns : " + apnListToString(allApns));
@@ -636,6 +636,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             mReconnectIntent = null;
         }
 
+        setState(State.DISCONNECTING);
+
         for (DataConnection conn : pdpList) {
             PdpConnection pdp = (PdpConnection) conn;
             if (tearDown) {
@@ -647,25 +649,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
         stopNetStatPoll();
 
-        /*
-         * If we've been asked to tear down the connection,
-         * set the state to DISCONNECTING. However, there's
-         * a race that can occur if for some reason we were
-         * already in the IDLE state. In that case, the call
-         * to pdp.disconnect() above will immediately post
-         * a message to the handler thread that the disconnect
-         * is done, and if the handler runs before the code
-         * below does, the handler will have set the state to
-         * IDLE before the code below runs. If we didn't check
-         * for that, future calls to trySetupData would fail,
-         * and we would never get out of the DISCONNECTING state.
-         */
         if (!tearDown) {
             setState(State.IDLE);
             phone.notifyDataConnection(reason);
             mActiveApn = null;
-        } else if (state != State.IDLE) {
-            setState(State.DISCONNECTING);
         }
     }
 
@@ -813,6 +800,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (state != State.DISCONNECTING) {
             cleanUpConnection(isConnected, Phone.REASON_APN_CHANGED);
             if (!isConnected) {
+                // reset reconnect timer
+                nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
                 trySetupData(Phone.REASON_APN_CHANGED);
             }
         }
@@ -1326,13 +1315,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             cause = (PdpConnection.FailCause) (ar.result);
             if(DBG) log("PDP setup failed " + cause);
                     // Log this failure to the Event Logs.
-            if (cause == PdpConnection.FailCause.BAD_APN ||
-                    cause == PdpConnection.FailCause.BAD_PAP_SECRET ||
-                    cause == PdpConnection.FailCause.BARRED ||
-                    cause == PdpConnection.FailCause.RADIO_ERROR_RETRY ||
-                    cause == PdpConnection.FailCause.SUSPENED_TEMPORARY ||
-                    cause == PdpConnection.FailCause.UNKNOWN ||
-                    cause == PdpConnection.FailCause.USER_AUTHENTICATION) {
+            if (cause.isEventLoggable()) {
                 int cid = -1;
                 GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
                 if (loc != null) cid = loc.getCid();
@@ -1346,23 +1329,20 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // No try for permanent failure
             if (cause.isPermanentFail()) {
                 notifyNoData(cause);
+                return;
             }
 
-            if (tryNextApn(cause)) {
-                waitingApns.remove(0);
-                if (waitingApns.isEmpty()) {
-                    // No more to try, start delayed retry
-                    startDelayedRetry(cause, reason);
-                } else {
-                    // we still have more apns to try
-                    setState(State.SCANNING);
-                    // Wait a bit before trying the next APN, so that
-                    // we're not tying up the RIL command channel
-                    sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
-                            RECONNECT_DELAY_INITIAL_MILLIS);
-                }
-            } else {
+            waitingApns.remove(0);
+            if (waitingApns.isEmpty()) {
+                // No more to try, start delayed retry
                 startDelayedRetry(cause, reason);
+            } else {
+                // we still have more apns to try
+                setState(State.SCANNING);
+                // Wait a bit before trying the next APN, so that
+                // we're not tying up the RIL command channel
+                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
+                        RECONNECT_DELAY_INITIAL_MILLIS);
             }
         }
     }
@@ -1406,6 +1386,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 resetPollStats();
             }
         } else {
+            // reset reconnect timer
+            nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED);
         }
@@ -1413,14 +1395,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     protected void onCleanUpConnection(boolean tearDown, String reason) {
         cleanUpConnection(tearDown, reason);
-    }
-
-    private boolean tryNextApn(FailCause cause) {
-        return (cause != FailCause.RADIO_NOT_AVAILABLE)
-                && (cause != FailCause.RADIO_OFF)
-                && (cause != FailCause.RADIO_ERROR_RETRY)
-                && (cause != FailCause.NO_SIGNAL)
-                && (cause != FailCause.SIM_LOCKED);
     }
 
     private int getRestoreDefaultApnDelay() {
@@ -1469,7 +1443,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (allApns.isEmpty()) {
             if (DBG) log("No APN found for carrier: " + operator);
             preferredApn = null;
-            notifyNoData(PdpConnection.FailCause.BAD_APN);
+            notifyNoData(PdpConnection.FailCause.MISSING_UKNOWN_APN);
         } else {
             preferredApn = getPreferredApn();
             Log.d(LOG_TAG, "Get PreferredAPN");

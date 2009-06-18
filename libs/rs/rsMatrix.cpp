@@ -136,4 +136,26 @@ void Matrix::loadMultiply(const Matrix *lhs, const Matrix *rhs)
     }
 }
 
+void Matrix::loadOrtho(float l, float r, float b, float t, float n, float f) {
+    loadIdentity();
+    m[0] = 2 / (r - l);
+    m[5] = 2 / (t - b);
+    m[10]= -2 / (f - n);
+    m[12]= -(r + l) / (r - l);
+    m[13]= -(t + b) / (t - b);
+    m[14]= -(f + n) / (f - n);
+}
+
+void Matrix::loadFrustum(float l, float r, float b, float t, float n, float f) {
+    loadIdentity();
+    m[0] = 2 * n / (r - l);
+    m[5] = 2 * n / (t - b);
+    m[8] = (r + l) / (r - l);
+    m[9] = (t + b) / (t - b);
+    m[10]= -(f + n) / (f - n);
+    m[11]= -1;
+    m[14]= -2*f*n / (f - n);
+    m[15]= 0;
+}
+
 

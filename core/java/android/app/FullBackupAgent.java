@@ -1,5 +1,6 @@
 package android.app;
 
+import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
 import android.backup.FileBackupHelper;
 import android.os.ParcelFileDescriptor;
@@ -47,12 +48,11 @@ public class FullBackupAgent extends BackupAgent {
         }
 
         // That's the file set; now back it all up
-        FileBackupHelper.performBackup(this, oldState, data, newState,
-                (String[]) allFiles.toArray());
+        FileBackupHelper helper = new FileBackupHelper(this);
+        helper.performBackup(oldState, data, newState, (String[])allFiles.toArray());
     }
 
     @Override
-    public void onRestore(ParcelFileDescriptor data, ParcelFileDescriptor newState) {
+    public void onRestore(BackupDataInput data, ParcelFileDescriptor newState) {
     }
-
 }

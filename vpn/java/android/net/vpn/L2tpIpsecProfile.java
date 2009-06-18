@@ -22,7 +22,7 @@ import android.os.Parcel;
  * The profile for L2TP-over-IPSec type of VPN.
  * {@hide}
  */
-public class L2tpIpsecProfile extends SingleServerProfile {
+public class L2tpIpsecProfile extends VpnProfile {
     private static final long serialVersionUID = 1L;
 
     private String mUserCertificate;

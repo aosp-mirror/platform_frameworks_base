@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 import time
+from Numeric import *
 
 TEST_LIST_FILE = "/sdcard/android/reliability_tests_list.txt"
 TEST_STATUS_FILE = "/sdcard/android/reliability_running_test.txt"
@@ -75,21 +76,28 @@ def ProcessPageLoadTime(raw_log):
       logging.info("Line has more than one '|': " + line)
       continue
     if pair[0] not in load_times:
-      load_times[pair[0]] = [0, 0]
+      load_times[pair[0]] = []
     try:
       pair[1] = int(pair[1])
     except ValueError:
       logging.info("Lins has non-numeric load time: " + line)
       continue
-    load_times[pair[0]][0] += pair[1]
-    load_times[pair[0]][1] += 1
+    load_times[pair[0]].append(pair[1])
 
   log_handle.close()
 
   # rewrite the average time to file
   log_handle = open(raw_log, "w")
   for url, times in load_times.iteritems():
-    log_handle.write("%s|%f\n" % (url, float(times[0]) / times[1]))
+    # calculate std
+    arr = array(times)
+    avg = average(arr)
+    d = arr - avg
+    std = sqrt(sum(d * d) / len(arr))
+    output = ("%-70s%-10d%-10d%-12.2f%-12.2f%s\n" %
+              (url, min(arr), max(arr), avg, std,
+               array2string(arr)))
+    log_handle.write(output)
   log_handle.close()
 
 
@@ -156,6 +164,7 @@ def main(options, args):
   # clean up previous results
   RemoveDeviceFile(adb_cmd, TEST_STATUS_FILE)
   RemoveDeviceFile(adb_cmd, TEST_TIMEOUT_FILE)
+  RemoveDeviceFile(adb_cmd, TEST_LOAD_TIME_FILE)
 
   logging.info("Running the test ...")
 

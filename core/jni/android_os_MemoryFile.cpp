@@ -118,7 +118,7 @@ static void android_os_MemoryFile_pin(JNIEnv* env, jobject clazz, jobject fileDe
     }
 }
 
-static jboolean android_os_MemoryFile_is_ashmem_region(JNIEnv* env, jobject clazz,
+static jint android_os_MemoryFile_get_mapped_size(JNIEnv* env, jobject clazz,
         jobject fileDescriptor) {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     // Use ASHMEM_GET_SIZE to find out if the fd refers to an ashmem region.
@@ -129,13 +129,13 @@ static jboolean android_os_MemoryFile_is_ashmem_region(JNIEnv* env, jobject claz
         if (errno == ENOTTY) {
             // ENOTTY means that the ioctl does not apply to this object,
             // i.e., it is not an ashmem region.
-            return JNI_FALSE;
+            return (jint) -1;
         }
         // Some other error, throw exception
         jniThrowIOException(env, errno);
-        return JNI_FALSE;
+        return (jint) -1;
     }
-    return JNI_TRUE;
+    return (jint) result;
 }
 
 static const JNINativeMethod methods[] = {
@@ -146,8 +146,8 @@ static const JNINativeMethod methods[] = {
     {"native_read",  "(Ljava/io/FileDescriptor;I[BIIIZ)I", (void*)android_os_MemoryFile_read},
     {"native_write", "(Ljava/io/FileDescriptor;I[BIIIZ)V", (void*)android_os_MemoryFile_write},
     {"native_pin",   "(Ljava/io/FileDescriptor;Z)V", (void*)android_os_MemoryFile_pin},
-    {"native_is_ashmem_region", "(Ljava/io/FileDescriptor;)Z",
-            (void*)android_os_MemoryFile_is_ashmem_region}
+    {"native_get_mapped_size", "(Ljava/io/FileDescriptor;)I",
+            (void*)android_os_MemoryFile_get_mapped_size}
 };
 
 static const char* const kClassPathName = "android/os/MemoryFile";

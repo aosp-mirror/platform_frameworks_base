@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.os.RuntimeInit;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
 import com.android.server.ProcessStats;
@@ -35,8 +34,6 @@ import android.app.Dialog;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
-import android.app.IIntentReceiver;
-import android.app.IIntentSender;
 import android.app.IServiceConnection;
 import android.app.IThumbnailReceiver;
 import android.app.Instrumentation;
@@ -49,6 +46,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -62,7 +61,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -89,7 +87,6 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.util.PrintWriterPrinter;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -128,6 +125,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_OOM_ADJ = localLOGV || false;
     static final boolean DEBUG_TRANSITION = localLOGV || false;
     static final boolean DEBUG_BROADCAST = localLOGV || false;
+    static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
     static final boolean DEBUG_SERVICE = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
@@ -2761,7 +2759,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // instance of the activity so a new fresh one can be started.
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE) {
                     if (!ret.finishing) {
-                        int index = indexOfTokenLocked(ret, false);
+                        int index = indexOfTokenLocked(ret);
                         if (index >= 0) {
                             finishActivityLocked(ret, 0, Activity.RESULT_CANCELED,
                                     null, "clear");
@@ -2854,7 +2852,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord sourceRecord = null;
         HistoryRecord resultRecord = null;
         if (resultTo != null) {
-            int index = indexOfTokenLocked(resultTo, false);
+            int index = indexOfTokenLocked(resultTo);
             if (DEBUG_RESULTS) Log.v(
                 TAG, "Sending result to " + resultTo + " (index " + index + ")");
             if (index >= 0) {
@@ -3420,7 +3418,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized (this) {
-            int index = indexOfTokenLocked(callingActivity, false);
+            int index = indexOfTokenLocked(callingActivity);
             if (index < 0) {
                 return false;
             }
@@ -3570,7 +3568,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public void setRequestedOrientation(IBinder token,
             int requestedOrientation) {
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -3592,7 +3590,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public int getRequestedOrientation(IBinder token) {
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
@@ -3648,7 +3646,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             TAG, "Finishing activity: token=" + token
             + ", result=" + resultCode + ", data=" + resultData);
 
-        int index = indexOfTokenLocked(token, false);
+        int index = indexOfTokenLocked(token);
         if (index < 0) {
             return false;
         }
@@ -3772,7 +3770,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final HistoryRecord finishCurrentActivityLocked(HistoryRecord r,
             int mode) {
-        final int index = indexOfTokenLocked(r, false);
+        final int index = indexOfTokenLocked(r);
         if (index < 0) {
             return null;
         }
@@ -3897,7 +3895,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public final void finishSubActivity(IBinder token, String resultWho,
             int requestCode) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -4447,7 +4445,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized(this) {
-            int index = indexOfTokenLocked(token, true);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -5012,7 +5010,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             // Get the activity record.
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
 
@@ -5166,7 +5164,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord r = null;
 
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (HistoryRecord)mHistory.get(index);
                 if (!timeout) {
@@ -5197,7 +5195,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         final long origId = Binder.clearCallingIdentity();
 
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (HistoryRecord)mHistory.get(index);
                 r.thumbnail = thumbnail;
@@ -5227,7 +5225,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (this) {
             mHandler.removeMessages(DESTROY_TIMEOUT_MSG, token);
             
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 if (r.state == ActivityState.DESTROYING) {
@@ -5254,7 +5252,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private HistoryRecord getCallingRecordLocked(IBinder token) {
-        int index = indexOfTokenLocked(token, true);
+        int index = indexOfTokenLocked(token);
         if (index >= 0) {
             HistoryRecord r = (HistoryRecord)mHistory.get(index);
             if (r != null) {
@@ -5266,7 +5264,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public ComponentName getActivityClassForToken(IBinder token) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 return r.intent.getComponent();
@@ -5277,7 +5275,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public String getPackageForToken(IBinder token) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 return r.packageName;
@@ -5316,7 +5314,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             HistoryRecord activity = null;
             if (type == INTENT_SENDER_ACTIVITY_RESULT) {
-                int index = indexOfTokenLocked(token, false);
+                int index = indexOfTokenLocked(token);
                 if (index < 0) {
                     return null;
                 }
@@ -6837,7 +6835,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         synchronized(this) {
             if (r == null) {
-                int index = indexOfTokenLocked(token, false);
+                int index = indexOfTokenLocked(token);
                 if (index < 0) {
                     return;
                 }
@@ -7906,7 +7904,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             // is there an Activity in this package that handles ACTION_APP_ERROR?
             Intent intent = new Intent(Intent.ACTION_APP_ERROR);
-            ResolveInfo info = pm.resolveIntentForPackage(intent, null, 0, installerPackageName);
+            intent.setPackage(installerPackageName);
+            ResolveInfo info = pm.resolveIntent(intent, null, 0);
             if (info == null || info.activityInfo == null) {
                 return null;
             }
@@ -8220,12 +8219,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 report.time = crashData.getTime();
                 report.crashInfo.stackTrace = throwData.toString();
 
-                // extract the source of the exception, useful for report
-                // clustering
+                // Extract the source of the exception, useful for report
+                // clustering. Also extract the "deepest" non-null exception
+                // message.
+                String exceptionMessage = throwData.getMessage();
                 while (throwData.getCause() != null) {
                     throwData = throwData.getCause();
+                    String msg = throwData.getMessage();
+                    if (msg != null && msg.length() > 0) {
+                       exceptionMessage = msg;
+                    }
                 }
                 StackTraceElementData trace = throwData.getStackTrace()[0];
+                report.crashInfo.exceptionMessage = exceptionMessage;
                 report.crashInfo.exceptionClassName = throwData.getType();
                 report.crashInfo.throwFileName = trace.getFileName();
                 report.crashInfo.throwClassName = trace.getClassName();
@@ -8943,7 +8949,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return false;
     }
 
-    private final int indexOfTokenLocked(IBinder token, boolean required) {
+    private final int indexOfTokenLocked(IBinder token) {
         int count = mHistory.size();
 
         // convert the token to an entry in the history.
@@ -8957,17 +8963,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 break;
             }
         }
-        if (index < 0 && required) {
-            RuntimeInit.crash(TAG, new InvalidTokenException(token));
-        }
 
         return index;
-    }
-
-    static class InvalidTokenException extends Exception {
-        InvalidTokenException(IBinder token) {
-            super("Bad activity token: " + token);
-        }
     }
 
     private final void killServicesLocked(ProcessRecord app,
@@ -9994,7 +9991,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             HistoryRecord activity = null;
             if (token != null) {
-                int aindex = indexOfTokenLocked(token, false);
+                int aindex = indexOfTokenLocked(token);
                 if (aindex < 0) {
                     Log.w(TAG, "Binding with unknown activity: " + token);
                     return 0;
@@ -10606,7 +10603,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             boolean ordered, boolean sticky, int callingPid, int callingUid) {
         intent = new Intent(intent);
 
-        if (DEBUG_BROADCAST) Log.v(
+        if (DEBUG_BROADCAST_LIGHT) Log.v(
             TAG, (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
             + " ordered=" + ordered);
         if ((resultTo != null) && !ordered) {
@@ -11098,7 +11095,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         boolean started = false;
         try {
-            if (DEBUG_BROADCAST) Log.v(TAG,
+            if (DEBUG_BROADCAST_LIGHT) Log.v(TAG,
                     "Delivering to component " + r.curComponent
                     + ": " + r);
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
@@ -11168,12 +11165,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 r.curFilter = filter;
                 filter.receiverList.curBroadcast = r;
                 r.state = BroadcastRecord.CALL_IN_RECEIVE;
+                if (filter.receiverList.app != null) {
+                    // Bump hosting application to no longer be in background
+                    // scheduling class.  Note that we can't do that if there
+                    // isn't an app...  but we can only be in that case for
+                    // things that directly call the IActivityManager API, which
+                    // are already core system stuff so don't matter for this.
+                    r.curApp = filter.receiverList.app;
+                    filter.receiverList.app.curReceiver = r;
+                    updateOomAdjLocked();
+                }
             }
             try {
-                if (DEBUG_BROADCAST) {
+                if (DEBUG_BROADCAST_LIGHT) {
                     int seq = r.intent.getIntExtra("seq", -1);
-                    Log.i(TAG, "Sending broadcast " + r.intent.getAction() + " seq=" + seq
-                            + " app=" + filter.receiverList.app);
+                    Log.i(TAG, "Delivering to " + filter.receiverList.app
+                            + " (seq=" + seq + "): " + r);
                 }
                 performReceive(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode,
@@ -11187,6 +11194,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     r.receiver = null;
                     r.curFilter = null;
                     filter.receiverList.curBroadcast = null;
+                    if (filter.receiverList.app != null) {
+                        filter.receiverList.app.curReceiver = null;
+                    }
                 }
             }
         }
@@ -11210,6 +11220,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             while (mParallelBroadcasts.size() > 0) {
                 r = mParallelBroadcasts.remove(0);
                 final int N = r.receivers.size();
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing parallel broadcast "
+                        + r);
                 for (int i=0; i<N; i++) {
                     Object target = r.receivers.get(i);
                     if (DEBUG_BROADCAST)  Log.v(TAG,
@@ -11217,6 +11229,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + target + ": " + r);
                     deliverToRegisteredReceiver(r, (BroadcastFilter)target, false);
                 }
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Done with parallel broadcast "
+                        + r);
             }
 
             // Now take care of the next serialized one...
@@ -11242,10 +11256,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
 
+            boolean looped = false;
+            
             do {
                 if (mOrderedBroadcasts.size() == 0) {
                     // No more broadcasts pending, so all done!
                     scheduleAppGcsLocked();
+                    if (looped) {
+                        // If we had finished the last ordered broadcast, then
+                        // make sure all processes have correct oom and sched
+                        // adjustments.
+                        updateOomAdjLocked();
+                    }
                     return;
                 }
                 r = mOrderedBroadcasts.get(0);
@@ -11302,9 +11324,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (DEBUG_BROADCAST) Log.v(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");
                     mHandler.removeMessages(BROADCAST_TIMEOUT_MSG);
 
+                    if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Finished with ordered broadcast "
+                            + r);
+                    
                     // ... and on to the next...
                     mOrderedBroadcasts.remove(0);
                     r = null;
+                    looped = true;
                     continue;
                 }
             } while (r == null);
@@ -11318,6 +11344,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (recIdx == 0) {
                 r.dispatchTime = r.startTime;
 
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing ordered broadcast "
+                        + r);
                 if (DEBUG_BROADCAST) Log.v(TAG,
                         "Submitting BROADCAST_TIMEOUT_MSG for "
                         + (r.startTime + BROADCAST_TIMEOUT));

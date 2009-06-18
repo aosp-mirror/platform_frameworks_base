@@ -215,7 +215,7 @@ status_t CameraService::Client::unlock()
 {
     Mutex::Autolock _l(mLock);
     // allow anyone to use camera
-    LOGV("unlock (%p)", getCameraClient()->asBinder().get());
+    LOGD("unlock (%p)", getCameraClient()->asBinder().get());
     status_t result = checkPid();
     if (result == NO_ERROR) {
         mClientPid = 0;
@@ -230,7 +230,7 @@ status_t CameraService::Client::unlock()
 status_t CameraService::Client::connect(const sp<ICameraClient>& client)
 {
     // connect a new process to the camera
-    LOGV("connect (%p)", client->asBinder().get());
+    LOGD("connect (%p)", client->asBinder().get());
 
     // I hate this hack, but things get really ugly when the media recorder
     // service is handing back the camera to the app. The ICameraClient
@@ -257,7 +257,7 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client)
             mCameraClient = client;
             mClientPid = -1;
             mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
-            LOGV("connect new process (%d) to existing camera client", mClientPid);
+            LOGD("connect new process (%d) to existing camera client", mClientPid);
         }
 
     }
@@ -319,17 +319,17 @@ void CameraService::Client::disconnect()
             IPCThreadState::self()->getCallingPid());
     Mutex::Autolock lock(mLock);
     if (mClientPid <= 0) {
-        LOGV("camera is unlocked, don't tear down hardware");
+        LOGD("camera is unlocked, don't tear down hardware");
         return;
     }
     if (checkPid() != NO_ERROR) {
-        LOGV("Different client - don't disconnect");
+        LOGD("Different client - don't disconnect");
         return;
     }
 
     mCameraService->removeClient(mCameraClient);
     if (mHardware != 0) {
-        LOGV("hardware teardown");
+        LOGD("hardware teardown");
         // Before destroying mHardware, we must make sure it's in the
         // idle state.
         mHardware->stopPreview();

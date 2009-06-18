@@ -33,8 +33,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.RegisteredServicesCache;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -50,10 +48,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Sync;
 import android.provider.Settings;
-import android.provider.Sync.History;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Config;
@@ -77,8 +72,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.Observer;
-import java.util.Observable;
 import java.util.Set;
 
 /**
@@ -1435,7 +1428,7 @@ class SyncManager implements OnAccountsUpdatedListener {
                             // outstanding
                             if (mActiveSyncContext.mSyncAdapter != null) {
                                 try {
-                                    mActiveSyncContext.mSyncAdapter.cancelSync();
+                                    mActiveSyncContext.mSyncAdapter.cancelSync(mActiveSyncContext);
                                 } catch (RemoteException e) {
                                     // we don't need to retry this in this case
                                 }
@@ -1642,7 +1635,7 @@ class SyncManager implements OnAccountsUpdatedListener {
             // connect to the sync adapter
             SyncAdapterType syncAdapterType = new SyncAdapterType(syncOperation.authority,
                     syncOperation.account.mType);
-            RegisteredServicesCache.ServiceInfo syncAdapterInfo =
+            RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                     mSyncAdapters.getServiceInfo(syncAdapterType);
             if (syncAdapterInfo == null) {
                 if (Config.LOGD) {
@@ -1678,8 +1671,8 @@ class SyncManager implements OnAccountsUpdatedListener {
             mActiveSyncContext.mSyncAdapter = syncAdapter;
             final SyncOperation syncOperation = mActiveSyncContext.mSyncOperation;
             try {
-                syncAdapter.startSync(mActiveSyncContext, syncOperation.account,
-                        syncOperation.extras);
+                syncAdapter.startSync(mActiveSyncContext, syncOperation.authority,
+                        syncOperation.account, syncOperation.extras);
             } catch (RemoteException remoteExc) {
                 if (Config.LOGD) {
                     Log.d(TAG, "runStateIdle: caught a RemoteException, rescheduling", remoteExc);
@@ -1742,7 +1735,7 @@ class SyncManager implements OnAccountsUpdatedListener {
                 }
                 if (activeSyncContext.mSyncAdapter != null) {
                     try {
-                        activeSyncContext.mSyncAdapter.cancelSync();
+                        activeSyncContext.mSyncAdapter.cancelSync(activeSyncContext);
                     } catch (RemoteException e) {
                         // we don't need to retry this in this case
                     }

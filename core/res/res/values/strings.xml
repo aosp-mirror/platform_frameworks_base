@@ -30,6 +30,11 @@
     <string name="terabyteShort">TB</string>
     <!-- Suffix added to a number to signify size in petabytes. -->
     <string name="petabyteShort">PB</string>
+    <!-- Format string used to add a suffix like "KB" or "MB" to a number
+         to display a size in kilobytes, megabytes, or other size units.
+         Some languages (like French) will want to add a space between
+         the placeholders. -->
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g><xliff:g id="unit" example="KB">%2$s</xliff:g></string>
 
     <!-- Used in Contacts for a field that has no label and in Note Pad
          for a note with no name. -->
@@ -463,13 +468,6 @@
         forcibly restart other applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setProcessForeground">keep from being stopped</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setProcessForeground">Allows an application to make
-        any process run in the foreground, so it can\'t be killed.
-        Should never be needed for normal applications.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_forceBack">force application to close</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_forceBack">Allows an application to force any
@@ -483,13 +481,6 @@
         internal state of the system. Malicious applications may retrieve
         a wide variety of private and secure information that they should
         never normally need.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_addSystemService">publish low-level services</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_addSystemService">Allows application to publish
-        its own low-level system services. Malicious applications may hijack
-        the system, and steal or corrupt any data on it.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_shutdown">partial shutdown</string>
@@ -548,15 +539,6 @@
     <string name="permdesc_setAlwaysFinish">Allows an application
         to control whether activities are always finished as soon as they
         go to the background. Never needed for normal applications.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fotaUpdate">automatically install system updates</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fotaUpdate">Allows an application to receive
-        notifications about pending system updates and trigger their
-        installation. Malicious applications may use this to corrupt the system
-        with unauthorized updates, or generally interfere with the update
-        process.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_batteryStats">modify battery statistics</string>

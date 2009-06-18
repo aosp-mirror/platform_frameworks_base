@@ -3297,6 +3297,10 @@
     <declare-styleable name="AccountAuthenticator">
         <!-- the account type this authenticator handles. -->
         <attr name="accountType" format="string"/>
+        <!-- the user-visible name of the authenticator. -->
+        <attr name="label"/>
+        <!-- the icon of the authenticator. -->
+        <attr name="icon"/>
     </declare-styleable>
 
     <!-- =============================== -->

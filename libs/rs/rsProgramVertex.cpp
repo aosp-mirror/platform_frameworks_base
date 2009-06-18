@@ -25,12 +25,19 @@ ProgramVertex::ProgramVertex(Element *in, Element *out) :
     Program(in, out)
 {
     mTextureMatrixEnable = false;
-    mProjectionEnable = false;
-    mTransformEnable = false;
 }
 
 ProgramVertex::~ProgramVertex()
 {
+}
+
+static void logMatrix(const char *txt, const float *f)
+{
+    LOGE("Matrix %s, %p", txt, f);
+    LOGE("%6.2f, %6.2f, %6.2f, %6.2f", f[0], f[4], f[8], f[12]);
+    LOGE("%6.2f, %6.2f, %6.2f, %6.2f", f[1], f[5], f[9], f[13]);
+    LOGE("%6.2f, %6.2f, %6.2f, %6.2f", f[2], f[6], f[10], f[14]);
+    LOGE("%6.2f, %6.2f, %6.2f, %6.2f", f[3], f[7], f[11], f[15]);
 }
 
 void ProgramVertex::setupGL()
@@ -44,20 +51,13 @@ void ProgramVertex::setupGL()
         glLoadIdentity();
     }
 
+    //logMatrix("prog", &f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
+    //logMatrix("model", &f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
 
     glMatrixMode(GL_PROJECTION);
-    if (mProjectionEnable) {
-        //glLoadMatrixf(&f[OFFSET_PROJECTION]);
-    } else {
-    }
-
+    glLoadMatrixf(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
     glMatrixMode(GL_MODELVIEW);
-    if (mTransformEnable) {
-        glLoadMatrixf(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
-    } else {
-        glLoadIdentity();
-    }
-
+    glLoadMatrixf(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
 }
 
 void ProgramVertex::setConstantType(uint32_t slot, const Type *t)
@@ -81,6 +81,23 @@ ProgramVertexState::~ProgramVertexState()
     delete mPV;
 }
 
+void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
+{
+    ProgramVertex *pv = new ProgramVertex(NULL, NULL);
+    Allocation *alloc = (Allocation *)
+        rsi_AllocationCreatePredefSized(rsc, RS_ELEMENT_USER_FLOAT, 48);
+    mDefaultAlloc.set(alloc);
+    mDefault.set(pv);
+
+    pv->bindAllocation(0, alloc);
+    
+    Matrix m;
+    m.loadOrtho(0,w, h,0, -1,1);
+    alloc->subData(RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0]);
+
+    m.loadIdentity();
+    alloc->subData(RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, 16, &m.m[0]);
+}
 
 
 namespace android {
@@ -111,19 +128,9 @@ void rsi_ProgramVertexSetType(Context *rsc, uint32_t slot, RsType constants)
     rsc->mStateVertex.mPV->setConstantType(slot, static_cast<const Type *>(constants));
 }
 
-void rsi_ProgramVertexSetCameraMode(Context *rsc, bool ortho)
-{
-    rsc->mStateVertex.mPV->setProjectionEnabled(!ortho);
-}
-
 void rsi_ProgramVertexSetTextureMatrixEnable(Context *rsc, bool enable)
 {
     rsc->mStateVertex.mPV->setTextureMatrixEnable(enable);
-}
-
-void rsi_ProgramVertexSetModelMatrixEnable(Context *rsc, bool enable)
-{
-    rsc->mStateVertex.mPV->setTransformEnable(enable);
 }
 
 

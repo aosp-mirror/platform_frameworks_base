@@ -21,6 +21,8 @@ import android.content.ContentProviderNative;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentSender;
+import android.content.IIntentReceiver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;

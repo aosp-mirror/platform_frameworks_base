@@ -320,7 +320,7 @@ public final class SearchableInfo implements Parcelable {
 
         // for now, implement some form of rules - minimal data
         if (mLabelId == 0) {
-            throw new IllegalArgumentException("No label.");
+            throw new IllegalArgumentException("Search label must be a resource reference.");
         }
     }
     
@@ -441,13 +441,17 @@ public final class SearchableInfo implements Parcelable {
         xml.close();
         
         if (DBG) {
-            Log.d(LOG_TAG, "Checked " + activityInfo.name
-                    + ",label=" + searchable.getLabelId()
-                    + ",icon=" + searchable.getIconId()
-                    + ",suggestAuthority=" + searchable.getSuggestAuthority()
-                    + ",target=" + searchable.getSearchActivity().getClassName()
-                    + ",global=" + searchable.shouldIncludeInGlobalSearch()
-                    + ",threshold=" + searchable.getSuggestThreshold());
+            if (searchable != null) {
+                Log.d(LOG_TAG, "Checked " + activityInfo.name
+                        + ",label=" + searchable.getLabelId()
+                        + ",icon=" + searchable.getIconId()
+                        + ",suggestAuthority=" + searchable.getSuggestAuthority()
+                        + ",target=" + searchable.getSearchActivity().getClassName()
+                        + ",global=" + searchable.shouldIncludeInGlobalSearch()
+                        + ",threshold=" + searchable.getSuggestThreshold());
+            } else {
+                Log.d(LOG_TAG, "Checked " + activityInfo.name + ", no searchable meta-data");
+            }
         }
         return searchable;
     }

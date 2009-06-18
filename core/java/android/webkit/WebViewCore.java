@@ -34,7 +34,6 @@ import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import junit.framework.Assert;
 
@@ -310,7 +309,7 @@ final class WebViewCore {
     // JNI methods
     //-------------------------------------------------------------------------
 
-    static native String nativeFindAddress(String addr);
+    static native String nativeFindAddress(String addr, boolean caseInsensitive);
 
     /**
      * Empty the picture set.
@@ -376,16 +375,14 @@ final class WebViewCore {
             String currentText, int keyCode, int keyValue, boolean down,
             boolean cap, boolean fn, boolean sym);
 
-    private native void nativeSetFocusControllerActive(boolean active);
+    private native void nativeSetFocusControllerInactive();
 
     private native void nativeSaveDocumentState(int frame);
 
-    private native void nativeMoveMouse(int framePtr, int nodePtr, int x,
-            int y);
+    private native void nativeMoveMouse(int framePtr, int x, int y);
 
     private native void nativeMoveMouseIfLatest(int moveGeneration,
-            int framePtr, int nodePtr, int x, int y,
-            boolean ignoreNullFocus);
+            int framePtr, int x, int y);
 
     private native String nativeRetrieveHref(int framePtr, int nodePtr);
 
@@ -513,20 +510,46 @@ final class WebViewCore {
         }
     }
 
+    static class BaseUrlData {
+        String mBaseUrl;
+        String mData;
+        String mMimeType;
+        String mEncoding;
+        String mFailUrl;
+    }
+
     static class CursorData {
         CursorData() {}
         CursorData(int frame, int node, int x, int y) {
             mFrame = frame;
-            mNode = node;
             mX = x;
             mY = y;
         }
         int mMoveGeneration;
         int mFrame;
-        int mNode;
         int mX;
         int mY;
-        boolean mIgnoreNullFocus;
+    }
+
+    static class JSInterfaceData {
+        Object mObject;
+        String mInterfaceName;
+    }
+
+    static class JSKeyData {
+        String mCurrentText;
+        KeyEvent mEvent;
+    }
+
+    static class PostUrlData {
+        String mUrl;
+        byte[] mPostData;
+    }
+
+    static class ReplaceTextData {
+        String mReplace;
+        int mNewStart;
+        int mNewEnd;
     }
 
     static class TouchUpData {
@@ -587,7 +610,7 @@ final class WebViewCore {
             "LOAD_DATA", // = 139;
             "TOUCH_UP", // = 140;
             "TOUCH_EVENT", // = 141;
-            "SET_ACTIVE", // = 142;
+            "SET_INACTIVE", // = 142;
             "ON_PAUSE",     // = 143
             "ON_RESUME",    // = 144
             "FREE_MEMORY",  // = 145
@@ -642,9 +665,10 @@ final class WebViewCore {
         // message used to pass UI touch events to WebCore
         static final int TOUCH_EVENT = 141;
 
-        // Used to tell the focus controller whether to draw the blinking cursor
-        // or not, based on whether the WebView has focus.
-        static final int SET_ACTIVE = 142;
+        // Used to tell the focus controller not to draw the blinking cursor,
+        // based on whether the WebView has focus and whether the WebView's
+        // cursor matches the webpage's focus.
+        static final int SET_INACTIVE = 142;
 
         // lifecycle activities for just this DOM (unlike pauseTimers, which
         // is global)
@@ -696,7 +720,7 @@ final class WebViewCore {
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
                         Log.v(LOGTAG, msg.what < LOAD_URL || msg.what
-                                > SET_ACTIVE ? Integer.toString(msg.what)
+                                > FREE_MEMORY ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what - LOAD_URL]);
                     }
                     switch (msg.what) {
@@ -717,15 +741,13 @@ final class WebViewCore {
                             break;
 
                         case POST_URL: {
-                            HashMap param = (HashMap) msg.obj;
-                            String url = (String) param.get("url");
-                            byte[] data = (byte[]) param.get("data");
-                            mBrowserFrame.postUrl(url, data);
+                            PostUrlData param = (PostUrlData) msg.obj;
+                            mBrowserFrame.postUrl(param.mUrl, param.mPostData);
                             break;
                         }
                         case LOAD_DATA:
-                            HashMap loadParams = (HashMap) msg.obj;
-                            String baseUrl = (String) loadParams.get("baseUrl");
+                            BaseUrlData loadParams = (BaseUrlData) msg.obj;
+                            String baseUrl = loadParams.mBaseUrl;
                             if (baseUrl != null) {
                                 int i = baseUrl.indexOf(':');
                                 if (i > 0) {
@@ -749,10 +771,10 @@ final class WebViewCore {
                                 }
                             }
                             mBrowserFrame.loadData(baseUrl,
-                                    (String) loadParams.get("data"),
-                                    (String) loadParams.get("mimeType"),
-                                    (String) loadParams.get("encoding"),
-                                    (String) loadParams.get("failUrl"));
+                                    loadParams.mData,
+                                    loadParams.mMimeType,
+                                    loadParams.mEncoding,
+                                    loadParams.mFailUrl);
                             break;
 
                         case STOP_LOADING:
@@ -792,7 +814,8 @@ final class WebViewCore {
                         case SET_SCROLL_OFFSET:
                             // note: these are in document coordinates
                             // (inv-zoom)
-                            nativeSetScrollOffset(msg.arg1, msg.arg2);
+                            Point pt = (Point) msg.obj;
+                            nativeSetScrollOffset(msg.arg1, pt.x, pt.y);
                             break;
 
                         case SET_GLOBAL_BOUNDS:
@@ -874,24 +897,19 @@ final class WebViewCore {
                             break;
 
                         case REPLACE_TEXT:
-                            HashMap jMap = (HashMap) msg.obj;
-                            String replace = (String) jMap.get("replace");
-                            int newStart =
-                                    ((Integer) jMap.get("start")).intValue();
-                            int newEnd =
-                                    ((Integer) jMap.get("end")).intValue();
-                            nativeReplaceTextfieldText(msg.arg1,
-                                    msg.arg2, replace, newStart, newEnd);
+                            ReplaceTextData rep = (ReplaceTextData) msg.obj;
+                            nativeReplaceTextfieldText(msg.arg1, msg.arg2,
+                                    rep.mReplace, rep.mNewStart, rep.mNewEnd);
                             break;
 
                         case PASS_TO_JS: {
-                            HashMap jsMap = (HashMap) msg.obj;
-                            KeyEvent evt = (KeyEvent) jsMap.get("event");
+                            JSKeyData jsData = (JSKeyData) msg.obj;
+                            KeyEvent evt = jsData.mEvent;
                             int keyCode = evt.getKeyCode();
                             int keyValue = evt.getUnicodeChar();
                             int generation = msg.arg1;
                             passToJs(generation,
-                                    (String) jsMap.get("currentText"),
+                                    jsData.mCurrentText,
                                     keyCode,
                                     keyValue,
                                     evt.isDown(),
@@ -929,17 +947,14 @@ final class WebViewCore {
                             break;
                         }
 
-                        case SET_ACTIVE:
-                            nativeSetFocusControllerActive(msg.arg1 == 1);
+                        case SET_INACTIVE:
+                            nativeSetFocusControllerInactive();
                             break;
 
                         case ADD_JS_INTERFACE:
-                            HashMap map = (HashMap) msg.obj;
-                            Object obj = map.get("object");
-                            String interfaceName = (String)
-                                    map.get("interfaceName");
-                            mBrowserFrame.addJavascriptInterface(obj,
-                                    interfaceName);
+                            JSInterfaceData jsData = (JSInterfaceData) msg.obj;
+                            mBrowserFrame.addJavascriptInterface(jsData.mObject,
+                                    jsData.mInterfaceName);
                             break;
 
                         case REQUEST_EXT_REPRESENTATION:
@@ -954,16 +969,14 @@ final class WebViewCore {
                         case SET_MOVE_MOUSE:
                             CursorData cursorData = (CursorData) msg.obj;
                             nativeMoveMouse(cursorData.mFrame,
-                                     cursorData.mNode, cursorData.mX,
-                                     cursorData.mY);
+                                     cursorData.mX, cursorData.mY);
                             break;
 
                         case SET_MOVE_MOUSE_IF_LATEST:
                             CursorData cData = (CursorData) msg.obj;
                             nativeMoveMouseIfLatest(cData.mMoveGeneration,
-                                    cData.mFrame, cData.mNode,
-                                    cData.mX, cData.mY,
-                                    cData.mIgnoreNullFocus);
+                                    cData.mFrame,
+                                    cData.mX, cData.mY);
                             break;
 
                         case REQUEST_CURSOR_HREF: {
@@ -1639,9 +1652,9 @@ final class WebViewCore {
 
         // now notify webview
         if (mWebView != null) {
-            HashMap scaleLimit = new HashMap();
-            scaleLimit.put("minScale", mViewportMinimumScale);
-            scaleLimit.put("maxScale", mViewportMaximumScale);
+            WebView.ScaleLimitData scaleLimit = new WebView.ScaleLimitData();
+            scaleLimit.mMinScale = mViewportMinimumScale;
+            scaleLimit.mMaxScale = mViewportMaximumScale;
 
             if (mRestoredScale > 0) {
                 Message.obtain(mWebView.mPrivateHandler,
@@ -1709,7 +1722,7 @@ final class WebViewCore {
     }
 
     // these must be in document space (i.e. not scaled/zoomed).
-    private native void nativeSetScrollOffset(int dx, int dy);
+    private native void nativeSetScrollOffset(int gen, int dx, int dy);
 
     private native void nativeSetGlobalBounds(int x, int y, int w, int h);
 

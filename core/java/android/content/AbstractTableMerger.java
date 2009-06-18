@@ -64,8 +64,9 @@ public abstract class AbstractTableMerger
     private static final String SELECT_BY_ID = BaseColumns._ID +"=?";
 
     private static final String SELECT_UNSYNCED =
-            "(" + _SYNC_ACCOUNT + " IS NULL OR " + _SYNC_ACCOUNT + "=?) AND "
-            + "(" + _SYNC_ID + " IS NULL OR (" + _SYNC_DIRTY + " > 0 AND "
+            "(" + _SYNC_ACCOUNT + " IS NULL OR ("
+                + _SYNC_ACCOUNT + "=? and " + _SYNC_ACCOUNT_TYPE + "=?)) and "
+            + "(" + _SYNC_ID + " IS NULL OR (" + _SYNC_DIRTY + " > 0 and "
                                               + _SYNC_VERSION + " IS NOT NULL))";
 
     public AbstractTableMerger(SQLiteDatabase database,

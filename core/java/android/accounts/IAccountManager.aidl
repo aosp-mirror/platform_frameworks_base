@@ -18,6 +18,7 @@ package android.accounts;
 
 import android.accounts.IAccountManagerResponse;
 import android.accounts.Account;
+import android.accounts.AuthenticatorDescription;
 import android.os.Bundle;
 
 /**
@@ -27,7 +28,7 @@ import android.os.Bundle;
 interface IAccountManager {
     String getPassword(in Account account);
     String getUserData(in Account account, String key);
-    String[] getAuthenticatorTypes();
+    AuthenticatorDescription[] getAuthenticatorTypes();
     Account[] getAccounts();
     Account[] getAccountsByType(String accountType);
     boolean addAccount(in Account account, String password, in Bundle extras);

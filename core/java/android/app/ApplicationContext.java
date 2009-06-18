@@ -32,6 +32,8 @@ import android.content.ContextWrapper;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentReceiver;
+import android.content.IntentSender;
 import android.content.ReceiverCallNotAllowedException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -1533,14 +1535,16 @@ class ApplicationContext extends Context {
             // overall package (such as if it has multiple launcher entries).
             Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
             intentToResolve.addCategory(Intent.CATEGORY_INFO);
-            ResolveInfo resolveInfo = resolveActivity(intentToResolve, 0, packageName);
+            intentToResolve.setPackage(packageName);
+            ResolveInfo resolveInfo = resolveActivity(intentToResolve, 0);
 
             // Otherwise, try to find a main launcher activity.
             if (resolveInfo == null) {
                 // reuse the intent instance
                 intentToResolve.removeCategory(Intent.CATEGORY_INFO);
                 intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
-                resolveInfo = resolveActivity(intentToResolve, 0, packageName);
+                intentToResolve.setPackage(packageName);
+                resolveInfo = resolveActivity(intentToResolve, 0);
             }
             if (resolveInfo == null) {
                 return null;
@@ -1782,19 +1786,6 @@ class ApplicationContext extends Context {
                     intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                     flags);
-            } catch (RemoteException e) {
-                throw new RuntimeException("Package manager has died", e);
-            }
-        }
-
-        @Override
-        public ResolveInfo resolveActivity(Intent intent, int flags, String packageName) {
-            try {
-                return mPM.resolveIntentForPackage(
-                    intent,
-                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    flags,
-                    packageName);
             } catch (RemoteException e) {
                 throw new RuntimeException("Package manager has died", e);
             }
@@ -2373,11 +2364,20 @@ class ApplicationContext extends Context {
                 // Should never happen!
             }
         }
-        
+
         @Override
-        public void freeStorage(long idealStorageSize, PendingIntent opFinishedIntent) {
+        public void freeStorage(long freeStorageSize, PendingIntent pi) {
             try {
-                mPM.freeStorage(idealStorageSize, opFinishedIntent);
+                mPM.freeStorage(freeStorageSize, pi);
+            } catch (RemoteException e) {
+                // Should never happen!
+            }
+        }
+
+        @Override
+        public void freeStorageWithIntent(long freeStorageSize, IntentSender pi) {
+            try {
+                mPM.freeStorageWithIntent(freeStorageSize, pi);
             } catch (RemoteException e) {
                 // Should never happen!
             }

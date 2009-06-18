@@ -130,7 +130,7 @@ public abstract class RegisteredServicesCache<V> {
      * @param type the account type of the authenticator
      * @return the AuthenticatorInfo that matches the account type or null if none is present
      */
-    public ServiceInfo getServiceInfo(V type) {
+    public ServiceInfo<V> getServiceInfo(V type) {
         if (mServices == null) {
             maybeRegisterForPackageChanges();
             mServices = generateServicesMap();
@@ -219,7 +219,7 @@ public abstract class RegisteredServicesCache<V> {
                         "Meta-data does not start with " + mAttributesName +  " tag");
             }
 
-            V v = parseServiceAttributes(attrs);
+            V v = parseServiceAttributes(si.packageName, attrs);
             if (v == null) {
                 return null;
             }
@@ -229,5 +229,5 @@ public abstract class RegisteredServicesCache<V> {
         }
     }
 
-    public abstract V parseServiceAttributes(AttributeSet attrs);
+    public abstract V parseServiceAttributes(String packageName, AttributeSet attrs);
 }

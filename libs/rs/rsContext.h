@@ -81,6 +81,17 @@ public:
     ObjectBase * lookupName(const char *name) const;
     void appendNameDefines(String8 *str) const;
 
+
+    ProgramFragment * getDefaultProgramFragment() const {
+        return mStateFragment.mDefault.get();
+    }
+    ProgramVertex * getDefaultProgramVertex() const {
+        return mStateVertex.mDefault.get();
+    }
+    ProgramFragmentStore * getDefaultProgramFragmentStore() const {
+        return mStateFragmentStore.mDefault.get();
+    }
+
 protected:
     Device *mDev;
 
@@ -106,10 +117,6 @@ protected:
     ObjectBaseRef<ProgramFragment> mFragment;
     ObjectBaseRef<ProgramVertex> mVertex;
     ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
-
-    ProgramFragment * mDefaultFragment;
-    ProgramVertex * mDefaultVertex;
-    ProgramFragmentStore * mDefaultFragmentStore;
 
 private:
     Context();
