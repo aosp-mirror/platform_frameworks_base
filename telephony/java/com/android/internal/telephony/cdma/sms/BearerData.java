@@ -17,6 +17,7 @@
 package com.android.internal.telephony.cdma.sms;
 
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import android.telephony.SmsMessage;
 
@@ -26,6 +27,7 @@ import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.cdma.sms.UserData;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.BitwiseInputStream;
@@ -35,7 +37,7 @@ import com.android.internal.util.BitwiseOutputStream;
 /**
  * An object to encode and decode CDMA SMS bearer data.
  */
-public final class BearerData{
+public final class BearerData {
     private final static String LOG_TAG = "SMS";
 
     /**
@@ -385,56 +387,61 @@ public final class BearerData{
         outStream.skip(3);
     }
 
-    private static class SeptetData {
-        byte data[];
-        int septetCount;
-
-        SeptetData(byte[] data, int septetCount) {
-            this.data = data;
-            this.septetCount = septetCount;
-        }
-    }
-
-    private static SeptetData encode7bitAscii(String msg, boolean force)
-        throws CodingException
-    {
-        try {
-            BitwiseOutputStream outStream = new BitwiseOutputStream(msg.length());
-            byte[] expandedData = msg.getBytes("US-ASCII");
-            for (int i = 0; i < expandedData.length; i++) {
-                int charCode = expandedData[i];
-                // Test ourselves for ASCII membership, since Java seems not to care.
-                if ((charCode < UserData.PRINTABLE_ASCII_MIN_INDEX) ||
-                        (charCode > UserData.PRINTABLE_ASCII_MAX_INDEX)) {
-                    if (force) {
-                        outStream.write(7, UserData.UNENCODABLE_7_BIT_CHAR);
-                    } else {
-                        throw new CodingException("illegal ASCII code (" + charCode + ")");
-                    }
-                } else {
-                    outStream.write(7, expandedData[i]);
-                }
+    private static int countAsciiSeptets(CharSequence msg, boolean force) {
+        int msgLen = msg.length();
+        if (force) return msgLen;
+        for (int i = 0; i < msgLen; i++) {
+            if (UserData.charToAscii.get(msg.charAt(i), -1) == -1) {
+                return -1;
             }
-            return new SeptetData(outStream.toByteArray(), expandedData.length);
-        } catch (java.io.UnsupportedEncodingException ex) {
-            throw new CodingException("7bit ASCII encode failed: " + ex);
-        } catch (BitwiseOutputStream.AccessException ex) {
-            throw new CodingException("7bit ASCII encode failed: " + ex);
         }
+        return msgLen;
     }
 
     /**
-     * Calculate the number of septets needed to encode the message.
+     * Calculate the message text encoding length, fragmentation, and other details.
      *
      * @param force ignore (but still count) illegal characters if true
      * @return septet count, or -1 on failure
      */
-    public static int calc7bitEncodedLength(String msg, boolean force) {
+    public static TextEncodingDetails calcTextEncodingDetails(CharSequence msg,
+            boolean force7BitEncoding) {
+        TextEncodingDetails ted;
+        int septets = countAsciiSeptets(msg, force7BitEncoding);
+        if (septets != -1 && septets <= SmsMessage.MAX_USER_DATA_SEPTETS) {
+            ted = new TextEncodingDetails();
+            ted.msgCount = 1;
+            ted.codeUnitCount = septets;
+            ted.codeUnitsRemaining = SmsMessage.MAX_USER_DATA_SEPTETS - septets;
+            ted.codeUnitSize = SmsMessage.ENCODING_7BIT;
+        } else {
+            ted = com.android.internal.telephony.gsm.SmsMessage.calculateLength(
+                    msg, force7BitEncoding);
+        }
+        return ted;
+    }
+
+    private static byte[] encode7bitAscii(String msg, boolean force)
+        throws CodingException
+    {
         try {
-            SeptetData data = encode7bitAscii(msg, force);
-            return data.septetCount;
-        } catch (CodingException ex) {
-            return -1;
+            BitwiseOutputStream outStream = new BitwiseOutputStream(msg.length());
+            int msgLen = msg.length();
+            for (int i = 0; i < msgLen; i++) {
+                int charCode = UserData.charToAscii.get(msg.charAt(i), -1);
+                if (charCode == -1) {
+                    if (force) {
+                        outStream.write(7, UserData.UNENCODABLE_7_BIT_CHAR);
+                    } else {
+                        throw new CodingException("cannot ASCII encode (" + msg.charAt(i) + ")");
+                    }
+                } else {
+                    outStream.write(7, charCode);
+                }
+            }
+            return outStream.toByteArray();
+        } catch (BitwiseOutputStream.AccessException ex) {
+            throw new CodingException("7bit ASCII encode failed: " + ex);
         }
     }
 
@@ -452,8 +459,10 @@ public final class BearerData{
         throws CodingException
     {
         try {
-            /**
-             * TODO(cleanup): find some way to do this without the copy.
+            /*
+             * TODO(cleanup): It would be nice if GsmAlphabet provided
+             * an option to produce just the data without prepending
+             * the length.
              */
             byte []fullData = GsmAlphabet.stringToGsm7BitPacked(msg);
             byte []data = new byte[fullData.length - 1];
@@ -470,54 +479,65 @@ public final class BearerData{
         throws CodingException
     {
         byte[] headerData = null;
+        // TODO: if there is a header, meaning EMS mode, we probably
+        // also want the total UD length prior to the UDH length...
         if (uData.userDataHeader != null) headerData = SmsHeader.toByteArray(uData.userDataHeader);
         int headerDataLen = (headerData == null) ? 0 : headerData.length + 1;  // + length octet
 
         byte[] payloadData;
+        int codeUnitCount;
         if (uData.msgEncodingSet) {
             if (uData.msgEncoding == UserData.ENCODING_OCTET) {
                 if (uData.payload == null) {
                     Log.e(LOG_TAG, "user data with octet encoding but null payload");
-                    // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
                     payloadData = new byte[0];
+                    codeUnitCount = 0;
                 } else {
                     payloadData = uData.payload;
+                    codeUnitCount = uData.payload.length;
                 }
             } else {
                 if (uData.payloadStr == null) {
                     Log.e(LOG_TAG, "non-octet user data with null payloadStr");
-                    // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
                     uData.payloadStr = "";
                 }
                 if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
                     payloadData = encode7bitGsm(uData.payloadStr);
+                    codeUnitCount = (payloadData.length * 8) / 7;
                 } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
-                    SeptetData septetData = encode7bitAscii(uData.payloadStr, true);
-                    payloadData = septetData.data;
+                    payloadData = encode7bitAscii(uData.payloadStr, true);
+                    codeUnitCount = uData.payloadStr.length();
                 } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
                     payloadData = encodeUtf16(uData.payloadStr);
+                    codeUnitCount = uData.payloadStr.length();
                 } else {
                     throw new CodingException("unsupported user data encoding (" +
                                               uData.msgEncoding + ")");
                 }
-                uData.numFields = uData.payloadStr.length();
             }
         } else {
             if (uData.payloadStr == null) {
                 Log.e(LOG_TAG, "user data with null payloadStr");
-                // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
                 uData.payloadStr = "";
             }
             try {
-                SeptetData septetData = encode7bitAscii(uData.payloadStr, false);
-                payloadData = septetData.data;
-                uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
+                if (headerData == null) {
+                    payloadData = encode7bitAscii(uData.payloadStr, false);
+                    codeUnitCount = uData.payloadStr.length();
+                    uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
+                } else {
+                    // If there is a header, we are in EMS mode, in
+                    // which case we use GSM encodings.
+                    payloadData = encode7bitGsm(uData.payloadStr);
+                    codeUnitCount = (payloadData.length * 8) / 7;
+                    uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
+                }
             } catch (CodingException ex) {
                 payloadData = encodeUtf16(uData.payloadStr);
+                codeUnitCount = uData.payloadStr.length();
                 uData.msgEncoding = UserData.ENCODING_UNICODE_16;
             }
             uData.msgEncodingSet = true;
-            uData.numFields = uData.payloadStr.length();
         }
 
         int totalLength = payloadData.length + headerDataLen;
@@ -526,6 +546,7 @@ public final class BearerData{
                                       " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
         }
 
+        uData.numFields = codeUnitCount;
         uData.payload = new byte[totalLength];
         if (headerData != null) {
             uData.payload[0] = (byte)headerData.length;
