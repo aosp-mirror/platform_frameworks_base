@@ -19,6 +19,7 @@
 
 #include <utils/Errors.h>
 #include <utils/String8.h>
+#include <utils/KeyedVector.h>
 
 namespace android {
 
@@ -31,6 +32,27 @@ typedef struct {
     int keyLen; // length of the key name, not including the null terminator
     int dataSize; // size of the data, not including the padding, -1 means delete
 } entity_header_v1;
+
+struct SnapshotHeader {
+    int magic0;
+    int fileCount;
+    int magic1;
+    int totalSize;
+};
+
+struct FileState {
+    int modTime_sec;
+    int modTime_nsec;
+    int size;
+    int crc32;
+    int nameLen;
+};
+
+struct FileRec {
+    String8 file;
+    bool deleted;
+    FileState s;
+};
 
 
 /**
@@ -99,6 +121,19 @@ private:
 int back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD,
         char const* const* files, char const* const *keys, int fileCount);
 
+class RestoreHelperBase
+{
+public:
+    RestoreHelperBase();
+    ~RestoreHelperBase();
+
+    status_t WriteFile(const String8& filename, BackupDataReader* in);
+    status_t WriteSnapshot(int fd);
+
+private:
+    void* m_buf;
+    KeyedVector<String8,FileRec> m_files;
+};
 
 #define TEST_BACKUP_HELPERS 1
 

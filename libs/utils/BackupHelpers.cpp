@@ -47,27 +47,6 @@ namespace android {
 #define LOGP(x...) LOGD(x)
 #endif
 
-struct SnapshotHeader {
-    int magic0;
-    int fileCount;
-    int magic1;
-    int totalSize;
-};
-
-struct FileState {
-    int modTime_sec;
-    int modTime_nsec;
-    int size;
-    int crc32;
-    int nameLen;
-};
-
-struct FileRec {
-    char const* file; // this object does not own this string
-    bool deleted;
-    FileState s;
-};
-
 const static int ROUND_UP[4] = { 0, 3, 2, 1 };
 
 static inline int
@@ -310,7 +289,8 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
     for (int i=0; i<fileCount; i++) {
         String8 key(keys[i]);
         FileRec r;
-        char const* file = r.file = files[i];
+        char const* file = files[i];
+        r.file = file;
         struct stat st;
 
         err = stat(file, &st);
@@ -351,20 +331,20 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
         }
         else if (cmp > 0) {
             // file added
-            LOGP("file added: %s", g.file);
-            write_update_file(dataStream, q, g.file);
+            LOGP("file added: %s", g.file.string());
+            write_update_file(dataStream, q, g.file.string());
             m++;
         }
         else {
             // both files exist, check them
             const FileState& f = oldSnapshot.valueAt(n);
 
-            int fd = open(g.file, O_RDONLY);
+            int fd = open(g.file.string(), O_RDONLY);
             if (fd < 0) {
                 // We can't open the file.  Don't report it as a delete either.  Let the
                 // server keep the old version.  Maybe they'll be able to deal with it
                 // on restore.
-                LOGP("Unable to open file %s - skipping", g.file);
+                LOGP("Unable to open file %s - skipping", g.file.string());
             } else {
                 g.s.crc32 = compute_crc32(fd);
 
@@ -375,7 +355,7 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
                         g.s.modTime_sec, g.s.modTime_nsec, g.s.size, g.s.crc32);
                 if (f.modTime_sec != g.s.modTime_sec || f.modTime_nsec != g.s.modTime_nsec
                         || f.size != g.s.size || f.crc32 != g.s.crc32) {
-                    write_update_file(dataStream, fd, p, g.file);
+                    write_update_file(dataStream, fd, p, g.file.string());
                 }
 
                 close(fd);
@@ -395,13 +375,91 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
     while (m<fileCount) {
         const String8& q = newSnapshot.keyAt(m);
         FileRec& g = newSnapshot.editValueAt(m);
-        write_update_file(dataStream, q, g.file);
+        write_update_file(dataStream, q, g.file.string());
         m++;
     }
 
     err = write_snapshot_file(newSnapshotFD, newSnapshot);
 
     return 0;
+}
+
+#define RESTORE_BUF_SIZE (8*1024)
+
+RestoreHelperBase::RestoreHelperBase()
+{
+    m_buf = malloc(RESTORE_BUF_SIZE);
+}
+
+RestoreHelperBase::~RestoreHelperBase()
+{
+    free(m_buf);
+}
+
+status_t
+RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
+{
+    ssize_t err;
+    size_t dataSize;
+    String8 key;
+    int fd;
+    void* buf = m_buf;
+    ssize_t amt;
+    int mode;
+    int crc;
+    struct stat st;
+    FileRec r;
+
+    err = in->ReadEntityHeader(&key, &dataSize);
+    if (err != NO_ERROR) {
+        return err;
+    }
+    
+    // TODO: World readable/writable for now.
+    mode = 0666;
+
+    // Write the file and compute the crc
+    crc = crc32(0L, Z_NULL, 0);
+    fd = open(filename.string(), O_CREAT|O_RDWR, mode);
+    if (fd != -1) {
+        return errno;
+    }
+    
+    while ((amt = in->ReadEntityData(buf, RESTORE_BUF_SIZE)) > 0) {
+        err = write(fd, buf, amt);
+        if (err != amt) {
+            close(fd);
+            return errno;
+        }
+        crc = crc32(crc, (Bytef*)buf, amt);
+    }
+
+    close(fd);
+
+    // Record for the snapshot
+    err = stat(filename.string(), &st);
+    if (err != 0) {
+        LOGW("Error stating file that we just created %s", filename.string());
+        return errno;
+    }
+
+    r.file = filename;
+    r.deleted = false;
+    r.s.modTime_sec = st.st_mtime;
+    r.s.modTime_nsec = 0; // workaround sim breakage
+    //r.s.modTime_nsec = st.st_mtime_nsec;
+    r.s.size = st.st_size;
+    r.s.crc32 = crc;
+
+    m_files.add(key, r);
+
+    return NO_ERROR;
+}
+
+status_t
+RestoreHelperBase::WriteSnapshot(int fd)
+{
+    return write_snapshot_file(fd, m_files);;
 }
 
 #if TEST_BACKUP_HELPERS
@@ -560,7 +618,6 @@ backup_helper_test_four()
     FileState states[4];
     FileRec r;
     r.deleted = false;
-    r.file = NULL;
 
     states[0].modTime_sec = 0xfedcba98;
     states[0].modTime_nsec = 0xdeadbeef;

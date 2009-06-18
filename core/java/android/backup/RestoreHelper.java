@@ -16,6 +16,8 @@
 
 package android.backup;
 
+import android.os.ParcelFileDescriptor;
+
 import java.io.InputStream;
 
 /** @hide */
@@ -27,5 +29,6 @@ public interface RestoreHelper {
      * <code>dataSize</code> bytes from <code>data</code>.
      */
     public void restoreEntity(BackupDataInputStream data);
+    public void writeSnapshot(ParcelFileDescriptor fd);
 }
 

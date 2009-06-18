@@ -161,8 +161,13 @@ public class BackupTestActivity extends ListActivity
                             new FileRestoreHelper(BackupTestActivity.this));
                     FileInputStream dataFile = openFileInput("backup_test");
                     BackupDataInput data = new BackupDataInput(dataFile.getFD());
-                    dispatch.dispatch(data);
+                    ParcelFileDescriptor state = ParcelFileDescriptor.open(
+                            new File(getFilesDir(), "restore_state"),
+                            ParcelFileDescriptor.MODE_READ_WRITE|ParcelFileDescriptor.MODE_CREATE|
+                            ParcelFileDescriptor.MODE_TRUNCATE);
+                    dispatch.dispatch(data, state);
                     dataFile.close();
+                    state.close();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
