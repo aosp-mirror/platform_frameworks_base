@@ -22,11 +22,9 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.app.ActivityThread.PackageInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemProperties;
@@ -35,6 +33,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
+import android.util.LongSparseArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,19 +58,19 @@ public class Resources {
     // Information about preloaded resources.  Note that they are not
     // protected by a lock, because while preloading in zygote we are all
     // single-threaded, and after that these are immutable.
-    private static final SparseArray<Drawable.ConstantState> sPreloadedDrawables
-            = new SparseArray<Drawable.ConstantState>();
+    private static final LongSparseArray<Drawable.ConstantState> sPreloadedDrawables
+            = new LongSparseArray<Drawable.ConstantState>();
     private static final SparseArray<ColorStateList> mPreloadedColorStateLists
             = new SparseArray<ColorStateList>();
     private static boolean mPreloaded;
 
-    private final SparseArray<Drawable.ConstantState> mPreloadedDrawables;
+    private final LongSparseArray<Drawable.ConstantState> mPreloadedDrawables;
 
     /*package*/ final TypedValue mTmpValue = new TypedValue();
 
     // These are protected by the mTmpValue lock.
-    private final SparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
-            = new SparseArray<WeakReference<Drawable.ConstantState> >();
+    private final LongSparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
+            = new LongSparseArray<WeakReference<Drawable.ConstantState> >();
     private final SparseArray<WeakReference<ColorStateList> > mColorStateListCache
             = new SparseArray<WeakReference<ColorStateList> >();
     private boolean mPreloading;
@@ -89,20 +88,20 @@ public class Resources {
     
     private final CompatibilityInfo mCompatibilityInfo;
 
-    private static final SparseArray<Object> EMPTY_ARRAY = new SparseArray<Object>() {
+    private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>() {
         @Override
-        public void put(int k, Object o) {
+        public void put(long k, Object o) {
             throw new UnsupportedOperationException();
         }
         @Override
-        public void append(int k, Object o) {
+        public void append(long k, Object o) {
             throw new UnsupportedOperationException();
         }
     };
 
     @SuppressWarnings("unchecked")
-    private static <T> SparseArray<T> emptySparseArray() {
-        return (SparseArray<T>) EMPTY_ARRAY;
+    private static <T> LongSparseArray<T> emptySparseArray() {
+        return (LongSparseArray<T>) EMPTY_ARRAY;
     }
 
     /**
@@ -1315,14 +1314,14 @@ public class Resources {
                                 configChanges, cs.getChangingConfigurations())) {
                             if (DEBUG_CONFIG) {
                                 Log.d(TAG, "FLUSHING #0x"
-                                        + Integer.toHexString(mDrawableCache.keyAt(i))
+                                        + Long.toHexString(mDrawableCache.keyAt(i))
                                         + " / " + cs + " with changes: 0x"
                                         + Integer.toHexString(cs.getChangingConfigurations()));
                             }
                             mDrawableCache.setValueAt(i, null);
                         } else if (DEBUG_CONFIG) {
                             Log.d(TAG, "(Keeping #0x"
-                                    + Integer.toHexString(mDrawableCache.keyAt(i))
+                                    + Long.toHexString(mDrawableCache.keyAt(i))
                                     + " / " + cs + " with changes: 0x"
                                     + Integer.toHexString(cs.getChangingConfigurations())
                                     + ")");
@@ -1653,7 +1652,7 @@ public class Resources {
             }
         }
 
-        final int key = (value.assetCookie << 24) | value.data;
+        final long key = (((long) value.assetCookie) << 32) | value.data;
         Drawable dr = getCachedDrawable(key);
 
         if (dr != null) {
@@ -1733,7 +1732,7 @@ public class Resources {
         return dr;
     }
 
-    private Drawable getCachedDrawable(int key) {
+    private Drawable getCachedDrawable(long key) {
         synchronized (mTmpValue) {
             WeakReference<Drawable.ConstantState> wr = mDrawableCache.get(key);
             if (wr != null) {   // we have the key
