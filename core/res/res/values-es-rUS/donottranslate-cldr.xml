@@ -143,4 +143,5 @@
     <string name="same_year_mdy1_mdy2">%3$s de %2$s al %8$s de %7$s de %9$s</string>
     <string name="same_month_mdy1_mdy2">%3$s-%8$s de %2$s de %9$s</string>
     <string name="same_year_wday1_mdy1_wday2_mdy2">%1$s %3$s de %2$s al %6$s %8$s de %7$s de %9$s</string>
+    <string name="short_format_month">%b</string>
 </resources>

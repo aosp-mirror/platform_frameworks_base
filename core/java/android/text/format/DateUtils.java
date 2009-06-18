@@ -184,6 +184,9 @@ public class DateUtils
      */
     public static final String HOUR_MINUTE_24 = "%H:%M";
     public static final String MONTH_FORMAT = "%B";
+    /**
+     * This is not actually a useful month name in all locales.
+     */
     public static final String ABBREV_MONTH_FORMAT = "%b";
     public static final String NUMERIC_MONTH_FORMAT = "%m";
     public static final String MONTH_DAY_FORMAT = "%-d";
@@ -1444,7 +1447,8 @@ public class DateUtils
         if (numericDate) {
             monthFormat = NUMERIC_MONTH_FORMAT;
         } else if (abbrevMonth) {
-            monthFormat = ABBREV_MONTH_FORMAT;
+            monthFormat =
+                res.getString(com.android.internal.R.string.short_format_month);
         } else {
             monthFormat = MONTH_FORMAT;
         }
