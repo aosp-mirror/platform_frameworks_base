@@ -41,14 +41,32 @@ public:
 
 
 protected:
+    class Signal {
+    public:
+        Signal();
+        ~Signal();
+
+        bool init();
+
+        void set();
+        void wait();
+
+    protected:
+        bool mSet;
+        pthread_mutex_t mMutex;
+        pthread_cond_t mCondition;
+    };
+
     uint8_t * volatile mPut;
     uint8_t * volatile mGet;
     uint8_t * mBuffer;
     uint8_t * mEnd;
     uint8_t mSize;
 
-    pthread_mutex_t mMutex;
-    pthread_cond_t mCondition;
+    Signal mSignalToWorker;
+    Signal mSignalToControl;
+
+
 
 public:
     void * reserve(uint32_t bytes);
