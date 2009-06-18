@@ -56,9 +56,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private static final String TAG = "UsageStats";
     
     // Current on-disk Parcel version
-    private static final int VERSION = 1004;
+    private static final int VERSION = 1005;
 
-    private static final int CHECKIN_VERSION = 3;
+    private static final int CHECKIN_VERSION = 4;
     
     private static final String FILE_PREFIX = "usage-";
     
@@ -82,7 +82,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
     // this lock held.
     final Object mFileLock;
     // Order of locks is mFileLock followed by mStatsLock to avoid deadlocks
-    private String mResumedPkg;
+    private String mLastResumedPkg;
+    private String mLastResumedComp;
+    private boolean mIsResumed;
     private File mFile;
     private String mFileLeaf;
     //private File mBackupFile;
@@ -92,9 +94,14 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private int mLastWriteDay;
     
     static class TimeStats {
+        int count;
         int[] times = new int[NUM_LAUNCH_TIME_BINS];
         
         TimeStats() {
+        }
+        
+        void incCount() {
+            count++;
         }
         
         void add(int val) {
@@ -109,6 +116,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
         
         TimeStats(Parcel in) {
+            count = in.readInt();
             final int[] localTimes = times;
             for (int i=0; i<NUM_LAUNCH_TIME_BINS; i++) {
                 localTimes[i] = in.readInt();
@@ -116,6 +124,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
         
         void writeToParcel(Parcel out) {
+            out.writeInt(count);
             final int[] localTimes = times;
             for (int i=0; i<NUM_LAUNCH_TIME_BINS; i++) {
                 out.writeInt(localTimes[i]);
@@ -152,14 +161,25 @@ public final class UsageStatsService extends IUsageStats.Stub {
             }
         }
         
-        void updateResume() {
-            mLaunchCount ++;
+        void updateResume(boolean launched) {
+            if (launched) {
+                mLaunchCount ++;
+            }
             mResumedTime = SystemClock.elapsedRealtime();
         }
         
         void updatePause() {
             mPausedTime =  SystemClock.elapsedRealtime();
             mUsageTime += (mPausedTime - mResumedTime);
+        }
+        
+        void addLaunchCount(String comp) {
+            TimeStats times = mLaunchTimes.get(comp);
+            if (times == null) {
+                times = new TimeStats();
+                mLaunchTimes.put(comp, times);
+            }
+            times.incCount();
         }
         
         void addLaunchTime(String comp, int millis) {
@@ -436,43 +456,70 @@ public final class UsageStatsService extends IUsageStats.Stub {
     public void noteResumeComponent(ComponentName componentName) {
         enforceCallingPermission();
         String pkgName;
-        if ((componentName == null) ||
-                ((pkgName = componentName.getPackageName()) == null)) {
-            return;
-        }
-        if ((mResumedPkg != null) && (mResumedPkg.equalsIgnoreCase(pkgName))) {
-            // Moving across activities in same package. just return
-            return;
-        } 
-        if (localLOGV) Log.i(TAG, "started component:"+pkgName);
         synchronized (mStatsLock) {
+            if ((componentName == null) ||
+                    ((pkgName = componentName.getPackageName()) == null)) {
+                return;
+            }
+            
+            final boolean samePackage = pkgName.equals(mLastResumedPkg);
+            if (mIsResumed) {
+                if (samePackage) {
+                    Log.w(TAG, "Something wrong here, didn't expect "
+                            + pkgName + " to be resumed");
+                    return;
+                }
+                
+                if (mLastResumedPkg != null) {
+                    // We last resumed some other package...  just pause it now
+                    // to recover.
+                    Log.w(TAG, "Unexpected resume of " + pkgName
+                            + " while already resumed in " + mLastResumedPkg);
+                    PkgUsageStatsExtended pus = mStats.get(mLastResumedPkg);
+                    if (pus != null) {
+                        pus.updatePause();
+                    }
+                }
+            }
+            
+            final boolean sameComp = samePackage
+                    && componentName.getClassName().equals(mLastResumedComp);
+            
+            mIsResumed = true;
+            mLastResumedPkg = pkgName;
+            mLastResumedComp = componentName.getClassName();
+            
+            if (localLOGV) Log.i(TAG, "started component:" + pkgName);
             PkgUsageStatsExtended pus = mStats.get(pkgName);
             if (pus == null) {
                 pus = new PkgUsageStatsExtended();
                 mStats.put(pkgName, pus);
             }
-            pus.updateResume();
+            pus.updateResume(!samePackage);
+            if (!sameComp) {
+                pus.addLaunchCount(mLastResumedComp);
+            }
         }
-        mResumedPkg = pkgName;
     }
 
     public void notePauseComponent(ComponentName componentName) {
         enforceCallingPermission();
-        String pkgName;
-        if ((componentName == null) ||
-                ((pkgName = componentName.getPackageName()) == null)) {
-            return;
-        }
-        if ((mResumedPkg == null) || (!pkgName.equalsIgnoreCase(mResumedPkg))) {
-            Log.w(TAG, "Something wrong here, Didn't expect "+pkgName+" to be paused");
-            return;
-        }
-        if (localLOGV) Log.i(TAG, "paused component:"+pkgName);
-        
-        // Persist current data to file if needed.
-        writeStatsToFile(false);
         
         synchronized (mStatsLock) {
+            String pkgName;
+            if ((componentName == null) ||
+                    ((pkgName = componentName.getPackageName()) == null)) {
+                return;
+            }
+            if (!mIsResumed) {
+                Log.w(TAG, "Something wrong here, didn't expect "
+                        + pkgName + " to be paused");
+                return;
+            }
+            mIsResumed = false;
+            
+            if (localLOGV) Log.i(TAG, "paused component:"+pkgName);
+        
             PkgUsageStatsExtended pus = mStats.get(pkgName);
             if (pus == null) {
                 // Weird some error here
@@ -481,6 +528,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
             }
             pus.updatePause();
         }
+        
+        // Persist current data to file if needed.
+        writeStatsToFile(false);
     }
     
     public void noteLaunchTime(ComponentName componentName, int millis) {
@@ -631,9 +681,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (isCompactOutput) {
                 sb.append("P:");
                 sb.append(pkgName);
-                sb.append(",");
+                sb.append(',');
                 sb.append(pus.mLaunchCount);
-                sb.append(",");
+                sb.append(',');
                 sb.append(pus.mUsageTime);
                 sb.append('\n');
                 final int NC = pus.mLaunchTimes.size();
@@ -642,6 +692,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
                         sb.append("A:");
                         sb.append(ent.getKey());
                         TimeStats times = ent.getValue();
+                        sb.append(',');
+                        sb.append(times.count);
                         for (int i=0; i<NUM_LAUNCH_TIME_BINS; i++) {
                             sb.append(",");
                             sb.append(times.times[i]);
@@ -665,25 +717,26 @@ public final class UsageStatsService extends IUsageStats.Stub {
                         sb.append("    ");
                         sb.append(ent.getKey());
                         TimeStats times = ent.getValue();
+                        sb.append(": ");
+                        sb.append(times.count);
+                        sb.append(" starts");
                         int lastBin = 0;
-                        boolean first = true;
                         for (int i=0; i<NUM_LAUNCH_TIME_BINS-1; i++) {
                             if (times.times[i] != 0) {
-                                sb.append(first ? ": " : ", ");
+                                sb.append(", ");
                                 sb.append(lastBin);
                                 sb.append('-');
                                 sb.append(LAUNCH_TIME_BINS[i]);
-                                sb.append('=');
+                                sb.append("ms=");
                                 sb.append(times.times[i]);
-                                first = false;
                             }
                             lastBin = LAUNCH_TIME_BINS[i];
                         }
                         if (times.times[NUM_LAUNCH_TIME_BINS-1] != 0) {
-                            sb.append(first ? ": " : ", ");
+                            sb.append(", ");
                             sb.append(">=");
                             sb.append(lastBin);
-                            sb.append('=');
+                            sb.append("ms=");
                             sb.append(times.times[NUM_LAUNCH_TIME_BINS-1]);
                         }
                         sb.append('\n');
