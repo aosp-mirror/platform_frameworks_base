@@ -97,6 +97,9 @@ class ServerThread extends Thread {
 
         // Critical services...
         try {
+            Log.i(TAG, "Starting Entropy Service.");
+            ServiceManager.addService("entropy", new EntropyService());
+
             Log.i(TAG, "Starting Power Manager.");
             power = new PowerManagerService();
             ServiceManager.addService(Context.POWER_SERVICE, power);
