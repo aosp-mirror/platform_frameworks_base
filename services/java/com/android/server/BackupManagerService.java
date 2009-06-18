@@ -52,6 +52,8 @@ import android.backup.RestoreSet;
 import com.android.internal.backup.LocalTransport;
 import com.android.internal.backup.IBackupTransport;
 
+import com.android.server.PackageManagerBackupAgent;
+
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -70,6 +72,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
 
+    // Default time to wait after data changes before we back up the data
     private static final long COLLECTION_INTERVAL = 1000;
     //private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
 
@@ -104,6 +107,9 @@ class BackupManagerService extends IBackupManager.Stub {
     // Backups that we haven't started yet.
     private HashMap<ApplicationInfo,BackupRequest> mPendingBackups
             = new HashMap<ApplicationInfo,BackupRequest>();
+    // Do we need to back up the package manager metadata on the next pass?
+    private boolean mDoPackageManager;
+    private static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
     // Backups that we have started.  These are separate to prevent starvation
     // if an app keeps re-enqueuing itself.
     private ArrayList<BackupRequest> mBackupQueue;
@@ -363,12 +369,13 @@ class BackupManagerService extends IBackupManager.Stub {
                     mBackupParticipants.put(uid, set);
                 }
                 set.add(app);
+                backUpPackageManagerData();
             }
         }
     }
 
-    // Remove the given package's backup services from our known active set.  If
-    // 'packageName' is null, *all* backup services will be removed.
+    // Remove the given package's entry from our known active set.  If
+    // 'packageName' is null, *all* participating apps will be removed.
     void removePackageParticipantsLocked(String packageName) {
         if (DEBUG) Log.v(TAG, "removePackageParticipantsLocked: " + packageName);
         List<ApplicationInfo> allApps = null;
@@ -406,6 +413,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     for (ApplicationInfo entry: set) {
                         if (entry.packageName.equals(app.packageName)) {
                             set.remove(entry);
+                            backUpPackageManagerData();
                             break;
                         }
                     }
@@ -418,6 +426,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Returns the set of all applications that define an android:backupAgent attribute
     private List<ApplicationInfo> allAgentApps() {
+        // !!! TODO: cache this and regenerate only when necessary
         List<ApplicationInfo> allApps = mPackageManager.getInstalledApplications(0);
         int N = allApps.size();
         if (N > 0) {
@@ -447,13 +456,29 @@ class BackupManagerService extends IBackupManager.Stub {
         addPackageParticipantsLockedInner(packageName, allApps);
     }
 
+    private void backUpPackageManagerData() {
+        // No need to schedule a backup just for the metadata; just piggyback on
+        // the next actual data backup.
+        synchronized(this) {
+            mDoPackageManager = true;
+        }
+    }
+
+    // The queue lock should be held when scheduling a backup pass
+    private void scheduleBackupPassLocked(long timeFromNowMillis) {
+        mBackupHandler.removeMessages(MSG_RUN_BACKUP);
+        mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, timeFromNowMillis);
+    }
+
     // Return the given transport
     private IBackupTransport getTransport(int transportID) {
         switch (transportID) {
         case BackupManager.TRANSPORT_LOCAL:
+            Log.v(TAG, "Supplying local transport");
             return mLocalTransport;
 
         case BackupManager.TRANSPORT_GOOGLE:
+            Log.v(TAG, "Supplying Google transport");
             return mGoogleTransport;
 
         default:
@@ -558,7 +583,29 @@ class BackupManagerService extends IBackupManager.Stub {
                 return;
             }
 
-            // The transport is up and running; now run all the backups in our queue
+            // The transport is up and running.  First, back up the package manager
+            // metadata if necessary
+            boolean doPackageManager;
+            synchronized (BackupManagerService.this) {
+                doPackageManager = mDoPackageManager;
+                mDoPackageManager = false;
+            }
+            if (doPackageManager) {
+                // The package manager doesn't have a proper <application> etc, but since
+                // it's running here in the system process we can just set up its agent
+                // directly and use a synthetic BackupRequest.
+                if (DEBUG) Log.i(TAG, "Running PM backup pass as well");
+
+                PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
+                        mPackageManager, allAgentApps());
+                BackupRequest pmRequest = new BackupRequest(new ApplicationInfo(), false);
+                pmRequest.appInfo.packageName = PACKAGE_MANAGER_SENTINEL;
+                processOneBackup(pmRequest,
+                        IBackupAgent.Stub.asInterface(pmAgent.onBind()),
+                        mTransport);
+            }
+
+            // Now run all the backups in our queue
             doQueuedBackups(mTransport);
 
             // Finally, tear down the transport
@@ -735,6 +782,8 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             if (err == 0) {
+                // !!! TODO: do the package manager signatures restore first
+
                 // build the set of apps to restore
                 try {
                     RestoreSet[] images = mTransport.getAvailableRestoreSets();
@@ -920,8 +969,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Schedule a backup pass in a few minutes.  As backup-eligible data
                 // keeps changing, continue to defer the backup pass until things
                 // settle down, to avoid extra overhead.
-                mBackupHandler.removeMessages(MSG_RUN_BACKUP);
-                mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, COLLECTION_INTERVAL);
+                scheduleBackupPassLocked(COLLECTION_INTERVAL);
             }
         } else {
             Log.w(TAG, "dataChanged but no participant pkg " + packageName);
@@ -947,8 +995,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
         synchronized (mQueueLock) {
-            mBackupHandler.removeMessages(MSG_RUN_BACKUP);
-            mBackupHandler.sendEmptyMessage(MSG_RUN_BACKUP);
+            scheduleBackupPassLocked(0);
         }
     }
 

@@ -36,6 +36,7 @@ public class BackupDataOutput {
         }
     }
 
+    // A dataSize of -1 indicates that the record under this key should be deleted
     public int writeEntityHeader(String key, int dataSize) throws IOException {
         int result = writeEntityHeader_native(mBackupWriter, key, dataSize);
         if (result >= 0) {
