@@ -32,6 +32,8 @@ import android.content.ContextWrapper;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentReceiver;
+import android.content.IntentSender;
 import android.content.ReceiverCallNotAllowedException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -2373,11 +2375,20 @@ class ApplicationContext extends Context {
                 // Should never happen!
             }
         }
-        
+
         @Override
-        public void freeStorage(long idealStorageSize, PendingIntent opFinishedIntent) {
+        public void freeStorage(long freeStorageSize, PendingIntent pi) {
             try {
-                mPM.freeStorage(idealStorageSize, opFinishedIntent);
+                mPM.freeStorage(freeStorageSize, pi);
+            } catch (RemoteException e) {
+                // Should never happen!
+            }
+        }
+
+        @Override
+        public void freeStorageWithIntent(long freeStorageSize, IntentSender pi) {
+            try {
+                mPM.freeStorageWithIntent(freeStorageSize, pi);
             } catch (RemoteException e) {
                 // Should never happen!
             }

@@ -17,9 +17,10 @@
 package android.app;
 
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentSender;
+import android.content.IIntentReceiver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
