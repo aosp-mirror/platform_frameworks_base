@@ -193,6 +193,14 @@ void DisplayHardware::init(uint32_t dpy)
         LOGW("ro.sf.lcd_density not defined, using 160 dpi by default.");
         strcpy(property, "160");
     }
+
+    /* Override the property value if qemu.sf.lcd_density is defined. */
+    {
+        char  qemu_property[PROPERTY_VALUE_MAX];
+        if (property_get("qemu.sf.lcd_density", qemu_property, NULL) > 0) {
+            strlcpy(property, qemu_property, sizeof property);
+        }
+    }
     mDensity = atoi(property) * (1.0f/160.0f);
 
 
