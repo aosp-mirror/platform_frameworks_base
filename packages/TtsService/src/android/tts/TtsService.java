@@ -15,9 +15,6 @@
  */
 package android.tts;
 
-import android.speech.tts.ITts.Stub;
-import android.speech.tts.ITtsCallback;
-
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -32,6 +29,9 @@ import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.speech.tts.ITts.Stub;
+import android.speech.tts.ITtsCallback;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,10 +92,6 @@ public class TtsService extends Service implements OnCompletionListener {
     private static final String ACTION = "android.intent.action.USE_TTS";
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
-
-    private static final int FALLBACK_TTS_DEFAULT_RATE = 100; // 1x
-    private static final int FALLBACK_TTS_DEFAULT_PITCH = 100;// 1x
-    private static final int FALLBACK_TTS_USE_DEFAULTS = 0;
 
     final RemoteCallbackList<android.speech.tts.ITtsCallback> mCallbacks = new RemoteCallbackList<ITtsCallback>();
 
@@ -162,14 +158,16 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private boolean isDefaultEnforced() {
         return (android.provider.Settings.Secure.getInt(mResolver,
-                    android.provider.Settings.Secure.TTS_USE_DEFAULTS, FALLBACK_TTS_USE_DEFAULTS)
+                    android.provider.Settings.Secure.TTS_USE_DEFAULTS,
+                    TextToSpeech.Engine.FALLBACK_TTS_USE_DEFAULTS)
                 == 1 );
     }
 
 
     private int getDefaultRate() {
         return android.provider.Settings.Secure.getInt(mResolver,
-                android.provider.Settings.Secure.TTS_DEFAULT_RATE, FALLBACK_TTS_DEFAULT_RATE);
+                android.provider.Settings.Secure.TTS_DEFAULT_RATE,
+                TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_RATE);
     }
 
 
