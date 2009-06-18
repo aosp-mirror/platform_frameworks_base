@@ -12,6 +12,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.bouncycastle.util.encoders.Base64;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -79,7 +81,10 @@ public class LocalTransport extends IBackupTransport.Stub {
             while (changeSet.readNextHeader()) {
                 String key = changeSet.getKey();
                 int dataSize = changeSet.getDataSize();
-                if (DEBUG) Log.v(TAG, "Got change set key=" + key + " size=" + dataSize);
+
+                String base64Key = new String(Base64.encode(key.getBytes()));
+                if (DEBUG) Log.v(TAG, "Got change set key=" + key + " size=" + dataSize
+                        + " key64=" + base64Key);
                 if (dataSize > bufSize) {
                     bufSize = dataSize;
                     buf = new byte[bufSize];
@@ -87,7 +92,7 @@ public class LocalTransport extends IBackupTransport.Stub {
                 changeSet.readEntityData(buf, 0, dataSize);
                 if (DEBUG) Log.v(TAG, "  + data size " + dataSize);
 
-                File entityFile = new File(packageDir, key);
+                File entityFile = new File(packageDir, base64Key);
                 FileOutputStream entity = new FileOutputStream(entityFile);
                 try {
                     entity.write(buf, 0, dataSize);
