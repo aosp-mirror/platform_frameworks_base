@@ -708,7 +708,7 @@ void drawPrimitivesTriangleStrip(ogles_context_t* c,
 void drawPrimitivesTriangleFan(ogles_context_t* c,
         GLint first, GLsizei count) {
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
-    if (drawTrangleFanWithCopybit(c, first, count)) {
+    if (drawTriangleFanWithCopybit(c, first, count)) {
         return;
     }
 #endif // LIBAGL_USE_GRALLOC_COPYBITS

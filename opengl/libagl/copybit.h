@@ -28,7 +28,8 @@ namespace android {
 
 bool drawTexiOESWithCopybit_impl(GLint x, GLint y, GLint z,
         GLint w, GLint h, ogles_context_t* c);
-bool drawTrangleFanWithCopybit_impl(ogles_context_t* c, GLint first,
+
+bool drawTriangleFanWithCopybit_impl(ogles_context_t* c, GLint first,
         GLsizei count);
 
 inline bool copybitQuickCheckContext(ogles_context_t* c) {
@@ -54,17 +55,16 @@ inline bool drawTexiOESWithCopybit(GLint x, GLint y, GLint z,
  * Tries to draw a triangle fan using copybit hardware.
  * Returns true if successful.
  */
-inline bool drawTrangleFanWithCopybit(ogles_context_t* c, GLint first,
+inline bool drawTriangleFanWithCopybit(ogles_context_t* c, GLint first,
         GLsizei count) {
     /*
      * We are looking for the glDrawArrays call made by SurfaceFlinger.
      */
 
-    if (!(copybitQuickCheckContext(c) && first == 0 && count == 4)) {
+    if ((count!=4) || first || !copybitQuickCheckContext(c))
         return false;
-    }
     
-    return drawTrangleFanWithCopybit_impl(c, first, count);
+    return drawTriangleFanWithCopybit_impl(c, first, count);
 }
 
 
