@@ -134,9 +134,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private SuggestionsAdapter mSuggestionsAdapter;
     
     // Whether to rewrite queries when selecting suggestions
-    // TODO: This is disabled because of problems with persistent selections
-    // causing non-user-initiated rewrites.
-    private static final boolean REWRITE_QUERIES = false;
+    private static final boolean REWRITE_QUERIES = true;
     
     // The query entered by the user. This is not changed when selecting a suggestion
     // that modifies the contents of the text field. But if the user then edits
