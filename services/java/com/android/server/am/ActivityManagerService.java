@@ -7904,7 +7904,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             // is there an Activity in this package that handles ACTION_APP_ERROR?
             Intent intent = new Intent(Intent.ACTION_APP_ERROR);
-            ResolveInfo info = pm.resolveIntentForPackage(intent, null, 0, installerPackageName);
+            intent.setPackage(installerPackageName);
+            ResolveInfo info = pm.resolveIntent(intent, null, 0);
             if (info == null || info.activityInfo == null) {
                 return null;
             }
