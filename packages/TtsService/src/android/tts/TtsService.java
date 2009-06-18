@@ -19,6 +19,7 @@ import android.speech.tts.ITts.Stub;
 import android.speech.tts.ITtsCallback;
 
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -92,6 +93,10 @@ public class TtsService extends Service implements OnCompletionListener {
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
 
+    private static final int FALLBACK_TTS_DEFAULT_RATE = 100; // 1x
+    private static final int FALLBACK_TTS_DEFAULT_PITCH = 100;// 1x
+    private static final int FALLBACK_TTS_USE_DEFAULTS = 0;
+
     final RemoteCallbackList<android.speech.tts.ITtsCallback> mCallbacks = new RemoteCallbackList<ITtsCallback>();
 
     private Boolean mIsSpeaking;
@@ -101,7 +106,7 @@ public class TtsService extends Service implements OnCompletionListener {
     private MediaPlayer mPlayer;
     private TtsService mSelf;
 
-    private SharedPreferences prefs;
+    private ContentResolver mResolver;
 
     private final ReentrantLock speechQueueLock = new ReentrantLock();
     private final ReentrantLock synthesizerLock = new ReentrantLock();
@@ -113,9 +118,7 @@ public class TtsService extends Service implements OnCompletionListener {
         super.onCreate();
         Log.i("TTS", "TTS starting");
 
-        // TODO: Make this work when the settings are done in the main Settings
-        // app.
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mResolver = getContentResolver();
 
         String soLibPath = "/system/lib/libttspico.so";
         nativeSynth = new SynthProxy(soLibPath);
@@ -129,10 +132,7 @@ public class TtsService extends Service implements OnCompletionListener {
         mSpeechQueue = new ArrayList<SpeechItem>();
         mPlayer = null;
 
-        // TODO set default settings
-        //setLanguage(prefs.getString("lang_pref", "en-rUS"));
-        setLanguage("eng", "USA", "");
-        setSpeechRate(Integer.parseInt(prefs.getString("rate_pref", "140")));
+        setDefaultSettings();
     }
 
     @Override
@@ -147,26 +147,48 @@ public class TtsService extends Service implements OnCompletionListener {
         mCallbacks.kill();
     }
 
+
+    private void setDefaultSettings() {
+
+        // TODO handle default language
+        setLanguage("eng", "USA", "");
+
+        // speech rate
+        setSpeechRate(getDefaultRate());
+
+        // TODO handle default pitch
+    }
+
+
+    private boolean isDefaultEnforced() {
+        return (android.provider.Settings.Secure.getInt(mResolver,
+                    android.provider.Settings.Secure.TTS_USE_DEFAULTS, FALLBACK_TTS_USE_DEFAULTS)
+                == 1 );
+    }
+
+
+    private int getDefaultRate() {
+        return android.provider.Settings.Secure.getInt(mResolver,
+                android.provider.Settings.Secure.TTS_DEFAULT_RATE, FALLBACK_TTS_DEFAULT_RATE);
+    }
+
+
     private void setSpeechRate(int rate) {
-        if (prefs.getBoolean("override_pref", false)) {
-            // This is set to the default here so that the preview in the prefs
-            // activity will show the change without a restart, even if apps are
-            // not allowed to change the defaults.
-            rate = Integer.parseInt(prefs.getString("rate_pref", "140"));
+        if (isDefaultEnforced()) {
+            nativeSynth.setSpeechRate(getDefaultRate());
+        } else {
+            nativeSynth.setSpeechRate(rate);
         }
-        nativeSynth.setSpeechRate(rate);
     }
 
     private void setLanguage(String lang, String country, String variant) {
-        if (prefs.getBoolean("override_pref", false)) {
-            // This is set to the default here so that the preview in the prefs
-            // activity will show the change without a restart, even if apps are
-            // not
-            // allowed to change the defaults.
-            lang = prefs.getString("lang_pref", "en-rUS");
-        }
         Log.v("TTS", "TtsService.setLanguage("+lang+", "+country+", "+variant+")");
-        nativeSynth.setLanguage(lang, country, variant);
+        if (isDefaultEnforced()) {
+            nativeSynth.setLanguage(lang, country, variant);
+        } else {
+            // TODO handle default language
+            nativeSynth.setLanguage("eng", "USA", "");
+        }
     }
 
     /**
