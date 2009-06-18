@@ -40,7 +40,7 @@ import java.io.InputStream;
  */
 public class Contacts {
     private static final String TAG = "Contacts";
-    
+
     public static final String AUTHORITY = "contacts";
 
     /**
@@ -191,7 +191,7 @@ public class Contacts {
          * <p>Type: TEXT</P>
          */
         public static final String PHONETIC_NAME = "phonetic_name";
-        
+
         /**
          * The display name. If name is not null name, else if number is not null number,
          * else if email is not null email.
@@ -206,7 +206,7 @@ public class Contacts {
          * @hide Used only in Contacts application for now.
          */
         public static final String SORT_STRING = "sort_string";
-        
+
         /**
          * Notes about the person.
          * <P>Type: TEXT</P>
@@ -248,7 +248,7 @@ public class Contacts {
          * The server version of the photo
          * <P>Type: TEXT (the version number portion of the photo URI)</P>
          */
-        public static final String PHOTO_VERSION = "photo_version";       
+        public static final String PHOTO_VERSION = "photo_version";
     }
 
     /**
@@ -287,14 +287,14 @@ public class Contacts {
          * additional path segment after this URI. This matches any people with
          * at least one E-mail or IM {@link ContactMethods} that match the
          * filter.
-         * 
+         *
          * Not exposed because we expect significant changes in the contacts
          * schema and do not want to have to support this.
          * @hide
          */
         public static final Uri WITH_EMAIL_OR_IM_FILTER_URI =
             Uri.parse("content://contacts/people/with_email_or_im_filter");
-        
+
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
@@ -379,13 +379,13 @@ public class Contacts {
             if (groupId == 0) {
                 throw new IllegalStateException("Failed to find the My Contacts group");
             }
-            
+
             return addToGroup(resolver, personId, groupId);
         }
 
         /**
          * Adds a person to a group referred to by name.
-         * 
+         *
          * @param resolver the resolver to use
          * @param personId the person to add to the group
          * @param groupName the name of the group to add the contact to
@@ -409,13 +409,13 @@ public class Contacts {
             if (groupId == 0) {
                 throw new IllegalStateException("Failed to find the My Contacts group");
             }
-            
+
             return addToGroup(resolver, personId, groupId);
         }
 
         /**
          * Adds a person to a group.
-         * 
+         *
          * @param resolver the resolver to use
          * @param personId the person to add to the group
          * @param groupId the group to add the person to
@@ -427,14 +427,14 @@ public class Contacts {
             values.put(GroupMembership.GROUP_ID, groupId);
             return resolver.insert(GroupMembership.CONTENT_URI, values);
         }
-        
+
         private static final String[] GROUPS_PROJECTION = new String[] {
             Groups._ID,
         };
 
         /**
          * Creates a new contacts and adds it to the "My Contacts" group.
-         * 
+         *
          * @param resolver the ContentResolver to use
          * @param values the values to use when creating the contact
          * @return the URI of the contact, or null if the operation fails
@@ -472,7 +472,7 @@ public class Contacts {
             values.put(Photos.DATA, data);
             cr.update(photoUri, values, null, null);
         }
-        
+
         /**
          * Opens an InputStream for the person's photo and returns the photo as a Bitmap.
          * If the person's photo isn't present returns the placeholderImageResource instead.
@@ -739,7 +739,7 @@ public class Contacts {
             CharSequence display = "";
 
             if (type != People.Phones.TYPE_CUSTOM) {
-                CharSequence[] labels = labelArray != null? labelArray 
+                CharSequence[] labels = labelArray != null? labelArray
                         : context.getResources().getTextArray(
                                 com.android.internal.R.array.phoneTypes);
                 try {
@@ -759,7 +759,7 @@ public class Contacts {
                 CharSequence label) {
             return getDisplayLabel(context, type, label, null);
         }
-        
+
         /**
          * The content:// style URL for this table
          */
@@ -984,7 +984,7 @@ public class Contacts {
             throw new IllegalArgumentException(
                     "the value is not a valid encoded protocol, " + encodedString);
         }
-        
+
         /**
          * This looks up the provider name defined in
          * {@link android.provider.Im.ProviderNames} from the predefined IM protocol id.
@@ -1197,7 +1197,7 @@ public class Contacts {
 
         /**
          * Gets the resource ID for the proper presence icon.
-         * 
+         *
          * @param status the status to get the icon for
          * @return the resource ID for the proper presence icon
          */
@@ -1205,17 +1205,17 @@ public class Contacts {
             switch (status) {
                 case Contacts.People.AVAILABLE:
                     return com.android.internal.R.drawable.presence_online;
-    
+
                 case Contacts.People.IDLE:
                 case Contacts.People.AWAY:
                     return com.android.internal.R.drawable.presence_away;
-    
+
                 case Contacts.People.DO_NOT_DISTURB:
                     return com.android.internal.R.drawable.presence_busy;
-    
+
                 case Contacts.People.INVISIBLE:
                     return com.android.internal.R.drawable.presence_invisible;
-                    
+
                 case Contacts.People.OFFLINE:
                 default:
                     return com.android.internal.R.drawable.presence_offline;
@@ -1455,28 +1455,27 @@ public class Contacts {
          * This is the intent that is fired when a search suggestion is clicked on.
          */
         public static final String SEARCH_SUGGESTION_CLICKED =
-                "android.provider.Contacts.SEARCH_SUGGESTION_CLICKED";
+                ContactsContract.Intents.SEARCH_SUGGESTION_CLICKED;
 
         /**
-         * This is the intent that is fired when a search suggestion for dialing a number 
+         * This is the intent that is fired when a search suggestion for dialing a number
          * is clicked on.
          */
         public static final String SEARCH_SUGGESTION_DIAL_NUMBER_CLICKED =
-                "android.provider.Contacts.SEARCH_SUGGESTION_DIAL_NUMBER_CLICKED";
+                ContactsContract.Intents.SEARCH_SUGGESTION_DIAL_NUMBER_CLICKED;
 
         /**
          * This is the intent that is fired when a search suggestion for creating a contact
          * is clicked on.
          */
         public static final String SEARCH_SUGGESTION_CREATE_CONTACT_CLICKED =
-                "android.provider.Contacts.SEARCH_SUGGESTION_CREATE_CONTACT_CLICKED";
+                ContactsContract.Intents.SEARCH_SUGGESTION_CREATE_CONTACT_CLICKED;
 
         /**
          * Starts an Activity that lets the user pick a contact to attach an image to.
          * After picking the contact it launches the image cropper in face detection mode.
          */
-        public static final String ATTACH_IMAGE =
-                "com.android.contacts.action.ATTACH_IMAGE";
+        public static final String ATTACH_IMAGE = ContactsContract.Intents.ATTACH_IMAGE;
 
         /**
          * Takes as input a data URI with a mailto: or tel: scheme. If a single
@@ -1502,7 +1501,7 @@ public class Contacts {
          * prompting the user when the contact doesn't exist.
          */
         public static final String SHOW_OR_CREATE_CONTACT =
-                "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
+                ContactsContract.Intents.SHOW_OR_CREATE_CONTACT;
 
         /**
          * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new
@@ -1511,9 +1510,8 @@ public class Contacts {
          * <p>
          * Type: BOOLEAN
          */
-        public static final String EXTRA_FORCE_CREATE =
-                "com.android.contacts.action.FORCE_CREATE";
-        
+        public static final String EXTRA_FORCE_CREATE = ContactsContract.Intents.EXTRA_FORCE_CREATE;
+
         /**
          * Used with {@link #SHOW_OR_CREATE_CONTACT} to specify an exact
          * description to be shown when prompting user about creating a new
@@ -1522,7 +1520,7 @@ public class Contacts {
          * Type: STRING
          */
         public static final String EXTRA_CREATE_DESCRIPTION =
-            "com.android.contacts.action.CREATE_DESCRIPTION";
+                ContactsContract.Intents.EXTRA_CREATE_DESCRIPTION;
 
         /**
          * Intents related to the Contacts app UI.
@@ -1531,43 +1529,42 @@ public class Contacts {
             /**
              * The action for the default contacts list tab.
              */
-            public static final String LIST_DEFAULT =
-                    "com.android.contacts.action.LIST_DEFAULT";
+            public static final String LIST_DEFAULT = ContactsContract.Intents.UI.LIST_DEFAULT;
 
             /**
              * The action for the contacts list tab.
              */
             public static final String LIST_GROUP_ACTION =
-                    "com.android.contacts.action.LIST_GROUP";
+                    ContactsContract.Intents.UI.LIST_GROUP_ACTION;
 
             /**
              * When in LIST_GROUP_ACTION mode, this is the group to display.
              */
-            public static final String GROUP_NAME_EXTRA_KEY = "com.android.contacts.extra.GROUP";
-            
+            public static final String GROUP_NAME_EXTRA_KEY =
+                    ContactsContract.Intents.UI.GROUP_NAME_EXTRA_KEY;
             /**
              * The action for the all contacts list tab.
              */
             public static final String LIST_ALL_CONTACTS_ACTION =
-                    "com.android.contacts.action.LIST_ALL_CONTACTS";
+                    ContactsContract.Intents.UI.LIST_ALL_CONTACTS_ACTION;
 
             /**
              * The action for the contacts with phone numbers list tab.
              */
             public static final String LIST_CONTACTS_WITH_PHONES_ACTION =
-                    "com.android.contacts.action.LIST_CONTACTS_WITH_PHONES";
+                    ContactsContract.Intents.UI.LIST_CONTACTS_WITH_PHONES_ACTION;
 
             /**
              * The action for the starred contacts list tab.
              */
             public static final String LIST_STARRED_ACTION =
-                    "com.android.contacts.action.LIST_STARRED";
+                    ContactsContract.Intents.UI.LIST_STARRED_ACTION;
 
             /**
              * The action for the frequent contacts list tab.
              */
             public static final String LIST_FREQUENT_ACTION =
-                    "com.android.contacts.action.LIST_FREQUENT";
+                    ContactsContract.Intents.UI.LIST_FREQUENT_ACTION;
 
             /**
              * The action for the "strequent" contacts list tab. It first lists the starred
@@ -1575,15 +1572,15 @@ public class Contacts {
              * order of the number of times they have been contacted.
              */
             public static final String LIST_STREQUENT_ACTION =
-                    "com.android.contacts.action.LIST_STREQUENT";
+                    ContactsContract.Intents.UI.LIST_STREQUENT_ACTION;
 
             /**
              * A key for to be used as an intent extra to set the activity
              * title to a custom String value.
              */
             public static final String TITLE_EXTRA_KEY =
-                "com.android.contacts.extra.TITLE_EXTRA";
-            
+                    ContactsContract.Intents.UI.TITLE_EXTRA_KEY;
+
             /**
              * Activity Action: Display a filtered list of contacts
              * <p>
@@ -1592,15 +1589,15 @@ public class Contacts {
              * <p>
              * Output: Nothing.
              */
-            public static final String FILTER_CONTACTS_ACTION = 
-                "com.android.contacts.action.FILTER_CONTACTS";
-            
+            public static final String FILTER_CONTACTS_ACTION =
+                    ContactsContract.Intents.UI.FILTER_CONTACTS_ACTION;
+
             /**
              * Used as an int extra field in {@link #FILTER_CONTACTS_ACTION}
              * intents to supply the text on which to filter.
              */
-            public static final String FILTER_TEXT_EXTRA_KEY = 
-                "com.android.contacts.extra.FILTER_TEXT";
+            public static final String FILTER_TEXT_EXTRA_KEY =
+                    ContactsContract.Intents.UI.FILTER_TEXT_EXTRA_KEY;
         }
 
         /**
@@ -1609,170 +1606,179 @@ public class Contacts {
          */
         public static final class Insert {
             /** The action code to use when adding a contact */
-            public static final String ACTION = Intent.ACTION_INSERT;
-
+            public static final String ACTION = ContactsContract.Intents.Insert.ACTION;
             /**
              * If present, forces a bypass of quick insert mode.
              */
-            public static final String FULL_MODE = "full_mode";
-
+            public static final String FULL_MODE = ContactsContract.Intents.Insert.FULL_MODE;
             /**
              * The extra field for the contact name.
              * <P>Type: String</P>
              */
-            public static final String NAME = "name";
+            public static final String NAME = ContactsContract.Intents.Insert.NAME;
 
             /**
              * The extra field for the contact phonetic name.
              * <P>Type: String</P>
              */
-            public static final String PHONETIC_NAME = "phonetic_name";
+            public static final String PHONETIC_NAME =
+                    ContactsContract.Intents.Insert.PHONETIC_NAME;
 
             /**
              * The extra field for the contact company.
              * <P>Type: String</P>
              */
-            public static final String COMPANY = "company";
+            public static final String COMPANY = ContactsContract.Intents.Insert.COMPANY;
 
             /**
              * The extra field for the contact job title.
              * <P>Type: String</P>
              */
-            public static final String JOB_TITLE = "job_title";
+            public static final String JOB_TITLE = ContactsContract.Intents.Insert.JOB_TITLE;
 
             /**
              * The extra field for the contact notes.
              * <P>Type: String</P>
              */
-            public static final String NOTES = "notes";
+            public static final String NOTES = ContactsContract.Intents.Insert.NOTES;
 
             /**
              * The extra field for the contact phone number.
              * <P>Type: String</P>
              */
-            public static final String PHONE = "phone";
+            public static final String PHONE = ContactsContract.Intents.Insert.PHONE;
 
             /**
              * The extra field for the contact phone number type.
              * <P>Type: Either an integer value from {@link android.provider.Contacts.PhonesColumns PhonesColumns},
              *  or a string specifying a custom label.</P>
              */
-            public static final String PHONE_TYPE = "phone_type";
+            public static final String PHONE_TYPE = ContactsContract.Intents.Insert.PHONE_TYPE;
 
             /**
              * The extra field for the phone isprimary flag.
              * <P>Type: boolean</P>
              */
-            public static final String PHONE_ISPRIMARY = "phone_isprimary";
+            public static final String PHONE_ISPRIMARY =
+                    ContactsContract.Intents.Insert.PHONE_ISPRIMARY;
 
             /**
              * The extra field for an optional second contact phone number.
              * <P>Type: String</P>
              */
-            public static final String SECONDARY_PHONE = "secondary_phone";
+            public static final String SECONDARY_PHONE =
+                    ContactsContract.Intents.Insert.SECONDARY_PHONE;
 
             /**
              * The extra field for an optional second contact phone number type.
              * <P>Type: Either an integer value from {@link android.provider.Contacts.PhonesColumns PhonesColumns},
              *  or a string specifying a custom label.</P>
              */
-            public static final String SECONDARY_PHONE_TYPE = "secondary_phone_type";
+            public static final String SECONDARY_PHONE_TYPE =
+                    ContactsContract.Intents.Insert.SECONDARY_PHONE_TYPE;
 
             /**
              * The extra field for an optional third contact phone number.
              * <P>Type: String</P>
              */
-            public static final String TERTIARY_PHONE = "tertiary_phone";
+            public static final String TERTIARY_PHONE =
+                    ContactsContract.Intents.Insert.TERTIARY_PHONE;
 
             /**
              * The extra field for an optional third contact phone number type.
              * <P>Type: Either an integer value from {@link android.provider.Contacts.PhonesColumns PhonesColumns},
              *  or a string specifying a custom label.</P>
              */
-            public static final String TERTIARY_PHONE_TYPE = "tertiary_phone_type";
+            public static final String TERTIARY_PHONE_TYPE =
+                    ContactsContract.Intents.Insert.TERTIARY_PHONE_TYPE;
 
             /**
              * The extra field for the contact email address.
              * <P>Type: String</P>
              */
-            public static final String EMAIL = "email";
+            public static final String EMAIL = ContactsContract.Intents.Insert.EMAIL;
 
             /**
              * The extra field for the contact email type.
              * <P>Type: Either an integer value from {@link android.provider.Contacts.ContactMethodsColumns ContactMethodsColumns}
              *  or a string specifying a custom label.</P>
              */
-            public static final String EMAIL_TYPE = "email_type";
+            public static final String EMAIL_TYPE = ContactsContract.Intents.Insert.EMAIL_TYPE;
 
             /**
              * The extra field for the email isprimary flag.
              * <P>Type: boolean</P>
              */
-            public static final String EMAIL_ISPRIMARY = "email_isprimary";
+            public static final String EMAIL_ISPRIMARY =
+                    ContactsContract.Intents.Insert.EMAIL_ISPRIMARY;
 
             /**
              * The extra field for an optional second contact email address.
              * <P>Type: String</P>
              */
-            public static final String SECONDARY_EMAIL = "secondary_email";
+            public static final String SECONDARY_EMAIL =
+                    ContactsContract.Intents.Insert.SECONDARY_EMAIL;
 
             /**
              * The extra field for an optional second contact email type.
              * <P>Type: Either an integer value from {@link android.provider.Contacts.ContactMethodsColumns ContactMethodsColumns}
              *  or a string specifying a custom label.</P>
              */
-            public static final String SECONDARY_EMAIL_TYPE = "secondary_email_type";
+            public static final String SECONDARY_EMAIL_TYPE =
+                    ContactsContract.Intents.Insert.SECONDARY_EMAIL_TYPE;
 
             /**
              * The extra field for an optional third contact email address.
              * <P>Type: String</P>
              */
-            public static final String TERTIARY_EMAIL = "tertiary_email";
+            public static final String TERTIARY_EMAIL =
+                    ContactsContract.Intents.Insert.TERTIARY_EMAIL;
 
             /**
              * The extra field for an optional third contact email type.
              * <P>Type: Either an integer value from {@link android.provider.Contacts.ContactMethodsColumns ContactMethodsColumns}
              *  or a string specifying a custom label.</P>
              */
-            public static final String TERTIARY_EMAIL_TYPE = "tertiary_email_type";
+            public static final String TERTIARY_EMAIL_TYPE =
+                    ContactsContract.Intents.Insert.TERTIARY_EMAIL_TYPE;
 
             /**
              * The extra field for the contact postal address.
              * <P>Type: String</P>
              */
-            public static final String POSTAL = "postal";
+            public static final String POSTAL = ContactsContract.Intents.Insert.POSTAL;
 
             /**
              * The extra field for the contact postal address type.
              * <P>Type: Either an integer value from {@link android.provider.Contacts.ContactMethodsColumns ContactMethodsColumns}
              *  or a string specifying a custom label.</P>
              */
-            public static final String POSTAL_TYPE = "postal_type";
+            public static final String POSTAL_TYPE = ContactsContract.Intents.Insert.POSTAL_TYPE;
 
             /**
              * The extra field for the postal isprimary flag.
              * <P>Type: boolean</P>
              */
-            public static final String POSTAL_ISPRIMARY = "postal_isprimary";
+            public static final String POSTAL_ISPRIMARY = ContactsContract.Intents.Insert.POSTAL_ISPRIMARY;
 
             /**
              * The extra field for an IM handle.
              * <P>Type: String</P>
              */
-            public static final String IM_HANDLE = "im_handle";
+            public static final String IM_HANDLE = ContactsContract.Intents.Insert.IM_HANDLE;
 
             /**
              * The extra field for the IM protocol
              * <P>Type: the result of {@link Contacts.ContactMethods#encodePredefinedImProtocol}
              * or {@link Contacts.ContactMethods#encodeCustomImProtocol}.</P>
              */
-            public static final String IM_PROTOCOL = "im_protocol";
+            public static final String IM_PROTOCOL = ContactsContract.Intents.Insert.IM_PROTOCOL;
 
             /**
              * The extra field for the IM isprimary flag.
              * <P>Type: boolean</P>
              */
-            public static final String IM_ISPRIMARY = "im_isprimary";
+            public static final String IM_ISPRIMARY = ContactsContract.Intents.Insert.IM_ISPRIMARY;
         }
     }
 }
