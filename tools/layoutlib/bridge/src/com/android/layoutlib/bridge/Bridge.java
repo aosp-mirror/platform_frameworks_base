@@ -55,6 +55,8 @@ import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
+import android.widget.TabHost;
+import android.widget.TabWidget;
 
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
@@ -69,10 +71,10 @@ import java.util.Map;
  * {@link #computeLayout(IXmlPullParser, Object, int, int, String, boolean, Map, Map, IProjectCallback, ILayoutLog)}.
  */
 public final class Bridge implements ILayoutBridge {
-    
+
     private static final int DEFAULT_TITLE_BAR_HEIGHT = 25;
     private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
-    
+
     public static class StaticMethodNotImplementedException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
@@ -82,19 +84,20 @@ public final class Bridge implements ILayoutBridge {
     }
 
     /**
-     * Maps from id to resource name/type.
+     * Maps from id to resource name/type. This is for android.R only.
      */
     private final static Map<Integer, String[]> sRMap = new HashMap<Integer, String[]>();
     /**
-     * Same as sRMap except for int[] instead of int resources.
+     * Same as sRMap except for int[] instead of int resources. This is for android.R only.
      */
     private final static Map<int[], String> sRArrayMap = new HashMap<int[], String>();
     /**
-     * Reverse map compared to sRMap, resource type -> (resource name -> id)
+     * Reverse map compared to sRMap, resource type -> (resource name -> id).
+     * This is for android.R only.
      */
     private final static Map<String, Map<String, Integer>> sRFullMap =
         new HashMap<String, Map<String,Integer>>();
-    
+
     private final static Map<Object, Map<String, SoftReference<Bitmap>>> sProjectBitmapCache =
         new HashMap<Object, Map<String, SoftReference<Bitmap>>>();
     private final static Map<Object, Map<String, SoftReference<NinePatch>>> sProject9PatchCache =
@@ -104,7 +107,7 @@ public final class Bridge implements ILayoutBridge {
         new HashMap<String, SoftReference<Bitmap>>();
     private final static Map<String, SoftReference<NinePatch>> sFramework9PatchCache =
         new HashMap<String, SoftReference<NinePatch>>();
-    
+
     private static Map<String, Map<String, Integer>> sEnumValueMap;
 
     /**
@@ -156,14 +159,14 @@ public final class Bridge implements ILayoutBridge {
 
         return sinit(fontOsLocation, enumValueMap);
     }
-    
+
     private static synchronized boolean sinit(String fontOsLocation,
             Map<String, Map<String, Integer>> enumValueMap) {
 
         // When DEBUG_LAYOUT is set and is not 0 or false, setup a default listener
         // on static (native) methods which prints the signature on the console and
         // throws an exception.
-        // This is useful when testing the rendering in ADT to identify static native 
+        // This is useful when testing the rendering in ADT to identify static native
         // methods that are ignored -- layoutlib_create makes them returns 0/false/null
         // which is generally OK yet might be a problem, so this is how you'd find out.
         //
@@ -214,7 +217,7 @@ public final class Bridge implements ILayoutBridge {
         } else {
             return false;
         }
-        
+
         sEnumValueMap = enumValueMap;
 
         // now parse com.android.internal.R (and only this one as android.R is a subset of
@@ -226,13 +229,13 @@ public final class Bridge implements ILayoutBridge {
             // int[] does not implement equals/hashCode, and if the parsing used a different class
             // loader for the R class, this would NOT work.
             Class<?> r = com.android.internal.R.class;
-            
+
             for (Class<?> inner : r.getDeclaredClasses()) {
                 String resType = inner.getSimpleName();
 
                 Map<String, Integer> fullMap = new HashMap<String, Integer>();
                 sRFullMap.put(resType, fullMap);
-                
+
                 for (Field f : inner.getDeclaredFields()) {
                     // only process static final fields. Since the final attribute may have
                     // been altered by layoutlib_create, we only check static
@@ -243,7 +246,7 @@ public final class Bridge implements ILayoutBridge {
                             // if the object is an int[] we put it in sRArrayMap
                             sRArrayMap.put((int[]) f.get(null), f.getName());
                         } else if (type == int.class) {
-                            Integer value = (Integer) f.get(null); 
+                            Integer value = (Integer) f.get(null);
                             sRMap.put(value, new String[] { f.getName(), resType });
                             fullMap.put(f.getName(), value);
                         } else {
@@ -281,7 +284,7 @@ public final class Bridge implements ILayoutBridge {
             themeName = themeName.substring(1);
             isProjectTheme = true;
         }
-        
+
         return computeLayout(layoutDescription, projectKey,
                 screenWidth, screenHeight, DisplayMetrics.DEFAULT_DENSITY,
                 DisplayMetrics.DEFAULT_DENSITY, DisplayMetrics.DEFAULT_DENSITY,
@@ -294,6 +297,7 @@ public final class Bridge implements ILayoutBridge {
      * (non-Javadoc)
      * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
+    @Deprecated
     public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
             int screenWidth, int screenHeight, String themeName, boolean isProjectTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
@@ -319,7 +323,7 @@ public final class Bridge implements ILayoutBridge {
         if (logger == null) {
             logger = sDefaultLogger;
         }
-        
+
         synchronized (sDefaultLogger) {
             sLogger = logger;
         }
@@ -327,12 +331,12 @@ public final class Bridge implements ILayoutBridge {
         // find the current theme and compute the style inheritance map
         Map<IStyleResourceValue, IStyleResourceValue> styleParentMap =
             new HashMap<IStyleResourceValue, IStyleResourceValue>();
-        
+
         IStyleResourceValue currentTheme = computeStyleMaps(themeName, isProjectTheme,
                 projectResources.get(BridgeConstants.RES_STYLE),
                 frameworkResources.get(BridgeConstants.RES_STYLE), styleParentMap);
-        
-        BridgeContext context = null; 
+
+        BridgeContext context = null;
         try {
             // setup the display Metrics.
             DisplayMetrics metrics = new DisplayMetrics();
@@ -347,29 +351,32 @@ public final class Bridge implements ILayoutBridge {
                     frameworkResources, styleParentMap, customViewLoader, logger);
             BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
             context.setBridgeInflater(inflater);
-            
+
             IResourceValue windowBackground = null;
             int screenOffset = 0;
             if (currentTheme != null) {
                 windowBackground = context.findItemInStyle(currentTheme, "windowBackground");
                 windowBackground = context.resolveResValue(windowBackground);
-    
+
                 screenOffset = getScreenOffset(currentTheme, context);
             }
-            
+
             // we need to make sure the Looper has been initialized for this thread.
             // this is required for View that creates Handler objects.
             if (Looper.myLooper() == null) {
                 Looper.prepare();
             }
-            
+
             BridgeXmlBlockParser parser = new BridgeXmlBlockParser(layoutDescription,
                     context, false /* platformResourceFlag */);
-            
+
             ViewGroup root = new FrameLayout(context);
-        
+
             View view = inflater.inflate(parser, root);
-            
+
+            // post-inflate process. For now this supports TabHost/TabWidget
+            postInflateProcess(view, customViewLoader);
+
             // set the AttachInfo on the root view.
             AttachInfo info = new AttachInfo(new WindowSession(), new Window(),
                     new Handler(), null);
@@ -392,16 +399,19 @@ public final class Bridge implements ILayoutBridge {
             // measure the views
             view.measure(w_spec, h_spec);
             view.layout(0, screenOffset, screenWidth, screenHeight);
-            
+
             // draw them
             BridgeCanvas canvas = new BridgeCanvas(screenWidth, screenHeight - screenOffset,
                     logger);
-            
+
             root.draw(canvas);
             canvas.dispose();
-            
+
             return new LayoutResult(visit(((ViewGroup)view).getChildAt(0), context),
                     canvas.getImage());
+        } catch (PostInflateException e) {
+            return new LayoutResult(ILayoutResult.ERROR, "Error during post inflation process:\n"
+                    + e.getMessage());
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -419,7 +429,7 @@ public final class Bridge implements ILayoutBridge {
             // Make sure to remove static references, otherwise we could not unload the lib
             BridgeResources.clearSystem();
             BridgeAssetManager.clearSystem();
-            
+
             // Remove the global logger
             synchronized (sDefaultLogger) {
                 sLogger = sDefaultLogger;
@@ -437,18 +447,18 @@ public final class Bridge implements ILayoutBridge {
             sProject9PatchCache.remove(projectKey);
         }
     }
-    
+
     /**
      * Returns details of a framework resource from its integer value.
      * @param value the integer value
      * @return an array of 2 strings containing the resource name and type, or null if the id
-     * does not match any resource. 
+     * does not match any resource.
      */
     public static String[] resolveResourceValue(int value) {
         return sRMap.get(value);
-        
+
     }
-    
+
     /**
      * Returns the name of a framework resource whose value is an int array.
      * @param array
@@ -456,7 +466,7 @@ public final class Bridge implements ILayoutBridge {
     public static String resolveResourceValue(int[] array) {
         return sRArrayMap.get(array);
     }
-    
+
     /**
      * Returns the integer id of a framework resource, from a given resource type and resource name.
      * @param type the type of the resource
@@ -468,15 +478,15 @@ public final class Bridge implements ILayoutBridge {
         if (map != null) {
             return map.get(name);
         }
-        
+
         return null;
     }
-    
+
     static Map<String, Integer> getEnumValues(String attributeName) {
         if (sEnumValueMap != null) {
             return sEnumValueMap.get(attributeName);
         }
-        
+
         return null;
     }
 
@@ -507,13 +517,13 @@ public final class Bridge implements ILayoutBridge {
 
         return result;
     }
-    
+
     /**
      * Compute style information from the given list of style for the project and framework.
      * @param themeName the name of the current theme.  In order to differentiate project and
      * platform themes sharing the same name, all project themes must be prepended with
      * a '*' character.
-     * @param isProjectTheme Is this a project theme 
+     * @param isProjectTheme Is this a project theme
      * @param inProjectStyleMap the project style map
      * @param inFrameworkStyleMap the framework style map
      * @param outInheritanceMap the map of style inheritance. This is filled by the method
@@ -523,23 +533,23 @@ public final class Bridge implements ILayoutBridge {
             String themeName, boolean isProjectTheme, Map<String,
             IResourceValue> inProjectStyleMap, Map<String, IResourceValue> inFrameworkStyleMap,
             Map<IStyleResourceValue, IStyleResourceValue> outInheritanceMap) {
-        
+
         if (inProjectStyleMap != null && inFrameworkStyleMap != null) {
             // first, get the theme
             IResourceValue theme = null;
-            
+
             // project theme names have been prepended with a *
             if (isProjectTheme) {
                 theme = inProjectStyleMap.get(themeName);
             } else {
                 theme = inFrameworkStyleMap.get(themeName);
             }
-            
+
             if (theme instanceof IStyleResourceValue) {
                 // compute the inheritance map for both the project and framework styles
                 computeStyleInheritance(inProjectStyleMap.values(), inProjectStyleMap,
                         inFrameworkStyleMap, outInheritanceMap);
-    
+
                 // Compute the style inheritance for the framework styles/themes.
                 // Since, for those, the style parent values do not contain 'android:'
                 // we want to force looking in the framework style only to avoid using
@@ -547,11 +557,11 @@ public final class Bridge implements ILayoutBridge {
                 // To do this, we pass null in lieu of the project style map.
                 computeStyleInheritance(inFrameworkStyleMap.values(), null /*inProjectStyleMap */,
                         inFrameworkStyleMap, outInheritanceMap);
-    
+
                 return (IStyleResourceValue)theme;
             }
         }
-        
+
         return null;
     }
 
@@ -573,7 +583,7 @@ public final class Bridge implements ILayoutBridge {
 
                 // first look for a specified parent.
                 String parentName = style.getParentStyle();
-                
+
                 // no specified parent? try to infer it from the name of the style.
                 if (parentName == null) {
                     parentName = getParentName(value.getName());
@@ -581,7 +591,7 @@ public final class Bridge implements ILayoutBridge {
 
                 if (parentName != null) {
                     parentStyle = getStyle(parentName, inProjectStyleMap, inFrameworkStyleMap);
-                    
+
                     if (parentStyle != null) {
                         outInheritanceMap.put(style, parentStyle);
                     }
@@ -589,7 +599,7 @@ public final class Bridge implements ILayoutBridge {
             }
         }
     }
-    
+
     /**
      * Searches for and returns the {@link IStyleResourceValue} from a given name.
      * <p/>The format of the name can be:
@@ -607,27 +617,27 @@ public final class Bridge implements ILayoutBridge {
             Map<String, IResourceValue> inProjectStyleMap,
             Map<String, IResourceValue> inFrameworkStyleMap) {
         boolean frameworkOnly = false;
-        
+
         String name = parentName;
-        
+
         // remove the useless @ if it's there
         if (name.startsWith(BridgeConstants.PREFIX_RESOURCE_REF)) {
             name = name.substring(BridgeConstants.PREFIX_RESOURCE_REF.length());
         }
-        
+
         // check for framework identifier.
         if (name.startsWith(BridgeConstants.PREFIX_ANDROID)) {
             frameworkOnly = true;
             name = name.substring(BridgeConstants.PREFIX_ANDROID.length());
         }
-        
+
         // at this point we could have the format style/<name>. we want only the name
         if (name.startsWith(BridgeConstants.REFERENCE_STYLE)) {
             name = name.substring(BridgeConstants.REFERENCE_STYLE.length());
         }
 
         IResourceValue parent = null;
-        
+
         // if allowed, search in the project resources.
         if (frameworkOnly == false && inProjectStyleMap != null) {
             parent = inProjectStyleMap.get(name);
@@ -637,17 +647,17 @@ public final class Bridge implements ILayoutBridge {
         if (parent == null) {
             parent = inFrameworkStyleMap.get(name);
         }
-        
+
         // make sure the result is the proper class type and return it.
         if (parent instanceof IStyleResourceValue) {
             return (IStyleResourceValue)parent;
         }
-        
+
         sLogger.error(String.format("Unable to resolve parent style name: ", parentName));
-        
+
         return null;
     }
-    
+
     /**
      * Computes the name of the parent style, or <code>null</code> if the style is a root style.
      */
@@ -656,10 +666,10 @@ public final class Bridge implements ILayoutBridge {
         if (index != -1) {
             return styleName.substring(0, index);
         }
-        
+
         return null;
     }
-    
+
     /**
      * Returns the top screen offset. This depends on whether the current theme defines the user
      * of the title and status bars.
@@ -670,7 +680,7 @@ public final class Bridge implements ILayoutBridge {
 
         // get the title bar flag from the current theme.
         IResourceValue value = context.findItemInStyle(currentTheme, "windowNoTitle");
-        
+
         // because it may reference something else, we resolve it.
         value = context.resolveResValue(value);
 
@@ -679,10 +689,10 @@ public final class Bridge implements ILayoutBridge {
                 XmlUtils.convertValueToBoolean(value.getValue(), false /* defValue */) == false) {
             // get value from the theme.
             value = context.findItemInStyle(currentTheme, "windowTitleSize");
-            
+
             // resolve it
             value = context.resolveResValue(value);
-            
+
             // default value
             offset = DEFAULT_TITLE_BAR_HEIGHT;
 
@@ -690,17 +700,17 @@ public final class Bridge implements ILayoutBridge {
             if (value != null) {
                 TypedValue typedValue = ResourceHelper.getValue(value.getValue());
                 if (typedValue != null) {
-                    offset = (int)typedValue.getDimension(context.getResources().mMetrics);   
+                    offset = (int)typedValue.getDimension(context.getResources().mMetrics);
                 }
             }
         }
-        
+
         // get the fullscreen flag from the current theme.
         value = context.findItemInStyle(currentTheme, "windowFullscreen");
-        
+
         // because it may reference something else, we resolve it.
         value = context.resolveResValue(value);
-        
+
         if (value == null || value.getValue() == null ||
                 XmlUtils.convertValueToBoolean(value.getValue(), false /* defValue */) == false) {
             // FIXME: Right now this is hard-coded in the platform, but once there's a constant, we'll need to use it.
@@ -708,6 +718,94 @@ public final class Bridge implements ILayoutBridge {
         }
 
         return offset;
+    }
+
+    /**
+     * Post process on a view hierachy that was just inflated.
+     * <p/>At the moment this only support TabHost: If {@link TabHost} is detected, look for the
+     * {@link TabWidget}, and the corresponding {@link FrameLayout} and make new tabs automatically
+     * based on the content of the {@link FrameLayout}.
+     * @param view the root view to process.
+     * @param projectCallback callback to the project.
+     */
+    private void postInflateProcess(View view, IProjectCallback projectCallback)
+            throws PostInflateException {
+        if (view instanceof TabHost) {
+            setupTabHost((TabHost)view, projectCallback);
+        } else if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup)view;
+            final int count = group.getChildCount();
+            for (int c = 0 ; c < count ; c++) {
+                View child = group.getChildAt(c);
+                postInflateProcess(child, projectCallback);
+            }
+        }
+    }
+
+    /**
+     * Sets up a {@link TabHost} object.
+     * @param tabHost the TabHost to setup.
+     * @param projectCallback The project callback object to access the project R class.
+     * @throws PostInflateException
+     */
+    private void setupTabHost(TabHost tabHost, IProjectCallback projectCallback)
+            throws PostInflateException {
+        // look for the TabWidget, and the FrameLayout. They have their own specific names
+        View v = tabHost.findViewById(android.R.id.tabs);
+
+        if (v == null) {
+            throw new PostInflateException(
+                    "TabHost requires a TabWidget with id \"android:id/tabs\".\n");
+        }
+
+        if ((v instanceof TabWidget) == false) {
+            throw new PostInflateException(String.format(
+                    "TabHost requires a TabWidget with id \"android:id/tabs\".\n" +
+                    "View found with id 'tabs' is '%s'", v.getClass().getCanonicalName()));
+        }
+
+        v = tabHost.findViewById(android.R.id.tabcontent);
+
+        if (v == null) {
+            // TODO: see if we can fake tabs even without the FrameLayout (same below when the framelayout is empty)
+            throw new PostInflateException(
+                    "TabHost requires a FrameLayout with id \"android:id/tabcontent\".");
+        }
+
+        if ((v instanceof FrameLayout) == false) {
+            throw new PostInflateException(String.format(
+                    "TabHost requires a FrameLayout with id \"android:id/tabcontent\".\n" +
+                    "View found with id 'tabcontent' is '%s'", v.getClass().getCanonicalName()));
+        }
+
+        FrameLayout content = (FrameLayout)v;
+
+        // now process the content of the framelayout and dynamically create tabs for it.
+        final int count = content.getChildCount();
+
+        if (count == 0) {
+            throw new PostInflateException(
+                    "The FrameLayout for the TabHost has no content. Rendering failed.\n");
+        }
+
+        // this must be called before addTab() so that the TabHost searches its TabWidget
+        // and FrameLayout.
+        tabHost.setup();
+
+        // for each child of the framelayout, add a new TabSpec
+        for (int i = 0 ; i < count ; i++) {
+            View child = content.getChildAt(i);
+            String tabSpec = String.format("tab_spec%d", i+1);
+            int id = child.getId();
+            String[] resource = projectCallback.resolveResourceValue(id);
+            String name;
+            if (resource != null) {
+                name = resource[0]; // 0 is resource name, 1 is resource type.
+            } else {
+                name = String.format("Tab %d", i+1); // default name if id is unresolved.
+            }
+            tabHost.addTab(tabHost.newTabSpec(tabSpec).setIndicator(name).setContent(id));
+        }
     }
 
     /**
@@ -750,7 +848,7 @@ public final class Bridge implements ILayoutBridge {
                 map = new HashMap<String, SoftReference<Bitmap>>();
                 sProjectBitmapCache.put(projectKey, map);
             }
-            
+
             map.put(value, new SoftReference<Bitmap>(bmp));
         } else {
             sFrameworkBitmapCache.put(value, new SoftReference<Bitmap>(bmp));
@@ -767,7 +865,7 @@ public final class Bridge implements ILayoutBridge {
     static NinePatch getCached9Patch(String value, Object projectKey) {
         if (projectKey != null) {
             Map<String, SoftReference<NinePatch>> map = sProject9PatchCache.get(projectKey);
-            
+
             if (map != null) {
                 SoftReference<NinePatch> ref = map.get(value);
                 if (ref != null) {
@@ -780,7 +878,7 @@ public final class Bridge implements ILayoutBridge {
                 return ref.get();
             }
         }
-        
+
         return null;
     }
 
@@ -798,10 +896,18 @@ public final class Bridge implements ILayoutBridge {
                 map = new HashMap<String, SoftReference<NinePatch>>();
                 sProject9PatchCache.put(projectKey, map);
             }
-            
+
             map.put(value, new SoftReference<NinePatch>(ninePatch));
         } else {
             sFramework9PatchCache.put(value, new SoftReference<NinePatch>(ninePatch));
+        }
+    }
+
+    private static final class PostInflateException extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        public PostInflateException(String message) {
+            super(message);
         }
     }
 
@@ -839,7 +945,7 @@ public final class Bridge implements ILayoutBridge {
             // pass for now.
             return false;
         }
-        
+
         @SuppressWarnings("unused")
         public MotionEvent getPendingPointerMove(IWindow arg0) throws RemoteException {
             // pass for now.
@@ -863,7 +969,7 @@ public final class Bridge implements ILayoutBridge {
         public void getDisplayFrame(IWindow window, Rect outDisplayFrame) {
             // pass for now.
         }
-        
+
         @SuppressWarnings("unused")
         public void remove(IWindow arg0) throws RemoteException {
             // pass for now.
@@ -883,13 +989,13 @@ public final class Bridge implements ILayoutBridge {
                 Rect visibleInsets) {
             // pass for now.
         }
-        
+
         public IBinder asBinder() {
             // pass for now.
             return null;
         }
     }
-    
+
     /**
      * Implementation of {@link IWindow} to pass to the {@link AttachInfo}.
      */
