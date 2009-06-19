@@ -40,9 +40,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-// !!!TODO: take this out
-import java.util.zip.CRC32;
-
 /**
  * We back up the signatures of each package so that during a system restore,
  * we can verify that the app whose data we think we have matches the app
@@ -57,7 +54,17 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     private List<ApplicationInfo> mAllApps;
     private PackageManager mPackageManager;
-    private HashMap<String, Signature[]> mRestoredSignatures;
+    private HashMap<String, Metadata> mRestoredSignatures;
+
+    public class Metadata {
+        public int versionCode;
+        public Signature[] signatures;
+
+        Metadata(int version, Signature[] sigs) {
+            versionCode = version;
+            signatures = sigs;
+        }
+    }
 
     // We're constructed with the set of applications that are participating
     // in backup.  This set changes as apps are installed & removed.
@@ -67,7 +74,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         mRestoredSignatures = null;
     }
 
-    public Signature[] getRestoredSignatures(String packageName) {
+    public Metadata getRestoredMetadata(String packageName) {
         if (mRestoredSignatures == null) {
             return null;
         }
@@ -83,6 +90,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
         // For each app we have on device, see if we've backed it up yet.  If not,
         // write its signature block to the output, keyed on the package name.
+        if (DEBUG) Log.v(TAG, "onBackup()");
+        ByteArrayOutputStream bufStream = new ByteArrayOutputStream();  // we'll reuse these
+        DataOutputStream outWriter = new DataOutputStream(bufStream);
         for (ApplicationInfo app : mAllApps) {
             String packName = app.packageName;
             if (!existing.contains(packName)) {
@@ -90,16 +100,27 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 try {
                     PackageInfo info = mPackageManager.getPackageInfo(packName,
                             PackageManager.GET_SIGNATURES);
-                    // build a byte array out of the signature list
+                    /*
+                     * Metadata for each package:
+                     *
+                     * int version       -- [4] the package's versionCode
+                     * byte[] signatures -- [len] flattened Signature[] of the package
+                     */
+
+                    // marshall the version code in a canonical form
+                    bufStream.reset();
+                    outWriter.writeInt(info.versionCode);
+                    byte[] versionBuf = bufStream.toByteArray();
+
                     byte[] sigs = flattenSignatureArray(info.signatures);
-//                  !!! TODO: take out this debugging
+
+                    // !!! TODO: take out this debugging
                     if (DEBUG) {
-                        CRC32 crc = new CRC32();
-                        crc.update(sigs);
-                        Log.i(TAG, "+ flat sig array for " + packName + " : "
-                                + crc.getValue());
+                        Log.v(TAG, "+ metadata for " + packName + " version=" + info.versionCode);
                     }
-                    data.writeEntityHeader(packName, sigs.length);
+                    // Now we can write the backup entity for this package
+                    data.writeEntityHeader(packName, versionBuf.length + sigs.length);
+                    data.writeEntityData(versionBuf, versionBuf.length);
                     data.writeEntityData(sigs, sigs.length);
                 } catch (NameNotFoundException e) {
                     // Weird; we just found it, and now are told it doesn't exist.
@@ -113,6 +134,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
             } else {
                 // We've already backed up this app.  Remove it from the set so
                 // we can tell at the end what has disappeared from the device.
+                // !!! TODO: take out the debugging message
+                if (DEBUG) Log.v(TAG, "= already backed up metadata for " + packName);
                 if (!existing.remove(packName)) {
                     Log.d(TAG, "*** failed to remove " + packName + " from package set!");
                 }
@@ -123,6 +146,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
         // mentioned in the saved state file, but appear to no longer be present
         // on the device.  Write a deletion entity for them.
         for (String app : existing) {
+            // !!! TODO: take out this msg
+            if (DEBUG) Log.v(TAG, "- removing metadata for deleted pkg " + app);
             try {
                 data.writeEntityHeader(app, -1);
             } catch (IOException e) {
@@ -141,27 +166,29 @@ public class PackageManagerBackupAgent extends BackupAgent {
     public void onRestore(BackupDataInput data, ParcelFileDescriptor newState)
             throws IOException {
         List<ApplicationInfo> restoredApps = new ArrayList<ApplicationInfo>();
-        HashMap<String, Signature[]> sigMap = new HashMap<String, Signature[]>();
+        HashMap<String, Metadata> sigMap = new HashMap<String, Metadata>();
 
         while (data.readNextHeader()) {
             int dataSize = data.getDataSize();
             byte[] buf = new byte[dataSize];
             data.readEntityData(buf, 0, dataSize);
 
-            Signature[] sigs = unflattenSignatureArray(buf);
+            ByteArrayInputStream bufStream = new ByteArrayInputStream(buf);
+            DataInputStream in = new DataInputStream(bufStream);
+            int versionCode = in.readInt();
+
+            Signature[] sigs = unflattenSignatureArray(in);
             String pkg = data.getKey();
 //          !!! TODO: take out this debugging
             if (DEBUG) {
-                CRC32 crc = new CRC32();
-                crc.update(buf);
-                Log.i(TAG, "- unflat sig array for " + pkg + " : "
-                        + crc.getValue());
+                Log.i(TAG, "+ restored metadata for " + pkg
+                        + " versionCode=" + versionCode + " sigs=" + sigs);
             }
 
             ApplicationInfo app = new ApplicationInfo();
             app.packageName = pkg;
             restoredApps.add(app);
-            sigMap.put(pkg, sigs);
+            sigMap.put(pkg, new Metadata(versionCode, sigs));
         }
 
         mRestoredSignatures = sigMap;
@@ -193,9 +220,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         return outBuf.toByteArray();
     }
 
-    private Signature[] unflattenSignatureArray(byte[] buffer) {
-        ByteArrayInputStream inBufStream = new ByteArrayInputStream(buffer);
-        DataInputStream in = new DataInputStream(inBufStream);
+    private Signature[] unflattenSignatureArray(/*byte[] buffer*/ DataInputStream in) {
         Signature[] sigs = null;
 
         try {
