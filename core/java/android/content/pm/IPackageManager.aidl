@@ -302,4 +302,11 @@ interface IPackageManager {
     boolean isSafeMode();
     void systemReady();
     boolean hasSystemUidErrors();
+    
+    /**
+     * Ask the package manager to perform dex-opt (if needed) on the given
+     * package, if it already hasn't done mode.  Only does this if running
+     * in the special development "no pre-dexopt" mode.
+     */
+    boolean performDexOpt(String packageName);
 }

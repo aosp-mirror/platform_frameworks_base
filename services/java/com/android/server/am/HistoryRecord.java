@@ -463,6 +463,12 @@ class HistoryRecord extends IApplicationToken.Stub {
                     return false;
                 }
                 
+                if (service.mDidDexOpt) {
+                    // Give more time since we were dexopting.
+                    service.mDidDexOpt = false;
+                    return false;
+                }
+                
                 if (r.app.instrumentationClass == null) { 
                     service.appNotRespondingLocked(r.app, r, "keyDispatchingTimedOut");
                 } else {

@@ -286,6 +286,14 @@ class ApplicationContext extends Context {
     }
 
     @Override
+    public ApplicationInfo getApplicationInfo() {
+        if (mPackageInfo != null) {
+            return mPackageInfo.getApplicationInfo();
+        }
+        throw new RuntimeException("Not supported in system context");
+    }
+
+    @Override
     public String getPackageResourcePath() {
         if (mPackageInfo != null) {
             return mPackageInfo.getResDir();

@@ -181,7 +181,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     // The flags that are set for all calls we make to the package manager.
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES
-            | PackageManager.GET_SUPPORTS_DENSITIES | PackageManager.GET_EXPANDABLE;
+            | PackageManager.GET_SUPPORTS_DENSITIES;
     
     private static final String SYSTEM_SECURE = "ro.secure";
 
@@ -809,6 +809,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     int[] mProcDeaths = new int[20];
     
+    /**
+     * This is set if we had to do a delayed dexopt of an app before launching
+     * it, to increasing the ANR timeouts in that case.
+     */
+    boolean mDidDexOpt;
+    
     String mDebugApp = null;
     boolean mWaitForDebugger = false;
     boolean mDebugTransient = false;
@@ -1007,6 +1013,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 processNextBroadcast(true);
             } break;
             case BROADCAST_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
+                    mHandler.sendMessageDelayed(nmsg, BROADCAST_TIMEOUT);
+                    return;
+                }
                 broadcastTimeout();
             } break;
             case PAUSE_TIMEOUT_MSG: {
@@ -1017,9 +1029,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 activityPaused(token, null, true);
             } break;
             case IDLE_TIMEOUT_MSG: {
-                IBinder token = (IBinder)msg.obj;
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, IDLE_TIMEOUT);
+                    return;
+                }
                 // We don't at this point know if the activity is fullscreen,
                 // so we need to be conservative and assume it isn't.
+                IBinder token = (IBinder)msg.obj;
                 Log.w(TAG, "Activity idle timeout for " + token);
                 activityIdleInternal(token, true);
             } break;
@@ -1035,6 +1054,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 activityIdle(token);
             } break;
             case SERVICE_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, SERVICE_TIMEOUT);
+                    return;
+                }
                 serviceTimeout((ProcessRecord)msg.obj);
             } break;
             case UPDATE_TIME_ZONE: {
@@ -1071,6 +1097,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             } break;
             case LAUNCH_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(LAUNCH_TIMEOUT_MSG);
+                    mHandler.sendMessageDelayed(nmsg, LAUNCH_TIMEOUT);
+                    return;
+                }
                 synchronized (ActivityManagerService.this) {
                     if (mLaunchingActivity.isHeld()) {
                         Log.w(TAG, "Launch timeout has expired, giving up wake lock!");
@@ -1091,6 +1123,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             case PROC_START_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, PROC_START_TIMEOUT);
+                    return;
+                }
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processStartTimedOutLocked(app);
@@ -1607,6 +1646,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return proc;
     }
 
+    private void ensurePackageDexOpt(String packageName) {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        try {
+            if (pm.performDexOpt(packageName)) {
+                mDidDexOpt = true;
+            }
+        } catch (RemoteException e) {
+        }
+    }
+    
     private boolean isNextTransitionForward() {
         int transit = mWindowManager.getPendingAppTransition();
         return transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
@@ -1666,6 +1715,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (r.isHomeActivity) {
                 mHomeProcess = app;
             }
+            ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     r.info, r.icicle, results, newIntents, !andResume,
                     isNextTransitionForward());
@@ -4819,6 +4869,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
                         || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
             }
+            ensurePackageDexOpt(app.info.packageName);
+            if (app.instrumentationInfo != null) {
+                ensurePackageDexOpt(app.instrumentationInfo.packageName);
+            }
             thread.bindApplication(processName, app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
@@ -4907,6 +4961,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Check whether the next backup agent is in this process...
         if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.info.uid) {
             if (DEBUG_BACKUP) Log.v(TAG, "New app is backup target, launching agent for " + app);
+            ensurePackageDexOpt(mBackupTarget.appInfo.packageName);
             try {
                 thread.scheduleCreateBackupAgent(mBackupTarget.appInfo, mBackupTarget.backupMode);
             } catch (Exception e) {
@@ -6918,6 +6973,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 app.pubProviders.put(cpi.name, cpr);
                 app.addPackage(cpi.applicationInfo.packageName);
+                ensurePackageDexOpt(cpi.applicationInfo.packageName);
             }
         }
         return providers;
@@ -9542,6 +9598,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
+            ensurePackageDexOpt(r.serviceInfo.packageName);
             app.thread.scheduleCreateService(r, r.serviceInfo);
             created = true;
         } finally {
@@ -11098,6 +11155,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (DEBUG_BROADCAST_LIGHT) Log.v(TAG,
                     "Delivering to component " + r.curComponent
                     + ": " + r);
+            ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
                     r.resultCode, r.resultData, r.resultExtras, r.ordered);
             started = true;
