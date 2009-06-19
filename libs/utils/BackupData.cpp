@@ -205,12 +205,17 @@ BackupDataReader::ReadNextHeader(bool* done, int* type)
     amt = read(m_fd, &m_header, sizeof(m_header));
     *done = m_done = (amt == 0);
     CHECK_SIZE(amt, sizeof(m_header));
+    m_pos += sizeof(m_header);
+    if (type) {
+        *type = m_header.type;
+    }
 
     // validate and fix up the fields.
     m_header.type = fromlel(m_header.type);
     switch (m_header.type)
     {
         case BACKUP_HEADER_ENTITY_V1:
+        {
             m_header.entity.keyLen = fromlel(m_header.entity.keyLen);
             if (m_header.entity.keyLen <= 0) {
                 LOGD("Entity header at %d has keyLen<=0: 0x%08x\n", (int)m_pos,
@@ -219,14 +224,26 @@ BackupDataReader::ReadNextHeader(bool* done, int* type)
             }
             m_header.entity.dataSize = fromlel(m_header.entity.dataSize);
             m_entityCount++;
+
+            // read the rest of the header (filename)
+            size_t size = m_header.entity.keyLen;
+            char* buf = m_key.lockBuffer(size);
+            if (buf == NULL) {
+                m_status = ENOMEM;
+                return m_status;
+            }
+            int amt = read(m_fd, buf, size+1);
+            CHECK_SIZE(amt, (int)size+1);
+            m_key.unlockBuffer(size);
+            m_pos += size+1;
+            SKIP_PADDING();
+            m_dataEndPos = m_pos + m_header.entity.dataSize;
+
             break;
+        }
         default:
             LOGD("Chunk header at %d has invalid type: 0x%08x", (int)m_pos, (int)m_header.type);
             m_status = EINVAL;
-    }
-    m_pos += sizeof(m_header);
-    if (type) {
-        *type = m_header.type;
     }
     
     return m_status;
@@ -247,20 +264,8 @@ BackupDataReader::ReadEntityHeader(String8* key, size_t* dataSize)
     if (m_header.type != BACKUP_HEADER_ENTITY_V1) {
         return EINVAL;
     }
-    size_t size = m_header.entity.keyLen;
-    char* buf = key->lockBuffer(size);
-    if (key == NULL) {
-        key->unlockBuffer();
-        m_status = ENOMEM;
-        return m_status;
-    }
-    int amt = read(m_fd, buf, size+1);
-    CHECK_SIZE(amt, (int)size+1);
-    key->unlockBuffer(size);
-    m_pos += size+1;
+    *key = m_key;
     *dataSize = m_header.entity.dataSize;
-    SKIP_PADDING();
-    m_dataEndPos = m_pos + *dataSize;
     return NO_ERROR;
 }
 
@@ -285,20 +290,24 @@ ssize_t
 BackupDataReader::ReadEntityData(void* data, size_t size)
 {
     if (m_status != NO_ERROR) {
-        return m_status;
+        return -1;
     }
     int remaining = m_dataEndPos - m_pos;
     //LOGD("ReadEntityData size=%d m_pos=0x%x m_dataEndPos=0x%x remaining=%d\n",
     //        size, m_pos, m_dataEndPos, remaining);
-    if (size > remaining) {
-        size = remaining;
-    }
     if (remaining <= 0) {
         return 0;
     }
+    if (size > remaining) {
+        size = remaining;
+    }
+    //LOGD("   reading %d bytes", size);
     int amt = read(m_fd, data, size);
-    CHECK_SIZE(amt, (int)size);
-    m_pos += size;
+    if (amt < 0) {
+        m_status = errno;
+        return -1;
+    }
+    m_pos += amt;
     return amt;
 }
 
