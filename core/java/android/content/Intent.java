@@ -1076,6 +1076,15 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
+
+    /**
+     * Activity Action: Show power usage information to the user.
+     * <p>Input: Nothing.
+     * <p>Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
+    
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).

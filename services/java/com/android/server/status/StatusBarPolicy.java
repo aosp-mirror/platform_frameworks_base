@@ -707,6 +707,23 @@ public class StatusBarPolicy {
                 b.setView(v);
                 b.setIcon(android.R.drawable.ic_dialog_alert);
                 b.setPositiveButton(android.R.string.ok, null);
+                
+                final Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                        | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                if (intent.resolveActivity(mContext.getPackageManager()) != null) {
+                    b.setNegativeButton(com.android.internal.R.string.battery_low_why,
+                            new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            mContext.startActivity(intent);
+                            if (mLowBatteryDialog != null) {
+                                mLowBatteryDialog.dismiss();
+                            }
+                        }
+                    });
+                }
 
             AlertDialog d = b.create();
             d.setOnDismissListener(mLowBatteryListener);
