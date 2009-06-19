@@ -20,7 +20,7 @@ import java.lang.Math;
 import android.util.Log;
 
 
-class Matrix {
+public class Matrix {
 
     public Matrix() {
         mMat = new float[16];
