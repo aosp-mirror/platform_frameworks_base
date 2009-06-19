@@ -1333,7 +1333,23 @@
 
     <!-- Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. -->
     <string name="save_password_label">Confirm</string>
-    
+
+    <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permlab_readHistoryBookmarks">read Browser\'s history and bookmarks</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_readHistoryBookmarks">Allows the application to read all
+        the URLs that the Browser has visited, and all of the Browser\'s bookmarks.</string>
+    <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permlab_writeHistoryBookmarks">write Browser\'s history and bookmarks</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_writeHistoryBookmarks">Allows an application to modify the
+        Browser\'s history or bookmarks stored on your phone. Malicious applications
+        can use this to erase or modify your Browser\'s data.</string>
+
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Text in the save password dialog, asking if the browser should remember a password. -->
     <string name="save_password_message">Do you want the browser to remember this password?</string>
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying not to remember this password. -->
