@@ -247,7 +247,7 @@ public final class Telephony {
             if (uri == null) {
                 return false;
             }
-            
+
             boolean markAsUnread = false;
             boolean markAsRead = false;
             switch(folder) {
@@ -274,7 +274,7 @@ public final class Telephony {
             } else if (markAsRead) {
                 values.put(READ, Integer.valueOf(1));
             }
-            
+
             return 1 == SqliteWrapper.update(context, context.getContentResolver(),
                             uri, values, null, null);
         }
@@ -1422,6 +1422,8 @@ public final class Telephony {
              */
             public static final String _DATA = "_data";
 
+            public static final String TEXT = "text";
+
         }
 
         public static final class Rate {
@@ -1498,10 +1500,10 @@ public final class Telephony {
 
         public static final Uri CONTENT_DRAFT_URI = Uri.parse(
                 "content://mms-sms/draft");
-        
+
         /***
          * Pass in a query parameter called "pattern" which is the text
-         * to search for.    
+         * to search for.
          * The sort order is fixed to be thread_id ASC,date DESC.
          */
         public static final Uri SEARCH_URI = Uri.parse(
