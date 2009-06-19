@@ -757,6 +757,16 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     private boolean signaturesMatch(Signature[] storedSigs, Signature[] deviceSigs) {
+        // Allow unsigned apps, but not signed on one device and unsigned on the other
+        // !!! TODO: is this the right policy?
+        if ((storedSigs == null || storedSigs.length == 0)
+                && (deviceSigs == null || deviceSigs.length == 0)) {
+            return true;
+        }
+        if (storedSigs == null || deviceSigs == null) {
+            return false;
+        }
+
         // !!! TODO: this demands that every stored signature match one
         // that is present on device, and does not demand the converse.
         // Is this this right policy?
@@ -815,8 +825,6 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             if (err == 0) {
-                // !!! TODO: do the package manager signatures restore first
-
                 // build the set of apps to restore
                 try {
                     RestoreSet[] images = mTransport.getAvailableRestoreSets();
@@ -841,16 +849,11 @@ class BackupManagerService extends IBackupManager.Stub {
                                 // Validate against the backed-up signature block, too
                                 Signature[] storedSigs
                                         = pmAgent.getRestoredSignatures(app.packageName);
-                                if (storedSigs != null) {
-                                    // !!! TODO: check app version here as well
-                                    if (signaturesMatch(storedSigs, app.signatures)) {
-                                        appsToRestore.add(app);
-                                    } else {
-                                        Log.w(TAG, "Sig mismatch on restore of " + app.packageName);
-                                    }
+                                // !!! TODO: check app version here as well
+                                if (signaturesMatch(storedSigs, app.signatures)) {
+                                    appsToRestore.add(app);
                                 } else {
-                                    Log.i(TAG, "No stored sigs for " + app.packageName
-                                            + " so not restoring");
+                                    Log.w(TAG, "Sig mismatch on restore of " + app.packageName);
                                 }
                             }
                         }
