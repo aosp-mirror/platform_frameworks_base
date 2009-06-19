@@ -196,7 +196,7 @@ int doList(Bundle* bundle)
             printf("\nNo resource table found.\n");
         } else {
             printf("\nResource table:\n");
-            res.print();
+            res.print(false);
         }
 
         Asset* manifestAsset = assets.openNonAsset("AndroidManifest.xml",
@@ -380,7 +380,7 @@ int doDump(Bundle* bundle)
     }
 
     if (strcmp("resources", option) == 0) {
-        res.print();
+        res.print(bundle->getValues());
 
     } else if (strcmp("xmltree", option) == 0) {
         if (bundle->getFileSpecCount() < 3) {
@@ -732,11 +732,12 @@ int doDump(Bundle* bundle)
                            activityIcon.string());
                 }
             }
+            
             printf("locales:");
             Vector<String8> locales;
             res.getLocales(&locales);
-            const size_t N = locales.size();
-            for (size_t i=0; i<N; i++) {
+            const size_t NL = locales.size();
+            for (size_t i=0; i<NL; i++) {
                 const char* localeStr =  locales[i].string();
                 if (localeStr == NULL || strlen(localeStr) == 0) {
                     localeStr = "--_--";
@@ -744,6 +745,24 @@ int doDump(Bundle* bundle)
                 printf(" '%s'", localeStr);
             }
             printf("\n");
+            
+            Vector<ResTable_config> configs;
+            res.getConfigurations(&configs);
+            SortedVector<int> densities;
+            const size_t NC = configs.size();
+            for (size_t i=0; i<NC; i++) {
+                int dens = configs[i].density;
+                if (dens == 0) dens = 160;
+                densities.add(dens);
+            }
+            
+            printf("densities:");
+            const size_t ND = densities.size();
+            for (size_t i=0; i<ND; i++) {
+                printf(" '%d'", densities[i]);
+            }
+            printf("\n");
+            
             AssetDir* dir = assets.openNonAssetDir(assetsCookie, "lib");
             if (dir != NULL) {
                 if (dir->getFileCount() > 0) {
