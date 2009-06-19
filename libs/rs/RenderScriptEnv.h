@@ -87,7 +87,7 @@ typedef struct {
     void (*drawRect)(void *con, int32_t x1, int32_t x2, int32_t y1, int32_t y2);
 } rsc_FunctionTable;
 
-typedef int (*rsc_RunScript)(void *con, const rsc_FunctionTable *, uint32_t launchID);
+typedef int (*rsc_RunScript)(void *con, const rsc_FunctionTable *, uint32_t launchIndex);
 
 
 /* EnableCap */
