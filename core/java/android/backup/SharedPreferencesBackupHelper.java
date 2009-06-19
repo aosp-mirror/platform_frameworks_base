@@ -18,39 +18,51 @@ package android.backup;
 
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
+import java.io.File;
 import java.io.FileDescriptor;
 
 /** @hide */
-public class SharedPreferencesBackupHelper {
+public class SharedPreferencesBackupHelper extends FileBackupHelperBase implements BackupHelper {
+    private static final String TAG = "SharedPreferencesBackupHelper";
+
     private Context mContext;
-    private String mKeyPrefix;
+    private String[] mPrefGroups;
 
-    public SharedPreferencesBackupHelper(Context context) {
+    public SharedPreferencesBackupHelper(Context context, String[] prefGroups) {
+        super(context);
+
         mContext = context;
+        mPrefGroups = prefGroups;
     }
 
-    public SharedPreferencesBackupHelper(Context context, String keyPrefix) {
-        mContext = context;
-        mKeyPrefix = keyPrefix;
-    }
-    
-    public void performBackup(ParcelFileDescriptor oldSnapshot, ParcelFileDescriptor newSnapshot,
-            BackupDataOutput data, String[] prefGroups) {
+    public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState) {
         Context context = mContext;
         
         // make filenames for the prefGroups
+        String[] prefGroups = mPrefGroups;
         final int N = prefGroups.length;
         String[] files = new String[N];
         for (int i=0; i<N; i++) {
             files[i] = context.getSharedPrefsFile(prefGroups[i]).getAbsolutePath();
         }
 
-        // make keys if necessary
-        String[] keys = FileBackupHelper.makeKeys(mKeyPrefix, prefGroups);
-
         // go
-        FileBackupHelper.performBackup_checked(oldSnapshot, data, newSnapshot, files, prefGroups);
+        performBackup_checked(oldState, data, newState, files, prefGroups);
+    }
+
+    public void restoreEntity(BackupDataInputStream data) {
+        Context context = mContext;
+        
+        // TODO: turn this off before ship
+        Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
+        String key = data.getKey();
+        if (isKeyInList(key, mPrefGroups)) {
+            File f = context.getSharedPrefsFile(key).getAbsoluteFile();
+            writeFile(f, data);
+        }
     }
 }
 

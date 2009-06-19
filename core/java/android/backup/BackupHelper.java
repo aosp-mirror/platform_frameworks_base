@@ -21,14 +21,26 @@ import android.os.ParcelFileDescriptor;
 import java.io.InputStream;
 
 /** @hide */
-public interface RestoreHelper {
+public interface BackupHelper {
     /**
-     * Called by RestoreHelperDispatcher to dispatch one entity of data.
+     * Based on oldState, determine which of the files from the application's data directory
+     * need to be backed up, write them to the data stream, and fill in newState with the
+     * state as it exists now.
+     */
+    public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState);
+
+    /**
+     * Called by BackupHelperDispatcher to dispatch one entity of data.
      * <p class=note>
      * Do not close the <code>data</code> stream.  Do not read more than
      * <code>dataSize</code> bytes from <code>data</code>.
      */
     public void restoreEntity(BackupDataInputStream data);
-    public void writeSnapshot(ParcelFileDescriptor fd);
+
+    /**
+     *
+     */
+    public void writeRestoreSnapshot(ParcelFileDescriptor fd);
 }
 

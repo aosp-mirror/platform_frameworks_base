@@ -16,46 +16,13 @@
 
 package com.android.backuptest;
 
-import android.app.BackupAgent;
-import android.backup.BackupDataInput;
-import android.backup.BackupDataOutput;
+import android.backup.BackupHelperAgent;
 import android.backup.FileBackupHelper;
-import android.backup.FileRestoreHelper;
-import android.backup.RestoreHelperDispatcher;
-import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
-import java.io.IOException;
-
-public class BackupTestAgent extends BackupAgent
+public class BackupTestAgent extends BackupHelperAgent
 {
-    static final String TAG = "BackupTestAgent";
-
-    static final String SHARED_PREFS = "shared_prefs";
-    static final String DATA_FILES = "data_files";
-    static final String[] FILES = new String[] {
-                    BackupTestActivity.FILE_NAME
-                };
-
-    @Override
-    public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-             ParcelFileDescriptor newState) {
-        Log.d(TAG, "onBackup");
-
-        (new FileBackupHelper(this, DATA_FILES)).performBackup(oldState, data, newState, FILES);
-    }
-
-    @Override
-    public void onRestore(BackupDataInput data, ParcelFileDescriptor newState)
-            throws IOException {
-        Log.d(TAG, "onRestore");
-
-        RestoreHelperDispatcher dispatch = new RestoreHelperDispatcher();
-
-        // dispatch.addHelper(SHARED_PREFS, new SharedPrefsRestoreHelper(this));
-        dispatch.addHelper(DATA_FILES, new FileRestoreHelper(this));
-
-        dispatch.dispatch(data, newState);
+    public void onCreate() {
+        addHelper("data_files", new FileBackupHelper(this, BackupTestActivity.FILE_NAME));
     }
 }
 

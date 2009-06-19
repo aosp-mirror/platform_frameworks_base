@@ -24,19 +24,19 @@ import java.io.File;
 import java.io.FileDescriptor;
 
 /** @hide */
-public class FileBackupHelper {
+public class FileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "FileBackupHelper";
 
     Context mContext;
-    String mKeyPrefix;
+    File mFilesDir;
+    String[] mFiles;
 
-    public FileBackupHelper(Context context) {
-        mContext = context;
-    }
+    public FileBackupHelper(Context context, String... files) {
+        super(context);
 
-    public FileBackupHelper(Context context, String keyPrefix) {
         mContext = context;
-        mKeyPrefix = keyPrefix;
+        mFilesDir = context.getFilesDir();
+        mFiles = files;
     }
 
     /**
@@ -45,8 +45,9 @@ public class FileBackupHelper {
      * state as it exists now.
      */
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-            ParcelFileDescriptor newState, String[] files) {
+            ParcelFileDescriptor newState) {
         // file names
+        String[] files = mFiles;
         File base = mContext.getFilesDir();
         final int N = files.length;
         String[] fullPaths = new String[N];
@@ -54,66 +55,18 @@ public class FileBackupHelper {
             fullPaths[i] = (new File(base, files[i])).getAbsolutePath();
         }
 
-        // keys
-        String[] keys = makeKeys(mKeyPrefix, files);
-
         // go
-        performBackup_checked(oldState, data, newState, fullPaths, keys);
+        performBackup_checked(oldState, data, newState, fullPaths, files);
     }
 
-    /**
-     * If keyPrefix is not null, prepend it to each of the strings in <code>original</code>;
-     * otherwise, return original.
-     */
-    static String[] makeKeys(String keyPrefix, String[] original) {
-        if (keyPrefix != null) {
-            String[] keys;
-            final int N = original.length;
-            keys = new String[N];
-            for (int i=0; i<N; i++) {
-                keys[i] = keyPrefix + ':' + original[i];
-            }
-            return keys;
-        } else {
-            return original;
+    public void restoreEntity(BackupDataInputStream data) {
+        // TODO: turn this off before ship
+        Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
+        String key = data.getKey();
+        if (isKeyInList(key, mFiles)) {
+            File f = new File(mFilesDir, key);
+            writeFile(f, data);
         }
     }
-
-    /**
-     * Check the parameters so the native code doens't have to throw all the exceptions
-     * since it's easier to do that from java.
-     */
-    static void performBackup_checked(ParcelFileDescriptor oldState, BackupDataOutput data,
-            ParcelFileDescriptor newState, String[] files, String[] keys) {
-        if (files.length == 0) {
-            return;
-        }
-        // files must be all absolute paths
-        for (String f: files) {
-            if (f.charAt(0) != '/') {
-                throw new RuntimeException("files must have all absolute paths: " + f);
-            }
-        }
-        // the length of files and keys must be the same
-        if (files.length != keys.length) {
-            throw new RuntimeException("files.length=" + files.length
-                    + " keys.length=" + keys.length);
-        }
-        // oldStateFd can be null
-        FileDescriptor oldStateFd = oldState != null ? oldState.getFileDescriptor() : null;
-        FileDescriptor newStateFd = newState.getFileDescriptor();
-        if (newStateFd == null) {
-            throw new NullPointerException();
-        }
-
-        int err = performBackup_native(oldStateFd, data.mBackupWriter, newStateFd, files, keys);
-
-        if (err != 0) {
-            // TODO: more here
-            throw new RuntimeException("Backup failed 0x" + Integer.toHexString(err));
-        }
-    }
-
-    native private static int performBackup_native(FileDescriptor oldState,
-            int data, FileDescriptor newState, String[] files, String[] keys);
 }
+

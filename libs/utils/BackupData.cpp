@@ -99,10 +99,20 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
         return amt;
     }
 
+    String8 k;
+    if (m_keyPrefix.length() > 0) {
+        k = m_keyPrefix;
+        k += ":";
+        k += key;
+    } else {
+        k = key;
+    }
+    LOGD("m_keyPrefix=%s key=%s k=%s", m_keyPrefix.string(), key.string(), k.string());
+
     entity_header_v1 header;
     ssize_t keyLen;
 
-    keyLen = key.length();
+    keyLen = k.length();
 
     header.type = tolel(BACKUP_HEADER_ENTITY_V1);
     header.keyLen = tolel(keyLen);
@@ -115,7 +125,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     }
     m_pos += amt;
 
-    amt = write(m_fd, key.string(), keyLen+1);
+    amt = write(m_fd, k.string(), keyLen+1);
     if (amt != keyLen+1) {
         m_status = errno;
         return m_status;
@@ -148,6 +158,11 @@ BackupDataWriter::WriteEntityData(const void* data, size_t size)
     return NO_ERROR;
 }
 
+void
+BackupDataWriter::SetKeyPrefix(const String8& keyPrefix)
+{
+    m_keyPrefix = keyPrefix;
+}
 
 
 BackupDataReader::BackupDataReader(int fd)
@@ -298,7 +313,7 @@ BackupDataReader::ReadEntityData(void* data, size_t size)
     if (remaining <= 0) {
         return 0;
     }
-    if (size > remaining) {
+    if (((int)size) > remaining) {
         size = remaining;
     }
     //LOGD("   reading %d bytes", size);
