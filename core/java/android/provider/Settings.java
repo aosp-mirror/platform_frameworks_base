@@ -2749,6 +2749,13 @@ public final class Settings {
         public static final String VENDING_TAB_2_TITLE = "vending_tab_2_title";
 
         /**
+         * Frequency in milliseconds at which we should request MCS heartbeats
+         * from the Vending Machine client.
+         */
+        public static final String VENDING_HEARTBEAT_FREQUENCY_MS =
+                "vending_heartbeat_frequency_ms";
+
+        /**
          * URL that points to the legal terms of service to display in Settings.
          * <p>
          * This should be a https URL. For a pretty user-friendly URL, use
