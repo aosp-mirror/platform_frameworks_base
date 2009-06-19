@@ -116,6 +116,7 @@ private:
         int type;
         entity_header_v1 entity;
     } m_header;
+    String8 m_key;
 };
 
 int back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD,

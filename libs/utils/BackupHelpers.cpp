@@ -414,14 +414,15 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     if (err != NO_ERROR) {
         return err;
     }
-    
+
     // TODO: World readable/writable for now.
     mode = 0666;
 
     // Write the file and compute the crc
     crc = crc32(0L, Z_NULL, 0);
-    fd = open(filename.string(), O_CREAT|O_RDWR, mode);
-    if (fd != -1) {
+    fd = open(filename.string(), O_CREAT|O_RDWR|O_TRUNC, mode);
+    if (fd == -1) {
+        LOGW("Could not open file %s -- %s", filename.string(), strerror(errno));
         return errno;
     }
     
@@ -429,6 +430,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
         err = write(fd, buf, amt);
         if (err != amt) {
             close(fd);
+            LOGW("Error '%s' writing '%s'", strerror(errno), filename.string());
             return errno;
         }
         crc = crc32(crc, (Bytef*)buf, amt);
