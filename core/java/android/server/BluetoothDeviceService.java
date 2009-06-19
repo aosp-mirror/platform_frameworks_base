@@ -1039,6 +1039,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             break;
         }
         pw.println("getHeadsetAddress() = " + headset.getHeadsetAddress());
+        pw.println("getBatteryUsageHint() = " + headset.getBatteryUsageHint());
+
         headset.close();
     }
 
