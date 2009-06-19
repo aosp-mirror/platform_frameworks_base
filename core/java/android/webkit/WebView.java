@@ -2335,6 +2335,16 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Gets the chrome handler.
+     * @return the current WebChromeClient instance.
+     *
+     * @hide API council approval.
+     */
+    public WebChromeClient getWebChromeClient() {
+        return mCallbackProxy.getWebChromeClient();
+    }
+
+    /**
      * Set the Picture listener. This is an interface used to receive
      * notifications of a new Picture.
      * @param listener An implementation of WebView.PictureListener.
