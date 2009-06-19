@@ -416,6 +416,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean singleLine = false;
         int maxlength = -1;
         CharSequence text = "";
+        CharSequence hint = null;
         int shadowcolor = 0;
         float dx = 0, dy = 0, r = 0;
         boolean password = false;
@@ -543,7 +544,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
 
             case com.android.internal.R.styleable.TextView_hint:
-                setHint(a.getText(attr));
+                hint = a.getText(attr);
                 break;
 
             case com.android.internal.R.styleable.TextView_text:
@@ -873,6 +874,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         setText(text, bufferType);
+        if (hint != null) setHint(hint);
 
         /*
          * Views are not normally focusable unless specified to be.
@@ -2817,8 +2819,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             checkForRelayout();
         }
 
-        if (mText.length() == 0)
+        if (mText.length() == 0) {
             invalidate();
+        }
     }
 
     /**
@@ -4802,10 +4805,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 alignment = Layout.Alignment.ALIGN_NORMAL;
         }
 
+        boolean shouldEllipsize = mEllipsize != null && mInput == null;
+
         if (mText instanceof Spannable) {
             mLayout = new DynamicLayout(mText, mTransformed, mTextPaint, w,
                     alignment, mSpacingMult,
-                    mSpacingAdd, mIncludePad, mEllipsize,
+                    mSpacingAdd, mIncludePad, mInput == null ? mEllipsize : null,
                     ellipsisWidth);
         } else {
             if (boring == UNKNOWN_BORING) {
@@ -4832,7 +4837,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // Log.e("aaa", "Boring: " + mTransformed);
 
                     mSavedLayout = (BoringLayout) mLayout;
-                } else if (mEllipsize != null && boring.width <= w) {
+                } else if (shouldEllipsize && boring.width <= w) {
                     if (mSavedLayout != null) {
                         mLayout = mSavedLayout.
                                 replaceOrMake(mTransformed, mTextPaint,
@@ -4845,7 +4850,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 boring, mIncludePad, mEllipsize,
                                 ellipsisWidth);
                     }
-                } else if (mEllipsize != null) {
+                } else if (shouldEllipsize) {
                     mLayout = new StaticLayout(mTransformed,
                                 0, mTransformed.length(),
                                 mTextPaint, w, alignment, mSpacingMult,
@@ -4857,7 +4862,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             mIncludePad);
                     // Log.e("aaa", "Boring but wide: " + mTransformed);
                 }
-            } else if (mEllipsize != null) {
+            } else if (shouldEllipsize) {
                 mLayout = new StaticLayout(mTransformed,
                             0, mTransformed.length(),
                             mTextPaint, w, alignment, mSpacingMult,
@@ -4870,9 +4875,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        shouldEllipsize = mEllipsize != null;
         mHintLayout = null;
 
         if (mHint != null) {
+            if (shouldEllipsize) hintWidth = w;
+
             if (hintBoring == UNKNOWN_BORING) {
                 hintBoring = BoringLayout.isBoring(mHint, mTextPaint,
                                                    mHintBoring);
@@ -4882,24 +4890,50 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (hintBoring != null) {
-                if (hintBoring.width <= hintWidth) {
+                if (hintBoring.width <= hintWidth &&
+                    (!shouldEllipsize || hintBoring.width <= ellipsisWidth)) {
                     if (mSavedHintLayout != null) {
                         mHintLayout = mSavedHintLayout.
                                 replaceOrMake(mHint, mTextPaint,
-                                hintWidth, alignment, mSpacingMult,
-                                mSpacingAdd, hintBoring, mIncludePad);
+                                hintWidth, alignment, mSpacingMult, mSpacingAdd,
+                                hintBoring, mIncludePad);
                     } else {
                         mHintLayout = BoringLayout.make(mHint, mTextPaint,
-                                hintWidth, alignment, mSpacingMult,
-                                mSpacingAdd, hintBoring, mIncludePad);
+                                hintWidth, alignment, mSpacingMult, mSpacingAdd,
+                                hintBoring, mIncludePad);
                     }
 
                     mSavedHintLayout = (BoringLayout) mHintLayout;
+                } else if (shouldEllipsize && hintBoring.width <= hintWidth) {
+                    if (mSavedHintLayout != null) {
+                        mHintLayout = mSavedHintLayout.
+                                replaceOrMake(mHint, mTextPaint,
+                                hintWidth, alignment, mSpacingMult, mSpacingAdd,
+                                hintBoring, mIncludePad, mEllipsize,
+                                ellipsisWidth);
+                    } else {
+                        mHintLayout = BoringLayout.make(mHint, mTextPaint,
+                                hintWidth, alignment, mSpacingMult, mSpacingAdd,
+                                hintBoring, mIncludePad, mEllipsize,
+                                ellipsisWidth);
+                    }
+                } else if (shouldEllipsize) {
+                    mHintLayout = new StaticLayout(mHint,
+                                0, mHint.length(),
+                                mTextPaint, hintWidth, alignment, mSpacingMult,
+                                mSpacingAdd, mIncludePad, mEllipsize,
+                                ellipsisWidth);
                 } else {
                     mHintLayout = new StaticLayout(mHint, mTextPaint,
                             hintWidth, alignment, mSpacingMult, mSpacingAdd,
                             mIncludePad);
                 }
+            } else if (shouldEllipsize) {
+                mHintLayout = new StaticLayout(mHint,
+                            0, mHint.length(),
+                            mTextPaint, hintWidth, alignment, mSpacingMult,
+                            mSpacingAdd, mIncludePad, mEllipsize,
+                            ellipsisWidth);
             } else {
                 mHintLayout = new StaticLayout(mHint, mTextPaint,
                         hintWidth, alignment, mSpacingMult, mSpacingAdd,
@@ -4983,8 +5017,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private static final BoringLayout.Metrics UNKNOWN_BORING =
-                                                new BoringLayout.Metrics();
+    private static final BoringLayout.Metrics UNKNOWN_BORING = new BoringLayout.Metrics();
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -5011,8 +5044,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (des < 0) {
-                boring = BoringLayout.isBoring(mTransformed, mTextPaint,
-                                               mBoring);
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -5022,8 +5054,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (boring == null || boring == UNKNOWN_BORING) {
                 if (des < 0) {
-                    des = (int) FloatMath.ceil(Layout.
-                                    getDesiredWidth(mTransformed, mTextPaint));
+                    des = (int) FloatMath.ceil(Layout.getDesiredWidth(mTransformed, mTextPaint));
                 }
 
                 width = des;
@@ -5041,13 +5072,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int hintDes = -1;
                 int hintWidth;
 
-                if (mHintLayout != null) {
+                if (mHintLayout != null && mEllipsize == null) {
                     hintDes = desired(mHintLayout);
                 }
 
                 if (hintDes < 0) {
-                    hintBoring = BoringLayout.isBoring(mHint, mTextPaint,
-                                                       mHintBoring);
+                    hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mHintBoring);
                     if (hintBoring != null) {
                         mHintBoring = hintBoring;
                     }
@@ -5055,8 +5085,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
                     if (hintDes < 0) {
-                        hintDes = (int) FloatMath.ceil(Layout.
-                                        getDesiredWidth(mHint, mTextPaint));
+                        hintDes = (int) FloatMath.ceil(
+                                Layout.getDesiredWidth(mHint, mTextPaint));
                     }
 
                     hintWidth = hintDes;
@@ -5102,20 +5132,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mLayout == null) {
             makeNewLayout(want, hintWant, boring, hintBoring,
-                          width - getCompoundPaddingLeft() - getCompoundPaddingRight(),
-                          false);
+                          width - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
         } else if ((mLayout.getWidth() != want) || (hintWidth != hintWant) ||
                    (mLayout.getEllipsizedWidth() !=
                         width - getCompoundPaddingLeft() - getCompoundPaddingRight())) {
             if (mHint == null && mEllipsize == null &&
                     want > mLayout.getWidth() &&
                     (mLayout instanceof BoringLayout ||
-                        (fromexisting && des >= 0 && des <= want))) {
+                            (fromexisting && des >= 0 && des <= want))) {
                 mLayout.increaseWidthTo(want);
             } else {
                 makeNewLayout(want, hintWant, boring, hintBoring,
-                              width - getCompoundPaddingLeft() - getCompoundPaddingRight(),
-                              false);
+                              width - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
             }
         } else {
             // Width has not changed.
@@ -5136,11 +5164,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        int unpaddedHeight = height - getCompoundPaddingTop() -
-                                getCompoundPaddingBottom();
+        int unpaddedHeight = height - getCompoundPaddingTop() - getCompoundPaddingBottom();
         if (mMaxMode == LINES && mLayout.getLineCount() > mMaximum) {
-            unpaddedHeight = Math.min(unpaddedHeight,
-                                      mLayout.getLineTop(mMaximum));
+            unpaddedHeight = Math.min(unpaddedHeight, mLayout.getLineTop(mMaximum));
         }
 
         /*
@@ -5159,8 +5185,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private int getDesiredHeight() {
-        return Math.max(getDesiredHeight(mLayout, true),
-                        getDesiredHeight(mHintLayout, false));
+        return Math.max(
+                getDesiredHeight(mLayout, true),
+                getDesiredHeight(mHintLayout, mEllipsize != null));
     }
 
     private int getDesiredHeight(Layout layout, boolean cap) {
@@ -5803,6 +5830,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void startMarquee() {
+        // Do not ellipsize EditText
+        if (mInput != null) return;
+
         if (compressText(getWidth() - getCompoundPaddingLeft() - getCompoundPaddingRight())) {
             return;
         }
