@@ -2164,6 +2164,14 @@ public final class Settings {
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
 
         /**
+         * Flag for allowing service provider to use location information to improve products and
+         * services.
+         * Type: int ( 0 = disallow, 1 = allow )
+         * @hide
+         */
+        public static final String USE_LOCATION_FOR_SERVICES = "use_location";
+
+        /**
          * Helper method for determining if a location provider is enabled.
          * @param cr the content resolver to use
          * @param provider the location provider to query
@@ -3059,6 +3067,7 @@ public final class Settings {
          * Flag for allowing service provider to use location information to improve products and
          * services.
          * Type: int ( 0 = disallow, 1 = allow )
+         * @deprecated
          */
         public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
