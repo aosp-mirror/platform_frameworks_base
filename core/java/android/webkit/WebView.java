@@ -489,22 +489,27 @@ public class WebView extends AbsoluteLayout
     // width which view is considered to be fully zoomed out
     static final int ZOOM_OUT_WIDTH = 1008;
 
-    private static final float DEFAULT_MAX_ZOOM_SCALE = 4.0f;
-    private static final float DEFAULT_MIN_ZOOM_SCALE = 0.25f;
+    // default scale limit. Depending on the display density
+    private static float DEFAULT_MAX_ZOOM_SCALE;
+    private static float DEFAULT_MIN_ZOOM_SCALE;
     // scale limit, which can be set through viewport meta tag in the web page
-    private float mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
-    private float mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+    private float mMaxZoomScale;
+    private float mMinZoomScale;
     private boolean mMinZoomScaleFixed = false;
 
     // initial scale in percent. 0 means using default.
     private int mInitialScale = 0;
 
+    // default scale. Depending on the display density.
+    static int DEFAULT_SCALE_PERCENT;
+    private float DEFAULT_SCALE;
+
     // set to true temporarily while the zoom control is being dragged
     private boolean mPreviewZoomOnly = false;
 
     // computed scale and inverse, from mZoomWidth.
-    private float mActualScale = 1;
-    private float mInvActualScale = 1;
+    private float mActualScale;
+    private float mInvActualScale;
     // if this is non-zero, it is used on drawing rather than mActualScale
     private float mZoomScale;
     private float mInvInitialZoomScale;
@@ -734,10 +739,19 @@ public class WebView extends AbsoluteLayout
         final int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
         mMinLockSnapReverseDistance = slop;
+        final float density = getContext().getResources().getDisplayMetrics().density;
         // use one line height, 16 based on our current default font, for how
         // far we allow a touch be away from the edge of a link
-        mNavSlop = (int) (16 * getContext().getResources()
-                .getDisplayMetrics().density);
+        mNavSlop = (int) (16 * density);
+        // density adjusted scale factors
+        DEFAULT_SCALE_PERCENT = (int) (100 * density);
+        DEFAULT_SCALE = density;
+        mActualScale = density;
+        mInvActualScale = 1 / density;
+        DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
+        DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
+        mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+        mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
     }
 
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
@@ -4217,9 +4231,9 @@ public class WebView extends AbsoluteLayout
     private boolean zoomWithPreview(float scale) {
         float oldScale = mActualScale;
 
-        // snap to 100% if it is close
-        if (scale > 0.95f && scale < 1.05f) {
-            scale = 1.0f;
+        // snap to DEFAULT_SCALE if it is close
+        if (scale > (DEFAULT_SCALE - 0.05) && scale < (DEFAULT_SCALE + 0.05)) {
+            scale = DEFAULT_SCALE;
         }
 
         setNewZoomScale(scale, false);
@@ -4748,8 +4762,8 @@ public class WebView extends AbsoluteLayout
                     }
                     int initialScale = msg.arg1;
                     int viewportWidth = msg.arg2;
-                    // by default starting a new page with 100% zoom scale.
-                    float scale = 1.0f;
+                    // start a new page with DEFAULT_SCALE zoom scale.
+                    float scale = DEFAULT_SCALE;
                     if (mInitialScale > 0) {
                         scale = mInitialScale / 100.0f;
                     } else  {
