@@ -97,7 +97,7 @@ final class WebViewCore {
 
     private boolean mViewportUserScalable = true;
     
-    private int mRestoredScale = 100;
+    private int mRestoredScale = WebView.DEFAULT_SCALE_PERCENT;
     private int mRestoredX = 0;
     private int mRestoredY = 0;
 
@@ -1563,16 +1563,16 @@ final class WebViewCore {
         // infer the values if they are not defined.
         if (mViewportWidth == 0) {
             if (mViewportInitialScale == 0) {
-                mViewportInitialScale = 100;
+                mViewportInitialScale = WebView.DEFAULT_SCALE_PERCENT;
             }
             if (mViewportMinimumScale == 0) {
-                mViewportMinimumScale = 100;
+                mViewportMinimumScale = WebView.DEFAULT_SCALE_PERCENT;
             }
         }
         if (mViewportUserScalable == false) {
-            mViewportInitialScale = 100;
-            mViewportMinimumScale = 100;
-            mViewportMaximumScale = 100;
+            mViewportInitialScale = WebView.DEFAULT_SCALE_PERCENT;
+            mViewportMinimumScale = WebView.DEFAULT_SCALE_PERCENT;
+            mViewportMaximumScale = WebView.DEFAULT_SCALE_PERCENT;
         }
         if (mViewportMinimumScale > mViewportInitialScale) {
             if (mViewportInitialScale == 0) {
@@ -1588,7 +1588,8 @@ final class WebViewCore {
                 mViewportInitialScale = mViewportMaximumScale;
             }            
         }
-        if (mViewportWidth < 0 && mViewportInitialScale == 100) {
+        if (mViewportWidth < 0
+                && mViewportInitialScale == WebView.DEFAULT_SCALE_PERCENT) {
             mViewportWidth = 0;
         }
 
