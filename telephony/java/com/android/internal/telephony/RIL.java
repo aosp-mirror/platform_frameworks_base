@@ -1268,7 +1268,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeString(user);
         rr.mp.writeString(password);
         //TODO(): Add to the APN database, AuthType is set to CHAP/PAP
-        rr.mp.writeString("3");
+        // 0 => Neither PAP nor CHAP will be performed, 3 => PAP / CHAP will be performed.
+        if (user != null)
+            rr.mp.writeString("3");
+        else
+            rr.mp.writeString("0");
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest) + " "
                 + apn);
