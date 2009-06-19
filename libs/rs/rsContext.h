@@ -48,6 +48,12 @@ public:
     Context(Device *, Surface *);
     ~Context();
 
+    static pthread_key_t gThreadTLSKey;
+    struct ScriptTLSStruct {
+        Context * mContext;
+        Script * mScript;
+    };
+
 
     //StructuredAllocationContext mStateAllocation;
     ElementState mStateElement;

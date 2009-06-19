@@ -30,64 +30,64 @@ typedef struct {
 #define RS_PROGRAM_VERTEX_TEXTURE_OFFSET 32
 
 typedef struct {
-    const void * (*loadEnvVp)(void *con, uint32_t bank, uint32_t offset);
+    const void * (*loadEnvVp)(uint32_t bank, uint32_t offset);
 
-    float (*loadEnvF)(void *con, uint32_t bank, uint32_t offset);
-    int32_t (*loadEnvI32)(void *con, uint32_t bank, uint32_t offset);
-    uint32_t (*loadEnvU32)(void *con, uint32_t bank, uint32_t offset);
-    void (*loadEnvVec4)(void *con, uint32_t bank, uint32_t offset, rsc_Vector4 *);
-    void (*loadEnvMatrix)(void *con, uint32_t bank, uint32_t offset, rsc_Matrix *);
+    float (*loadEnvF)(uint32_t bank, uint32_t offset);
+    int32_t (*loadEnvI32)(uint32_t bank, uint32_t offset);
+    uint32_t (*loadEnvU32)(uint32_t bank, uint32_t offset);
+    void (*loadEnvVec4)(uint32_t bank, uint32_t offset, rsc_Vector4 *);
+    void (*loadEnvMatrix)(uint32_t bank, uint32_t offset, rsc_Matrix *);
 
-    void (*storeEnvF)(void *con, uint32_t bank, uint32_t offset, float);
-    void (*storeEnvI32)(void *con, uint32_t bank, uint32_t offset, int32_t);
-    void (*storeEnvU32)(void *con, uint32_t bank, uint32_t offset, uint32_t);
-    void (*storeEnvVec4)(void *con, uint32_t bank, uint32_t offset, const rsc_Vector4 *);
-    void (*storeEnvMatrix)(void *con, uint32_t bank, uint32_t offset, const rsc_Matrix *);
+    void (*storeEnvF)(uint32_t bank, uint32_t offset, float);
+    void (*storeEnvI32)(uint32_t bank, uint32_t offset, int32_t);
+    void (*storeEnvU32)(uint32_t bank, uint32_t offset, uint32_t);
+    void (*storeEnvVec4)(uint32_t bank, uint32_t offset, const rsc_Vector4 *);
+    void (*storeEnvMatrix)(uint32_t bank, uint32_t offset, const rsc_Matrix *);
 
-    void (*matrixLoadIdentity)(void *con, rsc_Matrix *);
-    void (*matrixLoadFloat)(void *con, rsc_Matrix *, const float *);
-    void (*matrixLoadMat)(void *con, rsc_Matrix *, const rsc_Matrix *);
-    void (*matrixLoadRotate)(void *con, rsc_Matrix *, float rot, float x, float y, float z);
-    void (*matrixLoadScale)(void *con, rsc_Matrix *, float x, float y, float z);
-    void (*matrixLoadTranslate)(void *con, rsc_Matrix *, float x, float y, float z);
-    void (*matrixLoadMultiply)(void *con, rsc_Matrix *, const rsc_Matrix *lhs, const rsc_Matrix *rhs);
-    void (*matrixMultiply)(void *con, rsc_Matrix *, const rsc_Matrix *rhs);
-    void (*matrixRotate)(void *con, rsc_Matrix *, float rot, float x, float y, float z);
-    void (*matrixScale)(void *con, rsc_Matrix *, float x, float y, float z);
-    void (*matrixTranslate)(void *con, rsc_Matrix *, float x, float y, float z);
+    void (*matrixLoadIdentity)(rsc_Matrix *);
+    void (*matrixLoadFloat)(rsc_Matrix *, const float *);
+    void (*matrixLoadMat)(rsc_Matrix *, const rsc_Matrix *);
+    void (*matrixLoadRotate)(rsc_Matrix *, float rot, float x, float y, float z);
+    void (*matrixLoadScale)(rsc_Matrix *, float x, float y, float z);
+    void (*matrixLoadTranslate)(rsc_Matrix *, float x, float y, float z);
+    void (*matrixLoadMultiply)(rsc_Matrix *, const rsc_Matrix *lhs, const rsc_Matrix *rhs);
+    void (*matrixMultiply)(rsc_Matrix *, const rsc_Matrix *rhs);
+    void (*matrixRotate)(rsc_Matrix *, float rot, float x, float y, float z);
+    void (*matrixScale)(rsc_Matrix *, float x, float y, float z);
+    void (*matrixTranslate)(rsc_Matrix *, float x, float y, float z);
 
-    void (*color)(void *con, float r, float g, float b, float a);
+    void (*color)(float r, float g, float b, float a);
 
-    void (*programFragmentBindTexture)(void *con, RsProgramFragment, uint32_t slot, RsAllocation);
-    void (*programFragmentBindSampler)(void *con, RsProgramFragment, uint32_t slot, RsAllocation);
+    void (*programFragmentBindTexture)(RsProgramFragment, uint32_t slot, RsAllocation);
+    void (*programFragmentBindSampler)(RsProgramFragment, uint32_t slot, RsAllocation);
 
-    void (*materialDiffuse)(void *con, float r, float g, float b, float a);
-    void (*materialSpecular)(void *con, float r, float g, float b, float a);
-    void (*lightPosition)(void *con, float x, float y, float z, float w);
-    void (*materialShininess)(void *con, float s);
+    void (*materialDiffuse)(float r, float g, float b, float a);
+    void (*materialSpecular)(float r, float g, float b, float a);
+    void (*lightPosition)(float x, float y, float z, float w);
+    void (*materialShininess)(float s);
 
-    void (*uploadToTexture)(void *con, RsAllocation va, uint32_t baseMipLevel);
+    void (*uploadToTexture)(RsAllocation va, uint32_t baseMipLevel);
 
-    void (*enable)(void *con, uint32_t);
-    void (*disable)(void *con, uint32_t);
+    void (*enable)(uint32_t);
+    void (*disable)(uint32_t);
 
-    uint32_t (*rand)(void *con, uint32_t max);
+    uint32_t (*rand)(uint32_t max);
 
-    void (*contextBindProgramFragment)(void *con, RsProgramFragment pf);
-    void (*contextBindProgramFragmentStore)(void *con, RsProgramFragmentStore pfs);
+    void (*contextBindProgramFragment)(RsProgramFragment pf);
+    void (*contextBindProgramFragmentStore)(RsProgramFragmentStore pfs);
 
 
     // Drawing funcs
-    void (*renderTriangleMesh)(void *con, RsTriangleMesh);
-    void (*renderTriangleMeshRange)(void *con, RsTriangleMesh, uint32_t start, uint32_t count);
+    void (*renderTriangleMesh)(RsTriangleMesh);
+    void (*renderTriangleMeshRange)(RsTriangleMesh, uint32_t start, uint32_t count);
 
     // Assumes (GL_FIXED) x,y,z (GL_UNSIGNED_BYTE)r,g,b,a
-    void (*drawTriangleArray)(void *con, RsAllocation alloc, uint32_t count);
+    void (*drawTriangleArray)(RsAllocation alloc, uint32_t count);
 
-    void (*drawRect)(void *con, int32_t x1, int32_t x2, int32_t y1, int32_t y2);
+    void (*drawRect)(int32_t x1, int32_t x2, int32_t y1, int32_t y2);
 } rsc_FunctionTable;
 
-typedef int (*rsc_RunScript)(void *con, const rsc_FunctionTable *, uint32_t launchIndex);
+typedef int (*rsc_RunScript)(uint32_t launchIndex, const rsc_FunctionTable *);
 
 
 /* EnableCap */
