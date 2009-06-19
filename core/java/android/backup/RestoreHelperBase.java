@@ -17,69 +17,66 @@
 package android.backup;
 
 import android.content.Context;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import java.io.InputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 class RestoreHelperBase {
     private static final String TAG = "RestoreHelperBase";
-    private static final int BUF_SIZE = 8 * 1024;
 
+    int mPtr;
     Context mContext;
-    byte[] mBuf = new byte[BUF_SIZE];
     boolean mExceptionLogged;
     
     RestoreHelperBase(Context context) {
+        mPtr = ctor();
         mContext = context;
     }
 
-    void writeFile(File f, InputStream in) {
-        boolean success = false;
-        FileOutputStream out = null;
+    protected void finalize() throws Throwable {
         try {
-            // Create the enclosing directory.
-            File parent = f.getParentFile();
-            parent.mkdirs();
+            dtor(mPtr);
+        } finally {
+            super.finalize();
+        }
+    }
 
-            // Copy the file.
-            int sum = 0;
-            out = new FileOutputStream(f);
-            byte[] buf = mBuf;
-            int amt;
-            while ((amt = in.read(buf)) > 0) {
-                out.write(buf, 0, amt);
-                sum += amt;
-            }
+    void writeFile(File f, InputStream in) {
+        if (!(in instanceof BackupDataInputStream)) {
+            throw new IllegalStateException("input stream must be a BackupDataInputStream");
+        }
+        int result = -1;
 
-            // TODO: Set the permissions of the file.
+        // Create the enclosing directory.
+        File parent = f.getParentFile();
+        parent.mkdirs();
 
-            // We're done
-            success = true;
-            out = null;
-        } catch (IOException ex) {
-            // Bail on this entity.  Only log one exception per helper object.
+        result = writeFile_native(mPtr, f.getAbsolutePath(),
+                ((BackupDataInputStream)in).mData.mBackupReader);
+        if (result != 0) {
+            // Bail on this entity.  Only log one failure per helper object.
             if (!mExceptionLogged) {
                 Log.e(TAG, "Failed restoring file '" + f + "' for app '"
-                    + mContext.getPackageName() + '\'', ex);
+                        + mContext.getPackageName() + "\' result=0x"
+                        + Integer.toHexString(result));
                 mExceptionLogged = true;
             }
         }
-        finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException ex) {
-                }
-            }
-            if (!success) {
-                // Something didn't work out, delete the file
-                f.delete();
-            }
-        }
     }
+
+    public void writeSnapshot(ParcelFileDescriptor fd) {
+        int result = writeSnapshot_native(mPtr, fd.getFileDescriptor());
+        // TODO: Do something with the error.
+    }
+
+    private static native int ctor();
+    private static native void dtor(int ptr);
+    private static native int writeFile_native(int ptr, String filename, int backupReader);
+    private static native int writeSnapshot_native(int ptr, FileDescriptor fd);
 }
 
 
