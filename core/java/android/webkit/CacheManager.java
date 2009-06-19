@@ -79,6 +79,7 @@ public final class CacheManager {
         int httpStatusCode;
         long contentLength;
         long expires;
+        String expiresString;
         String localPath;
         String lastModified;
         String etag;
@@ -105,6 +106,10 @@ public final class CacheManager {
 
         public long getExpires() {
             return expires;
+        }
+
+        public String getExpiresString() {
+            return expiresString;
         }
 
         public String getLastModified() {
@@ -603,17 +608,18 @@ public final class CacheManager {
         if (location != null) ret.location = location;
 
         ret.expires = -1;
-        String expires = headers.getExpires();
-        if (expires != null) {
+        ret.expiresString = headers.getExpires();
+        if (ret.expiresString != null) {
             try {
-                ret.expires = HttpDateTime.parse(expires);
+                ret.expires = HttpDateTime.parse(ret.expiresString);
             } catch (IllegalArgumentException ex) {
                 // Take care of the special "-1" and "0" cases
-                if ("-1".equals(expires) || "0".equals(expires)) {
+                if ("-1".equals(ret.expiresString)
+                        || "0".equals(ret.expiresString)) {
                     // make it expired, but can be used for history navigation
                     ret.expires = 0;
                 } else {
-                    Log.e(LOGTAG, "illegal expires: " + expires);
+                    Log.e(LOGTAG, "illegal expires: " + ret.expiresString);
                 }
             }
         }

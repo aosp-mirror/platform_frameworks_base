@@ -48,7 +48,8 @@ public class WebViewDatabase {
     // 6 -> 7 Change cache localPath from int to String
     // 7 -> 8 Move cache to its own db
     // 8 -> 9 Store both scheme and host when storing passwords
-    private static final int CACHE_DATABASE_VERSION = 1;
+    private static final int CACHE_DATABASE_VERSION = 2;
+    // 1 -> 2 Add expires String
 
     private static WebViewDatabase mInstance = null;
 
@@ -107,6 +108,8 @@ public class WebViewDatabase {
 
     private static final String CACHE_EXPIRES_COL = "expires";
 
+    private static final String CACHE_EXPIRES_STRING_COL = "expiresstring";
+
     private static final String CACHE_MIMETYPE_COL = "mimetype";
 
     private static final String CACHE_ENCODING_COL = "encoding";
@@ -150,6 +153,7 @@ public class WebViewDatabase {
     private static int mCacheLastModifyColIndex;
     private static int mCacheETagColIndex;
     private static int mCacheExpiresColIndex;
+    private static int mCacheExpiresStringColIndex;
     private static int mCacheMimeTypeColIndex;
     private static int mCacheEncodingColIndex;
     private static int mCacheHttpStatusColIndex;
@@ -220,6 +224,8 @@ public class WebViewDatabase {
                         .getColumnIndex(CACHE_ETAG_COL);
                 mCacheExpiresColIndex = mCacheInserter
                         .getColumnIndex(CACHE_EXPIRES_COL);
+                mCacheExpiresStringColIndex = mCacheInserter
+                        .getColumnIndex(CACHE_EXPIRES_STRING_COL);
                 mCacheMimeTypeColIndex = mCacheInserter
                         .getColumnIndex(CACHE_MIMETYPE_COL);
                 mCacheEncodingColIndex = mCacheInserter
@@ -320,6 +326,7 @@ public class WebViewDatabase {
                     + " TEXT, " + CACHE_FILE_PATH_COL + " TEXT, "
                     + CACHE_LAST_MODIFY_COL + " TEXT, " + CACHE_ETAG_COL
                     + " TEXT, " + CACHE_EXPIRES_COL + " INTEGER, "
+                    + CACHE_EXPIRES_STRING_COL + " TEXT, "
                     + CACHE_MIMETYPE_COL + " TEXT, " + CACHE_ENCODING_COL
                     + " TEXT," + CACHE_HTTP_STATUS_COL + " INTEGER, "
                     + CACHE_LOCATION_COL + " TEXT, " + CACHE_CONTENTLENGTH_COL
@@ -537,7 +544,7 @@ public class WebViewDatabase {
         }
 
         Cursor cursor = mCacheDatabase.rawQuery("SELECT filepath, lastmodify, etag, expires, "
-                    + "mimetype, encoding, httpstatus, location, contentlength "
+                    + "expiresstring, mimetype, encoding, httpstatus, location, contentlength "
                     + "FROM cache WHERE url = ?",
                 new String[] { url });
 
@@ -548,11 +555,12 @@ public class WebViewDatabase {
                 ret.lastModified = cursor.getString(1);
                 ret.etag = cursor.getString(2);
                 ret.expires = cursor.getLong(3);
-                ret.mimeType = cursor.getString(4);
-                ret.encoding = cursor.getString(5);
-                ret.httpStatusCode = cursor.getInt(6);
-                ret.location = cursor.getString(7);
-                ret.contentLength = cursor.getLong(8);
+                ret.expiresString = cursor.getString(4);
+                ret.mimeType = cursor.getString(5);
+                ret.encoding = cursor.getString(6);
+                ret.httpStatusCode = cursor.getInt(7);
+                ret.location = cursor.getString(8);
+                ret.contentLength = cursor.getLong(9);
                 return ret;
             }
         } finally {
@@ -591,6 +599,7 @@ public class WebViewDatabase {
         mCacheInserter.bind(mCacheLastModifyColIndex, c.lastModified);
         mCacheInserter.bind(mCacheETagColIndex, c.etag);
         mCacheInserter.bind(mCacheExpiresColIndex, c.expires);
+        mCacheInserter.bind(mCacheExpiresStringColIndex, c.expiresString);
         mCacheInserter.bind(mCacheMimeTypeColIndex, c.mimeType);
         mCacheInserter.bind(mCacheEncodingColIndex, c.encoding);
         mCacheInserter.bind(mCacheHttpStatusColIndex, c.httpStatusCode);
