@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.os.Handler;
 import android.os.Message;
+import android.security.Keystore;
 import android.util.Log;
 
 final class JWebCoreJavaBridge extends Handler {
@@ -187,18 +188,11 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     private String[] getKeyStrengthList() {
-        // FIXME: fake the list for now
-        String[] list = new String[2];
-        list[0] = "1024";
-        list[1] = "512";
-        return list;
+        return Keystore.getInstance().getSupportedKeyStrenghs();
     }
 
     private String getSignedPublicKey(int index, String challenge, String url) {
-        // FIXME: do nothing for now
-        Log.w(LOGTAG, "getSignedPublicKey for " + index + " and challenge="
-                + challenge + " and url=" + url);
-        return "";
+        return Keystore.getInstance().generateKeyPair(index, challenge, url);
     }
 
     private native void nativeConstructor();
