@@ -2683,6 +2683,15 @@ public final class Settings {
         public static final String GTALK_USE_BARE_JID_TIMEOUT_MS = "gtalk_use_barejid_timeout_ms";
 
         /**
+         * This is the threshold of retry number when there is an authentication expired failure
+         * for Google Talk. In some situation, e.g. when a Google Apps account is disabled chat
+         * service, the connection keeps failing. This threshold controls when we should stop
+         * the retrying.
+         */
+        public static final String GTALK_MAX_RETRIES_FOR_AUTH_EXPIRED =
+            "gtalk_max_retries_for_auth_expired";
+
+        /**
          * Enable use of ssl session caching.
          * 'db' - save each session in a (per process) database
          * 'file' - save each session in a (per process) file
