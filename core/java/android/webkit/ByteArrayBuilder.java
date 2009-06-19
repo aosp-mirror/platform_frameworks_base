@@ -17,6 +17,7 @@
 package android.webkit;
 
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 /** Utility class optimized for accumulating bytes, and then spitting
     them back out.  It does not optimize for returning the result in a
@@ -92,6 +93,20 @@ class ByteArrayBuilder {
 
     public boolean isEmpty() {
         return mChunks.isEmpty();
+    }
+
+    public int size() {
+        return mChunks.size();
+    }
+
+    public int getByteSize() {
+        int total = 0;
+        ListIterator<Chunk> it = mChunks.listIterator(0);
+        while (it.hasNext()) {
+            Chunk c = it.next();
+            total += c.mLength;
+        }
+        return total;
     }
 
     public synchronized void clear() {

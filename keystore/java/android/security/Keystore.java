@@ -88,7 +88,7 @@ public abstract class Keystore {
     public abstract String generateKeyPair(
             int keyStrengthIndex, String challenge, String organizations);
 
-    public abstract void addCertificate(String cert);
+    public abstract void addCertificate(byte[] cert);
 
     private static class FileKeystore extends Keystore {
         private static final String SERVICE_NAME = "keystore";
@@ -217,7 +217,7 @@ public abstract class Keystore {
         }
 
         @Override
-        public void addCertificate(String cert) {
+        public void addCertificate(byte[] cert) {
             // TODO: real implementation
         }
 
