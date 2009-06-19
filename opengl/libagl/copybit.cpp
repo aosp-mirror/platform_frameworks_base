@@ -293,6 +293,7 @@ bool drawTriangleFanWithCopybit_impl(ogles_context_t* c, GLint first, GLsizei co
         return false;
     }
 
+    // FIXME: we should handle culling  here
     c->arrays.compileElements(c, c->vc.vBuffer, 0, 4);
 
     // we detect if we're dealing with a rectangle, by comparing the
@@ -316,6 +317,18 @@ bool drawTriangleFanWithCopybit_impl(ogles_context_t* c, GLint first, GLsizei co
         LOGD_IF(DEBUG_COPYBIT, "geometry not a rectangle");
         return false;
     }
+
+    // fetch and transform texture coordinates
+    // NOTE: maybe it would be better to have a "compileElementsAll" method
+    // that would ensure all vertex data are fetched and transformed
+    const transform_t& tr = c->transforms.texture[0].transform; 
+    for (size_t i=0 ; i<4 ; i++) {
+        const GLubyte* tp = c->arrays.texture[0].element(i);
+        vertex_t* const v = &c->vc.vBuffer[i];
+        c->arrays.texture[0].fetch(c, v->texture[0].v, tp);
+        // FIXME: we should bail if q!=1
+        c->arrays.tex_transform[0](&tr, &v->texture[0], &v->texture[0]);
+    }
     
     const vec4_t& t0 = c->vc.vBuffer[0].texture[0];
     const vec4_t& t1 = c->vc.vBuffer[1].texture[0];
@@ -333,7 +346,8 @@ bool drawTriangleFanWithCopybit_impl(ogles_context_t* c, GLint first, GLsizei co
     if ((txl != 0) || (txb != 0) ||
         (txr != FIXED_ONE) || (txt != FIXED_ONE)) {
         // we could probably handle this case, if we wanted to
-        LOGD_IF(DEBUG_COPYBIT, "texture is cropped");
+        LOGD_IF(DEBUG_COPYBIT, "texture is cropped: %08x,%08x,%08x,%08x",
+                txl, txb, txr, txt);
         return false;
     }
 
