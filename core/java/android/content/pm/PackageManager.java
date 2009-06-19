@@ -16,8 +16,6 @@
 
 package android.content.pm;
 
-
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1516,40 +1514,13 @@ public abstract class PackageManager {
      * and the current free storage is YY,
      * if XX is less than YY, just return. if not free XX-YY number
      * of bytes if possible.
-     * @param opFinishedIntent PendingIntent call back used to
-     * notify when the operation is completed.May be null
-     * to indicate that no call back is desired.
-     *
-     * @deprecated
-     * @hide
-     */
-    @Deprecated
-    public abstract void freeStorage(long freeStorageSize, PendingIntent opFinishedIntent);
-
-    /**
-     * Free storage by deleting LRU sorted list of cache files across
-     * all applications. If the currently available free storage
-     * on the device is greater than or equal to the requested
-     * free storage, no cache files are cleared. If the currently
-     * available storage on the device is less than the requested
-     * free storage, some or all of the cache files across
-     * all applications are deleted (based on last accessed time)
-     * to increase the free storage space on the device to
-     * the requested value. There is no guarantee that clearing all
-     * the cache files from all applications will clear up
-     * enough storage to achieve the desired value.
-     * @param freeStorageSize The number of bytes of storage to be
-     * freed by the system. Say if freeStorageSize is XX,
-     * and the current free storage is YY,
-     * if XX is less than YY, just return. if not free XX-YY number
-     * of bytes if possible.
      * @param pi IntentSender call back used to
      * notify when the operation is completed.May be null
      * to indicate that no call back is desired.
      * 
      * @hide
      */
-    public abstract void freeStorageWithIntent(long freeStorageSize, IntentSender pi);
+    public abstract void freeStorage(long freeStorageSize, IntentSender pi);
 
     /**
      * Retrieve the size information for a package.

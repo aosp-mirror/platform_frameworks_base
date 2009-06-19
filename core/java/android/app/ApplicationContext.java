@@ -2374,18 +2374,9 @@ class ApplicationContext extends Context {
         }
 
         @Override
-        public void freeStorage(long freeStorageSize, PendingIntent pi) {
+        public void freeStorage(long freeStorageSize, IntentSender pi) {
             try {
                 mPM.freeStorage(freeStorageSize, pi);
-            } catch (RemoteException e) {
-                // Should never happen!
-            }
-        }
-
-        @Override
-        public void freeStorageWithIntent(long freeStorageSize, IntentSender pi) {
-            try {
-                mPM.freeStorageWithIntent(freeStorageSize, pi);
             } catch (RemoteException e) {
                 // Should never happen!
             }
