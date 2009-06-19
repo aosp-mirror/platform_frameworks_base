@@ -187,7 +187,7 @@ public final class ActivityThread {
             try {
                 appInfo = getPackageManager().getApplicationInfo(
                         pkgInfo.getPackageName(),
-                        PackageManager.GET_SUPPORTS_DENSITIES | PackageManager.GET_EXPANDABLE);
+                        PackageManager.GET_SUPPORTS_DENSITIES);
             } catch (RemoteException e) {
                 throw new AssertionError(e);
             }
@@ -287,6 +287,10 @@ public final class ActivityThread {
             return mPackageName;
         }
 
+        public ApplicationInfo getApplicationInfo() {
+            return mApplicationInfo;
+        }
+        
         public boolean isSecurityViolation() {
             return mSecurityViolation;
         }

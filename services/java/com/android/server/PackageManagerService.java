@@ -19,7 +19,6 @@ package com.android.server;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
-import com.android.server.PackageManagerService.PreferredActivity;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -30,7 +29,6 @@ import android.app.IActivityManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -152,6 +150,7 @@ class PackageManagerService extends IPackageManager.Stub {
     
     final Context mContext;
     final boolean mFactoryTest;
+    final boolean mNoDexOpt;
     final DisplayMetrics mMetrics;
     final int mDefParseFlags;
     final String[] mSeparateProcesses;
@@ -303,6 +302,7 @@ class PackageManagerService extends IPackageManager.Stub {
         
         mContext = context;
         mFactoryTest = factoryTest;
+        mNoDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
         mSettings = new Settings();
         mSettings.addSharedUserLP("android.uid.system",
@@ -372,6 +372,10 @@ class PackageManagerService extends IPackageManager.Stub {
                     startTime);
             
             int scanMode = SCAN_MONITOR;
+            if (mNoDexOpt) {
+                Log.w(TAG, "Running ENG build: no pre-dexopt!");
+                scanMode |= SCAN_NO_DEX; 
+            }
             
             final HashSet<String> libFiles = new HashSet<String>();
             
@@ -993,10 +997,11 @@ class PackageManagerService extends IPackageManager.Stub {
             if (Config.LOGV) Log.v(TAG, "getActivityInfo " + component + ": " + a);
             if (a != null && mSettings.isEnabledLP(a.info, flags)) {
                 ActivityInfo ainfo = PackageParser.generateActivityInfo(a, flags);
-                if (ainfo != null && (flags & PackageManager.GET_EXPANDABLE) != 0) {
+                if (ainfo != null) {
                     ApplicationInfo appInfo = getApplicationInfo(component.getPackageName(),
-                            PackageManager.GET_EXPANDABLE | PackageManager.GET_SUPPORTS_DENSITIES); 
-                    if (appInfo != null && !appInfo.expandable) {
+                            PackageManager.GET_SUPPORTS_DENSITIES);
+                    if (appInfo != null &&
+                            (appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) == 0) {
                         // Check if the screen size is same as what the application expect.
                         CompatibilityInfo info = new CompatibilityInfo(appInfo);
                         DisplayMetrics metrics = new DisplayMetrics();
@@ -1009,11 +1014,13 @@ class PackageManagerService extends IPackageManager.Stub {
                             // Don't allow an app that cannot expand to handle rotation.
                             ainfo.configChanges &= ~ ActivityInfo.CONFIG_ORIENTATION;
                         } else {
-                            appInfo.expandable = true;
+                            appInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
                         }
                         if (DEBUG_SETTINGS) {
                             Log.d(TAG, "component=" + component +
-                                    ", expandable:" + appInfo.expandable);
+                                    ", expandable:" +
+                                    ((appInfo.flags &
+                                            ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0));
                         }
                     }
                 }
@@ -1943,7 +1950,56 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         return true;
     }
+    
+    public boolean performDexOpt(String packageName) {
+        if (!mNoDexOpt) {
+            return false;
+        }
         
+        PackageParser.Package p;
+        synchronized (mPackages) {
+            p = mPackages.get(packageName);
+            if (p == null || p.mDidDexOpt) {
+                return false;
+            }
+        }
+        synchronized (mInstallLock) {
+            return performDexOptLI(p, false) == DEX_OPT_PERFORMED;
+        }
+    }
+    
+    static final int DEX_OPT_SKIPPED = 0;
+    static final int DEX_OPT_PERFORMED = 1;
+    static final int DEX_OPT_FAILED = -1;
+    
+    private int performDexOptLI(PackageParser.Package pkg, boolean forceDex) {
+        boolean performed = false;
+        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
+            String path = pkg.mScanPath;
+            int ret = 0;
+            try {
+                if (forceDex || dalvik.system.DexFile.isDexOptNeeded(path)) {
+                    ret = mInstaller.dexopt(path, pkg.applicationInfo.uid, 
+                            !pkg.mForwardLocked);
+                    pkg.mDidDexOpt = true;
+                    performed = true;
+                }
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "Apk not found for dexopt: " + path);
+                ret = -1;
+            } catch (IOException e) {
+                Log.w(TAG, "Exception reading apk: " + path, e);
+                ret = -1;
+            }
+            if (ret < 0) {
+                //error from installer
+                return DEX_OPT_FAILED;
+            }
+        }
+        
+        return performed ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
+    }
+    
     private PackageParser.Package scanPackageLI(
         File scanFile, File destCodeFile, File destResourceFile,
         PackageParser.Package pkg, int parseFlags, int scanMode) {
@@ -2239,23 +2295,11 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            if ((scanMode&SCAN_NO_DEX) == 0
-                    && (pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
-                int ret = 0;
-                try {
-                    if (forceDex || dalvik.system.DexFile.isDexOptNeeded(path)) {
-                        ret = mInstaller.dexopt(path, pkg.applicationInfo.uid, 
-                                (scanMode&SCAN_FORWARD_LOCKED) == 0);
-                    }
-                } catch (FileNotFoundException e) {
-                    Log.w(TAG, "Apk not found for dexopt: " + path);
-                    ret = -1;
-                } catch (IOException e) {
-                    Log.w(TAG, "Exception reading apk: " + path, e);
-                    ret = -1;
-                }
-                if (ret < 0) {
-                    //error from installer
+            pkg.mForwardLocked = (scanMode&SCAN_FORWARD_LOCKED) != 0;
+            pkg.mScanPath = path;
+            
+            if ((scanMode&SCAN_NO_DEX) == 0) {
+                if (performDexOptLI(pkg, forceDex) == DEX_OPT_FAILED) {
                     mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
                     return null;
                 }

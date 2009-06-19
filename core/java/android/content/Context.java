@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -233,6 +234,9 @@ public abstract class Context {
     /** Return the name of this application's package. */
     public abstract String getPackageName();
 
+    /** Return the full application info for this context's package. */
+    public abstract ApplicationInfo getApplicationInfo();
+    
     /**
      * {@hide}
      * Return the full path to this context's resource files.  This is the ZIP files
