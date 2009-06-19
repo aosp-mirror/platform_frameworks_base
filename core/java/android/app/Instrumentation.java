@@ -446,13 +446,13 @@ public class Instrumentation {
             if (ai == null) {
                 throw new RuntimeException("Unable to resolve activity for: " + intent);
             }
-            if (!ai.applicationInfo.processName.equals(
-                    getTargetContext().getPackageName())) {
+            String myProc = mThread.getProcessName();
+            if (!ai.processName.equals(myProc)) {
                 // todo: if this intent is ambiguous, look here to see if
                 // there is a single match that is in our package.
-                throw new RuntimeException("Intent resolved to different package "
-                                           + ai.applicationInfo.packageName + ": "
-                                           + intent);
+                throw new RuntimeException("Intent in process "
+                        + myProc + " resolved to different process "
+                        + ai.processName + ": " + intent);
             }
     
             intent.setComponent(new ComponentName(

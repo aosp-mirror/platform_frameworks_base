@@ -2088,6 +2088,10 @@ public final class ActivityThread {
         return mInitialApplication;
     }
     
+    public String getProcessName() {
+        return mBoundApplication.processName;
+    }
+    
     public ApplicationContext getSystemContext() {
         synchronized (this) {
             if (mSystemContext == null) {
