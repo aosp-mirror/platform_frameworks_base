@@ -915,6 +915,23 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SEND = "android.intent.action.SEND";
     /**
+     * Activity Action: Deliver multiple data to someone else.
+     * <p>
+     * Like ACTION_SEND, except the data is multiple.
+     * <p>
+     * Input: {@link #getType} is the MIME type of the data being sent.
+     * get*ArrayListExtra can have either a {@link #EXTRA_TEXT} or {@link
+     * #EXTRA_STREAM} field, containing the data to be sent.
+     * <p>
+     * Optional standard extras, which may be interpreted by some recipients as
+     * appropriate, are: {@link #EXTRA_EMAIL}, {@link #EXTRA_CC},
+     * {@link #EXTRA_BCC}, {@link #EXTRA_SUBJECT}.
+     * <p>
+     * Output: nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SEND_MULTIPLE = "android.intent.action.SEND_MULTIPLE";
+    /**
      * Activity Action: Handle an incoming phone call.
      * <p>Input: nothing.
      * <p>Output: nothing.
