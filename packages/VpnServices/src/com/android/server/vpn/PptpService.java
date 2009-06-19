@@ -16,23 +16,21 @@
 
 package com.android.server.vpn;
 
-import android.net.vpn.L2tpProfile;
+import android.net.vpn.PptpProfile;
 
 import java.io.IOException;
 
 /**
- * The service that manages the L2TP VPN connection.
+ * The service that manages the PPTP VPN connection.
  */
-class L2tpService extends VpnService<L2tpProfile> {
-    static final String L2TP_DAEMON = "l2tp";
-    static final String L2TP_PORT = "1701";
-
+class PptpService extends VpnService<PptpProfile> {
+    static final String PPTP_DAEMON = "pptp";
+    static final String PPTP_PORT = "1723";
     @Override
     protected void connect(String serverIp, String username, String password)
             throws IOException {
-        L2tpProfile p = getProfile();
-        MtpdHelper.sendCommand(this, L2TP_DAEMON, serverIp, L2TP_PORT,
-                (p.isSecretEnabled() ? p.getSecretString() : null),
+        MtpdHelper.sendCommand(this, PPTP_DAEMON, serverIp, PPTP_PORT, null,
                 username, password);
     }
+
 }
