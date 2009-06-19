@@ -20,6 +20,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #include "LayerBase.h"
 #include "LayerBitmap.h"
 
@@ -29,6 +32,11 @@ namespace android {
 
 class LayerDim : public LayerBaseClient
 {
+    static bool sUseTexture;
+    static GLuint sTexId;
+    static EGLImageKHR sImage;
+    static int32_t sWidth;
+    static int32_t sHeight;
 public:    
     static const uint32_t typeInfo;
     static const char* const typeID;

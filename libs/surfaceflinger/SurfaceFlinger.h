@@ -180,6 +180,7 @@ private:
     friend class LayerBaseClient;
     friend class Layer;
     friend class LayerBlur;
+    friend class LayerDim;
 
     sp<ISurface> createSurface(ClientID client, int pid, 
             ISurfaceFlingerClient::surface_data_t* params,
