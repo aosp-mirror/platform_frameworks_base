@@ -69,7 +69,8 @@ public class CompatibilityInfo {
     public final boolean mScalingRequired;
 
     public CompatibilityInfo(ApplicationInfo appInfo) {
-        mExpandable = mConfiguredExpandable = appInfo.expandable;
+        mExpandable = mConfiguredExpandable =
+            (appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0;
         
         float packageDensityScale = -1.0f;
         if (appInfo.supportsDensities != null) {
