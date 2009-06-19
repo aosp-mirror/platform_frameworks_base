@@ -16,10 +16,12 @@
 
 package android.backup;
 
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 /** @hide */
 public class RestoreHelperDispatcher {
@@ -31,7 +33,7 @@ public class RestoreHelperDispatcher {
         mHelpers.put(keyPrefix, helper);
     }
 
-    public void dispatch(BackupDataInput input) throws IOException {
+    public void dispatch(BackupDataInput input, ParcelFileDescriptor newState) throws IOException {
         boolean alreadyComplained = false;
 
         BackupDataInputStream stream = new BackupDataInputStream(input);
@@ -60,5 +62,17 @@ public class RestoreHelperDispatcher {
             }
             input.skipEntityData(); // In case they didn't consume the data.
         }
+
+        if (mHelpers.size() > 1) {
+            throw new RuntimeException("RestoreHelperDispatcher won't get your your"
+                    + " data in the right order yet.");
+        }
+        
+        // Write out the state files
+        for (RestoreHelper helper: mHelpers.values()) {
+            // TODO: Write a header for the state
+            helper.writeSnapshot(newState);
+        }
     }
 }
+

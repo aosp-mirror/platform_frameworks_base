@@ -55,7 +55,7 @@ public class BackupTestAgent extends BackupAgent
         // dispatch.addHelper(SHARED_PREFS, new SharedPrefsRestoreHelper(this));
         dispatch.addHelper(DATA_FILES, new FileRestoreHelper(this));
 
-        dispatch.dispatch(data);
+        dispatch.dispatch(data, newState);
     }
 }
 
