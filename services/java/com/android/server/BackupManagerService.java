@@ -31,6 +31,7 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -153,7 +154,9 @@ class BackupManagerService extends IBackupManager.Stub {
         mJournalDir.mkdirs();
         makeJournalLocked();    // okay because no other threads are running yet
 
-        // Build our mapping of uid to backup client services
+        // Build our mapping of uid to backup client services.  This implicitly
+        // schedules a backup pass on the Package Manager metadata the first
+        // time anything needs to be backed up.
         synchronized (mBackupParticipants) {
             addPackageParticipantsLocked(null);
         }
@@ -656,8 +659,15 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Look up the package info & signatures.  This is first so that if it
                 // throws an exception, there's no file setup yet that would need to
                 // be unraveled.
-                PackageInfo packInfo = mPackageManager.getPackageInfo(packageName,
+                PackageInfo packInfo;
+                if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
+                    // The metadata 'package' is synthetic
+                    packInfo = new PackageInfo();
+                    packInfo.packageName = packageName;
+                } else {
+                    packInfo = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES);
+                }
 
                 // !!! TODO: get the state file dir from the transport
                 File savedStateName = new File(mStateDir, packageName);
@@ -745,6 +755,28 @@ class BackupManagerService extends IBackupManager.Stub {
         return null;
     }
 
+    private boolean signaturesMatch(Signature[] storedSigs, Signature[] deviceSigs) {
+        // !!! TODO: this demands that every stored signature match one
+        // that is present on device, and does not demand the converse.
+        // Is this this right policy?
+        int nStored = storedSigs.length;
+        int nDevice = deviceSigs.length;
+
+        for (int i=0; i < nStored; i++) {
+            boolean match = false;
+            for (int j=0; j < nDevice; j++) {
+                if (storedSigs[i].equals(deviceSigs[j])) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     class PerformRestoreThread extends Thread {
         private IBackupTransport mTransport;
         private int mToken;
@@ -791,6 +823,13 @@ class BackupManagerService extends IBackupManager.Stub {
                         // !!! TODO: pick out the set for this token
                         mImage = images[0];
 
+                        // Pull the Package Manager metadata from the restore set first
+                        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
+                                mPackageManager, allAgentApps());
+                        PackageInfo pmApp = new PackageInfo();
+                        pmApp.packageName = PACKAGE_MANAGER_SENTINEL;
+                        processOneRestore(pmApp, IBackupAgent.Stub.asInterface(pmAgent.onBind()));
+
                         // build the set of apps we will attempt to restore
                         PackageInfo[] packages = mTransport.getAppSet(mImage.token);
                         HashSet<PackageInfo> appsToRestore = new HashSet<PackageInfo>();
@@ -798,7 +837,20 @@ class BackupManagerService extends IBackupManager.Stub {
                             // get the real PackageManager idea of the package
                             PackageInfo app = isRestorable(pkg);
                             if (app != null) {
-                                appsToRestore.add(app);
+                                // Validate against the backed-up signature block, too
+                                Signature[] storedSigs
+                                        = pmAgent.getRestoredSignatures(app.packageName);
+                                if (storedSigs != null) {
+                                    // !!! TODO: check app version here as well
+                                    if (signaturesMatch(storedSigs, app.signatures)) {
+                                        appsToRestore.add(app);
+                                    } else {
+                                        Log.w(TAG, "Sig mismatch on restore of " + app.packageName);
+                                    }
+                                } else {
+                                    Log.i(TAG, "No stored sigs for " + app.packageName
+                                            + " so not restoring");
+                                }
                             }
                         }
 
@@ -1002,6 +1054,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Report the currently active transport
     public int getCurrentTransport() {
         mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
+        Log.v(TAG, "getCurrentTransport() returning " + mTransportId);
         return mTransportId;
     }
 
@@ -1011,6 +1064,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         int prevTransport = mTransportId;
         mTransportId = transportId;
+        Log.v(TAG, "selectBackupTransport() set " + mTransportId + " returning " + prevTransport);
         return prevTransport;
     }
 

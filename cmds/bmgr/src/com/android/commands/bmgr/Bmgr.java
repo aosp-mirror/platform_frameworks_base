@@ -80,6 +80,14 @@ public final class Bmgr {
             doRestore();
             return;
         }
+
+        if ("transport".equals(op)) {
+            doTransport();
+            return;
+        }
+
+        System.err.println("Unknown command");
+        showUsage();
     }
 
     private void doRun() {
@@ -107,6 +115,19 @@ public final class Bmgr {
         try {
             // !!! TODO: handle full backup
             mBmgr.dataChanged(pkg);
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void doTransport() {
+        try {
+            int which = Integer.parseInt(nextArg());
+            int old = mBmgr.selectBackupTransport(which);
+            System.out.println("Selected transport " + which + " (formerly " + old + ")");
+        } catch (NumberFormatException e) {
+            showUsage();
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
