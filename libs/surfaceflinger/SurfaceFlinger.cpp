@@ -1322,6 +1322,8 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
                 SurfaceFlinger* flinger, const sp<LayerBaseClient>& layer)
             : flinger(flinger), layer(layer) { }
         virtual bool handler() {
+            sp<LayerBaseClient> l(layer);
+            layer.clear(); // clear it outside of the lock;
             Mutex::Autolock _l(flinger->mStateLock);
             // remove the layer from the current list -- chances are that it's 
             // not in the list anyway, because it should have been removed 
@@ -1329,7 +1331,7 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
             // However, a buggy client could have not done that.
             // Since we know we don't have any more clients, we don't need
             // to use the purgatory.
-            status_t err = flinger->removeLayer_l(layer);
+            status_t err = flinger->removeLayer_l(l);
             if (err == NAME_NOT_FOUND) {
                 // The surface wasn't in the current list, which means it was
                 // removed already, which means it is in the purgatory, 
@@ -1338,9 +1340,9 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
                 // must run from there (b/c of OpenGL ES). Additionally, we
                 // can't really acquire our internal lock from 
                 // destroySurface() -- see postMessage() below.
-                ssize_t idx = flinger->mLayerPurgatory.remove(layer);
+                ssize_t idx = flinger->mLayerPurgatory.remove(l);
                 LOGE_IF(idx < 0,
-                        "layer=%p is not in the purgatory list", layer.get());
+                        "layer=%p is not in the purgatory list", l.get());
             }
             return true;
         }
