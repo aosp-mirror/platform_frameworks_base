@@ -54,6 +54,7 @@ import com.android.internal.backup.LocalTransport;
 import com.android.internal.backup.IBackupTransport;
 
 import com.android.server.PackageManagerBackupAgent;
+import com.android.server.PackageManagerBackupAgent.Metadata;
 
 import java.io.EOFException;
 import java.io.File;
@@ -111,9 +112,8 @@ class BackupManagerService extends IBackupManager.Stub {
     // Do we need to back up the package manager metadata on the next pass?
     private boolean mDoPackageManager;
     private static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
-    // Backups that we have started.  These are separate to prevent starvation
-    // if an app keeps re-enqueuing itself.
-    private ArrayList<BackupRequest> mBackupQueue;
+
+    // locking around the pending-backup management
     private final Object mQueueLock = new Object();
 
     // The thread performing the sequence of queued backups binds to each app's agent
@@ -296,6 +296,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 // snapshot the pending-backup set and work on that
+                ArrayList<BackupRequest> queue = new ArrayList<BackupRequest>();
                 File oldJournal = mJournal;
                 synchronized (mQueueLock) {
                     if (mPendingBackups.size() == 0) {
@@ -303,13 +304,11 @@ class BackupManagerService extends IBackupManager.Stub {
                         break;
                     }
 
-                    if (mBackupQueue == null) {
-                        mBackupQueue = new ArrayList<BackupRequest>();
-                        for (BackupRequest b: mPendingBackups.values()) {
-                            mBackupQueue.add(b);
-                        }
-                        mPendingBackups = new HashMap<ApplicationInfo,BackupRequest>();
+                    for (BackupRequest b: mPendingBackups.values()) {
+                        queue.add(b);
                     }
+                    Log.v(TAG, "clearing pending backups");
+                    mPendingBackups.clear();
 
                     // Start a new backup-queue journal file too
                     if (mJournalStream != null) {
@@ -328,7 +327,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // at next boot and the journaled requests fulfilled.
                 }
 
-                (new PerformBackupThread(transport, mBackupQueue, oldJournal)).start();
+                (new PerformBackupThread(transport, queue, oldJournal)).start();
                 break;
             }
 
@@ -759,6 +758,8 @@ class BackupManagerService extends IBackupManager.Stub {
     private boolean signaturesMatch(Signature[] storedSigs, Signature[] deviceSigs) {
         // Allow unsigned apps, but not signed on one device and unsigned on the other
         // !!! TODO: is this the right policy?
+        if (DEBUG) Log.v(TAG, "signaturesMatch(): stored=" + storedSigs
+                + " device=" + deviceSigs);
         if ((storedSigs == null || storedSigs.length == 0)
                 && (deviceSigs == null || deviceSigs.length == 0)) {
             return true;
@@ -800,6 +801,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
+            if (DEBUG) Log.v(TAG, "Beginning restore process");
             /**
              * Restore sequence:
              *
@@ -847,13 +849,19 @@ class BackupManagerService extends IBackupManager.Stub {
                             PackageInfo app = isRestorable(pkg);
                             if (app != null) {
                                 // Validate against the backed-up signature block, too
-                                Signature[] storedSigs
-                                        = pmAgent.getRestoredSignatures(app.packageName);
-                                // !!! TODO: check app version here as well
-                                if (signaturesMatch(storedSigs, app.signatures)) {
-                                    appsToRestore.add(app);
+                                Metadata info = pmAgent.getRestoredMetadata(app.packageName);
+                                if (app.versionCode >= info.versionCode) {
+                                    if (DEBUG) Log.v(TAG, "Restore version " + info.versionCode
+                                            + " compatible with app version " + app.versionCode);
+                                    if (signaturesMatch(info.signatures, app.signatures)) {
+                                        appsToRestore.add(app);
+                                    } else {
+                                        Log.w(TAG, "Sig mismatch restoring " + app.packageName);
+                                    }
                                 } else {
-                                    Log.w(TAG, "Sig mismatch on restore of " + app.packageName);
+                                    Log.i(TAG, "Restore set for " + app.packageName
+                                            + " is too new [" + info.versionCode
+                                            + "] for installed app version " + app.versionCode);
                                 }
                             }
                         }
@@ -1202,11 +1210,10 @@ class BackupManagerService extends IBackupManager.Stub {
                     pw.println(app.toString());
                 }
             }
-            pw.println("Pending:");
-            Iterator<BackupRequest> br = mPendingBackups.values().iterator();
-            while (br.hasNext()) {
-                pw.print("    ");
-                pw.println(br);
+            pw.println("Pending: " + mPendingBackups.size());
+            for (BackupRequest req : mPendingBackups.values()) {
+                pw.print("   ");
+                pw.println(req);
             }
         }
     }
