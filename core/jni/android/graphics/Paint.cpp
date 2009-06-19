@@ -69,6 +69,8 @@ public:
  
     static void reset(JNIEnv* env, jobject clazz, SkPaint* obj) {
         obj->reset();
+        // utf16 is required for java
+        obj->setTextEncoding(SkPaint::kUTF16_TextEncoding);
     }
  
     static void assign(JNIEnv* env, jobject clazz, SkPaint* dst, const SkPaint* src) {
