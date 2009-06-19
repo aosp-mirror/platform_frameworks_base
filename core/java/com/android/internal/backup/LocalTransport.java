@@ -80,28 +80,35 @@ public class LocalTransport extends IBackupTransport.Stub {
             byte[] buf = new byte[bufSize];
             while (changeSet.readNextHeader()) {
                 String key = changeSet.getKey();
+                String base64Key = new String(Base64.encode(key.getBytes()));
+                File entityFile = new File(packageDir, base64Key);
+
                 int dataSize = changeSet.getDataSize();
 
-                String base64Key = new String(Base64.encode(key.getBytes()));
                 if (DEBUG) Log.v(TAG, "Got change set key=" + key + " size=" + dataSize
                         + " key64=" + base64Key);
-                if (dataSize > bufSize) {
-                    bufSize = dataSize;
-                    buf = new byte[bufSize];
-                }
-                changeSet.readEntityData(buf, 0, dataSize);
-                if (DEBUG) Log.v(TAG, "  + data size " + dataSize);
 
-                File entityFile = new File(packageDir, base64Key);
-                FileOutputStream entity = new FileOutputStream(entityFile);
-                try {
-                    entity.write(buf, 0, dataSize);
-                } catch (IOException e) {
-                    Log.e(TAG, "Unable to update key file "
-                            + entityFile.getAbsolutePath());
-                    err = -1;
-                } finally {
-                    entity.close();
+                if (dataSize >= 0) {
+                    FileOutputStream entity = new FileOutputStream(entityFile);
+
+                    if (dataSize > bufSize) {
+                        bufSize = dataSize;
+                        buf = new byte[bufSize];
+                    }
+                    changeSet.readEntityData(buf, 0, dataSize);
+                    if (DEBUG) Log.v(TAG, "  data size " + dataSize);
+
+                    try {
+                        entity.write(buf, 0, dataSize);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Unable to update key file "
+                                + entityFile.getAbsolutePath());
+                        err = -1;
+                    } finally {
+                        entity.close();
+                    }
+                } else {
+                    entityFile.delete();
                 }
             }
         } catch (IOException e) {
@@ -172,7 +179,8 @@ public class LocalTransport extends IBackupTransport.Stub {
                     int size = (int) f.length();
                     byte[] buf = new byte[size];
                     in.read(buf);
-                    out.writeEntityHeader(f.getName(), size);
+                    String key = new String(Base64.decode(f.getName()));
+                    out.writeEntityHeader(key, size);
                     out.writeEntityData(buf, size);
                 }
             } catch (Exception e) {
