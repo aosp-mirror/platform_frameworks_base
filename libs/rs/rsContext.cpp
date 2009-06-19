@@ -130,14 +130,10 @@ void * Context::threadProc(void *vrsc)
      rsc->mRunning = true;
      bool mDraw = true;
      while (!rsc->mExit) {
-         mDraw |= gIO->playCoreCommands(rsc);
+         mDraw |= gIO->playCoreCommands(rsc, !mDraw);
+         mDraw &= (rsc->mRootScript.get() != NULL);
 
-         if (!mDraw || !rsc->mRootScript.get()) {
-             usleep(10000);
-             continue;
-         }
-
-         if (rsc->mRootScript.get()) {
+         if (mDraw) {
              mDraw = rsc->runRootScript();
              eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
          }

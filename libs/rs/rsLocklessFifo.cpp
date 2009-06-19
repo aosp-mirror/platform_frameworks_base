@@ -37,16 +37,8 @@ bool LocklessCommandFifo::init(uint32_t sizeInBytes)
         return false;
     }
 
-    int status = pthread_mutex_init(&mMutex, NULL);
-    if (status) {
-        LOGE("LocklessFifo mutex init failure");
-        free(mBuffer);
-        return false;
-    }
-    status = pthread_cond_init(&mCondition, NULL);
-    if (status) {
-        LOGE("LocklessFifo condition init failure");
-        pthread_mutex_destroy(&mMutex);
+    if (!mSignalToControl.init() || !mSignalToWorker.init()) {
+        LOGE("Signal setup failed");
         free(mBuffer);
         return false;
     }
@@ -106,6 +98,7 @@ void LocklessCommandFifo::commit(uint32_t command, uint32_t sizeInBytes)
     mPut += ((sizeInBytes + 3) & ~3) + 4;
     //dumpState("commit 2");
 
+    mSignalToWorker.set();
 }
 
 void LocklessCommandFifo::commitSync(uint32_t command, uint32_t sizeInBytes)
@@ -118,7 +111,7 @@ void LocklessCommandFifo::flush()
 {
     //dumpState("flush 1");
     while(mPut != mGet) {
-        usleep(1);
+        mSignalToControl.wait();
     }
     //dumpState("flush 2");
 }
@@ -126,8 +119,10 @@ void LocklessCommandFifo::flush()
 const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData)
 {
     while(1) {
+        //dumpState("get");
         while(isEmpty()) {
-            usleep(10);
+            mSignalToControl.set();
+            mSignalToWorker.wait();
         }
         //dumpState("get 3");
 
@@ -149,6 +144,9 @@ void LocklessCommandFifo::next()
 {
     uint32_t bytes = reinterpret_cast<const uint16_t *>(mGet)[1];
     mGet += ((bytes + 3) & ~3) + 4;
+    if (isEmpty()) {
+        mSignalToControl.set();
+    }
     //dumpState("next");
 }
 
@@ -179,4 +177,79 @@ void LocklessCommandFifo::dumpState(const char *s) const
     LOGE("%s  put %p, get %p,  buf %p,  end %p", s, mPut, mGet, mBuffer, mEnd);
 }
 
+LocklessCommandFifo::Signal::Signal()
+{
+    mSet = true;
+}
+
+LocklessCommandFifo::Signal::~Signal()
+{
+    pthread_mutex_destroy(&mMutex);
+    pthread_cond_destroy(&mCondition);
+}
+
+bool LocklessCommandFifo::Signal::init()
+{
+    int status = pthread_mutex_init(&mMutex, NULL);
+    if (status) {
+        LOGE("LocklessFifo mutex init failure");
+        return false;
+    }
+
+    status = pthread_cond_init(&mCondition, NULL);
+    if (status) {
+        LOGE("LocklessFifo condition init failure");
+        pthread_mutex_destroy(&mMutex);
+        return false;
+    }
+
+    return true;
+}
+
+void LocklessCommandFifo::Signal::set()
+{
+    int status;
+
+    status = pthread_mutex_lock(&mMutex);
+    if (status) {
+        LOGE("LocklessCommandFifo: error %i locking for set condition.", status);
+        return;
+    }
+
+    mSet = true;
+
+    status = pthread_cond_signal(&mCondition);
+    if (status) {
+        LOGE("LocklessCommandFifo: error %i on set condition.", status);
+    }
+
+    status = pthread_mutex_unlock(&mMutex);
+    if (status) {
+        LOGE("LocklessCommandFifo: error %i unlocking for set condition.", status);
+    }
+}
+
+void LocklessCommandFifo::Signal::wait()
+{
+    int status;
+
+    status = pthread_mutex_lock(&mMutex);
+    if (status) {
+        LOGE("LocklessCommandFifo: error %i locking for condition.", status);
+        return;
+    }
+
+    if (!mSet) {
+        status = pthread_cond_wait(&mCondition, &mMutex);
+        if (status) {
+            LOGE("LocklessCommandFifo: error %i waiting on condition.", status);
+        }
+    }
+    mSet = false;
+
+    status = pthread_mutex_unlock(&mMutex);
+    if (status) {
+        LOGE("LocklessCommandFifo: error %i unlocking for condition.", status);
+    }
+}
 
