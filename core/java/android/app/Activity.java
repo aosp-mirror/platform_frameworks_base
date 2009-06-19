@@ -864,7 +864,9 @@ public class Activity extends ContextThemeWrapper
             final Integer dialogId = ids[i];
             Bundle dialogState = b.getBundle(savedDialogKeyFor(dialogId));
             if (dialogState != null) {
-                final Dialog dialog = createDialog(dialogId);
+                // Calling onRestoreInstanceState() below will invoke dispatchOnCreate
+                // so tell createDialog() not to do it, otherwise we get an exception
+                final Dialog dialog = createDialog(dialogId, false);
                 mManagedDialogs.put(dialogId, dialog);
                 onPrepareDialog(dialogId, dialog);
                 dialog.onRestoreInstanceState(dialogState);
@@ -872,13 +874,13 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    private Dialog createDialog(Integer dialogId) {
+    private Dialog createDialog(Integer dialogId, boolean dispatchOnCreate) {
         final Dialog dialog = onCreateDialog(dialogId);
         if (dialog == null) {
             throw new IllegalArgumentException("Activity#onCreateDialog did "
                     + "not create a dialog for id " + dialogId);
         }
-        dialog.dispatchOnCreate(null);
+        if (dispatchOnCreate) dialog.dispatchOnCreate(null);
         return dialog;
     }
 
@@ -2430,7 +2432,7 @@ public class Activity extends ContextThemeWrapper
         }
         Dialog dialog = mManagedDialogs.get(id);
         if (dialog == null) {
-            dialog = createDialog(id);
+            dialog = createDialog(id, true);
             mManagedDialogs.put(id, dialog);
         }
         
