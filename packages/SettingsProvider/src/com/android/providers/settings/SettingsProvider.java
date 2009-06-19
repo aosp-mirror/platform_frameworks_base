@@ -159,7 +159,7 @@ public class SettingsProvider extends ContentProvider {
                         android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
                     PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException(
-                        String.format("Permission denial: writing to secure settings requires $1%s",
+                        String.format("Permission denial: writing to secure settings requires %1$s",
                                 android.Manifest.permission.WRITE_SECURE_SETTINGS));
 
         // TODO: Move gservices into its own provider so we don't need this nonsense.
@@ -168,7 +168,7 @@ public class SettingsProvider extends ContentProvider {
                     android.Manifest.permission.WRITE_GSERVICES) !=
                 PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException(
-                    String.format("Permission denial: writing to gservices settings requires $1%s",
+                    String.format("Permission denial: writing to gservices settings requires %1$s",
                             android.Manifest.permission.WRITE_GSERVICES));
         }
     }
