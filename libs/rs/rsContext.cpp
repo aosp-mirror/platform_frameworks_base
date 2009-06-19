@@ -23,6 +23,7 @@ using namespace android;
 using namespace android::renderscript;
 
 Context * Context::gCon = NULL;
+pthread_key_t Context::gThreadTLSKey = 0;
 
 void Context::initEGL()
 {
@@ -120,6 +121,18 @@ void * Context::threadProc(void *vrsc)
 
      rsc->initEGL();
 
+     ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
+     if (!tlsStruct) {
+         LOGE("Error allocating tls storage");
+         return NULL;
+     }
+     tlsStruct->mContext = rsc;
+     tlsStruct->mScript = NULL;
+     int status = pthread_setspecific(rsc->gThreadTLSKey, tlsStruct);
+     if (status) {
+         LOGE("pthread_setspecific %i", status);
+     }
+
      rsc->mStateVertex.init(rsc, rsc->mWidth, rsc->mHeight);
      rsc->setVertex(NULL);
      rsc->mStateFragment.init(rsc, rsc->mWidth, rsc->mHeight);
@@ -162,6 +175,12 @@ Context::Context(Device *dev, Surface *sur)
     int status;
     pthread_attr_t threadAttr;
 
+    status = pthread_key_create(&gThreadTLSKey, NULL);
+    if (status) {
+        LOGE("Failed to init thread tls key.");
+        return;
+    }
+
     status = pthread_attr_init(&threadAttr);
     if (status) {
         LOGE("Failed to init thread attribute.");
@@ -195,6 +214,7 @@ Context::~Context()
 
     if (mDev) {
         mDev->removeContext(this);
+        pthread_key_delete(gThreadTLSKey);
     }
 }
 
