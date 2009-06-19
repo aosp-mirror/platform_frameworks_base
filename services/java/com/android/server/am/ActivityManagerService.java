@@ -315,6 +315,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4*1024;
     
+    // System property defining error report receiver for system apps
+    static final String SYSTEM_APPS_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.system.apps";
+
+    // System property defining default error report receiver
+    static final String DEFAULT_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.default";
+
     // Corresponding memory levels for above adjustments.
     final int EMPTY_APP_MEM;
     final int HIDDEN_APP_MEM;
@@ -7950,27 +7956,62 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private ComponentName getErrorReportReceiver(ProcessRecord app) {
         IPackageManager pm = ActivityThread.getPackageManager();
+
         try {
-            // was an installer package name specified when this app was
-            // installed?
-            String installerPackageName = pm.getInstallerPackageName(app.info.packageName);
-            if (installerPackageName == null) {
-                return null;
+            // look for receiver in the installer package
+            String candidate = pm.getInstallerPackageName(app.info.packageName);
+            ComponentName result = getErrorReportReceiver(pm, app.info.packageName, candidate);
+            if (result != null) {
+                return result;
             }
 
-            // is there an Activity in this package that handles ACTION_APP_ERROR?
-            Intent intent = new Intent(Intent.ACTION_APP_ERROR);
-            intent.setPackage(installerPackageName);
-            ResolveInfo info = pm.resolveIntent(intent, null, 0);
-            if (info == null || info.activityInfo == null) {
-                return null;
+            // if the error app is on the system image, look for system apps
+            // error receiver
+            if ((app.info.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+                candidate = SystemProperties.get(SYSTEM_APPS_ERROR_RECEIVER_PROPERTY);
+                result = getErrorReportReceiver(pm, app.info.packageName, candidate);
+                if (result != null) {
+                    return result;
+                }
             }
 
-            return new ComponentName(installerPackageName, info.activityInfo.name);
+            // if there is a default receiver, try that
+            candidate = SystemProperties.get(DEFAULT_ERROR_RECEIVER_PROPERTY);
+            return getErrorReportReceiver(pm, app.info.packageName, candidate);
         } catch (RemoteException e) {
-            // will return null and no error report will be delivered
+            // should not happen
+            Log.e(TAG, "error talking to PackageManager", e);
+            return null;
         }
-        return null;
+    }
+
+    /**
+     * Return activity in receiverPackage that handles ACTION_APP_ERROR.
+     *
+     * @param pm PackageManager isntance
+     * @param errorPackage package which caused the error
+     * @param receiverPackage candidate package to receive the error
+     * @return activity component within receiverPackage which handles
+     * ACTION_APP_ERROR, or null if not found
+     */
+    private ComponentName getErrorReportReceiver(IPackageManager pm, String errorPackage,
+            String receiverPackage) throws RemoteException {
+        if (receiverPackage == null || receiverPackage.length() == 0) {
+            return null;
+        }
+
+        // break the loop if it's the error report receiver package that crashed
+        if (receiverPackage.equals(errorPackage)) {
+            return null;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_APP_ERROR);
+        intent.setPackage(receiverPackage);
+        ResolveInfo info = pm.resolveIntent(intent, null, 0);
+        if (info == null || info.activityInfo == null) {
+            return null;
+        }
+        return new ComponentName(receiverPackage, info.activityInfo.name);
     }
 
     void makeAppNotRespondingLocked(ProcessRecord app,
