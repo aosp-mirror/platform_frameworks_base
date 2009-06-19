@@ -336,13 +336,15 @@ static void android_location_GpsLocationProvider_agps_data_conn_failed(JNIEnv* e
 }
 
 static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jobject obj,
-        jint type, jint addr, jint port)
+        jint type, jstring hostname, jint port)
 {
     if (!sAGpsInterface) {
         sAGpsInterface = (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
     }
     if (sAGpsInterface) {
-        sAGpsInterface->set_server(type, addr, port);
+        const char *c_hostname = env->GetStringUTFChars(hostname, NULL);
+        sAGpsInterface->set_server(type, c_hostname, port);
+        env->ReleaseStringUTFChars(hostname, c_hostname);
     }
 }
 
@@ -365,7 +367,7 @@ static JNINativeMethod sMethods[] = {
     {"native_agps_data_conn_open", "(Ljava/lang/String;)V", (void*)android_location_GpsLocationProvider_agps_data_conn_open},
     {"native_agps_data_conn_closed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_closed},
     {"native_agps_data_conn_failed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_failed},
-    {"native_set_agps_server", "(III)V", (void*)android_location_GpsLocationProvider_set_agps_server},
+    {"native_set_agps_server", "(ILjava/lang/String;I)V", (void*)android_location_GpsLocationProvider_set_agps_server},
 };
 
 int register_android_location_GpsLocationProvider(JNIEnv* env)
