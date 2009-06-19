@@ -200,8 +200,13 @@ public final class WebStorage {
      */
     public void setQuotaForOrigin(String origin, long quota) {
         if (origin != null) {
-            postMessage(Message.obtain(null, SET_QUOTA_ORIGIN,
-                new Origin(origin, quota)));
+            if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
+                nativeSetQuotaForOrigin(origin, quota);
+                syncValues();
+            } else {
+                postMessage(Message.obtain(null, SET_QUOTA_ORIGIN,
+                    new Origin(origin, quota)));
+            }
         }
     }
 
@@ -211,8 +216,13 @@ public final class WebStorage {
      */
     public void deleteOrigin(String origin) {
         if (origin != null) {
-            postMessage(Message.obtain(null, DELETE_ORIGIN,
-                new Origin(origin)));
+            if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
+                nativeDeleteOrigin(origin);
+                syncValues();
+            } else {
+                postMessage(Message.obtain(null, DELETE_ORIGIN,
+                    new Origin(origin)));
+            }
         }
     }
 
@@ -221,7 +231,12 @@ public final class WebStorage {
      * Delete all databases
      */
     public void deleteAllDatabases() {
-        postMessage(Message.obtain(null, DELETE_ALL));
+        if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
+            nativeDeleteAllDatabases();
+            syncValues();
+        } else {
+            postMessage(Message.obtain(null, DELETE_ALL));
+        }
     }
 
     /**
@@ -250,7 +265,11 @@ public final class WebStorage {
      * Post a Sync request
      */
     public void update() {
-        postMessage(Message.obtain(null, UPDATE));
+        if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
+            syncValues();
+        } else {
+            postMessage(Message.obtain(null, UPDATE));
+        }
     }
 
     /**
