@@ -208,12 +208,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private GpsNetworkThread mNetworkThread;
     private Object mNetworkThreadLock = new Object();
 
-    private String mSuplHost;
-    private int mSuplPort;
-    private String mC2KHost;
-    private int mC2KPort;
-    private boolean mSetSuplServer;
-    private boolean mSetC2KServer;
     private String mAGpsApn;
     private int mAGpsDataConnectionState;
     private final ConnectivityManager mConnMgr;
@@ -355,23 +349,27 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             stream.close();
             mNtpServer = mProperties.getProperty("NTP_SERVER", null);
 
-            mSuplHost = mProperties.getProperty("SUPL_HOST");
+            String host = mProperties.getProperty("SUPL_HOST");
             String portString = mProperties.getProperty("SUPL_PORT");
-            if (mSuplHost != null && portString != null) {
+            if (host != null && portString != null) {
                 try {
-                    mSuplPort = Integer.parseInt(portString);
-                    mSetSuplServer = true;
+                    int port = Integer.parseInt(portString);
+                    native_set_agps_server(AGPS_TYPE_SUPL, host, port);
+                    // use MS-Based position mode if SUPL support is enabled
+                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
                 }
             }
 
-            mC2KHost = mProperties.getProperty("C2K_HOST");
+            host = mProperties.getProperty("C2K_HOST");
             portString = mProperties.getProperty("C2K_PORT");
-            if (mC2KHost != null && portString != null) {
+            if (host != null && portString != null) {
                 try {
-                    mC2KPort = Integer.parseInt(portString);
-                    mSetC2KServer = true;
+                    int port = Integer.parseInt(portString);
+                    native_set_agps_server(AGPS_TYPE_C2K, host, port);
+                    // use MS-Based position mode if SUPL support is enabled
+                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse C2K_PORT: " + portString);
                 }
@@ -386,10 +384,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
      * data network (e.g., the Internet), false otherwise.
      */
     public boolean requiresNetwork() {
-        // We want updateNetworkState() to get called when the network state changes
-        // for XTRA and NTP time injection support.
-        return (mNtpServer != null || native_supports_xtra() ||
-                mSuplHost != null || mC2KHost != null);
+        return true;
     }
 
     public void updateNetworkState(int state) {
@@ -989,29 +984,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
     }
 
-    private boolean setAGpsServer(int type, String host, int port) {
-        try {
-            InetAddress inetAddress = InetAddress.getByName(host);
-            if (inetAddress != null) {
-                byte[] addrBytes = inetAddress.getAddress();
-                long addr = 0;
-                for (int i = 0; i < addrBytes.length; i++) {
-                    int temp = addrBytes[i];
-                    // signed -> unsigned
-                    if (temp < 0) temp = 256 + temp;
-                    addr = addr * 256 + temp;
-                }
-                // use MS-Based position mode if SUPL support is enabled
-                mPositionMode = GPS_POSITION_MODE_MS_BASED;
-                native_set_agps_server(type, (int)addr, port);
-            }
-        } catch (UnknownHostException e) {
-            Log.e(TAG, "unknown host for server " + host);
-            return false;
-        }
-        return true;
-    }
-
     private class GpsEventThread extends Thread {
 
         public GpsEventThread() {
@@ -1085,7 +1057,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                     }
                     waitTime = getWaitTime();
                 } while (!mDone && ((!mXtraDownloadRequested &&
-                        !mTimeInjectRequested && !mSetSuplServer && !mSetC2KServer && waitTime > 0)
+                        !mTimeInjectRequested && waitTime > 0)
                         || !mNetworkAvailable));
                 if (Config.LOGD) Log.d(TAG, "NetworkThread out of wake loop");
                 
@@ -1110,18 +1082,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                         } else {
                             if (Config.LOGD) Log.d(TAG, "requestTime failed");
                             mNextNtpTime = System.currentTimeMillis() + RETRY_INTERVAL;
-                        }
-                    }
-
-                    // Set the AGPS server addresses if we have not yet
-                    if (mSetSuplServer) {
-                        if (setAGpsServer(AGPS_TYPE_SUPL, mSuplHost, mSuplPort)) {
-                            mSetSuplServer = false;
-                        }
-                    }
-                    if (mSetC2KServer) {
-                        if (setAGpsServer(AGPS_TYPE_C2K, mC2KHost, mC2KPort)) {
-                            mSetC2KServer = false;
                         }
                     }
 
@@ -1225,5 +1185,5 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private native void native_agps_data_conn_open(String apn);
     private native void native_agps_data_conn_closed();
     private native void native_agps_data_conn_failed();
-    private native void native_set_agps_server(int type, int addr, int port);
+    private native void native_set_agps_server(int type, String hostname, int port);
 }
