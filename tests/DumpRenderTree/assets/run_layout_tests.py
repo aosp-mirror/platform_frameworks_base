@@ -131,7 +131,7 @@ def CompareResults(ref_dir, results_dir):
     result_file_name = "layout_tests_" + f + ".txt"
     DiffResults(f, os.path.join(results_dir, result_file_name),
                 os.path.join(ref_dir, result_file_name), diff_result,
-                False, files != "passed")
+                False, f != "passed")
   logging.info("Detailed diffs are in " + diff_result)
 
 def main(options, args):
