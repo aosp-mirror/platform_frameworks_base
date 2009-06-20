@@ -297,11 +297,11 @@ public:
     virtual uint32_t getTypeInfo() const { return typeInfo; }
 
     LayerBaseClient(SurfaceFlinger* flinger, DisplayID display, 
-            Client* client, int32_t i);
+            const sp<Client>& client, int32_t i);
     virtual ~LayerBaseClient();
     virtual void onFirstRef();
 
-    Client*             const client;
+    wp<Client>          client;
     layer_cblk_t*       const lcblk;
 
     inline  uint32_t    getIdentity() const { return mIdentity; }

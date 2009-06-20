@@ -44,7 +44,7 @@ public:
     virtual uint32_t getTypeInfo() const { return typeInfo; }
     
                 LayerDim(SurfaceFlinger* flinger, DisplayID display,
-                        Client* client, int32_t i);
+                        const sp<Client>& client, int32_t i);
         virtual ~LayerDim();
 
     virtual void onDraw(const Region& clip) const;

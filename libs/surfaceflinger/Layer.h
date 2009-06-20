@@ -58,7 +58,7 @@ public:
     virtual uint32_t getTypeInfo() const { return typeInfo; }
 
                  Layer(SurfaceFlinger* flinger, DisplayID display,
-                         Client* c, int32_t i);
+                         const sp<Client>& client, int32_t i);
 
         virtual ~Layer();
 
@@ -66,8 +66,7 @@ public:
         return frontBuffer().getPixelFormat();
     }
 
-    status_t setBuffers(    Client* client,
-                            uint32_t w, uint32_t h,
+    status_t setBuffers(    uint32_t w, uint32_t h,
                             PixelFormat format, uint32_t flags=0);
 
     virtual void onDraw(const Region& clip) const;
@@ -105,6 +104,7 @@ private:
     Region post(uint32_t* oldState, bool& recomputeVisibleRegions);
     sp<SurfaceBuffer> peekBuffer();
     void destroy();
+    void scheduleBroadcast();
 
     
     class SurfaceLayer : public LayerBaseClient::Surface

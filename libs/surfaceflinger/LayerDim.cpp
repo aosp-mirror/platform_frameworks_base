@@ -40,7 +40,7 @@ int32_t LayerDim::sHeight;
 // ---------------------------------------------------------------------------
 
 LayerDim::LayerDim(SurfaceFlinger* flinger, DisplayID display,
-        Client* client, int32_t i)
+        const sp<Client>& client, int32_t i)
     : LayerBaseClient(flinger, display, client, i)
 {
 }

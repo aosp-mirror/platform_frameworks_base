@@ -57,7 +57,7 @@ public:
     virtual uint32_t getTypeInfo() const { return typeInfo; }
 
             LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
-                        Client* client, int32_t i);
+                    const sp<Client>& client, int32_t i);
         virtual ~LayerBuffer();
 
     virtual void onFirstRef();

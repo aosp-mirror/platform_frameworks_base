@@ -227,14 +227,13 @@ sp<ISurfaceFlingerClient> SurfaceFlinger::createConnection()
     Mutex::Autolock _l(mStateLock);
     uint32_t token = mTokens.acquire();
 
-    Client* client = new Client(token, this);
-    if ((client == 0) || (client->ctrlblk == 0)) {
+    sp<Client> client = new Client(token, this);
+    if (client->ctrlblk == 0) {
         mTokens.release(token);
         return 0;
     }
     status_t err = mClientsMap.add(token, client);
     if (err < 0) {
-        delete client;
         mTokens.release(token);
         return 0;
     }
@@ -246,8 +245,8 @@ sp<ISurfaceFlingerClient> SurfaceFlinger::createConnection()
 void SurfaceFlinger::destroyConnection(ClientID cid)
 {
     Mutex::Autolock _l(mStateLock);
-    Client* const client = mClientsMap.valueFor(cid);
-    if (client) {
+    sp<Client> client = mClientsMap.valueFor(cid);
+    if (client != 0) {
         // free all the layers this client owns
         Vector< wp<LayerBaseClient> > layers(client->getLayers());
         const size_t count = layers.size();
@@ -876,7 +875,7 @@ void SurfaceFlinger::unlockClients()
     }
 }
 
-void SurfaceFlinger::scheduleBroadcast(Client* client)
+void SurfaceFlinger::scheduleBroadcast(const sp<Client>& client)
 {
     if (mLastScheduledBroadcast != client) {
         mLastScheduledBroadcast = client;
@@ -886,19 +885,22 @@ void SurfaceFlinger::scheduleBroadcast(Client* client)
 
 void SurfaceFlinger::executeScheduledBroadcasts()
 {
-    SortedVector<Client*>& list = mScheduledBroadcasts;
+    SortedVector< wp<Client> >& list(mScheduledBroadcasts);
     size_t count = list.size();
     while (count--) {
-        per_client_cblk_t* const cblk = list[count]->ctrlblk;
-        if (cblk->lock.tryLock() == NO_ERROR) {
-            cblk->cv.broadcast();
-            list.removeAt(count);
-            cblk->lock.unlock();
-        } else {
-            // schedule another round
-            LOGW("executeScheduledBroadcasts() skipped, "
-                "contention on the client. We'll try again later...");
-            signalDelayedEvent(ms2ns(4));
+        sp<Client> client = list[count].promote();
+        if (client != 0) {
+            per_client_cblk_t* const cblk = client->ctrlblk;
+            if (cblk->lock.tryLock() == NO_ERROR) {
+                cblk->cv.broadcast();
+                list.removeAt(count);
+                cblk->lock.unlock();
+            } else {
+                // schedule another round
+                LOGW("executeScheduledBroadcasts() skipped, "
+                        "contention on the client. We'll try again later...");
+                signalDelayedEvent(ms2ns(4));
+            }
         }
     }
     mLastScheduledBroadcast = 0;
@@ -1090,11 +1092,11 @@ void SurfaceFlinger::free_resources_l()
     mLayersRemoved = false;
     
     // free resources associated with disconnected clients
-    SortedVector<Client*>& scheduledBroadcasts(mScheduledBroadcasts);
-    Vector<Client*>& disconnectedClients(mDisconnectedClients);
+    SortedVector< wp<Client> >& scheduledBroadcasts(mScheduledBroadcasts);
+    Vector< sp<Client> >& disconnectedClients(mDisconnectedClients);
     const size_t count = disconnectedClients.size();
     for (size_t i=0 ; i<count ; i++) {
-        Client* client = disconnectedClients[i];
+        sp<Client> client = disconnectedClients[i];
         // if this client is the scheduled broadcast list,
         // remove it from there (and we don't need to signal it
         // since it is dead).
@@ -1103,7 +1105,6 @@ void SurfaceFlinger::free_resources_l()
             scheduledBroadcasts.removeItemsAt(index);
         }
         mTokens.release(client->cid);
-        delete client;
     }
     disconnectedClients.clear();
 }
@@ -1194,14 +1195,14 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
     sp<LayerBaseClient> layer;
     sp<LayerBaseClient::Surface> surfaceHandle;
     Mutex::Autolock _l(mStateLock);
-    Client* const c = mClientsMap.valueFor(clientId);
-    if (UNLIKELY(!c)) {
+    sp<Client> client = mClientsMap.valueFor(clientId);
+    if (UNLIKELY(client == 0)) {
         LOGE("createSurface() failed, client not found (id=%d)", clientId);
         return surfaceHandle;
     }
 
     //LOGD("createSurface for pid %d (%d x %d)", pid, w, h);
-    int32_t id = c->generateId(pid);
+    int32_t id = client->generateId(pid);
     if (uint32_t(id) >= NUM_LAYERS_MAX) {
         LOGE("createSurface() failed, generateId = %d", id);
         return surfaceHandle;
@@ -1210,16 +1211,16 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
     switch (flags & eFXSurfaceMask) {
         case eFXSurfaceNormal:
             if (UNLIKELY(flags & ePushBuffers)) {
-                layer = createPushBuffersSurfaceLocked(c, d, id, w, h, flags);
+                layer = createPushBuffersSurfaceLocked(client, d, id, w, h, flags);
             } else {
-                layer = createNormalSurfaceLocked(c, d, id, w, h, format, flags);
+                layer = createNormalSurfaceLocked(client, d, id, w, h, format, flags);
             }
             break;
         case eFXSurfaceBlur:
-            layer = createBlurSurfaceLocked(c, d, id, w, h, flags);
+            layer = createBlurSurfaceLocked(client, d, id, w, h, flags);
             break;
         case eFXSurfaceDim:
-            layer = createDimSurfaceLocked(c, d, id, w, h, flags);
+            layer = createDimSurfaceLocked(client, d, id, w, h, flags);
             break;
     }
 
@@ -1234,7 +1235,7 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
 }
 
 sp<LayerBaseClient> SurfaceFlinger::createNormalSurfaceLocked(
-        Client* client, DisplayID display,
+        const sp<Client>& client, DisplayID display,
         int32_t id, uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
 {
     // initialize the surfaces
@@ -1249,7 +1250,7 @@ sp<LayerBaseClient> SurfaceFlinger::createNormalSurfaceLocked(
     }
 
     sp<Layer> layer = new Layer(this, display, client, id);
-    status_t err = layer->setBuffers(client, w, h, format, flags);
+    status_t err = layer->setBuffers(w, h, format, flags);
     if (LIKELY(err == NO_ERROR)) {
         layer->initStates(w, h, flags);
         addLayer_l(layer);
@@ -1261,7 +1262,7 @@ sp<LayerBaseClient> SurfaceFlinger::createNormalSurfaceLocked(
 }
 
 sp<LayerBaseClient> SurfaceFlinger::createBlurSurfaceLocked(
-        Client* client, DisplayID display,
+        const sp<Client>& client, DisplayID display,
         int32_t id, uint32_t w, uint32_t h, uint32_t flags)
 {
     sp<LayerBlur> layer = new LayerBlur(this, display, client, id);
@@ -1271,7 +1272,7 @@ sp<LayerBaseClient> SurfaceFlinger::createBlurSurfaceLocked(
 }
 
 sp<LayerBaseClient> SurfaceFlinger::createDimSurfaceLocked(
-        Client* client, DisplayID display,
+        const sp<Client>& client, DisplayID display,
         int32_t id, uint32_t w, uint32_t h, uint32_t flags)
 {
     sp<LayerDim> layer = new LayerDim(this, display, client, id);
@@ -1281,7 +1282,7 @@ sp<LayerBaseClient> SurfaceFlinger::createDimSurfaceLocked(
 }
 
 sp<LayerBaseClient> SurfaceFlinger::createPushBuffersSurfaceLocked(
-        Client* client, DisplayID display,
+        const sp<Client>& client, DisplayID display,
         int32_t id, uint32_t w, uint32_t h, uint32_t flags)
 {
     sp<LayerBuffer> layer = new LayerBuffer(this, display, client, id);
@@ -1446,7 +1447,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
         size_t s = mClientsMap.size();
         char name[64];
         for (size_t i=0 ; i<s ; i++) {
-            Client* client = mClientsMap.valueAt(i);
+            sp<Client> client = mClientsMap.valueAt(i);
             sprintf(name, "  Client (id=0x%08x)", client->cid);
             client->dump(name);
         }
@@ -1474,10 +1475,11 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             sp<LayerBaseClient> lbc =
                 LayerBase::dynamicCast< LayerBaseClient* >(layer.get());
             if (lbc != 0) {
+                sp<Client> client(lbc->client.promote());
                 snprintf(buffer, SIZE,
                         "      "
                         "id=0x%08x, client=0x%08x, identity=%u\n",
-                        lbc->clientIndex(), lbc->client ? lbc->client->cid : 0,
+                        lbc->clientIndex(), client.get() ? client->cid : 0,
                         lbc->getIdentity());
             }
             result.append(buffer);
@@ -1512,7 +1514,8 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 mFreezeDisplay?"yes":"no", mFreezeCount,
                 mCurrentState.orientation, hw.canDraw());
         result.append(buffer);
-        snprintf(buffer, SIZE, "  purgatory size: %d\n", mLayerPurgatory.size());
+        snprintf(buffer, SIZE, "  purgatory size: %d, client count: %d\n",
+                mLayerPurgatory.size(), mClientsMap.size());
         result.append(buffer);
         const BufferAllocator& alloc(BufferAllocator::get());
         alloc.dump(result);

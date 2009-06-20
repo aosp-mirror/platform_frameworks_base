@@ -47,7 +47,7 @@ const char* const Layer::typeID = "Layer";
 
 // ---------------------------------------------------------------------------
 
-Layer::Layer(SurfaceFlinger* flinger, DisplayID display, Client* c, int32_t i)
+Layer::Layer(SurfaceFlinger* flinger, DisplayID display, const sp<Client>& c, int32_t i)
     :   LayerBaseClient(flinger, display, c, i),
         mSecure(false),
         mFrontBufferIndex(1),
@@ -100,8 +100,7 @@ status_t Layer::ditch()
     return NO_ERROR;
 }
 
-status_t Layer::setBuffers( Client* client,
-                            uint32_t w, uint32_t h,
+status_t Layer::setBuffers( uint32_t w, uint32_t h,
                             PixelFormat format, uint32_t flags)
 {
     PixelFormatInfo info;
@@ -285,6 +284,14 @@ sp<SurfaceBuffer> Layer::peekBuffer()
     return buffer;
 }
 
+void Layer::scheduleBroadcast()
+{
+    sp<Client> ourClient(client.promote());
+    if (ourClient != 0) {
+        mFlinger->scheduleBroadcast(ourClient);
+    }
+}
+
 uint32_t Layer::doTransaction(uint32_t flags)
 {
     const Layer::State& front(drawingState());
@@ -380,7 +387,7 @@ uint32_t Layer::doTransaction(uint32_t flags)
                         eResizeBuffer1 : eResizeBuffer0;
                 android_atomic_and(~mask, &(lcblk->swapState));
                 // since a buffer became available, we can let the client go...
-                mFlinger->scheduleBroadcast(client);
+                scheduleBroadcast();
                 mResizeTransactionDone = true;
 
                 // we're being resized and there is a freeze display request,
@@ -489,7 +496,7 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     if (UNLIKELY(state & eInvalidSurface)) {
         // if eInvalidSurface is set, this means the surface
         // became invalid during a transaction (NO_MEMORY for instance)
-        mFlinger->scheduleBroadcast(client);
+        scheduleBroadcast();
         return;
     }
 
@@ -627,7 +634,7 @@ void Layer::unlockPageFlip(
 
         // client could be blocked, so signal them so they get a
         // chance to reevaluate their condition.
-        mFlinger->scheduleBroadcast(client);
+        scheduleBroadcast();
     }
 }
 
@@ -638,7 +645,7 @@ void Layer::finishPageFlip()
                 "layer %p wasn't locked!", this);
         android_atomic_and(~eBusy, &(lcblk->swapState));
     }
-    mFlinger->scheduleBroadcast(client);
+    scheduleBroadcast();
 }
 
 // ---------------------------------------------------------------------------

@@ -640,16 +640,17 @@ regular:
 // ---------------------------------------------------------------------------
 
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
-        Client* c, int32_t i)
-    : LayerBase(flinger, display), client(c),
-      lcblk( c ? &(c->ctrlblk->layers[i]) : 0 ),
+        const sp<Client>& client, int32_t i)
+    : LayerBase(flinger, display), client(client),
+      lcblk( client!=0 ? &(client->ctrlblk->layers[i]) : 0 ),
       mIndex(i)
 {
 }
 
 void LayerBaseClient::onFirstRef()
 {    
-    if (client) {
+    sp<Client> client(this->client.promote());
+    if (client != 0) {
         client->bindLayer(this, mIndex);
         // Initialize this layer's control block
         memset(this->lcblk, 0, sizeof(layer_cblk_t));
@@ -661,13 +662,16 @@ void LayerBaseClient::onFirstRef()
 
 LayerBaseClient::~LayerBaseClient()
 {
-    if (client) {
+    sp<Client> client(this->client.promote());
+    if (client != 0) {
         client->free(mIndex);
     }
 }
 
-int32_t LayerBaseClient::serverIndex() const {
-    if (client) {
+int32_t LayerBaseClient::serverIndex() const 
+{
+    sp<Client> client(this->client.promote());
+    if (client != 0) {
         return (client->cid<<16)|mIndex;
     }
     return 0xFFFF0000 | mIndex;

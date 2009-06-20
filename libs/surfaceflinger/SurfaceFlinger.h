@@ -64,7 +64,7 @@ typedef int32_t ClientID;
 
 // ---------------------------------------------------------------------------
 
-class Client
+class Client : public RefBase
 {
 public:
             Client(ClientID cid, const sp<SurfaceFlinger>& flinger);
@@ -188,20 +188,20 @@ private:
             uint32_t flags);
 
     sp<LayerBaseClient> createNormalSurfaceLocked(
-            Client* client, DisplayID display,
+            const sp<Client>& client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, 
             PixelFormat format, uint32_t flags);
 
     sp<LayerBaseClient> createBlurSurfaceLocked(
-            Client* client, DisplayID display,
+            const sp<Client>& client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
     sp<LayerBaseClient> createDimSurfaceLocked(
-            Client* client, DisplayID display,
+            const sp<Client>& client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
     sp<LayerBaseClient> createPushBuffersSurfaceLocked(
-            Client* client, DisplayID display,
+            const sp<Client>& client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
     status_t removeSurface(SurfaceID surface_id);
@@ -262,7 +262,7 @@ private:
             bool        lockPageFlip(const LayerVector& currentLayers);
             void        unlockPageFlip(const LayerVector& currentLayers);
             void        handleRepaint();
-            void        scheduleBroadcast(Client* client);
+            void        scheduleBroadcast(const sp<Client>& client);
             void        executeScheduledBroadcasts();
             void        postFramebuffer();
             void        composeSurfaces(const Region& dirty);
@@ -312,11 +312,11 @@ private:
                 
                 // protected by mStateLock (but we could use another lock)
                 Tokenizer                               mTokens;
-                DefaultKeyedVector<ClientID, Client*>   mClientsMap;
+                DefaultKeyedVector<ClientID, sp<Client> >   mClientsMap;
                 DefaultKeyedVector<SurfaceID, sp<LayerBaseClient> >   mLayerMap;
                 GraphicPlane                            mGraphicPlanes[1];
                 bool                                    mLayersRemoved;
-                Vector<Client*>                         mDisconnectedClients;
+                Vector< sp<Client> >                    mDisconnectedClients;
 
                 // constant members (no synchronization needed for access)
                 sp<MemoryDealer>            mServerHeap;
@@ -333,8 +333,8 @@ private:
                 Region                      mDirtyRegion;
                 Region                      mInvalidRegion;
                 Region                      mWormholeRegion;
-                Client*                     mLastScheduledBroadcast;
-                SortedVector<Client*>       mScheduledBroadcasts;
+                wp<Client>                  mLastScheduledBroadcast;
+                SortedVector< wp<Client> >  mScheduledBroadcasts;
                 bool                        mVisibleRegionsDirty;
                 bool                        mDeferReleaseConsole;
                 bool                        mFreezeDisplay;
