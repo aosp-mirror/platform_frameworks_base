@@ -58,18 +58,9 @@ public class PdpConnection extends DataConnection {
     private String pdp_name;
     private ApnSetting apn;
 
-    // dataLink is only used to support pppd link
-    private DataLink dataLink;
-
     //***** Constructor
     PdpConnection(GSMPhone phone) {
         super(phone);
-        this.dataLink = null;
-
-        if (SystemProperties.get("ro.radio.use-ppp","no").equals("yes")) {
-            dataLink = new PppLink((GsmDataConnectionTracker) phone.mDataConnection, phone);
-            dataLink.setOnLinkChange(this, EVENT_LINK_STATE_CHANGED, null);
-        }
     }
 
     /**
@@ -97,10 +88,6 @@ public class PdpConnection extends DataConnection {
     }
 
     private void tearDownData(Message msg) {
-        if (dataLink != null) {
-            dataLink.disconnect();
-        }
-
         if (phone.mCM.getRadioState().isOn()) {
             phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, msg));
         }
@@ -313,11 +300,7 @@ public class PdpConnection extends DataConnection {
                     }
                 }
 
-                if (dataLink != null) {
-                    dataLink.connect();
-                } else {
-                    onLinkStateChanged(DataLink.LinkState.LINK_UP);
-                }
+                onLinkStateChanged(DataLink.LinkState.LINK_UP);
 
                 if (DBG) log("PDP setup on cid = " + cid);
             }
