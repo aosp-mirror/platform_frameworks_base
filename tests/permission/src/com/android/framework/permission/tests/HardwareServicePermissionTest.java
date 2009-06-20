@@ -22,10 +22,12 @@ import android.os.Binder;
 import android.os.IHardwareService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Verify that Hardware apis cannot be called without required permissions.
  */
+@SmallTest
 public class HardwareServicePermissionTest extends TestCase {
 
     private IHardwareService mHardwareService;
