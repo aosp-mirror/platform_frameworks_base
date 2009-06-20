@@ -19,7 +19,6 @@ package com.android.server;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
-import com.android.server.PackageManagerService.PreferredActivity;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -27,13 +26,12 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -150,6 +148,7 @@ class PackageManagerService extends IPackageManager.Stub {
     
     final Context mContext;
     final boolean mFactoryTest;
+    final boolean mNoDexOpt;
     final DisplayMetrics mMetrics;
     final int mDefParseFlags;
     final String[] mSeparateProcesses;
@@ -301,6 +300,7 @@ class PackageManagerService extends IPackageManager.Stub {
         
         mContext = context;
         mFactoryTest = factoryTest;
+        mNoDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
         mSettings = new Settings();
         mSettings.addSharedUserLP("android.uid.system",
@@ -370,6 +370,10 @@ class PackageManagerService extends IPackageManager.Stub {
                     startTime);
             
             int scanMode = SCAN_MONITOR;
+            if (mNoDexOpt) {
+                Log.w(TAG, "Running ENG build: no pre-dexopt!");
+                scanMode |= SCAN_NO_DEX; 
+            }
             
             final HashSet<String> libFiles = new HashSet<String>();
             
@@ -930,7 +934,7 @@ class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
-    public void freeStorage(final long freeStorageSize, final PendingIntent opFinishedIntent) {
+    public void freeStorage(final long freeStorageSize, final IntentSender pi) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
         // Queue up an async operation since clearing cache may take a little while.
@@ -944,11 +948,13 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.w(TAG, "Couldn't clear application caches");
                     }
                 }
-                if(opFinishedIntent != null) {
+                if(pi != null) {
                     try {
                         // Callback via pending intent
-                        opFinishedIntent.send((retCode >= 0) ? 1 : 0);
-                    } catch (CanceledException e1) {
+                        int code = (retCode >= 0) ? 1 : 0;
+                        pi.sendIntent(null, code, null,
+                                null, null);
+                    } catch (SendIntentException e1) {
                         Log.i(TAG, "Failed to send pending intent");
                     }
                 }
@@ -963,10 +969,11 @@ class PackageManagerService extends IPackageManager.Stub {
             if (Config.LOGV) Log.v(TAG, "getActivityInfo " + component + ": " + a);
             if (a != null && mSettings.isEnabledLP(a.info, flags)) {
                 ActivityInfo ainfo = PackageParser.generateActivityInfo(a, flags);
-                if (ainfo != null && (flags & PackageManager.GET_EXPANDABLE) != 0) {
+                if (ainfo != null) {
                     ApplicationInfo appInfo = getApplicationInfo(component.getPackageName(),
-                            PackageManager.GET_EXPANDABLE | PackageManager.GET_SUPPORTS_DENSITIES); 
-                    if (appInfo != null && !appInfo.expandable) {
+                            PackageManager.GET_SUPPORTS_DENSITIES);
+                    if (appInfo != null &&
+                            (appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) == 0) {
                         // Check if the screen size is same as what the application expect.
                         CompatibilityInfo info = new CompatibilityInfo(appInfo);
                         DisplayMetrics metrics = new DisplayMetrics();
@@ -979,11 +986,13 @@ class PackageManagerService extends IPackageManager.Stub {
                             // Don't allow an app that cannot expand to handle rotation.
                             ainfo.configChanges &= ~ ActivityInfo.CONFIG_ORIENTATION;
                         } else {
-                            appInfo.expandable = true;
+                            appInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
                         }
                         if (DEBUG_SETTINGS) {
                             Log.d(TAG, "component=" + component +
-                                    ", expandable:" + appInfo.expandable);
+                                    ", expandable:" +
+                                    ((appInfo.flags &
+                                            ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0));
                         }
                     }
                 }
@@ -1239,28 +1248,6 @@ class PackageManagerService extends IPackageManager.Stub {
         return chooseBestActivity(intent, resolvedType, flags, query);
     }
 
-    public ResolveInfo resolveIntentForPackage(Intent intent, String resolvedType,
-                                               int flags, String packageName) {
-        ComponentName comp = intent.getComponent();
-        if (comp != null) {
-            // if this is an explicit intent, it must have the same the packageName
-            if (packageName.equals(comp.getPackageName())) {
-                return resolveIntent(intent, resolvedType, flags);
-            }
-            return null;
-        } else {
-            List<ResolveInfo> query = null;
-            synchronized (mPackages) {
-                PackageParser.Package pkg = mPackages.get(packageName);
-                if (pkg != null) {
-                    query = (List<ResolveInfo>) mActivities.
-                        queryIntentForPackage(intent, resolvedType, flags, pkg.activities);
-                }
-            }
-            return chooseBestActivity(intent, resolvedType, flags, query);
-        }
-    }
-
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
                                            int flags, List<ResolveInfo> query) {
         if (query != null) {
@@ -1379,8 +1366,17 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         synchronized (mPackages) {
-            return (List<ResolveInfo>)mActivities.
-                queryIntent(intent, resolvedType, flags);
+            String pkgName = intent.getPackage();
+            if (pkgName == null) {
+                return (List<ResolveInfo>)mActivities.queryIntent(intent,
+                        resolvedType, flags);
+            }
+            PackageParser.Package pkg = mPackages.get(pkgName);
+            if (pkg != null) {
+                return (List<ResolveInfo>) mActivities.queryIntentForPackage(intent,
+                        resolvedType, flags, pkg.activities);
+            }
+            return null;
         }
     }
 
@@ -1547,9 +1543,30 @@ class PackageManagerService extends IPackageManager.Stub {
 
     public List<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, int flags) {
+        ComponentName comp = intent.getComponent();
+        if (comp != null) {
+            List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
+            ActivityInfo ai = getReceiverInfo(comp, flags);
+            if (ai != null) {
+                ResolveInfo ri = new ResolveInfo();
+                ri.activityInfo = ai;
+                list.add(ri);
+            }
+            return list;
+        }
+        
         synchronized (mPackages) {
-            return (List<ResolveInfo>)mReceivers.
-                queryIntent(intent, resolvedType, flags);
+            String pkgName = intent.getPackage();
+            if (pkgName == null) {
+                return (List<ResolveInfo>)mReceivers.queryIntent(intent,
+                        resolvedType, flags);
+            }
+            PackageParser.Package pkg = mPackages.get(pkgName);
+            if (pkg != null) {
+                return (List<ResolveInfo>) mReceivers.queryIntentForPackage(intent,
+                        resolvedType, flags, pkg.receivers);
+            }
+            return null;
         }
     }
 
@@ -1582,7 +1599,17 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         synchronized (mPackages) {
-            return (List<ResolveInfo>)mServices.queryIntent(intent, resolvedType, flags);
+            String pkgName = intent.getPackage();
+            if (pkgName == null) {
+                return (List<ResolveInfo>)mServices.queryIntent(intent,
+                        resolvedType, flags);
+            }
+            PackageParser.Package pkg = mPackages.get(pkgName);
+            if (pkg != null) {
+                return (List<ResolveInfo>)mServices.queryIntentForPackage(intent,
+                        resolvedType, flags, pkg.services);
+            }
+            return null;
         }
     }
     
@@ -1898,7 +1925,56 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         return true;
     }
+    
+    public boolean performDexOpt(String packageName) {
+        if (!mNoDexOpt) {
+            return false;
+        }
         
+        PackageParser.Package p;
+        synchronized (mPackages) {
+            p = mPackages.get(packageName);
+            if (p == null || p.mDidDexOpt) {
+                return false;
+            }
+        }
+        synchronized (mInstallLock) {
+            return performDexOptLI(p, false) == DEX_OPT_PERFORMED;
+        }
+    }
+    
+    static final int DEX_OPT_SKIPPED = 0;
+    static final int DEX_OPT_PERFORMED = 1;
+    static final int DEX_OPT_FAILED = -1;
+    
+    private int performDexOptLI(PackageParser.Package pkg, boolean forceDex) {
+        boolean performed = false;
+        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
+            String path = pkg.mScanPath;
+            int ret = 0;
+            try {
+                if (forceDex || dalvik.system.DexFile.isDexOptNeeded(path)) {
+                    ret = mInstaller.dexopt(path, pkg.applicationInfo.uid, 
+                            !pkg.mForwardLocked);
+                    pkg.mDidDexOpt = true;
+                    performed = true;
+                }
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "Apk not found for dexopt: " + path);
+                ret = -1;
+            } catch (IOException e) {
+                Log.w(TAG, "Exception reading apk: " + path, e);
+                ret = -1;
+            }
+            if (ret < 0) {
+                //error from installer
+                return DEX_OPT_FAILED;
+            }
+        }
+        
+        return performed ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
+    }
+    
     private PackageParser.Package scanPackageLI(
         File scanFile, File destCodeFile, File destResourceFile,
         PackageParser.Package pkg, int parseFlags, int scanMode) {
@@ -2194,23 +2270,11 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            if ((scanMode&SCAN_NO_DEX) == 0
-                    && (pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
-                int ret = 0;
-                try {
-                    if (forceDex || dalvik.system.DexFile.isDexOptNeeded(path)) {
-                        ret = mInstaller.dexopt(path, pkg.applicationInfo.uid, 
-                                (scanMode&SCAN_FORWARD_LOCKED) == 0);
-                    }
-                } catch (FileNotFoundException e) {
-                    Log.w(TAG, "Apk not found for dexopt: " + path);
-                    ret = -1;
-                } catch (IOException e) {
-                    Log.w(TAG, "Exception reading apk: " + path, e);
-                    ret = -1;
-                }
-                if (ret < 0) {
-                    //error from installer
+            pkg.mForwardLocked = (scanMode&SCAN_FORWARD_LOCKED) != 0;
+            pkg.mScanPath = path;
+            
+            if ((scanMode&SCAN_NO_DEX) == 0) {
+                if (performDexOptLI(pkg, forceDex) == DEX_OPT_FAILED) {
                     mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
                     return null;
                 }
@@ -3077,6 +3141,27 @@ class PackageManagerService extends IPackageManager.Stub {
             mFlags = flags;
             return super.queryIntent(intent, resolvedType,
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
+        }
+
+        public List queryIntentForPackage(Intent intent, String resolvedType, int flags,
+                                          ArrayList<PackageParser.Service> packageServices) {
+            if (packageServices == null) {
+                return null;
+            }
+            mFlags = flags;
+            final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
+            int N = packageServices.size();
+            ArrayList<ArrayList<PackageParser.ServiceIntentInfo>> listCut =
+                new ArrayList<ArrayList<PackageParser.ServiceIntentInfo>>(N);
+
+            ArrayList<PackageParser.ServiceIntentInfo> intentFilters;
+            for (int i = 0; i < N; ++i) {
+                intentFilters = packageServices.get(i).intents;
+                if (intentFilters != null && intentFilters.size() > 0) {
+                    listCut.add(intentFilters);
+                }
+            }
+            return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut);
         }
 
         public final void addService(PackageParser.Service s) {

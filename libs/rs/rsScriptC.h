@@ -52,12 +52,6 @@ public:
     ACCscript*    mAccScript;
 
     virtual bool run(Context *, uint32_t launchID);
-
-    struct Env {
-        Context *mContext;
-        ScriptC *mScript;
-    };
-
 };
 
 class ScriptCState

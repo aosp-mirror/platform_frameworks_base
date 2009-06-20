@@ -11,6 +11,10 @@ else
 	LOCAL_CFLAGS += -DPACKED=""
 endif
 
+ifeq ($(WITH_JIT),true)
+	LOCAL_CFLAGS += -DWITH_JIT
+endif
+
 ifneq ($(USE_CUSTOM_RUNTIME_HEAP_MAX),)
   LOCAL_CFLAGS += -DCUSTOM_RUNTIME_HEAP_MAX=$(USE_CUSTOM_RUNTIME_HEAP_MAX)
 endif
@@ -119,7 +123,8 @@ LOCAL_SRC_FILES:= \
 	com_android_internal_graphics_NativeUtils.cpp \
 	android_backup_BackupDataInput.cpp \
 	android_backup_BackupDataOutput.cpp \
-	android_backup_FileBackupHelper.cpp
+	android_backup_FileBackupHelper.cpp \
+	android_backup_RestoreHelperBase.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \

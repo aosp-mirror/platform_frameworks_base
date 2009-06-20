@@ -30,12 +30,12 @@ public abstract class SyncAdapter {
     public static final int LOG_SYNC_DETAILS = 2743;
 
     class Transport extends ISyncAdapter.Stub {
-        public void startSync(ISyncContext syncContext, Account account,
+        public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) throws RemoteException {
             SyncAdapter.this.startSync(new SyncContext(syncContext), account, extras);
         }
 
-        public void cancelSync() throws RemoteException {
+        public void cancelSync(ISyncContext syncContext) throws RemoteException {
             SyncAdapter.this.cancelSync();
         }
     }

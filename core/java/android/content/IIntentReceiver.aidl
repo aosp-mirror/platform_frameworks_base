@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2006 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package android.backup;
+package android.content;
 
-import java.util.HashMap;
+import android.content.Intent;
+import android.os.Bundle;
 
-/** @hide */
-public class RestoreHelperDistributor {
-    HashMap<String,RestoreHelper> mHelpers;
-
-    public void addHelper(String keyPrefix, RestoreHelper helper) {
-        mHelpers.put(keyPrefix, helper);
-    }
+/**
+ * System private API for dispatching intent broadcasts.  This is given to the
+ * activity manager as part of registering for an intent broadcasts, and is
+ * called when it receives intents.
+ *
+ * {@hide}
+ */
+oneway interface IIntentReceiver {
+    void performReceive(in Intent intent, int resultCode,
+                        String data, in Bundle extras, boolean ordered);
 }
+

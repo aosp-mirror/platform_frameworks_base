@@ -70,8 +70,8 @@ public class SynthProxy {
     /**
      * Sets the language
      */
-    public void setLanguage(String language) {
-        native_setLanguage(mJniData, language);
+    public void setLanguage(String language, String country, String variant) {
+        native_setLanguage(mJniData, language, country, variant);
     }
 
     /**
@@ -141,7 +141,8 @@ public class SynthProxy {
 
     private native final void native_synthesizeToFile(int jniData, String text, String filename);
 
-    private native final void native_setLanguage(int jniData, String language);
+    private native final void native_setLanguage(int jniData, String language, String country,
+            String variant);
 
     private native final void native_setSpeechRate(int jniData, int speechRate);
 

@@ -12,6 +12,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.bouncycastle.util.encoders.Base64;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -78,25 +80,35 @@ public class LocalTransport extends IBackupTransport.Stub {
             byte[] buf = new byte[bufSize];
             while (changeSet.readNextHeader()) {
                 String key = changeSet.getKey();
-                int dataSize = changeSet.getDataSize();
-                if (DEBUG) Log.v(TAG, "Got change set key=" + key + " size=" + dataSize);
-                if (dataSize > bufSize) {
-                    bufSize = dataSize;
-                    buf = new byte[bufSize];
-                }
-                changeSet.readEntityData(buf, dataSize);
-                if (DEBUG) Log.v(TAG, "  + data size " + dataSize);
+                String base64Key = new String(Base64.encode(key.getBytes()));
+                File entityFile = new File(packageDir, base64Key);
 
-                File entityFile = new File(packageDir, key);
-                FileOutputStream entity = new FileOutputStream(entityFile);
-                try {
-                    entity.write(buf, 0, dataSize);
-                } catch (IOException e) {
-                    Log.e(TAG, "Unable to update key file "
-                            + entityFile.getAbsolutePath());
-                    err = -1;
-                } finally {
-                    entity.close();
+                int dataSize = changeSet.getDataSize();
+
+                if (DEBUG) Log.v(TAG, "Got change set key=" + key + " size=" + dataSize
+                        + " key64=" + base64Key);
+
+                if (dataSize >= 0) {
+                    FileOutputStream entity = new FileOutputStream(entityFile);
+
+                    if (dataSize > bufSize) {
+                        bufSize = dataSize;
+                        buf = new byte[bufSize];
+                    }
+                    changeSet.readEntityData(buf, 0, dataSize);
+                    if (DEBUG) Log.v(TAG, "  data size " + dataSize);
+
+                    try {
+                        entity.write(buf, 0, dataSize);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Unable to update key file "
+                                + entityFile.getAbsolutePath());
+                        err = -1;
+                    } finally {
+                        entity.close();
+                    }
+                } else {
+                    entityFile.delete();
                 }
             }
         } catch (IOException e) {
@@ -112,11 +124,9 @@ public class LocalTransport extends IBackupTransport.Stub {
     // Restore handling
     public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
         // one hardcoded restore set
-        RestoreSet[] set = new RestoreSet[1];
-        set[0].device = "flash";
-        set[0].name = "Local disk image";
-        set[0].token = 0;
-        return set;
+        RestoreSet set = new RestoreSet("Local disk image", "flash", 0);
+        RestoreSet[] array = { set };
+        return array;
     }
 
     public PackageInfo[] getAppSet(int token) throws android.os.RemoteException {
@@ -162,14 +172,15 @@ public class LocalTransport extends IBackupTransport.Stub {
         File[] blobs = packageDir.listFiles();
         int err = 0;
         if (blobs != null && blobs.length > 0) {
-            BackupDataOutput out = new BackupDataOutput(mContext, outFd.getFileDescriptor());
+            BackupDataOutput out = new BackupDataOutput(outFd.getFileDescriptor());
             try {
                 for (File f : blobs) {
                     FileInputStream in = new FileInputStream(f);
                     int size = (int) f.length();
                     byte[] buf = new byte[size];
                     in.read(buf);
-                    out.writeEntityHeader(f.getName(), size);
+                    String key = new String(Base64.decode(f.getName()));
+                    out.writeEntityHeader(key, size);
                     out.writeEntityData(buf, size);
                 }
             } catch (Exception e) {

@@ -22,13 +22,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  *
@@ -36,7 +35,7 @@ import java.util.HashMap;
  *
  * {@hide}
  */
-//TODO #TTS# review + complete javadoc
+//TODO #TTS# review + complete javadoc + add links to constants
 public class TextToSpeech {
 
     /**
@@ -52,9 +51,18 @@ public class TextToSpeech {
      */
     public static final int TTS_ERROR_MISSING_RESOURCE = -2;
 
+    /**
+     * Queue mode where all entries in the playback queue (media to be played
+     * and text to be synthesized) are dropped and replaced by the new entry.
+     */
+    public static final int TTS_QUEUE_FLUSH = 0;
+    /**
+     * Queue mode where the new entry is added at the end of the playback queue.
+     */
+    public static final int TTS_QUEUE_ADD = 1;
 
     /**
-     * Called when the TTS has initialized
+     * Called when the TTS has initialized.
      *
      * The InitListener must implement the onInit function. onInit is passed a
      * status code indicating the result of the TTS initialization.
@@ -73,9 +81,31 @@ public class TextToSpeech {
     }
 
     /**
-     * Connection needed for the TTS
+     * Internal constants for the TTS functionality
+     *
+     * {@hide}
      */
-    private ServiceConnection serviceConnection;
+    public class Engine {
+        // default values for a TTS engine when settings are not found in the provider
+        public static final int FALLBACK_TTS_DEFAULT_RATE = 100; // 1x
+        public static final int FALLBACK_TTS_DEFAULT_PITCH = 100;// 1x
+        public static final int FALLBACK_TTS_USE_DEFAULTS = 0; // false
+        public static final String FALLBACK_TTS_DEFAULT_LANG = "eng";
+        public static final String FALLBACK_TTS_DEFAULT_COUNTRY = "";
+        public static final String FALLBACK_TTS_DEFAULT_VARIANT = "";
+
+        // return codes for a TTS engine's check data activity
+        public static final int CHECK_VOICE_DATA_PASS = 1;
+        public static final int CHECK_VOICE_DATA_FAIL = 0;
+        public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
+        public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
+        public static final int CHECK_VOICE_DATA_MISSING_DATA_NO_SDCARD = -3;
+    }
+
+    /**
+     * Connection needed for the TTS.
+     */
+    private ServiceConnection mServiceConnection;
 
     private ITts mITts = null;
     private Context mContext = null;
@@ -104,8 +134,7 @@ public class TextToSpeech {
     }
 
 
-    public void setOnSpeechCompletedListener(
-            final OnSpeechCompletedListener listener) {
+    public void setOnSpeechCompletedListener(final OnSpeechCompletedListener listener) {
         synchronized(mSpeechCompListenerLock) {
             mSpeechCompListener = listener;
         }
@@ -126,7 +155,7 @@ public class TextToSpeech {
         mStarted = false;
 
         // Initialize the TTS, run the callback after the binding is successful
-        serviceConnection = new ServiceConnection() {
+        mServiceConnection = new ServiceConnection() {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 synchronized(mStartLock) {
                     mITts = ITts.Stub.asInterface(service);
@@ -176,7 +205,7 @@ public class TextToSpeech {
 
         Intent intent = new Intent("android.intent.action.USE_TTS");
         intent.addCategory("android.intent.category.TTS");
-        mContext.bindService(intent, serviceConnection,
+        mContext.bindService(intent, mServiceConnection,
                 Context.BIND_AUTO_CREATE);
         // TODO handle case where the binding works (should always work) but
         //      the plugin fails
@@ -190,7 +219,7 @@ public class TextToSpeech {
      */
     public void shutdown() {
         try {
-            mContext.unbindService(serviceConnection);
+            mContext.unbindService(mServiceConnection);
         } catch (IllegalArgumentException e) {
             // Do nothing and fail silently since an error here indicates that
             // binding never succeeded in the first place.
@@ -291,8 +320,8 @@ public class TextToSpeech {
      * @param text
      *            The string of text to be spoken.
      * @param queueMode
-     *            The queuing strategy to use. Use 0 for no queuing, and 1 for
-     *            queuing.
+     *            The queuing strategy to use.
+     *            See TTS_QUEUE_ADD and TTS_QUEUE_FLUSH.
      * @param params
      *            The hashmap of speech parameters to be used.
      */
@@ -329,12 +358,11 @@ public class TextToSpeech {
      * @param earcon
      *            The earcon that should be played
      * @param queueMode
-     *            0 for no queue (interrupts all previous utterances), 1 for
-     *            queued
+     *            See TTS_QUEUE_ADD and TTS_QUEUE_FLUSH.
      * @param params
      *            The hashmap of parameters to be used.
      */
-    public void playEarcon(String earcon, int queueMode, 
+    public void playEarcon(String earcon, int queueMode,
             HashMap<String,String> params) {
         synchronized (mStartLock) {
             if (!mStarted) {
@@ -358,8 +386,8 @@ public class TextToSpeech {
             }
         }
     }
-    
-    
+
+
     public void playSilence(long durationInMs, int queueMode) {
         // TODO implement, already present in TTS service
     }
@@ -429,20 +457,22 @@ public class TextToSpeech {
      * Note that the speech rate is not universally supported by all engines and
      * will be treated as a hint. The TTS library will try to use the specified
      * speech rate, but there is no guarantee.
-     *
-     * Currently, this will change the speech rate for the espeak engine, but it
-     * has no effect on any pre-recorded speech.
+     * This has no effect on any pre-recorded speech.
      *
      * @param speechRate
-     *            The speech rate for the TTS engine.
+     *            The speech rate for the TTS engine. 1 is the normal speed,
+     *            lower values slow down the speech (0.5 is half the normal speech rate),
+     *            greater values accelerate it (2 is twice the normal speech rate).
      */
-    public void setSpeechRate(int speechRate) {
+    public void setSpeechRate(float speechRate) {
         synchronized (mStartLock) {
             if (!mStarted) {
                 return;
             }
             try {
-                mITts.setSpeechRate(speechRate);
+                if (speechRate > 0) {
+                    mITts.setSpeechRate((int)(speechRate*100));
+                }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -457,24 +487,18 @@ public class TextToSpeech {
      *
      * Note that the language is not universally supported by all engines and
      * will be treated as a hint. The TTS library will try to use the specified
-     * language, but there is no guarantee.
+     * language as represented by the Locale, but there is no guarantee.
      *
-     * Currently, this will change the language for the espeak engine, but it
-     * has no effect on any pre-recorded speech.
-     *
-     * @param language
-     *            The language to be used. The languages are specified by their
-     *            IETF language tags as defined by BCP 47. This is the same
-     *            standard used for the lang attribute in HTML. See:
-     *            http://en.wikipedia.org/wiki/IETF_language_tag
+     * @param loc
+     *            The locale describing the language to be used.
      */
-    public void setLanguage(String language) {
+    public void setLanguage(Locale loc) {
         synchronized (mStartLock) {
             if (!mStarted) {
                 return;
             }
             try {
-                mITts.setLanguage(language);
+                mITts.setLanguage(loc.getISO3Language(), loc.getISO3Country(), loc.getVariant());
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;

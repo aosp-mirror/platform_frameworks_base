@@ -47,7 +47,7 @@ void usage(void)
         " %s l[ist] [-v] [-a] file.{zip,jar,apk}\n"
         "   List contents of Zip-compatible archive.\n\n", gProgName);
     fprintf(stderr,
-        " %s d[ump] WHAT file.{apk} [asset [asset ...]]\n"
+        " %s d[ump] [--values] WHAT file.{apk} [asset [asset ...]]\n"
         "   badging          Print the label and icon for the app declared in APK.\n"
         "   permissions      Print the permissions from the APK.\n"
         "   resources        Print the resource table from the APK.\n"
@@ -125,6 +125,8 @@ void usage(void)
         "       inserts android:targetSdkVersion in to manifest.\n"
         "   --max-sdk-version\n"
         "       inserts android:maxSdkVersion in to manifest.\n"
+        "   --values\n"
+        "       when used with \"dump resources\" also includes resource values.\n"
         "   --version-code\n"
         "       inserts android:versionCode in to manifest.\n"
         "   --version-name\n"
@@ -398,6 +400,8 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     bundle.setVersionName(argv[0]);
+                } else if (strcmp(cp, "-values") == 0) {
+                    bundle.setValues(true);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;

@@ -158,14 +158,18 @@ public class SettingsProvider extends ContentProvider {
                 getContext().checkCallingOrSelfPermission(
                         android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
                     PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Cannot write secure settings table");
-        
+                throw new SecurityException(
+                        String.format("Permission denial: writing to secure settings requires %1$s",
+                                android.Manifest.permission.WRITE_SECURE_SETTINGS));
+
         // TODO: Move gservices into its own provider so we don't need this nonsense.
         } else if ("gservices".equals(args.table) &&
             getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.WRITE_GSERVICES) !=
                 PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Cannot write gservices table");
+            throw new SecurityException(
+                    String.format("Permission denial: writing to gservices settings requires %1$s",
+                            android.Manifest.permission.WRITE_GSERVICES));
         }
     }
 

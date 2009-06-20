@@ -156,6 +156,7 @@ extern int register_android_location_GpsLocationProvider(JNIEnv* env);
 extern int register_android_backup_BackupDataInput(JNIEnv *env);
 extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelper(JNIEnv *env);
+extern int register_android_backup_RestoreHelperBase(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -528,7 +529,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     bool checkJni = false;
     bool checkDexSum = false;
     bool logStdio = false;
-    enum { kEMDefault, kEMIntPortable, kEMIntFast } executionMode = kEMDefault;
+    enum {
+      kEMDefault,
+      kEMIntPortable,
+      kEMIntFast,
+#if defined(WITH_JIT)
+      kEMJitCompiler,
+#endif
+    } executionMode = kEMDefault;
 
 
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -547,6 +555,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         executionMode = kEMIntPortable;
     } else if (strcmp(propBuf, "int:fast") == 0) {
         executionMode = kEMIntFast;
+#if defined(WITH_JIT)
+    } else if (strcmp(propBuf, "int:jit") == 0) {
+        executionMode = kEMJitCompiler;
+#endif
     }
 
     property_get("dalvik.vm.stack-trace-file", stackTraceFileBuf, "");
@@ -683,12 +695,70 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         //opt.optionString = "-verbose:jni";
         //mOptions.add(opt);
     }
+
+#if defined(WITH_JIT)
+    /* Minimal profile threshold to trigger JIT compilation */
+    char jitThresholdBuf[sizeof("-Xthreshold:") + PROPERTY_VALUE_MAX];
+    property_get("dalvik.vm.jit.threshold", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        strcpy(jitThresholdBuf, "-Xthreshold:");
+        strcat(jitThresholdBuf, propBuf);
+        opt.optionString = jitThresholdBuf;
+        mOptions.add(opt);
+    }
+
+    /* Force interpreter-only mode for selected opcodes. Eg "1-0a,3c,f1-ff" */
+    char jitOpBuf[sizeof("-Xjitop:") + PROPERTY_VALUE_MAX];
+    property_get("dalvik.vm.jit.op", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        strcpy(jitOpBuf, "-Xjitop:");
+        strcat(jitOpBuf, propBuf);
+        opt.optionString = jitOpBuf;
+        mOptions.add(opt);
+    }
+
+    /*
+     * Reverse the polarity of dalvik.vm.jit.op and force interpreter-only
+     * for non-selected opcodes.
+     */
+    property_get("dalvik.vm.jit.includeop", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        opt.optionString = "-Xincludeselectedop";
+        mOptions.add(opt);
+    }
+
+    /* Force interpreter-only mode for selected methods */
+    char jitMethodBuf[sizeof("-Xjitmethod:") + PROPERTY_VALUE_MAX];
+    property_get("dalvik.vm.jit.method", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        strcpy(jitMethodBuf, "-Xjitmethod:");
+        strcat(jitMethodBuf, propBuf);
+        opt.optionString = jitMethodBuf;
+        mOptions.add(opt);
+    }
+
+    /*
+     * Reverse the polarity of dalvik.vm.jit.method and force interpreter-only
+     * for non-selected methods.
+     */
+    property_get("dalvik.vm.jit.includemethod", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        opt.optionString = "-Xincludeselectedmethod";
+        mOptions.add(opt);
+    }
+#endif
+
     if (executionMode == kEMIntPortable) {
         opt.optionString = "-Xint:portable";
         mOptions.add(opt);
     } else if (executionMode == kEMIntFast) {
         opt.optionString = "-Xint:fast";
         mOptions.add(opt);
+#if defined(WITH_JIT)
+    } else if (executionMode == kEMJitCompiler) {
+        opt.optionString = "-Xint:jit";
+        mOptions.add(opt);
+#endif
     }
 
     if (checkDexSum) {
@@ -1172,6 +1242,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_backup_BackupDataInput),
     REG_JNI(register_android_backup_BackupDataOutput),
     REG_JNI(register_android_backup_FileBackupHelper),
+    REG_JNI(register_android_backup_RestoreHelperBase),
 };
 
 /*

@@ -23,6 +23,7 @@ import android.content.ContentProvider;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.Intent;
+import android.content.IIntentReceiver;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -31,6 +32,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageParser.Component;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -185,7 +187,7 @@ public final class ActivityThread {
             try {
                 appInfo = getPackageManager().getApplicationInfo(
                         pkgInfo.getPackageName(),
-                        PackageManager.GET_SUPPORTS_DENSITIES | PackageManager.GET_EXPANDABLE);
+                        PackageManager.GET_SUPPORTS_DENSITIES);
             } catch (RemoteException e) {
                 throw new AssertionError(e);
             }
@@ -285,6 +287,10 @@ public final class ActivityThread {
             return mPackageName;
         }
 
+        public ApplicationInfo getApplicationInfo() {
+            return mApplicationInfo;
+        }
+        
         public boolean isSecurityViolation() {
             return mSecurityViolation;
         }
@@ -2082,6 +2088,10 @@ public final class ActivityThread {
         return mInitialApplication;
     }
     
+    public String getProcessName() {
+        return mBoundApplication.processName;
+    }
+    
     public ApplicationContext getSystemContext() {
         synchronized (this) {
             if (mSystemContext == null) {
@@ -3216,7 +3226,7 @@ public final class ActivityThread {
                             r.activity.getComponentName().getClassName());
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(
-                            "Activity " + r.intent.getComponent().toShortString()
+                            "Activity " + safeToComponentShortString(r.intent)
                             + " did not call through to super.onPause()");
                     }
                 } catch (SuperNotCalledException e) {
@@ -3225,7 +3235,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to pause activity "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3240,7 +3250,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to stop activity "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3265,7 +3275,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to retain child activities "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3276,7 +3286,7 @@ public final class ActivityThread {
                 r.activity.onDestroy();
                 if (!r.activity.mCalled) {
                     throw new SuperNotCalledException(
-                        "Activity " + r.intent.getComponent().toShortString() +
+                        "Activity " + safeToComponentShortString(r.intent) +
                         " did not call through to super.onDestroy()");
                 }
                 if (r.window != null) {
@@ -3287,8 +3297,7 @@ public final class ActivityThread {
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
                     throw new RuntimeException(
-                            "Unable to destroy activity "
-                            + r.intent.getComponent().toShortString()
+                            "Unable to destroy activity " + safeToComponentShortString(r.intent)
                             + ": " + e.toString(), e);
                 }
             }
@@ -3296,6 +3305,11 @@ public final class ActivityThread {
         mActivities.remove(token);
 
         return r;
+    }
+
+    private static String safeToComponentShortString(Intent intent) {
+        ComponentName component = intent.getComponent();
+        return component == null ? "[Unknown]" : component.toShortString();
     }
 
     private final void handleDestroyActivity(IBinder token, boolean finishing,

@@ -1781,7 +1781,7 @@ public:
     void getLocales(Vector<String8>* locales) const;
 
 #ifndef HAVE_ANDROID_OS
-    void print() const;
+    void print(bool inclValues) const;
 #endif
 
 private:

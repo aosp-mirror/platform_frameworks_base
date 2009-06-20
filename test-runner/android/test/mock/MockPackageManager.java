@@ -16,10 +16,10 @@
 
 package android.test.mock;
 
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDeleteObserver;
@@ -58,11 +58,6 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public Intent getLaunchIntentForPackage(String packageName) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ResolveInfo resolveActivity(Intent intent, int flags, String packageName) {
         throw new UnsupportedOperationException();
     }
 
@@ -328,13 +323,13 @@ public class MockPackageManager extends PackageManager {
             long idealStorageSize, IPackageDataObserver observer) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @hide - to match hiding in superclass
      */
     @Override
     public void freeStorage(
-            long idealStorageSize, PendingIntent onFinishedIntent) {
+            long idealStorageSize, IntentSender pi) {
         throw new UnsupportedOperationException();
     }
 

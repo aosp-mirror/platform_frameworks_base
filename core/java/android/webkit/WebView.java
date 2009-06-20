@@ -489,22 +489,27 @@ public class WebView extends AbsoluteLayout
     // width which view is considered to be fully zoomed out
     static final int ZOOM_OUT_WIDTH = 1008;
 
-    private static final float DEFAULT_MAX_ZOOM_SCALE = 4.0f;
-    private static final float DEFAULT_MIN_ZOOM_SCALE = 0.25f;
+    // default scale limit. Depending on the display density
+    private static float DEFAULT_MAX_ZOOM_SCALE;
+    private static float DEFAULT_MIN_ZOOM_SCALE;
     // scale limit, which can be set through viewport meta tag in the web page
-    private float mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
-    private float mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+    private float mMaxZoomScale;
+    private float mMinZoomScale;
     private boolean mMinZoomScaleFixed = false;
 
     // initial scale in percent. 0 means using default.
     private int mInitialScale = 0;
 
+    // default scale. Depending on the display density.
+    static int DEFAULT_SCALE_PERCENT;
+    private float DEFAULT_SCALE;
+
     // set to true temporarily while the zoom control is being dragged
     private boolean mPreviewZoomOnly = false;
 
     // computed scale and inverse, from mZoomWidth.
-    private float mActualScale = 1;
-    private float mInvActualScale = 1;
+    private float mActualScale;
+    private float mInvActualScale;
     // if this is non-zero, it is used on drawing rather than mActualScale
     private float mZoomScale;
     private float mInvInitialZoomScale;
@@ -734,10 +739,19 @@ public class WebView extends AbsoluteLayout
         final int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
         mMinLockSnapReverseDistance = slop;
+        final float density = getContext().getResources().getDisplayMetrics().density;
         // use one line height, 16 based on our current default font, for how
         // far we allow a touch be away from the edge of a link
-        mNavSlop = (int) (16 * getContext().getResources()
-                .getDisplayMetrics().density);
+        mNavSlop = (int) (16 * density);
+        // density adjusted scale factors
+        DEFAULT_SCALE_PERCENT = (int) (100 * density);
+        DEFAULT_SCALE = density;
+        mActualScale = density;
+        mInvActualScale = 1 / density;
+        DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
+        DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
+        mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+        mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
     }
 
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
@@ -1750,8 +1764,9 @@ public class WebView extends AbsoluteLayout
         }
         // Rect.equals() checks for null input.
         if (!rect.equals(mLastVisibleRectSent)) {
+            Point pos = new Point(rect.left, rect.top);
             mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
-                                     rect.left, rect.top);
+                    nativeMoveGeneration(), 0, pos);
             mLastVisibleRectSent = rect;
         }
         Rect globalRect = new Rect();
@@ -2061,7 +2076,33 @@ public class WebView extends AbsoluteLayout
      * @return the address, or if no address is found, return null.
      */
     public static String findAddress(String addr) {
-        return WebViewCore.nativeFindAddress(addr);
+        return findAddress(addr, false);
+    }
+
+    /**
+     * @hide
+     * Return the first substring consisting of the address of a physical
+     * location. Currently, only addresses in the United States are detected,
+     * and consist of:
+     * - a house number
+     * - a street name
+     * - a street type (Road, Circle, etc), either spelled out or abbreviated
+     * - a city name
+     * - a state or territory, either spelled out or two-letter abbr.
+     * - an optional 5 digit or 9 digit zip code.
+     *
+     * Names are optionally capitalized, and the zip code, if present,
+     * must be valid for the state. The street type must be a standard USPS
+     * spelling or abbreviation. The state or territory must also be spelled
+     * or abbreviated using USPS standards. The house number may not exceed
+     * five digits.
+     * @param addr The string to search for addresses.
+     * @param caseInsensitive addr Set to true to make search ignore case.
+     *
+     * @return the address, or if no address is found, return null.
+     */
+    public static String findAddress(String addr, boolean caseInsensitive) {
+        return WebViewCore.nativeFindAddress(addr, caseInsensitive);
     }
 
     /*
@@ -2889,10 +2930,9 @@ public class WebView extends AbsoluteLayout
         WebViewCore.CursorData result = new WebViewCore.CursorData();
         result.mMoveGeneration = nativeMoveGeneration();
         result.mFrame = nativeCursorFramePointer();
-        result.mNode = nativeCursorNodePointer();
-        Rect bounds = nativeCursorNodeBounds();
-        result.mX = bounds.centerX();
-        result.mY = bounds.centerY();
+        Point position = nativeCursorPosition();
+        result.mX = position.x;
+        result.mY = position.y;
         return result;
     }
 
@@ -4191,9 +4231,9 @@ public class WebView extends AbsoluteLayout
     private boolean zoomWithPreview(float scale) {
         float oldScale = mActualScale;
 
-        // snap to 100% if it is close
-        if (scale > 0.95f && scale < 1.05f) {
-            scale = 1.0f;
+        // snap to DEFAULT_SCALE if it is close
+        if (scale > (DEFAULT_SCALE - 0.05) && scale < (DEFAULT_SCALE + 0.05)) {
+            scale = DEFAULT_SCALE;
         }
 
         setNewZoomScale(scale, false);
@@ -4582,6 +4622,9 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_CLICK:
+                    // The user clicked with the trackball, and did not click a
+                    // second time, so perform the action of a trackball single
+                    // click
                     mTouchMode = TOUCH_DONE_MODE;
                     Rect visibleRect = sendOurVisibleRect();
                     // Note that sendOurVisibleRect calls viewToContent, so the
@@ -4593,8 +4636,13 @@ public class WebView extends AbsoluteLayout
                     mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE,
                             cursorData());
                     playSoundEffect(SoundEffectConstants.CLICK);
-                    if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
+                    boolean isTextInput = nativeCursorIsTextInput();
+                    if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(
+                                nativeCursorText())) {
                         mWebViewCore.sendMessage(EventHub.CLICK);
+                    }
+                    if (isTextInput) {
+                        rebuildWebTextView();
                     }
                     break;
                 case SCROLL_BY_MSG_ID:
@@ -4714,8 +4762,8 @@ public class WebView extends AbsoluteLayout
                     }
                     int initialScale = msg.arg1;
                     int viewportWidth = msg.arg2;
-                    // by default starting a new page with 100% zoom scale.
-                    float scale = 1.0f;
+                    // start a new page with DEFAULT_SCALE zoom scale.
+                    float scale = DEFAULT_SCALE;
                     if (mInitialScale > 0) {
                         scale = mInitialScale / 100.0f;
                     } else  {
@@ -5210,6 +5258,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
     private native boolean  nativeCursorIsTextInput();
+    private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
     /**
      * Returns true if the native cursor node says it wants to handle key events

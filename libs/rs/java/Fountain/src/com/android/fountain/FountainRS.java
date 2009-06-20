@@ -18,12 +18,13 @@ package com.android.fountain;
 
 import java.io.Writer;
 
-import android.renderscript.RenderScript;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.renderscript.RenderScript;
+import android.renderscript.ProgramVertexAlloc;
 import android.util.Log;
 
 public class FountainRS {
@@ -106,6 +107,7 @@ public class FountainRS {
         mPF2.bindTexture(mTexture, 0);
         mPF2.bindSampler(mSampler, 0);
         mPF2.setName("PgmFragBackground");
+
 
         mParams[0] = 0;
         mParams[1] = partCount;

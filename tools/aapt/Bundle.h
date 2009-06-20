@@ -37,6 +37,7 @@ public:
           mForce(false), mGrayscaleTolerance(0), mMakePackageDirs(false),
           mUpdate(false), mExtending(false),
           mRequireLocalization(false), mPseudolocalize(false),
+          mValues(false),
           mCompressionMethod(0), mOutputAPKFile(NULL),
           mAssetSourceDir(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
@@ -75,6 +76,8 @@ public:
     void setRequireLocalization(bool val) { mRequireLocalization = val; }
     bool getPseudolocalize(void) const { return mPseudolocalize; }
     void setPseudolocalize(bool val) { mPseudolocalize = val; }
+    bool getValues(void) const { return mValues; }
+    void setValues(bool val) { mValues = val; }
     int getCompressionMethod(void) const { return mCompressionMethod; }
     void setCompressionMethod(int val) { mCompressionMethod = val; }
     const char* getOutputAPKFile() const { return mOutputAPKFile; }
@@ -154,6 +157,7 @@ private:
     bool        mExtending;
     bool        mRequireLocalization;
     bool        mPseudolocalize;
+    bool        mValues;
     int         mCompressionMethod;
     const char* mOutputAPKFile;
     const char* mAssetSourceDir;

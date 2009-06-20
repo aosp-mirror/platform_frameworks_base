@@ -19,21 +19,13 @@
 
 #include <utils/Errors.h>
 #include <utils/String8.h>
+#include <utils/KeyedVector.h>
 
 namespace android {
 
 enum {
-    BACKUP_HEADER_APP_V1 = 0x31707041, // App1 (little endian)
     BACKUP_HEADER_ENTITY_V1 = 0x61746144, // Data (little endian)
-    BACKUP_FOOTER_APP_V1 = 0x746f6f46, // Foot (little endian)
 };
-
-// the sizes of all of these match.
-typedef struct {
-    int type; // == BACKUP_HEADER_APP_V1
-    int packageLen; // length of the name of the package that follows, not including the null.
-    int cookie;
-} app_header_v1;
 
 typedef struct {
     int type; // BACKUP_HEADER_ENTITY_V1
@@ -41,11 +33,26 @@ typedef struct {
     int dataSize; // size of the data, not including the padding, -1 means delete
 } entity_header_v1;
 
-typedef struct {
-    int type; // BACKUP_FOOTER_APP_V1
-    int entityCount; // the number of entities that were written
-    int cookie;
-} app_footer_v1;
+struct SnapshotHeader {
+    int magic0;
+    int fileCount;
+    int magic1;
+    int totalSize;
+};
+
+struct FileState {
+    int modTime_sec;
+    int modTime_nsec;
+    int size;
+    int crc32;
+    int nameLen;
+};
+
+struct FileRec {
+    String8 file;
+    bool deleted;
+    FileState s;
+};
 
 
 /**
@@ -61,12 +68,8 @@ public:
     // does not close fd
     ~BackupDataWriter();
 
-    status_t WriteAppHeader(const String8& packageName, int cookie);
-
     status_t WriteEntityHeader(const String8& key, size_t dataSize);
     status_t WriteEntityData(const void* data, size_t size);
-
-    status_t WriteAppFooter(int cookie);
 
 private:
     explicit BackupDataWriter();
@@ -92,34 +95,46 @@ public:
     ~BackupDataReader();
 
     status_t Status();
-    status_t ReadNextHeader(int* type = NULL);
+    status_t ReadNextHeader(bool* done, int* type);
 
-    status_t ReadAppHeader(String8* packageName, int* cookie);
     bool HasEntities();
     status_t ReadEntityHeader(String8* key, size_t* dataSize);
     status_t SkipEntityData(); // must be called with the pointer at the begining of the data.
-    status_t ReadEntityData(void* data, size_t size);
-    status_t ReadAppFooter(int* cookie);
+    ssize_t ReadEntityData(void* data, size_t size);
 
 private:
     explicit BackupDataReader();
     status_t skip_padding();
     
     int m_fd;
+    bool m_done;
     status_t m_status;
     ssize_t m_pos;
+    ssize_t m_dataEndPos;
     int m_entityCount;
     union {
         int type;
-        app_header_v1 app;
         entity_header_v1 entity;
-        app_footer_v1 footer;
     } m_header;
+    String8 m_key;
 };
 
 int back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD,
         char const* const* files, char const* const *keys, int fileCount);
 
+class RestoreHelperBase
+{
+public:
+    RestoreHelperBase();
+    ~RestoreHelperBase();
+
+    status_t WriteFile(const String8& filename, BackupDataReader* in);
+    status_t WriteSnapshot(int fd);
+
+private:
+    void* m_buf;
+    KeyedVector<String8,FileRec> m_files;
+};
 
 #define TEST_BACKUP_HELPERS 1
 

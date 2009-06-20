@@ -34,7 +34,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
-import android.app.PendingIntent;
+import android.content.IntentSender;
 
 /**
  *  See {@link PackageManager} for documentation on most of the APIs
@@ -80,9 +80,6 @@ interface IPackageManager {
     int getUidForSharedUser(String sharedUserName);
     
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags);
-
-    ResolveInfo resolveIntentForPackage(in Intent intent, String resolvedType, int flags,
-            String packageName);
 
     List<ResolveInfo> queryIntentActivities(in Intent intent, 
             String resolvedType, int flags);
@@ -238,12 +235,12 @@ interface IPackageManager {
      * and the current free storage is YY,
      * if XX is less than YY, just return. if not free XX-YY number
      * of bytes if possible.
-     * @param opFinishedIntent PendingIntent call back used to
+     * @param pi IntentSender call back used to
      * notify when the operation is completed.May be null
      * to indicate that no call back is desired.
      */
      void freeStorage(in long freeStorageSize,
-             in PendingIntent opFinishedIntent);
+             in IntentSender pi);
      
     /**
      * Delete all the cache files in an applications cache directory
@@ -280,4 +277,11 @@ interface IPackageManager {
     boolean isSafeMode();
     void systemReady();
     boolean hasSystemUidErrors();
+    
+    /**
+     * Ask the package manager to perform dex-opt (if needed) on the given
+     * package, if it already hasn't done mode.  Only does this if running
+     * in the special development "no pre-dexopt" mode.
+     */
+    boolean performDexOpt(String packageName);
 }

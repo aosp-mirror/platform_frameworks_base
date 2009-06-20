@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IIntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -863,11 +864,24 @@ public class Activity extends ContextThemeWrapper
             final Integer dialogId = ids[i];
             Bundle dialogState = b.getBundle(savedDialogKeyFor(dialogId));
             if (dialogState != null) {
-                final Dialog dialog = onCreateDialog(dialogId);
-                dialog.onRestoreInstanceState(dialogState);
+                // Calling onRestoreInstanceState() below will invoke dispatchOnCreate
+                // so tell createDialog() not to do it, otherwise we get an exception
+                final Dialog dialog = createDialog(dialogId, false);
                 mManagedDialogs.put(dialogId, dialog);
+                onPrepareDialog(dialogId, dialog);
+                dialog.onRestoreInstanceState(dialogState);
             }
         }
+    }
+
+    private Dialog createDialog(Integer dialogId, boolean dispatchOnCreate) {
+        final Dialog dialog = onCreateDialog(dialogId);
+        if (dialog == null) {
+            throw new IllegalArgumentException("Activity#onCreateDialog did "
+                    + "not create a dialog for id " + dialogId);
+        }
+        if (dispatchOnCreate) dialog.dispatchOnCreate(null);
+        return dialog;
     }
 
     private String savedDialogKeyFor(int key) {
@@ -2418,12 +2432,7 @@ public class Activity extends ContextThemeWrapper
         }
         Dialog dialog = mManagedDialogs.get(id);
         if (dialog == null) {
-            dialog = onCreateDialog(id);
-            if (dialog == null) {
-                throw new IllegalArgumentException("Activity#onCreateDialog did "
-                        + "not create a dialog for id " + id);
-            }
-            dialog.dispatchOnCreate(null);
+            dialog = createDialog(id, true);
             mManagedDialogs.put(id, dialog);
         }
         

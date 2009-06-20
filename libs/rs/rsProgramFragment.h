@@ -82,9 +82,10 @@ public:
     ~ProgramFragmentState();
 
     ProgramFragment *mPF;
+    void init(Context *rsc, int32_t w, int32_t h);
 
     ObjectBaseRef<Type> mTextureTypes[ProgramFragment::MAX_TEXTURE];
-
+    ObjectBaseRef<ProgramFragment> mDefault;
     Vector<ProgramFragment *> mPrograms;
 };
 

@@ -36,9 +36,14 @@ public final class Bmgr {
     private String mCurArgData;
 
     public static void main(String[] args) {
-        new Bmgr().run(args);
+        try {
+            new Bmgr().run(args);
+        } catch (Exception e) {
+            System.err.println("Exception caught:");
+            e.printStackTrace();
+        }
     }
-    
+
     public void run(String[] args) {
         boolean validCommand = false;
         if (args.length < 1) {
@@ -70,6 +75,19 @@ public final class Bmgr {
             doList();
             return;
         }
+
+        if ("restore".equals(op)) {
+            doRestore();
+            return;
+        }
+
+        if ("transport".equals(op)) {
+            doTransport();
+            return;
+        }
+
+        System.err.println("Unknown command");
+        showUsage();
     }
 
     private void doRun() {
@@ -103,6 +121,19 @@ public final class Bmgr {
         }
     }
 
+    private void doTransport() {
+        try {
+            int which = Integer.parseInt(nextArg());
+            int old = mBmgr.selectBackupTransport(which);
+            System.out.println("Selected transport " + which + " (formerly " + old + ")");
+        } catch (NumberFormatException e) {
+            showUsage();
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
     private void doList() {
         String arg = nextArg();     // sets, transports, packages set#
         if ("transports".equals(arg)) {
@@ -114,6 +145,10 @@ public final class Bmgr {
         try {
             int curTransport = mBmgr.getCurrentTransport();
             mRestore = mBmgr.beginRestoreSession(curTransport);
+            if (mRestore == null) {
+                System.err.println(BMGR_NOT_RUNNING_ERR);
+                return;
+            }
 
             if ("sets".equals(arg)) {
                 doListRestoreSets();
@@ -127,13 +162,12 @@ public final class Bmgr {
     }
 
     private void doListTransports() {
-        
     }
 
     private void doListRestoreSets() {
         try {
             RestoreSet[] sets = mRestore.getAvailableRestoreSets();
-            if (sets.length == 0) {
+            if (sets == null || sets.length == 0) {
                 System.out.println("No restore sets available");
             } else {
                 for (RestoreSet s : sets) {
@@ -143,6 +177,37 @@ public final class Bmgr {
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(TRANSPORT_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void doRestore() {
+        int token;
+        try {
+            token = Integer.parseInt(nextArg());
+        } catch (NumberFormatException e) {
+            showUsage();
+            return;
+        }
+
+        try {
+            int curTransport = mBmgr.getCurrentTransport();
+            mRestore = mBmgr.beginRestoreSession(curTransport);
+            if (mRestore == null) {
+                System.err.println(BMGR_NOT_RUNNING_ERR);
+                return;
+            }
+            RestoreSet[] sets = mRestore.getAvailableRestoreSets();
+            for (RestoreSet s : sets) {
+                if (s.token == token) {
+                    System.out.println("Scheduling restore: " + s.name);
+                    mRestore.performRestore(token);
+                    break;
+                }
+            }
+            mRestore.endRestoreSession();
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
         }
     }
 
@@ -161,7 +226,7 @@ public final class Bmgr {
         System.err.println("       bmgr list sets");
         System.err.println("       #bmgr list transports");
         System.err.println("       #bmgr transport which#");
-        System.err.println("       #bmgr restore set#");
+        System.err.println("       bmgr restore token#");
         System.err.println("       bmgr run");
     }
 }

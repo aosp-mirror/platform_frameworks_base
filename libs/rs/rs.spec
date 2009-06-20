@@ -286,10 +286,6 @@ ScriptCSetRoot {
 	param bool isRoot
 	}
 
-ScriptCSetOrtho {
-	param bool isOrtho
-	}
-
 ScriptCSetScript {
 	param void * codePtr
 	}
@@ -403,19 +399,7 @@ ProgramVertexSetType {
 	param RsType constants
 	}
 
-ProgramVertexSetCameraMode {
-	param bool ortho
-	}
-
 ProgramVertexSetTextureMatrixEnable {
-	param bool enable
-	}
-
-ProgramVertexSetModelMatrixEnable {
-	param bool enable
-	}
-
-ProgramVertexSetProjectionMatrixEnable {
 	param bool enable
 	}
 

@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.os.Handler;
 import android.os.Message;
+import android.security.Keystore;
 import android.util.Log;
 
 final class JWebCoreJavaBridge extends Handler {
@@ -135,10 +136,9 @@ final class JWebCoreJavaBridge extends Handler {
     /**
      * Store a cookie string associated with a url.
      * @param url The url to be used as a key for the cookie.
-     * @param docUrl The policy base url used by WebCore.
      * @param value The cookie string to be stored.
      */
-    private void setCookies(String url, String docUrl, String value) {
+    private void setCookies(String url, String value) {
         if (value.contains("\r") || value.contains("\n")) {
             // for security reason, filter out '\r' and '\n' from the cookie
             int size = value.length();
@@ -223,18 +223,11 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     private String[] getKeyStrengthList() {
-        // FIXME: fake the list for now
-        String[] list = new String[2];
-        list[0] = "1024";
-        list[1] = "512";
-        return list;
+        return Keystore.getInstance().getSupportedKeyStrenghs();
     }
 
     private String getSignedPublicKey(int index, String challenge, String url) {
-        // FIXME: do nothing for now
-        Log.w(LOGTAG, "getSignedPublicKey for " + index + " and challenge="
-                + challenge + " and url=" + url);
-        return "";
+        return Keystore.getInstance().generateKeyPair(index, challenge, url);
     }
 
     private native void nativeConstructor();

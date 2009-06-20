@@ -24,13 +24,11 @@ import java.io.IOException;
 /** @hide */
 public class BackupDataOutput {
     int mBackupWriter;
-    private Context mContext;
 
     public static final int OP_UPDATE = 1;
     public static final int OP_DELETE = 2;
 
-    public BackupDataOutput(Context context, FileDescriptor fd) {
-        mContext = context;
+    public BackupDataOutput(FileDescriptor fd) {
         if (fd == null) throw new NullPointerException();
         mBackupWriter = ctor(fd);
         if (mBackupWriter == 0) {
@@ -38,6 +36,7 @@ public class BackupDataOutput {
         }
     }
 
+    // A dataSize of -1 indicates that the record under this key should be deleted
     public int writeEntityHeader(String key, int dataSize) throws IOException {
         int result = writeEntityHeader_native(mBackupWriter, key, dataSize);
         if (result >= 0) {

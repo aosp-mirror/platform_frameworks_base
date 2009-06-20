@@ -86,6 +86,38 @@ public abstract class SmsMessageBase {
     /** TP-Message-Reference - Message Reference of sent message. @hide */
     public int messageRef;
 
+    /**
+     * For a specific text string, this object describes protocol
+     * properties of encoding it for transmission as message user
+     * data.
+     */
+    public static class TextEncodingDetails {
+        /**
+         *The number of SMS's required to encode the text.
+         */
+        public int msgCount;
+
+        /**
+         * The number of code units consumed so far, where code units
+         * are basically characters in the encoding -- for example,
+         * septets for the standard ASCII and GSM encodings, and 16
+         * bits for Unicode.
+         */
+        public int codeUnitCount;
+
+        /**
+         * How many code units are still available without spilling
+         * into an additional message.
+         */
+        public int codeUnitsRemaining;
+
+        /**
+         * The encoding code unit size (specified using
+         * android.telephony.SmsMessage ENCODING_*).
+         */
+        public int codeUnitSize;
+    }
+
     public static abstract class SubmitPduBase  {
         public byte[] encodedScAddress; // Null if not applicable.
         public byte[] encodedMessage;

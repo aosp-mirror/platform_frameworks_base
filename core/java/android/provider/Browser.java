@@ -96,7 +96,7 @@ public class Browser {
     public static final String[] HISTORY_PROJECTION = new String[] {
         BookmarkColumns._ID, BookmarkColumns.URL, BookmarkColumns.VISITS,
         BookmarkColumns.DATE, BookmarkColumns.BOOKMARK, BookmarkColumns.TITLE,
-        BookmarkColumns.FAVICON };
+        BookmarkColumns.FAVICON, BookmarkColumns.THUMBNAIL };
 
     /* these indices dependent on HISTORY_PROJECTION */
     public static final int HISTORY_PROJECTION_ID_INDEX = 0;
@@ -106,6 +106,10 @@ public class Browser {
     public static final int HISTORY_PROJECTION_BOOKMARK_INDEX = 4;
     public static final int HISTORY_PROJECTION_TITLE_INDEX = 5;
     public static final int HISTORY_PROJECTION_FAVICON_INDEX = 6;
+    /**
+     * @hide
+     */
+    public static final int HISTORY_PROJECTION_THUMBNAIL_INDEX = 7;
 
     /* columns needed to determine whether to truncate history */
     public static final String[] TRUNCATE_HISTORY_PROJECTION = new String[] {
@@ -486,6 +490,10 @@ public class Browser {
         public static final String TITLE = "title";
         public static final String CREATED = "created";
         public static final String FAVICON = "favicon";
+        /**
+         * @hide
+         */
+        public static final String THUMBNAIL = "thumbnail";
     }
 
     public static class SearchColumns implements BaseColumns {

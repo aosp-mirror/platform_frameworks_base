@@ -777,7 +777,7 @@ public class PackageParser {
                             targetCode = minCode = val.string.toString();
                         } else {
                             // If it's not a string, it's an integer.
-                            minVers = val.data;
+                            targetVers = minVers = val.data;
                         }
                     }
                     
@@ -798,6 +798,25 @@ public class PackageParser {
 
                     sa.recycle();
 
+                    if (minCode != null) {
+                        if (!minCode.equals(mSdkCodename)) {
+                            if (mSdkCodename != null) {
+                                outError[0] = "Requires development platform " + minCode
+                                        + " (current platform is " + mSdkCodename + ")";
+                            } else {
+                                outError[0] = "Requires development platform " + minCode
+                                        + " but this is a release platform.";
+                            }
+                            mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
+                            return null;
+                        }
+                    } else if (minVers > mSdkVersion) {
+                        outError[0] = "Requires newer sdk version #" + minVers
+                                + " (current version is #" + mSdkVersion + ")";
+                        mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
+                        return null;
+                    }
+                    
                     if (targetCode != null) {
                         if (!targetCode.equals(mSdkCodename)) {
                             if (mSdkCodename != null) {
@@ -815,13 +834,6 @@ public class PackageParser {
                                 = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
                     } else {
                         pkg.applicationInfo.targetSdkVersion = targetVers;
-                    }
-                    
-                    if (minVers > mSdkVersion) {
-                        outError[0] = "Requires newer sdk version #" + minVers
-                                + " (current version is #" + mSdkVersion + ")";
-                        mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
-                        return null;
                     }
                     
                     if (maxVers < mSdkVersion) {
@@ -865,7 +877,7 @@ public class PackageParser {
                 XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("expandable")) {
-                pkg.expandable = true;
+                pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
                 XmlUtils.skipCurrentTag(parser);
             } else {
                 Log.w(TAG, "Bad element under <manifest>: "
@@ -2262,9 +2274,6 @@ public class PackageParser {
         public final ArrayList<Integer> supportsDensityList = new ArrayList<Integer>();
         public int[] supportsDensities = null;
 
-        // If the application's window is expandable.
-        public boolean expandable;
-        
         // If this is a 3rd party app, this is the path of the zip file.
         public String mPath;
 
@@ -2287,6 +2296,17 @@ public class PackageParser {
         // preferred up order.
         public int mPreferredOrder = 0;
 
+        // For use by package manager service to keep track of which apps
+        // have been installed with forward locking.
+        public boolean mForwardLocked;
+        
+        // For use by the package manager to keep track of the path to the
+        // file an app came from.
+        public String mScanPath;
+        
+        // For use by package manager to keep track of where it has done dexopt.
+        public boolean mDidDexOpt;
+        
         // Additional data supplied by callers.
         public Object mExtras;
         
@@ -2439,9 +2459,6 @@ public class PackageParser {
                 && p.supportsDensities != null) {
             return true;
         }
-        if ((flags & PackageManager.GET_EXPANDABLE) != 0) {
-            return true;
-        }
         return false;
     }
 
@@ -2461,9 +2478,6 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0) {
             ai.supportsDensities = p.supportsDensities;
-        }
-        if ((flags & PackageManager.GET_EXPANDABLE) != 0) {
-            ai.expandable = p.expandable;
         }
         return ai;
     }

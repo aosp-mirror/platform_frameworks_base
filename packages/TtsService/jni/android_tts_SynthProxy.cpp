@@ -272,7 +272,7 @@ android_tts_SynthProxy_native_finalize(JNIEnv *env, jobject thiz, jint jniData)
 
 static void
 android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
-        jstring language)
+        jstring language, jstring country, jstring variant)
 {
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setLanguage(): invalid JNI data");
@@ -281,12 +281,16 @@ android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     const char *langNativeString = env->GetStringUTFChars(language, 0);
+    const char *countryNativeString = env->GetStringUTFChars(country, 0);
+    const char *variantNativeString = env->GetStringUTFChars(variant, 0);
     // TODO check return codes
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->setLanguage(langNativeString,
-                strlen(langNativeString));
+        pSynthData->mNativeSynthInterface->setLanguage(langNativeString, countryNativeString,
+                variantNativeString);
     }
     env->ReleaseStringUTFChars(language, langNativeString);
+    env->ReleaseStringUTFChars(language, countryNativeString);
+    env->ReleaseStringUTFChars(language, variantNativeString);
 }
 
 
@@ -494,6 +498,7 @@ android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
     return env->NewStringUTF(buf);
 }
 
+
 JNIEXPORT int JNICALL
 android_tts_SynthProxy_getRate(JNIEnv *env, jobject thiz, jint jniData)
 {
@@ -529,7 +534,7 @@ static JNINativeMethod gMethods[] = {
         (void*)android_tts_SynthProxy_synthesizeToFile
     },
     {   "native_setLanguage",
-        "(ILjava/lang/String;)V",
+        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
         (void*)android_tts_SynthProxy_setLanguage
     },
     {   "native_setSpeechRate",
@@ -565,7 +570,6 @@ static JNINativeMethod gMethods[] = {
 #define SP_JNIDATA_FIELD_NAME                "mJniData"
 #define SP_POSTSPEECHSYNTHESIZED_METHOD_NAME "postNativeSpeechSynthesizedInJava"
 
-// TODO: verify this is the correct path
 static const char* const kClassPathName = "android/tts/SynthProxy";
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)

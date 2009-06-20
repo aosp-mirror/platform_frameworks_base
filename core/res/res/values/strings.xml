@@ -228,6 +228,8 @@
     <string name="httpErrorFileNotFound">The requested file was not found.</string>
     <!-- Displayed when a request failed because there are too many requests right now. -->
     <string name="httpErrorTooManyRequests">Too many requests are being processed. Try again later.</string>
+    <!-- Displayed a toast that a certificate is saved in the keystore -->
+    <string name="certificateSaved">The certificate is saved in the system\'s key store.</string>
 
     <!-- Account notifications --> <skip />
     <!-- A notification is shown when the AccountManager is unable to
@@ -1306,6 +1308,9 @@
     <string name="battery_low_percent_format">less than <xliff:g id="number">%d%%</xliff:g>
     remaining.</string>
 
+    <!-- When the battery is low, this is the label of the button to go to the
+         power usage activity to find out what drained the battery. -->
+    <string name="battery_low_why">Why?</string>
 
     <!-- Title of the alert when something went wrong in the factory test. -->
     <string name="factorytest_failed">Factory test failed</string>

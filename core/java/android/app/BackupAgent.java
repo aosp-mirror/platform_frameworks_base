@@ -17,6 +17,7 @@
 package android.app;
 
 import android.app.IBackupAgent;
+import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -25,6 +26,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.io.IOException;
+
 /**
  * This is the central interface between an application and Android's
  * settings backup mechanism.
@@ -32,6 +35,8 @@ import android.util.Log;
  * @hide pending API solidification
  */
 public abstract class BackupAgent extends ContextWrapper {
+    private static final String TAG = "BackupAgent";
+
     public BackupAgent() {
         super(null);
     }
@@ -77,8 +82,8 @@ public abstract class BackupAgent extends ContextWrapper {
      *                 file.  The application should record the final backup state
      *                 here after restoring its data from dataFd.
      */
-    public abstract void onRestore(ParcelFileDescriptor /* TODO: BackupDataInput */ data,
-            ParcelFileDescriptor newState);
+    public abstract void onRestore(BackupDataInput data, ParcelFileDescriptor newState)
+            throws IOException;
 
 
     // ----- Core implementation -----
@@ -107,13 +112,11 @@ public abstract class BackupAgent extends ContextWrapper {
                 ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
             Log.v(TAG, "doBackup() invoked");
-            BackupDataOutput output = new BackupDataOutput(BackupAgent.this,
-                    data.getFileDescriptor());
+            BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
             } catch (RuntimeException ex) {
-                Log.d("BackupAgent", "onBackup ("
-                        + BackupAgent.this.getClass().getName() + ") threw", ex);
+                Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             }
         }
@@ -122,7 +125,16 @@ public abstract class BackupAgent extends ContextWrapper {
                 ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
             Log.v(TAG, "doRestore() invoked");
-            BackupAgent.this.onRestore(data, newState);
+            BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
+            try {
+                BackupAgent.this.onRestore(input, newState);
+            } catch (IOException ex) {
+                Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
+                throw new RuntimeException(ex);
+            } catch (RuntimeException ex) {
+                Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
+                throw ex;
+            }
         }
     }
 }

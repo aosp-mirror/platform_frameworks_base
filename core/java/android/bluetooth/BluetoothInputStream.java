@@ -59,7 +59,7 @@ import java.io.InputStream;
         byte b[] = new byte[1];
         int ret = mSocket.readNative(b, 0, 1);
         if (ret == 1) {
-            return (int)b[0];
+            return (int)b[0] & 0xff;
         } else {
             return -1;
         }

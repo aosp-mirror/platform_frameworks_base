@@ -16,12 +16,11 @@
 
 package android.content.pm;
 
-
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -178,12 +177,6 @@ public abstract class PackageManager {
      * supplied Intent.
      */
     public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
-
-    /**
-     * {@link ApplicationInfo} flag: return the
-     * {link ApplicationInfo#expandable} boolean flag of the package.
-     */
-    public static final int GET_EXPANDABLE = 0x00020000;
 
     /**
      * Permission check result: this is returned by {@link #checkPermission}
@@ -985,23 +978,6 @@ public abstract class PackageManager {
     public abstract ResolveInfo resolveActivity(Intent intent, int flags);
 
     /**
-     * Resolve the intent restricted to a package.
-     * {@see #resolveActivity}
-     *
-     * @param intent An intent containing all of the desired specification
-     *               (action, data, type, category, and/or component).
-     * @param flags Additional option flags.  The most important is
-     *                    MATCH_DEFAULT_ONLY, to limit the resolution to only
-     *                    those activities that support the CATEGORY_DEFAULT.
-     * @param packageName Restrict the intent resolution to this package.
-     *
-     * @return Returns a ResolveInfo containing the final activity intent that
-     *         was determined to be the best action.  Returns null if no
-     *         matching activity was found.
-     */
-    public abstract ResolveInfo resolveActivity(Intent intent, int flags, String packageName);
-
-    /**
      * Retrieve all activities that can be performed for the given intent.
      *
      * @param intent The desired intent as per resolveActivity().
@@ -1520,7 +1496,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer);
-    
+
     /**
      * Free storage by deleting LRU sorted list of cache files across
      * all applications. If the currently available free storage
@@ -1538,13 +1514,13 @@ public abstract class PackageManager {
      * and the current free storage is YY,
      * if XX is less than YY, just return. if not free XX-YY number
      * of bytes if possible.
-     * @param opFinishedIntent PendingIntent call back used to
+     * @param pi IntentSender call back used to
      * notify when the operation is completed.May be null
      * to indicate that no call back is desired.
      * 
      * @hide
      */
-    public abstract void freeStorage(long freeStorageSize, PendingIntent opFinishedIntent);
+    public abstract void freeStorage(long freeStorageSize, IntentSender pi);
 
     /**
      * Retrieve the size information for a package.

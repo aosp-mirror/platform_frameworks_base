@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -119,6 +120,11 @@ public class ContextWrapper extends Context {
         return mBase.getPackageName();
     }
 
+    @Override
+    public ApplicationInfo getApplicationInfo() {
+        return mBase.getApplicationInfo();
+    }
+    
     @Override
     public String getPackageResourcePath() {
         return mBase.getPackageResourcePath();

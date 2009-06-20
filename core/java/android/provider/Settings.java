@@ -1976,6 +1976,16 @@ public final class Settings {
         public static final String TTS_DEFAULT_LANG = "tts_default_lang";
 
         /**
+         * Default text-to-speech country.
+         */
+        public static final String TTS_DEFAULT_COUNTRY = "tts_default_country";
+
+        /**
+         * Default text-to-speech locale variant.
+         */
+        public static final String TTS_DEFAULT_VARIANT = "tts_default_variant";
+
+        /**
          * Whether to notify the user of open networks.
          * <p>
          * If not connected and the scan results have an open network, we will
@@ -2178,6 +2188,14 @@ public final class Settings {
          * @hide
          */
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
+
+        /**
+         * Flag for allowing service provider to use location information to improve products and
+         * services.
+         * Type: int ( 0 = disallow, 1 = allow )
+         * @hide
+         */
+        public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
         /**
          * Helper method for determining if a location provider is enabled.
@@ -2623,26 +2641,6 @@ public final class Settings {
                 "gtalk_wifi_max_heartbeat_ping_interval_ms";
 
         /**
-         * The minimum interval for how frequently we send heartbeat pings to the GTalk server.
-         */
-        public static final String GTALK_SERVICE_MIN_HEARTBEAT_INTERVAL_MS =
-                "gtalk_min_heartbeat_ping_interval_ms";
-
-        /**
-         * The scale down factor used by adaptive heartbeat logic (to scale down the heartbeat
-         * interval) when the previous interval fails to get a response from the server.
-         */
-        public static final String GTALK_SERVICE_ADAPTIVE_HEARTBEAT_SCALER =
-                "gtalk_adaptive_heartbeat_scaler";
-
-        /**
-         * The trigger for adaptively scaling down the heartbeat interval. This is the number of
-         * consecutive times we failed to get a server response for sending the heartbeat ping.
-         */
-        public static final String GTALK_SERVICE_ADAPTIVE_HEARTBEAT_TRIGGER =
-                "gtalk_adaptive_heartbeat_trigger";
-
-        /**
          * How long we wait to receive a heartbeat ping acknowledgement (or another packet)
          * from the GTalk server, before deeming the connection dead.
          */
@@ -2693,6 +2691,15 @@ public final class Settings {
          * the other user.
          */
         public static final String GTALK_USE_BARE_JID_TIMEOUT_MS = "gtalk_use_barejid_timeout_ms";
+
+        /**
+         * This is the threshold of retry number when there is an authentication expired failure
+         * for Google Talk. In some situation, e.g. when a Google Apps account is disabled chat
+         * service, the connection keeps failing. This threshold controls when we should stop
+         * the retrying.
+         */
+        public static final String GTALK_MAX_RETRIES_FOR_AUTH_EXPIRED =
+            "gtalk_max_retries_for_auth_expired";
 
         /**
          * Enable use of ssl session caching.
@@ -2789,6 +2796,13 @@ public final class Settings {
          * Title string to use for second category tab.
          */
         public static final String VENDING_TAB_2_TITLE = "vending_tab_2_title";
+
+        /**
+         * Frequency in milliseconds at which we should request MCS heartbeats
+         * from the Vending Machine client.
+         */
+        public static final String VENDING_HEARTBEAT_FREQUENCY_MS =
+                "vending_heartbeat_frequency_ms";
 
         /**
          * URL that points to the legal terms of service to display in Settings.
@@ -3094,6 +3108,7 @@ public final class Settings {
          * Flag for allowing service provider to use location information to improve products and
          * services.
          * Type: int ( 0 = disallow, 1 = allow )
+         * @deprecated
          */
         public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 

@@ -151,6 +151,11 @@ public class ApplicationErrorReport implements Parcelable {
         public String exceptionClassName;
 
         /**
+         * Message stored in the exception.
+         */
+        public String exceptionMessage;
+
+        /**
          * File which the exception was thrown from.
          */
         public String throwFileName;
@@ -181,6 +186,7 @@ public class ApplicationErrorReport implements Parcelable {
          */
         public CrashInfo(Parcel in) {
             exceptionClassName = in.readString();
+            exceptionMessage = in.readString();
             throwFileName = in.readString();
             throwClassName = in.readString();
             throwMethodName = in.readString();
@@ -192,6 +198,7 @@ public class ApplicationErrorReport implements Parcelable {
          */
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(exceptionClassName);
+            dest.writeString(exceptionMessage);
             dest.writeString(throwFileName);
             dest.writeString(throwClassName);
             dest.writeString(throwMethodName);
@@ -203,6 +210,7 @@ public class ApplicationErrorReport implements Parcelable {
          */
         public void dump(Printer pw, String prefix) {
             pw.println(prefix + "exceptionClassName: " + exceptionClassName);
+            pw.println(prefix + "exceptionMessage: " + exceptionMessage);
             pw.println(prefix + "throwFileName: " + throwFileName);
             pw.println(prefix + "throwClassName: " + throwClassName);
             pw.println(prefix + "throwMethodName: " + throwMethodName);

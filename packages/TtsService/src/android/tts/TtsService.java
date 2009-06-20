@@ -15,10 +15,8 @@
  */
 package android.tts;
 
-import android.speech.tts.ITts.Stub;
-import android.speech.tts.ITtsCallback;
-
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,6 +29,9 @@ import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.speech.tts.ITts.Stub;
+import android.speech.tts.ITtsCallback;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,7 +102,7 @@ public class TtsService extends Service implements OnCompletionListener {
     private MediaPlayer mPlayer;
     private TtsService mSelf;
 
-    private SharedPreferences prefs;
+    private ContentResolver mResolver;
 
     private final ReentrantLock speechQueueLock = new ReentrantLock();
     private final ReentrantLock synthesizerLock = new ReentrantLock();
@@ -113,9 +114,7 @@ public class TtsService extends Service implements OnCompletionListener {
         super.onCreate();
         Log.i("TTS", "TTS starting");
 
-        // TODO: Make this work when the settings are done in the main Settings
-        // app.
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mResolver = getContentResolver();
 
         String soLibPath = "/system/lib/libttspico.so";
         nativeSynth = new SynthProxy(soLibPath);
@@ -129,8 +128,7 @@ public class TtsService extends Service implements OnCompletionListener {
         mSpeechQueue = new ArrayList<SpeechItem>();
         mPlayer = null;
 
-        setLanguage(prefs.getString("lang_pref", "en-rUS"));
-        setSpeechRate(Integer.parseInt(prefs.getString("rate_pref", "140")));
+        setDefaultSettings();
     }
 
     @Override
@@ -145,25 +143,50 @@ public class TtsService extends Service implements OnCompletionListener {
         mCallbacks.kill();
     }
 
-    private void setSpeechRate(int rate) {
-        if (prefs.getBoolean("override_pref", false)) {
-            // This is set to the default here so that the preview in the prefs
-            // activity will show the change without a restart, even if apps are
-            // not allowed to change the defaults.
-            rate = Integer.parseInt(prefs.getString("rate_pref", "140"));
-        }
-        nativeSynth.setSpeechRate(rate);
+
+    private void setDefaultSettings() {
+
+        // TODO handle default language
+        setLanguage("eng", "USA", "");
+
+        // speech rate
+        setSpeechRate(getDefaultRate());
+
+        // TODO handle default pitch
     }
 
-    private void setLanguage(String lang) {
-        if (prefs.getBoolean("override_pref", false)) {
-            // This is set to the default here so that the preview in the prefs
-            // activity will show the change without a restart, even if apps are
-            // not
-            // allowed to change the defaults.
-            lang = prefs.getString("lang_pref", "en-rUS");
+
+    private boolean isDefaultEnforced() {
+        return (android.provider.Settings.Secure.getInt(mResolver,
+                    android.provider.Settings.Secure.TTS_USE_DEFAULTS,
+                    TextToSpeech.Engine.FALLBACK_TTS_USE_DEFAULTS)
+                == 1 );
+    }
+
+
+    private int getDefaultRate() {
+        return android.provider.Settings.Secure.getInt(mResolver,
+                android.provider.Settings.Secure.TTS_DEFAULT_RATE,
+                TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_RATE);
+    }
+
+
+    private void setSpeechRate(int rate) {
+        if (isDefaultEnforced()) {
+            nativeSynth.setSpeechRate(getDefaultRate());
+        } else {
+            nativeSynth.setSpeechRate(rate);
         }
-        nativeSynth.setLanguage(lang);
+    }
+
+    private void setLanguage(String lang, String country, String variant) {
+        Log.v("TTS", "TtsService.setLanguage("+lang+", "+country+", "+variant+")");
+        if (isDefaultEnforced()) {
+            nativeSynth.setLanguage(lang, country, variant);
+        } else {
+            // TODO handle default language
+            nativeSynth.setLanguage("eng", "USA", "");
+        }
     }
 
     /**
@@ -683,20 +706,14 @@ public class TtsService extends Service implements OnCompletionListener {
         }
 
         /**
-         * Sets the speech rate for the TTS. Note that this will only have an
-         * effect on synthesized speech; it will not affect pre-recorded speech.
+         * Sets the speech rate for the TTS, which affects the synthesized voice.
          *
-         * @param language
-         *            Language values are based on the Android conventions for
-         *            localization as described in the Android platform
-         *            documentation on internationalization. This implies that
-         *            language data is specified in the format xx-rYY, where xx
-         *            is a two letter ISO 639-1 language code in lowercase and
-         *            rYY is a two letter ISO 3166-1-alpha-2 language code in
-         *            uppercase preceded by a lowercase "r".
+         * @param lang  the three letter ISO language code.
+         * @param country  the three letter ISO country code.
+         * @param variant  the variant code associated with the country and language pair.
          */
-        public void setLanguage(String language) {
-            mSelf.setLanguage(language);
+        public void setLanguage(String lang, String country, String variant) {
+            mSelf.setLanguage(lang, country, variant);
         }
 
         /**

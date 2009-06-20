@@ -46,11 +46,11 @@ public class RestoreSet implements Parcelable {
     public int token;
 
 
-    RestoreSet() {
+    public RestoreSet() {
         // Leave everything zero / null
     }
 
-    RestoreSet(String _name, String _dev, int _token) {
+    public RestoreSet(String _name, String _dev, int _token) {
         name = _name;
         device = _dev;
         token = _token;

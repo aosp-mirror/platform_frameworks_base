@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -99,6 +100,11 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public ApplicationInfo getApplicationInfo() {
+        throw new UnsupportedOperationException();
+    }
+    
     @Override
     public String getPackageResourcePath() {
         throw new UnsupportedOperationException();

@@ -1,5 +1,6 @@
 package android.app;
 
+import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
 import android.backup.FileBackupHelper;
 import android.os.ParcelFileDescriptor;
@@ -52,6 +53,6 @@ public class FullBackupAgent extends BackupAgent {
     }
 
     @Override
-    public void onRestore(ParcelFileDescriptor data, ParcelFileDescriptor newState) {
+    public void onRestore(BackupDataInput data, ParcelFileDescriptor newState) {
     }
 }

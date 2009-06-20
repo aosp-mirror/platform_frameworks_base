@@ -34,6 +34,7 @@ import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.cdma.SmsMessage;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
+import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.util.HexDump;
 
 import java.io.ByteArrayOutputStream;
@@ -302,8 +303,12 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
                 deliveryIntent = deliveryIntents.get(i);
             }
 
-            SmsMessage.SubmitPdu submitPdu = SmsMessage.getSubmitPdu(scAddr, destAddr,
-                    parts.get(i), deliveryIntent != null, smsHeader);
+            UserData uData = new UserData();
+            uData.payloadStr = parts.get(i);
+            uData.userDataHeader = smsHeader;
+
+            SmsMessage.SubmitPdu submitPdu = SmsMessage.getSubmitPdu(destAddr,
+                    uData, deliveryIntent != null);
 
             sendSubmitPdu(submitPdu, sentIntent, deliveryIntent);
         }

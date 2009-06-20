@@ -39,7 +39,6 @@ public:
 
     struct Enviroment_t {
         bool mIsRoot;
-        bool mIsOrtho;
         float mClearColor[4];
         float mClearDepth;
         uint32_t mClearStencil;

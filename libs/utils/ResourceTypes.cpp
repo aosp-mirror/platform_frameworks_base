@@ -3830,9 +3830,45 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
 #define CHAR16_ARRAY_EQ(constant, var, len) \
         ((len == (sizeof(constant)/sizeof(constant[0]))) && (0 == memcmp((var), (constant), (len))))
 
-void ResTable::print() const
+void print_complex(uint32_t complex, bool isFraction)
 {
-    printf("mError=0x%x (%s)\n", mError, strerror(mError));
+    const float MANTISSA_MULT =
+        1.0f / (1<<Res_value::COMPLEX_MANTISSA_SHIFT);
+    const float RADIX_MULTS[] = {
+        1.0f*MANTISSA_MULT, 1.0f/(1<<7)*MANTISSA_MULT,
+        1.0f/(1<<15)*MANTISSA_MULT, 1.0f/(1<<23)*MANTISSA_MULT
+    };
+
+    float value = (complex&(Res_value::COMPLEX_MANTISSA_MASK
+                   <<Res_value::COMPLEX_MANTISSA_SHIFT))
+            * RADIX_MULTS[(complex>>Res_value::COMPLEX_RADIX_SHIFT)
+                            & Res_value::COMPLEX_RADIX_MASK];
+    printf("%f", value);
+    
+    if (isFraction) {
+        switch ((complex>>Res_value::COMPLEX_UNIT_SHIFT)&Res_value::COMPLEX_UNIT_MASK) {
+            case Res_value::COMPLEX_UNIT_PX: printf("px"); break;
+            case Res_value::COMPLEX_UNIT_DIP: printf("dp"); break;
+            case Res_value::COMPLEX_UNIT_SP: printf("sp"); break;
+            case Res_value::COMPLEX_UNIT_PT: printf("pt"); break;
+            case Res_value::COMPLEX_UNIT_IN: printf("in"); break;
+            case Res_value::COMPLEX_UNIT_MM: printf("mm"); break;
+            default: printf(" (unknown unit)"); break;
+        }
+    } else {
+        switch ((complex>>Res_value::COMPLEX_UNIT_SHIFT)&Res_value::COMPLEX_UNIT_MASK) {
+            case Res_value::COMPLEX_UNIT_FRACTION: printf("%%"); break;
+            case Res_value::COMPLEX_UNIT_FRACTION_PARENT: printf("%%p"); break;
+            default: printf(" (unknown unit)"); break;
+        }
+    }
+}
+
+void ResTable::print(bool inclValues) const
+{
+    if (mError != 0) {
+        printf("mError=0x%x (%s)\n", mError, strerror(mError));
+    }
 #if 0
     printf("mParams=%c%c-%c%c,\n",
             mParams.language[0], mParams.language[1],
@@ -3947,6 +3983,8 @@ void ResTable::print() const
                                  (void*)(entriesStart + thisOffset));
                             continue;
                         }
+                        
+                        const Res_value* value = NULL;
                         if ((dtohs(ent->flags)&ResTable_entry::FLAG_COMPLEX) != 0) {
                             printf("<bag>");
                         } else {
@@ -3962,7 +4000,7 @@ void ResTable::print() const
                                 continue;
                             }
                             
-                            const Res_value* value = (const Res_value*)
+                            value = (const Res_value*)
                                 (((const uint8_t*)ent) + esize);
                             printf("t=0x%02x d=0x%08x (s=0x%04x r=0x%02x)",
                                    (int)value->dataType, (int)dtohl(value->data),
@@ -3973,6 +4011,49 @@ void ResTable::print() const
                             printf(" (PUBLIC)");
                         }
                         printf("\n");
+                        
+                        if (inclValues) {
+                            if (value != NULL) {
+                                printf("          ");
+                                if (value->dataType == Res_value::TYPE_NULL) {
+                                    printf("(null)\n");
+                                } else if (value->dataType == Res_value::TYPE_REFERENCE) {
+                                    printf("(reference) 0x%08x\n", value->data);
+                                } else if (value->dataType == Res_value::TYPE_ATTRIBUTE) {
+                                    printf("(attribute) 0x%08x\n", value->data);
+                                } else if (value->dataType == Res_value::TYPE_STRING) {
+                                    size_t len;
+                                    const char16_t* str = pkg->header->values.stringAt(
+                                            value->data, &len);
+                                    if (str == NULL) {
+                                        printf("(string) null\n");
+                                    } else {
+                                        printf("(string) \"%s\"\n",
+                                                String8(str, len).string());
+                                    } 
+                                } else if (value->dataType == Res_value::TYPE_FLOAT) {
+                                    printf("(float) %g\n", *(const float*)&value->data);
+                                } else if (value->dataType == Res_value::TYPE_DIMENSION) {
+                                    printf("(dimension) ");
+                                    print_complex(value->data, false);
+                                    printf("\n");
+                                } else if (value->dataType == Res_value::TYPE_FRACTION) {
+                                    printf("(fraction) ");
+                                    print_complex(value->data, true);
+                                    printf("\n");
+                                } else if (value->dataType >= Res_value::TYPE_FIRST_COLOR_INT
+                                        || value->dataType <= Res_value::TYPE_LAST_COLOR_INT) {
+                                    printf("(color) #%08x\n", value->data);
+                                } else if (value->dataType == Res_value::TYPE_INT_BOOLEAN) {
+                                    printf("(boolean) %s\n", value->data ? "true" : "false");
+                                } else if (value->dataType >= Res_value::TYPE_FIRST_INT
+                                        || value->dataType <= Res_value::TYPE_LAST_INT) {
+                                    printf("(int) 0x%08x or %d\n", value->data, value->data);
+                                } else {
+                                    printf("(unknown type)\n");
+                                }
+                            }
+                        }
                     }
                 }
             }

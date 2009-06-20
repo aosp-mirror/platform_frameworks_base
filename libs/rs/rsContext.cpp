@@ -23,6 +23,7 @@ using namespace android;
 using namespace android::renderscript;
 
 Context * Context::gCon = NULL;
+pthread_key_t Context::gThreadTLSKey = 0;
 
 void Context::initEGL()
 {
@@ -81,24 +82,6 @@ bool Context::runRootScript()
     glEnable(GL_LIGHT0);
     glViewport(0, 0, mWidth, mHeight);
 
-    if(mRootScript->mEnviroment.mIsOrtho) {
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrthof(0, mWidth,  mHeight, 0,  0, 1);
-        glMatrixMode(GL_MODELVIEW);
-    } else {
-        float aspectH = ((float)mWidth) / mHeight;
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glFrustumf(-1, 1,  -aspectH, aspectH,  1, 100);
-        glRotatef(-90, 0,0,1);
-        glTranslatef(0,  0,  -3);
-        glMatrixMode(GL_MODELVIEW);
-    }
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
     glDepthMask(GL_TRUE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
@@ -137,17 +120,33 @@ void * Context::threadProc(void *vrsc)
      rsc->mServerReturns.init(128);
 
      rsc->initEGL();
+
+     ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
+     if (!tlsStruct) {
+         LOGE("Error allocating tls storage");
+         return NULL;
+     }
+     tlsStruct->mContext = rsc;
+     tlsStruct->mScript = NULL;
+     int status = pthread_setspecific(rsc->gThreadTLSKey, tlsStruct);
+     if (status) {
+         LOGE("pthread_setspecific %i", status);
+     }
+
+     rsc->mStateVertex.init(rsc, rsc->mWidth, rsc->mHeight);
+     rsc->setVertex(NULL);
+     rsc->mStateFragment.init(rsc, rsc->mWidth, rsc->mHeight);
+     rsc->setFragment(NULL);
+     rsc->mStateFragmentStore.init(rsc, rsc->mWidth, rsc->mHeight);
+     rsc->setFragmentStore(NULL);
+
      rsc->mRunning = true;
      bool mDraw = true;
      while (!rsc->mExit) {
-         mDraw |= gIO->playCoreCommands(rsc);
+         mDraw |= gIO->playCoreCommands(rsc, !mDraw);
+         mDraw &= (rsc->mRootScript.get() != NULL);
 
-         if (!mDraw || !rsc->mRootScript.get()) {
-             usleep(10000);
-             continue;
-         }
-
-         if (rsc->mRootScript.get()) {
+         if (mDraw) {
              mDraw = rsc->runRootScript();
              eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
          }
@@ -175,6 +174,12 @@ Context::Context(Device *dev, Surface *sur)
 
     int status;
     pthread_attr_t threadAttr;
+
+    status = pthread_key_create(&gThreadTLSKey, NULL);
+    if (status) {
+        LOGE("Failed to init thread tls key.");
+        return;
+    }
 
     status = pthread_attr_init(&threadAttr);
     if (status) {
@@ -209,6 +214,7 @@ Context::~Context()
 
     if (mDev) {
         mDev->removeContext(this);
+        pthread_key_delete(gThreadTLSKey);
     }
 }
 
@@ -230,20 +236,32 @@ void Context::setRootScript(Script *s)
 
 void Context::setFragmentStore(ProgramFragmentStore *pfs)
 {
-    mFragmentStore.set(pfs);
-    pfs->setupGL();
+    if (pfs == NULL) {
+        mFragmentStore.set(mStateFragmentStore.mDefault);
+    } else {
+        mFragmentStore.set(pfs);
+    }
+    mFragmentStore->setupGL();
 }
 
 void Context::setFragment(ProgramFragment *pf)
 {
-    mFragment.set(pf);
-    pf->setupGL();
+    if (pf == NULL) {
+        mFragment.set(mStateFragment.mDefault);
+    } else {
+        mFragment.set(pf);
+    }
+    mFragment->setupGL();
 }
 
 void Context::setVertex(ProgramVertex *pv)
 {
-    mVertex.set(pv);
-    pv->setupGL();
+    if (pv == NULL) {
+        mVertex.set(mStateVertex.mDefault);
+    } else {
+        mVertex.set(pv);
+    }
+    mVertex->setupGL();
 }
 
 void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)

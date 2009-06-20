@@ -20,7 +20,7 @@ import java.lang.Math;
 import android.util.Log;
 
 
-class Matrix {
+public class Matrix {
 
     public Matrix() {
         mMat = new float[16];
@@ -139,8 +139,8 @@ class Matrix {
         mMat[5] = 2 / (t - b);
         mMat[10]= -2 / (f - n);
         mMat[12]= -(r + l) / (r - l);
-        mMat[12]= -(t + b) / (t - b);
-        mMat[12]= -(f + n) / (f - n);
+        mMat[13]= -(t + b) / (t - b);
+        mMat[14]= -(f + n) / (f - n);
     }
 
     public void loadFrustum(float l, float r, float b, float t, float n, float f) {

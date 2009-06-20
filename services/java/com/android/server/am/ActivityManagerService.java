@@ -34,8 +34,6 @@ import android.app.Dialog;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
-import android.app.IIntentReceiver;
-import android.app.IIntentSender;
 import android.app.IServiceConnection;
 import android.app.IThumbnailReceiver;
 import android.app.Instrumentation;
@@ -48,6 +46,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -61,7 +61,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -88,7 +87,6 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.util.PrintWriterPrinter;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -127,6 +125,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_OOM_ADJ = localLOGV || false;
     static final boolean DEBUG_TRANSITION = localLOGV || false;
     static final boolean DEBUG_BROADCAST = localLOGV || false;
+    static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
     static final boolean DEBUG_SERVICE = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
@@ -182,7 +181,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     // The flags that are set for all calls we make to the package manager.
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES
-            | PackageManager.GET_SUPPORTS_DENSITIES | PackageManager.GET_EXPANDABLE;
+            | PackageManager.GET_SUPPORTS_DENSITIES;
     
     private static final String SYSTEM_SECURE = "ro.secure";
 
@@ -316,6 +315,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4*1024;
     
+    // System property defining error report receiver for system apps
+    static final String SYSTEM_APPS_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.system.apps";
+
+    // System property defining default error report receiver
+    static final String DEFAULT_ERROR_RECEIVER_PROPERTY = "ro.error.receiver.default";
+
     // Corresponding memory levels for above adjustments.
     final int EMPTY_APP_MEM;
     final int HIDDEN_APP_MEM;
@@ -810,6 +815,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     int[] mProcDeaths = new int[20];
     
+    /**
+     * This is set if we had to do a delayed dexopt of an app before launching
+     * it, to increasing the ANR timeouts in that case.
+     */
+    boolean mDidDexOpt;
+    
     String mDebugApp = null;
     boolean mWaitForDebugger = false;
     boolean mDebugTransient = false;
@@ -1008,6 +1019,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 processNextBroadcast(true);
             } break;
             case BROADCAST_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
+                    mHandler.sendMessageDelayed(nmsg, BROADCAST_TIMEOUT);
+                    return;
+                }
                 broadcastTimeout();
             } break;
             case PAUSE_TIMEOUT_MSG: {
@@ -1018,9 +1035,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 activityPaused(token, null, true);
             } break;
             case IDLE_TIMEOUT_MSG: {
-                IBinder token = (IBinder)msg.obj;
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, IDLE_TIMEOUT);
+                    return;
+                }
                 // We don't at this point know if the activity is fullscreen,
                 // so we need to be conservative and assume it isn't.
+                IBinder token = (IBinder)msg.obj;
                 Log.w(TAG, "Activity idle timeout for " + token);
                 activityIdleInternal(token, true);
             } break;
@@ -1036,6 +1060,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 activityIdle(token);
             } break;
             case SERVICE_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, SERVICE_TIMEOUT);
+                    return;
+                }
                 serviceTimeout((ProcessRecord)msg.obj);
             } break;
             case UPDATE_TIME_ZONE: {
@@ -1072,6 +1103,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             } break;
             case LAUNCH_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(LAUNCH_TIMEOUT_MSG);
+                    mHandler.sendMessageDelayed(nmsg, LAUNCH_TIMEOUT);
+                    return;
+                }
                 synchronized (ActivityManagerService.this) {
                     if (mLaunchingActivity.isHeld()) {
                         Log.w(TAG, "Launch timeout has expired, giving up wake lock!");
@@ -1092,6 +1129,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             case PROC_START_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, PROC_START_TIMEOUT);
+                    return;
+                }
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processStartTimedOutLocked(app);
@@ -1608,6 +1652,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return proc;
     }
 
+    private void ensurePackageDexOpt(String packageName) {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        try {
+            if (pm.performDexOpt(packageName)) {
+                mDidDexOpt = true;
+            }
+        } catch (RemoteException e) {
+        }
+    }
+    
     private boolean isNextTransitionForward() {
         int transit = mWindowManager.getPendingAppTransition();
         return transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
@@ -1667,6 +1721,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (r.isHomeActivity) {
                 mHomeProcess = app;
             }
+            ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     r.info, r.icicle, results, newIntents, !andResume,
                     isNextTransitionForward());
@@ -4820,6 +4875,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
                         || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
             }
+            ensurePackageDexOpt(app.info.packageName);
+            if (app.instrumentationInfo != null) {
+                ensurePackageDexOpt(app.instrumentationInfo.packageName);
+            }
             thread.bindApplication(processName, app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
@@ -4908,6 +4967,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Check whether the next backup agent is in this process...
         if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.info.uid) {
             if (DEBUG_BACKUP) Log.v(TAG, "New app is backup target, launching agent for " + app);
+            ensurePackageDexOpt(mBackupTarget.appInfo.packageName);
             try {
                 thread.scheduleCreateBackupAgent(mBackupTarget.appInfo, mBackupTarget.backupMode);
             } catch (Exception e) {
@@ -6919,6 +6979,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 app.pubProviders.put(cpi.name, cpr);
                 app.addPackage(cpi.applicationInfo.packageName);
+                ensurePackageDexOpt(cpi.applicationInfo.packageName);
             }
         }
         return providers;
@@ -7895,26 +7956,62 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private ComponentName getErrorReportReceiver(ProcessRecord app) {
         IPackageManager pm = ActivityThread.getPackageManager();
+
         try {
-            // was an installer package name specified when this app was
-            // installed?
-            String installerPackageName = pm.getInstallerPackageName(app.info.packageName);
-            if (installerPackageName == null) {
-                return null;
+            // look for receiver in the installer package
+            String candidate = pm.getInstallerPackageName(app.info.packageName);
+            ComponentName result = getErrorReportReceiver(pm, app.info.packageName, candidate);
+            if (result != null) {
+                return result;
             }
 
-            // is there an Activity in this package that handles ACTION_APP_ERROR?
-            Intent intent = new Intent(Intent.ACTION_APP_ERROR);
-            ResolveInfo info = pm.resolveIntentForPackage(intent, null, 0, installerPackageName);
-            if (info == null || info.activityInfo == null) {
-                return null;
+            // if the error app is on the system image, look for system apps
+            // error receiver
+            if ((app.info.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+                candidate = SystemProperties.get(SYSTEM_APPS_ERROR_RECEIVER_PROPERTY);
+                result = getErrorReportReceiver(pm, app.info.packageName, candidate);
+                if (result != null) {
+                    return result;
+                }
             }
 
-            return new ComponentName(installerPackageName, info.activityInfo.name);
+            // if there is a default receiver, try that
+            candidate = SystemProperties.get(DEFAULT_ERROR_RECEIVER_PROPERTY);
+            return getErrorReportReceiver(pm, app.info.packageName, candidate);
         } catch (RemoteException e) {
-            // will return null and no error report will be delivered
+            // should not happen
+            Log.e(TAG, "error talking to PackageManager", e);
+            return null;
         }
-        return null;
+    }
+
+    /**
+     * Return activity in receiverPackage that handles ACTION_APP_ERROR.
+     *
+     * @param pm PackageManager isntance
+     * @param errorPackage package which caused the error
+     * @param receiverPackage candidate package to receive the error
+     * @return activity component within receiverPackage which handles
+     * ACTION_APP_ERROR, or null if not found
+     */
+    private ComponentName getErrorReportReceiver(IPackageManager pm, String errorPackage,
+            String receiverPackage) throws RemoteException {
+        if (receiverPackage == null || receiverPackage.length() == 0) {
+            return null;
+        }
+
+        // break the loop if it's the error report receiver package that crashed
+        if (receiverPackage.equals(errorPackage)) {
+            return null;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_APP_ERROR);
+        intent.setPackage(receiverPackage);
+        ResolveInfo info = pm.resolveIntent(intent, null, 0);
+        if (info == null || info.activityInfo == null) {
+            return null;
+        }
+        return new ComponentName(receiverPackage, info.activityInfo.name);
     }
 
     void makeAppNotRespondingLocked(ProcessRecord app,
@@ -8219,12 +8316,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 report.time = crashData.getTime();
                 report.crashInfo.stackTrace = throwData.toString();
 
-                // extract the source of the exception, useful for report
-                // clustering
+                // Extract the source of the exception, useful for report
+                // clustering. Also extract the "deepest" non-null exception
+                // message.
+                String exceptionMessage = throwData.getMessage();
                 while (throwData.getCause() != null) {
                     throwData = throwData.getCause();
+                    String msg = throwData.getMessage();
+                    if (msg != null && msg.length() > 0) {
+                       exceptionMessage = msg;
+                    }
                 }
                 StackTraceElementData trace = throwData.getStackTrace()[0];
+                report.crashInfo.exceptionMessage = exceptionMessage;
                 report.crashInfo.exceptionClassName = throwData.getType();
                 report.crashInfo.throwFileName = trace.getFileName();
                 report.crashInfo.throwClassName = trace.getClassName();
@@ -9535,6 +9639,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
+            ensurePackageDexOpt(r.serviceInfo.packageName);
             app.thread.scheduleCreateService(r, r.serviceInfo);
             created = true;
         } finally {
@@ -10596,7 +10701,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             boolean ordered, boolean sticky, int callingPid, int callingUid) {
         intent = new Intent(intent);
 
-        if (DEBUG_BROADCAST) Log.v(
+        if (DEBUG_BROADCAST_LIGHT) Log.v(
             TAG, (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
             + " ordered=" + ordered);
         if ((resultTo != null) && !ordered) {
@@ -11088,9 +11193,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         boolean started = false;
         try {
-            if (DEBUG_BROADCAST) Log.v(TAG,
+            if (DEBUG_BROADCAST_LIGHT) Log.v(TAG,
                     "Delivering to component " + r.curComponent
                     + ": " + r);
+            ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
                     r.resultCode, r.resultData, r.resultExtras, r.ordered);
             started = true;
@@ -11158,12 +11264,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 r.curFilter = filter;
                 filter.receiverList.curBroadcast = r;
                 r.state = BroadcastRecord.CALL_IN_RECEIVE;
+                if (filter.receiverList.app != null) {
+                    // Bump hosting application to no longer be in background
+                    // scheduling class.  Note that we can't do that if there
+                    // isn't an app...  but we can only be in that case for
+                    // things that directly call the IActivityManager API, which
+                    // are already core system stuff so don't matter for this.
+                    r.curApp = filter.receiverList.app;
+                    filter.receiverList.app.curReceiver = r;
+                    updateOomAdjLocked();
+                }
             }
             try {
-                if (DEBUG_BROADCAST) {
+                if (DEBUG_BROADCAST_LIGHT) {
                     int seq = r.intent.getIntExtra("seq", -1);
-                    Log.i(TAG, "Sending broadcast " + r.intent.getAction() + " seq=" + seq
-                            + " app=" + filter.receiverList.app);
+                    Log.i(TAG, "Delivering to " + filter.receiverList.app
+                            + " (seq=" + seq + "): " + r);
                 }
                 performReceive(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode,
@@ -11177,6 +11293,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     r.receiver = null;
                     r.curFilter = null;
                     filter.receiverList.curBroadcast = null;
+                    if (filter.receiverList.app != null) {
+                        filter.receiverList.app.curReceiver = null;
+                    }
                 }
             }
         }
@@ -11200,6 +11319,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             while (mParallelBroadcasts.size() > 0) {
                 r = mParallelBroadcasts.remove(0);
                 final int N = r.receivers.size();
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing parallel broadcast "
+                        + r);
                 for (int i=0; i<N; i++) {
                     Object target = r.receivers.get(i);
                     if (DEBUG_BROADCAST)  Log.v(TAG,
@@ -11207,6 +11328,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + target + ": " + r);
                     deliverToRegisteredReceiver(r, (BroadcastFilter)target, false);
                 }
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Done with parallel broadcast "
+                        + r);
             }
 
             // Now take care of the next serialized one...
@@ -11232,10 +11355,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
 
+            boolean looped = false;
+            
             do {
                 if (mOrderedBroadcasts.size() == 0) {
                     // No more broadcasts pending, so all done!
                     scheduleAppGcsLocked();
+                    if (looped) {
+                        // If we had finished the last ordered broadcast, then
+                        // make sure all processes have correct oom and sched
+                        // adjustments.
+                        updateOomAdjLocked();
+                    }
                     return;
                 }
                 r = mOrderedBroadcasts.get(0);
@@ -11292,9 +11423,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (DEBUG_BROADCAST) Log.v(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");
                     mHandler.removeMessages(BROADCAST_TIMEOUT_MSG);
 
+                    if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Finished with ordered broadcast "
+                            + r);
+                    
                     // ... and on to the next...
                     mOrderedBroadcasts.remove(0);
                     r = null;
+                    looped = true;
                     continue;
                 }
             } while (r == null);
@@ -11308,6 +11443,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (recIdx == 0) {
                 r.dispatchTime = r.startTime;
 
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing ordered broadcast "
+                        + r);
                 if (DEBUG_BROADCAST) Log.v(TAG,
                         "Submitting BROADCAST_TIMEOUT_MSG for "
                         + (r.startTime + BROADCAST_TIMEOUT));
