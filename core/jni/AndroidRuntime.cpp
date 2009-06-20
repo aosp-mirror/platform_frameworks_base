@@ -721,7 +721,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
      * Reverse the polarity of dalvik.vm.jit.op and force interpreter-only
      * for non-selected opcodes.
      */
-    property_get("dalvik.vm.jit.includeselectedop", propBuf, "");
+    property_get("dalvik.vm.jit.includeop", propBuf, "");
     if (strlen(propBuf) > 0) {
         opt.optionString = "-Xincludeselectedop";
         mOptions.add(opt);
@@ -741,7 +741,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
      * Reverse the polarity of dalvik.vm.jit.method and force interpreter-only
      * for non-selected methods.
      */
-    property_get("dalvik.vm.jit.includeselectedmethod", propBuf, "");
+    property_get("dalvik.vm.jit.includemethod", propBuf, "");
     if (strlen(propBuf) > 0) {
         opt.optionString = "-Xincludeselectedmethod";
         mOptions.add(opt);
