@@ -809,7 +809,16 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
 
     /* package */ synchronized void addRemoteDeviceProperties(String address, String[] properties) {
-        Map<String, String> propertyValues = new HashMap<String, String>();
+        /*
+         * We get a DeviceFound signal every time RSSI changes or name changes.
+         * Don't create a new Map object every time */
+        Map<String, String> propertyValues = mRemoteDeviceProperties.get(address);
+        if (propertyValues != null) {
+            propertyValues.clear();
+        } else {
+            propertyValues = new HashMap<String, String>();
+        }
+
         for (int i = 0; i < properties.length; i+=2) {
             String value = null;
             if (propertyValues.containsKey(properties[i])) {

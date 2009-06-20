@@ -43,6 +43,16 @@ ScriptC::~ScriptC()
     }
 }
 
+extern "C" float fixedToFloat(int32_t f)
+{
+    return ((float)f) / 0x10000;
+}
+
+extern "C" float intToFloat(int32_t f)
+{
+    return (float)f;
+}
+
 extern "C" void matrixLoadIdentity(rsc_Matrix *mat)
 {
     Matrix *m = reinterpret_cast<Matrix *>(mat);

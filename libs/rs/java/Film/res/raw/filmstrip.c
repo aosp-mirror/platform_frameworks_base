@@ -2,8 +2,8 @@
 
 #pragma version(1)
 #pragma stateVertex(PV)
-#pragma stateFragment(default)
-#pragma stateFragmentStore(default)
+#pragma stateFragment(PFBackground)
+#pragma stateFragmentStore(PFSBackground)
 
 /*
 typedef struct FilmScriptUserEnvRec {
@@ -19,66 +19,54 @@ typedef struct FilmScriptUserEnvRec {
 // bank1: (r) The position information
 // bank2: (rw) The temporary texture state
 
-int main(void* con, int ft, int index) 
+int main(int index) 
 {
-    int f1;
-    int f2;
-    int f3;
-    int f4;
-    int f5;
-    int f6;
-    int f7;
-    int f8;
-    int f9;
-    int f10;
-    int f11;
-    int f12;
-    int f13;
-    int f14;
-    int f15;
-    int f16;
-
+    int f1,f2,f3,f4, f5,f6,f7,f8, f9,f10,f11,f12, f13,f14,f15,f16;
+    int g1,g2,g3,g4, g5,g6,g7,g8, g9,g10,g11,g12, g13,g14,g15,g16;
+    int float_1;
+    int float_0;
+    int float_2;
+    int float_90;
+    int float_0_5;
     int trans;  // float
     int rot;   // float
+    int x;
 
+    float_2 = intToFloat(2);
+    float_1 = intToFloat(1);
+    float_0 = intToFloat(0);
+    float_90= intToFloat(90);
+    float_0_5 = fixedtoFloat(0x8000);
 
-    //trans = loadEnvF(con, 1, 0);
-    //rot = loadEnvF(con, 1, 1);
+    trans = loadF(1, 0);
+    rot = loadF(1, 1);
 
-    //matrixLoadTranslate(con, &f1, 0, 0, trans);
-    //matrixRotate(con, &f1, rot, 1, 0, 0);
-    //matrixScale(con, &f1, 3.0f, 3.0f, 3.0f);
-    //storeEnvMatrix(con, 3, RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, &f1);
-
-    //rsc_Matrix m;
-    //int imgId = 0;
-
-    // This should be replaced in the compiler with a 
-    // smart load of a structure.
-    //const FilmScriptUserEnv *env = loadEnvVp(con, 0,0);
+    matrixLoadScale(&f16, float_2, float_2, float_2);
+    matrixTranslate(&f16, 0, 0, trans);
+    matrixRotate(&f16, float_90, 0, 0, float_1);
+    matrixRotate(&f16, rot, float_1, 0, 0);
+    storeEnvMatrix(3, 0, &f16);
 
     //materialDiffuse(con, 0.0f, 0.0f, 0.0f, 1.0f);
     //materialSpecular(con, 0.5f, 0.5f, 0.5f, 0.5f);
-    //materialShininess(con, 20.0f);
-
-
-
+    //materialShininess(intToFloat(20));
     //lightPosition(con, 0.2f, -0.2f, -2.0f, 0.0f);
-
-    //contextBindProgramFragmentStore(con, NAMED_PFSBackground);
-    //contextBindProgramFragment(con, NAMED_PFBackground);
     //enable(con, GL_LIGHTING);
-    renderTriangleMesh(con, NAMED_mesh);
+    renderTriangleMesh(NAMED_mesh);
+
+
+
+    //int imgId = 0;
 
 /*
-    contextBindProgramFragmentStore(con, env->fsImages);
-    contextBindProgramFragment(con, env->fpImages);
-    disable(con, GL_LIGHTING);
+    contextBindProgramFragmentStore(env->fsImages);
+    contextBindProgramFragment(env->fpImages);
+    disable(GL_LIGHTING);
 
-    float focusPos = loadEnvF(con, 1, 2);
-    int32_t focusID = 0;
-    int32_t lastFocusID = loadEnvI32(con, 2, 0);
-    int32_t imgCount = 13;
+    float focusPos = loadEnvF(1, 2);
+    int focusID = 0;
+    int lastFocusID = loadEnvI32(2, 0);
+    int imgCount = 13;
 
     if (trans > (-.3)) {
         focusID = -1.0 - focusPos;
@@ -127,5 +115,6 @@ int main(void* con, int ft, int index)
         renderTriangleMeshRange(con, env->mesh, env->triangleOffsets[start], env->triangleOffsets[end] - env->triangleOffsets[start]);
     } 
 */
+    return 0;
 }
 

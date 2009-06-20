@@ -130,12 +130,14 @@ class BluetoothEventLoop {
         mBluetoothService.addRemoteDeviceProperties(address, properties);
         String rssi = mBluetoothService.getRemoteDeviceProperty(address, "RSSI");
         String classValue = mBluetoothService.getRemoteDeviceProperty(address, "Class");
+        String name = mBluetoothService.getRemoteDeviceProperty(address, "Name");
 
         if (rssi != null && classValue != null) {
             Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_FOUND_ACTION);
             intent.putExtra(BluetoothIntent.ADDRESS, address);
-            intent.putExtra(BluetoothIntent.CLASS, classValue);
+            intent.putExtra(BluetoothIntent.CLASS, Integer.valueOf(classValue));
             intent.putExtra(BluetoothIntent.RSSI, (short)Integer.valueOf(rssi).intValue());
+            intent.putExtra(BluetoothIntent.NAME, name);
 
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         } else {
