@@ -51,18 +51,17 @@ public class FilmRS {
 
     public void setFilmStripPosition(int x, int y)
     {
-        if (x < 0) {
-            x = 0;
-        }
-        if (x > 50) {
+        if (x < 50) {
             x = 50;
         }
+        if (x > 270) {
+            x = 270;
+        }
     
-        float anim = ((float)x) / 50.f;
-        mBufferPos[0] = -2f * anim - .2f;   // translation
-        mBufferPos[1] = -90 + (anim * 40);  // rotation
+        float anim = ((float)x-50) / 270.f;
+        mBufferPos[0] = 2f * anim + 0.5f;   // translation
+        mBufferPos[1] = (anim * 40);  // rotation
         mBufferPos[2] = ((float)y) / 16.f - 8;  // focusPos
-    
         mAllocPos.data(mBufferPos);
     }
 
@@ -166,28 +165,14 @@ public class FilmRS {
         mAllocPos = mRS.allocationCreatePredefSized(
             RenderScript.ElementPredefined.USER_FLOAT, 
             mBufferPos.length);
-        setFilmStripPosition(0, 0);
 
         mPVA = new ProgramVertexAlloc(mRS);
         mPV.bindAllocation(0, mPVA.mAlloc);
         mPVA.setupProjectionNormalized(320, 480);
 
-        Matrix m = new Matrix();
 
-        m.loadIdentity();
-
-        m.translate(0, 0, 1);
-        m.rotate(90, 0, 0, 1);
-        m.rotate(20, 1, 0, 0);
-        mPVA.loadModelview(m);
-
-
-
-
-
-        //mScriptStrip.bindAllocation(mEnvAlloc, 0);
         mScriptStrip.bindAllocation(mAllocPos, 1);
-        //mScriptStrip.bindAllocation(gStateAlloc, 2);
+       //mScriptStrip.bindAllocation(gStateAlloc, 2);
         mScriptStrip.bindAllocation(mPVA.mAlloc, 3);
 
 
@@ -233,6 +218,8 @@ public class FilmRS {
         }
         mPartAlloc.data(t2);
         */
+
+        setFilmStripPosition(0, 0);
 
         mRS.contextBindRootScript(mScriptStrip);
     }
