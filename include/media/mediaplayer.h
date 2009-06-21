@@ -75,7 +75,7 @@ enum media_error_type {
 // 'notify' is invoked with the following:
 //   'msg' is set to MEDIA_INFO.
 //   'ext1' should be a value from the enum media_info_type.
-//   'ext2' contains an implementation dependant error code to provide
+//   'ext2' contains an implementation dependant info code to provide
 //          more details. Should default to 0 when not used.
 //
 // The codes are distributed as follow:
