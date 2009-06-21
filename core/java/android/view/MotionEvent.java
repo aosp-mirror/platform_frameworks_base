@@ -212,28 +212,47 @@ public final class MotionEvent implements Parcelable {
     }
 
     /**
-     * Scales down the cood of this event by the given scale.
+     * Scales down the coordination of this event by the given scale.
      *
      * @hide
      */
     public void scale(float scale) {
-        if (scale != 1.0f) {
-            mX *= scale;
-            mY *= scale;
-            mRawX *= scale;
-            mRawY *= scale;
-            mSize *= scale;
-            mXPrecision *= scale;
-            mYPrecision *= scale;
-            if (mHistory != null) {
-                float[] history = mHistory;
-                int length = history.length;
-                for (int i = 0; i < length; i += 4) {
-                    history[i] *= scale;        // X
-                                                // history[i + 2] == pressure
-                    history[i + 1] *= scale;    // Y
-                    history[i + 3] *= scale;    // Size, TODO: square this?
-                }
+        mX *= scale;
+        mY *= scale;
+        mRawX *= scale;
+        mRawY *= scale;
+        mSize *= scale;
+        mXPrecision *= scale;
+        mYPrecision *= scale;
+        if (mHistory != null) {
+            float[] history = mHistory;
+            int length = history.length;
+            for (int i = 0; i < length; i += 4) {
+                history[i] *= scale;        // X
+                history[i + 1] *= scale;    // Y
+                // no need to scale pressure ([i+2])
+                history[i + 3] *= scale;    // Size, TODO: square this?
+            }
+        }
+    }
+
+    /**
+     * Translate the coordination of the event by given x and y.
+     *
+     * @hide
+     */
+    public void translate(float dx, float dy) {
+        mX += dx;
+        mY += dy;
+        mRawX += dx;
+        mRawY += dx;
+        if (mHistory != null) {
+            float[] history = mHistory;
+            int length = history.length;
+            for (int i = 0; i < length; i += 4) {
+                history[i] += dx;        // X
+                history[i + 1] += dy;    // Y
+                // no need to translate pressure (i+2) and size (i+3) 
             }
         }
     }

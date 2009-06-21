@@ -158,10 +158,10 @@ public class Resources {
         }
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
-        if (!mCompatibilityInfo.mScalingRequired) {
-            mPreloadedDrawables = sPreloadedDrawables;
-        } else {
+        if (mCompatibilityInfo.isScalingRequired()) {
             mPreloadedDrawables = emptySparseArray();
+        } else {
+            mPreloadedDrawables = sPreloadedDrawables;
         }
     }
 
