@@ -37,6 +37,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -180,6 +181,34 @@ public class ContactStruct {
         organizationList.add(organizationData);
     }
 
+    /**
+     * Set "position" value to the appropriate data. If there's more than one
+     * OrganizationData objects, the value is set to the last one. If there's no
+     * OrganizationData object, a new OrganizationData is created, whose company name is
+     * empty.  
+     * 
+     * TODO: incomplete logic. fix this:
+     * 
+     * e.g. This assumes ORG comes earlier, but TITLE may come earlier like this, though we do not
+     * know how to handle it in general cases...
+     * ----
+     * TITLE:Software Engineer
+     * ORG:Google
+     * ----
+     */
+    public void setPosition(String positionValue) {
+        if (organizationList == null) {
+            organizationList = new ArrayList<OrganizationData>();
+        }
+        int size = organizationList.size();
+        if (size == 0) {
+            addOrganization(Contacts.OrganizationColumns.TYPE_OTHER, "", null, false);
+            size = 1;
+        }
+        OrganizationData lastData = organizationList.get(size - 1);
+        lastData.positionName = positionValue;
+    }
+    
     public void addExtension(PropertyNode propertyNode) {
         if (propertyNode.propValue.length() == 0) {
             return;
@@ -426,8 +455,6 @@ public class ContactStruct {
             } else if (name.equals("ORG")) {
                 // vCard specification does not specify other types.
                 int type = Contacts.OrganizationColumns.TYPE_WORK;
-                String companyName = "";
-                String positionName = "";
                 boolean isPrimary = false;
                 
                 for (String typeString : propertyNode.paramMap_TYPE) {
@@ -441,29 +468,20 @@ public class ContactStruct {
                 }
 
                 List<String> list = propertyNode.propValue_vector; 
-                int size = list.size(); 
-                if (size > 1) {
-                    companyName = list.get(0);
-                    StringBuilder builder = new StringBuilder();
-                    for (int i = 1; i < size; i++) {
-                        builder.append(list.get(1));
-                        if (i != size - 1) {
-                            builder.append(", ");
-                        }
+                int size = list.size();
+                StringBuilder builder = new StringBuilder();
+                for (Iterator<String> iter = list.iterator(); iter.hasNext();) {
+                    builder.append(iter.next());
+                    if (iter.hasNext()) {
+                        builder.append(' ');
                     }
-                    positionName = builder.toString();
-                } else if (size == 1) {
-                    companyName = propertyNode.propValue;
-                    positionName = "";
                 }
-                contact.addOrganization(type, companyName, positionName, isPrimary);
+
+                contact.addOrganization(type, builder.toString(), "", isPrimary);
             } else if (name.equals("TITLE")) {
-                contact.title = propertyNode.propValue;
-                // XXX: What to do this? Isn't ORG enough?
-                contact.addExtension(propertyNode);
+                contact.setPosition(propertyNode.propValue);
             } else if (name.equals("ROLE")) {
-                // XXX: What to do this? Isn't ORG enough?
-                contact.addExtension(propertyNode);
+                contact.setPosition(propertyNode.propValue);
             } else if (name.equals("PHOTO")) {
                 // We prefer PHOTO to LOGO.
                 String valueType = propertyNode.paramMap.getAsString("VALUE");
