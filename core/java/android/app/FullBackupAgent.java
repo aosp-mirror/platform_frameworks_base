@@ -53,6 +53,6 @@ public class FullBackupAgent extends BackupAgent {
     }
 
     @Override
-    public void onRestore(BackupDataInput data, ParcelFileDescriptor newState) {
+    public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState) {
     }
 }

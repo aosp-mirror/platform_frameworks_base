@@ -33,19 +33,19 @@ interface IBackupManager {
      * Tell the system service that the caller has made changes to its
      * data, and therefore needs to undergo an incremental backup pass.
      */
-    oneway void dataChanged(String packageName);
+    void dataChanged(String packageName);
 
     /**
      * Notifies the Backup Manager Service that an agent has become available.  This
      * method is only invoked by the Activity Manager.
      */
-    oneway void agentConnected(String packageName, IBinder agent);
+    void agentConnected(String packageName, IBinder agent);
 
     /**
      * Notify the Backup Manager Service that an agent has unexpectedly gone away.
      * This method is only invoked by the Activity Manager.
      */
-    oneway void agentDisconnected(String packageName);
+    void agentDisconnected(String packageName);
 
     /**
      * Schedule an immediate backup attempt for all pending updates.  This is
@@ -57,7 +57,7 @@ interface IBackupManager {
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
-    oneway void backupNow();
+    void backupNow();
 
     /**
      * Identify the currently selected transport.  Callers must hold the

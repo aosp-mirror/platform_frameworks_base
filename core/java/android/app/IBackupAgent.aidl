@@ -51,9 +51,14 @@ interface IBackupAgent {
      *        app's backup.  This is to be a <i>replacement</i> of the app's
      *        current data, not to be merged into it.
      *
+     * @param appVersionCode The android:versionCode attribute of the application
+     *        that created this data set.  This can help the agent distinguish among
+     *        various historical backup content possibilities.
+     *
      * @param newState Read-write file, empty when onRestore() is called,
      *        that is to be written with the state description that holds after
      *        the restore has been completed.
      */
-    void doRestore(in ParcelFileDescriptor data, in ParcelFileDescriptor newState);
+    void doRestore(in ParcelFileDescriptor data, int appVersionCode,
+            in ParcelFileDescriptor newState);
 }
