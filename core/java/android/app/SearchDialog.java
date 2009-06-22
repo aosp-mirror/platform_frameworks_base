@@ -310,15 +310,17 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     + appSearchData + ", " + globalSearch + ")");
         }
         
+        SearchManager searchManager = (SearchManager)
+                mContext.getSystemService(Context.SEARCH_SERVICE);
         // Try to get the searchable info for the provided component (or for global search,
         // if globalSearch == true).
-        mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
+        mSearchable = searchManager.getSearchableInfo(componentName, globalSearch);
         
         // If we got back nothing, and it wasn't a request for global search, then try again
         // for global search, as we'll try to launch that in lieu of any component-specific search.
         if (!globalSearch && mSearchable == null) {
             globalSearch = true;
-            mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
+            mSearchable = searchManager.getSearchableInfo(componentName, globalSearch);
             
             // If we still get back null (i.e., there's not even a searchable info available
             // for global search), then really give up.
@@ -333,7 +335,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mAppSearchData = appSearchData;
         // Using globalSearch here is just an optimization, just calling
         // isDefaultSearchable() should always give the same result.
-        mGlobalSearchMode = globalSearch || SearchManager.isDefaultSearchable(mSearchable); 
+        mGlobalSearchMode = globalSearch || searchManager.isDefaultSearchable(mSearchable);
         mActivityContext = mSearchable.getActivityContext(getContext());
         
         // show the dialog. this will call onStart().
