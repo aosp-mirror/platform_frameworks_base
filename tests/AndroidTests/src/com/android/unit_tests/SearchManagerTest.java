@@ -163,17 +163,19 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
 
     @MediumTest
     public void testSearchables() {
+        SearchManager searchManager = (SearchManager)
+                mContext.getSystemService(Context.SEARCH_SERVICE);
         SearchableInfo si;
 
-        si = SearchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, false);
+        si = searchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, false);
         assertNotNull(si);
-        assertFalse(SearchManager.isDefaultSearchable(si));
-        si = SearchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, true);
+        assertFalse(searchManager.isDefaultSearchable(si));
+        si = searchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, true);
         assertNotNull(si);
-        assertTrue(SearchManager.isDefaultSearchable(si));
-        si = SearchManager.getSearchableInfo(null, true);
+        assertTrue(searchManager.isDefaultSearchable(si));
+        si = searchManager.getSearchableInfo(null, true);
         assertNotNull(si);
-        assertTrue(SearchManager.isDefaultSearchable(si));
+        assertTrue(searchManager.isDefaultSearchable(si));
     }
 
     /**

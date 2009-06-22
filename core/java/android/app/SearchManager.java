@@ -1514,7 +1514,7 @@ public class SearchManager
     /**
      * Reference to the shared system search service.
      */
-    private static ISearchManager sService = getSearchManagerService();
+    private static ISearchManager mService;
 
     private final Context mContext;
 
@@ -1529,6 +1529,8 @@ public class SearchManager
     /*package*/ SearchManager(Context context, Handler handler)  {
         mContext = context;
         mHandler = handler;
+        mService = ISearchManager.Stub.asInterface(
+                ServiceManager.getService(Context.SEARCH_SERVICE));
     }
     
     /**
@@ -1581,7 +1583,7 @@ public class SearchManager
         try {
             mIsShowing = true;
             // activate the search manager and start it up!
-            sService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
+            mService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                     globalSearch, mSearchManagerCallback);
         } catch (RemoteException ex) {
             Log.e(TAG, "startSearch() failed: " + ex);
@@ -1603,7 +1605,7 @@ public class SearchManager
         if (DBG) debug("stopSearch(), mIsShowing=" + mIsShowing);
         if (!mIsShowing) return;
         try {
-            sService.stopSearch();
+            mService.stopSearch();
             // onDismiss will also clear this, but we do it here too since onDismiss() is
             // called asynchronously.
             mIsShowing = false;
@@ -1725,7 +1727,7 @@ public class SearchManager
         if (DBG) debug("saveSearchDialog(), mIsShowing=" + mIsShowing);
         if (!mIsShowing) return null;
         try {
-            return sService.onSaveInstanceState();
+            return mService.onSaveInstanceState();
         } catch (RemoteException ex) {
             Log.e(TAG, "onSaveInstanceState() failed: " + ex);
             return null;
@@ -1743,7 +1745,7 @@ public class SearchManager
         if (DBG) debug("restoreSearchDialog(" + searchDialogState + ")");
         if (searchDialogState == null) return;
         try {
-            sService.onRestoreInstanceState(searchDialogState);
+            mService.onRestoreInstanceState(searchDialogState);
         } catch (RemoteException ex) {
             Log.e(TAG, "onRestoreInstanceState() failed: " + ex);
         }
@@ -1760,17 +1762,12 @@ public class SearchManager
         if (DBG) debug("onConfigurationChanged(" + newConfig + "), mIsShowing=" + mIsShowing);
         if (!mIsShowing) return;
         try {
-            sService.onConfigurationChanged(newConfig);
+            mService.onConfigurationChanged(newConfig);
         } catch (RemoteException ex) {
             Log.e(TAG, "onConfigurationChanged() failed:" + ex);
         }
     }
 
-    private static ISearchManager getSearchManagerService() {
-        return ISearchManager.Stub.asInterface(
-            ServiceManager.getService(Context.SEARCH_SERVICE));
-    }
-    
     /**
      * Gets information about a searchable activity. This method is static so that it can
      * be used from non-Activity contexts.
@@ -1782,10 +1779,10 @@ public class SearchManager
      * 
      * @hide because SearchableInfo is not part of the API.
      */
-    public static SearchableInfo getSearchableInfo(ComponentName componentName, 
+    public SearchableInfo getSearchableInfo(ComponentName componentName,
             boolean globalSearch) {
         try {
-            return sService.getSearchableInfo(componentName, globalSearch);
+            return mService.getSearchableInfo(componentName, globalSearch);
         } catch (RemoteException ex) {
             Log.e(TAG, "getSearchableInfo() failed: " + ex);
             return null;
@@ -1797,12 +1794,12 @@ public class SearchManager
      * 
      * @hide because SearchableInfo is not part of the API.
      */
-    public static boolean isDefaultSearchable(SearchableInfo searchable) {
-        SearchableInfo defaultSearchable = SearchManager.getSearchableInfo(null, true);
+    public boolean isDefaultSearchable(SearchableInfo searchable) {
+        SearchableInfo defaultSearchable = getSearchableInfo(null, true);
         return defaultSearchable != null 
                 && defaultSearchable.getSearchActivity().equals(searchable.getSearchActivity());
     }
-    
+
     /**
      * Gets a cursor with search suggestions.
      *
@@ -1813,20 +1810,6 @@ public class SearchManager
      * @hide because SearchableInfo is not part of the API.
      */
     public Cursor getSuggestions(SearchableInfo searchable, String query) {
-        return getSuggestions(mContext, searchable, query);
-    }
-
-    /**
-     * Gets a cursor with search suggestions. This method is static so that it can
-     * be used from non-Activity context.
-     *
-     * @param searchable Information about how to get the suggestions.
-     * @param query The search text entered (so far).
-     * @return a cursor with suggestions, or <code>null</null> the suggestion query failed. 
-     * 
-     * @hide because SearchableInfo is not part of the API.
-     */
-    public static Cursor getSuggestions(Context context, SearchableInfo searchable, String query) {
         if (searchable == null) {
             return null;
         }
@@ -1865,7 +1848,7 @@ public class SearchManager
                 .build();
 
         // finally, make the query
-        return context.getContentResolver().query(uri, null, selection, selArgs, null);
+        return mContext.getContentResolver().query(uri, null, selection, selArgs, null);
     }
      
     /**
@@ -1877,9 +1860,9 @@ public class SearchManager
      * 
      * @hide because SearchableInfo is not part of the API.
      */
-    public static List<SearchableInfo> getSearchablesInGlobalSearch() {
+    public List<SearchableInfo> getSearchablesInGlobalSearch() {
         try {
-            return sService.getSearchablesInGlobalSearch();
+            return mService.getSearchablesInGlobalSearch();
         } catch (RemoteException e) {
             Log.e(TAG, "getSearchablesInGlobalSearch() failed: " + e);
             return null;
@@ -1894,9 +1877,9 @@ public class SearchManager
      *
      * @hide because SearchableInfo is not part of the API.
      */
-    public static List<SearchableInfo> getSearchablesForWebSearch() {
+    public List<SearchableInfo> getSearchablesForWebSearch() {
         try {
-            return sService.getSearchablesForWebSearch();
+            return mService.getSearchablesForWebSearch();
         } catch (RemoteException e) {
             Log.e(TAG, "getSearchablesForWebSearch() failed: " + e);
             return null;
@@ -1910,9 +1893,9 @@ public class SearchManager
      *
      * @hide because SearchableInfo is not part of the API.
      */
-    public static SearchableInfo getDefaultSearchableForWebSearch() {
+    public SearchableInfo getDefaultSearchableForWebSearch() {
         try {
-            return sService.getDefaultSearchableForWebSearch();
+            return mService.getDefaultSearchableForWebSearch();
         } catch (RemoteException e) {
             Log.e(TAG, "getDefaultSearchableForWebSearch() failed: " + e);
             return null;
@@ -1926,9 +1909,9 @@ public class SearchManager
      *
      * @hide
      */
-    public static void setDefaultWebSearch(ComponentName component) {
+    public void setDefaultWebSearch(ComponentName component) {
         try {
-            sService.setDefaultWebSearch(component);
+            mService.setDefaultWebSearch(component);
         } catch (RemoteException e) {
             Log.e(TAG, "setDefaultWebSearch() failed: " + e);
         }
