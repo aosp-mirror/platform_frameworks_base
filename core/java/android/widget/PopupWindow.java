@@ -823,6 +823,7 @@ public class PopupWindow {
         p.flags = computeFlags(p.flags);
         p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
         p.token = token;
+        p.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
 
         return p;

@@ -585,7 +585,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (isPopupShowing()) {
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (keyCode == KeyEvent.KEYCODE_BACK && !mDropDownAlwaysVisible) {
                 dismissDropDown();
                 return true;
             }
@@ -755,7 +755,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         } else {
             // drop down is automatically dismissed when enough characters
             // are deleted from the text view
-            dismissDropDown();
+            if (!mDropDownAlwaysVisible) dismissDropDown();
             if (mFilter != null) {
                 mFilter.filter(null);
             }
@@ -896,7 +896,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
         }
 
-        if (mDropDownDismissedOnCompletion) {
+        if (mDropDownDismissedOnCompletion && !mDropDownAlwaysVisible) {
             dismissDropDown();
         }
     }
@@ -977,7 +977,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             if (hasFocus() && hasWindowFocus()) {
                 showDropDown();
             }
-        } else {
+        } else if (!mDropDownAlwaysVisible) {
             dismissDropDown();
         }
     }
@@ -986,7 +986,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
         performValidation();
-        if (!hasWindowFocus) {
+        if (!hasWindowFocus && !mDropDownAlwaysVisible) {
             dismissDropDown();
         }
     }
@@ -995,7 +995,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
         performValidation();
-        if (!focused) {
+        if (!focused && !mDropDownAlwaysVisible) {
             dismissDropDown();
         }
     }
