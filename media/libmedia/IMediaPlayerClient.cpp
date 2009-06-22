@@ -46,7 +46,7 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MediaPlayerClient, "android.hardware.IMediaPlayerClient");
+IMPLEMENT_META_INTERFACE(MediaPlayerClient, "android.media.IMediaPlayerClient");
 
 // ----------------------------------------------------------------------
 
@@ -68,4 +68,3 @@ status_t BnMediaPlayerClient::onTransact(
 }
 
 }; // namespace android
-

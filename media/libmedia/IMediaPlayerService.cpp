@@ -111,7 +111,7 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.hardware.IMediaPlayerService");
+IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.media.IMediaPlayerService");
 
 // ----------------------------------------------------------------------
 
