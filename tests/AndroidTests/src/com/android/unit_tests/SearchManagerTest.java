@@ -126,26 +126,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
     }
     
     /**
-     * The goal of this test is to confirm that we can *only* obtain a search manager
-     * interface from an Activity context.
-     */
-    @MediumTest
-    public void testSearchManagerContextRestrictions() {
-        SearchManager searchManager1 = (SearchManager)
-                mContext.getSystemService(Context.SEARCH_SERVICE);
-        assertNotNull(searchManager1);
-        
-        Context applicationContext = mContext.getApplicationContext();
-        // this should fail, because you can't get a SearchManager from a non-Activity context
-        try {
-            applicationContext.getSystemService(Context.SEARCH_SERVICE);
-            assertFalse("Shouldn't retrieve SearchManager from a non-Activity context", true);
-        } catch (AndroidRuntimeException e) {
-            // happy here - we should catch this.
-        }
-    }
-    
-    /**
      * The goal of this test is to confirm that we can obtain
      * a search manager at any time, and that for any given context,
      * it is a singleton.
