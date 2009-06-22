@@ -42,6 +42,7 @@ extern "C" {
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <signal.h>
 }
 
 // When you enable this, as well as DEBUG_REFS=1 and
@@ -62,6 +63,10 @@ extern "C" {
 #if DEBUG_DUMP_PREVIEW_FRAME_TO_FILE
 static int debug_frame_cnt;
 #endif
+
+static int getCallingPid() {
+    return IPCThreadState::self()->getCallingPid();
+}
 
 // ----------------------------------------------------------------------------
 
@@ -87,7 +92,9 @@ CameraService::~CameraService()
 
 sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
 {
-    LOGD("Connect E from ICameraClient %p", cameraClient->asBinder().get());
+    int callingPid = getCallingPid();
+    LOGD("CameraService::connect E (pid %d, client %p)", callingPid,
+            cameraClient->asBinder().get());
 
     Mutex::Autolock lock(mLock);
     sp<Client> client;
@@ -96,36 +103,46 @@ sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
         if (currentClient != 0) {
             sp<ICameraClient> currentCameraClient(currentClient->getCameraClient());
             if (cameraClient->asBinder() == currentCameraClient->asBinder()) {
-                // this is the same client reconnecting...
-                LOGD("Connect X same client (%p) is reconnecting...", cameraClient->asBinder().get());
+                // This is the same client reconnecting...
+                LOGD("CameraService::connect X (pid %d, same client %p) is reconnecting...",
+                    callingPid, cameraClient->asBinder().get());
                 return currentClient;
             } else {
-                // it's another client... reject it
-                LOGD("new client (%p) attempting to connect - rejected", cameraClient->asBinder().get());
+                // It's another client... reject it
+                LOGD("CameraService::connect X (pid %d, new client %p) rejected. "
+                    "(old pid %d, old client %p)",
+                    callingPid, cameraClient->asBinder().get(),
+                    currentClient->mClientPid, currentCameraClient->asBinder().get());
+                if (kill(currentClient->mClientPid, 0) == ESRCH) {
+                    LOGD("The old client is dead!");
+                }
                 return client;
             }
         } else {
             // can't promote, the previous client has died...
-            LOGD("new client connecting, old reference was dangling...");
+            LOGD("New client (pid %d) connecting, old reference was dangling...",
+                    callingPid);
             mClient.clear();
         }
     }
 
     // create a new Client object
-    client = new Client(this, cameraClient, IPCThreadState::self()->getCallingPid());
+    client = new Client(this, cameraClient, callingPid);
     mClient = client;
 #if DEBUG_CLIENT_REFERENCES
     // Enable tracking for this object, and track increments and decrements of
     // the refcount.
     client->trackMe(true, true);
 #endif
-    LOGD("Connect X");
+    LOGD("CameraService::connect X");
     return client;
 }
 
 void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
 {
-    // declar this outside the lock to make absolutely sure the
+    int callingPid = getCallingPid();
+
+    // Declare this outside the lock to make absolutely sure the
     // destructor won't be called with the lock held.
     sp<Client> client;
 
@@ -133,26 +150,28 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
 
     if (mClient == 0) {
         // This happens when we have already disconnected.
-        LOGV("mClient is null.");
+        LOGD("removeClient (pid %d): already disconnected", callingPid);
         return;
     }
 
-    // Promote mClient. It should never fail because we're called from
-    // a binder call, so someone has to have a strong reference.
+    // Promote mClient. It can fail if we are called from this path:
+    // Client::~Client() -> disconnect() -> removeClient().
     client = mClient.promote();
     if (client == 0) {
-        LOGW("can't get a strong reference on mClient!");
+        LOGD("removeClient (pid %d): no more strong reference", callingPid);
         mClient.clear();
         return;
     }
 
     if (cameraClient->asBinder() != client->getCameraClient()->asBinder()) {
         // ugh! that's not our client!!
-        LOGW("removeClient() called, but mClient doesn't match!");
+        LOGW("removeClient (pid %d): mClient doesn't match!", callingPid);
     } else {
         // okay, good, forget about mClient
         mClient.clear();
     }
+
+    LOGD("removeClient (pid %d) done", callingPid);
 }
 
 static sp<MediaPlayer> newMediaPlayer(const char *file) 
@@ -177,7 +196,8 @@ static sp<MediaPlayer> newMediaPlayer(const char *file)
 CameraService::Client::Client(const sp<CameraService>& cameraService,
         const sp<ICameraClient>& cameraClient, pid_t clientPid)
 {
-    LOGD("Client E constructor");
+    int callingPid = getCallingPid();
+    LOGD("Client::Client E (pid %d)", callingPid);
     mCameraService = cameraService;
     mCameraClient = cameraClient;
     mClientPid = clientPid;
@@ -189,22 +209,27 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
 
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
-    LOGD("Client X constructor");
+    LOGD("Client::Client X (pid %d)", callingPid);
 }
 
 status_t CameraService::Client::checkPid()
 {
-    if (mClientPid == IPCThreadState::self()->getCallingPid()) return NO_ERROR;
-    LOGW("Attempt to use locked camera (%p) from different process", getCameraClient()->asBinder().get());
+    int callingPid = getCallingPid();
+    if (mClientPid == callingPid) return NO_ERROR;
+    LOGW("Attempt to use locked camera (client %p) from different process "
+        " (old pid %d, new pid %d)",
+        getCameraClient()->asBinder().get(), mClientPid, callingPid);
     return -EBUSY;
 }
 
 status_t CameraService::Client::lock()
 {
+    int callingPid = getCallingPid();
+    LOGD("lock from pid %d (mClientPid %d)", callingPid, mClientPid);
     Mutex::Autolock _l(mLock);
     // lock camera to this client if the the camera is unlocked
     if (mClientPid == 0) {
-        mClientPid = IPCThreadState::self()->getCallingPid();
+        mClientPid = callingPid;
         return NO_ERROR;
     }
     // returns NO_ERROR if the client already owns the camera, -EBUSY otherwise
@@ -213,13 +238,14 @@ status_t CameraService::Client::lock()
 
 status_t CameraService::Client::unlock()
 {
+    int callingPid = getCallingPid();
+    LOGD("unlock from pid %d (mClientPid %d)", callingPid, mClientPid);    
     Mutex::Autolock _l(mLock);
     // allow anyone to use camera
-    LOGD("unlock (%p)", getCameraClient()->asBinder().get());
     status_t result = checkPid();
     if (result == NO_ERROR) {
         mClientPid = 0;
-
+        LOGD("clear mCameraClient (pid %d)", callingPid);
         // we need to remove the reference so that when app goes
         // away, the reference count goes to 0.
         mCameraClient.clear();
@@ -229,15 +255,17 @@ status_t CameraService::Client::unlock()
 
 status_t CameraService::Client::connect(const sp<ICameraClient>& client)
 {
+    int callingPid = getCallingPid();
+
     // connect a new process to the camera
-    LOGD("connect (%p)", client->asBinder().get());
+    LOGD("Client::connect E (pid %d, client %p)", callingPid, client->asBinder().get());
 
     // I hate this hack, but things get really ugly when the media recorder
     // service is handing back the camera to the app. The ICameraClient
     // destructor will be called during the same IPC, making it look like
     // the remote client is trying to disconnect. This hack temporarily
     // sets the mClientPid to an invalid pid to prevent the hardware from
-    //  being torn down.
+    // being torn down.
     {
 
         // hold a reference to the old client or we will deadlock if the client is
@@ -246,24 +274,29 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client)
         {
             Mutex::Autolock _l(mLock);
             if (mClientPid != 0 && checkPid() != NO_ERROR) {
-                LOGW("Tried to connect to locked camera");
+                LOGW("Tried to connect to locked camera (old pid %d, new pid %d)",
+                        mClientPid, callingPid);
                 return -EBUSY;
             }
             oldClient = mCameraClient;
 
             // did the client actually change?
-            if (client->asBinder() == mCameraClient->asBinder()) return NO_ERROR;
+            if (client->asBinder() == mCameraClient->asBinder()) {
+                LOGD("Connect to the same client");
+                return NO_ERROR;
+            }
 
             mCameraClient = client;
             mClientPid = -1;
             mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
-            LOGD("connect new process (%d) to existing camera client", mClientPid);
+            LOGD("Connect to the new client (pid %d, client %p)",
+                callingPid, mCameraClient->asBinder().get());
         }
 
     }
     // the old client destructor is called when oldClient goes out of scope
     // now we set the new PID to lock the interface again
-    mClientPid = IPCThreadState::self()->getCallingPid();
+    mClientPid = callingPid;
 
     return NO_ERROR;
 }
@@ -280,8 +313,11 @@ static void *unregister_surface(void *arg)
 
 CameraService::Client::~Client()
 {
+    int callingPid = getCallingPid();
+
     // tear down client
-    LOGD("Client (%p)  E destructor", getCameraClient()->asBinder().get());
+    LOGD("Client::~Client E (pid %d, client %p)",
+            callingPid, getCameraClient()->asBinder().get());
     if (mSurface != 0 && !mUseOverlay) {
 #if HAVE_ANDROID_OS
         pthread_t thr;
@@ -307,19 +343,21 @@ CameraService::Client::~Client()
     }
 
     // make sure we tear down the hardware
-    mClientPid = IPCThreadState::self()->getCallingPid();
+    mClientPid = callingPid;
     disconnect();
-    LOGD("Client X destructor");
+    LOGD("Client::~Client X (pid %d)", mClientPid);
 }
 
 void CameraService::Client::disconnect()
 {
-    LOGD("Client (%p) E disconnect from (%d)",
-            getCameraClient()->asBinder().get(),
-            IPCThreadState::self()->getCallingPid());
+    int callingPid = getCallingPid();    
+
+    LOGD("Client::disconnect() E (pid %d client %p)",
+            callingPid, getCameraClient()->asBinder().get());
+
     Mutex::Autolock lock(mLock);
     if (mClientPid <= 0) {
-        LOGD("camera is unlocked, don't tear down hardware");
+        LOGD("camera is unlocked (mClientPid = %d), don't tear down hardware", mClientPid);
         return;
     }
     if (checkPid() != NO_ERROR) {
@@ -339,13 +377,13 @@ void CameraService::Client::disconnect()
         mHardware->release();
     }
     mHardware.clear();
-    LOGD("Client X disconnect");
+    LOGD("Client::disconnect() X (pid %d)", callingPid);
 }
 
 // pass the buffered ISurface to the camera service
 status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
 {
-    LOGD("setPreviewDisplay(%p)", surface.get());
+    LOGD("setPreviewDisplay(%p) (pid %d)", surface.get(), getCallingPid());
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
     if (result != NO_ERROR) return result;
@@ -365,7 +403,7 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
 // preview are handled.
 void CameraService::Client::setPreviewCallbackFlag(int callback_flag)
 {
-    LOGV("setPreviewCallbackFlag");
+    LOGV("setPreviewCallbackFlag (pid %d)", getCallingPid());
     Mutex::Autolock lock(mLock);
     if (checkPid() != NO_ERROR) return;
     mPreviewCallbackFlag = callback_flag;
@@ -374,7 +412,9 @@ void CameraService::Client::setPreviewCallbackFlag(int callback_flag)
 // start preview mode, must call setPreviewDisplay first
 status_t CameraService::Client::startCameraMode(camera_mode mode)
 {
-    LOGD("startCameraMode(%d)", mode);
+    int callingPid = getCallingPid();
+
+    LOGD("startCameraMode(%d) (pid %d)", mode, callingPid);
 
     /* we cannot call into mHardware with mLock held because
      * mHardware has callbacks onto us which acquire this lock
@@ -405,7 +445,7 @@ status_t CameraService::Client::startCameraMode(camera_mode mode)
 
 status_t CameraService::Client::startRecordingMode()
 {
-    LOGV("startRecordingMode");
+    LOGD("startRecordingMode (pid %d)", getCallingPid());
 
     status_t ret = UNKNOWN_ERROR;
 
@@ -433,7 +473,7 @@ status_t CameraService::Client::startRecordingMode()
 
 status_t CameraService::Client::startPreviewMode()
 {
-    LOGV("startPreviewMode");
+    LOGD("startPreviewMode (pid %d)", getCallingPid());
 
     // if preview has been enabled, nothing needs to be done
     if (mHardware->previewEnabled()) {
@@ -500,11 +540,15 @@ status_t CameraService::Client::startPreviewMode()
 
 status_t CameraService::Client::startPreview()
 {
+    LOGD("startPreview (pid %d)", getCallingPid());
+    
     return startCameraMode(CAMERA_PREVIEW_MODE);
 }
 
 status_t CameraService::Client::startRecording()
 {
+    LOGD("startRecording (pid %d)", getCallingPid());
+
     if (mMediaPlayerBeep.get() != NULL) {
         mMediaPlayerBeep->seekTo(0);
         mMediaPlayerBeep->start();
@@ -515,7 +559,7 @@ status_t CameraService::Client::startRecording()
 // stop preview mode
 void CameraService::Client::stopPreview()
 {
-    LOGD("stopPreview()");
+    LOGD("stopPreview (pid %d)", getCallingPid());
 
     Mutex::Autolock lock(mLock);
     if (checkPid() != NO_ERROR) return;
@@ -537,7 +581,7 @@ void CameraService::Client::stopPreview()
 // stop recording mode
 void CameraService::Client::stopRecording()
 {
-    LOGV("stopRecording()");
+    LOGD("stopRecording (pid %d)", getCallingPid());
 
     Mutex::Autolock lock(mLock);
     if (checkPid() != NO_ERROR) return;
@@ -552,15 +596,13 @@ void CameraService::Client::stopRecording()
         mMediaPlayerBeep->start();
     }
     mHardware->stopRecording();
-    LOGV("stopRecording(), hardware stopped OK");
+    LOGD("stopRecording(), hardware stopped OK");
     mPreviewBuffer.clear();
 }
 
 // release a recording frame
 void CameraService::Client::releaseRecordingFrame(const sp<IMemory>& mem)
 {
-    LOGV("releaseRecordingFrame()");
-
     Mutex::Autolock lock(mLock);
     if (checkPid() != NO_ERROR) return;
 
@@ -704,7 +746,7 @@ void CameraService::Client::recordingCallback(const sp<IMemory>& mem, void* user
 // take a picture - image is returned in callback
 status_t CameraService::Client::autoFocus()
 {
-    LOGV("autoFocus");
+    LOGD("autoFocus (pid %d)", getCallingPid());
 
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
@@ -722,7 +764,7 @@ status_t CameraService::Client::autoFocus()
 // take a picture - image is returned in callback
 status_t CameraService::Client::takePicture()
 {
-    LOGD("takePicture");
+    LOGD("takePicture (pid %d)", getCallingPid());
 
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
@@ -920,6 +962,7 @@ void CameraService::Client::postAutoFocus(bool focused)
 
 void CameraService::Client::postShutter()
 {
+    LOGD("postShutter");
     mCameraClient->notifyCallback(CAMERA_MSG_SHUTTER, 0, 0);
 }
 
@@ -1029,7 +1072,7 @@ status_t CameraService::dump(int fd, const Vector<String16>& args)
     if (checkCallingPermission(String16("android.permission.DUMP")) == false) {
         snprintf(buffer, SIZE, "Permission Denial: "
                 "can't dump CameraService from pid=%d, uid=%d\n",
-                IPCThreadState::self()->getCallingPid(),
+                getCallingPid(),
                 IPCThreadState::self()->getCallingUid());
         result.append(buffer);
         write(fd, result.string(), result.size());
