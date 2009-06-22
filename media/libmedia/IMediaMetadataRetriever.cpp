@@ -126,7 +126,7 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MediaMetadataRetriever, "android.hardware.IMediaMetadataRetriever");
+IMPLEMENT_META_INTERFACE(MediaMetadataRetriever, "android.media.IMediaMetadataRetriever");
 
 // ----------------------------------------------------------------------
 
@@ -209,4 +209,3 @@ status_t BnMediaMetadataRetriever::onTransact(
 // ----------------------------------------------------------------------------
 
 }; // namespace android
-
