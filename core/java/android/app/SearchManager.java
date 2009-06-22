@@ -1804,6 +1804,19 @@ public class SearchManager
     }
     
     /**
+     * Gets a cursor with search suggestions.
+     *
+     * @param searchable Information about how to get the suggestions.
+     * @param query The search text entered (so far).
+     * @return a cursor with suggestions, or <code>null</null> the suggestion query failed.
+     *
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public Cursor getSuggestions(SearchableInfo searchable, String query) {
+        return getSuggestions(mContext, searchable, query);
+    }
+
+    /**
      * Gets a cursor with search suggestions. This method is static so that it can
      * be used from non-Activity context.
      *
