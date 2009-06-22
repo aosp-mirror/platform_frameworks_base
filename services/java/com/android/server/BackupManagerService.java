@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -850,18 +851,27 @@ class BackupManagerService extends IBackupManager.Stub {
                             if (app != null) {
                                 // Validate against the backed-up signature block, too
                                 Metadata info = pmAgent.getRestoredMetadata(app.packageName);
-                                if (app.versionCode >= info.versionCode) {
-                                    if (DEBUG) Log.v(TAG, "Restore version " + info.versionCode
-                                            + " compatible with app version " + app.versionCode);
-                                    if (signaturesMatch(info.signatures, app.signatures)) {
-                                        appsToRestore.add(app);
+                                if (info != null) {
+                                    if (app.versionCode >= info.versionCode) {
+                                        if (DEBUG) Log.v(TAG, "Restore version "
+                                                + info.versionCode
+                                                + " compatible with app version "
+                                                + app.versionCode);
+                                        if (signaturesMatch(info.signatures, app.signatures)) {
+                                            appsToRestore.add(app);
+                                        } else {
+                                            Log.w(TAG, "Sig mismatch restoring "
+                                                    + app.packageName);
+                                        }
                                     } else {
-                                        Log.w(TAG, "Sig mismatch restoring " + app.packageName);
+                                        Log.i(TAG, "Restore set for " + app.packageName
+                                                + " is too new [" + info.versionCode
+                                                + "] for installed app version "
+                                                + app.versionCode);
                                     }
                                 } else {
-                                    Log.i(TAG, "Restore set for " + app.packageName
-                                            + " is too new [" + info.versionCode
-                                            + "] for installed app version " + app.versionCode);
+                                    Log.d(TAG, "Unable to get metadata for "
+                                            + app.packageName);
                                 }
                             }
                         }

@@ -170,18 +170,13 @@ public class LocalTransport extends IBackupTransport.Stub {
         // The restore set is the concatenation of the individual record blobs,
         // each of which is a file in the package's directory
         File[] blobs = packageDir.listFiles();
+        if (DEBUG) Log.v(TAG, "   found " + blobs.length + " key files");
         int err = 0;
         if (blobs != null && blobs.length > 0) {
             BackupDataOutput out = new BackupDataOutput(outFd.getFileDescriptor());
             try {
                 for (File f : blobs) {
-                    FileInputStream in = new FileInputStream(f);
-                    int size = (int) f.length();
-                    byte[] buf = new byte[size];
-                    in.read(buf);
-                    String key = new String(Base64.decode(f.getName()));
-                    out.writeEntityHeader(key, size);
-                    out.writeEntityData(buf, size);
+                    copyToRestoreData(f, out);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Unable to read backup records");
@@ -189,5 +184,17 @@ public class LocalTransport extends IBackupTransport.Stub {
             }
         }
         return err;
+    }
+
+    private void copyToRestoreData(File f, BackupDataOutput out) throws IOException {
+        FileInputStream in = new FileInputStream(f);
+        int size = (int) f.length();
+        byte[] buf = new byte[size];
+        in.read(buf);
+        String key = new String(Base64.decode(f.getName()));
+        if (DEBUG) Log.v(TAG, "   ... copy to stream: key=" + key
+                + " size=" + size);
+        out.writeEntityHeader(key, size);
+        out.writeEntityData(buf, size);
     }
 }
