@@ -44,7 +44,6 @@ public:
         HAS_TRIVIAL_CTOR    = 0x00000001,
         HAS_TRIVIAL_DTOR    = 0x00000002,
         HAS_TRIVIAL_COPY    = 0x00000004,
-        HAS_TRIVIAL_ASSIGN  = 0x00000008
     };
 
                             VectorImpl(size_t itemSize, uint32_t flags);
