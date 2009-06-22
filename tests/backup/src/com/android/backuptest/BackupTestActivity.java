@@ -17,12 +17,11 @@
 package com.android.backuptest;
 
 import android.app.ListActivity;
+import android.backup.BackupHelperDispatcher;
 import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
 import android.backup.BackupManager;
 import android.backup.FileBackupHelper;
-import android.backup.FileRestoreHelper;
-import android.backup.RestoreHelperDispatcher;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -142,10 +141,10 @@ public class BackupTestActivity extends ListActivity
                             ParcelFileDescriptor.MODE_READ_WRITE|ParcelFileDescriptor.MODE_CREATE|
                             ParcelFileDescriptor.MODE_TRUNCATE);
                     FileBackupHelper h = new FileBackupHelper(BackupTestActivity.this,
-                            "FileBackupHelper");
+                            new String[] { "a", "empty" });
                     FileOutputStream dataFile = openFileOutput("backup_test", MODE_WORLD_READABLE);
                     BackupDataOutput data = new BackupDataOutput(dataFile.getFD());
-                    h.performBackup(null, data, state, new String[] { "a", "empty" });
+                    h.performBackup(null, data, state);
                     dataFile.close();
                     state.close();
                 } catch (IOException ex) {
@@ -156,16 +155,16 @@ public class BackupTestActivity extends ListActivity
         new Test("Restore Helpers") {
             void run() {
                 try {
-                    RestoreHelperDispatcher dispatch = new RestoreHelperDispatcher();
-                    dispatch.addHelper("FileBackupHelper",
-                            new FileRestoreHelper(BackupTestActivity.this));
+                    BackupHelperDispatcher dispatch = new BackupHelperDispatcher();
+                    dispatch.addHelper("", new FileBackupHelper(BackupTestActivity.this,
+                            new String[] { "a", "empty" }));
                     FileInputStream dataFile = openFileInput("backup_test");
                     BackupDataInput data = new BackupDataInput(dataFile.getFD());
                     ParcelFileDescriptor state = ParcelFileDescriptor.open(
                             new File(getFilesDir(), "restore_state"),
                             ParcelFileDescriptor.MODE_READ_WRITE|ParcelFileDescriptor.MODE_CREATE|
                             ParcelFileDescriptor.MODE_TRUNCATE);
-                    dispatch.dispatch(data, state);
+                    dispatch.performRestore(data, state);
                     dataFile.close();
                     state.close();
                 } catch (IOException ex) {

@@ -41,6 +41,45 @@ dtor(JNIEnv* env, jobject clazz, jint ptr)
 }
 
 static int
+performBackup_native(JNIEnv* env, jobject clazz, jobject oldState, int data,
+        jobject newState, jobjectArray files, jobjectArray keys)
+{
+    int err;
+
+    // all parameters have already been checked against null
+    int oldStateFD = oldState != NULL ? env->GetIntField(oldState, s_descriptorField) : -1;
+    int newStateFD = env->GetIntField(newState, s_descriptorField);
+    BackupDataWriter* dataStream = (BackupDataWriter*)data;
+
+    const int fileCount = env->GetArrayLength(files);
+    char const** filesUTF = (char const**)malloc(sizeof(char*)*fileCount);
+    for (int i=0; i<fileCount; i++) {
+        filesUTF[i] = env->GetStringUTFChars((jstring)env->GetObjectArrayElement(files, i), NULL);
+    }
+
+    const int keyCount = env->GetArrayLength(keys);
+    char const** keysUTF = (char const**)malloc(sizeof(char*)*keyCount);
+    for (int i=0; i<keyCount; i++) {
+        keysUTF[i] = env->GetStringUTFChars((jstring)env->GetObjectArrayElement(keys, i), NULL);
+    }
+
+    err = back_up_files(oldStateFD, dataStream, newStateFD, filesUTF, keysUTF, fileCount);
+
+    for (int i=0; i<fileCount; i++) {
+        env->ReleaseStringUTFChars((jstring)env->GetObjectArrayElement(files, i), filesUTF[i]);
+    }
+    free(filesUTF);
+
+    for (int i=0; i<keyCount; i++) {
+        env->ReleaseStringUTFChars((jstring)env->GetObjectArrayElement(keys, i), keysUTF[i]);
+    }
+    free(keysUTF);
+
+    return err;
+}
+
+
+static int
 writeFile_native(JNIEnv* env, jobject clazz, jint ptr, jstring filenameObj, int backupReaderPtr)
 {
     int err;
@@ -73,11 +112,14 @@ writeSnapshot_native(JNIEnv* env, jobject clazz, jint ptr, jobject fileDescripto
 static const JNINativeMethod g_methods[] = {
     { "ctor", "()I", (void*)ctor },
     { "dtor", "(I)V", (void*)dtor },
+    { "performBackup_native",
+       "(Ljava/io/FileDescriptor;ILjava/io/FileDescriptor;[Ljava/lang/String;[Ljava/lang/String;)I",
+       (void*)performBackup_native },
     { "writeFile_native", "(ILjava/lang/String;I)I", (void*)writeFile_native },
     { "writeSnapshot_native", "(ILjava/io/FileDescriptor;)I", (void*)writeSnapshot_native },
 };
 
-int register_android_backup_RestoreHelperBase(JNIEnv* env)
+int register_android_backup_FileBackupHelperBase(JNIEnv* env)
 {
     jclass clazz;
 
@@ -87,7 +129,7 @@ int register_android_backup_RestoreHelperBase(JNIEnv* env)
     LOG_FATAL_IF(s_descriptorField == NULL,
             "Unable to find descriptor field in java.io.FileDescriptor");
     
-    return AndroidRuntime::registerNativeMethods(env, "android/backup/RestoreHelperBase",
+    return AndroidRuntime::registerNativeMethods(env, "android/backup/FileBackupHelperBase",
             g_methods, NELEM(g_methods));
 }
 

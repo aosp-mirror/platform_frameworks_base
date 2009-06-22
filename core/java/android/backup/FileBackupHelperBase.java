@@ -25,14 +25,14 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 
-class RestoreHelperBase {
+class FileBackupHelperBase {
     private static final String TAG = "RestoreHelperBase";
 
     int mPtr;
     Context mContext;
     boolean mExceptionLogged;
     
-    RestoreHelperBase(Context context) {
+    FileBackupHelperBase(Context context) {
         mPtr = ctor();
         mContext = context;
     }
@@ -42,6 +42,41 @@ class RestoreHelperBase {
             dtor(mPtr);
         } finally {
             super.finalize();
+        }
+    }
+
+    /**
+     * Check the parameters so the native code doens't have to throw all the exceptions
+     * since it's easier to do that from java.
+     */
+    static void performBackup_checked(ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState, String[] files, String[] keys) {
+        if (files.length == 0) {
+            return;
+        }
+        // files must be all absolute paths
+        for (String f: files) {
+            if (f.charAt(0) != '/') {
+                throw new RuntimeException("files must have all absolute paths: " + f);
+            }
+        }
+        // the length of files and keys must be the same
+        if (files.length != keys.length) {
+            throw new RuntimeException("files.length=" + files.length
+                    + " keys.length=" + keys.length);
+        }
+        // oldStateFd can be null
+        FileDescriptor oldStateFd = oldState != null ? oldState.getFileDescriptor() : null;
+        FileDescriptor newStateFd = newState.getFileDescriptor();
+        if (newStateFd == null) {
+            throw new NullPointerException();
+        }
+
+        int err = performBackup_native(oldStateFd, data.mBackupWriter, newStateFd, files, keys);
+
+        if (err != 0) {
+            // TODO: more here
+            throw new RuntimeException("Backup failed 0x" + Integer.toHexString(err));
         }
     }
 
@@ -68,13 +103,26 @@ class RestoreHelperBase {
         }
     }
 
-    public void writeSnapshot(ParcelFileDescriptor fd) {
+    public void writeRestoreSnapshot(ParcelFileDescriptor fd) {
         int result = writeSnapshot_native(mPtr, fd.getFileDescriptor());
         // TODO: Do something with the error.
     }
 
+    boolean isKeyInList(String key, String[] list) {
+        for (String s: list) {
+            if (s.equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static native int ctor();
     private static native void dtor(int ptr);
+
+    native private static int performBackup_native(FileDescriptor oldState,
+            int data, FileDescriptor newState, String[] files, String[] keys);
+    
     private static native int writeFile_native(int ptr, String filename, int backupReader);
     private static native int writeSnapshot_native(int ptr, FileDescriptor fd);
 }
