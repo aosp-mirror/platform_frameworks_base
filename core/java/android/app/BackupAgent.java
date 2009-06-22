@@ -78,11 +78,16 @@ public abstract class BackupAgent extends ContextWrapper {
      *
      * @param data An open, read-only ParcelFileDescriptor pointing to a full snapshot
      *             of the application's data.
+     * @param appVersionCode The android:versionCode value of the application that backed
+     *        up this particular data set.  This makes it easier for an application's
+     *        agent to distinguish among several possible older data versions when
+     *        asked to perform the restore operation.
      * @param newState An open, read/write ParcelFileDescriptor pointing to an empty
      *                 file.  The application should record the final backup state
      *                 here after restoring its data from dataFd.
      */
-    public abstract void onRestore(BackupDataInput data, ParcelFileDescriptor newState)
+    public abstract void onRestore(BackupDataInput data, int appVersionCode,
+            ParcelFileDescriptor newState)
             throws IOException;
 
 
@@ -121,13 +126,13 @@ public abstract class BackupAgent extends ContextWrapper {
             }
         }
 
-        public void doRestore(ParcelFileDescriptor data,
+        public void doRestore(ParcelFileDescriptor data, int appVersionCode,
                 ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
             Log.v(TAG, "doRestore() invoked");
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
             try {
-                BackupAgent.this.onRestore(input, newState);
+                BackupAgent.this.onRestore(input, appVersionCode, newState);
             } catch (IOException ex) {
                 Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw new RuntimeException(ex);

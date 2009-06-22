@@ -192,7 +192,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // "Restore" here is a misnomer.  What we're really doing is reading back the
     // set of app signatures associated with each backed-up app in this restore
     // image.  We'll use those later to determine what we can legitimately restore.
-    public void onRestore(BackupDataInput data, ParcelFileDescriptor newState)
+    public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
         List<ApplicationInfo> restoredApps = new ArrayList<ApplicationInfo>();
         HashMap<String, Metadata> sigMap = new HashMap<String, Metadata>();

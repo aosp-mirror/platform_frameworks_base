@@ -164,7 +164,8 @@ public class BackupTestActivity extends ListActivity
                             new File(getFilesDir(), "restore_state"),
                             ParcelFileDescriptor.MODE_READ_WRITE|ParcelFileDescriptor.MODE_CREATE|
                             ParcelFileDescriptor.MODE_TRUNCATE);
-                    dispatch.performRestore(data, state);
+                    // TODO: a more plausable synthetic stored-data version number
+                    dispatch.performRestore(data, 0, state);
                     dataFile.close();
                     state.close();
                 } catch (IOException ex) {
