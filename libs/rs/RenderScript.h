@@ -38,6 +38,7 @@ typedef void * RsScript;
 typedef void * RsScriptBasicTemp;
 typedef void * RsTriangleMesh;
 typedef void * RsType;
+typedef void * RsLight;
 
 typedef void * RsProgramVertex;
 typedef void * RsProgramFragment;

@@ -33,6 +33,7 @@
 #include "rsProgramFragment.h"
 #include "rsProgramFragmentStore.h"
 #include "rsProgramVertex.h"
+#include "rsLight.h"
 
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
@@ -62,6 +63,7 @@ public:
     ProgramFragmentState mStateFragment;
     ProgramFragmentStoreState mStateFragmentStore;
     ProgramVertexState mStateVertex;
+    LightState mStateLight;
 
     TriangleMeshContext mStateTriangleMesh;
 
