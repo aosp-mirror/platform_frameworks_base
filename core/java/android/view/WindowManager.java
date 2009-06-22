@@ -18,7 +18,6 @@ package android.view;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -805,6 +804,7 @@ public interface WindowManager extends ViewManager {
             screenOrientation = in.readInt();
         }
     
+        @SuppressWarnings({"PointlessBitwiseExpression"})
         public static final int LAYOUT_CHANGED = 1<<0;
         public static final int TYPE_CHANGED = 1<<1;
         public static final int FLAGS_CHANGED = 1<<2;
