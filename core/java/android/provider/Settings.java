@@ -2552,12 +2552,7 @@ public final class Settings {
         /**
          * URL that points to the privacy terms of the Google Talk service.
          */
-        public static final String GTALK_PRIVACY_URL = "gtalk_privacy_url";
-
-        /**
-         * URL that points to the legal terms of the Google Talk service.
-         */
-        public static final String GTALK_LEGAL_URL = "gtalk_legal_url";
+        public static final String GTALK_TERMS_OF_SERVICE_URL = "gtalk_terms_of_service_url";
 
         /**
          * Hostname of the GTalk server.
