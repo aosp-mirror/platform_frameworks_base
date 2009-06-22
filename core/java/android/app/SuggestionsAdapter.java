@@ -54,6 +54,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
 
+    private SearchManager mSearchManager;
     private SearchDialog mSearchDialog;
     private SearchableInfo mSearchable;
     private Context mProviderContext;
@@ -92,6 +93,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 com.android.internal.R.layout.search_dropdown_item_icons_2line,
                 null,   // no initial cursor
                 true);  // auto-requery
+        mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
         mSearchDialog = searchDialog;
         mSearchable = searchable;
 
@@ -142,7 +144,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
         }
         try {
-            final Cursor cursor = SearchManager.getSuggestions(mContext, mSearchable, query);
+            final Cursor cursor = mSearchManager.getSuggestions(mSearchable, query);
             // trigger fill window so the spinner stays up until the results are copied over and
             // closer to being ready
             if (!mGlobalSearchMode) cursor.getCount();
