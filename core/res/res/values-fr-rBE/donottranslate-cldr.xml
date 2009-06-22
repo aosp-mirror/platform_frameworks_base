@@ -109,7 +109,7 @@
     <string name="month">%-B</string>
     <string name="month_year">%B %Y</string>
     <string name="abbrev_month_day">%-e %b</string>
-    <string name="abbrev_month">%-b</string>
+    <string name="abbrev_month">%b</string>
     <string name="abbrev_month_year">%b %Y</string>
     <string name="time1_time2">du %1$s au %2$s</string>
     <string name="date1_date2">du %2$s au %5$s</string>
