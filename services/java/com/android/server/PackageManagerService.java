@@ -5937,7 +5937,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
                 for (PackageSetting pkg:sus.packages) {
-                    if (pkg.grantedPermissions.contains (eachPerm)) {
+                    if (pkg.pkg.requestedPermissions.contains(eachPerm)) {
                         used = true;
                         break;
                     }
