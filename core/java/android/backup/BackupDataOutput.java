@@ -55,6 +55,10 @@ public class BackupDataOutput {
         }
     }
 
+    public void setKeyPrefix(String keyPrefix) {
+        setKeyPrefix_native(mBackupWriter, keyPrefix);
+    }
+
     protected void finalize() throws Throwable {
         try {
             dtor(mBackupWriter);
@@ -62,11 +66,12 @@ public class BackupDataOutput {
             super.finalize();
         }
     }
-        
+
     private native static int ctor(FileDescriptor fd);
     private native static void dtor(int mBackupWriter);
 
     private native static int writeEntityHeader_native(int mBackupWriter, String key, int dataSize);
     private native static int writeEntityData_native(int mBackupWriter, byte[] data, int size);
+    private native static void setKeyPrefix_native(int mBackupWriter, String keyPrefix);
 }
 
