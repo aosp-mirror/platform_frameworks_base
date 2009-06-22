@@ -227,7 +227,8 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     private String getSignedPublicKey(int index, String challenge, String url) {
-        return Keystore.getInstance().generateKeyPair(index, challenge, url);
+        // generateKeyPair expects organizations which we don't have. Ignore url.
+        return Keystore.getInstance().generateKeyPair(index, challenge, null);
     }
 
     private native void nativeConstructor();
