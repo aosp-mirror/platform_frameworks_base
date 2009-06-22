@@ -44,6 +44,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.util.Regex;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -55,6 +56,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -145,7 +147,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     // more than once.
     private final WeakHashMap<String, Drawable> mOutsideDrawablesCache =
             new WeakHashMap<String, Drawable>();
-    
+
+    // Last known IME options value for the search edit text.
+    private int mSearchAutoCompleteImeOptions;
+
     /**
      * Constructor - fires it up and makes it look like the search UI.
      * 
@@ -224,6 +229,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        mSearchAutoCompleteImeOptions = mSearchAutoComplete.getImeOptions();
     }
 
     /**
@@ -565,7 +572,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 }
             }
             mSearchAutoComplete.setInputType(inputType);
-            mSearchAutoComplete.setImeOptions(mSearchable.getImeOptions());
+            mSearchAutoCompleteImeOptions = mSearchable.getImeOptions();
+            mSearchAutoComplete.setImeOptions(mSearchAutoCompleteImeOptions);
         }
     }
     
@@ -796,7 +804,24 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             }
         }
 
-        public void afterTextChanged(Editable s) { }
+        public void afterTextChanged(Editable s) {
+            if (!mSearchAutoComplete.isPerformingCompletion()) {
+                // The user changed the query, check if it is a URL and if so change the search
+                // button in the soft keyboard to the 'Go' button.
+                int options = (mSearchAutoComplete.getImeOptions() & (~EditorInfo.IME_MASK_ACTION));
+                if (Regex.WEB_URL_PATTERN.matcher(mUserQuery).matches()) {
+                    options = options | EditorInfo.IME_ACTION_GO;
+                } else {
+                    options = options | EditorInfo.IME_ACTION_SEARCH;
+                }
+                if (options != mSearchAutoCompleteImeOptions) {
+                    mSearchAutoCompleteImeOptions = options;
+                    mSearchAutoComplete.setImeOptions(options);
+                    // This call is required to update the soft keyboard UI with latest IME flags.
+                    mSearchAutoComplete.setInputType(mSearchAutoComplete.getInputType());
+                }
+            }
+        }
     };
 
     /**
@@ -934,6 +959,32 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
 
     /**
+     * Corrects http/https typo errors in the given url string, and if the protocol specifier was
+     * not present defaults to http.
+     * 
+     * @param inUrl URL to check and fix
+     * @return fixed URL string.
+     */
+    private String fixUrl(String inUrl) {
+        if (inUrl.startsWith("http://") || inUrl.startsWith("https://"))
+            return inUrl;
+
+        if (inUrl.startsWith("http:") || inUrl.startsWith("https:")) {
+            if (inUrl.startsWith("http:/") || inUrl.startsWith("https:/")) {
+                inUrl = inUrl.replaceFirst("/", "//");
+            } else {
+                inUrl = inUrl.replaceFirst(":", "://");
+            }
+        }
+
+        if (inUrl.indexOf("://") == -1) {
+            inUrl = "http://" + inUrl;
+        }
+
+        return inUrl;
+    }
+
+    /**
      * React to the user typing "enter" or other hardwired keys while typing in the search box.
      * This handles these special keys while the edit box has focus.
      */
@@ -963,7 +1014,19 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 if (keyCode == KeyEvent.KEYCODE_ENTER 
                         && event.getAction() == KeyEvent.ACTION_UP) {
                     v.cancelLongPress();
-                    launchQuerySearch();                    
+
+                    // If this is a url entered by the user and we displayed the 'Go' button which
+                    // the user clicked, launch the url instead of using it as a search query.
+                    if ((mSearchAutoCompleteImeOptions & EditorInfo.IME_MASK_ACTION)
+                            == EditorInfo.IME_ACTION_GO) {
+                        Uri uri = Uri.parse(fixUrl(mSearchAutoComplete.getText().toString()));
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        launchIntent(intent);
+                    } else {
+                        // Launch as a regular search.
+                        launchQuerySearch();
+                    }
                     return true;
                 }
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
