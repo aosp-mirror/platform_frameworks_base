@@ -71,7 +71,7 @@ namespace android {
  * The relative sizes of the stretchy segments indicates the relative
  * amount of stretchiness of the regions bordered by the segments.  For
  * example, regions 3, 7 and 11 above will take up more horizontal space
- * than regions 1, 5 and 9 since the horizonal segment associated with
+ * than regions 1, 5 and 9 since the horizontal segment associated with
  * the first set of regions is larger than the other set of regions.  The
  * ratios of the amount of horizontal (or vertical) space taken by any
  * two stretchable slices is exactly the ratio of their corresponding
@@ -87,7 +87,7 @@ namespace android {
  * the leftmost slices always start at x=0 and the rightmost slices
  * always end at the end of the image. So, for example, the regions 0,
  * 4 and 8 (which are fixed along the X axis) start at x value 0 and
- * go to xDiv[0] amd slices 2, 6 and 10 start at xDiv[1] and end at
+ * go to xDiv[0] and slices 2, 6 and 10 start at xDiv[1] and end at
  * xDiv[2].
  *
  * The array pointed to by the colors field lists contains hints for
@@ -626,25 +626,25 @@ public:
     event_code_t next();
 
     // These are available for all nodes:
-    const int32_t getCommentID() const;
+    int32_t getCommentID() const;
     const uint16_t* getComment(size_t* outLen) const;
-    const uint32_t getLineNumber() const;
+    uint32_t getLineNumber() const;
     
     // This is available for TEXT:
-    const int32_t getTextID() const;
+    int32_t getTextID() const;
     const uint16_t* getText(size_t* outLen) const;
     ssize_t getTextValue(Res_value* outValue) const;
     
     // These are available for START_NAMESPACE and END_NAMESPACE:
-    const int32_t getNamespacePrefixID() const;
+    int32_t getNamespacePrefixID() const;
     const uint16_t* getNamespacePrefix(size_t* outLen) const;
-    const int32_t getNamespaceUriID() const;
+    int32_t getNamespaceUriID() const;
     const uint16_t* getNamespaceUri(size_t* outLen) const;
     
     // These are available for START_TAG and END_TAG:
-    const int32_t getElementNamespaceID() const;
+    int32_t getElementNamespaceID() const;
     const uint16_t* getElementNamespace(size_t* outLen) const;
-    const int32_t getElementNameID() const;
+    int32_t getElementNameID() const;
     const uint16_t* getElementName(size_t* outLen) const;
     
     // Remaining methods are for retrieving information about attributes
@@ -653,14 +653,14 @@ public:
     size_t getAttributeCount() const;
     
     // Returns -1 if no namespace, -2 if idx out of range.
-    const int32_t getAttributeNamespaceID(size_t idx) const;
+    int32_t getAttributeNamespaceID(size_t idx) const;
     const uint16_t* getAttributeNamespace(size_t idx, size_t* outLen) const;
     
-    const int32_t getAttributeNameID(size_t idx) const;
+    int32_t getAttributeNameID(size_t idx) const;
     const uint16_t* getAttributeName(size_t idx, size_t* outLen) const;
-    const uint32_t getAttributeNameResID(size_t idx) const;
+    uint32_t getAttributeNameResID(size_t idx) const;
     
-    const int32_t getAttributeValueStringID(size_t idx) const;
+    int32_t getAttributeValueStringID(size_t idx) const;
     const uint16_t* getAttributeStringValue(size_t idx, size_t* outLen) const;
     
     int32_t getAttributeDataType(size_t idx) const;

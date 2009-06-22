@@ -544,7 +544,7 @@ ResXMLParser::event_code_t ResXMLParser::next()
     return mEventCode;
 }
 
-const int32_t ResXMLParser::getCommentID() const
+int32_t ResXMLParser::getCommentID() const
 {
     return mCurNode != NULL ? dtohl(mCurNode->comment.index) : -1;
 }
@@ -555,12 +555,12 @@ const uint16_t* ResXMLParser::getComment(size_t* outLen) const
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
 }
 
-const uint32_t ResXMLParser::getLineNumber() const
+uint32_t ResXMLParser::getLineNumber() const
 {
     return mCurNode != NULL ? dtohl(mCurNode->lineNumber) : -1;
 }
 
-const int32_t ResXMLParser::getTextID() const
+int32_t ResXMLParser::getTextID() const
 {
     if (mEventCode == TEXT) {
         return dtohl(((const ResXMLTree_cdataExt*)mCurExt)->data.index);
@@ -583,7 +583,7 @@ ssize_t ResXMLParser::getTextValue(Res_value* outValue) const
     return BAD_TYPE;
 }
 
-const int32_t ResXMLParser::getNamespacePrefixID() const
+int32_t ResXMLParser::getNamespacePrefixID() const
 {
     if (mEventCode == START_NAMESPACE || mEventCode == END_NAMESPACE) {
         return dtohl(((const ResXMLTree_namespaceExt*)mCurExt)->prefix.index);
@@ -598,7 +598,7 @@ const uint16_t* ResXMLParser::getNamespacePrefix(size_t* outLen) const
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
 }
 
-const int32_t ResXMLParser::getNamespaceUriID() const
+int32_t ResXMLParser::getNamespaceUriID() const
 {
     if (mEventCode == START_NAMESPACE || mEventCode == END_NAMESPACE) {
         return dtohl(((const ResXMLTree_namespaceExt*)mCurExt)->uri.index);
@@ -613,7 +613,7 @@ const uint16_t* ResXMLParser::getNamespaceUri(size_t* outLen) const
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
 }
 
-const int32_t ResXMLParser::getElementNamespaceID() const
+int32_t ResXMLParser::getElementNamespaceID() const
 {
     if (mEventCode == START_TAG) {
         return dtohl(((const ResXMLTree_attrExt*)mCurExt)->ns.index);
@@ -630,7 +630,7 @@ const uint16_t* ResXMLParser::getElementNamespace(size_t* outLen) const
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
 }
 
-const int32_t ResXMLParser::getElementNameID() const
+int32_t ResXMLParser::getElementNameID() const
 {
     if (mEventCode == START_TAG) {
         return dtohl(((const ResXMLTree_attrExt*)mCurExt)->name.index);
@@ -655,7 +655,7 @@ size_t ResXMLParser::getAttributeCount() const
     return 0;
 }
 
-const int32_t ResXMLParser::getAttributeNamespaceID(size_t idx) const
+int32_t ResXMLParser::getAttributeNamespaceID(size_t idx) const
 {
     if (mEventCode == START_TAG) {
         const ResXMLTree_attrExt* tag = (const ResXMLTree_attrExt*)mCurExt;
@@ -678,7 +678,7 @@ const uint16_t* ResXMLParser::getAttributeNamespace(size_t idx, size_t* outLen) 
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
 }
 
-const int32_t ResXMLParser::getAttributeNameID(size_t idx) const
+int32_t ResXMLParser::getAttributeNameID(size_t idx) const
 {
     if (mEventCode == START_TAG) {
         const ResXMLTree_attrExt* tag = (const ResXMLTree_attrExt*)mCurExt;
@@ -701,7 +701,7 @@ const uint16_t* ResXMLParser::getAttributeName(size_t idx, size_t* outLen) const
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
 }
 
-const uint32_t ResXMLParser::getAttributeNameResID(size_t idx) const
+uint32_t ResXMLParser::getAttributeNameResID(size_t idx) const
 {
     int32_t id = getAttributeNameID(idx);
     if (id >= 0 && (size_t)id < mTree.mNumResIds) {
@@ -710,7 +710,7 @@ const uint32_t ResXMLParser::getAttributeNameResID(size_t idx) const
     return 0;
 }
 
-const int32_t ResXMLParser::getAttributeValueStringID(size_t idx) const
+int32_t ResXMLParser::getAttributeValueStringID(size_t idx) const
 {
     if (mEventCode == START_TAG) {
         const ResXMLTree_attrExt* tag = (const ResXMLTree_attrExt*)mCurExt;
