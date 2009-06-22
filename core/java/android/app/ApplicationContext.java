@@ -1037,11 +1037,6 @@ class ApplicationContext extends Context {
     }
 
     private SearchManager getSearchManager() {
-        // This is only useable in Activity Contexts
-        if (getActivityToken() == null) {
-            throw new AndroidRuntimeException(
-                "Acquiring SearchManager objects only valid in Activity Contexts.");
-        }
         synchronized (mSync) {
             if (mSearchManager == null) {
                 mSearchManager = new SearchManager(getOuterContext(), mMainThread.getHandler());
