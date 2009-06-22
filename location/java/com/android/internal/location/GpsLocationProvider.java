@@ -949,8 +949,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                  int result = mConnMgr.startUsingNetworkFeature(
                         ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
                 if (result == Phone.APN_ALREADY_ACTIVE) {
-                    native_agps_data_conn_open(mAGpsApn);
-                    mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
+                    if (mAGpsApn != null) {
+                        native_agps_data_conn_open(mAGpsApn);
+                        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
+                    } else {
+                        Log.e(TAG, "mAGpsApn not set when receiving Phone.APN_ALREADY_ACTIVE");
+                        native_agps_data_conn_failed();
+                    }
                 } else if (result == Phone.APN_REQUEST_STARTED) {
                     mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
                 } else {
