@@ -6469,6 +6469,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         
         protected void onReceiveResult(int resultCode, Bundle resultData) {
             if (resultCode != InputMethodManager.RESULT_SHOWN) {
+                final int len = mText.length();
+                if (mNewStart > len) {
+                    mNewStart = len;
+                }
+                if (mNewEnd > len) {
+                    mNewEnd = len;
+                }
                 Selection.setSelection((Spannable)mText, mNewStart, mNewEnd);
             }
         }
