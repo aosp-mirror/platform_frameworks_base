@@ -130,6 +130,19 @@ public final class ContactsContract {
         public static final String STARRED = "starred";
 
         /**
+         * A custom ringtone associated with a person. Not always present.
+         * <P>Type: TEXT (URI to the ringtone)</P>
+         */
+        public static final String CUSTOM_RINGTONE = "custom_ringtone";
+
+        /**
+         * Whether the person should always be sent to voicemail. Not always
+         * present.
+         * <P>Type: INTEGER (0 for false, 1 for true)</P>
+         */
+        public static final String SEND_TO_VOICEMAIL = "send_to_voicemail";
+
+        /**
          * Reference to the row in the data table holding the primary phone number.
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
@@ -146,12 +159,6 @@ public final class ContactsContract {
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
         public static final String PHOTO_ID = "photo_id";
-
-        /**
-         * Reference to a row containing custom ringtone and send to voicemail information.
-         * <P>Type: INTEGER REFERENCES data(_id)</P>
-         */
-        public static final String CUSTOM_RINGTONE_ID = "custom_ringtone_id";
     }
 
     /**
@@ -928,28 +935,6 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String NOTE = "data1";
-        }
-
-        /**
-         * Custom ringtone associated with the contact.
-         */
-        public static final class CustomRingtone implements BaseCommonColumns {
-            private CustomRingtone() {}
-
-            public static final String CONTENT_ITEM_TYPE =
-                    "vnd.android.cursor.item/custom_ringtone";
-
-            /**
-             * Whether to send the number to voicemail.
-             * <P>Type: INTEGER (if set, non-0 means true)</P>
-             */
-            public static final String SEND_TO_VOICEMAIL = "data1";
-
-            /**
-             * The ringtone uri.
-             * <P>Type: TEXT</P>
-             */
-            public static final String RINGTONE_URI = "data2";
         }
 
         /**
