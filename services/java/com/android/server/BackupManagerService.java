@@ -795,6 +795,16 @@ class BackupManagerService extends IBackupManager.Stub {
         private int mToken;
         private RestoreSet mImage;
 
+        class RestoreRequest {
+            public PackageInfo app;
+            public int storedAppVersion;
+
+            RestoreRequest(PackageInfo _app, int _version) {
+                app = _app;
+                storedAppVersion = _version;
+            }
+        }
+
         PerformRestoreThread(IBackupTransport transport, int restoreSetToken) {
             mTransport = transport;
             mToken = restoreSetToken;
@@ -840,11 +850,13 @@ class BackupManagerService extends IBackupManager.Stub {
                                 mPackageManager, allAgentApps());
                         PackageInfo pmApp = new PackageInfo();
                         pmApp.packageName = PACKAGE_MANAGER_SENTINEL;
-                        processOneRestore(pmApp, IBackupAgent.Stub.asInterface(pmAgent.onBind()));
+                        // !!! TODO: version currently ignored when 'restoring' the PM metadata
+                        processOneRestore(pmApp, 0,
+                                IBackupAgent.Stub.asInterface(pmAgent.onBind()));
 
                         // build the set of apps we will attempt to restore
                         PackageInfo[] packages = mTransport.getAppSet(mImage.token);
-                        HashSet<PackageInfo> appsToRestore = new HashSet<PackageInfo>();
+                        HashSet<RestoreRequest> appsToRestore = new HashSet<RestoreRequest>();
                         for (PackageInfo pkg: packages) {
                             // get the real PackageManager idea of the package
                             PackageInfo app = isRestorable(pkg);
@@ -858,7 +870,8 @@ class BackupManagerService extends IBackupManager.Stub {
                                                 + " compatible with app version "
                                                 + app.versionCode);
                                         if (signaturesMatch(info.signatures, app.signatures)) {
-                                            appsToRestore.add(app);
+                                            appsToRestore.add(
+                                                    new RestoreRequest(app, info.versionCode));
                                         } else {
                                             Log.w(TAG, "Sig mismatch restoring "
                                                     + app.packageName);
@@ -896,8 +909,9 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         // restore each app in the queue
-        void doQueuedRestores(HashSet<PackageInfo> appsToRestore) {
-            for (PackageInfo app : appsToRestore) {
+        void doQueuedRestores(HashSet<RestoreRequest> appsToRestore) {
+            for (RestoreRequest req : appsToRestore) {
+                PackageInfo app = req.app;
                 Log.d(TAG, "starting agent for restore of " + app);
 
                 try {
@@ -908,7 +922,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     IBackupAgent agent = bindToAgentSynchronous(app.applicationInfo,
                             IApplicationThread.BACKUP_MODE_RESTORE);
                     if (agent != null) {
-                        processOneRestore(app, agent);
+                        processOneRestore(app, req.storedAppVersion, agent);
                     }
 
                     // unbind even on timeout, just in case
@@ -925,7 +939,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // Do the guts of a restore of one application, derived from the 'mImage'
         // restore set via the 'mTransport' transport.
-        void processOneRestore(PackageInfo app, IBackupAgent agent) {
+        void processOneRestore(PackageInfo app, int storedAppVersion, IBackupAgent agent) {
             // !!! TODO: actually run the restore through mTransport
             final String packageName = app.packageName;
 
@@ -961,7 +975,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 boolean success = false;
                 try {
-                    agent.doRestore(backupData, newState);
+                    agent.doRestore(backupData, storedAppVersion, newState);
                     success = true;
                 } catch (Exception e) {
                     Log.e(TAG, "Restore failed for " + packageName);

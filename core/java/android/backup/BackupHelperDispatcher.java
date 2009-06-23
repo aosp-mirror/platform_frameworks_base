@@ -46,7 +46,8 @@ public class BackupHelperDispatcher {
         }
     }
 
-    public void performRestore(BackupDataInput input, ParcelFileDescriptor newState)
+    public void performRestore(BackupDataInput input, int appVersionCode,
+            ParcelFileDescriptor newState)
             throws IOException {
         boolean alreadyComplained = false;
 

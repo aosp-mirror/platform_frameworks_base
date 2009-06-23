@@ -39,9 +39,9 @@ public class BackupHelperAgent extends BackupAgent {
     }
 
     @Override
-    public void onRestore(BackupDataInput data, ParcelFileDescriptor newState)
+    public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
-        mDispatcher.performRestore(data, newState);
+        mDispatcher.performRestore(data, appVersionCode, newState);
     }
 
     public BackupHelperDispatcher getDispatcher() {
