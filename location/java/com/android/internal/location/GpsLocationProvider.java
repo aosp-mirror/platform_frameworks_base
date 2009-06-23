@@ -621,23 +621,37 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     }
 
     public void addListener(int uid) {
-        mClientUids.put(uid, 0);
-        if (mNavigating) {
-            try {
-                mBatteryStats.noteStartGps(uid);
-            } catch (RemoteException e) {
-                Log.w(TAG, "RemoteException in addListener");
+        synchronized(mListeners) {
+            if (mClientUids.indexOfKey(uid) >= 0) {
+                // Shouldn't be here -- already have this uid.
+                Log.w(TAG, "Duplicate add listener for uid " + uid);
+                return;
+            }
+            mClientUids.put(uid, 0);
+            if (mNavigating) {
+                try {
+                    mBatteryStats.noteStartGps(uid);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException in addListener");
+                }
             }
         }
     }
 
     public void removeListener(int uid) {
-        mClientUids.delete(uid);
-        if (mNavigating) {
-            try {
-                mBatteryStats.noteStopGps(uid);
-            } catch (RemoteException e) {
-                Log.w(TAG, "RemoteException in removeListener");
+        synchronized(mListeners) {
+            if (mClientUids.indexOfKey(uid) < 0) {
+                // Shouldn't be here -- don't have this uid.
+                Log.w(TAG, "Unneeded remove listener for uid " + uid);
+                return;
+            }
+            mClientUids.delete(uid);
+            if (mNavigating) {
+                try {
+                    mBatteryStats.noteStopGps(uid);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException in removeListener");
+                }
             }
         }
     }
@@ -836,30 +850,33 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private void reportStatus(int status) {
         if (VERBOSE) Log.v(TAG, "reportStatus status: " + status);
 
-        boolean wasNavigating = mNavigating;
-        mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
-
-        if (wasNavigating != mNavigating) {
+        synchronized(mListeners) {
+            boolean wasNavigating = mNavigating;
+            mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
+    
+            if (wasNavigating == mNavigating) {
+                return;
+            }
+            
             if (mNavigating) {
                 if (DEBUG) Log.d(TAG, "Acquiring wakelock");
                  mWakeLock.acquire();
             }
-            synchronized(mListeners) {
-                int size = mListeners.size();
-                for (int i = 0; i < size; i++) {
-                    Listener listener = mListeners.get(i);
-                    try {
-                        if (mNavigating) {
-                            listener.mListener.onGpsStarted(); 
-                        } else {
-                            listener.mListener.onGpsStopped(); 
-                        }
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException in reportStatus");
-                        mListeners.remove(listener);
-                        // adjust for size of list changing
-                        size--;
+        
+            int size = mListeners.size();
+            for (int i = 0; i < size; i++) {
+                Listener listener = mListeners.get(i);
+                try {
+                    if (mNavigating) {
+                        listener.mListener.onGpsStarted(); 
+                    } else {
+                        listener.mListener.onGpsStopped(); 
                     }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException in reportStatus");
+                    mListeners.remove(listener);
+                    // adjust for size of list changing
+                    size--;
                 }
             }
 
