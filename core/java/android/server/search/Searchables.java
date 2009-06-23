@@ -57,6 +57,11 @@ public class Searchables {
     private SearchableInfo mDefaultSearchable = null;
     private SearchableInfo mDefaultSearchableForWebSearch = null;
 
+    public static String GOOGLE_SEARCH_COMPONENT_NAME =
+            "com.android.googlesearch/.GoogleSearch";
+    public static String ENHANCED_GOOGLE_SEARCH_COMPONENT_NAME =
+            "com.google.android.providers.enhancedgooglesearch/.Launcher";
+
     /**
      *
      * @param context Context to use for looking up activities etc.
@@ -339,6 +344,18 @@ public class Searchables {
                 ComponentName component = ComponentName.unflattenFromString(componentName);
                 if (setPreferredActivity(component, Intent.ACTION_WEB_SEARCH)) {
                     return component;
+                }
+            }
+        } else {
+            // If the current preferred activity is GoogleSearch, and we detect
+            // EnhancedGoogleSearch installed as well, set the latter as preferred since that
+            // is a superset and provides more functionality.
+            ComponentName cn = new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name);
+            if (cn.flattenToShortString().equals(GOOGLE_SEARCH_COMPONENT_NAME)) {
+                ComponentName enhancedGoogleSearch = ComponentName.unflattenFromString(
+                        ENHANCED_GOOGLE_SEARCH_COMPONENT_NAME);
+                if (setPreferredActivity(enhancedGoogleSearch, Intent.ACTION_WEB_SEARCH)) {
+                    return enhancedGoogleSearch;
                 }
             }
         }
