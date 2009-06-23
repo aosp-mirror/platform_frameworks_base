@@ -17,12 +17,14 @@
 package android.content;
 
 import android.text.TextUtils;
+import android.os.Parcelable;
+import android.os.Parcel;
 
 /**
  * Value type that represents a SyncAdapterType. This object overrides {@link #equals} and
  * {@link #hashCode}, making it suitable for use as the key of a {@link java.util.Map}
  */
-public class SyncAdapterType {
+public class SyncAdapterType implements Parcelable {
     public final String authority;
     public final String accountType;
 
@@ -54,4 +56,27 @@ public class SyncAdapterType {
     public String toString() {
         return "SyncAdapterType {name=" + authority + ", type=" + accountType + "}";
     }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(authority);
+        dest.writeString(accountType);
+    }
+
+    public SyncAdapterType(Parcel source) {
+        this(source.readString(), source.readString());
+    }
+
+    public static final Creator<SyncAdapterType> CREATOR = new Creator<SyncAdapterType>() {
+        public SyncAdapterType createFromParcel(Parcel source) {
+            return new SyncAdapterType(source);
+        }
+
+        public SyncAdapterType[] newArray(int size) {
+            return new SyncAdapterType[size];
+        }
+    };
 }

@@ -141,7 +141,8 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             if (!upgradeDatabase(db, oldVersion, newVersion)) {
                 mSyncState.discardSyncData(db, null /* all accounts */);
-                getContext().getContentResolver().startSync(mContentUri, new Bundle());
+                ContentResolver.requestSync(null /* all accounts */,
+                        mContentUri.getAuthority(), new Bundle());
             }
         }
 
