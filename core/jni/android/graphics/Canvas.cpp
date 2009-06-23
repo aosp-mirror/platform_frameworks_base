@@ -23,6 +23,7 @@
 #include "SkGLCanvas.h"
 #include "SkGraphics.h"
 #include "SkImageRef_GlobalPool.h"
+#include "SkPorterDuff.h"
 #include "SkShader.h"
 #include "SkTemplates.h"
 
@@ -324,7 +325,7 @@ public:
  
     static void drawColor__II(JNIEnv* env, jobject, SkCanvas* canvas,
                               jint color, SkPorterDuff::Mode mode) {
-        canvas->drawColor(color, mode);
+        canvas->drawColor(color, SkPorterDuff::ToXfermodeMode(mode));
     }
  
     static void drawPaint(JNIEnv* env, jobject, SkCanvas* canvas,
