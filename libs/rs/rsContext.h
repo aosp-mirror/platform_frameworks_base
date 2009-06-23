@@ -17,10 +17,6 @@
 #ifndef ANDROID_RS_CONTEXT_H
 #define ANDROID_RS_CONTEXT_H
 
-#include <utils/Vector.h>
-#include <ui/EGLNativeWindowSurface.h>
-#include <ui/Surface.h>
-
 #include "rsType.h"
 #include "rsMatrix.h"
 #include "rsAllocation.h"
@@ -37,6 +33,10 @@
 
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
+
+#include <ui/EGLNativeWindowSurface.h>
+#include <ui/Surface.h>
+
 
 
 // ---------------------------------------------------------------------------

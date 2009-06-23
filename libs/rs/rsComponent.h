@@ -17,11 +17,7 @@
 #ifndef ANDROID_RS_STRUCTURED_COMPONENT_H
 #define ANDROID_RS_STRUCTURED_COMPONENT_H
 
-#include <stdint.h>
-#include <sys/types.h>
-#include <stdlib.h>
-
-#include "RenderScript.h"
+#include "rsUtils.h"
 #include "rsObjectBase.h"
 
 // ---------------------------------------------------------------------------

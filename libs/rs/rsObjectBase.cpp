@@ -15,7 +15,6 @@
  */
 
 #include "rsObjectBase.h"
-#include <utils/Log.h>
 
 using namespace android;
 using namespace android::renderscript;

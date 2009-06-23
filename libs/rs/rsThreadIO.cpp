@@ -16,8 +16,6 @@
 
 #include "rsContext.h"
 
-#include <utils/Log.h>
-
 #include "rsThreadIO.h"
 
 using namespace android;

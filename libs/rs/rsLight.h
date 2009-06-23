@@ -14,35 +14,49 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_RS_DEVICE_H
-#define ANDROID_RS_DEVICE_H
+#ifndef ANDROID_LIGHT_H
+#define ANDROID_LIGHT_H
 
-#include "rsUtils.h"
+
+#include "rsObjectBase.h"
 
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
 
-class Context;
 
-class Device {
+// An element is a group of Components that occupies one cell in a structure.
+class Light : public ObjectBase
+{
 public:
-    Device();
-    ~Device();
+    Light(bool isLocal, bool isMono);
+    virtual ~Light();
 
-    void addContext(Context *);
-    void removeContext(Context *);
+    // Values, mutable after creation.
+    void setPosition(float x, float y, float z);
+    void setColor(float r, float g, float b);
 
 protected:
-    Vector<Context *> mContexts;
-
-
+    float mR, mG, mB;
+    float mX, mY, mZ;
+    bool mIsLocal;
+    bool mIsMono;
 };
 
 
+class LightState {
+public:
+    LightState();
+    ~LightState();
 
+    void clear();
+
+    bool mIsMono;
+    bool mIsLocal;
+};
 
 
 }
 }
-#endif
+#endif //ANDROID_LIGHT_H
+

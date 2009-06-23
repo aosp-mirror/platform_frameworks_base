@@ -17,9 +17,13 @@
 #ifndef ANDROID_RS_UTILS_H
 #define ANDROID_RS_UTILS_H
 
-#include <stdint.h>
-#include <sys/types.h>
+#include "RenderScript.h"
+
+#define LOG_TAG "rs"
+#include <utils/Log.h>
+#include <utils/Vector.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 namespace android {
 namespace renderscript {

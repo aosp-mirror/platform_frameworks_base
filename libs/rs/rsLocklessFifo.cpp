@@ -18,7 +18,6 @@
 
 using namespace android;
 
-#include <utils/Log.h>
 
 LocklessCommandFifo::LocklessCommandFifo()
 {

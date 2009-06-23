@@ -18,10 +18,7 @@
 #define ANDROID_RS_LOCKLESS_FIFO_H
 
 
-#include <stdint.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <pthread.h>
+#include "rsUtils.h"
 
 namespace android {
 
