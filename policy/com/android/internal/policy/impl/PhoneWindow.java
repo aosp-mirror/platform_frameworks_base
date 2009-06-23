@@ -952,7 +952,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final void setBackgroundDrawable(Drawable drawable) {
-        if (drawable != mBackgroundDrawable) {
+        if (drawable != mBackgroundDrawable || mBackgroundResource != 0) {
             mBackgroundResource = 0;
             mBackgroundDrawable = drawable;
             if (mDecor != null) {
