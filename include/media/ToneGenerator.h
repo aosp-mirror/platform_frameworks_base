@@ -71,6 +71,82 @@ public:
         TONE_SUP_CONGESTION_ABBREV, // Abbreviated congestion: congestion tone limited to 4 seconds
         TONE_SUP_CONFIRM, // Confirm tone: a 350 Hz tone added to a 440 Hz tone repeated 3 times in a 100 ms on, 100 ms off cycle.
         TONE_SUP_PIP, // Pip tone: four bursts of 480 Hz tone (0.1 s on, 0.1 s off).
+
+        // CDMA Tones
+        TONE_CDMA_DIAL_TONE_LITE,
+        TONE_CDMA_NETWORK_USA_RINGBACK,
+        TONE_CDMA_INTERCEPT,
+        TONE_CDMA_ABBR_INTERCEPT,
+        TONE_CDMA_REORDER,
+        TONE_CDMA_ABBR_REORDER,
+        TONE_CDMA_NETWORK_BUSY,
+        TONE_CDMA_CONFIRM,
+        TONE_CDMA_ANSWER,
+        TONE_CDMA_NETWORK_CALLWAITING,
+        TONE_CDMA_PIP,
+
+        // ISDN
+        TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL,  // ISDN Alert Normal
+        TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP, // ISDN Intergroup
+        TONE_CDMA_CALL_SIGNAL_ISDN_SP_PRI, // ISDN SP PRI
+        TONE_CDMA_CALL_SIGNAL_ISDN_PAT3,  // ISDN Alert PAT3
+        TONE_CDMA_CALL_SIGNAL_ISDN_PING_RING, // ISDN Alert PING RING
+        TONE_CDMA_CALL_SIGNAL_ISDN_PAT5,  // ISDN Alert PAT5
+        TONE_CDMA_CALL_SIGNAL_ISDN_PAT6,  // ISDN Alert PAT6
+        TONE_CDMA_CALL_SIGNAL_ISDN_PAT7,  // ISDN Alert PAT7
+        // ISDN end
+
+        // IS54
+        TONE_CDMA_HIGH_L,  // IS54 High Pitch Long
+        TONE_CDMA_MED_L, // IS54 Med Pitch Long
+        TONE_CDMA_LOW_L, // IS54 Low Pitch Long
+        TONE_CDMA_HIGH_SS, // IS54 High Pitch Short Short
+        TONE_CDMA_MED_SS, // IS54 Medium Pitch Short Short
+        TONE_CDMA_LOW_SS, // IS54 Low Pitch Short Short
+        TONE_CDMA_HIGH_SSL, // IS54 High Pitch Short Short Long
+        TONE_CDMA_MED_SSL, // IS54 Medium  Pitch Short Short Long
+        TONE_CDMA_LOW_SSL, // IS54 Low  Pitch Short Short Long
+        TONE_CDMA_HIGH_SS_2, // IS54 High Pitch Short Short 2
+        TONE_CDMA_MED_SS_2, // IS54 Med Pitch Short Short 2
+        TONE_CDMA_LOW_SS_2, // IS54 Low  Pitch Short Short 2
+        TONE_CDMA_HIGH_SLS, // IS54 High Pitch Short Long Short
+        TONE_CDMA_MED_SLS, // IS54 Med Pitch Short Long Short
+        TONE_CDMA_LOW_SLS, // IS54 Low Pitch Short Long Short
+        TONE_CDMA_HIGH_S_X4, // IS54 High Pitch Short Short Short Short
+        TONE_CDMA_MED_S_X4, // IS54 Med Pitch Short Short Short Short
+        TONE_CDMA_LOW_S_X4, // IS54 Low Pitch Short Short Short Short
+        TONE_CDMA_HIGH_PBX_L, // PBX High Pitch Long
+        TONE_CDMA_MED_PBX_L, // PBX Med Pitch Long
+        TONE_CDMA_LOW_PBX_L, // PBX Low  Pitch Long
+        TONE_CDMA_HIGH_PBX_SS, // PBX High Short Short
+        TONE_CDMA_MED_PBX_SS, // PBX Med Short Short
+        TONE_CDMA_LOW_PBX_SS, // PBX Low  Short Short
+        TONE_CDMA_HIGH_PBX_SSL, // PBX High Short Short Long
+        TONE_CDMA_MED_PBX_SSL, // PBX Med Short Short Long
+        TONE_CDMA_LOW_PBX_SSL,  // PBX Low Short Short Long
+        TONE_CDMA_HIGH_PBX_SLS, // PBX High  SLS
+        TONE_CDMA_MED_PBX_SLS,  // PBX Med SLS
+        TONE_CDMA_LOW_PBX_SLS, // PBX Low SLS
+        TONE_CDMA_HIGH_PBX_S_X4, // PBX High SSSS
+        TONE_CDMA_MED_PBX_S_X4, // PBX Med SSSS
+        TONE_CDMA_LOW_PBX_S_X4, // PBX LOW SSSS
+        //IS54 end
+        // proprietary
+        TONE_CDMA_ALERT_NETWORK_LITE,
+        TONE_CDMA_ALERT_AUTOREDIAL_LITE,
+        TONE_CDMA_ONE_MIN_BEEP,
+        TONE_CDMA_KEYPAD_VOLUME_KEY_LITE,
+        TONE_CDMA_PRESSHOLDKEY_LITE,
+        TONE_CDMA_ALERT_INCALL_LITE,
+        TONE_CDMA_EMERGENCY_RINGBACK,
+        TONE_CDMA_ALERT_CALL_GUARD,
+        TONE_CDMA_SOFT_ERROR_LITE,
+        TONE_CDMA_CALLDROP_LITE,
+        // proprietary end
+        TONE_CDMA_NETWORK_BUSY_ONE_SHOT,
+        TONE_CDMA_ABBR_ALERT,
+        TONE_CDMA_SIGNAL_OFF,
+        //CDMA end
         NUM_TONES,
         NUM_SUP_TONES = LAST_SUP_TONE-FIRST_SUP_TONE+1
     };
@@ -125,7 +201,7 @@ private:
     static const unsigned char sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONES];
 
     static const unsigned int TONEGEN_MAX_WAVES = 3;     // Maximun number of sine waves in a tone segment
-    static const unsigned int TONEGEN_MAX_SEGMENTS = 5;  // Maximun number of segments in a tone descriptor
+    static const unsigned int TONEGEN_MAX_SEGMENTS = 12;  // Maximun number of segments in a tone descriptor
     static const unsigned int TONEGEN_INF = 0xFFFFFFFF;  // Represents infinite time duration
     static const float TONEGEN_GAIN = 0.9;  // Default gain passed to  WaveGenerator().
 
@@ -140,6 +216,8 @@ private:
     //        correspond to tone ON state and segments with odd index to OFF state.
     //        The data stored in segments[] is the duration of the corresponding period in ms.
     //        The first segment encountered with a 0 duration    indicates that no more segment follows.
+    //    - loopCnt - Number of times to repeat a sequence of seqments after playing this
+    //    - loopIndx - The segment index to go back and play is loopcnt > 0
     //    - repeatCnt indicates the number of times the sequence described by segments[] array must be repeated.
     //        When the tone generator encounters the first 0 duration segment, it will compare repeatCnt to mCurCount.
     //        If mCurCount > repeatCnt, the tone is stopped automatically. Otherwise, tone sequence will be
@@ -150,6 +228,8 @@ private:
     public:
         unsigned int duration;
         unsigned short waveFreq[TONEGEN_MAX_WAVES+1];
+        unsigned short loopCnt;
+        unsigned short loopIndx;
     };
 
     class ToneDescriptor {
@@ -173,6 +253,8 @@ private:
     unsigned short mRegion;
     const ToneDescriptor *mpToneDesc;  // pointer to active tone descriptor
     const ToneDescriptor *mpNewToneDesc;  // pointer to next active tone descriptor
+
+    unsigned short mLoopCounter; // Current tone loopback count
 
     int mSamplingRate;  // AudioFlinger Sampling rate
     AudioTrack *mpAudioTrack;  // Pointer to audio track used for playback

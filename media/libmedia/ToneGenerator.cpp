@@ -33,199 +33,720 @@ namespace android {
 
 // Descriptors for all available tones (See ToneGenerator::ToneDescriptor class declaration for details)
 const ToneGenerator::ToneDescriptor ToneGenerator::sToneDescriptors[] = {
-        { segments: {{ duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 941, 0 }},
-                     { duration: 0 , waveFreq: { 0 }}},
+        { segments: {{ duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 941, 0 }, 0, 0},
+                     { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_0
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 697, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 697, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_1
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 697, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 697, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_2
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 697, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 697, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_3
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 770, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 770, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_4
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 770, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 770, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_5
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 770, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 770, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_6
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 852, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 852, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_7
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 852, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1336, 852, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_8
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 852, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 852, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_9
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 941, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1209, 941, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_S
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 941, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1477, 941, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_P
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 697, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 697, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_A
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 770, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 770, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                             // TONE_DTMF_B
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 852, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 852, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_C
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 941, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 1633, 941, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_DTMF_D
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 425, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 425, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_SUP_DIAL
-        { segments: { { duration: 500 , waveFreq: { 425, 0 }},
-                      { duration: 500, waveFreq: { 0 }},
-                         { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 500 , waveFreq: { 425, 0 }, 0, 0},
+                      { duration: 500, waveFreq: { 0 }, 0, 0},
+                         { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_SUP_BUSY
-        { segments: { { duration: 200, waveFreq: { 425, 0 } },
-                      { duration: 200, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 200, waveFreq: { 425, 0 }, 0, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_SUP_CONGESTION
-        { segments: { { duration: 200, waveFreq: { 425, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 200, waveFreq: { 425, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 0,
           repeatSegment: 0 },                              // TONE_SUP_RADIO_ACK
-        { segments: { { duration: 200, waveFreq: { 425, 0 }},
-                      { duration: 200, waveFreq: { 0 }},
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 200, waveFreq: { 425, 0 }, 0, 0},
+                      { duration: 200, waveFreq: { 0 }, 0, 0},
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 2,
           repeatSegment: 0 },                              // TONE_SUP_RADIO_NOTAVAIL
-        { segments: { { duration: 330, waveFreq: { 950, 1400, 1800, 0 }},
-                      { duration: 1000, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 330, waveFreq: { 950, 1400, 1800, 0 }, 0, 0},
+                      { duration: 1000, waveFreq: { 0 }, 0, 0},
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_SUP_ERROR
-        { segments: { { duration: 200, waveFreq: { 425, 0 } },
-                      { duration: 600, waveFreq: { 0 } },
-                      { duration: 200, waveFreq: { 425, 0 } },
-                      { duration: 3000, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 200, waveFreq: { 425, 0 }, 0, 0 },
+                      { duration: 600, waveFreq: { 0 }, 0, 0 },
+                      { duration: 200, waveFreq: { 425, 0 }, 0, 0 },
+                      { duration: 3000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_SUP_CALL_WAITING
-        { segments: { { duration: 1000, waveFreq: { 425, 0 } },
-                      { duration: 4000, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 1000, waveFreq: { 425, 0 }, 0, 0 },
+                      { duration: 4000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_SUP_RINGTONE
-        { segments: { { duration: 40, waveFreq: { 400, 1200, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 40, waveFreq: { 400, 1200, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 0,
           repeatSegment: 0 },                              // TONE_PROP_BEEP
-        { segments: { { duration: 100, waveFreq: { 1200, 0 } },
-                      { duration: 100, waveFreq: { 0 }  },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 100, waveFreq: { 1200, 0 }, 0, 0 },
+                      { duration: 100, waveFreq: { 0 }, 0, 0  },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 1,
           repeatSegment: 0 },                              // TONE_PROP_ACK
-        { segments: { { duration: 400, waveFreq: { 300, 400, 500, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 400, waveFreq: { 300, 400, 500, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 0,
           repeatSegment: 0 },                              // TONE_PROP_NACK
-        { segments: { { duration: 200, waveFreq: { 400, 1200, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 200, waveFreq: { 400, 1200, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 0,
           repeatSegment: 0 },                              // TONE_PROP_PROMPT
-        { segments: { { duration: 40, waveFreq: { 400, 1200, 0 } },
-                      { duration: 200, waveFreq: { 0 } },
-                      { duration: 40, waveFreq: { 400, 1200, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 40, waveFreq: { 400, 1200, 0 }, 0, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 40, waveFreq: { 400, 1200, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 0,
           repeatSegment: 0 },                             // TONE_PROP_BEEP2
-        { segments: { { duration: 250, waveFreq: { 440, 0 } },
-                      { duration: 250, waveFreq: { 620, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 250, waveFreq: { 440, 0 }, 0, 0 },
+                      { duration: 250, waveFreq: { 620, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0 }},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_SUP_INTERCEPT
-        { segments: { { duration: 250, waveFreq: { 440, 0 } },
-                      { duration: 250, waveFreq: { 620, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 250, waveFreq: { 440, 0 }, 0, 0 },
+                      { duration: 250, waveFreq: { 620, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 7,
           repeatSegment: 0 },                             // TONE_SUP_INTERCEPT_ABBREV
-        { segments: { { duration: 250, waveFreq: { 480, 620, 0 } },
-                      { duration: 250, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 250, waveFreq: { 480, 620, 0 }, 0, 0 },
+                      { duration: 250, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 7,
           repeatSegment: 0 },                             // TONE_SUP_CONGESTION_ABBREV
-        { segments: { { duration: 100, waveFreq: { 350, 440, 0 } },
-                      { duration: 100, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 100, waveFreq: { 350, 440, 0 }, 0, 0 },
+                      { duration: 100, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 2,
           repeatSegment: 0 },                             // TONE_SUP_CONFIRM
-        { segments: { { duration: 100, waveFreq: { 480, 0 } },
-                      { duration: 100, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 100, waveFreq: { 480, 0 }, 0, 0 },
+                      { duration: 100, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 3,
           repeatSegment: 0 },                              // TONE_SUP_PIP
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 350, 440, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: {{ duration: ToneGenerator::TONEGEN_INF, waveFreq: { 425, 0 }, 0, 0},
+                     { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_CDMA_DIAL_TONE_LITE
+        { segments: { { duration: 2000, waveFreq: { 440, 480, 0 }, 0, 0 },
+                      { duration: 4000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_CDMA_NETWORK_USA_RINGBACK
+        { segments: { { duration: 250, waveFreq: { 440, 0 }, 0, 0 },
+                      { duration: 250, waveFreq: { 620, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt:  ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                             // TONE_CDMA_INTERCEPT
+        { segments: { { duration: 250, waveFreq: { 440, 0 }, 0, 0 },
+                      { duration: 250, waveFreq: { 620, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt:  0,
+          repeatSegment: 0 },                             // TONE_CDMA_ABBR_INTERCEPT
+        { segments: { { duration: 250, waveFreq: { 480, 620, 0 }, 0, 0 },
+                      { duration: 250, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_CDMA_REORDER
+        { segments: { { duration: 250, waveFreq: { 480, 620, 0 }, 0, 0 },
+                      { duration: 250, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt: 7,
+          repeatSegment: 0 },                              // TONE_CDMA_ABBR_REORDER
+        { segments: { { duration: 500, waveFreq: { 480, 620, 0 }, 0, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                              // TONE_CDMA_NETWORK_BUSY
+        { segments: { { duration: 100, waveFreq: { 350, 440, 0 }, 0, 0 },
+                      { duration: 100, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt: 2,
+          repeatSegment: 0 },                              // TONE_CDMA_CONFIRM
+        { segments: { { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: 0,
+          repeatSegment: 0 },                              // TONE_CDMA_ANSWER
+        { segments: { { duration: 300, waveFreq: { 440, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt: 0,
+          repeatSegment: 0 },                              // TONE_CDMA_NETWORK_CALLWAITING
+        { segments: { { duration: 100, waveFreq: { 480, 0 }, 0, 0 },
+                      { duration: 100, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
+          repeatCnt: 3,
+          repeatSegment: 0 },                              // TONE_CDMA_PIP
+
+        { segments: { { duration: 32, waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 64, waveFreq: { 2556, 0}, 19, 0},
+                      { duration: 32, waveFreq: { 2091, 0}, 0, 0},
+                      { duration: 48, waveFreq: { 2556, 0}, 0, 0},
+                      { duration: 4000, waveFreq: { 0 }, 0, 0},
+                      { duration: 0,  waveFreq: { 0 }, 0, 0}},
+          repeatCnt: 0,
+          repeatSegment: 0 },                             // TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL
+        { segments: { { duration: 32, waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 64, waveFreq: { 2556, 0}, 7, 0 },
+                      { duration: 32, waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 400, waveFreq: { 0 }, 0, 0 },
+                      { duration: 32,  waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 64,  waveFreq: { 2556, 0}, 7, 4 },
+                      { duration: 32,  waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 4000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0,    waveFreq: { 0 }, 0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                              // TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP
+        { segments: { { duration: 32, waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 64, waveFreq: { 2556, 0}, 3, 0 },
+                      { duration: 16, waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 200, waveFreq: { 0 },     0, 0 },
+                      { duration: 32, waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 64, waveFreq: { 2556, 0}, 3, 4 },
+                      { duration: 16, waveFreq: { 2091, 0}, 0, 0 },
+                      { duration: 200, waveFreq: { 0 },     0, 0 },
+                      { duration: 0,   waveFreq: { 0 },     0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_CALL_SIGNAL_ISDN_SP_PRI
+        { segments: { { duration: 0,  waveFreq: { 0 }, 0, 0} },
+           repeatCnt: 0,
+           repeatSegment: 0 },                            // TONE_CDMA_CALL_SIGNAL_ISDN_PAT3
+        { segments: { { duration: 32, waveFreq: { 2091, 0 }, 0, 0 },
+                      { duration: 64, waveFreq: { 2556, 0 }, 4, 0 },
+                      { duration: 20, waveFreq: { 2091, 0 }, 0, 0 },
+                      { duration: 0,  waveFreq: { 0 }      , 0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                             // TONE_CDMA_CALL_SIGNAL_ISDN_PING_RING
+        { segments: { { duration: 0,  waveFreq: { 0 }, 0, 0} },
+          repeatCnt: 0,
+          repeatSegment: 0 },                             // TONE_CDMA_CALL_SIGNAL_ISDN_PAT5
+        { segments: { { duration: 0,  waveFreq: { 0 }, 0, 0} },
+          repeatCnt: 0,
+          repeatSegment: 0 },                             // TONE_CDMA_CALL_SIGNAL_ISDN_PAT6
+        { segments: { { duration: 0,  waveFreq: { 0 }, 0, 0} },
+          repeatCnt: 0,
+          repeatSegment: 0 },                             // TONE_CDMA_CALL_SIGNAL_ISDN_PAT7
+
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 39, 0 },
+                      { duration: 4000, waveFreq: { 0 },     0, 0 },
+                      { duration: 0,    waveFreq: { 0 },     0, 0 } },
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_L
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 39, 0 },
+                      { duration: 4000, waveFreq: { 0 },     0, 0 },
+                      { duration: 0,    waveFreq: { 0 },     0, 0 } },
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_L
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 39, 0 },
+                      { duration: 4000, waveFreq: { 0 },     0, 0 },
+                      { duration: 0,    waveFreq: { 0 },     0, 0 } },
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_L
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 15, 0 },
+                      { duration: 400, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 } },
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_SS
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 15, 0 },
+                      { duration: 400, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_SS
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 15, 0 },
+                      { duration: 400, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_SS
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 15, 6 },
+                      { duration: 4000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_SSL
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 15, 6 },
+                      { duration: 4000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_SSL
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 15, 6 },
+                      { duration: 4000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_SSL
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 19, 0 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 19, 3 },
+                      { duration: 3000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_SS_2
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 19, 0 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 19, 3 },
+                      { duration: 3000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_SS_2
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 19, 0 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 19, 3 },
+                      { duration: 3000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_SS_2
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 9, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 19, 3 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 9, 6 },
+                      { duration: 3000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_SLS
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 9, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 19, 3 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 9, 6 },
+                      { duration: 3000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_SLS
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 9, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 19, 3 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 9, 6 },
+                      { duration: 3000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_SLS
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 9, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 9, 3 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 9, 6 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 9, 9 },
+                      { duration: 2500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_S_X4
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 9, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 9, 3 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 9, 6 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 9, 9 },
+                      { duration: 2500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_S_X4
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 9, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 9, 3 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 9, 6 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 9, 9 },
+                      { duration: 2500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_S_X4
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 19, 0 },
+                      { duration: 2000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_PBX_L
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 19, 0 },
+                      { duration: 2000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_PBX_L
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 19, 0 },
+                      { duration: 2000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_PBX_L
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 3 },
+                      { duration: 2000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_PBX_SS
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 3 },
+                      { duration: 2000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_PBX_SS
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 3 },
+                      { duration: 2000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_PBX_SS
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 15, 6 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_PBX_SSL
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 15, 6 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_PBX_SSL
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 15, 6 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_PBX_SSL
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 15, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 6 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_PBX_SLS
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 15, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 6 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_PBX_SLS
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 15, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 6 },
+                      { duration: 1000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_PBX_SLS
+        { segments: { { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 6 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 3700, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 4000, 0 }, 7, 9 },
+                      { duration: 800, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_HIGH_PBX_S_X4
+        { segments: { { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 6 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2600, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 2900, 0 }, 7, 9 },
+                      { duration: 800, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_MED_PBX_S_X4
+        { segments: { { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 0 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 3 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 6 },
+                      { duration: 200, waveFreq: { 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1300, 0 }, 0, 0 },
+                      { duration: 25, waveFreq: { 1450, 0 }, 7, 9 },
+                      { duration: 800, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                           // TONE_CDMA_LOW_PBX_S_X4
+
+        { segments: { { duration: 62, waveFreq: { 1109, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 784, 0 },  0, 0 },
+                      { duration: 62, waveFreq: { 740, 0 },  0, 0 },
+                      { duration: 62, waveFreq: { 622, 0 },  0, 0 },
+                      { duration: 62, waveFreq: { 1109, 0 }, 0, 0 },
+                      { duration: 0,  waveFreq: { 0 },       0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_ALERT_NETWORK_LITE
+        { segments: { { duration: 62, waveFreq: { 1245, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 659, 0 },  2, 0 },
+                      { duration: 62, waveFreq: { 1245, 0 }, 0, 0 },
+                      { duration: 0,  waveFreq: { 0 },       0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_ALERT_AUTOREDIAL_LITE
+        { segments: { { duration: 400, waveFreq: { 1150, 770, 0 }, 0, 0 },
+                      { duration: 0,   waveFreq: { 0 },            0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_ONE_MIN_BEEP
+        { segments: { { duration: 120, waveFreq: { 941, 1477, 0 }, 0, 0 },
+                      { duration: 0,   waveFreq: { 0 },            0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_KEYPAD_VOLUME_KEY_LITE
+        { segments: { { duration: 375, waveFreq: { 587, 0 }, 0, 0 },
+                      { duration: 125, waveFreq: { 1175, 0 }, 0, 0 },
+                      { duration: 0,   waveFreq: { 0 },       0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_PRESSHOLDKEY_LITE
+        { segments: { { duration: 62, waveFreq: { 587, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 784, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 831, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 784, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 1109, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 784, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 831, 0 }, 0, 0 },
+                      { duration: 62, waveFreq: { 784, 0 }, 0, 0 },
+                      { duration: 0,  waveFreq: { 0 },      0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                             // TONE_CDMA_ALERT_INCALL_LITE
+        { segments: { { duration: 125, waveFreq: { 941, 0 }, 0, 0 },
+                      { duration: 10,  waveFreq: { 0 },      2, 0 },
+                      { duration: 4990, waveFreq: { 0 },     0, 0 },
+                      { duration: 0,    waveFreq: { 0 },     0, 0 } },
+          repeatCnt: ToneGenerator::TONEGEN_INF,
+          repeatSegment: 0 },                            // TONE_CDMA_EMERGENCY_RINGBACK
+        { segments: { { duration: 125, waveFreq: { 1319, 0 }, 0, 0 },
+                      { duration: 125, waveFreq: { 0 },       0, 0 },
+                      { duration: 0,   waveFreq: { 0 },       0, 0 } },
+          repeatCnt: 2,
+          repeatSegment: 0 },                            // TONE_CDMA_ALERT_CALL_GUARD
+        { segments: { { duration: 125, waveFreq: { 1047, 0 }, 0, 0 },
+                      { duration: 125, waveFreq: { 370,  0 }, 0, 0 },
+                      { duration: 0,   waveFreq: { 0 },       0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_SOFT_ERROR_LITE
+        { segments: { { duration: 125, waveFreq: { 1480, 0 }, 0, 0 },
+                      { duration: 125, waveFreq: { 1397, 0 }, 0, 0 },
+                      { duration: 125, waveFreq: { 784, 0 },  0, 0 },
+                      { duration: 0,   waveFreq: { 0 },       0, 0 } },
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_CALLDROP_LITE
+
+        { segments: { { duration: 500, waveFreq: { 425, 0 }, 0, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: 0,
+          repeatSegment: 0 },                           // TONE_CDMA_NETWORK_BUSY_ONE_SHOT
+        { segments: { { duration: 400, waveFreq: { 1150, 770 }, 0, 0 },
+                      { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: 0,
+          repeatSegment: 0 },                           // TONE_CDMA_ABBR_ALERT
+          { segments: { { duration: 0, waveFreq: { 0 }, 0, 0 }},
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_SIGNAL_OFF
+
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 350, 440, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_ANSI_DIAL
-        { segments: { { duration: 500, waveFreq: { 480, 620, 0 } },
-                      { duration: 500, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 500, waveFreq: { 480, 620, 0 }, 0, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_ANSI_BUSY
-        { segments: { { duration: 250, waveFreq: { 480, 620, 0 } },
-                      { duration: 250, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 250, waveFreq: { 480, 620, 0 }, 0, 0 },
+                      { duration: 250, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_ANSI_CONGESTION
-        { segments: { { duration: 300, waveFreq: { 440, 0 } },
-                      { duration: 9700, waveFreq: { 0 } },
-                      { duration: 100, waveFreq: { 440, 0 } },
-                      { duration: 100, waveFreq: { 0 } },
-                      { duration: 100, waveFreq: { 440, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 300, waveFreq: { 440, 0 }, 0, 0 },
+                      { duration: 9700, waveFreq: { 0 }, 0, 0 },
+                      { duration: 100, waveFreq: { 440, 0 }, 0, 0 },
+                      { duration: 100, waveFreq: { 0 }, 0, 0 },
+                      { duration: 100, waveFreq: { 440, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 1 },                              // TONE_ANSI_CALL_WAITING
-        { segments: { { duration: 2000, waveFreq: { 440, 480, 0 } },
-                      { duration: 4000, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 2000, waveFreq: { 440, 480, 0 }, 0, 0 },
+                      { duration: 4000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_ANSI_RINGTONE
-        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 400, 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: ToneGenerator::TONEGEN_INF, waveFreq: { 400, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_JAPAN_DIAL
-        { segments: { { duration: 500, waveFreq: { 400, 0 } },
-                      { duration: 500, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 500, waveFreq: { 400, 0 }, 0, 0 },
+                      { duration: 500, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_JAPAN_BUSY
-        { segments: { { duration: 1000, waveFreq: { 400, 0 } },
-                      { duration: 2000, waveFreq: { 0 } },
-                      { duration: 0 , waveFreq: { 0 }}},
+        { segments: { { duration: 1000, waveFreq: { 400, 0 }, 0, 0 },
+                      { duration: 2000, waveFreq: { 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: ToneGenerator::TONEGEN_INF,
           repeatSegment: 0 },                              // TONE_JAPAN_RADIO_ACK
+
+
+
 };
 
 // Used by ToneGenerator::getToneForRegion() to convert user specified supervisory tone type
@@ -529,9 +1050,9 @@ initAudioTrack_exit:
 //
 ////////////////////////////////////////////////////////////////////////////////
 void ToneGenerator::audioCallback(int event, void* user, void *info) {
-    
+
     if (event != AudioTrack::EVENT_MORE_DATA) return;
-    
+
     const AudioTrack::Buffer *buffer = static_cast<const AudioTrack::Buffer *>(info);
     ToneGenerator *lpToneGen = static_cast<ToneGenerator *>(user);
     short *lpOut = buffer->i16;
@@ -549,12 +1070,12 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
         unsigned int lGenSmp;
         unsigned int lWaveCmd = WaveGenerator::WAVEGEN_CONT;
         bool lSignal = false;
- 
+
         lpToneGen->mLock.lock();
 
         // Update pcm frame count and end time (current time at the end of this process)
         lpToneGen->mTotalSmp += lReqSmp;
-    
+
         // Update tone gen state machine and select wave gen command
         switch (lpToneGen->mState) {
         case TONE_PLAYING:
@@ -562,13 +1083,13 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
             break;
         case TONE_STARTING:
             LOGV("Starting Cbk");
-    
+
             lWaveCmd = WaveGenerator::WAVEGEN_START;
             break;
         case TONE_STOPPING:
         case TONE_RESTARTING:
             LOGV("Stop/restart Cbk");
-    
+
             lWaveCmd = WaveGenerator::WAVEGEN_STOP;
             lpToneGen->mNextSegSmp = TONEGEN_INF; // forced to skip state machine management below
             break;
@@ -578,21 +1099,21 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
             lNumSmp = 0;
             goto audioCallback_EndLoop;
         }
-        
-    
+
+
         // Exit if tone sequence is over
         if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0) {
             if (lpToneGen->mState == TONE_PLAYING) {
-                lpToneGen->mState = TONE_STOPPING;            
+                lpToneGen->mState = TONE_STOPPING;
             }
             goto audioCallback_EndLoop;
         }
-    
+
         if (lpToneGen->mTotalSmp > lpToneGen->mNextSegSmp) {
             // Time to go to next sequence segment
-    
+
             LOGV("End Segment, time: %d\n", (unsigned int)(systemTime()/1000000));
-    
+
             lGenSmp = lReqSmp;
 
             // If segment,  ON -> OFF transition : ramp volume down
@@ -609,25 +1130,49 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
                 LOGV("ON->OFF, lGenSmp: %d, lReqSmp: %d\n", lGenSmp, lReqSmp);
             }
 
-            // Go to next segment
-            lpToneGen->mCurSegment++;
+            // check if we need to loop and loop for the reqd times
+            if (lpToneDesc->segments[lpToneGen->mCurSegment].loopCnt) {
+                if (lpToneGen->mLoopCounter < lpToneDesc->segments[lpToneGen->mCurSegment].loopCnt) {
+                    LOGV ("in if loop loopCnt(%d) loopctr(%d), CurSeg(%d) \n",
+                          lpToneDesc->segments[lpToneGen->mCurSegment].loopCnt,
+                          lpToneGen->mLoopCounter,
+                          lpToneGen->mCurSegment);
+                    lpToneGen->mCurSegment = lpToneDesc->segments[lpToneGen->mCurSegment].loopIndx;
+                    ++lpToneGen->mLoopCounter;
+                } else {
+                    // completed loop. go to next segment
+                    lpToneGen->mLoopCounter = 0;
+                    lpToneGen->mCurSegment++;
+                    LOGV ("in else loop loopCnt(%d) loopctr(%d), CurSeg(%d) \n",
+                          lpToneDesc->segments[lpToneGen->mCurSegment].loopCnt,
+                          lpToneGen->mLoopCounter,
+                          lpToneGen->mCurSegment);
+                }
+            } else {
+                lpToneGen->mCurSegment++;
+                LOGV ("Goto next seg loopCnt(%d) loopctr(%d), CurSeg(%d) \n",
+                      lpToneDesc->segments[lpToneGen->mCurSegment].loopCnt,
+                      lpToneGen->mLoopCounter,
+                      lpToneGen->mCurSegment);
+
+            }
 
             // Handle loop if last segment reached
             if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0) {
                 LOGV("Last Seg: %d\n", lpToneGen->mCurSegment);
-    
+
                 // Pre increment loop count and restart if total count not reached. Stop sequence otherwise
                 if (++lpToneGen->mCurCount <= lpToneDesc->repeatCnt) {
                     LOGV("Repeating Count: %d\n", lpToneGen->mCurCount);
-    
+
                     lpToneGen->mCurSegment = lpToneDesc->repeatSegment;
                     if (lpToneDesc->segments[lpToneDesc->repeatSegment].waveFreq[0] != 0) {
                         lWaveCmd = WaveGenerator::WAVEGEN_START;
                     }
-    
+
                     LOGV("New segment %d, Next Time: %d\n", lpToneGen->mCurSegment,
                             (lpToneGen->mNextSegSmp*1000)/lpToneGen->mSamplingRate);
-    
+
                 } else {
                     lGenSmp = 0;
                     LOGV("End repeat, time: %d\n", (unsigned int)(systemTime()/1000000));
@@ -644,11 +1189,11 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
                     lGenSmp = 0;
                 }
             }
-    
+
             // Update next segment transition position. No harm to do it also for last segment as lpToneGen->mNextSegSmp won't be used any more
             lpToneGen->mNextSegSmp
                     += (lpToneDesc->segments[lpToneGen->mCurSegment].duration * lpToneGen->mSamplingRate) / 1000;
-    
+
         } else {
             // Inside a segment keep tone ON or OFF
             if (lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[0] == 0) {
@@ -657,24 +1202,24 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
                 lGenSmp = lReqSmp;  // If event segment, tone is currently ON
             }
         }
-    
+
         if (lGenSmp) {
             // If samples must be generated, call all active wave generators and acumulate waves in lpOut
             unsigned int lFreqIdx = 0;
             unsigned short lFrequency = lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[lFreqIdx];
-    
+
             while (lFrequency != 0) {
                 WaveGenerator *lpWaveGen = lpToneGen->mWaveGens.valueFor(lFrequency);
                 lpWaveGen->getSamples(lpOut, lGenSmp, lWaveCmd);
                 lFrequency = lpToneDesc->segments[lpToneGen->mCurSegment].waveFreq[++lFreqIdx];
             }
         }
-        
+
         lNumSmp -= lReqSmp;
         lpOut += lReqSmp;
-    
+
 audioCallback_EndLoop:
-    
+
         switch (lpToneGen->mState) {
         case TONE_RESTARTING:
             LOGV("Cbk restarting track\n");
@@ -694,7 +1239,7 @@ audioCallback_EndLoop:
             LOGV("Cbk Stopping track\n");
             lSignal = true;
             lpToneGen->mpAudioTrack->stop();
-            
+
             // Force loop exit
             lNumSmp = 0;
             break;
@@ -765,6 +1310,7 @@ bool ToneGenerator::prepareWave() {
     mTotalSmp = 0;
     mCurSegment = 0;
     mCurCount = 0;
+    mLoopCounter = 0;
     if (mpToneDesc->segments[0].duration == TONEGEN_INF) {
         mNextSegSmp = TONEGEN_INF;
     } else{

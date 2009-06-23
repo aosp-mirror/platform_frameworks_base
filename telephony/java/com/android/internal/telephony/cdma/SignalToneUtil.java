@@ -22,6 +22,9 @@ import android.util.Log;
 import android.media.ToneGenerator;
 
 public class SignalToneUtil {
+    /** A marker that isn't a valid TONE */
+    public static final int CDMA_INVALID_TONE = -1;
+
     // public final int int IS95_CONST_IR_SIGNAL_TYPE_TYPE;
     static public final int IS95_CONST_IR_SIGNAL_TONE = 0;
     static public final int IS95_CONST_IR_SIGNAL_ISDN = 1;
@@ -76,7 +79,7 @@ public class SignalToneUtil {
     private static Integer signalParamHash(int signalType, int alertPitch, int signal) {
         if ((signalType < 0) || (signalType > 256) || (alertPitch > 256) ||
                 (alertPitch < 0) || (signal > 256) || (signal < 0)) {
-            return new Integer(ToneGenerator.TONE_CDMA_INVALID);
+            return new Integer(CDMA_INVALID_TONE);
         }
         return new Integer(signalType * 256 * 256 + alertPitch * 256 + signal);
     }
@@ -84,7 +87,7 @@ public class SignalToneUtil {
     public static int getAudioToneFromSignalInfo(int signalType, int alertPitch, int signal) {
         Integer result = hm.get(signalParamHash(signalType, alertPitch, signal));
         if (result == null) {
-            return ToneGenerator.TONE_CDMA_INVALID;
+            return CDMA_INVALID_TONE;
         }
         return result;
     }
@@ -100,13 +103,13 @@ public class SignalToneUtil {
                         ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP);
 
         hm.put(signalParamHash(IS95_CONST_IR_SIGNAL_ISDN, TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN,
-                IS95_CONST_IR_SIG_ISDN_SP_PRI), ToneGenerator.TONE_CDMA_CALL_SIGNAL_SP_PRI);
+                IS95_CONST_IR_SIG_ISDN_SP_PRI), ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_SP_PRI);
 
         hm.put(signalParamHash(IS95_CONST_IR_SIGNAL_ISDN, TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN,
                 IS95_CONST_IR_SIG_ISDN_PAT_3), ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_PAT3);
 
         hm.put(signalParamHash(IS95_CONST_IR_SIGNAL_ISDN, TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN,
-                IS95_CONST_IR_SIG_ISDN_PING), ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_RING_RING);
+                IS95_CONST_IR_SIG_ISDN_PING), ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_PING_RING);
 
         hm.put(signalParamHash(IS95_CONST_IR_SIGNAL_ISDN, TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN,
                 IS95_CONST_IR_SIG_ISDN_PAT_5), ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_PAT5);
@@ -163,7 +166,7 @@ public class SignalToneUtil {
                 IS95_CONST_IR_SIG_IS54B_L), ToneGenerator.TONE_CDMA_HIGH_L);
 
         hm.put(signalParamHash(IS95_CONST_IR_SIGNAL_IS54B, IS95_CONST_IR_ALERT_MED,
-                IS95_CONST_IR_SIG_IS54B_L), ToneGenerator.TONE_CDMA_INVALID);
+                IS95_CONST_IR_SIG_IS54B_L), ToneGenerator.TONE_CDMA_MED_L);
 
         hm.put(signalParamHash(IS95_CONST_IR_SIGNAL_IS54B, IS95_CONST_IR_ALERT_LOW,
                 IS95_CONST_IR_SIG_IS54B_L), ToneGenerator.TONE_CDMA_LOW_L);
