@@ -152,7 +152,6 @@ public class TtsService extends Service implements OnCompletionListener {
         // speech rate
         setSpeechRate(getDefaultRate());
 
-        // TODO handle default pitch
     }
 
 
@@ -178,6 +177,12 @@ public class TtsService extends Service implements OnCompletionListener {
             nativeSynth.setSpeechRate(rate);
         }
     }
+
+
+    private void setPitch(int pitch) {
+        nativeSynth.setPitch(pitch);
+    }
+
 
     private void setLanguage(String lang, String country, String variant) {
         Log.v("TTS", "TtsService.setLanguage("+lang+", "+country+", "+variant+")");
@@ -703,6 +708,17 @@ public class TtsService extends Service implements OnCompletionListener {
          */
         public void setSpeechRate(int speechRate) {
             mSelf.setSpeechRate(speechRate);
+        }
+
+        /**
+         * Sets the pitch for the TTS. Note that this will only have an
+         * effect on synthesized speech; it will not affect pre-recorded speech.
+         *
+         * @param pitch
+         *            The pitch that should be used for the synthesized voice
+         */
+        public void setPitch(int pitch) {
+            mSelf.setPitch(pitch);
         }
 
         /**
