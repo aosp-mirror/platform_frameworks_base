@@ -94,9 +94,9 @@ void Type::compute()
         mLODs[lod].mOffset = offset;
         //LOGE("txyz %i %i %i", tx, ty, tz);
         offset += tx * rsMax(ty, 1u) * rsMax(tz, 1u) * mElement->getSizeBytes();
-        tx >>= 1;
-        ty >>= 1;
-        tz >>= 1;
+        tx = (tx + 1) >> 1;
+        ty = (ty + 1) >> 1;
+        tz = (tz + 1) >> 1;
     }
 
     //LOGE("size %i", offset);
