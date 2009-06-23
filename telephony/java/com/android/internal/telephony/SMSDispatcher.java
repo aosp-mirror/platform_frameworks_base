@@ -289,7 +289,13 @@ public abstract class SMSDispatcher extends Handler {
             sms = (SmsMessage) ar.result;
             try {
                 if (mStorageAvailable) {
-                    dispatchMessage(sms.mWrappedSmsMessage);
+                    int result = dispatchMessage(sms.mWrappedSmsMessage);
+                    if (result != Activity.RESULT_OK) {
+                        // RESULT_OK means that message was broadcast for app(s) to handle.
+                        // Any other result, we should ack here.
+                        boolean handled = (result == Intents.RESULT_SMS_HANDLED);
+                        acknowledgeLastIncomingSms(handled, result, null);
+                    }
                 } else {
                     acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_OUT_OF_MEMORY, null);
                 }
@@ -469,8 +475,11 @@ public abstract class SMSDispatcher extends Handler {
      * Dispatches an incoming SMS messages.
      *
      * @param sms the incoming message from the phone
+     * @return a result code from {@link Telephony.Sms.Intents}, or
+     *         {@link Activity#RESULT_OK} if the message has been broadcast
+     *         to applications
      */
-    protected abstract void dispatchMessage(SmsMessageBase sms);
+    protected abstract int dispatchMessage(SmsMessageBase sms);
 
 
     /**
@@ -478,8 +487,11 @@ public abstract class SMSDispatcher extends Handler {
      * the part is stored for later processing.
      *
      * NOTE: concatRef (naturally) needs to be non-null, but portAddrs can be null.
+     * @return a result code from {@link Telephony.Sms.Intents}, or
+     *         {@link Activity#RESULT_OK} if the message has been broadcast
+     *         to applications
      */
-    protected void processMessagePart(SmsMessageBase sms,
+    protected int processMessagePart(SmsMessageBase sms,
             SmsHeader.ConcatRef concatRef, SmsHeader.PortAddrs portAddrs) {
 
         // Lookup all other related parts
@@ -506,8 +518,7 @@ public abstract class SMSDispatcher extends Handler {
                     values.put("destination_port", portAddrs.destPort);
                 }
                 mResolver.insert(mRawUri, values);
-                acknowledgeLastIncomingSms(true, Intents.RESULT_SMS_HANDLED, null);
-                return;
+                return Intents.RESULT_SMS_HANDLED;
             }
 
             // All the parts are in place, deal with them
@@ -529,8 +540,7 @@ public abstract class SMSDispatcher extends Handler {
         } catch (SQLException e) {
             Log.e(TAG, "Can't access multipart SMS database", e);
             // TODO:  Would OUT_OF_MEMORY be more appropriate?
-            acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
-            return;
+            return Intents.RESULT_SMS_GENERIC_ERROR;
         } finally {
             if (cursor != null) cursor.close();
         }
@@ -555,7 +565,7 @@ public abstract class SMSDispatcher extends Handler {
                     output.write(data, 0, data.length);
                 }
                 // Handle the PUSH
-                mWapPush.dispatchWapPdu(output.toByteArray());
+                return mWapPush.dispatchWapPdu(output.toByteArray());
             } else {
                 // The messages were sent to a port, so concoct a URI for it
                 dispatchPortAddressedPdus(pdus, portAddrs.destPort);
@@ -564,6 +574,7 @@ public abstract class SMSDispatcher extends Handler {
             // The messages were not sent to a port
             dispatchPdus(pdus);
         }
+        return Activity.RESULT_OK;
     }
 
     /**
