@@ -32,7 +32,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 
 public class RenderScript {
-    private static final String LOG_TAG = "libRS_jni";
+    static final String LOG_TAG = "libRS_jni";
     private static final boolean DEBUG  = false;
     private static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
 

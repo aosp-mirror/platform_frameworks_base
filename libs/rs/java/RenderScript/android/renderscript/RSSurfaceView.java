@@ -40,7 +40,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public RSSurfaceView(Context context) {
         super(context);
         init();
-        Log.v("***", "RSSurfaceView");
+        Log.v(RenderScript.LOG_TAG, "RSSurfaceView");
     }
 
     /**
@@ -50,7 +50,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public RSSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
-        Log.v("***", "RSSurfaceView");
+        Log.v(RenderScript.LOG_TAG, "RSSurfaceView");
     }
 
     private void init() {
@@ -66,7 +66,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * not normally called or subclassed by clients of RSSurfaceView.
      */
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.v("***", "surfaceCreated");
+        Log.v(RenderScript.LOG_TAG, "surfaceCreated");
         mSurfaceHolder = holder;
         //mGLThread.surfaceCreated();
     }
@@ -77,7 +77,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void surfaceDestroyed(SurfaceHolder holder) {
         // Surface will be destroyed when we return
-        Log.v("***", "surfaceDestroyed");
+        Log.v(RenderScript.LOG_TAG, "surfaceDestroyed");
         //mGLThread.surfaceDestroyed();
     }
 
@@ -86,7 +86,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * not normally called or subclassed by clients of RSSurfaceView.
      */
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        Log.v("***", "surfaceChanged");
+        Log.v(RenderScript.LOG_TAG, "surfaceChanged");
 
         //mGLThread.onWindowResize(w, h);
     }
@@ -98,7 +98,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * Must not be called before a renderer has been set.
      */
     public void onPause() {
-        Log.v("***", "onPause");
+        Log.v(RenderScript.LOG_TAG, "onPause");
         //mGLThread.onPause();
     }
 
@@ -110,7 +110,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * Must not be called before a renderer has been set.
      */
     public void onResume() {
-        Log.v("***", "onResume");
+        Log.v(RenderScript.LOG_TAG, "onResume");
         //mGLThread.onResume();
     }
 
@@ -121,7 +121,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * @param r the runnable to be run on the GL rendering thread.
      */
     public void queueEvent(Runnable r) {
-        Log.v("***", "queueEvent");
+        Log.v(RenderScript.LOG_TAG, "queueEvent");
         //mGLThread.queueEvent(r);
     }
 
@@ -139,14 +139,14 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     // ----------------------------------------------------------------------
 
     public RenderScript createRenderScript() {
-        Log.v("***", "createRenderScript 1");
+        Log.v(RenderScript.LOG_TAG, "createRenderScript 1");
         Surface sur = null;
         while ((sur == null) || (mSurfaceHolder == null)) {
             sur = getHolder().getSurface();
         }
-        Log.v("***", "createRenderScript 2");
+        Log.v(RenderScript.LOG_TAG, "createRenderScript 2");
         RenderScript rs = new RenderScript(sur);
-        Log.v("***", "createRenderScript 3 rs");
+        Log.v(RenderScript.LOG_TAG, "createRenderScript 3 rs");
         return rs;
     }
 

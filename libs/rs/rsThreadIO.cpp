@@ -34,22 +34,17 @@ ThreadIO::~ThreadIO()
 
 bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand)
 {
-    //LOGE("playCoreCommands 1");
     uint32_t cmdID = 0;
     uint32_t cmdSize = 0;
     bool ret = false;
     while(!mToCore.isEmpty() || waitForCommand) {
         ret = true;
-        //LOGE("playCoreCommands 2");
         const void * data = mToCore.get(&cmdID, &cmdSize);
         waitForCommand = false;
-        //LOGE("playCoreCommands 3 %i %i", cmdID, cmdSize);
+        //LOGV("playCoreCommands 3 %i %i", cmdID, cmdSize);
 
         gPlaybackFuncs[cmdID](con, data);
-        //LOGE("playCoreCommands 4");
-
         mToCore.next();
-        //LOGE("playCoreCommands 5");
     }
     return ret;
 }

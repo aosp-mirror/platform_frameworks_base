@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "libRS_jni"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <math.h>
-
 #include <utils/misc.h>
 
 #include <ui/EGLNativeWindowSurface.h>
 #include <ui/Surface.h>
 
 #include <core/SkBitmap.h>
+
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -107,7 +109,6 @@ nContextCreate(JNIEnv *_env, jobject _this, jint dev, jobject wnd, jint ver)
     if (window == NULL)
         goto not_valid_surface;
 
-    LOGE("nContextCreate 5");
     return (jint)rsContextCreate((RsDevice)dev, window, ver);
 }
 
@@ -1067,8 +1068,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
     JNIEnv* env = NULL;
     jint result = -1;
-
-    LOGE("****************************************************\n");
 
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         LOGE("ERROR: GetEnv failed\n");
