@@ -8,6 +8,11 @@
     <string name="month_long_standalone_may">Maggio</string>
     <string name="month_long_standalone_june">Giugno</string>
     <string name="month_long_standalone_july">Luglio</string>
+    <string name="month_long_standalone_august">Agosto</string>
+    <string name="month_long_standalone_september">Settembre</string>
+    <string name="month_long_standalone_october">Ottobre</string>
+    <string name="month_long_standalone_november">Novembre</string>
+    <string name="month_long_standalone_december">Dicembre</string>
 
     <string name="month_long_january">gennaio</string>
     <string name="month_long_february">febbraio</string>
@@ -15,7 +20,7 @@
     <string name="month_long_april">aprile</string>
     <string name="month_long_may">maggio</string>
     <string name="month_long_june">giugno</string>
-    <string name="month_long_july">Luglio</string>
+    <string name="month_long_july">luglio</string>
     <string name="month_long_august">agosto</string>
     <string name="month_long_september">settembre</string>
     <string name="month_long_october">ottobre</string>
