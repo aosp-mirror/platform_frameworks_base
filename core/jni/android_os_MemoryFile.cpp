@@ -30,8 +30,6 @@ static jobject android_os_MemoryFile_open(JNIEnv* env, jobject clazz, jstring na
 {
     const char* namestr = (name ? env->GetStringUTFChars(name, NULL) : NULL);
 
-    // round up length to page boundary
-    length = (((length - 1) / getpagesize()) + 1) * getpagesize();
     int result = ashmem_create_region(namestr, length);
 
     if (name)
@@ -118,7 +116,7 @@ static void android_os_MemoryFile_pin(JNIEnv* env, jobject clazz, jobject fileDe
     }
 }
 
-static jint android_os_MemoryFile_get_mapped_size(JNIEnv* env, jobject clazz,
+static jint android_os_MemoryFile_get_size(JNIEnv* env, jobject clazz,
         jobject fileDescriptor) {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     // Use ASHMEM_GET_SIZE to find out if the fd refers to an ashmem region.
@@ -146,8 +144,8 @@ static const JNINativeMethod methods[] = {
     {"native_read",  "(Ljava/io/FileDescriptor;I[BIIIZ)I", (void*)android_os_MemoryFile_read},
     {"native_write", "(Ljava/io/FileDescriptor;I[BIIIZ)V", (void*)android_os_MemoryFile_write},
     {"native_pin",   "(Ljava/io/FileDescriptor;Z)V", (void*)android_os_MemoryFile_pin},
-    {"native_get_mapped_size", "(Ljava/io/FileDescriptor;)I",
-            (void*)android_os_MemoryFile_get_mapped_size}
+    {"native_get_size", "(Ljava/io/FileDescriptor;)I",
+            (void*)android_os_MemoryFile_get_size}
 };
 
 static const char* const kClassPathName = "android/os/MemoryFile";
