@@ -29,6 +29,8 @@ import android.content.Intent;
 interface ITts {
     void setSpeechRate(in int speechRate);
 
+    void setPitch(in int pitch);
+
     void speak(in String text, in int queueMode, in String[] params);
 
     boolean isSpeaking();
