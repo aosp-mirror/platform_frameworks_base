@@ -35,7 +35,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.RegisteredServicesCache;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -72,7 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * @hide
@@ -160,7 +159,7 @@ class SyncManager implements OnAccountsUpdatedListener {
                             Log.v(TAG, "Internal storage is low.");
                         }
                         mStorageIsLow = true;
-                        cancelActiveSync(null /* no url */);
+                        cancelActiveSync(null /* any account */, null /* any authority */);
                     } else if (Intent.ACTION_DEVICE_STORAGE_OK.equals(action)) {
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
                             Log.v(TAG, "Internal storage is ok.");
@@ -204,7 +203,7 @@ class SyncManager implements OnAccountsUpdatedListener {
         if (hadAccountsAlready && accounts.length > 0) {
             // request a sync so that if the password was changed we will
             // retry any sync that failed when it was wrong
-            startSync(null /* all providers */, null /* no extras */);
+            scheduleSync(null, null, null, 0 /* no delay */);
         }
     }
 
@@ -327,7 +326,7 @@ class SyncManager implements OnAccountsUpdatedListener {
         mHandleAlarmWakeLock.setReferenceCounted(false);
 
         mSyncStorageEngine.addStatusChangeListener(
-                SyncStorageEngine.CHANGE_SETTINGS, new ISyncStatusObserver.Stub() {
+                ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, new ISyncStatusObserver.Stub() {
             public void onStatusChanged(int which) {
                 // force the sync loop to run if the settings change
                 sendCheckAlarmsMessage();
@@ -406,7 +405,8 @@ class SyncManager implements OnAccountsUpdatedListener {
         scheduleSyncPollAlarm(nextRelativePollTimeMs);
 
         // perform a poll
-        scheduleSync(null /* sync all syncable providers */, new Bundle(), 0 /* no delay */);
+        scheduleSync(null /* sync all syncable accounts */, null /* sync all syncable providers */,
+                new Bundle(), 0 /* no delay */);
     }
 
     private void writeSyncPollTime(long when) {
@@ -502,20 +502,21 @@ class SyncManager implements OnAccountsUpdatedListener {
      *
      * <p>You'll start getting callbacks after this.
      *
-     * @param url The Uri of a specific provider to be synced, or
-     *          null to sync all providers.
+     * @param requestedAccount the account to sync, may be null to signify all accounts
+     * @param requestedAuthority the authority to sync, may be null to indicate all authorities
      * @param extras a Map of SyncAdapter-specific information to control
 *          syncs of a specific provider. Can be null. Is ignored
 *          if the url is null.
      * @param delay how many milliseconds in the future to wait before performing this
-     *   sync. -1 means to make this the next sync to perform.
      */
-    public void scheduleSync(Uri url, Bundle extras, long delay) {
+    public void scheduleSync(Account requestedAccount, String requestedAuthority,
+            Bundle extras, long delay) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         if (isLoggable) {
             Log.v(TAG, "scheduleSync:"
                     + " delay " + delay
-                    + ", url " + ((url == null) ? "(null)" : url)
+                    + ", account " + requestedAccount
+                    + ", authority " + requestedAuthority
                     + ", extras " + ((extras == null) ? "(null)" : extras));
         }
 
@@ -539,9 +540,8 @@ class SyncManager implements OnAccountsUpdatedListener {
         }
 
         Account[] accounts;
-        Account accountFromExtras = extras.getParcelable(ContentResolver.SYNC_EXTRAS_ACCOUNT);
-        if (accountFromExtras != null) {
-            accounts = new Account[]{accountFromExtras};
+        if (requestedAccount != null) {
+            accounts = new Account[]{requestedAccount};
         } else {
             // if the accounts aren't configured yet then we can't support an account-less
             // sync request
@@ -563,14 +563,14 @@ class SyncManager implements OnAccountsUpdatedListener {
         }
 
         final boolean uploadOnly = extras.getBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, false);
-        final boolean force = extras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false);
+        final boolean manualSync = extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
 
         int source;
         if (uploadOnly) {
             source = SyncStorageEngine.SOURCE_LOCAL;
-        } else if (force) {
+        } else if (manualSync) {
             source = SyncStorageEngine.SOURCE_USER;
-        } else if (url == null) {
+        } else if (requestedAuthority == null) {
             source = SyncStorageEngine.SOURCE_POLL;
         } else {
             // this isn't strictly server, since arbitrary callers can (and do) request
@@ -578,9 +578,9 @@ class SyncManager implements OnAccountsUpdatedListener {
             source = SyncStorageEngine.SOURCE_SERVER;
         }
 
-        // compile a list of authorities that have sync adapters
-        // for each authority sync each account that matches a sync adapter
-        Set<String> syncableAuthorities = new HashSet<String>();
+        // Compile a list of authorities that have sync adapters.
+        // For each authority sync each account that matches a sync adapter.
+        final HashSet<String> syncableAuthorities = new HashSet<String>();
         for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapter :
                 mSyncAdapters.getAllServices()) {
             syncableAuthorities.add(syncAdapter.type.authority);
@@ -588,10 +588,10 @@ class SyncManager implements OnAccountsUpdatedListener {
 
         // if the url was specified then replace the list of authorities with just this authority
         // or clear it if this authority isn't syncable
-        if (url != null) {
-            boolean isSyncable = syncableAuthorities.contains(url.getAuthority());
+        if (requestedAuthority != null) {
+            final boolean isSyncable = syncableAuthorities.contains(requestedAuthority);
             syncableAuthorities.clear();
-            if (isSyncable) syncableAuthorities.add(url.getAuthority());
+            if (isSyncable) syncableAuthorities.add(requestedAuthority);
         }
 
         for (String authority : syncableAuthorities) {
@@ -614,10 +614,10 @@ class SyncManager implements OnAccountsUpdatedListener {
         mStatusText = message;
     }
 
-    public void scheduleLocalSync(Uri url) {
+    public void scheduleLocalSync(Account account, String authority) {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
-        scheduleSync(url, extras, LOCAL_SYNC_DELAY);
+        scheduleSync(account, authority, extras, LOCAL_SYNC_DELAY);
     }
 
     private IPackageManager getPackageManager() {
@@ -631,18 +631,16 @@ class SyncManager implements OnAccountsUpdatedListener {
         return mPackageManager;
     }
 
-    /**
-     * Initiate a sync for this given URL, or pass null for a full sync.
-     *
-     * <p>You'll start getting callbacks after this.
-     *
-     * @param url The Uri of a specific provider to be synced, or
-     *          null to sync all providers.
-     * @param extras a Map of SyncAdapter specific information to control
-     *          syncs of a specific provider. Can be null. Is ignored
-     */
-    public void startSync(Uri url, Bundle extras) {
-        scheduleSync(url, extras, 0 /* no delay */);
+    public SyncAdapterType[] getSyncAdapterTypes() {
+        final Collection<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> serviceInfos =
+                mSyncAdapters.getAllServices();
+        SyncAdapterType[] types = new SyncAdapterType[serviceInfos.size()];
+        int i = 0;
+        for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> serviceInfo : serviceInfos) {
+            types[i] = serviceInfo.type;
+            ++i;
+        }
+        return types;
     }
 
     public void updateHeartbeatTime() {
@@ -725,17 +723,22 @@ class SyncManager implements OnAccountsUpdatedListener {
     }
 
     /**
-     * Cancel the active sync if it matches the uri. The uri corresponds to the one passed
-     * in to startSync().
-     * @param uri If non-null, the active sync is only canceled if it matches the uri.
-     *   If null, any active sync is canceled.
+     * Cancel the active sync if it matches the authority and account.
+     * @param account limit the cancelations to syncs with this account, if non-null
+     * @param authority limit the cancelations to syncs with this authority, if non-null
      */
-    public void cancelActiveSync(Uri uri) {
+    public void cancelActiveSync(Account account, String authority) {
         ActiveSyncContext activeSyncContext = mActiveSyncContext;
         if (activeSyncContext != null) {
-            // if a Uri was specified then only cancel the sync if it matches the the uri
-            if (uri != null) {
-                if (!uri.getAuthority().equals(activeSyncContext.mSyncOperation.authority)) {
+            // if an authority was specified then only cancel the sync if it matches
+            if (account != null) {
+                if (!account.equals(activeSyncContext.mSyncOperation.account)) {
+                    return;
+                }
+            }
+            // if an account was specified then only cancel the sync if it matches
+            if (authority != null) {
+                if (!authority.equals(activeSyncContext.mSyncOperation.authority)) {
                     return;
                 }
             }
@@ -787,14 +790,13 @@ class SyncManager implements OnAccountsUpdatedListener {
     }
 
     /**
-     * Remove any scheduled sync operations that match uri. The uri corresponds to the one passed
-     * in to startSync().
-     * @param uri If non-null, only operations that match the uri are cleared.
-     *   If null, all operations are cleared.
+     * Remove scheduled sync operations.
+     * @param account limit the removals to operations with this account, if non-null
+     * @param authority limit the removals to operations with this authority, if non-null
      */
-    public void clearScheduledSyncOperations(Uri uri) {
+    public void clearScheduledSyncOperations(Account account, String authority) {
         synchronized (mSyncQueue) {
-            mSyncQueue.clear(null, uri != null ? uri.getAuthority() : null);
+            mSyncQueue.clear(account, authority);
         }
     }
 
@@ -1558,14 +1560,14 @@ class SyncManager implements OnAccountsUpdatedListener {
             // Otherwise consume SyncOperations from the head of the SyncQueue until one is
             // found that is runnable (not disabled, etc). If that one is ready to run then
             // start it, otherwise just get out.
-            SyncOperation syncOperation;
+            SyncOperation op;
             final ConnectivityManager connManager = (ConnectivityManager)
                     mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            final boolean backgroundDataSetting = connManager.getBackgroundDataSetting();
+            final boolean backgroundDataUsageAllowed = connManager.getBackgroundDataSetting();
             synchronized (mSyncQueue) {
                 while (true) {
-                    syncOperation = mSyncQueue.head();
-                    if (syncOperation == null) {
+                    op = mSyncQueue.head();
+                    if (op == null) {
                         if (isLoggable) {
                             Log.v(TAG, "runStateIdle: no more sync operations, returning");
                         }
@@ -1575,39 +1577,40 @@ class SyncManager implements OnAccountsUpdatedListener {
                     // Sync is disabled, drop this operation.
                     if (!isSyncEnabled()) {
                         if (isLoggable) {
-                            Log.v(TAG, "runStateIdle: sync disabled, dropping " + syncOperation);
+                            Log.v(TAG, "runStateIdle: sync disabled, dropping " + op);
                         }
                         mSyncQueue.popHead();
                         continue;
                     }
 
-                    // skip the sync if it isn't a force and the settings are off for this provider
-                    final boolean force = syncOperation.extras.getBoolean(
-                            ContentResolver.SYNC_EXTRAS_FORCE, false);
-                    if (!force && (!backgroundDataSetting
-                            || !mSyncStorageEngine.getListenForNetworkTickles()
-                            || !mSyncStorageEngine.getSyncProviderAutomatically(
-                                    null, syncOperation.authority))) {
+                    // skip the sync if it isn't manual and auto sync is disabled
+                    final boolean manualSync = op.extras.getBoolean(
+                            ContentResolver.SYNC_EXTRAS_MANUAL, false);
+                    final boolean syncAutomatically =
+                            mSyncStorageEngine.getSyncAutomatically(op.account, op.authority)
+                                    || mSyncStorageEngine.getMasterSyncAutomatically();
+                    boolean syncAllowed =
+                            manualSync || (backgroundDataUsageAllowed && syncAutomatically);
+                    if (!syncAllowed) {
                         if (isLoggable) {
-                            Log.v(TAG, "runStateIdle: sync off, dropping " + syncOperation);
+                            Log.v(TAG, "runStateIdle: sync off, dropping " + op);
                         }
                         mSyncQueue.popHead();
                         continue;
                     }
 
                     // skip the sync if the account of this operation no longer exists
-                    if (!ArrayUtils.contains(accounts, syncOperation.account)) {
+                    if (!ArrayUtils.contains(accounts, op.account)) {
                         mSyncQueue.popHead();
                         if (isLoggable) {
-                            Log.v(TAG, "runStateIdle: account not present, dropping "
-                                    + syncOperation);
+                            Log.v(TAG, "runStateIdle: account not present, dropping " + op);
                         }
                         continue;
                     }
 
                     // go ahead and try to sync this syncOperation
                     if (isLoggable) {
-                        Log.v(TAG, "runStateIdle: found sync candidate: " + syncOperation);
+                        Log.v(TAG, "runStateIdle: found sync candidate: " + op);
                     }
                     break;
                 }
@@ -1615,11 +1618,10 @@ class SyncManager implements OnAccountsUpdatedListener {
                 // If the first SyncOperation isn't ready to run schedule a wakeup and
                 // get out.
                 final long now = SystemClock.elapsedRealtime();
-                if (syncOperation.earliestRunTime > now) {
+                if (op.earliestRunTime > now) {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
                         Log.d(TAG, "runStateIdle: the time is " + now + " yet the next "
-                                + "sync operation is for " + syncOperation.earliestRunTime
-                                + ": " + syncOperation);
+                                + "sync operation is for " + op.earliestRunTime + ": " + op);
                     }
                     return;
                 }
@@ -1627,14 +1629,14 @@ class SyncManager implements OnAccountsUpdatedListener {
                 // We will do this sync. Remove it from the queue and run it outside of the
                 // synchronized block.
                 if (isLoggable) {
-                    Log.v(TAG, "runStateIdle: we are going to sync " + syncOperation);
+                    Log.v(TAG, "runStateIdle: we are going to sync " + op);
                 }
                 mSyncQueue.popHead();
             }
 
             // connect to the sync adapter
-            SyncAdapterType syncAdapterType = new SyncAdapterType(syncOperation.authority,
-                    syncOperation.account.mType);
+            SyncAdapterType syncAdapterType = new SyncAdapterType(op.authority,
+                    op.account.mType);
             RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                     mSyncAdapters.getServiceInfo(syncAdapterType);
             if (syncAdapterInfo == null) {
@@ -1646,7 +1648,7 @@ class SyncManager implements OnAccountsUpdatedListener {
             }
 
             ActiveSyncContext activeSyncContext =
-                    new ActiveSyncContext(syncOperation, insertStartSyncEvent(syncOperation));
+                    new ActiveSyncContext(op, insertStartSyncEvent(op));
             mActiveSyncContext = activeSyncContext;
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "runStateIdle: setting mActiveSyncContext to " + mActiveSyncContext);
@@ -1776,21 +1778,21 @@ class SyncManager implements OnAccountsUpdatedListener {
          */
         private int syncResultToErrorNumber(SyncResult syncResult) {
             if (syncResult.syncAlreadyInProgress)
-                return SyncStorageEngine.ERROR_SYNC_ALREADY_IN_PROGRESS;
+                return ContentResolver.SYNC_ERROR_SYNC_ALREADY_IN_PROGRESS;
             if (syncResult.stats.numAuthExceptions > 0)
-                return SyncStorageEngine.ERROR_AUTHENTICATION;
+                return ContentResolver.SYNC_ERROR_AUTHENTICATION;
             if (syncResult.stats.numIoExceptions > 0)
-                return SyncStorageEngine.ERROR_IO;
+                return ContentResolver.SYNC_ERROR_IO;
             if (syncResult.stats.numParseExceptions > 0)
-                return SyncStorageEngine.ERROR_PARSE;
+                return ContentResolver.SYNC_ERROR_PARSE;
             if (syncResult.stats.numConflictDetectedExceptions > 0)
-                return SyncStorageEngine.ERROR_CONFLICT;
+                return ContentResolver.SYNC_ERROR_CONFLICT;
             if (syncResult.tooManyDeletions)
-                return SyncStorageEngine.ERROR_TOO_MANY_DELETIONS;
+                return ContentResolver.SYNC_ERROR_TOO_MANY_DELETIONS;
             if (syncResult.tooManyRetries)
-                return SyncStorageEngine.ERROR_TOO_MANY_RETRIES;
+                return ContentResolver.SYNC_ERROR_TOO_MANY_RETRIES;
             if (syncResult.databaseError)
-                return SyncStorageEngine.ERROR_INTERNAL;
+                return ContentResolver.SYNC_ERROR_INTERNAL;
             throw new IllegalStateException("we are not in an error state, " + syncResult);
         }
 
@@ -1831,9 +1833,10 @@ class SyncManager implements OnAccountsUpdatedListener {
                 } else {
                     final boolean timeToShowNotification =
                             now > mSyncNotificationInfo.startTime + SYNC_NOTIFICATION_DELAY;
-                    final boolean syncIsForced = syncOperation.extras
-                            .getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false);
-                    shouldInstall = timeToShowNotification || syncIsForced;
+                    // show the notification immediately if this is a manual sync
+                    final boolean manualSync = syncOperation.extras
+                            .getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
+                    shouldInstall = timeToShowNotification || manualSync;
                 }
             }
 
@@ -2088,9 +2091,9 @@ class SyncManager implements OnAccountsUpdatedListener {
             SyncOperation existingOperation = mOpsByKey.get(operationKey);
 
             // if this operation matches an existing operation that is being retried (delay > 0)
-            // and this operation isn't forced, ignore this operation
+            // and this isn't a manual sync operation, ignore this operation
             if (existingOperation != null && existingOperation.delay > 0) {
-                if (!operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false)) {
+                if (!operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)) {
                     return false;
                 }
             }

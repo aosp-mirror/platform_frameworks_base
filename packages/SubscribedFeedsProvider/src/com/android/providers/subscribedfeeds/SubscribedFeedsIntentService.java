@@ -16,9 +16,7 @@ import android.database.sqlite.SQLiteFullException;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.text.TextUtils;
-import android.net.Uri;
 import android.accounts.Account;
 
 import java.util.ArrayList;
@@ -113,8 +111,9 @@ public class SubscribedFeedsIntentService extends IntentService {
                 + "and " + SubscribedFeeds.Feeds.FEED + "= ?";
         try {
             // TODO(fredq) fix the hardcoded type
+            final Account account = new Account(accountName, "com.google.GAIA");
             c = context.getContentResolver().query(SubscribedFeeds.Feeds.CONTENT_URI,
-                    null, where, new String[]{accountName, "com.google.GAIA", feed}, null);
+                    null, where, new String[]{account.mName, account.mType, feed}, null);
             if (c.getCount() == 0) {
                 Log.w(TAG, "received tickle for non-existent feed: "
                         + "account " + accountName + ", feed " + feed);
@@ -125,22 +124,14 @@ public class SubscribedFeedsIntentService extends IntentService {
                 String authority = c.getString(c.getColumnIndexOrThrow(
                         SubscribedFeeds.Feeds.AUTHORITY));
                 EventLog.writeEvent(LOG_TICKLE, authority);
-                try {
-                    if (!ContentResolver.getContentService()
-                            .getSyncProviderAutomatically(authority)) {
-                        Log.d(TAG, "supressing tickle since provider " + authority
-                                + " is configured to not sync automatically");
-                        continue;
-                    }
-                } catch (RemoteException e) {
+                if (!ContentResolver.getSyncAutomatically(account, authority)) {
+                    Log.d(TAG, "supressing tickle since provider " + authority
+                            + " is configured to not sync automatically");
                     continue;
                 }
-                Uri uri = Uri.parse("content://" + authority);
                 Bundle extras = new Bundle();
-                extras.putParcelable(ContentResolver.SYNC_EXTRAS_ACCOUNT,
-                        new Account(accountName, "com.google.GAIA"));
                 extras.putString("feed", feed);
-                context.getContentResolver().startSync(uri, extras);
+                ContentResolver.requestSync(account, authority, extras);
             }
         } finally {
             if (c != null) c.deactivate();

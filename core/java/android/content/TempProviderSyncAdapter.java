@@ -63,12 +63,10 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
      *
      * @param context allows you to publish status and interact with the
      * @param account the account to sync
-     * @param forced if true then the sync was forced
+     * @param manualSync true if this sync was requested manually by the user
      * @param result information to track what happened during this sync attempt
-     * @return true, if the sync was successfully started. One reason it can
-     *   fail to start is if there is no user configured on the device.
      */
-    public abstract void onSyncStarting(SyncContext context, Account account, boolean forced,
+    public abstract void onSyncStarting(SyncContext context, Account account, boolean manualSync,
             SyncResult result);
 
     /**
@@ -229,12 +227,12 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             mAdapterSyncStarted = false;
             String message = null;
 
-            boolean syncForced = extras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false);
+            boolean manualSync = extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
 
             try {
                 mProvider.onSyncStart(syncContext, account);
                 mProviderSyncStarted = true;
-                onSyncStarting(syncContext, account, syncForced, mResult);
+                onSyncStarting(syncContext, account, manualSync, mResult);
                 if (mResult.hasError()) {
                     message = "SyncAdapter failed while trying to start sync";
                     return;
