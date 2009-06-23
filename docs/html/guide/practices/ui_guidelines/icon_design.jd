@@ -25,7 +25,7 @@ application can use the standard icons by referencing them as resources.</li>
 
 <li style="margin-top:4px;"><a href="#dodonts">General guidelines</a></li>
 <li><a href="#templatespack">Using the Icon Templates Pack</a></li>
-<li><a href="#file">Icon appendix</a>
+<li><a href="#iconappendix">Icon appendix</a>
 	<ol>
 	<li><a href="#launcherapx">Launcher icons</a></li>
 	<li><a href="#menuapx">Menu icons</a></li>
@@ -989,25 +989,9 @@ simply look at image filenames, which use the format
 <table class="image-caption">
 <tr>
 
-
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_add.png" title="ic_menu_add" alt="Android asset" />
   <div class="caption">Add</div></td>
-	
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_archive.png" title="ic_menu_archive" alt="Android asset" />
-  <div class="caption">Archive</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_attachment.png" title="ic_menu_attachment" alt="Android asset" />
-  <div class="caption">Attach</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_back.png" title="ic_menu_back" alt="Android asset" />
-  <div class="caption">Back</div></td>
 
 
 <td class="image-caption-i image-list">
@@ -1024,9 +1008,6 @@ simply look at image filenames, which use the format
   <img src="{@docRoot}images/icon_design/ic_menu_close_clear_cancel.png" title="ic_menu_close_clear_cancel" alt="Android asset" />
   <div class="caption">Clear / Close / Cancel / Discard </div></td>
 
-</tr>
-<tr>
-
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_compass.png" title="ic_menu_compass" alt="Android asset" />
@@ -1036,55 +1017,29 @@ simply look at image filenames, which use the format
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_delete.png" title="ic_menu_delete" alt="Android asset" />
   <div class="caption">Delete</div></td>
-	
+
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_directions.png" title="ic_menu_directions" alt="Android asset" />
   <div class="caption">Directions</div></td>
-	
+
+</tr>
+<tr>
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_edit.png" title="ic_menu_edit" alt="Android asset" />
   <div class="caption">Edit</div></td>
 
 
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_favorite.png" title="ic_menu_favorite" alt="Android asset" />
-  <div class="caption">Favorite</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_forward.png" title="ic_menu_forward" alt="Android asset" />
-  <div class="caption">Forward</div></td>
-	
-
 <td class="image-caption-i image-list">	
   <img src="{@docRoot}images/icon_design/ic_menu_gallery.png" title="ic_menu_gallery" alt="Android asset" />
   <div class="caption">Gallery</div></td>
 
-</tr>
-<tr>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_goto.png" title="ic_menu_goto" alt="Android asset" />
-  <div class="caption">Go to</div></td>
-	
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_help.png" title="ic_menu_help" alt="Android asset" />
   <div class="caption">Help</div></td>
 
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_recent_history.png" title="ic_menu_recent_history" alt="Android asset" />
-  <div class="caption">History</div></td>
-	
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_home.png" title="ic_menu_home" alt="Android asset" />
-  <div class="caption">Home</div></td>
-	
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_info_details.png" title="ic_menu_info_details" alt="Android asset" />
@@ -1094,14 +1049,6 @@ simply look at image filenames, which use the format
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_mapmode.png" title="ic_menu_mapmode" alt="Android asset" />
   <div class="caption">Map mode</div></td>
-	
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_mark.png" title="ic_menu_mark" alt="Android asset" />
-  <div class="caption">Mark</div></td>
-
-</tr>
-<tr>
 
 
 <td class="image-caption-i image-list">
@@ -1113,21 +1060,13 @@ simply look at image filenames, which use the format
   <img src="{@docRoot}images/icon_design/ic_menu_more.png" title="ic_menu_more" alt="Android asset" />
   <div class="caption">More</div></td>
 
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_play_clip.png" title="ic_menu_play_clip" alt="Android asset" />
-  <div class="caption">Play</div></td>
-	
+</tr>
+<tr>
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_preferences.png" title="ic_menu_preferences" alt="Android asset" />
   <div class="caption">Preferences</div></td>
 
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_refresh.png" title="ic_menu_refresh" alt="Android asset" />
-  <div class="caption">Refresh</div></td>
-	
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_rotate.png" title="ic_menu_rotate" alt="Android asset" />
@@ -1137,9 +1076,6 @@ simply look at image filenames, which use the format
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_save.png" title="ic_menu_save" alt="Android asset" />
   <div class="caption">Save</div></td>
-
-</tr>
-<tr>
 
 
 <td class="image-caption-i image-list">
@@ -1158,26 +1094,15 @@ simply look at image filenames, which use the format
 
 
 <td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_shuffle.png" title="ic_menu_shuffle" alt="Android asset" />
-  <div class="caption">Shuffle</div></td>
-	
-
-<td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_upload.png" title="ic_menu_upload" alt="Android asset" />
   <div class="caption">Upload</div></td>
-	
+
+</tr>
+<tr>
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/ic_menu_view.png" title="ic_menu_view" alt="Android asset" />
   <div class="caption">View</div></td>
-	
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/ic_menu_camera_video_view.png" title="ic_menu_camera_video_view" alt="Android asset" />
-  <div class="caption">Video</div></td>
-
-</tr>
-<tr>
 
 
 <td class="image-caption-i image-list">
@@ -1214,44 +1139,8 @@ or simply look at the image filename, which use the format
 <tr>
 
 <td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_data_connected_3g.png" title="stat_sys_data_connected_3g" alt="Android asset" />
-  <div class="caption">3G</div></td>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_signal_flightmode.png" title="stat_sys_signal_flightmode" alt="Android asset" />
-  <div class="caption">Airplane mode</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_alarm.png" title="stat_notify_alarm" alt="Android asset" />
-  <div class="caption">Alarm</div></td>
-
-
-<td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/stat_sys_data_bluetooth.png" title="stat_sys_data_bluetooth" alt="Android asset" />
   <div class="caption">Bluetooth</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_data_bluetooth_connected.png" title="stat_sys_data_bluetooth_connected" alt="Android asset" />
-  <div class="caption">Bluetooth connected</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_calendar.png" title="stat_notify_calendar" alt="Android asset" />
-  <div class="caption">Calendar</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_disk_full.png" title="stat_notify_disk_full" alt="Android asset" />
-  <div class="caption">Disk full</div></td>
-
-</tr>
-<tr>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_data_connected_e.png" title="stat_sys_data_connected_e" alt="Android asset" />
-  <div class="caption">EDGE</div></td>
 
 
 <td class="image-caption-i image-list">
@@ -1260,82 +1149,8 @@ or simply look at the image filename, which use the format
 
 
 <td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_email.png" title="stat_notify_email" alt="Android asset" />
-  <div class="caption">Gmail</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_data_connected_g.png" title="stat_sys_data_connected_g" alt="Android asset" />
-  <div class="caption">GPRS</div></td>
-
-
-<td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/stat_notify_chat.png" title="stat_notify_chat" alt="Android asset" />
   <div class="caption">IM</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_install_complete.png" title="stat_sys_install_complete" alt="Android asset" />
-  <div class="caption">Installation complete</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_musicplayer.png" title="stat_notify_musicplayer" alt="Android asset" />
-  <div class="caption">Music</div></td>
-
-</tr>
-<tr>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_r_signal_4.png" title="stat_sys_r_signal_4" alt="Android asset" />
-  <div class="caption">Roaming</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_signal_4.png" title="stat_sys_signal_4" alt="Android asset" />
-  <div class="caption">Signal</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_signal_null.png" title="stat_sys_signal_null" alt="Android asset" />
-  <div class="caption">Signal unavailable</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_ringer_silent_old.png" title="stat_sys_ringer_silent_old" alt="Android asset" />
-  <div class="caption">Silent mode</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_sms.png" title="stat_notify_sms" alt="Android asset" />
-  <div class="caption">SMS/MMS</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_speakerphone.png" title="stat_sys_speakerphone" alt="Android asset" />
-  <div class="caption">Speaker phone</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_sync_anim0.png" title="stat_notify_sync_anim0" alt="Android asset" />
-  <div class="caption">Sync</div></td>
-
-</tr>
-<tr>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_sync_error.png" title="stat_notify_sync_error" alt="Android asset" />
-  <div class="caption">Sync error</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_data_usb.png" title="stat_sys_data_usb" alt="Android asset" />
-  <div class="caption">USB connected</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_ringer_vibrate.png" title="stat_sys_ringer_vibrate" alt="Android asset" />
-  <div class="caption">Vibrate</div></td>
 
 
 <td class="image-caption-i image-list">
@@ -1349,32 +1164,6 @@ or simply look at the image filename, which use the format
 
 
 <td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_wifi_signal_4.png" title="stat_sys_wifi_signal_4" alt="Android asset" />
-  <div class="caption">WiFi</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_notify_wifi_in_range.png" title="stat_notify_wifi_in_range" alt="Android asset" />
-  <div class="caption">WiFi network available</div></td>
-
-</tr>
-<tr>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_wifi_unavailable.png" title="stat_sys_wifi_unavailable" alt="Android asset" />
-  <div class="caption">WiFi unavailable</div></td>
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_battery_100.png" title="stat_sys_battery_100" alt="Android asset" />
-  <div class="caption">Battery 100%</div></td>
-
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_battery_empty.png" title="stat_sys_battery_empty" alt="Android asset" />
-  <div class="caption">Battery empty</div></td>
-
-
-<td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/stat_sys_phone_call.png" title="stat_sys_phone_call" alt="Android asset" />
   <div class="caption">Call</div></td>
 
@@ -1383,18 +1172,13 @@ or simply look at the image filename, which use the format
   <img src="{@docRoot}images/icon_design/stat_sys_phone_call_forward.png" title="stat_sys_phone_call_forward" alt="Android asset" />
   <div class="caption">Call forward</div></td>
 
+</tr>
+<tr>
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/stat_sys_phone_call_on_hold.png" title="stat_sys_phone_call_on_hold" alt="Android asset" />
   <div class="caption">Call on hold</div></td>
 
-
-<td class="image-caption-i image-list">
-  <img src="{@docRoot}images/icon_design/stat_sys_gps_on.png" title="stat_sys_gps_on" alt="Android asset" />
-  <div class="caption">GPS on</div></td>
-
-</tr>
-<tr>
 
 <td class="image-caption-i image-list">
   <img src="{@docRoot}images/icon_design/stat_notify_missed_call.png" title="stat_notify_missed_call" alt="Android asset" />
