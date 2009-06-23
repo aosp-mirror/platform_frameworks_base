@@ -43,6 +43,7 @@ struct SnapshotHeader {
 struct FileState {
     int modTime_sec;
     int modTime_nsec;
+    int mode;
     int size;
     int crc32;
     int nameLen;
