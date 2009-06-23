@@ -56,6 +56,7 @@ public class FountainRS {
     private RenderScript.Allocation mVertAlloc;
     private RenderScript.Script mScript;
     private RenderScript.ProgramFragmentStore mPFS;
+    private RenderScript.ProgramFragmentStore mPFS2;
     private RenderScript.ProgramFragment mPF;
     private RenderScript.ProgramFragment mPF2;
     private RenderScript.Allocation mTexture;
@@ -79,20 +80,29 @@ public class FountainRS {
             Bitmap b = bd.getBitmap();
             mTexture = mRS.allocationCreateFromBitmap(b,
                                                       RenderScript.ElementPredefined.RGB_565,
-                                                      true);
+                                                      false);
             mTexture.uploadToTexture(0);
         }
 
         mRS.programFragmentStoreBegin(null, null);
         mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA, RenderScript.BlendDstFunc.ONE);
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
+        mRS.programFragmentStoreDepthMask(false);
+        mRS.programFragmentStoreDitherEnable(false);
         mPFS = mRS.programFragmentStoreCreate();
-        mPFS.setName("MyBlend");
-        mRS.contextBindProgramFragmentStore(mPFS);
+        mPFS.setName("PFSBlend");
+
+        mRS.programFragmentStoreBegin(null, null);
+        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
+        mRS.programFragmentStoreDepthMask(false);
+        mRS.programFragmentStoreDitherEnable(false);
+        mPFS2 = mRS.programFragmentStoreCreate();
+        mPFS2.setName("PFSReplace");
+        mRS.contextBindProgramFragmentStore(mPFS2);
 
         mRS.samplerBegin();
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG, RenderScript.SamplerValue.LINEAR);
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN, RenderScript.SamplerValue.LINEAR);
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG, RenderScript.SamplerValue.NEAREST);
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN, RenderScript.SamplerValue.NEAREST);
         mSampler = mRS.samplerCreate();
 
 
