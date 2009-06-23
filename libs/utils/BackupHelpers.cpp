@@ -302,6 +302,7 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
             r.s.modTime_sec = st.st_mtime;
             r.s.modTime_nsec = 0; // workaround sim breakage
             //r.s.modTime_nsec = st.st_mtime_nsec;
+            r.s.mode = st.st_mode;
             r.s.size = st.st_size;
             // we compute the crc32 later down below, when we already have the file open.
 
@@ -349,12 +350,12 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
                 g.s.crc32 = compute_crc32(fd);
 
                 LOGP("%s", q.string());
-                LOGP("  new: modTime=%d,%d size=%-3d crc32=0x%08x",
-                        f.modTime_sec, f.modTime_nsec, f.size, f.crc32);
-                LOGP("  old: modTime=%d,%d size=%-3d crc32=0x%08x",
-                        g.s.modTime_sec, g.s.modTime_nsec, g.s.size, g.s.crc32);
+                LOGP("  new: modTime=%d,%d mode=%04o size=%-3d crc32=0x%08x",
+                        f.modTime_sec, f.modTime_nsec, f.mode, f.size, f.crc32);
+                LOGP("  old: modTime=%d,%d mode=%04o size=%-3d crc32=0x%08x",
+                        g.s.modTime_sec, g.s.modTime_nsec, g.s.mode, g.s.size, g.s.crc32);
                 if (f.modTime_sec != g.s.modTime_sec || f.modTime_nsec != g.s.modTime_nsec
-                        || f.size != g.s.size || f.crc32 != g.s.crc32) {
+                        || f.mode != g.s.mode || f.size != g.s.size || f.crc32 != g.s.crc32) {
                     write_update_file(dataStream, fd, p, g.file.string());
                 }
 
@@ -450,6 +451,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     r.s.modTime_sec = st.st_mtime;
     r.s.modTime_nsec = 0; // workaround sim breakage
     //r.s.modTime_nsec = st.st_mtime_nsec;
+    r.s.mode = st.st_mode;
     r.s.size = st.st_size;
     r.s.crc32 = crc;
 
@@ -623,6 +625,7 @@ backup_helper_test_four()
 
     states[0].modTime_sec = 0xfedcba98;
     states[0].modTime_nsec = 0xdeadbeef;
+    states[0].mode = 0777; // decimal 511, hex 0x000001ff
     states[0].size = 0xababbcbc;
     states[0].crc32 = 0x12345678;
     states[0].nameLen = -12;
@@ -632,6 +635,7 @@ backup_helper_test_four()
 
     states[1].modTime_sec = 0x93400031;
     states[1].modTime_nsec = 0xdeadbeef;
+    states[1].mode = 0666; // decimal 438, hex 0x000001b6
     states[1].size = 0x88557766;
     states[1].crc32 = 0x22334422;
     states[1].nameLen = -1;
@@ -641,6 +645,7 @@ backup_helper_test_four()
 
     states[2].modTime_sec = 0x33221144;
     states[2].modTime_nsec = 0xdeadbeef;
+    states[2].mode = 0744; // decimal 484, hex 0x000001e4
     states[2].size = 0x11223344;
     states[2].crc32 = 0x01122334;
     states[2].nameLen = 0;
@@ -650,6 +655,7 @@ backup_helper_test_four()
 
     states[3].modTime_sec = 0x33221144;
     states[3].modTime_nsec = 0xdeadbeef;
+    states[3].mode = 0755; // decimal 493, hex 0x000001ed
     states[3].size = 0x11223344;
     states[3].crc32 = 0x01122334;
     states[3].nameLen = 0;
@@ -669,35 +675,38 @@ backup_helper_test_four()
     static const unsigned char correct_data[] = {
         // header
         0x53, 0x6e, 0x61, 0x70,  0x04, 0x00, 0x00, 0x00,
-        0x46, 0x69, 0x6c, 0x65,  0xac, 0x00, 0x00, 0x00,
+        0x46, 0x69, 0x6c, 0x65,  0xbc, 0x00, 0x00, 0x00,
 
         // bytes_of_padding
         0x98, 0xba, 0xdc, 0xfe,  0xef, 0xbe, 0xad, 0xde,
-        0xbc, 0xbc, 0xab, 0xab,  0x78, 0x56, 0x34, 0x12,
-        0x10, 0x00, 0x00, 0x00,  0x62, 0x79, 0x74, 0x65,
-        0x73, 0x5f, 0x6f, 0x66,  0x5f, 0x70, 0x61, 0x64,
-        0x64, 0x69, 0x6e, 0x67,
+        0xff, 0x01, 0x00, 0x00,  0xbc, 0xbc, 0xab, 0xab,
+        0x78, 0x56, 0x34, 0x12,  0x10, 0x00, 0x00, 0x00,
+        0x62, 0x79, 0x74, 0x65,  0x73, 0x5f, 0x6f, 0x66,
+        0x5f, 0x70, 0x61, 0x64,  0x64, 0x69, 0x6e, 0x67,
 
         // bytes_of_padding3
         0x31, 0x00, 0x40, 0x93,  0xef, 0xbe, 0xad, 0xde,
-        0x66, 0x77, 0x55, 0x88,  0x22, 0x44, 0x33, 0x22,
-        0x11, 0x00, 0x00, 0x00,  0x62, 0x79, 0x74, 0x65,
-        0x73, 0x5f, 0x6f, 0x66,  0x5f, 0x70, 0x61, 0x64,
-        0x64, 0x69, 0x6e, 0x67,  0x33, 0xab, 0xab, 0xab,
+        0xb6, 0x01, 0x00, 0x00,  0x66, 0x77, 0x55, 0x88,
+        0x22, 0x44, 0x33, 0x22,  0x11, 0x00, 0x00, 0x00,
+        0x62, 0x79, 0x74, 0x65,  0x73, 0x5f, 0x6f, 0x66,
+        0x5f, 0x70, 0x61, 0x64,  0x64, 0x69, 0x6e, 0x67,
+        0x33, 0xab, 0xab, 0xab,
 
         // bytes of padding2
         0x44, 0x11, 0x22, 0x33,  0xef, 0xbe, 0xad, 0xde,
-        0x44, 0x33, 0x22, 0x11,  0x34, 0x23, 0x12, 0x01,
-        0x12, 0x00, 0x00, 0x00,  0x62, 0x79, 0x74, 0x65,
-        0x73, 0x5f, 0x6f, 0x66,  0x5f, 0x70, 0x61, 0x64,
-        0x64, 0x69, 0x6e, 0x67,  0x5f, 0x32, 0xab, 0xab,
+        0xe4, 0x01, 0x00, 0x00,  0x44, 0x33, 0x22, 0x11,
+        0x34, 0x23, 0x12, 0x01,  0x12, 0x00, 0x00, 0x00,
+        0x62, 0x79, 0x74, 0x65,  0x73, 0x5f, 0x6f, 0x66,
+        0x5f, 0x70, 0x61, 0x64,  0x64, 0x69, 0x6e, 0x67,
+        0x5f, 0x32, 0xab, 0xab,
 
         // bytes of padding3
         0x44, 0x11, 0x22, 0x33,  0xef, 0xbe, 0xad, 0xde,
-        0x44, 0x33, 0x22, 0x11,  0x34, 0x23, 0x12, 0x01,
-        0x13, 0x00, 0x00, 0x00,  0x62, 0x79, 0x74, 0x65,
-        0x73, 0x5f, 0x6f, 0x66,  0x5f, 0x70, 0x61, 0x64,
-        0x64, 0x69, 0x6e, 0x67,  0x5f, 0x5f, 0x31, 0xab
+        0xed, 0x01, 0x00, 0x00,  0x44, 0x33, 0x22, 0x11,
+        0x34, 0x23, 0x12, 0x01,  0x13, 0x00, 0x00, 0x00,
+        0x62, 0x79, 0x74, 0x65,  0x73, 0x5f, 0x6f, 0x66,
+        0x5f, 0x70, 0x61, 0x64,  0x64, 0x69, 0x6e, 0x67,
+        0x5f, 0x5f, 0x31, 0xab
     };
 
     err = compare_file(filename, correct_data, sizeof(correct_data));
@@ -731,14 +740,14 @@ backup_helper_test_four()
         const FileState state = readSnapshot.valueAt(i);
 
         if (name != filenames[i] || states[i].modTime_sec != state.modTime_sec
-                || states[i].modTime_nsec != state.modTime_nsec
+                || states[i].modTime_nsec != state.modTime_nsec || states[i].mode != state.mode
                 || states[i].size != state.size || states[i].crc32 != states[i].crc32) {
-            fprintf(stderr, "state %d expected={%d/%d, 0x%08x, 0x%08x, %3d} '%s'\n"
-                            "          actual={%d/%d, 0x%08x, 0x%08x, %3d} '%s'\n", i,
-                    states[i].modTime_sec, states[i].modTime_nsec, states[i].size, states[i].crc32,
-                    name.length(), filenames[i].string(),
-                    state.modTime_sec, state.modTime_nsec, state.size, state.crc32, state.nameLen,
-                    name.string());
+            fprintf(stderr, "state %d expected={%d/%d, 0x%08x, %04o, 0x%08x, %3d} '%s'\n"
+                            "          actual={%d/%d, 0x%08x, %04o, 0x%08x, %3d} '%s'\n", i,
+                    states[i].modTime_sec, states[i].modTime_nsec, states[i].mode, states[i].size,
+                    states[i].crc32, name.length(), filenames[i].string(),
+                    state.modTime_sec, state.modTime_nsec, state.mode, state.size, state.crc32,
+                    state.nameLen, name.string());
             matched = false;
         }
     }
@@ -839,6 +848,7 @@ test_read_header_and_entity(BackupDataReader& reader, const char* str)
     size_t actualSize;
     bool done;
     int type;
+    ssize_t nRead;
 
     // printf("\n\n---------- test_read_header_and_entity -- %s\n\n", str);
 
@@ -873,8 +883,9 @@ test_read_header_and_entity(BackupDataReader& reader, const char* str)
         goto finished;
     }
 
-    err = reader.ReadEntityData(buf, bufSize);
-    if (err != NO_ERROR) {
+    nRead = reader.ReadEntityData(buf, bufSize);
+    if (nRead < 0) {
+        err = reader.Status();
         fprintf(stderr, "ReadEntityData failed with %s\n", strerror(err));
         goto finished;
     }
