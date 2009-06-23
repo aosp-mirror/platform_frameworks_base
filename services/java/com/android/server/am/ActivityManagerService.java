@@ -8335,6 +8335,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 report.crashInfo.throwFileName = trace.getFileName();
                 report.crashInfo.throwClassName = trace.getClassName();
                 report.crashInfo.throwMethodName = trace.getMethodName();
+                report.crashInfo.throwLineNumber = trace.getLineNumber();
             } else if (r.notResponding) {
                 report.type = ApplicationErrorReport.TYPE_ANR;
                 report.anrInfo = new ApplicationErrorReport.AnrInfo();
