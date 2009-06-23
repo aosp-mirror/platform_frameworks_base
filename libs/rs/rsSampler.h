@@ -17,11 +17,6 @@
 #ifndef ANDROID_RS_SAMPLER_H
 #define ANDROID_RS_SAMPLER_H
 
-#include <math.h>
-#include <EGL/egl.h>
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-
 #include "rsAllocation.h"
 #include "RenderScript.h"
 

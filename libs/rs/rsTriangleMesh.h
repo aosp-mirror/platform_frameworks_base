@@ -17,15 +17,6 @@
 #ifndef ANDROID_RS_TRIANGLE_MESH_H
 #define ANDROID_RS_TRIANGLE_MESH_H
 
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <math.h>
-#include <EGL/egl.h>
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-
-#include <utils/Vector.h>
 
 #include "RenderScript.h"
 
@@ -60,7 +51,7 @@ public:
     size_t mSizeNorm;
 
     // GL buffer info
-    GLuint mBufferObjects[2];
+    uint32_t mBufferObjects[2];
 
     void analyzeElement();
 protected:

@@ -22,8 +22,6 @@ using namespace android::renderscript;
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-#include <utils/Log.h>
-
 TriangleMesh::TriangleMesh()
 {
     mVertexElement = NULL;

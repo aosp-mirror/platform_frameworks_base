@@ -20,8 +20,6 @@
 #include "string.h"
 #include "math.h"
 
-#include <utils/Log.h>
-
 using namespace android;
 using namespace android::renderscript;
 

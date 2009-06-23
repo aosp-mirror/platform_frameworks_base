@@ -21,7 +21,6 @@
 #include <math.h>
 
 #include <utils/misc.h>
-#include <utils/Log.h>
 
 #include <ui/EGLNativeWindowSurface.h>
 #include <ui/Surface.h>

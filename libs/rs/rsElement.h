@@ -17,8 +17,6 @@
 #ifndef ANDROID_STRUCTURED_ELEMENT_H
 #define ANDROID_STRUCTURED_ELEMENT_H
 
-#include <utils/Vector.h>
-
 #include "rsComponent.h"
 
 // ---------------------------------------------------------------------------

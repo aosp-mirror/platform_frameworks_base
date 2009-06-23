@@ -19,6 +19,9 @@
 #include "rsThreadIO.h"
 #include "utils/String8.h"
 
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+
 using namespace android;
 using namespace android::renderscript;
 
