@@ -4875,9 +4875,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
                         || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
             }
-            ensurePackageDexOpt(app.info.packageName);
-            if (app.instrumentationInfo != null) {
-                ensurePackageDexOpt(app.instrumentationInfo.packageName);
+            ensurePackageDexOpt(app.instrumentationInfo != null
+                    ? app.instrumentationInfo.packageName
+                    : app.info.packageName);
+            if (app.instrumentationClass != null) {
+                ensurePackageDexOpt(app.instrumentationClass.getPackageName());
             }
             thread.bindApplication(processName, app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info, providers,
