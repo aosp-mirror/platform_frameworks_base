@@ -88,13 +88,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private static final String INSTANCE_KEY_COMPONENT = "comp";
     private static final String INSTANCE_KEY_APPDATA = "data";
     private static final String INSTANCE_KEY_GLOBALSEARCH = "glob";
-    private static final String INSTANCE_KEY_DISPLAY_QUERY = "dQry";
-    private static final String INSTANCE_KEY_DISPLAY_SEL_START = "sel1";
-    private static final String INSTANCE_KEY_DISPLAY_SEL_END = "sel2";
-    private static final String INSTANCE_KEY_SELECTED_ELEMENT = "slEl";
-    private static final int INSTANCE_SELECTED_BUTTON = -2;
-    private static final int INSTANCE_SELECTED_QUERY = -1;
-    
+    private static final String INSTANCE_KEY_STORED_COMPONENT = "sComp";
+    private static final String INSTANCE_KEY_STORED_APPDATA = "sData";
+    private static final String INSTANCE_KEY_PREVIOUS_COMPONENTS = "sPrev";
+    private static final String INSTANCE_KEY_USER_QUERY = "uQry";
+
     private static final int SEARCH_PLATE_LEFT_PADDING_GLOBAL = 12;
     private static final int SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL = 7;
     
@@ -450,8 +448,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     /**
      * Save the minimal set of data necessary to recreate the search
      * 
-     * TODO: go through this and make sure that it saves everything that is needed
-     * 
      * @return A bundle with the state of the dialog.
      */
     @Override
@@ -462,20 +458,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         bundle.putParcelable(INSTANCE_KEY_COMPONENT, mLaunchComponent);
         bundle.putBundle(INSTANCE_KEY_APPDATA, mAppSearchData);
         bundle.putBoolean(INSTANCE_KEY_GLOBALSEARCH, mGlobalSearchMode);
-        
-        // UI state
-        bundle.putString(INSTANCE_KEY_DISPLAY_QUERY, mSearchAutoComplete.getText().toString());
-        bundle.putInt(INSTANCE_KEY_DISPLAY_SEL_START, mSearchAutoComplete.getSelectionStart());
-        bundle.putInt(INSTANCE_KEY_DISPLAY_SEL_END, mSearchAutoComplete.getSelectionEnd());
-        
-        int selectedElement = INSTANCE_SELECTED_QUERY;
-        if (mGoButton.isFocused()) {
-            selectedElement = INSTANCE_SELECTED_BUTTON;
-        } else if (mSearchAutoComplete.isPopupShowing()) {
-            selectedElement = 0; // TODO mSearchTextField.getListSelection()    // 0..n
-        }
-        bundle.putInt(INSTANCE_KEY_SELECTED_ELEMENT, selectedElement);
-        
+        bundle.putParcelable(INSTANCE_KEY_STORED_COMPONENT, mStoredComponentName);
+        bundle.putBundle(INSTANCE_KEY_STORED_APPDATA, mStoredAppSearchData);
+        bundle.putParcelableArrayList(INSTANCE_KEY_PREVIOUS_COMPONENTS, mPreviousComponents);
+        bundle.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
+
         return bundle;
     }
 
@@ -489,44 +476,26 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-        // Get the launch info
         ComponentName launchComponent = savedInstanceState.getParcelable(INSTANCE_KEY_COMPONENT);
         Bundle appSearchData = savedInstanceState.getBundle(INSTANCE_KEY_APPDATA);
         boolean globalSearch = savedInstanceState.getBoolean(INSTANCE_KEY_GLOBALSEARCH);
-        
-        // get the UI state
-        String displayQuery = savedInstanceState.getString(INSTANCE_KEY_DISPLAY_QUERY);
-        int querySelStart = savedInstanceState.getInt(INSTANCE_KEY_DISPLAY_SEL_START, -1);
-        int querySelEnd = savedInstanceState.getInt(INSTANCE_KEY_DISPLAY_SEL_END, -1);
-        int selectedElement = savedInstanceState.getInt(INSTANCE_KEY_SELECTED_ELEMENT);
-        
-        // show the dialog.  skip any show/hide animation, we want to go fast.
-        // send the text that actually generates the suggestions here;  we'll replace the display
-        // text as necessary in a moment.
-        if (!show(displayQuery, false, launchComponent, appSearchData, globalSearch)) {
+        ComponentName storedComponentName =
+                savedInstanceState.getParcelable(INSTANCE_KEY_STORED_COMPONENT);
+        Bundle storedAppSearchData =
+                savedInstanceState.getBundle(INSTANCE_KEY_STORED_APPDATA);
+        ArrayList<ComponentName> previousComponents =
+                savedInstanceState.getParcelableArrayList(INSTANCE_KEY_PREVIOUS_COMPONENTS);
+        String userQuery = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
+
+        // Set stored state
+        mStoredComponentName = storedComponentName;
+        mStoredAppSearchData = storedAppSearchData;
+        mPreviousComponents = previousComponents;
+
+        // show the dialog.
+        if (!doShow(userQuery, false, launchComponent, appSearchData, globalSearch)) {
             // for some reason, we couldn't re-instantiate
             return;
-        }
-        
-        mSearchAutoComplete.setText(displayQuery);
-        
-        // clean up the selection state
-        switch (selectedElement) {
-        case INSTANCE_SELECTED_BUTTON:
-            mGoButton.setEnabled(true);
-            mGoButton.setFocusable(true);
-            mGoButton.requestFocus();
-            break;
-        case INSTANCE_SELECTED_QUERY:
-            if (querySelStart >= 0 && querySelEnd >= 0) {
-                mSearchAutoComplete.requestFocus();
-                mSearchAutoComplete.setSelection(querySelStart, querySelEnd);
-            }
-            break;
-        default:
-            // TODO: defer selecting a list element until suggestion list appears
-//            mSearchAutoComplete.setListSelection(selectedElement)
-            break;
         }
     }
     
