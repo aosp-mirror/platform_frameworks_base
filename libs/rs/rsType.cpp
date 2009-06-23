@@ -63,7 +63,6 @@ size_t Type::getOffsetForFace(uint32_t face) const
 
 void Type::compute()
 {
-    //LOGE("compute");
     uint32_t oldLODCount = mLODCount;
     if (mDimLOD) {
         uint32_t l2x = rsFindHighBit(mDimX) + 1;
@@ -80,9 +79,6 @@ void Type::compute()
         mLODs = new LOD[mLODCount];
     }
 
-    //LOGE("xyz %i %i %i", mDimX, mDimY, mDimZ);
-    //LOGE("mips %i", mLODCount);
-    //LOGE("e size %i", mElement->getSizeBytes());
     uint32_t tx = mDimX;
     uint32_t ty = mDimY;
     uint32_t tz = mDimZ;
@@ -92,14 +88,11 @@ void Type::compute()
         mLODs[lod].mY = ty;
         mLODs[lod].mZ = tz;
         mLODs[lod].mOffset = offset;
-        //LOGE("txyz %i %i %i", tx, ty, tz);
         offset += tx * rsMax(ty, 1u) * rsMax(tz, 1u) * mElement->getSizeBytes();
         tx = (tx + 1) >> 1;
         ty = (ty + 1) >> 1;
         tz = (tz + 1) >> 1;
     }
-
-    //LOGE("size %i", offset);
 
     // At this point the offset is the size of a mipmap chain;
     mMipChainSizeBytes = offset;

@@ -171,8 +171,6 @@ void rsi_ProgramFragmentBindTexture(Context *rsc, RsProgramFragment vpf, uint32_
 {
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
     pf->bindTexture(slot, static_cast<Allocation *>(a));
-
-    //LOGE("%p %p", pf, rsc->getFragment());
     if (pf == rsc->getFragment()) {
         pf->setupGL();
     }

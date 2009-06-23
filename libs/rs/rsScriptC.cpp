@@ -472,13 +472,9 @@ void ScriptCState::runCompiler(Context *rsc)
         accGetPragmas(mAccScript, &pragmaCount, pragmaMax, &str[0]);
 
         for (int ct=0; ct < pragmaCount; ct+=2) {
-            LOGE("pragma %i %s %s", ct, str[ct], str[ct+1]);
-
             if (!strcmp(str[ct], "version")) {
                 continue;
-
             }
-
 
             if (!strcmp(str[ct], "stateVertex")) {
                 if (!strcmp(str[ct+1], "default")) {

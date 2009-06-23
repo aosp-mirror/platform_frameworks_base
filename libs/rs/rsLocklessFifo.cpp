@@ -64,8 +64,6 @@ uint32_t LocklessCommandFifo::getFreeSpace() const
     if (freeSpace < 0) {
         freeSpace = 0;
     }
-    
-    //LOGE("free %i", freeSpace);
     return freeSpace;
 }
 
@@ -90,13 +88,11 @@ void * LocklessCommandFifo::reserve(uint32_t sizeInBytes)
 
 void LocklessCommandFifo::commit(uint32_t command, uint32_t sizeInBytes)
 {
-    //LOGE("commit cmd %i  size %i", command, sizeInBytes);
     //dumpState("commit 1");
     reinterpret_cast<uint16_t *>(mPut)[0] = command;
     reinterpret_cast<uint16_t *>(mPut)[1] = sizeInBytes;
     mPut += ((sizeInBytes + 3) & ~3) + 4;
     //dumpState("commit 2");
-
     mSignalToWorker.set();
 }
 
@@ -123,12 +119,9 @@ const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData)
             mSignalToControl.set();
             mSignalToWorker.wait();
         }
-        //dumpState("get 3");
 
         *command = reinterpret_cast<const uint16_t *>(mGet)[0];
         *bytesData = reinterpret_cast<const uint16_t *>(mGet)[1];
-        //LOGE("Got %i, %i", *command, *bytesData);
-    
         if (*command) {
             // non-zero command is valid
             return mGet+4;
@@ -173,7 +166,7 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes)
 
 void LocklessCommandFifo::dumpState(const char *s) const
 {
-    LOGE("%s  put %p, get %p,  buf %p,  end %p", s, mPut, mGet, mBuffer, mEnd);
+    LOGV("%s  put %p, get %p,  buf %p,  end %p", s, mPut, mGet, mBuffer, mEnd);
 }
 
 LocklessCommandFifo::Signal::Signal()

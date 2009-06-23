@@ -50,7 +50,6 @@ Allocation::Allocation(const Type *type)
 
 Allocation::~Allocation()
 {
-    LOGE("Allocation %p destryed", this);
 }
 
 void Allocation::setCpuWritable(bool)
@@ -79,8 +78,6 @@ void Allocation::uploadToTexture(uint32_t lodOffset)
     //rsAssert(!mTextureId);
     rsAssert(lodOffset < mType->getLODCount());
 
-    //LOGE("uploadToTexture  %i,  lod %i", mTextureID, lodOffset);
-
     GLenum type = mType->getElement()->getGLType();
     GLenum format = mType->getElement()->getGLFormat();
 
@@ -108,8 +105,6 @@ void Allocation::uploadToBufferObject()
 {
     rsAssert(!mType->getDimY());
     rsAssert(!mType->getDimZ());
-
-    //LOGE("uploadToTexture  %i,  lod %i", mTextureID, lodOffset);
 
     if (!mBufferID) {
         glGenBuffers(1, &mBufferID);

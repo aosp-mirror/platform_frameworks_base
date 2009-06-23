@@ -119,9 +119,6 @@ void * Context::threadProc(void *vrsc)
      Context *rsc = static_cast<Context *>(vrsc);
 
      gIO = new ThreadIO();
-     rsc->mServerCommands.init(128);
-     rsc->mServerReturns.init(128);
-
      rsc->initEGL();
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
@@ -169,9 +166,6 @@ Context::Context(Device *dev, Surface *sur)
     mRunning = false;
     mExit = false;
 
-    mServerCommands.init(256);
-    mServerReturns.init(256);
-
     // see comment in header
     gCon = this;
 
@@ -194,13 +188,14 @@ Context::Context(Device *dev, Surface *sur)
     sparam.sched_priority = ANDROID_PRIORITY_DISPLAY;
     pthread_attr_setschedparam(&threadAttr, &sparam);
 
-    LOGE("RS Launching thread");
+    mWndSurface = sur;
+
+    LOGV("RS Launching thread");
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
     if (status) {
         LOGE("Failed to start rs context thread.");
     }
 
-    mWndSurface = sur;
     while(!mRunning) {
         sleep(1);
     }

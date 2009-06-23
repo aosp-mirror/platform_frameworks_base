@@ -36,11 +36,11 @@ ProgramVertex::~ProgramVertex()
 
 static void logMatrix(const char *txt, const float *f)
 {
-    LOGE("Matrix %s, %p", txt, f);
-    LOGE("%6.2f, %6.2f, %6.2f, %6.2f", f[0], f[4], f[8], f[12]);
-    LOGE("%6.2f, %6.2f, %6.2f, %6.2f", f[1], f[5], f[9], f[13]);
-    LOGE("%6.2f, %6.2f, %6.2f, %6.2f", f[2], f[6], f[10], f[14]);
-    LOGE("%6.2f, %6.2f, %6.2f, %6.2f", f[3], f[7], f[11], f[15]);
+    LOGV("Matrix %s, %p", txt, f);
+    LOGV("%6.2f, %6.2f, %6.2f, %6.2f", f[0], f[4], f[8], f[12]);
+    LOGV("%6.2f, %6.2f, %6.2f, %6.2f", f[1], f[5], f[9], f[13]);
+    LOGV("%6.2f, %6.2f, %6.2f, %6.2f", f[2], f[6], f[10], f[14]);
+    LOGV("%6.2f, %6.2f, %6.2f, %6.2f", f[3], f[7], f[11], f[15]);
 }
 
 void ProgramVertex::setupGL()

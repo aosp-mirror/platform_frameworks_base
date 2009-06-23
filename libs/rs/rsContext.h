@@ -116,9 +116,6 @@ protected:
     bool mRunning;
     bool mExit;
 
-    LocklessCommandFifo mServerCommands;
-    LocklessCommandFifo mServerReturns;
-
     pthread_t mThreadId;
 
     ObjectBaseRef<Script> mRootScript;
