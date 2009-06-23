@@ -51,8 +51,8 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
     private SQLiteDatabase mDB;
     private SurfaceHolder mSurfaceHolder = null;
-    private static final int NUM_STRESS_LOOP = 1;
-    private static final int NUM_PLAYBACk_IN_EACH_LOOP = 2;
+    private static final int NUM_STRESS_LOOP = 10;
+    private static final int NUM_PLAYBACk_IN_EACH_LOOP = 20;
     private static final long MEDIA_STRESS_WAIT_TIME = 5000; //5 seconds
     private static final String MEDIA_MEMORY_OUTPUT =
         "/sdcard/mediaMemOutput.txt";
