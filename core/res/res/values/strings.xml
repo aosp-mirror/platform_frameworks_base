@@ -1808,15 +1808,15 @@
     <!-- External media notification strings -->
     <!-- Shown when external media is being checked -->
     <string name="ext_media_checking_notification_title">Preparing SD card</string>
-    <string name="ext_media_checking_notification_message">Checking for errors</string>
+    <string name="ext_media_checking_notification_message">Checking for errors.</string>
 
     <!-- Shown when external media is blank (or unsupported filesystem) -->
     <string name="ext_media_nofs_notification_title">Blank SD card</string>
-    <string name="ext_media_nofs_notification_message">The SD card is blank or using an unsupported filesystem.</string>
+    <string name="ext_media_nofs_notification_message">SD card blank or has unsupported filesystem.</string>
 
     <!-- Shown when external media is unmountable (corrupt)) -->
     <string name="ext_media_unmountable_notification_title">Damaged SD card</string>
-    <string name="ext_media_unmountable_notification_message">The SD card is damaged. You may have to reformat your card.</string>
+    <string name="ext_media_unmountable_notification_message">SD card damaged. You may have to reformat it.</string>
 
     <!-- Shown when external media is unsafely removed -->
     <string name="ext_media_badremoval_notification_title">SD card unexpectedly removed</string>
@@ -1824,11 +1824,11 @@
 
     <!-- Shown when external media has been safely removed -->
     <string name="ext_media_safe_unmount_notification_title">SD card safe to remove</string>
-    <string name="ext_media_safe_unmount_notification_message">The SD card can now be safely removed.</string>
+    <string name="ext_media_safe_unmount_notification_message">You can safely remove SD card.</string>
 
     <!-- Shown when external media is missing -->
     <string name="ext_media_nomedia_notification_title">Removed SD card</string>
-    <string name="ext_media_nomedia_notification_message">The SD has been removed. Insert a new SD card to increase your device storage.</string>
+    <string name="ext_media_nomedia_notification_message">SD card removed. Insert a new one.</string>
 
     <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
     <string name="activity_list_empty">No matching activities found</string>
