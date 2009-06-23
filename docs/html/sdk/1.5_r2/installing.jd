@@ -9,7 +9,7 @@ page.title=Installing the Android SDK
 <p>This page describes how to install the Android SDK and set up your
 development environment. If you haven't downloaded the SDK, you can
 do so from the 
-<a href="{@docRoot}sdk/1.5_r2/index.html">Download</a> page. Once you've downloaded
+<a href="index.html">Download</a> page. Once you've downloaded
 the SDK, return here.</p>
 
 <p>If you encounter any problems during installation, see the 
@@ -19,7 +19,7 @@ this page.</p>
 <h4 style="margin-top">Upgrading?</h4>
 <p>If you have already developed applications using an earlier version
 of the SDK, please read 
-<a href="{@docRoot}sdk/1.5_r2/upgrading.html"><strong>Upgrading the
+<a href="upgrading.html"><strong>Upgrading the
 SDK</strong></a></b>, instead.
 </p>
 
@@ -27,7 +27,7 @@ SDK</strong></a></b>, instead.
 <h2 id="setup">Preparing for Installation</h2>
 
 <p>Before you begin, take a moment to confirm that your development machine meets the 
-<a href="{@docRoot}sdk/1.5_r2/requirements.html">System Requirements</a>.
+<a href="requirements.html">System Requirements</a>.
 </p>
 
 <p>If you will be developing on Eclipse with the Android Development
@@ -323,7 +323,7 @@ begin developing applications. Here are a few ways you can get started: </p>
 <ul>
   <li>If JDK is already installed on your development computer, please
   take a moment to make sure that it meets the version requirements listed
-  in the <a href="{@docRoot}sdk/1.1_r1/requirements.html">System Requirements</a>.
+  in the <a href="{@docRoot}sdk/{@sdkCurrent}/requirements.html">System Requirements</a>.
   In particular, note that some Linux distributions may include JDK 1.4 or Gnu
   Compiler for Java, both of which are not supported for Android development.</li>
 </ul>

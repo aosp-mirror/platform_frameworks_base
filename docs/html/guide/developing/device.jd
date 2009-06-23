@@ -137,7 +137,7 @@ would on the emulator. There are just a few things to do before you can start.</
       <li>If you're developing on Mac OS X, it just works. Skip this step.</li>
       <li>If you're developing on Ubuntu Linux, you need to add a rules file:
         <ol>
-          <li>Login as root and create this file: <code>/etc/udev/rules.d/50-android.rules</code>.
+          <li>Login as root and create this file: <code>/etc/udev/rules.d/51-android.rules</code>.
             <p>For Gusty/Hardy, edit the file to read: <br/>
               <code>SUBSYSTEM=="usb", SYSFS{idVendor}=="0bb4", MODE="0666"</code></p>
 
