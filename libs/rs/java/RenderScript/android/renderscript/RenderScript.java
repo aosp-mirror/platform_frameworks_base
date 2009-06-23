@@ -157,6 +157,14 @@ public class RenderScript {
     native private void nProgramVertexSetTextureMatrixEnable(boolean enable);
     native private int  nProgramVertexCreate();
 
+    native private void nLightBegin();
+    native private void nLightSetIsMono(boolean isMono);
+    native private void nLightSetIsLocal(boolean isLocal);
+    native private int  nLightCreate();
+    native private void nLightDestroy(int l);
+    native private void nLightSetColor(int l, float r, float g, float b);
+    native private void nLightSetPosition(int l, float x, float y, float z);
+
 
     private int     mDev;
     private int     mContext;
@@ -869,6 +877,44 @@ public class RenderScript {
         return new Sampler(id);
     }
 
+    //////////////////////////////////////////////////////////////////////////////////
+    // Light
+
+    public class Light extends BaseObj {
+        Light(int id) {
+            mID = id;
+        }
+
+        public void destroy() {
+            nLightDestroy(mID);
+            mID = 0;
+        }
+
+        public void setColor(float r, float g, float b) {
+            nLightSetColor(mID, r, g, b);
+        }
+
+        public void setPosition(float x, float y, float z) {
+            nLightSetPosition(mID, x, y, z);
+        }
+    }
+
+    public void lightBegin() {
+        nLightBegin();
+    }
+
+    public void lightSetIsMono(boolean isMono) {
+        nLightSetIsMono(isMono);
+    }
+
+    public void lightSetIsLocal(boolean isLocal) {
+        nLightSetIsLocal(isLocal);
+    }
+
+    public Light lightCreate() {
+        int id = nLightCreate();
+        return new Light(id);
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Root state

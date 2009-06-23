@@ -881,10 +881,67 @@ static jint
 nSamplerCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nSamplerCreate, con(%p), script(%p)", con, (RsScript)script);
+    LOG_API("nSamplerCreate, con(%p)", con);
     return (jint)rsSamplerCreate();
 }
 
+// ---------------------------------------------------------------------------
+
+static void
+nLightBegin(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nLightBegin, con(%p)", con);
+    rsLightBegin();
+}
+
+static void
+nLightSetIsMono(JNIEnv *_env, jobject _this, jboolean isMono)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nLightSetIsMono, con(%p), isMono(%i)", con, isMono);
+    rsLightSetMonochromatic(isMono);
+}
+
+static void
+nLightSetIsLocal(JNIEnv *_env, jobject _this, jboolean isLocal)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nLightSetIsLocal, con(%p), isLocal(%i)", con, isLocal);
+    rsLightSetLocal(isLocal);
+}
+
+static jint
+nLightCreate(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nLightCreate, con(%p)", con);
+    return (jint)rsLightCreate();
+}
+
+static void
+nLightDestroy(JNIEnv *_env, jobject _this, jint light)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nLightDestroy, con(%p), light(%p)", con, (RsLight)light);
+    rsLightDestroy((RsLight)light);
+}
+
+static void
+nLightSetColor(JNIEnv *_env, jobject _this, jint light, float r, float g, float b)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nLightSetColor, con(%p), light(%p), r(%f), g(%f), b(%f)", con, (RsLight)light, r, g, b);
+    rsLightSetColor((RsLight)light, r, g, b);
+}
+
+static void
+nLightSetPosition(JNIEnv *_env, jobject _this, jint light, float x, float y, float z)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nLightSetPosition, con(%p), light(%p), x(%f), y(%f), z(%f)", con, (RsLight)light, x, y, z);
+    rsLightSetPosition((RsLight)light, x, y, z);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -978,6 +1035,14 @@ static JNINativeMethod methods[] = {
 {"nProgramVertexSetType",          "(II)V",                                (void*)nProgramVertexSetType },
 {"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
 {"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
+
+{"nLightBegin",                    "()V",                                  (void*)nLightBegin },
+{"nLightSetIsMono",                "(Z)V",                                 (void*)nLightSetIsMono },
+{"nLightSetIsLocal",               "(Z)V",                                 (void*)nLightSetIsLocal },
+{"nLightCreate",                   "()I",                                  (void*)nLightCreate },
+{"nLightDestroy",                  "(I)V",                                 (void*)nLightDestroy },
+{"nLightSetColor",                 "(IFFF)V",                              (void*)nLightSetColor },
+{"nLightSetPosition",              "(IFFF)V",                              (void*)nLightSetPosition },
 
 {"nContextBindRootScript",         "(I)V",                                 (void*)nContextBindRootScript },
 {"nContextBindProgramFragmentStore","(I)V",                                (void*)nContextBindProgramFragmentStore },

@@ -85,6 +85,7 @@ public class FilmRS {
     private RenderScript.Allocation mAllocState;
     private RenderScript.Allocation mAllocPV;
     private RenderScript.TriangleMesh mMesh;
+    private RenderScript.Light mLight;
 
     private float[] mBufferPos;
     private float[] mBufferPV;
@@ -143,6 +144,10 @@ public class FilmRS {
         mRS.programVertexSetTextureMatrixEnable(true);
         mPV = mRS.programVertexCreate();
         mPV.setName("PV");
+
+        mRS.lightBegin();
+        mLight = mRS.lightCreate();
+        mLight.setPosition(0, -0.5f, -1.0f);
 
         Log.e("rs", "Done loading named");
     }
