@@ -50,12 +50,12 @@ public class ToneGenerator
      *
      * @see #ToneGenerator(int, int)
      */
-   public static final int TONE_DTMF_2 = 2;
-   /**
-    * DTMF tone for key 3: 1477Hz, 697Hz, continuous
-    *
-    * @see #ToneGenerator(int, int)
-    */
+    public static final int TONE_DTMF_2 = 2;
+    /**
+     * DTMF tone for key 3: 1477Hz, 697Hz, continuous
+     *
+     * @see #ToneGenerator(int, int)
+     */
     public static final int TONE_DTMF_3 = 3;
     /**
      * DTMF tone for key 4: 1209Hz, 770Hz, continuous
@@ -254,242 +254,474 @@ public class ToneGenerator
      * @see #ToneGenerator(int, int)
      */
     public static final int TONE_SUP_PIP = 33;
-
-
     /**
-     * CDMA SPECIFIC TONES START
-     */
-
-    /** TODO(Moto): Change "Proprietary" below with an appropriate specification reference */
-
-    /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
+     *  CDMA Dial tone : 425Hz  continuous
      *
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
     public static final int TONE_CDMA_DIAL_TONE_LITE = 34;
-
-     /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
+    /**
+     * CDMA USA Ringback: 440Hz+480Hz 2s ON, 4000 OFF ...
      *
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
     public static final int TONE_CDMA_NETWORK_USA_RINGBACK = 35;
-
     /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
+     *  CDMA Intercept tone: 440Hz 250ms ON, 620Hz 250ms ON ...
      *
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
-    public static final int TONE_CDMA_REORDER = 36;
-
-   /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
-     *
-     * @see #ToneGenerator(int, int)
-     *
-     * @hide
-     */
-     public static final int TONE_CDMA_ABBR_REORDER = 37;
-
-   /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
-     *
-     * @see #ToneGenerator(int, int)
-     *
-     * @hide
-     */
-     public static final int TONE_CDMA_NETWORK_BUSY = 38;
-
-
-   /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
-     *
-     * @see #ToneGenerator(int, int)
-     *
-     * @hide
-     */
-    public static final int TONE_CDMA_ANSWER = 39;
-
-   /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
-     *
-     * @see #ToneGenerator(int, int)
-     *
-     * @hide
-     */
-    public static final int TONE_CDMA_NETWORK_CALLWAITING = 40;
-
-   /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
-     *
-     * @see #ToneGenerator(int, int)
-     *
-     * @hide
-     */
-    public static final int TONE_CDMA_PIP = 41;
-
-
+    public static final int TONE_CDMA_INTERCEPT = 36;
     /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
+     * CDMA Abbr Intercept tone: 440Hz 250ms ON, 620Hz 250ms ON
      *
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
-    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL = 42;
-
+    public static final int TONE_CDMA_ABBR_INTERCEPT = 37;
     /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
+     * CDMA Reorder tone: 480Hz+620Hz 250ms ON, 250ms OFF...
      *
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
-    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP = 43;
-
-     /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
-     *
-     * @see #ToneGenerator(int, int)
-     *
-     * @hide
-     */
-    public static final int TONE_CDMA_CALL_SIGNAL_SP_PRI = 44;
-
+    public static final int TONE_CDMA_REORDER = 38;
     /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
      *
+     * CDMA Abbr Reorder tone: 480Hz+620Hz 250ms ON, 250ms OFF repeated for 8 times
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
-    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PAT3 = 45;
-
+    public static final int TONE_CDMA_ABBR_REORDER = 39;
     /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
+     * CDMA Network Busy tone: 480Hz+620Hz 500ms ON, 500ms OFF continuous
      *
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
-    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_RING_RING = 46;
-
+    public static final int TONE_CDMA_NETWORK_BUSY = 40;
     /**
-     * Proprietary tone, general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
+     * CDMA Confirm tone: 350Hz+440Hz 100ms ON, 100ms OFF repeated for 3 times
      *
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
-    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PAT5 = 47;
-
+    public static final int TONE_CDMA_CONFIRM = 41;
     /**
-     * general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
      *
+     * CDMA answer tone: silent tone - defintion Frequency 0, 0ms ON, 0ms OFF
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
-    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PAT6 = 48;
-
+    public static final int TONE_CDMA_ANSWER = 42;
     /**
-     * general double beep: twice 400Hz+1200Hz, 35ms ON, 200ms OFF, 35ms ON
+     *
+     * CDMA Network Callwaiting tone: 440Hz 300ms ON
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_NETWORK_CALLWAITING = 43;
+    /**
+     * CDMA PIP tone: 480Hz 100ms ON, 100ms OFF repeated for 4 times
      *
      * @see #ToneGenerator(int, int)
-     *
-     * @hide
      */
-    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PAT7 = 49;
-
-    // TODO(Moto): Need comments for each one and we need ToneGenerator.cpp/ToneGenerator.h
-
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_L = 50;
-
-    /** @hide */
-    public static final int TONE_CDMA_LOW_L = 51;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_SS = 52;
-    /** @hide */
-    public static final int TONE_CDMA_MED_SS = 53;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_SS = 54;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_SSL = 55;
-
-
-    /** @hide */
-    public static final int TONE_CDMA_MED_SSL = 56;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_SSL = 57;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_SS_2 = 58;
-    /** @hide */
-    public static final int TONE_CDMA_MED_SS_2 = 59;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_SS_2 = 60;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_SLS = 61;
-    /** @hide */
-    public static final int TONE_CDMA_MED_SLS = 62;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_SLS = 63;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_S_X4 = 64;
-    /** @hide */
-    public static final int TONE_CDMA_MED_S_X4 = 65;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_S_X4 = 66;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_PBX_L = 67;
-    /** @hide */
-    public static final int TONE_CDMA_MED_PBX_L = 68;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_PBX_L = 69;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_PBX_SS = 70;
-    /** @hide */
-    public static final int TONE_CDMA_MED_PBX_SS = 71;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_PBX_SS = 72;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_PBX_SSL = 73;
-    /** @hide */
-    public static final int TONE_CDMA_MED_PBX_SSL = 74;
-
-    /** @hide */
-    public static final int TONE_CDMA_LOW_PBX_SSL = 75;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_PBX_SLS = 76;
-    /** @hide */
-    public static final int TONE_CDMA_MED_PBX_SLS = 77;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_PBX_SLS = 78;
-    /** @hide */
-    public static final int TONE_CDMA_HIGH_PBX_S_X4 = 79;
-    /** @hide */
-    public static final int TONE_CDMA_MED_PBX_S_X4 = 80;
-    /** @hide */
-    public static final int TONE_CDMA_LOW_PBX_S_X4 = 81;
-    /** @hide */
-    public static final int TONE_CDMA_INTERCEPT_ONE_SHOT = TONE_SUP_INTERCEPT_ABBREV;
-    /** @hide */
-    public static final int TONE_CDMA_REORDER_ONE_SHOT = TONE_CDMA_ABBR_REORDER;
-    /** @hide */
-    public static final int TONE_CDMA_NETWORK_BUSY_ONE_SHOT = 82;
-    /** @hide */
-    public static final int TONE_CDMA_ABBR_ALERT = 83;
-    /** @hide */
-    public static final int TONE_CDMA_SIGNAL_OFF = 84;
-    /** @hide */
-    public static final int TONE_CDMA_INVALID = 85;
+    public static final int TONE_CDMA_PIP = 44;
+    /**
+     *  ISDN Call Signal Normal tone: {2091Hz 32ms ON, 2556 64ms ON} 20 times,
+     *  2091 32ms ON, 2556 48ms ON, 4s OFF
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL = 45;
+    /**
+     *  ISDN Call Signal Intergroup tone: {2091Hz 32ms ON, 2556 64ms ON} 8 times,
+     * 2091Hz 32ms ON, 400ms OFF, {2091Hz 32ms ON, 2556Hz 64ms ON} times,
+     * 2091Hz 32ms ON, 4s OFF.
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP = 46;
+    /**
+     * ISDN Call Signal SP PRI tone:{2091Hz 32ms ON, 2556 64ms ON} 4 times
+     * 2091Hz 16ms ON, 200ms OFF, {2091Hz 32ms ON, 2556Hz 64ms ON} 4 times,
+     * 2091Hz 16ms ON, 200ms OFF
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_SP_PRI = 47;
+    /**
+     * ISDN Call sign PAT3 tone: silent tone
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PAT3 = 48;
+    /**
+     * ISDN Ping Ring tone: {2091Hz 32ms ON, 2556Hz 64ms ON} 5 times
+     * 2091Hz 20ms ON
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PING_RING = 49;
+    /**
+     *
+     * ISDN Pat5 tone: silent tone
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PAT5 = 50;
+    /**
+     *
+     * ISDN Pat6 tone: silent tone
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PAT6 = 51;
+    /**
+     * ISDN Pat7 tone: silent tone
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_CALL_SIGNAL_ISDN_PAT7 = 52;
+    /**
+     * TONE_CDMA_HIGH_L tone: {3700Hz 25ms, 4000Hz 25ms} 40 times
+     * 4000ms OFF, Repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_L = 53;
+    /**
+     * TONE_CDMA_MED_L tone: {2600Hz 25ms, 2900Hz 25ms} 40 times
+     * 4000ms OFF, Repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_L = 54;
+    /**
+     * TONE_CDMA_LOW_L tone: {1300Hz 25ms, 1450Hz 25ms} 40 times,
+     * 4000ms OFF, Repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_L = 55;
+    /**
+     * CDMA HIGH SS tone: {3700Hz 25ms, 4000Hz 25ms} repeat 16 times,
+     * 400ms OFF, repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_SS = 56;
+    /**
+     * CDMA MED SS tone: {2600Hz 25ms, 2900Hz 25ms} repeat 16 times,
+     * 400ms OFF, repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_SS = 57;
+    /**
+     * CDMA LOW SS tone: {1300z 25ms, 1450Hz 25ms} repeat 16 times,
+     * 400ms OFF, repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_SS = 58;
+    /**
+     * CDMA HIGH SSL tone: {3700Hz 25ms, 4000Hz 25ms} 8 times,
+     * 200ms OFF, {3700Hz 25ms, 4000Hz 25ms} repeat 8 times,
+     * 200ms OFF, {3700Hz 25ms, 4000Hz 25ms} repeat 16 times,
+     * 4000ms OFF, repeat ...
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_SSL = 59;
+    /**
+     * CDMA MED SSL tone: {2600Hz 25ms, 2900Hz 25ms} 8 times,
+     * 200ms OFF, {2600Hz 25ms, 2900Hz 25ms} repeat 8 times,
+     * 200ms OFF, {2600Hz 25ms, 2900Hz 25ms} repeat 16 times,
+     * 4000ms OFF, repeat ...
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_SSL = 60;
+    /**
+     * CDMA LOW SSL tone: {1300Hz 25ms, 1450Hz 25ms} 8 times,
+     * 200ms OFF, {1300Hz 25ms, 1450Hz 25ms} repeat 8 times,
+     * 200ms OFF, {1300Hz 25ms, 1450Hz 25ms} repeat 16 times,
+     * 4000ms OFF, repeat ...
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_SSL = 61;
+    /**
+     * CDMA HIGH SS2 tone: {3700Hz 25ms, 4000Hz 25ms} 20 times,
+     * 1000ms OFF, {3700Hz 25ms, 4000Hz 25ms} 20 times,
+     * 3000ms OFF, repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_SS_2 = 62;
+    /**
+     * CDMA MED SS2 tone: {2600Hz 25ms, 2900Hz 25ms} 20 times,
+     * 1000ms OFF, {2600Hz 25ms, 2900Hz 25ms} 20 times,
+     * 3000ms OFF, repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_SS_2 = 63;
+    /**
+     * CDMA LOW SS2 tone: {1300Hz 25ms, 1450Hz 25ms} 20 times,
+     * 1000ms OFF, {1300Hz 25ms, 1450Hz 25ms} 20 times,
+     * 3000ms OFF, repeat ....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_SS_2 = 64;
+    /**
+     *  CDMA HIGH SLS tone: {3700Hz 25ms, 4000Hz 25ms} 10 times,
+     *  500ms OFF, {3700Hz 25ms, 4000Hz 25ms} 20 times, 500ms OFF,
+     *  {3700Hz 25ms, 4000Hz 25ms} 10 times, 3000ms OFF, REPEAT
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_SLS = 65;
+    /**
+     *  CDMA MED  SLS tone: {2600Hz 25ms, 2900Hz 25ms} 10 times,
+     *  500ms OFF, {2600Hz 25ms, 2900Hz 25ms} 20 times, 500ms OFF,
+     *  {2600Hz 25ms, 2900Hz 25ms} 10 times, 3000ms OFF, REPEAT
+     *
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_SLS = 66;
+    /**
+     *  CDMA LOW SLS tone: {1300Hz 25ms, 1450Hz 25ms} 10 times,
+     *  500ms OFF, {1300Hz 25ms, 1450Hz 25ms} 20 times, 500ms OFF,
+     *  {1300Hz 25ms, 1450Hz 25ms} 10 times, 3000ms OFF, REPEAT
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_SLS = 67;
+    /**
+     *  CDMA HIGH S X4 tone: {3700Hz 25ms, 4000Hz 25ms} 10 times,
+     *  500ms OFF, {3700Hz 25ms, 4000Hz 25ms} 10 times, 500ms OFF,
+     *  {3700Hz 25ms, 4000Hz 25ms} 10 times, 500ms OFF,
+     *  {3700Hz 25ms, 4000Hz 25ms} 10 times, 2500ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_S_X4 = 68;
+    /**
+     *  CDMA MED S X4 tone: {2600Hz 25ms, 2900Hz 25ms} 10 times,
+     *  500ms OFF, {2600Hz 25ms, 2900Hz 25ms} 10 times, 500ms OFF,
+     *  {2600Hz 25ms, 2900Hz 25ms} 10 times, 500ms OFF,
+     *  {2600Hz 25ms, 2900Hz 25ms} 10 times, 2500ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_S_X4 = 69;
+    /**
+     *  CDMA LOW  S X4 tone: {2600Hz 25ms, 2900Hz 25ms} 10 times,
+     *  500ms OFF, {2600Hz 25ms, 2900Hz 25ms} 10 times, 500ms OFF,
+     *  {2600Hz 25ms, 2900Hz 25ms} 10 times, 500ms OFF,
+     *  {2600Hz 25ms, 2900Hz 25ms} 10 times, 2500ms OFF, REPEAT....
+     *
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_S_X4 = 70;
+    /**
+     * CDMA HIGH PBX L: {3700Hz 25ms, 4000Hz 25ms}20 times,
+     * 2000ms OFF,  REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_PBX_L = 71;
+    /**
+     *  CDMA MED PBX L: {2600Hz 25ms, 2900Hz 25ms}20 times,
+     * 2000ms OFF,  REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_PBX_L = 72;
+    /**
+     * CDMA LOW PBX L: {1300Hz 25ms,1450Hz 25ms}20 times,
+     * 2000ms OFF,  REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_PBX_L = 73;
+    /**
+     * CDMA HIGH PBX SS tone: {3700Hz 25ms, 4000Hz 25ms} 8 times
+     * 200 ms OFF, {3700Hz 25ms 4000Hz 25ms}8 times,
+     * 2000ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_PBX_SS = 74;
+    /**
+     * CDMA MED PBX SS tone: {2600Hz 25ms, 2900Hz 25ms} 8 times
+     * 200 ms OFF, {2600Hz 25ms 2900Hz 25ms}8 times,
+     * 2000ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_PBX_SS = 75;
+    /**
+     * CDMA LOW PBX SS tone: {1300Hz 25ms, 1450Hz 25ms} 8 times
+     * 200 ms OFF, {1300Hz 25ms 1450Hz 25ms}8 times,
+     * 2000ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_PBX_SS = 76;
+    /**
+     * CDMA HIGH PBX SSL tone:{3700Hz 25ms, 4000Hz 25ms} 8 times
+     * 200ms OFF, {3700Hz 25ms, 4000Hz 25ms} 8 times, 200ms OFF,
+     * {3700Hz 25ms, 4000Hz 25ms} 16 times, 1000ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_PBX_SSL = 77;
+    /**
+     * CDMA MED PBX SSL tone:{2600Hz 25ms, 2900Hz 25ms} 8 times
+     * 200ms OFF, {2600Hz 25ms, 2900Hz 25ms} 8 times, 200ms OFF,
+     * {2600Hz 25ms, 2900Hz 25ms} 16 times, 1000ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_PBX_SSL = 78;
+    /**
+     * CDMA LOW PBX SSL tone:{1300Hz 25ms, 1450Hz 25ms} 8 times
+     * 200ms OFF, {1300Hz 25ms, 1450Hz 25ms} 8 times, 200ms OFF,
+     * {1300Hz 25ms, 1450Hz 25ms} 16 times, 1000ms OFF, REPEAT....
+     *
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_PBX_SSL = 79;
+    /**
+     * CDMA HIGH PBX SSL tone:{3700Hz 25ms, 4000Hz 25ms} 8 times
+     * 200ms OFF, {3700Hz 25ms, 4000Hz 25ms} 16 times, 200ms OFF,
+     * {3700Hz 25ms, 4000Hz 25ms} 8 times, 1000ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_PBX_SLS = 80;
+    /**
+     * CDMA HIGH PBX SLS tone:{2600Hz 25ms, 2900Hz 25ms} 8 times
+     * 200ms OFF, {2600Hz 25ms, 2900Hz 25ms} 16 times, 200ms OFF,
+     * {2600Hz 25ms, 2900Hz 25ms} 8 times, 1000ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_PBX_SLS = 81;
+    /**
+     * CDMA HIGH PBX SLS tone:{1300Hz 25ms, 1450Hz 25ms} 8 times
+     * 200ms OFF, {1300Hz 25ms, 1450Hz 25ms} 16 times, 200ms OFF,
+     * {1300Hz 25ms, 1450Hz 25ms} 8 times, 1000ms OFF, REPEAT....
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_PBX_SLS = 82;
+    /**
+     * CDMA HIGH PBX X S4 tone: {3700Hz 25ms 4000Hz 25ms} 8 times,
+     * 200ms OFF, {3700Hz 25ms 4000Hz 25ms} 8 times, 200ms OFF,
+     * {3700Hz 25ms 4000Hz 25ms} 8 times, 200ms OFF,
+     * {3700Hz 25ms 4000Hz 25ms} 8 times, 800ms OFF, REPEAT...
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_HIGH_PBX_S_X4 = 83;
+    /**
+     * CDMA MED PBX X S4 tone: {2600Hz 25ms 2900Hz 25ms} 8 times,
+     * 200ms OFF, {2600Hz 25ms 2900Hz 25ms} 8 times, 200ms OFF,
+     * {2600Hz 25ms 2900Hz 25ms} 8 times, 200ms OFF,
+     * {2600Hz 25ms 2900Hz 25ms} 8 times, 800ms OFF, REPEAT...
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_MED_PBX_S_X4 = 84;
+    /**
+     * CDMA LOW PBX X S4 tone: {1300Hz 25ms 1450Hz 25ms} 8 times,
+     * 200ms OFF, {1300Hz 25ms 1450Hz 25ms} 8 times, 200ms OFF,
+     * {1300Hz 25ms 1450Hz 25ms} 8 times, 200ms OFF,
+     * {1300Hz 25ms 1450Hz 25ms} 8 times, 800ms OFF, REPEAT...
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_LOW_PBX_S_X4 = 85;
+    /**
+     * CDMA Alert Network Lite tone: 1109Hz 62ms ON, 784Hz 62ms ON, 740Hz 62ms ON
+     * 622Hz 62ms ON, 1109Hz 62ms ON
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_ALERT_NETWORK_LITE = 86;
+    /**
+     * CDMA Alert Auto Redial tone: {1245Hz 62ms ON, 659Hz 62ms ON} 3 times,
+     * 1245 62ms ON
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_ALERT_AUTOREDIAL_LITE = 87;
+    /**
+     * CDMA One Min Beep tone: 1150Hz+770Hz 400ms ON
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_ONE_MIN_BEEP = 88;
+    /**
+     *
+     * CDMA KEYPAD Volume key lite tone: 941Hz+1477Hz 120ms ON
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_KEYPAD_VOLUME_KEY_LITE = 89;
+    /**
+     * CDMA PRESSHOLDKEY LITE tone: 587Hz 375ms ON, 1175Hz 125ms ON
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_PRESSHOLDKEY_LITE = 90;
+    /**
+     * CDMA ALERT INCALL LITE tone: 587Hz 62ms, 784 62ms, 831Hz 62ms,
+     * 784Hz 62ms, 1109 62ms, 784Hz 62ms, 831Hz 62ms, 784Hz 62ms
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_ALERT_INCALL_LITE = 91;
+    /**
+     * CDMA EMERGENCY RINGBACK tone: {941Hz 125ms ON, 10ms OFF} 3times
+     * 4990ms OFF, REPEAT...
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_EMERGENCY_RINGBACK = 92;
+    /**
+     * CDMA ALERT CALL GUARD tone: {1319Hz 125ms ON, 125ms OFF} 3 times
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_ALERT_CALL_GUARD = 93;
+    /**
+     * CDMA SOFT ERROR LITE  tone: 1047Hz 125ms ON, 370Hz 125ms
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_SOFT_ERROR_LITE = 94;
+    /**
+     * CDMA CALLDROP LITE tone: 1480Hz 125ms, 1397Hz 125ms, 784Hz 125ms
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_CALLDROP_LITE = 95;
+    /**
+     * CDMA_NETWORK_BUSY_ONE_SHOT tone: 425Hz 500ms ON, 500ms OFF.
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_NETWORK_BUSY_ONE_SHOT = 96;
+    /**
+     * CDMA_ABBR_ALERT tone: 1150Hz+770Hz 400ms ON
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int    TONE_CDMA_ABBR_ALERT = 97;
+    /**
+     * CDMA_SIGNAL_OFF - silent tone
+     *
+     * @see #ToneGenerator(int, int)
+     */
+    public static final int TONE_CDMA_SIGNAL_OFF = 98;
 
     /** Maximum volume, for use with {@link #ToneGenerator(int,int)} */
     public static final int MAX_VOLUME = AudioSystem.MAX_VOLUME;
@@ -546,6 +778,71 @@ public class ToneGenerator
      * <li>{@link #TONE_SUP_CONGESTION_ABBREV}
      * <li>{@link #TONE_SUP_CONFIRM}
      * <li>{@link #TONE_SUP_PIP}
+     * <li>{@link #TONE_CDMA_DIAL_TONE_LITE}
+     * <li>{@link #TONE_CDMA_NETWORK_USA_RINGBACK}
+     * <li>{@link #TONE_CDMA_INTERCEPT}
+     * <li>{@link #TONE_CDMA_ABBR_INTERCEPT}
+     * <li>{@link #TONE_CDMA_REORDER}
+     * <li>{@link #TONE_CDMA_ABBR_REORDER}
+     * <li>{@link #TONE_CDMA_NETWORK_BUSY}
+     * <li>{@link #TONE_CDMA_CONFIRM}
+     * <li>{@link #TONE_CDMA_ANSWER}
+     * <li>{@link #TONE_CDMA_NETWORK_CALLWAITING}
+     * <li>{@link #TONE_CDMA_PIP}
+     * <li>{@link #TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL}
+     * <li>{@link #TONE_CDMA_CALL_SIGNAL_ISDN_INTERGROUP}
+     * <li>{@link #TONE_CDMA_CALL_SIGNAL_ISDN_SP_PRI}
+     * <li>{@link #TONE_CDMA_CALL_SIGNAL_ISDN_PAT3}
+     * <li>{@link #TONE_CDMA_CALL_SIGNAL_ISDN_PING_RING}
+     * <li>{@link #TONE_CDMA_CALL_SIGNAL_ISDN_PAT5}
+     * <li>{@link #TONE_CDMA_CALL_SIGNAL_ISDN_PAT6}
+     * <li>{@link #TONE_CDMA_CALL_SIGNAL_ISDN_PAT7}
+     * <li>{@link #TONE_CDMA_HIGH_L}
+     * <li>{@link #TONE_CDMA_MED_L}
+     * <li>{@link #TONE_CDMA_LOW_L}
+     * <li>{@link #TONE_CDMA_HIGH_SS}
+     * <li>{@link #TONE_CDMA_MED_SS}
+     * <li>{@link #TONE_CDMA_LOW_SS}
+     * <li>{@link #TONE_CDMA_HIGH_SSL}
+     * <li>{@link #TONE_CDMA_MED_SSL}
+     * <li>{@link #TONE_CDMA_LOW_SSL}
+     * <li>{@link #TONE_CDMA_HIGH_SS_2}
+     * <li>{@link #TONE_CDMA_MED_SS_2}
+     * <li>{@link #TONE_CDMA_LOW_SS_2}
+     * <li>{@link #TONE_CDMA_HIGH_SLS}
+     * <li>{@link #TONE_CDMA_MED_SLS}
+     * <li>{@link #TONE_CDMA_LOW_SLS}
+     * <li>{@link #TONE_CDMA_HIGH_S_X4}
+     * <li>{@link #TONE_CDMA_MED_S_X4}
+     * <li>{@link #TONE_CDMA_LOW_S_X4}
+     * <li>{@link #TONE_CDMA_HIGH_PBX_L}
+     * <li>{@link #TONE_CDMA_MED_PBX_L}
+     * <li>{@link #TONE_CDMA_LOW_PBX_L}
+     * <li>{@link #TONE_CDMA_HIGH_PBX_SS}
+     * <li>{@link #TONE_CDMA_MED_PBX_SS}
+     * <li>{@link #TONE_CDMA_LOW_PBX_SS}
+     * <li>{@link #TONE_CDMA_HIGH_PBX_SSL}
+     * <li>{@link #TONE_CDMA_MED_PBX_SSL}
+     * <li>{@link #TONE_CDMA_LOW_PBX_SSL}
+     * <li>{@link #TONE_CDMA_HIGH_PBX_SLS}
+     * <li>{@link #TONE_CDMA_MED_PBX_SLS}
+     * <li>{@link #TONE_CDMA_LOW_PBX_SLS}
+     * <li>{@link #TONE_CDMA_HIGH_PBX_S_X4}
+     * <li>{@link #TONE_CDMA_MED_PBX_S_X4}
+     * <li>{@link #TONE_CDMA_LOW_PBX_S_X4}
+     * <li>{@link #TONE_CDMA_ALERT_NETWORK_LITE}
+     * <li>{@link #TONE_CDMA_ALERT_AUTOREDIAL_LITE}
+     * <li>{@link #TONE_CDMA_ONE_MIN_BEEP}
+     * <li>{@link #TONE_CDMA_KEYPAD_VOLUME_KEY_LITE}
+     * <li>{@link #TONE_CDMA_PRESSHOLDKEY_LITE}
+     * <li>{@link #TONE_CDMA_ALERT_INCALL_LITE}
+     * <li>{@link #TONE_CDMA_EMERGENCY_RINGBACK}
+     * <li>{@link #TONE_CDMA_ALERT_CALL_GUARD}
+     * <li>{@link #TONE_CDMA_SOFT_ERROR_LITE}
+     * <li>{@link #TONE_CDMA_CALLDROP_LITE}
+     * <li>{@link #TONE_CDMA_NETWORK_BUSY_ONE_SHOT}
+     * <li>{@link #TONE_CDMA_ABBR_ALERT}
+     * <li>{@link #TONE_CDMA_SIGNAL_OFF}
      * </ul>
      * @see #ToneGenerator(int, int)
     */
@@ -566,7 +863,7 @@ public class ToneGenerator
     private native final void native_setup(int streamType, int volume);
 
     private native final void native_finalize();
-    
+
     @Override
     protected void finalize() { native_finalize(); }
 
