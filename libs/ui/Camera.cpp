@@ -149,21 +149,21 @@ status_t Camera::unlock()
 status_t Camera::setPreviewDisplay(const sp<Surface>& surface)
 {
     LOGV("setPreviewDisplay");
-    if (surface == 0) {
-        LOGE("app passed NULL surface");
-        return NO_INIT;
-    }
     sp <ICamera> c = mCamera;
     if (c == 0) return NO_INIT;
-    return c->setPreviewDisplay(surface->getISurface());
+    if (surface != 0) {
+        return c->setPreviewDisplay(surface->getISurface());
+    } else {
+        LOGD("app passed NULL surface");
+        return c->setPreviewDisplay(0);
+    }
 }
 
 status_t Camera::setPreviewDisplay(const sp<ISurface>& surface)
 {
     LOGV("setPreviewDisplay");
     if (surface == 0) {
-        LOGE("app passed NULL surface");
-        return NO_INIT;
+        LOGD("app passed NULL surface");
     }
     sp <ICamera> c = mCamera;
     if (c == 0) return NO_INIT;
@@ -171,7 +171,7 @@ status_t Camera::setPreviewDisplay(const sp<ISurface>& surface)
 }
 
 
-// start preview mode, must call setPreviewDisplay first
+// start preview mode
 status_t Camera::startPreview()
 {
     LOGV("startPreview");

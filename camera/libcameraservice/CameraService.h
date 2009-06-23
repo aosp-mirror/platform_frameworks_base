@@ -157,6 +157,8 @@ private:
         status_t                startCameraMode(camera_mode mode);
         status_t                startPreviewMode();
         status_t                startRecordingMode();
+        status_t                setOverlay();
+        status_t                registerPreviewBuffers();
 
         // Ensures atomicity among the public methods
         mutable     Mutex                       mLock;

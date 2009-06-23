@@ -410,11 +410,14 @@ void CameraService::Client::disconnect()
 // pass the buffered ISurface to the camera service
 status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
 {
-    LOGD("setPreviewDisplay(%p) (pid %d)", surface.get(), getCallingPid());
+    LOGD("setPreviewDisplay(%p) (pid %d)",
+         ((surface == NULL) ? NULL : surface.get()), getCallingPid());
     Mutex::Autolock lock(mLock);
     status_t result = checkPid();
     if (result != NO_ERROR) return result;
+
     Mutex::Autolock surfaceLock(mSurfaceLock);
+    result = NO_ERROR;
     // asBinder() is safe on NULL (returns NULL)
     if (surface->asBinder() != mSurface->asBinder()) {
         if (mSurface != 0 && !mUseOverlay) {
@@ -422,8 +425,17 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
             mSurface->unregisterBuffers();
         }
         mSurface = surface;
+        // If preview has been already started, set overlay or register preview
+        // buffers now.
+        if (mHardware->previewEnabled()) {
+            if (mUseOverlay) {
+                result = setOverlay();
+            } else if (mSurface != 0) {
+                result = registerPreviewBuffers();
+            }
+        }
     }
-    return NO_ERROR;
+    return result;
 }
 
 // set the preview callback flag to affect how the received frames from
@@ -436,7 +448,7 @@ void CameraService::Client::setPreviewCallbackFlag(int callback_flag)
     mPreviewCallbackFlag = callback_flag;
 }
 
-// start preview mode, must call setPreviewDisplay first
+// start preview mode
 status_t CameraService::Client::startCameraMode(camera_mode mode)
 {
     int callingPid = getCallingPid();
@@ -456,16 +468,18 @@ status_t CameraService::Client::startCameraMode(camera_mode mode)
         return INVALID_OPERATION;
     }
 
-    if (mSurface == 0) {
-        LOGE("setPreviewDisplay must be called before startCameraMode!");
-        return INVALID_OPERATION;
-    }
-
     switch(mode) {
     case CAMERA_RECORDING_MODE:
+        if (mSurface == 0) {
+            LOGE("setPreviewDisplay must be called before startRecordingMode.");
+            return INVALID_OPERATION;
+        }
         return startRecordingMode();
 
     default: // CAMERA_PREVIEW_MODE
+        if (mSurface == 0) {
+            LOGD("mSurface is not set yet.");
+        }
         return startPreviewMode();
     }
 }
@@ -498,6 +512,62 @@ status_t CameraService::Client::startRecordingMode()
     return ret;
 }
 
+status_t CameraService::Client::setOverlay()
+{
+    LOGD("setOverlay");
+    int w, h;
+    CameraParameters params(mHardware->getParameters());
+    params.getPreviewSize(&w, &h);
+
+    const char *format = params.getPreviewFormat();
+    int fmt;
+    if (!strcmp(format, "yuv422i"))
+        fmt = OVERLAY_FORMAT_YCbCr_422_I;
+    else if (!strcmp(format, "rgb565"))
+        fmt = OVERLAY_FORMAT_RGB_565;
+    else {
+        LOGE("Invalid preview format for overlays");
+        return -EINVAL;
+    }
+
+    status_t ret = NO_ERROR;
+    if (mSurface != 0) {
+        sp<OverlayRef> ref = mSurface->createOverlay(w, h, fmt);
+        ret = mHardware->setOverlay(new Overlay(ref));
+    } else {
+        ret = mHardware->setOverlay(NULL);
+    }
+    if (ret != NO_ERROR) {
+        LOGE("mHardware->setOverlay() failed with status %d\n", ret);
+    }
+    return ret;
+}
+
+status_t CameraService::Client::registerPreviewBuffers()
+{
+    int w, h;
+    CameraParameters params(mHardware->getParameters());
+    params.getPreviewSize(&w, &h);
+
+    uint32_t transform = 0;
+    if (params.getOrientation() ==
+        CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
+      LOGV("portrait mode");
+      transform = ISurface::BufferHeap::ROT_90;
+    }
+    ISurface::BufferHeap buffers(w, h, w, h,
+                                 PIXEL_FORMAT_YCbCr_420_SP,
+                                 transform,
+                                 0,
+                                 mHardware->getPreviewHeap());
+
+    status_t ret = mSurface->registerBuffers(buffers);
+    if (ret != NO_ERROR) {
+        LOGE("registerBuffers failed with status %d", ret);
+    }
+    return ret;
+}
+
 status_t CameraService::Client::startPreviewMode()
 {
     LOGD("startPreviewMode (pid %d)", getCallingPid());
@@ -511,55 +581,24 @@ status_t CameraService::Client::startPreviewMode()
 #if DEBUG_DUMP_PREVIEW_FRAME_TO_FILE
     debug_frame_cnt = 0;
 #endif
-    status_t ret = UNKNOWN_ERROR;
-    int w, h;
-    CameraParameters params(mHardware->getParameters());
-    params.getPreviewSize(&w, &h);
+    status_t ret = NO_ERROR;
 
     if (mUseOverlay) {
-        const char *format = params.getPreviewFormat();
-        int fmt;
-        LOGD("Use Overlays");
-        if (!strcmp(format, "yuv422i"))
-            fmt = OVERLAY_FORMAT_YCbCr_422_I;
-        else if (!strcmp(format, "rgb565"))
-            fmt = OVERLAY_FORMAT_RGB_565;
-        else {
-            LOGE("Invalid preview format for overlays");
-            return -EINVAL;
+        // If preview display has been set, set overlay now.
+        if (mSurface != 0) {
+            ret = setOverlay();
         }
-        sp<OverlayRef> ref = mSurface->createOverlay(w, h, fmt);
-        ret = mHardware->setOverlay(new Overlay(ref));
-        if (ret != NO_ERROR) {
-            LOGE("mHardware->setOverlay() failed with status %d\n", ret);
-            return ret;
-        }
+        if (ret != NO_ERROR) return ret;
         ret = mHardware->startPreview(NULL, mCameraService.get());
-        if (ret != NO_ERROR)
-            LOGE("mHardware->startPreview() failed with status %d\n", ret);
-
     } else {
         ret = mHardware->startPreview(previewCallback,
                                       mCameraService.get());
-        if (ret == NO_ERROR) {
-
-            mSurface->unregisterBuffers();
-
-            uint32_t transform = 0;
-            if (params.getOrientation() ==
-                CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
-              LOGV("portrait mode");
-              transform = ISurface::BufferHeap::ROT_90;
-            }
-            ISurface::BufferHeap buffers(w, h, w, h,
-                                         PIXEL_FORMAT_YCbCr_420_SP,
-                                         transform,
-                                         0,
-                                         mHardware->getPreviewHeap());
-
-            mSurface->registerBuffers(buffers);
-        } else {
-          LOGE("mHardware->startPreview() failed with status %d", ret);
+        if (ret != NO_ERROR) return ret;
+        // If preview display has been set, register preview buffers now.
+        if (mSurface != 0) {
+           // Unregister here because the surface registered with raw heap.
+           mSurface->unregisterBuffers();
+           ret = registerPreviewBuffers();
         }
     }
     return ret;
