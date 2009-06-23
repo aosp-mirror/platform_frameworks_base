@@ -296,7 +296,7 @@ android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
 
 static void
 android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
-        int speechRate)
+        jint speechRate)
 {
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setSpeechRate(): invalid JNI data");
@@ -312,6 +312,28 @@ android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
     // TODO check return codes
     if (pSynthData->mNativeSynthInterface) {
         pSynthData->mNativeSynthInterface->setProperty("rate", buffer, bufSize);
+    }
+}
+
+
+static void
+android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
+        jint pitch)
+{
+    if (jniData == 0) {
+        LOGE("android_tts_SynthProxy_setPitch(): invalid JNI data");
+        return;
+    }
+
+    int bufSize = 10;
+    char buffer [bufSize];
+    sprintf(buffer, "%d", pitch);
+
+    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    LOGI("setting pitch to %d", pitch);
+    // TODO check return codes
+    if (pSynthData->mNativeSynthInterface) {
+        pSynthData->mNativeSynthInterface->setProperty("pitch", buffer, bufSize);
     }
 }
 
@@ -540,6 +562,10 @@ static JNINativeMethod gMethods[] = {
     {   "native_setSpeechRate",
         "(II)V",
         (void*)android_tts_SynthProxy_setSpeechRate
+    },
+    {   "native_setPitch",
+        "(II)V",
+        (void*)android_tts_SynthProxy_setPitch
     },
     {   "native_playAudioBuffer",
         "(III)V",

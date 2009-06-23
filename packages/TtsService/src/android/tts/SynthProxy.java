@@ -81,6 +81,12 @@ public class SynthProxy {
         native_setSpeechRate(mJniData, speechRate);
     }
 
+    /**
+     * Sets the pitch of the synthesized voice
+     */
+    public final void setPitch(int pitch) {
+        native_setPitch(mJniData, pitch);
+    }
 
     /**
      * Plays the given audio buffer
@@ -145,6 +151,8 @@ public class SynthProxy {
             String variant);
 
     private native final void native_setSpeechRate(int jniData, int speechRate);
+    
+    private native final void native_setPitch(int jniData, int speechRate);
 
     // TODO add buffer format
     private native final void native_playAudioBuffer(int jniData, int bufferPointer, int bufferSize);

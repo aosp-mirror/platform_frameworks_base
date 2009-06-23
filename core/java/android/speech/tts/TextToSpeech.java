@@ -450,7 +450,6 @@ public class TextToSpeech {
     }
 
 
-
     /**
      * Sets the speech rate for the TTS engine.
      *
@@ -472,6 +471,37 @@ public class TextToSpeech {
             try {
                 if (speechRate > 0) {
                     mITts.setSpeechRate((int)(speechRate*100));
+                }
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            }
+        }
+    }
+
+
+    /**
+     * Sets the speech pitch for the TTS engine.
+     *
+     * Note that the pitch is not universally supported by all engines and
+     * will be treated as a hint. The TTS library will try to use the specified
+     * pitch, but there is no guarantee.
+     * This has no effect on any pre-recorded speech.
+     *
+     * @param pitch
+     *            The pitch for the TTS engine. 1 is the normal pitch,
+     *            lower values lower the tone of the synthesized voice,
+     *            greater values increase it.
+     */
+    public void setPitch(float pitch) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
+                return;
+            }
+            try {
+                if (pitch > 0) {
+                    mITts.setPitch((int)(pitch*100));
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
