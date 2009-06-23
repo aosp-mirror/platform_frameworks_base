@@ -18,7 +18,6 @@
 #define ANDROID_RS_CONTEXT_H
 
 #include <utils/Vector.h>
-#include <ui/EGLNativeWindowSurface.h>
 #include <ui/Surface.h>
 
 #include "rsType.h"

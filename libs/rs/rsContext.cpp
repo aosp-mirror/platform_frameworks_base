@@ -18,6 +18,7 @@
 #include "rsContext.h"
 #include "rsThreadIO.h"
 #include "utils/String8.h"
+#include <ui/FramebufferNativeWindow.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -43,8 +44,7 @@ void Context::initEGL()
      eglChooseConfig(mDisplay, s_configAttribs, &mConfig, 1, &mNumConfigs);
 
      if (mWndSurface) {
-         mSurface = eglCreateWindowSurface(mDisplay, mConfig,
-                 new EGLNativeWindowSurface(mWndSurface),
+         mSurface = eglCreateWindowSurface(mDisplay, mConfig, mWndSurface,
                  NULL);
      } else {
          mSurface = eglCreateWindowSurface(mDisplay, mConfig,
