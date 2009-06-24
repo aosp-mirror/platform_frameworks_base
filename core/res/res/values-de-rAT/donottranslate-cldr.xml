@@ -2,10 +2,43 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="month_long_standalone_january">Jänner</string>
+    <string name="month_long_standalone_february">Februar</string>
+    <string name="month_long_standalone_march">März</string>
+    <string name="month_long_standalone_april">April</string>
+    <string name="month_long_standalone_may">Mai</string>
+    <string name="month_long_standalone_june">Juni</string>
+    <string name="month_long_standalone_july">Juli</string>
+    <string name="month_long_standalone_august">August</string>
+    <string name="month_long_standalone_september">September</string>
+    <string name="month_long_standalone_october">Oktober</string>
+    <string name="month_long_standalone_november">November</string>
+    <string name="month_long_standalone_december">Dezember</string>
 
     <string name="month_long_january">Jänner</string>
+    <string name="month_long_february">Februar</string>
+    <string name="month_long_march">März</string>
+    <string name="month_long_april">April</string>
+    <string name="month_long_may">Mai</string>
+    <string name="month_long_june">Juni</string>
+    <string name="month_long_july">Juli</string>
+    <string name="month_long_august">August</string>
+    <string name="month_long_september">September</string>
+    <string name="month_long_october">Oktober</string>
+    <string name="month_long_november">November</string>
+    <string name="month_long_december">Dezember</string>
 
     <string name="month_medium_january">Jän</string>
+    <string name="month_medium_february">Feb</string>
+    <string name="month_medium_march">Mär</string>
+    <string name="month_medium_april">Apr</string>
+    <string name="month_medium_may">Mai</string>
+    <string name="month_medium_june">Jun</string>
+    <string name="month_medium_july">Jul</string>
+    <string name="month_medium_august">Aug</string>
+    <string name="month_medium_september">Sep</string>
+    <string name="month_medium_october">Okt</string>
+    <string name="month_medium_november">Nov</string>
+    <string name="month_medium_december">Dez</string>
 
     <string name="month_shortest_january">J</string>
     <string name="month_shortest_february">F</string>
