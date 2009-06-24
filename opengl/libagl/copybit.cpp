@@ -163,15 +163,23 @@ static bool copybit(GLint x, GLint y,
     const GLint Wcr = crop_rect[2];
     const GLint Hcr = crop_rect[3];
 
-    int32_t dsdx = (Wcr << 16) / w;   // dsdx =  ((Wcr/w)/Wt)*Wt
-    int32_t dtdy = ((-Hcr) <<  16) / h;   // dtdy = -((Hcr/h)/Ht)*Ht
-
+    int32_t dsdx = (Wcr << 16);     // dsdx =  ((Wcr/w)/Wt)*Wt
+    int32_t dtdy = ((-Hcr) <<  16); // dtdy = -((Hcr/h)/Ht)*Ht
+    if (transform & COPYBIT_TRANSFORM_ROT_90) {
+        dsdx /= h;
+        dtdy /= w;
+    } else {
+        dsdx /= w;
+        dtdy /= h;
+    }
     if (dsdx < c->copybits.minScale || dsdx > c->copybits.maxScale
             || dtdy < c->copybits.minScale || dtdy > c->copybits.maxScale) {
         // The requested scale is out of the range the hardware
         // can support.
         LOGD_IF(DEBUG_COPYBIT,
-                "scale out of range dsdx=%08x, dtdy=%08x", dsdx, dtdy);
+                "scale out of range dsdx=%08x (Wcr=%d / w=%d), "
+                "dtdy=%08x (Hcr=%d / h=%d), Ucr=%d, Vcr=%d", 
+                dsdx, Wcr, w, dtdy, Hcr, h, Ucr, Vcr);
         return false;
     }
 
@@ -198,22 +206,30 @@ static bool copybit(GLint x, GLint y,
     static const int tmu = 0;
     texture_t& tev(c->rasterizer.state.texture[tmu]);
     bool srcTextureHasAlpha = hasAlpha(textureObject->surface.format);
+    if (!srcTextureHasAlpha) {
+        planeAlpha = fixedToByte(c->currentColorClamped.a);
+    }
+
     switch (tev.env) {
-
     case GGL_REPLACE:
-        if (!srcTextureHasAlpha) {
-            planeAlpha = fixedToByte(c->currentColorClamped.a);
-        }
         break;
-
     case GGL_MODULATE:
-        if (! (c->currentColorClamped.r == FIXED_ONE
-                && c->currentColorClamped.g == FIXED_ONE
-                && c->currentColorClamped.b == FIXED_ONE)) {
-            LOGD_IF(DEBUG_COPYBIT, "MODULATE and non white color");
+        if (! (c->currentColorClamped.r == FIXED_ONE &&
+               c->currentColorClamped.g == FIXED_ONE &&
+               c->currentColorClamped.b == FIXED_ONE)) {
+            LOGD_IF(DEBUG_COPYBIT, 
+                    "MODULATE and non white color (%08x, %08x, %08x)",
+                    c->currentColorClamped.r,
+                    c->currentColorClamped.g,
+                    c->currentColorClamped.b);
             return false;
         }
-        planeAlpha = fixedToByte(c->currentColorClamped.a);
+        if (srcTextureHasAlpha && c->currentColorClamped.a < FIXED_ONE) {
+            LOGD_IF(DEBUG_COPYBIT, 
+                    "MODULATE and texture w/alpha and alpha=%08x)",
+                    c->currentColorClamped.a);
+            return false;
+        }
         break;
 
     default:
@@ -223,7 +239,6 @@ static bool copybit(GLint x, GLint y,
     }
 
     bool blending = false;
-
     if ((enables & GGL_ENABLE_BLENDING)
             && !(c->rasterizer.state.blend.src == GL_ONE
                     && c->rasterizer.state.blend.dst == GL_ZERO)) {
