@@ -277,9 +277,6 @@ protected:
                 // don't change, don't need a lock
                 bool            mPremultipliedAlpha;
 
-                // only read
-    const       uint32_t        mIdentity;
-     
                 // atomic
     volatile    int32_t         mInvalidate;
                 
@@ -290,7 +287,6 @@ protected:
 private:
     LayerBase(const LayerBase& rhs);
     void validateTexture(GLint textureName) const;
-    static int32_t sIdentity;
 };
 
 
@@ -360,6 +356,9 @@ private:
                 int32_t         mIndex;
     mutable     Mutex           mLock;
     mutable     wp<Surface>     mClientSurface;
+    // only read
+    const       uint32_t        mIdentity;
+    static      int32_t         sIdentity;
 };
 
 // ---------------------------------------------------------------------------

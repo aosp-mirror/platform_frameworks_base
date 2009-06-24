@@ -52,6 +52,7 @@ LayerBuffer::~LayerBuffer()
 
 void LayerBuffer::onFirstRef()
 {
+    LayerBaseClient::onFirstRef();
     mSurface = new SurfaceBuffer(mFlinger, clientIndex(),
             const_cast<LayerBuffer *>(this));
 }

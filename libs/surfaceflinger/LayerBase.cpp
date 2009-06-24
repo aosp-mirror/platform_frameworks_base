@@ -53,8 +53,6 @@ const char* const LayerBaseClient::typeID = "LayerBaseClient";
 
 // ---------------------------------------------------------------------------
 
-int32_t LayerBase::sIdentity = 0;
-
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       mFlinger(flinger),
@@ -62,7 +60,6 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
       mOrientation(0),
       mTransactionFlags(0),
       mPremultipliedAlpha(true),
-      mIdentity(uint32_t(android_atomic_inc(&sIdentity))),
       mInvalidate(0)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
@@ -644,11 +641,14 @@ regular:
 
 // ---------------------------------------------------------------------------
 
+int32_t LayerBaseClient::sIdentity = 0;
+
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
     : LayerBase(flinger, display), client(client),
       lcblk( client!=0 ? &(client->ctrlblk->layers[i]) : 0 ),
-      mIndex(i)
+      mIndex(i),
+      mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
 }
 
