@@ -94,11 +94,6 @@ public:
     virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr) = 0;
 };
 
-typedef void (*shutter_callback)(void *cookie);
-typedef void (*frame_callback)(const sp<IMemory>& mem, void *cookie);
-typedef void (*autofocus_callback)(bool focused, void *cookie);
-typedef void (*error_callback)(status_t err, void *cookie);
-
 class Camera : public BnCameraClient, public IBinder::DeathRecipient
 {
 public:
@@ -163,6 +158,8 @@ public:
 
 private:
                         Camera();
+                        Camera(const Camera&);
+                        Camera& operator=(const Camera);
                         virtual void binderDied(const wp<IBinder>& who);
 
             class DeathNotifier: public IBinder::DeathRecipient
