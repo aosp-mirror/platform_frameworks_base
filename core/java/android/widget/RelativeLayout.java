@@ -349,9 +349,10 @@ public class RelativeLayout extends ViewGroup {
             View child = views[i];
             if (child.getVisibility() != GONE) {
                 LayoutParams params = (LayoutParams) child.getLayoutParams();
-                applyVerticalSizeRules(params, myHeight);
-                measureChildVertical(child, params, myHeight);
-                positionChildVertical(child, params, myHeight);
+
+                applyHorizontalSizeRules(params, myWidth);
+                measureChildHorizontal(child, params, myWidth);
+                positionChildHorizontal(child, params, myWidth);
             }
         }
 
@@ -361,9 +362,10 @@ public class RelativeLayout extends ViewGroup {
             View child = views[i];
             if (child.getVisibility() != GONE) {
                 LayoutParams params = (LayoutParams) child.getLayoutParams();
-                applyHorizontalSizeRules(params, myWidth);
+                
+                applyVerticalSizeRules(params, myHeight);
                 measureChild(child, params, myWidth, myHeight);
-                positionChildHorizontal(child, params, myWidth);
+                positionChildVertical(child, params, myHeight);
 
                 if (widthMode != MeasureSpec.EXACTLY) {
                     width = Math.max(width, params.mRight);
@@ -508,13 +510,13 @@ public class RelativeLayout extends ViewGroup {
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
-    private void measureChildVertical(View child, LayoutParams params, int myHeight) {
-        int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-        int childHeightMeasureSpec = getChildMeasureSpec(params.mTop,
-                params.mBottom, params.height,
-                params.topMargin, params.bottomMargin,
-                mPaddingTop, mPaddingBottom,
-                myHeight);
+    private void measureChildHorizontal(View child, LayoutParams params, int myWidth) {
+        int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft,
+                params.mRight, params.width,
+                params.leftMargin, params.rightMargin,
+                mPaddingLeft, mPaddingRight,
+                myWidth);
+        int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
