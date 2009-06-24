@@ -77,7 +77,7 @@ private:
     void* mBuf;
 };
 
-#if 0 // TEST_BACKUP_HELPERS
+#if 1 // TEST_BACKUP_HELPERS
 #define LOGP(f, x...) printf(f "\n", x)
 #else
 #define LOGP(x...) LOGD(x)
