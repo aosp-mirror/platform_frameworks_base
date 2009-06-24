@@ -402,6 +402,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     if (synthAvailable) {
                         synthesizerLock.unlock();
                     }
+                    processSpeechQueue();
                 }
             }
         }
