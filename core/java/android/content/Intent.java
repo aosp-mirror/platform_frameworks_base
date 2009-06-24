@@ -1593,6 +1593,15 @@ public class Intent implements Parcelable {
     public static final String ACTION_REMOTE_INTENT =
             "android.intent.action.REMOTE_INTENT";
 
+    /**
+     * @hide
+     * TODO: This will be unhidden in a later CL.
+     * Broadcast Action: The TextToSpeech synthesizer has completed processing 
+     * all of the text in the speech queue.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_TTS_QUEUE_PROCESSING_COMPLETED =
+            "android.intent.action.TTS_QUEUE_PROCESSING_COMPLETED";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
