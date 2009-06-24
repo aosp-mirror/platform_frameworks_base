@@ -337,9 +337,32 @@ void Camera::setErrorCallback(error_callback cb, void *cookie)
     mErrorCallbackCookie = cookie;
 }
 
+void Camera::setListener(const sp<CameraListener>& listener)
+{
+    Mutex::Autolock _l(mLock);
+    mListener = listener;
+}
+
+void Camera::setPreviewCallbackFlags(int flag)
+{
+    LOGV("setPreviewCallbackFlags");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return;
+    mCamera->setPreviewCallbackFlag(flag);
+}
+
 // callback from camera service
 void Camera::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2)
 {
+    sp<CameraListener> listener;
+    {
+        Mutex::Autolock _l(mLock);
+        listener = mListener;
+    }
+    if (listener != NULL) {
+        listener->notify(msgType, ext1, ext2);
+    }
+
     switch(msgType) {
     case CAMERA_MSG_ERROR:
         LOGV("errorCallback");
@@ -368,6 +391,15 @@ void Camera::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2)
 // callback from camera service when frame or image is ready
 void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
 {
+    sp<CameraListener> listener;
+    {
+        Mutex::Autolock _l(mLock);
+        listener = mListener;
+    }
+    if (listener != NULL) {
+        listener->postData(msgType, dataPtr);
+    }
+
     switch(msgType) {
     case CAMERA_MSG_PREVIEW_FRAME:
         LOGV("previewCallback");
@@ -401,6 +433,7 @@ void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
 
 void Camera::binderDied(const wp<IBinder>& who) {
     LOGW("ICamera died");
+    notifyCallback(CAMERA_MSG_ERROR, DEAD_OBJECT, 0);
     if (mErrorCallback) {
         mErrorCallback(DEAD_OBJECT, mErrorCallbackCookie);
     }

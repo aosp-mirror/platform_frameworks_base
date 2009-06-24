@@ -86,6 +86,14 @@ class Surface;
 class Mutex;
 class String8;
 
+// ref-counted object for callbacks
+class CameraListener: virtual public RefBase
+{
+public:
+    virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2) = 0;
+    virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr) = 0;
+};
+
 typedef void (*shutter_callback)(void *cookie);
 typedef void (*frame_callback)(const sp<IMemory>& mem, void *cookie);
 typedef void (*autofocus_callback)(bool focused, void *cookie);
@@ -152,6 +160,9 @@ public:
             void        setErrorCallback(error_callback cb, void *cookie);
             void        setAutoFocusCallback(autofocus_callback cb, void *cookie);
 
+            void        setListener(const sp<CameraListener>& listener);
+            void        setPreviewCallbackFlags(int preview_callback_flag);
+
     // ICameraClient interface
     virtual void        notifyCallback(int32_t msgType, int32_t ext, int32_t ext2);
     virtual void        dataCallback(int32_t msgType, const sp<IMemory>& dataPtr);
@@ -193,6 +204,8 @@ private:
             void                *mErrorCallbackCookie;
             autofocus_callback  mAutoFocusCallback;
             void                *mAutoFocusCallbackCookie;
+
+            sp<CameraListener>  mListener;
 
             friend class DeathNotifier;
 
