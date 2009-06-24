@@ -191,6 +191,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     private final Map<String, KernelWakelockStats> mProcWakelockFileStats = 
             new HashMap<String, KernelWakelockStats>();
 
+    private HashMap<String, Integer> mUidCache = new HashMap<String, Integer>();
+    
     // For debugging
     public BatteryStatsImpl() {
         mFile = mBackupFile = null;
@@ -714,6 +716,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        boolean isRunningLocked() {
+            return mNesting > 0;
+        }
+
         void stopRunningLocked(BatteryStatsImpl stats) {
             // Ignore attempt to stop a timer that isn't running
             if (mNesting == 0) {
@@ -1048,7 +1054,24 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPhoneOnTimer.stopRunningLocked(this);
         }
     }
-    
+
+    public void noteAirplaneModeLocked(boolean isAirplaneMode) {
+        final int bin = mPhoneSignalStrengthBin;
+        if (bin >= 0) {
+            if (!isAirplaneMode) {
+                if (!mPhoneSignalStrengthsTimer[bin].isRunningLocked()) {
+                    mPhoneSignalStrengthsTimer[bin].startRunningLocked(this);
+                }
+            } else {
+                for (int i = 0; i < NUM_SIGNAL_STRENGTH_BINS; i++) {
+                    while (mPhoneSignalStrengthsTimer[i].isRunningLocked()) {
+                        mPhoneSignalStrengthsTimer[i].stopRunningLocked(this);
+                    }
+                }
+            }
+        }
+    }
+
     public void notePhoneSignalStrengthLocked(SignalStrength signalStrength) {
         // Bin the strength.
         int bin;
@@ -2797,12 +2820,32 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void removeUidStatsLocked(int uid) {
         mUidStats.remove(uid);
     }
-    
+
     /**
      * Retrieve the statistics object for a particular process, creating
      * if needed.
      */
     public Uid.Proc getProcessStatsLocked(int uid, String name) {
+        Uid u = getUidStatsLocked(uid);
+        return u.getProcessStatsLocked(name);
+    }
+
+    /**
+     * Retrieve the statistics object for a particular process, given
+     * the name of the process.
+     * @param name process name
+     * @return the statistics object for the process
+     */
+    public Uid.Proc getProcessStatsLocked(String name) {
+        int uid;
+        if (mUidCache.containsKey(name)) {
+            uid = mUidCache.get(name);
+        } else {
+            // TODO: Find the actual uid from /proc/pid/status. For now use the hashcode of the
+            // process name
+            uid = name.hashCode();
+            mUidCache.put(name, uid);
+        }
         Uid u = getUidStatsLocked(uid);
         return u.getProcessStatsLocked(name);
     }

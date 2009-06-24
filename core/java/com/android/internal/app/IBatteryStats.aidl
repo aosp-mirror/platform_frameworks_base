@@ -37,6 +37,7 @@ interface IBatteryStats {
     void notePhoneOff();
     void notePhoneSignalStrength(in SignalStrength signalStrength);
     void notePhoneDataConnectionState(int dataType, boolean hasData);
+    void noteAirplaneMode(boolean isAirplaneMode);
     void noteWifiOn(int uid);
     void noteWifiOff(int uid);
     void noteWifiRunning();

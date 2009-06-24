@@ -61,6 +61,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -1523,7 +1524,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             
-            synchronized(mBatteryStatsService.getActiveStatistics()) {
+            final BatteryStatsImpl bstats =
+                    (BatteryStatsImpl) mBatteryStatsService.getActiveStatistics();
+            synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
                     if (haveNewCpuStats) {
                         if (mBatteryStatsService.isOnBattery()) {
@@ -1535,12 +1538,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 if (pr != null) {
                                     BatteryStatsImpl.Uid.Proc ps = pr.batteryStats;
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                } else {
+                                    BatteryStatsImpl.Uid.Proc ps =
+                                            bstats.getProcessStatsLocked(st.name);
+                                    if (ps != null) {
+                                        ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-        
+
                 if (mLastWriteTime < (now-BATTERY_STATS_TIME)) {
                     mLastWriteTime = now;
                     mBatteryStatsService.getActiveStatistics().writeLocked();
