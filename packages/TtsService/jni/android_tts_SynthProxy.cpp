@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#define LOG_NDEBUG 0
 
 #include <stdio.h>
 #include <unistd.h>
@@ -168,7 +168,7 @@ void prepAudioTrack(SynthProxyJniStorage* pJniData,
 static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
                            AudioSystem::audio_format format, int channel,
                            int8_t *&wav, size_t &bufferSize, tts_synth_status status) {
-    LOGI("ttsSynthDoneCallback: %d bytes", bufferSize);
+    LOGV("ttsSynthDoneCallback: %d bytes", bufferSize);
 
     if (userdata == NULL){
         LOGE("userdata == NULL");
@@ -178,7 +178,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
     SynthProxyJniStorage* pJniData = (SynthProxyJniStorage*)(pForAfter->jniStorage);
 
     if (pForAfter->usageMode == USAGEMODE_PLAY_IMMEDIATELY){
-        LOGI("Direct speech");
+        LOGV("Direct speech");
 
         if (wav == NULL) {
             delete pForAfter;
@@ -189,16 +189,16 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
             prepAudioTrack(pJniData, rate, format, channel);
             if (pJniData->mAudioOut) {
                 pJniData->mAudioOut->write(wav, bufferSize);
-                LOGI("AudioTrack wrote: %d bytes", bufferSize);
+                //LOGV("AudioTrack wrote: %d bytes", bufferSize);
             } else {
-                LOGI("Can't play, null audiotrack");
+                LOGE("Can't play, null audiotrack");
             }
         }
     } else  if (pForAfter->usageMode == USAGEMODE_WRITE_TO_FILE) {
-        LOGI("Save to file");
+        LOGV("Save to file");
         if (wav == NULL) {
             delete pForAfter;
-            LOGI("Null: speech has completed");
+            LOGV("Null: speech has completed");
         }
         if (bufferSize > 0){
             fwrite(wav, 1, bufferSize, pForAfter->outputFile);
