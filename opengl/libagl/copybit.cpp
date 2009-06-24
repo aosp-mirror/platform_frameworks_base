@@ -32,7 +32,6 @@
 #include <hardware/gralloc.h>
 #include <hardware/copybit.h>
 #include <private/ui/android_natives_priv.h>
-#include "gralloc_priv.h"
 
 
 #define DEBUG_COPYBIT true
@@ -44,14 +43,11 @@ namespace android {
 static void textureToCopyBitImage(
         const GGLSurface* surface, buffer_handle_t buffer, copybit_image_t* img) 
 {
-    // we know private_handle_t is good here
-    private_handle_t* hnd = (private_handle_t*)buffer;
     img->w      = surface->stride;
     img->h      = surface->height;
     img->format = surface->format;
-    img->offset = hnd->offset;
     img->base   = surface->data;
-    img->fd     = hnd->fd;
+    img->handle = (native_handle_t *)buffer;
 }
 
 struct clipRectRegion : public copybit_region_t {
@@ -283,7 +279,6 @@ static bool copybit(GLint x, GLint y,
     textureToCopyBitImage(&cbSurface, target_hnd, &dst);
     copybit_rect_t drect = {x, y, x+w, y+h};
 
-    // we know private_handle_t is good here
     copybit_image_t src;
     buffer_handle_t source_hnd = textureObject->buffer->handle;
     textureToCopyBitImage(&textureObject->surface, source_hnd, &src);

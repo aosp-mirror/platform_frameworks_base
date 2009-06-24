@@ -32,6 +32,7 @@
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
 
+#include "gralloc_priv.h"   // needed for msm / copybit
 
 namespace android {
 
@@ -233,20 +234,28 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
     : mBufferHeap(buffers)
 {
     NativeBuffer& src(mNativeBuffer);
+    
     src.crop.l = 0;
     src.crop.t = 0;
     src.crop.r = buffers.w;
     src.crop.b = buffers.h;
-    src.img.w = buffers.hor_stride ?: buffers.w;
-    src.img.h = buffers.ver_stride ?: buffers.h;
-    src.img.format = buffers.format;
-    src.img.offset = offset;
-    src.img.base   = buffers.heap->base();
-    src.img.fd     = buffers.heap->heapID();
+    
+    src.img.w       = buffers.hor_stride ?: buffers.w;
+    src.img.h       = buffers.ver_stride ?: buffers.h;
+    src.img.format  = buffers.format;
+    src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
+
+    private_handle_t* hnd = new private_handle_t(
+            buffers.heap->heapID(), buffers.heap->getSize(), 0);
+    hnd->offset = offset;
+    src.img.handle = hnd;
 }
 
 LayerBuffer::Buffer::~Buffer()
 {
+    NativeBuffer& src(mNativeBuffer);
+    if (src.img.handle)
+        delete (private_handle_t*)src.img.handle;
 }
 
 // ============================================================================
@@ -465,45 +474,38 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         android_native_buffer_t const* nb = fbw->getBackbuffer();
         native_handle_t const* hnd = nb->handle;
 
-        if (hnd->data[1] != 0x3141592) {
-            LOGE("buffer not compatible with copybit");
-            err = -1;
-        } else {
+        dst.w       = 320;
+        dst.h       = 480;
+        dst.format  = 4;
+        dst.base    = 0;
+        dst.handle  = (native_handle_t *)nb->handle;
 
-            dst.w       = 320;
-            dst.h       = 480;
-            dst.format  = 4;
-            dst.offset  = hnd->data[4];
-            dst.base    = 0;
-            dst.fd      = hnd->data[0];
-
-            const Rect& transformedBounds = mLayer.getTransformedBounds();
-            const copybit_rect_t& drect
+        const Rect& transformedBounds = mLayer.getTransformedBounds();
+        const copybit_rect_t& drect
                 = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
-            const State& s(mLayer.drawingState());
-            region_iterator it(clip);
+        const State& s(mLayer.drawingState());
+        region_iterator it(clip);
 
-            // pick the right orientation for this buffer
-            int orientation = mLayer.getOrientation();
-            if (UNLIKELY(mBufferHeap.transform)) {
-                Transform rot90;
-                GraphicPlane::orientationToTransfrom(
-                        ISurfaceComposer::eOrientation90, 0, 0, &rot90);
-                const Transform& planeTransform(mLayer.graphicPlane(0).transform());
-                const Layer::State& s(mLayer.drawingState());
-                Transform tr(planeTransform * s.transform * rot90);
-                orientation = tr.getOrientation();
-            }
+        // pick the right orientation for this buffer
+        int orientation = mLayer.getOrientation();
+        if (UNLIKELY(mBufferHeap.transform)) {
+            Transform rot90;
+            GraphicPlane::orientationToTransfrom(
+                    ISurfaceComposer::eOrientation90, 0, 0, &rot90);
+            const Transform& planeTransform(mLayer.graphicPlane(0).transform());
+            const Layer::State& s(mLayer.drawingState());
+            Transform tr(planeTransform * s.transform * rot90);
+            orientation = tr.getOrientation();
+        }
 
-            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
-            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
-            copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
+        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
+        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
 
-            err = copybit->stretch(copybit,
-                    &dst, &src.img, &drect, &src.crop, &it);
-            if (err != NO_ERROR) {
-                LOGE("copybit failed (%s)", strerror(err));
-            }
+        err = copybit->stretch(copybit,
+                &dst, &src.img, &drect, &src.crop, &it);
+        if (err != NO_ERROR) {
+            LOGE("copybit failed (%s)", strerror(err));
         }
     }
 
@@ -522,7 +524,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         t.stride = src.img.w;
         t.vstride= src.img.h;
         t.format = src.img.format;
-        t.data = (GGLubyte*)(intptr_t(src.img.base) + src.img.offset);
+        t.data = (GGLubyte*)src.img.base;
         const Region dirty(Rect(t.width, t.height));
         mLayer.loadTexture(&mTexture, mTexture.name, dirty, t);
         mTexture.transform = mBufferHeap.transform;

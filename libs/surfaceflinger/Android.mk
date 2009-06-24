@@ -47,6 +47,8 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_C_INCLUDES := \
 	$(call include-path-for, corecg graphics)
 
+LOCAL_C_INCLUDES += hardware/libhardware/modules/gralloc
+
 LOCAL_MODULE:= libsurfaceflinger
 
 include $(BUILD_SHARED_LIBRARY)
