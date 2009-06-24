@@ -194,6 +194,11 @@ private:
                             CameraService();
     virtual                 ~CameraService();
 
+    // We use a count for number of clients (shoule only be 0 or 1).
+    volatile    int32_t                     mUsers;
+    virtual     void                        incUsers();
+    virtual     void                        decUsers();
+
     mutable     Mutex                       mLock;
                 wp<Client>                  mClient;
 
