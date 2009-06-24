@@ -1116,7 +1116,8 @@
   <public type="attr" name="allowBackup" />
   <public type="attr" name="glEsVersion" />
   <public type="attr" name="queryAfterZeroResults" />
-  
+  <public type="attr" name="dropDownHeight" />
+
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 
   <public-padding type="id" name="donut_resource_pad" end="0x01020040" />
