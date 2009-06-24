@@ -545,15 +545,28 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             Log.e(TAG, "*Error*: GetAdapterProperties returned NULL");
             return;
         }
-        for (int i = 0; i < properties.length; i+=2) {
-            String value = null;
-            if (mProperties.containsKey(properties[i])) {
-                value = mProperties.get(properties[i]);
-                value = value + ',' + properties[i+1];
-            } else
-                value = properties[i+1];
 
-            mProperties.put(properties[i], value);
+        for (int i = 0; i < properties.length; i++) {
+            String name = properties[i];
+            String newValue;
+            int len;
+            if (name == null) {
+                Log.e(TAG, "Error:Adapter Property at index" + i + "is null");
+                continue;
+            }
+            if (name.equals("Devices")) {
+                len = Integer.valueOf(properties[++i]);
+                if (len != 0)
+                    newValue = "";
+                else
+                    newValue = null;
+                for (int j = 0; j < len; j++) {
+                    newValue += properties[++i] + ",";
+                }
+            } else {
+                newValue = properties[++i];
+            }
+            mProperties.put(name, newValue);
         }
 
         // Add adapter object path property.
@@ -819,15 +832,27 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             propertyValues = new HashMap<String, String>();
         }
 
-        for (int i = 0; i < properties.length; i+=2) {
-            String value = null;
-            if (propertyValues.containsKey(properties[i])) {
-                value = propertyValues.get(properties[i]);
-                value = value + ',' + properties[i+1];
-            } else {
-                value = properties[i+1];
+        for (int i = 0; i < properties.length; i++) {
+            String name = properties[i];
+            String newValue;
+            int len;
+            if (name == null) {
+                Log.e(TAG, "Error: Remote Device Property at index" + i + "is null");
+                continue;
             }
-            propertyValues.put(properties[i], value);
+            if (name.equals("UUIDs") || name.equals("Nodes")) {
+                len = Integer.valueOf(properties[++i]);
+                if (len != 0)
+                    newValue = "";
+                else
+                    newValue = null;
+                for (int j = 0; j < len; j++) {
+                    newValue += properties[++i] + ",";
+                }
+            } else {
+                newValue = properties[++i];
+            }
+            propertyValues.put(name, newValue);
         }
         mRemoteDeviceProperties.put(address, propertyValues);
     }
