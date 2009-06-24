@@ -68,15 +68,6 @@ struct file_metadata_v1 {
 
 const static int CURRENT_METADATA_VERSION = 1;
 
-// auto-free buffer management object
-class StAutoFree {
-public:
-    StAutoFree(void* buffer) { mBuf = buffer; }
-    ~StAutoFree() { free(mBuf); }
-private:
-    void* mBuf;
-};
-
 #if 1 // TEST_BACKUP_HELPERS
 #define LOGP(f, x...) printf(f "\n", x)
 #else
@@ -230,8 +221,6 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
     file_metadata_v1 metadata;
 
     char* buf = (char*)malloc(bufsize);
-    StAutoFree _autoFree(buf);
-
     int crc = crc32(0L, Z_NULL, 0);
 
 
@@ -245,6 +234,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
     bytesLeft = fileSize + sizeof(metadata);
     err = dataStream->WriteEntityHeader(key, bytesLeft);
     if (err != 0) {
+        free(buf);
         return err;
     }
 
@@ -254,6 +244,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
     metadata.undefined_1 = metadata.undefined_2 = 0;
     err = dataStream->WriteEntityData(&metadata, sizeof(metadata));
     if (err != 0) {
+        free(buf);
         return err;
     }
     bytesLeft -= sizeof(metadata); // bytesLeft should == fileSize now
@@ -266,6 +257,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
         }
         err = dataStream->WriteEntityData(buf, amt);
         if (err != 0) {
+            free(buf);
             return err;
         }
     }
@@ -279,6 +271,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
                 bytesLeft -= amt;
                 err = dataStream->WriteEntityData(buf, amt);
                 if (err != 0) {
+                    free(buf);
                     return err;
                 }
             }
@@ -287,6 +280,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
                 " You aren't doing proper locking!", realFilename, fileSize, fileSize-bytesLeft);
     }
 
+    free(buf);
     return NO_ERROR;
 }
 
@@ -318,8 +312,6 @@ compute_crc32(int fd)
     int amt;
 
     char* buf = (char*)malloc(bufsize);
-    StAutoFree _autoFree(buf);
-
     int crc = crc32(0L, Z_NULL, 0);
 
     lseek(fd, 0, SEEK_SET);
@@ -328,6 +320,7 @@ compute_crc32(int fd)
         crc = crc32(crc, (Bytef*)buf, amt);
     }
 
+    free(buf);
     return crc;
 }
 
@@ -451,6 +444,7 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
 RestoreHelperBase::RestoreHelperBase()
 {
     m_buf = malloc(RESTORE_BUF_SIZE);
+    m_loggedUnknownMetadata = false;
 }
 
 RestoreHelperBase::~RestoreHelperBase()
@@ -489,8 +483,11 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     metadata.version = fromlel(metadata.version);
     metadata.mode = fromlel(metadata.mode);
     if (metadata.version > CURRENT_METADATA_VERSION) {
-        LOGW("Restoring file with unsupported metadata version %d (currently %d)",
-                metadata.version, CURRENT_METADATA_VERSION);
+        if (!m_loggedUnknownMetadata) {
+            m_loggedUnknownMetadata = true;
+            LOGW("Restoring file with unsupported metadata version %d (currently %d)",
+                    metadata.version, CURRENT_METADATA_VERSION);
+        }
     }
     mode = metadata.mode;
 
@@ -587,7 +584,6 @@ compare_file(const char* path, const unsigned char* data, int len)
         fprintf(stderr, "malloc(%d) failed\n", len);
         return ENOMEM;
     }
-    StAutoFree _autoFree(contents);
 
     bool sizesMatch = true;
     amt = lseek(fd, 0, SEEK_END);
@@ -614,6 +610,7 @@ compare_file(const char* path, const unsigned char* data, int len)
         }
     }
 
+    free(contents);
     return contentsMatch && sizesMatch ? 0 : 1;
 }
 
@@ -919,7 +916,6 @@ test_read_header_and_entity(BackupDataReader& reader, const char* str)
     int err;
     int bufSize = strlen(str)+1;
     char* buf = (char*)malloc(bufSize);
-    StAutoFree _autoFree(buf);
     String8 string;
     int cookie = 0x11111111;
     size_t actualSize;
@@ -981,6 +977,7 @@ finished:
     if (err != NO_ERROR) {
         fprintf(stderr, "test_read_header_and_entity failed with %s\n", strerror(err));
     }
+    free(buf);
     return err;
 }
 
