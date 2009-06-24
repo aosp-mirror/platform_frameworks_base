@@ -170,6 +170,39 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
 
+    private String getDefaultLanguage() {
+        String defaultLang = android.provider.Settings.Secure.getString(mResolver,
+                android.provider.Settings.Secure.TTS_DEFAULT_LANG);
+        if (defaultLang == null) {
+            return TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_LANG;
+        } else {
+            return defaultLang;
+        }
+    }
+
+
+    private String getDefaultCountry() {
+        String defaultCountry = android.provider.Settings.Secure.getString(mResolver,
+                android.provider.Settings.Secure.TTS_DEFAULT_COUNTRY);
+        if (defaultCountry == null) {
+            return TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_COUNTRY;
+        } else {
+            return defaultCountry;
+        }
+    }
+
+
+    private String getDefaultLocVariant() {
+        String defaultVar = android.provider.Settings.Secure.getString(mResolver,
+                android.provider.Settings.Secure.TTS_DEFAULT_VARIANT);
+        if (defaultVar == null) {
+            return TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_VARIANT;
+        } else {
+            return defaultVar;
+        }
+    }
+
+
     private void setSpeechRate(int rate) {
         if (isDefaultEnforced()) {
             nativeSynth.setSpeechRate(getDefaultRate());
@@ -185,14 +218,15 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private void setLanguage(String lang, String country, String variant) {
-        Log.v("TTS", "TtsService.setLanguage("+lang+", "+country+", "+variant+")");
+        Log.v("TTS", "TtsService.setLanguage(" + lang + ", " + country + ", " + variant + ")");
         if (isDefaultEnforced()) {
-            nativeSynth.setLanguage(lang, country, variant);
+            nativeSynth.setLanguage(getDefaultLanguage(), getDefaultCountry(),
+                    getDefaultLocVariant());
         } else {
-            // TODO handle default language
-            nativeSynth.setLanguage("eng", "USA", "");
+            nativeSynth.setLanguage(lang, country, variant);
         }
     }
+
 
     /**
      * Adds a sound resource to the TTS.
