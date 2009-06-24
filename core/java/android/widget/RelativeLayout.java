@@ -764,18 +764,16 @@ public class RelativeLayout extends ViewGroup {
     private View getRelatedView(int[] rules, int relation) {
         int id = rules[relation];
         if (id != 0) {
-            View v = mGraph.mNodes.get(id).view;
-            if (v == null) {
-                return null;
-            }
+            DependencyGraph.Node node = mGraph.mNodes.get(id);
+            if (node == null) return null;
+            View v = node.view;
 
             // Find the first non-GONE view up the chain
             while (v.getVisibility() == View.GONE) {
                 rules = ((LayoutParams) v.getLayoutParams()).getRules();
-                v = mGraph.mNodes.get((rules[relation])).view;
-                if (v == null) {
-                    return null;
-                }
+                node = mGraph.mNodes.get((rules[relation]));
+                if (node == null) return null;
+                v = node.view;
             }
 
             return v;
