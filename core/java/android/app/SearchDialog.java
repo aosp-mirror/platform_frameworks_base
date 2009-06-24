@@ -1322,6 +1322,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
         String query = intent.getStringExtra(SearchManager.QUERY);
         setUserQuery(query);
+        mSearchAutoComplete.showDropDown();
     }
 
     /**
