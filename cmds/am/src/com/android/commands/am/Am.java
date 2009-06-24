@@ -26,10 +26,13 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.view.IWindowManager;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -446,6 +449,8 @@ public class Am {
             return;
         }
         
+        ParcelFileDescriptor fd = null;
+        
         String cmd = nextArg();
         if ("start".equals(cmd)) {
             start = true;
@@ -455,6 +460,16 @@ public class Am {
                 showUsage();
                 return;
             }
+            try {
+                fd = ParcelFileDescriptor.open(
+                        new File(profileFile),
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE |
+                        ParcelFileDescriptor.MODE_READ_WRITE);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error: Unable to open file: " + profileFile);
+                return;
+            }
         } else if (!"stop".equals(cmd)) {
             System.err.println("Error: Profile command " + cmd + " not valid");
             showUsage();
@@ -462,8 +477,8 @@ public class Am {
         }
         
         try {
-            if (!mAm.profileControl(process, start, profileFile)) {
-                System.out.println("PROFILE FAILED on process " + process);
+            if (!mAm.profileControl(process, start, profileFile, fd)) {
+                System.err.println("PROFILE FAILED on process " + process);
                 return;
             }
         } catch (IllegalArgumentException e) {
