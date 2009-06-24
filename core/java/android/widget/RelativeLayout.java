@@ -40,7 +40,6 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.LinkedList;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -279,6 +278,17 @@ public class RelativeLayout extends ViewGroup {
         graph.getSortedViews(mSortedVerticalChildren, ABOVE, BELOW, ALIGN_BASELINE,
                 ALIGN_TOP, ALIGN_BOTTOM);
         graph.getSortedViews(mSortedHorizontalChildren, LEFT_OF, RIGHT_OF, ALIGN_LEFT, ALIGN_RIGHT);
+
+        if (DEBUG_GRAPH) {
+            d(LOG_TAG, "=== Ordered list of vertical children");
+            for (View view : mSortedVerticalChildren) {
+                DependencyGraph.printViewId(getResources(), view);
+            }
+            d(LOG_TAG, "=== Ordered list of horizontal children");
+            for (View view : mSortedHorizontalChildren) {
+                DependencyGraph.printViewId(getResources(), view);
+            }
+        }        
     }
 
     @Override
@@ -332,7 +342,6 @@ public class RelativeLayout extends ViewGroup {
         if ((horizontalGravity || verticalGravity) && mIgnoreGravity != View.NO_ID) {
             ignore = findViewById(mIgnoreGravity);
         }
-
 
         View[] views = mSortedVerticalChildren;
         int count = views.length;
@@ -755,7 +764,7 @@ public class RelativeLayout extends ViewGroup {
     private View getRelatedView(int[] rules, int relation) {
         int id = rules[relation];
         if (id != 0) {
-            View v = findViewById(id);
+            View v = mGraph.mNodes.get(id).view;
             if (v == null) {
                 return null;
             }
@@ -763,7 +772,7 @@ public class RelativeLayout extends ViewGroup {
             // Find the first non-GONE view up the chain
             while (v.getVisibility() == View.GONE) {
                 rules = ((LayoutParams) v.getLayoutParams()).getRules();
-                v = v.findViewById(rules[relation]);
+                v = mGraph.mNodes.get((rules[relation])).view;
                 if (v == null) {
                     return null;
                 }
@@ -1100,12 +1109,6 @@ public class RelativeLayout extends ViewGroup {
 
     private static class DependencyGraph {
         /**
-         * List of views with no id. These views cannot be dependencies of
-         * other views, so treat the apart for faster processing.
-         */
-        private ArrayList<View> mNakedRoots = new ArrayList<View>();
-
-        /**
          * List of nodes in the graph. Each node is identified by its
          * view id (see View#getId()).
          */
@@ -1129,7 +1132,6 @@ public class RelativeLayout extends ViewGroup {
             }
             nodes.clear();
 
-            mNakedRoots.clear();
             mRoots.clear();
         }
 
@@ -1139,13 +1141,7 @@ public class RelativeLayout extends ViewGroup {
          * @param view The view to be added as a node to the graph.
          */
         void add(View view) {
-            final int id = view.getId();
-
-            if (id != View.NO_ID) {
-                mNodes.put(id, Node.acquire(view));
-            } else {
-                mNakedRoots.add(view);
-            }
+            mNodes.put(view.getId(), Node.acquire(view));
         }
 
         /**
@@ -1161,12 +1157,6 @@ public class RelativeLayout extends ViewGroup {
         void getSortedViews(View[] sorted, int... rules) {
             final LinkedList<Node> roots = findRoots(rules);
             int index = 0;
-
-            final ArrayList<View> nakedRoots = mNakedRoots;
-            final int count = nakedRoots.size();
-            for ( ; index < count; index++) {
-                sorted[index] = nakedRoots.get(index);
-            }
 
             while (roots.size() > 0) {
                 final Node node = roots.removeFirst();
@@ -1259,17 +1249,13 @@ public class RelativeLayout extends ViewGroup {
          * @param rules The list of rules to take into account.
          */
         void log(Resources resources, int... rules) {
-            for (View view : mNakedRoots) {
-                printViewId(resources, view);
-            }
-
             final LinkedList<Node> roots = findRoots(rules);
             for (Node node : roots) {
                 printNode(resources, node);
             }
         }
 
-        private static void printViewId(Resources resources, View view) {
+        static void printViewId(Resources resources, View view) {
             if (view.getId() != View.NO_ID) {
                 d(LOG_TAG, resources.getResourceEntryName(view.getId()));
             } else {
