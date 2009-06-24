@@ -32,6 +32,7 @@
 #include <media/AudioSystem.h>
 #include "CameraService.h"
 
+#include <cutils/atomic.h>
 #include <cutils/properties.h>
 
 namespace android {
@@ -81,6 +82,7 @@ CameraService::CameraService() :
     BnCameraService()
 {
     LOGI("CameraService started: pid=%d", getpid());
+    mUsers = 0;
 }
 
 CameraService::~CameraService()
@@ -113,7 +115,7 @@ sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
                     "(old pid %d, old client %p)",
                     callingPid, cameraClient->asBinder().get(),
                     currentClient->mClientPid, currentCameraClient->asBinder().get());
-                if (kill(currentClient->mClientPid, 0) == ESRCH) {
+                if (kill(currentClient->mClientPid, 0) == -1 && errno == ESRCH) {
                     LOGD("The old client is dead!");
                 }
                 return client;
@@ -123,6 +125,10 @@ sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
             LOGD("New client (pid %d) connecting, old reference was dangling...",
                     callingPid);
             mClient.clear();
+            if (mUsers > 0) {
+                LOGD("Still have client, rejected");
+                return client;
+            }
         }
     }
 
@@ -174,6 +180,20 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
     LOGD("removeClient (pid %d) done", callingPid);
 }
 
+// The reason we need this count is a new CameraService::connect() request may
+// come in while the previous Client's destructor has not been run or is still
+// running. If the last strong reference of the previous Client is gone but
+// destructor has not been run, we should not allow the new Client to be created
+// because we need to wait for the previous Client to tear down the hardware
+// first.
+void CameraService::incUsers() {
+    android_atomic_inc(&mUsers);
+}
+
+void CameraService::decUsers() {
+    android_atomic_dec(&mUsers);
+}
+
 static sp<MediaPlayer> newMediaPlayer(const char *file) 
 {
     sp<MediaPlayer> mp = new MediaPlayer();
@@ -209,6 +229,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
 
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
+    cameraService->incUsers();
     LOGD("Client::Client X (pid %d)", callingPid);
 }
 
@@ -350,7 +371,7 @@ CameraService::Client::~Client()
 
 void CameraService::Client::disconnect()
 {
-    int callingPid = getCallingPid();    
+    int callingPid = getCallingPid();
 
     LOGD("Client::disconnect() E (pid %d client %p)",
             callingPid, getCameraClient()->asBinder().get());
@@ -365,18 +386,24 @@ void CameraService::Client::disconnect()
         return;
     }
 
+    // Make sure disconnect() is done once and once only, whether it is called
+    // from the user directly, or called by the destructor.
+    if (mHardware == 0) return;
+
     mCameraService->removeClient(mCameraClient);
-    if (mHardware != 0) {
-        LOGD("hardware teardown");
-        // Before destroying mHardware, we must make sure it's in the
-        // idle state.
-        mHardware->stopPreview();
-        // Cancel all picture callbacks.
-        mHardware->cancelPicture(true, true, true);
-        // Release the hardware resources.
-        mHardware->release();
-    }
+
+    LOGD("hardware teardown");
+    // Before destroying mHardware, we must make sure it's in the
+    // idle state.
+    mHardware->stopPreview();
+    // Cancel all picture callbacks.
+    mHardware->cancelPicture(true, true, true);
+    // Release the hardware resources.
+    mHardware->release();
     mHardware.clear();
+
+    mCameraService->decUsers();
+
     LOGD("Client::disconnect() X (pid %d)", callingPid);
 }
 
