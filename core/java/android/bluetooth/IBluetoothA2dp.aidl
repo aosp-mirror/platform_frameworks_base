@@ -26,6 +26,8 @@ import android.bluetooth.BluetoothDevice;
 interface IBluetoothA2dp {
     boolean connectSink(in BluetoothDevice device);
     boolean disconnectSink(in BluetoothDevice device);
+    boolean suspendSink(in BluetoothDevice device);
+    boolean resumeSink(in BluetoothDevice device);
     BluetoothDevice[] getConnectedSinks();  // change to Set<> once AIDL supports
     int getSinkState(in BluetoothDevice device);
     boolean setSinkPriority(in BluetoothDevice device, int priority);
