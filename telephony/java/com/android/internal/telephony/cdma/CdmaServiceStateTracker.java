@@ -296,6 +296,10 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                         EVENT_RUIM_RECORDS_LOADED, null);
                 mNeedToRegForRuimLoaded = false;
             }
+
+            cm.getCDMASubscription(obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
+            if (DBG) log("Receive EVENT_RUIM_READY and Send Request getCDMASubscription.");
+
             // restore the previous network selection.
             pollState();
 
