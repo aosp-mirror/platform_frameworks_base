@@ -49,7 +49,7 @@ import java.lang.ref.WeakReference;
  */
 public class PopupWindow {
     /**
-     * Mode for {@link #setInputMethodMode(int): the requirements for the
+     * Mode for {@link #setInputMethodMode(int)}: the requirements for the
      * input method should be based on the focusability of the popup.  That is
      * if it is focusable than it needs to work with the input method, else
      * it doesn't.
@@ -57,16 +57,15 @@ public class PopupWindow {
     public static final int INPUT_METHOD_FROM_FOCUSABLE = 0;
     
     /**
-     * Mode for {@link #setInputMethodMode(int): this popup always needs to
+     * Mode for {@link #setInputMethodMode(int)}: this popup always needs to
      * work with an input method, regardless of whether it is focusable.  This
      * means that it will always be displayed so that the user can also operate
      * the input method while it is shown.
      */
-    
     public static final int INPUT_METHOD_NEEDED = 1;
     
     /**
-     * Mode for {@link #setInputMethodMode(int): this popup never needs to
+     * Mode for {@link #setInputMethodMode(int)}: this popup never needs to
      * work with an input method, regardless of whether it is focusable.  This
      * means that it will always be displayed to use as much space on the
      * screen as needed, regardless of whether this covers the input method.
@@ -1131,8 +1130,7 @@ public class PopupWindow {
             return;
         }
 
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams)
-                mPopupView.getLayoutParams();
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams) mPopupView.getLayoutParams();
 
         boolean update = force;
 
@@ -1219,8 +1217,7 @@ public class PopupWindow {
             registerForScrollChanged(anchor, xoff, yoff);
         }
 
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams)
-                mPopupView.getLayoutParams();
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams) mPopupView.getLayoutParams();
 
         if (updateDimension) {
             if (width == -1) {
