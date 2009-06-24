@@ -119,8 +119,11 @@ public interface Phone {
     static final String APN_TYPE_MMS = "mms";
     /** APN type for SUPL assisted GPS */
     static final String APN_TYPE_SUPL = "supl";
+    /** APN type for default data traffic, when requested using startUsingNetworkFeature */
+    static final String APN_TYPE_DEFAULT_FEATURE = "default-feature";
 
     // "Features" accessible through the connectivity manager
+    static final String FEATURE_ENABLE_DEFAULT = "enableDEFAULT";
     static final String FEATURE_ENABLE_MMS = "enableMMS";
     static final String FEATURE_ENABLE_SUPL = "enableSUPL";
 

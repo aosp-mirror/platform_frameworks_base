@@ -377,6 +377,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
             mLastCallingPid = callingPid;
             return setEnableApn(Phone.APN_TYPE_MMS, true);
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DEFAULT)) {
+            return setEnableApn(Phone.APN_TYPE_DEFAULT_FEATURE, true);
         } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
             return setEnableApn(Phone.APN_TYPE_SUPL, true);
         } else {
@@ -399,6 +401,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
     public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
         if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
             return setEnableApn(Phone.APN_TYPE_MMS, false);
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DEFAULT)) {
+            return setEnableApn(Phone.APN_TYPE_DEFAULT_FEATURE, false);
         } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
             return setEnableApn(Phone.APN_TYPE_SUPL, false);
         } else {
