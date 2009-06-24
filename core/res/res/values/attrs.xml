@@ -1998,6 +1998,16 @@
             <!-- The dropdown should fit the width of its anchor. -->
             <enum name="wrap_content" value="-2" />
         </attr>
+        <!-- Specifies the basic width of the dropdown. Its value may
+             be a dimension (such as "12dip") for a constant width, fill_parent
+             to fill the width of the screen, or wrap_content to match the height of
+             the content of the drop down. -->
+        <attr name="dropDownHeight" format="dimension">
+            <!-- The dropdown should fill the width of the screen. -->
+            <enum name="fill_parent" value="-1" />
+            <!-- The dropdown should fit the width of its anchor. -->
+            <enum name="wrap_content" value="-2" />
+        </attr>
         <attr name="inputType" />
     </declare-styleable>
     <declare-styleable name="PopupWindow">

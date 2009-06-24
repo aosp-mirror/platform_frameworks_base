@@ -80,6 +80,7 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownSelector
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownAnchor
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
+ * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
  */
 public class AutoCompleteTextView extends EditText implements Filter.FilterListener {
     static final boolean DEBUG = false;
@@ -101,6 +102,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private int mDropDownAnchorId;
     private View mDropDownAnchorView;  // view is retrieved lazily from id once needed
     private int mDropDownWidth;
+    private int mDropDownHeight;
 
     private Drawable mDropDownListHighlight;
 
@@ -165,6 +167,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         // For dropdown width, the developer can specify a specific width, or FILL_PARENT
         // (for full screen width) or WRAP_CONTENT (to match the width of the anchored view).
         mDropDownWidth = a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownWidth,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        mDropDownHeight = a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownHeight,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
 
         mHintResource = a.getResourceId(R.styleable.AutoCompleteTextView_completionHintView,
@@ -253,6 +257,34 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public void setDropDownWidth(int width) {
         mDropDownWidth = width;
+    }
+
+    /**
+     * <p>Returns the current height for the auto-complete drop down list. This can
+     * be a fixed height, or {@link ViewGroup.LayoutParams#FILL_PARENT} to fill
+     * the screen, or {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the height
+     * of the drop down's content.</p>
+     *
+     * @return the height for the drop down list
+     *
+     * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
+     */
+    public int getDropDownHeight() {
+        return mDropDownHeight;
+    }
+
+    /**
+     * <p>Sets the current height for the auto-complete drop down list. This can
+     * be a fixed height, or {@link ViewGroup.LayoutParams#FILL_PARENT} to fill
+     * the screen, or {@link ViewGroup.LayoutParams#WRAP_CONTENT} to fit the height
+     * of the drop down's content.</p>
+     *
+     * @param height the height to use
+     *
+     * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
+     */
+    public void setDropDownHeight(int height) {
+        mDropDownHeight = height;
     }
     
     /**
@@ -621,7 +653,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                     // event to prevent focus from moving.
                     clearListSelection();
                     mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-                    mPopup.update();
+                    showDropDown();
                     return true;
                 } else {
                     // WARNING: Please read the comment where mListSelectionHidden
@@ -641,7 +673,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                     // by ensuring it has focus and getting its window out
                     // of touch mode.
                     mDropDownList.requestFocusFromTouch();
-                    mPopup.update();
+                    showDropDown();
 
                     switch (keyCode) {
                         // avoid passing the focus from the text view to the
@@ -1038,8 +1070,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public void showDropDown() {
         int height = buildDropDown();
+
+        int widthSpec = 0;
+        int heightSpec = 0;
+
+        boolean noInputMethod = mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
+
         if (mPopup.isShowing()) {
-            int widthSpec;
             if (mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT) {
                 // The call to PopupWindow's update method below can accept -1 for any
                 // value you do not want to update.
@@ -1049,20 +1086,51 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             } else {
                 widthSpec = mDropDownWidth;
             }
+
+            if (mDropDownHeight == ViewGroup.LayoutParams.FILL_PARENT) {
+                // The call to PopupWindow's update method below can accept -1 for any
+                // value you do not want to update.
+                heightSpec = noInputMethod ? height : ViewGroup.LayoutParams.FILL_PARENT;
+                if (noInputMethod) {
+                    mPopup.setWindowLayoutMode(
+                            mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT ?
+                                    ViewGroup.LayoutParams.FILL_PARENT : 0, 0);
+                } else {
+                    mPopup.setWindowLayoutMode(
+                            mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT ?
+                                    ViewGroup.LayoutParams.FILL_PARENT : 0,
+                            ViewGroup.LayoutParams.FILL_PARENT);
+                }
+            } else if (mDropDownHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                heightSpec = height;
+            } else {
+                heightSpec = mDropDownHeight;
+            }
+
             mPopup.update(getDropDownAnchorView(), mDropDownHorizontalOffset,
-                    mDropDownVerticalOffset, widthSpec, height);
+                    mDropDownVerticalOffset, widthSpec, heightSpec);
         } else {
             if (mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT) {
-                mPopup.setWindowLayoutMode(ViewGroup.LayoutParams.FILL_PARENT, 0);
+                widthSpec = ViewGroup.LayoutParams.FILL_PARENT;
             } else {
-                mPopup.setWindowLayoutMode(0, 0);
                 if (mDropDownWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     mPopup.setWidth(getDropDownAnchorView().getWidth());
                 } else {
                     mPopup.setWidth(mDropDownWidth);
                 }
             }
-            mPopup.setHeight(height);
+
+            if (mDropDownHeight == ViewGroup.LayoutParams.FILL_PARENT) {
+                heightSpec = ViewGroup.LayoutParams.FILL_PARENT;
+            } else {
+                if (mDropDownHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                    mPopup.setHeight(height);
+                } else {
+                    mPopup.setHeight(mDropDownHeight);
+                }
+            }
+
+            mPopup.setWindowLayoutMode(widthSpec, heightSpec);
             mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
             mPopup.setOutsideTouchable(true);
             mPopup.setTouchInterceptor(new PopupTouchIntercepter());
@@ -1178,10 +1246,12 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         final int maxHeight = mPopup.getMaxAvailableHeight(
                 getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
 
-        final int measuredHeight = mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
-                0, ListView.NO_POSITION, maxHeight - otherHeights, 2) + otherHeights;
+        if (mDropDownAlwaysVisible) {
+            return maxHeight;
+        }
 
-        return mDropDownAlwaysVisible ? maxHeight : measuredHeight;
+        return mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
+                0, ListView.NO_POSITION, maxHeight - otherHeights, 2) + otherHeights;
     }
 
     private View getHintView(Context context) {

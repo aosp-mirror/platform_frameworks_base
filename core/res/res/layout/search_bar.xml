@@ -76,6 +76,7 @@
                 android:ellipsize="end"
                 android:inputType="text|textAutoComplete"
                 android:dropDownWidth="fill_parent"
+                android:dropDownHeight="fill_parent"
                 android:dropDownAnchor="@id/search_plate"
                 android:dropDownVerticalOffset="-9dip"
                 android:popupBackground="@android:drawable/search_dropdown_background"
