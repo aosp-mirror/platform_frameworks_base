@@ -227,7 +227,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     private void refreshUnlockIntructions() {
         if (mLockPatternUtils.isLockPatternEnabled()
-                || mUpdateMonitor.getSimState() == IccCard.State.PIN_REQUIRED) {
+                || mUpdateMonitor.getSimState() == IccCard.State.PIN_REQUIRED
+                || mUpdateMonitor.getSimState() == IccCard.State.ABSENT) {
             mLockInstructions.setText(R.string.lockscreen_instructions_when_pattern_enabled);
         } else {
             mLockInstructions.setText(R.string.lockscreen_instructions_when_pattern_disabled);
@@ -327,6 +328,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     public void onSimStateChanged(IccCard.State simState) {
         mSimOk = isSimOk(simState);
         refreshViewsWRTSimOk();
+        refreshUnlockIntructions();
     }
 
     /**
