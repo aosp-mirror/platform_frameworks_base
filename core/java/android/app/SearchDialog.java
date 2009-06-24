@@ -1474,6 +1474,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (data != null) {
             intent.setData(data);
         }
+        intent.putExtra(SearchManager.USER_QUERY, mUserQuery);
         if (query != null) {
             intent.putExtra(SearchManager.QUERY, query);
         }

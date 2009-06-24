@@ -1136,6 +1136,20 @@ public class SearchManager
     public final static String QUERY = "query";
 
     /**
+     * Intent extra data key: Use this key with
+     * {@link android.content.Intent#getStringExtra
+     *  content.Intent.getStringExtra()}
+     * to obtain the query string typed in by the user.
+     * This may be different from the value of {@link #QUERY}
+     * if the intent is the result of selecting a suggestion.
+     * In that case, {@link #QUERY} will contain the value of
+     * {@link #SUGGEST_COLUMN_QUERY} for the suggestion, and
+     * {@link #USER_QUERY} will contain the string typed by the
+     * user.
+     */
+    public final static String USER_QUERY = "user_query";
+
+    /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getBundleExtra
      *  content.Intent.getBundleExtra()}
