@@ -121,13 +121,13 @@ private:
         virtual void unregisterBuffers();
         virtual bool transformed() const;
     private:
-        mutable Mutex   mLock;
-        sp<Buffer>      mBuffer;
-        status_t        mStatus;
-        ISurface::BufferHeap mBufferHeap;
-        size_t          mBufferSize;
-        mutable sp<android::Buffer>  mTempBitmap;
-        mutable GLuint  mTextureName;
+        mutable Mutex                   mLock;
+        sp<Buffer>                      mBuffer;
+        status_t                        mStatus;
+        ISurface::BufferHeap            mBufferHeap;
+        size_t                          mBufferSize;
+        mutable sp<android::Buffer>     mTempBitmap;
+        mutable LayerBase::Texture      mTexture;
     };
     
     class OverlaySource : public Source {

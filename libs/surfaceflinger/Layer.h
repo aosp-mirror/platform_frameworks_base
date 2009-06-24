@@ -123,16 +123,6 @@ private:
     };
     friend class SurfaceLayer;
     
-    struct Texture {
-        Texture() : name(-1U), width(0), height(0), image(EGL_NO_IMAGE_KHR),
-            dirty(true) { }
-        GLuint      name;
-        GLuint      width;
-        GLuint      height;
-        EGLImageKHR image;
-        bool        dirty;
-    };
-    
     sp<Surface>             mSurface;
 
             bool            mSecure;

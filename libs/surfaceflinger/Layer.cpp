@@ -187,7 +187,9 @@ void Layer::reloadTexture(const Region& dirty)
                     mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
                 } else {
                     // Everything went okay!
-                    mTextures[index].dirty = false;
+                    mTextures[index].dirty  = false;
+                    mTextures[index].width  = clientBuf->width;
+                    mTextures[index].height = clientBuf->height;
                 }
             }                
         }
@@ -200,8 +202,7 @@ void Layer::reloadTexture(const Region& dirty)
             if (UNLIKELY(mTextures[0].name == -1U)) {
                 mTextures[0].name = createTexture();
             }
-            loadTexture(dirty, mTextures[0].name, t, 
-                    mTextures[0].width, mTextures[0].height);
+            loadTexture(&mTextures[0], mTextures[0].name, dirty, t);
             buffer->unlock();
         }
     }
@@ -222,10 +223,7 @@ void Layer::onDraw(const Region& clip) const
         clearWithOpenGL(clip);
         return;
     }
-
-    GGLSurface t;
-    sp<const Buffer> buffer(frontBuffer().getBuffer());
-    drawWithOpenGL(clip, textureName, buffer);
+    drawWithOpenGL(clip, mTextures[index]);
 }
 
 sp<SurfaceBuffer> Layer::peekBuffer()

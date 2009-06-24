@@ -276,8 +276,7 @@ bool LayerBuffer::Source::transformed() const {
 
 LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
         const ISurface::BufferHeap& buffers)
-    : Source(layer), mStatus(NO_ERROR), 
-      mBufferSize(0), mTextureName(-1U)
+    : Source(layer), mStatus(NO_ERROR), mBufferSize(0)
 {
     if (buffers.heap == NULL) {
         // this is allowed, but in this case, it is illegal to receive
@@ -321,8 +320,8 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
 
 LayerBuffer::BufferSource::~BufferSource()
 {    
-    if (mTextureName != -1U) {
-        glDeleteTextures(1, &mTextureName);
+    if (mTexture.name != -1U) {
+        glDeleteTextures(1, &mTexture.name);
     }
 }
 
@@ -380,37 +379,36 @@ bool LayerBuffer::BufferSource::transformed() const
 
 void LayerBuffer::BufferSource::onDraw(const Region& clip) const 
 {
-    // FIXME: we should get a native buffer here 
-    /*
-    sp<Buffer> ourBbuffer(getBuffer());
-    if (UNLIKELY(buffer == 0))  {
+    sp<Buffer> ourBuffer(getBuffer());
+    if (UNLIKELY(ourBuffer == 0))  {
         // nothing to do, we don't have a buffer
         mLayer.clearWithOpenGL(clip);
         return;
     }
 
-    // FIXME: We should model this after the overlay stuff
-    if (UNLIKELY(mTextureName == -1LU)) {
-        mTextureName = mLayer.createTexture();
-    }
+    const NativeBuffer& src( ourBuffer->getBuffer() );
 
-    // FIXME: Use EGLImage extension for this
-    
-    
-    
-    GGLSurface t;
-    status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_RARELY);
-    if (res == NO_ERROR) {
+    //if (!can_use_copybit || err) 
+    {
+        // OpenGL fall-back
+        if (UNLIKELY(mTexture.name == -1LU)) {
+            mTexture.name = mLayer.createTexture();
+        }
         GLuint w = 0;
         GLuint h = 0;
-        const Region dirty(Rect(buffer->width, buffer->height));
-        mLayer.loadTexture(dirty, mTextureName, t, w, h);
-        buffer->unlock();
+        GGLSurface t;
+        t.version = sizeof(GGLSurface);
+        t.width  = src.crop.r;
+        t.height = src.crop.b;
+        t.stride = src.img.w;
+        t.vstride= src.img.h;
+        t.format = src.img.format;
+        t.data = (GGLubyte*)(intptr_t(src.img.base) + src.img.offset);
+        const Region dirty(Rect(t.width, t.height));
+        mLayer.loadTexture(&mTexture, mTexture.name, dirty, t);
+        mTexture.transform = mBufferHeap.transform;
+        mLayer.drawWithOpenGL(clip, mTexture);
     }
-    if (res == NO_ERROR) {
-        mLayer.drawWithOpenGL(clip, mTextureName, buffer, mBufferHeap.transform);
-    }
-    */
 }
 
 

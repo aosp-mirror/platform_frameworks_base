@@ -20,6 +20,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #include <private/ui/LayerState.h>
 
 #include <utils/RefBase.h>
@@ -238,17 +241,23 @@ protected:
 
           GLuint createTexture() const;
     
-          void drawWithOpenGL(const Region& clip,
-                  GLint textureName,
-                  const sp<const Buffer>& buffer,
-                  int transform = 0) const;
-
+          struct Texture {
+              Texture() : name(-1U), width(0), height(0),
+                  image(EGL_NO_IMAGE_KHR), transform(0), dirty(true) { }
+              GLuint        name;
+              GLuint        width;
+              GLuint        height;
+              EGLImageKHR   image;
+              uint32_t      transform;
+              bool          dirty;
+          };
+          
           void clearWithOpenGL(const Region& clip) const;
+          void drawWithOpenGL(const Region& clip, const Texture& texture) const;
+          void loadTexture(Texture* texture, GLint textureName, 
+                  const Region& dirty, const GGLSurface& t) const;
 
-          void loadTexture(const Region& dirty,
-                  GLint textureName, const GGLSurface& t,
-                  GLuint& textureWidth, GLuint& textureHeight) const;
-
+          
                 sp<SurfaceFlinger> mFlinger;
                 uint32_t        mFlags;
 

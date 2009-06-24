@@ -380,17 +380,17 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
     }
 }
 
-void LayerBase::drawWithOpenGL(const Region& clip,
-        GLint textureName, const sp<const Buffer>& buffer, int transform) const
+void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
     const State& s(drawingState());
-    const uint32_t width = buffer->width;
-    const uint32_t height = buffer->height;
     
     // bind our texture
-    validateTexture(textureName);
+    validateTexture(texture.name);
+    uint32_t width  = texture.width; 
+    uint32_t height = texture.height;
+    
     glEnable(GL_TEXTURE_2D);
 
     // Dithering...
@@ -457,7 +457,9 @@ void LayerBase::drawWithOpenGL(const Region& clip,
             glMatrixMode(GL_TEXTURE);
             glLoadIdentity();
             
-            if (transform == HAL_TRANSFORM_ROT_90) {
+            // the texture's source is rotated
+            if (texture.transform == HAL_TRANSFORM_ROT_90) {
+                // TODO: handle the other orientations
                 glTranslatef(0, 1, 0);
                 glRotatef(-90, 0, 0, 1);
             }
@@ -518,13 +520,16 @@ void LayerBase::validateTexture(GLint textureName) const
     // this is currently done in loadTexture() below
 }
 
-void LayerBase::loadTexture(const Region& dirty,
-        GLint textureName, const GGLSurface& t,
-        GLuint& textureWidth, GLuint& textureHeight) const
+void LayerBase::loadTexture(Texture* texture, GLint textureName, 
+        const Region& dirty, const GGLSurface& t) const
 {
     // TODO: defer the actual texture reload until LayerBase::validateTexture
     // is called.
 
+    texture->name = textureName;
+    GLuint& textureWidth(texture->width);
+    GLuint& textureHeight(texture->height);
+    
     uint32_t flags = mFlags;
     glBindTexture(GL_TEXTURE_2D, textureName);
 
