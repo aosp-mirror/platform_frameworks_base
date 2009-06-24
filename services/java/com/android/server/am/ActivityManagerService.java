@@ -12643,51 +12643,63 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public boolean profileControl(String process, boolean start,
-            String path) throws RemoteException {
+            String path, ParcelFileDescriptor fd) throws RemoteException {
 
-        synchronized (this) {
-            // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
-            // its own permission.
-            if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires permission "
-                        + android.Manifest.permission.SET_ACTIVITY_WATCHER);
-            }
-            
-            ProcessRecord proc = null;
-            try {
-                int pid = Integer.parseInt(process);
-                synchronized (mPidsSelfLocked) {
-                    proc = mPidsSelfLocked.get(pid);
+        try {
+            synchronized (this) {
+                // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
+                // its own permission.
+                if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Requires permission "
+                            + android.Manifest.permission.SET_ACTIVITY_WATCHER);
                 }
-            } catch (NumberFormatException e) {
-            }
-            
-            if (proc == null) {
-                HashMap<String, SparseArray<ProcessRecord>> all
-                        = mProcessNames.getMap();
-                SparseArray<ProcessRecord> procs = all.get(process);
-                if (procs != null && procs.size() > 0) {
-                    proc = procs.valueAt(0);
+                
+                if (start && fd == null) {
+                    throw new IllegalArgumentException("null fd");
                 }
-            }
-            
-            if (proc == null || proc.thread == null) {
-                throw new IllegalArgumentException("Unknown process: " + process);
-            }
-            
-            boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
-            if (isSecure) {
-                if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                    throw new SecurityException("Process not debuggable: " + proc);
+                
+                ProcessRecord proc = null;
+                try {
+                    int pid = Integer.parseInt(process);
+                    synchronized (mPidsSelfLocked) {
+                        proc = mPidsSelfLocked.get(pid);
+                    }
+                } catch (NumberFormatException e) {
                 }
-            }
+                
+                if (proc == null) {
+                    HashMap<String, SparseArray<ProcessRecord>> all
+                            = mProcessNames.getMap();
+                    SparseArray<ProcessRecord> procs = all.get(process);
+                    if (procs != null && procs.size() > 0) {
+                        proc = procs.valueAt(0);
+                    }
+                }
+                
+                if (proc == null || proc.thread == null) {
+                    throw new IllegalArgumentException("Unknown process: " + process);
+                }
+                
+                boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
+                if (isSecure) {
+                    if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                        throw new SecurityException("Process not debuggable: " + proc);
+                    }
+                }
             
-            try {
-                proc.thread.profilerControl(start, path);
+                proc.thread.profilerControl(start, path, fd);
+                fd = null;
                 return true;
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Process disappeared");
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Process disappeared");
+        } finally {
+            if (fd != null) {
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                }
             }
         }
     }

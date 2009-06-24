@@ -25,6 +25,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -92,7 +93,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleLowMemory() throws RemoteException;
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
     void requestPss() throws RemoteException;
-    void profilerControl(boolean start, String path) throws RemoteException;
+    void profilerControl(boolean start, String path, ParcelFileDescriptor fd)
+            throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
     
     String descriptor = "android.app.IApplicationThread";
