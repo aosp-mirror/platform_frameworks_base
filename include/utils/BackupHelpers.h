@@ -137,6 +137,7 @@ public:
 
 private:
     void* m_buf;
+    bool m_loggedUnknownMetadata;
     KeyedVector<String8,FileRec> m_files;
 };
 
