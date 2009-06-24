@@ -349,10 +349,7 @@ void DisplayHardware::makeCurrent() const
     eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
 }
 
-void DisplayHardware::copyFrontToImage(const copybit_image_t& front) const {
-    // FIXME: we need to get rid of this
+sp<FramebufferNativeWindow> DisplayHardware::getFb() const { 
+    return mNativeWindow; 
 }
 
-void DisplayHardware::copyBackToImage(const copybit_image_t& front) const {
-    // FIXME: we need to get rid of this
-}

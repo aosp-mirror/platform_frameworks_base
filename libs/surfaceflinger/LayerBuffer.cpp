@@ -24,6 +24,9 @@
 #include <utils/StopWatch.h>
 
 #include <ui/PixelFormat.h>
+#include <ui/FramebufferNativeWindow.h>
+
+#include <hardware/copybit.h>
 
 #include "LayerBuffer.h"
 #include "SurfaceFlinger.h"
@@ -316,7 +319,12 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
     mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);    
     mBufferSize = info.getScanlineSize(buffers.hor_stride)*buffers.ver_stride;
     mLayer.forceVisibilityTransaction();
-    
+
+    hw_module_t const* module;
+    mBlitEngine = NULL;
+    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
+        copybit_open(module, &mBlitEngine);
+    }
 }
 
 LayerBuffer::BufferSource::~BufferSource()
@@ -387,9 +395,119 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         return;
     }
 
-    const NativeBuffer& src( ourBuffer->getBuffer() );
+    status_t err = NO_ERROR;
+    NativeBuffer src(ourBuffer->getBuffer());
+    const Rect& transformedBounds = mLayer.getTransformedBounds();
+    copybit_device_t* copybit = mBlitEngine;
 
-    //if (!can_use_copybit || err) 
+    if (copybit)  {
+        const int src_width  = src.crop.r - src.crop.l;
+        const int src_height = src.crop.b - src.crop.t;
+        int W = transformedBounds.width();
+        int H = transformedBounds.height();
+        if (mLayer.getOrientation() & Transform::ROT_90) {
+            int t(W); W=H; H=t;
+        }
+
+#if 0
+        /* With LayerBuffer, it is likely that we'll have to rescale the
+         * surface, because this is often used for video playback or
+         * camera-preview. Since we want these operation as fast as possible
+         * we make sure we can use the 2D H/W even if it doesn't support
+         * the requested scale factor, in which case we perform the scaling
+         * in several passes. */
+
+        const float min = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
+        const float mag = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
+
+        float xscale = 1.0f;
+        if (src_width > W*min)          xscale = 1.0f / min;
+        else if (src_width*mag < W)     xscale = mag;
+
+        float yscale = 1.0f;
+        if (src_height > H*min)         yscale = 1.0f / min;
+        else if (src_height*mag < H)    yscale = mag;
+
+        if (UNLIKELY(xscale!=1.0f || yscale!=1.0f)) {
+            if (UNLIKELY(mTemporaryDealer == 0)) {
+                // allocate a memory-dealer for this the first time
+                mTemporaryDealer = mLayer.mFlinger->getSurfaceHeapManager()
+                    ->createHeap(ISurfaceComposer::eHardware);
+                mTempBitmap.init(mTemporaryDealer);
+            }
+
+            const int tmp_w = floorf(src_width  * xscale);
+            const int tmp_h = floorf(src_height * yscale);
+            err = mTempBitmap.setBits(tmp_w, tmp_h, 1, src.img.format);
+
+            if (LIKELY(err == NO_ERROR)) {
+                NativeBuffer tmp;
+                mTempBitmap.getBitmapSurface(&tmp.img);
+                tmp.crop.l = 0;
+                tmp.crop.t = 0;
+                tmp.crop.r = tmp.img.w;
+                tmp.crop.b = tmp.img.h;
+
+                region_iterator tmp_it(Region(Rect(tmp.crop.r, tmp.crop.b)));
+                copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+                copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+                copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
+                err = copybit->stretch(copybit,
+                        &tmp.img, &src.img, &tmp.crop, &src.crop, &tmp_it);
+                src = tmp;
+            }
+        }
+#endif
+
+        copybit_image_t dst;
+        const DisplayHardware& hw(mLayer.graphicPlane(0).displayHardware());
+        sp<FramebufferNativeWindow> fbw = hw.getFb();
+        android_native_buffer_t const* nb = fbw->getBackbuffer();
+        native_handle_t const* hnd = nb->handle;
+
+        if (hnd->data[1] != 0x3141592) {
+            LOGE("buffer not compatible with copybit");
+            err = -1;
+        } else {
+
+            dst.w       = 320;
+            dst.h       = 480;
+            dst.format  = 4;
+            dst.offset  = hnd->data[4];
+            dst.base    = 0;
+            dst.fd      = hnd->data[0];
+
+            const Rect& transformedBounds = mLayer.getTransformedBounds();
+            const copybit_rect_t& drect
+                = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
+            const State& s(mLayer.drawingState());
+            region_iterator it(clip);
+
+            // pick the right orientation for this buffer
+            int orientation = mLayer.getOrientation();
+            if (UNLIKELY(mBufferHeap.transform)) {
+                Transform rot90;
+                GraphicPlane::orientationToTransfrom(
+                        ISurfaceComposer::eOrientation90, 0, 0, &rot90);
+                const Transform& planeTransform(mLayer.graphicPlane(0).transform());
+                const Layer::State& s(mLayer.drawingState());
+                Transform tr(planeTransform * s.transform * rot90);
+                orientation = tr.getOrientation();
+            }
+
+            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
+            copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+
+            err = copybit->stretch(copybit,
+                    &dst, &src.img, &drect, &src.crop, &it);
+            if (err != NO_ERROR) {
+                LOGE("copybit failed (%s)", strerror(err));
+            }
+        }
+    }
+
+    if (!copybit || err) 
     {
         // OpenGL fall-back
         if (UNLIKELY(mTexture.name == -1LU)) {

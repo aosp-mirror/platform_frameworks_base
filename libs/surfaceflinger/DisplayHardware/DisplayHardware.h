@@ -80,13 +80,13 @@ public:
     EGLDisplay getEGLDisplay() const { return mDisplay; }
     overlay_control_device_t* getOverlayEngine() const { return mOverlayEngine; }
     
-    void copyFrontToImage(const copybit_image_t& front) const;
-    void copyBackToImage(const copybit_image_t& front) const;
-       
     Rect bounds() const {
         return Rect(mWidth, mHeight);
     }
 
+    // FIXME: needed in LayerBuffer for msm7k/copybit hack
+    sp<FramebufferNativeWindow> getFb() const;
+    
 private:
     void init(uint32_t displayIndex) __attribute__((noinline));
     void fini() __attribute__((noinline));

@@ -26,6 +26,8 @@
 #include "LayerBase.h"
 #include "LayerBitmap.h"
 
+struct copybit_device_t;
+
 namespace android {
 
 // ---------------------------------------------------------------------------
@@ -128,6 +130,7 @@ private:
         size_t                          mBufferSize;
         mutable sp<android::Buffer>     mTempBitmap;
         mutable LayerBase::Texture      mTexture;
+        copybit_device_t*               mBlitEngine;
     };
     
     class OverlaySource : public Source {
