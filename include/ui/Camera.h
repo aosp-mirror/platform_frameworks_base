@@ -152,14 +152,6 @@ public:
             // get preview/capture parameters - key/value pairs
             String8     getParameters() const;
 
-            void        setShutterCallback(shutter_callback cb, void *cookie);
-            void        setRawCallback(frame_callback cb, void *cookie);
-            void        setJpegCallback(frame_callback cb, void *cookie);
-            void        setRecordingCallback(frame_callback cb, void *cookie);
-            void        setPreviewCallback(frame_callback cb, void *cookie, int preview_callback_flag = FRAME_CALLBACK_FLAG_NOOP);
-            void        setErrorCallback(error_callback cb, void *cookie);
-            void        setAutoFocusCallback(autofocus_callback cb, void *cookie);
-
             void        setListener(const sp<CameraListener>& listener);
             void        setPreviewCallbackFlags(int preview_callback_flag);
 
@@ -189,21 +181,6 @@ private:
 
             sp<ICamera>         mCamera;
             status_t            mStatus;
-
-            shutter_callback    mShutterCallback;
-            void                *mShutterCallbackCookie;
-            frame_callback      mRawCallback;
-            void                *mRawCallbackCookie;
-            frame_callback      mJpegCallback;
-            void                *mJpegCallbackCookie;
-            frame_callback      mPreviewCallback;
-            void                *mPreviewCallbackCookie;
-            frame_callback      mRecordingCallback;
-            void                *mRecordingCallbackCookie;
-            error_callback      mErrorCallback;
-            void                *mErrorCallbackCookie;
-            autofocus_callback  mAutoFocusCallback;
-            void                *mAutoFocusCallbackCookie;
 
             sp<CameraListener>  mListener;
 
