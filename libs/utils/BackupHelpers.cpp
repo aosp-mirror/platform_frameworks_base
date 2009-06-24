@@ -41,7 +41,43 @@ namespace android {
 #define MAGIC0 0x70616e53 // Snap
 #define MAGIC1 0x656c6946 // File
 
-#if 1 // TEST_BACKUP_HELPERS
+/*
+ * File entity data format (v1):
+ *
+ *   - 4-byte version number of the metadata, little endian (0x00000001 for v1)
+ *   - 12 bytes of metadata
+ *   - the file data itself
+ *
+ * i.e. a 16-byte metadata header followed by the raw file data.  If the
+ * restore code does not recognize the metadata version, it can still
+ * interpret the file data itself correctly.
+ *
+ * file_metadata_v1:
+ *
+ *   - 4 byte version number === 0x00000001 (little endian)
+ *   - 4-byte access mode (little-endian)
+ *   - undefined (8 bytes)
+ */
+
+struct file_metadata_v1 {
+    int version;
+    int mode;
+    int undefined_1;
+    int undefined_2;
+};
+
+const static int CURRENT_METADATA_VERSION = 1;
+
+// auto-free buffer management object
+class StAutoFree {
+public:
+    StAutoFree(void* buffer) { mBuf = buffer; }
+    ~StAutoFree() { free(mBuf); }
+private:
+    void* mBuf;
+};
+
+#if 0 // TEST_BACKUP_HELPERS
 #define LOGP(f, x...) printf(f "\n", x)
 #else
 #define LOGP(x...) LOGD(x)
@@ -181,29 +217,48 @@ write_delete_file(BackupDataWriter* dataStream, const String8& key)
 }
 
 static int
-write_update_file(BackupDataWriter* dataStream, int fd, const String8& key,
+write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8& key,
         char const* realFilename)
 {
-    LOGP("write_update_file %s (%s)\n", realFilename, key.string());
+    LOGP("write_update_file %s (%s) : mode 0%o\n", realFilename, key.string(), mode);
 
     const int bufsize = 4*1024;
     int err;
     int amt;
     int fileSize;
     int bytesLeft;
+    file_metadata_v1 metadata;
 
     char* buf = (char*)malloc(bufsize);
+    StAutoFree _autoFree(buf);
+
     int crc = crc32(0L, Z_NULL, 0);
 
 
-    bytesLeft = fileSize = lseek(fd, 0, SEEK_END);
+    fileSize = lseek(fd, 0, SEEK_END);
     lseek(fd, 0, SEEK_SET);
 
+    if (sizeof(metadata) != 16) {
+        LOGE("ERROR: metadata block is the wrong size!");
+    }
+
+    bytesLeft = fileSize + sizeof(metadata);
     err = dataStream->WriteEntityHeader(key, bytesLeft);
     if (err != 0) {
         return err;
     }
 
+    // store the file metadata first
+    metadata.version = tolel(CURRENT_METADATA_VERSION);
+    metadata.mode = tolel(mode);
+    metadata.undefined_1 = metadata.undefined_2 = 0;
+    err = dataStream->WriteEntityData(&metadata, sizeof(metadata));
+    if (err != 0) {
+        return err;
+    }
+    bytesLeft -= sizeof(metadata); // bytesLeft should == fileSize now
+
+    // now store the file content
     while ((amt = read(fd, buf, bufsize)) != 0 && bytesLeft > 0) {
         bytesLeft -= amt;
         if (bytesLeft < 0) {
@@ -232,8 +287,6 @@ write_update_file(BackupDataWriter* dataStream, int fd, const String8& key,
                 " You aren't doing proper locking!", realFilename, fileSize, fileSize-bytesLeft);
     }
 
-    free(buf);
-
     return NO_ERROR;
 }
 
@@ -241,11 +294,19 @@ static int
 write_update_file(BackupDataWriter* dataStream, const String8& key, char const* realFilename)
 {
     int err;
+    struct stat st;
+
+    err = stat(realFilename, &st);
+    if (err < 0) {
+        return errno;
+    }
+
     int fd = open(realFilename, O_RDONLY);
     if (fd == -1) {
         return errno;
     }
-    err = write_update_file(dataStream, fd, key, realFilename);
+
+    err = write_update_file(dataStream, fd, st.st_mode, key, realFilename);
     close(fd);
     return err;
 }
@@ -257,6 +318,8 @@ compute_crc32(int fd)
     int amt;
 
     char* buf = (char*)malloc(bufsize);
+    StAutoFree _autoFree(buf);
+
     int crc = crc32(0L, Z_NULL, 0);
 
     lseek(fd, 0, SEEK_SET);
@@ -264,8 +327,6 @@ compute_crc32(int fd)
     while ((amt = read(fd, buf, bufsize)) != 0) {
         crc = crc32(crc, (Bytef*)buf, amt);
     }
-
-    free(buf);
 
     return crc;
 }
@@ -356,7 +417,7 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
                         g.s.modTime_sec, g.s.modTime_nsec, g.s.mode, g.s.size, g.s.crc32);
                 if (f.modTime_sec != g.s.modTime_sec || f.modTime_nsec != g.s.modTime_nsec
                         || f.mode != g.s.mode || f.size != g.s.size || f.crc32 != g.s.crc32) {
-                    write_update_file(dataStream, fd, p, g.file.string());
+                    write_update_file(dataStream, fd, g.s.mode, p, g.file.string());
                 }
 
                 close(fd);
@@ -416,8 +477,22 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
         return err;
     }
 
-    // TODO: World readable/writable for now.
-    mode = 0666;
+    // Get the metadata block off the head of the file entity and use that to
+    // set up the output file
+    file_metadata_v1 metadata;
+    amt = in->ReadEntityData(&metadata, sizeof(metadata));
+    if (amt != sizeof(metadata)) {
+        LOGW("Could not read metadata for %s -- %ld / %s", filename.string(),
+                (long)amt, strerror(errno));
+        return EIO;
+    }
+    metadata.version = fromlel(metadata.version);
+    metadata.mode = fromlel(metadata.mode);
+    if (metadata.version > CURRENT_METADATA_VERSION) {
+        LOGW("Restoring file with unsupported metadata version %d (currently %d)",
+                metadata.version, CURRENT_METADATA_VERSION);
+    }
+    mode = metadata.mode;
 
     // Write the file and compute the crc
     crc = crc32(0L, Z_NULL, 0);
@@ -512,6 +587,7 @@ compare_file(const char* path, const unsigned char* data, int len)
         fprintf(stderr, "malloc(%d) failed\n", len);
         return ENOMEM;
     }
+    StAutoFree _autoFree(contents);
 
     bool sizesMatch = true;
     amt = lseek(fd, 0, SEEK_END);
@@ -843,6 +919,7 @@ test_read_header_and_entity(BackupDataReader& reader, const char* str)
     int err;
     int bufSize = strlen(str)+1;
     char* buf = (char*)malloc(bufSize);
+    StAutoFree _autoFree(buf);
     String8 string;
     int cookie = 0x11111111;
     size_t actualSize;
@@ -904,7 +981,6 @@ finished:
     if (err != NO_ERROR) {
         fprintf(stderr, "test_read_header_and_entity failed with %s\n", strerror(err));
     }
-    free(buf);
     return err;
 }
 
