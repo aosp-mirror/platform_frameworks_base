@@ -43,14 +43,14 @@ public class RestoreSet implements Parcelable {
      * transport.  This is guaranteed to be valid for the duration of a restore
      * session, but is meaningless once the session has ended.
      */
-    public int token;
+    public long token;
 
 
     public RestoreSet() {
         // Leave everything zero / null
     }
 
-    public RestoreSet(String _name, String _dev, int _token) {
+    public RestoreSet(String _name, String _dev, long _token) {
         name = _name;
         device = _dev;
         token = _token;
@@ -65,7 +65,7 @@ public class RestoreSet implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(name);
         out.writeString(device);
-        out.writeInt(token);
+        out.writeLong(token);
     }
 
     public static final Parcelable.Creator<RestoreSet> CREATOR
@@ -82,6 +82,6 @@ public class RestoreSet implements Parcelable {
     private RestoreSet(Parcel in) {
         name = in.readString();
         device = in.readString();
-        token = in.readInt();
+        token = in.readLong();
     }
 }

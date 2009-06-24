@@ -57,7 +57,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // is stored using the package name as a key)
     private static final String GLOBAL_METADATA_KEY = "@meta@";
 
-    private List<ApplicationInfo> mAllApps;
+    private List<PackageInfo> mAllPackages;
     private PackageManager mPackageManager;
     private HashMap<String, Metadata> mRestoredSignatures;
 
@@ -73,9 +73,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     // We're constructed with the set of applications that are participating
     // in backup.  This set changes as apps are installed & removed.
-    PackageManagerBackupAgent(PackageManager packageMgr, List<ApplicationInfo> apps) {
+    PackageManagerBackupAgent(PackageManager packageMgr, List<PackageInfo> packages) {
         mPackageManager = packageMgr;
-        mAllApps = apps;
+        mAllPackages = packages;
         mRestoredSignatures = null;
     }
 
@@ -118,8 +118,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
             // For each app we have on device, see if we've backed it up yet.  If not,
             // write its signature block to the output, keyed on the package name.
-            for (ApplicationInfo app : mAllApps) {
-                String packName = app.packageName;
+            for (PackageInfo pkg : mAllPackages) {
+                String packName = pkg.packageName;
                 if (!existing.contains(packName)) {
                     // We haven't stored this app's signatures yet, so we do that now
                     try {
@@ -186,7 +186,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         }
 
         // Finally, write the new state blob -- just the list of all apps we handled
-        writeStateFile(mAllApps, newState);
+        writeStateFile(mAllPackages, newState);
     }
 
     // "Restore" here is a misnomer.  What we're really doing is reading back the
@@ -327,7 +327,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
     }
 
     // Util: write out our new backup state file
-    private void writeStateFile(List<ApplicationInfo> apps, ParcelFileDescriptor stateFile) {
+    private void writeStateFile(List<PackageInfo> pkgs, ParcelFileDescriptor stateFile) {
         FileOutputStream outstream = new FileOutputStream(stateFile.getFileDescriptor());
         DataOutputStream out = new DataOutputStream(outstream);
 
@@ -338,8 +338,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
             out.write(metaNameBuf);
 
             // now write all the app names too
-            for (ApplicationInfo app : apps) {
-                byte[] pkgNameBuf = app.packageName.getBytes();
+            for (PackageInfo pkg : pkgs) {
+                byte[] pkgNameBuf = pkg.packageName.getBytes();
                 out.writeInt(pkgNameBuf.length);
                 out.write(pkgNameBuf);
             }
