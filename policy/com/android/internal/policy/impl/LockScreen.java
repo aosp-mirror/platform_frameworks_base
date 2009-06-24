@@ -21,6 +21,7 @@ import com.android.internal.widget.LockPatternUtils;
 
 import android.content.Context;
 import android.text.format.DateFormat;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -236,8 +237,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     private void refreshAlarmDisplay() {
-        String nextAlarmText = mLockPatternUtils.getNextAlarm();
-        if (nextAlarmText != null && mSimOk) {
+        final String nextAlarmText = mLockPatternUtils.getNextAlarm();
+
+        // bug 1685880: if we are in landscape and showing plmn, the information can end up not
+        // fitting on screen.  in this case, the alarm will get cut.
+        final CharSequence plmn = mUpdateMonitor.getTelephonyPlmn();
+        final boolean showingPlmn = plmn != null && !TextUtils.isEmpty(plmn);
+        final boolean wontFit = !mUpdateMonitor.isInPortrait() && showingPlmn;
+        if (nextAlarmText != null && mSimOk && !wontFit) {
             setAlarmInfoVisible(true);
             mAlarmText.setText(nextAlarmText);
         } else {
@@ -292,19 +299,20 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
         refreshSimOkHeaders(plmn, spn);
+        refreshAlarmDisplay();  // in case alarm won't fit anymore
     }
 
     private void refreshSimOkHeaders(CharSequence plmn, CharSequence spn) {
         final IccCard.State simState = mUpdateMonitor.getSimState();
         if (simState == IccCard.State.READY) {
-            if (plmn != null) {
+            if (plmn != null && !TextUtils.isEmpty(plmn)) {
                 mHeaderSimOk1.setVisibility(View.VISIBLE);
                 mHeaderSimOk1.setText(plmn);
             } else {
                 mHeaderSimOk1.setVisibility(View.GONE);
             }
 
-            if (spn != null) {
+            if (spn != null && !TextUtils.isEmpty(spn)) {
                 mHeaderSimOk2.setVisibility(View.VISIBLE);
                 mHeaderSimOk2.setText(spn);
             } else {
