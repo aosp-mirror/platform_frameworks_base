@@ -560,12 +560,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
         if (mGlobalSearchMode) {
             mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in
-            mSearchAutoComplete.setDropDownBackgroundResource(
-                    com.android.internal.R.drawable.search_dropdown_background);
         } else {
             mSearchAutoComplete.setDropDownAlwaysVisible(false);
-            mSearchAutoComplete.setDropDownBackgroundResource(
-                    com.android.internal.R.drawable.search_dropdown_background_apps);
         }
 
         // attach the suggestions adapter, if suggestions are available
