@@ -147,7 +147,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             final Cursor cursor = mSearchManager.getSuggestions(mSearchable, query);
             // trigger fill window so the spinner stays up until the results are copied over and
             // closer to being ready
-            if (!mGlobalSearchMode) cursor.getCount();
+            if (!mGlobalSearchMode && cursor != null) cursor.getCount();
             return cursor;
         } catch (RuntimeException e) {
             Log.w(LOG_TAG, "Search suggestions query threw an exception.", e);
