@@ -20,11 +20,13 @@ package com.android.internal.telephony.cdma;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.provider.Telephony.Sms.Intents;
+import android.preference.PreferenceManager;
 import android.util.Config;
 import android.util.Log;
 
@@ -83,27 +85,6 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         int teleService = sms.getTeleService();
         boolean handled = false;
 
-        // Teleservices W(E)MT and VMN are handled together:
-        if ((teleService == SmsEnvelope.TELESERVICE_WMT)
-                || (teleService == SmsEnvelope.TELESERVICE_WEMT)
-                || (teleService == SmsEnvelope.TELESERVICE_VMN)) {
-            // From here on we need decoded BD.
-            // Special case the message waiting indicator messages
-            if (sms.isMWISetMessage()) {
-                mCdmaPhone.updateMessageWaitingIndicator(true);
-                handled |= sms.isMwiDontStore();
-                if (Config.LOGD) {
-                    Log.d(TAG, "Received voice mail indicator set SMS shouldStore=" + !handled);
-                }
-            } else if (sms.isMWIClearMessage()) {
-                mCdmaPhone.updateMessageWaitingIndicator(false);
-                handled |= sms.isMwiDontStore();
-                if (Config.LOGD) {
-                    Log.d(TAG, "Received voice mail indicator clear SMS shouldStore=" + !handled);
-                }
-            }
-        }
-
         if (sms.getUserData() == null) {
             if (Config.LOGD) {
                 Log.d(TAG, "Received SMS without user data");
@@ -115,6 +96,18 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
         if (SmsEnvelope.TELESERVICE_WAP == teleService){
             processCdmaWapPdu(sms.getUserData(), sms.messageRef, sms.getOriginatingAddress());
+            return;
+        } else if (SmsEnvelope.TELESERVICE_VMN == teleService) {
+            // handling Voicemail
+            int voicemailCount = sms.getNumOfVoicemails();
+            Log.d(TAG, "Voicemail count=" + voicemailCount);
+            // Store the voicemail count in preferences.
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(
+                    ((CDMAPhone) mPhone).getContext());
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putInt(CDMAPhone.VM_COUNT_CDMA, voicemailCount);
+            editor.commit();
+            ((CDMAPhone) mPhone).updateMessageWaitingIndicator(voicemailCount);
             return;
         }
 
