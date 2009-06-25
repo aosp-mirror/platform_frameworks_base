@@ -1052,23 +1052,25 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
     if (!validate_display_context(dpy, ctx))
         return EGL_FALSE;    
     
+    EGLSurface impl_draw = EGL_NO_SURFACE;
+    EGLSurface impl_read = EGL_NO_SURFACE;
     egl_context_t * const c = get_context(ctx);
     if (draw != EGL_NO_SURFACE) {
         egl_surface_t const * d = get_surface(draw);
         if (!d) return setError(EGL_BAD_SURFACE, EGL_FALSE);
         if (d->impl != c->impl)
             return setError(EGL_BAD_MATCH, EGL_FALSE);
-        draw = d->surface;
+        impl_draw = d->surface;
     }
     if (read != EGL_NO_SURFACE) {
         egl_surface_t const * r = get_surface(read);
         if (!r) return setError(EGL_BAD_SURFACE, EGL_FALSE);
         if (r->impl != c->impl)
             return setError(EGL_BAD_MATCH, EGL_FALSE);
-        read = r->surface;
+        impl_read = r->surface;
     }
     EGLBoolean result = c->cnx->hooks->egl.eglMakeCurrent(
-            dp->dpys[c->impl], draw, read, c->context);
+            dp->dpys[c->impl], impl_draw, impl_read, c->context);
 
     if (result == EGL_TRUE) {
         setGlThreadSpecific(c->cnx->hooks);
