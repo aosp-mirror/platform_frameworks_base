@@ -1222,6 +1222,9 @@ public class RelativeLayout extends ViewGroup {
                             throw new IllegalStateException("A view cannot have a dependency" +
                                     " on itself");
                         }
+                        if (dependency == null) {
+                            continue;
+                        }
                         // Add the current node as a dependent
                         dependency.dependents.add(node);
                         // Add a dependency to the current node
