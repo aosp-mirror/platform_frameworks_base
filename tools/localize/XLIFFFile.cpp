@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <sys/time.h>
 #include <time.h>
+#include <cstdio>
 
 const char* const XLIFF_XMLNS = "urn:oasis:names:tc:xliff:document:1.2";
 
