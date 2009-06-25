@@ -3697,6 +3697,13 @@ public final class ActivityThread {
          */
         Locale.setDefault(data.config.locale);
 
+        /*
+         * Update the system configuration since its preloaded and might not
+         * reflect configuration changes. The configuration object passed
+         * in AppBindData can be safely assumed to be up to date
+         */
+        Resources.getSystem().updateConfiguration(mConfiguration, null);
+
         data.info = getPackageInfoNoCheck(data.appInfo);
 
         if (data.debugMode != IApplicationThread.DEBUG_OFF) {
