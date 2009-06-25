@@ -136,6 +136,11 @@ public class RenamingDelegatingContext extends ContextWrapper {
             return false;
         }
     }
+    
+    @Override
+    public File getDatabasePath(String name) {
+        return mFileContext.getDatabasePath(renamedFileName(name));
+    }
 
     @Override
     public String[] databaseList() {
