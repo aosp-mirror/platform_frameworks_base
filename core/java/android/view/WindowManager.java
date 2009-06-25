@@ -483,6 +483,12 @@ public interface WindowManager extends ViewManager {
          * {@hide} */
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
+        /** Window flag: special flag to let a window ignore the compatibility scaling.
+         * This is used by SurfaceView to create a window that does not scale the content.
+         *
+         * {@hide} */
+        public static final int FLAG_NO_COMPATIBILITY_SCALING = 0x00100000;
+
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.
@@ -978,8 +984,9 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Scale the layout params' coordinates and size.
+         * @hide
          */
-        void scale(float scale) {
+        public void scale(float scale) {
             x *= scale;
             y *= scale;
             if (width > 0) {
@@ -997,14 +1004,13 @@ public interface WindowManager extends ViewManager {
         void backup() {
             int[] backup = mCompatibilityParamsBackup;
             if (backup == null) {
-                // we backup 5 elements, x, y, width, height and gravity.
-                backup = mCompatibilityParamsBackup = new int[5];
+                // we backup 4 elements, x, y, width, height
+                backup = mCompatibilityParamsBackup = new int[4];
             }
             backup[0] = x;
             backup[1] = y;
             backup[2] = width;
             backup[3] = height;
-            backup[4] = gravity;
         }
 
         /**
@@ -1018,7 +1024,6 @@ public interface WindowManager extends ViewManager {
                 y = backup[1];
                 width = backup[2];
                 height = backup[3];
-                gravity = backup[4];
             }
         }
 

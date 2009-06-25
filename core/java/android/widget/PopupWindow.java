@@ -990,7 +990,7 @@ public class PopupWindow {
         
         int bottomEdge = displayFrame.bottom;
         if (ignoreBottomDecorations) {
-            bottomEdge = WindowManagerImpl.getDefault().getDefaultDisplay().getHeight();
+            bottomEdge = anchor.getContext().getResources().getDisplayMetrics().heightPixels;
         }
         final int distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
         final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
