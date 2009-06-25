@@ -76,8 +76,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final boolean DEBUG = true;
 
     // Default time to wait after data changes before we back up the data
-    private static final long COLLECTION_INTERVAL = 1000;
-    //private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
+    private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
 
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
@@ -360,7 +359,8 @@ class BackupManagerService extends IBackupManager.Stub {
         if (DEBUG) {
             Log.v(TAG, "Adding " + targetPkgs.size() + " backup participants:");
             for (PackageInfo p : targetPkgs) {
-                Log.v(TAG, "    " + p + " agent=" + p.applicationInfo.backupAgentName);
+                Log.v(TAG, "    " + p + " agent=" + p.applicationInfo.backupAgentName
+                        + " uid=" + p.applicationInfo.uid);
             }
         }
 
