@@ -573,7 +573,21 @@ public class Process {
      * directly to a gid.
      */
     public static final native int getGidForName(String name);
-    
+
+    /**
+     * Returns a uid for a currently running process.
+     * @param pid the process id
+     * @return the uid of the process, or -1 if the process is not running.
+     * @hide pending API council review
+     */
+    public static final int getUidForPid(int pid) {
+        String[] procStatusLabels = { "Uid:" };
+        long[] procStatusValues = new long[1];
+        procStatusValues[0] = -1;
+        Process.readProcLines("/proc/" + pid + "/status", procStatusLabels, procStatusValues);
+        return (int) procStatusValues[0];
+    }
+
     /**
      * Set the priority of a thread, based on Linux priorities.
      * 
