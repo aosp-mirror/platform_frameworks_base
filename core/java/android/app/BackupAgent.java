@@ -67,7 +67,7 @@ public abstract class BackupAgent extends ContextWrapper {
      *                 here after writing the requested data to dataFd.
      */
     public abstract void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-             ParcelFileDescriptor newState);
+             ParcelFileDescriptor newState) throws IOException;
     
     /**
      * The application is being restored from backup, and should replace any
@@ -120,6 +120,9 @@ public abstract class BackupAgent extends ContextWrapper {
             BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
+            } catch (IOException ex) {
+                Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
+                throw new RuntimeException(ex);
             } catch (RuntimeException ex) {
                 Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;

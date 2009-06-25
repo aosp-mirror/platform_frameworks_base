@@ -158,6 +158,7 @@ extern int register_android_location_GpsLocationProvider(JNIEnv* env);
 extern int register_android_backup_BackupDataInput(JNIEnv *env);
 extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelperBase(JNIEnv *env);
+extern int register_android_backup_BackupHelperDispatcher(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -1131,6 +1132,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_backup_BackupDataInput),
     REG_JNI(register_android_backup_BackupDataOutput),
     REG_JNI(register_android_backup_FileBackupHelperBase),
+    REG_JNI(register_android_backup_BackupHelperDispatcher),
 };
 
 /*

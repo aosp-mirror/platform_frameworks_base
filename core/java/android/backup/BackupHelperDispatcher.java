@@ -19,13 +19,21 @@ package android.backup;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.FileDescriptor;
 import java.util.TreeMap;
 import java.util.Map;
 
 /** @hide */
 public class BackupHelperDispatcher {
     private static final String TAG = "BackupHelperDispatcher";
+
+    private static class Header {
+        int chunkSize; // not including the header
+        String keyPrefix;
+    }
 
     TreeMap<String,BackupHelper> mHelpers = new TreeMap<String,BackupHelper>();
     
@@ -36,13 +44,63 @@ public class BackupHelperDispatcher {
         mHelpers.put(keyPrefix, helper);
     }
 
-    /** TODO: Make this save and restore the key prefix. */
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-             ParcelFileDescriptor newState) {
-        // Write out the state files -- mHelpers is a TreeMap, so the order is well defined.
-        for (Map.Entry<String,BackupHelper> entry: mHelpers.entrySet()) {
-            data.setKeyPrefix(entry.getKey());
-            entry.getValue().performBackup(oldState, data, newState);
+             ParcelFileDescriptor newState) throws IOException {
+        // First, do the helpers that we've already done, since they're already in the state
+        // file.
+        int err;
+        Header header = new Header();
+        TreeMap<String,BackupHelper> helpers = (TreeMap<String,BackupHelper>)mHelpers.clone();
+        FileDescriptor oldStateFD = null;
+        FileDescriptor newStateFD = newState.getFileDescriptor();
+
+        if (oldState != null) {
+            oldStateFD = oldState.getFileDescriptor();
+            while ((err = readHeader_native(header, oldStateFD)) >= 0) {
+                if (err == 0) {
+                    BackupHelper helper = helpers.get(header.keyPrefix);
+                    Log.d(TAG, "handling existing helper '" + header.keyPrefix + "' " + helper);
+                    if (helper != null) {
+                        doOneBackup(oldState, data, newState, header, helper);
+                        helpers.remove(header.keyPrefix);
+                    } else {
+                        skipChunk_native(oldStateFD, header.chunkSize);
+                    }
+                }
+            }
+        }
+
+        // Then go through and do the rest that we haven't done.
+        for (Map.Entry<String,BackupHelper> entry: helpers.entrySet()) {
+            header.keyPrefix = entry.getKey();
+            Log.d(TAG, "handling new helper '" + header.keyPrefix + "'");
+            BackupHelper helper = entry.getValue();
+            doOneBackup(oldState, data, newState, header, helper);
+        }
+    }
+
+    private void doOneBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState, Header header, BackupHelper helper) 
+            throws IOException {
+        int err;
+        FileDescriptor newStateFD = newState.getFileDescriptor();
+
+        // allocate space for the header in the file
+        int pos = allocateHeader_native(header, newStateFD);
+        if (pos < 0) {
+            throw new IOException("allocateHeader_native failed (error " + pos + ")");
+        }
+
+        data.setKeyPrefix(header.keyPrefix);
+
+        // do the backup
+        helper.performBackup(oldState, data, newState);
+
+        // fill in the header (seeking back to pos).  The file pointer will be returned to
+        // where it was at the end of performBackup.  Header.chunkSize will not be filled in.
+        err = writeHeader_native(header, newStateFD, pos);
+        if (err != 0) {
+            throw new IOException("writeHeader_native failed (error " + err + ")");
         }
     }
 
@@ -83,5 +141,11 @@ public class BackupHelperDispatcher {
             helper.writeRestoreSnapshot(newState);
         }
     }
+
+    private static native int readHeader_native(Header h, FileDescriptor fd);
+    private static native int skipChunk_native(FileDescriptor fd, int bytesToSkip);
+
+    private static native int allocateHeader_native(Header h, FileDescriptor fd);
+    private static native int writeHeader_native(Header h, FileDescriptor fd, int pos);
 }
 
