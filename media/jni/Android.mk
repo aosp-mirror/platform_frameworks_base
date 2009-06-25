@@ -27,6 +27,7 @@ LOCAL_STATIC_LIBRARIES :=
 
 LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
+    frameworks/base/core/jni \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, corecg graphics)

@@ -85,6 +85,7 @@ LOCAL_SRC_FILES:= \
 	rsContext.cpp \
 	rsDevice.cpp \
 	rsElement.cpp \
+	rsLight.cpp \
 	rsLocklessFifo.cpp \
 	rsObjectBase.cpp \
 	rsMatrix.cpp \

@@ -54,63 +54,70 @@ interface IBackupTransport {
     long requestBackupTime();
 
     /**
-     * Establish a connection to the back-end data repository, if necessary.  If the transport
-     * needs to initialize state that is not tied to individual applications' backup operations,
-     * this is where it should be done.
-     *
-     * @return Zero on success; a nonzero error code on failure.
-     */
-    int startSession();
-
-    /**
-     * Send one application's data to the backup destination.
+     * Send one application's data to the backup destination.  The transport may send
+     * the data immediately, or may buffer it.  After this is called, {@link #finishBackup}
+     * must be called to ensure the data is sent and recorded successfully.
      *
      * @param packageInfo The identity of the application whose data is being backed up.
      *   This specifically includes the signature list for the package.
      * @param data The data stream that resulted from invoking the application's
      *   BackupService.doBackup() method.  This may be a pipe rather than a file on
      *   persistent media, so it may not be seekable.
-     * @return Zero on success; a nonzero error code on failure.
+     * @return false if errors occurred (the backup should be aborted and rescheduled),
+     *   true if everything is OK so far (but {@link #finishBackup} must be called).
      */
-    int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor data);
+    boolean performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd);
+
+    /**
+     * Finish sending application data to the backup destination.  This must be
+     * called after {@link #performBackup} to ensure that all data is sent.  Only
+     * when this method returns true can the backup be assumed to have succeeded.
+     *
+     * @return false if errors occurred (the backup should be aborted and rescheduled),
+     *   true if everything is OK so far (but {@link #finishBackup} must be called).
+     */
+    boolean finishBackup();
 
     /**
      * Get the set of backups currently available over this transport.
      *
-     * @return Descriptions of the set of restore images available for this device.
+     * @return Descriptions of the set of restore images available for this device,
+     *   or null if an error occurred (the attempt should be rescheduled).
      **/
     RestoreSet[] getAvailableRestoreSets();
 
     /**
-     * Get the set of applications from a given restore image.
+     * Start restoring application data from backup.  After calling this function,
+     * alternate calls to {@link #nextRestorePackage} and {@link #nextRestoreData}
+     * to walk through the actual application data.
      *
      * @param token A backup token as returned by {@link #getAvailableRestoreSets}.
-     * @return An array of PackageInfo objects describing all of the applications
-     *   available for restore from this restore image.  This should include the list
-     *   of signatures for each package so that the Backup Manager can filter using that
-     *   information.
+     * @param packages List of applications to restore (if data is available).
+     *   Application data will be restored in the order given.
+     * @return false if errors occurred (the restore should be aborted and rescheduled),
+     *   true if everything is OK so far (go ahead and call {@link #nextRestorePackage}).
      */
-    PackageInfo[] getAppSet(int token);
+    boolean startRestore(long token, in PackageInfo[] packages);
 
     /**
-     * Retrieve one application's data from the backing store.
-     *
-     * @param token The backup record from which a restore is being requested.
-     * @param packageInfo The identity of the application whose data is being restored.
-     *   This must include the signature list for the package; it is up to the transport
-     *   to verify that the requested app's signatures match the saved backup record
-     *   because the transport cannot necessarily trust the client device.
-     * @param data An open, writable file into which the backup image should be stored.
-     * @return Zero on success; a nonzero error code on failure.
+     * Get the package name of the next application with data in the backup store.
+     * @return The name of one of the packages supplied to {@link #startRestore},
+     *   or "" (the empty string) if no more backup data is available,
+     *   or null if an error occurred (the restore should be aborted and rescheduled).
      */
-    int getRestoreData(int token, in PackageInfo packageInfo, in ParcelFileDescriptor data);
+    String nextRestorePackage();
 
     /**
-     * Terminate the backup session, closing files, freeing memory, and cleaning up whatever
-     * other state the transport required.
-     *
-     * @return Zero on success; a nonzero error code on failure.  Even on failure, the session
-     *         is torn down and must be restarted if another backup is attempted.
+     * Get the data for the application returned by {@link #nextRestorePackage}.
+     * @param data An open, writable file into which the backup data should be stored.
+     * @return false if errors occurred (the restore should be aborted and rescheduled),
+     *   true if everything is OK so far (go ahead and call {@link #nextRestorePackage}).
      */
-    int endSession();
+    boolean getRestoreData(in ParcelFileDescriptor outFd);
+
+    /**
+     * End a restore session (aborting any in-process data transfer as necessary),
+     * freeing any resources and connections used during the restore process.
+     */
+    void finishRestore();
 }

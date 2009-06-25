@@ -264,7 +264,7 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MediaRecorder, "android.hardware.IMediaRecorder");
+IMPLEMENT_META_INTERFACE(MediaRecorder, "android.media.IMediaRecorder");
 
 // ----------------------------------------------------------------------
 

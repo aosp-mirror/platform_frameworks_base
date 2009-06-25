@@ -20,6 +20,7 @@
 #include <binder/Parcel.h>
 
 #include <binder/IMemory.h>
+#include <utils/Errors.h>  // for status_t
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>
 
@@ -111,7 +112,7 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.hardware.IMediaPlayerService");
+IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.media.IMediaPlayerService");
 
 // ----------------------------------------------------------------------
 

@@ -87,11 +87,26 @@ writeEntityData_native(JNIEnv* env, jobject clazz, int w, jbyteArray data, int s
     return err;
 }
 
+static void
+setKeyPrefix_native(JNIEnv* env, jobject clazz, int w, jstring keyPrefixObj)
+{
+    int err;
+    BackupDataWriter* writer = (BackupDataWriter*)w;
+
+    const char* keyPrefixUTF = env->GetStringUTFChars(keyPrefixObj, NULL);
+    String8 keyPrefix(keyPrefixUTF ? keyPrefixUTF : "");
+
+    writer->SetKeyPrefix(keyPrefix);
+
+    env->ReleaseStringUTFChars(keyPrefixObj, keyPrefixUTF);
+}
+
 static const JNINativeMethod g_methods[] = {
     { "ctor", "(Ljava/io/FileDescriptor;)I", (void*)ctor_native },
     { "dtor", "(I)V", (void*)dtor_native },
     { "writeEntityHeader_native", "(ILjava/lang/String;I)I", (void*)writeEntityHeader_native },
     { "writeEntityData_native", "(I[BI)I", (void*)writeEntityData_native },
+    { "setKeyPrefix_native", "(ILjava/lang/String;)V", (void*)setKeyPrefix_native },
 };
 
 int register_android_backup_BackupDataOutput(JNIEnv* env)

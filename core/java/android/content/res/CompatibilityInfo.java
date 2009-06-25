@@ -17,8 +17,15 @@
 package android.content.res;
 
 import android.content.pm.ApplicationInfo;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 /**
  * CompatibilityInfo class keeps the information about compatibility mode that the application is
@@ -27,6 +34,9 @@ import android.view.Gravity;
  *  {@hide} 
  */
 public class CompatibilityInfo {
+    private static final boolean DBG = false;
+    private static final String TAG = "CompatibilityInfo";
+    
     /** default compatibility info object for compatible applications */
     public static final CompatibilityInfo DEFAULT_COMPATIBILITY_INFO = new CompatibilityInfo(); 
 
@@ -41,36 +51,75 @@ public class CompatibilityInfo {
     public static final int DEFAULT_PORTRAIT_HEIGHT = 480;
 
     /**
+     * The x-shift mode that controls the position of the content or the window under
+     * compatibility mode.
+     * {@see getTranslator}
+     * {@see Translator#mShiftMode}
+     */
+    private static final int X_SHIFT_NONE = 0;
+    private static final int X_SHIFT_CONTENT = 1;
+    private static final int X_SHIFT_AND_CLIP_CONTENT = 2;
+    private static final int X_SHIFT_WINDOW = 3;
+
+
+    /**
+     *  A compatibility flags
+     */
+    private int compatibilityFlags;
+    
+    /**
+     * A flag mask to tell if the application needs scaling (when mApplicationScale != 1.0f)
+     * {@see compatibilityFlag}
+     */
+    private static final int SCALING_REQUIRED = 1; 
+
+    /**
+     * A flag mask to indicates that the application can expand over the original size.
+     * The flag is set to true if
+     * 1) Application declares its expandable in manifest file using <expandable /> or
+     * 2) The screen size is same as (320 x 480) * density. 
+     * {@see compatibilityFlag}
+     */
+    private static final int EXPANDABLE = 2;
+    
+    /**
+     * A flag mask to tell if the application is configured to be expandable. This differs
+     * from EXPANDABLE in that the application that is not expandable will be 
+     * marked as expandable if it runs in (320x 480) * density screen size.
+     */
+    private static final int CONFIGURED_EXPANDABLE = 4; 
+
+    private static final int SCALING_EXPANDABLE_MASK = SCALING_REQUIRED | EXPANDABLE;
+
+    /**
      * Application's scale.
      */
-    public final float mApplicationScale;
+    public final float applicationScale;
 
     /**
      * Application's inverted scale.
      */
-    public final float mApplicationInvertedScale;
-    
-    /**
-     * A boolean flag to indicates that the application can expand over the original size.
-     * The flag is set to true if
-     * 1) Application declares its expandable in manifest file using <expandable /> or
-     * 2) The screen size is same as (320 x 480) * density. 
-     */
-    public boolean mExpandable;
+    public final float applicationInvertedScale;
+
 
     /**
-     * A expandable flag in the configuration.
+     * Window size in Compatibility Mode, in real pixels. This is updated by
+     * {@link DisplayMetrics#updateMetrics}.
      */
-    public final boolean mConfiguredExpandable;
+    private int mWidth;
+    private int mHeight;
     
     /**
-     * A boolean flag to tell if the application needs scaling (when mApplicationScale != 1.0f)
+     * The x offset to center the window content. In X_SHIFT_WINDOW mode, the offset is added
+     * to the window's layout. In X_SHIFT_CONTENT/X_SHIFT_AND_CLIP_CONTENT mode, the offset
+     * is used to translate the Canvas.
      */
-    public final boolean mScalingRequired;
+    private int mXOffset;
 
     public CompatibilityInfo(ApplicationInfo appInfo) {
-        mExpandable = mConfiguredExpandable =
-            (appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0;
+        if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+            compatibilityFlags = EXPANDABLE | CONFIGURED_EXPANDABLE;
+        }
         
         float packageDensityScale = -1.0f;
         if (appInfo.supportsDensities != null) {
@@ -93,23 +142,323 @@ public class CompatibilityInfo {
             }
         }
         if (packageDensityScale > 0.0f) {
-            mApplicationScale = packageDensityScale;
+            applicationScale = packageDensityScale;
         } else {
-            mApplicationScale = DisplayMetrics.DEVICE_DENSITY / (float) DisplayMetrics.DEFAULT_DENSITY;
+            applicationScale =
+                    DisplayMetrics.DEVICE_DENSITY / (float) DisplayMetrics.DEFAULT_DENSITY;
         }
-        mApplicationInvertedScale = 1.0f / mApplicationScale;
-        mScalingRequired = mApplicationScale != 1.0f;
+        applicationInvertedScale = 1.0f / applicationScale;
+        if (applicationScale != 1.0f) {
+            compatibilityFlags |= SCALING_REQUIRED;
+        }
     }
 
     private CompatibilityInfo() {
-        mApplicationScale = mApplicationInvertedScale = 1.0f;
-        mExpandable = mConfiguredExpandable = true;
-        mScalingRequired = false;
+        applicationScale = applicationInvertedScale = 1.0f;
+        compatibilityFlags = EXPANDABLE | CONFIGURED_EXPANDABLE;
     }
 
+    /**
+     * Sets the application's visible rect in compatibility mode.
+     * @param xOffset the application's x offset that is added to center the content.
+     * @param widthPixels the application's width in real pixels on the screen.
+     * @param heightPixels the application's height in real pixels on the screen.
+     */
+    public void setVisibleRect(int xOffset, int widthPixels, int heightPixels) {
+        this.mXOffset = xOffset; 
+        mWidth = widthPixels;
+        mHeight = heightPixels;
+    }
+    
+    /**
+     * Sets expandable bit in the compatibility flag.
+     */
+    public void setExpandable(boolean expandable) {
+        if (expandable) {
+            compatibilityFlags |= CompatibilityInfo.EXPANDABLE;
+        } else {
+            compatibilityFlags &= ~CompatibilityInfo.EXPANDABLE;
+        }
+    }
+
+    /**
+     * @return true if the application is configured to be expandable.
+     */
+    public boolean isConfiguredExpandable() {
+        return (compatibilityFlags & CompatibilityInfo.CONFIGURED_EXPANDABLE) != 0;
+    }
+
+    /**
+     * @return true if the scaling is required
+     */
+    public boolean isScalingRequired() {
+        return (compatibilityFlags & SCALING_REQUIRED) != 0;
+    }
+    
     @Override
     public String toString() {
-        return "CompatibilityInfo{scale=" + mApplicationScale +
-                ", expandable=" + mExpandable + "}"; 
+        return "CompatibilityInfo{scale=" + applicationScale +
+                ", compatibility flag=" + compatibilityFlags + "}"; 
+    }
+
+    /**
+     * Returns the translator which can translate the coordinates of the window.
+     * There are five different types of Translator.
+     * 
+     * 1) {@link CompatibilityInfo#X_SHIFT_AND_CLIP_CONTENT}
+     *   Shift and clip the content of the window at drawing time. Used for activities'
+     *   main window (with no gravity).
+     * 2) {@link CompatibilityInfo#X_SHIFT_CONTENT}
+     *   Shift the content of the window at drawing time. Used for windows that is created by
+     *   an application and expected to be aligned with the application window.
+     * 3) {@link CompatibilityInfo#X_SHIFT_WINDOW}
+     *   Create the window with adjusted x- coordinates. This is typically used 
+     *   in popup window, where it has to be placed relative to main window.
+     * 4) {@link CompatibilityInfo#X_SHIFT_NONE}
+     *   No adjustment required, such as dialog.
+     * 5) Same as X_SHIFT_WINDOW, but no scaling. This is used by {@link SurfaceView}, which
+     *  does not require scaling, but its window's location has to be adjusted.
+     * 
+     * @param params the window's parameter
+     */
+    public Translator getTranslator(WindowManager.LayoutParams params) {
+        if ( (compatibilityFlags & CompatibilityInfo.SCALING_EXPANDABLE_MASK)
+                == CompatibilityInfo.EXPANDABLE) {
+            if (DBG) Log.d(TAG, "no translation required");
+            return null;
+        }
+        
+        if ((compatibilityFlags & CompatibilityInfo.EXPANDABLE) == 0) {
+            if ((params.flags & WindowManager.LayoutParams.FLAG_NO_COMPATIBILITY_SCALING) != 0) {
+                if (DBG) Log.d(TAG, "translation for surface view selected");
+                return new Translator(X_SHIFT_WINDOW, false, 1.0f, 1.0f);
+            } else {
+                int shiftMode;
+                if (params.gravity == Gravity.NO_GRAVITY) {
+                    // For Regular Application window
+                    shiftMode = X_SHIFT_AND_CLIP_CONTENT;
+                    if (DBG) Log.d(TAG, "shift and clip translator");
+                } else if (params.width == WindowManager.LayoutParams.FILL_PARENT) {
+                    // For Regular Application window
+                    shiftMode = X_SHIFT_CONTENT;
+                    if (DBG) Log.d(TAG, "shift content translator");
+                } else if ((params.gravity & Gravity.LEFT) != 0 && params.x > 0) {
+                    shiftMode = X_SHIFT_WINDOW;
+                    if (DBG) Log.d(TAG, "shift window translator");
+                } else {
+                    shiftMode = X_SHIFT_NONE;
+                    if (DBG) Log.d(TAG, "no content/window translator");
+                }
+                return new Translator(shiftMode);
+            }
+        } else if (isScalingRequired()) {
+            return new Translator();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * A helper object to translate the screen and window coordinates back and forth.
+     * @hide
+     */
+    public class Translator {
+        final private int mShiftMode;
+        final public boolean scalingRequired;
+        final public float applicationScale;
+        final public float applicationInvertedScale;
+        
+        private Rect mContentInsetsBuffer = null;
+        private Rect mVisibleInsets = null;
+        
+        Translator(int shiftMode, boolean scalingRequired, float applicationScale,
+                float applicationInvertedScale) {
+            mShiftMode = shiftMode;
+            this.scalingRequired = scalingRequired;
+            this.applicationScale = applicationScale;
+            this.applicationInvertedScale = applicationInvertedScale;
+        }
+
+        Translator(int shiftMode) {
+            this(shiftMode,
+                    isScalingRequired(),
+                    CompatibilityInfo.this.applicationScale,
+                    CompatibilityInfo.this.applicationInvertedScale);
+        }
+        
+        Translator() {
+            this(X_SHIFT_NONE);
+        }
+
+        /**
+         * Translate the screen rect to the application frame.
+         */
+        public void translateRectInScreenToAppWinFrame(Rect rect) {
+            if (rect.isEmpty()) return; // skip if the window size is empty.
+            switch (mShiftMode) {
+                case X_SHIFT_AND_CLIP_CONTENT:
+                    rect.intersect(0, 0, mWidth, mHeight);
+                    break;
+                case X_SHIFT_CONTENT:
+                    rect.intersect(0, 0, mWidth + mXOffset, mHeight);
+                    break;
+                case X_SHIFT_WINDOW:
+                case X_SHIFT_NONE:
+                    break;
+            }
+            if (scalingRequired) {
+                rect.scale(applicationInvertedScale);
+            }
+        }
+
+        /**
+         * Translate the region in window to screen. 
+         */
+        public void translateRegionInWindowToScreen(Region transparentRegion) {
+            switch (mShiftMode) {
+                case X_SHIFT_AND_CLIP_CONTENT:
+                case X_SHIFT_CONTENT:
+                    transparentRegion.scale(applicationScale);
+                    transparentRegion.translate(mXOffset, 0);
+                    break;
+                case X_SHIFT_WINDOW:
+                case X_SHIFT_NONE:
+                    transparentRegion.scale(applicationScale);
+            }
+        }
+
+        /**
+         * Apply translation to the canvas that is necessary to draw the content.
+         */
+        public void translateCanvas(Canvas canvas) {
+            if (mShiftMode == X_SHIFT_CONTENT ||
+                    mShiftMode == X_SHIFT_AND_CLIP_CONTENT) {
+                // TODO: clear outside when rotation is changed.
+
+                // Translate x-offset only when the content is shifted.
+                canvas.translate(mXOffset, 0);
+            }
+            if (scalingRequired) {
+                canvas.scale(applicationScale, applicationScale);
+            }
+        }
+
+        /**
+         * Translate the motion event captured on screen to the application's window.
+         */
+        public void translateEventInScreenToAppWindow(MotionEvent event) {
+            if (mShiftMode == X_SHIFT_CONTENT ||
+                    mShiftMode == X_SHIFT_AND_CLIP_CONTENT) {
+                event.translate(-mXOffset, 0);
+            }
+            if (scalingRequired) {
+                event.scale(applicationInvertedScale);
+            }
+        }
+
+        /**
+         * Translate the window's layout parameter, from application's view to
+         * Screen's view.
+         */
+        public void translateWindowLayout(WindowManager.LayoutParams params) {
+            switch (mShiftMode) {
+                case X_SHIFT_NONE:
+                case X_SHIFT_AND_CLIP_CONTENT:
+                case X_SHIFT_CONTENT:
+                    params.scale(applicationScale);
+                    break;
+                case X_SHIFT_WINDOW:
+                    params.scale(applicationScale);
+                    params.x += mXOffset;
+                    break;
+            }
+        }
+        
+        /**
+         * Translate a Rect in application's window to screen.
+         */
+        public void translateRectInAppWindowToScreen(Rect rect) {
+            // TODO Auto-generated method stub
+            if (scalingRequired) {
+                rect.scale(applicationScale);
+            }
+            switch(mShiftMode) {
+                case X_SHIFT_NONE:
+                case X_SHIFT_WINDOW:
+                    break;
+                case X_SHIFT_CONTENT:
+                case X_SHIFT_AND_CLIP_CONTENT:
+                    rect.offset(mXOffset, 0);
+                    break;
+            }
+        }
+ 
+        /**
+         * Translate a Rect in screen coordinates into the app window's coordinates.
+         */
+        public void translateRectInScreenToAppWindow(Rect rect) {
+            switch (mShiftMode) {
+                case X_SHIFT_NONE:
+                case X_SHIFT_WINDOW:
+                    break;
+                case X_SHIFT_CONTENT: {
+                    rect.intersects(mXOffset, 0, rect.right, rect.bottom);
+                    int dx = Math.min(mXOffset, rect.left);
+                    rect.offset(-dx, 0);
+                    break;
+                }
+                case X_SHIFT_AND_CLIP_CONTENT: {
+                    rect.intersects(mXOffset, 0, mWidth + mXOffset, mHeight);
+                    int dx = Math.min(mXOffset, rect.left);
+                    rect.offset(-dx, 0);
+                    break;
+                }
+            }
+            if (scalingRequired) {
+                rect.scale(applicationInvertedScale);
+            }
+        }
+
+        /**
+         * Translate the location of the sub window.
+         * @param params
+         */
+        public void translateLayoutParamsInAppWindowToScreen(LayoutParams params) {
+            if (scalingRequired) {
+                params.scale(applicationScale);
+            }
+            switch (mShiftMode) {
+                // the window location on these mode does not require adjustmenet.
+                case X_SHIFT_NONE:
+                case X_SHIFT_WINDOW:
+                    break;
+                case X_SHIFT_CONTENT:
+                case X_SHIFT_AND_CLIP_CONTENT:
+                    params.x += mXOffset;
+                    break;
+            }
+        }
+
+        /**
+         * Translate the content insets in application window to Screen. This uses
+         * the internal buffer for content insets to avoid extra object allocation.
+         */
+        public Rect getTranslatedContentInsets(Rect contentInsets) {
+            if (mContentInsetsBuffer == null) mContentInsetsBuffer = new Rect();
+            mContentInsetsBuffer.set(contentInsets);
+            translateRectInAppWindowToScreen(mContentInsetsBuffer);
+            return mContentInsetsBuffer;
+        }
+
+        /**
+         * Translate the visible insets in application window to Screen. This uses
+         * the internal buffer for content insets to avoid extra object allocation.
+         */
+        public Rect getTranslatedVisbileInsets(Rect visibleInsets) {
+            if (mVisibleInsets == null) mVisibleInsets = new Rect();
+            mVisibleInsets.set(visibleInsets);
+            translateRectInAppWindowToScreen(mVisibleInsets);
+            return mVisibleInsets;
+        }
     }
 }

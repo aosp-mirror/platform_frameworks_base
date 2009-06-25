@@ -17,11 +17,7 @@
 #ifndef ANDROID_RS_THREAD_IO_H
 #define ANDROID_RS_THREAD_IO_H
 
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "RenderScript.h"
-
+#include "rsUtils.h"
 #include "rsLocklessFifo.h"
 
 // ---------------------------------------------------------------------------

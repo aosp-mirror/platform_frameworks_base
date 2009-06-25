@@ -20,20 +20,35 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 
 /** @hide */
-public class RestoreHelperDispatcher {
-    private static final String TAG = "RestoreHelperDispatcher";
+public class BackupHelperDispatcher {
+    private static final String TAG = "BackupHelperDispatcher";
 
-    HashMap<String,RestoreHelper> mHelpers = new HashMap<String,RestoreHelper>();
+    TreeMap<String,BackupHelper> mHelpers = new TreeMap<String,BackupHelper>();
+    
+    public BackupHelperDispatcher() {
+    }
 
-    public void addHelper(String keyPrefix, RestoreHelper helper) {
+    public void addHelper(String keyPrefix, BackupHelper helper) {
         mHelpers.put(keyPrefix, helper);
     }
 
-    public void dispatch(BackupDataInput input, ParcelFileDescriptor newState) throws IOException {
+    /** TODO: Make this save and restore the key prefix. */
+    public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+             ParcelFileDescriptor newState) {
+        // Write out the state files -- mHelpers is a TreeMap, so the order is well defined.
+        for (Map.Entry<String,BackupHelper> entry: mHelpers.entrySet()) {
+            data.setKeyPrefix(entry.getKey());
+            entry.getValue().performBackup(oldState, data, newState);
+        }
+    }
+
+    public void performRestore(BackupDataInput input, int appVersionCode,
+            ParcelFileDescriptor newState)
+            throws IOException {
         boolean alreadyComplained = false;
 
         BackupDataInputStream stream = new BackupDataInputStream(input);
@@ -43,7 +58,7 @@ public class RestoreHelperDispatcher {
             int pos = rawKey.indexOf(':');
             if (pos > 0) {
                 String prefix = rawKey.substring(0, pos);
-                RestoreHelper helper = mHelpers.get(prefix);
+                BackupHelper helper = mHelpers.get(prefix);
                 if (helper != null) {
                     stream.dataSize = input.getDataSize();
                     stream.key = rawKey.substring(pos+1);
@@ -63,15 +78,9 @@ public class RestoreHelperDispatcher {
             input.skipEntityData(); // In case they didn't consume the data.
         }
 
-        if (mHelpers.size() > 1) {
-            throw new RuntimeException("RestoreHelperDispatcher won't get your your"
-                    + " data in the right order yet.");
-        }
-        
-        // Write out the state files
-        for (RestoreHelper helper: mHelpers.values()) {
-            // TODO: Write a header for the state
-            helper.writeSnapshot(newState);
+        // Write out the state files -- mHelpers is a TreeMap, so the order is well defined.
+        for (BackupHelper helper: mHelpers.values()) {
+            helper.writeRestoreSnapshot(newState);
         }
     }
 }

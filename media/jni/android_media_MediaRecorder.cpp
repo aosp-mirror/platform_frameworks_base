@@ -41,7 +41,7 @@ using namespace android;
 // ----------------------------------------------------------------------------
 
 // helper function to extract a native Camera object from a Camera Java object
-extern sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, struct camera_context_t** context);
+extern sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, struct JNICameraContext** context);
 
 struct fields_t {
     jfieldID    context;

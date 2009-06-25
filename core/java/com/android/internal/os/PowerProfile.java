@@ -219,12 +219,12 @@ public class PowerProfile {
     public double getAveragePower(String type, int level) {
         if (sPowerMap.containsKey(type)) {
             Object data = sPowerMap.get(type);
-            if (data instanceof double[]) {
-                final double[] values = (double[]) data;
-                if (values.length > level) {
+            if (data instanceof Double[]) {
+                final Double[] values = (Double[]) data;
+                if (values.length > level && level >= 0) {
                     return values[level];
-                } else if (values.length < 0) {
-                    return values[0];
+                } else if (level < 0) {
+                    return 0;
                 } else {
                     return values[values.length - 1];
                 }

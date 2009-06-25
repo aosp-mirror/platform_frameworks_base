@@ -87,7 +87,15 @@ public class FileFilter {
         "fast/regex/test1.html",
         "fast/regex/slow.html",
         // RegExp is too large, causing OOM
-        "fast/js/regexp-charclass-crash.html"
+        "fast/js/regexp-charclass-crash.html",
+        // The Android browser has no notion of private browsing.
+        "storage/private-browsing-readonly.html",
+        "storage/domstorage/localstorage/private-browsing-affects-storage.html",
+        "storage/domstorage/sessionstorage/private-browsing-affects-storage.html",
+        // Android layout tests are stored in "layout_tests". The following two
+        // tests expect "LayoutTests" in their output.
+        "storage/domstorage/localstorage/iframe-events.html",
+        "storage/domstorage/sessionstorage/iframe-events.html"
     };
     
     static void fillIgnoreResultSet() {

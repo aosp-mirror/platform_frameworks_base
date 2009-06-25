@@ -44,6 +44,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.util.Regex;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -55,6 +56,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -86,13 +88,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private static final String INSTANCE_KEY_COMPONENT = "comp";
     private static final String INSTANCE_KEY_APPDATA = "data";
     private static final String INSTANCE_KEY_GLOBALSEARCH = "glob";
-    private static final String INSTANCE_KEY_DISPLAY_QUERY = "dQry";
-    private static final String INSTANCE_KEY_DISPLAY_SEL_START = "sel1";
-    private static final String INSTANCE_KEY_DISPLAY_SEL_END = "sel2";
-    private static final String INSTANCE_KEY_SELECTED_ELEMENT = "slEl";
-    private static final int INSTANCE_SELECTED_BUTTON = -2;
-    private static final int INSTANCE_SELECTED_QUERY = -1;
-    
+    private static final String INSTANCE_KEY_STORED_COMPONENT = "sComp";
+    private static final String INSTANCE_KEY_STORED_APPDATA = "sData";
+    private static final String INSTANCE_KEY_PREVIOUS_COMPONENTS = "sPrev";
+    private static final String INSTANCE_KEY_USER_QUERY = "uQry";
+
     private static final int SEARCH_PLATE_LEFT_PADDING_GLOBAL = 12;
     private static final int SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL = 7;
     
@@ -145,7 +145,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     // more than once.
     private final WeakHashMap<String, Drawable> mOutsideDrawablesCache =
             new WeakHashMap<String, Drawable>();
-    
+
+    // Last known IME options value for the search edit text.
+    private int mSearchAutoCompleteImeOptions;
+
     /**
      * Constructor - fires it up and makes it look like the search UI.
      * 
@@ -224,6 +227,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        mSearchAutoCompleteImeOptions = mSearchAutoComplete.getImeOptions();
     }
 
     /**
@@ -310,15 +315,17 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     + appSearchData + ", " + globalSearch + ")");
         }
         
+        SearchManager searchManager = (SearchManager)
+                mContext.getSystemService(Context.SEARCH_SERVICE);
         // Try to get the searchable info for the provided component (or for global search,
         // if globalSearch == true).
-        mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
+        mSearchable = searchManager.getSearchableInfo(componentName, globalSearch);
         
         // If we got back nothing, and it wasn't a request for global search, then try again
         // for global search, as we'll try to launch that in lieu of any component-specific search.
         if (!globalSearch && mSearchable == null) {
             globalSearch = true;
-            mSearchable = SearchManager.getSearchableInfo(componentName, globalSearch);
+            mSearchable = searchManager.getSearchableInfo(componentName, globalSearch);
             
             // If we still get back null (i.e., there's not even a searchable info available
             // for global search), then really give up.
@@ -333,7 +340,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mAppSearchData = appSearchData;
         // Using globalSearch here is just an optimization, just calling
         // isDefaultSearchable() should always give the same result.
-        mGlobalSearchMode = globalSearch || SearchManager.isDefaultSearchable(mSearchable); 
+        mGlobalSearchMode = globalSearch || searchManager.isDefaultSearchable(mSearchable);
         mActivityContext = mSearchable.getActivityContext(getContext());
         
         // show the dialog. this will call onStart().
@@ -441,8 +448,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     /**
      * Save the minimal set of data necessary to recreate the search
      * 
-     * TODO: go through this and make sure that it saves everything that is needed
-     * 
      * @return A bundle with the state of the dialog.
      */
     @Override
@@ -453,20 +458,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         bundle.putParcelable(INSTANCE_KEY_COMPONENT, mLaunchComponent);
         bundle.putBundle(INSTANCE_KEY_APPDATA, mAppSearchData);
         bundle.putBoolean(INSTANCE_KEY_GLOBALSEARCH, mGlobalSearchMode);
-        
-        // UI state
-        bundle.putString(INSTANCE_KEY_DISPLAY_QUERY, mSearchAutoComplete.getText().toString());
-        bundle.putInt(INSTANCE_KEY_DISPLAY_SEL_START, mSearchAutoComplete.getSelectionStart());
-        bundle.putInt(INSTANCE_KEY_DISPLAY_SEL_END, mSearchAutoComplete.getSelectionEnd());
-        
-        int selectedElement = INSTANCE_SELECTED_QUERY;
-        if (mGoButton.isFocused()) {
-            selectedElement = INSTANCE_SELECTED_BUTTON;
-        } else if (mSearchAutoComplete.isPopupShowing()) {
-            selectedElement = 0; // TODO mSearchTextField.getListSelection()    // 0..n
-        }
-        bundle.putInt(INSTANCE_KEY_SELECTED_ELEMENT, selectedElement);
-        
+        bundle.putParcelable(INSTANCE_KEY_STORED_COMPONENT, mStoredComponentName);
+        bundle.putBundle(INSTANCE_KEY_STORED_APPDATA, mStoredAppSearchData);
+        bundle.putParcelableArrayList(INSTANCE_KEY_PREVIOUS_COMPONENTS, mPreviousComponents);
+        bundle.putString(INSTANCE_KEY_USER_QUERY, mUserQuery);
+
         return bundle;
     }
 
@@ -480,44 +476,26 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-        // Get the launch info
         ComponentName launchComponent = savedInstanceState.getParcelable(INSTANCE_KEY_COMPONENT);
         Bundle appSearchData = savedInstanceState.getBundle(INSTANCE_KEY_APPDATA);
         boolean globalSearch = savedInstanceState.getBoolean(INSTANCE_KEY_GLOBALSEARCH);
-        
-        // get the UI state
-        String displayQuery = savedInstanceState.getString(INSTANCE_KEY_DISPLAY_QUERY);
-        int querySelStart = savedInstanceState.getInt(INSTANCE_KEY_DISPLAY_SEL_START, -1);
-        int querySelEnd = savedInstanceState.getInt(INSTANCE_KEY_DISPLAY_SEL_END, -1);
-        int selectedElement = savedInstanceState.getInt(INSTANCE_KEY_SELECTED_ELEMENT);
-        
-        // show the dialog.  skip any show/hide animation, we want to go fast.
-        // send the text that actually generates the suggestions here;  we'll replace the display
-        // text as necessary in a moment.
-        if (!show(displayQuery, false, launchComponent, appSearchData, globalSearch)) {
+        ComponentName storedComponentName =
+                savedInstanceState.getParcelable(INSTANCE_KEY_STORED_COMPONENT);
+        Bundle storedAppSearchData =
+                savedInstanceState.getBundle(INSTANCE_KEY_STORED_APPDATA);
+        ArrayList<ComponentName> previousComponents =
+                savedInstanceState.getParcelableArrayList(INSTANCE_KEY_PREVIOUS_COMPONENTS);
+        String userQuery = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
+
+        // Set stored state
+        mStoredComponentName = storedComponentName;
+        mStoredAppSearchData = storedAppSearchData;
+        mPreviousComponents = previousComponents;
+
+        // show the dialog.
+        if (!doShow(userQuery, false, launchComponent, appSearchData, globalSearch)) {
             // for some reason, we couldn't re-instantiate
             return;
-        }
-        
-        mSearchAutoComplete.setText(displayQuery);
-        
-        // clean up the selection state
-        switch (selectedElement) {
-        case INSTANCE_SELECTED_BUTTON:
-            mGoButton.setEnabled(true);
-            mGoButton.setFocusable(true);
-            mGoButton.requestFocus();
-            break;
-        case INSTANCE_SELECTED_QUERY:
-            if (querySelStart >= 0 && querySelEnd >= 0) {
-                mSearchAutoComplete.requestFocus();
-                mSearchAutoComplete.setSelection(querySelStart, querySelEnd);
-            }
-            break;
-        default:
-            // TODO: defer selecting a list element until suggestion list appears
-//            mSearchAutoComplete.setListSelection(selectedElement)
-            break;
         }
     }
     
@@ -563,7 +541,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 }
             }
             mSearchAutoComplete.setInputType(inputType);
-            mSearchAutoComplete.setImeOptions(mSearchable.getImeOptions());
+            mSearchAutoCompleteImeOptions = mSearchable.getImeOptions();
+            mSearchAutoComplete.setImeOptions(mSearchAutoCompleteImeOptions);
         }
     }
     
@@ -581,12 +560,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
         if (mGlobalSearchMode) {
             mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in
-            mSearchAutoComplete.setDropDownBackgroundResource(
-                    com.android.internal.R.drawable.search_dropdown_background);
         } else {
             mSearchAutoComplete.setDropDownAlwaysVisible(false);
-            mSearchAutoComplete.setDropDownBackgroundResource(
-                    com.android.internal.R.drawable.search_dropdown_background_apps);
         }
 
         // attach the suggestions adapter, if suggestions are available
@@ -794,7 +769,24 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             }
         }
 
-        public void afterTextChanged(Editable s) { }
+        public void afterTextChanged(Editable s) {
+            if (!mSearchAutoComplete.isPerformingCompletion()) {
+                // The user changed the query, check if it is a URL and if so change the search
+                // button in the soft keyboard to the 'Go' button.
+                int options = (mSearchAutoComplete.getImeOptions() & (~EditorInfo.IME_MASK_ACTION));
+                if (Regex.WEB_URL_PATTERN.matcher(mUserQuery).matches()) {
+                    options = options | EditorInfo.IME_ACTION_GO;
+                } else {
+                    options = options | EditorInfo.IME_ACTION_SEARCH;
+                }
+                if (options != mSearchAutoCompleteImeOptions) {
+                    mSearchAutoCompleteImeOptions = options;
+                    mSearchAutoComplete.setImeOptions(options);
+                    // This call is required to update the soft keyboard UI with latest IME flags.
+                    mSearchAutoComplete.setInputType(mSearchAutoComplete.getInputType());
+                }
+            }
+        }
     };
 
     /**
@@ -932,6 +924,32 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
 
     /**
+     * Corrects http/https typo errors in the given url string, and if the protocol specifier was
+     * not present defaults to http.
+     * 
+     * @param inUrl URL to check and fix
+     * @return fixed URL string.
+     */
+    private String fixUrl(String inUrl) {
+        if (inUrl.startsWith("http://") || inUrl.startsWith("https://"))
+            return inUrl;
+
+        if (inUrl.startsWith("http:") || inUrl.startsWith("https:")) {
+            if (inUrl.startsWith("http:/") || inUrl.startsWith("https:/")) {
+                inUrl = inUrl.replaceFirst("/", "//");
+            } else {
+                inUrl = inUrl.replaceFirst(":", "://");
+            }
+        }
+
+        if (inUrl.indexOf("://") == -1) {
+            inUrl = "http://" + inUrl;
+        }
+
+        return inUrl;
+    }
+
+    /**
      * React to the user typing "enter" or other hardwired keys while typing in the search box.
      * This handles these special keys while the edit box has focus.
      */
@@ -961,7 +979,19 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 if (keyCode == KeyEvent.KEYCODE_ENTER 
                         && event.getAction() == KeyEvent.ACTION_UP) {
                     v.cancelLongPress();
-                    launchQuerySearch();                    
+
+                    // If this is a url entered by the user and we displayed the 'Go' button which
+                    // the user clicked, launch the url instead of using it as a search query.
+                    if ((mSearchAutoCompleteImeOptions & EditorInfo.IME_MASK_ACTION)
+                            == EditorInfo.IME_ACTION_GO) {
+                        Uri uri = Uri.parse(fixUrl(mSearchAutoComplete.getText().toString()));
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        launchIntent(intent);
+                    } else {
+                        // Launch as a regular search.
+                        launchQuerySearch();
+                    }
                     return true;
                 }
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -1292,6 +1322,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
         String query = intent.getStringExtra(SearchManager.QUERY);
         setUserQuery(query);
+        mSearchAutoComplete.showDropDown();
     }
 
     /**
@@ -1440,6 +1471,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (data != null) {
             intent.setData(data);
         }
+        intent.putExtra(SearchManager.USER_QUERY, mUserQuery);
         if (query != null) {
             intent.putExtra(SearchManager.QUERY, query);
         }

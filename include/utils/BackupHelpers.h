@@ -43,6 +43,7 @@ struct SnapshotHeader {
 struct FileState {
     int modTime_sec;
     int modTime_nsec;
+    int mode;
     int size;
     int crc32;
     int nameLen;
@@ -71,6 +72,8 @@ public:
     status_t WriteEntityHeader(const String8& key, size_t dataSize);
     status_t WriteEntityData(const void* data, size_t size);
 
+    void SetKeyPrefix(const String8& keyPrefix);
+
 private:
     explicit BackupDataWriter();
     status_t write_padding_for(int n);
@@ -79,6 +82,7 @@ private:
     status_t m_status;
     ssize_t m_pos;
     int m_entityCount;
+    String8 m_keyPrefix;
 };
 
 /**
@@ -133,6 +137,7 @@ public:
 
 private:
     void* m_buf;
+    bool m_loggedUnknownMetadata;
     KeyedVector<String8,FileRec> m_files;
 };
 

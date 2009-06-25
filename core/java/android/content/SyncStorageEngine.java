@@ -49,8 +49,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TimeZone;
 
-import com.google.android.collect.Sets;
-
 /**
  * Singleton that tracks the sync data and overall sync
  * history on the device.
@@ -89,6 +87,9 @@ public class SyncStorageEngine extends Handler {
     /** Enum value for a user-initiated sync. */
     public static final int SOURCE_USER = 3;
 
+    private static final Intent SYNC_CONNECTION_SETTING_CHANGED_INTENT =
+            new Intent("com.android.sync.SYNC_CONN_STATUS_CHANGED");
+
     // TODO: i18n -- grab these out of resources.
     /** String names for the sync source types. */
     public static final String[] SOURCES = { "SERVER",
@@ -96,26 +97,10 @@ public class SyncStorageEngine extends Handler {
                                              "POLL",
                                              "USER" };
 
-    // Error types
-    public static final int ERROR_SYNC_ALREADY_IN_PROGRESS = 1;
-    public static final int ERROR_AUTHENTICATION = 2;
-    public static final int ERROR_IO = 3;
-    public static final int ERROR_PARSE = 4;
-    public static final int ERROR_CONFLICT = 5;
-    public static final int ERROR_TOO_MANY_DELETIONS = 6;
-    public static final int ERROR_TOO_MANY_RETRIES = 7;
-    public static final int ERROR_INTERNAL = 8;
-
     // The MESG column will contain one of these or one of the Error types.
     public static final String MESG_SUCCESS = "success";
     public static final String MESG_CANCELED = "canceled";
 
-    public static final int CHANGE_SETTINGS = 1<<0;
-    public static final int CHANGE_PENDING = 1<<1;
-    public static final int CHANGE_ACTIVE = 1<<2;
-    public static final int CHANGE_STATUS = 1<<3;
-    public static final int CHANGE_ALL = 0x7fffffff;
-    
     public static final int MAX_HISTORY = 15;
     
     private static final int MSG_WRITE_STATUS = 1;
@@ -166,7 +151,7 @@ public class SyncStorageEngine extends Handler {
         final String authority;
         final int ident;
         boolean enabled;
-        
+
         AuthorityInfo(Account account, String authority, int ident) {
             this.account = account;
             this.authority = authority;
@@ -259,7 +244,7 @@ public class SyncStorageEngine extends Handler {
     private int mNumPendingFinished = 0;
     
     private int mNextHistoryId = 0;
-    private boolean mListenForTickles = true;
+    private boolean mMasterSyncAutomatically = true;
     
     private SyncStorageEngine(Context context) {
         mContext = context;
@@ -356,14 +341,14 @@ public class SyncStorageEngine extends Handler {
         }
     }
     
-    public boolean getSyncProviderAutomatically(Account account, String providerName) {
+    public boolean getSyncAutomatically(Account account, String providerName) {
         synchronized (mAuthorities) {
             if (account != null) {
                 AuthorityInfo authority = getAuthorityLocked(account, providerName,
-                        "getSyncProviderAutomatically");
-                return authority != null ? authority.enabled : false;
+                        "getSyncAutomatically");
+                return authority != null && authority.enabled;
             }
-            
+
             int i = mAuthorities.size();
             while (i > 0) {
                 i--;
@@ -377,42 +362,31 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public void setSyncProviderAutomatically(Account account, String providerName,
-            boolean sync) {
+    public void setSyncAutomatically(Account account, String providerName, boolean sync) {
         synchronized (mAuthorities) {
-            if (account != null) {
-                AuthorityInfo authority = getAuthorityLocked(account, providerName,
-                        "setSyncProviderAutomatically");
-                if (authority != null) {
-                    authority.enabled = sync;
-                }
-            } else {
-                int i = mAuthorities.size();
-                while (i > 0) {
-                    i--;
-                    AuthorityInfo authority = mAuthorities.get(i);
-                    if (authority.authority.equals(providerName)) {
-                        authority.enabled = sync;
-                    }
-                }
+            AuthorityInfo authority = getAuthorityLocked(account, providerName,
+                    "setSyncAutomatically");
+            if (authority != null) {
+                authority.enabled = sync;
             }
             writeAccountInfoLocked();
         }
         
-        reportChange(CHANGE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
     }
 
-    public void setListenForNetworkTickles(boolean flag) {
+    public void setMasterSyncAutomatically(boolean flag) {
         synchronized (mAuthorities) {
-            mListenForTickles = flag;
+            mMasterSyncAutomatically = flag;
             writeAccountInfoLocked();
         }
-        reportChange(CHANGE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        mContext.sendBroadcast(SYNC_CONNECTION_SETTING_CHANGED_INTENT);
     }
 
-    public boolean getListenForNetworkTickles() {
+    public boolean getMasterSyncAutomatically() {
         synchronized (mAuthorities) {
-            return mListenForTickles;
+            return mMasterSyncAutomatically;
         }
     }
     
@@ -481,7 +455,7 @@ public class SyncStorageEngine extends Handler {
             status.pending = true;
         }
         
-        reportChange(CHANGE_PENDING);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
         return op;
     }
 
@@ -527,7 +501,7 @@ public class SyncStorageEngine extends Handler {
             }
         }
         
-        reportChange(CHANGE_PENDING);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
         return res;
     }
 
@@ -543,7 +517,7 @@ public class SyncStorageEngine extends Handler {
             }
             writePendingOperationsLocked();
         }
-        reportChange(CHANGE_PENDING);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
         return num;
     }
 
@@ -650,14 +624,14 @@ public class SyncStorageEngine extends Handler {
             }
         }
         
-        reportChange(CHANGE_ACTIVE);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE);
     }
 
     /**
      * To allow others to send active change reports, to poke clients.
      */
     public void reportActiveChange() {
-        reportChange(CHANGE_ACTIVE);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE);
     }
     
     /**
@@ -689,7 +663,7 @@ public class SyncStorageEngine extends Handler {
             if (DEBUG) Log.v(TAG, "returning historyId " + id);
         }
         
-        reportChange(CHANGE_STATUS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
         return id;
     }
 
@@ -793,7 +767,7 @@ public class SyncStorageEngine extends Handler {
             }            
         }
         
-        reportChange(CHANGE_STATUS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
     }
 
     /**
@@ -851,7 +825,7 @@ public class SyncStorageEngine extends Handler {
     /**
      * Return true if the pending status is true of any matching authorities.
      */
-    public boolean isAuthorityPending(Account account, String authority) {
+    public boolean isSyncPending(Account account, String authority) {
         synchronized (mAuthorities) {
             final int N = mSyncStatus.size();
             for (int i=0; i<N; i++) {
@@ -907,7 +881,7 @@ public class SyncStorageEngine extends Handler {
      */
     public long getInitialSyncFailureTime() {
         synchronized (mAuthorities) {
-            if (!mListenForTickles) {
+            if (!mMasterSyncAutomatically) {
                 return 0;
             }
             
@@ -1041,7 +1015,7 @@ public class SyncStorageEngine extends Handler {
             if ("accounts".equals(tagName)) {
                 String listen = parser.getAttributeValue(
                         null, "listen-for-tickles");
-                mListenForTickles = listen == null
+                mMasterSyncAutomatically = listen == null
                             || Boolean.parseBoolean(listen);
                 eventType = parser.next();
                 do {
@@ -1122,7 +1096,7 @@ public class SyncStorageEngine extends Handler {
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             
             out.startTag(null, "accounts");
-            if (!mListenForTickles) {
+            if (!mMasterSyncAutomatically) {
                 out.attribute(null, "listen-for-tickles", "false");
             }
             
@@ -1262,13 +1236,18 @@ public class SyncStorageEngine extends Handler {
                 String value = c.getString(c.getColumnIndex("value"));
                 if (name == null) continue;
                 if (name.equals("listen_for_tickles")) {
-                    setListenForNetworkTickles(value == null
-                            || Boolean.parseBoolean(value));
+                    setMasterSyncAutomatically(value == null || Boolean.parseBoolean(value));
                 } else if (name.startsWith("sync_provider_")) {
                     String provider = name.substring("sync_provider_".length(),
                             name.length());
-                    setSyncProviderAutomatically(null, provider,
-                            value == null || Boolean.parseBoolean(value));
+                    int i = mAuthorities.size();
+                    while (i > 0) {
+                        i--;
+                        AuthorityInfo authority = mAuthorities.get(i);
+                        if (authority.authority.equals(provider)) {
+                            authority.enabled = value == null || Boolean.parseBoolean(value);
+                        }
+                    }
                 }
             }
             

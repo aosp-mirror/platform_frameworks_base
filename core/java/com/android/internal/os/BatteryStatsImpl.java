@@ -191,6 +191,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     private final Map<String, KernelWakelockStats> mProcWakelockFileStats = 
             new HashMap<String, KernelWakelockStats>();
 
+    private HashMap<String, Integer> mUidCache = new HashMap<String, Integer>();
+    
     // For debugging
     public BatteryStatsImpl() {
         mFile = mBackupFile = null;
@@ -714,6 +716,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        boolean isRunningLocked() {
+            return mNesting > 0;
+        }
+
         void stopRunningLocked(BatteryStatsImpl stats) {
             // Ignore attempt to stop a timer that isn't running
             if (mNesting == 0) {
@@ -984,11 +990,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteStartGps(int uid) {
-        mUidStats.get(uid).noteStartGps();
+        getUidStatsLocked(uid).noteStartGps();
     }
     
     public void noteStopGps(int uid) {
-        mUidStats.get(uid).noteStopGps();
+        getUidStatsLocked(uid).noteStopGps();
     }
 
     public void noteScreenOnLocked() {
@@ -1032,10 +1038,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
     
     public void noteUserActivityLocked(int uid, int event) {
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteUserActivityLocked(event);
-        }
+        getUidStatsLocked(uid).noteUserActivityLocked(event);
     }
     
     public void notePhoneOnLocked() {
@@ -1051,7 +1054,24 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPhoneOnTimer.stopRunningLocked(this);
         }
     }
-    
+
+    public void noteAirplaneModeLocked(boolean isAirplaneMode) {
+        final int bin = mPhoneSignalStrengthBin;
+        if (bin >= 0) {
+            if (!isAirplaneMode) {
+                if (!mPhoneSignalStrengthsTimer[bin].isRunningLocked()) {
+                    mPhoneSignalStrengthsTimer[bin].startRunningLocked(this);
+                }
+            } else {
+                for (int i = 0; i < NUM_SIGNAL_STRENGTH_BINS; i++) {
+                    while (mPhoneSignalStrengthsTimer[i].isRunningLocked()) {
+                        mPhoneSignalStrengthsTimer[i].stopRunningLocked(this);
+                    }
+                }
+            }
+        }
+    }
+
     public void notePhoneSignalStrengthLocked(SignalStrength signalStrength) {
         // Bin the strength.
         int bin;
@@ -1115,16 +1135,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         if (mWifiOnUid != uid) {
             if (mWifiOnUid >= 0) {
-                Uid u = mUidStats.get(mWifiOnUid);
-                if (u != null) {
-                    u.noteWifiTurnedOffLocked();
-                }
+                getUidStatsLocked(mWifiOnUid).noteWifiTurnedOffLocked();
             }
             mWifiOnUid = uid;
-            Uid u = mUidStats.get(uid);
-            if (u != null) {
-                u.noteWifiTurnedOnLocked();
-            }
+            getUidStatsLocked(uid).noteWifiTurnedOnLocked();
         }
     }
     
@@ -1134,10 +1148,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiOnTimer.stopRunningLocked(this);
         }
         if (mWifiOnUid >= 0) {
-            Uid u = mUidStats.get(mWifiOnUid);
-            if (u != null) {
-                u.noteWifiTurnedOffLocked();
-            }
+            getUidStatsLocked(mWifiOnUid).noteWifiTurnedOffLocked();
             mWifiOnUid = -1;
         }
     }
@@ -1147,10 +1158,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mAudioOn = true;
             mAudioOnTimer.startRunningLocked(this);
         }
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteAudioTurnedOnLocked();
-        }
+        getUidStatsLocked(uid).noteAudioTurnedOnLocked();
     }
     
     public void noteAudioOffLocked(int uid) {
@@ -1158,10 +1166,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mAudioOn = false;
             mAudioOnTimer.stopRunningLocked(this);
         }
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteAudioTurnedOffLocked();
-        }
+        getUidStatsLocked(uid).noteAudioTurnedOffLocked();
     }
 
     public void noteVideoOnLocked(int uid) {
@@ -1169,10 +1174,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mVideoOn = true;
             mVideoOnTimer.startRunningLocked(this);
         }
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteVideoTurnedOnLocked();
-        }
+        getUidStatsLocked(uid).noteVideoTurnedOnLocked();
     }
     
     public void noteVideoOffLocked(int uid) {
@@ -1180,10 +1182,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mVideoOn = false;
             mVideoOnTimer.stopRunningLocked(this);
         }
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteVideoTurnedOffLocked();
-        }
+        getUidStatsLocked(uid).noteVideoTurnedOffLocked();
     }
 
     public void noteWifiRunningLocked() {
@@ -1215,45 +1214,27 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
     
     public void noteFullWifiLockAcquiredLocked(int uid) {
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteFullWifiLockAcquiredLocked();
-        }
+        getUidStatsLocked(uid).noteFullWifiLockAcquiredLocked();
     }
 
     public void noteFullWifiLockReleasedLocked(int uid) {
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteFullWifiLockReleasedLocked();
-        }
+        getUidStatsLocked(uid).noteFullWifiLockReleasedLocked();
     }
 
     public void noteScanWifiLockAcquiredLocked(int uid) {
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteScanWifiLockAcquiredLocked();
-        }
+        getUidStatsLocked(uid).noteScanWifiLockAcquiredLocked();
     }
 
     public void noteScanWifiLockReleasedLocked(int uid) {
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteScanWifiLockReleasedLocked();
-        }
+        getUidStatsLocked(uid).noteScanWifiLockReleasedLocked();
     }
 
     public void noteWifiMulticastEnabledLocked(int uid) {
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteWifiMulticastEnabledLocked();
-        }
+        getUidStatsLocked(uid).noteWifiMulticastEnabledLocked();
     }
 
     public void noteWifiMulticastDisabledLocked(int uid) {
-        Uid u = mUidStats.get(uid);
-        if (u != null) {
-            u.noteWifiMulticastDisabledLocked();
-        }
+        getUidStatsLocked(uid).noteWifiMulticastDisabledLocked();
     }
 
     @Override public long getScreenOnTime(long batteryRealtime, int which) {
@@ -2839,12 +2820,32 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void removeUidStatsLocked(int uid) {
         mUidStats.remove(uid);
     }
-    
+
     /**
      * Retrieve the statistics object for a particular process, creating
      * if needed.
      */
     public Uid.Proc getProcessStatsLocked(int uid, String name) {
+        Uid u = getUidStatsLocked(uid);
+        return u.getProcessStatsLocked(name);
+    }
+
+    /**
+     * Retrieve the statistics object for a particular process, given
+     * the name of the process.
+     * @param name process name
+     * @return the statistics object for the process
+     */
+    public Uid.Proc getProcessStatsLocked(String name) {
+        int uid;
+        if (mUidCache.containsKey(name)) {
+            uid = mUidCache.get(name);
+        } else {
+            // TODO: Find the actual uid from /proc/pid/status. For now use the hashcode of the
+            // process name
+            uid = name.hashCode();
+            mUidCache.put(name, uid);
+        }
         Uid u = getUidStatsLocked(uid);
         return u.getProcessStatsLocked(name);
     }

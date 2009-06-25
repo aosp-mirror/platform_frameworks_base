@@ -410,8 +410,6 @@ RsElement rsi_ElementCreate(Context *rsc)
 
     rsc->mStateElement.mComponentBuildList.clear();
     se->incRef();
-
-    LOGE("Create %p", se);
     return se;
 }
 

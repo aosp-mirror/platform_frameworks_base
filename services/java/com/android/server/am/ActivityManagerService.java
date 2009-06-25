@@ -61,6 +61,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -1523,7 +1524,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             
-            synchronized(mBatteryStatsService.getActiveStatistics()) {
+            final BatteryStatsImpl bstats =
+                    (BatteryStatsImpl) mBatteryStatsService.getActiveStatistics();
+            synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
                     if (haveNewCpuStats) {
                         if (mBatteryStatsService.isOnBattery()) {
@@ -1535,12 +1538,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 if (pr != null) {
                                     BatteryStatsImpl.Uid.Proc ps = pr.batteryStats;
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                } else {
+                                    BatteryStatsImpl.Uid.Proc ps =
+                                            bstats.getProcessStatsLocked(st.name);
+                                    if (ps != null) {
+                                        ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-        
+
                 if (mLastWriteTime < (now-BATTERY_STATS_TIME)) {
                     mLastWriteTime = now;
                     mBatteryStatsService.getActiveStatistics().writeLocked();
@@ -4875,9 +4884,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
                         || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
             }
-            ensurePackageDexOpt(app.info.packageName);
-            if (app.instrumentationInfo != null) {
-                ensurePackageDexOpt(app.instrumentationInfo.packageName);
+            ensurePackageDexOpt(app.instrumentationInfo != null
+                    ? app.instrumentationInfo.packageName
+                    : app.info.packageName);
+            if (app.instrumentationClass != null) {
+                ensurePackageDexOpt(app.instrumentationClass.getPackageName());
             }
             thread.bindApplication(processName, app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info, providers,
@@ -8333,6 +8344,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 report.crashInfo.throwFileName = trace.getFileName();
                 report.crashInfo.throwClassName = trace.getClassName();
                 report.crashInfo.throwMethodName = trace.getMethodName();
+                report.crashInfo.throwLineNumber = trace.getLineNumber();
             } else if (r.notResponding) {
                 report.type = ApplicationErrorReport.TYPE_ANR;
                 report.anrInfo = new ApplicationErrorReport.AnrInfo();
@@ -12631,51 +12643,63 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public boolean profileControl(String process, boolean start,
-            String path) throws RemoteException {
+            String path, ParcelFileDescriptor fd) throws RemoteException {
 
-        synchronized (this) {
-            // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
-            // its own permission.
-            if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires permission "
-                        + android.Manifest.permission.SET_ACTIVITY_WATCHER);
-            }
-            
-            ProcessRecord proc = null;
-            try {
-                int pid = Integer.parseInt(process);
-                synchronized (mPidsSelfLocked) {
-                    proc = mPidsSelfLocked.get(pid);
+        try {
+            synchronized (this) {
+                // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
+                // its own permission.
+                if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Requires permission "
+                            + android.Manifest.permission.SET_ACTIVITY_WATCHER);
                 }
-            } catch (NumberFormatException e) {
-            }
-            
-            if (proc == null) {
-                HashMap<String, SparseArray<ProcessRecord>> all
-                        = mProcessNames.getMap();
-                SparseArray<ProcessRecord> procs = all.get(process);
-                if (procs != null && procs.size() > 0) {
-                    proc = procs.valueAt(0);
+                
+                if (start && fd == null) {
+                    throw new IllegalArgumentException("null fd");
                 }
-            }
-            
-            if (proc == null || proc.thread == null) {
-                throw new IllegalArgumentException("Unknown process: " + process);
-            }
-            
-            boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
-            if (isSecure) {
-                if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                    throw new SecurityException("Process not debuggable: " + proc);
+                
+                ProcessRecord proc = null;
+                try {
+                    int pid = Integer.parseInt(process);
+                    synchronized (mPidsSelfLocked) {
+                        proc = mPidsSelfLocked.get(pid);
+                    }
+                } catch (NumberFormatException e) {
                 }
-            }
+                
+                if (proc == null) {
+                    HashMap<String, SparseArray<ProcessRecord>> all
+                            = mProcessNames.getMap();
+                    SparseArray<ProcessRecord> procs = all.get(process);
+                    if (procs != null && procs.size() > 0) {
+                        proc = procs.valueAt(0);
+                    }
+                }
+                
+                if (proc == null || proc.thread == null) {
+                    throw new IllegalArgumentException("Unknown process: " + process);
+                }
+                
+                boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
+                if (isSecure) {
+                    if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                        throw new SecurityException("Process not debuggable: " + proc);
+                    }
+                }
             
-            try {
-                proc.thread.profilerControl(start, path);
+                proc.thread.profilerControl(start, path, fd);
+                fd = null;
                 return true;
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Process disappeared");
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Process disappeared");
+        } finally {
+            if (fd != null) {
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                }
             }
         }
     }

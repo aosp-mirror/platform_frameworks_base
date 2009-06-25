@@ -21,6 +21,7 @@
 
 #include "SkColorFilter.h"
 #include "SkColorMatrixFilter.h"
+#include "SkPorterDuff.h"
 
 namespace android {
 
@@ -32,8 +33,9 @@ public:
     }
 
     static SkColorFilter* CreatePorterDuffFilter(JNIEnv* env, jobject,
-                            jint srcColor, SkPorterDuff::Mode porterDuffMode) {
-        return SkColorFilter::CreatePorterDuffFilter(srcColor, porterDuffMode);
+                            jint srcColor, SkPorterDuff::Mode mode) {
+        return SkColorFilter::CreateModeFilter(srcColor,
+                                           SkPorterDuff::ToXfermodeMode(mode));
     }
  
     static SkColorFilter* CreateLightingFilter(JNIEnv* env, jobject,

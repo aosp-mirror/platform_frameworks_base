@@ -1934,11 +1934,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         viewFlagValues &= ~SOUND_EFFECTS_ENABLED;
                         viewFlagMasks |= SOUND_EFFECTS_ENABLED;
                     }
+                    break;
                 case com.android.internal.R.styleable.View_hapticFeedbackEnabled:
                     if (!a.getBoolean(attr, true)) {
                         viewFlagValues &= ~HAPTIC_FEEDBACK_ENABLED;
                         viewFlagMasks |= HAPTIC_FEEDBACK_ENABLED;
                     }
+                    break;
                 case R.styleable.View_scrollbars:
                     final int scrollbars = a.getInt(attr, SCROLLBARS_NONE);
                     if (scrollbars != SCROLLBARS_NONE) {
@@ -6541,7 +6543,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         boolean changed = false;
 
         if (DBG) {
-            System.out.println(this + " View.setFrame(" + left + "," + top + ","
+            Log.d("View", this + " View.setFrame(" + left + "," + top + ","
                     + right + "," + bottom + ")");
         }
 

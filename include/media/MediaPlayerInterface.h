@@ -27,11 +27,14 @@
 
 namespace android {
 
+class Parcel;
+
 enum player_type {
     PV_PLAYER = 1,
     SONIVOX_PLAYER = 2,
     VORBIS_PLAYER = 3
 };
+
 
 #define DEFAULT_AUDIOSINK_BUFFERCOUNT 4
 #define DEFAULT_AUDIOSINK_BUFFERSIZE 1200
@@ -45,7 +48,6 @@ typedef void (*notify_callback_f)(void* cookie, int msg, int ext1, int ext2);
 class MediaPlayerBase : public RefBase
 {
 public:
-
     // AudioSink: abstraction layer for audio output
     class AudioSink : public RefBase {
     public:
@@ -88,7 +90,14 @@ public:
     virtual player_type playerType() = 0;
     virtual void        setNotifyCallback(void* cookie, notify_callback_f notifyFunc) {
                             mCookie = cookie; mNotify = notifyFunc; }
-
+    // Invoke a generic method on the player by using opaque parcels
+    // for the request and reply.
+    // @param request Parcel that is positioned at the start of the
+    //                data sent by the java layer.
+    // @param[out] reply Parcel to hold the reply data. Cannot be null.
+    // @return OK if the invocation was made successfully. A player
+    // not supporting the direct API should return INVALID_OPERATION.
+    virtual status_t    invoke(const Parcel& request, Parcel *reply) = 0;
 protected:
     virtual void        sendEvent(int msg, int ext1=0, int ext2=0) { if (mNotify) mNotify(mCookie, msg, ext1, ext2); }
 

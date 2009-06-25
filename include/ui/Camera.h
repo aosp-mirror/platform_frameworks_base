@@ -86,10 +86,13 @@ class Surface;
 class Mutex;
 class String8;
 
-typedef void (*shutter_callback)(void *cookie);
-typedef void (*frame_callback)(const sp<IMemory>& mem, void *cookie);
-typedef void (*autofocus_callback)(bool focused, void *cookie);
-typedef void (*error_callback)(status_t err, void *cookie);
+// ref-counted object for callbacks
+class CameraListener: virtual public RefBase
+{
+public:
+    virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2) = 0;
+    virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr) = 0;
+};
 
 class Camera : public BnCameraClient, public IBinder::DeathRecipient
 {
@@ -144,13 +147,8 @@ public:
             // get preview/capture parameters - key/value pairs
             String8     getParameters() const;
 
-            void        setShutterCallback(shutter_callback cb, void *cookie);
-            void        setRawCallback(frame_callback cb, void *cookie);
-            void        setJpegCallback(frame_callback cb, void *cookie);
-            void        setRecordingCallback(frame_callback cb, void *cookie);
-            void        setPreviewCallback(frame_callback cb, void *cookie, int preview_callback_flag = FRAME_CALLBACK_FLAG_NOOP);
-            void        setErrorCallback(error_callback cb, void *cookie);
-            void        setAutoFocusCallback(autofocus_callback cb, void *cookie);
+            void        setListener(const sp<CameraListener>& listener);
+            void        setPreviewCallbackFlags(int preview_callback_flag);
 
     // ICameraClient interface
     virtual void        notifyCallback(int32_t msgType, int32_t ext, int32_t ext2);
@@ -160,6 +158,8 @@ public:
 
 private:
                         Camera();
+                        Camera(const Camera&);
+                        Camera& operator=(const Camera);
                         virtual void binderDied(const wp<IBinder>& who);
 
             class DeathNotifier: public IBinder::DeathRecipient
@@ -179,20 +179,7 @@ private:
             sp<ICamera>         mCamera;
             status_t            mStatus;
 
-            shutter_callback    mShutterCallback;
-            void                *mShutterCallbackCookie;
-            frame_callback      mRawCallback;
-            void                *mRawCallbackCookie;
-            frame_callback      mJpegCallback;
-            void                *mJpegCallbackCookie;
-            frame_callback      mPreviewCallback;
-            void                *mPreviewCallbackCookie;
-            frame_callback      mRecordingCallback;
-            void                *mRecordingCallbackCookie;
-            error_callback      mErrorCallback;
-            void                *mErrorCallbackCookie;
-            autofocus_callback  mAutoFocusCallback;
-            void                *mAutoFocusCallbackCookie;
+            sp<CameraListener>  mListener;
 
             friend class DeathNotifier;
 

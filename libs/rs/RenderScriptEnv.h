@@ -14,6 +14,7 @@ typedef void * RsTriangleMesh;
 typedef void * RsType;
 typedef void * RsProgramFragment;
 typedef void * RsProgramFragmentStore;
+typedef void * RsLight;
 
 
 typedef struct {

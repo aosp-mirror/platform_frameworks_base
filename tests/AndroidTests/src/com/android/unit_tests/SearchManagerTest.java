@@ -126,26 +126,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
     }
     
     /**
-     * The goal of this test is to confirm that we can *only* obtain a search manager
-     * interface from an Activity context.
-     */
-    @MediumTest
-    public void testSearchManagerContextRestrictions() {
-        SearchManager searchManager1 = (SearchManager)
-                mContext.getSystemService(Context.SEARCH_SERVICE);
-        assertNotNull(searchManager1);
-        
-        Context applicationContext = mContext.getApplicationContext();
-        // this should fail, because you can't get a SearchManager from a non-Activity context
-        try {
-            applicationContext.getSystemService(Context.SEARCH_SERVICE);
-            assertFalse("Shouldn't retrieve SearchManager from a non-Activity context", true);
-        } catch (AndroidRuntimeException e) {
-            // happy here - we should catch this.
-        }
-    }
-    
-    /**
      * The goal of this test is to confirm that we can obtain
      * a search manager at any time, and that for any given context,
      * it is a singleton.
@@ -163,17 +143,19 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
 
     @MediumTest
     public void testSearchables() {
+        SearchManager searchManager = (SearchManager)
+                mContext.getSystemService(Context.SEARCH_SERVICE);
         SearchableInfo si;
 
-        si = SearchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, false);
+        si = searchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, false);
         assertNotNull(si);
-        assertFalse(SearchManager.isDefaultSearchable(si));
-        si = SearchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, true);
+        assertFalse(searchManager.isDefaultSearchable(si));
+        si = searchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, true);
         assertNotNull(si);
-        assertTrue(SearchManager.isDefaultSearchable(si));
-        si = SearchManager.getSearchableInfo(null, true);
+        assertTrue(searchManager.isDefaultSearchable(si));
+        si = searchManager.getSearchableInfo(null, true);
         assertNotNull(si);
-        assertTrue(SearchManager.isDefaultSearchable(si));
+        assertTrue(searchManager.isDefaultSearchable(si));
     }
 
     /**

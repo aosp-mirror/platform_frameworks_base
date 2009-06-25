@@ -22,8 +22,6 @@ using namespace android::renderscript;
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-#include <utils/Log.h>
-
 TriangleMesh::TriangleMesh()
 {
     mVertexElement = NULL;
@@ -122,7 +120,7 @@ void TriangleMesh::analyzeElement()
             mSizeTex = 2;
         }
     }
-    LOGE("TriangleMesh %i,%i  %i,%i  %i,%i", mSizeCoord, mOffsetCoord, mSizeNorm, mOffsetNorm, mSizeTex, mOffsetTex);
+    LOGV("TriangleMesh %i,%i  %i,%i  %i,%i", mSizeCoord, mOffsetCoord, mSizeNorm, mOffsetNorm, mSizeTex, mOffsetTex);
 
 }
 
@@ -132,7 +130,6 @@ namespace renderscript {
 
 void rsi_TriangleMeshBegin(Context *rsc, RsElement vertex, RsElement index)
 {
-    //LOGE("tmb  %p %p", vertex, index);
     TriangleMeshContext *tmc = &rsc->mStateTriangleMesh;
 
     tmc->clear();
@@ -140,8 +137,6 @@ void rsi_TriangleMeshBegin(Context *rsc, RsElement vertex, RsElement index)
     tmc->mVertexSizeBits = tmc->mVertexElement->getSizeBits();
     tmc->mIndexElement = static_cast<Element *>(index);
     tmc->mIndexSizeBits = tmc->mIndexElement->getSizeBits();
-
-    //LOGE("Element sizes  %i  %i", tmc->mVertexSizeBits, tmc->mIndexSizeBits);
 
     assert(!(tmc->mVertexSizeBits & 0x7));
     assert(!(tmc->mIndexSizeBits & 0x7));
@@ -200,8 +195,6 @@ RsTriangleMesh rsi_TriangleMeshCreate(Context *rsc)
         return 0;
     }
 
-    LOGE("Create mesh, triangleCount %i", tm->mTriangleCount);
-
     memcpy(tm->mVertexData, tmc->mVertexData.array(), tm->mVertexDataSize);
     memcpy(tm->mIndexData, tmc->mIndexData.array(), tm->mIndexDataSize);
     tm->analyzeElement();
@@ -227,8 +220,6 @@ void rsi_TriangleMeshRenderRange(Context *rsc, RsTriangleMesh vtm, uint32_t firs
 
     rsc->setupCheck();
 
-    //LOGE("1  %p   ", vtm);
-    //LOGE("1.1  %p   %p", tm->mVertexData,  tm->mIndexData);
     if (!tm->mBufferObjects[0]) {
         glGenBuffers(2, &tm->mBufferObjects[0]);
 
@@ -241,7 +232,6 @@ void rsi_TriangleMeshRenderRange(Context *rsc, RsTriangleMesh vtm, uint32_t firs
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    //LOGE("1.2");
     if (first >= tm->mTriangleCount) {
         return;
     }
@@ -254,7 +244,6 @@ void rsi_TriangleMeshRenderRange(Context *rsc, RsTriangleMesh vtm, uint32_t firs
 
     const float *f = (const float *)tm->mVertexData;
 
-    //LOGE("2");
     glBindBuffer(GL_ARRAY_BUFFER, tm->mBufferObjects[0]);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
 
@@ -284,8 +273,6 @@ void rsi_TriangleMeshRenderRange(Context *rsc, RsTriangleMesh vtm, uint32_t firs
     }
 
     glDrawElements(GL_TRIANGLES, count * 3, GL_UNSIGNED_SHORT, (GLvoid *)(first * 3 * 2));
-
-    //LOGE("4");
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -107,7 +107,7 @@
     <string name="abbrev_month_day_year">%d-%m-%Y</string>
     <string name="month_day">%-e %B</string>
     <string name="month">%-B</string>
-    <string name="month_year">%Y %B</string>
+    <string name="month_year">%B %Y</string>
     <string name="abbrev_month_day">%-e %b</string>
     <string name="abbrev_month">%-b</string>
     <string name="abbrev_month_year">%b %Y</string>

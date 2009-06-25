@@ -297,6 +297,10 @@ public class BaseInputConnection implements InputConnection {
             b = tmp;
         }
 
+        if (a <= 0) {
+            return "";
+        }
+        
         if (length > a) {
             length = a;
         }
@@ -488,12 +492,12 @@ public class BaseInputConnection implements InputConnection {
         } else {
             a = Selection.getSelectionStart(content);
             b = Selection.getSelectionEnd(content);
-            if (a >=0 && b>= 0 && a != b) {
-                if (b < a) {
-                    int tmp = a;
-                    a = b;
-                    b = tmp;
-                }
+            if (a < 0) a = 0;
+            if (b < 0) b = 0;
+            if (b < a) {
+                int tmp = a;
+                a = b;
+                b = tmp;
             }
         }
 

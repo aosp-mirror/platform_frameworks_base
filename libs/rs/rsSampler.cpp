@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-#include "rsContext.h"
-
-
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-#include <utils/Log.h>
 
 #include "rsContext.h"
 #include "rsSampler.h"
+
 
 using namespace android;
 using namespace android::renderscript;

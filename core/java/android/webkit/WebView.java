@@ -1759,9 +1759,6 @@ public class WebView extends AbsoluteLayout
     private Rect sendOurVisibleRect() {
         Rect rect = new Rect();
         calcOurContentVisibleRect(rect);
-        if (mFindIsUp) {
-            rect.bottom -= viewToContent(FIND_HEIGHT);
-        }
         // Rect.equals() checks for null input.
         if (!rect.equals(mLastVisibleRectSent)) {
             Point pos = new Point(rect.left, rect.top);
@@ -1772,6 +1769,11 @@ public class WebView extends AbsoluteLayout
         Rect globalRect = new Rect();
         if (getGlobalVisibleRect(globalRect)
                 && !globalRect.equals(mLastGlobalRect)) {
+            if (DebugFlags.WEB_VIEW) {
+                Log.v(LOGTAG, "sendOurVisibleRect=(" + globalRect.left + ","
+                        + globalRect.top + ",r=" + globalRect.right + ",b="
+                        + globalRect.bottom);
+            }
             // TODO: the global offset is only used by windowRect()
             // in ChromeClientAndroid ; other clients such as touch
             // and mouse events could return view + screen relative points.
@@ -1786,6 +1788,9 @@ public class WebView extends AbsoluteLayout
         Point p = new Point();
         getGlobalVisibleRect(r, p);
         r.offset(-p.x, -p.y);
+        if (mFindIsUp) {
+            r.bottom -= FIND_HEIGHT;
+        }
     }
 
     // Sets r to be our visible rectangle in content coordinates
@@ -3006,7 +3011,8 @@ public class WebView extends AbsoluteLayout
             mTextGeneration = 0;
         }
         mWebTextView.setTextSize(contentToView(nativeFocusCandidateTextSize()));
-        Rect visibleRect = sendOurVisibleRect();
+        Rect visibleRect = new Rect();
+        calcOurContentVisibleRect(visibleRect);
         // Note that sendOurVisibleRect calls viewToContent, so the coordinates
         // should be in content coordinates.
         Rect bounds = nativeFocusCandidateNodeBounds();

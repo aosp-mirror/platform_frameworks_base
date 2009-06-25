@@ -48,6 +48,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -74,6 +75,7 @@ import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -1236,6 +1238,11 @@ public final class ActivityThread {
         String who;
     }
 
+    private static final class ProfilerControlData {
+        String path;
+        ParcelFileDescriptor fd;
+    }
+
     private final class ApplicationThread extends ApplicationThreadNative {
         private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%17s %8d";
@@ -1494,8 +1501,11 @@ public final class ActivityThread {
             }
         }
         
-        public void profilerControl(boolean start, String path) {
-            queueOrSendMessage(H.PROFILER_CONTROL, path, start ? 1 : 0);
+        public void profilerControl(boolean start, String path, ParcelFileDescriptor fd) {
+            ProfilerControlData pcd = new ProfilerControlData();
+            pcd.path = path;
+            pcd.fd = fd;
+            queueOrSendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0);
         }
 
         public void setSchedulingGroup(int group) {
@@ -1838,7 +1848,7 @@ public final class ActivityThread {
                     handleActivityConfigurationChanged((IBinder)msg.obj);
                     break;
                 case PROFILER_CONTROL:
-                    handleProfilerControl(msg.arg1 != 0, (String)msg.obj);
+                    handleProfilerControl(msg.arg1 != 0, (ProfilerControlData)msg.obj);
                     break;
                 case CREATE_BACKUP_AGENT:
                     handleCreateBackupAgent((CreateBackupAgentData)msg.obj);
@@ -3618,15 +3628,20 @@ public final class ActivityThread {
         performConfigurationChanged(r.activity, mConfiguration);
     }
 
-    final void handleProfilerControl(boolean start, String path) {
+    final void handleProfilerControl(boolean start, ProfilerControlData pcd) {
         if (start) {
-            File file = new File(path);
-            file.getParentFile().mkdirs();
             try {
-                Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
+                Debug.startMethodTracing(pcd.path, pcd.fd.getFileDescriptor(),
+                        8 * 1024 * 1024, 0);
             } catch (RuntimeException e) {
-                Log.w(TAG, "Profiling failed on path " + path
+                Log.w(TAG, "Profiling failed on path " + pcd.path
                         + " -- can the process access this path?");
+            } finally {
+                try {
+                    pcd.fd.close();
+                } catch (IOException e) {
+                    Log.w(TAG, "Failure closing profile fd", e);
+                }
             }
         } else {
             Debug.stopMethodTracing();

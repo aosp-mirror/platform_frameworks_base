@@ -968,35 +968,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
             if (Config.LOGV) Log.v(TAG, "getActivityInfo " + component + ": " + a);
             if (a != null && mSettings.isEnabledLP(a.info, flags)) {
-                ActivityInfo ainfo = PackageParser.generateActivityInfo(a, flags);
-                if (ainfo != null) {
-                    ApplicationInfo appInfo = getApplicationInfo(component.getPackageName(),
-                            PackageManager.GET_SUPPORTS_DENSITIES);
-                    if (appInfo != null &&
-                            (appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) == 0) {
-                        // Check if the screen size is same as what the application expect.
-                        CompatibilityInfo info = new CompatibilityInfo(appInfo);
-                        DisplayMetrics metrics = new DisplayMetrics();
-                        metrics.setTo(mMetrics);
-                        int orientation = mMetrics.widthPixels > mMetrics.heightPixels ?
-                                Configuration.ORIENTATION_LANDSCAPE :
-                                Configuration.ORIENTATION_PORTRAIT;
-                        metrics.updateMetrics(info, orientation);
-                        if (!info.mExpandable) {
-                            // Don't allow an app that cannot expand to handle rotation.
-                            ainfo.configChanges &= ~ ActivityInfo.CONFIG_ORIENTATION;
-                        } else {
-                            appInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
-                        }
-                        if (DEBUG_SETTINGS) {
-                            Log.d(TAG, "component=" + component +
-                                    ", expandable:" +
-                                    ((appInfo.flags &
-                                            ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0));
-                        }
-                    }
-                }
-                return ainfo;
+                return PackageParser.generateActivityInfo(a, flags);
             }
             if (mResolveComponentName.equals(component)) {
                 return mResolveActivity;
@@ -5937,7 +5909,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
                 for (PackageSetting pkg:sus.packages) {
-                    if (pkg.grantedPermissions.contains (eachPerm)) {
+                    if (pkg.pkg.requestedPermissions.contains(eachPerm)) {
                         used = true;
                         break;
                     }

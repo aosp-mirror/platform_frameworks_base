@@ -53,6 +53,7 @@ public:
     virtual status_t    reset();
     virtual status_t    setLooping(int loop);
     virtual player_type playerType() { return VORBIS_PLAYER; }
+    virtual status_t    invoke(const Parcel& request, Parcel *reply) {return INVALID_OPERATION;}
 
 private:
             status_t    setdatasource(const char *path, int fd, int64_t offset, int64_t length);
@@ -88,4 +89,3 @@ private:
 }; // namespace android
 
 #endif // ANDROID_VORBISPLAYER_H
-

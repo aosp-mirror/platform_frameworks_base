@@ -3,7 +3,7 @@
 #pragma version(1)
 #pragma stateVertex(default)
 #pragma stateFragment(PgmFragBackground)
-#pragma stateFragmentStore(parent)
+#pragma stateFragmentStore(PFSReplace)
 
 
 int main(int launchID) {
@@ -36,6 +36,7 @@ int main(int launchID) {
 
     drawRect(0, 256, 0, 512);
     contextBindProgramFragment(NAMED_PgmFragParts);
+    contextBindProgramFragmentStore(NAMED_PFSBlend);
 
     if (touch) {
         newPart = loadI32(2, 0);

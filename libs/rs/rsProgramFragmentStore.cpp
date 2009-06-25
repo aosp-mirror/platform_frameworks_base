@@ -17,6 +17,9 @@
 #include "rsContext.h"
 #include "rsProgramFragmentStore.h"
 
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+
 using namespace android;
 using namespace android::renderscript;
 

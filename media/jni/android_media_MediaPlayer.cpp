@@ -20,6 +20,7 @@
 #include "utils/Log.h"
 
 #include <media/mediaplayer.h>
+#include <media/MediaPlayerInterface.h>
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
@@ -30,6 +31,8 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "utils/Errors.h"  // for status_t
+#include "android_util_Binder.h"
+#include <binder/Parcel.h>
 
 
 // ----------------------------------------------------------------------------
@@ -442,6 +445,28 @@ android_media_MediaPlayer_getFrameAt(JNIEnv *env, jobject thiz, jint msec)
     return NULL;
 }
 
+
+// Sends the request and reply parcels to the media player via the
+// binder interface.
+static jint
+android_media_MediaPlayer_invoke(JNIEnv *env, jobject thiz,
+                                 jobject java_request, jobject java_reply)
+{
+    sp<MediaPlayer> media_player = getMediaPlayer(env, thiz);
+    if (media_player == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+    }
+
+
+    Parcel *request = parcelForJavaObject(env, java_request);
+    Parcel *reply = parcelForJavaObject(env, java_reply);
+
+    const status_t status = media_player->invoke(*request, reply);
+    // Don't use process_media_player_call which use the async loop to
+    // report errors, instead returns the status.
+    return status;
+}
+
 static void
 android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
@@ -503,6 +528,7 @@ static JNINativeMethod gMethods[] = {
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer_isLooping},
     {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
     {"getFrameAt",          "(I)Landroid/graphics/Bitmap;",     (void *)android_media_MediaPlayer_getFrameAt},
+    {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
 };

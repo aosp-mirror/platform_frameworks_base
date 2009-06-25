@@ -2545,6 +2545,16 @@ public final class Settings {
         public static final String GMAIL_DISCARD_ERROR_UPHILL_OP = "gmail_discard_error_uphill_op";
 
         /**
+         * the transcoder URL for mobile devices.
+         */
+        public static final String TRANSCODER_URL = "mobile_transcoder_url";
+
+        /**
+         * URL that points to the privacy terms of the Google Talk service.
+         */
+        public static final String GTALK_TERMS_OF_SERVICE_URL = "gtalk_terms_of_service_url";
+
+        /**
          * Hostname of the GTalk server.
          */
         public static final String GTALK_SERVICE_HOSTNAME = "gtalk_hostname";

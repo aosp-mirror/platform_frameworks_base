@@ -17,9 +17,7 @@
 #ifndef ANDROID_RS_DEVICE_H
 #define ANDROID_RS_DEVICE_H
 
-#include <utils/Vector.h>
-
-//#include "StructuredComponent.h"
+#include "rsUtils.h"
 
 // ---------------------------------------------------------------------------
 namespace android {

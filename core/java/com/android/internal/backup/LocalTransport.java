@@ -33,11 +33,8 @@ public class LocalTransport extends IBackupTransport.Stub {
     private Context mContext;
     private PackageManager mPackageManager;
     private File mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup");
-    private FileFilter mDirFileFilter = new FileFilter() {
-        public boolean accept(File f) {
-            return f.isDirectory();
-        }
-    };
+    private PackageInfo[] mRestorePackages = null;
+    private int mRestorePackage = -1;  // Index into mRestorePackages
 
 
     public LocalTransport(Context context) {
@@ -51,21 +48,9 @@ public class LocalTransport extends IBackupTransport.Stub {
         return 0;
     }
 
-    public int startSession() throws RemoteException {
-        if (DEBUG) Log.v(TAG, "session started");
-        mDataDir.mkdirs();
-        return 0;
-    }
-
-    public int endSession() throws RemoteException {
-        if (DEBUG) Log.v(TAG, "session ended");
-        return 0;
-    }
-
-    public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data)
+    public boolean performBackup(PackageInfo packageInfo, ParcelFileDescriptor data)
             throws RemoteException {
         if (DEBUG) Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName);
-        int err = 0;
 
         File packageDir = new File(mDataDir, packageInfo.packageName);
         packageDir.mkdirs();
@@ -101,9 +86,8 @@ public class LocalTransport extends IBackupTransport.Stub {
                     try {
                         entity.write(buf, 0, dataSize);
                     } catch (IOException e) {
-                        Log.e(TAG, "Unable to update key file "
-                                + entityFile.getAbsolutePath());
-                        err = -1;
+                        Log.e(TAG, "Unable to update key file " + entityFile.getAbsolutePath());
+                        return false;
                     } finally {
                         entity.close();
                     }
@@ -111,14 +95,17 @@ public class LocalTransport extends IBackupTransport.Stub {
                     entityFile.delete();
                 }
             }
+            return true;
         } catch (IOException e) {
             // oops, something went wrong.  abort the operation and return error.
-            Log.v(TAG, "Exception reading backup input:");
-            e.printStackTrace();
-            err = -1;
+            Log.v(TAG, "Exception reading backup input:", e);
+            return false;
         }
+    }
 
-        return err;
+    public boolean finishBackup() throws RemoteException {
+        if (DEBUG) Log.v(TAG, "finishBackup()");
+        return true;
     }
 
     // Restore handling
@@ -129,65 +116,66 @@ public class LocalTransport extends IBackupTransport.Stub {
         return array;
     }
 
-    public PackageInfo[] getAppSet(int token) throws android.os.RemoteException {
-        if (DEBUG) Log.v(TAG, "getting app set " + token);
-        // the available packages are the extant subdirs of mDatadir
-        File[] packageDirs = mDataDir.listFiles(mDirFileFilter);
-        ArrayList<PackageInfo> packages = new ArrayList<PackageInfo>();
-        for (File dir : packageDirs) {
-            try {
-                PackageInfo pkg = mPackageManager.getPackageInfo(dir.getName(),
-                        PackageManager.GET_SIGNATURES);
-                if (pkg != null) {
-                    packages.add(pkg);
-                }
-            } catch (NameNotFoundException e) {
-                // restore set contains data for a package not installed on the
-                // phone -- just ignore it.
-            }
-        }
-
-        if (DEBUG) {
-            Log.v(TAG, "Built app set of " + packages.size() + " entries:");
-            for (PackageInfo p : packages) {
-                Log.v(TAG, "    + " + p.packageName);
-            }
-        }
-
-        PackageInfo[] result = new PackageInfo[packages.size()];
-        return packages.toArray(result);
+    public boolean startRestore(long token, PackageInfo[] packages) {
+        if (DEBUG) Log.v(TAG, "start restore " + token);
+        mRestorePackages = packages;
+        mRestorePackage = -1;
+        return true;
     }
 
-    public int getRestoreData(int token, PackageInfo packageInfo, ParcelFileDescriptor outFd)
-            throws android.os.RemoteException {
-        if (DEBUG) Log.v(TAG, "getting restore data " + token + " : " + packageInfo.packageName);
-        // we only support one hardcoded restore set
-        if (token != 0) return -1;
+    public String nextRestorePackage() {
+        if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
+        while (++mRestorePackage < mRestorePackages.length) {
+            String name = mRestorePackages[mRestorePackage].packageName;
+            if (new File(mDataDir, name).isDirectory()) {
+                if (DEBUG) Log.v(TAG, "  nextRestorePackage() = " + name);
+                return name;
+            }
+        }
 
-        // the data for a given package is at a known location
-        File packageDir = new File(mDataDir, packageInfo.packageName);
+        if (DEBUG) Log.v(TAG, "  no more packages to restore");
+        return "";
+    }
+
+    public boolean getRestoreData(ParcelFileDescriptor outFd) {
+        if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
+        if (mRestorePackage < 0) throw new IllegalStateException("nextRestorePackage not called");
+        File packageDir = new File(mDataDir, mRestorePackages[mRestorePackage].packageName);
 
         // The restore set is the concatenation of the individual record blobs,
         // each of which is a file in the package's directory
         File[] blobs = packageDir.listFiles();
-        int err = 0;
-        if (blobs != null && blobs.length > 0) {
-            BackupDataOutput out = new BackupDataOutput(outFd.getFileDescriptor());
-            try {
-                for (File f : blobs) {
-                    FileInputStream in = new FileInputStream(f);
+        if (blobs == null) {
+            Log.e(TAG, "Error listing directory: " + packageDir);
+            return false;  // nextRestorePackage() ensures the dir exists, so this is an error
+        }
+
+        // We expect at least some data if the directory exists in the first place
+        if (DEBUG) Log.v(TAG, "  getRestoreData() found " + blobs.length + " key files");
+        BackupDataOutput out = new BackupDataOutput(outFd.getFileDescriptor());
+        try {
+            for (File f : blobs) {
+                FileInputStream in = new FileInputStream(f);
+                try {
                     int size = (int) f.length();
                     byte[] buf = new byte[size];
                     in.read(buf);
                     String key = new String(Base64.decode(f.getName()));
+                    if (DEBUG) Log.v(TAG, "    ... key=" + key + " size=" + size);
                     out.writeEntityHeader(key, size);
                     out.writeEntityData(buf, size);
+                } finally {
+                    in.close();
                 }
-            } catch (Exception e) {
-                Log.e(TAG, "Unable to read backup records");
-                err = -1;
             }
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to read backup records", e);
+            return false;
         }
-        return err;
+    }
+
+    public void finishRestore() {
+        if (DEBUG) Log.v(TAG, "finishRestore()");
     }
 }

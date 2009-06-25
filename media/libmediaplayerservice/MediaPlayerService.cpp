@@ -39,6 +39,10 @@
 #include <binder/IServiceManager.h>
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
+#include <utils/Errors.h>  // for status_t
+#include <utils/String8.h>
+#include <utils/Vector.h>
+#include <cutils/properties.h>
 
 #include <media/MediaPlayerInterface.h>
 #include <media/mediarecorder.h>
@@ -64,7 +68,6 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #endif
 #undef __KERNEL__
 #endif
-
 
 namespace android {
 
@@ -673,6 +676,14 @@ status_t MediaPlayerService::Client::setVideoSurface(const sp<ISurface>& surface
     sp<MediaPlayerBase> p = getPlayer();
     if (p == 0) return UNKNOWN_ERROR;
     return p->setVideoSurface(surface);
+}
+
+status_t MediaPlayerService::Client::invoke(const Parcel& request,
+                                            Parcel *reply)
+{
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == NULL) return UNKNOWN_ERROR;
+    return p->invoke(request, reply);
 }
 
 status_t MediaPlayerService::Client::prepareAsync()

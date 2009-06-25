@@ -462,6 +462,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     //
 
     private void broadcastServiceStateChanged(ServiceState state) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.noteAirplaneMode(state.getState() == ServiceState.STATE_POWER_OFF);
+        } catch (RemoteException re) {
+            // Can't do much
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+
         Intent intent = new Intent(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         Bundle data = new Bundle();
         state.fillInNotifierBundle(data);

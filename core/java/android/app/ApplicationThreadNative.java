@@ -26,6 +26,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -331,7 +332,9 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             boolean start = data.readInt() != 0;
             String path = data.readString();
-            profilerControl(start, path);
+            ParcelFileDescriptor fd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            profilerControl(start, path, fd);
             return true;
         }
         
@@ -711,11 +714,18 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
     
-    public void profilerControl(boolean start, String path) throws RemoteException {
+    public void profilerControl(boolean start, String path,
+            ParcelFileDescriptor fd) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeInt(start ? 1 : 0);
         data.writeString(path);
+        if (fd != null) {
+            data.writeInt(1);
+            fd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(PROFILER_CONTROL_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();

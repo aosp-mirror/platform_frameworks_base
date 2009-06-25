@@ -15,7 +15,6 @@
  */
 
 #include "rsObjectBase.h"
-#include <utils/Log.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -34,14 +33,14 @@ ObjectBase::~ObjectBase()
 void ObjectBase::incRef() const
 {
     mRefCount ++;
-    //LOGE("ObjectBase %p inc ref %i", this, mRefCount);
+    //LOGV("ObjectBase %p inc ref %i", this, mRefCount);
 }
 
 void ObjectBase::decRef() const
 {
     rsAssert(mRefCount > 0);
     mRefCount --;
-    //LOGE("ObjectBase %p dec ref %i", this, mRefCount);
+    //LOGV("ObjectBase %p dec ref %i", this, mRefCount);
     if (!mRefCount) {
         delete this;
     }
