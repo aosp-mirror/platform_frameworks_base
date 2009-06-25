@@ -108,6 +108,9 @@ public final class CacheManager {
             return expires;
         }
 
+        /**
+         * @hide Pending API council approval
+         */
         public String getExpiresString() {
             return expiresString;
         }
