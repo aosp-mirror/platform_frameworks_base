@@ -164,8 +164,7 @@ class BackupManagerService extends IBackupManager.Stub {
         // Set up our transport options and initialize the default transport
         // TODO: Have transports register themselves somehow?
         // TODO: Don't create transports that we don't need to?
-        mTransportId = BackupManager.TRANSPORT_LOCAL;
-        //mTransportId = BackupManager.TRANSPORT_GOOGLE;
+        mTransportId = BackupManager.TRANSPORT_GOOGLE;
         mLocalTransport = new LocalTransport(context);  // This is actually pretty cheap
         mGoogleTransport = null;
 
