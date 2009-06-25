@@ -55,9 +55,6 @@ public:
     bool isUpdateOnDemand() const { return mUpdateOnDemand; }
     status_t setUpdateRectangle(const Rect& updateRect);
     
-    // FIXME: needed for copybit hack in LayerBuffer
-    android_native_buffer_t const* getBackbuffer() const;
-    
 private:
     friend class LightRefBase<FramebufferNativeWindow>;    
     ~FramebufferNativeWindow(); // this class cannot be overloaded
@@ -78,9 +75,6 @@ private:
     int32_t mNumFreeBuffers;
     int32_t mBufferHead;
     bool mUpdateOnDemand;
-
-    // FIXME: for getBackbuffer
-    int32_t mLastDequeued;
 };
     
 // ---------------------------------------------------------------------------

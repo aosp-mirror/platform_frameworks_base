@@ -348,8 +348,3 @@ void DisplayHardware::makeCurrent() const
 {
     eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
 }
-
-sp<FramebufferNativeWindow> DisplayHardware::getFb() const { 
-    return mNativeWindow; 
-}
-

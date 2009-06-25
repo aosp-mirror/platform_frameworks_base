@@ -63,11 +63,6 @@ private:
 };
 
 
-android_native_buffer_t const* FramebufferNativeWindow::getBackbuffer() const {
-    return static_cast<android_native_buffer_t const*>(buffers[mLastDequeued].get());
-}
-
-
 /*
  * This implements the (main) framebuffer management. This class is used
  * mostly by SurfaceFlinger, but also by command line GL application.
@@ -170,7 +165,6 @@ int FramebufferNativeWindow::dequeueBuffer(android_native_window_t* window,
     if (self->mBufferHead >= self->mNumBuffers)
         self->mBufferHead = 0;
 
-    self->mLastDequeued = index;
     *buffer = self->buffers[index].get();
 
     return 0;

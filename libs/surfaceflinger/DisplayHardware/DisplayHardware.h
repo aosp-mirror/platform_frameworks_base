@@ -84,9 +84,6 @@ public:
         return Rect(mWidth, mHeight);
     }
 
-    // FIXME: needed in LayerBuffer for msm7k/copybit hack
-    sp<FramebufferNativeWindow> getFb() const;
-    
 private:
     void init(uint32_t displayIndex) __attribute__((noinline));
     void fini() __attribute__((noinline));

@@ -468,47 +468,52 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         }
 #endif
 
-        copybit_image_t dst;
-        const DisplayHardware& hw(mLayer.graphicPlane(0).displayHardware());
-        sp<FramebufferNativeWindow> fbw = hw.getFb();
-        android_native_buffer_t const* nb = fbw->getBackbuffer();
-        native_handle_t const* hnd = nb->handle;
+#ifdef EGL_ANDROID_get_render_buffer
+        EGLDisplay dpy = eglGetCurrentDisplay();
+        EGLSurface draw = eglGetCurrentSurface(EGL_DRAW); 
+        EGLClientBuffer clientBuf = eglGetRenderBufferANDROID(dpy, draw);
+        android_native_buffer_t* nb = (android_native_buffer_t*)clientBuf;
+        if (nb == 0) {
+            err = BAD_VALUE;
+        } else {
+            copybit_image_t dst;
+            dst.w       = nb->width;
+            dst.h       = nb->height;
+            dst.format  = nb->format;
+            dst.base    = NULL; // unused by copybit on msm7k
+            dst.handle  = (native_handle_t *)nb->handle;
 
-        dst.w       = 320;
-        dst.h       = 480;
-        dst.format  = 4;
-        dst.base    = 0;
-        dst.handle  = (native_handle_t *)nb->handle;
+            const Rect& transformedBounds = mLayer.getTransformedBounds();
+            const copybit_rect_t& drect
+            = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
+            const State& s(mLayer.drawingState());
+            region_iterator it(clip);
 
-        const Rect& transformedBounds = mLayer.getTransformedBounds();
-        const copybit_rect_t& drect
-                = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
-        const State& s(mLayer.drawingState());
-        region_iterator it(clip);
+            // pick the right orientation for this buffer
+            int orientation = mLayer.getOrientation();
+            if (UNLIKELY(mBufferHeap.transform)) {
+                Transform rot90;
+                GraphicPlane::orientationToTransfrom(
+                        ISurfaceComposer::eOrientation90, 0, 0, &rot90);
+                const Transform& planeTransform(mLayer.graphicPlane(0).transform());
+                const Layer::State& s(mLayer.drawingState());
+                Transform tr(planeTransform * s.transform * rot90);
+                orientation = tr.getOrientation();
+            }
 
-        // pick the right orientation for this buffer
-        int orientation = mLayer.getOrientation();
-        if (UNLIKELY(mBufferHeap.transform)) {
-            Transform rot90;
-            GraphicPlane::orientationToTransfrom(
-                    ISurfaceComposer::eOrientation90, 0, 0, &rot90);
-            const Transform& planeTransform(mLayer.graphicPlane(0).transform());
-            const Layer::State& s(mLayer.drawingState());
-            Transform tr(planeTransform * s.transform * rot90);
-            orientation = tr.getOrientation();
-        }
+            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
+            copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
 
-        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
-        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
-        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
-
-        err = copybit->stretch(copybit,
-                &dst, &src.img, &drect, &src.crop, &it);
-        if (err != NO_ERROR) {
-            LOGE("copybit failed (%s)", strerror(err));
+            err = copybit->stretch(copybit,
+                    &dst, &src.img, &drect, &src.crop, &it);
+            if (err != NO_ERROR) {
+                LOGE("copybit failed (%s)", strerror(err));
+            }
         }
     }
-
+#endif
+    
     if (!copybit || err) 
     {
         // OpenGL fall-back
