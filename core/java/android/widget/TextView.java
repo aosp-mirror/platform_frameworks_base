@@ -3681,12 +3681,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected boolean isPaddingOffsetRequired() {
-        return mShadowRadius != 0;
+        return mShadowRadius != 0 || mDrawables != null;
     }
 
     @Override
     protected int getLeftPaddingOffset() {
-        return (int) Math.min(0, mShadowDx - mShadowRadius);
+        return getCompoundPaddingLeft() - mPaddingLeft +
+                (int) Math.min(0, mShadowDx - mShadowRadius);
     }
 
     @Override
@@ -3701,7 +3702,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected int getRightPaddingOffset() {
-        return (int) Math.max(0, mShadowDx + mShadowRadius);
+        return -(getCompoundPaddingRight() - mPaddingRight) +
+                (int) Math.max(0, mShadowDx + mShadowRadius);
     }
 
     @Override
@@ -6665,9 +6667,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else if (getLineCount() == 1) {
                 switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
-                        return (mLayout.getLineRight(0) - mScrollX - (mRight - mLeft) -
-                                getCompoundPaddingLeft() - getCompoundPaddingRight()) /
-                                getHorizontalFadingEdgeLength();
+                        final int textWidth = (mRight - mLeft) - getCompoundPaddingLeft() -
+                                getCompoundPaddingRight();
+                        final float lineWidth = mLayout.getLineWidth(0);
+                        return (lineWidth - textWidth) / getHorizontalFadingEdgeLength();
                     case Gravity.RIGHT:
                         return 0.0f;
                     case Gravity.CENTER_HORIZONTAL:
