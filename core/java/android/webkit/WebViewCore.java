@@ -139,7 +139,7 @@ final class WebViewCore {
         // ready.
         mEventHub = new EventHub();
         // Create a WebSettings object for maintaining all settings
-        mSettings = new WebSettings(mContext);
+        mSettings = new WebSettings(mContext, mWebView);
         // The WebIconDatabase needs to be initialized within the UI thread so
         // just request the instance here.
         WebIconDatabase.getInstance();
@@ -1560,6 +1560,20 @@ final class WebViewCore {
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
+        // adjust the default scale to match the density
+        if (WebView.DEFAULT_SCALE_PERCENT != 100) {
+            float adjust = WebView.DEFAULT_SCALE_PERCENT / 100;
+            if (mViewportInitialScale > 0) {
+                mViewportInitialScale *= adjust;
+            }
+            if (mViewportMinimumScale > 0) {
+                mViewportMinimumScale *= adjust;
+            }
+            if (mViewportMaximumScale > 0) {
+                mViewportMaximumScale *= adjust;
+            }
+        }
+
         // infer the values if they are not defined.
         if (mViewportWidth == 0) {
             if (mViewportInitialScale == 0) {
@@ -1586,7 +1600,7 @@ final class WebViewCore {
                 mViewportMaximumScale = mViewportInitialScale;
             } else if (mViewportInitialScale == 0) {
                 mViewportInitialScale = mViewportMaximumScale;
-            }            
+            }
         }
         if (mViewportWidth < 0
                 && mViewportInitialScale == WebView.DEFAULT_SCALE_PERCENT) {
