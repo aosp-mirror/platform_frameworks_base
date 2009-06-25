@@ -2,6 +2,7 @@
 #include "XLIFFFile.h"
 #include "ValuesFile.h"
 #include "localize.h"
+#include <stdio.h>
 
 int pseudolocalize_xliff(XLIFFFile* xliff, bool expand);
 
