@@ -358,7 +358,7 @@ public class RelativeLayout extends ViewGroup {
                 LayoutParams params = (LayoutParams) child.getLayoutParams();
 
                 applyHorizontalSizeRules(params, myWidth);
-                measureChildHorizontal(child, params, myWidth);
+                measureChildHorizontal(child, params, myWidth, myHeight);
                 if (positionChildHorizontal(child, params, myWidth, isWrapContentWidth)) {
                     offsetHorizontalAxis = true;
                 }
@@ -550,13 +550,18 @@ public class RelativeLayout extends ViewGroup {
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
-    private void measureChildHorizontal(View child, LayoutParams params, int myWidth) {
+    private void measureChildHorizontal(View child, LayoutParams params, int myWidth, int myHeight) {
         int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft,
                 params.mRight, params.width,
                 params.leftMargin, params.rightMargin,
                 mPaddingLeft, mPaddingRight,
                 myWidth);
-        int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        int childHeightMeasureSpec;
+        if (params.width == LayoutParams.FILL_PARENT) {
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.EXACTLY, myHeight);
+        } else {
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        }
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
