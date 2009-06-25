@@ -592,6 +592,21 @@ class DatabaseHelper extends SQLiteOpenHelper {
         loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
                 R.integer.def_screen_off_timeout);
 
+        // Set default cdma emergency tone
+        loadSetting(stmt, Settings.System.EMERGENCY_TONE, 0);
+
+        // Set default cdma call auto retry
+        loadSetting(stmt, Settings.System.CALL_AUTO_RETRY, 0);
+
+        // Set default cdma DTMF type
+        loadSetting(stmt, Settings.System.DTMF_TONE_TYPE_WHEN_DIALING, 0);
+
+        // Set default hearing aid
+        loadSetting(stmt, Settings.System.HEARING_AID, 0);
+
+        // Set default tty mode
+        loadSetting(stmt, Settings.System.TTY_MODE, 0);
+
         loadBooleanSetting(stmt, Settings.System.AIRPLANE_MODE_ON,
                 R.bool.def_airplane_mode_on);
 
