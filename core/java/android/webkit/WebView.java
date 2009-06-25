@@ -459,6 +459,8 @@ public class WebView extends AbsoluteLayout
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
     static final int DID_FIRST_LAYOUT_MSG_ID            = 18;
     static final int MOVE_OUT_OF_PLUGIN                 = 19;
+    static final int CLEAR_TEXT_ENTRY                   = 20;
+
     static final int UPDATE_CLIPBOARD                   = 22;
     static final int LONG_PRESS_CENTER                  = 23;
     static final int PREVENT_TOUCH_ID                   = 24;
@@ -486,7 +488,7 @@ public class WebView extends AbsoluteLayout
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 17;
         "DID_FIRST_LAYOUT_MSG_ID", //        = 18;
         "MOVE_OUT_OF_PLUGIN", //             = 19;
-        "20",
+        "CLEAR_TEXT_ENTRY", //               = 20;
         "21", //                             = 21;
         "UPDATE_CLIPBOARD", //               = 22;
         "LONG_PRESS_CENTER", //              = 23;
@@ -3108,6 +3110,9 @@ public class WebView extends AbsoluteLayout
             mWebTextView.setInPassword(nativeFocusCandidateIsPassword());
             if (null == text) {
                 mWebTextView.setText("", 0, 0);
+                if (DebugFlags.WEB_VIEW) {
+                    Log.v(LOGTAG, "rebuildWebTextView null == text");
+                }
             } else {
                 // Change to true to enable the old style behavior, where
                 // entering a textfield/textarea always set the selection to the
@@ -3122,8 +3127,14 @@ public class WebView extends AbsoluteLayout
                 } else if (isTextField) {
                     int length = text.length();
                     mWebTextView.setText(text, length, length);
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "rebuildWebTextView length=" + length);
+                    }
                 } else {
                     mWebTextView.setText(text, 0, 0);
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "rebuildWebTextView !isTextField");
+                    }
                 }
             }
             mWebTextView.requestFocus();
@@ -4846,6 +4857,9 @@ public class WebView extends AbsoluteLayout
                         mWebTextView.bringIntoView();
                     }
                     rebuildWebTextView();
+                    break;
+                case CLEAR_TEXT_ENTRY:
+                    clearTextEntry();
                     break;
                 case INVAL_RECT_MSG_ID: {
                     Rect r = (Rect)msg.obj;

@@ -720,9 +720,11 @@ final class WebViewCore {
                 @Override
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
-                        Log.v(LOGTAG, msg.what < LOAD_URL || msg.what
+                        Log.v(LOGTAG, (msg.what < LOAD_URL || msg.what
                                 > FREE_MEMORY ? Integer.toString(msg.what)
-                                : HandlerDebugString[msg.what - LOAD_URL]);
+                                : HandlerDebugString[msg.what - LOAD_URL])
+                                + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
+                                + " obj=" + msg.obj);
                     }
                     switch (msg.what) {
                         case WEBKIT_DRAW:
@@ -1747,6 +1749,13 @@ final class WebViewCore {
             msg.getData().putBoolean("password", changeToPassword);
             msg.sendToTarget();
         }
+    }
+
+    // called by JNI
+    private void clearTextEntry() {
+        if (mWebView == null) return;
+        Message.obtain(mWebView.mPrivateHandler,
+                WebView.CLEAR_TEXT_ENTRY).sendToTarget();
     }
 
     // these must be in document space (i.e. not scaled/zoomed).

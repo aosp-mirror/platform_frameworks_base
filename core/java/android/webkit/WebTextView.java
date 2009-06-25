@@ -24,6 +24,7 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.MovementMethod;
+import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.KeyCharacterMap;
@@ -44,6 +45,8 @@ import java.util.ArrayList;
  * text editing.
  */
 /* package */ class WebTextView extends AutoCompleteTextView {
+
+    static final String LOGTAG = "webtextview";
 
     private WebView         mWebView;
     private boolean         mSingle;
@@ -82,6 +85,7 @@ import java.util.ArrayList;
         setImeOptions(EditorInfo.IME_ACTION_NONE);
         // Allow webkit's drawing to show through
         setWillNotDraw(true);
+        setCursorVisible(false);
     }
 
     @Override
@@ -268,6 +272,10 @@ import java.util.ArrayList;
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
         if (mWebView != null) {
+            if (DebugFlags.WEB_TEXT_VIEW) {
+                Log.v(LOGTAG, "onSelectionChanged selStart=" + selStart
+                        + " selEnd=" + selEnd);
+            }
             mWebView.setSelection(selStart, selEnd);
         }
     }
@@ -313,6 +321,10 @@ import java.util.ArrayList;
         } else {
             // This corrects the selection which may have been affected by the
             // trackball or auto-correct.
+            if (DebugFlags.WEB_TEXT_VIEW) {
+                Log.v(LOGTAG, "onTextChanged start=" + start
+                        + " start + before=" + (start + before));
+            }
             mWebView.setSelection(start, start + before);
         }
         if (!cannotUseKeyEvents) {
@@ -541,6 +553,10 @@ import java.util.ArrayList;
             start = 0;
         } else if (start > length) {
             start = length;
+        }
+        if (DebugFlags.WEB_TEXT_VIEW) {
+            Log.v(LOGTAG, "setText start=" + start
+                    + " end=" + end);
         }
         Selection.setSelection(span, start, end);
     }
