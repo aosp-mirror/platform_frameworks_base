@@ -38,6 +38,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Config;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -183,7 +184,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     // number of fixes we have received since we started navigating
     private int mFixCount;
 
-    private int mPositionMode = GPS_POSITION_MODE_STANDALONE;
+    private boolean mAgpsConfigured;
 
     // true if we started navigation
     private boolean mStarted;
@@ -355,8 +356,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 try {
                     int port = Integer.parseInt(portString);
                     native_set_agps_server(AGPS_TYPE_SUPL, host, port);
-                    // use MS-Based position mode if SUPL support is enabled
-                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
+                    mAgpsConfigured = true;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
                 }
@@ -368,8 +368,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 try {
                     int port = Integer.parseInt(portString);
                     native_set_agps_server(AGPS_TYPE_C2K, host, port);
-                    // use MS-Based position mode if SUPL support is enabled
-                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
+                    mAgpsConfigured = true;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse C2K_PORT: " + portString);
                 }
@@ -719,7 +718,15 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         if (!mStarted) {
             if (DEBUG) Log.d(TAG, "startNavigating");
             mStarted = true;
-            if (!native_start(mPositionMode, false, mFixInterval)) {
+            int positionMode;
+            if (mAgpsConfigured && Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.ASSISTED_GPS_ENABLED, 0) != 0) {
+                positionMode = GPS_POSITION_MODE_MS_BASED;
+            } else {
+                positionMode = GPS_POSITION_MODE_STANDALONE;
+            }
+
+            if (!native_start(positionMode, false, mFixInterval)) {
                 mStarted = false;
                 Log.e(TAG, "native_start failed in startNavigating()");
                 return;
