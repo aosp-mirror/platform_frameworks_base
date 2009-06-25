@@ -701,17 +701,6 @@ public class PhoneNumberUtils
     }
 
     /**
-     * Note: calls extractNetworkPortion(), so do not use for
-     * SIM EF[ADN] style records
-     *
-     * Exceptions thrown if extractNetworkPortion(s).length() == 0
-     */
-    public static byte[]
-    networkPortionToCalledPartyBCD(String s) {
-        return numberToCalledPartyBCD(extractNetworkPortion(s));
-    }
-
-    /**
      * Return true iff the network portion of <code>address</code> is,
      * as far as we can tell on the device, suitable for use as an SMS
      * destination address.
@@ -744,12 +733,25 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Note: calls extractNetworkPortion(), so do not use for
+     * SIM EF[ADN] style records
+     *
+     * Returns null if network portion is empty.
+     */
+    public static byte[]
+    networkPortionToCalledPartyBCD(String s) {
+        String networkPortion = extractNetworkPortion(s);
+        return numberToCalledPartyBCDHelper(networkPortion, false);
+    }
+
+    /**
      * Same as {@link #networkPortionToCalledPartyBCD}, but includes a
      * one-byte length prefix.
      */
     public static byte[]
     networkPortionToCalledPartyBCDWithLength(String s) {
-        return numberToCalledPartyBCDWithLength(extractNetworkPortion(s));
+        String networkPortion = extractNetworkPortion(s);
+        return numberToCalledPartyBCDHelper(networkPortion, true);
     }
 
     /**
@@ -761,61 +763,46 @@ public class PhoneNumberUtils
      */
     public static byte[]
     numberToCalledPartyBCD(String number) {
-        // The extra byte required for '+' is taken into consideration while calculating
-        // length of ret.
-        int size = (hasPlus(number) ? number.length() - 1 : number.length());
-        byte[] ret = new byte[(size + 1) / 2 + 1];
-
-        return numberToCalledPartyBCDHelper(ret, 0, number);
+        return numberToCalledPartyBCDHelper(number, false);
     }
 
     /**
-     * Same as {@link #numberToCalledPartyBCD}, but includes a
-     * one-byte length prefix.
+     * If includeLength is true, prepend a one-byte length value to
+     * the return array.
      */
     private static byte[]
-    numberToCalledPartyBCDWithLength(String number) {
-        // The extra byte required for '+' is taken into consideration while calculating
-        // length of ret.
-        int size = (hasPlus(number) ? number.length() - 1 : number.length());
-        int length = (size + 1) / 2 + 1;
-        byte[] ret = new byte[length + 1];
+    numberToCalledPartyBCDHelper(String number, boolean includeLength) {
+        int numberLenReal = number.length();
+        int numberLenEffective = numberLenReal;
+        boolean hasPlus = number.indexOf('+') != -1;
+        if (hasPlus) numberLenEffective--;
 
-        ret[0] = (byte) (length & 0xff);
-        return numberToCalledPartyBCDHelper(ret, 1, number);
-    }
+        if (numberLenEffective == 0) return null;
 
-    private static boolean
-    hasPlus(String s) {
-      return s.indexOf('+') >= 0;
-    }
+        int resultLen = (numberLenEffective + 1) / 2;  // Encoded numbers require only 4 bits each.
+        int extraBytes = 1;                            // Prepended TOA byte.
+        if (includeLength) extraBytes++;               // Optional prepended length byte.
+        resultLen += extraBytes;
 
-    private static byte[]
-    numberToCalledPartyBCDHelper(byte[] ret, int offset, String number) {
-        if (hasPlus(number)) {
-            number = number.replaceAll("\\+", "");
-            ret[offset] = (byte) TOA_International;
-        } else {
-            ret[offset] = (byte) TOA_Unknown;
+        byte[] result = new byte[resultLen];
+
+        int digitCount = 0;
+        for (int i = 0; i < numberLenReal; i++) {
+            char c = number.charAt(i);
+            if (c == '+') continue;
+            int shift = ((digitCount & 0x01) == 1) ? 4 : 0;
+            result[extraBytes + (digitCount >> 1)] |= (byte)((charToBCD(c) & 0x0F) << shift);
+            digitCount++;
         }
 
-        int size = number.length();
-        int curChar = 0;
-        int countFullBytes = ret.length - offset - 1 - ((size - curChar) & 1);
-        for (int i = 1; i < 1 + countFullBytes; i++) {
-            ret[offset + i]
-                    = (byte) ((charToBCD(number.charAt(curChar++)))
-                              | (charToBCD(number.charAt(curChar++))) << 4);
-        }
+        // 1-fill any trailing odd nibble/quartet.
+        if ((digitCount & 0x01) == 1) result[extraBytes + (digitCount >> 1)] |= 0xF0;
 
-        // The left-over octet for odd-length phone numbers should be
-        // filled with 0xf.
-        if (countFullBytes + offset < ret.length - 1) {
-            ret[ret.length - 1]
-                    = (byte) (charToBCD(number.charAt(curChar))
-                              | (0xf << 4));
-        }
-        return ret;
+        int offset = 0;
+        if (includeLength) result[offset++] = (byte)(resultLen - 1);
+        result[offset] = (byte)(hasPlus ? TOA_International : TOA_Unknown);
+
+        return result;
     }
 
     /** all of 'a' up to len must match non-US trunk prefix ('0') */
