@@ -109,8 +109,8 @@ class BackupManagerService extends IBackupManager.Stub {
     // Backups that we haven't started yet.
     private HashMap<ApplicationInfo,BackupRequest> mPendingBackups
             = new HashMap<ApplicationInfo,BackupRequest>();
-    // Do we need to back up the package manager metadata on the next pass?
-    private boolean mDoPackageManager;
+
+    // Pseudoname that we use for the Package Manager metadata "package"
     private static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
 
     // locking around the pending-backup management
@@ -133,7 +133,8 @@ class BackupManagerService extends IBackupManager.Stub {
     private IBackupTransport mLocalTransport, mGoogleTransport;
     private RestoreSession mActiveRestoreSession;
 
-    private File mStateDir;
+    // Where we keep our journal files and other bookkeeping
+    private File mBaseStateDir;
     private File mDataDir;
     private File mJournalDir;
     private File mJournal;
@@ -145,13 +146,12 @@ class BackupManagerService extends IBackupManager.Stub {
         mActivityManager = ActivityManagerNative.getDefault();
 
         // Set up our bookkeeping
-        mStateDir = new File(Environment.getDataDirectory(), "backup");
-        mStateDir.mkdirs();
+        mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mDataDir = Environment.getDownloadCacheDirectory();
 
         // Set up the backup-request journaling
-        mJournalDir = new File(mStateDir, "pending");
-        mJournalDir.mkdirs();
+        mJournalDir = new File(mBaseStateDir, "pending");
+        mJournalDir.mkdirs();   // creates mBaseStateDir along the way
         makeJournalLocked();    // okay because no other threads are running yet
 
         // Build our mapping of uid to backup client services.  This implicitly
@@ -372,7 +372,6 @@ class BackupManagerService extends IBackupManager.Stub {
                     mBackupParticipants.put(uid, set);
                 }
                 set.add(pkg.applicationInfo);
-                backUpPackageManagerData();
             }
         }
     }
@@ -416,7 +415,6 @@ class BackupManagerService extends IBackupManager.Stub {
                     for (ApplicationInfo entry: set) {
                         if (entry.packageName.equals(pkg.packageName)) {
                             set.remove(entry);
-                            backUpPackageManagerData();
                             break;
                         }
                     }
@@ -457,14 +455,6 @@ class BackupManagerService extends IBackupManager.Stub {
         List<PackageInfo> allApps = allAgentPackages();
         removePackageParticipantsLockedInner(packageName, allApps);
         addPackageParticipantsLockedInner(packageName, allApps);
-    }
-
-    private void backUpPackageManagerData() {
-        // No need to schedule a backup just for the metadata; just piggyback on
-        // the next actual data backup.
-        synchronized(this) {
-            mDoPackageManager = true;
-        }
     }
 
     // The queue lock should be held when scheduling a backup pass
@@ -564,6 +554,7 @@ class BackupManagerService extends IBackupManager.Stub {
         private static final String TAG = "PerformBackupThread";
         IBackupTransport mTransport;
         ArrayList<BackupRequest> mQueue;
+        File mStateDir;
         File mJournal;
 
         public PerformBackupThread(IBackupTransport transport, ArrayList<BackupRequest> queue,
@@ -571,32 +562,31 @@ class BackupManagerService extends IBackupManager.Stub {
             mTransport = transport;
             mQueue = queue;
             mJournal = journal;
+
+            try {
+                mStateDir = new File(mBaseStateDir, transport.transportDirName());
+            } catch (RemoteException e) {
+                // can't happen; the transport is local
+            }
+            mStateDir.mkdirs();
         }
 
         @Override
         public void run() {
             if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
 
-            // First, back up the package manager metadata if necessary
-            boolean doPackageManager;
-            synchronized (BackupManagerService.this) {
-                doPackageManager = mDoPackageManager;
-                mDoPackageManager = false;
-            }
-            if (doPackageManager) {
-                // The package manager doesn't have a proper <application> etc, but since
-                // it's running here in the system process we can just set up its agent
-                // directly and use a synthetic BackupRequest.
-                if (DEBUG) Log.i(TAG, "Running PM backup pass as well");
-
-                PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
-                        mPackageManager, allAgentPackages());
-                BackupRequest pmRequest = new BackupRequest(new ApplicationInfo(), false);
-                pmRequest.appInfo.packageName = PACKAGE_MANAGER_SENTINEL;
-                processOneBackup(pmRequest,
-                        IBackupAgent.Stub.asInterface(pmAgent.onBind()),
-                        mTransport);
-            }
+            // The package manager doesn't have a proper <application> etc, but since
+            // it's running here in the system process we can just set up its agent
+            // directly and use a synthetic BackupRequest.  We always run this pass
+            // because it's cheap and this way we guarantee that we don't get out of
+            // step even if we're selecting among various transports at run time.
+            PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
+                    mPackageManager, allAgentPackages());
+            BackupRequest pmRequest = new BackupRequest(new ApplicationInfo(), false);
+            pmRequest.appInfo.packageName = PACKAGE_MANAGER_SENTINEL;
+            processOneBackup(pmRequest,
+                    IBackupAgent.Stub.asInterface(pmAgent.onBind()),
+                    mTransport);
 
             // Now run all the backups in our queue
             doQueuedBackups(mTransport);
@@ -760,6 +750,7 @@ class BackupManagerService extends IBackupManager.Stub {
         private IBackupTransport mTransport;
         private int mToken;
         private RestoreSet mImage;
+        private File mStateDir;
 
         class RestoreRequest {
             public PackageInfo app;
@@ -774,6 +765,13 @@ class BackupManagerService extends IBackupManager.Stub {
         PerformRestoreThread(IBackupTransport transport, int restoreSetToken) {
             mTransport = transport;
             mToken = restoreSetToken;
+
+            try {
+                mStateDir = new File(mBaseStateDir, transport.transportDirName());
+            } catch (RemoteException e) {
+                // can't happen; the transport is local
+            }
+            mStateDir.mkdirs();
         }
 
         @Override
