@@ -30,6 +30,9 @@ public class LocalTransport extends IBackupTransport.Stub {
     private static final String TAG = "LocalTransport";
     private static final boolean DEBUG = true;
 
+    private static final String TRANSPORT_DIR_NAME
+            = "com.android.internal.backup.LocalTransport";
+
     private Context mContext;
     private PackageManager mPackageManager;
     private File mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup");
@@ -41,6 +44,11 @@ public class LocalTransport extends IBackupTransport.Stub {
         if (DEBUG) Log.v(TAG, "Transport constructed");
         mContext = context;
         mPackageManager = context.getPackageManager();
+    }
+
+
+    public String transportDirName() throws RemoteException {
+        return TRANSPORT_DIR_NAME;
     }
 
     public long requestBackupTime() throws RemoteException {
