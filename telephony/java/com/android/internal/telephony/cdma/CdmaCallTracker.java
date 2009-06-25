@@ -253,11 +253,7 @@ public final class CdmaCallTracker extends CallTracker {
             // Always unmute when answering a new call
             setMute(false);
             cm.acceptCall(obtainCompleteMessage());
-        } else if ((foregroundCall.connections.size() > 0) &&
-                   (ringingCall.getState() == CdmaCall.State.WAITING)) {
-            // TODO(Moto): jsh asks, "Is this check necessary? I don't think it should be
-            // possible to have no fg connection and a WAITING call, but if we should hit
-            // this situation, is a CallStateExcetion appropriate?"
+        } else if (ringingCall.getState() == CdmaCall.State.WAITING) {
             CdmaConnection cwConn = (CdmaConnection)(ringingCall.getLatestConnection());
 
             // Since there is no network response for supplimentary
@@ -530,10 +526,6 @@ public final class CdmaCallTracker extends CallTracker {
                         CdmaConnection cn = (CdmaConnection)foregroundCall.connections.get(n);
                         droppedDuringPoll.add(cn);
                     }
-                    // TODO(Moto): jsh asks, "Are we sure we don't need to do this for
-                    // ringingCall as well? What if there's a WAITING call (ie, UI timer
-                    // hasn't expired, moving it to DISCONNECTED)? How/when will it
-                    // transition to DISCONNECTED?"
                 }
                 foregroundCall.setGeneric(false);
                 // Dropped connections are removed from the CallTracker
@@ -681,8 +673,12 @@ public final class CdmaCallTracker extends CallTracker {
             // set the ringing call state to IDLE here to avoid a race condition
             // where a new call waiting could get a hang up from an old call
             // waiting ringingCall.
-            // TODO(Moto): jsh asks, "Should we call conn.ondisconnect() here or Somewhere?"
-            ringingCall.detach(conn);
+            //
+            // PhoneApp does the call log itself since only PhoneApp knows
+            // the hangup reason is user ignoring or timing out. So conn.onDisconnect()
+            // is not called here. Instead, conn.onLocalDisconnect() is called.
+            conn.onLocalDisconnect();
+            phone.notifyCallStateChanged();
             return;
         } else {
             try {
