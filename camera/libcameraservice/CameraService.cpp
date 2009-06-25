@@ -98,7 +98,7 @@ sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
     LOGD("CameraService::connect E (pid %d, client %p)", callingPid,
             cameraClient->asBinder().get());
 
-    Mutex::Autolock lock(mLock);
+    Mutex::Autolock lock(mServiceLock);
     sp<Client> client;
     if (mClient != 0) {
         sp<Client> currentClient = mClient.promote();
@@ -125,11 +125,12 @@ sp<ICamera> CameraService::connect(const sp<ICameraClient>& cameraClient)
             LOGD("New client (pid %d) connecting, old reference was dangling...",
                     callingPid);
             mClient.clear();
-            if (mUsers > 0) {
-                LOGD("Still have client, rejected");
-                return client;
-            }
         }
+    }
+
+    if (mUsers > 0) {
+        LOGD("Still have client, rejected");
+        return client;
     }
 
     // create a new Client object
@@ -152,7 +153,7 @@ void CameraService::removeClient(const sp<ICameraClient>& cameraClient)
     // destructor won't be called with the lock held.
     sp<Client> client;
 
-    Mutex::Autolock lock(mLock);
+    Mutex::Autolock lock(mServiceLock);
 
     if (mClient == 0) {
         // This happens when we have already disconnected.
@@ -390,8 +391,6 @@ void CameraService::Client::disconnect()
     // from the user directly, or called by the destructor.
     if (mHardware == 0) return;
 
-    mCameraService->removeClient(mCameraClient);
-
     LOGD("hardware teardown");
     // Before destroying mHardware, we must make sure it's in the
     // idle state.
@@ -402,6 +401,7 @@ void CameraService::Client::disconnect()
     mHardware->release();
     mHardware.clear();
 
+    mCameraService->removeClient(mCameraClient);
     mCameraService->decUsers();
 
     LOGD("Client::disconnect() X (pid %d)", callingPid);
@@ -661,7 +661,7 @@ sp<CameraService::Client> CameraService::Client::getClientFromCookie(void* user)
     sp<Client> client = 0;
     CameraService *service = static_cast<CameraService*>(user);
     if (service != NULL) {
-        Mutex::Autolock ourLock(service->mLock);
+        Mutex::Autolock ourLock(service->mServiceLock);
         if (service->mClient != 0) {
             client = service->mClient.promote();
             if (client == 0) {
@@ -1104,7 +1104,7 @@ status_t CameraService::dump(int fd, const Vector<String16>& args)
         result.append(buffer);
         write(fd, result.string(), result.size());
     } else {
-        AutoMutex lock(&mLock);
+        AutoMutex lock(&mServiceLock);
         if (mClient != 0) {
             sp<Client> currentClient = mClient.promote();
             sprintf(buffer, "Client (%p) PID: %d\n",
