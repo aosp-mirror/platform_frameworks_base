@@ -46,10 +46,6 @@ public class TextToSpeech {
      * Denotes a generic operation failure.
      */
     public static final int TTS_ERROR                  = -1;
-    /**
-     * Denotes a failure due to a missing resource.
-     */
-    public static final int TTS_ERROR_MISSING_RESOURCE = -2;
 
     /**
      * Queue mode where all entries in the playback queue (media to be played
@@ -60,6 +56,39 @@ public class TextToSpeech {
      * Queue mode where the new entry is added at the end of the playback queue.
      */
     public static final int TTS_QUEUE_ADD = 1;
+
+
+    /**
+     * Denotes the language is available exactly as specified by the locale
+     */
+    public static final int TTS_LANG_COUNTRY_VAR_AVAILABLE = 2;
+
+
+    /**
+     * Denotes the language is available for the language and country specified 
+     * by the locale, but not the variant.
+     */
+    public static final int TTS_LANG_COUNTRY_AVAILABLE = 1;
+
+
+    /**
+     * Denotes the language is available for the language by the locale, 
+     * but not the country and variant.
+     */
+    public static final int TTS_LANG_AVAILABLE = 0;
+
+    /**
+     * Denotes the language data is missing.
+     */
+    public static final int TTS_LANG_MISSING_DATA = -1;
+
+    /**
+     * Denotes the language is not supported by the current TTS engine.
+     */
+    public static final int TTS_LANG_NOT_SUPPORTED = -2;
+
+
+
 
     /**
      * Called when the TTS has initialized.
@@ -138,16 +167,6 @@ public class TextToSpeech {
         synchronized(mSpeechCompListenerLock) {
             mSpeechCompListener = listener;
         }
-    }
-
-
-    private boolean dataFilesCheck() {
-        // TODO #TTS# config manager will be in settings
-        Log.i("TTS_FIXME", "FIXME in Tts: config manager will be in settings");
-        // TODO #TTS# implement checking of the correct installation of
-        //             the data files.
-
-        return true;
     }
 
 
@@ -353,6 +372,27 @@ public class TextToSpeech {
 
 
     /**
+     * Speaks the IPA string using the specified queuing strategy and speech
+     * parameters. Note that the speech parameters are not universally supported
+     * by all engines and will be treated as a hint. The TTS library will try to
+     * fulfill these parameters as much as possible, but there is no guarantee
+     * that the voice used will have the properties specified.
+     *
+     * @param ipaText
+     *            The string of IPA text to be spoken.
+     * @param queueMode
+     *            The queuing strategy to use.
+     *            See TTS_QUEUE_ADD and TTS_QUEUE_FLUSH.
+     * @param params
+     *            The hashmap of speech parameters to be used.
+     */
+    public void speakIpa(String ipaText, int queueMode, HashMap<String,String> params)
+    {
+        //TODO: Implement speakIpa
+    }
+
+
+    /**
      * Plays the earcon using the specified queueing mode and parameters.
      *
      * @param earcon
@@ -536,6 +576,18 @@ public class TextToSpeech {
             }
         }
     }
+
+    /**
+     * Checks if the specified language as represented by the locale is available.
+     *
+     * @param loc
+     *            The locale describing the language to be used.
+     */
+    public int isLanguageAvailable(Locale loc) {
+        //TODO: Implement isLanguageAvailable
+        return 0;
+    }
+
 
 
     /**
