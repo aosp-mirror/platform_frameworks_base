@@ -1518,8 +1518,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             
-            final BatteryStatsImpl bstats =
-                    (BatteryStatsImpl) mBatteryStatsService.getActiveStatistics();
+            final BatteryStatsImpl bstats = mBatteryStatsService.getActiveStatistics();
             synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
                     if (haveNewCpuStats) {
@@ -1534,7 +1533,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps =
-                                            bstats.getProcessStatsLocked(st.name);
+                                            bstats.getProcessStatsLocked(st.name, st.pid);
                                     if (ps != null) {
                                         ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                     }

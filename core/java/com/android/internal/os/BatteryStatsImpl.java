@@ -2836,14 +2836,12 @@ public final class BatteryStatsImpl extends BatteryStats {
      * @param name process name
      * @return the statistics object for the process
      */
-    public Uid.Proc getProcessStatsLocked(String name) {
+    public Uid.Proc getProcessStatsLocked(String name, int pid) {
         int uid;
         if (mUidCache.containsKey(name)) {
             uid = mUidCache.get(name);
         } else {
-            // TODO: Find the actual uid from /proc/pid/status. For now use the hashcode of the
-            // process name
-            uid = name.hashCode();
+            uid = Process.getUidForPid(pid);
             mUidCache.put(name, uid);
         }
         Uid u = getUidStatsLocked(uid);
