@@ -343,7 +343,7 @@ public class RelativeLayout extends ViewGroup {
             ignore = findViewById(mIgnoreGravity);
         }
 
-        View[] views = mSortedVerticalChildren;
+        View[] views = mSortedHorizontalChildren;
         int count = views.length;
         for (int i = 0; i < count; i++) {
             View child = views[i];
@@ -356,7 +356,7 @@ public class RelativeLayout extends ViewGroup {
             }
         }
 
-        views = mSortedHorizontalChildren;
+        views = mSortedVerticalChildren;
         count = views.length;
         for (int i = 0; i < count; i++) {
             View child = views[i];
