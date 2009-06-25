@@ -23,7 +23,7 @@
 #include "jni.h"
 #include "utils/misc.h"
 #include "android_runtime/AndroidRuntime.h"
-#include <utils/TimeUtils.h>
+#include "TimeUtils.h"
 #include <nativehelper/JNIHelp.h>
 #include <cutils/tztime.h>
 
