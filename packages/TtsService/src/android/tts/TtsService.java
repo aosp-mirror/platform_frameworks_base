@@ -424,6 +424,11 @@ public class TtsService extends Service implements OnCompletionListener {
         return sr;
     }
 
+    private void broadcastTtsQueueProcessingCompleted(){
+        Intent i = new Intent(Intent.ACTION_TTS_QUEUE_PROCESSING_COMPLETED);
+        sendBroadcast(i);
+    }
+
     private void dispatchSpeechCompletedCallbacks(String mark) {
         Log.i("TTS callback", "dispatch started");
         // Broadcast to all clients the new value.
@@ -449,11 +454,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
             if (mSpeechQueue.size() < 1) {
                 mIsSpeaking = false;
-                // Dispatch a completion here as this is the
-                // only place where speech completes normally.
-                // Nothing left to say in the queue is a special case
-                // that is always a "mark" - associated text is null.
-                dispatchSpeechCompletedCallbacks("");
+                broadcastTtsQueueProcessingCompleted();
                 return;
             }
 
