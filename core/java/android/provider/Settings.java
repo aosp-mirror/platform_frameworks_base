@@ -1290,6 +1290,50 @@ public final class Settings {
         public static final String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
 
         /**
+         * CDMA only settings
+         * DTMF tone type played by the dialer when dialing.
+         *                 0 = Normal
+         *                 1 = Long
+         * @hide
+         */
+        public static final String DTMF_TONE_TYPE_WHEN_DIALING = "dtmf_tone_type";
+
+        /**
+         * CDMA only settings
+         * Emergency Tone  0 = Off
+         *                 1 = Alert
+         *                 2 = Vibrate
+         * @hide
+         */
+        public static final String EMERGENCY_TONE = "emergency_tone";
+
+        /**
+         * CDMA only settings
+         * Whether the auto retry is enabled. The value is
+         * boolean (1 or 0).
+         * @hide
+         */
+        public static final String CALL_AUTO_RETRY = "call_auto_retry";
+
+        /**
+         * Whether the hearing aid is enabled. The value is
+         * boolean (1 or 0).
+         * @hide
+         */
+        public static final String HEARING_AID = "hearing_aid";
+
+        /**
+         * CDMA only settings
+         * TTY Mode
+         * 0 = OFF
+         * 1 = FULL
+         * 2 = VCO
+         * 3 = HCO
+         * @hide
+         */
+        public static final String TTY_MODE = "tty_mode";
+
+        /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
          * boolean (1 or 0).
          */
