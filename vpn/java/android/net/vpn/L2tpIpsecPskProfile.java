@@ -19,47 +19,36 @@ package android.net.vpn;
 import android.os.Parcel;
 
 /**
- * The profile for certificate-based L2TP-over-IPSec type of VPN.
+ * The profile for pre-shared-key-based L2TP-over-IPSec type of VPN.
  * {@hide}
  */
-public class L2tpIpsecProfile extends L2tpProfile {
+public class L2tpIpsecPskProfile extends L2tpProfile {
     private static final long serialVersionUID = 1L;
 
-    private String mUserCertificate;
-    private String mCaCertificate;
+    private String mPresharedKey;
 
     @Override
     public VpnType getType() {
-        return VpnType.L2TP_IPSEC;
+        return VpnType.L2TP_IPSEC_PSK;
     }
 
-    public void setCaCertificate(String name) {
-        mCaCertificate = name;
+    public void setPresharedKey(String key) {
+        mPresharedKey = key;
     }
 
-    public String getCaCertificate() {
-        return mCaCertificate;
-    }
-
-    public void setUserCertificate(String name) {
-        mUserCertificate = name;
-    }
-
-    public String getUserCertificate() {
-        return mUserCertificate;
+    public String getPresharedKey() {
+        return mPresharedKey;
     }
 
     @Override
     protected void readFromParcel(Parcel in) {
         super.readFromParcel(in);
-        mCaCertificate = in.readString();
-        mUserCertificate = in.readString();
+        mPresharedKey = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         super.writeToParcel(parcel, flags);
-        parcel.writeString(mCaCertificate);
-        parcel.writeString(mUserCertificate);
+        parcel.writeString(mPresharedKey);
     }
 }

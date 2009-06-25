@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, The Android Open Source Project
+ * Copyright (C) 2009, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.net.NetworkUtils;
 import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
@@ -31,8 +32,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -153,16 +156,25 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     /**
-     * Returns the IP of the specified host name.
+     * Returns the IP address of the specified host name.
      */
     protected String getIp(String hostName) throws IOException {
-        InetAddress iaddr = InetAddress.getByName(hostName);
-        byte[] aa = iaddr.getAddress();
-        StringBuilder sb = new StringBuilder().append(byteToInt(aa[0]));
-        for (int i = 1; i < aa.length; i++) {
-            sb.append(".").append(byteToInt(aa[i]));
+        return InetAddress.getByName(hostName).getHostAddress();
+    }
+
+    /**
+     * Returns the IP address of the default gateway.
+     */
+    protected String getGatewayIp() throws IOException {
+        Enumeration<NetworkInterface> ifces =
+                NetworkInterface.getNetworkInterfaces();
+        for (; ifces.hasMoreElements(); ) {
+            NetworkInterface ni = ifces.nextElement();
+            int gateway = NetworkUtils.getDefaultRoute(ni.getName());
+            if (gateway == 0) continue;
+            return toInetAddress(gateway).getHostAddress();
         }
-        return sb.toString();
+        throw new IOException("Default gateway is not available");
     }
 
     /**
@@ -170,7 +182,7 @@ abstract class VpnService<E extends VpnProfile> {
      * connection is established.
      */
     protected String getConnectMonitorFile() {
-        return "/etc/ppp/ip-up";
+        return "/etc/ppp/ip-up-vpn";
     }
 
     /**
@@ -461,12 +473,18 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     private String reallyGetHostIp() throws IOException {
-        Socket s = new Socket();
-        s.connect(new InetSocketAddress("www.google.com", 80), DNS_TIMEOUT);
-        String ipAddress = s.getLocalAddress().getHostAddress();
-        Log.d(TAG, "Host IP: " + ipAddress);
-        s.close();
-        return ipAddress;
+        Enumeration<NetworkInterface> ifces =
+                NetworkInterface.getNetworkInterfaces();
+        for (; ifces.hasMoreElements(); ) {
+            NetworkInterface ni = ifces.nextElement();
+            int gateway = NetworkUtils.getDefaultRoute(ni.getName());
+            if (gateway == 0) continue;
+            Enumeration<InetAddress> addrs = ni.getInetAddresses();
+            for (; addrs.hasMoreElements(); ) {
+                return addrs.nextElement().getHostAddress();
+            }
+        }
+        throw new IOException("Host IP is not available");
     }
 
     private String getProfileSubpath(String subpath) throws IOException {
@@ -496,8 +514,13 @@ abstract class VpnService<E extends VpnProfile> {
         return ((message == null) || (message.length() == 0));
     }
 
-    private static int byteToInt(byte b) {
-        return ((int) b) & 0x0FF;
+    private InetAddress toInetAddress(int addr) throws IOException {
+        byte[] aa = new byte[4];
+        for (int i= 0; i < aa.length; i++) {
+            aa[i] = (byte) (addr & 0x0FF);
+            addr >>= 8;
+        }
+        return InetAddress.getByAddress(aa);
     }
 
     private class ServiceHelper implements ProcessProxy.Callback {
