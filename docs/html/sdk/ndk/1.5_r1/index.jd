@@ -167,7 +167,8 @@ required.</li>
   <li>For all development platforms, GNU Make 3.81 or later is required. Earlier
 versions of GNU Make might work but have not been tested.</li>
   <li>For Windows, a recent release of <a
-href="http://www.cygwin.com">Cygwin</a> is required.</li>
+href="http://www.cygwin.com">Cygwin</a>, including both the gmake and gcc 
+packages, is required. </li>
 </ul>
 
 <h4>Android platform compatibility</h4>
