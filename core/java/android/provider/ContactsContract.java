@@ -16,6 +16,9 @@
 
 package android.provider;
 
+import java.util.Arrays;
+import java.util.List;
+
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -518,6 +521,18 @@ public final class ContactsContract {
                 default:
                     return android.R.drawable.presence_offline;
             }
+        }
+
+        /**
+         * Returns the precedence of the status code the higher number being the higher precedence.
+         *
+         * @param status The status code.
+         * @return An integer representing the precedence, 0 being the lowest.
+         */
+        public static final int getPresencePrecedence(int status) {
+            // Keep this function here incase we want to enforce a different precedence than the
+            // natural order of the status constants.
+            return status;
         }
 
         /**
