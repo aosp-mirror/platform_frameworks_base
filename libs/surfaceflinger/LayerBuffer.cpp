@@ -341,6 +341,9 @@ LayerBuffer::BufferSource::~BufferSource()
     if (mTexture.name != -1U) {
         glDeleteTextures(1, &mTexture.name);
     }
+    if (mBlitEngine) {
+        copybit_close(mBlitEngine);
+    }
 }
 
 void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
@@ -485,7 +488,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 
             const Rect& transformedBounds = mLayer.getTransformedBounds();
             const copybit_rect_t& drect
-            = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
+                    = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
             const State& s(mLayer.drawingState());
             region_iterator it(clip);
 

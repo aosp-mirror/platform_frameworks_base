@@ -41,6 +41,8 @@
 
 #include <private/ui/android_natives_priv.h>
 
+#include <hardware/copybit.h>
+
 #include "context.h"
 #include "state.h"
 #include "texture.h"
@@ -234,6 +236,7 @@ private:
     android_native_buffer_t*   buffer;
     android_native_buffer_t*   previousBuffer;
     gralloc_module_t const*    module;
+    copybit_device_t*          blitengine;
     int width;
     int height;
     void* bits;
@@ -268,6 +271,9 @@ private:
 
     struct Region {
         inline Region() : count(0) { }
+        typedef Rect const* const_iterator;
+        const_iterator begin() const { return storage; }
+        const_iterator end() const { return storage+count; }
         static Region subtract(const Rect& lhs, const Rect& rhs) {
             Region reg;
             Rect* storage = reg.storage;
@@ -276,26 +282,30 @@ private:
                     storage->left   = lhs.left;
                     storage->top    = lhs.top;
                     storage->right  = lhs.right;
-                    storage->bottom = max(lhs.top, rhs.top);
+                    storage->bottom = rhs.top;
                     storage++;
                 }
-                if (lhs.left < rhs.left) { // left-side rect
-                    storage->left   = lhs.left;
-                    storage->top    = max(lhs.top, rhs.top);
-                    storage->right  = max(lhs.left, rhs.left);
-                    storage->bottom = min(lhs.bottom, rhs.bottom);
-                    storage++;
-                }
-                if (lhs.right > rhs.right) { // right-side rect
-                    storage->left   = min(lhs.right, rhs.right);
-                    storage->top    = max(lhs.top, rhs.top);
-                    storage->right  = lhs.right;
-                    storage->bottom = min(lhs.bottom, rhs.bottom);
-                    storage++;
+                const int32_t top = max(lhs.top, rhs.top);
+                const int32_t bot = min(lhs.bottom, rhs.bottom);
+                if (top < bot) {
+                    if (lhs.left < rhs.left) { // left-side rect
+                        storage->left   = lhs.left;
+                        storage->top    = top;
+                        storage->right  = rhs.left;
+                        storage->bottom = bot;
+                        storage++;
+                    }
+                    if (lhs.right > rhs.right) { // right-side rect
+                        storage->left   = rhs.right;
+                        storage->top    = top;
+                        storage->right  = lhs.right;
+                        storage->bottom = bot;
+                        storage++;
+                    }
                 }
                 if (lhs.bottom > rhs.bottom) { // bottom rect
                     storage->left   = lhs.left;
-                    storage->top    = min(lhs.bottom, rhs.bottom);
+                    storage->top    = rhs.bottom;
                     storage->right  = lhs.right;
                     storage->bottom = lhs.bottom;
                     storage++;
@@ -307,19 +317,33 @@ private:
         bool isEmpty() const {
             return count<=0;
         }
-        ssize_t getRects(Rect const* * rects) const {
-            *rects = storage;
-            return count;
-        }
     private:
         Rect storage[4];
         ssize_t count;
     };
     
+    struct region_iterator : public copybit_region_t {
+        region_iterator(const Region& region)
+            : b(region.begin()), e(region.end()) {
+            this->next = iterate;
+        }
+    private:
+        static int iterate(copybit_region_t const * self, copybit_rect_t* rect) {
+            region_iterator const* me = static_cast<region_iterator const*>(self);
+            if (me->b != me->e) {
+                *reinterpret_cast<Rect*>(rect) = *me->b++;
+                return 1;
+            }
+            return 0;
+        }
+        mutable Region::const_iterator b;
+        Region::const_iterator const e;
+    };
+
     void copyBlt(
             android_native_buffer_t* dst, void* dst_vaddr,
             android_native_buffer_t* src, void const* src_vaddr,
-            const Rect* reg, ssize_t count);
+            const Region& clip);
 
     Rect dirtyRegion;
     Rect oldDirtyRegion;
@@ -331,11 +355,15 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
         android_native_window_t* window)
     : egl_surface_t(dpy, config, depthFormat), 
     nativeWindow(window), buffer(0), previousBuffer(0), module(0),
-    bits(NULL)
+    blitengine(0), bits(NULL)
 {
     hw_module_t const* pModule;
     hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule);
     module = reinterpret_cast<gralloc_module_t const*>(pModule);
+
+    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &pModule) == 0) {
+        copybit_open(pModule, &blitengine);
+    }
 
     pixelFormatTable = gglGetPixelFormatTable();
     
@@ -371,6 +399,9 @@ egl_window_surface_v2_t::~egl_window_surface_v2_t() {
         previousBuffer->common.decRef(&previousBuffer->common); 
     }
     nativeWindow->common.decRef(&nativeWindow->common);
+    if (blitengine) {
+        copybit_close(blitengine);
+    }
 }
 
 void egl_window_surface_v2_t::connect() 
@@ -380,7 +411,7 @@ void egl_window_surface_v2_t::connect()
     // pin the buffer down
     if (lock(buffer, GRALLOC_USAGE_SW_READ_OFTEN | 
             GRALLOC_USAGE_SW_WRITE_OFTEN, &bits) != NO_ERROR) {
-        LOGE("eglSwapBuffers() failed to lock buffer %p (%ux%u)",
+        LOGE("connect() failed to lock buffer %p (%ux%u)",
                 buffer, buffer->width, buffer->height);
         setError(EGL_BAD_ACCESS, EGL_NO_SURFACE);
         // FIXME: we should make sure we're not accessing the buffer anymore
@@ -412,36 +443,65 @@ status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
 void egl_window_surface_v2_t::copyBlt(
         android_native_buffer_t* dst, void* dst_vaddr,
         android_native_buffer_t* src, void const* src_vaddr,
-        const Rect* reg, ssize_t count)
+        const Region& clip)
 {
     // FIXME: use copybit if possible
     // NOTE: dst and src must be the same format
     
-    Rect r;
-    const size_t bpp = pixelFormatTable[src->format].size;
-    const size_t dbpr = dst->stride * bpp;
-    const size_t sbpr = src->stride * bpp;
+    status_t err = NO_ERROR;
+    copybit_device_t* const copybit = blitengine;
+    if (copybit)  {
+        copybit_image_t simg;
+        simg.w = src->width;
+        simg.h = src->height;
+        simg.format = src->format;
+        simg.handle = const_cast<native_handle_t*>(src->handle);
 
-    uint8_t const * const src_bits = (uint8_t const *)src_vaddr;
-    uint8_t       * const dst_bits = (uint8_t       *)dst_vaddr;
-    
-    for (int i= 0 ; i<count ; i++) {
-        const Rect& r(reg[i]);
-        ssize_t w = r.right - r.left;
-        ssize_t h = r.bottom - r.top;
-        if (w <= 0 || h<=0) continue;
-        size_t size = w * bpp;
-        uint8_t const * s = src_bits + (r.left + src->stride * r.top) * bpp;
-        uint8_t       * d = dst_bits + (r.left + dst->stride * r.top) * bpp;
-        if (dbpr==sbpr && size==sbpr) {
-            size *= h;
-            h = 1;
+        copybit_image_t dimg;
+        dimg.w = dst->width;
+        dimg.h = dst->height;
+        dimg.format = dst->format;
+        dimg.handle = const_cast<native_handle_t*>(dst->handle);
+        
+        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 255);
+        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
+        region_iterator it(clip);
+        err = copybit->blit(copybit, &dimg, &simg, &it);
+        if (err != NO_ERROR) {
+            LOGE("copybit failed (%s)", strerror(err));
         }
-        do {
-            memcpy(d, s, size);
-            d += dbpr;
-            s += sbpr;
-        } while (--h > 0);
+    }
+
+    if (!copybit || err) {
+        Region::const_iterator cur = clip.begin();
+        Region::const_iterator end = clip.end();
+        
+        const size_t bpp = pixelFormatTable[src->format].size;
+        const size_t dbpr = dst->stride * bpp;
+        const size_t sbpr = src->stride * bpp;
+
+        uint8_t const * const src_bits = (uint8_t const *)src_vaddr;
+        uint8_t       * const dst_bits = (uint8_t       *)dst_vaddr;
+
+        while (cur != end) {
+            const Rect& r(*cur++);
+            ssize_t w = r.right - r.left;
+            ssize_t h = r.bottom - r.top;
+            if (w <= 0 || h<=0) continue;
+            size_t size = w * bpp;
+            uint8_t const * s = src_bits + (r.left + src->stride * r.top) * bpp;
+            uint8_t       * d = dst_bits + (r.left + dst->stride * r.top) * bpp;
+            if (dbpr==sbpr && size==sbpr) {
+                size *= h;
+                h = 1;
+            }
+            do {
+                memcpy(d, s, size);
+                d += dbpr;
+                s += sbpr;
+            } while (--h > 0);
+        }
     }
 }
 
@@ -456,14 +516,11 @@ EGLBoolean egl_window_surface_v2_t::swapBuffers()
         if (previousBuffer) {
             const Region copyBack(Region::subtract(oldDirtyRegion, dirtyRegion));
             if (!copyBack.isEmpty()) {
-                Rect const* list;
-                ssize_t count = copyBack.getRects(&list);
-                // copy from previousBuffer to buffer
                 void* prevBits;
                 if (lock(previousBuffer, 
-                        GRALLOC_USAGE_SW_READ_OFTEN, &prevBits) == NO_ERROR) 
-                {
-                    copyBlt(buffer, bits, previousBuffer, prevBits, list, count);
+                        GRALLOC_USAGE_SW_READ_OFTEN, &prevBits) == NO_ERROR) {
+                    // copy from previousBuffer to buffer
+                    copyBlt(buffer, bits, previousBuffer, prevBits, copyBack);
                     unlock(previousBuffer);
                 }
             }
