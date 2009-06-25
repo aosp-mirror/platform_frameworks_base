@@ -2756,6 +2756,12 @@ public final class Settings {
             "gtalk_max_retries_for_auth_expired";
 
         /**
+         * This is the url for getting the app token for server-to-device data messaging.
+         */
+        public static final String DATA_MESSAGE_GET_APP_TOKEN_URL =
+                "data_messaging_get_app_token_url";
+        
+        /**
          * Enable use of ssl session caching.
          * 'db' - save each session in a (per process) database
          * 'file' - save each session in a (per process) file
