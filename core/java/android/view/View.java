@@ -6543,7 +6543,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         boolean changed = false;
 
         if (DBG) {
-            System.out.println(this + " View.setFrame(" + left + "," + top + ","
+            Log.d("View", this + " View.setFrame(" + left + "," + top + ","
                     + right + "," + bottom + ")");
         }
 

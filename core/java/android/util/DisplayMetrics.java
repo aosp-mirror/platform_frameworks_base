@@ -106,16 +106,8 @@ public class DisplayMetrics {
      * {@hide}
      */
     public void updateMetrics(CompatibilityInfo compatibilityInfo, int orientation) {
-        if (compatibilityInfo.mScalingRequired) {
-            float invertedRatio = compatibilityInfo.mApplicationInvertedScale;
-            density *= invertedRatio;
-            scaledDensity *= invertedRatio;
-            xdpi *= invertedRatio;
-            ydpi *= invertedRatio;
-            widthPixels *= invertedRatio;
-            heightPixels *= invertedRatio;
-        }
-        if (!compatibilityInfo.mConfiguredExpandable) {
+        int xOffset = 0;
+        if (!compatibilityInfo.isConfiguredExpandable()) {
             // Note: this assume that configuration is updated before calling
             // updateMetrics method.
             int defaultWidth;
@@ -141,11 +133,13 @@ public class DisplayMetrics {
             
             if (defaultWidth == widthPixels && defaultHeight == heightPixels) {
                 // the screen size is same as expected size. make it expandable
-                compatibilityInfo.mExpandable = true;
+                compatibilityInfo.setExpandable(true);
             } else {
-                compatibilityInfo.mExpandable = false;
+                compatibilityInfo.setExpandable(false);
                 // adjust the size only when the device's screen is bigger.
                 if (defaultWidth < widthPixels) {
+                    // content/window's x offset in original pixels
+                    xOffset = ((widthPixels - defaultWidth) / 2);
                     widthPixels = defaultWidth;
                 }
                 if (defaultHeight < heightPixels) {
@@ -153,8 +147,19 @@ public class DisplayMetrics {
                 }
             }
         }
+        compatibilityInfo.setVisibleRect(xOffset, widthPixels, heightPixels);
+        if (compatibilityInfo.isScalingRequired()) {
+            float invertedRatio = compatibilityInfo.applicationInvertedScale;
+            density *= invertedRatio;
+            scaledDensity *= invertedRatio;
+            xdpi *= invertedRatio;
+            ydpi *= invertedRatio;
+            widthPixels *= invertedRatio;
+            heightPixels *= invertedRatio;
+        }
     }
 
+    @Override
     public String toString() {
         return "DisplayMetrics{density=" + density + ", width=" + widthPixels +
             ", height=" + heightPixels + ", scaledDensity=" + scaledDensity +
