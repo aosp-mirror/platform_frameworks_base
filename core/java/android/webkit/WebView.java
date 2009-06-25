@@ -4571,9 +4571,11 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
-                    mTouchMode = TOUCH_DONE_MODE;
-                    performLongClick();
-                    updateTextEntry();
+                    if (!mPreventDrag) {
+                        mTouchMode = TOUCH_DONE_MODE;
+                        performLongClick();
+                        updateTextEntry();
+                    }
                     break;
                 }
                 case SWITCH_TO_ENTER:
