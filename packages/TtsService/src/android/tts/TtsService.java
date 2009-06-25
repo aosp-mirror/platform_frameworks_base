@@ -89,6 +89,8 @@ public class TtsService extends Service implements OnCompletionListener {
         }
     }
 
+    private static final int MAX_SPEECH_ITEM_CHAR_LENGTH = 4000;
+
     private static final String ACTION = "android.intent.action.USE_TTS";
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
@@ -108,7 +110,6 @@ public class TtsService extends Service implements OnCompletionListener {
     private final ReentrantLock synthesizerLock = new ReentrantLock();
 
     private SynthProxy nativeSynth;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -145,13 +146,11 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private void setDefaultSettings() {
-
         // TODO handle default language
         setLanguage("eng", "USA", "");
 
         // speech rate
         setSpeechRate(getDefaultRate());
-
     }
 
 
@@ -445,6 +444,33 @@ public class TtsService extends Service implements OnCompletionListener {
         Log.i("TTS callback", "dispatch completed to " + N);
     }
 
+    private SpeechItem splitCurrentTextIfNeeded(SpeechItem currentSpeechItem){
+        if (currentSpeechItem.mText.length() < MAX_SPEECH_ITEM_CHAR_LENGTH){
+            return currentSpeechItem;
+        } else {
+            ArrayList<SpeechItem> splitItems = new ArrayList<SpeechItem>();
+            int start = 0;
+            int end = start + MAX_SPEECH_ITEM_CHAR_LENGTH - 1;
+            String splitText;
+            SpeechItem splitItem;
+            while (end < currentSpeechItem.mText.length()){
+                splitText = currentSpeechItem.mText.substring(start, end);
+                splitItem = new SpeechItem(splitText, null, SpeechItem.SPEECH);
+                splitItems.add(splitItem);
+                start = end;
+                end = start + MAX_SPEECH_ITEM_CHAR_LENGTH - 1;
+            }
+            splitText = currentSpeechItem.mText.substring(start);
+            splitItem = new SpeechItem(splitText, null, SpeechItem.SPEECH);
+            splitItems.add(splitItem);
+            mSpeechQueue.remove(0);
+            for (int i = splitItems.size() - 1; i >= 0; i--){
+                mSpeechQueue.add(0, splitItems.get(i));
+            }
+            return mSpeechQueue.get(0);
+        }
+    }
+
     private void processSpeechQueue() {
         boolean speechQueueAvailable = false;
         try {
@@ -466,8 +492,7 @@ public class TtsService extends Service implements OnCompletionListener {
             Log.i("TTS processing: ", currentSpeechItem.mText);
             if (sr == null) {
                 if (currentSpeechItem.mType == SpeechItem.SPEECH) {
-                    // TODO: Split text up into smaller chunks before accepting
-                    // them for processing.
+                    currentSpeechItem = splitCurrentTextIfNeeded(currentSpeechItem);
                     speakInternalOnly(currentSpeechItem.mText,
                             currentSpeechItem.mParams);
                 } else {
