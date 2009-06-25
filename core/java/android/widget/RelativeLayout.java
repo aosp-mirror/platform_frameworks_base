@@ -41,6 +41,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.LinkedList;
 import java.util.HashSet;
+import java.util.ArrayList;
 
 /**
  * A Layout where the positions of the children can be described in relation to each other or to the
@@ -766,14 +767,14 @@ public class RelativeLayout extends ViewGroup {
     private View getRelatedView(int[] rules, int relation) {
         int id = rules[relation];
         if (id != 0) {
-            DependencyGraph.Node node = mGraph.mNodes.get(id);
+            DependencyGraph.Node node = mGraph.mKeyNodes.get(id);
             if (node == null) return null;
             View v = node.view;
 
             // Find the first non-GONE view up the chain
             while (v.getVisibility() == View.GONE) {
                 rules = ((LayoutParams) v.getLayoutParams()).getRules();
-                node = mGraph.mNodes.get((rules[relation]));
+                node = mGraph.mKeyNodes.get((rules[relation]));
                 if (node == null) return null;
                 v = node.view;
             }
@@ -1109,10 +1110,15 @@ public class RelativeLayout extends ViewGroup {
 
     private static class DependencyGraph {
         /**
+         * List of all views in the graph.
+         */
+        private ArrayList<Node> mNodes = new ArrayList<Node>();
+
+        /**
          * List of nodes in the graph. Each node is identified by its
          * view id (see View#getId()).
          */
-        private SparseArray<Node> mNodes = new SparseArray<Node>();
+        private SparseArray<Node> mKeyNodes = new SparseArray<Node>();
 
         /**
          * Temporary data structure used to build the list of roots
@@ -1124,14 +1130,15 @@ public class RelativeLayout extends ViewGroup {
          * Clears the graph.
          */
         void clear() {
-            final SparseArray<Node> nodes = mNodes;
+            final ArrayList<Node> nodes = mNodes;
             final int count = nodes.size();
 
             for (int i = 0; i < count; i++) {
-                nodes.valueAt(i).release();
+                nodes.get(i).release();
             }
             nodes.clear();
 
+            mKeyNodes.clear();
             mRoots.clear();
         }
 
@@ -1141,7 +1148,14 @@ public class RelativeLayout extends ViewGroup {
          * @param view The view to be added as a node to the graph.
          */
         void add(View view) {
-            mNodes.put(view.getId(), Node.acquire(view));
+            final int id = view.getId();
+            final Node node = Node.acquire(view);
+
+            if (id != View.NO_ID) {
+                mKeyNodes.put(id, node);
+            }
+
+            mNodes.add(node);
         }
 
         /**
@@ -1192,20 +1206,21 @@ public class RelativeLayout extends ViewGroup {
          * @return A list of node, each being a root of the graph
          */
         private LinkedList<Node> findRoots(int[] rulesFilter) {
-            final SparseArray<Node> nodes = mNodes;
+            final SparseArray<Node> keyNodes = mKeyNodes;
+            final ArrayList<Node> nodes = mNodes;
             final int count = nodes.size();
 
             // Find roots can be invoked several times, so make sure to clear
             // all dependents and dependencies before running the algorithm
             for (int i = 0; i < count; i++) {
-                final Node node = nodes.valueAt(i);
+                final Node node = nodes.get(i);
                 node.dependents.clear();
                 node.dependencies.clear();
             }
 
             // Builds up the dependents and dependencies for each node of the graph
             for (int i = 0; i < count; i++) {
-                final Node node = nodes.valueAt(i);
+                final Node node = nodes.get(i);
 
                 final LayoutParams layoutParams = (LayoutParams) node.view.getLayoutParams();
                 final int[] rules = layoutParams.mRules;
@@ -1217,7 +1232,7 @@ public class RelativeLayout extends ViewGroup {
                     final int rule = rules[rulesFilter[j]];
                     if (rule > 0) {
                         // The node this node depends on
-                        final Node dependency = nodes.get(rule);
+                        final Node dependency = keyNodes.get(rule);
                         if (dependency == node) {
                             throw new IllegalStateException("A view cannot have a dependency" +
                                     " on itself");
@@ -1238,7 +1253,7 @@ public class RelativeLayout extends ViewGroup {
 
             // Finds all the roots in the graph: all nodes with no dependencies
             for (int i = 0; i < count; i++) {
-                final Node node = nodes.valueAt(i);
+                final Node node = nodes.get(i);
                 if (node.dependencies.size() == 0) roots.add(node);
             }
 
