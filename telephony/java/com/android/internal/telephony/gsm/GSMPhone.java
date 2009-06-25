@@ -448,11 +448,6 @@ public class GSMPhone extends PhoneBase {
     }
 
     public void
-    notifyMessageWaitingIndicator() {
-        mNotifier.notifyMessageWaitingChanged(this);
-    }
-
-    public void
     notifyCallForwardingIndicator() {
         mNotifier.notifyCallForwardingChanged(this);
     }

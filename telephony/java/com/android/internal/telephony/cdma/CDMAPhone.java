@@ -19,6 +19,7 @@ package com.android.internal.telephony.cdma;
 import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,6 +27,7 @@ import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.os.SystemProperties;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telephony.CellLocation;
 import android.telephony.PhoneNumberUtils;
@@ -40,6 +42,7 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
 import com.android.internal.telephony.IccSmsInterfaceManager;
@@ -65,6 +68,9 @@ public class CDMAPhone extends PhoneBase {
 
     // Default Emergency Callback Mode exit timer
     private static final int DEFAULT_ECM_EXIT_TIMER_VALUE = 30000;
+    static final String VM_COUNT_CDMA = "vm_count_key_cdma";
+    private static final String VM_NUMBER_CDMA = "vm_number_key_cdma";
+    private String mVmNumber = null;
 
     //***** Instance Variables
     CdmaCallTracker mCT;
@@ -147,6 +153,9 @@ public class CDMAPhone extends PhoneBase {
         // This is needed to handle phone process crashes
         String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
         mIsPhoneInECMState = inEcm.equals("true");
+
+        // Notify voicemails.
+        notifier.notifyMessageWaitingChanged(this);
     }
 
     public void dispose() {
@@ -300,7 +309,7 @@ public class CDMAPhone extends PhoneBase {
 
     public boolean
     getMessageWaitingIndicator() {
-        return mRuimRecords.getVoiceMessageWaiting();
+        return (getVoiceMessageCount() > 0);
     }
 
     public List<? extends MmiCode>
@@ -678,22 +687,33 @@ public class CDMAPhone extends PhoneBase {
     public void setVoiceMailNumber(String alphaTag,
                                    String voiceMailNumber,
                                    Message onComplete) {
-        //mSIMRecords.setVoiceMailNumber(alphaTag, voiceMailNumber, onComplete);
-        //TODO: Where do we have to store this value has to be clarified with QC
+        Message resp;
+        mVmNumber = voiceMailNumber;
+        resp = h.obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
+        mRuimRecords.setVoiceMailNumber(alphaTag, mVmNumber, resp);
     }
 
     public String getVoiceMailNumber() {
-        //TODO: Where can we get this value has to be clarified with QC
-        //return mSIMRecords.getVoiceMailNumber();
-//      throw new RuntimeException();
-        return "*86";
+        String number = null;
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        // TODO(Moto): The default value of voicemail number should be read from a system property
+        number = sp.getString(VM_NUMBER_CDMA, "*86");
+        return number;
     }
 
     /* Returns Number of Voicemails
      * @hide
      */
-    public int getCountVoiceMessages() {
-        return mRuimRecords.getCountVoiceMessages();
+    public int getVoiceMessageCount() {
+        int voicemailCount =  mRuimRecords.getVoiceMessageCount();
+        // If mRuimRecords.getVoiceMessageCount returns zero, then there is possibility
+        // that phone was power cycled and would have lost the voicemail count.
+        // So get the count from preferences.
+        if (voicemailCount == 0) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+            voicemailCount = sp.getInt(VM_COUNT_CDMA, 0);
+        }
+        return voicemailCount;
     }
 
     public String getVoiceMailAlphaTag() {
@@ -820,9 +840,10 @@ public class CDMAPhone extends PhoneBase {
         mRuimRecords.setVoiceMessageWaiting(1, mwi ? -1 : 0);
     }
 
-    public void
-    notifyMessageWaitingIndicator() {
-        mNotifier.notifyMessageWaitingChanged(this);
+    /* This function is overloaded to send number of voicemails instead of sending true/false */
+    /*package*/ void
+    updateMessageWaitingIndicator(int mwi) {
+        mRuimRecords.setVoiceMessageWaiting(1, mwi);
     }
 
     /**
@@ -983,6 +1004,19 @@ public class CDMAPhone extends PhoneBase {
                     setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE,"false");
                 }
                 break;
+
+                case EVENT_SET_VM_NUMBER_DONE:{
+                    ar = (AsyncResult)msg.obj;
+                    if (IccException.class.isInstance(ar.exception)) {
+                        storeVoiceMailNumber(mVmNumber);
+                        ar.exception = null;
+                    }
+                    onComplete = (Message) ar.userObj;
+                    if (onComplete != null) {
+                        AsyncResult.forMessage(onComplete, ar.result, ar.exception);
+                        onComplete.sendToTarget();
+                    }
+                }
 
                 default:{
                     throw new RuntimeException("unexpected event not handled");
@@ -1198,4 +1232,16 @@ public class CDMAPhone extends PhoneBase {
         int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
         return mEriManager.getCdmaEriText(roamInd, defRoamInd);
     }
+
+    /**
+     * Store the voicemail number in preferences
+     */
+    private void storeVoiceMailNumber(String number) {
+        // Update the preference value of voicemail number
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(VM_NUMBER_CDMA, number);
+        editor.commit();
+    }
+
 }

@@ -612,6 +612,21 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the voice mail count.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * @hide
+     */
+    public int getVoiceMessageCount() {
+        try {
+            return getITelephony().getVoiceMessageCount();
+        } catch (RemoteException ex) {
+        }
+        return 0;
+    }
+
+    /**
      * Retrieves the alphabetic identifier associated with the voice
      * mail number.
      * <p>
