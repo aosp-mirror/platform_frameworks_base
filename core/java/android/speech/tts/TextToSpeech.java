@@ -88,8 +88,6 @@ public class TextToSpeech {
     public static final int TTS_LANG_NOT_SUPPORTED = -2;
 
 
-
-
     /**
      * Called when the TTS has initialized.
      *
@@ -98,15 +96,6 @@ public class TextToSpeech {
      */
     public interface OnInitListener {
         public void onInit(int status);
-    }
-
-    /**
-     * Called when the TTS has finished speaking by itself (speaking
-     * finished without being canceled).
-     *
-     */
-    public interface OnSpeechCompletedListener {
-        public void onSpeechCompleted();
     }
 
     /**
@@ -129,6 +118,16 @@ public class TextToSpeech {
         public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
         public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
         public static final int CHECK_VOICE_DATA_MISSING_DATA_NO_SDCARD = -3;
+        
+        // keys for the parameters passed with speak commands
+        public static final String TTS_KEY_PARAM_RATE = "rate";
+        public static final String TTS_KEY_PARAM_LANGUAGE = "language";
+        public static final String TTS_KEY_PARAM_COUNTRY = "country";
+        public static final String TTS_KEY_PARAM_VARIANT = "variant";
+        public static final int TTS_PARAM_POSITION_RATE = 0;
+        public static final int TTS_PARAM_POSITION_LANGUAGE = 2;
+        public static final int TTS_PARAM_POSITION_COUNTRY = 4;
+        public static final int TTS_PARAM_POSITION_VARIANT = 6;
     }
 
     /**
@@ -141,11 +140,11 @@ public class TextToSpeech {
     private OnInitListener mInitListener = null;
     private boolean mStarted = false;
     private final Object mStartLock = new Object();
-    private ITtsCallback mITtsCallback;
-    private OnSpeechCompletedListener mSpeechCompListener = null;
-    private final Object mSpeechCompListenerLock = new Object();
-
-
+    private int mCachedRate = Engine.FALLBACK_TTS_DEFAULT_RATE;
+    private String mCachedLang = Engine.FALLBACK_TTS_DEFAULT_LANG;
+    private String mCachedCountry = Engine.FALLBACK_TTS_DEFAULT_COUNTRY;
+    private String mCachedVariant = Engine.FALLBACK_TTS_DEFAULT_VARIANT;
+    private String[] mCachedParams;
 
     /**
      * The constructor for the TTS.
@@ -159,14 +158,23 @@ public class TextToSpeech {
     public TextToSpeech(Context context, OnInitListener listener) {
         mContext = context;
         mInitListener = listener;
+
+        mCachedParams = new String[2*4]; //4 parameters, store key and value
+        mCachedParams[Engine.TTS_PARAM_POSITION_RATE] = Engine.TTS_KEY_PARAM_RATE;
+        mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE] = Engine.TTS_KEY_PARAM_LANGUAGE;
+        mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY] = Engine.TTS_KEY_PARAM_COUNTRY;
+        mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT] = Engine.TTS_KEY_PARAM_VARIANT;
+        updateCachedParamArray();
+
         initTts();
     }
 
 
-    public void setOnSpeechCompletedListener(final OnSpeechCompletedListener listener) {
-        synchronized(mSpeechCompListenerLock) {
-            mSpeechCompListener = listener;
-        }
+    private void updateCachedParamArray() {
+        mCachedParams[Engine.TTS_PARAM_POSITION_RATE+1] = String.valueOf(mCachedRate);
+        mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE+1] = mCachedLang;
+        mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY+1] = mCachedCountry;
+        mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT+1] = mCachedVariant;
     }
 
 
@@ -178,34 +186,7 @@ public class TextToSpeech {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 synchronized(mStartLock) {
                     mITts = ITts.Stub.asInterface(service);
-                    try {
-                        mITtsCallback = new ITtsCallback.Stub() {
-                            public void markReached(String mark)
-                            throws RemoteException {
-                                // call the listener of that event, but not
-                                // while locked.
-                                OnSpeechCompletedListener listener = null;
-                                synchronized(mSpeechCompListenerLock) {
-                                    listener = mSpeechCompListener;
-                                }
-                                if (listener != null) {
-                                    listener.onSpeechCompleted();
-                                }
-                            }
-                        };
-                        mITts.registerCallback(mITtsCallback);
-
-                    } catch (RemoteException e) {
-                        initTts();
-                        return;
-                    }
-
                     mStarted = true;
-                    // The callback can become null if the Android OS decides to
-                    // restart the TTS process as well as whatever is using it.
-                    // In such cases, do nothing - the error handling from the
-                    // speaking calls will kick in and force a proper restart of
-                    // the TTS.
                     if (mInitListener != null) {
                         // TODO manage failures and missing resources
                         mInitListener.onInit(TTS_SUCCESS);
@@ -352,8 +333,8 @@ public class TextToSpeech {
                 return;
             }
             try {
-                // TODO support extra parameters, passing null for the moment
-                mITts.speak(text, queueMode, null);
+                // TODO support extra parameters, passing cache of current parameters for the moment
+                mITts.speak(text, queueMode, mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -510,7 +491,9 @@ public class TextToSpeech {
             }
             try {
                 if (speechRate > 0) {
-                    mITts.setSpeechRate((int)(speechRate*100));
+                    mCachedRate = (int)(speechRate*100);
+                    updateCachedParamArray();
+                    mITts.setSpeechRate(mCachedRate);
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -568,7 +551,11 @@ public class TextToSpeech {
                 return;
             }
             try {
-                mITts.setLanguage(loc.getISO3Language(), loc.getISO3Country(), loc.getVariant());
+                mCachedLang = loc.getISO3Language();
+                mCachedCountry = loc.getISO3Country();
+                mCachedVariant = loc.getVariant();
+                updateCachedParamArray();
+                mITts.setLanguage(mCachedLang, mCachedCountry, mCachedVariant);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -582,10 +569,12 @@ public class TextToSpeech {
      *
      * @param loc
      *            The locale describing the language to be used.
+     * @return one of TTS_LANG_NOT_SUPPORTED, TTS_LANG_MISSING_DATA, TTS_LANG_AVAILABLE,
+               TTS_LANG_COUNTRY_AVAILABLE, TTS_LANG_COUNTRY_VAR_AVAILABLE.
      */
     public int isLanguageAvailable(Locale loc) {
         //TODO: Implement isLanguageAvailable
-        return 0;
+        return TTS_LANG_NOT_SUPPORTED;
     }
 
 
