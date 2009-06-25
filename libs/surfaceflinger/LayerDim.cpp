@@ -63,6 +63,12 @@ void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
      * This burns a full-screen worth of graphic memory.
      */
 
+    // copybit supports 4x scaling, so we only need to allocate 1/16 of the
+    // buffer.
+    // FIXME: we have to add 1px because the mdp fails
+    w = w/4 + 1;
+    h = h/4 + 1;
+
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
     uint32_t flags = hw.getFlags();
 
@@ -93,7 +99,7 @@ void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
         // initialize the texture with zeros
         GGLSurface t;
         buffer->lock(&t, GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_OFTEN);
-        memset(t.data, 0, t.width * t.stride * 2);
+        memset(t.data, 0, t.stride * t.height * 2);
         buffer->unlock();
         sUseTexture = true;
     }
