@@ -1928,6 +1928,12 @@ public final class Settings {
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
 
         /**
+         * Whether assisted GPS should be enabled or not.
+         * @hide
+         */
+        public static final String ASSISTED_GPS_ENABLED = "assisted_gps_enabled";
+
+        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has

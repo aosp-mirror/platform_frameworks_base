@@ -64,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 34;
+    private static final int DATABASE_VERSION = 35;
 
     private Context mContext;
 
@@ -386,6 +386,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 34;
         }
 
+        if (upgradeVersion == 34) {
+            db.beginTransaction();
+            try {
+                String value =
+                        mContext.getResources().getBoolean(R.bool.assisted_gps_enabled) ? "1" : "0";
+                db.execSQL("INSERT OR IGNORE INTO secure(name,value) values('" +
+                        Settings.Secure.ASSISTED_GPS_ENABLED + "','" + value + "');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 35;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -652,6 +667,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                 R.string.def_location_providers_allowed);
+
+        loadBooleanSetting(stmt, Settings.Secure.ASSISTED_GPS_ENABLED,
+                R.bool.assisted_gps_enabled);
 
         loadIntegerSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
                 R.integer.def_network_preference);
