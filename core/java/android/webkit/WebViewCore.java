@@ -1562,7 +1562,7 @@ final class WebViewCore {
 
         // adjust the default scale to match the density
         if (WebView.DEFAULT_SCALE_PERCENT != 100) {
-            float adjust = WebView.DEFAULT_SCALE_PERCENT / 100;
+            float adjust = (float) WebView.DEFAULT_SCALE_PERCENT / 100.0f;
             if (mViewportInitialScale > 0) {
                 mViewportInitialScale *= adjust;
             }
