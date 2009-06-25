@@ -496,7 +496,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
                 const String8& field = fields[i];
                 if (strncmp(p, field.string(), field.length()) == 0) {
                     p += field.length();
-                    while (*p == ' ') p++;
+                    while (*p == ' ' || *p == '\t') p++;
                     char* num = p;
                     while (*p >= '0' && *p <= '9') p++;
                     skipToEol = *p != '\n';
