@@ -68,9 +68,11 @@ public class BackupManager {
      * {@link android.app.BackupAgent} subclass will be scheduled when you call this method.
      */
     public void dataChanged() {
-        try {
-            mService.dataChanged(mContext.getPackageName());
-        } catch (RemoteException e) {
+        if (mService != null) {
+            try {
+                mService.dataChanged(mContext.getPackageName());
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -83,9 +85,11 @@ public class BackupManager {
      */
     public IRestoreSession beginRestoreSession(int transportID) {
         IRestoreSession binder = null;
-        try {
-            binder = mService.beginRestoreSession(transportID);
-        } catch (RemoteException e) {
+        if (mService != null) {
+            try {
+                binder = mService.beginRestoreSession(transportID);
+            } catch (RemoteException e) {
+            }
         }
         return binder;
     }

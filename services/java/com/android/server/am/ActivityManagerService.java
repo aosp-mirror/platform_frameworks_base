@@ -10472,8 +10472,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // done with this agent
     public void unbindBackupAgent(ApplicationInfo appInfo) {
         if (DEBUG_BACKUP) Log.v(TAG, "unbindBackupAgent: " + appInfo);
+        if (appInfo == null) {
+            Log.w(TAG, "unbind backup agent for null app");
+            return;
+        }
 
         synchronized(this) {
+            if (mBackupAppName == null) {
+                Log.w(TAG, "Unbinding backup agent with no active backup");
+                return;
+            }
+
             if (!mBackupAppName.equals(appInfo.packageName)) {
                 Log.e(TAG, "Unbind of " + appInfo + " but is not the current backup target");
                 return;
