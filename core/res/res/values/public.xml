@@ -1117,6 +1117,9 @@
   <public type="attr" name="glEsVersion" />
   <public type="attr" name="queryAfterZeroResults" />
   <public type="attr" name="dropDownHeight" />
+  <public type="attr" name="smallScreens" />
+  <public type="attr" name="normalScreens" />
+  <public type="attr" name="largeScreens" />
 
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 

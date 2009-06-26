@@ -235,6 +235,12 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_ORIENTATION = 0x0080;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle changes to the screen layout.  Set from the
+     * {@link android.R.attr#configChanges} attribute.
+     */
+    public static final int CONFIG_SCREEN_LAYOUT = 0x0100;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the font scaling factor.  Set from the
      * {@link android.R.attr#configChanges} attribute.  This is
      * not a core resource configutation, but a higher-level value, so its
@@ -248,8 +254,8 @@ public class ActivityInfo extends ComponentInfo
      * Contains any combination of {@link #CONFIG_FONT_SCALE},
      * {@link #CONFIG_MCC}, {@link #CONFIG_MNC},
      * {@link #CONFIG_LOCALE}, {@link #CONFIG_TOUCHSCREEN},
-     * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION}, and
-     * {@link #CONFIG_ORIENTATION}.  Set from the
+     * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
+     * {@link #CONFIG_ORIENTATION}, and {@link #CONFIG_SCREEN_LAYOUT}.  Set from the
      * {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;
