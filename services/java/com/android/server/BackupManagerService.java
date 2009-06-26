@@ -529,6 +529,19 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // clear an application's data, blocking until the operation completes or times out
     void clearApplicationDataSynchronous(String packageName) {
+        // Don't wipe packages marked allowClearUserData=false
+        try {
+            PackageInfo info = mPackageManager.getPackageInfo(packageName, 0);
+            if ((info.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA) == 0) {
+                if (DEBUG) Log.i(TAG, "allowClearUserData=false so not wiping "
+                        + packageName);
+                return;
+            }
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Tried to clear data for " + packageName + " but not found");
+            return;
+        }
+
         ClearDataObserver observer = new ClearDataObserver();
 
         synchronized(mClearDataLock) {
