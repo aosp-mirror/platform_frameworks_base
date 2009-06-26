@@ -2327,6 +2327,15 @@
         <attr name="drawable" />
     </declare-styleable>
 
+    <declare-styleable name="AnimatedRotateDrawable">
+        <attr name="visible" />
+        <attr name="frameDuration" format="integer" />
+        <attr name="framesCount" format="integer" />
+        <attr name="pivotX" />
+        <attr name="pivotY" />
+        <attr name="drawable" />
+    </declare-styleable>
+    
     <declare-styleable name="InsetDrawable">
         <attr name="visible" />
         <attr name="drawable" />
