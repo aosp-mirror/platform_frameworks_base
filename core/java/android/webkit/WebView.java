@@ -2505,6 +2505,14 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean performLongClick() {
+        if (mNativeClass != 0 && nativeCursorIsTextInput()) {
+            // Send the click so that the textfield is in focus
+            // FIXME: When we start respecting changes to the native textfield's
+            // selection, need to make sure that this does not change it.
+            mWebViewCore.sendMessage(EventHub.CLICK, nativeCursorFramePointer(),
+                    nativeCursorNodePointer());
+            rebuildWebTextView();
+        }
         if (inEditingMode()) {
             return mWebTextView.performLongClick();
         } else {
@@ -3484,9 +3492,7 @@ public class WebView extends AbsoluteLayout
 
     public void onChildViewRemoved(View p, View child) {
         if (child == this) {
-            if (inEditingMode()) {
-                clearTextEntry();
-            }
+            clearTextEntry();
         }
     }
 
@@ -4025,9 +4031,10 @@ public class WebView extends AbsoluteLayout
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mPrivateHandler.removeMessages(SWITCH_TO_CLICK);
             mTrackballDown = true;
-            if (mNativeClass != 0) {
-                nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
+            if (mNativeClass == 0) {
+                return false;
             }
+            nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
             if (time - mLastCursorTime <= TRACKBALL_TIMEOUT
                     && !mLastCursorBounds.equals(nativeGetCursorRingBounds())) {
                 nativeSelectBestAt(mLastCursorBounds);
