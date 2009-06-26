@@ -458,7 +458,7 @@ public class WebView extends AbsoluteLayout
     static final int WEBCORE_INITIALIZED_MSG_ID         = 16;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
     static final int DID_FIRST_LAYOUT_MSG_ID            = 18;
-
+    static final int MOVE_OUT_OF_PLUGIN                 = 19;
     static final int UPDATE_CLIPBOARD                   = 22;
     static final int LONG_PRESS_CENTER                  = 23;
     static final int PREVENT_TOUCH_ID                   = 24;
@@ -485,7 +485,7 @@ public class WebView extends AbsoluteLayout
         "WEBCORE_INITIALIZED_MSG_ID", //     = 16;
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 17;
         "DID_FIRST_LAYOUT_MSG_ID", //        = 18;
-        "19",
+        "MOVE_OUT_OF_PLUGIN", //             = 19;
         "20",
         "21", //                             = 21;
         "UPDATE_CLIPBOARD", //               = 22;
@@ -3165,7 +3165,7 @@ public class WebView extends AbsoluteLayout
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyDown at " + System.currentTimeMillis()
-                    + ", " + event);
+                    + ", " + event + ", unicode=" + event.getUnicodeChar());
         }
 
         if (mNativeClass == 0) {
@@ -3211,7 +3211,7 @@ public class WebView extends AbsoluteLayout
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             // always handle the navigation keys in the UI thread
             switchOutDrawHistory();
-            if (navHandledKey(keyCode, 1, false, event.getEventTime())) {
+            if (navHandledKey(keyCode, 1, false, event.getEventTime(), false)) {
                 playSoundEffect(keyCodeToSoundsEffect(keyCode));
                 return true;
             }
@@ -3271,7 +3271,10 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
+        if (nativeCursorIsPlugin()) {
+            nativeUpdatePluginReceivesEvents();
+            invalidate();
+        } else if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
             // This message will put the node in focus, for the DOM's notion
             // of focus
             mWebViewCore.sendMessage(EventHub.CLICK);
@@ -3300,7 +3303,7 @@ public class WebView extends AbsoluteLayout
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyUp at " + System.currentTimeMillis()
-                    + ", " + event);
+                    + ", " + event + ", unicode=" + event.getUnicodeChar());
         }
 
         if (mNativeClass == 0) {
@@ -4198,7 +4201,7 @@ public class WebView extends AbsoluteLayout
                         + " mTrackballRemainsX=" + mTrackballRemainsX
                         + " mTrackballRemainsY=" + mTrackballRemainsY);
             }
-            if (navHandledKey(selectKeyCode, count, false, time)) {
+            if (navHandledKey(selectKeyCode, count, false, time, false)) {
                 playSoundEffect(keyCodeToSoundsEffect(selectKeyCode));
             }
             mTrackballRemainsX = mTrackballRemainsY = 0;
@@ -4480,7 +4483,7 @@ public class WebView extends AbsoluteLayout
                         return result;
                 }
                 if (mNativeClass != 0 && !nativeHasCursorNode()) {
-                    navHandledKey(fakeKeyDirection, 1, true, 0);
+                    navHandledKey(fakeKeyDirection, 1, true, 0, true);
                 }
             }
         }
@@ -4677,6 +4680,7 @@ public class WebView extends AbsoluteLayout
                         break;
                     }
                     nativeSetFollowedLink(true);
+                    nativeUpdatePluginReceivesEvents();
                     WebViewCore.CursorData data = cursorData();
                     mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
                     playSoundEffect(SoundEffectConstants.CLICK);
@@ -4829,6 +4833,11 @@ public class WebView extends AbsoluteLayout
                         }
                     }
                     setNewZoomScale(scale, false);
+                    break;
+                case MOVE_OUT_OF_PLUGIN:
+                    if (nativePluginEatsNavKey()) {
+                        navHandledKey(msg.arg1, 1, false, 0, true);
+                    }
                     break;
                 case UPDATE_TEXT_ENTRY_MSG_ID:
                     // this is sent after finishing resize in WebViewCore. Make
@@ -5215,10 +5224,20 @@ public class WebView extends AbsoluteLayout
     }
 
     // return true if the key was handled
-    private boolean navHandledKey(int keyCode, int count, boolean noScroll
-            , long time) {
+    private boolean navHandledKey(int keyCode, int count, boolean noScroll,
+            long time, boolean ignorePlugin) {
         if (mNativeClass == 0) {
             return false;
+        }
+        if (ignorePlugin == false && nativePluginEatsNavKey()) {
+            KeyEvent event = new KeyEvent(time, time, KeyEvent.ACTION_DOWN
+                , keyCode, count, (mShiftIsPressed ? KeyEvent.META_SHIFT_ON : 0)
+                | (false ? KeyEvent.META_ALT_ON : 0) // FIXME
+                | (false ? KeyEvent.META_SYM_ON : 0) // FIXME
+                , 0, 0, 0);
+            mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
+            mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+            return true;
         }
         mLastCursorTime = time;
         mLastCursorBounds = nativeGetCursorRingBounds();
@@ -5302,6 +5321,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
+    private native boolean  nativeCursorIsPlugin();
     private native boolean  nativeCursorIsTextInput();
     private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
@@ -5345,6 +5365,7 @@ public class WebView extends AbsoluteLayout
     private native int      nativeMoveGeneration();
     private native void     nativeMoveSelection(int x, int y,
             boolean extendSelection);
+    private native boolean  nativePluginEatsNavKey();
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
     private native void     nativeRecordButtons(boolean focused,
@@ -5358,5 +5379,5 @@ public class WebView extends AbsoluteLayout
     // we always want to pass in our generation number.
     private native void     nativeUpdateCachedTextfield(String updatedText,
             int generation);
-
+    private native void     nativeUpdatePluginReceivesEvents();
 }

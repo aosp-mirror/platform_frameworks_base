@@ -346,7 +346,8 @@ final class WebViewCore {
     private native void nativeSplitContent();
 
     private native boolean nativeKey(int keyCode, int unichar,
-            int repeatCount, boolean isShift, boolean isAlt, boolean isDown);
+            int repeatCount, boolean isShift, boolean isAlt, boolean isSym,
+            boolean isDown);
 
     private native void nativeClick(int framePtr, int nodePtr);
 
@@ -1260,7 +1261,19 @@ final class WebViewCore {
         int keyCode = evt.getKeyCode();
         if (!nativeKey(keyCode, evt.getUnicodeChar(),
                 evt.getRepeatCount(), evt.isShiftPressed(), evt.isAltPressed(),
+                evt.isSymPressed(),
                 isDown) && keyCode != KeyEvent.KEYCODE_ENTER) {
+            if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
+                    && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
+                if (DebugFlags.WEB_VIEW_CORE) {
+                    Log.v(LOGTAG, "key: arrow unused by plugin: " + keyCode);
+                }
+                if (mWebView != null && evt.isDown()) {
+                    Message.obtain(mWebView.mPrivateHandler,
+                            WebView.MOVE_OUT_OF_PLUGIN, keyCode).sendToTarget();
+                }
+                return;
+            }
             // bubble up the event handling
             // but do not bubble up the ENTER key, which would open the search
             // bar without any text.
