@@ -5368,7 +5368,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeFocusCandidateIsTextField();
     private native boolean  nativeFocusCandidateIsTextInput();
     private native int      nativeFocusCandidateMaxLength();
-    private native String   nativeFocusCandidateName();
+    /* package */ native String   nativeFocusCandidateName();
     private native Rect     nativeFocusCandidateNodeBounds();
     /* package */ native int nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();

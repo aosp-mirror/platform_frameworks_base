@@ -25,13 +25,14 @@ import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.MovementMethod;
 import android.util.Log;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputConnection;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -267,6 +268,18 @@ import java.util.ArrayList;
      */
     /* package */ boolean isSameTextField(int ptr) {
         return ptr == mNodePointer;
+    }
+
+    @Override public InputConnection onCreateInputConnection(
+            EditorInfo outAttrs) {
+        InputConnection connection = super.onCreateInputConnection(outAttrs);
+        if (mWebView != null) {
+            // Use the name of the textfield + the url.  Use backslash as an
+            // arbitrary separator.
+            outAttrs.fieldName = mWebView.nativeFocusCandidateName() + "\\"
+                    + mWebView.getUrl();
+        }
+        return connection;
     }
 
     @Override
