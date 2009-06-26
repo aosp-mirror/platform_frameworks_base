@@ -35,16 +35,6 @@ public final class Bmgr {
     private String[] mArgs;
     private int mNextArg;
     private String mCurArgData;
-    private RestoreObserver mObserver = new RestoreObserver();
-
-    class RestoreObserver extends IRestoreObserver.Stub {
-        public void restoreStarting(int numPackages) {
-        }
-        public void onUpdate(int nowBeingRestored) {
-        }
-        public void restoreFinished(int error) {
-        }
-    }
 
     public static void main(String[] args) {
         try {
@@ -191,6 +181,25 @@ public final class Bmgr {
         }
     }
 
+    class RestoreObserver extends IRestoreObserver.Stub {
+        boolean done;
+        public void restoreStarting(int numPackages) {
+            System.out.println("restoreStarting: " + numPackages + " packages");
+        }
+
+        public void onUpdate(int nowBeingRestored) {
+            System.out.println("onUpdate: " + nowBeingRestored);
+        }
+
+        public void restoreFinished(int error) {
+            System.out.println("restoreFinished: " + error);
+            synchronized (this) {
+                done = true;
+                this.notify();
+            }
+        }
+    }
+
     private void doRestore() {
         int token;
         try {
@@ -199,6 +208,8 @@ public final class Bmgr {
             showUsage();
             return;
         }
+
+        RestoreObserver observer = new RestoreObserver();
 
         try {
             int curTransport = mBmgr.getCurrentTransport();
@@ -211,7 +222,7 @@ public final class Bmgr {
             for (RestoreSet s : sets) {
                 if (s.token == token) {
                     System.out.println("Scheduling restore: " + s.name);
-                    mRestore.performRestore(token, mObserver);
+                    mRestore.performRestore(token, observer);
                     break;
                 }
             }
@@ -220,6 +231,17 @@ public final class Bmgr {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
         }
+
+        // now wait for it to be done
+        synchronized (observer) {
+            while (!observer.done) {
+                try {
+                    observer.wait();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
+        System.out.println("done");
     }
 
     private String nextArg() {
