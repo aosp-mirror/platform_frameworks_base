@@ -205,9 +205,9 @@ public final class Bmgr {
     }
 
     private void doRestore() {
-        int token;
+        long token;
         try {
-            token = Integer.parseInt(nextArg());
+            token = Long.parseLong(nextArg());
         } catch (NumberFormatException e) {
             showUsage();
             return;

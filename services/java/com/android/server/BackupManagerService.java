@@ -138,10 +138,12 @@ class BackupManagerService extends IBackupManager.Stub {
     private class RestoreParams {
         public IBackupTransport transport;
         public IRestoreObserver observer;
+        public long token;
 
-        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs) {
+        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token) {
             transport = _transport;
             observer = _obs;
+            token = _token;
         }
     }
 
@@ -347,9 +349,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
             case MSG_RUN_RESTORE:
             {
-                int token = msg.arg1;
                 RestoreParams params = (RestoreParams)msg.obj;
-                (new PerformRestoreThread(params.transport, params.observer, token)).start();
+                (new PerformRestoreThread(params.transport, params.observer, params.token)).start();
                 break;
             }
             }
@@ -761,7 +762,7 @@ class BackupManagerService extends IBackupManager.Stub {
     class PerformRestoreThread extends Thread {
         private IBackupTransport mTransport;
         private IRestoreObserver mObserver;
-        private int mToken;
+        private long mToken;
         private RestoreSet mImage;
         private File mStateDir;
 
@@ -776,7 +777,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         PerformRestoreThread(IBackupTransport transport, IRestoreObserver observer,
-                int restoreSetToken) {
+                long restoreSetToken) {
             mTransport = transport;
             mObserver = observer;
             mToken = restoreSetToken;
@@ -847,9 +848,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     }
                 }
 
-                // STOPSHIP TODO: pick out the set for this token (instead of images[0])
-                long token = images[0].token;
-                if (!mTransport.startRestore(token, restorePackages.toArray(new PackageInfo[0]))) {
+                if (!mTransport.startRestore(mToken, restorePackages.toArray(new PackageInfo[0]))) {
                     // STOPSHIP TODO: Handle the failure somehow?
                     Log.e(TAG, "Error starting restore operation");
                     return;
@@ -1198,7 +1197,7 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        public int performRestore(int token, IRestoreObserver observer)
+        public int performRestore(long token, IRestoreObserver observer)
                 throws android.os.RemoteException {
             mContext.enforceCallingPermission("android.permission.BACKUP", "performRestore");
 
@@ -1206,8 +1205,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                        msg.obj = new RestoreParams(mRestoreTransport, observer);
-                        msg.arg1 = token;
+                        msg.obj = new RestoreParams(mRestoreTransport, observer, token);
                         mBackupHandler.sendMessage(msg);
                         return 0;
                     }

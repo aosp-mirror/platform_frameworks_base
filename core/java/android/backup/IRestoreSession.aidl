@@ -45,7 +45,7 @@ interface IRestoreSession {
      * @param observer If non-null, this binder points to an object that will receive
      *   progress callbacks during the restore operation.
      */
-    int performRestore(int token, IRestoreObserver observer);
+    int performRestore(long token, IRestoreObserver observer);
 
     /**
      * End this restore session.  After this method is called, the IRestoreSession binder
