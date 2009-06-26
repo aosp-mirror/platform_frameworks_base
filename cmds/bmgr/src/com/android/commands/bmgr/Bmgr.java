@@ -171,13 +171,17 @@ public final class Bmgr {
             if (sets == null || sets.length == 0) {
                 System.out.println("No restore sets available");
             } else {
-                for (RestoreSet s : sets) {
-                    System.out.println("  " + s.token + " : " + s.name);
-                }
+                printRestoreSets(sets);
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(TRANSPORT_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void printRestoreSets(RestoreSet[] sets) {
+        for (RestoreSet s : sets) {
+            System.out.println("  " + s.token + " : " + s.name);
         }
     }
 
@@ -212,6 +216,7 @@ public final class Bmgr {
         RestoreObserver observer = new RestoreObserver();
 
         try {
+            boolean didRestore = false;
             int curTransport = mBmgr.getCurrentTransport();
             mRestore = mBmgr.beginRestoreSession(curTransport);
             if (mRestore == null) {
@@ -223,7 +228,16 @@ public final class Bmgr {
                 if (s.token == token) {
                     System.out.println("Scheduling restore: " + s.name);
                     mRestore.performRestore(token, observer);
+                    didRestore = true;
                     break;
+                }
+            }
+            if (!didRestore) {
+                if (sets == null || sets.length == 0) {
+                    System.out.println("No available restore sets; no restore performed");
+                } else {
+                    System.out.println("No matching restore set token.  Available sets:");
+                    printRestoreSets(sets);
                 }
             }
             mRestore.endRestoreSession();
