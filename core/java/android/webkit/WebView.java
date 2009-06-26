@@ -4677,13 +4677,14 @@ public class WebView extends AbsoluteLayout
                         break;
                     }
                     nativeSetFollowedLink(true);
-                    mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE,
-                            cursorData());
+                    WebViewCore.CursorData data = cursorData();
+                    mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
                     playSoundEffect(SoundEffectConstants.CLICK);
                     boolean isTextInput = nativeCursorIsTextInput();
                     if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(
                                 nativeCursorText())) {
-                        mWebViewCore.sendMessage(EventHub.CLICK);
+                        mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
+                                nativeCursorNodePointer());
                     }
                     if (isTextInput) {
                         rebuildWebTextView();

@@ -348,7 +348,7 @@ final class WebViewCore {
     private native boolean nativeKey(int keyCode, int unichar,
             int repeatCount, boolean isShift, boolean isAlt, boolean isDown);
 
-    private native boolean nativeClick();
+    private native void nativeClick(int framePtr, int nodePtr);
 
     private native void nativeSendListBoxChoices(boolean[] choices, int size);
 
@@ -803,7 +803,7 @@ final class WebViewCore {
                             break;
 
                         case CLICK:
-                            nativeClick();
+                            nativeClick(msg.arg1, msg.arg2);
                             break;
 
                         case VIEW_SIZE_CHANGED:
