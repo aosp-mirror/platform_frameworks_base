@@ -329,9 +329,18 @@ public class WebView extends AbsoluteLayout
 
     /**
      * The minimum elapsed time before sending another ACTION_MOVE event to
-     * WebViewCore
+     * WebViewCore. This really should be tuned for each type of the devices.
+     * For example in Google Map api test case, it takes Dream device at least
+     * 150ms to do a full cycle in the WebViewCore by processing a touch event,
+     * triggering the layout and drawing the picture. While the same process
+     * takes 60+ms on the current high speed device. If we make
+     * TOUCH_SENT_INTERVAL too small, there will be multiple touch events sent
+     * to WebViewCore queue and the real layout and draw events will be pushed
+     * to further, which slows down the refresh rate. Choose 50 to favor the
+     * current high speed devices. For Dream like devices, 100 is a better
+     * choice. Maybe make this in the buildspec later.
      */
-    private static final int TOUCH_SENT_INTERVAL = 100;
+    private static final int TOUCH_SENT_INTERVAL = 50;
 
     /**
      * Helper class to get velocity for fling
