@@ -269,9 +269,9 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
-    if (pri == ANDROID_PRIORITY_BACKGROUND) {
+    if (pri >= ANDROID_PRIORITY_BACKGROUND) {
         add_pid_to_cgroup(pid, ANDROID_TGROUP_BG_NONINTERACT);
-    } else if (getpriority(PRIO_PROCESS, pid) == ANDROID_PRIORITY_BACKGROUND) {
+    } else if (getpriority(PRIO_PROCESS, pid) >= ANDROID_PRIORITY_BACKGROUND) {
         add_pid_to_cgroup(pid, ANDROID_TGROUP_DEFAULT);
     }
 
