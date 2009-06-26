@@ -245,6 +245,8 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
     src.img.format  = buffers.format;
     src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
 
+    // FIXME: gross hack, we should never access private_handle_t from here,
+    // but this is needed by msm drivers
     private_handle_t* hnd = new private_handle_t(
             buffers.heap->heapID(), buffers.heap->getSize(), 0);
     hnd->offset = offset;
@@ -421,56 +423,6 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
             int t(W); W=H; H=t;
         }
 
-#if 0
-        /* With LayerBuffer, it is likely that we'll have to rescale the
-         * surface, because this is often used for video playback or
-         * camera-preview. Since we want these operation as fast as possible
-         * we make sure we can use the 2D H/W even if it doesn't support
-         * the requested scale factor, in which case we perform the scaling
-         * in several passes. */
-
-        const float min = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
-        const float mag = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
-
-        float xscale = 1.0f;
-        if (src_width > W*min)          xscale = 1.0f / min;
-        else if (src_width*mag < W)     xscale = mag;
-
-        float yscale = 1.0f;
-        if (src_height > H*min)         yscale = 1.0f / min;
-        else if (src_height*mag < H)    yscale = mag;
-
-        if (UNLIKELY(xscale!=1.0f || yscale!=1.0f)) {
-            if (UNLIKELY(mTemporaryDealer == 0)) {
-                // allocate a memory-dealer for this the first time
-                mTemporaryDealer = mLayer.mFlinger->getSurfaceHeapManager()
-                    ->createHeap(ISurfaceComposer::eHardware);
-                mTempBitmap.init(mTemporaryDealer);
-            }
-
-            const int tmp_w = floorf(src_width  * xscale);
-            const int tmp_h = floorf(src_height * yscale);
-            err = mTempBitmap.setBits(tmp_w, tmp_h, 1, src.img.format);
-
-            if (LIKELY(err == NO_ERROR)) {
-                NativeBuffer tmp;
-                mTempBitmap.getBitmapSurface(&tmp.img);
-                tmp.crop.l = 0;
-                tmp.crop.t = 0;
-                tmp.crop.r = tmp.img.w;
-                tmp.crop.b = tmp.img.h;
-
-                region_iterator tmp_it(Region(Rect(tmp.crop.r, tmp.crop.b)));
-                copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
-                copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
-                copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
-                err = copybit->stretch(copybit,
-                        &tmp.img, &src.img, &tmp.crop, &src.crop, &tmp_it);
-                src = tmp;
-            }
-        }
-#endif
-
 #ifdef EGL_ANDROID_get_render_buffer
         EGLDisplay dpy = eglGetCurrentDisplay();
         EGLSurface draw = eglGetCurrentSurface(EGL_DRAW); 
@@ -486,9 +438,60 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
             dst.base    = NULL; // unused by copybit on msm7k
             dst.handle  = (native_handle_t *)nb->handle;
 
+            /* With LayerBuffer, it is likely that we'll have to rescale the
+             * surface, because this is often used for video playback or
+             * camera-preview. Since we want these operation as fast as possible
+             * we make sure we can use the 2D H/W even if it doesn't support
+             * the requested scale factor, in which case we perform the scaling
+             * in several passes. */
+
+            const float min = copybit->get(copybit, COPYBIT_MINIFICATION_LIMIT);
+            const float mag = copybit->get(copybit, COPYBIT_MAGNIFICATION_LIMIT);
+
+            float xscale = 1.0f;
+            if (src_width > W*min)          xscale = 1.0f / min;
+            else if (src_width*mag < W)     xscale = mag;
+
+            float yscale = 1.0f;
+            if (src_height > H*min)         yscale = 1.0f / min;
+            else if (src_height*mag < H)    yscale = mag;
+
+            if (UNLIKELY(xscale!=1.0f || yscale!=1.0f)) {
+                const int tmp_w = floorf(src_width  * xscale);
+                const int tmp_h = floorf(src_height * yscale);
+                
+                if (mTempBitmap==0 || 
+                        mTempBitmap->getWidth() < tmp_w || 
+                        mTempBitmap->getHeight() < tmp_h) {
+                    mTempBitmap.clear();
+                    mTempBitmap = new android::Buffer(tmp_w, tmp_h, src.img.format);
+                    err = mTempBitmap->initCheck();
+                }
+
+                if (LIKELY(err == NO_ERROR)) {
+                    NativeBuffer tmp;
+                    tmp.img.w = tmp_w;
+                    tmp.img.h = tmp_h;
+                    tmp.img.format = src.img.format;
+                    tmp.img.handle = (native_handle_t*)mTempBitmap->getNativeBuffer()->handle;
+                    tmp.crop.l = 0;
+                    tmp.crop.t = 0;
+                    tmp.crop.r = tmp.img.w;
+                    tmp.crop.b = tmp.img.h;
+
+                    region_iterator tmp_it(Region(Rect(tmp.crop.r, tmp.crop.b)));
+                    copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+                    copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+                    copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
+                    err = copybit->stretch(copybit,
+                            &tmp.img, &src.img, &tmp.crop, &src.crop, &tmp_it);
+                    src = tmp;
+                }
+            }
+
             const Rect& transformedBounds = mLayer.getTransformedBounds();
-            const copybit_rect_t& drect
-                    = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
+            const copybit_rect_t& drect =
+                reinterpret_cast<const copybit_rect_t&>(transformedBounds);
             const State& s(mLayer.drawingState());
             region_iterator it(clip);
 
