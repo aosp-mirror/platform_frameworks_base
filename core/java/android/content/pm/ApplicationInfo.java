@@ -138,10 +138,27 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Value for {@link #flags}: true when the application's window can be
-     * expanded over default window size in target density (320x480 for
-     * 1.0 density, 480x720 for 1.5 density etc)
+     * reduced in size for smaller screens.  Corresponds to
+     * {@link android.R.styleable#AndroidManifestSupportsScreens_smallScreens
+     * android:smallScreens}.
      */
-    public static final int FLAG_SUPPORTS_LARGE_SCREENS = 1<<9;
+    public static final int FLAG_SUPPORTS_SMALL_SCREENS = 1<<9;
+    
+    /**
+     * Value for {@link #flags}: true when the application's window can be
+     * displayed on normal screens.  Corresponds to
+     * {@link android.R.styleable#AndroidManifestSupportsScreens_normalScreens
+     * android:normalScreens}.
+     */
+    public static final int FLAG_SUPPORTS_NORMAL_SCREENS = 1<<10; 
+    
+    /**
+     * Value for {@link #flags}: true when the application's window can be
+     * increased in size for larger screens.  Corresponds to
+     * {@link android.R.styleable#AndroidManifestSupportsScreens_largeScreens
+     * android:smallScreens}.
+     */
+    public static final int FLAG_SUPPORTS_LARGE_SCREENS = 1<<11;
     
     /**
      * Value for {@link #flags}: this is false if the application has set
@@ -149,7 +166,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * 
      * {@hide}
      */
-    public static final int FLAG_ALLOW_BACKUP = 1<<10;
+    public static final int FLAG_ALLOW_BACKUP = 1<<12;
     
     /**
      * Indicates that the application supports any densities;
@@ -164,7 +181,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and
      * {@link #FLAG_ALLOW_TASK_REPARENTING}
      * {@link #FLAG_ALLOW_CLEAR_USER_DATA}, {@link #FLAG_UPDATED_SYSTEM_APP},
-     * {@link #FLAG_TEST_ONLY}.
+     * {@link #FLAG_TEST_ONLY}, {@link #FLAG_SUPPORTS_SMALL_SCREENS},
+     * {@link #FLAG_SUPPORTS_NORMAL_SCREENS},
+     * {@link #FLAG_SUPPORTS_LARGE_SCREENS}.
      */
     public int flags = 0;
     

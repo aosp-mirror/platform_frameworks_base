@@ -329,6 +329,9 @@ enum {
     TARGET_SDK_VERSION_ATTR = 0x01010270,
     TEST_ONLY_ATTR = 0x01010272,
     DENSITY_ATTR = 0x0101026c,
+    SMALL_SCREEN_ATTR = 0x01010284,
+    NORMAL_SCREEN_ATTR = 0x01010285,
+    LARGE_SCREEN_ATTR = 0x01010286,
 };
 
 const char *getComponentName(String8 &pkgName, String8 &componentName) {
@@ -499,6 +502,10 @@ int doDump(Bundle* bundle)
             bool isLauncherActivity = false;
             bool withinApplication = false;
             bool withinReceiver = false;
+            int targetSdk = 0;
+            int smallScreen = 1;
+            int normalScreen = 1;
+            int largeScreen = 1;
             String8 pkg;
             String8 activityName;
             String8 activityLabel;
@@ -572,8 +579,10 @@ int doDump(Bundle* bundle)
                                         error.string());
                                 goto bail;
                             }
+                            if (name == "Donut") targetSdk = 4;
                             printf("sdkVersion:'%s'\n", name.string());
                         } else if (code != -1) {
+                            targetSdk = code;
                             printf("sdkVersion:'%d'\n", code);
                         }
                         code = getIntegerAttribute(tree, TARGET_SDK_VERSION_ATTR, &error);
@@ -585,8 +594,12 @@ int doDump(Bundle* bundle)
                                         error.string());
                                 goto bail;
                             }
+                            if (name == "Donut" && targetSdk < 4) targetSdk = 4;
                             printf("targetSdkVersion:'%s'\n", name.string());
                         } else if (code != -1) {
+                            if (targetSdk < code) {
+                                targetSdk = code;
+                            }
                             printf("targetSdkVersion:'%d'\n", code);
                         }
                     } else if (tag == "uses-configuration") {
@@ -625,6 +638,13 @@ int doDump(Bundle* bundle)
                             goto bail;
                         }
                         printf("supports-density:'%d'\n", dens);
+                    } else if (tag == "supports-screens") {
+                        smallScreen = getIntegerAttribute(tree,
+                                SMALL_SCREEN_ATTR, NULL, 1);
+                        normalScreen = getIntegerAttribute(tree,
+                                NORMAL_SCREEN_ATTR, NULL, 1);
+                        largeScreen = getIntegerAttribute(tree,
+                                LARGE_SCREEN_ATTR, NULL, 1);
                     }
                 } else if (depth == 3 && withinApplication) {
                     withinActivity = false;
@@ -732,6 +752,25 @@ int doDump(Bundle* bundle)
                            activityIcon.string());
                 }
             }
+            
+            // Determine default values for any unspecified screen sizes,
+            // based on the target SDK of the package.  As of 4 (donut)
+            // the screen size support was introduced, so all default to
+            // enabled.
+            if (smallScreen > 0) {
+                smallScreen = targetSdk >= 4 ? -1 : 0;
+            }
+            if (normalScreen > 0) {
+                normalScreen = -1;
+            }
+            if (largeScreen > 0) {
+                largeScreen = targetSdk >= 4 ? -1 : 0;
+            }
+            printf("supports-screens:");
+            if (smallScreen != 0) printf(" 'small'");
+            if (normalScreen != 0) printf(" 'normal'");
+            if (largeScreen != 0) printf(" 'large'");
+            printf("\n");
             
             printf("locales:");
             Vector<String8> locales;
