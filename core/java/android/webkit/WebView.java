@@ -3285,17 +3285,15 @@ public class WebView extends AbsoluteLayout
         if (nativeCursorIsPlugin()) {
             nativeUpdatePluginReceivesEvents();
             invalidate();
-        } else if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
+        } else if (nativeCursorIsTextInput()) {
             // This message will put the node in focus, for the DOM's notion
-            // of focus
+            // of focus, and make the focuscontroller active
             mWebViewCore.sendMessage(EventHub.CLICK);
-            if (nativeCursorIsTextInput()) {
-                // This will bring up the WebTextView and put it in focus, for
-                // our view system's notion of focus
-                rebuildWebTextView();
-                // Now we need to pass the event to it
-                return mWebTextView.onKeyDown(keyCode, event);
-            }
+            // This will bring up the WebTextView and put it in focus, for
+            // our view system's notion of focus
+            rebuildWebTextView();
+            // Now we need to pass the event to it
+            return mWebTextView.onKeyDown(keyCode, event);
         }
 
         // TODO: should we pass all the keys to DOM or check the meta tag
@@ -5180,12 +5178,23 @@ public class WebView extends AbsoluteLayout
                 new WebViewCore.CursorData(frame, node, x, y));
     }
 
-    // called by JNI
-    private void sendMoveMouseIfLatest(boolean setFocusControllerInactive) {
-        if (setFocusControllerInactive) {
+    /*
+     * Send a mouse move event to the webcore thread.
+     *
+     * @param removeFocus Pass true if the "mouse" cursor is now over a node
+     *                    which wants key events, but it is not the focus. This
+     *                    will make the visual appear as though nothing is in
+     *                    focus.  Remove the WebTextView, if present, and stop
+     *                    drawing the blinking caret.
+     * called by JNI
+     */
+    private void sendMoveMouseIfLatest(boolean removeFocus) {
+        if (removeFocus) {
+            clearTextEntry();
             setFocusControllerInactive();
         }
-        mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST, cursorData());
+        mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST,
+                cursorData());
     }
 
     // called by JNI
