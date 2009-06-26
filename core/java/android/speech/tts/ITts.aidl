@@ -33,6 +33,8 @@ interface ITts {
 
     void speak(in String text, in int queueMode, in String[] params);
 
+    void speakIpa(in String ipaText, in int queueMode, in String[] params);
+
     boolean isSpeaking();
 
     void stop();
@@ -44,6 +46,8 @@ interface ITts {
     void setLanguage(in String language, in String country, in String variant);
 
     boolean synthesizeToFile(in String text, in String[] params, in String outputDirectory);
+
+    boolean synthesizeIpaToFile(in String ipaText, in String[] params, in String outputDirectory);
 
     void playEarcon(in String earcon, in int queueMode, in String[] params);
 

@@ -47,12 +47,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TtsService extends Service implements OnCompletionListener {
 
     private static class SpeechItem {
-        public static final int SPEECH = 0;
-        public static final int EARCON = 1;
-        public static final int SILENCE = 2;
+        public static final int TEXT = 0;
+        public static final int IPA = 1;
+        public static final int EARCON = 2;
+        public static final int SILENCE = 3;
         public String mText = null;
         public ArrayList<String> mParams = null;
-        public int mType = SPEECH;
+        public int mType = TEXT;
         public long mDuration = 0;
 
         public SpeechItem(String text, ArrayList<String> params, int itemType) {
@@ -297,7 +298,29 @@ public class TtsService extends Service implements OnCompletionListener {
         if (queueMode == 0) {
             stop();
         }
-        mSpeechQueue.add(new SpeechItem(text, params, SpeechItem.SPEECH));
+        mSpeechQueue.add(new SpeechItem(text, params, SpeechItem.TEXT));
+        if (!mIsSpeaking) {
+            processSpeechQueue();
+        }
+    }
+
+    /**
+     * Speaks the given IPA text using the specified queueing mode and parameters.
+     *
+     * @param ipaText
+     *            The IPA text that should be spoken
+     * @param queueMode
+     *            0 for no queue (interrupts all previous utterances), 1 for
+     *            queued
+     * @param params
+     *            An ArrayList of parameters. This is not implemented for all
+     *            engines.
+     */
+    private void speakIpa(String ipaText, int queueMode, ArrayList<String> params) {
+        if (queueMode == 0) {
+            stop();
+        }
+        mSpeechQueue.add(new SpeechItem(ipaText, params, SpeechItem.IPA));
         if (!mIsSpeaking) {
             processSpeechQueue();
         }
@@ -455,13 +478,13 @@ public class TtsService extends Service implements OnCompletionListener {
             SpeechItem splitItem;
             while (end < currentSpeechItem.mText.length()){
                 splitText = currentSpeechItem.mText.substring(start, end);
-                splitItem = new SpeechItem(splitText, null, SpeechItem.SPEECH);
+                splitItem = new SpeechItem(splitText, null, SpeechItem.TEXT);
                 splitItems.add(splitItem);
                 start = end;
                 end = start + MAX_SPEECH_ITEM_CHAR_LENGTH - 1;
             }
             splitText = currentSpeechItem.mText.substring(start);
-            splitItem = new SpeechItem(splitText, null, SpeechItem.SPEECH);
+            splitItem = new SpeechItem(splitText, null, SpeechItem.TEXT);
             splitItems.add(splitItem);
             mSpeechQueue.remove(0);
             for (int i = splitItems.size() - 1; i >= 0; i--){
@@ -491,10 +514,12 @@ public class TtsService extends Service implements OnCompletionListener {
             // processSpeechQueue to continue running the queue
             Log.i("TTS processing: ", currentSpeechItem.mText);
             if (sr == null) {
-                if (currentSpeechItem.mType == SpeechItem.SPEECH) {
+                if (currentSpeechItem.mType == SpeechItem.TEXT) {
                     currentSpeechItem = splitCurrentTextIfNeeded(currentSpeechItem);
                     speakInternalOnly(currentSpeechItem.mText,
                             currentSpeechItem.mParams);
+                } else if (currentSpeechItem.mType == SpeechItem.IPA) {
+                    // TODO Implement IPA support
                 } else {
                     // This is either silence or an earcon that was missing
                     silence(currentSpeechItem.mDuration);
@@ -560,8 +585,7 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
     /**
-     * Synthesizes the given text using the specified queuing mode and
-     * parameters.
+     * Synthesizes the given text to a file using the specified parameters.
      *
      * @param text
      *            The String of text that should be synthesized
@@ -595,6 +619,52 @@ public class TtsService extends Service implements OnCompletionListener {
                 return false;
             }
             nativeSynth.synthesizeToFile(text, filename);
+        } finally {
+            // This check is needed because finally will always run; even if the
+            // method returns somewhere in the try block.
+            if (synthAvailable) {
+                synthesizerLock.unlock();
+            }
+        }
+        Log.i("TTS", "Completed synthesis for " + filename);
+        return true;
+    }
+
+    /**
+     * Synthesizes the given IPA text to a file using the specified parameters.
+     *
+     * @param ipaText
+     *            The String of IPA text that should be synthesized
+     * @param params
+     *            An ArrayList of parameters. The first element of this array
+     *            controls the type of voice to use.
+     * @param filename
+     *            The string that gives the full output filename; it should be
+     *            something like "/sdcard/myappsounds/mysound.wav".
+     * @return A boolean that indicates if the synthesis succeeded
+     */
+    private boolean synthesizeIpaToFile(String ipaText, ArrayList<String> params,
+            String filename, boolean calledFromApi) {
+        // Only stop everything if this is a call made by an outside app trying
+        // to
+        // use the API. Do NOT stop if this is a call from within the service as
+        // clearing the speech queue here would be a mistake.
+        if (calledFromApi) {
+            stop();
+        }
+        Log.i("TTS", "Synthesizing IPA to " + filename);
+        boolean synthAvailable = false;
+        try {
+            synthAvailable = synthesizerLock.tryLock();
+            if (!synthAvailable) {
+                return false;
+            }
+            // Don't allow a filename that is too long
+            // TODO use platform constant
+            if (filename.length() > 250) {
+                return false;
+            }
+            // TODO: Add nativeSynth.synthesizeIpaToFile(text, filename);
         } finally {
             // This check is needed because finally will always run; even if the
             // method returns somewhere in the try block.
@@ -649,6 +719,27 @@ public class TtsService extends Service implements OnCompletionListener {
                 speakingParams = new ArrayList<String>(Arrays.asList(params));
             }
             mSelf.speak(text, queueMode, speakingParams);
+        }
+
+        /**
+         * Speaks the given IPA text using the specified queueing mode and
+         * parameters.
+         *
+         * @param ipaText
+         *            The IPA text that should be spoken
+         * @param queueMode
+         *            0 for no queue (interrupts all previous utterances), 1 for
+         *            queued
+         * @param params
+         *            An ArrayList of parameters. The first element of this
+         *            array controls the type of voice to use.
+         */
+        public void speakIpa(String ipaText, int queueMode, String[] params) {
+            ArrayList<String> speakingParams = new ArrayList<String>();
+            if (params != null) {
+                speakingParams = new ArrayList<String>(Arrays.asList(params));
+            }
+            mSelf.speakIpa(ipaText, queueMode, speakingParams);
         }
 
         /**
@@ -794,7 +885,7 @@ public class TtsService extends Service implements OnCompletionListener {
         }
 
         /**
-         * Speaks the given text using the specified queueing mode and
+         * Synthesizes the given text to a file using the specified
          * parameters.
          *
          * @param text
@@ -814,6 +905,29 @@ public class TtsService extends Service implements OnCompletionListener {
                 speakingParams = new ArrayList<String>(Arrays.asList(params));
             }
             return mSelf.synthesizeToFile(text, speakingParams, filename, true);
+        }
+
+        /**
+         * Synthesizes the given IPA text to a file using the specified
+         * parameters.
+         *
+         * @param ipaText
+         *            The String of IPA text that should be synthesized
+         * @param params
+         *            An ArrayList of parameters. The first element of this
+         *            array controls the type of voice to use.
+         * @param filename
+         *            The string that gives the full output filename; it should
+         *            be something like "/sdcard/myappsounds/mysound.wav".
+         * @return A boolean that indicates if the synthesis succeeded
+         */
+        public boolean synthesizeIpaToFile(String ipaText, String[] params,
+                String filename) {
+            ArrayList<String> speakingParams = new ArrayList<String>();
+            if (params != null) {
+                speakingParams = new ArrayList<String>(Arrays.asList(params));
+            }
+            return mSelf.synthesizeIpaToFile(ipaText, speakingParams, filename, true);
         }
     };
 
