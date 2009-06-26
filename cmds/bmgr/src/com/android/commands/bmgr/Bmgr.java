@@ -17,6 +17,7 @@
 package com.android.commands.bmgr;
 
 import android.backup.IBackupManager;
+import android.backup.IRestoreObserver;
 import android.backup.IRestoreSession;
 import android.backup.RestoreSet;
 import android.os.RemoteException;
@@ -34,6 +35,16 @@ public final class Bmgr {
     private String[] mArgs;
     private int mNextArg;
     private String mCurArgData;
+    private RestoreObserver mObserver = new RestoreObserver();
+
+    class RestoreObserver extends IRestoreObserver.Stub {
+        public void restoreStarting(int numPackages) {
+        }
+        public void onUpdate(int nowBeingRestored) {
+        }
+        public void restoreFinished(int error) {
+        }
+    }
 
     public static void main(String[] args) {
         try {
@@ -200,7 +211,7 @@ public final class Bmgr {
             for (RestoreSet s : sets) {
                 if (s.token == token) {
                     System.out.println("Scheduling restore: " + s.name);
-                    mRestore.performRestore(token);
+                    mRestore.performRestore(token, mObserver);
                     break;
                 }
             }
