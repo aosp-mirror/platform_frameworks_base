@@ -252,13 +252,13 @@ public class WebSettings {
 
     // User agent strings.
     private static final String DESKTOP_USERAGENT =
-            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en)"
-            + " AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2"
-            + " Safari/525.20.1";
+            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; en-us)"
+            + " AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0"
+            + " Safari/530.17";
     private static final String IPHONE_USERAGENT = 
-            "Mozilla/5.0 (iPhone; U; CPU iPhone 2_1 like Mac OS X; en)"
-            + " AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2"
-            + " Mobile/5F136 Safari/525.20.1";
+            "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us)"
+            + " AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0"
+            + " Mobile/7A341 Safari/528.16";
     private static Locale sLocale;
     private static Object sLockForLocaleSettings;
     
