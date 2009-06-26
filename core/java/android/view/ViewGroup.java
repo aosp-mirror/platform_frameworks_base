@@ -1166,7 +1166,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final View child = children[i];
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
                     child.setDrawingCacheEnabled(true);
-                    child.buildDrawingCache();
+                    child.buildDrawingCache(true);
                 }
             }
 
@@ -1208,7 +1208,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     bindLayoutAnimation(child);
                     if (cache) {
                         child.setDrawingCacheEnabled(true);
-                        child.buildDrawingCache();
+                        child.buildDrawingCache(true);
                     }
                 }
             }
@@ -1448,7 +1448,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         Bitmap cache = null;
         if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
                 (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
-            cache = child.getDrawingCache();
+            cache = child.getDrawingCache(true);
             if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         }
 
