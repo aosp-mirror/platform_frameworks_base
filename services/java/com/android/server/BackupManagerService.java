@@ -47,6 +47,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import android.backup.IBackupManager;
+import android.backup.IRestoreObserver;
 import android.backup.IRestoreSession;
 import android.backup.BackupManager;
 import android.backup.RestoreSet;
@@ -81,6 +82,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;
+    private static final String RESTORE_OBSERVER_KEY = "_resOb";
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -132,6 +134,16 @@ class BackupManagerService extends IBackupManager.Stub {
     private int mTransportId;
     private IBackupTransport mLocalTransport, mGoogleTransport;
     private RestoreSession mActiveRestoreSession;
+
+    private class RestoreParams {
+        public IBackupTransport transport;
+        public IRestoreObserver observer;
+
+        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs) {
+            transport = _transport;
+            observer = _obs;
+        }
+    }
 
     // Where we keep our journal files and other bookkeeping
     private File mBaseStateDir;
@@ -336,8 +348,8 @@ class BackupManagerService extends IBackupManager.Stub {
             case MSG_RUN_RESTORE:
             {
                 int token = msg.arg1;
-                IBackupTransport transport = (IBackupTransport)msg.obj;
-                (new PerformRestoreThread(transport, token)).start();
+                RestoreParams params = (RestoreParams)msg.obj;
+                (new PerformRestoreThread(params.transport, params.observer, token)).start();
                 break;
             }
             }
@@ -748,6 +760,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class PerformRestoreThread extends Thread {
         private IBackupTransport mTransport;
+        private IRestoreObserver mObserver;
         private int mToken;
         private RestoreSet mImage;
         private File mStateDir;
@@ -762,8 +775,10 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        PerformRestoreThread(IBackupTransport transport, int restoreSetToken) {
+        PerformRestoreThread(IBackupTransport transport, IRestoreObserver observer,
+                int restoreSetToken) {
             mTransport = transport;
+            mObserver = observer;
             mToken = restoreSetToken;
 
             try {
@@ -792,6 +807,8 @@ class BackupManagerService extends IBackupManager.Stub {
              * 4. shut down the transport
              */
 
+            int error = -1; // assume error
+
             // build the set of apps to restore
             try {
                 RestoreSet[] images = mTransport.getAvailableRestoreSets();
@@ -817,6 +834,18 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 List<PackageInfo> agentPackages = allAgentPackages();
                 restorePackages.addAll(agentPackages);
+
+                // let the observer know that we're running
+                if (mObserver != null) {
+                    try {
+                        // !!! TODO: get an actual count from the transport after
+                        // its startRestore() runs?
+                        mObserver.restoreStarting(restorePackages.size());
+                    } catch (RemoteException e) {
+                        Log.d(TAG, "Restore observer died at restoreStarting");
+                        mObserver = null;
+                    }
+                }
 
                 // STOPSHIP TODO: pick out the set for this token (instead of images[0])
                 long token = images[0].token;
@@ -845,6 +874,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         mPackageManager, agentPackages);
                 processOneRestore(omPackage, 0, IBackupAgent.Stub.asInterface(pmAgent.onBind()));
 
+                int count = 0;
                 for (;;) {
                     packageName = mTransport.nextRestorePackage();
                     if (packageName == null) {
@@ -853,6 +883,16 @@ class BackupManagerService extends IBackupManager.Stub {
                         return;
                     } else if (packageName.equals("")) {
                         break;
+                    }
+
+                    if (mObserver != null) {
+                        ++count;
+                        try {
+                            mObserver.onUpdate(count);
+                        } catch (RemoteException e) {
+                            Log.d(TAG, "Restore observer died in onUpdate");
+                            mObserver = null;
+                        }
                     }
 
                     Metadata metaInfo = pmAgent.getRestoredMetadata(packageName);
@@ -898,6 +938,9 @@ class BackupManagerService extends IBackupManager.Stub {
                         mActivityManager.unbindBackupAgent(packageInfo.applicationInfo);
                     }
                 }
+
+                // if we get this far, report success to the observer
+                error = 0;
             } catch (NameNotFoundException e) {
                 // STOPSHIP TODO: Handle the failure somehow?
                 Log.e(TAG, "Invalid paackage restoring data", e);
@@ -909,6 +952,14 @@ class BackupManagerService extends IBackupManager.Stub {
                     mTransport.finishRestore();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error finishing restore", e);
+                }
+
+                if (mObserver != null) {
+                    try {
+                        mObserver.restoreFinished(error);
+                    } catch (RemoteException e) {
+                        Log.d(TAG, "Restore observer died at restoreFinished");
+                    }
                 }
             }
         }
@@ -1147,14 +1198,15 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        public int performRestore(int token) throws android.os.RemoteException {
+        public int performRestore(int token, IRestoreObserver observer)
+                throws android.os.RemoteException {
             mContext.enforceCallingPermission("android.permission.BACKUP", "performRestore");
 
             if (mRestoreSets != null) {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
-                        Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE,
-                                mRestoreTransport);
+                        Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+                        msg.obj = new RestoreParams(mRestoreTransport, observer);
                         msg.arg1 = token;
                         mBackupHandler.sendMessage(msg);
                         return 0;

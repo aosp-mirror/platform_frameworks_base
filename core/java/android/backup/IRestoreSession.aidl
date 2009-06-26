@@ -17,6 +17,7 @@
 package android.backup;
 
 import android.backup.RestoreSet;
+import android.backup.IRestoreObserver;
 
 /**
  * Binder interface used by clients who wish to manage a restore operation.  Every
@@ -41,8 +42,10 @@ interface IRestoreSession {
      *
      * @param token The token from {@link getAvailableRestoreSets()} corresponding to
      *   the restore set that should be used.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
      */
-    int performRestore(int token);
+    int performRestore(int token, IRestoreObserver observer);
 
     /**
      * End this restore session.  After this method is called, the IRestoreSession binder
