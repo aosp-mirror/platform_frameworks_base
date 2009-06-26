@@ -34,7 +34,7 @@ public class BackupHelperAgent extends BackupAgent {
 
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-             ParcelFileDescriptor newState) {
+             ParcelFileDescriptor newState) throws IOException {
         mDispatcher.performBackup(oldState, data, newState);
     }
 
