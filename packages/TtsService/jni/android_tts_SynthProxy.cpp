@@ -297,8 +297,32 @@ android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
                 variantNativeString);
     }
     env->ReleaseStringUTFChars(language, langNativeString);
-    env->ReleaseStringUTFChars(language, countryNativeString);
-    env->ReleaseStringUTFChars(language, variantNativeString);
+    env->ReleaseStringUTFChars(country, countryNativeString);
+    env->ReleaseStringUTFChars(variant, variantNativeString);
+}
+
+
+static void
+android_tts_SynthProxy_loadLanguage(JNIEnv *env, jobject thiz, jint jniData,
+        jstring language, jstring country, jstring variant)
+{
+    if (jniData == 0) {
+        LOGE("android_tts_SynthProxy_loadLanguage(): invalid JNI data");
+        return;
+    }
+
+    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    const char *langNativeString = env->GetStringUTFChars(language, 0);
+    const char *countryNativeString = env->GetStringUTFChars(country, 0);
+    const char *variantNativeString = env->GetStringUTFChars(variant, 0);
+    // TODO check return codes
+    if (pSynthData->mNativeSynthInterface) {
+        pSynthData->mNativeSynthInterface->loadLanguage(langNativeString, countryNativeString,
+                variantNativeString);
+    }
+    env->ReleaseStringUTFChars(language, langNativeString);
+    env->ReleaseStringUTFChars(country, countryNativeString);
+    env->ReleaseStringUTFChars(variant, variantNativeString);
 }
 
 
@@ -566,6 +590,10 @@ static JNINativeMethod gMethods[] = {
     {   "native_setLanguage",
         "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
         (void*)android_tts_SynthProxy_setLanguage
+    },
+    {   "native_loadLanguage",
+        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+        (void*)android_tts_SynthProxy_loadLanguage
     },
     {   "native_setSpeechRate",
         "(II)V",

@@ -69,6 +69,14 @@ enum tts_result {
     TTS_MISSING_RESOURCES       = -6
 };
 
+enum tts_support_result {
+    TTS_LANG_COUNTRY_VAR_AVAILABLE = 2,
+    TTS_LANG_COUNTRY_AVAILABLE = 1,
+    TTS_LANG_AVAILABLE = 0,
+    TTS_LANG_MISSING_DATA = -1,
+    TTS_LANG_NOT_SUPPORTED = -2
+};
+
 class TtsEngine
 {
 public:
@@ -86,19 +94,32 @@ public:
     // @return TTS_SUCCESS, or TTS_FAILURE
     virtual tts_result stop();
 
+    // Returns the level of support for the language, country and variant.
+    // @return TTS_LANG_COUNTRY_VAR_AVAILABLE if the language, country and variant are supported,
+    //            and the corresponding resources are correctly installed
+    //         TTS_LANG_COUNTRY_AVAILABLE if the language and country are supported and the
+    //             corresponding resources are correctly installed, but there is no match for
+    //             the specified variant
+    //         TTS_LANG_AVAILABLE if the language is supported and the
+    //             corresponding resources are correctly installed, but there is no match for
+    //             the specified country and variant
+    //         TTS_LANG_MISSING_DATA if the required resources to provide any level of support
+    //             for the language are not correctly installed
+    //         TTS_LANG_NOT_SUPPORTED if the language is not supported by the TTS engine.
+    virtual tts_support_result isLanguageAvailable(const char *lang, const char *country,
+            const char *variant);
+
     // Load the resources associated with the specified language. The loaded
     // language will only be used once a call to setLanguage() with the same
-    // language value is issued. Language values are based on the Android
-    // conventions for localization as described in the Android platform
-    // documentation on internationalization. This implies that language
-    // data is specified in the format xx-rYY, where xx is a two letter
-    // ISO 639-1 language code in lowercase and rYY is a two letter
-    // ISO 3166-1-alpha-2 language code in uppercase preceded by a
-    // lowercase "r".
-    // @param value pointer to the language value
-    // @param size  length of the language value
+    // language value is issued. Language and country values are coded according to the ISO three
+    // letter codes for languages and countries, as can be retrieved from a java.util.Locale
+    // instance. The variant value is encoded as the variant string retrieved from a
+    // java.util.Locale instance built with that variant data.
+    // @param lang pointer to the ISO three letter code for the language
+    // @param country pointer to the ISO three letter code for the country
+    // @param variant pointer to the variant code
     // @return TTS_SUCCESS, or TTS_FAILURE
-    virtual tts_result loadLanguage(const char *value, const size_t size);
+    virtual tts_result loadLanguage(const char *lang, const char *country, const char *variant);
     
     // Load the resources associated with the specified language, country and Locale variant.
     // The loaded language will only be used once a call to setLanguageFromLocale() with the same
