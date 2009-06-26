@@ -87,6 +87,14 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
         }
     }
 
+#if 0
+    LOGD("chunk header:");
+    LOGD("  headerSize=%d", flattenedHeader.headerSize);
+    LOGD("  version=0x%08x", flattenedHeader.version);
+    LOGD("  dataSize=%d", flattenedHeader.dataSize);
+    LOGD("  nameLength=%d", flattenedHeader.nameLength);
+#endif
+
     if (flattenedHeader.dataSize < 0 || flattenedHeader.nameLength < 0 ||
             remainingHeader < flattenedHeader.nameLength) {
         LOGW("Malformed V1 header remainingHeader=%d dataSize=%d nameLength=%d", remainingHeader,
@@ -101,12 +109,11 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
     }
 
     amt = read(fd, buf, flattenedHeader.nameLength);
+    buf[flattenedHeader.nameLength] = 0;
 
     keyPrefix.unlockBuffer(flattenedHeader.nameLength);
 
     remainingHeader -= flattenedHeader.nameLength;
-
-    LOGD("remainingHeader=%d", remainingHeader);
 
     if (remainingHeader > 0) {
         lseek(fd, remainingHeader, SEEK_CUR);
@@ -183,6 +190,7 @@ writeHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj,
 
     header.headerSize = sizeof(chunk_header_v1) + header.nameLength + namePadding;
     header.version = VERSION_1_HEADER;
+    header.dataSize = prevPos - (pos + header.headerSize);
 
     lseek(fd, pos, SEEK_SET);
     err = write(fd, &header, sizeof(chunk_header_v1));
