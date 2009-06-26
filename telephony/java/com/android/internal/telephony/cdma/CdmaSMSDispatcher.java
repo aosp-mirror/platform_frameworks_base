@@ -168,8 +168,8 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         int index = 0;
         int msgType;
 
-        int sourcePort;
-        int destinationPort;
+        int sourcePort = 0;
+        int destinationPort = 0;
 
         msgType = pdu[index++];
         if (msgType != 0){
@@ -179,11 +179,14 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         totalSegments = pdu[index++]; // >=1
         segment = pdu[index++]; // >=0
 
-        //process WDP segment
-        sourcePort = (0xFF & pdu[index++]) << 8;
-        sourcePort |= 0xFF & pdu[index++];
-        destinationPort = (0xFF & pdu[index++]) << 8;
-        destinationPort |= 0xFF & pdu[index++];
+        // Only the first segment contains sourcePort and destination Port
+        if (segment == 0) {
+            //process WDP segment
+            sourcePort = (0xFF & pdu[index++]) << 8;
+            sourcePort |= 0xFF & pdu[index++];
+            destinationPort = (0xFF & pdu[index++]) << 8;
+            destinationPort |= 0xFF & pdu[index++];
+        }
 
         // Lookup all other related parts
         StringBuilder where = new StringBuilder("reference_number =");
@@ -224,6 +227,11 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             for (int i = 0; i < cursorCount; i++) {
                 cursor.moveToNext();
                 int cursorSequence = (int)cursor.getLong(sequenceColumn);
+                // Read the destination port from the first segment
+                if (cursorSequence == 0) {
+                    int destinationPortColumn = cursor.getColumnIndex("destination_port");
+                    destinationPort = (int)cursor.getLong(destinationPortColumn);
+                }
                 pdus[cursorSequence] = HexDump.hexStringToByteArray(
                         cursor.getString(pduColumn));
             }
