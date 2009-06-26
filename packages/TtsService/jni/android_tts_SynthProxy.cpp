@@ -204,11 +204,19 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
             fwrite(wav, 1, bufferSize, pForAfter->outputFile);
         }
     }
-    // TODO update to call back into the SynthProxy class through the
+    // Future update:
+    //      For sync points in the speech, call back into the SynthProxy class through the
     //      javaTTSFields.synthProxyMethodPost methode to notify
-    //      playback has completed if the synthesis is done, i.e.
-    //      if status == TTS_SYNTH_DONE
-    //delete pForAfter;
+    //      playback has completed if the synthesis is done or if a marker has been reached.
+
+    if (status == TTS_SYNTH_DONE) {
+        // this struct was allocated in the original android_tts_SynthProxy_speak call,
+        // all processing matching this call is now done.
+        LOGV("Speech synthesis done.");
+        delete pForAfter;
+        pForAfter = NULL;
+        return TTS_CALLBACK_HALT;
+    }
 
     // we don't update the wav (output) parameter as we'll let the next callback
     // write at the same location, we've consumed the data already, but we need
