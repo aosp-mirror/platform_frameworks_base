@@ -35,6 +35,7 @@ echo
 check_file file.txt "first file"
 check_file another_file.txt "asdf"
 check_file 3.txt "3"
+check_file empty.txt ""
 
 echo
 echo
