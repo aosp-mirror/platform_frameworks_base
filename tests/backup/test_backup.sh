@@ -12,6 +12,7 @@ adb shell "rm /data/data/com.android.backuptest/files/* ; \
            echo -n first file > /data/data/com.android.backuptest/files/file.txt ; \
            echo -n asdf > /data/data/com.android.backuptest/files/another_file.txt ; \
            echo -n 3 > /data/data/com.android.backuptest/files/3.txt ; \
+           echo -n "" > /data/data/com.android.backuptest/files/empty.txt ; \
 "
 
 # say that the data has changed
