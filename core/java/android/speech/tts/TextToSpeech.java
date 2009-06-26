@@ -410,7 +410,27 @@ public class TextToSpeech {
 
 
     public void playSilence(long durationInMs, int queueMode) {
-        // TODO implement, already present in TTS service
+        synchronized (mStartLock) {
+            if (!mStarted) {
+                return;
+            }
+            try {
+                // TODO support extra parameters, passing cache of current parameters for the moment
+                mITts.playSilence(durationInMs, queueMode, mCachedParams);
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            }
+        }
     }
 
 
