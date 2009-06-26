@@ -68,10 +68,14 @@ struct file_metadata_v1 {
 
 const static int CURRENT_METADATA_VERSION = 1;
 
-#if 1 // TEST_BACKUP_HELPERS
+#if 1
+#define LOGP(f, x...)
+#else
+#if TEST_BACKUP_HELPERS
 #define LOGP(f, x...) printf(f "\n", x)
 #else
 #define LOGP(x...) LOGD(x)
+#endif
 #endif
 
 const static int ROUND_UP[4] = { 0, 3, 2, 1 };
@@ -349,7 +353,6 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
 
         err = stat(file, &st);
         if (err != 0) {
-            LOGW("Error stating file %s", file);
             r.deleted = true;
         } else {
             r.deleted = false;
