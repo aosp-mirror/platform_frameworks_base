@@ -369,7 +369,28 @@ public class TextToSpeech {
      */
     public void speakIpa(String ipaText, int queueMode, HashMap<String,String> params)
     {
-        //TODO: Implement speakIpa
+        synchronized (mStartLock) {
+            Log.i("TTS received: ", ipaText);
+            if (!mStarted) {
+                return;
+            }
+            try {
+                // TODO support extra parameters, passing cache of current parameters for the moment
+                mITts.speakIpa(ipaText, queueMode, mCachedParams);
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            }
+        }
     }
 
 
@@ -600,7 +621,7 @@ public class TextToSpeech {
 
 
     /**
-     * Speaks the given text using the specified queueing mode and parameters.
+     * Synthesizes the given text to a file using the specified parameters.
      *
      * @param text
      *            The String of text that should be synthesized
@@ -637,5 +658,42 @@ public class TextToSpeech {
         }
     }
 
+    /**
+     * Synthesizes the given IPA text to a file using the specified parameters.
+     *
+     * @param text
+     *            The String of text that should be synthesized
+     * @param params
+     *            A hashmap of parameters.
+     * @param filename
+     *            The string that gives the full output filename; it should be
+     *            something like "/sdcard/myappsounds/mysound.wav".
+     * @return A boolean that indicates if the synthesis succeeded
+     */
+    public boolean synthesizeIpaToFile(String ipaText,
+            HashMap<String,String> params, String filename) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
+                return false;
+            }
+            try {
+                // TODO support extra parameters, passing null for the moment
+                return mITts.synthesizeIpaToFile(ipaText, null, filename);
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            }
+            return false;
+        }
+    }
 
 }
