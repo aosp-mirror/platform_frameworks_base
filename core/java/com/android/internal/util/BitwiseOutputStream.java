@@ -95,8 +95,8 @@ public class BitwiseOutputStream {
         int offset = 16 - (mPos & 0x07) - bits;  // &7==%8
         data <<= offset;
         mPos += bits;
-        mBuf[index] |= (data >>> 8);
-        if (offset < 8) mBuf[index + 1] |= (data & 0x00FF);
+        mBuf[index] |= data >>> 8;
+        if (offset < 8) mBuf[index + 1] |= data & 0xFF;
     }
 
     /**
