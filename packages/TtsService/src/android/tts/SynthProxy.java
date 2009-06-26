@@ -73,6 +73,13 @@ public class SynthProxy {
     public void setLanguage(String language, String country, String variant) {
         native_setLanguage(mJniData, language, country, variant);
     }
+    
+    /**
+     * Loads the language: it's not set, but prepared for use later.
+     */
+    public void loadLanguage(String language, String country, String variant) {
+        native_loadLanguage(mJniData, language, country, variant);
+    }
 
     /**
      * Sets the speech rate
@@ -148,6 +155,9 @@ public class SynthProxy {
     private native final void native_synthesizeToFile(int jniData, String text, String filename);
 
     private native final void native_setLanguage(int jniData, String language, String country,
+            String variant);
+    
+    private native final void native_loadLanguage(int jniData, String language, String country,
             String variant);
 
     private native final void native_setSpeechRate(int jniData, int speechRate);
