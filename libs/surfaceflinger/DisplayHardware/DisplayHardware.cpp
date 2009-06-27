@@ -318,9 +318,8 @@ void DisplayHardware::flip(const Region& dirty) const
 
 #ifdef EGL_ANDROID_swap_rectangle    
     if (mFlags & SWAP_RECTANGLE) {
-        Region newDirty(dirty);
-        newDirty.andSelf(Rect(mWidth, mHeight));
-        const Rect& b(newDirty.bounds());
+        const Region newDirty(dirty.intersect(bounds()));
+        const Rect b(newDirty.getBounds());
         eglSetSwapRectangleANDROID(dpy, surface,
                 b.left, b.top, b.width(), b.height());
     } 

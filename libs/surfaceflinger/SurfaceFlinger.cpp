@@ -803,19 +803,24 @@ void SurfaceFlinger::unlockPageFlip(const LayerVector& currentLayers)
     }
 }
 
+
 void SurfaceFlinger::handleRepaint()
 {
-    // set the frame buffer
-    const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    // compute the invalid region
+    mInvalidRegion.orSelf(mDirtyRegion);
+    if (mInvalidRegion.isEmpty()) {
+        // nothing to do
+        return;
+    }
 
     if (UNLIKELY(mDebugRegion)) {
         debugFlashRegions();
     }
 
-    // compute the invalid region
-    mInvalidRegion.orSelf(mDirtyRegion);
+    // set the frame buffer
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
     uint32_t flags = hw.getFlags();
     if ((flags & DisplayHardware::SWAP_RECTANGLE) || 
@@ -945,8 +950,11 @@ void SurfaceFlinger::debugFlashRegions()
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
     
-    hw.flip(mDirtyRegion.merge(mInvalidRegion));
-    mInvalidRegion.clear();
+    if (mInvalidRegion.isEmpty()) {
+        mDirtyRegion.dump("mDirtyRegion");
+        mInvalidRegion.dump("mInvalidRegion");
+    }
+    hw.flip(mInvalidRegion);
 
     if (mDebugRegion > 1)
        usleep(mDebugRegion * 1000);
@@ -1549,6 +1557,7 @@ status_t SurfaceFlinger::onTransact(
     }
     status_t err = BnSurfaceComposer::onTransact(code, data, reply, flags);
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {
+        CHECK_INTERFACE(ISurfaceComposer, data, reply);
         if (UNLIKELY(!mHardwareTest.checkCalling())) {
             IPCThreadState* ipc = IPCThreadState::self();
             const int pid = ipc->getCallingPid();
