@@ -78,20 +78,10 @@ public class AndroidServiceProxy extends ProcessProxy {
 
     /**
      * Sends a command with arguments to the service through the control socket.
-     * Each argument is sent as a C-style zero-terminated string.
      */
     public void sendCommand(String ...args) throws IOException {
         OutputStream out = getControlSocketOutput();
         for (String arg : args) outputString(out, arg);
-        checkSocketResult();
-    }
-
-    /**
-     * Sends a command with arguments to the service through the control socket.
-     */
-    public void sendCommand2(String ...args) throws IOException {
-        OutputStream out = getControlSocketOutput();
-        for (String arg : args) outputString2(out, arg);
         out.write(END_OF_ARGUMENTS);
         out.flush();
         checkSocketResult();
@@ -128,8 +118,9 @@ public class AndroidServiceProxy extends ProcessProxy {
 
                         if (data == 0) {
                             // re-establish the connection:
-                            // synchronized here so that checkSocketResult() returns
-                            // when new mKeepaliveSocket is available for next cmd
+                            // synchronized here so that checkSocketResult()
+                            // returns when new mKeepaliveSocket is available for
+                            // next cmd
                             synchronized (this) {
                                 setResultAndCloseControlSocket((byte) data);
                                 s = mKeepaliveSocket = createServiceSocket();
@@ -244,12 +235,6 @@ public class AndroidServiceProxy extends ProcessProxy {
     }
 
     private void outputString(OutputStream out, String s) throws IOException {
-        out.write(s.getBytes());
-        out.write(0);
-        out.flush();
-    }
-
-    private void outputString2(OutputStream out, String s) throws IOException {
         byte[] bytes = s.getBytes();
         out.write(bytes.length);
         out.write(bytes);
