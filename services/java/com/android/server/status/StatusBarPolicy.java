@@ -99,7 +99,7 @@ public class StatusBarPolicy {
     private IBinder mBatteryIcon;
     private IconData mBatteryData;
     private boolean mBatteryFirst = true;
-    private boolean mBatteryPlugged;
+    private int mBatteryPlugged;
     private int mBatteryLevel;
     private int mBatteryThreshold = 0; // index into mBatteryThresholds
     private int[] mBatteryThresholds = new int[] { 20, 15, -1 };
@@ -108,6 +108,7 @@ public class StatusBarPolicy {
     private View mBatteryView;
     private int mBatteryViewSequence;
     private boolean mBatteryShowLowOnEndCall = false;
+    private boolean mSentLowBatteryBroadcast = false;
     private static final boolean SHOW_LOW_BATTERY_WARNING = true;
 
     // phone
@@ -581,7 +582,7 @@ public class StatusBarPolicy {
         mBatteryData.iconLevel = intent.getIntExtra("level", 0);
         mService.updateIcon(mBatteryIcon, mBatteryData, null);
 
-        boolean plugged = intent.getIntExtra("plugged", 0) != 0;
+        int plugged = intent.getIntExtra("plugged", 0);
         int level = intent.getIntExtra("level", -1);
         if (false) {
             Log.d(TAG, "updateBattery level=" + level
@@ -592,7 +593,7 @@ public class StatusBarPolicy {
                     + " mBatteryFirst=" + mBatteryFirst);
         }
 
-        boolean oldPlugged = mBatteryPlugged;
+        int oldPlugged = mBatteryPlugged;
         int oldThreshold = mBatteryThreshold;
         pickNextBatteryLevel(level);
 
@@ -619,11 +620,12 @@ public class StatusBarPolicy {
             Log.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level
                     + " mBatteryThreshold=" + mBatteryThreshold + " oldThreshold=" + oldThreshold);
         }
-        if (!plugged
-                && ((oldPlugged && level < mBatteryThresholds[BATTERY_THRESHOLD_WARNING])
+        if (plugged == 0
+                && ((oldPlugged != 0 && level < mBatteryThresholds[BATTERY_THRESHOLD_WARNING])
                     || (mBatteryThreshold > oldThreshold
                         && mBatteryThreshold > BATTERY_THRESHOLD_WARNING))) {
             // Broadcast the low battery warning
+            mSentLowBatteryBroadcast = true;
             mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_LOW));
 
             if (SHOW_LOW_BATTERY_WARNING) {
@@ -639,7 +641,11 @@ public class StatusBarPolicy {
                     mBatteryShowLowOnEndCall = true;
                 }
             }
-        } else if (mBatteryThreshold == BATTERY_THRESHOLD_CLOSE_WARNING) {
+        } else if (mBatteryThreshold < BATTERY_THRESHOLD_WARNING) {
+            if (mSentLowBatteryBroadcast == true) {
+                mSentLowBatteryBroadcast = false;
+                mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_OKAY));
+            }
             if (SHOW_LOW_BATTERY_WARNING) {
                 if (mLowBatteryDialog != null) {
                     mLowBatteryDialog.dismiss();
@@ -763,7 +769,7 @@ public class StatusBarPolicy {
         }
         if (mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
             if (mBatteryShowLowOnEndCall) {
-                if (!mBatteryPlugged) {
+                if (mBatteryPlugged == 0) {
                     showLowBatteryWarning();
                 }
                 mBatteryShowLowOnEndCall = false;
