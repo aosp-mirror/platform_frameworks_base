@@ -48,8 +48,8 @@ public:
     inline  bool        isEmpty() const     { return mBounds.isEmpty();  }
     inline  bool        isRect() const      { return mStorage.isEmpty(); }
 
-    inline  const Rect& getBounds() const   { return mBounds; }
-    inline  const Rect& bounds() const      { return getBounds(); }
+    inline  Rect        getBounds() const   { return mBounds; }
+    inline  Rect        bounds() const      { return getBounds(); }
 
             void        clear();
             void        set(const Rect& r);
