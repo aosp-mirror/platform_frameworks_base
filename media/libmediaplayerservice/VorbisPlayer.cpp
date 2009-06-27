@@ -345,9 +345,6 @@ status_t VorbisPlayer::reset()
 {
     LOGV("reset\n");
     Mutex::Autolock l(mMutex);
-    if (mState != STATE_OPEN) {
-        return NO_ERROR;
-    }
     return reset_nosync();
 }
 
@@ -355,10 +352,13 @@ status_t VorbisPlayer::reset()
 status_t VorbisPlayer::reset_nosync()
 {
     // close file
-    ov_clear(&mVorbisFile); // this also closes the FILE
     if (mFile != NULL) {
-        LOGV("OOPS! Vorbis didn't close the file");
-        fclose(mFile);
+        ov_clear(&mVorbisFile); // this also closes the FILE
+        if (mFile != NULL) {
+            LOGV("OOPS! Vorbis didn't close the file");
+            fclose(mFile);
+            mFile = NULL;
+        }
     }
     mState = STATE_ERROR;
 
