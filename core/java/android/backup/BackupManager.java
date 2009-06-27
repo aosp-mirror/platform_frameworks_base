@@ -83,11 +83,11 @@ public class BackupManager {
      *
      * {@hide}
      */
-    public IRestoreSession beginRestoreSession(int transportID) {
+    public IRestoreSession beginRestoreSession(String transport) {
         IRestoreSession binder = null;
         if (mService != null) {
             try {
-                binder = mService.beginRestoreSession(transportID);
+                binder = mService.beginRestoreSession(transport);
             } catch (RemoteException e) {
             }
         }

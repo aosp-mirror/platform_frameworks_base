@@ -124,11 +124,14 @@ public final class Bmgr {
 
     private void doTransport() {
         try {
-            int which = Integer.parseInt(nextArg());
-            int old = mBmgr.selectBackupTransport(which);
-            System.out.println("Selected transport " + which + " (formerly " + old + ")");
-        } catch (NumberFormatException e) {
-            showUsage();
+            String which = nextArg();
+            String old = mBmgr.selectBackupTransport(which);
+            if (old == null) {
+                System.out.println("Unknown transport '" + which
+                        + "' specified; no changes made.");
+            } else {
+                System.out.println("Selected transport " + which + " (formerly " + old + ")");
+            }
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -144,7 +147,7 @@ public final class Bmgr {
 
         // The rest of the 'list' options work with a restore session on the current transport
         try {
-            int curTransport = mBmgr.getCurrentTransport();
+            String curTransport = mBmgr.getCurrentTransport();
             mRestore = mBmgr.beginRestoreSession(curTransport);
             if (mRestore == null) {
                 System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -153,6 +156,8 @@ public final class Bmgr {
 
             if ("sets".equals(arg)) {
                 doListRestoreSets();
+            } else if ("transports".equals(arg)) {
+                doListTransports();
             }
 
             mRestore.endRestoreSession();
@@ -163,6 +168,22 @@ public final class Bmgr {
     }
 
     private void doListTransports() {
+        try {
+            String current = mBmgr.getCurrentTransport();
+            String[] transports = mBmgr.listAllTransports();
+            if (transports == null || transports.length == 0) {
+                System.out.println("No transports available.");
+                return;
+            }
+
+            for (String t : transports) {
+                String pad = (t.equals(current)) ? "  * " : "    ";
+                System.out.println(pad + t);
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
     }
 
     private void doListRestoreSets() {
@@ -217,7 +238,7 @@ public final class Bmgr {
 
         try {
             boolean didRestore = false;
-            int curTransport = mBmgr.getCurrentTransport();
+            String curTransport = mBmgr.getCurrentTransport();
             mRestore = mBmgr.beginRestoreSession(curTransport);
             if (mRestore == null) {
                 System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -269,11 +290,33 @@ public final class Bmgr {
 
     private static void showUsage() {
         System.err.println("usage: bmgr [backup|restore|list|transport|run]");
-        System.err.println("       bmgr backup [-f] package");
+        System.err.println("       bmgr backup PACKAGE");
+        System.err.println("       bmgr list transports");
         System.err.println("       bmgr list sets");
-        System.err.println("       #bmgr list transports");
-        System.err.println("       #bmgr transport which#");
-        System.err.println("       bmgr restore token#");
+        System.err.println("       bmgr transport WHICH");
+        System.err.println("       bmgr restore TOKEN");
         System.err.println("       bmgr run");
+        System.err.println("");
+        System.err.println("The 'backup' command schedules a backup pass for the named package.");
+        System.err.println("Note that the backup pass will effectively be a no-op if the package");
+        System.err.println("does not actually have changed data to store.");
+        System.err.println("");
+        System.err.println("The 'list transports' command reports the names of the backup transports");
+        System.err.println("currently available on the device.  These names can be passed as arguments");
+        System.err.println("to the 'transport' command.  The currently selected transport is indicated");
+        System.err.println("with a '*' character.");
+        System.err.println("");
+        System.err.println("The 'list sets' command reports the token and name of each restore set");
+        System.err.println("available to the device via the current transport.");
+        System.err.println("");
+        System.err.println("The 'transport' command designates the named transport as the currently");
+        System.err.println("active one.  This setting is persistent across reboots.");
+        System.err.println("");
+        System.err.println("The 'restore' command initiates a restore operation, using the restore set");
+        System.err.println("from the current transport whose token matches the argument.");
+        System.err.println("");
+        System.err.println("The 'run' command causes any scheduled backup operation to be initiated");
+        System.err.println("immediately, without the usual waiting period for batching together");
+        System.err.println("data changes.");
     }
 }
