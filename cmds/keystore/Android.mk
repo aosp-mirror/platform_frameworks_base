@@ -4,13 +4,14 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    keystore.c commands.c
+    netkeystore.c keymgmt.c
 
 LOCAL_C_INCLUDES := \
-    $(call include-path-for, system-core)/cutils
+    $(call include-path-for, system-core)/cutils \
+    external/openssl/include
 
 LOCAL_SHARED_LIBRARIES := \
-    libcutils
+    libcutils libssl
 
 LOCAL_STATIC_LIBRARIES :=
 
