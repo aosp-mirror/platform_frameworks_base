@@ -29,7 +29,7 @@ public class CdmaSmsAddress extends SmsAddress {
     static public final int DIGIT_MODE_4BIT_DTMF              = 0x00;
     static public final int DIGIT_MODE_8BIT_CHAR              = 0x01;
 
-    public byte digitMode;
+    public int digitMode;
 
     /**
      * Number Mode Indicator is 1-bit value that indicates whether the
@@ -39,7 +39,7 @@ public class CdmaSmsAddress extends SmsAddress {
     static public final int NUMBER_MODE_NOT_DATA_NETWORK      = 0x00;
     static public final int NUMBER_MODE_DATA_NETWORK          = 0x01;
 
-    public byte numberMode;
+    public int numberMode;
 
     /**
      * Number Types for data networks.
@@ -65,7 +65,7 @@ public class CdmaSmsAddress extends SmsAddress {
      * This field shall be set to the number of address digits
      * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
      */
-    public byte numberOfDigits;
+    public int numberOfDigits;
 
     /**
      * Numbering Plan identification is a 0 or 4-bit value that
@@ -78,7 +78,7 @@ public class CdmaSmsAddress extends SmsAddress {
     //static protected final int NUMBERING_PLAN_TELEX             = 0x4;
     //static protected final int NUMBERING_PLAN_PRIVATE           = 0x9;
 
-    public byte numberPlan;
+    public int numberPlan;
 
     /**
      * NOTE: the parsed string address and the raw byte array values
