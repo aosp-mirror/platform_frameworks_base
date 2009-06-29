@@ -159,15 +159,19 @@ static bool copybit(GLint x, GLint y,
     const GLint Wcr = crop_rect[2];
     const GLint Hcr = crop_rect[3];
 
-    int32_t dsdx = (Wcr << 16);     // dsdx =  ((Wcr/w)/Wt)*Wt
-    int32_t dtdy = ((-Hcr) <<  16); // dtdy = -((Hcr/h)/Ht)*Ht
+    GLint screen_w = w;
+    GLint screen_h = h;
+    int32_t dsdx = Wcr << 16;   // dsdx =  ((Wcr/screen_w)/Wt)*Wt
+    int32_t dtdy = Hcr << 16;   // dtdy = -((Hcr/screen_h)/Ht)*Ht
     if (transform & COPYBIT_TRANSFORM_ROT_90) {
-        dsdx /= h;
-        dtdy /= w;
-    } else {
-        dsdx /= w;
-        dtdy /= h;
+        swap(screen_w, screen_h);
     }
+    if (dsdx!=screen_w || dtdy!=screen_h) {
+        // in most cases the divide is not needed
+        dsdx /= screen_w;
+        dtdy /= screen_h;
+    }
+    dtdy = -dtdy; // see equation of dtdy above
     if (dsdx < c->copybits.minScale || dsdx > c->copybits.maxScale
             || dtdy < c->copybits.minScale || dtdy > c->copybits.maxScale) {
         // The requested scale is out of the range the hardware
@@ -290,8 +294,8 @@ static bool copybit(GLint x, GLint y,
             (enables & GGL_ENABLE_DITHER) ? COPYBIT_ENABLE : COPYBIT_DISABLE);
 
     clipRectRegion it(c);
-    copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
-    return true;
+    status_t err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
+    return err == NO_ERROR ? true : false;
 }
 
 /*
@@ -365,24 +369,24 @@ bool drawTriangleFanWithCopybit_impl(ogles_context_t* c, GLint first, GLsizei co
     // only need to consider 3 vertices for computing the jacobians
     
     const int dx01 = v1.x - v0.x;
-    const int dy01 = v1.y - v0.y;
     const int dx02 = v2.x - v0.x;
+    const int dy01 = v1.y - v0.y;
     const int dy02 = v2.y - v0.y;
     const int ds01 = t1.S - t0.S;
-    const int dt01 = t1.T - t0.T;
     const int ds02 = t2.S - t0.S;
+    const int dt01 = t1.T - t0.T;
     const int dt02 = t2.T - t0.T;
     const int area = dx01*dy02 - dy01*dx02;
     int dsdx, dsdy, dtdx, dtdy;
     if (area >= 0) {
         dsdx = ds01*dy02 - ds02*dy01;
-        dsdy = ds02*dx01 - ds01*dx02;
         dtdx = dt01*dy02 - dt02*dy01;
+        dsdy = ds02*dx01 - ds01*dx02;
         dtdy = dt02*dx01 - dt01*dx02;
     } else {
         dsdx = ds02*dy01 - ds01*dy02;
-        dsdy = ds01*dx02 - ds02*dx01;
         dtdx = dt02*dy01 - dt01*dy02;
+        dsdy = ds01*dx02 - ds02*dx01;
         dtdy = dt01*dx02 - dt02*dx01;
     }
 
