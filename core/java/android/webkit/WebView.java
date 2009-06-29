@@ -1010,6 +1010,17 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Sets JavaScript engine flags.
+     *
+     * @param flags JS engine flags in a String
+     *
+     * @hide pending API solidification
+     */
+    public void setJsFlags(String flags) {
+        mWebViewCore.sendMessage(EventHub.SET_JS_FLAGS, flags);
+    }
+
+    /**
      * Inform WebView of the network state. This is used to set
      * the javascript property window.navigator.isOnline and
      * generates the online/offline event as specified in HTML5, sec. 5.7.7
