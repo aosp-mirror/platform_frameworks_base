@@ -377,10 +377,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             removeMessages(EVENT_RESTORE_DEFAULT_APN);
             setEnabled(type, false);
             if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
+                mRequestedApnType = Phone.APN_TYPE_DEFAULT;
                 if (dataEnabled[APN_DEFAULT_ID]) {
                     return Phone.APN_ALREADY_ACTIVE;
                 } else {
-                    cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+                    Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
+                    msg.arg1 = 1; // tearDown is true;
+                    msg.obj = Phone.REASON_DATA_DISABLED;
+                    sendMessage(msg);
                     return Phone.APN_REQUEST_STARTED;
                 }
             } else {
@@ -1235,10 +1239,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void onRestoreDefaultApn() {
         if (DBG) Log.d(LOG_TAG, "Restore default APN");
         setEnabled(Phone.APN_TYPE_MMS, false);
-
+        mRequestedApnType = Phone.APN_TYPE_DEFAULT;
         if (!isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
             cleanUpConnection(true, Phone.REASON_RESTORE_DEFAULT_APN);
-            mRequestedApnType = Phone.APN_TYPE_DEFAULT;
         }
     }
 
