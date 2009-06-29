@@ -547,7 +547,8 @@ android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
     memset(buf, 0, bufSize);
     // TODO check return codes
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->getLanguage(buf, &bufSize);
+        // TODO use the correct getLanguage()
+        //pSynthData->mNativeSynthInterface->getLanguage(buf, &bufSize);
     }
     return env->NewStringUTF(buf);
 }
