@@ -48,8 +48,9 @@ public class WebViewDatabase {
     // 6 -> 7 Change cache localPath from int to String
     // 7 -> 8 Move cache to its own db
     // 8 -> 9 Store both scheme and host when storing passwords
-    private static final int CACHE_DATABASE_VERSION = 2;
+    private static final int CACHE_DATABASE_VERSION = 3;
     // 1 -> 2 Add expires String
+    // 2 -> 3 Add content-disposition
 
     private static WebViewDatabase mInstance = null;
 
@@ -120,6 +121,8 @@ public class WebViewDatabase {
 
     private static final String CACHE_CONTENTLENGTH_COL = "contentlength";
 
+    private static final String CACHE_CONTENTDISPOSITION_COL = "contentdisposition";
+
     // column id strings for "password" table
     private static final String PASSWORD_HOST_COL = "host";
 
@@ -159,6 +162,7 @@ public class WebViewDatabase {
     private static int mCacheHttpStatusColIndex;
     private static int mCacheLocationColIndex;
     private static int mCacheContentLengthColIndex;
+    private static int mCacheContentDispositionColIndex;
 
     private static int mCacheTransactionRefcount;
 
@@ -236,6 +240,8 @@ public class WebViewDatabase {
                         .getColumnIndex(CACHE_LOCATION_COL);
                 mCacheContentLengthColIndex = mCacheInserter
                         .getColumnIndex(CACHE_CONTENTLENGTH_COL);
+                mCacheContentDispositionColIndex = mCacheInserter
+                        .getColumnIndex(CACHE_CONTENTDISPOSITION_COL);
             }
         }
 
@@ -330,8 +336,8 @@ public class WebViewDatabase {
                     + CACHE_MIMETYPE_COL + " TEXT, " + CACHE_ENCODING_COL
                     + " TEXT," + CACHE_HTTP_STATUS_COL + " INTEGER, "
                     + CACHE_LOCATION_COL + " TEXT, " + CACHE_CONTENTLENGTH_COL
-                    + " INTEGER, " + " UNIQUE (" + CACHE_URL_COL
-                    + ") ON CONFLICT REPLACE);");
+                    + " INTEGER, " + CACHE_CONTENTDISPOSITION_COL + " TEXT, "
+                    + " UNIQUE (" + CACHE_URL_COL + ") ON CONFLICT REPLACE);");
             mCacheDatabase.execSQL("CREATE INDEX cacheUrlIndex ON cache ("
                     + CACHE_URL_COL + ")");
         }
@@ -544,8 +550,8 @@ public class WebViewDatabase {
         }
 
         Cursor cursor = mCacheDatabase.rawQuery("SELECT filepath, lastmodify, etag, expires, "
-                    + "expiresstring, mimetype, encoding, httpstatus, location, contentlength "
-                    + "FROM cache WHERE url = ?",
+                    + "expiresstring, mimetype, encoding, httpstatus, location, contentlength, "
+                    + "contentdisposition FROM cache WHERE url = ?",
                 new String[] { url });
 
         try {
@@ -561,6 +567,7 @@ public class WebViewDatabase {
                 ret.httpStatusCode = cursor.getInt(7);
                 ret.location = cursor.getString(8);
                 ret.contentLength = cursor.getLong(9);
+                ret.contentdisposition = cursor.getString(10);
                 return ret;
             }
         } finally {
@@ -605,6 +612,8 @@ public class WebViewDatabase {
         mCacheInserter.bind(mCacheHttpStatusColIndex, c.httpStatusCode);
         mCacheInserter.bind(mCacheLocationColIndex, c.location);
         mCacheInserter.bind(mCacheContentLengthColIndex, c.contentLength);
+        mCacheInserter.bind(mCacheContentDispositionColIndex,
+                c.contentdisposition);
         mCacheInserter.execute();
     }
 

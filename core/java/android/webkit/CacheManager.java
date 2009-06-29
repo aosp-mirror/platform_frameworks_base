@@ -86,6 +86,7 @@ public final class CacheManager {
         String mimeType;
         String location;
         String encoding;
+        String contentdisposition;
 
         // these fields are NOT saved to the database
         InputStream inStream;
@@ -133,6 +134,13 @@ public final class CacheManager {
 
         public String getEncoding() {
             return encoding;
+        }
+
+        /**
+         * @hide Pending API council approval
+         */
+        public String getContentDisposition() {
+            return contentdisposition;
         }
 
         // For out-of-package access to the underlying streams.
@@ -625,6 +633,11 @@ public final class CacheManager {
                     Log.e(LOGTAG, "illegal expires: " + ret.expiresString);
                 }
             }
+        }
+
+        String contentDisposition = headers.getContentDisposition();
+        if (contentDisposition != null) {
+            ret.contentdisposition = contentDisposition;
         }
 
         String lastModified = headers.getLastModified();
