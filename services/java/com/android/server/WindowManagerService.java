@@ -78,6 +78,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -418,7 +419,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     final Rect mTempRect = new Rect();
 
     final Configuration mTempConfiguration = new Configuration();
-
+    int screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
+    
     public static WindowManagerService main(Context context,
             PowerManagerService pm, boolean haveInputMethods) {
         WMThread thr = new WMThread(context, pm, haveInputMethods);
@@ -3731,6 +3733,40 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             orientation = Configuration.ORIENTATION_LANDSCAPE;
         }
         config.orientation = orientation;
+        
+        if (screenLayout == Configuration.SCREENLAYOUT_UNDEFINED) {
+            // Note we only do this once because at this point we don't
+            // expect the screen to change in this way at runtime, and want
+            // to avoid all of this computation for every config change.
+            DisplayMetrics dm = new DisplayMetrics();
+            mDisplay.getMetrics(dm);
+            int longSize = dw;
+            int shortSize = dh;
+            if (longSize < shortSize) {
+                int tmp = longSize;
+                longSize = shortSize;
+                shortSize = tmp;
+            }
+            longSize = (int)(longSize/dm.density);
+            shortSize = (int)(shortSize/dm.density);
+            
+            // These semi-magic numbers define our compatibility modes for
+            // applications with different screens.  Don't change unless you
+            // make sure to test lots and lots of apps!
+            if (longSize < 470) {
+                // This is shorter than an HVGA normal density screen (which
+                // is 480 pixels on its long side).
+                screenLayout = Configuration.SCREENLAYOUT_SMALL;
+            } else if (longSize > 490 && shortSize > 330) {
+                // This is larger than an HVGA normal density screen (which
+                // is 480x320 pixels).
+                screenLayout = Configuration.SCREENLAYOUT_LARGE;
+            } else {
+                screenLayout = Configuration.SCREENLAYOUT_NORMAL;
+            }
+        }
+        config.screenLayout = screenLayout;
+        
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
         config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
         mPolicy.adjustConfigurationLw(config);

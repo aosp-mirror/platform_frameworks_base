@@ -3919,7 +3919,7 @@ void ResTable::print(bool inclValues) const
                         printf("      NON-INTEGER ResTable_type ADDRESS: %p\n", type);
                         continue;
                     }
-                    printf("      config %d lang=%c%c cnt=%c%c orien=%d touch=%d density=%d key=%d infl=%d nav=%d w=%d h=%d\n",
+                    printf("      config %d lang=%c%c cnt=%c%c orien=%d touch=%d density=%d key=%d infl=%d nav=%d w=%d h=%d lyt=%d\n",
                            (int)configIndex,
                            type->config.language[0] ? type->config.language[0] : '-',
                            type->config.language[1] ? type->config.language[1] : '-',
@@ -3932,7 +3932,8 @@ void ResTable::print(bool inclValues) const
                            type->config.inputFlags,
                            type->config.navigation,
                            dtohs(type->config.screenWidth),
-                           dtohs(type->config.screenHeight));
+                           dtohs(type->config.screenHeight),
+                           type->config.screenLayout);
                     size_t entryCount = dtohl(type->entryCount);
                     uint32_t entriesStart = dtohl(type->entriesStart);
                     if ((entriesStart&0x3) != 0) {

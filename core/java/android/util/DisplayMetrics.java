@@ -103,40 +103,43 @@ public class DisplayMetrics {
 
     /**
      * Update the display metrics based on the compatibility info and orientation
+     * NOTE: DO NOT EXPOSE THIS API!  It is introducing a circular dependency
+     * with the higher-level android.res package.
      * {@hide}
      */
-    public void updateMetrics(CompatibilityInfo compatibilityInfo, int orientation) {
+    public void updateMetrics(CompatibilityInfo compatibilityInfo, int orientation,
+            int screenLayout) {
         int xOffset = 0;
         if (!compatibilityInfo.isConfiguredExpandable()) {
             // Note: this assume that configuration is updated before calling
             // updateMetrics method.
-            int defaultWidth;
-            int defaultHeight;
-            switch (orientation) {
-                case Configuration.ORIENTATION_LANDSCAPE: {
-                    defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
-                    defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
-                    break;
-                }
-                case Configuration.ORIENTATION_PORTRAIT:
-                case Configuration.ORIENTATION_SQUARE:
-                default: {
-                    defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
-                    defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
-                    break;
-                }
-                case Configuration.ORIENTATION_UNDEFINED: {
-                    // don't change
-                    return;
-                }
-            }
-            
-            if (defaultWidth == widthPixels && defaultHeight == heightPixels) {
-                // the screen size is same as expected size. make it expandable
-                compatibilityInfo.setExpandable(true);
-            } else {
+            if (screenLayout == Configuration.SCREENLAYOUT_LARGE) {
+                // This is a large screen device and the app is not 
+                // compatible with large screens, to diddle it.
+                
                 compatibilityInfo.setExpandable(false);
-                // adjust the size only when the device's screen is bigger.
+                // Figure out the compatibility width and height of the screen.
+                int defaultWidth;
+                int defaultHeight;
+                switch (orientation) {
+                    case Configuration.ORIENTATION_LANDSCAPE: {
+                        defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
+                        defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
+                        break;
+                    }
+                    case Configuration.ORIENTATION_PORTRAIT:
+                    case Configuration.ORIENTATION_SQUARE:
+                    default: {
+                        defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
+                        defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
+                        break;
+                    }
+                    case Configuration.ORIENTATION_UNDEFINED: {
+                        // don't change
+                        return;
+                    }
+                }
+                
                 if (defaultWidth < widthPixels) {
                     // content/window's x offset in original pixels
                     xOffset = ((widthPixels - defaultWidth) / 2);
@@ -145,6 +148,10 @@ public class DisplayMetrics {
                 if (defaultHeight < heightPixels) {
                     heightPixels = defaultHeight;
                 }
+                
+            } else {
+                // the screen size is same as expected size. make it expandable
+                compatibilityInfo.setExpandable(true);
             }
         }
         compatibilityInfo.setVisibleRect(xOffset, widthPixels, heightPixels);
