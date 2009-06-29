@@ -5922,8 +5922,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             int height = mBottom - mTop;
 
             final AttachInfo attachInfo = mAttachInfo;
+            final boolean scalingRequired = attachInfo != null && attachInfo.mScalingRequired;
 
-            if (autoScale && attachInfo != null && attachInfo.mScalingRequired) {
+            if (autoScale && scalingRequired) {
                 width = (int) ((width * attachInfo.mApplicationScale) + 0.5f);
                 height = (int) ((height * attachInfo.mApplicationScale) + 0.5f);
             }
@@ -6014,7 +6015,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             computeScroll();
             final int restoreCount = canvas.save();
             
-            if (autoScale && attachInfo.mScalingRequired) {
+            if (autoScale && scalingRequired) {
                 final float scale = attachInfo.mApplicationScale;
                 canvas.scale(scale, scale);
             }
