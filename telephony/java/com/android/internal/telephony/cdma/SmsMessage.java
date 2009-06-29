@@ -587,9 +587,24 @@ public class SmsMessage extends SmsMessageBase {
     private static CdmaSmsAddress parseCdmaSmsAddr(String addrStr) {
         // see C.S0015-B, v2.0, 3.4.3.3
         CdmaSmsAddress addr = new CdmaSmsAddress();
-        addr.digitMode = CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR;
+        addr.digitMode = CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF;
         try {
             addr.origBytes = addrStr.getBytes("UTF-8");
+            for (int index = 0; index < addr.origBytes.length; index++) {
+                if (addr.origBytes[index] >= '0' && addr.origBytes[index] <= '9') {
+                    if (addr.origBytes[index] == '0') {
+                        addr.origBytes[index] = 10;
+                    } else {
+                        addr.origBytes[index] -= '0';
+                    }
+                } else if (addr.origBytes[index] == '*') {
+                    addr.origBytes[index] = 11;
+                } else if (addr.origBytes[index] == '#') {
+                    addr.origBytes[index] = 12;
+                } else {
+                    return null;
+                }
+            }
         } catch  (java.io.UnsupportedEncodingException ex) {
             Log.e(LOG_TAG, "CDMA address parsing failed: " + ex);
             return null;
@@ -597,7 +612,7 @@ public class SmsMessage extends SmsMessageBase {
         addr.numberOfDigits = (byte)addr.origBytes.length;
         addr.numberMode = CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK;
         addr.numberPlan = CdmaSmsAddress.NUMBERING_PLAN_ISDN_TELEPHONY;
-        addr.ton = CdmaSmsAddress.TON_INTERNATIONAL_OR_IP;
+        addr.ton = CdmaSmsAddress.TON_UNKNOWN;
         return addr;
     }
 
