@@ -1780,6 +1780,15 @@ final class WebViewCore {
 
     }
 
+    // called by JNI
+    private void requestKeyboard(boolean showKeyboard) {
+        if (mWebView != null) {
+            Message.obtain(mWebView.mPrivateHandler,
+                    WebView.REQUEST_KEYBOARD, showKeyboard ? 1 : 0, 0)
+                    .sendToTarget();
+        }
+    }
+
     private native void nativePause();
     private native void nativeResume();
     private native void nativeFreeMemory();

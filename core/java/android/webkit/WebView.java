@@ -467,6 +467,7 @@ public class WebView extends AbsoluteLayout
     static final int WEBCORE_NEED_TOUCH_EVENTS          = 25;
     // obj=Rect in doc coordinates
     static final int INVAL_RECT_MSG_ID                  = 26;
+    static final int REQUEST_KEYBOARD                   = 27;
 
     static final String[] HandlerDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -494,7 +495,8 @@ public class WebView extends AbsoluteLayout
         "LONG_PRESS_CENTER", //              = 23;
         "PREVENT_TOUCH_ID", //               = 24;
         "WEBCORE_NEED_TOUCH_EVENTS", //      = 25;
-        "INVAL_RECT_MSG_ID" //               = 26;
+        "INVAL_RECT_MSG_ID", //              = 26;
+        "REQUEST_KEYBOARD" //                = 27;
     };
 
     // width which view is considered to be fully zoomed out
@@ -3002,22 +3004,36 @@ public class WebView extends AbsoluteLayout
     }
 
     // Called by JNI when a touch event puts a textfield into focus.
-    private void displaySoftKeyboard() {
+    private void displaySoftKeyboard(boolean isTextView) {
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(mWebTextView, 0);
-        mWebTextView.enableScrollOnScreen(true);
-        // Now we need to fake a touch event to place the cursor where the
-        // user touched.
-        AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams)
-                mWebTextView.getLayoutParams();
-        if (lp != null) {
-            // Take the last touch and adjust for the location of the
-            // WebTextView.
-            float x = mLastTouchX + (float) (mScrollX - lp.x);
-            float y = mLastTouchY + (float) (mScrollY - lp.y);
-            mWebTextView.fakeTouchEvent(x, y);
+
+        if (isTextView) {
+            imm.showSoftInput(mWebTextView, 0);
+            mWebTextView.enableScrollOnScreen(true);
+            // Now we need to fake a touch event to place the cursor where the
+            // user touched.
+            AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams)
+                    mWebTextView.getLayoutParams();
+            if (lp != null) {
+                // Take the last touch and adjust for the location of the
+                // WebTextView.
+                float x = mLastTouchX + (float) (mScrollX - lp.x);
+                float y = mLastTouchY + (float) (mScrollY - lp.y);
+                mWebTextView.fakeTouchEvent(x, y);
+            }
         }
+        else { // used by plugins
+            imm.showSoftInput(this, 0);
+        }
+    }
+
+    // Called by WebKit to instruct the UI to hide the keyboard
+    private void hideSoftKeyboard() {
+        InputMethodManager imm = (InputMethodManager)
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
     }
 
     /*
@@ -4917,6 +4933,14 @@ public class WebView extends AbsoluteLayout
                         if (mPreventDrag) {
                             mTouchMode = TOUCH_DONE_MODE;
                         }
+                    }
+                    break;
+
+                case REQUEST_KEYBOARD:
+                    if (msg.arg1 == 0) {
+                        hideSoftKeyboard();
+                    } else {
+                        displaySoftKeyboard(false);
                     }
                     break;
 
