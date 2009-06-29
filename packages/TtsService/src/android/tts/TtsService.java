@@ -148,8 +148,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private void setDefaultSettings() {
-        // TODO handle default language
-        setLanguage("eng", "USA", "");
+        setLanguage(this.getDefaultLanguage(), getDefaultLanguage(), getDefaultLocVariant());
 
         // speech rate
         setSpeechRate(getDefaultRate());
@@ -215,6 +214,17 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private void setPitch(int pitch) {
         nativeSynth.setPitch(pitch);
+    }
+
+
+    private int isLanguageAvailable(String lang, String country, String variant) {
+        Log.v("TTS", "TtsService.isLanguageAvailable(" + lang + ", " + country + ", " +variant+")");
+        return nativeSynth.isLanguageAvailable(lang, country, variant);
+    }
+
+
+    private String[] getLanguage() {
+        return nativeSynth.getLanguage();
     }
 
 
@@ -890,6 +900,30 @@ public class TtsService extends Service implements OnCompletionListener {
          */
         public void setPitch(int pitch) {
             mSelf.setPitch(pitch);
+        }
+
+        /**
+         * Returns the level of support for the specified language.
+         *
+         * @param lang  the three letter ISO language code.
+         * @param country  the three letter ISO country code.
+         * @param variant  the variant code associated with the country and language pair.
+         * @return one of TTS_LANG_NOT_SUPPORTED, TTS_LANG_MISSING_DATA, TTS_LANG_AVAILABLE,
+         *      TTS_LANG_COUNTRY_AVAILABLE, TTS_LANG_COUNTRY_VAR_AVAILABLE as defined in
+         *      android.speech.tts.TextToSpeech.
+         */
+        public int isLanguageAvailable(String lang, String country, String variant) {
+            return mSelf.isLanguageAvailable(lang, country, variant);
+        }
+
+        /**
+         * Returns the currently set language / country / variant strings representing the
+         * language used by the TTS engine.
+         * @return null is no language is set, or an array of 3 string containing respectively
+         *      the language, country and variant.
+         */
+        public String[] getLanguage() {
+            return mSelf.getLanguage();
         }
 
         /**

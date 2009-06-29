@@ -43,6 +43,10 @@ interface ITts {
 
     void addSpeechFile(in String text, in String filename);
 
+    String[] getLanguage();
+
+    int isLanguageAvailable(in String language, in String country, in String variant);
+
     void setLanguage(in String language, in String country, in String variant);
 
     boolean synthesizeToFile(in String text, in String[] params, in String outputDirectory);
