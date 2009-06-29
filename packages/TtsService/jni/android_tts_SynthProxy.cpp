@@ -278,6 +278,33 @@ android_tts_SynthProxy_native_finalize(JNIEnv *env, jobject thiz, jint jniData)
 }
 
 
+static int
+android_tts_SynthProxy_isLanguageAvailable(JNIEnv *env, jobject thiz, jint jniData,
+        jstring language, jstring country, jstring variant)
+{
+    int result = TTS_LANG_NOT_SUPPORTED;
+
+    if (jniData == 0) {
+        LOGE("android_tts_SynthProxy_isLanguageAvailable(): invalid JNI data");
+        return result;
+    }
+
+    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    const char *langNativeString = env->GetStringUTFChars(language, 0);
+    const char *countryNativeString = env->GetStringUTFChars(country, 0);
+    const char *variantNativeString = env->GetStringUTFChars(variant, 0);
+    // TODO check return codes
+    if (pSynthData->mNativeSynthInterface) {
+        result = pSynthData->mNativeSynthInterface->isLanguageAvailable(langNativeString,
+                countryNativeString, variantNativeString);
+    }
+    env->ReleaseStringUTFChars(language, langNativeString);
+    env->ReleaseStringUTFChars(country, countryNativeString);
+    env->ReleaseStringUTFChars(variant, variantNativeString);
+    return result;
+}
+
+
 static void
 android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
         jstring language, jstring country, jstring variant)
@@ -533,24 +560,34 @@ LOGI("android_tts_SynthProxy_playAudioBuffer");
 }
 
 
-JNIEXPORT jstring JNICALL
+static jobjectArray
 android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
 {
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_getLanguage(): invalid JNI data");
-        return env->NewStringUTF("");
+        return NULL;
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    size_t bufSize = 100;
-    char buf[bufSize];
-    memset(buf, 0, bufSize);
-    // TODO check return codes
+
     if (pSynthData->mNativeSynthInterface) {
-        // TODO use the correct getLanguage()
-        //pSynthData->mNativeSynthInterface->getLanguage(buf, &bufSize);
+        size_t bufSize = 100;
+        char lang[bufSize];
+        char country[bufSize];
+        char variant[bufSize];
+        memset(lang, 0, bufSize);
+        memset(country, 0, bufSize);
+        memset(variant, 0, bufSize);
+        jobjectArray retLocale = (jobjectArray)env->NewObjectArray(3,
+                env->FindClass("java/lang/String"), env->NewStringUTF(""));
+        pSynthData->mNativeSynthInterface->getLanguage(lang, country, variant);
+        env->SetObjectArrayElement(retLocale, 0, env->NewStringUTF(lang));
+        env->SetObjectArrayElement(retLocale, 1, env->NewStringUTF(country));
+        env->SetObjectArrayElement(retLocale, 2, env->NewStringUTF(variant));
+        return retLocale;
+    } else {
+        return NULL;
     }
-    return env->NewStringUTF(buf);
 }
 
 
@@ -588,6 +625,10 @@ static JNINativeMethod gMethods[] = {
         "(ILjava/lang/String;Ljava/lang/String;)V",
         (void*)android_tts_SynthProxy_synthesizeToFile
     },
+    {   "native_isLanguageAvailable",
+        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
+        (void*)android_tts_SynthProxy_isLanguageAvailable
+    },
     {   "native_setLanguage",
         "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
         (void*)android_tts_SynthProxy_setLanguage
@@ -609,7 +650,7 @@ static JNINativeMethod gMethods[] = {
         (void*)android_tts_SynthProxy_playAudioBuffer
     },
     {   "native_getLanguage",
-        "(I)Ljava/lang/String;",
+        "(I)[Ljava/lang/String;",
         (void*)android_tts_SynthProxy_getLanguage
     },
     {   "native_getRate",
