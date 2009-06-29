@@ -407,6 +407,8 @@ final class WebViewCore {
 
     private native void nativeDumpNavTree();
 
+    private native void nativeSetJsFlags(String flags);
+
     /**
      *  Delete text from start to end in the focused textfield. If there is no
      *  focus, or if start == end, silently fail.  If start and end are out of
@@ -688,6 +690,8 @@ final class WebViewCore {
         static final int DUMP_DOMTREE = 170;
         static final int DUMP_RENDERTREE = 171;
         static final int DUMP_NAVTREE = 172;
+
+        static final int SET_JS_FLAGS = 173;
 
         // private message ids
         private static final int DESTROY =     200;
@@ -1055,6 +1059,10 @@ final class WebViewCore {
 
                         case DUMP_NAVTREE:
                             nativeDumpNavTree();
+                            break;
+
+                        case SET_JS_FLAGS:
+                            nativeSetJsFlags((String)msg.obj);
                             break;
 
                         case SYNC_SCROLL:
