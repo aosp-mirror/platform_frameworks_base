@@ -48,6 +48,24 @@ interface IBackupManager {
     void agentDisconnected(String packageName);
 
     /**
+     * Enable/disable the backup service entirely.  When disabled, no backup
+     * or restore operations will take place.  Data-changed notifications will
+     * still be observed and collected, however, so that changes made while the
+     * mechanism was disabled will still be backed up properly if it is enabled
+     * at some point in the future.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void setBackupEnabled(boolean isEnabled);
+
+    /**
+     * Report whether the backup mechanism is currently enabled.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    boolean isBackupEnabled();
+
+    /**
      * Schedule an immediate backup attempt for all pending updates.  This is
      * primarily intended for transports to use when they detect a suitable
      * opportunity for doing a backup pass.  If there are no pending updates to

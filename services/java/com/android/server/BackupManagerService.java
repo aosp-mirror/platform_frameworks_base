@@ -74,6 +74,10 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
 
+    // Persistent properties
+    private static final String BACKUP_TRANSPORT_PROPERTY = "persist.service.bkup.trans";
+    private static final String BACKUP_ENABLED_PROPERTY = "persist.service.bkup.enabled";
+
     // Default time to wait after data changes before we back up the data
     private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
 
@@ -86,10 +90,11 @@ class BackupManagerService extends IBackupManager.Stub {
 
     private Context mContext;
     private PackageManager mPackageManager;
-    private final IActivityManager mActivityManager;
+    private IActivityManager mActivityManager;
+    private boolean mEnabled;   // access to this is synchronized on 'this'
     private final BackupHandler mBackupHandler = new BackupHandler();
     // map UIDs to the set of backup client services within that UID's app set
-    private SparseArray<HashSet<ApplicationInfo>> mBackupParticipants
+    private final SparseArray<HashSet<ApplicationInfo>> mBackupParticipants
         = new SparseArray<HashSet<ApplicationInfo>>();
     // set of backup services that have pending changes
     private class BackupRequest {
@@ -128,7 +133,6 @@ class BackupManagerService extends IBackupManager.Stub {
     private volatile boolean mClearingData;
 
     // Transport bookkeeping
-    static private final String BACKUP_TRANSPORT_PROPERTY = "persist.service.bkup.trans";
     private final HashMap<String,IBackupTransport> mTransports
             = new HashMap<String,IBackupTransport>();
     private String mCurrentTransport;
@@ -160,6 +164,9 @@ class BackupManagerService extends IBackupManager.Stub {
         mActivityManager = ActivityManagerNative.getDefault();
 
         // Set up our bookkeeping
+        // !!! STOPSHIP: make this disabled by default so that we then gate on
+        //               setupwizard or other opt-out UI
+        mEnabled = SystemProperties.getBoolean(BACKUP_ENABLED_PROPERTY, true);
         mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mDataDir = Environment.getDownloadCacheDirectory();
 
@@ -489,8 +496,15 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // The queue lock should be held when scheduling a backup pass
     private void scheduleBackupPassLocked(long timeFromNowMillis) {
-        mBackupHandler.removeMessages(MSG_RUN_BACKUP);
-        mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, timeFromNowMillis);
+        // We only schedule backups when we're actually enabled
+        synchronized (this) {
+            if (mEnabled) {
+                mBackupHandler.removeMessages(MSG_RUN_BACKUP);
+                mBackupHandler.sendEmptyMessageDelayed(MSG_RUN_BACKUP, timeFromNowMillis);
+            } else if (DEBUG) {
+                Log.v(TAG, "Disabled, so not scheduling backup pass");
+            }
+        }
     }
 
     // Return the given transport
@@ -1087,7 +1101,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 if (DEBUG) {
                     int numKeys = mPendingBackups.size();
-                    Log.d(TAG, "Scheduling backup for " + numKeys + " participants:");
+                    Log.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
                     for (BackupRequest b : mPendingBackups.values()) {
                         Log.d(TAG, "    + " + b + " agent=" + b.appInfo.backupAgentName);
                     }
@@ -1117,7 +1131,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Run a backup pass immediately for any applications that have declared
     // that they have pending updates.
     public void backupNow() throws RemoteException {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "tryBackupNow");
+        mContext.enforceCallingPermission("android.permission.BACKUP", "backupNow");
 
         if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
         synchronized (mQueueLock) {
@@ -1125,16 +1139,43 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // Enable/disable the backup transport
+    public void setBackupEnabled(boolean enable) {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "setBackupEnabled");
+
+        boolean wasEnabled = mEnabled;
+        synchronized (this) {
+            SystemProperties.set(BACKUP_ENABLED_PROPERTY, enable ? "true" : "false");
+            mEnabled = enable;
+        }
+
+        if (enable && !wasEnabled) {
+            synchronized (mQueueLock) {
+                if (mPendingBackups.size() > 0) {
+                    // !!! TODO: better policy around timing of the first backup pass
+                    if (DEBUG) Log.v(TAG, "Backup enabled with pending data changes, scheduling");
+                    this.scheduleBackupPassLocked(COLLECTION_INTERVAL);
+                }
+            }
+        }
+}
+
+    // Report whether the backup mechanism is currently enabled
+    public boolean isBackupEnabled() {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "isBackupEnabled");
+        return mEnabled;    // no need to synchronize just to read it
+    }
+
     // Report the name of the currently active transport
     public String getCurrentTransport() {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
+        mContext.enforceCallingPermission("android.permission.BACKUP", "getCurrentTransport");
         Log.v(TAG, "getCurrentTransport() returning " + mCurrentTransport);
         return mCurrentTransport;
     }
 
     // Report all known, available backup transports
     public String[] listAllTransports() {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
+        mContext.enforceCallingPermission("android.permission.BACKUP", "listAllTransports");
 
         String[] list = null;
         ArrayList<String> known = new ArrayList<String>();
@@ -1292,7 +1333,8 @@ class BackupManagerService extends IBackupManager.Stub {
         synchronized (mQueueLock) {
             pw.println("Available transports:");
             for (String t : listAllTransports()) {
-                pw.println("  " + t);
+                String pad = (t.equals(mCurrentTransport)) ? "  * " : "    ";
+                pw.println(pad + t);
             }
             int N = mBackupParticipants.size();
             pw.println("Participants:");
@@ -1302,14 +1344,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 pw.println(uid);
                 HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
                 for (ApplicationInfo app: participants) {
-                    pw.print("    ");
-                    pw.println(app.toString());
+                    pw.println("    " + app.toString());
                 }
             }
             pw.println("Pending: " + mPendingBackups.size());
             for (BackupRequest req : mPendingBackups.values()) {
-                pw.print("   ");
-                pw.println(req);
+                pw.println("    " + req);
             }
         }
     }
