@@ -67,6 +67,11 @@ static Properties adapter_properties[] = {
     {"Devices", DBUS_TYPE_ARRAY},
 };
 
+typedef union {
+    char *str_val;
+    int int_val;
+    char **array_val;
+} property_value;
 
 jfieldID get_field(JNIEnv *env, jclass clazz, const char *member,
                    const char *mtype) {
@@ -466,258 +471,217 @@ void append_variant(DBusMessageIter *iter, int type, void *val)
     dbus_message_iter_close_container(iter, &value_iter);
 }
 
-
-//TODO(): Remove code duplication between parse_properties and
-//parse_property_change
-jobjectArray parse_properties(JNIEnv *env, DBusMessageIter *iter, Properties *properties,
-                              const int max_num_properties) {
-    DBusMessageIter dict_entry, dict, prop_val, device_val, array_val_iter;
-    jobjectArray strArray = NULL;
-    char * property;
-    char values[max_num_properties][256];
-    char **uuid_array = NULL;
-    char **device_path = NULL;
-    char **array_elements = NULL;
-    char *string_val;
-    uint32_t int_val, bool_val;
-    int i, j, k, type, array_type, num_array_elements = 0;
-    int ret, num_properties = 0, num_uuids = 0, num_devices = 0;
-
-
-    jclass stringClass = env->FindClass("java/lang/String");
-    DBusError err;
-    dbus_error_init(&err);
-
-    for (i = 0; i < max_num_properties; i++)
-        memset(values[i], '\0', 128 * sizeof(char));
-
-    if(dbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY)
-        goto failure;
-    dbus_message_iter_recurse(iter, &dict);
-    do {
-        if (dbus_message_iter_get_arg_type(&dict) != DBUS_TYPE_DICT_ENTRY)
-            goto failure;
-        dbus_message_iter_recurse(&dict, &dict_entry);
-        if (dbus_message_iter_get_arg_type(&dict_entry) != DBUS_TYPE_STRING)
-            goto failure;
-        dbus_message_iter_get_basic(&dict_entry, &property);
-        if (!dbus_message_iter_next(&dict_entry))
-            goto failure;
-        if (dbus_message_iter_get_arg_type(&dict_entry) != DBUS_TYPE_VARIANT)
-            goto failure;
-
-        for (i = 0; i < max_num_properties; i++) {
-            if (!strncmp(properties[i].name, property, strlen(property))) {
-                num_properties ++;
-                break;
-            }
-        }
-        if (i == max_num_properties)
-            goto failure;
-
-        type = properties[i].type;
-        dbus_message_iter_recurse(&dict_entry, &prop_val);
-        if(dbus_message_iter_get_arg_type(&prop_val) != type) {
-            LOGE("Property type mismatch in parse_properties: %d, expected:%d",
-                 dbus_message_iter_get_arg_type(&prop_val), type);
-            goto failure;
-        }
-
-        switch(type) {
-        case DBUS_TYPE_STRING:
-        case DBUS_TYPE_OBJECT_PATH:
-            dbus_message_iter_get_basic(&prop_val, &string_val);
-            strcpy(values[i], string_val);
-            break;
-        case DBUS_TYPE_UINT32:
-        case DBUS_TYPE_INT16:
-            dbus_message_iter_get_basic(&prop_val, &int_val);
-            sprintf(values[i], "%d", int_val);
-            break;
-        case DBUS_TYPE_BOOLEAN:
-            dbus_message_iter_get_basic(&prop_val, &bool_val);
-            sprintf(values[i], "%s", bool_val ? "true" : "false");
-            break;
-        case DBUS_TYPE_ARRAY:
-            dbus_message_iter_recurse(&prop_val, &array_val_iter);
-            array_type = dbus_message_iter_get_arg_type(&array_val_iter);
-            num_array_elements = 0;
-            if (array_type == DBUS_TYPE_OBJECT_PATH ||
-                array_type == DBUS_TYPE_STRING){
-                do {
-                    num_array_elements++;
-                } while(dbus_message_iter_next(&array_val_iter));
-                dbus_message_iter_recurse(&prop_val, &array_val_iter);
-                // Allocate  an array
-                array_elements = (char **)malloc(sizeof(char *) *
-                                                 num_array_elements);
-                if (!array_elements)
-                    goto failure;
-
-                j = 0;
-                do {
-                   dbus_message_iter_get_basic(&array_val_iter, &array_elements[j]);
-                   j++;
-                } while(dbus_message_iter_next(&array_val_iter));
-                if (!strncmp(property, "UUIDs", strlen("UUIDs"))) {
-                    num_uuids = num_array_elements;
-                    uuid_array = array_elements;
-                } else {
-                    num_devices = num_array_elements;
-                    device_path = array_elements;
-                }
-            }
-            break;
-        default:
-            goto failure;
-        }
-    } while(dbus_message_iter_next(&dict));
-
-    // Convert it to a array of strings.
-    strArray = env->NewObjectArray((num_properties + num_array_elements) * 2,
-                                   stringClass, NULL);
-
-    j = 0;
-    for (i = 0; i < max_num_properties; i++) {
-        if (properties[i].type == DBUS_TYPE_ARRAY) {
-            if (!strncmp(properties[i].name, "UUIDs", strlen("UUIDs"))) {
-                num_array_elements = num_uuids;
-                array_elements = uuid_array;
-            } else {
-                num_array_elements = num_devices;
-                array_elements = device_path;
-            }
-
-            for (k = 0; k < num_array_elements; k++) {
-                set_object_array_element(env, strArray, properties[i].name, j++);
-                set_object_array_element(env, strArray, array_elements[k], j++);
-            }
-        } else if (values[i][0] != '\0') {
-            set_object_array_element(env, strArray, properties[i].name, j++);
-            set_object_array_element(env, strArray, values[i], j++);
-        }
-    }
-
-    if (uuid_array)
-        free(uuid_array);
-    if (device_path)
-        free(device_path);
-    return strArray;
-
-failure:
-    if (dbus_error_is_set(&err))
-        LOG_AND_FREE_DBUS_ERROR(&err);
-    if (uuid_array)
-        free(uuid_array);
-    if (device_path)
-        free(device_path);
-    return NULL;
-}
-
-jobjectArray create_prop_array(JNIEnv *env, Properties *properties,
-                               int prop_index, void *value, int len ) {
-    jclass stringClass= env->FindClass("java/lang/String");
-    char **prop_val = NULL;
-    char buf[32] = {'\0'};
-    int i, j;
-
-    jobjectArray strArray = env->NewObjectArray(1 + len, stringClass, NULL);
-    j = 0;
-    set_object_array_element(env, strArray, properties[prop_index].name, j++);
-
-    if (properties[prop_index].type == DBUS_TYPE_UINT32) {
-        sprintf(buf, "%d", *(int *) value);
-        set_object_array_element(env, strArray, buf, j++);
-    } else if (properties[prop_index].type == DBUS_TYPE_BOOLEAN) {
-        sprintf(buf, "%s", *(int *) value ? "true" : "false");
-        set_object_array_element(env, strArray, buf, j++);
-    } else if (properties[prop_index].type == DBUS_TYPE_ARRAY) {
-        prop_val = (char **) value;
-        for (i = 0; i < len; i++)
-             set_object_array_element(env, strArray, prop_val[i], j++);
-    } else {
-         set_object_array_element(env, strArray, (const char *) value, j++);
-    }
-    if (prop_val)
-        free (prop_val);
-    return strArray;
-}
-
-jobjectArray parse_property_change(JNIEnv *env, DBusMessage *msg,
-                           Properties *properties, int max_num_properties) {
-    DBusMessageIter iter, prop_val, array_val_iter;
-    DBusError err;
-    void *value;
-    char *property;
+int get_property(DBusMessageIter iter, Properties *properties,
+                  int max_num_properties, int *prop_index, property_value *value, int *len) {
+    DBusMessageIter prop_val, array_val_iter;
+    char *property = NULL;
     uint32_t array_type;
-    int i, j, type, len, prop_index;
+    char *str_val;
+    int i, j, type, int_val;
 
-    dbus_error_init(&err);
-    if (!dbus_message_iter_init(msg, &iter))
-        goto failure;
     if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING)
-        goto failure;
+        return -1;
     dbus_message_iter_get_basic(&iter, &property);
     if (!dbus_message_iter_next(&iter))
-        goto failure;
+        return -1;
     if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT)
-        goto failure;
+        return -1;
     for (i = 0; i <  max_num_properties; i++) {
-        if (!strncmp(property, properties[i].name, strlen(properties[i].name)))
+        if (!strncmp(property, properties[i].name, strlen(property)))
             break;
     }
-    prop_index = i;
+    *prop_index = i;
     if (i == max_num_properties)
-        goto failure;
+        return -1;
 
     dbus_message_iter_recurse(&iter, &prop_val);
-    type = properties[prop_index].type;
+    type = properties[*prop_index].type;
     if (dbus_message_iter_get_arg_type(&prop_val) != type) {
-        LOGE("Property type mismatch in parse_properties: %d, expected:%d",
-        dbus_message_iter_get_arg_type(&prop_val), type);
-        goto failure;
+        LOGE("Property type mismatch in get_property: %d, expected:%d, index:%d",
+             dbus_message_iter_get_arg_type(&prop_val), type, *prop_index);
+        return -1;
     }
 
     switch(type) {
     case DBUS_TYPE_STRING:
     case DBUS_TYPE_OBJECT_PATH:
-        dbus_message_iter_get_basic(&prop_val, &value);
-        len = 1;
+        dbus_message_iter_get_basic(&prop_val, &value->str_val);
+        *len = 1;
         break;
     case DBUS_TYPE_UINT32:
     case DBUS_TYPE_INT16:
     case DBUS_TYPE_BOOLEAN:
-        uint32_t int_val;
         dbus_message_iter_get_basic(&prop_val, &int_val);
-        value = &int_val;
-        len = 1;
+        value->int_val = int_val;
+        *len = 1;
         break;
     case DBUS_TYPE_ARRAY:
         dbus_message_iter_recurse(&prop_val, &array_val_iter);
         array_type = dbus_message_iter_get_arg_type(&array_val_iter);
-        len = 0;
+        *len = 0;
+        value->array_val = NULL;
         if (array_type == DBUS_TYPE_OBJECT_PATH ||
             array_type == DBUS_TYPE_STRING){
+            j = 0;
             do {
-                len ++;
+               j ++;
             } while(dbus_message_iter_next(&array_val_iter));
             dbus_message_iter_recurse(&prop_val, &array_val_iter);
             // Allocate  an array of char *
-            char **tmp = (char **)malloc(sizeof(char *) * len);
+            *len = j;
+            char **tmp = (char **)malloc(sizeof(char *) * *len);
             if (!tmp)
-                goto failure;
+                return -1;
             j = 0;
             do {
                dbus_message_iter_get_basic(&array_val_iter, &tmp[j]);
                j ++;
             } while(dbus_message_iter_next(&array_val_iter));
-            value = (char **) tmp;
+            value->array_val = tmp;
         }
         break;
     default:
-        goto failure;
+        return -1;
     }
-    return create_prop_array(env, properties, prop_index, value, len);
+    return 0;
+}
+
+void create_prop_array(JNIEnv *env, jobjectArray strArray, Properties *property,
+                       property_value *value, int len, int *array_index ) {
+    char **prop_val = NULL;
+    char buf[32] = {'\0'}, buf1[32] = {'\0'};
+    int i;
+
+    char *name = property->name;
+    int prop_type = property->type;
+
+    set_object_array_element(env, strArray, name, *array_index);
+    *array_index += 1;
+
+    if (prop_type == DBUS_TYPE_UINT32 || prop_type == DBUS_TYPE_INT16) {
+        sprintf(buf, "%d", value->int_val);
+        set_object_array_element(env, strArray, buf, *array_index);
+        *array_index += 1;
+    } else if (prop_type == DBUS_TYPE_BOOLEAN) {
+        sprintf(buf, "%s", value->int_val ? "true" : "false");
+
+        set_object_array_element(env, strArray, buf, *array_index);
+        *array_index += 1;
+    } else if (prop_type == DBUS_TYPE_ARRAY) {
+        // Write the length first
+        sprintf(buf1, "%d", len);
+        set_object_array_element(env, strArray, buf1, *array_index);
+        *array_index += 1;
+
+        prop_val = value->array_val;
+        for (i = 0; i < len; i++) {
+            set_object_array_element(env, strArray, prop_val[i], *array_index);
+            *array_index += 1;
+        }
+    } else {
+        set_object_array_element(env, strArray, (const char *) value->str_val, *array_index);
+        *array_index += 1;
+    }
+}
+
+jobjectArray parse_properties(JNIEnv *env, DBusMessageIter *iter, Properties *properties,
+                              const int max_num_properties) {
+    DBusMessageIter dict_entry, dict;
+    jobjectArray strArray = NULL;
+    property_value value;
+    int i, size = 0,array_index = 0;
+    int len = 0, prop_type = DBUS_TYPE_INVALID, prop_index = -1, type;
+    struct {
+        property_value value;
+        int len;
+        bool used;
+    } values[max_num_properties];
+    int t, j;
+
+    jclass stringClass = env->FindClass("java/lang/String");
+    DBusError err;
+    dbus_error_init(&err);
+
+    for (i = 0; i < max_num_properties; i++) {
+        values[i].used = false;
+    }
+
+    if(dbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY)
+        goto failure;
+    dbus_message_iter_recurse(iter, &dict);
+    do {
+        len = 0;
+        if (dbus_message_iter_get_arg_type(&dict) != DBUS_TYPE_DICT_ENTRY)
+            goto failure;
+        dbus_message_iter_recurse(&dict, &dict_entry);
+
+        if (!get_property(dict_entry, properties, max_num_properties, &prop_index,
+                          &value, &len)) {
+            size += 2;
+            if (properties[prop_index].type == DBUS_TYPE_ARRAY)
+                size += len;
+            values[prop_index].value = value;
+            values[prop_index].len = len;
+            values[prop_index].used = true;
+        } else {
+            goto failure;
+        }
+    } while(dbus_message_iter_next(&dict));
+
+    strArray = env->NewObjectArray(size, stringClass, NULL);
+
+    for (i = 0; i < max_num_properties; i++) {
+        if (values[i].used) {
+            create_prop_array(env, strArray, &properties[i], &values[i].value, values[i].len,
+                              &array_index);
+
+            if (properties[i].type == DBUS_TYPE_ARRAY && values[i].used
+                   && values[i].value.array_val != NULL)
+                free(values[i].value.array_val);
+        }
+
+    }
+    return strArray;
+
+failure:
+    if (dbus_error_is_set(&err))
+        LOG_AND_FREE_DBUS_ERROR(&err);
+    for (i = 0; i < max_num_properties; i++)
+        if (properties[i].type == DBUS_TYPE_ARRAY && values[i].used == true
+                                        && values[i].value.array_val != NULL)
+            free(values[i].value.array_val);
+    return NULL;
+}
+
+jobjectArray parse_property_change(JNIEnv *env, DBusMessage *msg,
+                           Properties *properties, int max_num_properties) {
+    DBusMessageIter iter;
+    DBusError err;
+    jobjectArray strArray = NULL;
+    jclass stringClass= env->FindClass("java/lang/String");
+    int len = 0, prop_index = -1;
+    int array_index = 0, size = 0;
+    property_value value;
+
+    dbus_error_init(&err);
+    if (!dbus_message_iter_init(msg, &iter))
+        goto failure;
+
+    if (!get_property(iter, properties, max_num_properties,
+                      &prop_index, &value, &len)) {
+        size += 2;
+        if (properties[prop_index].type == DBUS_TYPE_ARRAY)
+            size += len;
+        strArray = env->NewObjectArray(size, stringClass, NULL);
+
+        create_prop_array(env, strArray, &properties[prop_index],
+                          &value, len, &array_index);
+
+        if (properties[prop_index].type == DBUS_TYPE_ARRAY && value.array_val != NULL)
+             free(value.array_val);
+
+        return strArray;
+    }
 failure:
     LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
     return NULL;
