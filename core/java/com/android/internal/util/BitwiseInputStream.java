@@ -69,19 +69,19 @@ public class BitwiseInputStream {
      *
      * @return byte of read data (possibly partially filled, from lsb)
      */
-    public byte read(int bits) throws AccessException {
+    public int read(int bits) throws AccessException {
         int index = mPos >>> 3;
         int offset = 16 - (mPos & 0x07) - bits;  // &7==%8
         if ((bits < 0) || (bits > 8) || ((mPos + bits) > mEnd)) {
             throw new AccessException("illegal read " +
                 "(pos " + mPos + ", end " + mEnd + ", bits " + bits + ")");
         }
-        int data = (mBuf[index] & 0x00FF) << 8;
-        if (offset < 8) data |= (mBuf[index + 1] & 0xFF);
+        int data = (mBuf[index] & 0xFF) << 8;
+        if (offset < 8) data |= mBuf[index + 1] & 0xFF;
         data >>>= offset;
         data &= (-1 >>> (32 - bits));
         mPos += bits;
-        return (byte)data;
+        return data;
     }
 
     /**

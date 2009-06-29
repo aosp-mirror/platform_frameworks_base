@@ -171,14 +171,14 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(bearerData.msgCenterTimeStamp.minute, 1);
         assertEquals(bearerData.msgCenterTimeStamp.second, 59);
         assertEquals(bearerData.validityPeriodAbsolute, null);
-        assertEquals(bearerData.validityPeriodRelative, -63);
+        assertEquals(bearerData.validityPeriodRelative, 193);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.year, 1997);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.month, 5);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.monthDay, 18);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.hour, 0);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.minute, 0);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.second, 0);
-        assertEquals(bearerData.deferredDeliveryTimeRelative, -57);
+        assertEquals(bearerData.deferredDeliveryTimeRelative, 199);
         assertEquals(bearerData.hasUserDataHeader, false);
         assertEquals(bearerData.userData.msgEncoding, UserData.ENCODING_7BIT_ASCII);
         assertEquals(bearerData.userData.numFields, 2);
@@ -225,7 +225,7 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.hour, 0);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.minute, 0);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.second, 0);
-        assertEquals(bearerData.deferredDeliveryTimeRelative, -110);
+        assertEquals(bearerData.deferredDeliveryTimeRelative, 146);
         assertEquals(bearerData.hasUserDataHeader, false);
         assertEquals(bearerData.userData.msgEncoding, UserData.ENCODING_7BIT_ASCII);
         assertEquals(bearerData.userData.numFields, 2);

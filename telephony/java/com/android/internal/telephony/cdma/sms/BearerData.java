@@ -789,7 +789,7 @@ public final class BearerData {
         if (inStream.read(8) != 3) {
             throw new CodingException("MESSAGE_IDENTIFIER subparam size incorrect");
         }
-        bData.messageType = inStream.read(4);
+        bData.messageType = (byte)inStream.read(4);
         bData.messageId = inStream.read(8) << 8;
         bData.messageId |= inStream.read(8);
         bData.hasUserDataHeader = (inStream.read(1) == 1);
@@ -799,7 +799,7 @@ public final class BearerData {
     private static void decodeUserData(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         bData.userData = new UserData();
         bData.userData.msgEncoding = inStream.read(5);
         bData.userData.msgEncodingSet = true;
@@ -867,7 +867,7 @@ public final class BearerData {
             inStream.skip(offset);
             byte[] expandedData = new byte[numFields];
             for (int i = 0; i < numFields; i++) {
-                expandedData[i] = inStream.read(7);
+                expandedData[i] = (byte)inStream.read(7);
             }
             return new String(expandedData, 0, numFields, "US-ASCII");
         } catch (java.io.UnsupportedEncodingException ex) {
@@ -922,7 +922,7 @@ public final class BearerData {
     private static void decodeReplyOption(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         if (paramBytes != 1) {
             throw new CodingException("REPLY_OPTION subparam size incorrect");
         }
@@ -985,18 +985,18 @@ public final class BearerData {
     private static void decodeCallbackNumber(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         CdmaSmsAddress addr = new CdmaSmsAddress();
-        addr.digitMode = inStream.read(1);
+        addr.digitMode = (byte)inStream.read(1);
         byte fieldBits = 4;
         byte consumedBits = 1;
         if (addr.digitMode == CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR) {
             addr.ton = inStream.read(3);
-            addr.numberPlan = inStream.read(4);
+            addr.numberPlan = (byte)inStream.read(4);
             fieldBits = 8;
             consumedBits += 7;
         }
-        addr.numberOfDigits = inStream.read(8);
+        addr.numberOfDigits = (byte)inStream.read(8);
         consumedBits += 8;
         int remainingBits = (paramBytes * 8) - consumedBits;
         int dataBits = addr.numberOfDigits * fieldBits;
@@ -1076,7 +1076,7 @@ public final class BearerData {
         if (inStream.read(8) != 1) {
             throw new CodingException("PRIVACY_INDICATOR subparam size incorrect");
         }
-        bData.privacy = inStream.read(2);
+        bData.privacy = (byte)inStream.read(2);
         inStream.skip(6);
         bData.privacyIndicatorSet = true;
     }
@@ -1097,7 +1097,7 @@ public final class BearerData {
         if (inStream.read(8) != 1) {
             throw new CodingException("DISPLAY_MODE subparam size incorrect");
         }
-        bData.displayMode = inStream.read(2);
+        bData.displayMode = (byte)inStream.read(2);
         inStream.skip(6);
         bData.displayModeSet = true;
     }
@@ -1108,7 +1108,7 @@ public final class BearerData {
         if (inStream.read(8) != 1) {
             throw new CodingException("PRIORITY_INDICATOR subparam size incorrect");
         }
-        bData.priority = inStream.read(2);
+        bData.priority = (byte)inStream.read(2);
         inStream.skip(6);
         bData.priorityIndicatorSet = true;
     }
