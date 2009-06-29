@@ -30,7 +30,7 @@ public class SharedPreferencesBackupHelper extends FileBackupHelperBase implemen
     private Context mContext;
     private String[] mPrefGroups;
 
-    public SharedPreferencesBackupHelper(Context context, String[] prefGroups) {
+    public SharedPreferencesBackupHelper(Context context, String... prefGroups) {
         super(context);
 
         mContext = context;
