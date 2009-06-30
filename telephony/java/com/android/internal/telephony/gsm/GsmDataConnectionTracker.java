@@ -65,6 +65,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private static final String LOG_TAG = "GSM";
     private static final boolean DBG = true;
 
+    private GSMPhone mGsmPhone;
     /**
      * Handles changes to the APN db.
      */
@@ -85,6 +86,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     // Indicates baseband will not auto-attach
     private boolean noAutoAttach = false;
     long nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+    private boolean mReregisterOnReconnectFailure = false;
     private ContentResolver mResolver;
 
     private boolean mPingTestActive = false;
@@ -205,6 +207,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     GsmDataConnectionTracker(GSMPhone p) {
         super(p);
+        mGsmPhone = p;
 
         p.mCM.registerForAvailable (this, EVENT_RADIO_AVAILABLE, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
@@ -251,16 +254,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         //Unregister for all events
         phone.mCM.unregisterForAvailable(this);
         phone.mCM.unregisterForOffOrNotAvailable(this);
-        ((GSMPhone) phone).mSIMRecords.unregisterForRecordsLoaded(this);
+        mGsmPhone.mSIMRecords.unregisterForRecordsLoaded(this);
         phone.mCM.unregisterForDataStateChanged(this);
-        ((GSMPhone) phone).mCT.unregisterForVoiceCallEnded(this);
-        ((GSMPhone) phone).mCT.unregisterForVoiceCallStarted(this);
-        ((GSMPhone) phone).mSST.unregisterForGprsAttached(this);
-        ((GSMPhone) phone).mSST.unregisterForGprsDetached(this);
-        ((GSMPhone) phone).mSST.unregisterForRoamingOn(this);
-        ((GSMPhone) phone).mSST.unregisterForRoamingOff(this);
-        ((GSMPhone) phone).mSST.unregisterForPsRestrictedEnabled(this);
-        ((GSMPhone) phone).mSST.unregisterForPsRestrictedDisabled(this);
+        mGsmPhone.mCT.unregisterForVoiceCallEnded(this);
+        mGsmPhone.mCT.unregisterForVoiceCallStarted(this);
+        mGsmPhone.mSST.unregisterForGprsAttached(this);
+        mGsmPhone.mSST.unregisterForGprsDetached(this);
+        mGsmPhone.mSST.unregisterForRoamingOn(this);
+        mGsmPhone.mSST.unregisterForRoamingOff(this);
+        mGsmPhone.mSST.unregisterForPsRestrictedEnabled(this);
+        mGsmPhone.mSST.unregisterForPsRestrictedDisabled(this);
 
         phone.getContext().unregisterReceiver(this.mIntentReceiver);
         phone.getContext().getContentResolver().unregisterContentObserver(this.apnObserver);
@@ -417,8 +420,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     public boolean isDataConnectionAsDesired() {
         boolean roaming = phone.getServiceState().getRoaming();
 
-        if (((GSMPhone) phone).mSIMRecords.getRecordsLoaded() &&
-                ((GSMPhone) phone).mSST.getCurrentGprsState() == ServiceState.STATE_IN_SERVICE &&
+        if (mGsmPhone.mSIMRecords.getRecordsLoaded() &&
+                mGsmPhone.mSST.getCurrentGprsState() == ServiceState.STATE_IN_SERVICE &&
                 (!roaming || getDataOnRoamingEnabled()) &&
             !mIsWifiConnected &&
             !mIsPsRestricted ) {
@@ -593,13 +596,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return true;
         }
 
-        int gprsState = ((GSMPhone) phone).mSST.getCurrentGprsState();
+        int gprsState = mGsmPhone.mSST.getCurrentGprsState();
         boolean roaming = phone.getServiceState().getRoaming();
-        boolean desiredPowerState = ((GSMPhone) phone).mSST.getDesiredPowerState();
+        boolean desiredPowerState = mGsmPhone.mSST.getDesiredPowerState();
 
         if ((state == State.IDLE || state == State.SCANNING)
                 && (gprsState == ServiceState.STATE_IN_SERVICE || noAutoAttach)
-                && ((GSMPhone) phone).mSIMRecords.getRecordsLoaded()
+                && mGsmPhone.mSIMRecords.getRecordsLoaded()
                 && phone.getState() == Phone.State.IDLE
                 && isDataAllowed()
                 && !mIsPsRestricted
@@ -625,8 +628,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 log("trySetupData: Not ready for data: " +
                     " dataState=" + state +
                     " gprsState=" + gprsState +
-                    " sim=" + ((GSMPhone) phone).mSIMRecords.getRecordsLoaded() +
-                    " UMTS=" + ((GSMPhone) phone).mSST.isConcurrentVoiceAndData() +
+                    " sim=" + mGsmPhone.mSIMRecords.getRecordsLoaded() +
+                    " UMTS=" + mGsmPhone.mSST.isConcurrentVoiceAndData() +
                     " phoneState=" + phone.getState() +
                     " dataEnabled=" + getAnyDataEnabled() +
                     " roaming=" + roaming +
@@ -813,7 +816,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         isConnected = (state != State.IDLE && state != State.FAILED);
 
         // The "current" may no longer be valid.  MMS depends on this to send properly.
-        ((GSMPhone) phone).updateCurrentCarrierInProvider();
+        mGsmPhone.updateCurrentCarrierInProvider();
 
         // TODO: It'd be nice to only do this if the changed entrie(s)
         // match the current operator.
@@ -823,6 +826,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (!isConnected) {
                 // reset reconnect timer
                 nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                mReregisterOnReconnectFailure = false;
                 trySetupData(Phone.REASON_APN_CHANGED);
             }
         }
@@ -903,6 +907,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         startNetStatPoll();
         // reset reconnect timer
         nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+        mReregisterOnReconnectFailure = false;
     }
 
     private void setupDnsProperties() {
@@ -973,7 +978,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             } else {
                 mPdpResetCount = 0;
                 EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_REREGISTER_NETWORK, sentSinceLastRecv);
-                ((GSMPhone) phone).mSST.reRegisterNetwork(null);
+                mGsmPhone.mSST.reRegisterNetwork(null);
             }
             // TODO: Add increasingly drastic recovery steps, eg,
             // reset the radio, reset the device.
@@ -1187,6 +1192,20 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private void reconnectAfterFail(FailCause lastFailCauseCode, String reason) {
         if (state == State.FAILED) {
+            if (nextReconnectDelay > RECONNECT_DELAY_MAX_MILLIS) {
+                if (mReregisterOnReconnectFailure) {
+                    // We have already tried to re-register to the network.
+                    // This might be a problem with the data network.
+                    nextReconnectDelay = RECONNECT_DELAY_MAX_MILLIS;
+                } else {
+                    // Try to Re-register to the network.
+                    Log.d(LOG_TAG, "PDP activate failed, Reregistering to the network");
+                    mReregisterOnReconnectFailure = true;
+                    mGsmPhone.mSST.reRegisterNetwork(null);
+                    nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                    return;
+                }
+            }
             Log.d(LOG_TAG, "PDP activate failed. Scheduling next attempt for "
                     + (nextReconnectDelay / 1000) + "s");
 
@@ -1202,9 +1221,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
             // double it for next time
             nextReconnectDelay *= 2;
-            if (nextReconnectDelay > RECONNECT_DELAY_MAX_MILLIS) {
-                nextReconnectDelay = RECONNECT_DELAY_MAX_MILLIS;
-            }
 
             if (!shouldPostNotification(lastFailCauseCode)) {
                 Log.d(LOG_TAG,"NOT Posting GPRS Unavailable notification "
@@ -1279,6 +1295,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         // Make sure our reconnect delay starts at the initial value
         // next time the radio comes on
         nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+        mReregisterOnReconnectFailure = false;
 
         if (phone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
@@ -1392,7 +1409,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected void onVoiceCallStarted() {
-        if (state == State.CONNECTED && !((GSMPhone) phone).mSST.isConcurrentVoiceAndData()) {
+        if (state == State.CONNECTED && ! mGsmPhone.mSST.isConcurrentVoiceAndData()) {
             stopNetStatPoll();
             phone.notifyDataConnection(Phone.REASON_VOICE_CALL_STARTED);
         }
@@ -1400,7 +1417,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     protected void onVoiceCallEnded() {
         if (state == State.CONNECTED) {
-            if (!((GSMPhone) phone).mSST.isConcurrentVoiceAndData()) {
+            if (mGsmPhone.mSST.isConcurrentVoiceAndData()) {
                 startNetStatPoll();
                 phone.notifyDataConnection(Phone.REASON_VOICE_CALL_ENDED);
             } else {
@@ -1410,6 +1427,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         } else {
             // reset reconnect timer
             nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+            mReregisterOnReconnectFailure = false;
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED);
         }
@@ -1439,7 +1457,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private void createAllApnList() {
         allApns = new ArrayList<ApnSetting>();
-        String operator = ((GSMPhone) phone).mSIMRecords.getSIMOperatorNumeric();
+        String operator = mGsmPhone.mSIMRecords.getSIMOperatorNumeric();
 
         if (operator != null) {
             String selection = "numeric = '" + operator + "'";
@@ -1481,7 +1499,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         DataConnection pdp;
 
         for (int i = 0; i < PDP_CONNECTION_POOL_SIZE; i++) {
-            pdp = new PdpConnection((GSMPhone) phone);
+            pdp = new PdpConnection(mGsmPhone);
             pdpList.add(pdp);
          }
     }
@@ -1500,7 +1518,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private ArrayList<ApnSetting> buildWaitingApns() {
         ArrayList<ApnSetting> apnList = new ArrayList<ApnSetting>();
-        String operator = ((GSMPhone )phone).mSIMRecords.getSIMOperatorNumeric();
+        String operator = mGsmPhone.mSIMRecords.getSIMOperatorNumeric();
 
         if (mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
             if (canSetPreferApn && preferredApn != null) {
@@ -1686,6 +1704,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     if (state == State.FAILED) {
                         cleanUpConnection(false, Phone.REASON_PS_RESTRICT_ENABLED);
                         nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                        mReregisterOnReconnectFailure = false;
                     }
                     trySetupData(Phone.REASON_PS_RESTRICT_ENABLED);
                 }

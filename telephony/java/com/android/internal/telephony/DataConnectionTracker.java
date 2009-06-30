@@ -98,8 +98,8 @@ public abstract class DataConnectionTracker extends Handler {
     //***** Constants
     protected static final int RECONNECT_DELAY_INITIAL_MILLIS = 5 * 1000;
 
-    /** Cap out with 1 hour retry interval. */
-    protected static final int RECONNECT_DELAY_MAX_MILLIS = 60 * 60 * 1000;
+    /** Cap out with 30 min retry interval. */
+    protected static final int RECONNECT_DELAY_MAX_MILLIS = 30 * 60 * 1000;
 
     /** Slow poll when attempting connection recovery. */
     protected static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
