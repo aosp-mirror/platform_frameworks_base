@@ -159,11 +159,11 @@ public class RequestHandle {
             e.printStackTrace();
         }
 
-        // update the "cookie" header based on the redirected url
-        mHeaders.remove("cookie");
+        // update the "Cookie" header based on the redirected url
+        mHeaders.remove("Cookie");
         String cookie = CookieManager.getInstance().getCookie(mUri);
         if (cookie != null && cookie.length() > 0) {
-            mHeaders.put("cookie", cookie);
+            mHeaders.put("Cookie", cookie);
         }
 
         if ((statusCode == 302 || statusCode == 303) && mMethod.equals("POST")) {
