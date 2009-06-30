@@ -42,13 +42,13 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.SparseArray;
 
 import android.backup.IBackupManager;
 import android.backup.IRestoreObserver;
 import android.backup.IRestoreSession;
-import android.backup.BackupManager;
 import android.backup.RestoreSet;
 
 import com.android.internal.backup.LocalTransport;
@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
@@ -79,7 +80,6 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;
-    private static final String RESTORE_OBSERVER_KEY = "_resOb";
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -127,8 +127,11 @@ class BackupManagerService extends IBackupManager.Stub {
     private final Object mClearDataLock = new Object();
     private volatile boolean mClearingData;
 
-    // Current active transport & restore session
-    private int mTransportId;
+    // Transport bookkeeping
+    static private final String BACKUP_TRANSPORT_PROPERTY = "persist.service.bkup.trans";
+    private final HashMap<String,IBackupTransport> mTransports
+            = new HashMap<String,IBackupTransport>();
+    private String mCurrentTransport;
     private IBackupTransport mLocalTransport, mGoogleTransport;
     private RestoreSession mActiveRestoreSession;
 
@@ -175,11 +178,19 @@ class BackupManagerService extends IBackupManager.Stub {
         // Set up our transport options and initialize the default transport
         // TODO: Have transports register themselves somehow?
         // TODO: Don't create transports that we don't need to?
-        mTransportId = BackupManager.TRANSPORT_GOOGLE;
         mLocalTransport = new LocalTransport(context);  // This is actually pretty cheap
-        mGoogleTransport = null;
+        ComponentName localName = new ComponentName(context, LocalTransport.class);
+        registerTransport(localName.flattenToShortString(), mLocalTransport);
 
-        // Attach to the Google backup transport.
+        mGoogleTransport = null;
+        // !!! TODO: set up the default transport name "the right way"
+        mCurrentTransport = SystemProperties.get(BACKUP_TRANSPORT_PROPERTY,
+                "com.google.android.backup/.BackupTransportService");
+        if (DEBUG) Log.v(TAG, "Starting with transport " + mCurrentTransport);
+
+        // Attach to the Google backup transport.  When this comes up, it will set
+        // itself as the current transport because we explicitly reset mCurrentTransport
+        // to null.
         Intent intent = new Intent().setComponent(new ComponentName(
                 "com.google.android.backup",
                 "com.google.android.backup.BackupTransportService"));
@@ -238,6 +249,13 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // Add a transport to our set of available backends
+    private void registerTransport(String name, IBackupTransport transport) {
+        synchronized (mTransports) {
+            mTransports.put(name, transport);
+        }
+    }
+
     // ----- Track installation/removal of packages -----
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -283,11 +301,13 @@ class BackupManagerService extends IBackupManager.Stub {
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Log.v(TAG, "Connected to Google transport");
             mGoogleTransport = IBackupTransport.Stub.asInterface(service);
+            registerTransport(name.flattenToShortString(), mGoogleTransport);
         }
 
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) Log.v(TAG, "Disconnected from Google transport");
             mGoogleTransport = null;
+            registerTransport(name.flattenToShortString(), null);
         }
     };
 
@@ -299,7 +319,7 @@ class BackupManagerService extends IBackupManager.Stub {
             switch (msg.what) {
             case MSG_RUN_BACKUP:
             {
-                IBackupTransport transport = getTransport(mTransportId);
+                IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
                     Log.v(TAG, "Backup requested but no transport available");
                     break;
@@ -474,19 +494,13 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Return the given transport
-    private IBackupTransport getTransport(int transportID) {
-        switch (transportID) {
-        case BackupManager.TRANSPORT_LOCAL:
-            Log.v(TAG, "Supplying local transport");
-            return mLocalTransport;
-
-        case BackupManager.TRANSPORT_GOOGLE:
-            Log.v(TAG, "Supplying Google transport");
-            return mGoogleTransport;
-
-        default:
-            Log.e(TAG, "Asked for unknown transport " + transportID);
-            return null;
+    private IBackupTransport getTransport(String transportName) {
+        synchronized (mTransports) {
+            IBackupTransport transport = mTransports.get(transportName);
+            if (transport == null) {
+                Log.w(TAG, "Requested unavailable transport: " + transportName);
+            }
+            return transport;
         }
     }
 
@@ -1111,21 +1125,51 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    // Report the currently active transport
-    public int getCurrentTransport() {
+    // Report the name of the currently active transport
+    public String getCurrentTransport() {
         mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
-        Log.v(TAG, "getCurrentTransport() returning " + mTransportId);
-        return mTransportId;
+        Log.v(TAG, "getCurrentTransport() returning " + mCurrentTransport);
+        return mCurrentTransport;
     }
 
-    // Select which transport to use for the next backup operation
-    public int selectBackupTransport(int transportId) {
+    // Report all known, available backup transports
+    public String[] listAllTransports() {
         mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
 
-        int prevTransport = mTransportId;
-        mTransportId = transportId;
-        Log.v(TAG, "selectBackupTransport() set " + mTransportId + " returning " + prevTransport);
-        return prevTransport;
+        String[] list = null;
+        ArrayList<String> known = new ArrayList<String>();
+        for (Map.Entry<String, IBackupTransport> entry : mTransports.entrySet()) {
+            if (entry.getValue() != null) {
+                known.add(entry.getKey());
+            }
+        }
+
+        if (known.size() > 0) {
+            list = new String[known.size()];
+            known.toArray(list);
+        }
+        return list;
+    }
+
+    // Select which transport to use for the next backup operation.  If the given
+    // name is not one of the available transports, no action is taken and the method
+    // returns null.
+    public String selectBackupTransport(String transport) {
+        mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
+
+        synchronized (mTransports) {
+            String prevTransport = null;
+            if (mTransports.get(transport) != null) {
+                prevTransport = mCurrentTransport;
+                mCurrentTransport = transport;
+                SystemProperties.set(BACKUP_TRANSPORT_PROPERTY, transport);
+                Log.v(TAG, "selectBackupTransport() set " + mCurrentTransport
+                        + " returning " + prevTransport);
+            } else {
+                Log.w(TAG, "Attempt to select unavailable transport " + transport);
+            }
+            return prevTransport;
+        }
     }
 
     // Callback: a requested backup agent has been instantiated.  This should only
@@ -1163,7 +1207,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Hand off a restore session
-    public IRestoreSession beginRestoreSession(int transportID) {
+    public IRestoreSession beginRestoreSession(String transport) {
         mContext.enforceCallingPermission("android.permission.BACKUP", "beginRestoreSession");
 
         synchronized(this) {
@@ -1171,7 +1215,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 Log.d(TAG, "Restore session requested but one already active");
                 return null;
             }
-            mActiveRestoreSession = new RestoreSession(transportID);
+            mActiveRestoreSession = new RestoreSession(transport);
         }
         return mActiveRestoreSession;
     }
@@ -1184,8 +1228,8 @@ class BackupManagerService extends IBackupManager.Stub {
         private IBackupTransport mRestoreTransport = null;
         RestoreSet[] mRestoreSets = null;
 
-        RestoreSession(int transportID) {
-            mRestoreTransport = getTransport(transportID);
+        RestoreSession(String transport) {
+            mRestoreTransport = getTransport(transport);
         }
 
         // --- Binder interface ---
@@ -1246,6 +1290,10 @@ class BackupManagerService extends IBackupManager.Stub {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
+            pw.println("Available transports:");
+            for (String t : listAllTransports()) {
+                pw.println("  " + t);
+            }
             int N = mBackupParticipants.size();
             pw.println("Participants:");
             for (int i=0; i<N; i++) {
