@@ -34,6 +34,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -422,11 +423,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (working) {
             mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
                     null, null, mWorkingSpinner, null);
-//            mWorkingSpinner.start();
+            ((Animatable) mWorkingSpinner).start();
         } else {
             mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
                     null, null, null, null);
-//            mWorkingSpinner.stop();
+            ((Animatable) mWorkingSpinner).stop();
         }
     }
     
