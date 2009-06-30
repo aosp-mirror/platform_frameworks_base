@@ -211,7 +211,12 @@ void DisplayHardware::init(uint32_t dpy)
     if (strstr(egl_extensions, "EGL_ANDROID_swap_rectangle")) {
         mFlags |= SWAP_RECTANGLE;
     }
+    // when we have the choice between UPDATE_ON_DEMAND and SWAP_RECTANGLE
+    // choose UPDATE_ON_DEMAND, which is more efficient
+    if (mFlags & UPDATE_ON_DEMAND)
+        mFlags &= ~SWAP_RECTANGLE;
 #endif
+    
 
     mDpiX = mNativeWindow->xdpi;
     mDpiX = mNativeWindow->ydpi;
