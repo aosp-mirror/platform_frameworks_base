@@ -21,6 +21,7 @@
 #include "rsMatrix.h"
 #include "rsAllocation.h"
 #include "rsTriangleMesh.h"
+#include "rsMesh.h"
 #include "rsDevice.h"
 #include "rsScriptC.h"
 #include "rsAllocation.h"
