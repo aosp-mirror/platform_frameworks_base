@@ -1398,7 +1398,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     protected void onVoiceCallEnded() {
         if (state == State.CONNECTED) {
-            if (mGsmPhone.mSST.isConcurrentVoiceAndData()) {
+            if (!mGsmPhone.mSST.isConcurrentVoiceAndData()) {
                 startNetStatPoll();
                 phone.notifyDataConnection(Phone.REASON_VOICE_CALL_ENDED);
             } else {
