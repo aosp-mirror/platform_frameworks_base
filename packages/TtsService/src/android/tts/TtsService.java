@@ -148,7 +148,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private void setDefaultSettings() {
-        setLanguage(this.getDefaultLanguage(), getDefaultLanguage(), getDefaultLocVariant());
+        setLanguage(this.getDefaultLanguage(), getDefaultCountry(), getDefaultLocVariant());
 
         // speech rate
         setSpeechRate(getDefaultRate());
