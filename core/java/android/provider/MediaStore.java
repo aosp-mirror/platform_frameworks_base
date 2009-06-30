@@ -344,7 +344,10 @@ public final class MediaStore
                 // Check if file exists with a FileInputStream
                 FileInputStream stream = new FileInputStream(imagePath);
                 try {
-                    return insertImage(cr, BitmapFactory.decodeFile(imagePath), name, description);
+                    Bitmap bm = BitmapFactory.decodeFile(imagePath);
+                    String ret = insertImage(cr, bm, name, description);
+                    bm.recycle();
+                    return ret;
                 } finally {
                     try {
                         stream.close();
