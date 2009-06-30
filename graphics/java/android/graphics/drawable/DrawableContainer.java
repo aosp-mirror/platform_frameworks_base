@@ -234,8 +234,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            for (Drawable child : mDrawableContainerState.mDrawables) {
-                child.mutate();
+            final int N = mDrawableContainerState.getChildCount();
+            final Drawable[] drawables = mDrawableContainerState.getChildren();
+            for (int i = 0; i < N; i++) {
+                drawables[i].mutate();
             }
             mMutated = true;
         }
