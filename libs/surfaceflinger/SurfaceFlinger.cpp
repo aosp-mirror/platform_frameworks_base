@@ -827,14 +827,28 @@ void SurfaceFlinger::handleRepaint()
     if ((flags & DisplayHardware::SWAP_RECTANGLE) || 
         (flags & DisplayHardware::BUFFER_PRESERVED)) 
     {
-        // we can redraw only what's dirty
-    } else {
-        if (flags & DisplayHardware::UPDATE_ON_DEMAND) {
-            // we need to redraw the rectangle that will be updated
-            // (pushed to the framebuffer).
+        // we can redraw only what's dirty, but since SWAP_RECTANGLE only
+        // takes a rectangle, we must make sure to update that whole
+        // rectangle in that case
+        if (flags & DisplayHardware::SWAP_RECTANGLE) {
+            // FIXME: we really should be able to pass a region to
+            // SWAP_RECTANGLE so that we don't have to redraw all this.
             mDirtyRegion.set(mInvalidRegion.bounds());
         } else {
-            // we need to redraw everything
+            // in the BUFFER_PRESERVED case, obviously, we can update only
+            // what's needed and nothing more.
+            // NOTE: this is NOT a common case, as preserving the backbuffer
+            // is costly and usually involves copying the whole update back.
+        }
+    } else {
+        if (flags & DisplayHardware::UPDATE_ON_DEMAND) {
+            // We need to redraw the rectangle that will be updated
+            // (pushed to the framebuffer).
+            // This is needed because UPDATE_ON_DEMAND only takes one
+            // rectangle instead of a region (see DisplayHardware::flip())
+            mDirtyRegion.set(mInvalidRegion.bounds());
+        } else {
+            // we need to redraw everything (the whole screen)
             mDirtyRegion.set(hw.bounds());
             mInvalidRegion = mDirtyRegion;
         }

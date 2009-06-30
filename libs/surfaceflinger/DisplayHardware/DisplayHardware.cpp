@@ -326,7 +326,7 @@ void DisplayHardware::flip(const Region& dirty) const
 #endif
     
     if (mFlags & UPDATE_ON_DEMAND) {
-        mNativeWindow->setUpdateRectangle(dirty.bounds());
+        mNativeWindow->setUpdateRectangle(dirty.getBounds());
     }
     
     mPageFlipCount++;
