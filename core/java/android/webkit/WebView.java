@@ -3510,6 +3510,9 @@ public class WebView extends AbsoluteLayout
                 mDrawCursorRing = true;
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
+                    if (inEditingMode()) {
+                        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 1, 0);
+                    }
                 }
             } else {
                 // If our window gained focus, but we do not have it, do not
@@ -3552,7 +3555,7 @@ public class WebView extends AbsoluteLayout
         // Do not need to also check whether mWebViewCore is null, because
         // mNativeClass is only set if mWebViewCore is non null
         if (mNativeClass == 0) return;
-        mWebViewCore.sendMessage(EventHub.SET_INACTIVE);
+        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 0, 0);
     }
 
     @Override
