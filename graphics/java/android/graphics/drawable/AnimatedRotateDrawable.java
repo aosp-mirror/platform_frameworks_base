@@ -35,11 +35,14 @@ import com.android.internal.R;
 /**
  * @hide
  */
-public class AnimatedRotateDrawable extends Drawable implements Drawable.Callback, Runnable {
+public class AnimatedRotateDrawable extends Drawable implements Drawable.Callback, Runnable,
+        Animatable {
+
     private AnimatedRotateState mState;
     private boolean mMutated;
     private float mCurrentDegrees;
     private float mIncrement;
+    private boolean mRunning;
 
     public AnimatedRotateDrawable() {
         this(null);
@@ -80,10 +83,24 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         drawable.draw(canvas);
 
         canvas.restoreToCount(saveCount);
-        
-        nextFrame();
     }
-    
+
+    public void start() {
+        if (!mRunning) {
+            mRunning = true;
+            nextFrame();
+        }
+    }
+
+    public void stop() {
+        mRunning = false;
+        unscheduleSelf(this);
+    }
+
+    public boolean isRunning() {
+        return mRunning;
+    }
+
     private void nextFrame() {
         unscheduleSelf(this);
         scheduleSelf(this, SystemClock.uptimeMillis() + mState.mFrameDuration);
@@ -96,8 +113,8 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         if (mCurrentDegrees > (360.0f - mIncrement)) {
             mCurrentDegrees = 0.0f;
         }
-        nextFrame();
         invalidateSelf();
+        nextFrame();
     }
     
     @Override

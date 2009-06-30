@@ -350,6 +350,12 @@
         <attr name="progressBarStyleSmallTitle" format="reference" />
         <!-- Large ProgressBar style. This is a large circular progress bar. -->
         <attr name="progressBarStyleLarge" format="reference" />
+        <!-- Inverse ProgressBar style. This is a medium circular progress bar. -->
+        <attr name="progressBarStyleInverse" format="reference" />
+        <!-- Small inverse ProgressBar style. This is a small circular progress bar. -->
+        <attr name="progressBarStyleSmallInverse" format="reference" />
+        <!-- Large inverse ProgressBar style. This is a large circular progress bar. -->
+        <attr name="progressBarStyleLargeInverse" format="reference" /> 
         <!-- Default SeekBar style. -->
         <attr name="seekBarStyle" format="reference" />
         <!-- Default RatingBar style. -->

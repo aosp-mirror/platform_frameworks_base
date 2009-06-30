@@ -243,7 +243,7 @@
 
     <style name="Widget.ProgressBar">
         <item name="android:indeterminateOnly">true</item>
-        <item name="android:indeterminateDrawable">@android:drawable/progress_medium</item>
+        <item name="android:indeterminateDrawable">@android:drawable/progress_medium_white</item>
         <item name="android:indeterminateBehavior">repeat</item>
         <item name="android:indeterminateDuration">3500</item>
         <item name="android:minWidth">48dip</item>
@@ -253,7 +253,7 @@
     </style>
 
     <style name="Widget.ProgressBar.Large">
-        <item name="android:indeterminateDrawable">@android:drawable/progress_large</item>
+        <item name="android:indeterminateDrawable">@android:drawable/progress_large_white</item>
         <item name="android:minWidth">76dip</item>
         <item name="android:maxWidth">76dip</item>
         <item name="android:minHeight">76dip</item>
@@ -261,13 +261,25 @@
     </style>
     
     <style name="Widget.ProgressBar.Small">
-        <item name="android:indeterminateDrawable">@android:drawable/progress_small</item>
+        <item name="android:indeterminateDrawable">@android:drawable/progress_small_white</item>
         <item name="android:minWidth">16dip</item>
         <item name="android:maxWidth">16dip</item>
         <item name="android:minHeight">16dip</item>
         <item name="android:maxHeight">16dip</item>
     </style>
 
+    <style name="Widget.ProgressBar.Inverse">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_medium</item>
+    </style>
+
+    <style name="Widget.ProgressBar.Large.Inverse">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_large</item>
+    </style>
+
+    <style name="Widget.ProgressBar.Small.Inverse">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_small</item>
+    </style> 
+    
     <style name="Widget.ProgressBar.Small.Title">
         <item name="android:indeterminateDrawable">@android:drawable/progress_small_titlebar</item>
     </style>
