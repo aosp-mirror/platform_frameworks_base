@@ -133,16 +133,26 @@ public:
     // @return TTS_SUCCESS, or TTS_FAILURE
     virtual tts_result setLanguage(const char *lang, const char *country, const char *variant);
 
-    // Retrieve the currently set language, or an empty "value" if no language
-    // has been set.
-    // @param[out]   value pointer to the retrieved language value
-    // @param[inout] iosize in: stores the size available to store the language
-    //                         value in *value
-    //                      out: stores the size required to hold the language
-    //                         value if  getLanguage() returned
-    //                         TTS_PROPERTY_SIZE_TOO_SMALL, unchanged otherwise.
-    // @return TTS_SUCCESS, or TTS_PROPERTY_SIZE_TOO_SMALL, or TTS_FAILURE
-    virtual tts_result getLanguage(char *value, size_t *iosize);
+    // Retrieve the currently set language, country and variant, or empty strings if none of
+    // parameters have been set. Language and country are represented by their 3-letter ISO code
+    // @param[out]   pointer to the retrieved 3-letter code language value
+    // @param[out]   pointer to the retrieved 3-letter code country value
+    // @param[out]   pointer to the retrieved variant value
+    // @return TTS_SUCCESS, or TTS_FAILURE
+    virtual tts_result getLanguage(char *language, char *country, char *variant);
+
+    // Notifies the engine what audio parameters should be used for the synthesis.
+    // This is meant to be used as a hint, the engine implementation will set the output values
+    // to those of the synthesis format, based on a given hint.
+    // @param[inout] encoding in: the desired audio sample format
+    //                         out: the format used by the TTS engine
+    // @param[inout] rate in: the desired audio sample rate
+    //                         out: the sample rate used by the TTS engine
+    // @param[inout] channels in: the desired number of audio channels
+    //                         out: the number of channels used by the TTS engine
+    // @return TTS_SUCCESS, or TTS_FAILURE
+    virtual tts_result setAudioFormat(AudioSystem::audio_format& encoding, uint32_t& rate,
+            int& channels);
 
     // Set a property for the the TTS engine
     // "size" is the maximum size of "value" for properties "property"
