@@ -221,8 +221,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManager.WakeLock mBroadcastWakeLock;
 
     class SettingsObserver extends ContentObserver {
-        private ContentQueryMap mSettings;
-
         SettingsObserver(Handler handler) {
             super(handler);
         }
