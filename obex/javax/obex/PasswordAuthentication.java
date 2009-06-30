@@ -35,7 +35,7 @@ package javax.obex;
 /**
  * This class holds user name and password combinations.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public class PasswordAuthentication {
 

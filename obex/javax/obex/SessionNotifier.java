@@ -45,7 +45,7 @@ import java.io.IOException;
  * <code>ServerRequestHandler</code> argument that will process the requests
  * from the client that connects to the server.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public interface SessionNotifier {
 
@@ -86,12 +86,12 @@ public interface SessionNotifier {
      *
      * @return the connection to the client
      *
-     * @exception IOException if an error occurs in the transport layer
+     * @throws IOException if an error occurs in the transport layer
      *
-     * @exception NullPointerException if <code>handler</code> is
+     * @throws NullPointerException if <code>handler</code> is
      * <code>null</code>
      *
-     * @exception ServiceRegistrationException if the structure of the
+     * @throws ServiceRegistrationException if the structure of the
      * associated service record is invalid or if the service record
      * could not be added successfully to the local SDDB.  The
      * structure of service record is invalid if the service
@@ -100,7 +100,7 @@ public interface SessionNotifier {
      * cannot be changed. Failures to add the record to the SDDB could
      * be due to insufficient disk space, database locks, etc.
      *
-     * @exception BluetoothStateException if the server device could
+     * @throws BluetoothStateException if the server device could
      * not be placed in connectable mode because the device user has
      * configured the device to be non-connectable
      */
@@ -145,12 +145,12 @@ public interface SessionNotifier {
      *
      * @return the connection to the client
      *
-     * @exception IOException if an error occurs in the transport layer
+     * @throws IOException if an error occurs in the transport layer
      *
-     * @exception NullPointerException if <code>handler</code> is
+     * @throws NullPointerException if <code>handler</code> is
      * <code>null</code>
      *
-     * @exception ServiceRegistrationException if the structure of the
+     * @throws ServiceRegistrationException if the structure of the
      * associated service record is invalid or if the service record
      * could not be added successfully to the local SDDB.  The
      * structure of service record is invalid if the service
@@ -159,7 +159,7 @@ public interface SessionNotifier {
      * cannot be changed. Failures to add the record to the SDDB could
      * be due to insufficient disk space, database locks, etc.
      *
-     * @exception BluetoothStateException if the server device could
+     * @throws BluetoothStateException if the server device could
      * not be placed in connectable mode because the device user has
      * configured the device to be non-connectable
      */

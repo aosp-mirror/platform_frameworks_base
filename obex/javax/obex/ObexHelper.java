@@ -32,23 +32,46 @@
 
 package javax.obex;
 
-import java.io.*;
-import java.util.*;
+import android.security.Md5MessageDigest;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
- * This class defines a set of helper methods for the implementation of OBEX.
+ * This class defines a set of helper methods for the implementation of Obex.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
-public class OBEXHelper {
+public final class ObexHelper {
+
+    /** Prevent object construction of helper class */
+    private ObexHelper() {}
 
     /**
-     * Creates new OBEXHelper
+     * Defines the OBEX CONTINUE response code.
+     * <P>
+     * The value of <code>OBEX_HTTP_CONTINUE</code> is 0x90 (144).
      */
-    private OBEXHelper() {
-    }
+    public static final int OBEX_HTTP_CONTINUE = 0x90;
 
-    private static final String TAG = "OBEXHelper";
+    /**
+     * The maximum packet size for OBEX packets that this client can handle.
+     * At present, this must be changed for each port.
+     *
+     * OPTIMIZATION: The max packet size should be the Max incoming MTU minus
+     * OPTIMIZATION: L2CAP package headers and RFCOMM package headers.
+     *
+     * OPTIMIZATION: Retrieve the max incoming MTU from
+     * OPTIMIZATION: LocalDevice.getProperty().
+     */
+    /** android note
+     *  set as 0xFFFE to match remote MPS
+     */
+    public static final int MAX_PACKET_SIZE_INT = 0xFFFE;
 
     /**
      * Updates the HeaderSet with the headers received in the byte array
@@ -80,7 +103,7 @@ public class OBEXHelper {
      * the first byte in the result will specify if a body or end of body is
      * received
      *
-     * @exception IOException if an invalid header was found
+     * @throws IOException if an invalid header was found
      */
     public static byte[] updateHeaderSet(HeaderSet header, byte[] headerArray) throws IOException {
         int index = 0;
@@ -199,7 +222,7 @@ public class OBEXHelper {
                             default:
                                 try {
                                     if ((headerID & 0xC0) == 0x00) {
-                                        headerImpl.setHeader(headerID, OBEXHelper.convertToUnicode(
+                                        headerImpl.setHeader(headerID, ObexHelper.convertToUnicode(
                                                 value, true));
                                     } else {
                                         headerImpl.setHeader(headerID, value);
@@ -315,7 +338,7 @@ public class OBEXHelper {
             intHeader = (Long)headImpl.getHeader(HeaderSet.COUNT);
             if (intHeader != null) {
                 out.write((byte)HeaderSet.COUNT);
-                value = OBEXHelper.convertToByteArray(intHeader.longValue());
+                value = ObexHelper.convertToByteArray(intHeader.longValue());
                 out.write(value);
                 if (nullOut) {
                     headImpl.setHeader(HeaderSet.COUNT, null);
@@ -326,7 +349,7 @@ public class OBEXHelper {
             stringHeader = (String)headImpl.getHeader(HeaderSet.NAME);
             if (stringHeader != null) {
                 out.write((byte)HeaderSet.NAME);
-                value = OBEXHelper.convertToUnicodeByteArray(stringHeader);
+                value = ObexHelper.convertToUnicodeByteArray(stringHeader);
                 length = value.length + 3;
                 lengthArray[0] = (byte)(255 & (length >> 8));
                 lengthArray[1] = (byte)(255 & length);
@@ -362,7 +385,7 @@ public class OBEXHelper {
             intHeader = (Long)headImpl.getHeader(HeaderSet.LENGTH);
             if (intHeader != null) {
                 out.write((byte)HeaderSet.LENGTH);
-                value = OBEXHelper.convertToByteArray(intHeader.longValue());
+                value = ObexHelper.convertToByteArray(intHeader.longValue());
                 out.write(value);
                 if (nullOut) {
                     headImpl.setHeader(HeaderSet.LENGTH, null);
@@ -443,7 +466,7 @@ public class OBEXHelper {
                  * it to seconds since the TIME_4_BYTE expects the number of
                  * seconds since January 1, 1970.
                  */
-                value = OBEXHelper.convertToByteArray(dateHeader.getTime().getTime() / 1000L);
+                value = ObexHelper.convertToByteArray(dateHeader.getTime().getTime() / 1000L);
                 out.write(value);
                 if (nullOut) {
                     headImpl.setHeader(HeaderSet.TIME_4_BYTE, null);
@@ -454,7 +477,7 @@ public class OBEXHelper {
             stringHeader = (String)headImpl.getHeader(HeaderSet.DESCRIPTION);
             if (stringHeader != null) {
                 out.write((byte)HeaderSet.DESCRIPTION);
-                value = OBEXHelper.convertToUnicodeByteArray(stringHeader);
+                value = ObexHelper.convertToUnicodeByteArray(stringHeader);
                 length = value.length + 3;
                 lengthArray[0] = (byte)(255 & (length >> 8));
                 lengthArray[1] = (byte)(255 & length);
@@ -542,7 +565,7 @@ public class OBEXHelper {
                 stringHeader = (String)headImpl.getHeader(i + 0x30);
                 if (stringHeader != null) {
                     out.write((byte)i + 0x30);
-                    value = OBEXHelper.convertToUnicodeByteArray(stringHeader);
+                    value = ObexHelper.convertToUnicodeByteArray(stringHeader);
                     length = value.length + 3;
                     lengthArray[0] = (byte)(255 & (length >> 8));
                     lengthArray[1] = (byte)(255 & length);
@@ -581,7 +604,7 @@ public class OBEXHelper {
                 intHeader = (Long)headImpl.getHeader(i + 0xF0);
                 if (intHeader != null) {
                     out.write((byte)i + 0xF0);
-                    out.write(OBEXHelper.convertToByteArray(intHeader.longValue()));
+                    out.write(ObexHelper.convertToByteArray(intHeader.longValue()));
                     if (nullOut) {
                         headImpl.setHeader(i + 0xF0, null);
                     }
@@ -879,22 +902,15 @@ public class OBEXHelper {
     }
 
     /**
-     * Computes the MD5 hash algorithm on the byte array provided.  This
-     * implementation of MD5 is optimized for OBEX in that it provides for a
-     * single entry and exist and thus does not build up the input before
-     * applying the hash.
-     *
-     * OPTIMIZATION: Embedd MD5 algorithm in this method.  This will make the
-     * OPTIMIZATION: size smaller.
+     * Compute the MD5 hash of the byte array provided.
+     * Does not accumulate input.
      *
      * @param in the byte array to hash
-     *
      * @return the MD5 hash of the byte array
      */
-    public static byte[] computeMD5Hash(byte[] in) {
-
-        MD5Hash hash = new MD5Hash(in);
-        return hash.computeDigest();
+    public static byte[] computeMd5Hash(byte[] in) {
+        Md5MessageDigest md5 = new Md5MessageDigest();
+        return md5.digest(in);
     }
 
     /**
@@ -913,10 +929,10 @@ public class OBEXHelper {
      * @param userID if <code>true</code>, a user ID is required in the reply;
      * if <code>false</code>, no user ID is required
      *
-     * @exception IllegalArgumentException if the challenge is not 16 bytes
+     * @throws IllegalArgumentException if the challenge is not 16 bytes
      * long; if the realm can not be encoded in less then 255 bytes
      *
-     * @exception IOException if the encoding scheme ISO 8859-1 is not supported
+     * @throws IOException if the encoding scheme ISO 8859-1 is not supported
      */
     public static byte[] computeAuthenticationChallenge(byte[] nonce, String realm, boolean access,
             boolean userID) throws IOException {
@@ -975,352 +991,5 @@ public class OBEXHelper {
         }
 
         return authChall;
-    }
-}
-
-/**
- * This class will complete an MD5 hash of the buffer provided.
- */
-class MD5Hash {
-
-    // Constants for MD5Transform routine.
-    private static final int A1 = 7;
-
-    private static final int A2 = 12;
-
-    private static final int A3 = 17;
-
-    private static final int A4 = 22;
-
-    private static final int B1 = 5;
-
-    private static final int B2 = 9;
-
-    private static final int B3 = 14;
-
-    private static final int B4 = 20;
-
-    private static final int C1 = 4;
-
-    private static final int C2 = 11;
-
-    private static final int C3 = 16;
-
-    private static final int C4 = 23;
-
-    private static final int D1 = 6;
-
-    private static final int D2 = 10;
-
-    private static final int D3 = 15;
-
-    private static final int D4 = 21;
-
-    private int state[];
-
-    private int count[];
-
-    /**
-     * Keeps the present digest
-     */
-    private byte buffer[];
-
-    /**
-     * Completes a hash on the data provided.
-     *
-     * @param data the byte array to hash
-     */
-    public MD5Hash(byte data[]) {
-        buffer = new byte[64];
-        state = new int[4];
-        count = new int[2];
-
-        state[0] = 0x67452301;
-        state[1] = 0xefcdab89;
-        state[2] = 0x98badcfe;
-        state[3] = 0x10325476;
-
-        count[0] = 0;
-        count[1] = 0;
-
-        MD5Update(data, 0, data.length);
-    }
-
-    /**
-    * Updates the MD5 hash buffer.
-    *
-    * @param input byte array of data
-     *
-    * @param offset offset into the array to start the digest calculation
-     *
-    * @param inputLen the length of the byte array
-    */
-    private void MD5Update(byte input[], int offset, int inputLen) {
-        int i, index, partLen;
-
-        // Compute number of bytes mod 64
-        index = (count[0] >>> 3) & 0x3F;
-
-        // Update number of bits
-        int slen = inputLen << 3;
-        if ((count[0] += slen) < slen) {
-            count[1]++;
-        }
-
-        count[1] += (inputLen >>> 29);
-
-        partLen = 64 - index;
-        // Transform as many times as possible.
-        if (inputLen >= partLen) {
-            copy(index, input, offset, partLen);
-
-            MD5Transform(buffer, 0, 0);
-
-            for (i = partLen; i + 63 < inputLen; i += 64) {
-                MD5Transform(input, offset, i);
-            }
-
-            index = 0;
-        } else {
-            i = 0;
-        }
-
-        copy(index, input, i + offset, inputLen - i);
-    }
-
-    /**
-     * Computes the final MD5 digest
-     *
-     * @return the MD5 digest
-     */
-    public byte[] computeDigest() {
-        byte bits[];
-        byte digest[];
-        int index;
-        int length;
-
-        // Save number of bits
-        bits = MD5Encode(count, 8);
-
-        // Pad out to 56 mod 64.
-        index = ((count[0] >>> 3) & 0x3f);
-        length = (index < 56) ? (56 - index) : (120 - index);
-
-        // build padding buffer.
-        if (length > 0) {
-            byte padding[] = new byte[length];
-            padding[0] = (byte)0x80;
-            for (int i = 1; i < length; i++) {
-                padding[i] = 0;
-            }
-
-            MD5Update(padding, 0, length);
-        }
-
-        // Append length
-        MD5Update(bits, 0, 8);
-
-        // Store state in digest
-        digest = MD5Encode(state, 16);
-
-        return digest;
-    }
-
-    /**
-     * Copies the input array into the local objects buffer.  It performs a
-     * check to verify that data is available to copy.
-     *
-     * @param startIndex the offset into the local buffer to copy
-     *
-     * @param input the array to copy into the local buffer
-     *
-     * @param index the index to start copying from
-     *
-     * @param length the amount of data to copy
-     */
-    private void copy(int startIndex, byte input[], int index, int length) {
-        if (index == input.length)
-            return;
-        System.arraycopy(input, index, buffer, startIndex, length);
-    }
-
-    /**
-     * Rotates the bytes in <code>x</code> <code>n</code> times to the left.
-     * The rotation wraps the bits around.
-     *
-     * @param x the integer to rotate
-     *
-     * @param n the number of bits to rotate
-     *
-     * @return <code>x</code> rotated to the left <code>n</code> times
-     */
-    private int rotate(int x, int n) {
-        return (((x) << (n)) | ((x) >>> (32 - (n))));
-    }
-
-    /**
-     * Completes a single step in the MD5 hash algorithm.
-     */
-    private int MD5Step(int a, int b, int c, int d, int x, int s, int ac, int round) {
-        switch (round) {
-            case 1:
-                a += (((b) & (c)) | ((~b) & (d))) + (x) + (ac);
-                break;
-            case 2:
-                a += (((b) & (d)) | ((c) & (~d))) + (x) + (ac);
-                break;
-            case 3:
-                a += ((b) ^ (c) ^ (d)) + (x) + (ac);
-                break;
-            case 4:
-                a += ((c) ^ ((b) | (~d))) + (x) + (ac);
-                break;
-        }
-        a = rotate(a, (s));
-        a += (b);
-        return a;
-    }
-
-    /**
-     * Performs the core MD5 algorithm.  This method will add the data provided
-     * and recompute the hash.
-     *
-     * @param data the block of data to add
-     *
-     * @param index the starting index into the data to start processing
-     *
-     * @param length the length of the byte array to process
-     */
-    private void MD5Transform(byte data[], int index, int length) {
-        int a = state[0];
-        int b = state[1];
-        int c = state[2];
-        int d = state[3];
-        int x[];
-
-        x = MD5Decode(data, index, length, 64);
-
-        // Round 1
-        a = MD5Step(a, b, c, d, x[0], A1, 0xd76aa478, 1);
-        d = MD5Step(d, a, b, c, x[1], A2, 0xe8c7b756, 1);
-        c = MD5Step(c, d, a, b, x[2], A3, 0x242070db, 1);
-        b = MD5Step(b, c, d, a, x[3], A4, 0xc1bdceee, 1);
-        a = MD5Step(a, b, c, d, x[4], A1, 0xf57c0faf, 1);
-        d = MD5Step(d, a, b, c, x[5], A2, 0x4787c62a, 1);
-        c = MD5Step(c, d, a, b, x[6], A3, 0xa8304613, 1);
-        b = MD5Step(b, c, d, a, x[7], A4, 0xfd469501, 1);
-        a = MD5Step(a, b, c, d, x[8], A1, 0x698098d8, 1);
-        d = MD5Step(d, a, b, c, x[9], A2, 0x8b44f7af, 1);
-        c = MD5Step(c, d, a, b, x[10], A3, 0xffff5bb1, 1);
-        b = MD5Step(b, c, d, a, x[11], A4, 0x895cd7be, 1);
-        a = MD5Step(a, b, c, d, x[12], A1, 0x6b901122, 1);
-        d = MD5Step(d, a, b, c, x[13], A2, 0xfd987193, 1);
-        c = MD5Step(c, d, a, b, x[14], A3, 0xa679438e, 1);
-        b = MD5Step(b, c, d, a, x[15], A4, 0x49b40821, 1);
-
-        // Round 2
-        a = MD5Step(a, b, c, d, x[1], B1, 0xf61e2562, 2);
-        d = MD5Step(d, a, b, c, x[6], B2, 0xc040b340, 2);
-        c = MD5Step(c, d, a, b, x[11], B3, 0x265e5a51, 2);
-        b = MD5Step(b, c, d, a, x[0], B4, 0xe9b6c7aa, 2);
-        a = MD5Step(a, b, c, d, x[5], B1, 0xd62f105d, 2);
-        d = MD5Step(d, a, b, c, x[10], B2, 0x2441453, 2);
-        c = MD5Step(c, d, a, b, x[15], B3, 0xd8a1e681, 2);
-        b = MD5Step(b, c, d, a, x[4], B4, 0xe7d3fbc8, 2);
-        a = MD5Step(a, b, c, d, x[9], B1, 0x21e1cde6, 2);
-        d = MD5Step(d, a, b, c, x[14], B2, 0xc33707d6, 2);
-        c = MD5Step(c, d, a, b, x[3], B3, 0xf4d50d87, 2);
-        b = MD5Step(b, c, d, a, x[8], B4, 0x455a14ed, 2);
-        a = MD5Step(a, b, c, d, x[13], B1, 0xa9e3e905, 2);
-        d = MD5Step(d, a, b, c, x[2], B2, 0xfcefa3f8, 2);
-        c = MD5Step(c, d, a, b, x[7], B3, 0x676f02d9, 2);
-        b = MD5Step(b, c, d, a, x[12], B4, 0x8d2a4c8a, 2);
-
-        // Round 3
-        a = MD5Step(a, b, c, d, x[5], C1, 0xfffa3942, 3);
-        d = MD5Step(d, a, b, c, x[8], C2, 0x8771f681, 3);
-        c = MD5Step(c, d, a, b, x[11], C3, 0x6d9d6122, 3);
-        b = MD5Step(b, c, d, a, x[14], C4, 0xfde5380c, 3);
-        a = MD5Step(a, b, c, d, x[1], C1, 0xa4beea44, 3);
-        d = MD5Step(d, a, b, c, x[4], C2, 0x4bdecfa9, 3);
-        c = MD5Step(c, d, a, b, x[7], C3, 0xf6bb4b60, 3);
-        b = MD5Step(b, c, d, a, x[10], C4, 0xbebfbc70, 3);
-        a = MD5Step(a, b, c, d, x[13], C1, 0x289b7ec6, 3);
-        d = MD5Step(d, a, b, c, x[0], C2, 0xeaa127fa, 3);
-        c = MD5Step(c, d, a, b, x[3], C3, 0xd4ef3085, 3);
-        b = MD5Step(b, c, d, a, x[6], C4, 0x4881d05, 3);
-        a = MD5Step(a, b, c, d, x[9], C1, 0xd9d4d039, 3);
-        d = MD5Step(d, a, b, c, x[12], C2, 0xe6db99e5, 3);
-        c = MD5Step(c, d, a, b, x[15], C3, 0x1fa27cf8, 3);
-        b = MD5Step(b, c, d, a, x[2], C4, 0xc4ac5665, 3);
-
-        // Round 4
-        a = MD5Step(a, b, c, d, x[0], D1, 0xf4292244, 4);
-        d = MD5Step(d, a, b, c, x[7], D2, 0x432aff97, 4);
-        c = MD5Step(c, d, a, b, x[14], D3, 0xab9423a7, 4);
-        b = MD5Step(b, c, d, a, x[5], D4, 0xfc93a039, 4);
-        a = MD5Step(a, b, c, d, x[12], D1, 0x655b59c3, 4);
-        d = MD5Step(d, a, b, c, x[3], D2, 0x8f0ccc92, 4);
-        c = MD5Step(c, d, a, b, x[10], D3, 0xffeff47d, 4);
-        b = MD5Step(b, c, d, a, x[1], D4, 0x85845dd1, 4);
-        a = MD5Step(a, b, c, d, x[8], D1, 0x6fa87e4f, 4);
-        d = MD5Step(d, a, b, c, x[15], D2, 0xfe2ce6e0, 4);
-        c = MD5Step(c, d, a, b, x[6], D3, 0xa3014314, 4);
-        b = MD5Step(b, c, d, a, x[13], D4, 0x4e0811a1, 4);
-        a = MD5Step(a, b, c, d, x[4], D1, 0xf7537e82, 4);
-        d = MD5Step(d, a, b, c, x[11], D2, 0xbd3af235, 4);
-        c = MD5Step(c, d, a, b, x[2], D3, 0x2ad7d2bb, 4);
-        b = MD5Step(b, c, d, a, x[9], D4, 0xeb86d391, 4);
-
-        state[0] += a;
-        state[1] += b;
-        state[2] += c;
-        state[3] += d;
-    }
-
-    /**
-     * Encodes the input array.  <code>input</code> must be a multiple of
-     * four.
-     *
-     * @param input the array to encode
-     *
-     * @param length the length of the array to encode
-     */
-    private byte[] MD5Encode(int input[], int length) {
-        int i, j;
-        byte output[] = new byte[length];
-
-        for (i = 0, j = 0; j < length; i++, j += 4) {
-            output[j] = (byte)(input[i] & 0xff);
-            output[j + 1] = (byte)((input[i] >>> 8) & 0xff);
-            output[j + 2] = (byte)((input[i] >>> 16) & 0xff);
-            output[j + 3] = (byte)((input[i] >>> 24) & 0xff);
-        }
-
-        return output;
-    }
-
-    /**
-     * Decodes the array.  The <code>input</code> array must be a multiple of
-     * four.  Results are undefined if this is not true.
-     *
-     * @param input the array to decode
-     *
-     * @param index the starting position into the input array to start decoding
-     *
-     * @param posn
-     *
-     * @param length
-     */
-    private int[] MD5Decode(byte input[], int offset, int posn, int length) {
-        int output[] = new int[length / 4];
-        int i, j;
-        int limit = length + posn + offset;
-
-        for (i = 0, j = offset + posn; j < limit; i++, j += 4)
-            output[i] = ((input[j]) & 0xff) | (((input[j + 1]) & 0xff) << 8)
-                    | (((input[j + 2]) & 0xff) << 16) | (((input[j + 3]) & 0xff) << 24);
-
-        return output;
     }
 }

@@ -67,7 +67,7 @@ package javax.obex;
  * a CREATE-EMPTY request, there will be no Body data to read.  Therefore,
  * a call to <code>InputStream.read()</code> will return -1.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public class ServerRequestHandler {
 
@@ -99,7 +99,7 @@ public class ServerRequestHandler {
      * @param id the connection ID to use; -1 if no connection ID should be
      * sent
      *
-     * @exception IllegalArgumentException if <code>id</code> is not in the
+     * @throws IllegalArgumentException if <code>id</code> is not in the
      * range -1 to 2<sup>32</sup>-1
      */
     public void setConnectionID(long id) {

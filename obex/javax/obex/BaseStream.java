@@ -32,20 +32,20 @@
 
 package javax.obex;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * This interface defines the methods needed by a parent that uses the
  * PrivateInputStream and PrivateOutputStream objects defined in this package.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public interface BaseStream {
 
     /**
      * Verifies that this object is still open.
      *
-     * @exception IOException if the object is closed
+     * @throws IOException if the object is closed
      */
     public void ensureOpen() throws IOException;
 
@@ -53,7 +53,7 @@ public interface BaseStream {
      * Verifies that additional information may be sent.  In other words, the
      * operation is not done.
      *
-     * @exception IOException if the operation is completed
+     * @throws IOException if the operation is completed
      */
     public void ensureNotDone() throws IOException;
 
@@ -67,7 +67,7 @@ public interface BaseStream {
      * @return <code>true</code> if the operation was completed;
      * <code>false</code> if no operation took place
      *
-     * @exception IOException if an IO error occurs
+     * @throws IOException if an IO error occurs
      */
     public boolean continueOperation(boolean sendEmpty, boolean inStream) throws IOException;
 
@@ -77,7 +77,7 @@ public interface BaseStream {
      * @param inStream <code>true</code> if the input stream is closed;
      * <code>false</code> if the output stream is closed
      *
-     * @exception IOException if an IO error occurs
+     * @throws IOException if an IO error occurs
      */
     public void streamClosed(boolean inStream) throws IOException;
 }

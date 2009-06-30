@@ -41,17 +41,16 @@ import java.io.OutputStream;
  * This class implements the <code>Operation</code> interface.  It will read
  * and write data via puts and gets.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public class ClientSession implements ObexSession {
-    //protected StreamConnection client;
     protected Authenticator authenticator;
 
     protected boolean connectionOpen = false;
 
-    protected boolean isConnected; // Determines if an OBEX layer connection
+    // Determines if an OBEX layer connection has been established
+    protected boolean isConnected;
 
-    // has been established
     private byte[] connectionID = null;
 
     byte[] challengeDigest = null;
@@ -61,8 +60,6 @@ public class ClientSession implements ObexSession {
     protected OutputStream output = null;
 
     protected ObexTransport trans = null;
-
-    public int mode;
 
     /*
     * The max Packet size must be at least 256 according to the OBEX
@@ -87,29 +84,6 @@ public class ClientSession implements ObexSession {
 
     }
 
-    /* comment out as not used internally
-    public boolean isClosed() {
-      //  if (client instanceof BTConnection)
-      //      return ((BTConnection)client).isClosed();
-      //  else
-           return false;
-    }    
-    
-    public int getConnectionHandle() {
-       //if (client instanceof BTConnection)
-       //    return ((BTConnection)client).getConnectionHandle();
-       //else
-           return -1;
-    }
-
-    public RemoteDevice getRemoteDevice() {
-        if (client instanceof BTConnection)
-            return ((BTConnection)client).getRemoteDevice();
-        else
-            return null;
-    }
-    */
-
     public HeaderSet connect(HeaderSet header) throws java.io.IOException {
         ensureOpen();
         if (isConnected) {
@@ -130,7 +104,7 @@ public class ClientSession implements ObexSession {
                 challengeDigest = new byte[16];
                 System.arraycopy((header).nonce, 0, challengeDigest, 0, 16);
             }
-            head = OBEXHelper.createHeader(header, false);
+            head = ObexHelper.createHeader(header, false);
             totalLength += head.length;
         }
         /*
@@ -147,14 +121,14 @@ public class ClientSession implements ObexSession {
         // handle the length and 0x80.
         requestPacket[0] = (byte)0x10;
         requestPacket[1] = (byte)0x00;
-        requestPacket[2] = (byte)(OBEXConstants.MAX_PACKET_SIZE_INT >> 8);
-        requestPacket[3] = (byte)(OBEXConstants.MAX_PACKET_SIZE_INT & 0xFF);
+        requestPacket[2] = (byte)(ObexHelper.MAX_PACKET_SIZE_INT >> 8);
+        requestPacket[3] = (byte)(ObexHelper.MAX_PACKET_SIZE_INT & 0xFF);
         if (head != null) {
             System.arraycopy(head, 0, requestPacket, 4, head.length);
         }
 
         // check with local max packet size
-        if ((requestPacket.length + 3) > OBEXConstants.MAX_PACKET_SIZE_INT) {
+        if ((requestPacket.length + 3) > ObexHelper.MAX_PACKET_SIZE_INT) {
             throw new IOException("Packet size exceeds max packet size");
         }
 
@@ -207,7 +181,6 @@ public class ClientSession implements ObexSession {
             System.arraycopy(connectionID, 0, (header).connectionID, 0, 4);
         }
 
-        //      this.mode = javax.microedition.io.Connector.READ ;
         return new ClientOperation(input, maxPacketSize, this, header, true);
     }
 
@@ -218,7 +191,7 @@ public class ClientSession implements ObexSession {
         if ((id < 0) || (id > 0xFFFFFFFFL)) {
             throw new IllegalArgumentException("Connection ID is not in a valid range");
         }
-        connectionID = OBEXHelper.convertToByteArray(id);
+        connectionID = ObexHelper.convertToByteArray(id);
     }
 
     public HeaderSet createHeaderSet() {
@@ -258,7 +231,7 @@ public class ClientSession implements ObexSession {
                 (header).connectionID = new byte[4];
                 System.arraycopy(connectionID, 0, (header).connectionID, 0, 4);
             }
-            head = OBEXHelper.createHeader(header, false);
+            head = ObexHelper.createHeader(header, false);
 
             if ((head.length + 3) > maxPacketSize) {
                 throw new IOException("Packet size exceeds max packet size");
@@ -298,7 +271,7 @@ public class ClientSession implements ObexSession {
         if (connectionID == null) {
             return -1;
         }
-        return OBEXHelper.convertToLong(connectionID);
+        return ObexHelper.convertToLong(connectionID);
     }
 
     public Operation put(HeaderSet header) throws java.io.IOException {
@@ -331,7 +304,6 @@ public class ClientSession implements ObexSession {
             System.arraycopy(connectionID, 0, (header).connectionID, 0, 4);
         }
 
-        //       this.mode = javax.microedition.io.Connector.WRITE ;
         return new ClientOperation(input, maxPacketSize, this, header, false);
     }
 
@@ -380,7 +352,7 @@ public class ClientSession implements ObexSession {
             System.arraycopy(connectionID, 0, (header).connectionID, 0, 4);
         }
 
-        head = OBEXHelper.createHeader(header, false);
+        head = ObexHelper.createHeader(header, false);
         totalLength += head.length;
 
         if (totalLength > maxPacketSize) {
@@ -436,7 +408,7 @@ public class ClientSession implements ObexSession {
     /**
      * Verifies that the connection is open.
      *
-     * @exception IOException if the connection is closed
+     * @throws IOException if the connection is closed
      */
     public synchronized void ensureOpen() throws IOException {
         if (!connectionOpen) {
@@ -476,13 +448,13 @@ public class ClientSession implements ObexSession {
      * return <code>true</code> if the operation completed successfully;
      * <code>false</code> if an authentication response failed to pass
      *
-     * @exception IOException if an IO error occurs
+     * @throws IOException if an IO error occurs
      */
     public boolean sendRequest(int code, byte[] head, HeaderSet headers,
             PrivateInputStream privateInput) throws IOException {
         //check header length with local max size
         if (head != null) {
-            if ((head.length + 3) > OBEXConstants.MAX_PACKET_SIZE_INT) {
+            if ((head.length + 3) > ObexHelper.MAX_PACKET_SIZE_INT) {
                 throw new IOException("header too large ");
             }
         }
@@ -509,7 +481,7 @@ public class ClientSession implements ObexSession {
 
         int length = ((input.read() << 8) | (input.read()));
 
-        if (length > OBEXConstants.MAX_PACKET_SIZE_INT) {
+        if (length > ObexHelper.MAX_PACKET_SIZE_INT) {
             throw new IOException("Packet received exceeds packet size limit");
         }
         if (length > 3) {
@@ -520,8 +492,8 @@ public class ClientSession implements ObexSession {
                 maxPacketSize = (input.read() << 8) + input.read();
 
                 //check with local max size
-                if (maxPacketSize > OBEXConstants.MAX_PACKET_SIZE_INT) {
-                    maxPacketSize = OBEXConstants.MAX_PACKET_SIZE_INT;
+                if (maxPacketSize > ObexHelper.MAX_PACKET_SIZE_INT) {
+                    maxPacketSize = ObexHelper.MAX_PACKET_SIZE_INT;
                 }
 
                 if (length > 7) {
@@ -547,7 +519,7 @@ public class ClientSession implements ObexSession {
                 }
             }
 
-            byte[] body = OBEXHelper.updateHeaderSet(headers, data);
+            byte[] body = ObexHelper.updateHeaderSet(headers, data);
             if ((privateInput != null) && (body != null)) {
                 privateInput.writeBytes(body, 1);
             }
@@ -610,9 +582,9 @@ public class ClientSession implements ObexSession {
          * granted.  The tag 0x02 is the realm, which provides a description of
          * which user name and password to use.
          */
-        byte[] challenge = OBEXHelper.getTagValue((byte)0x00, header.authChall);
-        byte[] option = OBEXHelper.getTagValue((byte)0x01, header.authChall);
-        byte[] description = OBEXHelper.getTagValue((byte)0x02, header.authChall);
+        byte[] challenge = ObexHelper.getTagValue((byte)0x00, header.authChall);
+        byte[] option = ObexHelper.getTagValue((byte)0x01, header.authChall);
+        byte[] description = ObexHelper.getTagValue((byte)0x02, header.authChall);
 
         String realm = "";
         if (description != null) {
@@ -635,7 +607,7 @@ public class ClientSession implements ObexSession {
 
                 case 0xFF:
                     // UNICODE Encoding
-                    realm = OBEXHelper.convertToUnicode(realmString, false);
+                    realm = ObexHelper.convertToUnicode(realmString, false);
                     break;
 
                 case 0x02:
@@ -728,7 +700,7 @@ public class ClientSession implements ObexSession {
         header.authResp[0] = (byte)0x00;
         header.authResp[1] = (byte)0x10;
 
-        byte[] responseDigest = OBEXHelper.computeMD5Hash(digest);
+        byte[] responseDigest = ObexHelper.computeMd5Hash(digest);
         System.arraycopy(responseDigest, 0, header.authResp, 2, 16);
 
         // Add the challenge
@@ -753,7 +725,7 @@ public class ClientSession implements ObexSession {
             return false;
         }
 
-        byte[] correctPassword = authenticator.onAuthenticationResponse(OBEXHelper.getTagValue(
+        byte[] correctPassword = authenticator.onAuthenticationResponse(ObexHelper.getTagValue(
                 (byte)0x01, authResp));
         if (correctPassword == null) {
             return false;
@@ -763,8 +735,8 @@ public class ClientSession implements ObexSession {
         System.arraycopy(challengeDigest, 0, temp, 0, 16);
         System.arraycopy(correctPassword, 0, temp, 16, correctPassword.length);
 
-        byte[] correctResponse = OBEXHelper.computeMD5Hash(temp);
-        byte[] actualResponse = OBEXHelper.getTagValue((byte)0x00, authResp);
+        byte[] correctResponse = ObexHelper.computeMd5Hash(temp);
+        byte[] actualResponse = ObexHelper.getTagValue((byte)0x00, authResp);
         for (int i = 0; i < 16; i++) {
             if (correctResponse[i] != actualResponse[i]) {
                 return false;

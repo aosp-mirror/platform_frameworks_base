@@ -32,12 +32,14 @@
 
 package javax.obex;
 
-public class ApplicationParameter {
-    private int max_length_ini = 1000;
+/**
+ * @hide
+ */
+public final class ApplicationParameter {
 
     private byte[] b_array;
-
     private int length;
+    private int max_length = 1000;
 
     public static class TRIPLET_TAGID {
         public static final byte ORDER_TAGID = 0x01;
@@ -46,7 +48,8 @@ public class ApplicationParameter {
 
         public static final byte SEARCH_ATTRIBUTE_TAGID = 0x03;
 
-        public static final byte MAXLISTCOUNT_TAGID = 0x04;//if equals to "0", PSE only reply number of contacts
+        // if equals to "0", PSE only reply number of contacts
+        public static final byte MAXLISTCOUNT_TAGID = 0x04;
 
         public static final byte LISTSTARTOFFSET_TAGID = 0x05;
 
@@ -54,9 +57,11 @@ public class ApplicationParameter {
 
         public static final byte FORMAT_TAGID = 0x07;
 
-        public static final byte PHONEBOOKSIZE_TAGID = 0x08;//only used if max list count = 0
+        // only used if max list count = 0
+        public static final byte PHONEBOOKSIZE_TAGID = 0x08;
 
-        public static final byte NEWMISSEDCALLS_TAGID = 0x09;//only used in "mch" in response
+        // only used in "mch" in response
+        public static final byte NEWMISSEDCALLS_TAGID = 0x09;
     }
 
     public static class TRIPLET_VALUE {
@@ -110,16 +115,16 @@ public class ApplicationParameter {
     }
     */
     public ApplicationParameter() {
-        b_array = new byte[max_length_ini];
+        b_array = new byte[max_length];
         length = 0;
     }
 
     public void addAPPHeader(byte tag, byte len, byte[] value) {
-        if ((length + len + 2) > max_length_ini) {
+        if ((length + len + 2) > max_length) {
             byte[] array_tmp = new byte[length + 4 * len];
             System.arraycopy(b_array, 0, array_tmp, 0, length);
             b_array = array_tmp;
-            max_length_ini = length + 4 * len;
+            max_length = length + 4 * len;
         }
         b_array[length++] = tag;
         b_array[length++] = len;
