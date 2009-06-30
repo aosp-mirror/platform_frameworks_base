@@ -132,8 +132,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private static int APN_DEFAULT_ID = 0;
     private static int APN_MMS_ID = 1;
     private static int APN_SUPL_ID = 2;
-    private static int APN_DEFAULT_FEATURE_ID = 3;
-    private static int APN_NUM_TYPES = 4;
+    private static int APN_NUM_TYPES = 3;
 
     private boolean[] dataEnabled = new boolean[APN_NUM_TYPES];
 
@@ -321,8 +320,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     /**
      * Ensure that we are connected to an APN of the specified type.
      * @param type the APN type (currently the only valid values
-     * are {@link Phone#APN_TYPE_MMS}, {@link Phone#APN_TYPE_SUPL}
-     * and {@link Phone#APN_TYPE_DEFAULT_FEATURE})
+     * are {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL})
      * @return the result of the operation. Success is indicated by
      * a return value of either {@code Phone.APN_ALREADY_ACTIVE} or
      * {@code Phone.APN_REQUEST_STARTED}. In the latter case, a broadcast
@@ -330,13 +328,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * the APN has been established.
      */
     protected int enableApnType(String type) {
-        /* FIXME: APN_TYPE_DEFAULT_FEATURE is used to request the default APN.
-         * Due to the way mRequestedApnType is used, we needed to add 
-         * a different APN_TYPE for this rather than using APN_TYPE_DEFAULT.
-         */
-
-        if (!TextUtils.equals(type, Phone.APN_TYPE_DEFAULT_FEATURE) &&
-                !TextUtils.equals(type, Phone.APN_TYPE_MMS) &&
+        if (!TextUtils.equals(type, Phone.APN_TYPE_MMS) &&
                 !TextUtils.equals(type, Phone.APN_TYPE_SUPL)) {
             return Phone.APN_REQUEST_FAILED;
         }
@@ -374,14 +366,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * use of the default APN has not been explicitly disabled, we are connected
      * to the default APN.
      * @param type the APN type. The only valid values are currently
-     * {@link Phone#APN_TYPE_MMS} {@link Phone#APN_TYPE_SUPL} and
-     * {@link Phone#APN_TYPE_DEFAULT_FEATURE}).
+     * {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL}.
      * @return
      */
     protected int disableApnType(String type) {
         Log.d(LOG_TAG, "disableApnType("+type+")");
-        if ((TextUtils.equals(type, Phone.APN_TYPE_DEFAULT_FEATURE) ||
-                TextUtils.equals(type, Phone.APN_TYPE_MMS) ||
+        if ((TextUtils.equals(type, Phone.APN_TYPE_MMS) ||
                 TextUtils.equals(type, Phone.APN_TYPE_SUPL))
                 && isEnabled(type)) {
             removeMessages(EVENT_RESTORE_DEFAULT_APN);
@@ -432,9 +422,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private boolean isApnTypeActive(String type) {
         // TODO: to support simultaneous, mActiveApn can be a List instead.
-        if (TextUtils.equals(type, Phone.APN_TYPE_DEFAULT_FEATURE)) {
-            type = Phone.APN_TYPE_DEFAULT;
-        }
         return mActiveApn != null && mActiveApn.canHandleType(type);
     }
 
@@ -456,8 +443,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return dataEnabled[APN_MMS_ID];
         } else if (TextUtils.equals(apnType, Phone.APN_TYPE_SUPL)) {
             return dataEnabled[APN_SUPL_ID];
-        } else if (TextUtils.equals(apnType, Phone.APN_TYPE_DEFAULT_FEATURE)) {
-            return dataEnabled[APN_DEFAULT_FEATURE_ID];
         } else {
             return false;
         }
@@ -471,13 +456,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             dataEnabled[APN_MMS_ID] = enable;
         } else if (TextUtils.equals(apnType, Phone.APN_TYPE_SUPL)) {
             dataEnabled[APN_SUPL_ID] = enable;
-        } else if (TextUtils.equals(apnType, Phone.APN_TYPE_DEFAULT_FEATURE)) {
-            dataEnabled[APN_DEFAULT_FEATURE_ID] = enable;
         }
         Log.d(LOG_TAG, "dataEnabled[DEFAULT_APN]=" + dataEnabled[APN_DEFAULT_ID] +
                 " dataEnabled[MMS_APN]=" + dataEnabled[APN_MMS_ID] +
-                " dataEnabled[SUPL_APN]=" + dataEnabled[APN_SUPL_ID] +
-                " dataEnabled[APN_DEFAULT_FEATURE_ID]=" + dataEnabled[APN_DEFAULT_FEATURE_ID]);
+                " dataEnabled[SUPL_APN]=" + dataEnabled[APN_SUPL_ID]);
     }
 
     /**
@@ -505,9 +487,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // Don't tear down if there is an active APN and it handles MMS or SUPL.
             // TODO: This isn't very general.
             if ((isApnTypeActive(Phone.APN_TYPE_MMS) && isEnabled(Phone.APN_TYPE_MMS)) ||
-                (isApnTypeActive(Phone.APN_TYPE_SUPL) && isEnabled(Phone.APN_TYPE_SUPL)) ||
-                (isApnTypeActive(Phone.APN_TYPE_DEFAULT_FEATURE) &&
-                    isEnabled(Phone.APN_TYPE_DEFAULT_FEATURE))) {
+                (isApnTypeActive(Phone.APN_TYPE_SUPL) && isEnabled(Phone.APN_TYPE_SUPL))) {
                 return false;
             }
             Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
@@ -537,8 +517,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * {@code true} otherwise.
      */
     public boolean getAnyDataEnabled() {
-        return dataEnabled[APN_DEFAULT_ID] || dataEnabled[APN_MMS_ID] ||
-                dataEnabled[APN_SUPL_ID] || dataEnabled[APN_DEFAULT_FEATURE_ID];
+        return dataEnabled[APN_DEFAULT_ID] || dataEnabled[APN_MMS_ID] || dataEnabled[APN_SUPL_ID];
     }
 
     /**
@@ -1327,8 +1306,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
              * rather an app that inadvertantly fails to reset to the
              * default APN, or that dies before doing so.
              */
-            if (dataEnabled[APN_MMS_ID] || dataEnabled[APN_SUPL_ID] ||
-                    dataEnabled[APN_DEFAULT_FEATURE_ID]) {
+            if (dataEnabled[APN_MMS_ID] || dataEnabled[APN_SUPL_ID]) {
                 removeMessages(EVENT_RESTORE_DEFAULT_APN);
                 sendMessageDelayed(obtainMessage(EVENT_RESTORE_DEFAULT_APN),
                         getRestoreDefaultApnDelay());
