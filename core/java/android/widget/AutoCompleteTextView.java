@@ -1185,7 +1185,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                         int position, long id) {
 
                     if (position != -1) {
-                        mDropDownList.mListSelectionHidden = false;
+                        DropDownListView dropDownList = mDropDownList;
+
+                        if (dropDownList != null) {
+                            dropDownList.mListSelectionHidden = false;
+                        }
                     }
                 }
 
