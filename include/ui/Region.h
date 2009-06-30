@@ -51,6 +51,9 @@ public:
     inline  Rect        getBounds() const   { return mBounds; }
     inline  Rect        bounds() const      { return getBounds(); }
 
+            // the region becomes its bounds
+            Region&     makeBoundsSelf();
+    
             void        clear();
             void        set(const Rect& r);
             void        set(uint32_t w, uint32_t h);

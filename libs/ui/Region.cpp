@@ -87,6 +87,12 @@ Region& Region::operator = (const Region& rhs)
     return *this;
 }
 
+Region& Region::makeBoundsSelf()
+{
+    mStorage.clear();
+    return *this;
+}
+
 void Region::clear()
 {
     mBounds.clear();
