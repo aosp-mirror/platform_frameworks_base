@@ -91,6 +91,7 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
     private static final int MAX_SPEECH_ITEM_CHAR_LENGTH = 4000;
+    private static final int MAX_FILENAME_LENGTH = 250;
 
     private static final String ACTION = "android.intent.action.USE_TTS";
     private static final String CATEGORY = "android.intent.category.TTS";
@@ -414,6 +415,26 @@ public class TtsService extends Service implements OnCompletionListener {
                         synth.start();
                         return;
                     }
+                    if (params != null){
+                        String language = "";
+                        String country = "";
+                        String variant = "";
+                        for (int i = 0; i < params.size() - 1; i = i + 2){
+                            String param = params.get(i);
+                            if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
+                                setSpeechRate(Integer.parseInt(params.get(i+1)));
+                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
+                                language = params.get(i+1);
+                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
+                                country = params.get(i+1);
+                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
+                                variant = params.get(i+1);
+                            }
+                        }
+                        if (language.length() > 0){
+                            setLanguage(language, country, variant);
+                        }
+                    }
                     nativeSynth.speak(text);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -614,8 +635,7 @@ public class TtsService extends Service implements OnCompletionListener {
                 return false;
             }
             // Don't allow a filename that is too long
-            // TODO use platform constant
-            if (filename.length() > 250) {
+            if (filename.length() > MAX_FILENAME_LENGTH) {
                 return false;
             }
             nativeSynth.synthesizeToFile(text, filename);
@@ -660,8 +680,7 @@ public class TtsService extends Service implements OnCompletionListener {
                 return false;
             }
             // Don't allow a filename that is too long
-            // TODO use platform constant
-            if (filename.length() > 250) {
+            if (filename.length() > MAX_FILENAME_LENGTH) {
                 return false;
             }
             // TODO: Add nativeSynth.synthesizeIpaToFile(text, filename);
