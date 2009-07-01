@@ -3029,7 +3029,6 @@ public class WebView extends AbsoluteLayout
 
         if (isTextView) {
             imm.showSoftInput(mWebTextView, 0);
-            mWebTextView.enableScrollOnScreen(true);
             // Now we need to fake a touch event to place the cursor where the
             // user touched.
             AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams)
@@ -3090,8 +3089,7 @@ public class WebView extends AbsoluteLayout
         // should be in content coordinates.
         Rect bounds = nativeFocusCandidateNodeBounds();
         if (!Rect.intersects(bounds, visibleRect)) {
-            // Node is not on screen, so do not bother.
-            return;
+            mWebTextView.bringIntoView();
         }
         String text = nativeFocusCandidateText();
         int nodePointer = nativeFocusCandidatePointer();
@@ -3329,6 +3327,13 @@ public class WebView extends AbsoluteLayout
             rebuildWebTextView();
             // Now we need to pass the event to it
             return mWebTextView.onKeyDown(keyCode, event);
+        } else if (nativeHasFocusNode()) {
+            // In this case, the cursor is not on a text input, but the focus
+            // might be.  Check it, and if so, hand over to the WebTextView.
+            rebuildWebTextView();
+            if (inEditingMode()) {
+                return mWebTextView.onKeyDown(keyCode, event);
+            }
         }
 
         // TODO: should we pass all the keys to DOM or check the meta tag
