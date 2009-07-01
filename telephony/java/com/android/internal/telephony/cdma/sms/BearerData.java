@@ -83,7 +83,7 @@ public final class BearerData {
     public static final int MESSAGE_TYPE_DELIVER_REPORT = 0x07;
     public static final int MESSAGE_TYPE_SUBMIT_REPORT  = 0x08;
 
-    public byte messageType;
+    public int messageType;
 
     /**
      * 16-bit value indicating the message ID, which increments modulo 65536.
@@ -102,7 +102,7 @@ public final class BearerData {
     public static final int PRIORITY_EMERGENCY     = 0x3;
 
     public boolean priorityIndicatorSet = false;
-    public byte priority = PRIORITY_NORMAL;
+    public int priority = PRIORITY_NORMAL;
 
     /**
      * Supported privacy modes for CDMA SMS messages
@@ -114,7 +114,7 @@ public final class BearerData {
     public static final int PRIVACY_SECRET         = 0x3;
 
     public boolean privacyIndicatorSet = false;
-    public byte privacy = PRIVACY_NOT_RESTRICTED;
+    public int privacy = PRIVACY_NOT_RESTRICTED;
 
     /**
      * Supported alert priority modes for CDMA SMS messages
@@ -139,7 +139,7 @@ public final class BearerData {
     public static final int DISPLAY_MODE_USER           = 0x2;
 
     public boolean displayModeSet = false;
-    public byte displayMode = DISPLAY_MODE_DEFAULT;
+    public int displayMode = DISPLAY_MODE_DEFAULT;
 
     /**
      * Language Indicator values.  NOTE: the spec (3GPP2 C.S0015-B,
@@ -789,7 +789,7 @@ public final class BearerData {
         if (inStream.read(8) != 3) {
             throw new CodingException("MESSAGE_IDENTIFIER subparam size incorrect");
         }
-        bData.messageType = (byte)inStream.read(4);
+        bData.messageType = inStream.read(4);
         bData.messageId = inStream.read(8) << 8;
         bData.messageId |= inStream.read(8);
         bData.hasUserDataHeader = (inStream.read(1) == 1);
@@ -1103,16 +1103,16 @@ public final class BearerData {
     {
         int paramBytes = inStream.read(8);
         CdmaSmsAddress addr = new CdmaSmsAddress();
-        addr.digitMode = (byte)inStream.read(1);
+        addr.digitMode = inStream.read(1);
         byte fieldBits = 4;
         byte consumedBits = 1;
         if (addr.digitMode == CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR) {
             addr.ton = inStream.read(3);
-            addr.numberPlan = (byte)inStream.read(4);
+            addr.numberPlan = inStream.read(4);
             fieldBits = 8;
             consumedBits += 7;
         }
-        addr.numberOfDigits = (byte)inStream.read(8);
+        addr.numberOfDigits = inStream.read(8);
         consumedBits += 8;
         int remainingBits = (paramBytes * 8) - consumedBits;
         int dataBits = addr.numberOfDigits * fieldBits;
@@ -1192,7 +1192,7 @@ public final class BearerData {
         if (inStream.read(8) != 1) {
             throw new CodingException("PRIVACY_INDICATOR subparam size incorrect");
         }
-        bData.privacy = (byte)inStream.read(2);
+        bData.privacy = inStream.read(2);
         inStream.skip(6);
         bData.privacyIndicatorSet = true;
     }
@@ -1213,7 +1213,7 @@ public final class BearerData {
         if (inStream.read(8) != 1) {
             throw new CodingException("DISPLAY_MODE subparam size incorrect");
         }
-        bData.displayMode = (byte)inStream.read(2);
+        bData.displayMode = inStream.read(2);
         inStream.skip(6);
         bData.displayModeSet = true;
     }
@@ -1224,7 +1224,7 @@ public final class BearerData {
         if (inStream.read(8) != 1) {
             throw new CodingException("PRIORITY_INDICATOR subparam size incorrect");
         }
-        bData.priority = (byte)inStream.read(2);
+        bData.priority = inStream.read(2);
         inStream.skip(6);
         bData.priorityIndicatorSet = true;
     }
