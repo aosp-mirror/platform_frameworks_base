@@ -254,7 +254,11 @@ final class SMSDispatcher extends Handler {
             }
 
             sms = (SmsMessage) ar.result;
-            dispatchMessage(sms);
+            try {
+                dispatchMessage(sms);
+            } catch (RuntimeException ex) {
+                Log.e(TAG, "Exception processing incoming SMS. Exception:" + ex);
+            }
 
             break;
 
