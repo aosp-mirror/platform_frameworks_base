@@ -62,6 +62,16 @@ public final class Bmgr {
         String op = args[0];
         mNextArg = 1;
 
+        if ("enabled".equals(op)) {
+            doEnabled();
+            return;
+        }
+
+        if ("enable".equals(op)) {
+            doEnable();
+            return;
+        }
+
         if ("run".equals(op)) {
             doRun();
             return;
@@ -89,6 +99,41 @@ public final class Bmgr {
 
         System.err.println("Unknown command");
         showUsage();
+    }
+
+    private String enableToString(boolean enabled) {
+        return enabled ? "enabled" : "disabled";
+    }
+
+    private void doEnabled() {
+        try {
+            boolean isEnabled = mBmgr.isBackupEnabled();
+            System.out.println("Backup Manager currently "
+                    + enableToString(isEnabled));
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void doEnable() {
+        String arg = nextArg();
+        if (arg == null) {
+            showUsage();
+            return;
+        }
+
+        try {
+            boolean enable = Boolean.parseBoolean(arg);
+            mBmgr.setBackupEnabled(enable);
+            System.out.println("Backup Manager now " + enableToString(enable));
+        } catch (NumberFormatException e) {
+            showUsage();
+            return;
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
     }
 
     private void doRun() {
@@ -291,6 +336,8 @@ public final class Bmgr {
     private static void showUsage() {
         System.err.println("usage: bmgr [backup|restore|list|transport|run]");
         System.err.println("       bmgr backup PACKAGE");
+        System.err.println("       bmgr enable BOOL");
+        System.err.println("       bmgr enabled");
         System.err.println("       bmgr list transports");
         System.err.println("       bmgr list sets");
         System.err.println("       bmgr transport WHICH");
@@ -300,6 +347,14 @@ public final class Bmgr {
         System.err.println("The 'backup' command schedules a backup pass for the named package.");
         System.err.println("Note that the backup pass will effectively be a no-op if the package");
         System.err.println("does not actually have changed data to store.");
+        System.err.println("");
+        System.err.println("The 'enable' command enables or disables the entire backup mechanism.");
+        System.err.println("If the argument is 'true' it will be enabled, otherwise it will be");
+        System.err.println("disabled.  When disabled, neither backup or restore operations will");
+        System.err.println("be performed.");
+        System.err.println("");
+        System.err.println("The 'enabled' command reports the current enabled/disabled state of");
+        System.err.println("the backup mechanism.");
         System.err.println("");
         System.err.println("The 'list transports' command reports the names of the backup transports");
         System.err.println("currently available on the device.  These names can be passed as arguments");
