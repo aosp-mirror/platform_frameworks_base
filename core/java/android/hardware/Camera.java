@@ -155,7 +155,11 @@ public class Camera {
      * @throws IOException if the method fails.
      */
     public final void setPreviewDisplay(SurfaceHolder holder) throws IOException {
-        setPreviewDisplay(holder.getSurface());
+        if (holder != null) {
+            setPreviewDisplay(holder.getSurface());
+        } else {
+            setPreviewDisplay((Surface)null);
+        }
     }
 
     private native final void setPreviewDisplay(Surface surface);
