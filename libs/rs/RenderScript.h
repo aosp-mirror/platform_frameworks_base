@@ -173,6 +173,14 @@ enum RsTexEnvMode {
     RS_TEX_ENV_MODE_DECAL
 };
 
+enum RsPrimitive {
+    RS_PRIMITIVE_POINT,
+    RS_PRIMITIVE_LINE,
+    RS_PRIMITIVE_LINE_STRIP,
+    RS_PRIMITIVE_TRIANGLE,
+    RS_PRIMITIVE_TRIANGLE_STRIP,
+    RS_PRIMITIVE_TRIANGLE_FAN
+};
 
 
 #include "rsgApiFuncDecl.h"
