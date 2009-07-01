@@ -30,6 +30,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.Iterator;
 
+import java.lang.Integer;
+
 import android.util.Log;
 
 public class CdmaSmsTest extends AndroidTestCase {
@@ -679,4 +681,15 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(revBearerData.displayModeSet, true);
         assertEquals(revBearerData.displayMode, bearerData.displayMode);
     }
+
+    @SmallTest
+    public void testIs91() throws Exception {
+        String pdu1 = "000320001001070c2039acc13880";
+        BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
+        assertEquals(bd1.callbackNumber.address, "3598271");
+        String pdu4 = "000320001001080c283c314724b34e";
+        BearerData bd4 = BearerData.decode(HexDump.hexStringToByteArray(pdu4));
+        assertEquals(bd4.userData.payloadStr, "ABCDEFG");
+    }
+
 }
