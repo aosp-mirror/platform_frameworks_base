@@ -51,8 +51,8 @@ import java.io.ByteArrayOutputStream;
  * the server receives a 0x83, the client is signalling the server that it is
  * done with its request.
  *
- * OPTIMIZATION: Extend the ClientOperation and reuse the methods defined
- * OPTIMIZATION: in that class.
+ * TODO: Extend the ClientOperation and reuse the methods defined
+ * TODO: in that class.
  *
  * @hide
  */

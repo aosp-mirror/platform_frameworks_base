@@ -62,11 +62,11 @@ public final class ObexHelper {
      * The maximum packet size for OBEX packets that this client can handle.
      * At present, this must be changed for each port.
      *
-     * OPTIMIZATION: The max packet size should be the Max incoming MTU minus
-     * OPTIMIZATION: L2CAP package headers and RFCOMM package headers.
+     * TODO: The max packet size should be the Max incoming MTU minus
+     * TODO: L2CAP package headers and RFCOMM package headers.
      *
-     * OPTIMIZATION: Retrieve the max incoming MTU from
-     * OPTIMIZATION: LocalDevice.getProperty().
+     * TODO: Retrieve the max incoming MTU from
+     * TODO: LocalDevice.getProperty().
      */
     /** android note
      *  set as 0xFFFE to match remote MPS
@@ -293,10 +293,10 @@ public final class ObexHelper {
     /**
      * Creates the header part of OBEX packet based on the header provided.
      *
-     * OPTIMIZATION: Could use getHeaderList() to get the array of headers to
-     * OPTIMIZATION: include and then use the high two bits to determine the
-     * OPTIMIZATION: the type of the object and construct the byte array from
-     * OPTIMIZATION: that.  This will make the size smaller.
+     * TODO: Could use getHeaderList() to get the array of headers to
+     * TODO: include and then use the high two bits to determine the
+     * TODO: the type of the object and construct the byte array from
+     * TODO: that.  This will make the size smaller.
      *
      * @param head the header used to construct the byte array
      *

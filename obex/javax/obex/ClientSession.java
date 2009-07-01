@@ -43,66 +43,52 @@ import java.io.OutputStream;
  *
  * @hide
  */
-public class ClientSession implements ObexSession {
-    protected Authenticator authenticator;
+public final class ClientSession implements ObexSession {
+    private Authenticator mAuthenticator;
 
-    protected boolean connectionOpen = false;
+    private boolean mOpen;
 
     // Determines if an OBEX layer connection has been established
-    protected boolean isConnected;
+    private boolean mObexConnected;
 
-    private byte[] connectionID = null;
+    private byte[] mConnectionId = null;
 
-    byte[] challengeDigest = null;
-
-    protected InputStream input = null;
-
-    protected OutputStream output = null;
-
-    protected ObexTransport trans = null;
+    private byte[] mChallengeDigest = null;
 
     /*
-    * The max Packet size must be at least 256 according to the OBEX
-    * specification.
-    */
+     * The max Packet size must be at least 256 according to the OBEX
+     * specification.
+     */
     private int maxPacketSize = 256;
 
-    protected boolean isActive;
+    private boolean mRequestActive;
 
-    /* public ClientSession() {
-              connectionOpen = false;
-    }*/
+    private final InputStream mInput;
 
-    public ClientSession(ObexTransport trans) {
-        try {
-            this.trans = trans;
-            input = trans.openInputStream();
-            output = trans.openOutputStream();
-            connectionOpen = true;
-        } catch (IOException ioe) {
-        }
+    private final OutputStream mOutput;
 
+    public ClientSession(ObexTransport trans) throws IOException {
+        mInput = trans.openInputStream();
+        mOutput = trans.openOutputStream();
+        mOpen = true;
+        mRequestActive = false;
     }
 
-    public HeaderSet connect(HeaderSet header) throws java.io.IOException {
+    public HeaderSet connect(HeaderSet header) throws IOException {
         ensureOpen();
-        if (isConnected) {
+        if (mObexConnected) {
             throw new IOException("Already connected to server");
         }
-        synchronized (this) {
-            if (isActive) {
-                throw new IOException("OBEX request is already being performed");
-            }
-            isActive = true;
-        }
+        setRequestActive();
+
         int totalLength = 4;
         byte[] head = null;
 
         // Determine the header byte array
         if (header != null) {
-            if ((header).nonce != null) {
-                challengeDigest = new byte[16];
-                System.arraycopy((header).nonce, 0, challengeDigest, 0, 16);
+            if (header.nonce != null) {
+                mChallengeDigest = new byte[16];
+                System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
             }
             head = ObexHelper.createHeader(header, false);
             totalLength += head.length;
@@ -145,62 +131,52 @@ public class ClientSession implements ObexSession {
         * Byte 7 to n: Optional HeaderSet
         */
         if (returnHeaderSet.responseCode == ResponseCodes.OBEX_HTTP_OK) {
-            isConnected = true;
+            mObexConnected = true;
         }
-        synchronized (this) {
-            isActive = false;
-        }
+        setRequestInactive();
 
         return returnHeaderSet;
     }
 
-    public Operation get(HeaderSet header) throws java.io.IOException {
+    public Operation get(HeaderSet header) throws IOException {
 
-        if (!isConnected) {
+        if (!mObexConnected) {
             throw new IOException("Not connected to the server");
         }
-        synchronized (this) {
-            if (isActive) {
-                throw new IOException("OBEX request is already being performed");
-            }
-            isActive = true;
-        }
+        setRequestActive();
+
         ensureOpen();
 
         if (header == null) {
             header = new HeaderSet();
         } else {
-            if ((header).nonce != null) {
-                challengeDigest = new byte[16];
-                System.arraycopy((header).nonce, 0, challengeDigest, 0, 16);
+            if (header.nonce != null) {
+                mChallengeDigest = new byte[16];
+                System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
             }
         }
         // Add the connection ID if one exists
-        if (connectionID != null) {
-            (header).connectionID = new byte[4];
-            System.arraycopy(connectionID, 0, (header).connectionID, 0, 4);
+        if (mConnectionId != null) {
+            header.connectionID = new byte[4];
+            System.arraycopy(mConnectionId, 0, header.connectionID, 0, 4);
         }
 
-        return new ClientOperation(input, maxPacketSize, this, header, true);
+        return new ClientOperation(mInput, maxPacketSize, this, header, true);
     }
 
     /**
-    *  0xCB Connection Id an identifier used for OBEX connection multiplexing
-    */
+     *  0xCB Connection Id an identifier used for OBEX connection multiplexing
+     */
     public void setConnectionID(long id) {
         if ((id < 0) || (id > 0xFFFFFFFFL)) {
             throw new IllegalArgumentException("Connection ID is not in a valid range");
         }
-        connectionID = ObexHelper.convertToByteArray(id);
+        mConnectionId = ObexHelper.convertToByteArray(id);
     }
 
-    public HeaderSet createHeaderSet() {
-        return new HeaderSet();
-    }
+    public HeaderSet delete(HeaderSet header) throws IOException {
 
-    public HeaderSet delete(HeaderSet headers) throws java.io.IOException {
-
-        Operation op = put(headers);
+        Operation op = put(header);
         op.getResponseCode();
         HeaderSet returnValue = op.getReceivedHeaders();
         op.close();
@@ -208,28 +184,24 @@ public class ClientSession implements ObexSession {
         return returnValue;
     }
 
-    public HeaderSet disconnect(HeaderSet header) throws java.io.IOException {
-        if (!isConnected) {
+    public HeaderSet disconnect(HeaderSet header) throws IOException {
+        if (!mObexConnected) {
             throw new IOException("Not connected to the server");
         }
-        synchronized (this) {
-            if (isActive) {
-                throw new IOException("OBEX request is already being performed");
-            }
-            isActive = true;
-        }
+        setRequestActive();
+
         ensureOpen();
         // Determine the header byte array
         byte[] head = null;
         if (header != null) {
-            if ((header).nonce != null) {
-                challengeDigest = new byte[16];
-                System.arraycopy((header).nonce, 0, challengeDigest, 0, 16);
+            if (header.nonce != null) {
+                mChallengeDigest = new byte[16];
+                System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
             }
             // Add the connection ID if one exists
-            if (connectionID != null) {
-                (header).connectionID = new byte[4];
-                System.arraycopy(connectionID, 0, (header).connectionID, 0, 4);
+            if (mConnectionId != null) {
+                header.connectionID = new byte[4];
+                System.arraycopy(mConnectionId, 0, header.connectionID, 0, 4);
             }
             head = ObexHelper.createHeader(header, false);
 
@@ -238,10 +210,10 @@ public class ClientSession implements ObexSession {
             }
         } else {
             // Add the connection ID if one exists
-            if (connectionID != null) {
+            if (mConnectionId != null) {
                 head = new byte[5];
                 head[0] = (byte)0xCB;
-                System.arraycopy(connectionID, 0, head, 1, 4);
+                System.arraycopy(mConnectionId, 0, head, 1, 4);
             }
         }
 
@@ -249,18 +221,18 @@ public class ClientSession implements ObexSession {
         sendRequest(0x81, head, returnHeaderSet, null);
 
         /*
-        * An OBEX DISCONNECT reply from the server:
-        * Byte 1: Response code
-        * Bytes 2 & 3: packet size
-        * Bytes 4 & up: headers
-        */
+         * An OBEX DISCONNECT reply from the server:
+         * Byte 1: Response code
+         * Bytes 2 & 3: packet size
+         * Bytes 4 & up: headers
+         */
 
         /* response code , and header are ignored
          * */
 
         synchronized (this) {
-            isConnected = false;
-            isActive = false;
+            mObexConnected = false;
+            setRequestInactive();
         }
 
         return returnHeaderSet;
@@ -268,22 +240,17 @@ public class ClientSession implements ObexSession {
 
     public long getConnectionID() {
 
-        if (connectionID == null) {
+        if (mConnectionId == null) {
             return -1;
         }
-        return ObexHelper.convertToLong(connectionID);
+        return ObexHelper.convertToLong(mConnectionId);
     }
 
-    public Operation put(HeaderSet header) throws java.io.IOException {
-        if (!isConnected) {
+    public Operation put(HeaderSet header) throws IOException {
+        if (!mObexConnected) {
             throw new IOException("Not connected to the server");
         }
-        synchronized (this) {
-            if (isActive) {
-                throw new IOException("OBEX request is already being performed");
-            }
-            isActive = true;
-        }
+        setRequestActive();
 
         ensureOpen();
 
@@ -291,41 +258,35 @@ public class ClientSession implements ObexSession {
             header = new HeaderSet();
         } else {
             // when auth is initated by client ,save the digest 
-            if ((header).nonce != null) {
-                challengeDigest = new byte[16];
-                System.arraycopy((header).nonce, 0, challengeDigest, 0, 16);
+            if (header.nonce != null) {
+                mChallengeDigest = new byte[16];
+                System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
             }
         }
 
         // Add the connection ID if one exists
-        if (connectionID != null) {
+        if (mConnectionId != null) {
 
-            (header).connectionID = new byte[4];
-            System.arraycopy(connectionID, 0, (header).connectionID, 0, 4);
+            header.connectionID = new byte[4];
+            System.arraycopy(mConnectionId, 0, header.connectionID, 0, 4);
         }
 
-        return new ClientOperation(input, maxPacketSize, this, header, false);
+        return new ClientOperation(mInput, maxPacketSize, this, header, false);
     }
 
     public void setAuthenticator(Authenticator auth) {
         if (auth == null) {
             throw new NullPointerException("Authenticator may not be null");
         }
-        authenticator = auth;
+        mAuthenticator = auth;
     }
 
     public HeaderSet setPath(HeaderSet header, boolean backup, boolean create)
-            throws java.io.IOException {
-        if (!isConnected) {
+            throws IOException {
+        if (!mObexConnected) {
             throw new IOException("Not connected to the server");
         }
-        synchronized (this) {
-            if (isActive) {
-                throw new IOException("OBEX request is already being performed");
-            }
-            isActive = true;
-        }
-
+        setRequestActive();
         ensureOpen();
 
         int totalLength = 2;
@@ -334,22 +295,22 @@ public class ClientSession implements ObexSession {
         if (header == null) {
             header = new HeaderSet();
         } else {
-            if ((header).nonce != null) {
-                challengeDigest = new byte[16];
-                System.arraycopy((header).nonce, 0, challengeDigest, 0, 16);
+            if (header.nonce != null) {
+                mChallengeDigest = new byte[16];
+                System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
             }
         }
 
         // when auth is initiated by client ,save the digest
-        if ((header).nonce != null) {
-            challengeDigest = new byte[16];
-            System.arraycopy((header).nonce, 0, challengeDigest, 0, 16);
+        if (header.nonce != null) {
+            mChallengeDigest = new byte[16];
+            System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
         }
 
         // Add the connection ID if one exists
-        if (connectionID != null) {
-            (header).connectionID = new byte[4];
-            System.arraycopy(connectionID, 0, (header).connectionID, 0, 4);
+        if (mConnectionId != null) {
+            header.connectionID = new byte[4];
+            System.arraycopy(mConnectionId, 0, header.connectionID, 0, 4);
         }
 
         head = ObexHelper.createHeader(header, false);
@@ -398,9 +359,7 @@ public class ClientSession implements ObexSession {
          * Bytes 4 & up: headers
          */
 
-        synchronized (this) {
-            isActive = false;
-        }
+        setRequestInactive();
 
         return returnHeaderSet;
     }
@@ -411,19 +370,29 @@ public class ClientSession implements ObexSession {
      * @throws IOException if the connection is closed
      */
     public synchronized void ensureOpen() throws IOException {
-        if (!connectionOpen) {
+        if (!mOpen) {
             throw new IOException("Connection closed");
         }
     }
 
     /**
-     * Sets the active mode to off.  This allows Put and get operation objects
-     * to tell this object when they are done.
+     * Set request inactive.
+     * Allows Put and get operation objects to tell this object when they are
+     * done.
      */
-    public void setInactive() {
-        synchronized (this) {
-            isActive = false;
+    /*package*/ synchronized void setRequestInactive() {
+        mRequestActive = false;
+    }
+
+    /**
+     * Set request to active.
+     * @throws IOException if already active
+     */
+    private synchronized void setRequestActive() throws IOException {
+        if (mRequestActive) {
+            throw new IOException("OBEX request is already being performed");
         }
+        mRequestActive = true;
     }
 
     /**
@@ -440,7 +409,7 @@ public class ClientSession implements ObexSession {
      * challenge header located in <code>head</code>; <code>null</code>
      * if no authentication header is included in <code>head</code>
      *
-     * @param headers the header object to update with the response
+     * @param header the header object to update with the response
      *
      * @param input the input stream used by the Operation object; null if this
      * is called on a CONNECT, SETPATH or DISCONNECT
@@ -450,7 +419,7 @@ public class ClientSession implements ObexSession {
      *
      * @throws IOException if an IO error occurs
      */
-    public boolean sendRequest(int code, byte[] head, HeaderSet headers,
+    public boolean sendRequest(int code, byte[] head, HeaderSet header,
             PrivateInputStream privateInput) throws IOException {
         //check header length with local max size
         if (head != null) {
@@ -474,12 +443,12 @@ public class ClientSession implements ObexSession {
         }
 
         // Write the request to the output stream and flush the stream
-        output.write(out.toByteArray());
-        output.flush();
+        mOutput.write(out.toByteArray());
+        mOutput.flush();
 
-        headers.responseCode = input.read();
+        header.responseCode = mInput.read();
 
-        int length = ((input.read() << 8) | (input.read()));
+        int length = ((mInput.read() << 8) | (mInput.read()));
 
         if (length > ObexHelper.MAX_PACKET_SIZE_INT) {
             throw new IOException("Packet received exceeds packet size limit");
@@ -487,9 +456,9 @@ public class ClientSession implements ObexSession {
         if (length > 3) {
             byte[] data = null;
             if (code == 0x80) {
-                int version = input.read();
-                int flags = input.read();
-                maxPacketSize = (input.read() << 8) + input.read();
+                int version = mInput.read();
+                int flags = mInput.read();
+                maxPacketSize = (mInput.read() << 8) + mInput.read();
 
                 //check with local max size
                 if (maxPacketSize > ObexHelper.MAX_PACKET_SIZE_INT) {
@@ -499,9 +468,9 @@ public class ClientSession implements ObexSession {
                 if (length > 7) {
                     data = new byte[length - 7];
 
-                    bytesReceived = input.read(data);
+                    bytesReceived = mInput.read(data);
                     while (bytesReceived != (length - 7)) {
-                        bytesReceived += input.read(data, bytesReceived, data.length
+                        bytesReceived += mInput.read(data, bytesReceived, data.length
                                 - bytesReceived);
                     }
                 } else {
@@ -509,48 +478,48 @@ public class ClientSession implements ObexSession {
                 }
             } else {
                 data = new byte[length - 3];
-                bytesReceived = input.read(data);
+                bytesReceived = mInput.read(data);
 
                 while (bytesReceived != (length - 3)) {
-                    bytesReceived += input.read(data, bytesReceived, data.length - bytesReceived);
+                    bytesReceived += mInput.read(data, bytesReceived, data.length - bytesReceived);
                 }
                 if (code == 0xFF) {
                     return true;
                 }
             }
 
-            byte[] body = ObexHelper.updateHeaderSet(headers, data);
+            byte[] body = ObexHelper.updateHeaderSet(header, data);
             if ((privateInput != null) && (body != null)) {
                 privateInput.writeBytes(body, 1);
             }
 
-            if (headers.connectionID != null) {
-                connectionID = new byte[4];
-                System.arraycopy(headers.connectionID, 0, connectionID, 0, 4);
+            if (header.connectionID != null) {
+                mConnectionId = new byte[4];
+                System.arraycopy(header.connectionID, 0, mConnectionId, 0, 4);
             }
 
-            if (headers.authResp != null) {
-                if (!handleAuthResp(headers.authResp)) {
-                    setInactive();
+            if (header.authResp != null) {
+                if (!handleAuthResp(header.authResp)) {
+                    setRequestInactive();
                     throw new IOException("Authentication Failed");
                 }
             }
 
-            if ((headers.responseCode == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)
-                    && (headers.authChall != null)) {
+            if ((header.responseCode == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)
+                    && (header.authChall != null)) {
 
-                if (handleAuthChall(headers)) {
+                if (handleAuthChall(header)) {
                     out.write((byte)0x4E);
-                    out.write((byte)((headers.authResp.length + 3) >> 8));
-                    out.write((byte)(headers.authResp.length + 3));
-                    out.write(headers.authResp);
-                    headers.authChall = null;
-                    headers.authResp = null;
+                    out.write((byte)((header.authResp.length + 3) >> 8));
+                    out.write((byte)(header.authResp.length + 3));
+                    out.write(header.authResp);
+                    header.authChall = null;
+                    header.authResp = null;
 
                     byte[] sendHeaders = new byte[out.size() - 3];
                     System.arraycopy(out.toByteArray(), 3, sendHeaders, 0, sendHeaders.length);
 
-                    return sendRequest(code, sendHeaders, headers, privateInput);
+                    return sendRequest(code, sendHeaders, header, privateInput);
                 }
             }
         }
@@ -569,7 +538,7 @@ public class ClientSession implements ObexSession {
      */
     protected boolean handleAuthChall(HeaderSet header) {
 
-        if (authenticator == null) {
+        if (mAuthenticator == null) {
             return false;
         }
 
@@ -655,7 +624,7 @@ public class ClientSession implements ObexSession {
         header.authChall = null;
 
         try {
-            result = authenticator.onAuthenticationChallenge(realm, isUserIDRequired, isFullAccess);
+            result = mAuthenticator.onAuthenticationChallenge(realm, isUserIDRequired, isFullAccess);
         } catch (Exception e) {
             return false;
         }
@@ -721,18 +690,18 @@ public class ClientSession implements ObexSession {
      * the response failed
      */
     protected boolean handleAuthResp(byte[] authResp) {
-        if (authenticator == null) {
+        if (mAuthenticator == null) {
             return false;
         }
 
-        byte[] correctPassword = authenticator.onAuthenticationResponse(ObexHelper.getTagValue(
+        byte[] correctPassword = mAuthenticator.onAuthenticationResponse(ObexHelper.getTagValue(
                 (byte)0x01, authResp));
         if (correctPassword == null) {
             return false;
         }
 
         byte[] temp = new byte[correctPassword.length + 16];
-        System.arraycopy(challengeDigest, 0, temp, 0, 16);
+        System.arraycopy(mChallengeDigest, 0, temp, 0, 16);
         System.arraycopy(correctPassword, 0, temp, 16, correctPassword.length);
 
         byte[] correctResponse = ObexHelper.computeMd5Hash(temp);
@@ -747,9 +716,8 @@ public class ClientSession implements ObexSession {
     }
 
     public void close() throws IOException {
-        connectionOpen = false;
-        input.close();
-        output.close();
-        //client.close();
+        mOpen = false;
+        mInput.close();
+        mOutput.close();
     }
 }

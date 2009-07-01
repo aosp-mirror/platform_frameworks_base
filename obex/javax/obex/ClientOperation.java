@@ -347,7 +347,7 @@ public final class ClientOperation implements Operation, BaseStream {
         isClosed = true;
         inputStreamOpened = false;
         outputStreamOpened = false;
-        parent.setInactive();
+        parent.setRequestInactive();
     }
 
     /**
