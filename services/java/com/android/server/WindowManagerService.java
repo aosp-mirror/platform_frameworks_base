@@ -2325,6 +2325,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (!mDisplayFrozen) {
                 if (mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
                     mNextAppTransition = transit;
+                } else if (transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
+                        && mNextAppTransition == WindowManagerPolicy.TRANSIT_TASK_CLOSE) {
+                    // Opening a new task always supersedes a close for the anim.
+                    mNextAppTransition = transit;
+                } else if (transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
+                        && mNextAppTransition == WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE) {
+                    // Opening a new activity always supersedes a close for the anim.
+                    mNextAppTransition = transit;
                 }
                 mAppTransitionReady = false;
                 mAppTransitionTimeout = false;

@@ -2237,6 +2237,13 @@ public final class Settings {
          * @hide
          */
         public static final String BACKUP_TRANSPORT = "backup_transport";
+        
+        /**
+         * Version for which the setup wizard was last shown.  Bumped for
+         * each release when there is new setup information to show.
+         * @hide
+         */
+        public static final String LAST_SETUP_SHOWN = "last_setup_shown";
 
         /**
          * Helper method for determining if a location provider is enabled.
