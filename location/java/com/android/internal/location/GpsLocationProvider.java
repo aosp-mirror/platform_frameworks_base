@@ -617,6 +617,9 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             synchronized(mListeners) {
                 mListeners.remove(this);
             }
+            if (mListener != null) {
+                mListener.asBinder().unlinkToDeath(this, 0);
+            }
         }
     }
 

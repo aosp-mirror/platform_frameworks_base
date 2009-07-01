@@ -1875,7 +1875,9 @@ public class WifiService extends IWifiManager.Stub {
         private WifiLock removeLock(IBinder binder) {
             int index = findLockByBinder(binder);
             if (index >= 0) {
-                return mList.remove(index);
+                WifiLock ret = mList.remove(index);
+                ret.unlinkDeathRecipient();
+                return ret;
             } else {
                 return null;
             }
@@ -1987,6 +1989,10 @@ public class WifiService extends IWifiManager.Stub {
                 binderDied();
             }
         }
+
+        void unlinkDeathRecipient() {
+            mBinder.unlinkToDeath(this, 0);
+        }
     }
 
     private class Multicaster extends DeathRecipient {
@@ -2054,7 +2060,10 @@ public class WifiService extends IWifiManager.Stub {
 
     private void removeMulticasterLocked(int i, int uid)
     {
-        mMulticasters.remove(i);
+        Multicaster removed = mMulticasters.remove(i);
+        if (removed != null) {
+            removed.unlinkDeathRecipient();
+        }
         if (mMulticasters.size() == 0) {
             WifiNative.startPacketFiltering();
         }
