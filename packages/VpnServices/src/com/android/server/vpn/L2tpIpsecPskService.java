@@ -16,49 +16,34 @@
 
 package com.android.server.vpn;
 
-import android.net.vpn.L2tpIpsecProfile;
-import android.security.Keystore;
+import android.net.vpn.L2tpIpsecPskProfile;
 
 import java.io.IOException;
 
 /**
- * The service that manages the certificate based L2TP-over-IPSec VPN connection.
+ * The service that manages the preshared key based L2TP-over-IPSec VPN
+ * connection.
  */
-class L2tpIpsecService extends VpnService<L2tpIpsecProfile> {
+class L2tpIpsecPskService extends VpnService<L2tpIpsecPskProfile> {
     private static final String IPSEC_DAEMON = "racoon";
 
     @Override
     protected void connect(String serverIp, String username, String password)
             throws IOException {
         String hostIp = getHostIp();
+        L2tpIpsecPskProfile p = getProfile();
 
         // IPSEC
         AndroidServiceProxy ipsecService = startService(IPSEC_DAEMON);
         ipsecService.sendCommand(hostIp, serverIp, L2tpService.L2TP_PORT,
-                getUserkeyPath(), getUserCertPath(), getCaCertPath());
+                p.getPresharedKey());
 
         sleep(2000); // 2 seconds
 
         // L2TP
-        L2tpIpsecProfile p = getProfile();
         MtpdHelper.sendCommand(this, L2tpService.L2TP_DAEMON, serverIp,
                 L2tpService.L2TP_PORT,
                 (p.isSecretEnabled() ? p.getSecretString() : null),
                 username, password);
-    }
-
-    private String getCaCertPath() {
-        return Keystore.getInstance().getCaCertificate(
-                getProfile().getCaCertificate());
-    }
-
-    private String getUserCertPath() {
-        return Keystore.getInstance().getUserCertificate(
-                getProfile().getUserCertificate());
-    }
-
-    private String getUserkeyPath() {
-        return Keystore.getInstance().getUserPrivateKey(
-                getProfile().getUserCertificate());
     }
 }
