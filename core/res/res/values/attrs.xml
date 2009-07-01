@@ -3335,5 +3335,18 @@
         <attr name="accountType"/>
     </declare-styleable>
 
+    <!-- =============================== -->
+    <!-- Contacts meta-data attributes -->
+    <!-- =============================== -->
+
+    <declare-styleable name="Icon">
+        <attr name="icon" />
+        <attr name="mimeType" />
+    </declare-styleable>
+
+    <declare-styleable name="IconDefault">
+        <attr name="icon" />
+    </declare-styleable>
+
 </resources>
 
