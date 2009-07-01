@@ -45,18 +45,9 @@ import java.io.IOException;
  * This interface serves as the common super class for
  * <CODE>ClientSession</CODE> and <CODE>ServerSession</CODE>.
  * 
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public interface ObexSession {
-
-    /*
-    public InputStream openInputStream() throws IOException;
-
-    public DataInputStream openDataInputStream() throws IOException;
-
-    public OutputStream openOutputStream() throws IOException;
-
-    public DataOutputStream openDataOutputStream() throws IOException;*/
 
     public void close() throws IOException;
 

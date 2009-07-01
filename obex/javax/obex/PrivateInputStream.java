@@ -32,7 +32,8 @@
 
 package javax.obex;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
 
 /**
  * This object provides an input stream to the Operation objects used in this
@@ -40,7 +41,7 @@ import java.io.*;
  *
  * OPTIMIZATION: Include the other read() methods defined in InputStream.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public class PrivateInputStream extends InputStream {
 
@@ -77,7 +78,7 @@ public class PrivateInputStream extends InputStream {
      * @return the number of bytes that can be read from this input stream
      * without blocking
      *
-     * @exception IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public synchronized int available() throws IOException {
@@ -95,7 +96,7 @@ public class PrivateInputStream extends InputStream {
      * @return the byte read from the input stream or -1 if it reaches the end
      * of stream
      *
-     * @exception IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public synchronized int read() throws IOException {
@@ -173,7 +174,7 @@ public class PrivateInputStream extends InputStream {
     /**
      * Verifies that this stream is open
      *
-     * @exception IOException if the stream is not open
+     * @throws IOException if the stream is not open
      */
     private void ensureOpen() throws IOException {
         parent.ensureOpen();
@@ -186,7 +187,7 @@ public class PrivateInputStream extends InputStream {
      * Closes the input stream.  If the input stream is already closed, do
      * nothing.
      *
-     * @exception IOException this will never happen
+     * @throws IOException this will never happen
      */
     @Override
     public void close() throws IOException {

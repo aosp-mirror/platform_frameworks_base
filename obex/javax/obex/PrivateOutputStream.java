@@ -32,13 +32,15 @@
 
 package javax.obex;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
 
 /**
  * This object provides an output stream to the Operation objects used in this
  * package.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 class PrivateOutputStream extends OutputStream {
 
@@ -78,7 +80,7 @@ class PrivateOutputStream extends OutputStream {
      *
      * @param b the byte to write
      *
-     * @exception IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public synchronized void write(int b) throws IOException {
@@ -164,7 +166,7 @@ class PrivateOutputStream extends OutputStream {
     /**
      * Verifies that this stream is open
      *
-     * @exception IOException if the stream is not open
+     * @throws IOException if the stream is not open
      */
     private void ensureOpen() throws IOException {
         parent.ensureOpen();
@@ -177,7 +179,7 @@ class PrivateOutputStream extends OutputStream {
      * Closes the output stream.  If the input stream is already closed, do
      * nothing.
      *
-     * @exception IOException this will never happen
+     * @throws IOException this will never happen
      */
     @Override
     public void close() throws IOException {

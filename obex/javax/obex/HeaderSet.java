@@ -32,14 +32,16 @@
 
 package javax.obex;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Random;
 
 /**
  * This class implements the javax.obex.HeaderSet interface for OBEX over
  * RFCOMM.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public final class HeaderSet {
 
@@ -159,9 +161,8 @@ public final class HeaderSet {
 
     private byte[] who; // length prefixed byte sequence
 
-    private byte[] appParam; // byte sequence of the form tag length
+    private byte[] appParam; // byte sequence of the form tag length value
 
-    //value
     public byte[] authChall; // The authentication challenge header
 
     public byte[] authResp; // The authentication response header
@@ -178,11 +179,11 @@ public final class HeaderSet {
 
     private Long[] integerUserDefined; // 4 byte unsigned integer
 
-    public int responseCode;
+    /*package*/ int responseCode;
 
-    public byte[] nonce;
+    /*package*/ byte[] nonce;
 
-    private Random random;
+    private final Random random;
 
     /**
      * Creates new <code>HeaderSet</code> object.
@@ -209,7 +210,7 @@ public final class HeaderSet {
      *
      * @param headerValue the value of the header identifier
      *
-     * @exception IllegalArgumentException if the header identifier provided is
+     * @throws IllegalArgumentException if the header identifier provided is
      * not one defined in this interface or a user-defined header; if the type of
      * <code>headerValue</code> is not the correct Java type as defined in the
      * description of this interface\
@@ -406,10 +407,10 @@ public final class HeaderSet {
      * header identifier specified is not part of this <code>HeaderSet</code>
      * object
      *
-     * @exception IllegalArgumentException if the <code>headerID</code> is not
+     * @throws IllegalArgumentException if the <code>headerID</code> is not
      * one defined in this interface or any of the user-defined headers
      *
-     * @exception IOException if an error occurred in the transport layer during
+     * @throws IOException if an error occurred in the transport layer during
      * the operation or if the connection has been closed
      */
     public Object getHeader(int headerID) throws IOException {
@@ -471,7 +472,7 @@ public final class HeaderSet {
      * @return the array of headers that are set in this object or
      * <code>null</code> if no headers are available
      *
-     * @exception IOException if an error occurred in the transport layer during
+     * @throws IOException if an error occurred in the transport layer during
      * the operation or the connection has been closed
      */
     public int[] getHeaderList() throws IOException {
@@ -580,7 +581,7 @@ public final class HeaderSet {
                 nonce[i] = (byte)random.nextInt();
             }
 
-            authChall = OBEXHelper.computeAuthenticationChallenge(nonce, realm, access, userID);
+            authChall = ObexHelper.computeAuthenticationChallenge(nonce, realm, access, userID);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -594,7 +595,7 @@ public final class HeaderSet {
      *
      * @return the response code retrieved from the server
      *
-     * @exception IOException if an error occurred in the transport layer during
+     * @throws IOException if an error occurred in the transport layer during
      * the transaction; if this method is called on a <code>HeaderSet</code>
      * object created by calling <code>createHeaderSet()</code> in a
      * <code>ClientSession</code> object; if this object was created by an OBEX

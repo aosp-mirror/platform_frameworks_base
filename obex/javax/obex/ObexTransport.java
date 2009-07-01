@@ -52,7 +52,7 @@ import java.io.OutputStream;
  * RFCOMM device file medium may be constructed from a file descriptor or simply
  * a string while the TCP medium usually from a socket.
  * 
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public interface ObexTransport {
 
@@ -73,6 +73,5 @@ public interface ObexTransport {
     DataInputStream openDataInputStream() throws IOException;
 
     DataOutputStream openDataOutputStream() throws IOException;
-    //ObexSession accept() throws IOException;
 
 }

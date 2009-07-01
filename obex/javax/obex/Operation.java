@@ -124,7 +124,7 @@ import java.io.OutputStream;
  * <code>getResponseCode()</code> will cause an implicit close on the
  * <code>InputStream</code>.  No further data may be read at this point.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public interface Operation {
 
@@ -134,7 +134,7 @@ public interface Operation {
      * object.  No headers are sent in the abort request.  This will end the
      * operation since <code>close()</code> will be called by this method.
      *
-     * @exception IOException if the transaction has already ended or if an
+     * @throws IOException if the transaction has already ended or if an
      * OBEX server calls this method
      */
     public void abort() throws IOException;
@@ -146,7 +146,7 @@ public interface Operation {
      *
      * @return the headers received during this <code>Operation</code>
      *
-     * @exception IOException if this <code>Operation</code> has been closed
+     * @throws IOException if this <code>Operation</code> has been closed
      */
     public HeaderSet getReceivedHeaders() throws IOException;
 
@@ -156,14 +156,14 @@ public interface Operation {
      *
      * @param headers the headers to send in the next message
      *
-     * @exception IOException  if this <code>Operation</code> has been closed
+     * @throws IOException  if this <code>Operation</code> has been closed
      * or the transaction has ended and no further messages will be exchanged
      *
-     * @exception IllegalArgumentException if <code>headers</code> was not created
+     * @throws IllegalArgumentException if <code>headers</code> was not created
      * by a call to <code>ServerRequestHandler.createHeaderSet()</code> or
      * <code>ClientSession.createHeaderSet()</code>
      *
-     * @exception NullPointerException if <code>headers</code> if <code>null</code>
+     * @throws NullPointerException if <code>headers</code> if <code>null</code>
      */
     public void sendHeaders(HeaderSet headers) throws IOException;
 
@@ -175,7 +175,7 @@ public interface Operation {
      *
      * @return the response code retrieved from the server
      *
-     * @exception IOException if an error occurred in the transport layer during
+     * @throws IOException if an error occurred in the transport layer during
      * the transaction; if this object was created by an OBEX server
      */
     public int getResponseCode() throws IOException;

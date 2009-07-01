@@ -43,9 +43,9 @@ import java.io.ByteArrayOutputStream;
  * This class implements the <code>Operation</code> interface.  It will read
  * and write data via puts and gets.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
-public class ClientOperation implements Operation, BaseStream {
+public final class ClientOperation implements Operation, BaseStream {
 
     /**
      * Defines the basic packet length used by OBEX.  Event OBEX packet has the
@@ -99,7 +99,7 @@ public class ClientOperation implements Operation, BaseStream {
      * @param type <code>true</code> if this is a get request;
      * <code>false</code. if this is a put request
      *
-     * @exception IOExcpetion if the an IO error occured
+     * @throws IOExcpetion if the an IO error occured
      */
     public ClientOperation(InputStream in, int maxSize, ClientSession p, HeaderSet header,
             boolean type) throws IOException {
@@ -152,7 +152,7 @@ public class ClientOperation implements Operation, BaseStream {
      * corresponding input and output streams will be closed along with this
      * object.
      *
-     * @exception IOException if the transaction has already ended or if an
+     * @throws IOException if the transaction has already ended or if an
      * OBEX server called this method
      */
     public synchronized void abort() throws IOException {
@@ -163,12 +163,12 @@ public class ClientOperation implements Operation, BaseStream {
         //	}
 
         //no compatible with sun-ri
-        if ((isDone) && (replyHeaders.responseCode != OBEXConstants.OBEX_HTTP_CONTINUE)) {
+        if ((isDone) && (replyHeaders.responseCode != ObexHelper.OBEX_HTTP_CONTINUE)) {
             throw new IOException("Operation has already ended");
         }
 
         exceptionMessage = "Operation aborted";
-        if ((!isDone) && (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE)) {
+        if ((!isDone) && (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE)) {
             isDone = true;
             /*
              * Since we are not sending any headers or returning any headers then
@@ -192,7 +192,7 @@ public class ClientOperation implements Operation, BaseStream {
      *
      * @return the response code retrieved from the server
      *
-     * @exception IOException if an error occurred in the transport layer during
+     * @throws IOException if an error occurred in the transport layer during
      * the transaction; if this method is called on a <code>HeaderSet</code>
      * object created by calling <code>createHeaderSet</code> in a
      * <code>ClientSession</code> object
@@ -200,7 +200,7 @@ public class ClientOperation implements Operation, BaseStream {
     public synchronized int getResponseCode() throws IOException {
         //avoid dup validateConnection
         if ((replyHeaders.responseCode == -1)
-                || (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE)) {
+                || (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE)) {
             validateConnection();
         }
 
@@ -259,7 +259,7 @@ public class ClientOperation implements Operation, BaseStream {
      *
      * @return an input stream
      *
-     * @exception IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     public InputStream openInputStream() throws IOException {
         // TODO: this mode is not set yet.
@@ -290,7 +290,7 @@ public class ClientOperation implements Operation, BaseStream {
      *
      * @return an input stream
      *
-     * @exception IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     public DataInputStream openDataInputStream() throws IOException {
         return new DataInputStream(openInputStream());
@@ -301,7 +301,7 @@ public class ClientOperation implements Operation, BaseStream {
      *
      * @return an output stream
      *
-     * @exception IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     public OutputStream openOutputStream() throws IOException {
         // TODO: this mode is not set yet.
@@ -332,7 +332,7 @@ public class ClientOperation implements Operation, BaseStream {
      *
      * @return an output stream
      *
-     * @exception IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      */
     public DataOutputStream openDataOutputStream() throws IOException {
         return new DataOutputStream(openOutputStream());
@@ -341,7 +341,7 @@ public class ClientOperation implements Operation, BaseStream {
     /**
      * Closes the connection and ends the transaction
      *
-     * @exception IOException if the operation has already ended or is closed
+     * @throws IOException if the operation has already ended or is closed
      */
     public void close() throws IOException {
         isClosed = true;
@@ -357,7 +357,7 @@ public class ClientOperation implements Operation, BaseStream {
      *
      * @return the headers received during this <code>Operation</code>
      *
-     * @exception IOException if this <code>Operation</code> has been closed
+     * @throws IOException if this <code>Operation</code> has been closed
      */
     public HeaderSet getReceivedHeaders() throws IOException {
         ensureOpen();
@@ -371,13 +371,13 @@ public class ClientOperation implements Operation, BaseStream {
      *
      * @param headers the headers to send in the next message
      *
-     * @exception IOException  if this <code>Operation</code> has been closed
+     * @throws IOException  if this <code>Operation</code> has been closed
      * or the transaction has ended and no further messages will be exchanged
      *
-     * @exception IllegalArgumentException if <code>headers</code> was not created
+     * @throws IllegalArgumentException if <code>headers</code> was not created
      * by a call to <code>ServerRequestHandler.createHeaderSet()</code>
      *
-     * @exception NullPointerException if <code>headers</code> is <code>null</code>
+     * @throws NullPointerException if <code>headers</code> is <code>null</code>
      */
     public void sendHeaders(HeaderSet headers) throws IOException {
         ensureOpen();
@@ -404,14 +404,14 @@ public class ClientOperation implements Operation, BaseStream {
      * @return <code>true</code> if the transaction should end;
      * <code>false</code> if the transaction should not end
      *
-     * @exception IOException if an IO error occurred
+     * @throws IOException if an IO error occurred
      */
     private boolean readResponse() throws IOException {
         replyHeaders.responseCode = socketInput.read();
         int packetLength = socketInput.read();
         packetLength = (packetLength << 8) + socketInput.read();
 
-        if (packetLength > OBEXConstants.MAX_PACKET_SIZE_INT) {
+        if (packetLength > ObexHelper.MAX_PACKET_SIZE_INT) {
             if (exceptionMessage != null) {
                 abort();
             }
@@ -425,7 +425,7 @@ public class ClientOperation implements Operation, BaseStream {
             if (readLength != dataLength) {
                 throw new IOException("Received a packet without data as decalred length");
             }
-            byte[] body = OBEXHelper.updateHeaderSet(replyHeaders, data);
+            byte[] body = ObexHelper.updateHeaderSet(replyHeaders, data);
 
             if (body != null) {
                 privateInput.writeBytes(body, 1);
@@ -442,7 +442,7 @@ public class ClientOperation implements Operation, BaseStream {
             }
         }
 
-        if (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE) {
+        if (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE) {
             return true;
         } else {
             return false;
@@ -453,7 +453,7 @@ public class ClientOperation implements Operation, BaseStream {
      * Verifies that additional information may be sent.  In other words, the
      * operation is not done.
      *
-     * @exception IOException if the operation is completed
+     * @throws IOException if the operation is completed
      */
     public void ensureNotDone() throws IOException {
         if (isDone) {
@@ -464,7 +464,7 @@ public class ClientOperation implements Operation, BaseStream {
     /**
      * Verifies that the connection is open and no exceptions should be thrown.
      *
-     * @exception IOException if an exception needs to be thrown
+     * @throws IOException if an exception needs to be thrown
      */
     public void ensureOpen() throws IOException {
         parent.ensureOpen();
@@ -480,7 +480,7 @@ public class ClientOperation implements Operation, BaseStream {
     /**
      * Verifies that the connection is open and the proper data has been read.
      *
-     * @exception IOException if an IO error occurs
+     * @throws IOException if an IO error occurs
      */
     private void validateConnection() throws IOException {
         ensureOpen();
@@ -499,13 +499,13 @@ public class ClientOperation implements Operation, BaseStream {
      * @return <code>true</code> if there is more data to send;
      * <code>false</code> if there is no more data to send
      *
-     * @exception IOException if an IO error occurs
+     * @throws IOException if an IO error occurs
      */
     protected boolean sendRequest(int type) throws IOException {
         boolean returnValue = false;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int bodyLength = -1;
-        byte[] headerArray = OBEXHelper.createHeader(requestHeaders, true);
+        byte[] headerArray = ObexHelper.createHeader(requestHeaders, true);
         if (privateOutput != null) {
             bodyLength = privateOutput.size();
         }
@@ -525,7 +525,7 @@ public class ClientOperation implements Operation, BaseStream {
 
             while (end != headerArray.length) {
                 //split the headerArray
-                end = OBEXHelper.findHeaderEnd(headerArray, start, maxPacketSize
+                end = ObexHelper.findHeaderEnd(headerArray, start, maxPacketSize
                         - BASE_PACKET_LENGTH);
                 // can not split 
                 if (end == -1) {
@@ -551,7 +551,7 @@ public class ClientOperation implements Operation, BaseStream {
                     return false;
                 }
 
-                if (replyHeaders.responseCode != OBEXConstants.OBEX_HTTP_CONTINUE) {
+                if (replyHeaders.responseCode != ObexHelper.OBEX_HTTP_CONTINUE) {
                     return false;
                 }
 
@@ -642,7 +642,7 @@ public class ClientOperation implements Operation, BaseStream {
      * initial request.  If the response takes more then one packet, a thread
      * will be started to handle additional requests
      *
-     * @exception IOException if an IO error occurs
+     * @throws IOException if an IO error occurs
      */
     private synchronized void startProcessing() throws IOException {
 
@@ -653,33 +653,33 @@ public class ClientOperation implements Operation, BaseStream {
 
         if (isGet) {
             if (!isDone) {
-                replyHeaders.responseCode = OBEXConstants.OBEX_HTTP_CONTINUE;
-                while ((more) && (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE)) {
+                replyHeaders.responseCode = ObexHelper.OBEX_HTTP_CONTINUE;
+                while ((more) && (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE)) {
                     more = sendRequest(0x03);
                 }
 
-                if (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE) {
+                if (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE) {
                     parent.sendRequest(0x83, null, replyHeaders, privateInput);
                 }
-                if (replyHeaders.responseCode != OBEXConstants.OBEX_HTTP_CONTINUE) {
+                if (replyHeaders.responseCode != ObexHelper.OBEX_HTTP_CONTINUE) {
                     isDone = true;
                 }
             }
         } else {
 
             if (!isDone) {
-                replyHeaders.responseCode = OBEXConstants.OBEX_HTTP_CONTINUE;
-                while ((more) && (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE)) {
+                replyHeaders.responseCode = ObexHelper.OBEX_HTTP_CONTINUE;
+                while ((more) && (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE)) {
                     more = sendRequest(0x02);
 
                 }
             }
 
-            if (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE) {
+            if (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE) {
                 parent.sendRequest(0x82, null, replyHeaders, privateInput);
             }
 
-            if (replyHeaders.responseCode != OBEXConstants.OBEX_HTTP_CONTINUE) {
+            if (replyHeaders.responseCode != ObexHelper.OBEX_HTTP_CONTINUE) {
                 isDone = true;
             }
         }
@@ -692,7 +692,7 @@ public class ClientOperation implements Operation, BaseStream {
      * empty packet or not send anything if there is no data to send
      * @param inStream  <code>true</code> if the stream is input stream or
      * is output stream
-     * @exception IOException if an IO error occurs
+     * @throws IOException if an IO error occurs
      */
     public synchronized boolean continueOperation(boolean sendEmpty, boolean inStream)
             throws IOException {
@@ -704,7 +704,7 @@ public class ClientOperation implements Operation, BaseStream {
                 /*
                   * Determine if that was not the last packet in the operation
                   */
-                if (replyHeaders.responseCode != OBEXConstants.OBEX_HTTP_CONTINUE) {
+                if (replyHeaders.responseCode != ObexHelper.OBEX_HTTP_CONTINUE) {
                     isDone = true;
                 }
 
@@ -727,7 +727,7 @@ public class ClientOperation implements Operation, BaseStream {
             if ((!inStream) && (!isDone)) {
                 // to deal with outputstream in put operation
                 if (replyHeaders.responseCode == -1) {
-                    replyHeaders.responseCode = OBEXConstants.OBEX_HTTP_CONTINUE;
+                    replyHeaders.responseCode = ObexHelper.OBEX_HTTP_CONTINUE;
                 }
                 sendRequest(0x02);
                 return true;
@@ -749,7 +749,7 @@ public class ClientOperation implements Operation, BaseStream {
      * @param inStream <code>true</code> if the input stream is closed;
      * <code>false</code> if the output stream is closed
      *
-     * @exception IOException if an IO error occurs
+     * @throws IOException if an IO error occurs
      */
     public void streamClosed(boolean inStream) throws IOException {
         if (!isGet) {
@@ -759,16 +759,16 @@ public class ClientOperation implements Operation, BaseStream {
                 boolean more = true;
 
                 if ((privateOutput != null) && (privateOutput.size() <= 0)) {
-                    byte[] headerArray = OBEXHelper.createHeader(requestHeaders, false);
+                    byte[] headerArray = ObexHelper.createHeader(requestHeaders, false);
                     if (headerArray.length <= 0)
                         more = false;
                 }
                 // If have not sent any data so send  all now
                 if (replyHeaders.responseCode == -1) {
-                    replyHeaders.responseCode = OBEXConstants.OBEX_HTTP_CONTINUE;
+                    replyHeaders.responseCode = ObexHelper.OBEX_HTTP_CONTINUE;
                 }
 
-                while ((more) && (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE)) {
+                while ((more) && (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE)) {
                     more = sendRequest(0x02);
                 }
 
@@ -777,7 +777,7 @@ public class ClientOperation implements Operation, BaseStream {
                  * only have a single reply to send.  so we don't need the while
                  * loop.
                  */
-                while (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE) {
+                while (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE) {
 
                     sendRequest(0x82);
                 }
@@ -794,15 +794,15 @@ public class ClientOperation implements Operation, BaseStream {
                 // Have not sent any data so send it all now
 
                 if (replyHeaders.responseCode == -1) {
-                    replyHeaders.responseCode = OBEXConstants.OBEX_HTTP_CONTINUE;
+                    replyHeaders.responseCode = ObexHelper.OBEX_HTTP_CONTINUE;
                 }
 
-                while (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE) {
+                while (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE) {
                     if (!sendRequest(0x83)) {
                         break;
                     }
                 }
-                while (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE) {
+                while (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE) {
                     parent.sendRequest(0x83, null, replyHeaders, privateInput);
                 }
                 isDone = true;
@@ -813,7 +813,7 @@ public class ClientOperation implements Operation, BaseStream {
                 boolean more = true;
 
                 if ((privateOutput != null) && (privateOutput.size() <= 0)) {
-                    byte[] headerArray = OBEXHelper.createHeader(requestHeaders, false);
+                    byte[] headerArray = ObexHelper.createHeader(requestHeaders, false);
                     if (headerArray.length <= 0)
                         more = false;
                 }
@@ -824,13 +824,13 @@ public class ClientOperation implements Operation, BaseStream {
                 if ((privateOutput != null) && (privateOutput.size() <= 0))
                     more = false;
 
-                replyHeaders.responseCode = OBEXConstants.OBEX_HTTP_CONTINUE;
-                while ((more) && (replyHeaders.responseCode == OBEXConstants.OBEX_HTTP_CONTINUE)) {
+                replyHeaders.responseCode = ObexHelper.OBEX_HTTP_CONTINUE;
+                while ((more) && (replyHeaders.responseCode == ObexHelper.OBEX_HTTP_CONTINUE)) {
                     more = sendRequest(0x03);
                 }
                 sendRequest(0x83);
                 //                parent.sendRequest(0x83, null, replyHeaders, privateInput);
-                if (replyHeaders.responseCode != OBEXConstants.OBEX_HTTP_CONTINUE) {
+                if (replyHeaders.responseCode != ObexHelper.OBEX_HTTP_CONTINUE) {
                     isDone = true;
                 }
 

@@ -52,7 +52,7 @@ package javax.obex;
  * client wishes to access a database, database table, or database record that
  * has been locked.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public class ResponseCodes {
 
@@ -318,7 +318,5 @@ public class ResponseCodes {
     /**
      * Constructor does nothing.
      */
-    private ResponseCodes() {
-        throw new RuntimeException("Not Implemented! Used to compile Code");
-    }
+    private ResponseCodes() {}
 }

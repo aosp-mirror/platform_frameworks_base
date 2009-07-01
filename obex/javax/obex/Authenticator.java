@@ -81,7 +81,7 @@ package javax.obex;
  * <code>ServerRequestHandler</code> that failed authentication.  The
  * connection is <B>not</B> closed if authentication failed.
  *
- * @version 0.3 November 28, 2008
+ * @hide
  */
 public interface Authenticator {
 
