@@ -39,7 +39,7 @@ import java.io.IOException;
  * This object provides an input stream to the Operation objects used in this
  * package.
  *
- * OPTIMIZATION: Include the other read() methods defined in InputStream.
+ * TODO: Include the other read() methods defined in InputStream.
  *
  * @hide
  */
