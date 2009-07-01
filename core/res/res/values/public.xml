@@ -1120,11 +1120,17 @@
   <public type="attr" name="smallScreens" />
   <public type="attr" name="normalScreens" />
   <public type="attr" name="largeScreens" />
+  <public type="attr" name="progressBarStyleInverse" />
+  <public type="attr" name="progressBarStyleSmallInverse" />
+  <public type="attr" name="progressBarStyleLargeInverse" /> 
 
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 
   <public-padding type="id" name="donut_resource_pad" end="0x01020040" />
   
+  <public type="style" name="Widget.ProgressBar.Inverse" id="0x0103005b" />
+  <public type="style" name="Widget.ProgressBar.Large.Inverse" id="0x0103005c" />
+  <public type="style" name="Widget.ProgressBar.Small.Inverse" id="0x0103005d" /> 
   <public-padding type="style" name="donut_resource_pad" end="0x01030070" />
   
   <public-padding type="string" name="donut_resource_pad" end="0x01040030" />
