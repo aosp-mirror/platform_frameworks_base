@@ -3407,7 +3407,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 synchronized (mWindowMap) {
                     for (int i=0; i<mRotationWatchers.size(); i++) {
                         if (watcherBinder == mRotationWatchers.get(i).asBinder()) {
-                            mRotationWatchers.remove(i);
+                            IRotationWatcher removed = mRotationWatchers.remove(i);
+                            if (removed != null) {
+                                removed.asBinder().unlinkToDeath(this, 0);
+                            }
                             i--;
                         }
                     }
@@ -5442,6 +5445,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             } catch (RemoteException e) {
             }
             synchronized(mWindowMap) {
+                mClient.asBinder().unlinkToDeath(this, 0);
                 mClientDead = true;
                 killSessionLocked();
             }
