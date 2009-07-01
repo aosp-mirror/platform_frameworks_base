@@ -124,6 +124,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private boolean mBlockCompletion;
 
     private AutoCompleteTextView.ListSelectorHider mHideSelector;
+    private Runnable mShowDropDownRunnable;
 
     private AutoCompleteTextView.PassThroughClickListener mPassThroughClickListener;
 
@@ -1080,6 +1081,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     /**
+     * Issues a runnable to show the dropdown as soon as possible.
+     */
+    public void showDropDownAfterLayout() {
+        post(mShowDropDownRunnable);
+    }
+
+    /**
      * <p>Displays the drop down on screen.</p>
      */
     public void showDropDown() {
@@ -1189,6 +1197,22 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             Context context = getContext();
 
             mHideSelector = new ListSelectorHider();
+
+            /**
+             * This Runnable exists for the sole purpose of checking if the view layout has got
+             * completed and if so call showDropDown to display the drop down. This is used to show
+             * the drop down as soon as possible after user opens up the search dialog, without
+             * waiting for the normal UI pipeline to do it's job which is slower than this method.
+             */
+            mShowDropDownRunnable = new Runnable() {
+                public void run() {
+                    // View layout should be all done before displaying the drop down.
+                    View view = getDropDownAnchorView();
+                    if (view != null && view.getWindowToken() != null) {
+                        showDropDown();
+                    }
+                }
+            };
 
             mDropDownList = new DropDownListView(context);
             mDropDownList.setSelector(mDropDownListHighlight);
