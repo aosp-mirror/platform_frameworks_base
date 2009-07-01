@@ -67,6 +67,7 @@ public final class SearchableInfo implements Parcelable {
     private final int mSearchImeOptions;
     private final boolean mIncludeInGlobalSearch;
     private final boolean mQueryAfterZeroResults;
+    private final String mSettingsDescription;
     private final String mSuggestAuthority;
     private final String mSuggestPath;
     private final String mSuggestSelection;
@@ -133,6 +134,14 @@ public final class SearchableInfo implements Parcelable {
      */
     public boolean shouldRewriteQueryFromText() {
         return 0 != (mSearchMode & SEARCH_MODE_QUERY_REWRITE_FROM_TEXT);
+    }
+    
+    /**
+     * Gets the description to use for this source in system search settings, or null if
+     * none has been specified.
+     */
+    public String getSettingsDescription() {
+        return mSettingsDescription;
     }
 
     /**
@@ -280,6 +289,8 @@ public final class SearchableInfo implements Parcelable {
         mQueryAfterZeroResults = a.getBoolean(
                 com.android.internal.R.styleable.Searchable_queryAfterZeroResults, false);
 
+        mSettingsDescription = a.getString(
+                com.android.internal.R.styleable.Searchable_searchSettingsDescription);
         mSuggestAuthority = a.getString(
                 com.android.internal.R.styleable.Searchable_searchSuggestAuthority);
         mSuggestPath = a.getString(
@@ -448,6 +459,7 @@ public final class SearchableInfo implements Parcelable {
                         + ",suggestAuthority=" + searchable.getSuggestAuthority()
                         + ",target=" + searchable.getSearchActivity().getClassName()
                         + ",global=" + searchable.shouldIncludeInGlobalSearch()
+                        + ",settingsDescription=" + searchable.getSettingsDescription()
                         + ",threshold=" + searchable.getSuggestThreshold());
             } else {
                 Log.d(LOG_TAG, "Checked " + activityInfo.name + ", no searchable meta-data");
@@ -686,7 +698,8 @@ public final class SearchableInfo implements Parcelable {
         mSearchImeOptions = in.readInt();
         mIncludeInGlobalSearch = in.readInt() != 0;
         mQueryAfterZeroResults = in.readInt() != 0;
-
+        
+        mSettingsDescription = in.readString();
         mSuggestAuthority = in.readString();
         mSuggestPath = in.readString();
         mSuggestSelection = in.readString();
@@ -723,6 +736,7 @@ public final class SearchableInfo implements Parcelable {
         dest.writeInt(mIncludeInGlobalSearch ? 1 : 0);
         dest.writeInt(mQueryAfterZeroResults ? 1 : 0);
         
+        dest.writeString(mSettingsDescription);
         dest.writeString(mSuggestAuthority);
         dest.writeString(mSuggestPath);
         dest.writeString(mSuggestSelection);
