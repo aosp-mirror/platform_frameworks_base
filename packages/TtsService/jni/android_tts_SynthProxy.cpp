@@ -199,6 +199,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         if (wav == NULL) {
             delete pForAfter;
             LOGV("Null: speech has completed");
+            return TTS_CALLBACK_HALT;
         }
         if (bufferSize > 0){
             fwrite(wav, 1, bufferSize, pForAfter->outputFile);
@@ -213,8 +214,12 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         // this struct was allocated in the original android_tts_SynthProxy_speak call,
         // all processing matching this call is now done.
         LOGV("Speech synthesis done.");
-        delete pForAfter;
-        pForAfter = NULL;
+        if (pForAfter->usageMode == USAGEMODE_PLAY_IMMEDIATELY) {
+            // only delete for direct playback. When writing to a file, we still have work to do
+            // in android_tts_SynthProxy_synthesizeToFile. The struct will be deleted there.
+            delete pForAfter;
+            pForAfter = NULL;
+        }
         return TTS_CALLBACK_HALT;
     }
 
@@ -397,7 +402,6 @@ android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
 }
 
 
-// TODO: Refactor this to get rid of any assumptions about sample rate, etc.
 static void
 android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
         jstring textJavaString, jstring filenameJavaString)
@@ -408,6 +412,21 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    if (!pSynthData->mNativeSynthInterface) {
+        LOGE("android_tts_SynthProxy_synthesizeToFile(): invalid engine handle");
+        return;
+    }
+
+    // Retrieve audio parameters before writing the file header
+    AudioSystem::audio_format encoding = DEFAULT_TTS_FORMAT;
+    uint32_t rate = DEFAULT_TTS_RATE;
+    int channels = DEFAULT_TTS_NB_CHANNELS;
+    pSynthData->mNativeSynthInterface->setAudioFormat(encoding, rate, channels);
+
+    if ((encoding != AudioSystem::PCM_16_BIT) && (encoding != AudioSystem::PCM_8_BIT)) {
+        LOGE("android_tts_SynthProxy_synthesizeToFile(): engine uses invalid format");
+        return;
+    }
 
     const char *filenameNativeString =
             env->GetStringUTFChars(filenameJavaString, 0);
@@ -419,6 +438,12 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     pForAfter->outputFile = fopen(filenameNativeString, "wb");
 
+    if (pForAfter->outputFile == NULL) {
+        LOGE("android_tts_SynthProxy_synthesizeToFile(): error creating output file");
+        delete pForAfter;
+        return;
+    }
+
     // Write 44 blank bytes for WAV header, then come back and fill them in
     // after we've written the audio data
     char header[44];
@@ -427,10 +452,8 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
     unsigned int unique_identifier;
 
     // TODO check return codes
-    if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer, pSynthData->mBufferSize,
-                (void *)pForAfter);
-    }
+    pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer,
+            pSynthData->mBufferSize, (void *)pForAfter);
 
     long filelen = ftell(pForAfter->outputFile);
 
@@ -452,12 +475,14 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     ((uint32_t *)(&header[16]))[0] = 16;  // size of fmt
 
+    int sampleSizeInByte = (encoding == AudioSystem::PCM_16_BIT ? 2 : 1);
+
     ((unsigned short *)(&header[20]))[0] = 1;  // format
-    ((unsigned short *)(&header[22]))[0] = 1;  // channels
-    ((uint32_t *)(&header[24]))[0] = 22050;  // samplerate
-    ((uint32_t *)(&header[28]))[0] = 44100;  // byterate
-    ((unsigned short *)(&header[32]))[0] = 2;  // block align
-    ((unsigned short *)(&header[34]))[0] = 16;  // bits per sample
+    ((unsigned short *)(&header[22]))[0] = channels;  // channels
+    ((uint32_t *)(&header[24]))[0] = rate;  // samplerate
+    ((uint32_t *)(&header[28]))[0] = rate * sampleSizeInByte * channels;// byterate
+    ((unsigned short *)(&header[32]))[0] = sampleSizeInByte * channels;  // block align
+    ((unsigned short *)(&header[34]))[0] = sampleSizeInByte * 8;  // bits per sample
 
     header[36] = 'd';
     header[37] = 'a';
@@ -472,6 +497,9 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     fflush(pForAfter->outputFile);
     fclose(pForAfter->outputFile);
+
+    delete pForAfter;
+    pForAfter = NULL;
 
     env->ReleaseStringUTFChars(textJavaString, textNativeString);
     env->ReleaseStringUTFChars(filenameJavaString, filenameNativeString);
@@ -500,8 +528,8 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 
     if (pSynthData->mNativeSynthInterface) {
         const char *textNativeString = env->GetStringUTFChars(textJavaString, 0);
-        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer, pSynthData->mBufferSize,
-                (void *)pForAfter);
+        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer,
+                pSynthData->mBufferSize, (void *)pForAfter);
         env->ReleaseStringUTFChars(textJavaString, textNativeString);
     }
 }
