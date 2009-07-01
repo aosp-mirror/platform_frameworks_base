@@ -251,14 +251,17 @@ public class TextToSpeech {
      *
      * @param resourceId
      *            Example: <b><code>R.raw.south_south_east</code></b>
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public void addSpeech(String text, String packagename, int resourceId) {
+    public int addSpeech(String text, String packagename, int resourceId) {
         synchronized(mStartLock) {
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 mITts.addSpeech(text, packagename, resourceId);
+                return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -272,6 +275,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
@@ -285,14 +289,17 @@ public class TextToSpeech {
      * @param filename
      *            The full path to the sound file (for example:
      *            "/sdcard/mysounds/hello.wav")
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public void addSpeech(String text, String filename) {
+    public int addSpeech(String text, String filename) {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 mITts.addSpeechFile(text, filename);
+                return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -306,6 +313,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
@@ -324,17 +332,20 @@ public class TextToSpeech {
      *            See TTS_QUEUE_ADD and TTS_QUEUE_FLUSH.
      * @param params
      *            The hashmap of speech parameters to be used.
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public void speak(String text, int queueMode, HashMap<String,String> params)
+    public int speak(String text, int queueMode, HashMap<String,String> params)
     {
         synchronized (mStartLock) {
             Log.i("TTS received: ", text);
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 // TODO support extra parameters, passing cache of current parameters for the moment
                 mITts.speak(text, queueMode, mCachedParams);
+                return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -348,6 +359,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
@@ -366,17 +378,22 @@ public class TextToSpeech {
      *            See TTS_QUEUE_ADD and TTS_QUEUE_FLUSH.
      * @param params
      *            The hashmap of speech parameters to be used.
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
+     *
+     * {@hide}
      */
-    public void speakIpa(String ipaText, int queueMode, HashMap<String,String> params)
+    public int speakIpa(String ipaText, int queueMode, HashMap<String,String> params)
     {
         synchronized (mStartLock) {
             Log.i("TTS received: ", ipaText);
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 // TODO support extra parameters, passing cache of current parameters for the moment
                 mITts.speakIpa(ipaText, queueMode, mCachedParams);
+                return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -390,6 +407,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
@@ -403,16 +421,19 @@ public class TextToSpeech {
      *            See TTS_QUEUE_ADD and TTS_QUEUE_FLUSH.
      * @param params
      *            The hashmap of parameters to be used.
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public void playEarcon(String earcon, int queueMode,
+    public int playEarcon(String earcon, int queueMode,
             HashMap<String,String> params) {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 // TODO support extra parameters, passing null for the moment
                 mITts.playEarcon(earcon, queueMode, null);
+                return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -426,18 +447,30 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
-
-    public void playSilence(long durationInMs, int queueMode) {
+    /**
+     * Plays silence for the specified amount of time using the specified
+     * queue mode.
+     *
+     * @param durationInMs
+     *            A long that indicates how long the silence should last.
+     * @param queueMode
+     *            See TTS_QUEUE_ADD and TTS_QUEUE_FLUSH.
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
+     */
+    public int playSilence(long durationInMs, int queueMode) {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 // TODO support extra parameters, passing cache of current parameters for the moment
                 mITts.playSilence(durationInMs, queueMode, mCachedParams);
+                return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -451,6 +484,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
@@ -487,14 +521,17 @@ public class TextToSpeech {
 
     /**
      * Stops speech from the TTS.
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public void stop() {
+    public int stop() {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 mITts.stop();
+                return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -508,6 +545,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
@@ -524,23 +562,27 @@ public class TextToSpeech {
      *            The speech rate for the TTS engine. 1 is the normal speed,
      *            lower values slow down the speech (0.5 is half the normal speech rate),
      *            greater values accelerate it (2 is twice the normal speech rate).
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public void setSpeechRate(float speechRate) {
+    public int setSpeechRate(float speechRate) {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return;
+                return TTS_SUCCESS;
             }
             try {
                 if (speechRate > 0) {
                     mCachedRate = (int)(speechRate*100);
                     updateCachedParamArray();
                     mITts.setSpeechRate(mCachedRate);
+                    return TTS_SUCCESS;
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
@@ -557,21 +599,25 @@ public class TextToSpeech {
      *            The pitch for the TTS engine. 1 is the normal pitch,
      *            lower values lower the tone of the synthesized voice,
      *            greater values increase it.
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public void setPitch(float pitch) {
+    public int setPitch(float pitch) {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 if (pitch > 0) {
                     mITts.setPitch((int)(pitch*100));
+                    return TTS_SUCCESS;
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
 
@@ -585,11 +631,13 @@ public class TextToSpeech {
      *
      * @param loc
      *            The locale describing the language to be used.
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public void setLanguage(Locale loc) {
+    public int setLanguage(Locale loc) {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return;
+                return TTS_ERROR;
             }
             try {
                 mCachedLang = loc.getISO3Language();
@@ -597,27 +645,30 @@ public class TextToSpeech {
                 mCachedVariant = loc.getVariant();
                 updateCachedParamArray();
                 mITts.setLanguage(mCachedLang, mCachedCountry, mCachedVariant);
+                return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
             }
+            return TTS_ERROR;
         }
     }
+
 
     /**
      * Checks if the specified language as represented by the locale is available.
      *
      * @param loc
      *            The locale describing the language to be used.
+     *
      * @return one of TTS_LANG_NOT_SUPPORTED, TTS_LANG_MISSING_DATA, TTS_LANG_AVAILABLE,
-               TTS_LANG_COUNTRY_AVAILABLE, TTS_LANG_COUNTRY_VAR_AVAILABLE.
+     *         TTS_LANG_COUNTRY_AVAILABLE, TTS_LANG_COUNTRY_VAR_AVAILABLE.
      */
     public int isLanguageAvailable(Locale loc) {
         //TODO: Implement isLanguageAvailable
         return TTS_LANG_NOT_SUPPORTED;
     }
-
 
 
     /**
@@ -630,17 +681,20 @@ public class TextToSpeech {
      * @param filename
      *            The string that gives the full output filename; it should be
      *            something like "/sdcard/myappsounds/mysound.wav".
-     * @return A boolean that indicates if the synthesis succeeded
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public boolean synthesizeToFile(String text, HashMap<String,String> params,
+    public int synthesizeToFile(String text, HashMap<String,String> params,
             String filename) {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return false;
+                return TTS_ERROR;
             }
             try {
                 // TODO support extra parameters, passing null for the moment
-                return mITts.synthesizeToFile(text, null, filename);
+                if (mITts.synthesizeToFile(text, null, filename)){
+                    return TTS_SUCCESS;
+                }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -654,9 +708,10 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
-            return false;
+            return TTS_ERROR;
         }
     }
+
 
     /**
      * Synthesizes the given IPA text to a file using the specified parameters.
@@ -668,17 +723,22 @@ public class TextToSpeech {
      * @param filename
      *            The string that gives the full output filename; it should be
      *            something like "/sdcard/myappsounds/mysound.wav".
-     * @return A boolean that indicates if the synthesis succeeded
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
+     *
+     * {@hide}
      */
-    public boolean synthesizeIpaToFile(String ipaText,
+    public int synthesizeIpaToFile(String ipaText,
             HashMap<String,String> params, String filename) {
         synchronized (mStartLock) {
             if (!mStarted) {
-                return false;
+                return TTS_ERROR;
             }
             try {
                 // TODO support extra parameters, passing null for the moment
-                return mITts.synthesizeIpaToFile(ipaText, null, filename);
+                if (mITts.synthesizeIpaToFile(ipaText, null, filename)){
+                    return TTS_SUCCESS;
+                }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -692,7 +752,7 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             }
-            return false;
+            return TTS_ERROR;
         }
     }
 
