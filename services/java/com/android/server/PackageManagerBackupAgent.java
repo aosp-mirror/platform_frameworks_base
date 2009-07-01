@@ -120,7 +120,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // write its signature block to the output, keyed on the package name.
             for (PackageInfo pkg : mAllPackages) {
                 String packName = pkg.packageName;
-                if (!existing.contains(packName)) {
+                if (packName.equals(GLOBAL_METADATA_KEY)) {
+                    // We've already handled the metadata key; skip it here
+                    continue;
+                } else if (!existing.contains(packName)) {
                     // We haven't stored this app's signatures yet, so we do that now
                     try {
                         PackageInfo info = mPackageManager.getPackageInfo(packName,
