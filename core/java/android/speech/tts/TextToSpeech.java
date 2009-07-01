@@ -657,17 +657,55 @@ public class TextToSpeech {
 
 
     /**
-     * Checks if the specified language as represented by the locale is available.
+     * Returns a Locale instance describing the language currently being used by the TTS engine.
+     * @return language, country (if any) and variant (if any) used by the engine stored in a Locale
+     *     instance, or null is the TTS engine has failed.
+     */
+    public Locale getLanguage() {
+        synchronized (mStartLock) {
+            if (!mStarted) {
+                return null;
+            }
+            try {
+                String[] locStrings =  mITts.getLanguage();
+                if (locStrings.length == 3) {
+                    return new Locale(locStrings[0], locStrings[1], locStrings[2]);
+                } else {
+                    return null;
+                }
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Checks if the specified language as represented by the Locale is available.
      *
      * @param loc
-     *            The locale describing the language to be used.
+     *            The Locale describing the language to be used.
      *
      * @return one of TTS_LANG_NOT_SUPPORTED, TTS_LANG_MISSING_DATA, TTS_LANG_AVAILABLE,
      *         TTS_LANG_COUNTRY_AVAILABLE, TTS_LANG_COUNTRY_VAR_AVAILABLE.
      */
     public int isLanguageAvailable(Locale loc) {
-        //TODO: Implement isLanguageAvailable
-        return TTS_LANG_NOT_SUPPORTED;
+        synchronized (mStartLock) {
+            if (!mStarted) {
+                return TTS_LANG_NOT_SUPPORTED;
+            }
+            try {
+                return mITts.isLanguageAvailable(loc.getISO3Language(), loc.getISO3Country(),
+                        loc.getVariant());
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                mStarted = false;
+                initTts();
+            }
+            return TTS_LANG_NOT_SUPPORTED;
+        }
     }
 
 
