@@ -772,10 +772,11 @@ void SurfaceFlinger::computeVisibleRegions(
             dirty.orSelf(layer->visibleRegionScreen);
             layer->contentDirty = false;
         } else {
-            // compute the exposed region
-            // dirty = what's visible now - what's wasn't covered before
-            //       = what's visible now & what's was covered before
-            dirty = visibleRegion.intersect(layer->coveredRegionScreen);            
+            /* compute the exposed region:
+             *    exposed = what's VISIBLE and NOT COVERED now 
+             *    but was COVERED before
+             */
+            dirty = (visibleRegion - coveredRegion) & layer->coveredRegionScreen;
         }
         dirty.subtractSelf(aboveOpaqueLayers);
 
@@ -784,7 +785,7 @@ void SurfaceFlinger::computeVisibleRegions(
 
         // updade aboveOpaqueLayers/aboveCoveredLayers for next (lower) layer
         aboveOpaqueLayers.orSelf(opaqueRegion);
-        aboveCoveredLayers.orSelf(bounds);
+        aboveCoveredLayers.orSelf(visibleRegion);
         
         // Store the visible region is screen space
         layer->setVisibleRegion(visibleRegion);
