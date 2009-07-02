@@ -1068,6 +1068,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     /**
      * Issues a runnable to show the dropdown as soon as possible.
+     *
+     * @hide internal used only by Search Dialog
      */
     public void showDropDownAfterLayout() {
         post(mShowDropDownRunnable);
