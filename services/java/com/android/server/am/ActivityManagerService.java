@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
 import com.android.server.ProcessStats;
@@ -61,7 +62,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10757,6 +10757,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                             uninstallPackageLocked(ssp,
                                     intent.getIntExtra(Intent.EXTRA_UID, -1), false);
+                            AttributeCache ac = AttributeCache.instance();
+                            if (ac != null) {
+                                ac.removePackage(ssp);
+                            }
                         }
                     }
                 }
@@ -11807,6 +11811,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, false, false, MY_PID, Process.SYSTEM_UID);
+                
+                AttributeCache ac = AttributeCache.instance();
+                if (ac != null) {
+                    ac.updateConfiguration(mConfiguration);
+                }
             }
         }
         

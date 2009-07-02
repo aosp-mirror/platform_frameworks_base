@@ -3295,6 +3295,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (extras != null) {
                     intent.putExtras(extras);
                 }
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 am.broadcastIntent(
                     null, intent,
                             null, null, 0, null, null, null, false, false);

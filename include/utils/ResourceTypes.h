@@ -1441,7 +1441,7 @@ struct ResTable_type
  * This is the beginning of information about an entry in the resource
  * table.  It holds the reference to the name of this entry, and is
  * immediately followed by one of:
- *   * A Res_value structures, if FLAG_COMPLEX is -not- set.
+ *   * A Res_value structure, if FLAG_COMPLEX is -not- set.
  *   * An array of ResTable_map structures, if FLAG_COMPLEX is set.
  *     These supply a set of name/value mappings of data.
  */
@@ -1843,6 +1843,8 @@ private:
     status_t parsePackage(
         const ResTable_package* const pkg, const Header* const header);
 
+    void print_value(const Package* pkg, const Res_value& value) const;
+    
     mutable Mutex               mLock;
 
     status_t                    mError;

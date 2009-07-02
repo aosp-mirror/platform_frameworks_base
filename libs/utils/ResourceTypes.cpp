@@ -3845,7 +3845,7 @@ void print_complex(uint32_t complex, bool isFraction)
                             & Res_value::COMPLEX_RADIX_MASK];
     printf("%f", value);
     
-    if (isFraction) {
+    if (!isFraction) {
         switch ((complex>>Res_value::COMPLEX_UNIT_SHIFT)&Res_value::COMPLEX_UNIT_MASK) {
             case Res_value::COMPLEX_UNIT_PX: printf("px"); break;
             case Res_value::COMPLEX_UNIT_DIP: printf("dp"); break;
@@ -3861,6 +3861,49 @@ void print_complex(uint32_t complex, bool isFraction)
             case Res_value::COMPLEX_UNIT_FRACTION_PARENT: printf("%%p"); break;
             default: printf(" (unknown unit)"); break;
         }
+    }
+}
+
+void ResTable::print_value(const Package* pkg, const Res_value& value) const
+{
+    if (value.dataType == Res_value::TYPE_NULL) {
+        printf("(null)\n");
+    } else if (value.dataType == Res_value::TYPE_REFERENCE) {
+        printf("(reference) 0x%08x\n", value.data);
+    } else if (value.dataType == Res_value::TYPE_ATTRIBUTE) {
+        printf("(attribute) 0x%08x\n", value.data);
+    } else if (value.dataType == Res_value::TYPE_STRING) {
+        size_t len;
+        const char16_t* str = pkg->header->values.stringAt(
+                value.data, &len);
+        if (str == NULL) {
+            printf("(string) null\n");
+        } else {
+            printf("(string) \"%s\"\n",
+                    String8(str, len).string());
+        } 
+    } else if (value.dataType == Res_value::TYPE_FLOAT) {
+        printf("(float) %g\n", *(const float*)&value.data);
+    } else if (value.dataType == Res_value::TYPE_DIMENSION) {
+        printf("(dimension) ");
+        print_complex(value.data, false);
+        printf("\n");
+    } else if (value.dataType == Res_value::TYPE_FRACTION) {
+        printf("(fraction) ");
+        print_complex(value.data, true);
+        printf("\n");
+    } else if (value.dataType >= Res_value::TYPE_FIRST_COLOR_INT
+            || value.dataType <= Res_value::TYPE_LAST_COLOR_INT) {
+        printf("(color) #%08x\n", value.data);
+    } else if (value.dataType == Res_value::TYPE_INT_BOOLEAN) {
+        printf("(boolean) %s\n", value.data ? "true" : "false");
+    } else if (value.dataType >= Res_value::TYPE_FIRST_INT
+            || value.dataType <= Res_value::TYPE_LAST_INT) {
+        printf("(int) 0x%08x or %d\n", value.data, value.data);
+    } else {
+        printf("(unknown type) t=0x%02x d=0x%08x (s=0x%04x r=0x%02x)\n",
+               (int)value.dataType, (int)value.data,
+               (int)value.size, (int)value.res0);
     }
 }
 
@@ -3985,27 +4028,31 @@ void ResTable::print(bool inclValues) const
                             continue;
                         }
                         
-                        const Res_value* value = NULL;
+                        uint16_t esize = dtohs(ent->size);
+                        if ((esize&0x3) != 0) {
+                            printf("NON-INTEGER ResTable_entry SIZE: %p\n", (void*)esize);
+                            continue;
+                        }
+                        if ((thisOffset+esize) > typeSize) {
+                            printf("ResTable_entry OUT OF BOUNDS: %p+%p+%p (size is %p)\n",
+                                   (void*)entriesStart, (void*)thisOffset,
+                                   (void*)esize, (void*)typeSize);
+                            continue;
+                        }
+                            
+                        const Res_value* valuePtr = NULL;
+                        const ResTable_map_entry* bagPtr = NULL;
+                        Res_value value;
                         if ((dtohs(ent->flags)&ResTable_entry::FLAG_COMPLEX) != 0) {
                             printf("<bag>");
+                            bagPtr = (const ResTable_map_entry*)ent;
                         } else {
-                            uint16_t esize = dtohs(ent->size);
-                            if ((esize&0x3) != 0) {
-                                printf("NON-INTEGER ResTable_entry SIZE: %p\n", (void*)esize);
-                                continue;
-                            }
-                            if ((thisOffset+esize) > typeSize) {
-                                printf("ResTable_entry OUT OF BOUNDS: %p+%p+%p (size is %p)\n",
-                                       (void*)entriesStart, (void*)thisOffset,
-                                       (void*)esize, (void*)typeSize);
-                                continue;
-                            }
-                            
-                            value = (const Res_value*)
+                            valuePtr = (const Res_value*)
                                 (((const uint8_t*)ent) + esize);
+                            value.copyFrom_dtoh(*valuePtr);
                             printf("t=0x%02x d=0x%08x (s=0x%04x r=0x%02x)",
-                                   (int)value->dataType, (int)dtohl(value->data),
-                                   (int)dtohs(value->size), (int)value->res0);
+                                   (int)value.dataType, (int)value.data,
+                                   (int)value.size, (int)value.res0);
                         }
                         
                         if ((dtohs(ent->flags)&ResTable_entry::FLAG_PUBLIC) != 0) {
@@ -4014,44 +4061,23 @@ void ResTable::print(bool inclValues) const
                         printf("\n");
                         
                         if (inclValues) {
-                            if (value != NULL) {
+                            if (valuePtr != NULL) {
                                 printf("          ");
-                                if (value->dataType == Res_value::TYPE_NULL) {
-                                    printf("(null)\n");
-                                } else if (value->dataType == Res_value::TYPE_REFERENCE) {
-                                    printf("(reference) 0x%08x\n", value->data);
-                                } else if (value->dataType == Res_value::TYPE_ATTRIBUTE) {
-                                    printf("(attribute) 0x%08x\n", value->data);
-                                } else if (value->dataType == Res_value::TYPE_STRING) {
-                                    size_t len;
-                                    const char16_t* str = pkg->header->values.stringAt(
-                                            value->data, &len);
-                                    if (str == NULL) {
-                                        printf("(string) null\n");
-                                    } else {
-                                        printf("(string) \"%s\"\n",
-                                                String8(str, len).string());
-                                    } 
-                                } else if (value->dataType == Res_value::TYPE_FLOAT) {
-                                    printf("(float) %g\n", *(const float*)&value->data);
-                                } else if (value->dataType == Res_value::TYPE_DIMENSION) {
-                                    printf("(dimension) ");
-                                    print_complex(value->data, false);
-                                    printf("\n");
-                                } else if (value->dataType == Res_value::TYPE_FRACTION) {
-                                    printf("(fraction) ");
-                                    print_complex(value->data, true);
-                                    printf("\n");
-                                } else if (value->dataType >= Res_value::TYPE_FIRST_COLOR_INT
-                                        || value->dataType <= Res_value::TYPE_LAST_COLOR_INT) {
-                                    printf("(color) #%08x\n", value->data);
-                                } else if (value->dataType == Res_value::TYPE_INT_BOOLEAN) {
-                                    printf("(boolean) %s\n", value->data ? "true" : "false");
-                                } else if (value->dataType >= Res_value::TYPE_FIRST_INT
-                                        || value->dataType <= Res_value::TYPE_LAST_INT) {
-                                    printf("(int) 0x%08x or %d\n", value->data, value->data);
-                                } else {
-                                    printf("(unknown type)\n");
+                                print_value(pkg, value);
+                            } else if (bagPtr != NULL) {
+                                const int N = dtohl(bagPtr->count);
+                                const ResTable_map* mapPtr = (const ResTable_map*)
+                                        (((const uint8_t*)ent) + esize);
+                                printf("          Parent=0x%08x, Count=%d\n",
+                                    dtohl(bagPtr->parent.ident), N);
+                                for (int i=0; i<N; i++) {
+                                    printf("          #%i (Key=0x%08x): ",
+                                        i, dtohl(mapPtr->name.ident));
+                                    value.copyFrom_dtoh(mapPtr->value);
+                                    print_value(pkg, value);
+                                    const size_t size = dtohs(mapPtr->value.size);
+                                    mapPtr = (ResTable_map*)(((const uint8_t*)mapPtr)
+                                            + size + sizeof(*mapPtr)-sizeof(mapPtr->value));
                                 }
                             }
                         }
