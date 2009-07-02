@@ -2871,6 +2871,13 @@ public final class Settings {
                 "vending_heartbeat_frequency_ms";
 
         /**
+         * Frequency in milliseconds at which we should resend pending download
+         * requests to the API Server from the Vending Machine client.
+         */
+        public static final String VENDING_PENDING_DOWNLOAD_RESEND_FREQUENCY_MS =
+                "vending_pending_download_resend_frequency_ms";
+
+        /**
          * URL that points to the legal terms of service to display in Settings.
          * <p>
          * This should be a https URL. For a pretty user-friendly URL, use
