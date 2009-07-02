@@ -38,11 +38,8 @@ package javax.obex;
  * <P>
  * <STRONG>IMPORTANT NOTE</STRONG>
  * <P>
- * It is important to note that these values are different then those defined
- * in <code>javax.microedition.io.HttpConnection</code>.  The values in this
- * interface represent the values defined in the IrOBEX specification.  The
- * values in <code>javax.microedition.io.HttpConnection</code> represent values
- * defined in the HTTP specification.
+ * The values in this interface represent the values defined in the IrOBEX
+ * specification, which is different with the HTTP specification.
  * <P>
  * <code>OBEX_DATABASE_FULL</code> and <code>OBEX_DATABASE_LOCKED</code> require
  * further description since they are not defined in HTTP.  The server will send
@@ -54,7 +51,14 @@ package javax.obex;
  *
  * @hide
  */
-public class ResponseCodes {
+public final class ResponseCodes {
+
+    /**
+     * Defines the OBEX CONTINUE response code.
+     * <P>
+     * The value of <code>OBEX_HTTP_CONTINUE</code> is 0x90 (144).
+     */
+    public static final int OBEX_HTTP_CONTINUE = 0x90;
 
     /**
      * Defines the OBEX SUCCESS response code.
@@ -318,5 +322,6 @@ public class ResponseCodes {
     /**
      * Constructor does nothing.
      */
-    private ResponseCodes() {}
+    private ResponseCodes() {
+    }
 }

@@ -38,13 +38,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * This class implements the <code>Operation</code> interface.  It will read
- * and write data via puts and gets.
+ * This class in an implementation of the OBEX ClientSession.
  *
  * @hide
  */
-public final class ClientSession implements ObexSession {
-    private Authenticator mAuthenticator;
+public final class ClientSession extends ObexSession {
 
     private boolean mOpen;
 
@@ -52,8 +50,6 @@ public final class ClientSession implements ObexSession {
     private boolean mObexConnected;
 
     private byte[] mConnectionId = null;
-
-    private byte[] mChallengeDigest = null;
 
     /*
      * The max Packet size must be at least 256 according to the OBEX
@@ -67,14 +63,14 @@ public final class ClientSession implements ObexSession {
 
     private final OutputStream mOutput;
 
-    public ClientSession(ObexTransport trans) throws IOException {
+    public ClientSession(final ObexTransport trans) throws IOException {
         mInput = trans.openInputStream();
         mOutput = trans.openOutputStream();
         mOpen = true;
         mRequestActive = false;
     }
 
-    public HeaderSet connect(HeaderSet header) throws IOException {
+    public HeaderSet connect(final HeaderSet header) throws IOException {
         ensureOpen();
         if (mObexConnected) {
             throw new IOException("Already connected to server");
@@ -119,7 +115,7 @@ public final class ClientSession implements ObexSession {
         }
 
         HeaderSet returnHeaderSet = new HeaderSet();
-        sendRequest(0x80, requestPacket, returnHeaderSet, null);
+        sendRequest(ObexHelper.OBEX_OPCODE_CONNECT, requestPacket, returnHeaderSet, null);
 
         /*
         * Read the response from the OBEX server.
@@ -147,21 +143,23 @@ public final class ClientSession implements ObexSession {
 
         ensureOpen();
 
+        HeaderSet head;
         if (header == null) {
-            header = new HeaderSet();
+            head = new HeaderSet();
         } else {
-            if (header.nonce != null) {
+            head = header;
+            if (head.nonce != null) {
                 mChallengeDigest = new byte[16];
-                System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
+                System.arraycopy(head.nonce, 0, mChallengeDigest, 0, 16);
             }
         }
         // Add the connection ID if one exists
         if (mConnectionId != null) {
-            header.connectionID = new byte[4];
-            System.arraycopy(mConnectionId, 0, header.connectionID, 0, 4);
+            head.mConnectionID = new byte[4];
+            System.arraycopy(mConnectionId, 0, head.mConnectionID, 0, 4);
         }
 
-        return new ClientOperation(mInput, maxPacketSize, this, header, true);
+        return new ClientOperation(maxPacketSize, this, head, true);
     }
 
     /**
@@ -178,7 +176,7 @@ public final class ClientSession implements ObexSession {
 
         Operation op = put(header);
         op.getResponseCode();
-        HeaderSet returnValue = op.getReceivedHeaders();
+        HeaderSet returnValue = op.getReceivedHeader();
         op.close();
 
         return returnValue;
@@ -200,8 +198,8 @@ public final class ClientSession implements ObexSession {
             }
             // Add the connection ID if one exists
             if (mConnectionId != null) {
-                header.connectionID = new byte[4];
-                System.arraycopy(mConnectionId, 0, header.connectionID, 0, 4);
+                header.mConnectionID = new byte[4];
+                System.arraycopy(mConnectionId, 0, header.mConnectionID, 0, 4);
             }
             head = ObexHelper.createHeader(header, false);
 
@@ -212,13 +210,13 @@ public final class ClientSession implements ObexSession {
             // Add the connection ID if one exists
             if (mConnectionId != null) {
                 head = new byte[5];
-                head[0] = (byte)0xCB;
+                head[0] = (byte)HeaderSet.CONNECTION_ID;
                 System.arraycopy(mConnectionId, 0, head, 1, 4);
             }
         }
 
         HeaderSet returnHeaderSet = new HeaderSet();
-        sendRequest(0x81, head, returnHeaderSet, null);
+        sendRequest(ObexHelper.OBEX_OPCODE_DISCONNECT, head, returnHeaderSet, null);
 
         /*
          * An OBEX DISCONNECT reply from the server:
@@ -253,36 +251,36 @@ public final class ClientSession implements ObexSession {
         setRequestActive();
 
         ensureOpen();
-
+        HeaderSet head;
         if (header == null) {
-            header = new HeaderSet();
+            head = new HeaderSet();
         } else {
-            // when auth is initated by client ,save the digest 
-            if (header.nonce != null) {
+            head = header;
+            // when auth is initiated by client ,save the digest
+            if (head.nonce != null) {
                 mChallengeDigest = new byte[16];
-                System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
+                System.arraycopy(head.nonce, 0, mChallengeDigest, 0, 16);
             }
         }
 
         // Add the connection ID if one exists
         if (mConnectionId != null) {
 
-            header.connectionID = new byte[4];
-            System.arraycopy(mConnectionId, 0, header.connectionID, 0, 4);
+            head.mConnectionID = new byte[4];
+            System.arraycopy(mConnectionId, 0, head.mConnectionID, 0, 4);
         }
 
-        return new ClientOperation(mInput, maxPacketSize, this, header, false);
+        return new ClientOperation(maxPacketSize, this, head, false);
     }
 
-    public void setAuthenticator(Authenticator auth) {
+    public void setAuthenticator(Authenticator auth) throws IOException {
         if (auth == null) {
-            throw new NullPointerException("Authenticator may not be null");
+            throw new IOException("Authenticator may not be null");
         }
         mAuthenticator = auth;
     }
 
-    public HeaderSet setPath(HeaderSet header, boolean backup, boolean create)
-            throws IOException {
+    public HeaderSet setPath(HeaderSet header, boolean backup, boolean create) throws IOException {
         if (!mObexConnected) {
             throw new IOException("Not connected to the server");
         }
@@ -291,29 +289,30 @@ public final class ClientSession implements ObexSession {
 
         int totalLength = 2;
         byte[] head = null;
-
+        HeaderSet headset;
         if (header == null) {
-            header = new HeaderSet();
+            headset = new HeaderSet();
         } else {
-            if (header.nonce != null) {
+            headset = header;
+            if (headset.nonce != null) {
                 mChallengeDigest = new byte[16];
-                System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
+                System.arraycopy(headset.nonce, 0, mChallengeDigest, 0, 16);
             }
         }
 
         // when auth is initiated by client ,save the digest
-        if (header.nonce != null) {
+        if (headset.nonce != null) {
             mChallengeDigest = new byte[16];
-            System.arraycopy(header.nonce, 0, mChallengeDigest, 0, 16);
+            System.arraycopy(headset.nonce, 0, mChallengeDigest, 0, 16);
         }
 
         // Add the connection ID if one exists
         if (mConnectionId != null) {
-            header.connectionID = new byte[4];
-            System.arraycopy(mConnectionId, 0, header.connectionID, 0, 4);
+            headset.mConnectionID = new byte[4];
+            System.arraycopy(mConnectionId, 0, headset.mConnectionID, 0, 4);
         }
 
-        head = ObexHelper.createHeader(header, false);
+        head = ObexHelper.createHeader(headset, false);
         totalLength += head.length;
 
         if (totalLength > maxPacketSize) {
@@ -345,12 +344,12 @@ public final class ClientSession implements ObexSession {
         byte[] packet = new byte[totalLength];
         packet[0] = (byte)flags;
         packet[1] = (byte)0x00;
-        if (header != null) {
+        if (headset != null) {
             System.arraycopy(head, 0, packet, 2, head.length);
         }
 
         HeaderSet returnHeaderSet = new HeaderSet();
-        sendRequest(0x85, packet, returnHeaderSet, null);
+        sendRequest(ObexHelper.OBEX_OPCODE_SETPATH, packet, returnHeaderSet, null);
 
         /*
          * An OBEX SETPATH reply from the server:
@@ -380,7 +379,7 @@ public final class ClientSession implements ObexSession {
      * Allows Put and get operation objects to tell this object when they are
      * done.
      */
-    /*package*/ synchronized void setRequestInactive() {
+    /*package*/synchronized void setRequestInactive() {
         mRequestActive = false;
     }
 
@@ -401,7 +400,7 @@ public final class ClientSession implements ObexSession {
      * headers (i.e. authentication challenge or authentication response) are
      * received, they will be processed.
      *
-     * @param code the type of request to send to the client
+     * @param opCode the type of request to send to the client
      *
      * @param head the headers to send to the server
      *
@@ -419,7 +418,7 @@ public final class ClientSession implements ObexSession {
      *
      * @throws IOException if an IO error occurs
      */
-    public boolean sendRequest(int code, byte[] head, HeaderSet header,
+    public boolean sendRequest(int opCode, byte[] head, HeaderSet header,
             PrivateInputStream privateInput) throws IOException {
         //check header length with local max size
         if (head != null) {
@@ -427,10 +426,10 @@ public final class ClientSession implements ObexSession {
                 throw new IOException("header too large ");
             }
         }
-        //byte[] nonce;
+
         int bytesReceived;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        out.write((byte)code);
+        out.write((byte)opCode);
 
         // Determine if there are any headers to send
         if (head == null) {
@@ -453,10 +452,12 @@ public final class ClientSession implements ObexSession {
         if (length > ObexHelper.MAX_PACKET_SIZE_INT) {
             throw new IOException("Packet received exceeds packet size limit");
         }
-        if (length > 3) {
+        if (length > ObexHelper.BASE_PACKET_LENGTH) {
             byte[] data = null;
-            if (code == 0x80) {
+            if (opCode == ObexHelper.OBEX_OPCODE_CONNECT) {
+                @SuppressWarnings("unused")
                 int version = mInput.read();
+                @SuppressWarnings("unused")
                 int flags = mInput.read();
                 maxPacketSize = (mInput.read() << 8) + mInput.read();
 
@@ -483,7 +484,7 @@ public final class ClientSession implements ObexSession {
                 while (bytesReceived != (length - 3)) {
                     bytesReceived += mInput.read(data, bytesReceived, data.length - bytesReceived);
                 }
-                if (code == 0xFF) {
+                if (opCode == ObexHelper.OBEX_OPCODE_ABORT) {
                     return true;
                 }
             }
@@ -493,222 +494,34 @@ public final class ClientSession implements ObexSession {
                 privateInput.writeBytes(body, 1);
             }
 
-            if (header.connectionID != null) {
+            if (header.mConnectionID != null) {
                 mConnectionId = new byte[4];
-                System.arraycopy(header.connectionID, 0, mConnectionId, 0, 4);
+                System.arraycopy(header.mConnectionID, 0, mConnectionId, 0, 4);
             }
 
-            if (header.authResp != null) {
-                if (!handleAuthResp(header.authResp)) {
+            if (header.mAuthResp != null) {
+                if (!handleAuthResp(header.mAuthResp)) {
                     setRequestInactive();
                     throw new IOException("Authentication Failed");
                 }
             }
 
             if ((header.responseCode == ResponseCodes.OBEX_HTTP_UNAUTHORIZED)
-                    && (header.authChall != null)) {
+                    && (header.mAuthChall != null)) {
 
                 if (handleAuthChall(header)) {
-                    out.write((byte)0x4E);
-                    out.write((byte)((header.authResp.length + 3) >> 8));
-                    out.write((byte)(header.authResp.length + 3));
-                    out.write(header.authResp);
-                    header.authChall = null;
-                    header.authResp = null;
+                    out.write((byte)HeaderSet.AUTH_RESPONSE);
+                    out.write((byte)((header.mAuthResp.length + 3) >> 8));
+                    out.write((byte)(header.mAuthResp.length + 3));
+                    out.write(header.mAuthResp);
+                    header.mAuthChall = null;
+                    header.mAuthResp = null;
 
                     byte[] sendHeaders = new byte[out.size() - 3];
                     System.arraycopy(out.toByteArray(), 3, sendHeaders, 0, sendHeaders.length);
 
-                    return sendRequest(code, sendHeaders, header, privateInput);
+                    return sendRequest(opCode, sendHeaders, header, privateInput);
                 }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Called when the client received an authentication challenge header.  This
-     * will cause the authenticator to handle the authentication challenge.
-     *
-     * @param header the header with the authentication challenge
-     *
-     * @return <code>true</code> if the last request should be resent;
-     * <code>false</code> if the last request should not be resent
-     */
-    protected boolean handleAuthChall(HeaderSet header) {
-
-        if (mAuthenticator == null) {
-            return false;
-        }
-
-        /*
-         * An authentication challenge is made up of one required and two
-         * optional tag length value triplets.  The tag 0x00 is required to be
-         * in the authentication challenge and it represents the challenge
-         * digest that was received.  The tag 0x01 is the options tag.  This
-         * tag tracks if user ID is required and if full access will be
-         * granted.  The tag 0x02 is the realm, which provides a description of
-         * which user name and password to use.
-         */
-        byte[] challenge = ObexHelper.getTagValue((byte)0x00, header.authChall);
-        byte[] option = ObexHelper.getTagValue((byte)0x01, header.authChall);
-        byte[] description = ObexHelper.getTagValue((byte)0x02, header.authChall);
-
-        String realm = "";
-        if (description != null) {
-            byte[] realmString = new byte[description.length - 1];
-            System.arraycopy(description, 1, realmString, 0, realmString.length);
-
-            switch (description[0] & 0xFF) {
-
-                case 0x00:
-                    // ASCII encoding
-                    // Fall through
-                case 0x01:
-                    // ISO-8859-1 encoding
-                    try {
-                        realm = new String(realmString, "ISO8859_1");
-                    } catch (Exception e) {
-                        throw new RuntimeException("Unsupported Encoding Scheme");
-                    }
-                    break;
-
-                case 0xFF:
-                    // UNICODE Encoding
-                    realm = ObexHelper.convertToUnicode(realmString, false);
-                    break;
-
-                case 0x02:
-                    // ISO-8859-2 encoding
-                    // Fall through
-                case 0x03:
-                    // ISO-8859-3 encoding
-                    // Fall through
-                case 0x04:
-                    // ISO-8859-4 encoding
-                    // Fall through
-                case 0x05:
-                    // ISO-8859-5 encoding
-                    // Fall through
-                case 0x06:
-                    // ISO-8859-6 encoding
-                    // Fall through
-                case 0x07:
-                    // ISO-8859-7 encoding
-                    // Fall through
-                case 0x08:
-                    // ISO-8859-8 encoding
-                    // Fall through
-                case 0x09:
-                    // ISO-8859-9 encoding
-                    // Fall through
-                default:
-                    throw new RuntimeException("Unsupported Encoding Scheme");
-            }
-        }
-
-        boolean isUserIDRequired = false;
-        boolean isFullAccess = true;
-        if (option != null) {
-            if ((option[0] & 0x01) != 0) {
-                isUserIDRequired = true;
-            }
-
-            if ((option[0] & 0x02) != 0) {
-                isFullAccess = false;
-            }
-        }
-
-        PasswordAuthentication result = null;
-        header.authChall = null;
-
-        try {
-            result = mAuthenticator.onAuthenticationChallenge(realm, isUserIDRequired, isFullAccess);
-        } catch (Exception e) {
-            return false;
-        }
-
-        /*
-         * If no password was provided then do not resend the request
-         */
-        if (result == null) {
-            return false;
-        }
-
-        byte[] password = result.getPassword();
-        if (password == null) {
-            return false;
-        }
-
-        byte[] userName = result.getUserName();
-
-        /*
-         * Create the authentication response header.  It includes 1 required
-         * and 2 option tag length value triples.  The required triple has a
-         * tag of 0x00 and is the response digest.  The first optional tag is
-         * 0x01 and represents the user ID.  If no user ID is provided, then
-         * no user ID will be sent.  The second optional tag is 0x02 and is the
-         * challenge that was received.  This will always be sent
-         */
-        if (userName != null) {
-            header.authResp = new byte[38 + userName.length];
-            header.authResp[36] = (byte)0x01;
-            header.authResp[37] = (byte)userName.length;
-            System.arraycopy(userName, 0, header.authResp, 38, userName.length);
-        } else {
-            header.authResp = new byte[36];
-        }
-
-        // Create the secret String
-        byte[] digest = new byte[challenge.length + password.length];
-        System.arraycopy(challenge, 0, digest, 0, challenge.length);
-        System.arraycopy(password, 0, digest, challenge.length, password.length);
-
-        // Add the Response Digest
-        header.authResp[0] = (byte)0x00;
-        header.authResp[1] = (byte)0x10;
-
-        byte[] responseDigest = ObexHelper.computeMd5Hash(digest);
-        System.arraycopy(responseDigest, 0, header.authResp, 2, 16);
-
-        // Add the challenge
-        header.authResp[18] = (byte)0x02;
-        header.authResp[19] = (byte)0x10;
-        System.arraycopy(challenge, 0, header.authResp, 20, 16);
-
-        return true;
-    }
-
-    /**
-     * Called when the client received an authentication response header.  This
-     * will cause the authenticator to handle the authentication response.
-     *
-     * @param authResp the authentication response
-     *
-     * @return <code>true</code> if the response passed; <code>false</code> if
-     * the response failed
-     */
-    protected boolean handleAuthResp(byte[] authResp) {
-        if (mAuthenticator == null) {
-            return false;
-        }
-
-        byte[] correctPassword = mAuthenticator.onAuthenticationResponse(ObexHelper.getTagValue(
-                (byte)0x01, authResp));
-        if (correctPassword == null) {
-            return false;
-        }
-
-        byte[] temp = new byte[correctPassword.length + 16];
-        System.arraycopy(mChallengeDigest, 0, temp, 0, 16);
-        System.arraycopy(correctPassword, 0, temp, 16, correctPassword.length);
-
-        byte[] correctResponse = ObexHelper.computeMd5Hash(temp);
-        byte[] actualResponse = ObexHelper.getTagValue((byte)0x00, authResp);
-        for (int i = 0; i < 16; i++) {
-            if (correctResponse[i] != actualResponse[i]) {
-                return false;
             }
         }
 

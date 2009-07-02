@@ -71,7 +71,7 @@ package javax.obex;
  */
 public class ServerRequestHandler {
 
-    private long connectionID;
+    private long mConnectionId;
 
     /**
       * Creates a <code>ServerRequestHandler</code>.
@@ -80,33 +80,23 @@ public class ServerRequestHandler {
         /*
          * A connection ID of -1 implies there is no conenction ID
          */
-        connectionID = -1;
-    }
-
-    /**
-     * Creates a <code>HeaderSet</code> object that may be used in put and get
-     * operations.
-     *
-     * @return the <code>HeaderSet</code> object to use in put and get operations
-     */
-    public final HeaderSet createHeaderSet() {
-        return new HeaderSet();
+        mConnectionId = -1;
     }
 
     /**
      * Sets the connection ID header to include in the reply packets.
      *
-     * @param id the connection ID to use; -1 if no connection ID should be
+     * @param connectionId the connection ID to use; -1 if no connection ID should be
      * sent
      *
      * @throws IllegalArgumentException if <code>id</code> is not in the
      * range -1 to 2<sup>32</sup>-1
      */
-    public void setConnectionID(long id) {
-        if ((id < -1) || (id > 0xFFFFFFFFL)) {
+    public void setConnectionId(final long connectionId) {
+        if ((connectionId < -1) || (connectionId > 0xFFFFFFFFL)) {
             throw new IllegalArgumentException("Illegal Connection ID");
         }
-        connectionID = id;
+        mConnectionId = connectionId;
     }
 
     /**
@@ -116,8 +106,8 @@ public class ServerRequestHandler {
      * @return the connection id being used or -1 if no connection ID is being
      * used
      */
-    public long getConnectionID() {
-        return connectionID;
+    public long getConnectionId() {
+        return mConnectionId;
     }
 
     /**
@@ -231,7 +221,7 @@ public class ServerRequestHandler {
      * If an ABORT request is received during the processing of a PUT request,
      * <code>op</code> will be closed by the implementation.
      *
-     * @param op contains the headers sent by the client and allows new
+     * @param operation contains the headers sent by the client and allows new
      * headers to be sent in the reply; <code>op</code> will never be
      * <code>null</code>
      *
@@ -239,7 +229,7 @@ public class ServerRequestHandler {
      * returned to the client; if an invalid response code is provided, the
      * <code>OBEX_HTTP_INTERNAL_ERROR</code> response code will be used
      */
-    public int onPut(Operation op) {
+    public int onPut(Operation operation) {
         return ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED;
     }
 
@@ -253,7 +243,7 @@ public class ServerRequestHandler {
      * If an ABORT request is received during the processing of a GET request,
      * <code>op</code> will be closed by the implementation.
      *
-     * @param op contains the headers sent by the client and allows new
+     * @param operation contains the headers sent by the client and allows new
      * headers to be sent in the reply; <code>op</code> will never be
      * <code>null</code>
      *
@@ -261,7 +251,7 @@ public class ServerRequestHandler {
      * returned to the client; if an invalid response code is provided, the
      * <code>OBEX_HTTP_INTERNAL_ERROR</code> response code will be used
      */
-    public int onGet(Operation op) {
+    public int onGet(Operation operation) {
         return ResponseCodes.OBEX_HTTP_NOT_IMPLEMENTED;
     }
 
@@ -279,10 +269,23 @@ public class ServerRequestHandler {
     public void onAuthenticationFailure(byte[] userName) {
     }
 
-    /**Called by ServerSession to update the status of current transaction */
+    /**
+     * Called by ServerSession to update the status of current transaction
+     * <P>
+     * If this method is not implemented by the class that extends this class,
+     * this method will do nothing.
+     *
+     */
     public void updateStatus(String message) {
     }
 
+    /**
+     * Called when session is closed.
+     * <P>
+     * If this method is not implemented by the class that extends this class,
+     * this method will do nothing.
+     *
+     */
     public void onClose() {
     }
 }

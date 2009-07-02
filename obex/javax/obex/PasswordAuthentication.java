@@ -37,11 +37,11 @@ package javax.obex;
  *
  * @hide
  */
-public class PasswordAuthentication {
+public final class PasswordAuthentication {
 
-    private byte[] userName;
+    private byte[] mUserName;
 
-    private byte[] password;
+    private final byte[] mPassword;
 
     /**
      * Creates a new <code>PasswordAuthentication</code> with the user name
@@ -51,17 +51,17 @@ public class PasswordAuthentication {
      *
      * @param password the password to include in the response
      *
-     * @exception NullPointerException if <code>password</code> is
+     * @throws NullPointerException if <code>password</code> is
      * <code>null</code>
      */
-    public PasswordAuthentication(byte[] userName, byte[] password) {
+    public PasswordAuthentication(final byte[] userName, final byte[] password) {
         if (userName != null) {
-            this.userName = new byte[userName.length];
-            System.arraycopy(userName, 0, this.userName, 0, userName.length);
+            mUserName = new byte[userName.length];
+            System.arraycopy(userName, 0, mUserName, 0, userName.length);
         }
 
-        this.password = new byte[password.length];
-        System.arraycopy(password, 0, this.password, 0, password.length);
+        mPassword = new byte[password.length];
+        System.arraycopy(password, 0, mPassword, 0, password.length);
     }
 
     /**
@@ -71,7 +71,7 @@ public class PasswordAuthentication {
      * @return the user name
      */
     public byte[] getUserName() {
-        return this.userName;
+        return mUserName;
     }
 
     /**
@@ -80,6 +80,6 @@ public class PasswordAuthentication {
      * @return the password
      */
     public byte[] getPassword() {
-        return this.password;
+        return mPassword;
     }
 }

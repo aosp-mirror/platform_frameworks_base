@@ -42,15 +42,15 @@ import java.io.ByteArrayOutputStream;
  *
  * @hide
  */
-class PrivateOutputStream extends OutputStream {
+public final class PrivateOutputStream extends OutputStream {
 
-    private BaseStream parent;
+    private BaseStream mParent;
 
-    private ByteArrayOutputStream output;
+    private ByteArrayOutputStream mArray;
 
-    private boolean isClosed;
+    private boolean mOpen;
 
-    private int maxPacketSize;
+    private int mMaxPacketSize;
 
     /**
      * Creates an empty <code>PrivateOutputStream</code> to write to.
@@ -58,9 +58,9 @@ class PrivateOutputStream extends OutputStream {
      * @param p the connection that this stream runs over
      */
     public PrivateOutputStream(BaseStream p, int maxSize) {
-        parent = p;
-        output = new ByteArrayOutputStream();
-        maxPacketSize = maxSize;
+        mParent = p;
+        mArray = new ByteArrayOutputStream();
+        mMaxPacketSize = maxSize;
     }
 
     /**
@@ -68,8 +68,8 @@ class PrivateOutputStream extends OutputStream {
      *
      * @return the number of bytes written to the output stream
      */
-    protected int size() {
-        return output.size();
+    public int size() {
+        return mArray.size();
     }
 
     /**
@@ -85,10 +85,10 @@ class PrivateOutputStream extends OutputStream {
     @Override
     public synchronized void write(int b) throws IOException {
         ensureOpen();
-        parent.ensureNotDone();
-        output.write(b);
-        if (output.size() == maxPacketSize) {
-            parent.continueOperation(true, false);
+        mParent.ensureNotDone();
+        mArray.write(b);
+        if (mArray.size() == mMaxPacketSize) {
+            mParent.continueOperation(true, false);
         }
     }
 
@@ -103,41 +103,26 @@ class PrivateOutputStream extends OutputStream {
         int remainLength = count;
 
         if (buffer == null) {
-            throw new NullPointerException("buffer is null");
+            throw new IOException("buffer is null");
         }
         if ((offset | count) < 0 || count > buffer.length - offset) {
             throw new IndexOutOfBoundsException("index outof bound");
         }
 
         ensureOpen();
-        parent.ensureNotDone();
-        if (count < maxPacketSize) {
-            output.write(buffer, offset, count);
+        mParent.ensureNotDone();
+        if (count < mMaxPacketSize) {
+            mArray.write(buffer, offset, count);
         } else {
-            while (remainLength >= maxPacketSize) {
-                output.write(buffer, offset1, maxPacketSize);
-                offset1 += maxPacketSize;
+            while (remainLength >= mMaxPacketSize) {
+                mArray.write(buffer, offset1, mMaxPacketSize);
+                offset1 += mMaxPacketSize;
                 remainLength = count - offset1;
-                parent.continueOperation(true, false);
+                mParent.continueOperation(true, false);
             }
             if (remainLength > 0) {
-                output.write(buffer, offset1, remainLength);
+                mArray.write(buffer, offset1, remainLength);
             }
-        }
-    }
-
-    /**
-     * Reads the bytes that have been written to this stream.
-     *
-     * @return the byte array that is written
-     */
-    protected synchronized byte[] readBytes() {
-        if (output.size() > 0) {
-            byte[] result = output.toByteArray();
-            output.reset();
-            return result;
-        } else {
-            return null;
         }
     }
 
@@ -148,14 +133,14 @@ class PrivateOutputStream extends OutputStream {
      *
      * @return the byte array that is written
      */
-    protected synchronized byte[] readBytes(int size) {
-        if (output.size() > 0) {
-            byte[] temp = output.toByteArray();
-            output.reset();
+    public synchronized byte[] readBytes(int size) {
+        if (mArray.size() > 0) {
+            byte[] temp = mArray.toByteArray();
+            mArray.reset();
             byte[] result = new byte[size];
             System.arraycopy(temp, 0, result, 0, size);
             if (temp.length != size) {
-                output.write(temp, size, temp.length - size);
+                mArray.write(temp, size, temp.length - size);
             }
             return result;
         } else {
@@ -169,8 +154,8 @@ class PrivateOutputStream extends OutputStream {
      * @throws IOException if the stream is not open
      */
     private void ensureOpen() throws IOException {
-        parent.ensureOpen();
-        if (isClosed) {
+        mParent.ensureOpen();
+        if (!mOpen) {
             throw new IOException("Output stream is closed");
         }
     }
@@ -183,8 +168,8 @@ class PrivateOutputStream extends OutputStream {
      */
     @Override
     public void close() throws IOException {
-        isClosed = true;
-        parent.streamClosed(false);
+        mOpen = false;
+        mParent.streamClosed(false);
     }
 
     /**
@@ -193,7 +178,7 @@ class PrivateOutputStream extends OutputStream {
      * @return <code>true</code> if the connection is closed;
      * <code>false</code> if the connection is open
      */
-    protected boolean isClosed() {
-        return isClosed;
+    public boolean isClosed() {
+        return !mOpen;
     }
 }
