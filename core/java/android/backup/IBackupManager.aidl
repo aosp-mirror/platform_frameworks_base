@@ -32,8 +32,22 @@ interface IBackupManager {
     /**
      * Tell the system service that the caller has made changes to its
      * data, and therefore needs to undergo an incremental backup pass.
+     *
+     * Any application can invoke this method for its own package, but
+     * only callers who hold the android.permission.BACKUP permission
+     * may invoke it for arbitrary packages.
      */
     void dataChanged(String packageName);
+
+    /**
+     * Erase all backed-up data for the given package from the storage
+     * destination.
+     *
+     * Any application can invoke this method for its own package, but
+     * only callers who hold the android.permission.BACKUP permission
+     * may invoke it for arbitrary packages.
+     */
+    void clearBackupData(String packageName);
 
     /**
      * Notifies the Backup Manager Service that an agent has become available.  This
