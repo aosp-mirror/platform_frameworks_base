@@ -78,8 +78,9 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final String BACKUP_TRANSPORT_SETTING = "backup_transport";
     private static final String BACKUP_ENABLED_SETTING = "backup_enabled";
 
-    // Default time to wait after data changes before we back up the data
-    private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
+    // How often we perform a backup pass.  Privileged external callers can
+    // trigger an immediate pass.
+    private static final long BACKUP_INTERVAL = 60 * 60 * 1000;
 
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
@@ -210,7 +211,7 @@ class BackupManagerService extends IBackupManager.Stub {
         context.bindService(intent, mGoogleConnection, Context.BIND_AUTO_CREATE);
 
         // Now that we know about valid backup participants, parse any
-        // leftover journal files and schedule a new backup pass
+        // leftover journal files into the pending backup set
         parseLeftoverJournals();
 
         // Register for broadcasts about package install, etc., so we can
@@ -220,7 +221,13 @@ class BackupManagerService extends IBackupManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
-    }
+
+        // Schedule the first backup pass -- okay because no other threads are
+        // running yet
+        if (mEnabled) {
+            scheduleBackupPassLocked(BACKUP_INTERVAL);
+        }
+}
 
     private void makeJournalLocked() {
         try {
@@ -342,35 +349,39 @@ class BackupManagerService extends IBackupManager.Stub {
                 ArrayList<BackupRequest> queue = new ArrayList<BackupRequest>();
                 File oldJournal = mJournal;
                 synchronized (mQueueLock) {
-                    if (mPendingBackups.size() == 0) {
-                        Log.v(TAG, "Backup requested but nothing pending");
-                        break;
-                    }
-
-                    for (BackupRequest b: mPendingBackups.values()) {
-                        queue.add(b);
-                    }
-                    Log.v(TAG, "clearing pending backups");
-                    mPendingBackups.clear();
-
-                    // Start a new backup-queue journal file too
-                    if (mJournalStream != null) {
-                        try {
-                            mJournalStream.close();
-                        } catch (IOException e) {
-                            // don't need to do anything
+                    // Do we have any work to do?
+                    if (mPendingBackups.size() > 0) {
+                        for (BackupRequest b: mPendingBackups.values()) {
+                            queue.add(b);
                         }
-                        makeJournalLocked();
-                    }
+                        Log.v(TAG, "clearing pending backups");
+                        mPendingBackups.clear();
 
-                    // At this point, we have started a new journal file, and the old
-                    // file identity is being passed to the backup processing thread.
-                    // When it completes successfully, that old journal file will be
-                    // deleted.  If we crash prior to that, the old journal is parsed
-                    // at next boot and the journaled requests fulfilled.
+                        // Start a new backup-queue journal file too
+                        if (mJournalStream != null) {
+                            try {
+                                mJournalStream.close();
+                            } catch (IOException e) {
+                                // don't need to do anything
+                            }
+                            makeJournalLocked();
+                        }
+
+                        // At this point, we have started a new journal file, and the old
+                        // file identity is being passed to the backup processing thread.
+                        // When it completes successfully, that old journal file will be
+                        // deleted.  If we crash prior to that, the old journal is parsed
+                        // at next boot and the journaled requests fulfilled.
+                        (new PerformBackupThread(transport, queue, oldJournal)).start();
+                    } else {
+                        Log.v(TAG, "Backup requested but nothing pending");
+                    }
                 }
 
-                (new PerformBackupThread(transport, queue, oldJournal)).start();
+                // Schedule the next pass.
+                synchronized (mQueueLock) {
+                    scheduleBackupPassLocked(BACKUP_INTERVAL);
+                }
                 break;
             }
 
@@ -1115,10 +1126,6 @@ class BackupManagerService extends IBackupManager.Stub {
                         Log.d(TAG, "    + " + b + " agent=" + b.appInfo.backupAgentName);
                     }
                 }
-                // Schedule a backup pass in a few minutes.  As backup-eligible data
-                // keeps changing, continue to defer the backup pass until things
-                // settle down, to avoid extra overhead.
-                scheduleBackupPassLocked(COLLECTION_INTERVAL);
             }
         } else {
             Log.w(TAG, "dataChanged but no participant pkg " + packageName);
@@ -1159,16 +1166,16 @@ class BackupManagerService extends IBackupManager.Stub {
             mEnabled = enable;
         }
 
-        if (enable && !wasEnabled) {
-            synchronized (mQueueLock) {
-                if (mPendingBackups.size() > 0) {
-                    // !!! TODO: better policy around timing of the first backup pass
-                    if (DEBUG) Log.v(TAG, "Backup enabled with pending data changes, scheduling");
-                    this.scheduleBackupPassLocked(COLLECTION_INTERVAL);
-                }
+        synchronized (mQueueLock) {
+            if (enable && !wasEnabled) {
+                // if we've just been enabled, start scheduling backup passes
+                scheduleBackupPassLocked(BACKUP_INTERVAL);
+            } else if (!enable) {
+                // No longer enabled, so stop running backups.
+                mBackupHandler.removeMessages(MSG_RUN_BACKUP);
             }
         }
-}
+    }
 
     // Report whether the backup mechanism is currently enabled
     public boolean isBackupEnabled() {
@@ -1343,6 +1350,14 @@ class BackupManagerService extends IBackupManager.Stub {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled"));
+            boolean scheduled = mBackupHandler.hasMessages(MSG_RUN_BACKUP);
+            if (scheduled != mEnabled) {
+                if (mEnabled) {
+                    pw.println("ERROR: backups enabled but none scheduled!");
+                } else {
+                    pw.println("ERROR: backups are scheduled but not enabled!");
+                }
+            }
             pw.println("Available transports:");
             for (String t : listAllTransports()) {
                 String pad = (t.equals(mCurrentTransport)) ? "  * " : "    ";
