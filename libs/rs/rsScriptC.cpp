@@ -334,12 +334,19 @@ extern "C" void drawQuad(int32_t x1, int32_t y1, int32_t z1,
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
 
     glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FIXED, 0, vtx);
+
+    glClientActiveTexture(GL_TEXTURE0);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FIXED, 0, tex);
+    glClientActiveTexture(GL_TEXTURE1);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FIXED, 0, tex);
+    glClientActiveTexture(GL_TEXTURE0);
+
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
 
-    glVertexPointer(3, GL_FIXED, 0, vtx);
-    glTexCoordPointer(2, GL_FIXED, 0, tex);
     //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

@@ -32,6 +32,7 @@ ProgramFragment::ProgramFragment(Element *in, Element *out) :
         mTextureDimensions[ct] = 2;
     }
     mTextureEnableMask = 0;
+    mEnvModes[1] = RS_TEX_ENV_MODE_DECAL;
 }
 
 ProgramFragment::~ProgramFragment()
@@ -42,10 +43,7 @@ void ProgramFragment::setupGL()
 {
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
         glActiveTexture(GL_TEXTURE0 + ct);
-        if (!(mTextureEnableMask & (1 << ct)) ||
-            //!mSamplers[ct].get() ||
-            !mTextures[ct].get()) {
-
+        if (!(mTextureEnableMask & (1 << ct)) || !mTextures[ct].get()) {
             glDisable(GL_TEXTURE_2D);
             continue;
         }
@@ -55,13 +53,13 @@ void ProgramFragment::setupGL()
 
         switch(mEnvModes[ct]) {
         case RS_TEX_ENV_MODE_REPLACE:
-            glTexEnvf(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
             break;
         case RS_TEX_ENV_MODE_MODULATE:
-            glTexEnvf(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             break;
         case RS_TEX_ENV_MODE_DECAL:
-            glTexEnvf(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_DECAL);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
             break;
         }
 
@@ -70,10 +68,29 @@ void ProgramFragment::setupGL()
         } else {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         }
+
+        // Gross hack.
+        if (ct == 2) {
+            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+
+            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_ADD);
+            glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, GL_PREVIOUS);
+            glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, GL_TEXTURE);
+            glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+            glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
+
+            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
+            glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, GL_PREVIOUS);
+            glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, GL_TEXTURE);
+            glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
+            glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
+        }
     }
+
+
     glActiveTexture(GL_TEXTURE0);
 }
 
@@ -85,6 +102,7 @@ void ProgramFragment::bindTexture(uint32_t slot, Allocation *a)
         return;
     }
 
+    //LOGE("bindtex %i %p", slot, a);
     mTextures[slot].set(a);
 }
 

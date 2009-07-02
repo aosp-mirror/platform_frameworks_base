@@ -25,13 +25,13 @@ int main(void* con, int ft, int launchID)
     int pressure;
 
 
-    iconCount = 38;//loadI32(0, 1);
     rotStep = 20 * 0x10000;
     pressure = loadI32(0, 2);
 
     rowCount = 4;
-    rot = (-20 + loadI32(0, 0)) * 0x10000;
 
+    iconCount = loadI32(0, 1);
+    rot = (-20 + loadI32(0, 0)) * 0x10000;
     while (iconCount) {
         tmpSin = sinx(rot);
         tmpCos = cosx(rot);
@@ -45,9 +45,7 @@ int main(void* con, int ft, int launchID)
         for (y = 0; (y < rowCount) && iconCount; y++) {
             ty1 = (y * 0x30000) - 0x48000;
             ty2 = ty1 + 0x20000;
-
             pfBindTexture(NAMED_PF, 0, loadI32(1, y));
-
             drawQuad(tx1, ty1, tz1,
                      tx2, ty1, tz2,
                      tx2, ty2, tz2,
@@ -57,8 +55,6 @@ int main(void* con, int ft, int launchID)
         rot = rot + rotStep;
     }
 
-    //renderTriangleMesh(con, NAMED_MeshCard);
-    //renderTriangleMesh(con, NAMED_MeshTab);
-    return 1;
+    return 0;
 }
 
