@@ -118,7 +118,12 @@ public class TextToSpeech {
         public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
         public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
         public static final int CHECK_VOICE_DATA_MISSING_DATA_NO_SDCARD = -3;
-        
+
+        // return codes for a TTS engine's check data activity
+        public static final String VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
+        public static final String VOICE_DATA_FILES = "dataFiles";
+        public static final String VOICE_DATA_FILES_INFO = "dataFilesInfo";
+
         // keys for the parameters passed with speak commands
         public static final String TTS_KEY_PARAM_RATE = "rate";
         public static final String TTS_KEY_PARAM_LANGUAGE = "language";
