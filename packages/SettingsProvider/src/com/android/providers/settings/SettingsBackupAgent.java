@@ -95,7 +95,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         data.writeEntityHeader(KEY_SYNC, syncProviders.length);
         data.writeEntityData(syncProviders, syncProviders.length);
         
-        //TODO: Permissions problem : backupFile(FILE_WIFI_SUPPLICANT, data);
+        backupFile(FILE_WIFI_SUPPLICANT, data);
     }
 
     @Override

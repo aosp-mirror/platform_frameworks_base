@@ -49,6 +49,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.text.TextUtils;
@@ -64,6 +65,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import com.android.internal.app.IBatteryStats;
+import android.backup.IBackupManager;
 import com.android.server.am.BatteryStatsService;
 
 /**
@@ -1434,6 +1436,16 @@ public class WifiService extends IWifiManager.Stub {
                     Intent intent = new Intent(WifiManager.NETWORK_IDS_CHANGED_ACTION);
                     mContext.sendBroadcast(intent);
                 }
+            }
+        }
+        // Inform the backup manager about a data change
+        IBackupManager ibm = IBackupManager.Stub.asInterface(
+                ServiceManager.getService(Context.BACKUP_SERVICE));
+        if (ibm != null) {
+            try {
+                ibm.dataChanged("com.android.providers.settings");
+            } catch (Exception e) {
+                // Try again later
             }
         }
         return result;
