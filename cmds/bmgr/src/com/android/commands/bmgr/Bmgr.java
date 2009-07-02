@@ -97,6 +97,11 @@ public final class Bmgr {
             return;
         }
 
+        if ("wipe".equals(op)) {
+            doWipe();
+            return;
+        }
+
         System.err.println("Unknown command");
         showUsage();
     }
@@ -177,6 +182,22 @@ public final class Bmgr {
             } else {
                 System.out.println("Selected transport " + which + " (formerly " + old + ")");
             }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void doWipe() {
+        String pkg = nextArg();
+        if (pkg == null) {
+            showUsage();
+            return;
+        }
+
+        try {
+            mBmgr.clearBackupData(pkg);
+            System.out.println("Wiped backup data for " + pkg);
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -343,6 +364,7 @@ public final class Bmgr {
         System.err.println("       bmgr transport WHICH");
         System.err.println("       bmgr restore TOKEN");
         System.err.println("       bmgr run");
+        System.err.println("       bmgr wipe PACKAGE");
         System.err.println("");
         System.err.println("The 'backup' command schedules a backup pass for the named package.");
         System.err.println("Note that the backup pass will effectively be a no-op if the package");
@@ -373,5 +395,9 @@ public final class Bmgr {
         System.err.println("The 'run' command causes any scheduled backup operation to be initiated");
         System.err.println("immediately, without the usual waiting period for batching together");
         System.err.println("data changes.");
+        System.err.println("");
+        System.err.println("The 'wipe' command causes all backed-up data for the given package to be");
+        System.err.println("erased from the current transport's storage.  The next backup operation");
+        System.err.println("that the given application performs will rewrite its entire data set.");
     }
 }
