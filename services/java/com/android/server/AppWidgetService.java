@@ -40,6 +40,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.util.Xml;
 import android.widget.RemoteViews;
 
@@ -695,10 +696,16 @@ class AppWidgetService extends IAppWidgetService.Stub
 
             TypedArray sa = mContext.getResources().obtainAttributes(attrs,
                     com.android.internal.R.styleable.AppWidgetProviderInfo);
-            info.minWidth = sa.getDimensionPixelSize(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_minWidth, 0);
-            info.minHeight = sa.getDimensionPixelSize(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_minHeight, 0);
+            
+            // These dimensions has to be resolved in the application's context.
+            // We simply send back the raw complex data, which will be
+            // converted to dp in {@link AppWidgetManager#getAppWidgetInfo}.
+            TypedValue value = sa.peekValue(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_minWidth);
+            info.minWidth = value != null ? value.data : 0; 
+            value = sa.peekValue(com.android.internal.R.styleable.AppWidgetProviderInfo_minHeight);
+            info.minHeight = value != null ? value.data : 0;
+                    
             info.updatePeriodMillis = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_updatePeriodMillis, 0);
             info.initialLayout = sa.getResourceId(
