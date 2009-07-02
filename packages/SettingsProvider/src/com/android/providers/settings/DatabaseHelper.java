@@ -64,7 +64,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 34;
+    private static final int DATABASE_VERSION = 35;
 
     private Context mContext;
 
@@ -386,6 +386,20 @@ class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 34;
         }
 
+        if (upgradeVersion == 34) {
+            db.beginTransaction();
+            try {
+                SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadSecure35Settings(stmt);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 35;
+        }
+        
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -690,9 +704,19 @@ class DatabaseHelper extends SQLiteOpenHelper {
         loadSetting(stmt, Settings.Secure.ALLOW_MOCK_LOCATION,
                 "1".equals(SystemProperties.get("ro.allow.mock.location")) ? 1 : 0);
 
+        loadSecure35Settings(stmt);
+        
         stmt.close();
     }
 
+    private void loadSecure35Settings(SQLiteStatement stmt) {
+        loadBooleanSetting(stmt, Settings.Secure.BACKUP_ENABLED,
+                R.bool.def_backup_enabled);
+        
+        loadStringSetting(stmt, Settings.Secure.BACKUP_TRANSPORT,
+                R.string.def_backup_transport);
+    }
+    
     private void loadSetting(SQLiteStatement stmt, String key, Object value) {
         stmt.bindString(1, key);
         stmt.bindString(2, value.toString());

@@ -74,10 +74,6 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
 
-    // Secure settings
-    private static final String BACKUP_TRANSPORT_SETTING = "backup_transport";
-    private static final String BACKUP_ENABLED_SETTING = "backup_enabled";
-
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
     private static final long BACKUP_INTERVAL = 60 * 60 * 1000;
@@ -165,10 +161,8 @@ class BackupManagerService extends IBackupManager.Stub {
         mActivityManager = ActivityManagerNative.getDefault();
 
         // Set up our bookkeeping
-        // !!! STOPSHIP: make this disabled by default so that we then gate on
-        //               setupwizard or other opt-out UI
-        mEnabled = (Settings.Secure.getInt(mContext.getContentResolver(),
-                BACKUP_ENABLED_SETTING, 1) != 0);
+        mEnabled = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.BACKUP_ENABLED, 0) != 0;
         mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mDataDir = Environment.getDownloadCacheDirectory();
 
@@ -192,13 +186,10 @@ class BackupManagerService extends IBackupManager.Stub {
         registerTransport(localName.flattenToShortString(), mLocalTransport);
 
         mGoogleTransport = null;
-        // !!! TODO: set up the default transport name "the right way"
-        mCurrentTransport = Settings.Secure.getString(mContext.getContentResolver(),
-                BACKUP_TRANSPORT_SETTING);
-        if (mCurrentTransport == null) {
-            mCurrentTransport = "com.google.android.backup/.BackupTransportService";
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    BACKUP_TRANSPORT_SETTING, mCurrentTransport);
+        mCurrentTransport = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.BACKUP_TRANSPORT);
+        if ("".equals(mCurrentTransport)) {
+            mCurrentTransport = null;
         }
         if (DEBUG) Log.v(TAG, "Starting with transport " + mCurrentTransport);
 
@@ -1093,7 +1084,7 @@ class BackupManagerService extends IBackupManager.Stub {
         // If the caller does not hold the BACKUP permission, it can only request a
         // backup of its own data.
         HashSet<ApplicationInfo> targets;
-        if ((mContext.checkPermission("android.permission.BACKUP", Binder.getCallingPid(),
+        if ((mContext.checkPermission(android.Manifest.permission.BACKUP, Binder.getCallingPid(),
                 Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
             targets = mBackupParticipants.get(Binder.getCallingUid());
         } else {
@@ -1154,7 +1145,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Run a backup pass immediately for any applications that have declared
     // that they have pending updates.
     public void backupNow() throws RemoteException {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "backupNow");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "backupNow");
 
         if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
         synchronized (mQueueLock) {
@@ -1164,12 +1155,12 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Enable/disable the backup transport
     public void setBackupEnabled(boolean enable) {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "setBackupEnabled");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "setBackupEnabled");
 
         boolean wasEnabled = mEnabled;
         synchronized (this) {
-            Settings.Secure.putInt(mContext.getContentResolver(), BACKUP_ENABLED_SETTING,
-                    enable ? 1 : 0);
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.BACKUP_ENABLED, enable ? 1 : 0);
             mEnabled = enable;
         }
 
@@ -1186,7 +1177,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Report whether the backup mechanism is currently enabled
     public boolean isBackupEnabled() {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "isBackupEnabled");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "isBackupEnabled");
         return mEnabled;    // no need to synchronize just to read it
     }
 
@@ -1199,7 +1190,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Report all known, available backup transports
     public String[] listAllTransports() {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "listAllTransports");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "listAllTransports");
 
         String[] list = null;
         ArrayList<String> known = new ArrayList<String>();
@@ -1220,15 +1211,15 @@ class BackupManagerService extends IBackupManager.Stub {
     // name is not one of the available transports, no action is taken and the method
     // returns null.
     public String selectBackupTransport(String transport) {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "selectBackupTransport");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "selectBackupTransport");
 
         synchronized (mTransports) {
             String prevTransport = null;
             if (mTransports.get(transport) != null) {
                 prevTransport = mCurrentTransport;
                 mCurrentTransport = transport;
-                Settings.Secure.putString(mContext.getContentResolver(), BACKUP_TRANSPORT_SETTING,
-                        transport);
+                Settings.Secure.putString(mContext.getContentResolver(),
+                        Settings.Secure.BACKUP_TRANSPORT, transport);
                 Log.v(TAG, "selectBackupTransport() set " + mCurrentTransport
                         + " returning " + prevTransport);
             } else {
@@ -1274,7 +1265,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Hand off a restore session
     public IRestoreSession beginRestoreSession(String transport) {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "beginRestoreSession");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "beginRestoreSession");
 
         synchronized(this) {
             if (mActiveRestoreSession != null) {
@@ -1300,7 +1291,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // --- Binder interface ---
         public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
-            mContext.enforceCallingPermission("android.permission.BACKUP",
+            mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                     "getAvailableRestoreSets");
 
             try {
@@ -1319,7 +1310,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         public int performRestore(long token, IRestoreObserver observer)
                 throws android.os.RemoteException {
-            mContext.enforceCallingPermission("android.permission.BACKUP", "performRestore");
+            mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "performRestore");
 
             Log.d(TAG, "performRestore token=" + token + " observer=" + observer);
 
@@ -1339,7 +1330,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         public void endRestoreSession() throws android.os.RemoteException {
-            mContext.enforceCallingPermission("android.permission.BACKUP",
+            mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                     "endRestoreSession");
 
             Log.d(TAG, "endRestoreSession");
