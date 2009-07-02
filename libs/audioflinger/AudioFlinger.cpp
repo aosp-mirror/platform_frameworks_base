@@ -499,7 +499,8 @@ status_t AudioFlinger::setRouting(int mode, uint32_t routes, uint32_t mask)
     }
 
 #ifdef WITH_A2DP
-    LOGD("setRouting %d %d %d, tid %d, calling tid %d\n", mode, routes, mask, gettid(), IPCThreadState::self()->getCallingPid());
+    LOGV("setRouting %d %d %d, tid %d, calling tid %d\n", mode, routes, mask, gettid(),
+            IPCThreadState::self()->getCallingPid());
     if (mode == AudioSystem::MODE_NORMAL && 
             (mask & AudioSystem::ROUTE_BLUETOOTH_A2DP)) {
         AutoMutex lock(&mLock);
@@ -893,7 +894,7 @@ void AudioFlinger::handleRouteDisablesA2dp_l(int routes)
             }
             LOGV("mA2dpDisableCount decremented to %d", mA2dpDisableCount);
         } else {
-            LOGE("mA2dpDisableCount is already zero");
+            LOGV("mA2dpDisableCount is already zero");
         }
     }
 }
