@@ -308,6 +308,9 @@ public class WebView extends AbsoluteLayout
     // more key events.
     private int mTextGeneration;
 
+    // Used by WebViewCore to create child views.
+    /* package */ final ViewManager mViewManager;
+
     // The list of loaded plugins.
     private static PluginList sPluginList;
 
@@ -709,6 +712,8 @@ public class WebView extends AbsoluteLayout
         mWebViewCore = new WebViewCore(context, this, mCallbackProxy);
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new Scroller(context);
+
+        mViewManager = new ViewManager(this);
 
         mZoomButtonsController = new ZoomButtonsController(this);
         mZoomButtonsController.setOnZoomListener(mZoomListener);
@@ -1688,7 +1693,7 @@ public class WebView extends AbsoluteLayout
         return Math.round(x * mInvActualScale);
     }
 
-    private int contentToView(int x) {
+    /*package*/ int contentToView(int x) {
         return Math.round(x * mActualScale);
     }
 
@@ -1778,6 +1783,9 @@ public class WebView extends AbsoluteLayout
                 }
                 mActualScale = scale;
                 mInvActualScale = 1 / scale;
+
+                // Scale all the child views
+                mViewManager.scaleAll();
 
                 // as we don't have animation for scaling, don't do animation
                 // for scrolling, as it causes weird intermediate state
@@ -2716,6 +2724,8 @@ public class WebView extends AbsoluteLayout
                         - (width >> 1), (int) (scrollFrame.centerY()
                         * mActualScale) - (height >> 1));
                 mTouchMode = TOUCH_DONE_MODE;
+                // Show all the child views once we are done.
+                mViewManager.showAll();
             } else {
                 mTouchMode = SCROLL_ZOOM_OUT;
             }
@@ -2879,6 +2889,8 @@ public class WebView extends AbsoluteLayout
             mTouchMode = TOUCH_DONE_MODE;
             return;
         }
+        // Hide the child views while in this mode.
+        mViewManager.hideAll();
         startZoomScrollOut();
         mTouchMode = SCROLL_ZOOM_ANIMATION_OUT;
         invalidate();
@@ -3625,6 +3637,7 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
+
         sendOurVisibleRect();
     }
 
