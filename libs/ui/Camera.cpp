@@ -312,7 +312,7 @@ void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
 
 void Camera::binderDied(const wp<IBinder>& who) {
     LOGW("ICamera died");
-    notifyCallback(CAMERA_MSG_ERROR, DEAD_OBJECT, 0);
+    notifyCallback(CAMERA_MSG_ERROR, CAMERA_ERROR_SERVER_DIED, 0);
 }
 
 void Camera::DeathNotifier::binderDied(const wp<IBinder>& who) {
