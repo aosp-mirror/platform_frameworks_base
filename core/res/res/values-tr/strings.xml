@@ -21,374 +21,355 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
-    <string name="untitled">"&lt;untitled&gt;"</string>
+    <string name="untitled">"&lt;başlıksız&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(Telefon numarası yok)"</string>
     <string name="unknownName">"(Bilinmiyor)"</string>
-    <string name="defaultVoiceMailAlphaTag">"Sesli posta"</string>
+    <string name="defaultVoiceMailAlphaTag">"Sesli Mesaj"</string>
     <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
     <string name="mmiError">"Bağlantı sorunu veya geçersiz MMI kodu."</string>
-    <string name="serviceEnabled">"Servis etkinleştirildi."</string>
-    <string name="serviceEnabledFor">"Servis şunun için etkinleştirildi:"</string>
-    <string name="serviceDisabled">"Servis devre dışı bırakıldı."</string>
-    <string name="serviceRegistered">"Kayıt başarıyla tamamlandı."</string>
-    <string name="serviceErased">"Silme işlemi başarısız oldu."</string>
-    <string name="passwordIncorrect">"Hatalı şifre."</string>
+    <string name="serviceEnabled">"Hizmet etkindi."</string>
+    <string name="serviceEnabledFor">"Hizmet şunun için etkinleştirildi:"</string>
+    <string name="serviceDisabled">"Hizmet devre dışı bırakıldı."</string>
+    <string name="serviceRegistered">"Kayıt işlemi başarılı oldu."</string>
+    <string name="serviceErased">"Silme işlemi başarılı."</string>
+    <string name="passwordIncorrect">"Yanlış şifre."</string>
     <string name="mmiComplete">"MMI tamamlandı."</string>
     <string name="badPin">"Yazdığınız eski PIN doğru değil."</string>
     <string name="badPuk">"Yazdığınız PUK doğru değil."</string>
-    <string name="mismatchPin">"Girdiğiniz PIN\'ler eşleşmiyor."</string>
-    <string name="invalidPin">"4 ila 8 rakamlı bir PIN yazın."</string>
-    <string name="needPuk">"SIM kartınız PUK ile kilitlenmiş. Kilidini açmak için PUK kodunu girin."</string>
-    <string name="needPuk2">"SIM kart kilidini açmak için PUK2\'yi yazın."</string>
-    <string name="ClipMmi">"Gelen Arama Kimliği"</string>
-    <string name="ClirMmi">"Giden Arama Kimliği"</string>
-    <string name="CfMmi">"Arama iletme"</string>
-    <string name="CwMmi">"Arama bekletme"</string>
-    <string name="BaMmi">"Arama engelleme"</string>
-    <string name="PwdMmi">"Şifre değişimi"</string>
-    <string name="PinMmi">"PIN değiştirme"</string>
-    <string name="CLIRDefaultOnNextCallOn">"Arayan kimliği varsayılanları kısıtlı. Sonraki arama: Kısıtlı"</string>
-    <string name="CLIRDefaultOnNextCallOff">"Arayan kimliği varsayılanları kısıtlı. Sonraki arama:Kısıtlı değil"</string>
-    <string name="CLIRDefaultOffNextCallOn">"Arayan kimliği varsayılanları kısıtlı değil. Sonraki arama: Kısıtlı"</string>
-    <string name="CLIRDefaultOffNextCallOff">"Arayan kimliği varsayılanları kısıtlı değil. Sonraki arama:Kısıtlı değil"</string>
-    <string name="serviceNotProvisioned">"Servis hazırlanmadı."</string>
-    <string name="CLIRPermanent">"Arayan kimliği ayarı değiştirilemiyor."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="mismatchPin">"Girdiğiniz PIN kodları eşleşmiyor."</string>
+    <string name="invalidPin">"4 ila 8 rakamdan oluşan bir PIN girin."</string>
+    <string name="needPuk">"SIM kartınızın PUK kilidi devrede. Kilidi açmak için PUK kodunu yazın."</string>
+    <string name="needPuk2">"Engellenen SIM kartı açmak için PUK2 kodunu yazın."</string>
+    <string name="ClipMmi">"Gelen Çağrı Kimliği"</string>
+    <string name="ClirMmi">"Giden Çağrı Kimliği"</string>
+    <string name="CfMmi">"Çağrı yönlendirme"</string>
+    <string name="CwMmi">"Çağrı bekletme"</string>
+    <string name="BaMmi">"Çağrı engelleme"</string>
+    <string name="PwdMmi">"Şifre değişikliği"</string>
+    <string name="PinMmi">"PIN kodu değişikliği"</string>
+    <string name="CLIRDefaultOnNextCallOn">"Arayan kimliği varsayılanları kısıtlanmıştır. Sonraki çağrı: Kısıtlanmış"</string>
+    <string name="CLIRDefaultOnNextCallOff">"Arayan kimliği varsayılanları kısıtlanmıştır. Sonraki çağrı: Kısıtlanmamış"</string>
+    <string name="CLIRDefaultOffNextCallOn">"Arayan kimliği varsayılanları kısıtlanmamıştır. Sonraki çağrı: Kısıtlanmış"</string>
+    <string name="CLIRDefaultOffNextCallOff">"Arayan kimliği varsayılanları kısıtlanmamıştır. Sonraki çağrı: Kısıtlanmamış"</string>
+    <string name="serviceNotProvisioned">"Hizmet sağlanamadı."</string>
+    <string name="CLIRPermanent">"Arayan kimliği ayarı değiştirilemez."</string>
+    <string name="RestrictedChangedTitle">"Kısıtlanmış erişim değiştirildi"</string>
+    <string name="RestrictedOnData">"Veri hizmeti engellendi."</string>
+    <string name="RestrictedOnEmergency">"Acil durum hizmeti engellendi."</string>
+    <string name="RestrictedOnNormal">"Ses/SMS hizmeti engellendi."</string>
+    <string name="RestrictedOnAll">"Tüm ses/SMS hizmetleri engellendi."</string>
     <string name="serviceClassVoice">"Ses"</string>
     <string name="serviceClassData">"Veri"</string>
     <string name="serviceClassFAX">"FAKS"</string>
     <string name="serviceClassSMS">"SMS"</string>
-    <string name="serviceClassDataAsync">"Asenkron"</string>
-    <string name="serviceClassDataSync">"Senk"</string>
+    <string name="serviceClassDataAsync">"Asenk."</string>
+    <string name="serviceClassDataSync">"Senk."</string>
     <string name="serviceClassPacket">"Paket"</string>
-    <string name="serviceClassPAD">"TUŞ TAKIMI"</string>
-    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: İletilmedi"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yönlendirilmedi"</string>
     <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> saniye sonra <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: İletilmedi"</string>
-    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: İletilmedi"</string>
+    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yönlendirilmedi"</string>
+    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yönlendirilmedi"</string>
     <string name="httpErrorOk">"Tamam"</string>
-    <string name="httpError">"Bu web sayfasında hata var."</string>
-    <string name="httpErrorLookup">"Bu URL bulunamadı."</string>
-    <string name="httpErrorUnsupportedAuthScheme">"Bu sitenin kimlik doğrulama düzeni desteklenmiyor."</string>
-    <string name="httpErrorAuth">"Kimlik doğrulama başarısız oldu."</string>
-    <string name="httpErrorProxyAuth">"Proxy sunucusu üzerinden kimlik doğrulama başarısız oldu."</string>
-    <string name="httpErrorConnect">"Sunucu bağlantısı başarısız oldu."</string>
-    <string name="httpErrorIO">"Sunucu iletişimi kurulamadı. Daha sonra tekrar deneyin."</string>
-    <string name="httpErrorTimeout">"Sunucu bağlantısı zaman aşımına uğradı."</string>
-    <string name="httpErrorRedirectLoop">"Bu sayfa yön değiştiren çok fazla servis içeriyor."</string>
-    <string name="httpErrorUnsupportedScheme">"Bu protokol desteklenmiyor."</string>
+    <string name="httpError">"Web sayfası hata içeriyor."</string>
+    <string name="httpErrorLookup">"URL bulunamadı."</string>
+    <string name="httpErrorUnsupportedAuthScheme">"Site kimlik doğrulaması şeması desteklenmiyor."</string>
+    <string name="httpErrorAuth">"Kimlik doğrulanamadı."</string>
+    <string name="httpErrorProxyAuth">"Proxy sunucusu üzerinden kimlik doğrulanamadı."</string>
+    <string name="httpErrorConnect">"Sunucu ile bağlantı kurulamadı."</string>
+    <string name="httpErrorIO">"Sunucu iletişim kuramadı. Daha sonra yeniden deneyin."</string>
+    <string name="httpErrorTimeout">"Sunucuya bağlanma işlemi zaman aşımına uğradı."</string>
+    <string name="httpErrorRedirectLoop">"Sayfada çok fazla sunucu yeniden yönlendirmesi bulunuyor."</string>
+    <string name="httpErrorUnsupportedScheme">"Protokol desteklenmiyor."</string>
     <string name="httpErrorFailedSslHandshake">"Güvenli bir bağlantı kurulamadı."</string>
-    <string name="httpErrorBadUrl">"URL geçersiz olduğu için bu sayfa açılamadı."</string>
+    <string name="httpErrorBadUrl">"URL geçersiz olduğundan sayfa açılamadı."</string>
     <string name="httpErrorFile">"Dosyaya erişilemedi."</string>
     <string name="httpErrorFileNotFound">"İstenen dosya bulunamadı."</string>
-    <string name="httpErrorTooManyRequests">"Çok fazla talep işlenmekte. Daha sonra tekrar deneyin."</string>
-    <string name="contentServiceSync">"Senk"</string>
-    <string name="contentServiceSyncNotificationTitle">"Senkronize"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc">"Çok fazla <xliff:g id="CONTENT_TYPE">%s</xliff:g> siliniyor."</string>
-    <string name="low_memory">"Telefon hafızası dolu! Boş alan oluşturmak için bazı dosyaları silin."</string>
+    <string name="httpErrorTooManyRequests">"Çok fazla sayıda istek işleniyor. Daha sonra yeniden deneyin."</string>
+    <string name="contentServiceSync">"Senk."</string>
+    <string name="contentServiceSyncNotificationTitle">"Senk."</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"Çok fazla <xliff:g id="CONTENT_TYPE">%s</xliff:g> silme var."</string>
+    <string name="low_memory">"Telefonun depolama alanı doldu! Yer açmak için bazı dosyaları silin."</string>
     <string name="me">"Ben"</string>
     <string name="power_dialog">"Telefon seçenekleri"</string>
     <string name="silent_mode">"Sessiz mod"</string>
-    <string name="turn_on_radio">"Kablosuz özelliğini aç"</string>
-    <string name="turn_off_radio">"Kablosuz özelliğini kapat"</string>
+    <string name="turn_on_radio">"Kablosuzu aç"</string>
+    <string name="turn_off_radio">"Kablosuzu kapat"</string>
     <string name="screen_lock">"Ekran kilidi"</string>
-    <string name="power_off">"Güç kapalı"</string>
-    <string name="shutdown_progress">"Kapatılıyor..."</string>
+    <string name="power_off">"Kapat"</string>
+    <string name="shutdown_progress">"Kapanıyor…"</string>
     <string name="shutdown_confirm">"Telefonunuz kapanacak."</string>
-    <string name="no_recent_tasks">"En son kullanılan uygulama yok."</string>
+    <string name="no_recent_tasks">"Hiçbir yeni uygulama yok."</string>
     <string name="global_actions">"Telefon seçenekleri"</string>
     <string name="global_action_lock">"Ekran kilidi"</string>
-    <string name="global_action_power_off">"Güç kapalı"</string>
+    <string name="global_action_power_off">"Kapat"</string>
     <string name="global_action_toggle_silent_mode">"Sessiz mod"</string>
     <string name="global_action_silent_mode_on_status">"Ses KAPALI"</string>
     <string name="global_action_silent_mode_off_status">"Ses AÇIK"</string>
-    <!-- no translation found for global_actions_toggle_airplane_mode (5884330306926307456) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_on_status (2719557982608919750) -->
-    <skip />
-    <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
-    <skip />
+    <string name="global_actions_toggle_airplane_mode">"Uçak modu"</string>
+    <string name="global_actions_airplane_mode_on_status">"Uçak modu AÇIK"</string>
+    <string name="global_actions_airplane_mode_off_status">"Uçak modu KAPALI"</string>
     <string name="safeMode">"Güvenli mod"</string>
-    <!-- no translation found for android_system_label (6577375335728551336) -->
-    <skip />
-    <string name="permgrouplab_costMoney">"Para tasarrufu sağlayan servisler"</string>
-    <string name="permgroupdesc_costMoney">"Para tasarrufu sağlayabileceğiniz işlemler yapan uygulamalara izin verir."</string>
+    <string name="android_system_label">"Android Sistemi"</string>
+    <string name="permgrouplab_costMoney">"Size maliyet getiren hizmetler"</string>
+    <string name="permgroupdesc_costMoney">"Uygulamaların size maliyet getirebilecek işlemler yapmasına izin verir."</string>
     <string name="permgrouplab_messages">"Mesajlarınız"</string>
-    <string name="permgroupdesc_messages">"SMS, e-posta ve diğer mesajlarınızı okuyun ve yazın."</string>
+    <string name="permgroupdesc_messages">"SMS mesajlarınızı, e-postanızı ve diğer mesajlarınızı okuyup yazın."</string>
     <string name="permgrouplab_personalInfo">"Kişisel bilgileriniz"</string>
-    <string name="permgroupdesc_personalInfo">"Telefonunuzda saklanan kişilerinize ve takvime doğrudan erişin."</string>
+    <string name="permgroupdesc_personalInfo">"Telefonunuzda saklanan kişilere ve takvime doğrudan erişim."</string>
     <string name="permgrouplab_location">"Konumunuz"</string>
     <string name="permgroupdesc_location">"Fiziksel konumunuzu izleyin"</string>
-    <string name="permgrouplab_network">"Ağ iletişimi"</string>
-    <string name="permgroupdesc_network">"Uygulamalara çeşitli ağ özelliklerine erişme izni verir."</string>
+    <string name="permgrouplab_network">"Şebeke iletişimi"</string>
+    <string name="permgroupdesc_network">"Uygulamaların çeşitli ağ özelliklerine erişmesine izin verir."</string>
     <string name="permgrouplab_accounts">"Google hesaplarınız"</string>
-    <string name="permgroupdesc_accounts">"Mevcut Google hesaplarına erişin."</string>
-    <string name="permgrouplab_hardwareControls">"Donanım kontrolleri"</string>
-    <string name="permgroupdesc_hardwareControls">"Ahizeden donanıma doğrudan erişim."</string>
-    <string name="permgrouplab_phoneCalls">"Aramalar"</string>
-    <string name="permgroupdesc_phoneCalls">"Telefon aramalarını izle, kaydet ve işle."</string>
+    <string name="permgroupdesc_accounts">"Kullanılabilir Google hesaplarına erişin."</string>
+    <string name="permgrouplab_hardwareControls">"Donanım denetimleri"</string>
+    <string name="permgroupdesc_hardwareControls">"Telefon donanımına doğrudan erişim."</string>
+    <string name="permgrouplab_phoneCalls">"Telefon çağrıları"</string>
+    <string name="permgroupdesc_phoneCalls">"Telefon görüşmelerini izleyin, kaydedin ve işleyin."</string>
     <string name="permgrouplab_systemTools">"Sistem araçları"</string>
-    <string name="permgroupdesc_systemTools">"Daha düşük seviyeli sistem erişimi ve kontrolü."</string>
+    <string name="permgroupdesc_systemTools">"Sisteme alt düzey erişim ve denetimi."</string>
     <string name="permgrouplab_developmentTools">"Geliştirme araçları"</string>
-    <string name="permgroupdesc_developmentTools">"Özellikler yalnızca uygulama geliştiricileri için gereklidir."</string>
+    <string name="permgroupdesc_developmentTools">"Yalnızca uygulama geliştiriciler için gerekli özellikler."</string>
     <string name="permlab_statusBar">"durum çubuğunu devre dışı bırak veya değiştir"</string>
-    <string name="permdesc_statusBar">"Uygulamaya durum çubuğunu devre dışı bırakma veya sistem simgeleri ekleyip kaldırma izni verir."</string>
+    <string name="permdesc_statusBar">"Uygulamanın durum çubuğunu devre dışı bırakmasına veya sistem simgeleri ekleyip kaldırmasına izin verir."</string>
     <string name="permlab_expandStatusBar">"durum çubuğunu genişlet/daralt"</string>
-    <string name="permdesc_expandStatusBar">"Uygulamaya durum çubuğunu genişletme veya daraltma izni verir."</string>
-    <string name="permlab_processOutgoingCalls">"giden aramaları kesiştir"</string>
-    <string name="permdesc_processOutgoingCalls">"Uygulamaya giden aramaları işleme ve çevrilecek numarayı değiştirme izni verir. Kötü niyetli uygulamalar giden aramaları izleyebilir, yeniden yönlendirebilir veya engelleyebilir."</string>
+    <string name="permdesc_expandStatusBar">"Uygulamanın, durum çubuğunu genişletip daraltmasına izin verir."</string>
+    <string name="permlab_processOutgoingCalls">"giden aramalarda araya gir"</string>
+    <string name="permdesc_processOutgoingCalls">"Uygulamanın, giden çağrıları işlemesine ve aranacak numarayı değiştirmesine izin verir. Kötü amaçlı uygulamalar giden çağrıları izleyebilir, yönlendirebilir veya engelleyebilir."</string>
     <string name="permlab_receiveSms">"SMS al"</string>
-    <string name="permdesc_receiveSms">"Uygulamaya SMS mesajlarını alma ve işleme izni verir. Kötü niyetli uygulamalar, mesajlarınızı izleyebilir veya size göstermeden silebilir."</string>
+    <string name="permdesc_receiveSms">"Uygulamanın SMS mesajları alıp işlemesine izin verir. Kötü amaçlı uygulamalar mesajlarınızı izleyebilir veya bunları size göstermeden silebilir."</string>
     <string name="permlab_receiveMms">"MMS al"</string>
-    <string name="permdesc_receiveMms">"Uygulamaya SMS mesajlarını alma ve işleme izni verir. Kötü niyetli uygulamalar, mesajlarınızı izleyebilir veya size göstermeden silebilir."</string>
+    <string name="permdesc_receiveMms">"Uygulamanın MMS mesajları almasına ve işlemesine izin verir. Kötü amaçlı uygulamalar mesajlarınızı izleyebilir veya size göstermeden silebilir."</string>
     <string name="permlab_sendSms">"SMS mesajları gönder"</string>
-    <string name="permdesc_sendSms">"Uygulamaya SMS mesajları gönderme izni verir. Kötü niyetli uygulamalar onayınız olmadan mesaj göndererek para kaybetmenize yol açabilir."</string>
+    <string name="permdesc_sendSms">"Uygulamaların SMS mesajları göndermesine izin verir. Kötü amaçlı uygulamalar, onayınızı almadan mesaj göndererek size maliyet çıkarabilir."</string>
     <string name="permlab_readSms">"SMS veya MMS oku"</string>
-    <string name="permdesc_readSms">"Uygulamaya telefonunuzda veya SIM kartınızda saklı SMS mesajlarını okuma izni verir. Kötü niyetli uygulamalar gizli mesajlarınızı okuyabilir."</string>
+    <string name="permdesc_readSms">"Uygulamaların, telefonunuzda veya SIM kartta saklanan SMS mesajlarını okumasına izin verir. Kötü amaçlı uygulamalar gizli mesajlarınızı okuyabilir."</string>
     <string name="permlab_writeSms">"SMS veya MMS düzenle"</string>
-    <string name="permdesc_writeSms">"Uygulamaya telefonunuzda veya SIM kartınızda saklanan SMS mesajlarını yazma izni verir. Kötü niyetli uygulamalar mesajlarınızı silebilir."</string>
+    <string name="permdesc_writeSms">"Uygulamanın telefonunuzda veya SIM kartta saklanan SMS mesajlarına yazmasına izin verir. Kötü amaçlı uygulamalar mesajlarınızı silebilir."</string>
     <string name="permlab_receiveWapPush">"WAP al"</string>
-    <string name="permdesc_receiveWapPush">"Uygulamaya SMS mesajlarını alma ve işleme izni verir. Kötü niyetli uygulamalar, mesajlarınızı izleyebilir veya size göstermeden silebilir."</string>
+    <string name="permdesc_receiveWapPush">"Uygulamanın WAP mesajları alıp işlemesine izin verir. Kötü amaçlı uygulamalar mesajlarınızı izleyebilir veya bunları size göstermeden silebilir."</string>
     <string name="permlab_getTasks">"çalışan uygulamaları al"</string>
-    <string name="permdesc_getTasks">"Uygulamaya çalışmakta olan ve en son çalışan görevler hakkında bilgi alma izni verir. Kötü niyetli uygulamaların diğer uygulamalarla ilgili gizli bilgileri almasına izin verebilir."</string>
-    <string name="permlab_reorderTasks">"çalışan uygulamaları yeniden düzenle"</string>
-    <string name="permdesc_reorderTasks">"Bir uygulamaya görevleri arka plana ve ön plana taşıma izni verir. Kötü niyetli uygulamalar kendilerini kontrolünüz dışında öne atabilirler."</string>
-    <string name="permlab_setDebugApp">"uygulama hatası ayıklamayı etkinleştir"</string>
-    <string name="permdesc_setDebugApp">"Uygulamaya başka bir uygulamada hata ayıklama izni verir. Kötü niyetli uygulamalar diğer uygulamayı kaldırmak için bu özelliği kullanabilir."</string>
-    <string name="permlab_changeConfiguration">"UI ayarlarınızı değiştirin"</string>
-    <string name="permdesc_changeConfiguration">"Uygulamaya kısmi veya tüm yazı tipi boyutu gibi mevcut yapılandırmayı değiştirme izni verir."</string>
+    <string name="permdesc_getTasks">"Uygulamaların şu anda ve yakın geçmişte çalışmakta olan işlemler hakkında bilgi almasına izin verir. Kötü amaçlı uygulamaların diğer uygulamalar ile ilgili gizli bilgileri keşfetmesine izin verebilir."</string>
+    <string name="permlab_reorderTasks">"çalışan uygulamaları yeniden sırala"</string>
+    <string name="permdesc_reorderTasks">"Uygulamaların görevleri ön plana ve arka plana taşımasına izin verir. Kötü amaçlı uygulamalar kendilerini sizin denetiminiz dışında zorla ön plana çıkarabilir."</string>
+    <string name="permlab_setDebugApp">"uygulama hata ayıklamayı etkinleştir"</string>
+    <string name="permdesc_setDebugApp">"Bir uygulamanın başka bir uygulama için hata ayıklamayı çalıştırmasına izin verir. Kötü amaçlı uygulamalar bu işlevi başka uygulamaları kapatmak için kullanabilir."</string>
+    <string name="permlab_changeConfiguration">"kullanıcı arayüzü ayarlarınızı değiştirin"</string>
+    <string name="permdesc_changeConfiguration">"Uygulamaların güncel yapılandırmayı; örneğin yerel ayarı veya genel yazı tipi boyutunu değiştirmesine izin verir."</string>
     <string name="permlab_restartPackages">"diğer uygulamaları yeniden başlat"</string>
-    <string name="permdesc_restartPackages">"Uygulamaya diğer uygulamaları cebri olarak yeniden başlatma izni verir."</string>
+    <string name="permdesc_restartPackages">"Uygulamaların başka uygulamaları zorla yeniden başlatmasına izin verir."</string>
     <string name="permlab_setProcessForeground">"durdurulmasını önle"</string>
-    <string name="permdesc_setProcessForeground">"Uygulamaya herhangi bir işlemi arka planda yapma izni verir, bu nedenle kaldırılamaz. Normal uygulamalar için asla gereksinim duyulmamalıdır."</string>
-    <string name="permlab_forceBack">"uygulamayı cebri olarak kapat"</string>
-    <string name="permdesc_forceBack">"Bir uygulamaya ön planda olan herhangi bir eylemi kapatma ve tekrar açma izni verir. Normal uygulamalar için asla gerekli değildir."</string>
-    <string name="permlab_dump">"sistemin dahili durum bilgilerini al"</string>
-    <string name="permdesc_dump">"Uygulamaya sistemin dahili durum bilgilerini alma izni verir. Kötü niyetli uygulamaların normalde asla gereksinim duymamaları gereken geniş yelpazede özel ve gizli bilgileri almasına neden olabilir."</string>
-    <string name="permlab_addSystemService">"düşük seviyeli hizmetler yayınla"</string>
-    <string name="permdesc_addSystemService">"Uygulamaya kendi düşük seviyeli sistem hizmetlerini yayınlama izni verir. Kötü niyetli uygulamalar sistemi çökertebilir, sistemdeki verileri çalabilir veya bozabilir."</string>
-    <string name="permlab_runSetActivityWatcher">"başlayan tüm uygulamaları izle ve kontrol et"</string>
-    <string name="permdesc_runSetActivityWatcher">"Bir uygulamaya sistemin etkinlikleri nasıl başlattığını izleme ve kontrol etme izni verir. Kötü niyetli uygulamalar sistemi tamamen aşabilir. Bu izin yalnızca geliştirme için gereklidir, kesinlikle normal telefon kullanımı için değildir."</string>
-    <string name="permlab_broadcastPackageRemoved">"paketi kaldırılmış yayınları gönder"</string>
-    <string name="permdesc_broadcastPackageRemoved">"Bir uygulamaya uygulama paketinin kaldırıldığı bildirimini yayınlama izni verir. Kötü niyetli uygulamalar çalışan diğer uygulamaları kaldırmak için bunu kullanabilir."</string>
-    <string name="permlab_broadcastSmsReceived">"SMS alınan yayınları gönder"</string>
-    <string name="permdesc_broadcastSmsReceived">"Bir uygulamaya SMS mesajı alındı bildirisi yayınlama izni verir. Kötü niyetli uygulamalar gelen SMS mesajları uydurmak için bunu kullanabilir."</string>
-    <string name="permlab_broadcastWapPush">"WAP-PUSH ile alınan yayınları gönder"</string>
-    <string name="permdesc_broadcastWapPush">"Bir uygulamaya bir WAP mesajı alındı bildirimi yayınlama izni verir. Kötü niyetli uygulamalar bunu MMS mesajı alındısı uydurmak veya herhangi bir web sitesinin içeriğini kötü niyetli değişkenlerle değiştirmek için kullanabilir."</string>
-    <string name="permlab_setProcessLimit">"çalışan işlemlerin sayısını sınırla"</string>
-    <string name="permdesc_setProcessLimit">"Bir uygulamaya, çalışacak maksimum sayıda işlemi kontrol etme izni verir. Normal uygulamalar için asla gerekli değildir."</string>
-    <string name="permlab_setAlwaysFinish">"tüm arka plan uygulamalarını kapat"</string>
-    <string name="permdesc_setAlwaysFinish">"Bir uygulamaya etkinliklerin arka plana gider gitmez bitirilip bitirilmediğini sürekli kontrol etme izni verir."</string>
+    <string name="permdesc_setProcessForeground">"Uygulamaların herhangi bir işlemi ön planda çalıştırmasına izin verir; böylece işlem kapatılamaz. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
+    <string name="permlab_forceBack">"uygulamayı kapanmaya zorla"</string>
+    <string name="permdesc_forceBack">"Uygulamaların, ön plandaki herhangi bir etkinliği kapanmaya ve arka plana geçmeye zorlamasına izin verir. Normal uygulamalarda hiçbir zaman gerekmemelidir."</string>
+    <string name="permlab_dump">"sistemin dahili durumunu al"</string>
+    <string name="permdesc_dump">"Uygulamanın dahili sistem durumunu almasına izin verir. Kötü amaçlı uygulamalar, normalde gerekli olmaması gereken çok çeşitli özel ve koruma altındaki bilgiyi alabilir."</string>
+    <string name="permlab_addSystemService">"alt düzey hizmetleri yayımla"</string>
+    <string name="permdesc_addSystemService">"Uygulamaların kendi düşük düzey sistem hizmetlerini yayımlamasına izin verir. Kötü amaçlı uygulamalar sistemi ele geçirip üzerindeki verileri çalabilir veya bozabilir."</string>
+    <string name="permlab_runSetActivityWatcher">"tüm uygulama başlatma işlemlerini izle ve denetle"</string>
+    <string name="permdesc_runSetActivityWatcher">"Uygulamaların, sistemin etkinlikleri nasıl başlattığını izlemesine ve denetlemesine izin verir. Kötü amaçlı uygulamalar sistemin güvenliğini tamamen tehlikeye atabilir. Bu izin yalnızca program geliştirme amacıyla gereklidir, normal telefon kullanımı için gerekli değildir."</string>
+    <string name="permlab_broadcastPackageRemoved">"paket ile kaldırılan yayını gönder"</string>
+    <string name="permdesc_broadcastPackageRemoved">"Uygulamaların bir uygulama paketinin kaldırıldığında dair bir bildirim yayınlamasına izin verir. Kötü amaçlı uygulamalar bunu çalışan diğer herhangi bir uygulamayı kapatmak için kullanabilir."</string>
+    <string name="permlab_broadcastSmsReceived">"SMS ile alınan yayın gönder"</string>
+    <string name="permdesc_broadcastSmsReceived">"Uygulamaların bir SMS mesajı alındığında dair bir bildirim yayınlamasına izin verir. Kötü amaçlı uygulamalar bu işlevi telefona sahte SMS mesajları göndermek için kullanabilir."</string>
+    <string name="permlab_broadcastWapPush">"WAP-PUSH ile alınan yayın gönder"</string>
+    <string name="permdesc_broadcastWapPush">"Uygulamaların, WAP PUSH mesajının alındığına dair bildirim yayınlamasına izin verir. Kötü amaçlı uygulamalar bu işlevi, sahte MMS alındıları göndermek veya bir web sayfasını sessizce kötü amaçla tasarlanmış başkaları ile değiştirmek için kullanabilir."</string>
+    <string name="permlab_setProcessLimit">"çalışan işlem sayısını sınırla"</string>
+    <string name="permdesc_setProcessLimit">"Uygulamaların, çalışacak maksimum işlem sayısını denetlemesine izin verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
+    <string name="permlab_setAlwaysFinish">"tüm arka plan uygulamaları kapat"</string>
+    <string name="permdesc_setAlwaysFinish">"Uygulamaların, etkinliklerin arka planda daima tamamlanıp tamamlanmadığını denetlemesine izin verir. Normal uygulamalar için hiçbir zaman gerekli değildir."</string>
     <string name="permlab_fotaUpdate">"sistem güncellemelerini otomatik olarak yükle"</string>
-    <string name="permdesc_fotaUpdate">"Bir uygulamaya bekleyen sistem güncellemeleri ile ilgili bilgileri alma ve güncellemelerin yüklenmesini başlatma izni verir. Kötü niyetli uygulamalar bunu yetkisiz güncellemelerle sistemi bozmak ya da genellikle güncelleme işlemini bozmak için kullanabilirler."</string>
+    <string name="permdesc_fotaUpdate">"Uygulamaların bekleyen sistem güncellemeleri ile ilgili bildirimler almasına ve bunları tetiklemesine izin verir. Kötü amaçlı uygulamalar bu işlevi yetkisiz güncellemeler ile bozmak veya genel olarak güncelleme işleminde araya girmek için kullanabilir."</string>
     <string name="permlab_batteryStats">"pil istatistiklerini değiştir"</string>
-    <string name="permdesc_batteryStats">"Toplanan pil istatistiklerini değiştirme izni verir. Normal uygulamalarla kullanım için değildir."</string>
+    <string name="permdesc_batteryStats">"Toplanan pil istatistiklerinin değiştirilmesine izin verir. Normal uygulamalarda kullanılmamalıdır."</string>
     <string name="permlab_internalSystemWindow">"yetkisiz pencereleri görüntüle"</string>
-    <string name="permdesc_internalSystemWindow">"Dahili sistem kullanıcı arayüzü ile birlikte kullanılması tasarlanan pencerelerin oluşturulmasına izin verir. Normal uygulamalarla kullanım için değildir."</string>
-    <string name="permlab_systemAlertWindow">"sistem seviyesindeki uyarıları görüntüle"</string>
-    <string name="permdesc_systemAlertWindow">"Bir uygulamaya sistem uyarı pencerelerini gösterme izni verir. Kötü niyetli uygulamalar telefonun tüm ekranını ele geçirebilir."</string>
-    <string name="permlab_setAnimationScale">"global animasyon hızını değiştir"</string>
-    <string name="permdesc_setAnimationScale">"Bir uygulamaya global animasyon hızını (animasyonları hızlandırmak ve yavaşlatmak için) herhangi bir anda değiştirme izni verir."</string>
-    <string name="permlab_manageAppTokens">"uygulama belirteçlerini yönet"</string>
-    <string name="permdesc_manageAppTokens">"Uygulamalara normal Z-düzenini geçerek kendi belirteçlerini oluşturma ve yönetme izni verir. Normal uygulamalar için asla gereksinim duyulmamalıdır."</string>
-    <string name="permlab_injectEvents">"basmalı tuşlar ve kontrol düğmeleri"</string>
-    <string name="permdesc_injectEvents">"Bir uygulamaya kendi giriş etkinliklerini başka uygulamalara dağıtma izni verir (basılan tuşlar, v.b). Kötü niyetli uygulamalar bunu telefonu ele geçirmek için kullanabilir."</string>
-    <string name="permlab_readInputState">"yazdığınızı ve yaptığınız eylemleri kaydeder"</string>
-    <string name="permdesc_readInputState">"Uygulamalara başka bir uygulama ile etkileşim halindeyken bastığınız tuşları (örneğin girilen şifreleri) izleme izni verir. Normal uygulamalar için kesinlikle gereksinim duyulmamalıdır."</string>
-    <string name="permlab_bindInputMethod">"bir giriş yönetimini bağla"</string>
-    <string name="permdesc_bindInputMethod">"Kullanıcının bir giriş yönteminin en üst düzey arayüzüne bağlanmasına izin verir. Normal uygulamalarla kullanım için değildir."</string>
-    <string name="permlab_setOrientation">"ekran yönlendirmesini değiştir"</string>
-    <string name="permdesc_setOrientation">"Bir uygulamaya herhangi bir anda ekran yönünü değiştirme izni verir. Normal uygulamalar için asla gereksinim duyulmamalıdır."</string>
+    <string name="permdesc_internalSystemWindow">"Dahili sistem kullanıcı arayüzü tarafından kullanılmak üzere tasarlanmış pencerelerin oluşturulmasına izin verir. Normal uygulamalarda kullanılmaz."</string>
+    <string name="permlab_systemAlertWindow">"sistem düzeyi uyarıları görüntüle"</string>
+    <string name="permdesc_systemAlertWindow">"Uygulamaların sistem uyarı pencereleri göstermesine izin verir. Kötü amaçlı uygulamalar telefonun tüm ekranını işgal edebilir."</string>
+    <string name="permlab_setAnimationScale">"genel animasyon hızını değiştir"</string>
+    <string name="permdesc_setAnimationScale">"Uygulamaların, istedikleri zaman genel animasyon hızını değiştirmesine (animasyonları hızlandırmasına veya yavaşlatmasına) izin verir."</string>
+    <string name="permlab_manageAppTokens">"uygulama simgelerini yönet"</string>
+    <string name="permdesc_manageAppTokens">"Uygulamaların, kendi normal Z sıralamalarını atlayarak kendi simgelerini oluşturup yönetmelerine izin verir. Normal uygulamalar için hiçbir zaman gerekli olmamalıdır."</string>
+    <string name="permlab_injectEvents">"tuşlara bas ve düğmeleri denetle"</string>
+    <string name="permdesc_injectEvents">"Uygulamaların kendi giriş işlemlerini (tuşa basma vb.) başka uygulamalara göndermesine izin verir. Kötü amaçlı uygulamalar bunu telefonun denetimini ele geçirmek için kullanabilir."</string>
+    <string name="permlab_readInputState">"yazdıklarınızı ve yaptığınız işlemleri kaydedin"</string>
+    <string name="permdesc_readInputState">"Uygulamaların, başka bir uygulama ile etkileşim halindeyken (örneğin bir şifre girerken) bile bastığınız tuşları izlemesine izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
+    <string name="permlab_bindInputMethod">"bir giriş yöntemine bağla"</string>
+    <string name="permdesc_bindInputMethod">"Tutucunun bir giriş yönteminin en üst düzey arayüzüne bağlanmasına izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
+    <string name="permlab_setOrientation">"ekran yönünü değiştir"</string>
+    <string name="permdesc_setOrientation">"Uygulamaların ekran yönünü istedikleri zaman değiştirmesine izin verir. Normal uygulamalarda hiçbir zaman gerekmemelidir."</string>
     <string name="permlab_signalPersistentProcesses">"uygulamalara Linux sinyalleri gönder"</string>
-    <string name="permdesc_signalPersistentProcesses">"Uygulamaya, sağlanan sinyalin devam eden tüm işlemlere gönderilmesini isteme etme izni verir."</string>
-    <string name="permlab_persistentActivity">"uygulamayı daima çalışır durumda tut"</string>
-    <string name="permdesc_persistentActivity">"Bir uygulamaya kendi parçalarını kalıcı yapma izni verir, böylece sistem bu uygulamayı diğer uygulamalar için kullanamaz."</string>
+    <string name="permdesc_signalPersistentProcesses">"Uygulamaların, sağlanan sinyalin tüm kalıcı işlemlere gönderilmesini istemesine izin verir."</string>
+    <string name="permlab_persistentActivity">"uygulamayı her zaman çalıştır"</string>
+    <string name="permdesc_persistentActivity">"Uygulamaların, sistemin başka uygulamalarda kullanamaması için kendi parçalarını kalıcı kılmasına izin verir."</string>
     <string name="permlab_deletePackages">"uygulamaları sil"</string>
-    <string name="permdesc_deletePackages">"Bir uygulamaya Android paketlerini silme izni verir. Kötü niyetli uygulamalar bunu önemli uygulamaları silmek için kullanabilir."</string>
+    <string name="permdesc_deletePackages">"Uygulamaların Android paketlerini silmesine izin verir. Kötü amaçlı uygulamalar bu işlevi önemli uygulamaları silmek için kullanabilir."</string>
     <string name="permlab_clearAppUserData">"diğer uygulamaların verilerini sil"</string>
-    <string name="permdesc_clearAppUserData">"Bir uygulamaya kullanıcı verilerini silme izni verir."</string>
-    <string name="permlab_deleteCacheFiles">"diğer uygulamaların ön belleklerini sil"</string>
-    <string name="permdesc_deleteCacheFiles">"Bir uygulamaya önbellek dosyalarını silme izni verir."</string>
-    <string name="permlab_getPackageSize">"uygulamanın saklama alanını ölç"</string>
-    <string name="permdesc_getPackageSize">"Bir uygulamaya kendi kodunu, verilerini ve önbellek boyutlarını alma izni verir."</string>
-    <string name="permlab_installPackages">"uygulamaları doğrudan yükle"</string>
-    <string name="permdesc_installPackages">"Bir uygulamaya yeni veya güncellenmiş Android paketlerini yükleme izni verir. Kötü niyetli uygulamalar bunu isteğe bağlı güçlü izinlere sahip yeni uygulamaları eklemek için kullanabilir."</string>
-    <string name="permlab_clearAppCache">"tüm uygulamaların ön bellek verilerini sil"</string>
-    <string name="permdesc_clearAppCache">"Bir uygulamaya telefonun saklama alanını önbellek dizini içerisindeki dosyaları silerek boşaltma izni verir. Sistem işlemlerine erişim genellikle çok kısıtlıdır."</string>
-    <string name="permlab_readLogs">"sistem kayıt dosyalarını oku"</string>
-    <string name="permdesc_readLogs">"Bir uygulamaya sistemin çeşitli kayıt dosyalarını okuma izni verir. Bu, telefonla ne yaptığınız hakkında genel bilgiler edinilmesine olanak verir ancak bu bilgiler bazı kişisel ve özel bilgiler içerebilir."</string>
-    <string name="permlab_diagnostic">"iletişim grubuna ait kaynakları oku/yaz"</string>
-    <string name="permdesc_diagnostic">"Bir uygulamaya iletişim grubuna ait herhangi bir kaynaktan okuma ve yazma izni verir; ör. cihazdaki dosyalar. Bu özellik sistem kararlılığını ve güvenilirliğini potansiyel olarak etkileyebilir. YALNIZCA üretici veya operatör tarafından donanıma özgü tanılama için kullanılmalıdır."</string>
+    <string name="permdesc_clearAppUserData">"Uygulamaların kullanıcı verilerini temizlemesine izin verir."</string>
+    <string name="permlab_deleteCacheFiles">"diğer uygulamaların önbelleklerini sil"</string>
+    <string name="permdesc_deleteCacheFiles">"Uygulamaların önbellek dosyalarını silmesine izin verir."</string>
+    <string name="permlab_getPackageSize">"uygulama depolama alanını ölç"</string>
+    <string name="permdesc_getPackageSize">"Uygulamanın kodunu, verilerini ve önbellek boyutunu almasına izin verir"</string>
+    <string name="permlab_installPackages">"doğrudan uygulama yükle"</string>
+    <string name="permdesc_installPackages">"Uygulamaların yeni veya güncellenmiş Android paketleri yüklemesine izin verir. Kötü amaçlı uygulamalar bunu, kendilerine verilen izin derecesi keyfi olarak değişen yeni uygulamalar eklemek için kullanabilir."</string>
+    <string name="permlab_clearAppCache">"tüm uygulama önbelleği verilerini sil"</string>
+    <string name="permdesc_clearAppCache">"Uygulamaların uygulama önbelleği dizinindeki dosyaları silerek telefonda yer açmasına izin verir. Erişim genellikle sistem işlemlerine ve yüksek düzeyde kısıtlı olarak verilir."</string>
+    <string name="permlab_readLogs">"sistem günlük dosyalarını oku"</string>
+    <string name="permdesc_readLogs">"Uygulamaların sistemin çeşitli günlük dosyalarından okumalarına izin verir. Bu, uygulamaların telefon ile neler yaptığınız ile ilgili genel bilgi bulmasına izin verir, ancak bunlar kişisel veya özel bir bilgi içermemelidir."</string>
+    <string name="permlab_diagnostic">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
+    <string name="permdesc_diagnostic">"Uygulamanın tanılama grubundaki bir kaynağa ait herhangi bir kaynağı; örneğin /dev içindeki dosyaları okumasına ve bunlara yazmasına izin verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
     <string name="permlab_changeComponentState">"uygulama bileşenlerini etkinleştir veya devre dışı bırak"</string>
-    <string name="permdesc_changeComponentState">"Bir uygulamaya başka bir uygulamanın bileşenlerinin etkin olup olmama durumunu değiştirme izni verir. Kötü niyetli uygulamalar bunu önemli telefon olanaklarını devre dışı bırakmak için kullanabilir. Uygulama bileşenlerinin kullanılmaz, uyumsuz veya kararsız duruma gelme ihtimali olduğu için bu izinle birlikte dikkatli olunmalıdır."</string>
+    <string name="permdesc_changeComponentState">"Uygulamaların başka bir uygulamanın bir bileşenini etkinleştirme ayarını değiştirmesine izin verir. Kötü amaçlı uygulamalar bu ayarı telefonun önemli yeteneklerini devre dışı bırakmak için kullanabilir. Bu iznin verilmesi uygulama bileşenlerini kullanılamaz, tutarsız veya kararsız bir duruma sokabileceği için izin verilirken dikkatli olunmalıdır."</string>
     <string name="permlab_setPreferredApplications">"tercih edilen uygulamaları ayarla"</string>
-    <string name="permdesc_setPreferredApplications">"Bir uygulamaya tercih ettiğiniz uygulamaları değiştirme izni verir. Bu, kötü niyetli uygulamaların çalışan uygulamaları sessizce değiştirmesine ve gizli verilerinizi sizden almak için mevcut uygulamalarınızı yanıltmasına olanak verebilir."</string>
-    <string name="permlab_writeSettings">"global sistem ayarlarını değiştir"</string>
-    <string name="permdesc_writeSettings">"Bir uygulamaya sistemin ayar verilerini değiştirme izni verir. Kötü niyetli uygulamalar sistem yapılandırmanızı bozabilir."</string>
+    <string name="permdesc_setPreferredApplications">"Uygulamanın tercih ettiğiniz uygulamaları değiştirmesine izin verir. Bu işlem, kötü amaçlı uygulamaların, çalışmakta olan uygulamaları sessizce değiştirerek mevcut uygulamalarınızı aldatıp kişisel bilgilerinizi almasına izin verebilir."</string>
+    <string name="permlab_writeSettings">"genel sistem ayarlarını değiştir"</string>
+    <string name="permdesc_writeSettings">"Uygulamaların sistem ayar verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar sisteminizin yapılandırmasını bozabilir."</string>
     <string name="permlab_writeSecureSettings">"güvenli sistem ayarlarını değiştir"</string>
-    <string name="permdesc_writeSecureSettings">"Bir uygulamaya sistemin güvenli verilerini değiştirme izini verir. Normal uygulamalarla kullanım için değildir."</string>
-    <string name="permlab_writeGservices">"Google servis haritasını değiştir"</string>
-    <string name="permdesc_writeGservices">"Bir uygulamaya Google servis haritasını değiştirme izini verir. Normal uygulamalarla kullanım için değildir."</string>
-    <string name="permlab_receiveBootCompleted">"başlangıçta otomatik olarak başlat"</string>
-    <string name="permdesc_receiveBootCompleted">"Bir uygulamaya sistemin başlaması tamamlanır tamamlamaz kendini başlatma izni verir. Bu, telefonun başlamasının daha uzun sürmesine ve uygulamanın sürekli çalışarak tüm telefonu yavaşlatmasına neden olabilir."</string>
-    <string name="permlab_broadcastSticky">"yapışkan yayınlar gönder"</string>
-    <string name="permdesc_broadcastSticky">"Bir uygulamaya yayın sona erdikten sonra da devam eden yapışkan yayınlar gönderme izni verir. Kötü niyetli uygulamalar telefonu yavaşlatabilir veya çok fazla hafıza kullanarak dengesiz hale gelmesine neden olabilir."</string>
+    <string name="permdesc_writeSecureSettings">"Uygulamaların sistemin güvenlik ayarları verilerini değiştirmesine izin verir. Normal uygulamalarda kullanılmaz."</string>
+    <string name="permlab_writeGservices">"Google hizmetler haritasını değiştir"</string>
+    <string name="permdesc_writeGservices">"Uygulamanın, Google hizmetleri haritasını değiştirmesine izin verir. Normal uygulamalarda kullanılmaz."</string>
+    <string name="permlab_receiveBootCompleted">"açılışta otomatik başlat"</string>
+    <string name="permdesc_receiveBootCompleted">"Uygulamaların, sistem açıldıktan hemen sonra kendini başlatmasına izin verir. Bu işlev, telefonu başlatma süresini uzatabilir ve uygulama, sürekli çalışması nedeniyle telefonun çalışmasını genel olarak yavaşlatabilir."</string>
+    <string name="permlab_broadcastSticky">"sabit yayın gönder"</string>
+    <string name="permdesc_broadcastSticky">"Uygulamaların yayın bittikten sonra da kalan sabit yayınlar göndermesine izin verir. Kötü amaçlı uygulamalar telefonun aşırı miktarda bellek kullanmasına neden olarak telefonu yavaşlatabilir veya telefonun kararsız hale gelmesine neden olabilir."</string>
     <string name="permlab_readContacts">"kişi verilerini oku"</string>
-    <string name="permdesc_readContacts">"Bir uygulamaya telefonunuza kayıtlı kişi (adres) verilerinin tümünü okuma izni verir. Kötü niyetli uygulamalar verilerinizi başkalarına göndermek için bunu kullanabilir."</string>
-    <string name="permlab_writeContacts">"kişi verilerini yaz"</string>
-    <string name="permdesc_writeContacts">"Bir uygulamaya telefonunuzda saklanan kişi (adres) verilerini değiştirme izni verir. Kötü niyetli uygulamalar bunu kişi verilerinizi silmek veya değiştirmek için kullanabilir."</string>
-    <string name="permlab_writeOwnerData">"telefon sahibi verilerini yaz"</string>
-    <string name="permdesc_writeOwnerData">"Bir uygulamaya telefonunuzda saklı telefon sahibi verilerini değiştirme izni verir. Kötü niyetli uygulamalar bunu telefon sahibinin verilerini silmek veya değiştirmek için kullanabilir."</string>
-    <string name="permlab_readOwnerData">"telefon sahibinin verilerini oku"</string>
-    <string name="permdesc_readOwnerData">"Bir uygulamaya telefonunuzda saklı telefon sahibi verilerini okuma izni verir. Kötü niyetli uygulamalar bunu telefon sahibinin verilerini okumak için kullanabilir."</string>
+    <string name="permdesc_readContacts">"Uygulamaların telefonunuzda saklanan tüm kişi (adres) verilerini okumasına izin verir. Kötü amaçlı uygulamalar bu işlevi verilerinizi başkalarına göndermek için kullanabilir."</string>
+    <string name="permlab_writeContacts">"kişi verileri yaz"</string>
+    <string name="permdesc_writeContacts">"Uygulamaların telefonunuzda saklanan kişi (adres) verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar bu işlevi kişi verilerinizi silmek veya değiştirmek için kullanabilir."</string>
+    <string name="permlab_writeOwnerData">"sahip verilerini yaz"</string>
+    <string name="permdesc_writeOwnerData">"Uygulamaların telefonunuzda saklanan telefon sahibi verilerini değiştirmesine izin verir. Kötü amaçlı uygulamalar bu işlevi kullanıcı verilerini silmek veya değiştirmek için kullanabilir."</string>
+    <string name="permlab_readOwnerData">"sahip verilerini oku"</string>
+    <string name="permdesc_readOwnerData">"Uygulamaların telefonunuzda saklanan telefon sahibi verilerini okumasına izin verir. Kötü amaçlı uygulamalar bunu telefon sahibi verilerini okumak için kullanabilir."</string>
     <string name="permlab_readCalendar">"takvim verilerini oku"</string>
-    <string name="permdesc_readCalendar">"Bir uygulamaya telefonunuzda saklanmış olan tüm takvim etkinliklerini okuma izni verir. Kötü niyetli uygulamalar takvim etkinliklerinizi diğer insanlara göndermek için bu özelliği kullanabilirler."</string>
+    <string name="permdesc_readCalendar">"Uygulamaların telefonunuzda saklanan takvim etkinliklerinin tümünü okumasına izin verir. Kötü amaçlı uygulamalar bunu, takvim etkinliklerinizi başkalarına göndermek için kullanabilir."</string>
     <string name="permlab_writeCalendar">"takvim verilerini yaz"</string>
-    <string name="permdesc_writeCalendar">"Bir uygulamaya telefonunuzda saklanan takvim etkinliklerini değiştirme izni verir. Kötü niyetli uygulamalar bunu takvim verilerinizi silmek veya değiştirmek için kullanabilir."</string>
-    <string name="permlab_accessMockLocation">"test için konum kaynaklarını taklit et"</string>
-    <string name="permdesc_accessMockLocation">"Test için taklit konum kaynakları oluşturun. Kötü niyetli uygulamalar bunu, GPS veya Ağ sağlayıcılar tarafından geri döndürülen konumu ve/veya durumu geçersiz kılmak için kullanabilir."</string>
-    <string name="permlab_accessLocationExtraCommands">"konum sağlayıcı komutlarının daha fazlasına erişin"</string>
-    <string name="permdesc_accessLocationExtraCommands">"Konum sağlayıcı komutlarının daha fazlasına erişir. Kötü niyetli uygulamalar bunu GPS veya diğer konum kaynaklarını bozmak için kullanabilirler."</string>
-    <string name="permlab_accessFineLocation">"konumu (GPS) hassaslaştır"</string>
-    <string name="permdesc_accessFineLocation">"Varsa, telefondaki Global Konumlama Sistemi gibi ayarlı konum kaynaklarına erişir. Kötü niyetli uygulamalar bunu nerede olduğunuzu belirlemek için kullanabilir ve pilin daha fazla harcanmasına neden olabilirler."</string>
-    <string name="permlab_accessCoarseLocation">"yaklaşık (ağa bağlı) konum"</string>
-    <string name="permdesc_accessCoarseLocation">"Mümkün olduğunda, yaklaşık telefon konumunu belirlemek üzere cep telefonu ağı veri tabanı gibi yaklaşık konum kaynaklarına erişir. Kötü uygulamalar nerede olduğunuzu yaklaşık olarak belirlemek için bu özelliği kullanabilir."</string>
-    <string name="permlab_accessSurfaceFlinger">"SurfaceFlinger\'e eriş"</string>
-    <string name="permdesc_accessSurfaceFlinger">"Uygulamalara düşük seviyeli SurfaceFlinger özelliklerini kullanma izni verir."</string>
-    <string name="permlab_readFrameBuffer">"çerçeve ara belleği oku"</string>
-    <string name="permdesc_readFrameBuffer">"Uygulamaya çerçeve ara belleğin içeriğinden okunan verileri kullanma izni verir."</string>
+    <string name="permdesc_writeCalendar">"Uygulamaların telefonunuzda saklanan takvim etkinliklerini değiştirmesine izin verir. Kötü amaçlı uygulamaları bunu takvim verilerinizi silmek veya değiştirmek için kullanabilir."</string>
+    <string name="permlab_accessMockLocation">"test için sahte konum kaynakları"</string>
+    <string name="permdesc_accessMockLocation">"Test amacıyla sahte konum kaynakları oluşturur. Kötü amaçlı uygulamalar bu işlevi GPS veya Ağ Hizmeti sağlayıcılar gibi gerçek kaynaklardan gelen konum ve/veya durum bilgilerini geçersiz kılmak için kullanabilir."</string>
+    <string name="permlab_accessLocationExtraCommands">"ek konum sağlayıcı komutlarına eriş"</string>
+    <string name="permdesc_accessLocationExtraCommands">"Ek konum sağlayıcı komutlarına erişin. Kötü amaçlı uygulamalar bu işlevi GPS veya diğer konum kaynaklarının işleyişine müdahale etmek için kullanabilir."</string>
+    <string name="permlab_accessFineLocation">"iyi (GPS) konum"</string>
+    <string name="permdesc_accessFineLocation">"Bulunduğu yerlerde telefondan Küresel Konumlandırma Sistemi gibi hassas konum bulma kaynaklarına erişin. Kötü amaçlı uygulamalar bu işlevi bulunduğunuz yeri belirlemek için kullanabilir ve ek pil gücü tüketebilir."</string>
+    <string name="permlab_accessCoarseLocation">"kesinliksiz (ağ tabanlı) konum"</string>
+    <string name="permdesc_accessCoarseLocation">"Telefonun yaklaşık yerini belirlemek için bulunduğu yerlerde hücresel şebeke veritabanı gibi tahmini konum kaynaklarına erişir. Kötü amaçlı uygulamalar, bu işlevi bulunduğunuz yeri yaklaşık olarak belirlemek için kullanabilir."</string>
+    <string name="permlab_accessSurfaceFlinger">"SurfaceFlinger\'a eriş"</string>
+    <string name="permdesc_accessSurfaceFlinger">"Uygulamanın SurfaceFlinger alt düzey özelliklerini kullanmasına izin verir."</string>
+    <string name="permlab_readFrameBuffer">"çerçeve arabelleğini oku"</string>
+    <string name="permdesc_readFrameBuffer">"Kullanılacak uygulamanın çerçeve arabelleğinin içeriğini okumasına izin verir."</string>
     <string name="permlab_modifyAudioSettings">"ses ayarlarınızı değiştirin"</string>
-    <string name="permdesc_modifyAudioSettings">"Uygulamaya ses düzeyi ve yönlendirme gibi global ses ayarlarını değiştirme izni verir."</string>
+    <string name="permdesc_modifyAudioSettings">"Uygulamaların, ses düzeyi ve yönlendirme gibi genel ses ayarlarını değiştirmesine izin verir."</string>
     <string name="permlab_recordAudio">"ses kaydet"</string>
-    <string name="permdesc_recordAudio">"Uygulamaya ses kayıt yoluna erişme izni verir."</string>
+    <string name="permdesc_recordAudio">"Uygulamanın, ses kayıt yoluna erişmesine izin verir."</string>
     <string name="permlab_camera">"resim çek"</string>
-    <string name="permdesc_camera">"Uygulamaya kamera ile resim çekme izni verir. Bu, herhangi bir anda kameranın resimler çekmesi için uygulamaya izin verir."</string>
-    <string name="permlab_brick">"telefonu kalıcı olarak devre dışı bırak"</string>
-    <string name="permdesc_brick">"Uygulamaya telefonu tamamen devre dışı bırakma izni verir. Bu çok tehlikelidir."</string>
-    <string name="permlab_reboot">"telefonu cebri olarak yeniden başlatın"</string>
-    <string name="permdesc_reboot">"Uygulamaya telefonu cebri olarak yeniden başlatma izni verir."</string>
-    <string name="permlab_mount_unmount_filesystems">"dosya sistemlerini bağla ve ayır"</string>
-    <string name="permdesc_mount_unmount_filesystems">"Uygulamaya çıkarılabilir saklama alanı için dosya sistemlerini bağlama ve ayırma izni verir."</string>
-    <!-- no translation found for permlab_mount_format_filesystems (5523285143576718981) -->
-    <skip />
-    <!-- no translation found for permdesc_mount_format_filesystems (574060044906047386) -->
-    <skip />
-    <string name="permlab_vibrate">"titreştiriciyi kontrol et"</string>
-    <string name="permdesc_vibrate">"Uygulamaya titreştiriciyi kontrol etme izni verir."</string>
-    <string name="permlab_flashlight">"flaş lambasını kontrol et"</string>
-    <string name="permdesc_flashlight">"Uygulamaya flaş lambasını kontrol etme izni verir."</string>
+    <string name="permdesc_camera">"Uygulamaların kamera ile resim çekmesine izin verir. Bu işlev herhangi bir zamanda kameranın görmekte olduğu görüntüyü uygulamaların toplamasına izin verir."</string>
+    <string name="permlab_brick">"telefonu tamamen devre dışı bırak"</string>
+    <string name="permdesc_brick">"Uygulamaların tüm telefonu kalıcı olarak devre dışı bırakmasına izin verir. Bu çok tehlikelidir."</string>
+    <string name="permlab_reboot">"telefonu yeniden başlamaya zorla"</string>
+    <string name="permdesc_reboot">"Uygulamanın telefonu yeniden açılmaya zorlamasına izin verir."</string>
+    <string name="permlab_mount_unmount_filesystems">"dosya sistemlerini bağlama ve bağlantısını kesme"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Uygulamaların çıkarılabilir depolama birimleri için dosya sistemleri ile bağlantı kurmasına ve bağlantıyı kesmesine izin verir."</string>
+    <string name="permlab_mount_format_filesystems">"harici saklama birimini biçimlendir"</string>
+    <string name="permdesc_mount_format_filesystems">"Uygulamanın çıkarılabilir depolama birimini biçimlendirmesine izin verir."</string>
+    <string name="permlab_vibrate">"titreşimi denetle"</string>
+    <string name="permdesc_vibrate">"Uygulamanın titreşimi denetlemesine izin verir."</string>
+    <string name="permlab_flashlight">"flaşı denetle"</string>
+    <string name="permdesc_flashlight">"Uygulamaların flaş ışığını denetlemesine izin verir."</string>
     <string name="permlab_hardware_test">"donanımı test et"</string>
-    <string name="permdesc_hardware_test">"Uygulamaya donanım testi amacıyla çeşitli aygıtları kontrol etme izni verir."</string>
+    <string name="permdesc_hardware_test">"Uygulamanın donanım testi için çeşitli çevre birimlerini denetlemesine izin verir."</string>
     <string name="permlab_callPhone">"telefon numaralarını doğrudan ara"</string>
-    <string name="permdesc_callPhone">"Uygulamaya telefon numaralarını herhangi bir müdahalede bulunmaksızın arama izni verir. Kötü niyetli uygulamalar faturanıza beklenmedik arama bedelleri yazdırabilir. Bunun, uygulamaya acil durum numaralarını araması için izin vermediğini aklınızda bulundurun."</string>
+    <string name="permdesc_callPhone">"Uygulamanın müdahaleniz olmadan telefon numaralarını aramasına izin verir. Kötü amaçlı uygulamalar, telefon faturanızda beklenmedik görüşmeler çıkmasına neden olabilir. Bu işlev, uygulamanın acil numara aramasına izin vermez."</string>
     <string name="permlab_callPrivileged">"herhangi bir telefon numarasını doğrudan ara"</string>
-    <string name="permdesc_callPrivileged">"Uygulamaya acil durum numaralarını da içeren herhangi bir telefon numarasını hiç bir müdahalede bulunmadan arama izni verir. Kötü niyetli uygulamalar acil durum servislerini gereksiz yere ve yasadışı olarak arayabilir."</string>
-    <string name="permlab_locationUpdates">"konum güncelleme bildirimlerini kontrol et"</string>
-    <string name="permdesc_locationUpdates">"Konum güncelleme bildirimlerinin radyodan etkinleştirilmesine/devre dışı bırakılmasına izin verir. Normal uygulamalarla kullanım için değildir."</string>
-    <string name="permlab_checkinProperties">"kayıt özelliklerine eriş"</string>
-    <string name="permdesc_checkinProperties">"Kayıt servisi tarafından karşıya yüklenen özelliklerin okuma/yazma erişimine izin verir. Normal uygulamalarda kullanım için değildir."</string>
-    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
-    <skip />
-    <!-- no translation found for permdesc_bindGadget (2098697834497452046) -->
-    <skip />
-    <string name="permlab_modifyPhoneState">"Telefon durumunu değiştir"</string>
-    <string name="permdesc_modifyPhoneState">"Uygulamaya cihazın telefon özelliklerini kontrol etme izni verir. Bu izne sahip bir uygulama size bildirmeden ağlar arasında geçiş yapabilir, radyoyu açıp kapatabilir ve buna benzer işlemler yapabilir."</string>
+    <string name="permdesc_callPrivileged">"Uygulamanın, siz müdahale etmeden acil numaralar dahil herhangi bir numarayı aramasına izin verir. Kötü amaçlı uygulamalar acil servisleri gereksiz yere ve yasal olmayan şekilde arayabilir."</string>
+    <string name="permlab_locationUpdates">"konum güncelleme bildirimlerini denetle"</string>
+    <string name="permdesc_locationUpdates">"Radyo ile alınan konum güncelleme bildirimlerini etkinleştirmeye/devreden çıkarmaya izin verir. Normal uygulamalarda kullanılmamalıdır."</string>
+    <string name="permlab_checkinProperties">"erişim giriş özellikleri"</string>
+    <string name="permdesc_checkinProperties">"Kayıt hizmeti tarafından karşıya yüklenen özelliklere okuma/yazma erişimi verir. Normal uygulamalarda kullanılmamalıdır."</string>
+    <string name="permlab_bindGadget">"widget seç"</string>
+    <string name="permdesc_bindGadget">"Uygulamaların sisteme hangi uygulamalar tarafından hangi widget\'ların kullanılabileceğini söylemesine izin verir. Bu izin sayesinde uygulamalar, başka uygulamalara kişisel verilere erişim verebilir. Normal uygulamalarda kullanılmaz."</string>
+    <string name="permlab_modifyPhoneState">"telefon durumunu değiştir"</string>
+    <string name="permdesc_modifyPhoneState">"Uygulamaların cihazın telefon özelliklerini kullanmasına izin verir. Bu izne sahip bir uygulama, size bildirmeden şebeke değiştirebilir ve telefon radyosunu kapatıp açabilir."</string>
     <string name="permlab_readPhoneState">"telefon durumunu oku"</string>
-    <string name="permdesc_readPhoneState">"Uygulamaya, cihazın telefon özelliklerine erişme izni verir. Bu izine sahip bir uygulama bu telefonun telefon numarasını, bir arama bağlı olup olmadığını, aramanın bağlı olduğu numarayı ve benzerlerini belirleyebilir."</string>
-    <string name="permlab_wakeLock">"telefonun beklemeye geçmesini önle"</string>
-    <string name="permdesc_wakeLock">"Bir uygulamaya telefonun beklemeye geçmesini engelleme izni verir."</string>
+    <string name="permdesc_readPhoneState">"Uygulamaların cihazın telefon özelliklerine erişmesine izin verir. Bu izne sahip bir uygulama telefonun telefon numarasını, o anda bir çağrı sürmekte olup olmadığını, çağrının bağlanmış olduğu numarayı ve benzerini belirleyebilir."</string>
+    <string name="permlab_wakeLock">"telefonunun uykuya geçmesini önle"</string>
+    <string name="permdesc_wakeLock">"Uygulamaların telefonun uykuya geçmesini önlemesine izin verir."</string>
     <string name="permlab_devicePower">"telefonu aç veya kapat"</string>
-    <string name="permdesc_devicePower">"Uygulamaya telefonu açma ve kapatma izni verir."</string>
+    <string name="permdesc_devicePower">"Uygulamaların telefonunuzu açmasına veya kapatmasına izin verir."</string>
     <string name="permlab_factoryTest">"fabrika test modunda çalıştır"</string>
-    <string name="permdesc_factoryTest">"Düşük seviyeli üretici testi olarak çalışır, telefon donanımına tam olarak erişmeye izin verir. Telefon yalnızca üreticinin test modunda çalışırken kullanılabilir."</string>
+    <string name="permdesc_factoryTest">"Telefon donanımına tam erişim veren alt düzey bir üretici testi olarak çalıştırılır. Yalnızca telefon üretici test modunda çalışırken kullanılabilir."</string>
     <string name="permlab_setWallpaper">"duvar kağıdını ayarla"</string>
-    <string name="permdesc_setWallpaper">"Uygulamaya sistem duvar kağıdını ayarlama izni verir."</string>
-    <string name="permlab_setWallpaperHints">"duvar kağıdı ip uçlarını ayarla"</string>
-    <string name="permdesc_setWallpaperHints">"Uygulamaya sistemin duvar kağıdı boyut ip uçlarını ayarlama izni verir."</string>
-    <string name="permlab_masterClear">"sistemi varsayılan fabrika ayarlarına sıfırla"</string>
-    <string name="permdesc_masterClear">"Uygulamaya sistemi tamamen fabrika ayarlarına sıfırlama; tüm verileri, yapılandırma ve yüklü uygulamaları silme izni verir."</string>
+    <string name="permdesc_setWallpaper">"Uygulamanın sistem duvar kağıdını ayarlamasına izin verir."</string>
+    <string name="permlab_setWallpaperHints">"duvar kağıdı boyutu ipuçlarını ayarla"</string>
+    <string name="permdesc_setWallpaperHints">"Uygulamanın sistem duvar kağıdı boyutu ipuçlarını ayarlamasına izin verir."</string>
+    <string name="permlab_masterClear">"sistemi fabrika değerlerine sıfırla"</string>
+    <string name="permdesc_masterClear">"Uygulamanın, sistemi tamamen fabrika ayarlarına sıfırlamasına; verileri, yapılandırmayı ve yüklü uygulamaları silmesine izin verir."</string>
     <string name="permlab_setTimeZone">"saat dilimini ayarla"</string>
-    <string name="permdesc_setTimeZone">"Bir uygulamaya telefonun saat dilimini değiştirme izni verir."</string>
-    <string name="permlab_getAccounts">"bilinen hesapları tespit et"</string>
-    <string name="permdesc_getAccounts">"Bir uygulamaya telefon tarafından tanınan hesapları alma izni verir."</string>
+    <string name="permdesc_setTimeZone">"Uygulamaların telefonun saat dilimini değiştirmesine izin verir."</string>
+    <string name="permlab_getAccounts">"bilinen hesapları keşfet"</string>
+    <string name="permdesc_getAccounts">"Uygulamaların telefonda bilinen hesapların listesini almasına izin verir."</string>
     <string name="permlab_accessNetworkState">"ağ durumunu görüntüle"</string>
-    <string name="permdesc_accessNetworkState">"Uygulamaya ağların durumunu görüntüleme izni verir."</string>
-    <string name="permlab_createNetworkSockets">"tam internet erişimi"</string>
-    <string name="permdesc_createNetworkSockets">"Bir uygulamaya ağ soketleri oluşturma izni verir."</string>
+    <string name="permdesc_accessNetworkState">"Uygulamaların, tüm ağların durumunu görmesine izin verir."</string>
+    <string name="permlab_createNetworkSockets">"tam İnternet erişimi"</string>
+    <string name="permdesc_createNetworkSockets">"Uygulamaların ağ yuvaları oluşturmasına izin verir."</string>
     <string name="permlab_writeApnSettings">"Erişim Noktası Adı ayarlarını yaz"</string>
-    <string name="permdesc_writeApnSettings">"Bir uygulamaya Proxy ve herhangi bir APN portu gibi APN ayarlarını değiştirme izni verir."</string>
-    <string name="permlab_changeNetworkState">"ağ bağlanırlığını değiştir"</string>
-    <string name="permdesc_changeNetworkState">"Bir uygulamaya ağın bağlanılabilirlik durumunu değiştirme izni verir."</string>
-    <!-- no translation found for permlab_changeBackgroundDataSetting (1400666012671648741) -->
-    <skip />
-    <!-- no translation found for permdesc_changeBackgroundDataSetting (1001482853266638864) -->
-    <skip />
-    <string name="permlab_accessWifiState">"Wi-Fi durumunu görüntüle"</string>
-    <string name="permdesc_accessWifiState">"Bir uygulamaya Wi-Fi durumu ile ilgili bilgileri görüntüleme izni verir."</string>
-    <string name="permlab_changeWifiState">"Wi-Fi durumunu değiştir"</string>
-    <string name="permdesc_changeWifiState">"Bir uygulamaya Wi-Fi erişim noktalarına bağlanma ve bağlantıyı bu noktalardan kesme ve yapılandırılmış Wi-Fi ağlarında değişiklikler yapma izni verir."</string>
+    <string name="permdesc_writeApnSettings">"Uygulamaların herhangi bir APN\'nin Proxy ve Bağlantı Noktası gibi APN ayarlarını değiştirmesine izin verir."</string>
+    <string name="permlab_changeNetworkState">"ağ bağlantısını değiştir"</string>
+    <string name="permdesc_changeNetworkState">"Uygulamaların ağ bağlantı durumunu değiştirmesine izin verir."</string>
+    <string name="permlab_changeBackgroundDataSetting">"arka plan veri kullanımı ayarını değiştir"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Uygulamaların arka plan veri kullanımı ayarını değiştirmesine izin verir."</string>
+    <string name="permlab_accessWifiState">"Kablosuz durumunu görüntüle"</string>
+    <string name="permdesc_accessWifiState">"Uygulamaların, kablosuz bağlantının durumu ile ilgili bilgileri görüntülemesine izin verir."</string>
+    <string name="permlab_changeWifiState">"Kablosuz durumunu değiştir"</string>
+    <string name="permdesc_changeWifiState">"Uygulamaların kablosuz erişim noktalarına bağlanıp bunlarla bağlantısını kesmesine ve yapılandırılmış kablosuz şebekelerde değişiklikler yapmasına izin verir."</string>
     <string name="permlab_bluetoothAdmin">"bluetooth yönetimi"</string>
-    <string name="permdesc_bluetoothAdmin">"Bir uygulamaya yerel Bluetooth telefonu yapılandırma ve uzak cihazları tespit etme ve bunlara bağlanma izni verir."</string>
-    <string name="permlab_bluetooth">"Bluetooth bağlantısı oluştur"</string>
-    <string name="permdesc_bluetooth">"Bir uygulamaya yerel Bluetooth telefon yapılandırmasını görüntüleme ve eşleşmiş cihazlar arasında bağlantı yapma ve bu bağlantıları kabul etme izni verir."</string>
+    <string name="permdesc_bluetoothAdmin">"Uygulamaların yerel Bluetooth telefonunu yapılandırmasına ve uzak cihazları keşfedip bunlar ile eşleşmesine izin verir."</string>
+    <string name="permlab_bluetooth">"Bluetooth bağlantıları oluştur"</string>
+    <string name="permdesc_bluetooth">"Uygulamaların yerel Bluetooth telefonunun yapılandırmasını görüntülemesine ve eşleşilmiş cihazlar ile bağlantı kurup kabul etmesine izin verir."</string>
     <string name="permlab_disableKeyguard">"tuş kilidini devre dışı bırak"</string>
-    <string name="permdesc_disableKeyguard">"Bir uygulamaya tuş kilidini ve ilişkili tüm şifre güvenliğini devre dışı bırakma izni verir. Bunun alışılagelmiş bir örneği, gelen aramayı yanıtlarken veya arama yaparken tuş kilidinin devreden çıkarılması ve arama  sonlandırıldıktan sonra tekrar etkinleştirilmesidir."</string>
-    <string name="permlab_readSyncSettings">"senkronizasyon ayalarını oku"</string>
-    <string name="permdesc_readSyncSettings">"Bir uygulamaya senkronizasyon ayarlarını okuma izni verir. Ör. Rehber için senkronizasyonun etkinleştirilip etkinleştirilmeyeceği gibi."</string>
-    <string name="permlab_writeSyncSettings">"senkronizasyon ayarlarını yaz"</string>
-    <string name="permdesc_writeSyncSettings">"Uygulamaya senkronizasyon ayarlarını değiştirme izni verir. Ör. Rehber için senkronizasyonun etkinleştirilip etkinleştirilmeyeceği gibi."</string>
-    <string name="permlab_readSyncStats">"senkronizasyon istatistiklerini oku"</string>
-    <string name="permdesc_readSyncStats">"Bir uygulamaya, senkronizasyonların meydana geldiği geçmiş gibi senkronizasyon istatistiklerini okuma izni verir."</string>
-    <string name="permlab_subscribedFeedsRead">"abone yayınlarını oku"</string>
-    <string name="permdesc_subscribedFeedsRead">"Senkronize edilmiş mevcut ayrıntıları alması için bir uygulamaya izin verir."</string>
-    <string name="permlab_subscribedFeedsWrite">"abone yayınlarını yaz"</string>
-    <string name="permdesc_subscribedFeedsWrite">"Bir uygulamaya mevcut senkronize yayınlarınızı değiştirme izni verir. Bu özellik, kötü niyetli bir uygulamanın senkronize yayınlarınızı değiştirmesine izin verebilir."</string>
-    <!-- no translation found for permlab_readDictionary (432535716804748781) -->
-    <skip />
-    <!-- no translation found for permdesc_readDictionary (1082972603576360690) -->
-    <skip />
-    <!-- no translation found for permlab_writeDictionary (6703109511836343341) -->
-    <skip />
-    <!-- no translation found for permdesc_writeDictionary (2241256206524082880) -->
-    <skip />
+    <string name="permdesc_disableKeyguard">"Uygulamaların tuş kilidini ve ilgili şifreli güvenlik önlemini devre dışı bırakmasına izin verir. Bunun geçerli bir örneği gelen bir çağrı alındığında tuş kilidinin devre dışı bırakılması, sonra çağrı bittiğinde kilidin yeniden devreye sokulmasıdır."</string>
+    <string name="permlab_readSyncSettings">"senk. ayarlarını oku"</string>
+    <string name="permdesc_readSyncSettings">"Uygulamanın, senkronizasyon işlevinin Kişiler için devrede olup olmadığı gibi senkronizasyon ayarlarını okumasına izin verir."</string>
+    <string name="permlab_writeSyncSettings">"senk. ayarlarını yaz"</string>
+    <string name="permdesc_writeSyncSettings">"Uygulamanın, senkronizasyon işlevinin Kişiler için devrede olup olmadığı gibi senkronizasyon ayarlarını değiştirmesine izin verir."</string>
+    <string name="permlab_readSyncStats">"senk. istatistiklerini oku"</string>
+    <string name="permdesc_readSyncStats">"Uygulamaların senk. istatistiklerini; örn. geçmişte yapılmış senkronizasyonları okumasına izin verir."</string>
+    <string name="permlab_subscribedFeedsRead">"abone olunan yayınları oku"</string>
+    <string name="permdesc_subscribedFeedsRead">"Uygulamaların, o anda senkronize olan yayınlar ile ilgili bilgi almasına izin verir."</string>
+    <string name="permlab_subscribedFeedsWrite">"abone olunan yayınları yaz"</string>
+    <string name="permdesc_subscribedFeedsWrite">"Uygulamaların senkronize edilmiş yayınlarınızı değiştirmesine izin verir. Bu ayar, kötü amaçlı bir uygulamanın senkronize edilmiş yayınlarınızı değiştirmesine izin verebilir."</string>
+    <string name="permlab_readDictionary">"kullanıcı tanımlı sözlüğü oku"</string>
+    <string name="permdesc_readDictionary">"Kullanıcının kullanıcı sözlüğünde saklamış olabileceği kişisel kelimeleri, adları ve kelime öbeklerini uygulamaların okumasına izin verir."</string>
+    <string name="permlab_writeDictionary">"kullanıcı tanımlı sözlüğe yaz"</string>
+    <string name="permdesc_writeDictionary">"Uygulamaların kullanıcı sözlüğüne yeni kelimeler yazmasına izin verir."</string>
   <string-array name="phoneTypes">
-    <item>"Ana sayfa"</item>
+    <item>"Ev"</item>
     <item>"Mobil"</item>
     <item>"İş"</item>
-    <item>"İş Faksı"</item>
-    <item>"Ev Faksı"</item>
+    <item>"İş Faks"</item>
+    <item>"Ev Faks"</item>
     <item>"Çağrı cihazı"</item>
     <item>"Diğer"</item>
     <item>"Özel"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item>"Ana sayfa"</item>
+    <item>"Ev"</item>
     <item>"İş"</item>
     <item>"Diğer"</item>
     <item>"Özel"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item>"Ana sayfa"</item>
+    <item>"Ev"</item>
     <item>"İş"</item>
     <item>"Diğer"</item>
     <item>"Özel"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item>"Ana Sayfa"</item>
+    <item>"Ev"</item>
     <item>"İş"</item>
     <item>"Diğer"</item>
-    <item>"Özel..."</item>
+    <item>"Özel"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item>"İş"</item>
@@ -403,39 +384,36 @@
     <item>"QQ"</item>
     <item>"Google Talk"</item>
     <item>"ICQ"</item>
-    <item>"Anlaşılmayan konuşma"</item>
+    <item>"Jabber"</item>
   </string-array>
-    <string name="keyguard_password_enter_pin_code">"PIN kodunu girin"</string>
-    <string name="keyguard_password_wrong_pin_code">"Hatalı PIN kodu!"</string>
-    <string name="keyguard_label_text">"Kilit açmak için Menü\'ye ardından 0 tuşuna basın."</string>
+    <string name="keyguard_password_enter_pin_code">"PIN kodunu gir"</string>
+    <string name="keyguard_password_wrong_pin_code">"Yanlış PIN kodu!"</string>
+    <string name="keyguard_label_text">"Kilidi açmak için önce Menü\'ye, sonra 0\'a basın."</string>
     <string name="emergency_call_dialog_number_for_display">"Acil durum numarası"</string>
-    <string name="lockscreen_carrier_default">"(Servis yok)"</string>
+    <string name="lockscreen_carrier_default">"(Hizmet yok)"</string>
     <string name="lockscreen_screen_locked">"Ekran kilitli."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Kilit açmak veya acil durum araması yapmak için Menü\'ye basın."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"Kilidi açmak için Menü\'ye basın."</string>
-    <string name="lockscreen_pattern_instructions">"Kilidi açmak için desen çizin"</string>
-    <string name="lockscreen_emergency_call">"Acil durum araması"</string>
-    <string name="lockscreen_pattern_correct">"Düzeltin!"</string>
-    <string name="lockscreen_pattern_wrong">"Maalesef, tekrar deneyin:"</string>
-    <!-- no translation found for lockscreen_plugged_in (613343852842944435) -->
-    <skip />
+    <string name="lockscreen_pattern_instructions">"Kilit açmak için deseni çizin"</string>
+    <string name="lockscreen_emergency_call">"Acil durum çağrısı"</string>
+    <string name="lockscreen_pattern_correct">"Doğru!"</string>
+    <string name="lockscreen_pattern_wrong">"Üzgünüz, lütfen yeniden deneyin"</string>
+    <string name="lockscreen_plugged_in">"Şarj oluyor (<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="lockscreen_low_battery">"Şarj cihazınızı bağlayın."</string>
     <string name="lockscreen_missing_sim_message_short">"SIM kart yok."</string>
     <string name="lockscreen_missing_sim_message">"Telefonda SIM kart yok."</string>
-    <string name="lockscreen_missing_sim_instructions">"Lütfen bir SIM kart takın."</string>
+    <string name="lockscreen_missing_sim_instructions">"Lütfen SIM kart takın."</string>
     <string name="lockscreen_network_locked_message">"Ağ kilitli"</string>
-    <string name="lockscreen_sim_puk_locked_message">"SIM kart PUK ile kilitlenmiş."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_message">"SIM kart PUK kilidi devrede."</string>
+    <string name="lockscreen_sim_puk_locked_instructions">"Lütfen Kullanıcı Rehberi\'ne bakın veya Müşteri Hizmetleri\'ne başvurun."</string>
     <string name="lockscreen_sim_locked_message">"SIM kart kilitli."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM kart kilidi açılıyor..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Kilit açma desenini <xliff:g id="NUMBER_0">%d</xliff:g> kez hatalı çizdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde tekrar deneyin."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin">"Kilit açma desenini <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> üzerinde başarısız deneme sonrasında, telefonunuzu Google oturumu ile açmanız istenecektir."\n\n" Lütfen <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde tekrar deneyin."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde tekrar deneyin."</string>
-    <string name="lockscreen_forgot_pattern_button_text">"Desen hafızadan silinsin mi?"</string>
-    <string name="lockscreen_glogin_too_many_attempts">"Çok fazla desen denemesi!"</string>
-    <!-- no translation found for lockscreen_glogin_instructions (1816635201812207709) -->
-    <skip />
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"SIM kart kilidi açılıyor…"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde yeniden deneyin."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra telefonunuzu Google oturum açma bilgilerinizi kullanarak açmanız istenir."\n\n" Lütfen <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde yeniden deneyin."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde yeniden deneyin."</string>
+    <string name="lockscreen_forgot_pattern_button_text">"Deseni unuttunuz mu?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"Çok fazla sayıda desen denemesi yapıldı!"</string>
+    <string name="lockscreen_glogin_instructions">"Kilidi açmak için Google hesabınızla oturum açın"</string>
     <string name="lockscreen_glogin_username_hint">"Kullanıcı adı (e-posta)"</string>
     <string name="lockscreen_glogin_password_hint">"Şifre"</string>
     <string name="lockscreen_glogin_submit_button">"Oturum aç"</string>
@@ -443,40 +421,34 @@
     <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for hour_ampm (4329881288269772723) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (1829009197680861107) -->
-    <skip />
-    <string name="status_bar_clear_all_button">"Bildirimleri sil"</string>
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
+    <string name="status_bar_clear_all_button">"Bildirimleri temizle"</string>
     <string name="status_bar_no_notifications_title">"Bildirim yok"</string>
-    <string name="status_bar_ongoing_events_title">"Giden"</string>
+    <string name="status_bar_ongoing_events_title">"Sürüyor"</string>
     <string name="status_bar_latest_events_title">"Bildirimler"</string>
-    <!-- no translation found for battery_status_text_percent_format (7660311274698797147) -->
-    <skip />
-    <string name="battery_status_charging">"Şarj oluyor..."</string>
-    <string name="battery_low_title">"Lütfen şarj cihazına bağlayın"</string>
-    <string name="battery_low_subtitle">"Pil azalıyor:"</string>
-    <string name="battery_low_percent_format">"Kalan <xliff:g id="NUMBER">%d%%</xliff:g> altında."</string>
-    <string name="factorytest_failed">"Fabrika testi başarısız"</string>
-    <string name="factorytest_not_system">"FACTORY_TEST eylemi yalnızca /system/app konumuna yüklenmiş paketler için desteklenmektedir."</string>
-    <string name="factorytest_no_action">"FACTORY_TEST eylemini sağlayan herhangi bir paket bulunamadı."</string>
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="battery_status_charging">"Şarj oluyor…"</string>
+    <string name="battery_low_title">"Lütfen şarj cihazını takın"</string>
+    <string name="battery_low_subtitle">"Pil tükeniyor:"</string>
+    <string name="battery_low_percent_format">"<xliff:g id="NUMBER">%d%%</xliff:g> adetten daha az kaldı."</string>
+    <string name="factorytest_failed">"Fabrika testi yapılamadı"</string>
+    <string name="factorytest_not_system">"FACTORY_TEST işlemi yalnızca /system/app dizinine yüklenmiş paketler için desteklenir."</string>
+    <string name="factorytest_no_action">"FACTORY_TEST işlemini sağlayan hiçbir paket bulunamadı."</string>
     <string name="factorytest_reboot">"Yeniden başlat"</string>
-    <!-- no translation found for js_dialog_title (8143918455087008109) -->
-    <skip />
-    <!-- no translation found for js_dialog_title_default (6961903213729667573) -->
-    <skip />
-    <!-- no translation found for js_dialog_before_unload (1901675448179653089) -->
-    <skip />
+    <string name="js_dialog_title">"\"<xliff:g id="TITLE">%s</xliff:g>\" adresindeki sayfada şunlar belirtiliyor:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Bu sayfadan ayrılıyor musunuz?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Devam etmek için Tamam\'ı, sayfada kalmak için İptal\'i tıklatın."</string>
     <string name="save_password_label">"Onayla"</string>
-    <string name="save_password_message">"Tarayıcının bu şifreyi hatırlamasını istiyor musunuz?"</string>
+    <string name="save_password_message">"Tarayıcının bu şifreyi anımsamasını istiyor musunuz?"</string>
     <string name="save_password_notnow">"Şimdi değil"</string>
-    <string name="save_password_remember">"Hatırla"</string>
-    <string name="save_password_never">"Asla"</string>
-    <string name="open_permission_deny">"Bu sayfayı açma iznine sahip değilsiniz."</string>
+    <string name="save_password_remember">"Anımsa"</string>
+    <string name="save_password_never">"Hiçbir zaman"</string>
+    <string name="open_permission_deny">"Bu sayfayı açma izniniz yok."</string>
     <string name="text_copied">"Metin panoya kopyalandı."</string>
-    <string name="more_item_label">"Daha fazla"</string>
+    <string name="more_item_label">"Diğer"</string>
     <string name="prepend_shortcut_label">"Menü+"</string>
-    <string name="menu_space_shortcut_label">"alan"</string>
+    <string name="menu_space_shortcut_label">"boşluk"</string>
     <string name="menu_enter_shortcut_label">"gir"</string>
     <string name="menu_delete_shortcut_label">"sil"</string>
     <string name="search_go">"Ara"</string>
@@ -484,7 +456,7 @@
     <string name="yesterday">"Dün"</string>
     <string name="tomorrow">"Yarın"</string>
     <string name="oneMonthDurationPast">"1 ay önce"</string>
-    <string name="beforeOneMonthDurationPast">"1 aydan daha önce"</string>
+    <string name="beforeOneMonthDurationPast">"1 ay önce"</string>
   <plurals name="num_seconds_ago">
     <item quantity="one">"1 saniye önce"</item>
     <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> saniye önce"</item>
@@ -517,24 +489,40 @@
     <item quantity="one">"yarın"</item>
     <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> gün içinde"</item>
   </plurals>
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"1 saniye önce"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> saniye önce"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"1 dak. önce"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> dakika önce"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"1 saat önce"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> saat önce"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"dün"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> gün önce"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"1 san. içinde"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> saniye içinde"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"1 dak. içinde"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> dakika içinde"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"1 saat içinde"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> saat içinde"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"yarın"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> gün içinde"</item>
+  </plurals>
     <string name="preposition_for_date">"%s üzerinde"</string>
-    <string name="preposition_for_time">"hedef: %s"</string>
+    <string name="preposition_for_time">"saat: %s"</string>
     <string name="preposition_for_year">"%s içinde"</string>
     <string name="day">"gün"</string>
     <string name="days">"gün"</string>
@@ -542,7 +530,7 @@
     <string name="hours">"saat"</string>
     <string name="minute">"dak"</string>
     <string name="minutes">"dakika"</string>
-    <string name="second">"sn"</string>
+    <string name="second">"san."</string>
     <string name="seconds">"saniye"</string>
     <string name="week">"hafta"</string>
     <string name="weeks">"hafta"</string>
@@ -555,80 +543,73 @@
     <string name="thursday">"Perşembe"</string>
     <string name="friday">"Cuma"</string>
     <string name="saturday">"Cumartesi"</string>
-    <string name="every_weekday">"Her hafta sonu (Pzt-Cu)"</string>
+    <string name="every_weekday">"Hafta içi her gün (Pzt-Cum)"</string>
     <string name="daily">"Günlük"</string>
-    <string name="weekly">"<xliff:g id="DAY">%s</xliff:g> üzerinde haftalık"</string>
+    <string name="weekly">"Her hafta <xliff:g id="DAY">%s</xliff:g> günü"</string>
     <string name="monthly">"Aylık"</string>
-    <string name="yearly">"Yıllık"</string>
+    <string name="yearly">"Yılda bir"</string>
     <string name="VideoView_error_title">"Video oynatılamıyor"</string>
-    <!-- no translation found for VideoView_error_text_invalid_progressive_playback (897920883624437033) -->
-    <skip />
-    <string name="VideoView_error_text_unknown">"Maalesef, bu video oynatılamıyor."</string>
+    <string name="VideoView_error_text_invalid_progressive_playback">"Maalesef, bu video cihaza akışla göndermek için uygun değil."</string>
+    <string name="VideoView_error_text_unknown">"Maalesef bu video oynatılamıyor."</string>
     <string name="VideoView_error_button">"Tamam"</string>
-    <string name="am">"AM"</string>
-    <string name="pm">"PM"</string>
-    <string name="numeric_date">"<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>"</string>
+    <string name="am">"ÖÖ"</string>
+    <string name="pm">"ÖS"</string>
+    <string name="numeric_date">"<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="WEEKDAY2">%4$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
+    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
     <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
-    <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <!-- no translation found for date_time (6104442718633642836) -->
-    <skip />
-    <!-- no translation found for relative_time (1818557177829411417) -->
-    <skip />
-    <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first" format="date">"<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
+    <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>, <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
+    <string name="full_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
+    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
     <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"öğle"</string>
     <string name="Noon">"Öğle"</string>
-    <string name="midnight">"gece"</string>
-    <string name="Midnight">"Gece"</string>
-    <!-- no translation found for month_day (3693060561170538204) -->
-    <skip />
+    <string name="midnight">"geceyarısı"</string>
+    <string name="Midnight">"Gece Yarısı"</string>
+    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for month_year (2106203387378728384) -->
-    <skip />
+    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="abbrev_month_day_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <!-- no translation found for abbrev_month_year (5966980891147982768) -->
-    <skip />
-    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
-    <skip />
+    <string name="same_year_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>– <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> –  <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="numeric_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
+    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
+    <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
+    <string name="abbrev_month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g>"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
     <string name="day_of_week_long_sunday">"Pazar"</string>
@@ -639,38 +620,38 @@
     <string name="day_of_week_long_friday">"Cuma"</string>
     <string name="day_of_week_long_saturday">"Cumartesi"</string>
     <string name="day_of_week_medium_sunday">"Paz"</string>
-    <string name="day_of_week_medium_monday">"Pts"</string>
+    <string name="day_of_week_medium_monday">"Pzt"</string>
     <string name="day_of_week_medium_tuesday">"Sal"</string>
-    <string name="day_of_week_medium_wednesday">"Çrş"</string>
+    <string name="day_of_week_medium_wednesday">"Çar"</string>
     <string name="day_of_week_medium_thursday">"Per"</string>
-    <string name="day_of_week_medium_friday">"Cu"</string>
+    <string name="day_of_week_medium_friday">"Cum"</string>
     <string name="day_of_week_medium_saturday">"Cts"</string>
     <string name="day_of_week_short_sunday">"Pa"</string>
-    <string name="day_of_week_short_monday">"Pzt"</string>
+    <string name="day_of_week_short_monday">"Pt"</string>
     <string name="day_of_week_short_tuesday">"Sa"</string>
-    <string name="day_of_week_short_wednesday">"Çrş"</string>
-    <string name="day_of_week_short_thursday">"Per"</string>
+    <string name="day_of_week_short_wednesday">"Ça"</string>
+    <string name="day_of_week_short_thursday">"Pe"</string>
     <string name="day_of_week_short_friday">"Cu"</string>
     <string name="day_of_week_short_saturday">"Ct"</string>
-    <string name="day_of_week_shorter_sunday">"Pa"</string>
-    <string name="day_of_week_shorter_monday">"A"</string>
+    <string name="day_of_week_shorter_sunday">"P"</string>
+    <string name="day_of_week_shorter_monday">"Pt"</string>
     <string name="day_of_week_shorter_tuesday">"Sa"</string>
     <string name="day_of_week_shorter_wednesday">"Ç"</string>
-    <string name="day_of_week_shorter_thursday">"Per"</string>
+    <string name="day_of_week_shorter_thursday">"Pe"</string>
     <string name="day_of_week_shorter_friday">"C"</string>
     <string name="day_of_week_shorter_saturday">"Ct"</string>
-    <string name="day_of_week_shortest_sunday">"S"</string>
-    <string name="day_of_week_shortest_monday">"A"</string>
-    <string name="day_of_week_shortest_tuesday">"T"</string>
-    <string name="day_of_week_shortest_wednesday">"W"</string>
-    <string name="day_of_week_shortest_thursday">"T"</string>
+    <string name="day_of_week_shortest_sunday">"P"</string>
+    <string name="day_of_week_shortest_monday">"P"</string>
+    <string name="day_of_week_shortest_tuesday">"S"</string>
+    <string name="day_of_week_shortest_wednesday">"Ç"</string>
+    <string name="day_of_week_shortest_thursday">"P"</string>
     <string name="day_of_week_shortest_friday">"C"</string>
-    <string name="day_of_week_shortest_saturday">"S"</string>
+    <string name="day_of_week_shortest_saturday">"C"</string>
     <string name="month_long_january">"Ocak"</string>
     <string name="month_long_february">"Şubat"</string>
     <string name="month_long_march">"Mart"</string>
     <string name="month_long_april">"Nisan"</string>
-    <string name="month_long_may">"Mayıs"</string>
+    <string name="month_long_may">"May"</string>
     <string name="month_long_june">"Haziran"</string>
     <string name="month_long_july">"Temmuz"</string>
     <string name="month_long_august">"Ağustos"</string>
@@ -678,30 +659,30 @@
     <string name="month_long_october">"Ekim"</string>
     <string name="month_long_november">"Kasım"</string>
     <string name="month_long_december">"Aralık"</string>
-    <string name="month_medium_january">"Haz"</string>
+    <string name="month_medium_january">"Oca"</string>
     <string name="month_medium_february">"Şub"</string>
     <string name="month_medium_march">"Mar"</string>
-    <string name="month_medium_april">"Nisan"</string>
+    <string name="month_medium_april">"Nis"</string>
     <string name="month_medium_may">"May"</string>
-    <string name="month_medium_june">"Haziran"</string>
+    <string name="month_medium_june">"Haz"</string>
     <string name="month_medium_july">"Tem"</string>
     <string name="month_medium_august">"Ağu"</string>
     <string name="month_medium_september">"Eyl"</string>
-    <string name="month_medium_october">"Ekm"</string>
-    <string name="month_medium_november">"Kasım"</string>
-    <string name="month_medium_december">"Arl"</string>
+    <string name="month_medium_october">"Eki"</string>
+    <string name="month_medium_november">"Kas"</string>
+    <string name="month_medium_december">"Ara"</string>
     <string name="month_shortest_january">"O"</string>
-    <string name="month_shortest_february">"C"</string>
-    <string name="month_shortest_march">"A"</string>
-    <string name="month_shortest_april">"A"</string>
-    <string name="month_shortest_may">"A"</string>
-    <string name="month_shortest_june">"O"</string>
-    <string name="month_shortest_july">"O"</string>
+    <string name="month_shortest_february">"Ş"</string>
+    <string name="month_shortest_march">"P"</string>
+    <string name="month_shortest_april">"N"</string>
+    <string name="month_shortest_may">"M"</string>
+    <string name="month_shortest_june">"H"</string>
+    <string name="month_shortest_july">"T"</string>
     <string name="month_shortest_august">"A"</string>
-    <string name="month_shortest_september">"S"</string>
-    <string name="month_shortest_october">"O"</string>
-    <string name="month_shortest_november">"N"</string>
-    <string name="month_shortest_december">"G"</string>
+    <string name="month_shortest_september">"E"</string>
+    <string name="month_shortest_october">"E"</string>
+    <string name="month_shortest_november">"K"</string>
+    <string name="month_shortest_december">"A"</string>
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Tümünü seç"</string>
@@ -712,152 +693,113 @@
     <string name="copy">"Kopyala"</string>
     <string name="copyAll">"Tümünü kopyala"</string>
     <string name="paste">"Yapıştır"</string>
-    <string name="copyUrl">"URL kopyala"</string>
+    <string name="copyUrl">"URL\'yi kopyala"</string>
     <string name="inputMethod">"Giriş Yöntemi"</string>
-    <!-- no translation found for addToDictionary (726256909274177272) -->
-    <skip />
-    <string name="editTextMenuTitle">"Metni düzenle"</string>
-    <string name="low_internal_storage_view_title">"Alan yetersiz"</string>
-    <string name="low_internal_storage_view_text">"Telefonun saklama alanı azalıyor."</string>
+    <string name="addToDictionary">"\"%s\" kelimesini sözlüğe ekle"</string>
+    <string name="editTextMenuTitle">"Metin düzenle"</string>
+    <string name="low_internal_storage_view_title">"Yer az"</string>
+    <string name="low_internal_storage_view_text">"Telefonun depolama alanı azalıyor."</string>
     <string name="ok">"Tamam"</string>
     <string name="cancel">"İptal"</string>
     <string name="yes">"Tamam"</string>
     <string name="no">"İptal"</string>
-    <!-- no translation found for dialog_alert_title (2049658708609043103) -->
-    <skip />
+    <string name="dialog_alert_title">"Dikkat"</string>
     <string name="capital_on">"AÇIK"</string>
     <string name="capital_off">"KAPALI"</string>
-    <string name="whichApplication">"Eylemi tamamlamak için kullan:"</string>
-    <string name="alwaysUse">"Bu eylem için varsayılan ile kullan."</string>
-    <string name="clearDefaultHintMsg">"Ana Sayfa Ayarları &gt; Uygulamalar &gt; Uygulamaları yönet yolunu izleyerek varsayılanı silin."</string>
-    <string name="chooseActivity">"Bir eylem seç"</string>
-    <string name="noApplications">"Bu eylemi hiç bir uygulama gerçekleştiremez."</string>
-    <string name="aerr_title">"Maalesef!"</string>
-    <string name="aerr_application">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (işlem <xliff:g id="PROCESS">%2$s</xliff:g>) beklenmedik biçimde durdu. Lütfen tekrar deneyin."</string>
-    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> süreci beklemeyen biçimde durduruldu. Lütfen tekrar deneyin."</string>
-    <string name="anr_title">"Maalesef!"</string>
-    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g> etkinliği (<xliff:g id="APPLICATION">%2$s</xliff:g> uygulamasındaki) yanıt vermiyor."</string>
-    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> etkinliği (<xliff:g id="PROCESS">%2$s</xliff:g> işlemindeki) yanıt vermiyor."</string>
-    <string name="anr_application_process">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işlemindeki) yanıt vermiyor."</string>
+    <string name="whichApplication">"İşlemi şunu kullanarak tamamla"</string>
+    <string name="alwaysUse">"Varsayılan olarak bu işlem için kullan."</string>
+    <string name="clearDefaultHintMsg">"Giriş Ayarları &gt; Uygulamalar &gt; Uygulamaları yönet\'te varsayılanı temizleyin."</string>
+    <string name="chooseActivity">"İşlem seç"</string>
+    <string name="noApplications">"Hiçbir uygulama bu işlemi yapamaz."</string>
+    <string name="aerr_title">"Üzgünüz!"</string>
+    <string name="aerr_application">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işlemi) beklenmedik biçimde durdu. Lütfen yeniden deneyin."</string>
+    <string name="aerr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> işlemi beklenmedik biçimde durdu. Lütfen yeniden deneyin."</string>
+    <string name="anr_title">"Üzgünüz!"</string>
+    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g> etkinliği (<xliff:g id="APPLICATION">%2$s</xliff:g> uygulamasında) yanıt vermiyor."</string>
+    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> etkinliği (<xliff:g id="PROCESS">%2$s</xliff:g> işleminde) yanıt vermiyor."</string>
+    <string name="anr_application_process">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işleminde) yanıt vermiyor."</string>
     <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> işlemi yanıt vermiyor."</string>
-    <string name="force_close">"Cebri kapatma"</string>
+    <string name="force_close">"Kapanmaya zorla"</string>
     <string name="wait">"Bekle"</string>
     <string name="debug">"Hata ayıkla"</string>
-    <string name="sendText">"Metin için bir eylem seç"</string>
+    <string name="sendText">"Metin için bir işlem seçin"</string>
     <string name="volume_ringtone">"Zil sesi düzeyi"</string>
-    <string name="volume_music">"Ortam boyutu"</string>
-    <string name="volume_music_hint_playing_through_bluetooth">"Bluetooth üzerinden yürütülüyor"</string>
-    <string name="volume_call">"Ahize ses düzeyi"</string>
-    <!-- no translation found for volume_bluetooth_call (2002891926351151534) -->
-    <skip />
+    <string name="volume_music">"Medya ses düzeyi"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Bluetooth üzerinden çalıyor"</string>
+    <string name="volume_call">"Gelen çağrı ses düzeyi"</string>
+    <string name="volume_bluetooth_call">"Bluetooth gelen çağrı ses düzeyi"</string>
     <string name="volume_alarm">"Alarm ses düzeyi"</string>
     <string name="volume_notification">"Bildirim ses düzeyi"</string>
-    <string name="volume_unknown">"Ses düzeyi"</string>
+    <string name="volume_unknown">"Ses"</string>
     <string name="ringtone_default">"Varsayılan zil sesi"</string>
     <string name="ringtone_default_with_actual">"Varsayılan zil sesi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent">"Sessiz"</string>
     <string name="ringtone_picker_title">"Zil sesleri"</string>
     <string name="ringtone_unknown">"Bilinmeyen zil sesi"</string>
   <plurals name="wifi_available">
-    <item quantity="one">"Wi-Fi ağı mevcut"</item>
-    <item quantity="other">"Wi-Fi ağları mevcut"</item>
+    <item quantity="one">"Kablosuz ağ var"</item>
+    <item quantity="other">"Kablosuz ağlar var"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one">"Açık Wi-Fi ağı mevcut"</item>
-    <item quantity="other">"Açık Wi-Fi ağları mevcut"</item>
+    <item quantity="one">"Kullanılabilir kablosuz ağı aç"</item>
+    <item quantity="other">"Kullanılabilir kablosuz ağları aç"</item>
   </plurals>
     <string name="select_character">"Karakter ekle"</string>
     <string name="sms_control_default_app_name">"Bilinmeyen uygulama"</string>
-    <string name="sms_control_title">"SMS mesajları gönderiliyor"</string>
-    <string name="sms_control_message">"Fazla sayıda SMS mesajı gönderilmekte. Devam etmek için \"Tamam\"ı veya göndermeyi durdurmak için \"İptal\"i tıklayın."</string>
+    <string name="sms_control_title">"SMS mesajları gönderme"</string>
+    <string name="sms_control_message">"Çok sayıda SMS mesajı gönderiliyor. Devam etmek için \"Tamam\"ı, göndermeyi durdurmak için \"İptal\"i seçin."</string>
     <string name="sms_control_yes">"Tamam"</string>
     <string name="sms_control_no">"İptal"</string>
     <string name="date_time_set">"Ayarla"</string>
     <string name="default_permission_group">"Varsayılan"</string>
-    <string name="no_permissions">"İzin gerekli değil"</string>
+    <string name="no_permissions">"İzin gerektirmez"</string>
     <string name="perms_hide"><b>"Gizle"</b></string>
     <string name="perms_show_all"><b>"Tümünü göster"</b></string>
-    <string name="googlewebcontenthelper_loading">"Yükleniyor..."</string>
-    <string name="usb_storage_title">"USB ile bağlı"</string>
-    <string name="usb_storage_message">"Telefonunuzu USB ile bilgisayarınıza bağladınız. Dosyaları bilgisayarınız ve telefonunuzun SD kartı arasında birbirine kopyalamak için \"Bağla\"yı seçin."</string>
+    <string name="googlewebcontenthelper_loading">"Yükleniyor…"</string>
+    <string name="usb_storage_title">"USB bağlandı"</string>
+    <string name="usb_storage_message">"Telefonunuzu bilgisayarınıza USB ile bağladınız. Bilgisayarınız ve telefonunuzun SD kartı arasında dosya kopyalamak istiyorsanız, \"Bağla\"\'yı seçin."</string>
     <string name="usb_storage_button_mount">"Bağla"</string>
     <string name="usb_storage_button_unmount">"Bağlama"</string>
-    <string name="usb_storage_error_message">"USB depolama için SD kartınızı kullanırken sorun oluştu."</string>
-    <string name="usb_storage_notification_title">"USB ile bağlı"</string>
-    <string name="usb_storage_notification_message">"Bilgisayarınıza/bilgisayarınızdan kopyalanacak dosyaları seçin."</string>
-    <!-- no translation found for usb_storage_stop_notification_title (2336058396663516017) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_notification_message (2591813490269841539) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_title (6014127947456185321) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_message (2390958966725232848) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_mount (1181858854166273345) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_button_unmount (3774611918660582898) -->
-    <skip />
-    <!-- no translation found for usb_storage_stop_error_message (3917317248440072084) -->
-    <skip />
-    <!-- no translation found for extmedia_format_title (8663247929551095854) -->
-    <skip />
-    <!-- no translation found for extmedia_format_message (3621369962433523619) -->
-    <skip />
-    <!-- no translation found for extmedia_format_button_format (4131064560127478695) -->
-    <skip />
+    <string name="usb_storage_error_message">"SD kartınızı USB depolama birimi için kullanmada bir sorun var."</string>
+    <string name="usb_storage_notification_title">"USB bağlandı"</string>
+    <string name="usb_storage_notification_message">"Bilgisayarınıza/bilgisayarınızdan dosya kopyalamak için seçin."</string>
+    <string name="usb_storage_stop_notification_title">"USB depolama birimini kapat"</string>
+    <string name="usb_storage_stop_notification_message">"USB depolama birimini kapatmak için seçin."</string>
+    <string name="usb_storage_stop_title">"USB depolama birimini kapat"</string>
+    <string name="usb_storage_stop_message">"USB depolama birimini kapatmadan önce USB ana makinesinde bağlantıyı kestiğinizden emin olun. USB depolama birimini kapatmak için \"Kapat\"ı seçin."</string>
+    <string name="usb_storage_stop_button_mount">"Kapat"</string>
+    <string name="usb_storage_stop_button_unmount">"İptal"</string>
+    <string name="usb_storage_stop_error_message">"USB depolama birimini kapatırken bir sorunla karşılaştık. USB ana makinesinde bağlantıyı kestiğinizden emin olun, sonra yeniden deneyin."</string>
+    <string name="extmedia_format_title">"SD kartı biçimlendir"</string>
+    <string name="extmedia_format_message">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>
+    <string name="extmedia_format_button_format">"Biçimlendir"</string>
     <string name="select_input_method">"Giriş Yöntemini Seç"</string>
     <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for candidates_style (4333913089637062257) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_title (5457603418970994050) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_title (780477838241212997) -->
-    <skip />
-    <!-- no translation found for ext_media_nofs_notification_message (1312266820092958014) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (6410723906019100189) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (2679412884290061775) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (6872152882604407837) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (7260183293747448241) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_title (6729801130790616200) -->
-    <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_message (7613960686747592770) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (8902518030404381318) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (4205117227342822275) -->
-    <skip />
-    <!-- no translation found for activity_list_empty (4168820609403385789) -->
-    <skip />
-    <!-- no translation found for permlab_pkgUsageStats (8787352074326748892) -->
-    <skip />
-    <!-- no translation found for permdesc_pkgUsageStats (891553695716752835) -->
-    <skip />
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
-    <!-- no translation found for gadget_host_error_inflating (2613287218853846830) -->
-    <skip />
-    <!-- no translation found for ime_action_go (8320845651737369027) -->
-    <skip />
-    <!-- no translation found for ime_action_search (658110271822807811) -->
-    <skip />
-    <!-- no translation found for ime_action_send (2316166556349314424) -->
-    <skip />
-    <!-- no translation found for ime_action_next (3138843904009813834) -->
-    <skip />
-    <!-- no translation found for ime_action_done (8971516117910934605) -->
-    <skip />
-    <!-- no translation found for ime_action_default (2840921885558045721) -->
-    <skip />
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
-    <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
-    <skip />
+    <string name="candidates_style"><u>"adaylar"</u></string>
+    <string name="ext_media_checking_notification_title">"SD kart hazırlanıyor"</string>
+    <string name="ext_media_checking_notification_message">"Hatalar denetleniyor"</string>
+    <string name="ext_media_nofs_notification_title">"Boş SD kart"</string>
+    <string name="ext_media_nofs_notification_message">"SD kart boş veya desteklenmeyen bir dosya sistemi kullanıyor."</string>
+    <string name="ext_media_unmountable_notification_title">"Hasarlı SD kart"</string>
+    <string name="ext_media_unmountable_notification_message">"SD kart hasarlı. Kartınızı yeniden biçimlendirmeniz gerekebilir."</string>
+    <string name="ext_media_badremoval_notification_title">"SD kart beklenmedik biçimde çıkarıldı"</string>
+    <string name="ext_media_badremoval_notification_message">"Veri kaybından kaçınmak için SD kartı çıkarmadan önce bağlantısını kesin."</string>
+    <string name="ext_media_safe_unmount_notification_title">"SD kart güvenle çıkarılabilir"</string>
+    <string name="ext_media_safe_unmount_notification_message">"SD kart şimdi güvenli bir şekilde çıkarılabilir."</string>
+    <string name="ext_media_nomedia_notification_title">"SD kart çıkarıldı"</string>
+    <string name="ext_media_nomedia_notification_message">"SD kart çıkarılmış. Cihazınızın saklama alanını artırmak için yeni bir SD kart takın."</string>
+    <string name="activity_list_empty">"Eşleşen hiçbir etkinlik bulunamadı"</string>
+    <string name="permlab_pkgUsageStats">"bileşen kullanım istatistiklerini güncelle"</string>
+    <string name="permdesc_pkgUsageStats">"Toplanmış bileşen istatistiklerinin değiştirilmesine izin verir. Normal uygulamalarda kullanılmamalıdır."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short">"Zum denetimi için iki kez dokun"</string>
+    <string name="gadget_host_error_inflating">"Widget\'ı genişletirken hata oluştu"</string>
+    <string name="ime_action_go">"Git"</string>
+    <string name="ime_action_search">"Ara"</string>
+    <string name="ime_action_send">"Gönder"</string>
+    <string name="ime_action_next">"İleri"</string>
+    <string name="ime_action_done">"Bitti"</string>
+    <string name="ime_action_default">"Çalıştır"</string>
+    <string name="dial_number_using">"Numarayı çevir:"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"<xliff:g id="NUMBER">%s</xliff:g>"\n" ile kişi oluştur"</string>
 </resources>
