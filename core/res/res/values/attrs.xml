@@ -2879,6 +2879,11 @@
              results for "bo", it would not be queried again for "bob".
              The default value is <code>false</code>. <i>Optional attribute.</i>. -->
         <attr name="queryAfterZeroResults" format="boolean" />
+        
+        <!-- If provided, this string will be used to describe the searchable item in the
+             searchable items settings within system search settings. <i>Optional
+             attribute.</i> -->
+        <attr name="searchSettingsDescription" format="string" />
 
     </declare-styleable>
 
