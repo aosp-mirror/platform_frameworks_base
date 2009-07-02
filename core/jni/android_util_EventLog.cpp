@@ -51,17 +51,17 @@ struct ByteBuf {
     size_t len;
     size_t capacity;
     uint8_t* buf;
-    
+
     ByteBuf(size_t initSize) {
         buf = (uint8_t*)malloc(initSize);
         len = 0;
-        capacity = initSize;        
+        capacity = initSize;
     }
-    
+
     ~ByteBuf() {
         free(buf);
     }
-    
+
     bool ensureExtraCapacity(size_t extra) {
         size_t spaceNeeded = len + extra;
         if (spaceNeeded > capacity) {
@@ -77,7 +77,7 @@ struct ByteBuf {
             return true;
         }
     }
- 
+
     void putIntEvent(jint value) {
         bool succeeded = ensureExtraCapacity(INT_BUFFER_SIZE);
         buf[len++] = EVENT_TYPE_INT;
@@ -162,7 +162,7 @@ static jint android_util_EventLog_writeEvent_Integer(JNIEnv* env, jobject clazz,
  * In class android.util.EventLog:
  *  static native int writeEvent(long tag, long value)
  */
-static jint android_util_EventLog_writeEvent_Long(JNIEnv* env, jobject clazz, 
+static jint android_util_EventLog_writeEvent_Long(JNIEnv* env, jobject clazz,
                                                   jint tag, jlong value)
 {
     return android_btWriteLog(tag, EVENT_TYPE_LONG, &value, sizeof(value));
@@ -210,6 +210,8 @@ static jint android_util_EventLog_writeEvent_String(JNIEnv* env, jobject clazz,
 /*
  * In class android.util.EventLog:
  *  static native void readEvents(int[] tags, Collection<Event> output)
+ *
+ *  Reads events from the event log, typically /dev/log/events
  */
 static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz,
                                              jintArray tags,
@@ -273,6 +275,80 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz,
     env->ReleaseIntArrayElements(tags, tagValues, 0);
 }
 
+/*
+ * In class android.util.EventLog:
+ *  static native void readEvents(String path, Collection<Event> output)
+ *
+ *  Reads events from a file (See Checkin.Aggregation). Events are stored in
+ *  native raw format (logger_entry + payload).
+ */
+static void android_util_EventLog_readEventsFile(JNIEnv* env, jobject clazz, jstring path,
+            jobject out) {
+    if (path == NULL || out == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        return;
+    }
+
+    const char *pathString = env->GetStringUTFChars(path, 0);
+    int fd = open(pathString, O_RDONLY | O_NONBLOCK);
+    env->ReleaseStringUTFChars(path, pathString);
+
+    if (fd < 0) {
+        jniThrowIOException(env, errno);
+        return;
+    }
+
+    uint8_t buf[LOGGER_ENTRY_MAX_LEN];
+    for (;;) {
+        // read log entry structure from file
+        int len = read(fd, buf, sizeof(logger_entry));
+        if (len == 0) {
+            break; // end of file
+        } else if (len < 0) {
+            jniThrowIOException(env, errno);
+        } else if ((size_t) len < sizeof(logger_entry)) {
+            jniThrowException(env, "java/io/IOException", "Event header too short");
+            break;
+        }
+
+        // read event payload
+        logger_entry* entry = (logger_entry*) buf;
+        if (entry->len > LOGGER_ENTRY_MAX_PAYLOAD) {
+            jniThrowException(env,
+                    "java/lang/IllegalArgumentException",
+                    "Too much data for event payload. Corrupt file?");
+            break;
+        }
+
+        len = read(fd, buf + sizeof(logger_entry), entry->len);
+        if (len == 0) {
+            break; // end of file
+        } else if (len < 0) {
+            jniThrowIOException(env, errno);
+        } else if ((size_t) len < entry->len) {
+            jniThrowException(env, "java/io/IOException", "Event payload too short");
+            break;
+        }
+
+        // create EventLog$Event and add it to the collection
+        int buffer_size = sizeof(logger_entry) + entry->len;
+        jbyteArray array = env->NewByteArray(buffer_size);
+        if (array == NULL) break;
+
+        jbyte *bytes = env->GetByteArrayElements(array, NULL);
+        memcpy(bytes, buf, buffer_size);
+        env->ReleaseByteArrayElements(array, bytes, 0);
+
+        jobject event = env->NewObject(gEventClass, gEventInitID, array);
+        if (event == NULL) break;
+
+        env->CallBooleanMethod(out, gCollectionAddID, event);
+        env->DeleteLocalRef(event);
+        env->DeleteLocalRef(array);
+    }
+
+    close(fd);
+}
 
 /*
  * JNI registration.
@@ -292,6 +368,10 @@ static JNINativeMethod gRegisterMethods[] = {
     { "readEvents",
       "([ILjava/util/Collection;)V",
       (void*) android_util_EventLog_readEvents
+    },
+    { "readEvents",
+      "(Ljava/lang/String;Ljava/util/Collection;)V",
+      (void*) android_util_EventLog_readEventsFile
     }
 };
 
