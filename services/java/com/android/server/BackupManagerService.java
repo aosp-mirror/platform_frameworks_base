@@ -33,6 +33,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.net.Uri;
+import android.provider.Settings;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -42,7 +43,6 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -74,9 +74,9 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
 
-    // Persistent properties
-    private static final String BACKUP_TRANSPORT_PROPERTY = "persist.service.bkup.trans";
-    private static final String BACKUP_ENABLED_PROPERTY = "persist.service.bkup.enabled";
+    // Secure settings
+    private static final String BACKUP_TRANSPORT_SETTING = "backup_transport";
+    private static final String BACKUP_ENABLED_SETTING = "backup_enabled";
 
     // Default time to wait after data changes before we back up the data
     private static final long COLLECTION_INTERVAL = 3 * 60 * 1000;
@@ -166,7 +166,8 @@ class BackupManagerService extends IBackupManager.Stub {
         // Set up our bookkeeping
         // !!! STOPSHIP: make this disabled by default so that we then gate on
         //               setupwizard or other opt-out UI
-        mEnabled = SystemProperties.getBoolean(BACKUP_ENABLED_PROPERTY, true);
+        mEnabled = (Settings.Secure.getInt(mContext.getContentResolver(),
+                BACKUP_ENABLED_SETTING, 1) != 0);
         mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mDataDir = Environment.getDownloadCacheDirectory();
 
@@ -191,8 +192,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
         mGoogleTransport = null;
         // !!! TODO: set up the default transport name "the right way"
-        mCurrentTransport = SystemProperties.get(BACKUP_TRANSPORT_PROPERTY,
-                "com.google.android.backup/.BackupTransportService");
+        mCurrentTransport = Settings.Secure.getString(mContext.getContentResolver(),
+                BACKUP_TRANSPORT_SETTING);
+        if (mCurrentTransport == null) {
+            mCurrentTransport = "com.google.android.backup/.BackupTransportService";
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    BACKUP_TRANSPORT_SETTING, mCurrentTransport);
+        }
         if (DEBUG) Log.v(TAG, "Starting with transport " + mCurrentTransport);
 
         // Attach to the Google backup transport.  When this comes up, it will set
@@ -1148,7 +1154,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
         boolean wasEnabled = mEnabled;
         synchronized (this) {
-            SystemProperties.set(BACKUP_ENABLED_PROPERTY, enable ? "true" : "false");
+            Settings.Secure.putInt(mContext.getContentResolver(), BACKUP_ENABLED_SETTING,
+                    enable ? 1 : 0);
             mEnabled = enable;
         }
 
@@ -1206,7 +1213,8 @@ class BackupManagerService extends IBackupManager.Stub {
             if (mTransports.get(transport) != null) {
                 prevTransport = mCurrentTransport;
                 mCurrentTransport = transport;
-                SystemProperties.set(BACKUP_TRANSPORT_PROPERTY, transport);
+                Settings.Secure.putString(mContext.getContentResolver(), BACKUP_TRANSPORT_SETTING,
+                        transport);
                 Log.v(TAG, "selectBackupTransport() set " + mCurrentTransport
                         + " returning " + prevTransport);
             } else {
@@ -1334,13 +1342,14 @@ class BackupManagerService extends IBackupManager.Stub {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
+            pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled"));
             pw.println("Available transports:");
             for (String t : listAllTransports()) {
                 String pad = (t.equals(mCurrentTransport)) ? "  * " : "    ";
                 pw.println(pad + t);
             }
             int N = mBackupParticipants.size();
-            pw.println("Participants:");
+            pw.println("Participants: " + N);
             for (int i=0; i<N; i++) {
                 int uid = mBackupParticipants.keyAt(i);
                 pw.print("  uid: ");
