@@ -38,12 +38,6 @@ enum CallbackMessageID {
     kErrorCallback = 5
 };
 
-enum CameraError {
-    kCameraErrorUnknown = 1,
-    kCameraErrorMediaServer = 100
-};
-
-
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
