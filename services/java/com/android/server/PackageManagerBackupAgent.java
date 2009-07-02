@@ -59,7 +59,14 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     private List<PackageInfo> mAllPackages;
     private PackageManager mPackageManager;
+    // version & signature info of each app in a restore set
     private HashMap<String, Metadata> mRestoredSignatures;
+    // The version info of each backed-up app as read from the state file
+    private HashMap<String, Metadata> mStateVersions = new HashMap<String, Metadata>();
+
+    private final HashSet<String> mExisting = new HashSet<String>();
+    private int mStoredSdkVersion;
+    private String mStoredIncrementalVersion;
 
     public class Metadata {
         public int versionCode;
@@ -96,35 +103,78 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
         ByteArrayOutputStream bufStream = new ByteArrayOutputStream();  // we'll reuse these
         DataOutputStream outWriter = new DataOutputStream(bufStream);
-        HashSet<String> existing = parseStateFile(oldState);
+        parseStateFile(oldState);
+
+        // If the stored version string differs, we need to re-backup all
+        // of the metadata.  We force this by removing everything from the
+        // "already backed up" map built by parseStateFile().
+        if (mStoredIncrementalVersion == null
+                || !mStoredIncrementalVersion.equals(Build.VERSION.INCREMENTAL)) {
+            Log.i(TAG, "Previous metadata " + mStoredIncrementalVersion + " mismatch vs "
+                    + Build.VERSION.INCREMENTAL + " - rewriting");
+            mExisting.clear();
+        }
 
         try {
             /*
              * Global metadata:
              *
-             * int version -- the SDK version of the OS itself on the device
-             *                that produced this backup set.  Used to reject
-             *                backups from later OSes onto earlier ones.
+             * int SDKversion -- the SDK version of the OS itself on the device
+             *                   that produced this backup set.  Used to reject
+             *                   backups from later OSes onto earlier ones.
+             * String incremental -- the incremental release name of the OS stored in
+             *                       the backup set.
              */
-            if (!existing.contains(GLOBAL_METADATA_KEY)) {
+            if (!mExisting.contains(GLOBAL_METADATA_KEY)) {
                 if (DEBUG) Log.v(TAG, "Storing global metadata key");
                 outWriter.writeInt(Build.VERSION.SDK_INT);
+                outWriter.writeUTF(Build.VERSION.INCREMENTAL);
                 byte[] metadata = bufStream.toByteArray();
                 data.writeEntityHeader(GLOBAL_METADATA_KEY, metadata.length);
                 data.writeEntityData(metadata, metadata.length);
             } else {
                 if (DEBUG) Log.v(TAG, "Global metadata key already stored");
+                // don't consider it to have been skipped/deleted
+                mExisting.remove(GLOBAL_METADATA_KEY);
             }
 
             // For each app we have on device, see if we've backed it up yet.  If not,
             // write its signature block to the output, keyed on the package name.
             for (PackageInfo pkg : mAllPackages) {
                 String packName = pkg.packageName;
-                if (!existing.contains(packName)) {
-                    // We haven't stored this app's signatures yet, so we do that now
+                if (packName.equals(GLOBAL_METADATA_KEY)) {
+                    // We've already handled the metadata key; skip it here
+                    continue;
+                } else {
+                    PackageInfo info = null;
                     try {
-                        PackageInfo info = mPackageManager.getPackageInfo(packName,
+                        info = mPackageManager.getPackageInfo(packName,
                                 PackageManager.GET_SIGNATURES);
+                    } catch (NameNotFoundException e) {
+                        // Weird; we just found it, and now are told it doesn't exist.
+                        // Treat it as having been removed from the device.
+                        mExisting.add(packName);
+                        continue;
+                    }
+
+                    boolean doBackup = false;
+                    if (!mExisting.contains(packName)) {
+                        // We haven't backed up this app before
+                        doBackup = true;
+                    } else {
+                        // We *have* backed this one up before.  Check whether the version
+                        // of the backup matches the version of the current app; if they
+                        // don't match, the app has been updated and we need to store its
+                        // metadata again.  In either case, take it out of mExisting so that
+                        // we don't consider it deleted later.
+                        if (info.versionCode != mStateVersions.get(packName).versionCode) {
+                            doBackup = true;
+                        }
+                        mExisting.remove(packName);
+                    }
+
+                    if (doBackup) {
+                        // We need to store this app's metadata
                         /*
                          * Metadata for each package:
                          *
@@ -132,7 +182,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                          * byte[] signatures -- [len] flattened Signature[] of the package
                          */
 
-                        // marshall the version code in a canonical form
+                        // marshal the version code in a canonical form
                         bufStream.reset();
                         outWriter.writeInt(info.versionCode);
                         byte[] versionBuf = bufStream.toByteArray();
@@ -150,18 +200,6 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         data.writeEntityHeader(packName, versionBuf.length + sigs.length);
                         data.writeEntityData(versionBuf, versionBuf.length);
                         data.writeEntityData(sigs, sigs.length);
-                    } catch (NameNotFoundException e) {
-                        // Weird; we just found it, and now are told it doesn't exist.
-                        // Treat it as having been removed from the device.
-                        existing.add(packName);
-                    }
-                } else {
-                    // We've already backed up this app.  Remove it from the set so
-                    // we can tell at the end what has disappeared from the device.
-                    // !!! TODO: take out the debugging message
-                    if (DEBUG) Log.v(TAG, "= already backed up metadata for " + packName);
-                    if (!existing.remove(packName)) {
-                        Log.d(TAG, "*** failed to remove " + packName + " from package set!");
                     }
                 }
             }
@@ -169,7 +207,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // At this point, the only entries in 'existing' are apps that were
             // mentioned in the saved state file, but appear to no longer be present
             // on the device.  Write a deletion entity for them.
-            for (String app : existing) {
+            for (String app : mExisting) {
                 // !!! TODO: take out this msg
                 if (DEBUG) Log.v(TAG, "- removing metadata for deleted pkg " + app);
                 try {
@@ -212,17 +250,21 @@ public class PackageManagerBackupAgent extends BackupAgent {
             DataInputStream in = new DataInputStream(baStream);
 
             if (key.equals(GLOBAL_METADATA_KEY)) {
-                storedSystemVersion = in.readInt();
+                int storedSdkVersion = in.readInt();
                 if (DEBUG) Log.v(TAG, "   storedSystemVersion = " + storedSystemVersion);
                 if (storedSystemVersion > Build.VERSION.SDK_INT) {
                     // returning before setting the sig map means we rejected the restore set
                     Log.w(TAG, "Restore set was from a later version of Android; not restoring");
                     return;
                 }
+                mStoredSdkVersion = storedSdkVersion;
+                mStoredIncrementalVersion = in.readUTF();
                 // !!! TODO: remove this debugging output
                 if (DEBUG) {
                     Log.i(TAG, "Restore set version " + storedSystemVersion
-                            + " is compatible with OS version " + Build.VERSION.SDK_INT);
+                            + " is compatible with OS version " + Build.VERSION.SDK_INT
+                            + " (" + mStoredIncrementalVersion + " vs "
+                            + Build.VERSION.INCREMENTAL + ")");
                 }
             } else {
                 // it's a file metadata record
@@ -299,31 +341,45 @@ public class PackageManagerBackupAgent extends BackupAgent {
     }
 
     // Util: parse out an existing state file into a usable structure
-    private HashSet<String> parseStateFile(ParcelFileDescriptor stateFile) {
-        HashSet<String> set = new HashSet<String>();
+    private void parseStateFile(ParcelFileDescriptor stateFile) {
+        mExisting.clear();
+        mStateVersions.clear();
+        mStoredSdkVersion = 0;
+        mStoredIncrementalVersion = null;
+
         // The state file is just the list of app names we have stored signatures for
+        // with the exception of the metadata block, to which is also appended the
+        // version numbers corresponding with the last time we wrote this PM block.
+        // If they mismatch the current system, we'll re-store the metadata key.
         FileInputStream instream = new FileInputStream(stateFile.getFileDescriptor());
         DataInputStream in = new DataInputStream(instream);
 
         int bufSize = 256;
         byte[] buf = new byte[bufSize];
         try {
-            int nameSize = in.readInt();
-            if (bufSize < nameSize) {
-                bufSize = nameSize + 32;
-                buf = new byte[bufSize];
+            String pkg = in.readUTF();
+            if (pkg.equals(GLOBAL_METADATA_KEY)) {
+                mStoredSdkVersion = in.readInt();
+                mStoredIncrementalVersion = in.readUTF();
+                mExisting.add(GLOBAL_METADATA_KEY);
+            } else {
+                Log.e(TAG, "No global metadata in state file!");
+                return;
             }
-            in.read(buf, 0, nameSize);
-            String pkg = new String(buf, 0, nameSize);
-            set.add(pkg);
+
+            // The global metadata was first; now read all the apps
+            while (true) {
+                pkg = in.readUTF();
+                int versionCode = in.readInt();
+                mExisting.add(pkg);
+                mStateVersions.put(pkg, new Metadata(versionCode, null));
+            }
         } catch (EOFException eof) {
             // safe; we're done
         } catch (IOException e) {
             // whoops, bad state file.  abort.
-            Log.e(TAG, "Unable to read Package Manager state file");
-            return null;
+            Log.e(TAG, "Unable to read Package Manager state file: " + e);
         }
-        return set;
     }
 
     // Util: write out our new backup state file
@@ -333,15 +389,14 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
         try {
             // by the time we get here we know we've stored the global metadata record
-            byte[] metaNameBuf = GLOBAL_METADATA_KEY.getBytes();
-            out.writeInt(metaNameBuf.length);
-            out.write(metaNameBuf);
+            out.writeUTF(GLOBAL_METADATA_KEY);
+            out.writeInt(Build.VERSION.SDK_INT);
+            out.writeUTF(Build.VERSION.INCREMENTAL);
 
             // now write all the app names too
             for (PackageInfo pkg : pkgs) {
-                byte[] pkgNameBuf = pkg.packageName.getBytes();
-                out.writeInt(pkgNameBuf.length);
-                out.write(pkgNameBuf);
+                out.writeUTF(pkg.packageName);
+                out.writeInt(pkg.versionCode);
             }
         } catch (IOException e) {
             Log.e(TAG, "Unable to write package manager state file!");

@@ -24,8 +24,7 @@ LOCAL_SRC_FILES:= \
 	Region.cpp \
 	Surface.cpp \
 	SurfaceComposerClient.cpp \
-	SurfaceFlingerSynchro.cpp \
-	Time.cpp
+	SurfaceFlingerSynchro.cpp 
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \

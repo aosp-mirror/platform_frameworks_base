@@ -20,11 +20,14 @@ package com.android.internal.telephony.cdma;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
+import android.preference.PreferenceManager;
 import android.util.Config;
 import android.util.Log;
 
@@ -64,17 +67,12 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         Log.d(TAG, "handleStatusReport is a special GSM function, should never be called in CDMA!");
     }
 
-    /**
-     * Dispatches an incoming SMS messages.
-     *
-     * @param smsb the incoming message from the phone
-     */
-    protected void dispatchMessage(SmsMessageBase smsb) {
+    /** {@inheritDoc} */
+    protected int dispatchMessage(SmsMessageBase smsb) {
 
         // If sms is null, means there was a parsing error.
-        // TODO: Should NAK this.
         if (smsb == null) {
-            return;
+            return Intents.RESULT_SMS_GENERIC_ERROR;
         }
 
         // Decode BD stream and set sms variables.
@@ -83,27 +81,6 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         int teleService = sms.getTeleService();
         boolean handled = false;
 
-        // Teleservices W(E)MT and VMN are handled together:
-        if ((teleService == SmsEnvelope.TELESERVICE_WMT)
-                || (teleService == SmsEnvelope.TELESERVICE_WEMT)
-                || (teleService == SmsEnvelope.TELESERVICE_VMN)) {
-            // From here on we need decoded BD.
-            // Special case the message waiting indicator messages
-            if (sms.isMWISetMessage()) {
-                mCdmaPhone.updateMessageWaitingIndicator(true);
-                handled |= sms.isMwiDontStore();
-                if (Config.LOGD) {
-                    Log.d(TAG, "Received voice mail indicator set SMS shouldStore=" + !handled);
-                }
-            } else if (sms.isMWIClearMessage()) {
-                mCdmaPhone.updateMessageWaitingIndicator(false);
-                handled |= sms.isMwiDontStore();
-                if (Config.LOGD) {
-                    Log.d(TAG, "Received voice mail indicator clear SMS shouldStore=" + !handled);
-                }
-            }
-        }
-
         if (sms.getUserData() == null) {
             if (Config.LOGD) {
                 Log.d(TAG, "Received SMS without user data");
@@ -111,11 +88,25 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             handled = true;
         }
 
-        if (handled) return;
+        if (handled) {
+            return Intents.RESULT_SMS_HANDLED;
+        }
 
         if (SmsEnvelope.TELESERVICE_WAP == teleService){
-            processCdmaWapPdu(sms.getUserData(), sms.messageRef, sms.getOriginatingAddress());
-            return;
+            return processCdmaWapPdu(sms.getUserData(), sms.messageRef,
+                    sms.getOriginatingAddress());
+        } else if (SmsEnvelope.TELESERVICE_VMN == teleService) {
+            // handling Voicemail
+            int voicemailCount = sms.getNumOfVoicemails();
+            Log.d(TAG, "Voicemail count=" + voicemailCount);
+            // Store the voicemail count in preferences.
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(
+                    ((CDMAPhone) mPhone).getContext());
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putInt(CDMAPhone.VM_COUNT_CDMA, voicemailCount);
+            editor.commit();
+            ((CDMAPhone) mPhone).updateMessageWaitingIndicator(voicemailCount);
+            return Intents.RESULT_SMS_HANDLED;
         }
 
         /**
@@ -145,17 +136,19 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             if (smsHeader != null && smsHeader.portAddrs != null) {
                 if (smsHeader.portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
                     // GSM-style WAP indication
-                    mWapPush.dispatchWapPdu(sms.getUserData());
+                    return mWapPush.dispatchWapPdu(sms.getUserData());
+                } else {
+                    // The message was sent to a port, so concoct a URI for it.
+                    dispatchPortAddressedPdus(pdus, smsHeader.portAddrs.destPort);
                 }
-                // The message was sent to a port, so concoct a URI for it.
-                dispatchPortAddressedPdus(pdus, smsHeader.portAddrs.destPort);
             } else {
                 // Normal short and non-port-addressed message, dispatch it.
                 dispatchPdus(pdus);
             }
+            return Activity.RESULT_OK;
         } else {
             // Process the message part.
-            processMessagePart(sms, smsHeader.concatRef, smsHeader.portAddrs);
+            return processMessagePart(sms, smsHeader.concatRef, smsHeader.portAddrs);
         }
     }
 
@@ -165,29 +158,35 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
      * WDP segments are gathered until a datagram completes and gets dispatched.
      *
      * @param pdu The WAP-WDP PDU segment
+     * @return a result code from {@link Telephony.Sms.Intents}, or
+     *         {@link Activity#RESULT_OK} if the message has been broadcast
+     *         to applications
      */
-    protected void processCdmaWapPdu(byte[] pdu, int referenceNumber, String address) {
+    protected int processCdmaWapPdu(byte[] pdu, int referenceNumber, String address) {
         int segment;
         int totalSegments;
         int index = 0;
         int msgType;
 
-        int sourcePort;
-        int destinationPort;
+        int sourcePort = 0;
+        int destinationPort = 0;
 
         msgType = pdu[index++];
         if (msgType != 0){
             Log.w(TAG, "Received a WAP SMS which is not WDP. Discard.");
-            return;
+            return Intents.RESULT_SMS_HANDLED;
         }
         totalSegments = pdu[index++]; // >=1
         segment = pdu[index++]; // >=0
 
-        //process WDP segment
-        sourcePort = (0xFF & pdu[index++]) << 8;
-        sourcePort |= 0xFF & pdu[index++];
-        destinationPort = (0xFF & pdu[index++]) << 8;
-        destinationPort |= 0xFF & pdu[index++];
+        // Only the first segment contains sourcePort and destination Port
+        if (segment == 0) {
+            //process WDP segment
+            sourcePort = (0xFF & pdu[index++]) << 8;
+            sourcePort |= 0xFF & pdu[index++];
+            destinationPort = (0xFF & pdu[index++]) << 8;
+            destinationPort |= 0xFF & pdu[index++];
+        }
 
         // Lookup all other related parts
         StringBuilder where = new StringBuilder("reference_number =");
@@ -217,7 +216,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
                 mResolver.insert(mRawUri, values);
 
-                return;
+                return Intents.RESULT_SMS_HANDLED;
             }
 
             // All the parts are in place, deal with them
@@ -228,6 +227,11 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             for (int i = 0; i < cursorCount; i++) {
                 cursor.moveToNext();
                 int cursorSequence = (int)cursor.getLong(sequenceColumn);
+                // Read the destination port from the first segment
+                if (cursorSequence == 0) {
+                    int destinationPortColumn = cursor.getColumnIndex("destination_port");
+                    destinationPort = (int)cursor.getLong(destinationPortColumn);
+                }
                 pdus[cursorSequence] = HexDump.hexStringToByteArray(
                         cursor.getString(pduColumn));
             }
@@ -237,7 +241,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             mResolver.delete(mRawUri, where.toString(), whereArgs);
         } catch (SQLException e) {
             Log.e(TAG, "Can't access multipart SMS database", e);
-            return;  // TODO: NACK the message or something, don't just discard.
+            return Intents.RESULT_SMS_GENERIC_ERROR;
         } finally {
             if (cursor != null) cursor.close();
         }
@@ -257,15 +261,14 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         switch (destinationPort) {
         case SmsHeader.PORT_WAP_PUSH:
             // Handle the PUSH
-            mWapPush.dispatchWapPdu(datagram);
-            break;
+            return mWapPush.dispatchWapPdu(datagram);
 
         default:{
             pdus = new byte[1][];
             pdus[0] = datagram;
             // The messages were sent to any other WAP port
             dispatchPortAddressedPdus(pdus, destinationPort);
-            break;
+            return Activity.RESULT_OK;
         }
         }
     }

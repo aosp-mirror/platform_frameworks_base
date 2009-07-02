@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, The Android Open Source Project
+ * Copyright (C) 2009, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,15 @@ import java.io.IOException;
  * The service that manages the L2TP VPN connection.
  */
 class L2tpService extends VpnService<L2tpProfile> {
-    private static final String L2TP_SERVICE = "mtpd";
+    static final String L2TP_DAEMON = "l2tp";
+    static final String L2TP_PORT = "1701";
 
     @Override
     protected void connect(String serverIp, String username, String password)
             throws IOException {
-        String hostIp = getHostIp();
-
-        // L2TP
-        AndroidServiceProxy l2tpService = startService(L2TP_SERVICE);
-        l2tpService.sendCommand2("l2tp", serverIp, "1701", "",
-                    "file", getPppOptionFilePath(),
-                    "name", username,
-                    "password", password);
+        L2tpProfile p = getProfile();
+        MtpdHelper.sendCommand(this, L2TP_DAEMON, serverIp, L2TP_PORT,
+                (p.isSecretEnabled() ? p.getSecretString() : null),
+                username, password);
     }
-
 }

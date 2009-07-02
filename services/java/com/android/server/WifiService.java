@@ -1349,39 +1349,42 @@ public class WifiService extends IWifiManager.Stub {
                         level = 0;
                     }
 
+                    /*
+                     * The formatting of the results returned by
+                     * wpa_supplicant is intended to make the fields
+                     * line up nicely when printed,
+                     * not to make them easy to parse. So we have to
+                     * apply some heuristics to figure out which field
+                     * is the SSID and which field is the flags.
+                     */
+                    String ssid;
+                    String flags;
+                    if (result.length == 4) {
+                        if (result[3].charAt(0) == '[') {
+                            flags = result[3];
+                            ssid = "";
+                        } else {
+                            flags = "";
+                            ssid = result[3];
+                        }
+                    } else if (result.length == 5) {
+                        flags = result[3];
+                        ssid = result[4];
+                    } else {
+                        // Here, we must have 3 fields: no flags and ssid
+                        // set
+                        flags = "";
+                        ssid = "";
+                    }
+
                     // bssid is the hash key
                     scanResult = mScanResultCache.get(bssid);
                     if (scanResult != null) {
                         scanResult.level = level;
+                        scanResult.SSID = ssid;
+                        scanResult.capabilities = flags;
+                        scanResult.frequency = frequency;
                     } else {
-                        /*
-                         * The formatting of the results returned by
-                         * wpa_supplicant is intended to make the fields
-                         * line up nicely when printed,
-                         * not to make them easy to parse. So we have to
-                         * apply some heuristics to figure out which field
-                         * is the SSID and which field is the flags.
-                         */
-                        String ssid;
-                        String flags;
-                        if (result.length == 4) {
-                            if (result[3].charAt(0) == '[') {
-                                flags = result[3];
-                                ssid = "";
-                            } else {
-                                flags = "";
-                                ssid = result[3];
-                            }
-                        } else if (result.length == 5) {
-                            flags = result[3];
-                            ssid = result[4];
-                        } else {
-                            // Here, we must have 3 fields: no flags and ssid
-                            // set
-                            flags = "";
-                            ssid = "";
-                        }
-
                         // Do not add scan results that have no SSID set
                         if (0 < ssid.trim().length()) {
                             scanResult =

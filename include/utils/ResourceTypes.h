@@ -866,7 +866,7 @@ struct ResTable_config
             uint8_t keyboard;
             uint8_t navigation;
             uint8_t inputFlags;
-            uint8_t pad0;
+            uint8_t inputPad0;
         };
         uint32_t input;
     };
@@ -903,6 +903,23 @@ struct ResTable_config
             uint16_t minorVersion;
         };
         uint32_t version;
+    };
+    
+    enum {
+        SCREENLAYOUT_ANY  = 0x0000,
+        SCREENLAYOUT_SMALL = 0x0001,
+        SCREENLAYOUT_NORMAL = 0x0002,
+        SCREENLAYOUT_LARGE = 0x0003,
+    };
+    
+    union {
+        struct {
+            uint8_t screenLayout;
+            uint8_t screenConfigPad0;
+            uint8_t screenConfigPad1;
+            uint8_t screenConfigPad2;
+        };
+        uint32_t screenConfig;
     };
     
     inline void copyFromDeviceNoSwap(const ResTable_config& o) {
@@ -950,6 +967,8 @@ struct ResTable_config
         diff = (int32_t)(screenSize - o.screenSize);
         if (diff != 0) return diff;
         diff = (int32_t)(version - o.version);
+        if (diff != 0) return diff;
+        diff = (int32_t)(screenLayout - o.screenLayout);
         return (int)diff;
     }
     
@@ -967,7 +986,8 @@ struct ResTable_config
         CONFIG_ORIENTATION = 0x0080,
         CONFIG_DENSITY = 0x0100,
         CONFIG_SCREEN_SIZE = 0x0200,
-        CONFIG_VERSION = 0x0400
+        CONFIG_VERSION = 0x0400,
+        CONFIG_SCREEN_LAYOUT = 0x0800
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value
@@ -985,6 +1005,7 @@ struct ResTable_config
         if (navigation != o.navigation) diffs |= CONFIG_NAVIGATION;
         if (screenSize != o.screenSize) diffs |= CONFIG_SCREEN_SIZE;
         if (version != o.version) diffs |= CONFIG_VERSION;
+        if (screenLayout != o.screenLayout) diffs |= CONFIG_SCREEN_LAYOUT;
         return diffs;
     }
     
@@ -1059,6 +1080,13 @@ struct ResTable_config
             if (screenHeight != o.screenHeight) {
                 if (!screenHeight) return false;
                 if (!o.screenHeight) return true;
+            }
+        }
+
+        if (screenConfig || o.screenConfig) {
+            if (screenLayout != o.screenLayout) {
+                if (!screenLayout) return false;
+                if (!o.screenLayout) return true;
             }
         }
 
@@ -1191,6 +1219,12 @@ struct ResTable_config
                 }
             }
 
+            if (screenConfig || o.screenConfig) {
+                if ((screenLayout != o.screenLayout) && requested->screenLayout) {
+                    return (screenLayout);
+                }
+            }
+
             if (version || o.version) {
                 if ((sdkVersion != o.sdkVersion) && requested->sdkVersion) {
                     return (sdkVersion);
@@ -1282,6 +1316,12 @@ struct ResTable_config
                 return false;
             }
         }
+        if (screenConfig != 0) {
+            if (settings.screenLayout != 0 && screenLayout != 0
+                && screenLayout != settings.screenLayout) {
+                return false;
+            }
+        }
         if (version != 0) {
             if (settings.sdkVersion != 0 && sdkVersion != 0
                 && sdkVersion != settings.sdkVersion) {
@@ -1310,13 +1350,13 @@ struct ResTable_config
 
     String8 toString() const {
         char buf[200];
-        sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=0x%02x touch=0x%02x dens=0x%02x "
-                "kbd=0x%02x nav=0x%02x input=0x%02x screenW=0x%04x screenH=0x%04x vers=%d.%d",
+        sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=%d touch=%d dens=%d "
+                "kbd=%d nav=%d input=%d scrnW=%d scrnH=%d layout=%d vers=%d.%d",
                 mcc, mnc,
                 language[0] ? language[0] : '-', language[1] ? language[1] : '-',
                 country[0] ? country[0] : '-', country[1] ? country[1] : '-',
                 orientation, touchscreen, density, keyboard, navigation, inputFlags,
-                screenWidth, screenHeight, sdkVersion, minorVersion);
+                screenWidth, screenHeight, screenLayout, sdkVersion, minorVersion);
         return String8(buf);
     }
 };

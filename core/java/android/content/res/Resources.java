@@ -1267,7 +1267,8 @@ public class Resources {
             }
             if (metrics != null) {
                 mMetrics.setTo(metrics);
-                mMetrics.updateMetrics(mCompatibilityInfo, mConfiguration.orientation);
+                mMetrics.updateMetrics(mCompatibilityInfo,
+                        mConfiguration.orientation, mConfiguration.screenLayout);
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
 
@@ -1299,7 +1300,7 @@ public class Resources {
                     mConfiguration.touchscreen,
                     (int)(mMetrics.density*160), mConfiguration.keyboard,
                     keyboardHidden, mConfiguration.navigation, width, height,
-                    sSdkVersion);
+                    mConfiguration.screenLayout, sSdkVersion);
             int N = mDrawableCache.size();
             if (DEBUG_CONFIG) {
                 Log.d(TAG, "Cleaning up drawables config changes: 0x"

@@ -154,6 +154,9 @@
         <item name="progressBarStyleSmall">@android:style/Widget.ProgressBar.Small</item>
         <item name="progressBarStyleSmallTitle">@android:style/Widget.ProgressBar.Small.Title</item>
         <item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large</item>
+        <item name="progressBarStyleInverse">@android:style/Widget.ProgressBar.Inverse</item>
+		<item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small.Inverse</item>
+	    <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large.Inverse</item> 
         <item name="seekBarStyle">@android:style/Widget.SeekBar</item>
         <item name="ratingBarStyle">@android:style/Widget.RatingBar</item>
         <item name="ratingBarStyleIndicator">@android:style/Widget.RatingBar.Indicator</item>
@@ -233,6 +236,13 @@
         <item name="listViewStyle">@android:style/Widget.ListView.White</item>
         <item name="listDivider">@drawable/divider_horizontal_bright</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator.White</item>
+        
+        <item name="progressBarStyle">@android:style/Widget.ProgressBar.Inverse</item>
+		<item name="progressBarStyleSmall">@android:style/Widget.ProgressBar.Small.Inverse</item>
+		<item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large.Inverse</item>
+		<item name="progressBarStyleInverse">@android:style/Widget.ProgressBar</item>
+		<item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small</item>
+		<item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large</item> 
     </style>
     
     <!-- Variant of the light theme with no title bar -->

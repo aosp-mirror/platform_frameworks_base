@@ -199,16 +199,29 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         if (wav == NULL) {
             delete pForAfter;
             LOGV("Null: speech has completed");
+            return TTS_CALLBACK_HALT;
         }
         if (bufferSize > 0){
             fwrite(wav, 1, bufferSize, pForAfter->outputFile);
         }
     }
-    // TODO update to call back into the SynthProxy class through the
+    // Future update:
+    //      For sync points in the speech, call back into the SynthProxy class through the
     //      javaTTSFields.synthProxyMethodPost methode to notify
-    //      playback has completed if the synthesis is done, i.e.
-    //      if status == TTS_SYNTH_DONE
-    //delete pForAfter;
+    //      playback has completed if the synthesis is done or if a marker has been reached.
+
+    if (status == TTS_SYNTH_DONE) {
+        // this struct was allocated in the original android_tts_SynthProxy_speak call,
+        // all processing matching this call is now done.
+        LOGV("Speech synthesis done.");
+        if (pForAfter->usageMode == USAGEMODE_PLAY_IMMEDIATELY) {
+            // only delete for direct playback. When writing to a file, we still have work to do
+            // in android_tts_SynthProxy_synthesizeToFile. The struct will be deleted there.
+            delete pForAfter;
+            pForAfter = NULL;
+        }
+        return TTS_CALLBACK_HALT;
+    }
 
     // we don't update the wav (output) parameter as we'll let the next callback
     // write at the same location, we've consumed the data already, but we need
@@ -270,6 +283,33 @@ android_tts_SynthProxy_native_finalize(JNIEnv *env, jobject thiz, jint jniData)
 }
 
 
+static int
+android_tts_SynthProxy_isLanguageAvailable(JNIEnv *env, jobject thiz, jint jniData,
+        jstring language, jstring country, jstring variant)
+{
+    int result = TTS_LANG_NOT_SUPPORTED;
+
+    if (jniData == 0) {
+        LOGE("android_tts_SynthProxy_isLanguageAvailable(): invalid JNI data");
+        return result;
+    }
+
+    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    const char *langNativeString = env->GetStringUTFChars(language, 0);
+    const char *countryNativeString = env->GetStringUTFChars(country, 0);
+    const char *variantNativeString = env->GetStringUTFChars(variant, 0);
+    // TODO check return codes
+    if (pSynthData->mNativeSynthInterface) {
+        result = pSynthData->mNativeSynthInterface->isLanguageAvailable(langNativeString,
+                countryNativeString, variantNativeString);
+    }
+    env->ReleaseStringUTFChars(language, langNativeString);
+    env->ReleaseStringUTFChars(country, countryNativeString);
+    env->ReleaseStringUTFChars(variant, variantNativeString);
+    return result;
+}
+
+
 static void
 android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
         jstring language, jstring country, jstring variant)
@@ -289,8 +329,32 @@ android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
                 variantNativeString);
     }
     env->ReleaseStringUTFChars(language, langNativeString);
-    env->ReleaseStringUTFChars(language, countryNativeString);
-    env->ReleaseStringUTFChars(language, variantNativeString);
+    env->ReleaseStringUTFChars(country, countryNativeString);
+    env->ReleaseStringUTFChars(variant, variantNativeString);
+}
+
+
+static void
+android_tts_SynthProxy_loadLanguage(JNIEnv *env, jobject thiz, jint jniData,
+        jstring language, jstring country, jstring variant)
+{
+    if (jniData == 0) {
+        LOGE("android_tts_SynthProxy_loadLanguage(): invalid JNI data");
+        return;
+    }
+
+    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    const char *langNativeString = env->GetStringUTFChars(language, 0);
+    const char *countryNativeString = env->GetStringUTFChars(country, 0);
+    const char *variantNativeString = env->GetStringUTFChars(variant, 0);
+    // TODO check return codes
+    if (pSynthData->mNativeSynthInterface) {
+        pSynthData->mNativeSynthInterface->loadLanguage(langNativeString, countryNativeString,
+                variantNativeString);
+    }
+    env->ReleaseStringUTFChars(language, langNativeString);
+    env->ReleaseStringUTFChars(country, countryNativeString);
+    env->ReleaseStringUTFChars(variant, variantNativeString);
 }
 
 
@@ -338,7 +402,6 @@ android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
 }
 
 
-// TODO: Refactor this to get rid of any assumptions about sample rate, etc.
 static void
 android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
         jstring textJavaString, jstring filenameJavaString)
@@ -349,6 +412,21 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    if (!pSynthData->mNativeSynthInterface) {
+        LOGE("android_tts_SynthProxy_synthesizeToFile(): invalid engine handle");
+        return;
+    }
+
+    // Retrieve audio parameters before writing the file header
+    AudioSystem::audio_format encoding = DEFAULT_TTS_FORMAT;
+    uint32_t rate = DEFAULT_TTS_RATE;
+    int channels = DEFAULT_TTS_NB_CHANNELS;
+    pSynthData->mNativeSynthInterface->setAudioFormat(encoding, rate, channels);
+
+    if ((encoding != AudioSystem::PCM_16_BIT) && (encoding != AudioSystem::PCM_8_BIT)) {
+        LOGE("android_tts_SynthProxy_synthesizeToFile(): engine uses invalid format");
+        return;
+    }
 
     const char *filenameNativeString =
             env->GetStringUTFChars(filenameJavaString, 0);
@@ -360,6 +438,12 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     pForAfter->outputFile = fopen(filenameNativeString, "wb");
 
+    if (pForAfter->outputFile == NULL) {
+        LOGE("android_tts_SynthProxy_synthesizeToFile(): error creating output file");
+        delete pForAfter;
+        return;
+    }
+
     // Write 44 blank bytes for WAV header, then come back and fill them in
     // after we've written the audio data
     char header[44];
@@ -368,10 +452,8 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
     unsigned int unique_identifier;
 
     // TODO check return codes
-    if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer, pSynthData->mBufferSize,
-                (void *)pForAfter);
-    }
+    pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer,
+            pSynthData->mBufferSize, (void *)pForAfter);
 
     long filelen = ftell(pForAfter->outputFile);
 
@@ -393,12 +475,14 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     ((uint32_t *)(&header[16]))[0] = 16;  // size of fmt
 
+    int sampleSizeInByte = (encoding == AudioSystem::PCM_16_BIT ? 2 : 1);
+
     ((unsigned short *)(&header[20]))[0] = 1;  // format
-    ((unsigned short *)(&header[22]))[0] = 1;  // channels
-    ((uint32_t *)(&header[24]))[0] = 22050;  // samplerate
-    ((uint32_t *)(&header[28]))[0] = 44100;  // byterate
-    ((unsigned short *)(&header[32]))[0] = 2;  // block align
-    ((unsigned short *)(&header[34]))[0] = 16;  // bits per sample
+    ((unsigned short *)(&header[22]))[0] = channels;  // channels
+    ((uint32_t *)(&header[24]))[0] = rate;  // samplerate
+    ((uint32_t *)(&header[28]))[0] = rate * sampleSizeInByte * channels;// byterate
+    ((unsigned short *)(&header[32]))[0] = sampleSizeInByte * channels;  // block align
+    ((unsigned short *)(&header[34]))[0] = sampleSizeInByte * 8;  // bits per sample
 
     header[36] = 'd';
     header[37] = 'a';
@@ -413,6 +497,9 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     fflush(pForAfter->outputFile);
     fclose(pForAfter->outputFile);
+
+    delete pForAfter;
+    pForAfter = NULL;
 
     env->ReleaseStringUTFChars(textJavaString, textNativeString);
     env->ReleaseStringUTFChars(filenameJavaString, filenameNativeString);
@@ -441,8 +528,8 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 
     if (pSynthData->mNativeSynthInterface) {
         const char *textNativeString = env->GetStringUTFChars(textJavaString, 0);
-        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer, pSynthData->mBufferSize,
-                (void *)pForAfter);
+        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer,
+                pSynthData->mBufferSize, (void *)pForAfter);
         env->ReleaseStringUTFChars(textJavaString, textNativeString);
     }
 }
@@ -501,23 +588,34 @@ LOGI("android_tts_SynthProxy_playAudioBuffer");
 }
 
 
-JNIEXPORT jstring JNICALL
+static jobjectArray
 android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
 {
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_getLanguage(): invalid JNI data");
-        return env->NewStringUTF("");
+        return NULL;
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    size_t bufSize = 100;
-    char buf[bufSize];
-    memset(buf, 0, bufSize);
-    // TODO check return codes
+
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->getLanguage(buf, &bufSize);
+        size_t bufSize = 100;
+        char lang[bufSize];
+        char country[bufSize];
+        char variant[bufSize];
+        memset(lang, 0, bufSize);
+        memset(country, 0, bufSize);
+        memset(variant, 0, bufSize);
+        jobjectArray retLocale = (jobjectArray)env->NewObjectArray(3,
+                env->FindClass("java/lang/String"), env->NewStringUTF(""));
+        pSynthData->mNativeSynthInterface->getLanguage(lang, country, variant);
+        env->SetObjectArrayElement(retLocale, 0, env->NewStringUTF(lang));
+        env->SetObjectArrayElement(retLocale, 1, env->NewStringUTF(country));
+        env->SetObjectArrayElement(retLocale, 2, env->NewStringUTF(variant));
+        return retLocale;
+    } else {
+        return NULL;
     }
-    return env->NewStringUTF(buf);
 }
 
 
@@ -555,9 +653,17 @@ static JNINativeMethod gMethods[] = {
         "(ILjava/lang/String;Ljava/lang/String;)V",
         (void*)android_tts_SynthProxy_synthesizeToFile
     },
+    {   "native_isLanguageAvailable",
+        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
+        (void*)android_tts_SynthProxy_isLanguageAvailable
+    },
     {   "native_setLanguage",
         "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
         (void*)android_tts_SynthProxy_setLanguage
+    },
+    {   "native_loadLanguage",
+        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+        (void*)android_tts_SynthProxy_loadLanguage
     },
     {   "native_setSpeechRate",
         "(II)V",
@@ -572,7 +678,7 @@ static JNINativeMethod gMethods[] = {
         (void*)android_tts_SynthProxy_playAudioBuffer
     },
     {   "native_getLanguage",
-        "(I)Ljava/lang/String;",
+        "(I)[Ljava/lang/String;",
         (void*)android_tts_SynthProxy_getLanguage
     },
     {   "native_getRate",

@@ -64,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 34;
+    private static final int DATABASE_VERSION = 35;
 
     private Context mContext;
 
@@ -386,6 +386,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 34;
         }
 
+        if (upgradeVersion == 34) {
+            db.beginTransaction();
+            try {
+                String value =
+                        mContext.getResources().getBoolean(R.bool.assisted_gps_enabled) ? "1" : "0";
+                db.execSQL("INSERT OR IGNORE INTO secure(name,value) values('" +
+                        Settings.Secure.ASSISTED_GPS_ENABLED + "','" + value + "');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 35;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -592,6 +607,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
                 R.integer.def_screen_off_timeout);
 
+        // Set default cdma emergency tone
+        loadSetting(stmt, Settings.System.EMERGENCY_TONE, 0);
+
+        // Set default cdma call auto retry
+        loadSetting(stmt, Settings.System.CALL_AUTO_RETRY, 0);
+
+        // Set default cdma DTMF type
+        loadSetting(stmt, Settings.System.DTMF_TONE_TYPE_WHEN_DIALING, 0);
+
+        // Set default hearing aid
+        loadSetting(stmt, Settings.System.HEARING_AID, 0);
+
+        // Set default tty mode
+        loadSetting(stmt, Settings.System.TTY_MODE, 0);
+
         loadBooleanSetting(stmt, Settings.System.AIRPLANE_MODE_ON,
                 R.bool.def_airplane_mode_on);
 
@@ -637,6 +667,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                 R.string.def_location_providers_allowed);
+
+        loadBooleanSetting(stmt, Settings.Secure.ASSISTED_GPS_ENABLED,
+                R.bool.assisted_gps_enabled);
 
         loadIntegerSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
                 R.integer.def_network_preference);

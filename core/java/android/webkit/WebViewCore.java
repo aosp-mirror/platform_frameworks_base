@@ -136,7 +136,7 @@ final class WebViewCore {
         // ready.
         mEventHub = new EventHub();
         // Create a WebSettings object for maintaining all settings
-        mSettings = new WebSettings(mContext);
+        mSettings = new WebSettings(mContext, mWebView);
         // The WebIconDatabase needs to be initialized within the UI thread so
         // just request the instance here.
         WebIconDatabase.getInstance();
@@ -346,9 +346,10 @@ final class WebViewCore {
     private native void nativeSplitContent();
 
     private native boolean nativeKey(int keyCode, int unichar,
-            int repeatCount, boolean isShift, boolean isAlt, boolean isDown);
+            int repeatCount, boolean isShift, boolean isAlt, boolean isSym,
+            boolean isDown);
 
-    private native boolean nativeClick();
+    private native void nativeClick(int framePtr, int nodePtr);
 
     private native void nativeSendListBoxChoices(boolean[] choices, int size);
 
@@ -375,7 +376,7 @@ final class WebViewCore {
             String currentText, int keyCode, int keyValue, boolean down,
             boolean cap, boolean fn, boolean sym);
 
-    private native void nativeSetFocusControllerInactive();
+    private native void nativeSetFocusControllerActive(boolean active);
 
     private native void nativeSaveDocumentState(int frame);
 
@@ -405,6 +406,8 @@ final class WebViewCore {
     private native void nativeDumpRenderTree(boolean useFile);
 
     private native void nativeDumpNavTree();
+
+    private native void nativeSetJsFlags(String flags);
 
     /**
      *  Delete text from start to end in the focused textfield. If there is no
@@ -610,7 +613,7 @@ final class WebViewCore {
             "LOAD_DATA", // = 139;
             "TOUCH_UP", // = 140;
             "TOUCH_EVENT", // = 141;
-            "SET_INACTIVE", // = 142;
+            "SET_ACTIVE", // = 142;
             "ON_PAUSE",     // = 143
             "ON_RESUME",    // = 144
             "FREE_MEMORY",  // = 145
@@ -668,7 +671,7 @@ final class WebViewCore {
         // Used to tell the focus controller not to draw the blinking cursor,
         // based on whether the WebView has focus and whether the WebView's
         // cursor matches the webpage's focus.
-        static final int SET_INACTIVE = 142;
+        static final int SET_ACTIVE = 142;
 
         // lifecycle activities for just this DOM (unlike pauseTimers, which
         // is global)
@@ -687,6 +690,8 @@ final class WebViewCore {
         static final int DUMP_DOMTREE = 170;
         static final int DUMP_RENDERTREE = 171;
         static final int DUMP_NAVTREE = 172;
+
+        static final int SET_JS_FLAGS = 173;
 
         // private message ids
         private static final int DESTROY =     200;
@@ -719,9 +724,11 @@ final class WebViewCore {
                 @Override
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
-                        Log.v(LOGTAG, msg.what < LOAD_URL || msg.what
+                        Log.v(LOGTAG, (msg.what < LOAD_URL || msg.what
                                 > FREE_MEMORY ? Integer.toString(msg.what)
-                                : HandlerDebugString[msg.what - LOAD_URL]);
+                                : HandlerDebugString[msg.what - LOAD_URL])
+                                + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
+                                + " obj=" + msg.obj);
                     }
                     switch (msg.what) {
                         case WEBKIT_DRAW:
@@ -803,7 +810,7 @@ final class WebViewCore {
                             break;
 
                         case CLICK:
-                            nativeClick();
+                            nativeClick(msg.arg1, msg.arg2);
                             break;
 
                         case VIEW_SIZE_CHANGED:
@@ -947,8 +954,8 @@ final class WebViewCore {
                             break;
                         }
 
-                        case SET_INACTIVE:
-                            nativeSetFocusControllerInactive();
+                        case SET_ACTIVE:
+                            nativeSetFocusControllerActive(msg.arg1 == 1);
                             break;
 
                         case ADD_JS_INTERFACE:
@@ -1052,6 +1059,10 @@ final class WebViewCore {
 
                         case DUMP_NAVTREE:
                             nativeDumpNavTree();
+                            break;
+
+                        case SET_JS_FLAGS:
+                            nativeSetJsFlags((String)msg.obj);
                             break;
 
                         case SYNC_SCROLL:
@@ -1260,7 +1271,19 @@ final class WebViewCore {
         int keyCode = evt.getKeyCode();
         if (!nativeKey(keyCode, evt.getUnicodeChar(),
                 evt.getRepeatCount(), evt.isShiftPressed(), evt.isAltPressed(),
+                evt.isSymPressed(),
                 isDown) && keyCode != KeyEvent.KEYCODE_ENTER) {
+            if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
+                    && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
+                if (DebugFlags.WEB_VIEW_CORE) {
+                    Log.v(LOGTAG, "key: arrow unused by plugin: " + keyCode);
+                }
+                if (mWebView != null && evt.isDown()) {
+                    Message.obtain(mWebView.mPrivateHandler,
+                            WebView.MOVE_OUT_OF_PLUGIN, keyCode).sendToTarget();
+                }
+                return;
+            }
             // bubble up the event handling
             // but do not bubble up the ENTER key, which would open the search
             // bar without any text.
@@ -1618,6 +1641,20 @@ final class WebViewCore {
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
+        // adjust the default scale to match the density
+        if (WebView.DEFAULT_SCALE_PERCENT != 100) {
+            float adjust = (float) WebView.DEFAULT_SCALE_PERCENT / 100.0f;
+            if (mViewportInitialScale > 0) {
+                mViewportInitialScale *= adjust;
+            }
+            if (mViewportMinimumScale > 0) {
+                mViewportMinimumScale *= adjust;
+            }
+            if (mViewportMaximumScale > 0) {
+                mViewportMaximumScale *= adjust;
+            }
+        }
+
         // infer the values if they are not defined.
         if (mViewportWidth == 0) {
             if (mViewportInitialScale == 0) {
@@ -1722,6 +1759,13 @@ final class WebViewCore {
         }
     }
 
+    // called by JNI
+    private void clearTextEntry() {
+        if (mWebView == null) return;
+        Message.obtain(mWebView.mPrivateHandler,
+                WebView.CLEAR_TEXT_ENTRY).sendToTarget();
+    }
+
     // these must be in document space (i.e. not scaled/zoomed).
     private native void nativeSetScrollOffset(int gen, int dx, int dy);
 
@@ -1742,6 +1786,15 @@ final class WebViewCore {
             mWebView.requestListBox(array, enabledArray, selection);
         }
 
+    }
+
+    // called by JNI
+    private void requestKeyboard(boolean showKeyboard) {
+        if (mWebView != null) {
+            Message.obtain(mWebView.mPrivateHandler,
+                    WebView.REQUEST_KEYBOARD, showKeyboard ? 1 : 0, 0)
+                    .sendToTarget();
+        }
     }
 
     private native void nativePause();

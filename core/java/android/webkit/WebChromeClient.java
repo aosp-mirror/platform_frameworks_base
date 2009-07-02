@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.graphics.Bitmap;
 import android.os.Message;
+import android.view.View;
 
 public class WebChromeClient {
 
@@ -42,6 +43,23 @@ public class WebChromeClient {
      * @param icon A Bitmap containing the favicon for the current page.
      */
     public void onReceivedIcon(WebView view, Bitmap icon) {}
+
+    /**
+     * Notify the host application that the current page would
+     * like to show a custom View.
+     * @param view is the View object to be shown.
+     *
+     * @hide pending council approval
+     */
+    public void onShowCustomView(View view) {}
+
+    /**
+     * Notify the host application that the current page would
+     * like to hide its custom view.
+     *
+     * @hide pending council approval
+     */
+    public void onHideCustomView() {}
 
     /**
      * Request the host application to create a new Webview. The host

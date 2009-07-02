@@ -91,6 +91,17 @@ public class Browser {
      */
     public static final String EXTRA_APPEND_LOCATION = "com.android.browser.append_location";
 
+    /**
+     * The name of the extra data in the VIEW intent. The data is in the format of
+     * a byte array.
+     * <p>
+     * Any value sent here will be passed in the http request to the provided url as post data.
+     * <p>
+     * pending api approval
+     * @hide
+     */
+    public static final String EXTRA_POST_DATA = "com.android.browser.post_data";
+
     /* if you change column order you must also change indices
        below */
     public static final String[] HISTORY_PROJECTION = new String[] {

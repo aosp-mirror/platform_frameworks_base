@@ -78,6 +78,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -418,7 +419,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     final Rect mTempRect = new Rect();
 
     final Configuration mTempConfiguration = new Configuration();
-
+    int screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
+    
     public static WindowManagerService main(Context context,
             PowerManagerService pm, boolean haveInputMethods) {
         WMThread thr = new WMThread(context, pm, haveInputMethods);
@@ -3731,6 +3733,40 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             orientation = Configuration.ORIENTATION_LANDSCAPE;
         }
         config.orientation = orientation;
+        
+        if (screenLayout == Configuration.SCREENLAYOUT_UNDEFINED) {
+            // Note we only do this once because at this point we don't
+            // expect the screen to change in this way at runtime, and want
+            // to avoid all of this computation for every config change.
+            DisplayMetrics dm = new DisplayMetrics();
+            mDisplay.getMetrics(dm);
+            int longSize = dw;
+            int shortSize = dh;
+            if (longSize < shortSize) {
+                int tmp = longSize;
+                longSize = shortSize;
+                shortSize = tmp;
+            }
+            longSize = (int)(longSize/dm.density);
+            shortSize = (int)(shortSize/dm.density);
+            
+            // These semi-magic numbers define our compatibility modes for
+            // applications with different screens.  Don't change unless you
+            // make sure to test lots and lots of apps!
+            if (longSize < 470) {
+                // This is shorter than an HVGA normal density screen (which
+                // is 480 pixels on its long side).
+                screenLayout = Configuration.SCREENLAYOUT_SMALL;
+            } else if (longSize > 490 && shortSize > 330) {
+                // This is larger than an HVGA normal density screen (which
+                // is 480x320 pixels).
+                screenLayout = Configuration.SCREENLAYOUT_LARGE;
+            } else {
+                screenLayout = Configuration.SCREENLAYOUT_NORMAL;
+            }
+        }
+        config.screenLayout = screenLayout;
+        
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
         config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
         mPolicy.adjustConfigurationLw(config);
@@ -3809,7 +3845,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         Object targetObj = mKeyWaiter.waitForNextEventTarget(null, qev,
-                ev, true, false);
+                ev, true, false, pid, uid);
         
         if (MEASURE_LATENCY) {
             lt.sample("3 Last dispatch finished ", System.nanoTime() - qev.whenNano);
@@ -4029,7 +4065,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 TAG, "dispatchTrackball [" + ev.getAction() +"] <" + ev.getX() + ", " + ev.getY() + ">");
 
         Object focusObj = mKeyWaiter.waitForNextEventTarget(null, qev,
-                ev, false, false);
+                ev, false, false, pid, uid);
         if (focusObj == null) {
             Log.w(TAG, "No focus window, dropping trackball: " + ev);
             if (qev != null) {
@@ -4100,7 +4136,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         if (DEBUG_INPUT) Log.v(TAG, "Dispatch key: " + event);
 
         Object focusObj = mKeyWaiter.waitForNextEventTarget(event, null,
-                null, false, false);
+                null, false, false, pid, uid);
         if (focusObj == null) {
             Log.w(TAG, "No focus window, dropping: " + event);
             return INJECT_FAILED;
@@ -4217,10 +4253,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
                 deviceId, scancode, KeyEvent.FLAG_FROM_SYSTEM);
 
-        int result = dispatchKey(newEvent, Binder.getCallingPid(), Binder.getCallingUid());
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        final int result = dispatchKey(newEvent, pid, uid);
         if (sync) {
-            mKeyWaiter.waitForNextEventTarget(null, null, null, false, true);
+            mKeyWaiter.waitForNextEventTarget(null, null, null, false, true, pid, uid);
         }
+        Binder.restoreCallingIdentity(ident);
         switch (result) {
             case INJECT_NO_PERMISSION:
                 throw new SecurityException(
@@ -4241,10 +4281,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * @return Returns true if event was dispatched, false if it was dropped for any reason
      */
     public boolean injectPointerEvent(MotionEvent ev, boolean sync) {
-        int result = dispatchPointer(null, ev, Binder.getCallingPid(), Binder.getCallingUid());
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        final int result = dispatchPointer(null, ev, pid, uid);
         if (sync) {
-            mKeyWaiter.waitForNextEventTarget(null, null, null, false, true);
+            mKeyWaiter.waitForNextEventTarget(null, null, null, false, true, pid, uid);
         }
+        Binder.restoreCallingIdentity(ident);
         switch (result) {
             case INJECT_NO_PERMISSION:
                 throw new SecurityException(
@@ -4265,10 +4309,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * @return Returns true if event was dispatched, false if it was dropped for any reason
      */
     public boolean injectTrackballEvent(MotionEvent ev, boolean sync) {
-        int result = dispatchTrackball(null, ev, Binder.getCallingPid(), Binder.getCallingUid());
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        final int result = dispatchTrackball(null, ev, pid, uid);
         if (sync) {
-            mKeyWaiter.waitForNextEventTarget(null, null, null, false, true);
+            mKeyWaiter.waitForNextEventTarget(null, null, null, false, true, pid, uid);
         }
+        Binder.restoreCallingIdentity(ident);
         switch (result) {
             case INJECT_NO_PERMISSION:
                 throw new SecurityException(
@@ -4377,7 +4425,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
          */
         Object waitForNextEventTarget(KeyEvent nextKey, QueuedEvent qev,
                 MotionEvent nextMotion, boolean isPointerEvent,
-                boolean failIfTimeout) {
+                boolean failIfTimeout, int callingPid, int callingUid) {
             long startTime = SystemClock.uptimeMillis();
             long keyDispatchingTimeout = 5 * 1000;
             long waitedFor = 0;
@@ -4395,7 +4443,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         ", mLastWin=" + mLastWin);
                 if (targetIsNew) {
                     Object target = findTargetWindow(nextKey, qev, nextMotion,
-                            isPointerEvent);
+                            isPointerEvent, callingPid, callingUid);
                     if (target == SKIP_TARGET_TOKEN) {
                         // The user has pressed a special key, and we are
                         // dropping all pending events before it.
@@ -4571,7 +4619,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         Object findTargetWindow(KeyEvent nextKey, QueuedEvent qev,
-                MotionEvent nextMotion, boolean isPointerEvent) {
+                MotionEvent nextMotion, boolean isPointerEvent,
+                int callingPid, int callingUid) {
             mOutsideTouchTargets = null;
 
             if (nextKey != null) {
@@ -4580,9 +4629,16 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 final int repeatCount = nextKey.getRepeatCount();
                 final boolean down = nextKey.getAction() != KeyEvent.ACTION_UP;
                 boolean dispatch = mKeyWaiter.checkShouldDispatchKey(keycode);
+                
                 if (!dispatch) {
-                    mPolicy.interceptKeyTi(null, keycode,
-                            nextKey.getMetaState(), down, repeatCount);
+                    if (callingUid == 0 ||
+                            mContext.checkPermission(
+                                    android.Manifest.permission.INJECT_EVENTS,
+                                    callingPid, callingUid)
+                                    == PackageManager.PERMISSION_GRANTED) {
+                        mPolicy.interceptKeyTi(null, keycode,
+                                nextKey.getMetaState(), down, repeatCount);
+                    }
                     Log.w(TAG, "Event timeout during app switch: dropping "
                             + nextKey);
                     return SKIP_TARGET_TOKEN;
@@ -4597,9 +4653,16 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
                 wakeupIfNeeded(focus, LocalPowerManager.BUTTON_EVENT);
 
-                if (mPolicy.interceptKeyTi(focus,
-                        keycode, nextKey.getMetaState(), down, repeatCount)) {
-                    return CONSUMED_EVENT_TOKEN;
+                if (callingUid == 0 ||
+                        (focus != null && callingUid == focus.mSession.mUid) ||
+                        mContext.checkPermission(
+                                android.Manifest.permission.INJECT_EVENTS,
+                                callingPid, callingUid)
+                                == PackageManager.PERMISSION_GRANTED) {
+                    if (mPolicy.interceptKeyTi(focus,
+                            keycode, nextKey.getMetaState(), down, repeatCount)) {
+                        return CONSUMED_EVENT_TOKEN;
+                    }
                 }
 
                 return focus;

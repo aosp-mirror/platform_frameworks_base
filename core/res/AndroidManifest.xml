@@ -973,7 +973,7 @@
     <permission android:name="android.permission.BACKUP"
         android:label="@string/permlab_backup"
         android:description="@string/permdesc_backup"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to tell the AppWidget service which application
          can access AppWidget's data.  The normal user flow is that a user
@@ -1000,6 +1000,7 @@
                  android:hasCode="false"
                  android:label="@string/android_system_label"
                  android:allowClearUserData="false"
+                 android:backupAgent="com.android.internal.backup.SystemBackupAgent"
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.Dialog.Alert"

@@ -38,7 +38,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.lang.StringBuilder;
-import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,7 +56,6 @@ import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.conn.ssl.StrictHostnameVerifier;
-import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.util.CharArrayBuffer;
 
 import java.util.concurrent.locks.Condition;
@@ -863,12 +861,9 @@ public final class ApacheHttpRequestAndroid {
         mResponseHeaders = new HashMap<String, String[]>();
         String contentLength = Long.toString(cacheResult.getContentLength());
         setResponseHeader(KEY_CONTENT_LENGTH, contentLength);
-        long expires = cacheResult.getExpires();
-        if (expires >= 0) {
-            // "Expires" header is valid and finite. Milliseconds since 1970
-            // epoch, formatted as RFC-1123.
-            String expiresString = DateUtils.formatDate(new Date(expires));
-            setResponseHeader(KEY_EXPIRES, expiresString);
+        String expires = cacheResult.getExpiresString();
+        if (expires != null) {
+            setResponseHeader(KEY_EXPIRES, expires);
         }
         String lastModified = cacheResult.getLastModified();
         if (lastModified != null) {

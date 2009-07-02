@@ -17,20 +17,21 @@
 package android.webkit;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.MovementMethod;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
+import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputConnection;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -45,6 +46,8 @@ import java.util.ArrayList;
  */
 /* package */ class WebTextView extends AutoCompleteTextView {
 
+    static final String LOGTAG = "webtextview";
+
     private WebView         mWebView;
     private boolean         mSingle;
     private int             mWidthSpec;
@@ -54,9 +57,6 @@ import java.util.ArrayList;
     // on the enter key.  The method for blocking unmatched key ups prevents
     // the shift key from working properly.
     private boolean         mGotEnterDown;
-    // mScrollToAccommodateCursor being set to false prevents us from scrolling
-    // the cursor on screen when using the trackball to select a textfield.
-    private boolean         mScrollToAccommodateCursor;
     private int             mMaxLength;
     // Keep track of the text before the change so we know whether we actually
     // need to send down the DOM events.
@@ -82,6 +82,7 @@ import java.util.ArrayList;
         setImeOptions(EditorInfo.IME_ACTION_NONE);
         // Allow webkit's drawing to show through
         setWillNotDraw(true);
+        setCursorVisible(false);
     }
 
     @Override
@@ -184,7 +185,6 @@ import java.util.ArrayList;
             if (maxedOut && !isArrowKey && keyCode != KeyEvent.KEYCODE_DEL) {
                 if (oldEnd == oldStart) {
                     // Return true so the key gets dropped.
-                    mScrollToAccommodateCursor = true;
                     return true;
                 } else if (!oldText.equals(getText().toString())) {
                     // FIXME: This makes the text work properly, but it
@@ -198,7 +198,6 @@ import java.util.ArrayList;
                     int newEnd = Selection.getSelectionEnd(span);
                     mWebView.replaceTextfieldText(0, oldLength, span.toString(),
                             newStart, newEnd);
-                    mScrollToAccommodateCursor = true;
                     return true;
                 }
             }
@@ -214,7 +213,6 @@ import java.util.ArrayList;
                 sendDomEvent(event);
             }
              */
-            mScrollToAccommodateCursor = true;
             return true;
         }
         // Ignore the key up event for newlines. This prevents
@@ -265,9 +263,25 @@ import java.util.ArrayList;
         return ptr == mNodePointer;
     }
 
+    @Override public InputConnection onCreateInputConnection(
+            EditorInfo outAttrs) {
+        InputConnection connection = super.onCreateInputConnection(outAttrs);
+        if (mWebView != null) {
+            // Use the name of the textfield + the url.  Use backslash as an
+            // arbitrary separator.
+            outAttrs.fieldName = mWebView.nativeFocusCandidateName() + "\\"
+                    + mWebView.getUrl();
+        }
+        return connection;
+    }
+
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
         if (mWebView != null) {
+            if (DebugFlags.WEB_TEXT_VIEW) {
+                Log.v(LOGTAG, "onSelectionChanged selStart=" + selStart
+                        + " selEnd=" + selEnd);
+            }
             mWebView.setSelection(selStart, selEnd);
         }
     }
@@ -313,6 +327,10 @@ import java.util.ArrayList;
         } else {
             // This corrects the selection which may have been affected by the
             // trackball or auto-correct.
+            if (DebugFlags.WEB_TEXT_VIEW) {
+                Log.v(LOGTAG, "onTextChanged start=" + start
+                        + " start + before=" + (start + before));
+            }
             mWebView.setSelection(start, start + before);
         }
         if (!cannotUseKeyEvents) {
@@ -348,12 +366,6 @@ import java.util.ArrayList;
             // Selection is changed in onSelectionChanged
             return true;
         }
-        // If the user is in a textfield, and the movement method is not
-        // handling the trackball events, it means they are at the end of the
-        // field and continuing to move the trackball.  In this case, we should
-        // not scroll the cursor on screen bc the user may be attempting to
-        // scroll the page, possibly in the opposite direction of the cursor.
-        mScrollToAccommodateCursor = false;
         return false;
     }
 
@@ -367,25 +379,12 @@ import java.util.ArrayList;
                 getWindowToken(), 0);
         mWebView.removeView(this);
         mWebView.requestFocus();
-        mScrollToAccommodateCursor = false;
-    }
-
-    /* package */ void enableScrollOnScreen(boolean enable) {
-        mScrollToAccommodateCursor = enable;
     }
 
     /* package */ void bringIntoView() {
         if (getLayout() != null) {
             bringPointIntoView(Selection.getSelectionEnd(getText()));
         }
-    }
-
-    @Override
-    public boolean requestRectangleOnScreen(Rect rectangle) {
-        if (mScrollToAccommodateCursor) {
-            return super.requestRectangleOnScreen(rectangle);
-        }
-        return false;
     }
 
     /**
@@ -541,6 +540,10 @@ import java.util.ArrayList;
             start = 0;
         } else if (start > length) {
             start = length;
+        }
+        if (DebugFlags.WEB_TEXT_VIEW) {
+            Log.v(LOGTAG, "setText start=" + start
+                    + " end=" + end);
         }
         Selection.setSelection(span, start, end);
     }

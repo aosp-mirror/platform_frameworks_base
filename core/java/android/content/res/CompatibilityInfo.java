@@ -65,7 +65,7 @@ public class CompatibilityInfo {
     /**
      *  A compatibility flags
      */
-    private int compatibilityFlags;
+    private int mCompatibilityFlags;
     
     /**
      * A flag mask to tell if the application needs scaling (when mApplicationScale != 1.0f)
@@ -101,7 +101,11 @@ public class CompatibilityInfo {
      */
     public final float applicationInvertedScale;
 
-
+    /**
+     * The flags from ApplicationInfo.
+     */
+    public final int appFlags;
+    
     /**
      * Window size in Compatibility Mode, in real pixels. This is updated by
      * {@link DisplayMetrics#updateMetrics}.
@@ -117,8 +121,10 @@ public class CompatibilityInfo {
     private int mXOffset;
 
     public CompatibilityInfo(ApplicationInfo appInfo) {
+        appFlags = appInfo.flags;
+        
         if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-            compatibilityFlags = EXPANDABLE | CONFIGURED_EXPANDABLE;
+            mCompatibilityFlags = EXPANDABLE | CONFIGURED_EXPANDABLE;
         }
         
         float packageDensityScale = -1.0f;
@@ -149,13 +155,16 @@ public class CompatibilityInfo {
         }
         applicationInvertedScale = 1.0f / applicationScale;
         if (applicationScale != 1.0f) {
-            compatibilityFlags |= SCALING_REQUIRED;
+            mCompatibilityFlags |= SCALING_REQUIRED;
         }
     }
 
     private CompatibilityInfo() {
+        appFlags = ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
+                | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
+                | ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
         applicationScale = applicationInvertedScale = 1.0f;
-        compatibilityFlags = EXPANDABLE | CONFIGURED_EXPANDABLE;
+        mCompatibilityFlags = EXPANDABLE | CONFIGURED_EXPANDABLE;
     }
 
     /**
@@ -175,9 +184,9 @@ public class CompatibilityInfo {
      */
     public void setExpandable(boolean expandable) {
         if (expandable) {
-            compatibilityFlags |= CompatibilityInfo.EXPANDABLE;
+            mCompatibilityFlags |= CompatibilityInfo.EXPANDABLE;
         } else {
-            compatibilityFlags &= ~CompatibilityInfo.EXPANDABLE;
+            mCompatibilityFlags &= ~CompatibilityInfo.EXPANDABLE;
         }
     }
 
@@ -185,20 +194,20 @@ public class CompatibilityInfo {
      * @return true if the application is configured to be expandable.
      */
     public boolean isConfiguredExpandable() {
-        return (compatibilityFlags & CompatibilityInfo.CONFIGURED_EXPANDABLE) != 0;
+        return (mCompatibilityFlags & CompatibilityInfo.CONFIGURED_EXPANDABLE) != 0;
     }
 
     /**
      * @return true if the scaling is required
      */
     public boolean isScalingRequired() {
-        return (compatibilityFlags & SCALING_REQUIRED) != 0;
+        return (mCompatibilityFlags & SCALING_REQUIRED) != 0;
     }
     
     @Override
     public String toString() {
         return "CompatibilityInfo{scale=" + applicationScale +
-                ", compatibility flag=" + compatibilityFlags + "}"; 
+                ", compatibility flag=" + mCompatibilityFlags + "}"; 
     }
 
     /**
@@ -222,13 +231,13 @@ public class CompatibilityInfo {
      * @param params the window's parameter
      */
     public Translator getTranslator(WindowManager.LayoutParams params) {
-        if ( (compatibilityFlags & CompatibilityInfo.SCALING_EXPANDABLE_MASK)
+        if ( (mCompatibilityFlags & CompatibilityInfo.SCALING_EXPANDABLE_MASK)
                 == CompatibilityInfo.EXPANDABLE) {
             if (DBG) Log.d(TAG, "no translation required");
             return null;
         }
         
-        if ((compatibilityFlags & CompatibilityInfo.EXPANDABLE) == 0) {
+        if ((mCompatibilityFlags & CompatibilityInfo.EXPANDABLE) == 0) {
             if ((params.flags & WindowManager.LayoutParams.FLAG_NO_COMPATIBILITY_SCALING) != 0) {
                 if (DBG) Log.d(TAG, "translation for surface view selected");
                 return new Translator(X_SHIFT_WINDOW, false, 1.0f, 1.0f);

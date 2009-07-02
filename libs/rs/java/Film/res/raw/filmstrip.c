@@ -31,6 +31,10 @@ int main(int index)
     int trans;  // float
     int rot;   // float
     int x;
+    float focusPos;  // float
+    int focusID;
+    int lastFocusID;
+    int imgCount;
 
     float_2 = intToFloat(2);
     float_1 = intToFloat(1);
@@ -58,15 +62,17 @@ int main(int index)
 
     //int imgId = 0;
 
-/*
-    contextBindProgramFragmentStore(env->fsImages);
-    contextBindProgramFragment(env->fpImages);
+    contextBindProgramFragmentStore(NAMED_PFImages);
+    contextBindProgramFragment(NAMED_PFSImages);
+
+    //focusPos = loadF(1, 2);
+    //focusID = 0;
+    //lastFocusID = loadI32(2, 0);
+    //imgCount = 13;
+
+    /*
     disable(GL_LIGHTING);
 
-    float focusPos = loadEnvF(1, 2);
-    int focusID = 0;
-    int lastFocusID = loadEnvI32(2, 0);
-    int imgCount = 13;
 
     if (trans > (-.3)) {
         focusID = -1.0 - focusPos;

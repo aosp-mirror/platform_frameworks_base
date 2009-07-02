@@ -948,8 +948,7 @@ class LoadListener extends Handler implements EventHandler {
         // pass content-type content-length and content-encoding
         final int nativeResponse = nativeCreateResponse(
                 mUrl, statusCode, mStatusText,
-                mMimeType, mContentLength, mEncoding,
-                mCacheResult == null ? 0 : mCacheResult.expires / 1000);
+                mMimeType, mContentLength, mEncoding);
         if (mHeaders != null) {
             mHeaders.getHeaders(new Headers.HeaderCallback() {
                     public void header(String name, String value) {
@@ -1460,12 +1459,11 @@ class LoadListener extends Handler implements EventHandler {
      * @param expectedLength An estimate of the content length or the length
      *                       given by the server.
      * @param encoding HTTP encoding.
-     * @param expireTime HTTP expires converted to seconds since the epoch.
      * @return The native response pointer.
      */
     private native int nativeCreateResponse(String url, int statusCode,
             String statusText, String mimeType, long expectedLength,
-            String encoding, long expireTime);
+            String encoding);
 
     /**
      * Add a response header to the native object.

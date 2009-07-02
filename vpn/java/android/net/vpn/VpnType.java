@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, The Android Open Source Project
+ * Copyright (C) 2009, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,30 @@ package android.net.vpn;
  * {@hide}
  */
 public enum VpnType {
-    L2TP_IPSEC("L2TP/IPSec", L2tpIpsecProfile.class),
-    L2TP("L2TP", L2tpProfile.class);
+    PPTP("PPTP", "", PptpProfile.class),
+    L2TP("L2TP", "", L2tpProfile.class),
+    L2TP_IPSEC_PSK("L2TP/IPSec PSK", "Pre-shared key based L2TP/IPSec VPN",
+            L2tpIpsecPskProfile.class),
+    L2TP_IPSEC("L2TP/IPSec CRT", "Certificate based L2TP/IPSec VPN",
+            L2tpIpsecProfile.class);
 
     private String mDisplayName;
+    private String mDescription;
     private Class<? extends VpnProfile> mClass;
 
-    VpnType(String displayName, Class<? extends VpnProfile> klass) {
+    VpnType(String displayName, String description,
+            Class<? extends VpnProfile> klass) {
         mDisplayName = displayName;
+        mDescription = description;
         mClass = klass;
     }
 
     public String getDisplayName() {
         return mDisplayName;
+    }
+
+    public String getDescription() {
+        return mDescription;
     }
 
     public Class<? extends VpnProfile> getProfileClass() {

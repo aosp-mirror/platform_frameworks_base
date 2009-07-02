@@ -63,16 +63,12 @@ namespace android {
 #define FRAME_CALLBACK_FLAG_CAMERA                   0x05
 #define FRAME_CALLBACK_FLAG_BARCODE_SCANNER          0x07
 
-// msgType in notifyCallback function
+// msgType in notifyCallback and dataCallback functions
 enum {
-    CAMERA_MSG_ERROR,
+    CAMERA_MSG_ERROR = 0,
     CAMERA_MSG_SHUTTER,
     CAMERA_MSG_FOCUS,
-    CAMERA_MSG_ZOOM
-};
-
-// msgType in dataCallback function
-enum {
+    CAMERA_MSG_ZOOM,
     CAMERA_MSG_PREVIEW_FRAME,
     CAMERA_MSG_VIDEO_FRAME,
     CAMERA_MSG_POSTVIEW_FRAME,

@@ -452,12 +452,7 @@ public class CdmaConnection extends Connection {
         this.cause = cause;
 
         if (!disconnected) {
-            index = -1;
-
-            disconnectTime = System.currentTimeMillis();
-            duration = SystemClock.elapsedRealtime() - connectTimeReal;
-            disconnected = true;
-
+            doDisconnect();
             if (Config.LOGD) Log.d(LOG_TAG,
                     "[CDMAConn] onDisconnect: cause=" + cause);
 
@@ -465,6 +460,21 @@ public class CdmaConnection extends Connection {
 
             if (parent != null) {
                 parent.connectionDisconnected(this);
+            }
+        }
+        releaseWakeLock();
+    }
+
+    /** Called when the call waiting connection has been hung up */
+    /*package*/ void
+    onLocalDisconnect() {
+        if (!disconnected) {
+            doDisconnect();
+            if (Config.LOGD) Log.d(LOG_TAG,
+                    "[CDMAConn] onLoalDisconnect" );
+
+            if (parent != null) {
+                parent.detach(this);
             }
         }
         releaseWakeLock();
@@ -584,6 +594,14 @@ public class CdmaConnection extends Connection {
             processNextPostDialChar();
         }
         releaseWakeLock();
+    }
+
+    private void
+    doDisconnect() {
+       index = -1;
+       disconnectTime = System.currentTimeMillis();
+       duration = SystemClock.elapsedRealtime() - connectTimeReal;
+       disconnected = true;
     }
 
     private void

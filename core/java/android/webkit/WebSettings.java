@@ -69,7 +69,24 @@ public class WebSettings {
         }
         int value;
     }
-    
+
+    /**
+     * Enum for specifying the WebView's desired density.
+     * FAR makes 100% looking like in 240dpi
+     * MEDIUM makes 100% looking like in 160dpi
+     * CLOSE makes 100% looking like in 120dpi
+     * @hide Pending API council approval
+     */
+    public enum ZoomDensity {
+        FAR(150),      // 240dpi
+        MEDIUM(100),    // 160dpi
+        CLOSE(75);     // 120dpi
+        ZoomDensity(int size) {
+            value = size;
+        }
+        int value;
+    }
+
     /**
      * Default cache usage pattern  Use with {@link #setCacheMode}.
      */
@@ -105,6 +122,8 @@ public class WebSettings {
         LOW
     }
 
+    // WebView associated with this WebSettings.
+    private WebView mWebView;
     // BrowserFrame used to access the native frame pointer.
     private BrowserFrame mBrowserFrame;
     // Flag to prevent multiple SYNC messages at one time.
@@ -149,6 +168,7 @@ public class WebSettings {
     // Don't need to synchronize the get/set methods as they
     // are basic types, also none of these values are used in
     // native WebCore code.
+    private ZoomDensity     mDefaultZoom = ZoomDensity.MEDIUM;
     private RenderPriority  mRenderPriority = RenderPriority.NORMAL;
     private int             mOverrideCacheMode = LOAD_DEFAULT;
     private boolean         mSaveFormData = true;
@@ -232,13 +252,13 @@ public class WebSettings {
 
     // User agent strings.
     private static final String DESKTOP_USERAGENT =
-            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en)"
-            + " AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2"
-            + " Safari/525.20.1";
+            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; en-us)"
+            + " AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0"
+            + " Safari/530.17";
     private static final String IPHONE_USERAGENT = 
-            "Mozilla/5.0 (iPhone; U; CPU iPhone 2_1 like Mac OS X; en)"
-            + " AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2"
-            + " Mobile/5F136 Safari/525.20.1";
+            "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us)"
+            + " AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0"
+            + " Mobile/7A341 Safari/528.16";
     private static Locale sLocale;
     private static Object sLockForLocaleSettings;
     
@@ -246,9 +266,10 @@ public class WebSettings {
      * Package constructor to prevent clients from creating a new settings
      * instance.
      */
-    WebSettings(Context context) {   
+    WebSettings(Context context, WebView webview) {
         mEventHandler = new EventHandler();
         mContext = context;
+        mWebView = webview;
         mDefaultTextEncoding = context.getString(com.android.internal.
                                                  R.string.default_text_encoding);
 
@@ -453,6 +474,31 @@ public class WebSettings {
      */
     public synchronized TextSize getTextSize() {
         return mTextSize;
+    }
+
+    /**
+     * Set the default zoom density of the page. This should be called from UI
+     * thread.
+     * @param zoom A ZoomDensity value
+     * @see WebSettings.ZoomDensity
+     * @hide Pending API council approval
+     */
+    public void setDefaultZoom(ZoomDensity zoom) {
+        if (mDefaultZoom != zoom) {
+            mDefaultZoom = zoom;
+            mWebView.updateDefaultZoomDensity(zoom.value);
+        }
+    }
+
+    /**
+     * Get the default zoom density of the page. This should be called from UI
+     * thread.
+     * @return A ZoomDensity value
+     * @see WebSettings.ZoomDensity
+     * @hide Pending API council approval
+     */
+    public ZoomDensity getDefaultZoom() {
+        return mDefaultZoom;
     }
 
     /**

@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.net.http.Headers;
+import android.text.TextUtils;
 
 /**
  * This class is a concrete implementation of StreamLoader that uses a
@@ -49,17 +50,22 @@ class CacheLoader extends StreamLoader {
     @Override
     protected void buildHeaders(Headers headers) {
         StringBuilder sb = new StringBuilder(mCacheResult.mimeType);
-        if (mCacheResult.encoding != null &&
-                mCacheResult.encoding.length() > 0) {
+        if (!TextUtils.isEmpty(mCacheResult.encoding)) {
             sb.append(';');
             sb.append(mCacheResult.encoding);
         }
         headers.setContentType(sb.toString());
 
-        if (mCacheResult.location != null &&
-                mCacheResult.location.length() > 0) {
+        if (!TextUtils.isEmpty(mCacheResult.location)) {
             headers.setLocation(mCacheResult.location);
         }
-    }
 
+        if (!TextUtils.isEmpty(mCacheResult.expiresString)) {
+            headers.setExpires(mCacheResult.expiresString);
+        }
+
+        if (!TextUtils.isEmpty(mCacheResult.contentdisposition)) {
+            headers.setContentDisposition(mCacheResult.contentdisposition);
+        }
+    }
 }

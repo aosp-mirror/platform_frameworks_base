@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, The Android Open Source Project
+ * Copyright (C) 2009, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,14 @@ package android.net.vpn;
 import android.os.Parcel;
 
 /**
- * The profile for L2TP-over-IPSec type of VPN.
+ * The profile for certificate-based L2TP-over-IPSec type of VPN.
  * {@hide}
  */
-public class L2tpIpsecProfile extends VpnProfile {
+public class L2tpIpsecProfile extends L2tpProfile {
     private static final long serialVersionUID = 1L;
 
     private String mUserCertificate;
     private String mCaCertificate;
-    private String mUserkey;
 
     @Override
     public VpnType getType() {
@@ -50,20 +49,11 @@ public class L2tpIpsecProfile extends VpnProfile {
         return mUserCertificate;
     }
 
-    public void setUserkey(String name) {
-        mUserkey = name;
-    }
-
-    public String getUserkey() {
-        return mUserkey;
-    }
-
     @Override
     protected void readFromParcel(Parcel in) {
         super.readFromParcel(in);
         mCaCertificate = in.readString();
         mUserCertificate = in.readString();
-        mUserkey = in.readString();
     }
 
     @Override
@@ -71,6 +61,5 @@ public class L2tpIpsecProfile extends VpnProfile {
         super.writeToParcel(parcel, flags);
         parcel.writeString(mCaCertificate);
         parcel.writeString(mUserCertificate);
-        parcel.writeString(mUserkey);
     }
 }

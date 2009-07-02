@@ -65,30 +65,31 @@ public class BitwiseInputStream {
     /**
      * Read some data and increment the current position.
      *
-     * @param bits the amount of data to read (gte 0, lte 8)
+     * The 8-bit limit on access to bitwise streams is intentional to
+     * avoid endianness issues.
      *
+     * @param bits the amount of data to read (gte 0, lte 8)
      * @return byte of read data (possibly partially filled, from lsb)
      */
-    public byte read(int bits) throws AccessException {
+    public int read(int bits) throws AccessException {
         int index = mPos >>> 3;
         int offset = 16 - (mPos & 0x07) - bits;  // &7==%8
         if ((bits < 0) || (bits > 8) || ((mPos + bits) > mEnd)) {
             throw new AccessException("illegal read " +
                 "(pos " + mPos + ", end " + mEnd + ", bits " + bits + ")");
         }
-        int data = (mBuf[index] & 0x00FF) << 8;
-        if (offset < 8) data |= (mBuf[index + 1] & 0xFF);
+        int data = (mBuf[index] & 0xFF) << 8;
+        if (offset < 8) data |= mBuf[index + 1] & 0xFF;
         data >>>= offset;
         data &= (-1 >>> (32 - bits));
         mPos += bits;
-        return (byte)data;
+        return data;
     }
 
     /**
      * Read data in bulk into a byte array and increment the current position.
      *
      * @param bits the amount of data to read
-     *
      * @return newly allocated byte array of read data
      */
     public byte[] readByteArray(int bits) throws AccessException {

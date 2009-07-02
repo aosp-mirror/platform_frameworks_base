@@ -79,12 +79,14 @@ public final class CacheManager {
         int httpStatusCode;
         long contentLength;
         long expires;
+        String expiresString;
         String localPath;
         String lastModified;
         String etag;
         String mimeType;
         String location;
         String encoding;
+        String contentdisposition;
 
         // these fields are NOT saved to the database
         InputStream inStream;
@@ -107,6 +109,13 @@ public final class CacheManager {
             return expires;
         }
 
+        /**
+         * @hide Pending API council approval
+         */
+        public String getExpiresString() {
+            return expiresString;
+        }
+
         public String getLastModified() {
             return lastModified;
         }
@@ -125,6 +134,13 @@ public final class CacheManager {
 
         public String getEncoding() {
             return encoding;
+        }
+
+        /**
+         * @hide Pending API council approval
+         */
+        public String getContentDisposition() {
+            return contentdisposition;
         }
 
         // For out-of-package access to the underlying streams.
@@ -603,19 +619,25 @@ public final class CacheManager {
         if (location != null) ret.location = location;
 
         ret.expires = -1;
-        String expires = headers.getExpires();
-        if (expires != null) {
+        ret.expiresString = headers.getExpires();
+        if (ret.expiresString != null) {
             try {
-                ret.expires = HttpDateTime.parse(expires);
+                ret.expires = HttpDateTime.parse(ret.expiresString);
             } catch (IllegalArgumentException ex) {
                 // Take care of the special "-1" and "0" cases
-                if ("-1".equals(expires) || "0".equals(expires)) {
+                if ("-1".equals(ret.expiresString)
+                        || "0".equals(ret.expiresString)) {
                     // make it expired, but can be used for history navigation
                     ret.expires = 0;
                 } else {
-                    Log.e(LOGTAG, "illegal expires: " + expires);
+                    Log.e(LOGTAG, "illegal expires: " + ret.expiresString);
                 }
             }
+        }
+
+        String contentDisposition = headers.getContentDisposition();
+        if (contentDisposition != null) {
+            ret.contentdisposition = contentDisposition;
         }
 
         String lastModified = headers.getLastModified();

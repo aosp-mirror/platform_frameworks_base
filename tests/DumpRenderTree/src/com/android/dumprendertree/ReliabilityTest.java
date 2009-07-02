@@ -45,7 +45,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
 
         //always try to resume first, hence cleaning up status will be the
         //responsibility of driver scripts
-        String lastUrl = readTestStatus();
+        String lastUrl = FsUtils.readTestStatus(TEST_STATUS_FILE);
         if(lastUrl != null && !TEST_DONE.equals(lastUrl))
             fastForward(listReader, lastUrl);
 
@@ -62,7 +62,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
                 continue;
             start = System.currentTimeMillis();
             Log.v(LOGTAG, "Testing URL: " + url);
-            updateTestStatus(url);
+            FsUtils.updateTestStatus(TEST_STATUS_FILE, url);
             activity.reset();
             //use message to send new URL to avoid interacting with
             //WebView in non-UI thread
@@ -92,7 +92,7 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             System.gc();
             System.gc();
         }
-        updateTestStatus(TEST_DONE);
+        FsUtils.updateTestStatus(TEST_STATUS_FILE, TEST_DONE);
         activity.finish();
         listReader.close();
     }
@@ -120,35 +120,6 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
         }catch (IOException e) {
             Log.e(LOGTAG, "Cannot extract scripts for testing.", e);
         }
-    }
-
-    private void updateTestStatus(String s) {
-        // write last tested url into status file
-        try {
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(TEST_STATUS_FILE));
-            bos.write(s.getBytes());
-            bos.close();
-        } catch (IOException e) {
-            Log.e(LOGTAG, "Cannot update file " + TEST_STATUS_FILE, e);
-        }
-    }
-
-    private String readTestStatus() {
-        // read out the test name it stopped last time.
-        String status = null;
-        File testStatusFile = new File(TEST_STATUS_FILE);
-        if(testStatusFile.exists()) {
-            try {
-                BufferedReader inReader = new BufferedReader(
-                        new FileReader(testStatusFile));
-                status = inReader.readLine();
-                inReader.close();
-            } catch (IOException e) {
-                Log.e(LOGTAG, "Error reading test status.", e);
-            }
-        }
-        return status;
     }
 
     private void fastForward(BufferedReader testListReader, String lastUrl) {

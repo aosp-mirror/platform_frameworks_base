@@ -147,6 +147,16 @@ class CallbackProxy extends Handler {
     }
 
     /**
+     * Get the WebChromeClient.
+     * @return the current WebChromeClient instance.
+     *
+     *@hide pending API council approval.
+     */
+    public WebChromeClient getWebChromeClient() {
+       return mWebChromeClient;
+    }
+
+    /**
      * Set the client DownloadListener.
      * @param client An implementation of DownloadListener.
      */

@@ -48,7 +48,9 @@ public class WebViewDatabase {
     // 6 -> 7 Change cache localPath from int to String
     // 7 -> 8 Move cache to its own db
     // 8 -> 9 Store both scheme and host when storing passwords
-    private static final int CACHE_DATABASE_VERSION = 1;
+    private static final int CACHE_DATABASE_VERSION = 3;
+    // 1 -> 2 Add expires String
+    // 2 -> 3 Add content-disposition
 
     private static WebViewDatabase mInstance = null;
 
@@ -107,6 +109,8 @@ public class WebViewDatabase {
 
     private static final String CACHE_EXPIRES_COL = "expires";
 
+    private static final String CACHE_EXPIRES_STRING_COL = "expiresstring";
+
     private static final String CACHE_MIMETYPE_COL = "mimetype";
 
     private static final String CACHE_ENCODING_COL = "encoding";
@@ -116,6 +120,8 @@ public class WebViewDatabase {
     private static final String CACHE_LOCATION_COL = "location";
 
     private static final String CACHE_CONTENTLENGTH_COL = "contentlength";
+
+    private static final String CACHE_CONTENTDISPOSITION_COL = "contentdisposition";
 
     // column id strings for "password" table
     private static final String PASSWORD_HOST_COL = "host";
@@ -150,11 +156,13 @@ public class WebViewDatabase {
     private static int mCacheLastModifyColIndex;
     private static int mCacheETagColIndex;
     private static int mCacheExpiresColIndex;
+    private static int mCacheExpiresStringColIndex;
     private static int mCacheMimeTypeColIndex;
     private static int mCacheEncodingColIndex;
     private static int mCacheHttpStatusColIndex;
     private static int mCacheLocationColIndex;
     private static int mCacheContentLengthColIndex;
+    private static int mCacheContentDispositionColIndex;
 
     private static int mCacheTransactionRefcount;
 
@@ -220,6 +228,8 @@ public class WebViewDatabase {
                         .getColumnIndex(CACHE_ETAG_COL);
                 mCacheExpiresColIndex = mCacheInserter
                         .getColumnIndex(CACHE_EXPIRES_COL);
+                mCacheExpiresStringColIndex = mCacheInserter
+                        .getColumnIndex(CACHE_EXPIRES_STRING_COL);
                 mCacheMimeTypeColIndex = mCacheInserter
                         .getColumnIndex(CACHE_MIMETYPE_COL);
                 mCacheEncodingColIndex = mCacheInserter
@@ -230,6 +240,8 @@ public class WebViewDatabase {
                         .getColumnIndex(CACHE_LOCATION_COL);
                 mCacheContentLengthColIndex = mCacheInserter
                         .getColumnIndex(CACHE_CONTENTLENGTH_COL);
+                mCacheContentDispositionColIndex = mCacheInserter
+                        .getColumnIndex(CACHE_CONTENTDISPOSITION_COL);
             }
         }
 
@@ -320,11 +332,12 @@ public class WebViewDatabase {
                     + " TEXT, " + CACHE_FILE_PATH_COL + " TEXT, "
                     + CACHE_LAST_MODIFY_COL + " TEXT, " + CACHE_ETAG_COL
                     + " TEXT, " + CACHE_EXPIRES_COL + " INTEGER, "
+                    + CACHE_EXPIRES_STRING_COL + " TEXT, "
                     + CACHE_MIMETYPE_COL + " TEXT, " + CACHE_ENCODING_COL
                     + " TEXT," + CACHE_HTTP_STATUS_COL + " INTEGER, "
                     + CACHE_LOCATION_COL + " TEXT, " + CACHE_CONTENTLENGTH_COL
-                    + " INTEGER, " + " UNIQUE (" + CACHE_URL_COL
-                    + ") ON CONFLICT REPLACE);");
+                    + " INTEGER, " + CACHE_CONTENTDISPOSITION_COL + " TEXT, "
+                    + " UNIQUE (" + CACHE_URL_COL + ") ON CONFLICT REPLACE);");
             mCacheDatabase.execSQL("CREATE INDEX cacheUrlIndex ON cache ("
                     + CACHE_URL_COL + ")");
         }
@@ -537,8 +550,8 @@ public class WebViewDatabase {
         }
 
         Cursor cursor = mCacheDatabase.rawQuery("SELECT filepath, lastmodify, etag, expires, "
-                    + "mimetype, encoding, httpstatus, location, contentlength "
-                    + "FROM cache WHERE url = ?",
+                    + "expiresstring, mimetype, encoding, httpstatus, location, contentlength, "
+                    + "contentdisposition FROM cache WHERE url = ?",
                 new String[] { url });
 
         try {
@@ -548,11 +561,13 @@ public class WebViewDatabase {
                 ret.lastModified = cursor.getString(1);
                 ret.etag = cursor.getString(2);
                 ret.expires = cursor.getLong(3);
-                ret.mimeType = cursor.getString(4);
-                ret.encoding = cursor.getString(5);
-                ret.httpStatusCode = cursor.getInt(6);
-                ret.location = cursor.getString(7);
-                ret.contentLength = cursor.getLong(8);
+                ret.expiresString = cursor.getString(4);
+                ret.mimeType = cursor.getString(5);
+                ret.encoding = cursor.getString(6);
+                ret.httpStatusCode = cursor.getInt(7);
+                ret.location = cursor.getString(8);
+                ret.contentLength = cursor.getLong(9);
+                ret.contentdisposition = cursor.getString(10);
                 return ret;
             }
         } finally {
@@ -591,11 +606,14 @@ public class WebViewDatabase {
         mCacheInserter.bind(mCacheLastModifyColIndex, c.lastModified);
         mCacheInserter.bind(mCacheETagColIndex, c.etag);
         mCacheInserter.bind(mCacheExpiresColIndex, c.expires);
+        mCacheInserter.bind(mCacheExpiresStringColIndex, c.expiresString);
         mCacheInserter.bind(mCacheMimeTypeColIndex, c.mimeType);
         mCacheInserter.bind(mCacheEncodingColIndex, c.encoding);
         mCacheInserter.bind(mCacheHttpStatusColIndex, c.httpStatusCode);
         mCacheInserter.bind(mCacheLocationColIndex, c.location);
         mCacheInserter.bind(mCacheContentLengthColIndex, c.contentLength);
+        mCacheInserter.bind(mCacheContentDispositionColIndex,
+                c.contentdisposition);
         mCacheInserter.execute();
     }
 

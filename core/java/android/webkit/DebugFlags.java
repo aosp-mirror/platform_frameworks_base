@@ -42,6 +42,7 @@ class DebugFlags {
     public static final boolean WEB_BACK_FORWARD_LIST = false;
     public static final boolean WEB_SETTINGS = false;
     public static final boolean WEB_SYNC_MANAGER = false;
+    public static final boolean WEB_TEXT_VIEW = false;
     public static final boolean WEB_VIEW = false;
     public static final boolean WEB_VIEW_CORE = false;
 

@@ -125,37 +125,8 @@ void JNICameraContext::notify(int32_t msgType, int32_t ext1, int32_t ext2)
         return;
     }
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-
-    // parse message
-    switch (msgType) {
-    case CAMERA_MSG_ERROR:
-        LOGV("errorCallback");
-        int error;
-        switch (ext1) {
-            case DEAD_OBJECT:
-                error = kCameraErrorMediaServer;
-                break;
-            default:
-                error = kCameraErrorUnknown;
-                break;
-        }
-        env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-                mCameraJObjectWeak, kErrorCallback, error, 0, NULL);
-        break;
-    case CAMERA_MSG_FOCUS:
-        LOGV("autoFocusCallback");
-        env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-                mCameraJObjectWeak, kAutoFocusCallback, ext1, 0, NULL);
-        break;
-    case CAMERA_MSG_SHUTTER:
-        LOGV("shutterCallback");
-        env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-                mCameraJObjectWeak, kShutterCallback, 0, 0, NULL);
-        break;
-    default:
-        LOGV("notifyCallback(%d, %d, %d)", msgType, ext1, ext2);
-        break;
-    }
+    env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
+            mCameraJObjectWeak, msgType, ext1, ext2);
 }
 
 void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int msgType)
@@ -200,30 +171,27 @@ void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
     // VM pointer will be NULL if object is released
     Mutex::Autolock _l(mLock);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (mCameraJObjectWeak == NULL) {
+        LOGW("callback on dead camera object");
+        return;
+    }
 
     // return data based on callback type
     switch(msgType) {
-    case CAMERA_MSG_PREVIEW_FRAME:
-        LOGV("previewCallback");
-        copyAndPost(env, dataPtr, kPreviewCallback);
-        break;
     case CAMERA_MSG_VIDEO_FRAME:
-        LOGV("recordingCallback");
+        // should never happen
         break;
+    // don't return raw data to Java
     case CAMERA_MSG_RAW_IMAGE:
         LOGV("rawCallback");
         env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-                mCameraJObjectWeak, kRawCallback, 0, 0, NULL);
-        break;
-    case CAMERA_MSG_COMPRESSED_IMAGE:
-        LOGV("jpegCallback");
-        copyAndPost(env, dataPtr, kJpegCallback);
+                mCameraJObjectWeak, msgType, 0, 0, NULL);
         break;
     default:
         LOGV("dataCallback(%d, %p)", msgType, dataPtr.get());
+        copyAndPost(env, dataPtr, msgType);
         break;
     }
-
 }
 
 // connect to camera service
@@ -298,7 +266,10 @@ static void android_hardware_Camera_setPreviewDisplay(JNIEnv *env, jobject thiz,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
-    sp<Surface> surface = reinterpret_cast<Surface*>(env->GetIntField(jSurface, fields.surface));
+    sp<Surface> surface = NULL;
+    if (jSurface != NULL) {
+        surface = reinterpret_cast<Surface*>(env->GetIntField(jSurface, fields.surface));
+    }
     if (camera->setPreviewDisplay(surface) != NO_ERROR) {
         jniThrowException(env, "java/io/IOException", "setPreviewDisplay failed");
     }

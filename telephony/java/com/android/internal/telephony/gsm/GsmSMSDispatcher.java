@@ -78,24 +78,16 @@ final class GsmSMSDispatcher extends SMSDispatcher {
                 }
             }
         }
-
-        if (mCm != null) {
-            mCm.acknowledgeLastIncomingGsmSms(true, Intents.RESULT_SMS_HANDLED, null);
-        }
+        acknowledgeLastIncomingSms(true, Intents.RESULT_SMS_HANDLED, null);
     }
 
 
-    /**
-     * Dispatches an incoming SMS messages.
-     *
-     * @param sms the incoming message from the phone
-     */
-    protected void dispatchMessage(SmsMessageBase smsb) {
+    /** {@inheritDoc} */
+    protected int dispatchMessage(SmsMessageBase smsb) {
 
         // If sms is null, means there was a parsing error.
-        // TODO: Should NAK this.
         if (smsb == null) {
-            return;
+            return Intents.RESULT_SMS_GENERIC_ERROR;
         }
         SmsMessage sms = (SmsMessage) smsb;
         boolean handled = false;
@@ -115,7 +107,9 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             }
         }
 
-        if (handled) return;
+        if (handled) {
+            return Intents.RESULT_SMS_HANDLED;
+        }
 
         SmsHeader smsHeader = sms.getUserDataHeader();
          // See if message is partial or port addressed.
@@ -126,17 +120,19 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
             if (smsHeader != null && smsHeader.portAddrs != null) {
                 if (smsHeader.portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
-                    mWapPush.dispatchWapPdu(sms.getUserData());
+                    return mWapPush.dispatchWapPdu(sms.getUserData());
+                } else {
+                    // The message was sent to a port, so concoct a URI for it.
+                    dispatchPortAddressedPdus(pdus, smsHeader.portAddrs.destPort);
                 }
-                // The message was sent to a port, so concoct a URI for it.
-                dispatchPortAddressedPdus(pdus, smsHeader.portAddrs.destPort);
             } else {
                 // Normal short and non-port-addressed message, dispatch it.
                 dispatchPdus(pdus);
             }
+            return Activity.RESULT_OK;
         } else {
             // Process the message part.
-            processMessagePart(sms, smsHeader.concatRef, smsHeader.portAddrs);
+            return processMessagePart(sms, smsHeader.concatRef, smsHeader.portAddrs);
         }
     }
 

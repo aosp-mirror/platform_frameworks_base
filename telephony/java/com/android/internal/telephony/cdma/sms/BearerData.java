@@ -83,7 +83,7 @@ public final class BearerData {
     public static final int MESSAGE_TYPE_DELIVER_REPORT = 0x07;
     public static final int MESSAGE_TYPE_SUBMIT_REPORT  = 0x08;
 
-    public byte messageType;
+    public int messageType;
 
     /**
      * 16-bit value indicating the message ID, which increments modulo 65536.
@@ -102,7 +102,7 @@ public final class BearerData {
     public static final int PRIORITY_EMERGENCY     = 0x3;
 
     public boolean priorityIndicatorSet = false;
-    public byte priority = PRIORITY_NORMAL;
+    public int priority = PRIORITY_NORMAL;
 
     /**
      * Supported privacy modes for CDMA SMS messages
@@ -114,7 +114,7 @@ public final class BearerData {
     public static final int PRIVACY_SECRET         = 0x3;
 
     public boolean privacyIndicatorSet = false;
-    public byte privacy = PRIVACY_NOT_RESTRICTED;
+    public int privacy = PRIVACY_NOT_RESTRICTED;
 
     /**
      * Supported alert priority modes for CDMA SMS messages
@@ -139,7 +139,7 @@ public final class BearerData {
     public static final int DISPLAY_MODE_USER           = 0x2;
 
     public boolean displayModeSet = false;
-    public byte displayMode = DISPLAY_MODE_DEFAULT;
+    public int displayMode = DISPLAY_MODE_DEFAULT;
 
     /**
      * Language Indicator values.  NOTE: the spec (3GPP2 C.S0015-B,
@@ -799,7 +799,7 @@ public final class BearerData {
     private static void decodeUserData(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         bData.userData = new UserData();
         bData.userData.msgEncoding = inStream.read(5);
         bData.userData.msgEncodingSet = true;
@@ -867,7 +867,7 @@ public final class BearerData {
             inStream.skip(offset);
             byte[] expandedData = new byte[numFields];
             for (int i = 0; i < numFields; i++) {
-                expandedData[i] = inStream.read(7);
+                expandedData[i] = (byte)inStream.read(7);
             }
             return new String(expandedData, 0, numFields, "US-ASCII");
         } catch (java.io.UnsupportedEncodingException ex) {
@@ -919,10 +919,126 @@ public final class BearerData {
         }
     }
 
+    /**
+     * IS-91 Voice Mail message decoding
+     * (See 3GPP2 C.S0015-A, Table 4.3.1.4.1-1)
+     * (For character encodings, see TIA/EIA/IS-91, Annex B)
+     *
+     * Protocol Summary: The user data payload may contain 3-14
+     * characters.  The first two characters are parsed as a number
+     * and indicate the number of voicemails.  The third character is
+     * either a SPACE or '!' to indicate normal or urgent priority,
+     * respectively.  Any following characters are treated as normal
+     * text user data payload.
+     *
+     * Note that the characters encoding is 6-bit packed.
+     */
+    private static void decodeIs91VoicemailStatus(BearerData bData)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        BitwiseInputStream inStream = new BitwiseInputStream(bData.userData.payload);
+        int dataLen = inStream.available() / 6;  // 6-bit packed character encoding.
+        int numFields = bData.userData.numFields;
+        if ((dataLen > 14) || (dataLen < 3) || (dataLen < numFields)) {
+            throw new CodingException("IS-91 voicemail status decoding failed");
+        }
+        try {
+            StringBuffer strbuf = new StringBuffer(dataLen);
+            while (inStream.available() >= 6) {
+                strbuf.append(UserData.IA5_MAP[inStream.read(6)]);
+            }
+            String data = strbuf.toString();
+            bData.numberOfMessages = Integer.parseInt(data.substring(0, 2));
+            char prioCode = data.charAt(2);
+            if (prioCode == ' ') {
+                bData.priority = PRIORITY_NORMAL;
+            } else if (prioCode == '!') {
+                bData.priority = PRIORITY_URGENT;
+            } else {
+                throw new CodingException("IS-91 voicemail status decoding failed: " +
+                        "illegal priority setting (" + prioCode + ")");
+            }
+            bData.priorityIndicatorSet = true;
+            bData.userData.payloadStr = data.substring(3, numFields - 3);
+       } catch (java.lang.NumberFormatException ex) {
+            throw new CodingException("IS-91 voicemail status decoding failed: " + ex);
+        } catch (java.lang.IndexOutOfBoundsException ex) {
+            throw new CodingException("IS-91 voicemail status decoding failed: " + ex);
+        }
+    }
+
+    /**
+     * IS-91 Short Message decoding
+     * (See 3GPP2 C.S0015-A, Table 4.3.1.4.1-1)
+     * (For character encodings, see TIA/EIA/IS-91, Annex B)
+     *
+     * Protocol Summary: The user data payload may contain 1-14
+     * characters, which are treated as normal text user data payload.
+     * Note that the characters encoding is 6-bit packed.
+     */
+    private static void decodeIs91ShortMessage(BearerData bData)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        BitwiseInputStream inStream = new BitwiseInputStream(bData.userData.payload);
+        int dataLen = inStream.available() / 6;  // 6-bit packed character encoding.
+        int numFields = bData.userData.numFields;
+        if ((dataLen > 14) || (dataLen < numFields)) {
+            throw new CodingException("IS-91 voicemail status decoding failed");
+        }
+        StringBuffer strbuf = new StringBuffer(dataLen);
+        for (int i = 0; i < numFields; i++) {
+            strbuf.append(UserData.IA5_MAP[inStream.read(6)]);
+        }
+        bData.userData.payloadStr = strbuf.toString();
+    }
+
+    /**
+     * IS-91 CLI message (callback number) decoding
+     * (See 3GPP2 C.S0015-A, Table 4.3.1.4.1-1)
+     *
+     * Protocol Summary: The data payload may contain 1-32 digits,
+     * encoded using standard 4-bit DTMF, which are treated as a
+     * callback number.
+     */
+    private static void decodeIs91Cli(BearerData bData) throws CodingException {
+        BitwiseInputStream inStream = new BitwiseInputStream(bData.userData.payload);
+        int dataLen = inStream.available() / 4;  // 4-bit packed DTMF digit encoding.
+        int numFields = bData.userData.numFields;
+        if ((dataLen > 14) || (dataLen < 3) || (dataLen < numFields)) {
+            throw new CodingException("IS-91 voicemail status decoding failed");
+        }
+        CdmaSmsAddress addr = new CdmaSmsAddress();
+        addr.digitMode = CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF;
+        addr.origBytes = bData.userData.payload;
+        addr.numberOfDigits = (byte)numFields;
+        decodeSmsAddress(addr);
+        bData.callbackNumber = addr;
+    }
+
+    private static void decodeIs91(BearerData bData)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        switch (bData.userData.msgType) {
+        case UserData.IS91_MSG_TYPE_VOICEMAIL_STATUS:
+            decodeIs91VoicemailStatus(bData);
+            break;
+        case UserData.IS91_MSG_TYPE_CLI:
+            decodeIs91Cli(bData);
+            break;
+        case UserData.IS91_MSG_TYPE_SHORT_MESSAGE_FULL:
+        case UserData.IS91_MSG_TYPE_SHORT_MESSAGE:
+            decodeIs91ShortMessage(bData);
+            break;
+        default:
+            throw new CodingException("unsupported IS-91 message type (" +
+                    bData.userData.msgType + ")");
+        }
+    }
+
     private static void decodeReplyOption(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         if (paramBytes != 1) {
             throw new CodingException("REPLY_OPTION subparam size incorrect");
         }
@@ -985,7 +1101,7 @@ public final class BearerData {
     private static void decodeCallbackNumber(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         CdmaSmsAddress addr = new CdmaSmsAddress();
         addr.digitMode = inStream.read(1);
         byte fieldBits = 4;
@@ -1219,7 +1335,18 @@ public final class BearerData {
                 throw new CodingException("missing MESSAGE_IDENTIFIER subparam");
             }
             if (bData.userData != null) {
-                decodeUserDataPayload(bData.userData, bData.hasUserDataHeader);
+                if (bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) {
+                    if ((foundSubparamMask ^
+                             (1 << SUBPARAM_MESSAGE_IDENTIFIER) ^
+                             (1 << SUBPARAM_USER_DATA))
+                            != 0) {
+                        Log.e(LOG_TAG, "IS-91 must occur without extra subparams (" +
+                              foundSubparamMask + ")");
+                    }
+                    decodeIs91(bData);
+                } else {
+                    decodeUserDataPayload(bData.userData, bData.hasUserDataHeader);
+                }
             }
             return bData;
         } catch (BitwiseInputStream.AccessException ex) {

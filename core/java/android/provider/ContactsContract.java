@@ -16,6 +16,9 @@
 
 package android.provider;
 
+import java.util.Arrays;
+import java.util.List;
+
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -127,6 +130,19 @@ public final class ContactsContract {
         public static final String STARRED = "starred";
 
         /**
+         * A custom ringtone associated with a person. Not always present.
+         * <P>Type: TEXT (URI to the ringtone)</P>
+         */
+        public static final String CUSTOM_RINGTONE = "custom_ringtone";
+
+        /**
+         * Whether the person should always be sent to voicemail. Not always
+         * present.
+         * <P>Type: INTEGER (0 for false, 1 for true)</P>
+         */
+        public static final String SEND_TO_VOICEMAIL = "send_to_voicemail";
+
+        /**
          * Reference to the row in the data table holding the primary phone number.
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
@@ -143,12 +159,6 @@ public final class ContactsContract {
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
         public static final String PHOTO_ID = "photo_id";
-
-        /**
-         * Reference to a row containing custom ringtone and send to voicemail information.
-         * <P>Type: INTEGER REFERENCES data(_id)</P>
-         */
-        public static final String CUSTOM_RINGTONE_ID = "custom_ringtone_id";
     }
 
     /**
@@ -261,6 +271,19 @@ public final class ContactsContract {
         private Contacts()  {}
 
         /**
+         * The package name that owns this contact and all of its details. This
+         * package has control over the {@link #IS_RESTRICTED} flag, and can
+         * grant {@link RestrictionExceptions} to other packages.
+         */
+        public static final String PACKAGE = "package";
+
+        /**
+         * Flag indicating that this data entry has been restricted by the owner
+         * {@link #PACKAGE}.
+         */
+        public static final String IS_RESTRICTED = "is_restricted";
+
+        /**
          * A reference to the {@link Accounts#_ID} that this data belongs to.
          */
         public static final String ACCOUNTS_ID = "accounts_id";
@@ -332,11 +355,6 @@ public final class ContactsContract {
 
     private interface DataColumns {
         /**
-         * The package name that defines this type of data.
-         */
-        public static final String PACKAGE = "package";
-
-        /**
          * The mime-type of the item represented by this row.
          */
         public static final String MIMETYPE = "mimetype";
@@ -359,12 +377,6 @@ public final class ContactsContract {
          * <P>Type: INTEGER (if set, non-0 means true)</P>
          */
         public static final String IS_SUPER_PRIMARY = "is_super_primary";
-
-        /**
-         * Flag indicating that this data entry has been restricted by the owner
-         * {@link #PACKAGE}.
-         */
-        public static final String IS_RESTRICTED = "is_restricted";
 
         /**
          * The version of this data record. This is a read-only value. The data column is
@@ -516,6 +528,18 @@ public final class ContactsContract {
                 default:
                     return android.R.drawable.presence_offline;
             }
+        }
+
+        /**
+         * Returns the precedence of the status code the higher number being the higher precedence.
+         *
+         * @param status The status code.
+         * @return An integer representing the precedence, 0 being the lowest.
+         */
+        public static final int getPresencePrecedence(int status) {
+            // Keep this function here incase we want to enforce a different precedence than the
+            // natural order of the status constants.
+            return status;
         }
 
         /**
@@ -911,28 +935,6 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String NOTE = "data1";
-        }
-
-        /**
-         * Custom ringtone associated with the contact.
-         */
-        public static final class CustomRingtone implements BaseCommonColumns {
-            private CustomRingtone() {}
-
-            public static final String CONTENT_ITEM_TYPE =
-                    "vnd.android.cursor.item/custom_ringtone";
-
-            /**
-             * Whether to send the number to voicemail.
-             * <P>Type: INTEGER (if set, non-0 means true)</P>
-             */
-            public static final String SEND_TO_VOICEMAIL = "data1";
-
-            /**
-             * The ringtone uri.
-             * <P>Type: TEXT</P>
-             */
-            public static final String RINGTONE_URI = "data2";
         }
 
         /**

@@ -33,8 +33,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -107,7 +107,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private Button mGoButton;
     private ImageButton mVoiceButton;
     private View mSearchPlate;
-    private AnimationDrawable mWorkingSpinner;
+    private Drawable mWorkingSpinner;
 
     // interaction with searchable application
     private SearchableInfo mSearchable;
@@ -188,7 +188,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mGoButton = (Button) findViewById(com.android.internal.R.id.search_go_btn);
         mVoiceButton = (ImageButton) findViewById(com.android.internal.R.id.search_voice_btn);
         mSearchPlate = findViewById(com.android.internal.R.id.search_plate);
-        mWorkingSpinner = (AnimationDrawable) getContext().getResources().
+        mWorkingSpinner = getContext().getResources().
                 getDrawable(com.android.internal.R.drawable.search_spinner);
         
         // attach listeners
@@ -423,11 +423,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (working) {
             mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
                     null, null, mWorkingSpinner, null);
-            mWorkingSpinner.start();
+            ((Animatable) mWorkingSpinner).start();
         } else {
             mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
                     null, null, null, null);
-            mWorkingSpinner.stop();
+            ((Animatable) mWorkingSpinner).stop();
         }
     }
     
@@ -601,7 +601,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     mSearchPlate.getPaddingBottom());
         } else {
             PackageManager pm = getContext().getPackageManager();
-            Drawable icon = null;
+            Drawable icon;
             try {
                 ActivityInfo info = pm.getActivityInfo(mLaunchComponent, 0);
                 icon = pm.getApplicationIcon(info.applicationInfo);

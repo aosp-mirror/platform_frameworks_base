@@ -48,6 +48,12 @@ public class RolloRS {
         initRS();
     }
 
+    public void setPosition(float dx, float pressure) {
+        mAllocStateBuf[0] += (int)(dx);
+        mAllocStateBuf[2] = (int)(pressure * 0x40000);
+        mAllocState.data(mAllocStateBuf);
+    }
+
 
     private Resources mRes;
     private RenderScript mRS;
@@ -63,23 +69,13 @@ public class RolloRS {
     private RenderScript.ProgramVertex mPV;
     private ProgramVertexAlloc mPVAlloc;
 
-    private RenderScript.Allocation mAllocEnv;
-    private RenderScript.Allocation mAllocPos;
+    private int[] mAllocStateBuf;
     private RenderScript.Allocation mAllocState;
-    //private RenderScript.Allocation mAllocPV;
-    private RenderScript.TriangleMesh mMeshCard;
-    private RenderScript.TriangleMesh mMeshTab;
 
     private float[] mBufferPos;
     //private float[] mBufferPV;
 
     private void initNamed() {
-        mMeshTab = RolloMesh.createTab(mRS);
-        mMeshTab.setName("MeshTab");
-        mMeshCard = RolloMesh.createCard(mRS);
-        mMeshCard.setName("MeshCard");
-        Log.e("rs", "Done loading strips");
-
         mRS.samplerBegin();
         mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN,
                        RenderScript.SamplerValue.LINEAR_MIP_LINEAR);
@@ -122,6 +118,8 @@ public class RolloRS {
         mPV.setName("PV");
         mPV.bindAllocation(0, mPVAlloc.mAlloc);
 
+
+
         mPVAlloc.setupProjectionNormalized(320, 480);
         //mPVAlloc.setupOrthoNormalized(320, 480);
         mRS.contextBindProgramVertex(mPV);
@@ -131,6 +129,7 @@ public class RolloRS {
     }
 
 
+
     private void initRS() {
         mRS.scriptCBegin();
         mRS.scriptCSetClearColor(0.0f, 0.7f, 0.0f, 1.0f);
@@ -138,6 +137,11 @@ public class RolloRS {
         mRS.scriptCSetRoot(true);
         mScript = mRS.scriptCCreate();
 
+        mAllocStateBuf = new int[] {0, 38, 0};
+        mAllocState = mRS.allocationCreatePredefSized(
+            RenderScript.ElementPredefined.USER_I32, mAllocStateBuf.length);
+        mScript.bindAllocation(mAllocState, 0);
+        setPosition(0, 0);
 
         mRS.contextBindRootScript(mScript);
     }

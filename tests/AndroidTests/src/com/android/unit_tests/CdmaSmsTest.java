@@ -30,6 +30,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.Iterator;
 
+import java.lang.Integer;
+
 import android.util.Log;
 
 public class CdmaSmsTest extends AndroidTestCase {
@@ -171,14 +173,14 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(bearerData.msgCenterTimeStamp.minute, 1);
         assertEquals(bearerData.msgCenterTimeStamp.second, 59);
         assertEquals(bearerData.validityPeriodAbsolute, null);
-        assertEquals(bearerData.validityPeriodRelative, -63);
+        assertEquals(bearerData.validityPeriodRelative, 193);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.year, 1997);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.month, 5);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.monthDay, 18);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.hour, 0);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.minute, 0);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.second, 0);
-        assertEquals(bearerData.deferredDeliveryTimeRelative, -57);
+        assertEquals(bearerData.deferredDeliveryTimeRelative, 199);
         assertEquals(bearerData.hasUserDataHeader, false);
         assertEquals(bearerData.userData.msgEncoding, UserData.ENCODING_7BIT_ASCII);
         assertEquals(bearerData.userData.numFields, 2);
@@ -225,7 +227,7 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.hour, 0);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.minute, 0);
         assertEquals(bearerData.deferredDeliveryTimeAbsolute.second, 0);
-        assertEquals(bearerData.deferredDeliveryTimeRelative, -110);
+        assertEquals(bearerData.deferredDeliveryTimeRelative, 146);
         assertEquals(bearerData.hasUserDataHeader, false);
         assertEquals(bearerData.userData.msgEncoding, UserData.ENCODING_7BIT_ASCII);
         assertEquals(bearerData.userData.numFields, 2);
@@ -679,4 +681,15 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(revBearerData.displayModeSet, true);
         assertEquals(revBearerData.displayMode, bearerData.displayMode);
     }
+
+    @SmallTest
+    public void testIs91() throws Exception {
+        String pdu1 = "000320001001070c2039acc13880";
+        BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
+        assertEquals(bd1.callbackNumber.address, "3598271");
+        String pdu4 = "000320001001080c283c314724b34e";
+        BearerData bd4 = BearerData.decode(HexDump.hexStringToByteArray(pdu4));
+        assertEquals(bd4.userData.payloadStr, "ABCDEFG");
+    }
+
 }

@@ -307,6 +307,60 @@ extern "C" void drawRect(int32_t x1, int32_t x2, int32_t y1, int32_t y2)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
+extern "C" void drawQuad(int32_t x1, int32_t y1, int32_t z1,
+                         int32_t x2, int32_t y2, int32_t z2,
+                         int32_t x3, int32_t y3, int32_t z3,
+                         int32_t x4, int32_t y4, int32_t z4)
+{
+    GET_TLS();
+    //x1 = (x1 << 16);
+    //x2 = (x2 << 16);
+    //y1 = (y1 << 16);
+    //y2 = (y2 << 16);
+
+    //LOGE("Quad");
+    //LOGE("0x%08x, 0x%08x, 0x%08x", x1, y1, z1);
+    //LOGE("0x%08x, 0x%08x, 0x%08x", x2, y2, z2);
+    //LOGE("0x%08x, 0x%08x, 0x%08x", x3, y3, z3);
+    //LOGE("0x%08x, 0x%08x, 0x%08x", x4, y4, z4);
+
+    int32_t vtx[] = {x1,y1,z1, x4,y4,z4, x3,y3,z3, x2,y2,z2};
+    static const int32_t tex[] = {0,0, 0,0x10000, 0x10000,0, 0x10000,0x10000};
+
+
+    rsc->setupCheck();
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    glVertexPointer(3, GL_FIXED, 0, vtx);
+    glTexCoordPointer(2, GL_FIXED, 0, tex);
+    //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
+
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+}
+
+extern "C" int32_t sinx(int32_t angle)
+{
+    float a = ((float)angle) / 0x10000;
+    a *= 3.14f / 180.f;
+    float s = (float)sin(a);
+    return int32_t(s * 0x10000);
+}
+
+extern "C" int32_t cosx(int32_t angle)
+{
+    float a = ((float)angle) / 0x10000;
+    a *= 3.14f / 180.f;
+    float s = (float)cos(a);
+    return int32_t(s * 0x10000);
+}
+
 extern "C" void pfBindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va)
 {
     GET_TLS();

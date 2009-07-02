@@ -260,11 +260,15 @@ class BluetoothEventLoop {
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             mBluetoothService.setProperty(name, propValues[1]);
         } else if (name.equals("Devices")) {
-            String value = "";
-            for (int i = 1; i < propValues.length; i++) {
-                value = value + propValues[i] + ',';
+            String value = null;
+            int len = Integer.valueOf(propValues[1]);
+            if (len > 0) {
+                value = "";
+                for (int i = 2; i < propValues.length; i++) {
+                    value = value + propValues[i] + ',';
+                }
             }
-            mBluetoothService.setProperty(name, value.equals("") ? null : value);
+            mBluetoothService.setProperty(name, value);
         } else if (name.equals("Powered")) {
             // bluetoothd has restarted, re-read all our properties.
             // Note: bluez only sends this property change when it restarts.
@@ -303,12 +307,15 @@ class BluetoothEventLoop {
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
         } else if (name.equals("UUIDs")) {
-            String uuid = "" ;
-            for (int i = 1; i < propValues.length; i++) {
-                uuid = uuid + propValues[i] + ",";
+            String uuid = null;
+            int len = Integer.valueOf(propValues[1]);
+            if (len > 0) {
+                uuid = "";
+                for (int i = 2; i < propValues.length; i++) {
+                    uuid = uuid + propValues[i] + ",";
+                }
             }
-            mBluetoothService.setRemoteDeviceProperty(address, name,
-                                                        uuid.equals("") ? null : uuid);
+            mBluetoothService.setRemoteDeviceProperty(address, name, uuid);
         }
 
     }

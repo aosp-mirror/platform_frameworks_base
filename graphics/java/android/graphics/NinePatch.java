@@ -57,7 +57,9 @@ public class NinePatch {
         mBitmap = patch.mBitmap;
         mChunk = patch.mChunk;
         mSrcName = patch.mSrcName;
-        mPaint = new Paint(patch.mPaint);
+        if (patch.mPaint != null) {
+            mPaint = new Paint(patch.mPaint);
+        }
         validateNinePatchChunk(mBitmap.ni(), mChunk);
     }
 
@@ -120,7 +122,6 @@ public class NinePatch {
     
     public native static boolean isNinePatchChunk(byte[] chunk);
 
-    private final Rect   mRect = new Rect();
     private final Bitmap mBitmap;
     private final byte[] mChunk;
     private Paint        mPaint;

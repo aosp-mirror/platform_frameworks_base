@@ -25,6 +25,7 @@ public class Constants {
     public static final int ERROR_CODE_INVALID_RESPONSE = 5;
     public static final int ERROR_CODE_UNSUPPORTED_OPERATION = 6;
     public static final int ERROR_CODE_BAD_ARGUMENTS = 7;
+    public static final int ERROR_CODE_BAD_REQUEST = 8;
 
     public static final String ACCOUNTS_KEY = "accounts";
     public static final String AUTHENTICATOR_TYPES_KEY = "authenticator_types";

@@ -68,49 +68,64 @@ public class SynthProxy {
     // TODO add IPA methods
 
     /**
-     * Sets the language
+     * Queries for language support.
+     * Return codes are defined in android.speech.tts.TextToSpeech
+     */
+    public int isLanguageAvailable(String language, String country, String variant) {
+        return native_isLanguageAvailable(mJniData, language, country, variant);
+    }
+
+    /**
+     * Sets the language.
      */
     public void setLanguage(String language, String country, String variant) {
         native_setLanguage(mJniData, language, country, variant);
     }
 
     /**
-     * Sets the speech rate
+     * Loads the language: it's not set, but prepared for use later.
+     */
+    public void loadLanguage(String language, String country, String variant) {
+        native_loadLanguage(mJniData, language, country, variant);
+    }
+
+    /**
+     * Sets the speech rate.
      */
     public final void setSpeechRate(int speechRate) {
         native_setSpeechRate(mJniData, speechRate);
     }
 
     /**
-     * Sets the pitch of the synthesized voice
+     * Sets the pitch of the synthesized voice.
      */
     public final void setPitch(int pitch) {
         native_setPitch(mJniData, pitch);
     }
 
     /**
-     * Plays the given audio buffer
+     * Plays the given audio buffer.
      */
     public void playAudioBuffer(int bufferPointer, int bufferSize) {
         native_playAudioBuffer(mJniData, bufferPointer, bufferSize);
     }
 
     /**
-     * Gets the currently set language
+     * Returns the currently set language, country and variant information.
      */
-    public String getLanguage() {
+    public String[] getLanguage() {
         return native_getLanguage(mJniData);
     }
 
     /**
-     * Gets the currently set rate
+     * Gets the currently set rate.
      */
     public int getRate() {
         return native_getRate(mJniData);
     }
 
     /**
-     * Shuts down the native synthesizer
+     * Shuts down the native synthesizer.
      */
     public void shutdown()  {
         native_shutdown(mJniData);
@@ -147,17 +162,23 @@ public class SynthProxy {
 
     private native final void native_synthesizeToFile(int jniData, String text, String filename);
 
+    private native final int  native_isLanguageAvailable(int jniData, String language,
+            String country, String variant);
+
     private native final void native_setLanguage(int jniData, String language, String country,
             String variant);
 
+    private native final void native_loadLanguage(int jniData, String language, String country,
+            String variant);
+
     private native final void native_setSpeechRate(int jniData, int speechRate);
-    
+
     private native final void native_setPitch(int jniData, int speechRate);
 
     // TODO add buffer format
     private native final void native_playAudioBuffer(int jniData, int bufferPointer, int bufferSize);
 
-    private native final String native_getLanguage(int jniData);
+    private native final String[] native_getLanguage(int jniData);
 
     private native final int native_getRate(int jniData);
 

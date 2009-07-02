@@ -1690,6 +1690,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private int[] mDrawableState = null;
 
     private SoftReference<Bitmap> mDrawingCache;
+    private SoftReference<Bitmap> mUnscaledDrawingCache;
 
     /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
@@ -5783,28 +5784,52 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * <p>Calling this method is equivalent to calling <code>getDrawingCache(false)</code>.</p>
+     * 
+     * @return A non-scaled bitmap representing this view or null if cache is disabled.
+     * 
+     * @see #getDrawingCache(boolean)
+     */
+    public Bitmap getDrawingCache() {
+        return getDrawingCache(false);
+    }
+
+    /**
      * <p>Returns the bitmap in which this view drawing is cached. The returned bitmap
      * is null when caching is disabled. If caching is enabled and the cache is not ready,
      * this method will create it. Calling {@link #draw(android.graphics.Canvas)} will not
      * draw from the cache when the cache is enabled. To benefit from the cache, you must
      * request the drawing cache by calling this method and draw it on screen if the
      * returned bitmap is not null.</p>
+     * 
+     * <p>Note about auto scaling in compatibility mode: When auto scaling is not enabled,
+     * this method will create a bitmap of the same size as this view. Because this bitmap
+     * will be drawn scaled by the parent ViewGroup, the result on screen might show
+     * scaling artifacts. To avoid such artifacts, you should call this method by setting
+     * the auto scaling to true. Doing so, however, will generate a bitmap of a different
+     * size than the view. This implies that your application must be able to handle this
+     * size.</p>
+     * 
+     * @param autoScale Indicates whether the generated bitmap should be scaled based on
+     *        the current density of the screen when the application is in compatibility
+     *        mode.
      *
-     * @return a bitmap representing this view or null if cache is disabled
-     *
+     * @return A bitmap representing this view or null if cache is disabled.
+     * 
      * @see #setDrawingCacheEnabled(boolean)
      * @see #isDrawingCacheEnabled()
-     * @see #buildDrawingCache()
+     * @see #buildDrawingCache(boolean)
      * @see #destroyDrawingCache()
      */
-    public Bitmap getDrawingCache() {
+    public Bitmap getDrawingCache(boolean autoScale) {
         if ((mViewFlags & WILL_NOT_CACHE_DRAWING) == WILL_NOT_CACHE_DRAWING) {
             return null;
         }
         if ((mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED) {
-            buildDrawingCache();
+            buildDrawingCache(autoScale);
         }
-        return mDrawingCache == null ? null : mDrawingCache.get();
+        return autoScale ? (mDrawingCache == null ? null : mDrawingCache.get()) :
+                (mUnscaledDrawingCache == null ? null : mUnscaledDrawingCache.get());
     }
 
     /**
@@ -5822,6 +5847,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             final Bitmap bitmap = mDrawingCache.get();
             if (bitmap != null) bitmap.recycle();
             mDrawingCache = null;
+        }
+        if (mUnscaledDrawingCache != null) {
+            final Bitmap bitmap = mUnscaledDrawingCache.get();
+            if (bitmap != null) bitmap.recycle();
+            mUnscaledDrawingCache = null;
         }
     }
 
@@ -5850,18 +5880,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * <p>Calling this method is equivalent to calling <code>buildDrawingCache(false)</code>.</p>
+     * 
+     * @see #buildDrawingCache(boolean)
+     */
+    public void buildDrawingCache() {
+        buildDrawingCache(false);
+    }
+
+    /**
      * <p>Forces the drawing cache to be built if the drawing cache is invalid.</p>
      *
      * <p>If you call {@link #buildDrawingCache()} manually without calling
      * {@link #setDrawingCacheEnabled(boolean) setDrawingCacheEnabled(true)}, you
      * should cleanup the cache by calling {@link #destroyDrawingCache()} afterwards.</p>
+     * 
+     * <p>Note about auto scaling in compatibility mode: When auto scaling is not enabled,
+     * this method will create a bitmap of the same size as this view. Because this bitmap
+     * will be drawn scaled by the parent ViewGroup, the result on screen might show
+     * scaling artifacts. To avoid such artifacts, you should call this method by setting
+     * the auto scaling to true. Doing so, however, will generate a bitmap of a different
+     * size than the view. This implies that your application must be able to handle this
+     * size.</p>
      *
      * @see #getDrawingCache()
      * @see #destroyDrawingCache()
      */
-    public void buildDrawingCache() {
-        if ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || mDrawingCache == null ||
-                mDrawingCache.get() == null) {
+    public void buildDrawingCache(boolean autoScale) {
+        if ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || (autoScale ?
+                (mDrawingCache == null || mDrawingCache.get() == null) :
+                (mUnscaledDrawingCache == null || mUnscaledDrawingCache.get() == null))) {
 
             if (ViewDebug.TRACE_HIERARCHY) {
                 ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
@@ -5874,12 +5922,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             int height = mBottom - mTop;
 
             final AttachInfo attachInfo = mAttachInfo;
-            if (attachInfo != null) {
-                final boolean scalingRequired = attachInfo.mScalingRequired;
-                if (scalingRequired) {
-                    width = (int) ((width * attachInfo.mApplicationScale) + 0.5f);
-                    height = (int) ((height * attachInfo.mApplicationScale) + 0.5f);
-                }
+            final boolean scalingRequired = attachInfo != null && attachInfo.mScalingRequired;
+
+            if (autoScale && scalingRequired) {
+                width = (int) ((width * attachInfo.mApplicationScale) + 0.5f);
+                height = (int) ((height * attachInfo.mApplicationScale) + 0.5f);
             }
 
             final int drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
@@ -5894,7 +5941,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             }
 
             boolean clear = true;
-            Bitmap bitmap = mDrawingCache == null ? null : mDrawingCache.get();
+            Bitmap bitmap = autoScale ? (mDrawingCache == null ? null : mDrawingCache.get()) :
+                    (mUnscaledDrawingCache == null ? null : mUnscaledDrawingCache.get());
 
             if (bitmap == null || bitmap.getWidth() != width || bitmap.getHeight() != height) {
 
@@ -5923,12 +5971,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                 try {
                     bitmap = Bitmap.createBitmap(width, height, quality);
-                    mDrawingCache = new SoftReference<Bitmap>(bitmap);
+                    if (autoScale) {
+                        mDrawingCache = new SoftReference<Bitmap>(bitmap);
+                    } else {
+                        mUnscaledDrawingCache = new SoftReference<Bitmap>(bitmap);
+                    }
                 } catch (OutOfMemoryError e) {
                     // If there is not enough memory to create the bitmap cache, just
                     // ignore the issue as bitmap caches are not required to draw the
                     // view hierarchy
-                    mDrawingCache = null;
+                    if (autoScale) {
+                        mDrawingCache = null;
+                    } else {
+                        mUnscaledDrawingCache = null;
+                    }
                     return;
                 }
 
@@ -5940,13 +5996,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 canvas = attachInfo.mCanvas;
                 if (canvas == null) {
                     canvas = new Canvas();
-
-                    // NOTE: This should have to happen only once since compatibility
-                    //       mode should not change at runtime
-                    if (attachInfo.mScalingRequired) {
-                        final float scale = attachInfo.mApplicationScale;
-                        canvas.scale(scale, scale);
-                    }
                 }
                 canvas.setBitmap(bitmap);
                 // Temporarily clobber the cached Canvas in case one of our children
@@ -5965,6 +6014,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             computeScroll();
             final int restoreCount = canvas.save();
+            
+            if (autoScale && scalingRequired) {
+                final float scale = attachInfo.mApplicationScale;
+                canvas.scale(scale, scale);
+            }
+            
             canvas.translate(-mScrollX, -mScrollY);
 
             mPrivateFlags |= DRAWN;

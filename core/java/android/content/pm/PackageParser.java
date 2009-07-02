@@ -668,6 +668,11 @@ public class PackageParser {
         }
         sa.recycle();
 
+        // Resource boolean are -1, so 1 means we don't know the value.
+        int supportsSmallScreens = 1;
+        int supportsNormalScreens = 1;
+        int supportsLargeScreens = 1;
+        
         int outerDepth = parser.getDepth();
         while ((type=parser.next()) != parser.END_DOCUMENT
                && (type != parser.END_TAG || parser.getDepth() > outerDepth)) {
@@ -876,8 +881,24 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
-            } else if (tagName.equals("expandable")) {
-                pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
+            } else if (tagName.equals("supports-screens")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens);
+
+                // This is a trick to get a boolean and still able to detect
+                // if a value was actually set.
+                supportsSmallScreens = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_smallScreens,
+                        supportsSmallScreens);
+                supportsNormalScreens = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_normalScreens,
+                        supportsNormalScreens);
+                supportsLargeScreens = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_largeScreens,
+                        supportsLargeScreens);
+
+                sa.recycle();
+                
                 XmlUtils.skipCurrentTag(parser);
             } else {
                 Log.w(TAG, "Bad element under <manifest>: "
@@ -910,7 +931,20 @@ public class PackageParser {
             pkg.usesLibraryFiles = new String[pkg.usesLibraries.size()];
             pkg.usesLibraries.toArray(pkg.usesLibraryFiles);
         }
-        // TODO: enable all density & expandable if target sdk is higher than donut 
+        
+        if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS;
+        }
+        if (supportsNormalScreens != 0) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS;
+        }
+        if (supportsLargeScreens < 0 || (supportsLargeScreens > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
+        }
         
         int size = pkg.supportsDensityList.size();
         if (size > 0) {

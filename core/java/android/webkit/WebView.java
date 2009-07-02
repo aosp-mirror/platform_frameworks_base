@@ -329,9 +329,18 @@ public class WebView extends AbsoluteLayout
 
     /**
      * The minimum elapsed time before sending another ACTION_MOVE event to
-     * WebViewCore
+     * WebViewCore. This really should be tuned for each type of the devices.
+     * For example in Google Map api test case, it takes Dream device at least
+     * 150ms to do a full cycle in the WebViewCore by processing a touch event,
+     * triggering the layout and drawing the picture. While the same process
+     * takes 60+ms on the current high speed device. If we make
+     * TOUCH_SENT_INTERVAL too small, there will be multiple touch events sent
+     * to WebViewCore queue and the real layout and draw events will be pushed
+     * to further, which slows down the refresh rate. Choose 50 to favor the
+     * current high speed devices. For Dream like devices, 100 is a better
+     * choice. Maybe make this in the buildspec later.
      */
-    private static final int TOUCH_SENT_INTERVAL = 100;
+    private static final int TOUCH_SENT_INTERVAL = 50;
 
     /**
      * Helper class to get velocity for fling
@@ -449,6 +458,8 @@ public class WebView extends AbsoluteLayout
     static final int WEBCORE_INITIALIZED_MSG_ID         = 16;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
     static final int DID_FIRST_LAYOUT_MSG_ID            = 18;
+    static final int MOVE_OUT_OF_PLUGIN                 = 19;
+    static final int CLEAR_TEXT_ENTRY                   = 20;
 
     static final int UPDATE_CLIPBOARD                   = 22;
     static final int LONG_PRESS_CENTER                  = 23;
@@ -456,6 +467,7 @@ public class WebView extends AbsoluteLayout
     static final int WEBCORE_NEED_TOUCH_EVENTS          = 25;
     // obj=Rect in doc coordinates
     static final int INVAL_RECT_MSG_ID                  = 26;
+    static final int REQUEST_KEYBOARD                   = 27;
 
     static final String[] HandlerDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -476,14 +488,15 @@ public class WebView extends AbsoluteLayout
         "WEBCORE_INITIALIZED_MSG_ID", //     = 16;
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 17;
         "DID_FIRST_LAYOUT_MSG_ID", //        = 18;
-        "19",
-        "20",
+        "MOVE_OUT_OF_PLUGIN", //             = 19;
+        "CLEAR_TEXT_ENTRY", //               = 20;
         "21", //                             = 21;
         "UPDATE_CLIPBOARD", //               = 22;
         "LONG_PRESS_CENTER", //              = 23;
         "PREVENT_TOUCH_ID", //               = 24;
         "WEBCORE_NEED_TOUCH_EVENTS", //      = 25;
-        "INVAL_RECT_MSG_ID" //               = 26;
+        "INVAL_RECT_MSG_ID", //              = 26;
+        "REQUEST_KEYBOARD" //                = 27;
     };
 
     // width which view is considered to be fully zoomed out
@@ -502,7 +515,7 @@ public class WebView extends AbsoluteLayout
 
     // default scale. Depending on the display density.
     static int DEFAULT_SCALE_PERCENT;
-    private float DEFAULT_SCALE;
+    private float mDefaultScale;
 
     // set to true temporarily while the zoom control is being dragged
     private boolean mPreviewZoomOnly = false;
@@ -745,13 +758,30 @@ public class WebView extends AbsoluteLayout
         mNavSlop = (int) (16 * density);
         // density adjusted scale factors
         DEFAULT_SCALE_PERCENT = (int) (100 * density);
-        DEFAULT_SCALE = density;
+        mDefaultScale = density;
         mActualScale = density;
         mInvActualScale = 1 / density;
         DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
         DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
         mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
         mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+    }
+
+    /* package */void updateDefaultZoomDensity(int zoomDensity) {
+        final float density = getContext().getResources().getDisplayMetrics().density
+                * 100 / zoomDensity;
+        if (Math.abs(density - mDefaultScale) > 0.01) {
+            float scaleFactor = density / mDefaultScale;
+            // adjust the limits
+            mNavSlop = (int) (16 * density);
+            DEFAULT_SCALE_PERCENT = (int) (100 * density);
+            DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
+            DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
+            mDefaultScale = density;
+            mMaxZoomScale *= scaleFactor;
+            mMinZoomScale *= scaleFactor;
+            setNewZoomScale(mActualScale * scaleFactor, false);
+        }
     }
 
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
@@ -977,6 +1007,17 @@ public class WebView extends AbsoluteLayout
      */
     public static void disablePlatformNotifications() {
         Network.disablePlatformNotifications();
+    }
+
+    /**
+     * Sets JavaScript engine flags.
+     *
+     * @param flags JS engine flags in a String
+     *
+     * @hide pending API solidification
+     */
+    public void setJsFlags(String flags) {
+        mWebViewCore.sendMessage(EventHub.SET_JS_FLAGS, flags);
     }
 
     /**
@@ -2318,6 +2359,16 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Gets the chrome handler.
+     * @return the current WebChromeClient instance.
+     *
+     * @hide API council approval.
+     */
+    public WebChromeClient getWebChromeClient() {
+        return mCallbackProxy.getWebChromeClient();
+    }
+
+    /**
      * Set the Picture listener. This is an interface used to receive
      * notifications of a new Picture.
      * @param listener An implementation of WebView.PictureListener.
@@ -2454,6 +2505,14 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean performLongClick() {
+        if (mNativeClass != 0 && nativeCursorIsTextInput()) {
+            // Send the click so that the textfield is in focus
+            // FIXME: When we start respecting changes to the native textfield's
+            // selection, need to make sure that this does not change it.
+            mWebViewCore.sendMessage(EventHub.CLICK, nativeCursorFramePointer(),
+                    nativeCursorNodePointer());
+            rebuildWebTextView();
+        }
         if (inEditingMode()) {
             return mWebTextView.performLongClick();
         } else {
@@ -2964,22 +3023,35 @@ public class WebView extends AbsoluteLayout
     }
 
     // Called by JNI when a touch event puts a textfield into focus.
-    private void displaySoftKeyboard() {
+    private void displaySoftKeyboard(boolean isTextView) {
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(mWebTextView, 0);
-        mWebTextView.enableScrollOnScreen(true);
-        // Now we need to fake a touch event to place the cursor where the
-        // user touched.
-        AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams)
-                mWebTextView.getLayoutParams();
-        if (lp != null) {
-            // Take the last touch and adjust for the location of the
-            // WebTextView.
-            float x = mLastTouchX + (float) (mScrollX - lp.x);
-            float y = mLastTouchY + (float) (mScrollY - lp.y);
-            mWebTextView.fakeTouchEvent(x, y);
+
+        if (isTextView) {
+            imm.showSoftInput(mWebTextView, 0);
+            // Now we need to fake a touch event to place the cursor where the
+            // user touched.
+            AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams)
+                    mWebTextView.getLayoutParams();
+            if (lp != null) {
+                // Take the last touch and adjust for the location of the
+                // WebTextView.
+                float x = mLastTouchX + (float) (mScrollX - lp.x);
+                float y = mLastTouchY + (float) (mScrollY - lp.y);
+                mWebTextView.fakeTouchEvent(x, y);
+            }
         }
+        else { // used by plugins
+            imm.showSoftInput(this, 0);
+        }
+    }
+
+    // Called by WebKit to instruct the UI to hide the keyboard
+    private void hideSoftKeyboard() {
+        InputMethodManager imm = (InputMethodManager)
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
     }
 
     /*
@@ -3017,8 +3089,7 @@ public class WebView extends AbsoluteLayout
         // should be in content coordinates.
         Rect bounds = nativeFocusCandidateNodeBounds();
         if (!Rect.intersects(bounds, visibleRect)) {
-            // Node is not on screen, so do not bother.
-            return;
+            mWebTextView.bringIntoView();
         }
         String text = nativeFocusCandidateText();
         int nodePointer = nativeFocusCandidatePointer();
@@ -3072,6 +3143,9 @@ public class WebView extends AbsoluteLayout
             mWebTextView.setInPassword(nativeFocusCandidateIsPassword());
             if (null == text) {
                 mWebTextView.setText("", 0, 0);
+                if (DebugFlags.WEB_VIEW) {
+                    Log.v(LOGTAG, "rebuildWebTextView null == text");
+                }
             } else {
                 // Change to true to enable the old style behavior, where
                 // entering a textfield/textarea always set the selection to the
@@ -3086,8 +3160,14 @@ public class WebView extends AbsoluteLayout
                 } else if (isTextField) {
                     int length = text.length();
                     mWebTextView.setText(text, length, length);
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "rebuildWebTextView length=" + length);
+                    }
                 } else {
                     mWebTextView.setText(text, 0, 0);
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "rebuildWebTextView !isTextField");
+                    }
                 }
             }
             mWebTextView.requestFocus();
@@ -3129,7 +3209,7 @@ public class WebView extends AbsoluteLayout
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyDown at " + System.currentTimeMillis()
-                    + ", " + event);
+                    + ", " + event + ", unicode=" + event.getUnicodeChar());
         }
 
         if (mNativeClass == 0) {
@@ -3175,7 +3255,7 @@ public class WebView extends AbsoluteLayout
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             // always handle the navigation keys in the UI thread
             switchOutDrawHistory();
-            if (navHandledKey(keyCode, 1, false, event.getEventTime())) {
+            if (navHandledKey(keyCode, 1, false, event.getEventTime(), false)) {
                 playSoundEffect(keyCodeToSoundsEffect(keyCode));
                 return true;
             }
@@ -3235,15 +3315,23 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
+        if (nativeCursorIsPlugin()) {
+            nativeUpdatePluginReceivesEvents();
+            invalidate();
+        } else if (nativeCursorIsTextInput()) {
             // This message will put the node in focus, for the DOM's notion
-            // of focus
+            // of focus, and make the focuscontroller active
             mWebViewCore.sendMessage(EventHub.CLICK);
-            if (nativeCursorIsTextInput()) {
-                // This will bring up the WebTextView and put it in focus, for
-                // our view system's notion of focus
-                rebuildWebTextView();
-                // Now we need to pass the event to it
+            // This will bring up the WebTextView and put it in focus, for
+            // our view system's notion of focus
+            rebuildWebTextView();
+            // Now we need to pass the event to it
+            return mWebTextView.onKeyDown(keyCode, event);
+        } else if (nativeHasFocusNode()) {
+            // In this case, the cursor is not on a text input, but the focus
+            // might be.  Check it, and if so, hand over to the WebTextView.
+            rebuildWebTextView();
+            if (inEditingMode()) {
                 return mWebTextView.onKeyDown(keyCode, event);
             }
         }
@@ -3264,7 +3352,7 @@ public class WebView extends AbsoluteLayout
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyUp at " + System.currentTimeMillis()
-                    + ", " + event);
+                    + ", " + event + ", unicode=" + event.getUnicodeChar());
         }
 
         if (mNativeClass == 0) {
@@ -3409,9 +3497,7 @@ public class WebView extends AbsoluteLayout
 
     public void onChildViewRemoved(View p, View child) {
         if (child == this) {
-            if (inEditingMode()) {
-                clearTextEntry();
-            }
+            clearTextEntry();
         }
     }
 
@@ -3435,6 +3521,9 @@ public class WebView extends AbsoluteLayout
                 mDrawCursorRing = true;
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
+                    if (inEditingMode()) {
+                        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 1, 0);
+                    }
                 }
             } else {
                 // If our window gained focus, but we do not have it, do not
@@ -3477,7 +3566,7 @@ public class WebView extends AbsoluteLayout
         // Do not need to also check whether mWebViewCore is null, because
         // mNativeClass is only set if mWebViewCore is non null
         if (mNativeClass == 0) return;
-        mWebViewCore.sendMessage(EventHub.SET_INACTIVE);
+        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 0, 0);
     }
 
     @Override
@@ -3947,9 +4036,10 @@ public class WebView extends AbsoluteLayout
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mPrivateHandler.removeMessages(SWITCH_TO_CLICK);
             mTrackballDown = true;
-            if (mNativeClass != 0) {
-                nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
+            if (mNativeClass == 0) {
+                return false;
             }
+            nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
             if (time - mLastCursorTime <= TRACKBALL_TIMEOUT
                     && !mLastCursorBounds.equals(nativeGetCursorRingBounds())) {
                 nativeSelectBestAt(mLastCursorBounds);
@@ -4162,7 +4252,7 @@ public class WebView extends AbsoluteLayout
                         + " mTrackballRemainsX=" + mTrackballRemainsX
                         + " mTrackballRemainsY=" + mTrackballRemainsY);
             }
-            if (navHandledKey(selectKeyCode, count, false, time)) {
+            if (navHandledKey(selectKeyCode, count, false, time, false)) {
                 playSoundEffect(keyCodeToSoundsEffect(selectKeyCode));
             }
             mTrackballRemainsX = mTrackballRemainsY = 0;
@@ -4238,8 +4328,8 @@ public class WebView extends AbsoluteLayout
         float oldScale = mActualScale;
 
         // snap to DEFAULT_SCALE if it is close
-        if (scale > (DEFAULT_SCALE - 0.05) && scale < (DEFAULT_SCALE + 0.05)) {
-            scale = DEFAULT_SCALE;
+        if (scale > (mDefaultScale - 0.05) && scale < (mDefaultScale + 0.05)) {
+            scale = mDefaultScale;
         }
 
         setNewZoomScale(scale, false);
@@ -4444,7 +4534,7 @@ public class WebView extends AbsoluteLayout
                         return result;
                 }
                 if (mNativeClass != 0 && !nativeHasCursorNode()) {
-                    navHandledKey(fakeKeyDirection, 1, true, 0);
+                    navHandledKey(fakeKeyDirection, 1, true, 0, true);
                 }
             }
         }
@@ -4622,9 +4712,11 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
-                    mTouchMode = TOUCH_DONE_MODE;
-                    performLongClick();
-                    rebuildWebTextView();
+                    if (!mPreventDrag) {
+                        mTouchMode = TOUCH_DONE_MODE;
+                        performLongClick();
+                        rebuildWebTextView();
+                    }
                     break;
                 }
                 case SWITCH_TO_CLICK:
@@ -4639,13 +4731,15 @@ public class WebView extends AbsoluteLayout
                         break;
                     }
                     nativeSetFollowedLink(true);
-                    mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE,
-                            cursorData());
+                    nativeUpdatePluginReceivesEvents();
+                    WebViewCore.CursorData data = cursorData();
+                    mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
                     playSoundEffect(SoundEffectConstants.CLICK);
                     boolean isTextInput = nativeCursorIsTextInput();
                     if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(
                                 nativeCursorText())) {
-                        mWebViewCore.sendMessage(EventHub.CLICK);
+                        mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
+                                nativeCursorNodePointer());
                     }
                     if (isTextInput) {
                         rebuildWebTextView();
@@ -4769,7 +4863,7 @@ public class WebView extends AbsoluteLayout
                     int initialScale = msg.arg1;
                     int viewportWidth = msg.arg2;
                     // start a new page with DEFAULT_SCALE zoom scale.
-                    float scale = DEFAULT_SCALE;
+                    float scale = mDefaultScale;
                     if (mInitialScale > 0) {
                         scale = mInitialScale / 100.0f;
                     } else  {
@@ -4791,6 +4885,11 @@ public class WebView extends AbsoluteLayout
                     }
                     setNewZoomScale(scale, false);
                     break;
+                case MOVE_OUT_OF_PLUGIN:
+                    if (nativePluginEatsNavKey()) {
+                        navHandledKey(msg.arg1, 1, false, 0, true);
+                    }
+                    break;
                 case UPDATE_TEXT_ENTRY_MSG_ID:
                     // this is sent after finishing resize in WebViewCore. Make
                     // sure the text edit box is still on the  screen.
@@ -4798,6 +4897,9 @@ public class WebView extends AbsoluteLayout
                         mWebTextView.bringIntoView();
                     }
                     rebuildWebTextView();
+                    break;
+                case CLEAR_TEXT_ENTRY:
+                    clearTextEntry();
                     break;
                 case INVAL_RECT_MSG_ID: {
                     Rect r = (Rect)msg.obj;
@@ -4857,6 +4959,14 @@ public class WebView extends AbsoluteLayout
                         if (mPreventDrag) {
                             mTouchMode = TOUCH_DONE_MODE;
                         }
+                    }
+                    break;
+
+                case REQUEST_KEYBOARD:
+                    if (msg.arg1 == 0) {
+                        hideSoftKeyboard();
+                    } else {
+                        displaySoftKeyboard(false);
                     }
                     break;
 
@@ -5118,12 +5228,23 @@ public class WebView extends AbsoluteLayout
                 new WebViewCore.CursorData(frame, node, x, y));
     }
 
-    // called by JNI
-    private void sendMoveMouseIfLatest(boolean setFocusControllerInactive) {
-        if (setFocusControllerInactive) {
+    /*
+     * Send a mouse move event to the webcore thread.
+     *
+     * @param removeFocus Pass true if the "mouse" cursor is now over a node
+     *                    which wants key events, but it is not the focus. This
+     *                    will make the visual appear as though nothing is in
+     *                    focus.  Remove the WebTextView, if present, and stop
+     *                    drawing the blinking caret.
+     * called by JNI
+     */
+    private void sendMoveMouseIfLatest(boolean removeFocus) {
+        if (removeFocus) {
+            clearTextEntry();
             setFocusControllerInactive();
         }
-        mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST, cursorData());
+        mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST,
+                cursorData());
     }
 
     // called by JNI
@@ -5176,10 +5297,20 @@ public class WebView extends AbsoluteLayout
     }
 
     // return true if the key was handled
-    private boolean navHandledKey(int keyCode, int count, boolean noScroll
-            , long time) {
+    private boolean navHandledKey(int keyCode, int count, boolean noScroll,
+            long time, boolean ignorePlugin) {
         if (mNativeClass == 0) {
             return false;
+        }
+        if (ignorePlugin == false && nativePluginEatsNavKey()) {
+            KeyEvent event = new KeyEvent(time, time, KeyEvent.ACTION_DOWN
+                , keyCode, count, (mShiftIsPressed ? KeyEvent.META_SHIFT_ON : 0)
+                | (false ? KeyEvent.META_ALT_ON : 0) // FIXME
+                | (false ? KeyEvent.META_SYM_ON : 0) // FIXME
+                , 0, 0, 0);
+            mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
+            mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+            return true;
         }
         mLastCursorTime = time;
         mLastCursorBounds = nativeGetCursorRingBounds();
@@ -5263,6 +5394,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
+    private native boolean  nativeCursorIsPlugin();
     private native boolean  nativeCursorIsTextInput();
     private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
@@ -5286,7 +5418,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeFocusCandidateIsTextField();
     private native boolean  nativeFocusCandidateIsTextInput();
     private native int      nativeFocusCandidateMaxLength();
-    private native String   nativeFocusCandidateName();
+    /* package */ native String   nativeFocusCandidateName();
     private native Rect     nativeFocusCandidateNodeBounds();
     /* package */ native int nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
@@ -5306,6 +5438,7 @@ public class WebView extends AbsoluteLayout
     private native int      nativeMoveGeneration();
     private native void     nativeMoveSelection(int x, int y,
             boolean extendSelection);
+    private native boolean  nativePluginEatsNavKey();
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
     private native void     nativeRecordButtons(boolean focused,
@@ -5319,5 +5452,5 @@ public class WebView extends AbsoluteLayout
     // we always want to pass in our generation number.
     private native void     nativeUpdateCachedTextfield(String updatedText,
             int generation);
-
+    private native void     nativeUpdatePluginReceivesEvents();
 }

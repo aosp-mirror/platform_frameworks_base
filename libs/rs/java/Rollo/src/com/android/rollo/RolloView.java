@@ -74,6 +74,11 @@ public class RolloView extends RSSurfaceView {
         if (act == ev.ACTION_UP) {
             ret = false;
         }
+        float x = ev.getX();
+        x = (x - 180) / 40;
+        //Log.e("rs", Float(x).toString());
+
+        mRender.setPosition(x, ev.getPressure());
         //mRender.newTouchPosition((int)ev.getX(), (int)ev.getY());
         return ret;
     }

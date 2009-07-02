@@ -41,6 +41,20 @@ interface IBackupTransport {
         - adb: close the file
 */
     /**
+     * Ask the transport where, on local device storage, to keep backup state blobs.
+     * This is per-transport so that mock transports used for testing can coexist with
+     * "live" backup services without interfering with the live bookkeeping.  The
+     * returned string should be a name that is expected to be unambiguous among all
+     * available backup transports; the name of the class implementing the transport
+     * is a good choice.
+     *
+     * @return A unique name, suitable for use as a file or directory name, that the
+     *         Backup Manager could use to disambiguate state files associated with
+     *         different backup transports.
+     */
+    String transportDirName();
+
+    /**
      * Verify that this is a suitable time for a backup pass.  This should return zero
      * if a backup is reasonable right now, some positive value otherwise.  This method
      * will be called outside of the {@link #startSession}/{@link #endSession} pair.

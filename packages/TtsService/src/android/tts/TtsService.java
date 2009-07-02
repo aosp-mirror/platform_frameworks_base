@@ -47,12 +47,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TtsService extends Service implements OnCompletionListener {
 
     private static class SpeechItem {
-        public static final int SPEECH = 0;
-        public static final int EARCON = 1;
-        public static final int SILENCE = 2;
+        public static final int TEXT = 0;
+        public static final int IPA = 1;
+        public static final int EARCON = 2;
+        public static final int SILENCE = 3;
         public String mText = null;
         public ArrayList<String> mParams = null;
-        public int mType = SPEECH;
+        public int mType = TEXT;
         public long mDuration = 0;
 
         public SpeechItem(String text, ArrayList<String> params, int itemType) {
@@ -89,6 +90,9 @@ public class TtsService extends Service implements OnCompletionListener {
         }
     }
 
+    private static final int MAX_SPEECH_ITEM_CHAR_LENGTH = 4000;
+    private static final int MAX_FILENAME_LENGTH = 250;
+
     private static final String ACTION = "android.intent.action.USE_TTS";
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
@@ -108,7 +112,6 @@ public class TtsService extends Service implements OnCompletionListener {
     private final ReentrantLock synthesizerLock = new ReentrantLock();
 
     private SynthProxy nativeSynth;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -145,13 +148,10 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private void setDefaultSettings() {
-
-        // TODO handle default language
-        setLanguage("eng", "USA", "");
+        setLanguage(this.getDefaultLanguage(), getDefaultCountry(), getDefaultLocVariant());
 
         // speech rate
         setSpeechRate(getDefaultRate());
-
     }
 
 
@@ -214,6 +214,17 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private void setPitch(int pitch) {
         nativeSynth.setPitch(pitch);
+    }
+
+
+    private int isLanguageAvailable(String lang, String country, String variant) {
+        Log.v("TTS", "TtsService.isLanguageAvailable(" + lang + ", " + country + ", " +variant+")");
+        return nativeSynth.isLanguageAvailable(lang, country, variant);
+    }
+
+
+    private String[] getLanguage() {
+        return nativeSynth.getLanguage();
     }
 
 
@@ -298,7 +309,29 @@ public class TtsService extends Service implements OnCompletionListener {
         if (queueMode == 0) {
             stop();
         }
-        mSpeechQueue.add(new SpeechItem(text, params, SpeechItem.SPEECH));
+        mSpeechQueue.add(new SpeechItem(text, params, SpeechItem.TEXT));
+        if (!mIsSpeaking) {
+            processSpeechQueue();
+        }
+    }
+
+    /**
+     * Speaks the given IPA text using the specified queueing mode and parameters.
+     *
+     * @param ipaText
+     *            The IPA text that should be spoken
+     * @param queueMode
+     *            0 for no queue (interrupts all previous utterances), 1 for
+     *            queued
+     * @param params
+     *            An ArrayList of parameters. This is not implemented for all
+     *            engines.
+     */
+    private void speakIpa(String ipaText, int queueMode, ArrayList<String> params) {
+        if (queueMode == 0) {
+            stop();
+        }
+        mSpeechQueue.add(new SpeechItem(ipaText, params, SpeechItem.IPA));
         if (!mIsSpeaking) {
             processSpeechQueue();
         }
@@ -392,6 +425,26 @@ public class TtsService extends Service implements OnCompletionListener {
                         synth.start();
                         return;
                     }
+                    if (params != null){
+                        String language = "";
+                        String country = "";
+                        String variant = "";
+                        for (int i = 0; i < params.size() - 1; i = i + 2){
+                            String param = params.get(i);
+                            if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
+                                setSpeechRate(Integer.parseInt(params.get(i+1)));
+                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
+                                language = params.get(i+1);
+                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
+                                country = params.get(i+1);
+                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
+                                variant = params.get(i+1);
+                            }
+                        }
+                        if (language.length() > 0){
+                            setLanguage(language, country, variant);
+                        }
+                    }
                     nativeSynth.speak(text);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -424,6 +477,11 @@ public class TtsService extends Service implements OnCompletionListener {
         return sr;
     }
 
+    private void broadcastTtsQueueProcessingCompleted(){
+        Intent i = new Intent(Intent.ACTION_TTS_QUEUE_PROCESSING_COMPLETED);
+        sendBroadcast(i);
+    }
+
     private void dispatchSpeechCompletedCallbacks(String mark) {
         Log.i("TTS callback", "dispatch started");
         // Broadcast to all clients the new value.
@@ -440,6 +498,33 @@ public class TtsService extends Service implements OnCompletionListener {
         Log.i("TTS callback", "dispatch completed to " + N);
     }
 
+    private SpeechItem splitCurrentTextIfNeeded(SpeechItem currentSpeechItem){
+        if (currentSpeechItem.mText.length() < MAX_SPEECH_ITEM_CHAR_LENGTH){
+            return currentSpeechItem;
+        } else {
+            ArrayList<SpeechItem> splitItems = new ArrayList<SpeechItem>();
+            int start = 0;
+            int end = start + MAX_SPEECH_ITEM_CHAR_LENGTH - 1;
+            String splitText;
+            SpeechItem splitItem;
+            while (end < currentSpeechItem.mText.length()){
+                splitText = currentSpeechItem.mText.substring(start, end);
+                splitItem = new SpeechItem(splitText, null, SpeechItem.TEXT);
+                splitItems.add(splitItem);
+                start = end;
+                end = start + MAX_SPEECH_ITEM_CHAR_LENGTH - 1;
+            }
+            splitText = currentSpeechItem.mText.substring(start);
+            splitItem = new SpeechItem(splitText, null, SpeechItem.TEXT);
+            splitItems.add(splitItem);
+            mSpeechQueue.remove(0);
+            for (int i = splitItems.size() - 1; i >= 0; i--){
+                mSpeechQueue.add(0, splitItems.get(i));
+            }
+            return mSpeechQueue.get(0);
+        }
+    }
+
     private void processSpeechQueue() {
         boolean speechQueueAvailable = false;
         try {
@@ -449,11 +534,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
             if (mSpeechQueue.size() < 1) {
                 mIsSpeaking = false;
-                // Dispatch a completion here as this is the
-                // only place where speech completes normally.
-                // Nothing left to say in the queue is a special case
-                // that is always a "mark" - associated text is null.
-                dispatchSpeechCompletedCallbacks("");
+                broadcastTtsQueueProcessingCompleted();
                 return;
             }
 
@@ -464,11 +545,12 @@ public class TtsService extends Service implements OnCompletionListener {
             // processSpeechQueue to continue running the queue
             Log.i("TTS processing: ", currentSpeechItem.mText);
             if (sr == null) {
-                if (currentSpeechItem.mType == SpeechItem.SPEECH) {
-                    // TODO: Split text up into smaller chunks before accepting
-                    // them for processing.
+                if (currentSpeechItem.mType == SpeechItem.TEXT) {
+                    currentSpeechItem = splitCurrentTextIfNeeded(currentSpeechItem);
                     speakInternalOnly(currentSpeechItem.mText,
                             currentSpeechItem.mParams);
+                } else if (currentSpeechItem.mType == SpeechItem.IPA) {
+                    // TODO Implement IPA support
                 } else {
                     // This is either silence or an earcon that was missing
                     silence(currentSpeechItem.mDuration);
@@ -534,8 +616,7 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
     /**
-     * Synthesizes the given text using the specified queuing mode and
-     * parameters.
+     * Synthesizes the given text to a file using the specified parameters.
      *
      * @param text
      *            The String of text that should be synthesized
@@ -564,11 +645,55 @@ public class TtsService extends Service implements OnCompletionListener {
                 return false;
             }
             // Don't allow a filename that is too long
-            // TODO use platform constant
-            if (filename.length() > 250) {
+            if (filename.length() > MAX_FILENAME_LENGTH) {
                 return false;
             }
             nativeSynth.synthesizeToFile(text, filename);
+        } finally {
+            // This check is needed because finally will always run; even if the
+            // method returns somewhere in the try block.
+            if (synthAvailable) {
+                synthesizerLock.unlock();
+            }
+        }
+        Log.i("TTS", "Completed synthesis for " + filename);
+        return true;
+    }
+
+    /**
+     * Synthesizes the given IPA text to a file using the specified parameters.
+     *
+     * @param ipaText
+     *            The String of IPA text that should be synthesized
+     * @param params
+     *            An ArrayList of parameters. The first element of this array
+     *            controls the type of voice to use.
+     * @param filename
+     *            The string that gives the full output filename; it should be
+     *            something like "/sdcard/myappsounds/mysound.wav".
+     * @return A boolean that indicates if the synthesis succeeded
+     */
+    private boolean synthesizeIpaToFile(String ipaText, ArrayList<String> params,
+            String filename, boolean calledFromApi) {
+        // Only stop everything if this is a call made by an outside app trying
+        // to
+        // use the API. Do NOT stop if this is a call from within the service as
+        // clearing the speech queue here would be a mistake.
+        if (calledFromApi) {
+            stop();
+        }
+        Log.i("TTS", "Synthesizing IPA to " + filename);
+        boolean synthAvailable = false;
+        try {
+            synthAvailable = synthesizerLock.tryLock();
+            if (!synthAvailable) {
+                return false;
+            }
+            // Don't allow a filename that is too long
+            if (filename.length() > MAX_FILENAME_LENGTH) {
+                return false;
+            }
+            // TODO: Add nativeSynth.synthesizeIpaToFile(text, filename);
         } finally {
             // This check is needed because finally will always run; even if the
             // method returns somewhere in the try block.
@@ -623,6 +748,27 @@ public class TtsService extends Service implements OnCompletionListener {
                 speakingParams = new ArrayList<String>(Arrays.asList(params));
             }
             mSelf.speak(text, queueMode, speakingParams);
+        }
+
+        /**
+         * Speaks the given IPA text using the specified queueing mode and
+         * parameters.
+         *
+         * @param ipaText
+         *            The IPA text that should be spoken
+         * @param queueMode
+         *            0 for no queue (interrupts all previous utterances), 1 for
+         *            queued
+         * @param params
+         *            An ArrayList of parameters. The first element of this
+         *            array controls the type of voice to use.
+         */
+        public void speakIpa(String ipaText, int queueMode, String[] params) {
+            ArrayList<String> speakingParams = new ArrayList<String>();
+            if (params != null) {
+                speakingParams = new ArrayList<String>(Arrays.asList(params));
+            }
+            mSelf.speakIpa(ipaText, queueMode, speakingParams);
         }
 
         /**
@@ -757,6 +903,30 @@ public class TtsService extends Service implements OnCompletionListener {
         }
 
         /**
+         * Returns the level of support for the specified language.
+         *
+         * @param lang  the three letter ISO language code.
+         * @param country  the three letter ISO country code.
+         * @param variant  the variant code associated with the country and language pair.
+         * @return one of TTS_LANG_NOT_SUPPORTED, TTS_LANG_MISSING_DATA, TTS_LANG_AVAILABLE,
+         *      TTS_LANG_COUNTRY_AVAILABLE, TTS_LANG_COUNTRY_VAR_AVAILABLE as defined in
+         *      android.speech.tts.TextToSpeech.
+         */
+        public int isLanguageAvailable(String lang, String country, String variant) {
+            return mSelf.isLanguageAvailable(lang, country, variant);
+        }
+
+        /**
+         * Returns the currently set language / country / variant strings representing the
+         * language used by the TTS engine.
+         * @return null is no language is set, or an array of 3 string containing respectively
+         *      the language, country and variant.
+         */
+        public String[] getLanguage() {
+            return mSelf.getLanguage();
+        }
+
+        /**
          * Sets the speech rate for the TTS, which affects the synthesized voice.
          *
          * @param lang  the three letter ISO language code.
@@ -768,7 +938,7 @@ public class TtsService extends Service implements OnCompletionListener {
         }
 
         /**
-         * Speaks the given text using the specified queueing mode and
+         * Synthesizes the given text to a file using the specified
          * parameters.
          *
          * @param text
@@ -788,6 +958,29 @@ public class TtsService extends Service implements OnCompletionListener {
                 speakingParams = new ArrayList<String>(Arrays.asList(params));
             }
             return mSelf.synthesizeToFile(text, speakingParams, filename, true);
+        }
+
+        /**
+         * Synthesizes the given IPA text to a file using the specified
+         * parameters.
+         *
+         * @param ipaText
+         *            The String of IPA text that should be synthesized
+         * @param params
+         *            An ArrayList of parameters. The first element of this
+         *            array controls the type of voice to use.
+         * @param filename
+         *            The string that gives the full output filename; it should
+         *            be something like "/sdcard/myappsounds/mysound.wav".
+         * @return A boolean that indicates if the synthesis succeeded
+         */
+        public boolean synthesizeIpaToFile(String ipaText, String[] params,
+                String filename) {
+            ArrayList<String> speakingParams = new ArrayList<String>();
+            if (params != null) {
+                speakingParams = new ArrayList<String>(Arrays.asList(params));
+            }
+            return mSelf.synthesizeIpaToFile(ipaText, speakingParams, filename, true);
         }
     };
 

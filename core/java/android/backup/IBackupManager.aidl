@@ -48,6 +48,24 @@ interface IBackupManager {
     void agentDisconnected(String packageName);
 
     /**
+     * Enable/disable the backup service entirely.  When disabled, no backup
+     * or restore operations will take place.  Data-changed notifications will
+     * still be observed and collected, however, so that changes made while the
+     * mechanism was disabled will still be backed up properly if it is enabled
+     * at some point in the future.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void setBackupEnabled(boolean isEnabled);
+
+    /**
+     * Report whether the backup mechanism is currently enabled.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    boolean isBackupEnabled();
+
+    /**
      * Schedule an immediate backup attempt for all pending updates.  This is
      * primarily intended for transports to use when they detect a suitable
      * opportunity for doing a backup pass.  If there are no pending updates to
@@ -63,23 +81,32 @@ interface IBackupManager {
      * Identify the currently selected transport.  Callers must hold the
      * android.permission.BACKUP permission to use this method.
      */
-    int getCurrentTransport();
+    String getCurrentTransport();
 
     /**
-     * Specify a default backup transport.  Callers must hold the
+     * Request a list of all available backup transports' names.  Callers must
+     * hold the android.permission.BACKUP permission to use this method.
+     */
+    String[] listAllTransports();
+
+    /**
+     * Specify the current backup transport.  Callers must hold the
      * android.permission.BACKUP permission to use this method.
      *
-     * @param transportID The ID of the transport to select.  This should be one
+     * @param transport The name of the transport to select.  This should be one
      * of {@link BackupManager.TRANSPORT_GOOGLE} or {@link BackupManager.TRANSPORT_ADB}.
-     * @return The ID of the previously selected transport.
+     * @return The name of the previously selected transport.  If the given transport
+     *   name is not one of the currently available transports, no change is made to
+     *   the current transport setting and the method returns null.
      */
-    int selectBackupTransport(int transportID);
+    String selectBackupTransport(String transport);
 
     /**
      * Begin a restore session with the given transport (which may differ from the
      * currently-active backup transport).
      *
+     * @param transport The name of the transport to use for the restore operation.
      * @return An interface to the restore session, or null on error.
      */
-    IRestoreSession beginRestoreSession(int transportID);
+    IRestoreSession beginRestoreSession(String transportID);
 }
