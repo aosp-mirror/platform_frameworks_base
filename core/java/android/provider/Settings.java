@@ -1337,6 +1337,49 @@ public final class Settings {
          */
         public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
 
+        /**
+         * Settings to backup. This is here so that it's in the same place as the settings
+         * keys and easy to update.
+         * @hide
+         */
+        public static final String[] SETTINGS_TO_BACKUP = {
+            STAY_ON_WHILE_PLUGGED_IN,
+            END_BUTTON_BEHAVIOR,
+            WIFI_SLEEP_POLICY,
+            WIFI_USE_STATIC_IP,
+            WIFI_STATIC_IP,
+            WIFI_STATIC_GATEWAY,
+            WIFI_STATIC_NETMASK,
+            WIFI_STATIC_DNS1,
+            WIFI_STATIC_DNS2,
+            BLUETOOTH_DISCOVERABILITY,
+            BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+            DIM_SCREEN,
+            SCREEN_OFF_TIMEOUT,
+            SCREEN_BRIGHTNESS,
+            VIBRATE_ON,
+            NOTIFICATIONS_USE_RING_VOLUME,
+            RINGTONE,
+            NOTIFICATION_SOUND,
+            TEXT_AUTO_REPLACE,
+            TEXT_AUTO_CAPS,
+            TEXT_AUTO_PUNCTUATE,
+            TEXT_SHOW_PASSWORD,
+            AUTO_TIME,
+            TIME_12_24,
+            DATE_FORMAT,
+            ACCELEROMETER_ROTATION,
+            DTMF_TONE_WHEN_DIALING,
+            DTMF_TONE_TYPE_WHEN_DIALING,
+            EMERGENCY_TONE,
+            CALL_AUTO_RETRY,
+            HEARING_AID,
+            TTY_MODE,
+            SOUND_EFFECTS_ENABLED,
+            HAPTIC_FEEDBACK_ENABLED,
+            SHOW_WEB_SUGGESTIONS
+        };
+
         // Settings moved to Settings.Secure
 
         /**
@@ -2244,6 +2287,34 @@ public final class Settings {
          * @hide
          */
         public static final String LAST_SETUP_SHOWN = "last_setup_shown";
+
+        /**
+         * @hide
+         */
+        public static final String[] SETTINGS_TO_BACKUP = {
+            INSTALL_NON_MARKET_APPS,
+            PARENTAL_CONTROL_ENABLED,
+            PARENTAL_CONTROL_REDIRECT_URL,
+            USB_MASS_STORAGE_ENABLED,
+            ACCESSIBILITY_ENABLED,
+            ENABLED_ACCESSIBILITY_SERVICES,
+            TTS_USE_DEFAULTS,
+            TTS_DEFAULT_RATE,
+            TTS_DEFAULT_PITCH,
+            TTS_DEFAULT_SYNTH,
+            TTS_DEFAULT_LANG,
+            TTS_DEFAULT_COUNTRY,
+            WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+            WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
+            WIFI_NUM_ALLOWED_CHANNELS,
+            WIFI_NUM_OPEN_NETWORKS_KEPT,
+            BACKGROUND_DATA,
+            PREFERRED_NETWORK_MODE,
+            PREFERRED_TTY_MODE,
+            CDMA_CELL_BROADCAST_SMS,
+            PREFERRED_CDMA_SUBSCRIPTION,
+            ENHANCED_VOICE_PRIVACY_ENABLED
+        };
 
         /**
          * Helper method for determining if a location provider is enabled.
