@@ -1205,7 +1205,7 @@ class BackupManagerService extends IBackupManager.Stub {
         // If the caller does not hold the BACKUP permission, it can only request a
         // wipe of its own backed-up data.
         HashSet<ApplicationInfo> apps;
-        if ((mContext.checkPermission("android.permission.BACKUP", Binder.getCallingPid(),
+        if ((mContext.checkPermission(android.Manifest.permission.BACKUP, Binder.getCallingPid(),
                 Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
             apps = mBackupParticipants.get(Binder.getCallingUid());
         } else {
@@ -1278,7 +1278,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Report the name of the currently active transport
     public String getCurrentTransport() {
-        mContext.enforceCallingPermission("android.permission.BACKUP", "getCurrentTransport");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+                "getCurrentTransport");
         Log.v(TAG, "... getCurrentTransport() returning " + mCurrentTransport);
         return mCurrentTransport;
     }
