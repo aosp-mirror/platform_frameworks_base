@@ -1,7 +1,7 @@
 #pragma version(1)
 #pragma stateVertex(PV)
 #pragma stateFragment(PF)
-#pragma stateFragmentStore(PFSBackground)
+#pragma stateFragmentStore(PFS)
 
 int main(void* con, int ft, int launchID)
 {
@@ -45,6 +45,8 @@ int main(void* con, int ft, int launchID)
         for (y = 0; (y < rowCount) && iconCount; y++) {
             ty1 = (y * 0x30000) - 0x48000;
             ty2 = ty1 + 0x20000;
+
+            pfBindTexture(NAMED_PF, 0, loadI32(1, y));
 
             drawQuad(tx1, ty1, tz1,
                      tx2, ty1, tz2,
