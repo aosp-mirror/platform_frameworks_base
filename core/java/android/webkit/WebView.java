@@ -4504,6 +4504,15 @@ public class WebView extends AbsoluteLayout
         mCallbackProxy.uiOverrideUrlLoading(url);
     }
 
+    // called by JNI
+    private void sendPluginState(int state) {
+        WebViewCore.PluginStateData psd = new WebViewCore.PluginStateData();
+        psd.mFrame = nativeCursorFramePointer();
+        psd.mNode = nativeCursorNodePointer();
+        psd.mState = state;
+        mWebViewCore.sendMessage(EventHub.PLUGIN_STATE, psd);
+    }
+
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
         boolean result = false;
