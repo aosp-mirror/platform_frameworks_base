@@ -83,12 +83,24 @@ interface IBackupTransport {
     boolean performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd);
 
     /**
-     * Finish sending application data to the backup destination.  This must be
-     * called after {@link #performBackup} to ensure that all data is sent.  Only
-     * when this method returns true can the backup be assumed to have succeeded.
+     * Erase the give application's data from the backup destination.  This clears
+     * out the given package's data from the current backup set, making it as though
+     * the app had never yet been backed up.  After this is called, {@link finishBackup}
+     * must be called to ensure that the operation is recorded successfully.
      *
      * @return false if errors occurred (the backup should be aborted and rescheduled),
      *   true if everything is OK so far (but {@link #finishBackup} must be called).
+     */
+    boolean clearBackupData(in PackageInfo packageInfo);
+
+    /**
+     * Finish sending application data to the backup destination.  This must be
+     * called after {@link #performBackup} or {@link clearBackupData} to ensure that
+     * all data is sent.  Only when this method returns true can a backup be assumed
+     * to have succeeded.
+     *
+     * @return false if errors occurred (the backup should be aborted and rescheduled),
+     *   true if everything is OK.
      */
     boolean finishBackup();
 
