@@ -630,7 +630,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     }
 
     public void
-    getIccStatus(Message result) {
+    getIccCardStatus(Message result) {
         //Note: This RIL request has not been renamed to ICC,
         //       but this request is also valid for SIM and RUIM
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_GET_SIM_STATUS, result);
@@ -2732,24 +2732,22 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     private Object
     responseIccCardStatus(Parcel p) {
-        RadioState currentRadioState;
         IccCardApplication ca;
 
-        currentRadioState = getRadioState();
-
         IccCardStatus status = new IccCardStatus();
-        status.card_state                      = status.CardStateFromRILInt(p.readInt());
-        status.universal_pin_state             = status.PinStateFromRILInt(p.readInt());
-        status.gsm_umts_subscription_app_index = p.readInt();
-        status.cdma_subscription_app_index     = p.readInt();
-        status.num_applications                = p.readInt();
+        status.setCardState(p.readInt());
+        status.setUniversalPinState(p.readInt());
+        status.setGsmUmtsSubscriptionAppIndex(p.readInt());
+        status.setCdmaSubscriptionAppIndex(p.readInt());
+        int numApplications = p.readInt();
 
         // limit to maximum allowed applications
-        if (status.num_applications > IccCardStatus.CARD_MAX_APPS) {
-            status.num_applications = IccCardStatus.CARD_MAX_APPS;
+        if (numApplications > IccCardStatus.CARD_MAX_APPS) {
+            numApplications = IccCardStatus.CARD_MAX_APPS;
         }
+        status.setNumApplications(numApplications);
 
-        for (int i = 0 ; i < status.num_applications ; i++) {
+        for (int i = 0 ; i < numApplications ; i++) {
             ca = new IccCardApplication();
             ca.app_type       = ca.AppTypeFromRILInt(p.readInt());
             ca.app_state      = ca.AppStateFromRILInt(p.readInt());
@@ -2759,62 +2757,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             ca.pin1_replaced  = p.readInt();
             ca.pin1           = p.readInt();
             ca.pin2           = p.readInt();
-            status.application.add(ca);
+            status.addApplication(ca);
         }
-
-        // this is common for all radio technologies
-        if (!status.card_state.isCardPresent()) {
-            return IccStatus.ICC_ABSENT;
-        }
-
-        // check radio technology
-        if( currentRadioState == RadioState.RADIO_OFF         ||
-            currentRadioState == RadioState.RADIO_UNAVAILABLE ||
-            currentRadioState == RadioState.SIM_NOT_READY     ||
-            currentRadioState == RadioState.RUIM_NOT_READY    ||
-            currentRadioState == RadioState.NV_NOT_READY      ||
-            currentRadioState == RadioState.NV_READY            ) {
-            return IccStatus.ICC_NOT_READY;
-        }
-
-        if( currentRadioState == RadioState.SIM_LOCKED_OR_ABSENT  ||
-            currentRadioState == RadioState.SIM_READY             ||
-            currentRadioState == RadioState.RUIM_LOCKED_OR_ABSENT ||
-            currentRadioState == RadioState.RUIM_READY) {
-
-            int index;
-
-            // check for CDMA radio technology
-            if (currentRadioState == RadioState.RUIM_LOCKED_OR_ABSENT ||
-                currentRadioState == RadioState.RUIM_READY) {
-                index = status.cdma_subscription_app_index;
-            }
-            else {
-                index = status.gsm_umts_subscription_app_index;
-            }
-
-            // check if PIN required
-            if (status.application.get(index).app_state.isPinRequired()) {
-                return IccStatus.ICC_PIN;
-            }
-            if (status.application.get(index).app_state.isPukRequired()) {
-                return IccStatus.ICC_PUK;
-            }
-            if (status.application.get(index).app_state.isSubscriptionPersoEnabled()) {
-                return IccStatus.ICC_NETWORK_PERSONALIZATION;
-            }
-            if (status.application.get(index).app_state.isAppReady()) {
-                return IccStatus.ICC_READY;
-            }
-            if (status.application.get(index).app_state.isAppNotReady()) {
-                return IccStatus.ICC_NOT_READY;
-            }
-            return IccStatus.ICC_NOT_READY;
-        }
-
-        // Unrecognized ICC status. Treat it like a missing ICC.
-        Log.e(LOG_TAG, "Unrecognized RIL_REQUEST_GET_SIM_STATUS result: " + status);
-        return IccStatus.ICC_ABSENT;
+        return status;
     }
 
     private Object
