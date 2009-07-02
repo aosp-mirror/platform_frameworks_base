@@ -39,6 +39,14 @@ graphics files and templates that will make your designer's life easier.</dd>
       multitasking, activity reuse, intents, the activity stack, and 
       tasks. It covers this all from a high-level design perspective.
 </dd>
+  <dt><a href="{@docRoot}guide/practices/ui_guidelines/menu_design.html">Menu Design Guidelines</a> </dt>
+  <dd>Android applications make use of Option menus and Context menus 
+      that enable users to perform operations and navigate to other parts
+      of your application or to other applications.  These guidelines describe
+      the difference between Options and Context menus, how to arrange
+      menu items, when to put commands on-screen, and other details about
+      menu design.
+</dd>
 </dl>
 
 
