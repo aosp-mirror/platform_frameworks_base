@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
+import android.bluetooth.BluetoothPbap;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -301,6 +302,7 @@ public class StatusBarPolicy {
     private IconData mBluetoothData;
     private int mBluetoothHeadsetState;
     private int mBluetoothA2dpState;
+    private int mBluetoothPbapState;
     private boolean mBluetoothEnabled;
 
     // wifi
@@ -378,7 +380,8 @@ public class StatusBarPolicy {
             }
             else if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ||
-                    action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
+                    action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION) ||
+                    action.equals(BluetoothPbap.PBAP_STATE_CHANGED_ACTION)) {
                 updateBluetooth(intent);
             }
             else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION) ||
@@ -478,6 +481,7 @@ public class StatusBarPolicy {
         }
         mBluetoothA2dpState = BluetoothA2dp.STATE_DISCONNECTED;
         mBluetoothHeadsetState = BluetoothHeadset.STATE_DISCONNECTED;
+        mBluetoothPbapState = BluetoothPbap.STATE_DISCONNECTED;
         mService.setIconVisibility(mBluetoothIcon, mBluetoothEnabled);
 
         // Gps status
@@ -527,6 +531,7 @@ public class StatusBarPolicy {
         filter.addAction(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
         filter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
         filter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
+        filter.addAction(BluetoothPbap.PBAP_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
@@ -1084,13 +1089,17 @@ public class StatusBarPolicy {
         } else if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
             mBluetoothA2dpState = intent.getIntExtra(BluetoothA2dp.SINK_STATE,
                     BluetoothA2dp.STATE_DISCONNECTED);
+        } else if (action.equals(BluetoothPbap.PBAP_STATE_CHANGED_ACTION)) {
+            mBluetoothPbapState = intent.getIntExtra(BluetoothPbap.PBAP_STATE,
+                    BluetoothPbap.STATE_DISCONNECTED);
         } else {
             return;
         }
 
         if (mBluetoothHeadsetState == BluetoothHeadset.STATE_CONNECTED ||
                 mBluetoothA2dpState == BluetoothA2dp.STATE_CONNECTED ||
-                mBluetoothA2dpState == BluetoothA2dp.STATE_PLAYING) {
+                mBluetoothA2dpState == BluetoothA2dp.STATE_PLAYING ||
+                mBluetoothPbapState == BluetoothPbap.STATE_CONNECTED) {
             iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth_connected;
         }
 
