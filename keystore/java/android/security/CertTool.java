@@ -51,7 +51,7 @@ public class CertTool {
     private static final String USER_CERTIFICATE = "USRCERT";
     private static final String USER_KEY = "USRKEY";
 
-    private static final String KEYNAME_DELIMITER = " ";
+    private static final String KEYNAME_DELIMITER = "_";
     private static final Keystore keystore = Keystore.getInstance();
 
     private native String generateCertificateRequest(int bits, String subject);

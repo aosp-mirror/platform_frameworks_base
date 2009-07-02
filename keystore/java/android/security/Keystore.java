@@ -25,6 +25,12 @@ public abstract class Keystore {
     private static final String TAG = "Keystore";
     private static final String[] NOTFOUND = new String[0];
 
+    // Keystore States
+    public static final int BOOTUP = 0;
+    public static final int UNINITIALIZED = 1;
+    public static final int LOCKED = 2;
+    public static final int UNLOCKED = 3;
+
     /**
      */
     public static Keystore getInstance() {
@@ -195,9 +201,11 @@ public abstract class Keystore {
         public String[] listKeys(String namespace) {
             Reply result = mServiceCommand.execute(ServiceCommand.LIST_KEYS,
                     namespace);
-            return (result != null) ? ((result.returnCode != 0) ? NOTFOUND :
-                    new String(result.data, 0, result.len).split("\\s+"))
-                    : NOTFOUND;
+            if ((result == null) || (result.returnCode != 0) ||
+                    (result.len == 0)) {
+                return NOTFOUND;
+            }
+            return new String(result.data, 0, result.len).split("\\s+");
         }
 
         @Override

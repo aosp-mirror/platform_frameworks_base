@@ -142,7 +142,7 @@ static void do_get_state(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 static void do_listkeys(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 {
     reply->retcode = list_keys((const char*)cmd->data, (char*)reply->data);
-    if (!reply->retcode) reply->len = strlen((char*)reply->data) + 1;
+    if (!reply->retcode) reply->len = strlen((char*)reply->data);
 }
 
 // args of get():
