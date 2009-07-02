@@ -76,11 +76,7 @@ public class StatusBarPolicy {
     private static StatusBarPolicy sInstance;
 
     // message codes for the handler
-    private static final int EVENT_DATA_CONN_STATE_CHANGED = 2;
-    private static final int EVENT_DATA_ACTIVITY = 3;
     private static final int EVENT_BATTERY_CLOSE = 4;
-
-    private static final int BATTERY_LEVEL_CLOSE_WARNING = 20;
 
     private final Context mContext;
     private final StatusBarService mService;
@@ -357,6 +353,9 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
                 updateClock();
             }
+            else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+                updateBattery(intent);
+            }
             else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 updateClock();
             }
@@ -371,11 +370,11 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_SYNC_STATE_CHANGED)) {
                 updateSyncState(intent);
             }
-            else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                updateBattery(intent);
-            }
             else if (action.equals(Intent.ACTION_BATTERY_LOW)) {
                 onBatteryLow(intent);
+            }
+            else if (action.equals(Intent.ACTION_BATTERY_OKAY)) {
+                onBatteryOkay(intent);
             }
             else if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ||
@@ -519,6 +518,7 @@ public class StatusBarPolicy {
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_LOW);
+        filter.addAction(Intent.ACTION_BATTERY_OKAY);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_ALARM_CHANGED);
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
@@ -601,13 +601,6 @@ public class StatusBarPolicy {
         if (false) {
             Log.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level);
         }
-
-        if (mLowBatteryDialog != null
-            && mBatteryLevel >= BATTERY_LEVEL_CLOSE_WARNING
-            && SHOW_LOW_BATTERY_WARNING) {
-            mLowBatteryDialog.dismiss();
-            mBatteryShowLowOnEndCall = false;
-        }
     }
 
     private void onBatteryLow(Intent intent) {
@@ -623,6 +616,14 @@ public class StatusBarPolicy {
             } else {
                 mBatteryShowLowOnEndCall = true;
             }
+        }
+    }
+
+    private void onBatteryOkay(Intent intent) {
+        if (mLowBatteryDialog != null
+                && SHOW_LOW_BATTERY_WARNING) {
+            mLowBatteryDialog.dismiss();
+            mBatteryShowLowOnEndCall = false;
         }
     }
 

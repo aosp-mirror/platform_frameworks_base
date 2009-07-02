@@ -1290,6 +1290,13 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
     /**
+     * Broadcast Action:  Indicates the battery is now okay after being low.
+     * This will be sent after {@link #ACTION_BATTERY_LOW} once the battery has
+     * gone back up to an okay state.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_BATTERY_OKAY = "android.intent.action.BATTERY_OKAY";
+    /**
      * Broadcast Action:  External power has been connected to the device.
      * This is intended for applications that wish to register specifically to this notification.
      * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
