@@ -507,6 +507,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private void removeProvider(LocationProviderProxy provider) {
         mProviders.remove(provider);
+        provider.unlinkProvider();
         mProvidersByName.remove(provider.getName());
     }
 

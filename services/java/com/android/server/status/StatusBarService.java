@@ -119,6 +119,7 @@ public class StatusBarService extends IStatusBar.Stub
         public void binderDied() {
             Log.i(TAG, "binder died for pkg=" + pkg);
             disable(0, token, pkg);
+            token.unlinkToDeath(this, 0);
         }
     }
 
@@ -494,6 +495,7 @@ public class StatusBarService extends IStatusBar.Stub
             if (what == 0 || !token.isBinderAlive()) {
                 if (tok != null) {
                     mDisableRecords.remove(i);
+                    tok.token.unlinkToDeath(tok, 0);
                 }
             } else {
                 if (tok == null) {

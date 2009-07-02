@@ -53,6 +53,12 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
         }
     }
 
+    public void unlinkProvider() {
+        if (mProvider != null) {
+            mProvider.asBinder().unlinkToDeath(this, 0);
+        }
+    }
+
     public String getName() {
         return mName;
     }
@@ -255,5 +261,6 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
     public void binderDied() {
         Log.w(TAG, "Location Provider " + mName + " died");
         mDead = true;
+        mProvider.asBinder().unlinkToDeath(this, 0);
     }
 }
