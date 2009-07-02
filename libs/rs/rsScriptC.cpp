@@ -324,8 +324,8 @@ extern "C" void drawQuad(int32_t x1, int32_t y1, int32_t z1,
     //LOGE("0x%08x, 0x%08x, 0x%08x", x3, y3, z3);
     //LOGE("0x%08x, 0x%08x, 0x%08x", x4, y4, z4);
 
-    int32_t vtx[] = {x1,y1,z1, x4,y4,z4, x3,y3,z3, x2,y2,z2};
-    static const int32_t tex[] = {0,0, 0,0x10000, 0x10000,0, 0x10000,0x10000};
+    int32_t vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
+    static const int32_t tex[] = {0,0, 0,0x10000, 0x10000,0x10000, 0x10000,0};
 
 
     rsc->setupCheck();
