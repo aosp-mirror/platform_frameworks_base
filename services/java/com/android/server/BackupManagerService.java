@@ -626,6 +626,9 @@ class BackupManagerService extends IBackupManager.Stub {
         public void run() {
             if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
 
+            // Backups run at background priority
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
             // The package manager doesn't have a proper <application> etc, but since
             // it's running here in the system process we can just set up its agent
             // directly and use a synthetic BackupRequest.  We always run this pass
