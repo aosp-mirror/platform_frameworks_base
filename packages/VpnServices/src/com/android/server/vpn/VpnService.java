@@ -24,14 +24,12 @@ import android.net.NetworkUtils;
 import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
-import android.os.FileObserver;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -43,21 +41,18 @@ import java.util.List;
  */
 abstract class VpnService<E extends VpnProfile> {
     private static final int NOTIFICATION_ID = 1;
-    private static final String PROFILES_ROOT = VpnManager.PROFILES_PATH + "/";
-    public static final String DEFAULT_CONFIG_PATH = "/etc";
 
-    private static final int DNS_TIMEOUT = 3000; // ms
     private static final String DNS1 = "net.dns1";
     private static final String DNS2 = "net.dns2";
+    private static final String VPN_DNS1 = "vpn.dns1";
+    private static final String VPN_DNS2 = "vpn.dns2";
+    private static final String VPN_UP = "vpn.up";
+    private static final String VPN_IS_UP = "1";
+    private static final String VPN_IS_DOWN = "0";
+
     private static final String REMOTE_IP = "net.ipremote";
     private static final String DNS_DOMAIN_SUFFICES = "net.dns.search";
-    private static final String SERVER_IP = "net.vpn.server_ip";
 
-    private static final int VPN_TIMEOUT = 30000; // milliseconds
-    private static final int ONE_SECOND = 1000; // milliseconds
-    private static final int FIVE_SECOND = 5000; // milliseconds
-
-    private static final String LOGWRAPPER = "/system/bin/logwrapper";
     private final String TAG = VpnService.class.getSimpleName();
 
     E mProfile;
@@ -75,13 +70,6 @@ abstract class VpnService<E extends VpnProfile> {
     private String mHostIp;
 
     private long mStartTime; // VPN connection start time
-
-    // monitors if the VPN connection is sucessfully established
-    private FileMonitor mConnectMonitor;
-
-    // watch dog timer; fired up if the connection cannot be established within
-    // VPN_TIMEOUT
-    private Object mWatchdog;
 
     // for helping managing multiple Android services
     private ServiceHelper mServiceHelper = new ServiceHelper();
@@ -110,41 +98,11 @@ abstract class VpnService<E extends VpnProfile> {
         return mServiceHelper.startService(serviceName);
     }
 
-    protected String getPppOptionFilePath() throws IOException {
-        String subpath = getProfileSubpath("/ppp/peers");
-        String[] kids = new File(subpath).list();
-        if ((kids == null) || (kids.length == 0)) {
-            throw new IOException("no option file found in " + subpath);
-        }
-        if (kids.length > 1) {
-            Log.w(TAG, "more than one option file found in " + subpath
-                    + ", arbitrarily choose " + kids[0]);
-        }
-        return subpath + "/" + kids[0];
-    }
-
     /**
      * Returns the VPN profile associated with the connection.
      */
     protected E getProfile() {
         return mProfile;
-    }
-
-    /**
-     * Returns the profile path where configuration files reside.
-     */
-    protected String getProfilePath() throws IOException {
-        String path = PROFILES_ROOT + mProfile.getId();
-        File dir = new File(path);
-        if (!dir.exists()) throw new IOException("Profile dir does not exist");
-        return path;
-    }
-
-    /**
-     * Returns the path where default configuration files reside.
-     */
-    protected String getDefaultConfigPath() throws IOException {
-        return DEFAULT_CONFIG_PATH;
     }
 
     /**
@@ -175,14 +133,6 @@ abstract class VpnService<E extends VpnProfile> {
             return toInetAddress(gateway).getHostAddress();
         }
         throw new IOException("Default gateway is not available");
-    }
-
-    /**
-     * Returns the path of the script file that is executed when the VPN
-     * connection is established.
-     */
-    protected String getConnectMonitorFile() {
-        return "/etc/ppp/ip-up-vpn";
     }
 
     /**
@@ -222,10 +172,10 @@ abstract class VpnService<E extends VpnProfile> {
         broadcastConnectivity(VpnState.CONNECTING);
 
         String serverIp = getIp(getProfile().getServerName());
-        setSystemProperty(SERVER_IP, serverIp);
-        onBeforeConnect();
 
+        onBeforeConnect();
         connect(serverIp, username, password);
+        waitUntilConnectedOrTimedout();
     }
 
     synchronized void onDisconnect(boolean cleanUpServices) {
@@ -259,39 +209,36 @@ abstract class VpnService<E extends VpnProfile> {
         }
     }
 
-    private void createConnectMonitor() {
-        mConnectMonitor = new FileMonitor(getConnectMonitorFile(),
-                new Runnable() {
-                    public void run() {
-                        onConnectMonitorTriggered();
-                    }
-                });
-    }
-
     private void onBeforeConnect() {
         mNotification.disableNotification();
 
-        createConnectMonitor();
-        mConnectMonitor.startWatching();
-        saveOriginalDnsProperties();
-
-        mWatchdog = startTimer(VPN_TIMEOUT, new Runnable() {
-            public void run() {
-                synchronized (VpnService.this) {
-                    if (mState == VpnState.CONNECTING) {
-                        Log.d(TAG, "       watchdog timer is fired !!");
-                        onError();
-                    }
-                }
-            }
-        });
+        SystemProperties.set(VPN_DNS1, "-");
+        SystemProperties.set(VPN_DNS2, "-");
+        SystemProperties.set(VPN_UP, VPN_IS_DOWN);
+        Log.d(TAG, "       VPN UP: " + SystemProperties.get(VPN_UP));
     }
 
-    private synchronized void onConnectMonitorTriggered() {
-        Log.d(TAG, "onConnectMonitorTriggered()");
+    private void waitUntilConnectedOrTimedout() {
+        sleep(2000); // 2 seconds
+        for (int i = 0; i < 60; i++) {
+            if (VPN_IS_UP.equals(SystemProperties.get(VPN_UP))) {
+                onConnected();
+                return;
+            }
+            sleep(500); // 0.5 second
+        }
 
-        stopTimer(mWatchdog);
-        mConnectMonitor.stopWatching();
+        synchronized (this) {
+            if (mState == VpnState.CONNECTING) {
+                Log.d(TAG, "       connecting timed out !!");
+                onError();
+            }
+        }
+    }
+
+    private synchronized void onConnected() {
+        Log.d(TAG, "onConnected()");
+
         saveVpnDnsProperties();
         saveAndSetDomainSuffices();
         startConnectivityMonitor();
@@ -310,8 +257,6 @@ abstract class VpnService<E extends VpnProfile> {
 
         restoreOriginalDnsProperties();
         restoreOriginalDomainSuffices();
-        if (mConnectMonitor != null) mConnectMonitor.stopWatching();
-        if (mWatchdog != null) stopTimer(mWatchdog);
         mState = VpnState.IDLE;
         broadcastConnectivity(VpnState.IDLE);
 
@@ -345,13 +290,6 @@ abstract class VpnService<E extends VpnProfile> {
         }
     }
 
-    private void saveOriginalDnsProperties() {
-        mOriginalDns1 = SystemProperties.get(DNS1);
-        mOriginalDns2 = SystemProperties.get(DNS2);
-        Log.d(TAG, String.format("save original dns prop: %s, %s",
-                mOriginalDns1, mOriginalDns2));
-    }
-
     private void restoreOriginalDnsProperties() {
         // restore only if they are not overridden
         if (mVpnDns1.equals(SystemProperties.get(DNS1))) {
@@ -365,15 +303,21 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     private void saveVpnDnsProperties() {
-        mVpnDns1 = mVpnDns2 = "";
+        mOriginalDns1 = mOriginalDns2 = "";
         for (int i = 0; i < 10; i++) {
-            mVpnDns1 = SystemProperties.get(DNS1);
-            mVpnDns2 = SystemProperties.get(DNS2);
-            if (mVpnDns1.equals(mOriginalDns1)) {
+            mVpnDns1 = SystemProperties.get(VPN_DNS1);
+            mVpnDns2 = SystemProperties.get(VPN_DNS2);
+            if (mOriginalDns1.equals(mVpnDns1)) {
                 Log.d(TAG, "wait for vpn dns to settle in..." + i);
                 sleep(500);
             } else {
-                Log.d(TAG, String.format("save vpn dns prop: %s, %s",
+                mOriginalDns1 = SystemProperties.get(DNS1);
+                mOriginalDns2 = SystemProperties.get(DNS2);
+                SystemProperties.set(DNS1, mVpnDns1);
+                SystemProperties.set(DNS2, mVpnDns2);
+                Log.d(TAG, String.format("save original dns prop: %s, %s",
+                        mOriginalDns1, mOriginalDns2));
+                Log.d(TAG, String.format("set vpn dns prop: %s, %s",
                         mVpnDns1, mVpnDns2));
                 return;
             }
@@ -381,23 +325,11 @@ abstract class VpnService<E extends VpnProfile> {
         Log.e(TAG, "saveVpnDnsProperties(): DNS not updated??");
     }
 
-    private void restoreVpnDnsProperties() {
-        if (isNullOrEmpty(mVpnDns1) && isNullOrEmpty(mVpnDns2)) {
-            return;
-        }
-        Log.d(TAG, String.format("restore vpn dns prop: %s --> %s",
-                SystemProperties.get(DNS1), mVpnDns1));
-        Log.d(TAG, String.format("restore vpn dns prop: %s --> %s",
-                SystemProperties.get(DNS2), mVpnDns2));
-        SystemProperties.set(DNS1, mVpnDns1);
-        SystemProperties.set(DNS2, mVpnDns2);
-    }
-
     private void saveAndSetDomainSuffices() {
         mOriginalDomainSuffices = SystemProperties.get(DNS_DOMAIN_SUFFICES);
         Log.d(TAG, "save original dns search: " + mOriginalDomainSuffices);
         String list = mProfile.getDomainSuffices();
-        if (!isNullOrEmpty(list)) {
+        if (!TextUtils.isEmpty(list)) {
             SystemProperties.set(DNS_DOMAIN_SUFFICES, list);
         }
     }
@@ -423,7 +355,7 @@ abstract class VpnService<E extends VpnProfile> {
                             if (mState != VpnState.CONNECTED) break;
                             mNotification.update();
                             checkConnectivity();
-                            VpnService.this.wait(ONE_SECOND);
+                            VpnService.this.wait(1000); // 1 second
                         }
                     }
                 } catch (InterruptedException e) {
@@ -446,32 +378,6 @@ abstract class VpnService<E extends VpnProfile> {
         }
     }
 
-    private Object startTimer(final int milliseconds, final Runnable task) {
-        Thread thread = new Thread(new Runnable() {
-            public void run() {
-                Log.d(TAG, "watchdog timer started");
-                Thread t = Thread.currentThread();
-                try {
-                    synchronized (t) {
-                        t.wait(milliseconds);
-                    }
-                    task.run();
-                } catch (InterruptedException e) {
-                    // ignored
-                }
-                Log.d(TAG, "watchdog timer stopped");
-            }
-        });
-        thread.start();
-        return thread;
-    }
-
-    private void stopTimer(Object timer) {
-        synchronized (timer) {
-            timer.notify();
-        }
-    }
-
     private String reallyGetHostIp() throws IOException {
         Enumeration<NetworkInterface> ifces =
                 NetworkInterface.getNetworkInterfaces();
@@ -487,31 +393,11 @@ abstract class VpnService<E extends VpnProfile> {
         throw new IOException("Host IP is not available");
     }
 
-    private String getProfileSubpath(String subpath) throws IOException {
-        String path = getProfilePath() + subpath;
-        if (new File(path).exists()) {
-            return path;
-        } else {
-            Log.w(TAG, "Profile subpath does not exist: " + path
-                    + ", use default one");
-            String path2 = getDefaultConfigPath() + subpath;
-            if (!new File(path2).exists()) {
-                throw new IOException("Profile subpath does not exist at "
-                        + path + " or " + path2);
-            }
-            return path2;
-        }
-    }
-
-    private void sleep(int ms) {
+    protected void sleep(int ms) {
         try {
             Thread.currentThread().sleep(ms);
         } catch (InterruptedException e) {
         }
-    }
-
-    private static boolean isNullOrEmpty(String message) {
-        return ((message == null) || (message.length() == 0));
     }
 
     private InetAddress toInetAddress(int addr) throws IOException {
@@ -561,20 +447,6 @@ abstract class VpnService<E extends VpnProfile> {
             mServiceList.remove(service);
             onOneServiceGone();
             if (mServiceList.isEmpty()) onAllServicesGone();
-        }
-    }
-
-    private class FileMonitor extends FileObserver {
-        private Runnable mCallback;
-
-        FileMonitor(String path, Runnable callback) {
-            super(path, CLOSE_NOWRITE);
-            mCallback = callback;
-        }
-
-        @Override
-        public void onEvent(int event, String path) {
-            if ((event & CLOSE_NOWRITE) > 0) mCallback.run();
         }
     }
 
