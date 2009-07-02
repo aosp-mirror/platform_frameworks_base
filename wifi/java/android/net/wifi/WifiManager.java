@@ -253,6 +253,15 @@ public class WifiManager {
     IWifiManager mService;
     Handler mHandler;
 
+    /* Maximum number of active locks we allow.
+     * This limit was added to prevent apps from creating a ridiculous number
+     * of locks and crashing the system by overflowing the global ref table.
+     */
+    private static final int MAX_ACTIVE_LOCKS = 50;
+
+    /* Number of currently active WifiLocks and MulticastLocks */
+    private int mActiveLockCount;
+
     /**
      * Create a new WifiManager instance.
      * Applications will almost always want to use
@@ -702,6 +711,14 @@ public class WifiManager {
                 if (mRefCounted ? (++mRefCount > 0) : (!mHeld)) {
                     try {
                         mService.acquireWifiLock(mBinder, mLockType, mTag);
+                        synchronized (WifiManager.this) {
+                            if (mActiveLockCount >= MAX_ACTIVE_LOCKS) {
+                                mService.releaseWifiLock(mBinder);
+                                throw new UnsupportedOperationException(
+                                            "Exceeded maximum number of wifi locks");
+                            }
+                            mActiveLockCount++;
+                        }
                     } catch (RemoteException ignore) {
                     }
                     mHeld = true;
@@ -726,6 +743,9 @@ public class WifiManager {
                 if (mRefCounted ? (--mRefCount == 0) : (mHeld)) {
                     try {
                         mService.releaseWifiLock(mBinder);
+                        synchronized (WifiManager.this) {
+                            mActiveLockCount--;
+                        }
                     } catch (RemoteException ignore) {
                     }
                     mHeld = false;
@@ -783,6 +803,9 @@ public class WifiManager {
                 if (mHeld) {
                     try {
                         mService.releaseWifiLock(mBinder);
+                        synchronized (WifiManager.this) {
+                            mActiveLockCount--;
+                        }
                     } catch (RemoteException ignore) {
                     }
                 }
@@ -877,6 +900,14 @@ public class WifiManager {
                 if (!mHeld) {
                     try {
                         mService.acquireMulticastLock(mBinder, mTag);
+                        synchronized (WifiManager.this) {
+                            if (mActiveLockCount >= MAX_ACTIVE_LOCKS) {
+                                mService.releaseMulticastLock();
+                                throw new UnsupportedOperationException(
+                                        "Exceeded maximum number of wifi locks");
+                            }
+                            mActiveLockCount++;
+                        }
                         mHeld = true;
                     } catch (RemoteException ignore) {
                     }
@@ -901,6 +932,9 @@ public class WifiManager {
                 if (mHeld) {
                     try {
                         mService.releaseMulticastLock();
+                        synchronized (WifiManager.this) {
+                            mActiveLockCount--;
+                        }
                         mHeld = false;
                     } catch (RemoteException ignore) {
                     }
