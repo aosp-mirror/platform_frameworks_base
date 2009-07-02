@@ -667,7 +667,10 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return CALL_STATE_IDLE;
-        }
+        } catch (NullPointerException ex) {
+          // the phone process is restarting.
+          return CALL_STATE_IDLE;
+      }
     }
 
     /** Data connection activity: No traffic. */
@@ -701,7 +704,10 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_ACTIVITY_NONE;
-        }
+        } catch (NullPointerException ex) {
+          // the phone process is restarting.
+          return DATA_ACTIVITY_NONE;
+      }
     }
 
     /** Data connection state: Disconnected. IP traffic not available. */
