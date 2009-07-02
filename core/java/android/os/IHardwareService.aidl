@@ -20,9 +20,9 @@ package android.os;
 interface IHardwareService
 {
     // Vibrator support
-    void vibrate(long milliseconds);
+    void vibrate(long milliseconds, IBinder token);
     void vibratePattern(in long[] pattern, int repeat, IBinder token);
-    void cancelVibrate();
+    void cancelVibrate(IBinder token);
     
     // flashlight support
     boolean getFlashlightEnabled();

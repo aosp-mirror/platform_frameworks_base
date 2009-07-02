@@ -46,7 +46,7 @@ public class HardwareServicePermissionTest extends TestCase {
      */
     public void testVibrate() throws RemoteException {
         try {
-            mHardwareService.vibrate(2000);
+            mHardwareService.vibrate(2000, new Binder());
             fail("vibrate did not throw SecurityException as expected");
         } catch (SecurityException e) {
             // expected
@@ -77,7 +77,7 @@ public class HardwareServicePermissionTest extends TestCase {
      */
     public void testCancelVibrate() throws RemoteException {
         try {
-            mHardwareService.cancelVibrate();
+            mHardwareService.cancelVibrate(new Binder());
             fail("cancelVibrate did not throw SecurityException as expected");
         } catch (SecurityException e) {
             // expected

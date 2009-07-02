@@ -37,6 +37,9 @@ import android.os.Binder;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 public class HardwareService extends IHardwareService.Stub {
     private static final String TAG = "HardwareService";
 
@@ -50,8 +53,61 @@ public class HardwareService extends IHardwareService.Stub {
     static final int LIGHT_FLASH_NONE = 0;
     static final int LIGHT_FLASH_TIMED = 1;
 
+    private final LinkedList<Vibration> mVibrations;
+    private Vibration mCurrentVibration;
+
     private boolean mAttentionLightOn;
     private boolean mPulsing;
+
+    private class Vibration implements IBinder.DeathRecipient {
+        private final IBinder mToken;
+        private final long    mTimeout;
+        private final long    mStartTime;
+        private final long[]  mPattern;
+        private final int     mRepeat;
+
+        Vibration(IBinder token, long millis) {
+            this(token, millis, null, 0);
+        }
+
+        Vibration(IBinder token, long[] pattern, int repeat) {
+            this(token, 0, pattern, repeat);
+        }
+
+        private Vibration(IBinder token, long millis, long[] pattern,
+                int repeat) {
+            mToken = token;
+            mTimeout = millis;
+            mStartTime = SystemClock.uptimeMillis();
+            mPattern = pattern;
+            mRepeat = repeat;
+        }
+
+        public void binderDied() {
+            synchronized (mVibrations) {
+                mVibrations.remove(this);
+                if (this == mCurrentVibration) {
+                    doCancelVibrateLocked();
+                    startNextVibrationLocked();
+                }
+            }
+        }
+
+        public boolean hasLongerTimeout(long millis) {
+            if (mTimeout == 0) {
+                // This is a pattern, return false to play the simple
+                // vibration.
+                return false;
+            }
+            if ((mStartTime + mTimeout)
+                    < (SystemClock.uptimeMillis() + millis)) {
+                // If this vibration will end before the time passed in, let
+                // the new vibration play.
+                return false;
+            }
+            return true;
+        }
+    }
 
     HardwareService(Context context) {
         // Reset the hardware to a default state, in case this is a runtime
@@ -66,6 +122,8 @@ public class HardwareService extends IHardwareService.Stub {
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.setReferenceCounted(true);
 
+        mVibrations = new LinkedList<Vibration>();
+
         mBatteryStats = BatteryStatsService.getService();
         
         IntentFilter filter = new IntentFilter();
@@ -78,13 +136,24 @@ public class HardwareService extends IHardwareService.Stub {
         super.finalize();
     }
 
-    public void vibrate(long milliseconds) {
+    public void vibrate(long milliseconds, IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
         }
-        doCancelVibrate();
-        vibratorOn(milliseconds);
+        if (mCurrentVibration != null
+                && mCurrentVibration.hasLongerTimeout(milliseconds)) {
+            // Ignore this vibration since the current vibration will play for
+            // longer than milliseconds.
+            return;
+        }
+        Vibration vib = new Vibration(token, milliseconds);
+        synchronized (mVibrations) {
+            removeVibrationLocked(token);
+            doCancelVibrateLocked();
+            mCurrentVibration = vib;
+            startVibrationLocked(vib);
+        }
     }
 
     private boolean isAll0(long[] pattern) {
@@ -121,34 +190,25 @@ public class HardwareService extends IHardwareService.Stub {
                 return;
             }
 
-            synchronized (this) {
-                Death death = new Death(token);
-                try {
-                    token.linkToDeath(death, 0);
-                } catch (RemoteException e) {
-                    return;
+            Vibration vib = new Vibration(token, pattern, repeat);
+            try {
+                token.linkToDeath(vib, 0);
+            } catch (RemoteException e) {
+                return;
+            }
+
+            synchronized (mVibrations) {
+                removeVibrationLocked(token);
+                doCancelVibrateLocked();
+                if (repeat >= 0) {
+                    mVibrations.addFirst(vib);
+                    startNextVibrationLocked();
+                } else {
+                    // A negative repeat means that this pattern is not meant
+                    // to repeat. Treat it like a simple vibration.
+                    mCurrentVibration = vib;
+                    startVibrationLocked(vib);
                 }
-
-                Thread oldThread = mThread;
-
-                if (oldThread != null) {
-                    // stop the old one
-                    synchronized (mThread) {
-                        mThread.mDone = true;
-                        mThread.notify();
-                    }
-                }
-
-                if (mDeath != null) {
-                    mToken.unlinkToDeath(mDeath, 0);
-                }
-
-                mDeath = death;
-                mToken = token;
-
-                // start the new thread
-                mThread = new VibrateThread(pattern, repeat);
-                mThread.start();
             }
         }
         finally {
@@ -156,7 +216,7 @@ public class HardwareService extends IHardwareService.Stub {
         }
     }
 
-    public void cancelVibrate() {
+    public void cancelVibrate(IBinder token) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.VIBRATE,
                 "cancelVibrate");
@@ -164,7 +224,13 @@ public class HardwareService extends IHardwareService.Stub {
         // so wakelock calls will succeed
         long identity = Binder.clearCallingIdentity();
         try {
-            doCancelVibrate();
+            synchronized (mVibrations) {
+                final Vibration vib = removeVibrationLocked(token);
+                if (vib == mCurrentVibration) {
+                    doCancelVibrateLocked();
+                    startNextVibrationLocked();
+                }
+            }
         }
         finally {
             Binder.restoreCallingIdentity(identity);
@@ -277,27 +343,74 @@ public class HardwareService extends IHardwareService.Stub {
         }
     };
 
-    private void doCancelVibrate() {
-        synchronized (this) {
-            if (mThread != null) {
-                synchronized (mThread) {
-                    mThread.mDone = true;
-                    mThread.notify();
-                }
-                mThread = null;
+    private final Runnable mVibrationRunnable = new Runnable() {
+        public void run() {
+            synchronized (mVibrations) {
+                doCancelVibrateLocked();
+                startNextVibrationLocked();
             }
-            vibratorOff();
+        }
+    };
+
+    // Lock held on mVibrations
+    private void doCancelVibrateLocked() {
+        if (mThread != null) {
+            synchronized (mThread) {
+                mThread.mDone = true;
+                mThread.notify();
+            }
+            mThread = null;
+        }
+        vibratorOff();
+        mH.removeCallbacks(mVibrationRunnable);
+    }
+
+    // Lock held on mVibrations
+    private void startNextVibrationLocked() {
+        if (mVibrations.size() <= 0) {
+            return;
+        }
+        mCurrentVibration = mVibrations.getFirst();
+        startVibrationLocked(mCurrentVibration);
+    }
+
+    // Lock held on mVibrations
+    private void startVibrationLocked(final Vibration vib) {
+        if (vib.mTimeout != 0) {
+            vibratorOn(vib.mTimeout);
+            mH.postDelayed(mVibrationRunnable, vib.mTimeout);
+        } else {
+            // mThread better be null here. doCancelVibrate should always be
+            // called before startNextVibrationLocked or startVibrationLocked.
+            mThread = new VibrateThread(vib);
+            mThread.start();
         }
     }
 
+    // Lock held on mVibrations
+    private Vibration removeVibrationLocked(IBinder token) {
+        ListIterator<Vibration> iter = mVibrations.listIterator(0);
+        while (iter.hasNext()) {
+            Vibration vib = iter.next();
+            if (vib.mToken == token) {
+                iter.remove();
+                return vib;
+            }
+        }
+        // We might be looking for a simple vibration which is only stored in
+        // mCurrentVibration.
+        if (mCurrentVibration != null && mCurrentVibration.mToken == token) {
+            return mCurrentVibration;
+        }
+        return null;
+    }
+
     private class VibrateThread extends Thread {
-        long[] mPattern;
-        int mRepeat;
+        final Vibration mVibration;
         boolean mDone;
     
-        VibrateThread(long[] pattern, int repeat) {
-            mPattern = pattern;
-            mRepeat = repeat;
+        VibrateThread(Vibration vib) {
+            mVibration = vib;
             mWakeLock.acquire();
         }
 
@@ -323,8 +436,9 @@ public class HardwareService extends IHardwareService.Stub {
             Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
             synchronized (this) {
                 int index = 0;
-                long[] pattern = mPattern;
+                long[] pattern = mVibration.mPattern;
                 int len = pattern.length;
+                int repeat = mVibration.mRepeat;
                 long duration = 0;
 
                 while (!mDone) {
@@ -347,50 +461,37 @@ public class HardwareService extends IHardwareService.Stub {
                             HardwareService.this.vibratorOn(duration);
                         }
                     } else {
-                        if (mRepeat < 0) {
+                        if (repeat < 0) {
                             break;
                         } else {
-                            index = mRepeat;
+                            index = repeat;
                             duration = 0;
                         }
                     }
                 }
-                if (mDone) {
-                    // make sure vibrator is off if we were cancelled.
-                    // otherwise, it will turn off automatically 
-                    // when the last timeout expires.
-                    HardwareService.this.vibratorOff();
-                }
                 mWakeLock.release();
             }
-            synchronized (HardwareService.this) {
+            synchronized (mVibrations) {
                 if (mThread == this) {
                     mThread = null;
+                }
+                if (!mDone) {
+                    // If this vibration finished naturally, start the next
+                    // vibration.
+                    mVibrations.remove(mVibration);
+                    startNextVibrationLocked();
                 }
             }
         }
     };
 
-    private class Death implements IBinder.DeathRecipient {
-        IBinder mMe;
-
-        Death(IBinder me) {
-            mMe = me;
-        }
-
-        public void binderDied() {
-            synchronized (HardwareService.this) {
-                if (mMe == mToken) {
-                    doCancelVibrate();
-                }
-            }
-        }
-    }
-
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                doCancelVibrate();
+                synchronized (mVibrations) {
+                    doCancelVibrateLocked();
+                    mVibrations.clear();
+                }
             }
         }
     };
@@ -407,8 +508,6 @@ public class HardwareService extends IHardwareService.Stub {
     private final IBatteryStats mBatteryStats;
     
     volatile VibrateThread mThread;
-    volatile Death mDeath;
-    volatile IBinder mToken;
 
     private int mNativePointer;
 

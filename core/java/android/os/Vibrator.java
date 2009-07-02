@@ -24,6 +24,7 @@ package android.os;
 public class Vibrator
 {
     IHardwareService mService;
+    private final Binder mToken = new Binder();
 
     /** @hide */
     public Vibrator()
@@ -40,7 +41,7 @@ public class Vibrator
     public void vibrate(long milliseconds)
     {
         try {
-            mService.vibrate(milliseconds);
+            mService.vibrate(milliseconds, mToken);
         } catch (RemoteException e) {
         }
     }
@@ -65,7 +66,7 @@ public class Vibrator
         // anyway
         if (repeat < pattern.length) {
             try {
-                mService.vibratePattern(pattern, repeat, new Binder());
+                mService.vibratePattern(pattern, repeat, mToken);
             } catch (RemoteException e) {
             }
         } else {
@@ -79,7 +80,7 @@ public class Vibrator
     public void cancel()
     {
         try {
-            mService.cancelVibrate();
+            mService.cancelVibrate(mToken);
         } catch (RemoteException e) {
         }
     }
