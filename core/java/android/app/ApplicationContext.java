@@ -88,8 +88,10 @@ import android.os.FileUtils.FileStatus;
 import android.telephony.TelephonyManager;
 import android.text.ClipboardManager;
 import android.util.AndroidRuntimeException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
@@ -149,6 +151,7 @@ class ReceiverRestrictedContext extends ContextWrapper {
  */
 class ApplicationContext extends Context {
     private final static String TAG = "ApplicationContext";
+    private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
 
     private static final Object sSync = new Object();
@@ -1238,7 +1241,7 @@ class ApplicationContext extends Context {
     @Override
     public int checkUriPermission(Uri uri, String readPermission,
             String writePermission, int pid, int uid, int modeFlags) {
-        if (false) {
+        if (DEBUG) {
             Log.i("foo", "checkUriPermission: uri=" + uri + "readPermission="
                     + readPermission + " writePermission=" + writePermission
                     + " pid=" + pid + " uid=" + uid + " mode" + modeFlags);
@@ -1340,6 +1343,19 @@ class ApplicationContext extends Context {
             c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
             c.init(pi, null, mMainThread);
             if (c.mResources != null) {
+                Resources newRes = c.mResources;
+                if (mResources.getCompatibilityInfo().applicationScale !=
+                    newRes.getCompatibilityInfo().applicationScale) {
+                    DisplayMetrics dm = mMainThread.getDisplayMetricsLocked(false);
+                    c.mResources = new Resources(newRes.getAssets(), dm,
+                            newRes.getConfiguration(),
+                            mResources.getCompatibilityInfo().copy());
+                    if (DEBUG) {
+                        Log.d(TAG, "loaded context has different scaling. Using container's" +
+                                " compatiblity info:" + mResources.getDisplayMetrics());
+                    }
+
+                }
                 return c;
             }
         }
@@ -1459,7 +1475,7 @@ class ApplicationContext extends Context {
         if ((mode&MODE_WORLD_WRITEABLE) != 0) {
             perms |= FileUtils.S_IWOTH;
         }
-        if (false) {
+        if (DEBUG) {
             Log.i(TAG, "File " + name + ": mode=0x" + Integer.toHexString(mode)
                   + ", perms=0x" + Integer.toHexString(perms));
         }

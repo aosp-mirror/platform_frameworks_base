@@ -129,7 +129,7 @@ public class Resources {
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
             Configuration config) {
-        this(assets, metrics, config, null);
+        this(assets, metrics, config, (ApplicationInfo) null);
     }
 
     /**
@@ -156,6 +156,26 @@ public class Resources {
         } else {
             mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
         }
+        updateConfiguration(config, metrics);
+        assets.ensureStringBlocks();
+        if (mCompatibilityInfo.isScalingRequired()) {
+            mPreloadedDrawables = emptySparseArray();
+        } else {
+            mPreloadedDrawables = sPreloadedDrawables;
+        }
+    }
+
+    /**
+     * Creates a new resources that uses the given compatibility info. Used to create
+     * a context for widgets using the container's compatibility info.
+     * {@see ApplicationContext#createPackageCotnext}.
+     * @hide
+     */
+    public Resources(AssetManager assets, DisplayMetrics metrics,
+            Configuration config, CompatibilityInfo info) {
+        mAssets = assets;
+        mMetrics.setToDefaults();
+        mCompatibilityInfo = info;
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
         if (mCompatibilityInfo.isScalingRequired()) {
