@@ -175,6 +175,7 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         assertEquals("+" + PHONE_NUMBER, number);
         c.close();
 
+        /*
         c = mDatabase.query("phones", null,
                 "PHONE_NUMBERS_EQUAL(num, '5551212')", null, null, null, null);
         assertNotNull(c);
@@ -183,6 +184,7 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         number = c.getString(c.getColumnIndexOrThrow("num"));
         assertEquals("+" + PHONE_NUMBER, number);
         c.close();
+        */
 
         c = mDatabase.query("phones", null,
                 "PHONE_NUMBERS_EQUAL(num, '011" + PHONE_NUMBER + "')", null, null, null, null);
@@ -203,85 +205,97 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         c.close();
     }
 
+
+    private void phoneNumberCompare(String phone1, String phone2, boolean equal)
+        throws Exception {
+        String[] temporalPhoneNumbers = new String[2];
+        temporalPhoneNumbers[0] = phone1;
+        temporalPhoneNumbers[1] = phone2;
+
+        Cursor cursor = mDatabase.rawQuery(
+                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
+                temporalPhoneNumbers);
+        try {
+            assertNotNull(cursor);
+            assertTrue(cursor.moveToFirst());
+            if (equal) {
+                assertEquals(String.format("Unexpectedly, \"%s != %s\".", phone1, phone2),
+                        "equal", cursor.getString(0));
+            } else {
+                assertEquals(String.format("Unexpectedly, \"%s\" == \"%s\".", phone1, phone2),
+                        "not equal", cursor.getString(0));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    private void assertPhoneNumberEqual(String phone1, String phone2) throws Exception {
+        phoneNumberCompare(phone1, phone2, true);
+    }
+
+    private void assertPhoneNumberNotEqual(String phone1, String phone2) throws Exception {
+        phoneNumberCompare(phone1, phone2, false);
+    }
+
     /**
      * Tests international matching issues for the PHONE_NUMBERS_EQUAL function.
      * 
      * @throws Exception
      */
+    @SmallTest
     public void testPhoneNumbersEqualInternationl() throws Exception {
-        Cursor c;
-        String[] phoneNumbers = new String[2];
+        assertPhoneNumberEqual("1", "1");
+        assertPhoneNumberEqual("123123", "123123");
+        assertPhoneNumberNotEqual("123123", "923123");
+        assertPhoneNumberNotEqual("123123", "123129");
+        assertPhoneNumberNotEqual("123123", "1231234");
+        assertPhoneNumberNotEqual("123123", "0123123");
+        assertPhoneNumberEqual("650-253-0000", "6502530000");
+        assertPhoneNumberEqual("650-253-0000", "650 253 0000");
+        assertPhoneNumberEqual("650 253 0000", "6502530000");
+        assertPhoneNumberEqual("+1 650-253-0000", "6502530000");
+        assertPhoneNumberEqual("001 650-253-0000", "6502530000");
+        assertPhoneNumberEqual("0111 650-253-0000", "6502530000");
 
         // Russian trunk digit
-        phoneNumbers[0] = "+79161234567"; // globablly dialable number
-        phoneNumbers[1] = "89161234567"; // in-country dialable number
-        c = mDatabase.rawQuery(
-                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
-                phoneNumbers);
-        assertTrue(c.moveToFirst());
-        assertEquals("equal", c.getString(0));
-        c.close();
+        assertPhoneNumberEqual("+79161234567", "89161234567");
 
         // French trunk digit
-        phoneNumbers[0] = "+33123456789"; // globablly dialable number
-        phoneNumbers[1] = "0123456789"; // in-country dialable number
-        c = mDatabase.rawQuery(
-                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
-                phoneNumbers);
-        assertTrue(c.moveToFirst());
-        assertEquals("equal", c.getString(0));
-        c.close();
-
+        assertPhoneNumberEqual("+33123456789", "0123456789");
 
         // Trunk digit for city codes in the Netherlands
-        phoneNumbers[0] = "+31771234567"; // globablly dialable number
-        phoneNumbers[1] = "0771234567"; // in-country dialable number
-        c = mDatabase.rawQuery(
-                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
-                phoneNumbers);
-        assertTrue(c.moveToFirst());
-        assertEquals("equal", c.getString(0));
-        c.close();
+        assertPhoneNumberEqual("+31771234567", "0771234567");
 
         // Test broken caller ID seen on call from Thailand to the US
-        phoneNumbers[0] = "+66811234567"; // in address book
-        phoneNumbers[1] = "166811234567"; // came in from the network
-        c = mDatabase.rawQuery(
-                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
-                phoneNumbers);
-        assertTrue(c.moveToFirst());
-        assertEquals("equal", c.getString(0));
-        c.close();
+        assertPhoneNumberEqual("+66811234567", "166811234567");
 
         // Test the same in-country number with different country codes
-        phoneNumbers[0] = "+33123456789";
-        phoneNumbers[1] = "+1123456789";
-        c = mDatabase.rawQuery(
-                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
-                phoneNumbers);
-        assertTrue(c.moveToFirst());
-        assertEquals("not equal", c.getString(0));
-        c.close();
+        assertPhoneNumberNotEqual("+33123456789", "+1123456789");
 
         // Test one number with country code and the other without
-        phoneNumbers[0] = "5125551212";
-        phoneNumbers[1] = "+15125551212";
-        c = mDatabase.rawQuery(
-                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
-                phoneNumbers);
-        assertTrue(c.moveToFirst());
-        assertEquals("equal", c.getString(0));
-        c.close();
+        assertPhoneNumberEqual("5125551212", "+15125551212");
 
         // Test two NANP numbers that only differ in the area code
-        phoneNumbers[0] = "5125551212";
-        phoneNumbers[1] = "6505551212";
-        c = mDatabase.rawQuery(
-                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
-                phoneNumbers);
-        assertTrue(c.moveToFirst());
-        assertEquals("not equal", c.getString(0));
-        c.close();
+        assertPhoneNumberNotEqual("5125551212", "6505551212");
+
+        // Japanese phone numbers
+        assertPhoneNumberEqual("090-1234-5678", "+819012345678");
+        assertPhoneNumberEqual("090(1234)5678", "+819012345678");
+        assertPhoneNumberEqual("090-1234-5678", "+81-90-1234-5678");
+
+        // Equador
+        assertPhoneNumberEqual("+593(800)123-1234", "8001231234");
+        assertPhoneNumberEqual("+593-2-1234-123", "21234123");
+
+        // Two continuous 0 at the beginning of the phone string should not be
+        // treated as trunk prefix.
+        assertPhoneNumberNotEqual("008001231234", "8001231234");
+
+        // Confirm that the bug found before does not re-appear.
+        assertPhoneNumberNotEqual("080-1234-5678", "+819012345678");
     }
 
     @MediumTest
