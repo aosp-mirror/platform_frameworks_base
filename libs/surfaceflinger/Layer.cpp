@@ -76,7 +76,9 @@ void Layer::destroy()
             eglDestroyImageKHR(dpy, mTextures[i].image);
             mTextures[i].image = EGL_NO_IMAGE_KHR;
         }
+        mBuffers[i].free();
     }
+    mSurface.clear();
 }
 
 void Layer::initStates(uint32_t w, uint32_t h, uint32_t flags)
@@ -95,7 +97,6 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
 status_t Layer::ditch()
 {
     // the layer is not on screen anymore. free as much resources as possible
-    mSurface.clear();
     destroy();
     return NO_ERROR;
 }

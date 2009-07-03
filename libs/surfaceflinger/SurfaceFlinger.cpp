@@ -1095,12 +1095,9 @@ status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
 
 status_t SurfaceFlinger::purgatorizeLayer_l(const sp<LayerBase>& layerBase)
 {
-    // First add the layer to the purgatory list, which makes sure it won't 
-    // go away, then remove it from the main list (through a transaction).
+    // remove the layer from the main list (through a transaction).
     ssize_t err = removeLayer_l(layerBase);
-    if (err >= 0) {
-        mLayerPurgatory.add(layerBase);
-    }
+
     // it's possible that we don't find a layer, because it might
     // have been destroyed already -- this is not technically an error
     // from the user because there is a race between BClient::destroySurface(),
@@ -1336,7 +1333,7 @@ status_t SurfaceFlinger::removeSurface(SurfaceID index)
 
 status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
 {
-    /* called by ~ISurface() when all references are gone */
+    // called by ~ISurface() when all references are gone
     
     class MessageDestroySurface : public MessageBase {
         SurfaceFlinger* flinger;
@@ -1349,32 +1346,20 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
             sp<LayerBaseClient> l(layer);
             layer.clear(); // clear it outside of the lock;
             Mutex::Autolock _l(flinger->mStateLock);
-            // remove the layer from the current list -- chances are that it's 
-            // not in the list anyway, because it should have been removed 
-            // already upon request of the client (eg: window manager). 
-            // However, a buggy client could have not done that.
-            // Since we know we don't have any more clients, we don't need
-            // to use the purgatory.
+            /*
+             * remove the layer from the current list -- chances are that it's 
+             * not in the list anyway, because it should have been removed 
+             * already upon request of the client (eg: window manager). 
+             * However, a buggy client could have not done that.
+             * Since we know we don't have any more clients, we don't need
+             * to use the purgatory.
+             */
             status_t err = flinger->removeLayer_l(l);
-            if (err == NAME_NOT_FOUND) {
-                // The surface wasn't in the current list, which means it was
-                // removed already, which means it is in the purgatory, 
-                // and need to be removed from there.
-                // This needs to happen from the main thread since its dtor
-                // must run from there (b/c of OpenGL ES). Additionally, we
-                // can't really acquire our internal lock from 
-                // destroySurface() -- see postMessage() below.
-                ssize_t idx = flinger->mLayerPurgatory.remove(l);
-                LOGE_IF(idx < 0,
-                        "layer=%p is not in the purgatory list", l.get());
-            }
+            LOGE_IF(err<0 && err != NAME_NOT_FOUND,
+                    "error removing layer=%p (%s)", l.get(), strerror(-err));
             return true;
         }
     };
-
-    // It's better to not acquire our internal lock here, because it's hard
-    // to predict that it's not going to be already taken when ~Surface()
-    // is called.
 
     mEventQueue.postMessage( new MessageDestroySurface(this, layer) );
     return NO_ERROR;
@@ -1537,8 +1522,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 mFreezeDisplay?"yes":"no", mFreezeCount,
                 mCurrentState.orientation, hw.canDraw());
         result.append(buffer);
-        snprintf(buffer, SIZE, "  purgatory size: %d, client count: %d\n",
-                mLayerPurgatory.size(), mClientsMap.size());
+        snprintf(buffer, SIZE, "  client count: %d\n", mClientsMap.size());
         result.append(buffer);
         const BufferAllocator& alloc(BufferAllocator::get());
         alloc.dump(result);

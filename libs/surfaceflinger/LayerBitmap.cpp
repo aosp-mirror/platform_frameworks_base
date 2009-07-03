@@ -130,12 +130,9 @@ status_t Buffer::lock(GGLSurface* sur, uint32_t usage)
     return res;
 }
 
-
-
 // ===========================================================================
 // LayerBitmap
 // ===========================================================================
-
 
 LayerBitmap::LayerBitmap()
     : mInfo(0), mWidth(0), mHeight(0)
@@ -184,7 +181,7 @@ sp<Buffer> LayerBitmap::allocate()
     sp<Buffer> buffer(mBuffer);
     const uint32_t w = mWidth; 
     const uint32_t h = mHeight;
-    if (w != buffer->getWidth() || h != buffer->getHeight()) {
+    if (buffer!=0 && (w != buffer->getWidth() || h != buffer->getHeight())) {
         surface_info_t* info = mInfo;
         buffer = new Buffer(w, h, mFormat, mFlags);
         status_t err = buffer->initCheck();
@@ -199,6 +196,15 @@ sp<Buffer> LayerBitmap::allocate()
     }
     return buffer;
 }
+
+status_t LayerBitmap::free()
+{
+    mBuffer.clear();
+    mWidth = 0;
+    mHeight = 0;
+    return NO_ERROR;
+}
+
 
 // ---------------------------------------------------------------------------
 

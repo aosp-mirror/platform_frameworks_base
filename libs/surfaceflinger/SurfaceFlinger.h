@@ -307,8 +307,6 @@ private:
     volatile    int32_t                 mTransactionFlags;
     volatile    int32_t                 mTransactionCount;
                 Condition               mTransactionCV;
-                SortedVector< sp<LayerBase> > mLayerPurgatory;
-
                 
                 // protected by mStateLock (but we could use another lock)
                 Tokenizer                               mTokens;

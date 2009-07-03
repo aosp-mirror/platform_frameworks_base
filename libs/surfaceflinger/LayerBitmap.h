@@ -110,7 +110,8 @@ public:
     status_t setSize(uint32_t w, uint32_t h);
 
     sp<Buffer> allocate();
-
+    status_t free();
+    
     sp<const Buffer>  getBuffer() const { return mBuffer; }
     sp<Buffer>        getBuffer()       { return mBuffer; }
     
