@@ -56,7 +56,7 @@ public:
         status_t writeToParcel(Parcel* parcel) const;
     };
     
-    virtual void getControlBlocks(sp<IMemory>* ctl) const = 0;
+    virtual sp<IMemoryHeap> getControlBlock() const = 0;
 
     virtual sp<ISurface> createSurface( surface_data_t* data,
                                         int pid, 

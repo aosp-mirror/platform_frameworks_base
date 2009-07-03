@@ -42,7 +42,6 @@ namespace android {
 
 class Client;
 class LayerBitmap;
-class MemoryDealer;
 class FreezeLock;
 
 // ---------------------------------------------------------------------------

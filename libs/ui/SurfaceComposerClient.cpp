@@ -59,7 +59,7 @@ static Mutex                                                gLock;
 static sp<ISurfaceComposer>                                 gSurfaceManager;
 static DefaultKeyedVector< sp<IBinder>, sp<SurfaceComposerClient> > gActiveConnections;
 static SortedVector<sp<SurfaceComposerClient> >             gOpenTransactions;
-static sp<IMemory>                                          gServerCblkMemory;
+static sp<IMemoryHeap>                                      gServerCblkMemory;
 static volatile surface_flinger_cblk_t*                     gServerCblk;
 
 const sp<ISurfaceComposer>& _get_surface_manager()
@@ -94,7 +94,7 @@ static volatile surface_flinger_cblk_t const * get_cblk()
         if (gServerCblk == 0) {
             gServerCblkMemory = sm->getCblk();
             LOGE_IF(gServerCblkMemory==0, "Can't get server control block");
-            gServerCblk = (surface_flinger_cblk_t *)gServerCblkMemory->pointer();
+            gServerCblk = (surface_flinger_cblk_t *)gServerCblkMemory->getBase();
             LOGE_IF(gServerCblk==0, "Can't get server control block address");
         }
     }
@@ -313,9 +313,9 @@ void SurfaceComposerClient::_init(
         return;
     }
 
-    mClient->getControlBlocks(&mControlMemory);
+    mControlMemory = mClient->getControlBlock();
     mSignalServer = new SurfaceFlingerSynchro(sm);
-    mControl = static_cast<per_client_cblk_t *>(mControlMemory->pointer());
+    mControl = static_cast<per_client_cblk_t *>(mControlMemory->getBase());
 }
 
 SurfaceComposerClient::~SurfaceComposerClient()
@@ -364,7 +364,7 @@ void SurfaceComposerClient::dispose()
 {
     // this can be called more than once.
 
-    sp<IMemory>                 controlMemory;
+    sp<IMemoryHeap>             controlMemory;
     sp<ISurfaceFlingerClient>   client;
 
     {

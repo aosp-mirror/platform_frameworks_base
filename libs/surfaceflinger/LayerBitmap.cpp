@@ -20,7 +20,6 @@
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
-#include <binder/MemoryDealer.h>
 #include <binder/MemoryBase.h>
 #include <binder/IMemory.h>
 

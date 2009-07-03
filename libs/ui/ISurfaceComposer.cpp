@@ -54,12 +54,12 @@ public:
         return interface_cast<ISurfaceFlingerClient>(reply.readStrongBinder());
     }
 
-    virtual sp<IMemory> getCblk() const
+    virtual sp<IMemoryHeap> getCblk() const
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
         remote()->transact(BnSurfaceComposer::GET_CBLK, data, &reply);
-        return interface_cast<IMemory>(reply.readStrongBinder());
+        return interface_cast<IMemoryHeap>(reply.readStrongBinder());
     }
 
     virtual void openGlobalTransaction()

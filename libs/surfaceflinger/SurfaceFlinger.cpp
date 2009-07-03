@@ -31,8 +31,8 @@
 
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
-#include <binder/MemoryDealer.h>
-#include <binder/MemoryBase.h>
+#include <binder/MemoryHeapBase.h>
+
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include <utils/StopWatch.h>
@@ -217,9 +217,9 @@ overlay_control_device_t* SurfaceFlinger::getOverlayEngine() const
     return graphicPlane(0).displayHardware().getOverlayEngine();
 }
 
-sp<IMemory> SurfaceFlinger::getCblk() const
+sp<IMemoryHeap> SurfaceFlinger::getCblk() const
 {
-    return mServerCblkMemory;
+    return mServerHeap;
 }
 
 sp<ISurfaceFlingerClient> SurfaceFlinger::createConnection()
@@ -238,7 +238,7 @@ sp<ISurfaceFlingerClient> SurfaceFlinger::createConnection()
         return 0;
     }
     sp<BClient> bclient =
-        new BClient(this, token, client->controlBlockMemory());
+        new BClient(this, token, client->getControlBlockMemory());
     return bclient;
 }
 
@@ -301,7 +301,6 @@ void SurfaceFlinger::onFirstRef()
     mReadyToRunBarrier.wait();
 }
 
-
 static inline uint16_t pack565(int r, int g, int b) {
     return (r<<11)|(g<<5)|b;
 }
@@ -310,17 +309,6 @@ status_t SurfaceFlinger::readyToRun()
 {
     LOGI(   "SurfaceFlinger's main thread ready to run. "
             "Initializing graphics H/W...");
-
-    // create the shared control-block
-    mServerHeap = new MemoryDealer(4096, MemoryDealer::READ_ONLY);
-    LOGE_IF(mServerHeap==0, "can't create shared memory dealer");
-
-    mServerCblkMemory = mServerHeap->allocate(4096);
-    LOGE_IF(mServerCblkMemory==0, "can't create shared control block");
-
-    mServerCblk = static_cast<surface_flinger_cblk_t *>(mServerCblkMemory->pointer());
-    LOGE_IF(mServerCblk==0, "can't get to shared control block's address");
-    new(mServerCblk) surface_flinger_cblk_t;
 
     // we only support one display currently
     int dpy = 0;
@@ -331,6 +319,16 @@ status_t SurfaceFlinger::readyToRun()
         DisplayHardware* const hw = new DisplayHardware(this, dpy);
         plane.setDisplayHardware(hw);
     }
+
+    // create the shared control-block
+    mServerHeap = new MemoryHeapBase(4096,
+            MemoryHeapBase::READ_ONLY, "SurfaceFlinger read-only heap");
+    LOGE_IF(mServerHeap==0, "can't create shared memory dealer");
+    
+    mServerCblk = static_cast<surface_flinger_cblk_t*>(mServerHeap->getBase());
+    LOGE_IF(mServerCblk==0, "can't get to shared control block's address");
+    
+    new(mServerCblk) surface_flinger_cblk_t;
 
     // initialize primary screen
     // (other display should be initialized in the same manner, but
@@ -1615,14 +1613,14 @@ Client::Client(ClientID clientID, const sp<SurfaceFlinger>& flinger)
     : ctrlblk(0), cid(clientID), mPid(0), mBitmap(0), mFlinger(flinger)
 {
     const int pgsize = getpagesize();
-    const int cblksize=((sizeof(per_client_cblk_t)+(pgsize-1))&~(pgsize-1));
-    mCblkHeap = new MemoryDealer(cblksize);
-    mCblkMemory = mCblkHeap->allocate(cblksize);
-    if (mCblkMemory != 0) {
-        ctrlblk = static_cast<per_client_cblk_t *>(mCblkMemory->pointer());
-        if (ctrlblk) { // construct the shared structure in-place.
-            new(ctrlblk) per_client_cblk_t;
-        }
+    const int cblksize = ((sizeof(per_client_cblk_t)+(pgsize-1))&~(pgsize-1));
+
+    mCblkHeap = new MemoryHeapBase(cblksize, 0,
+            "SurfaceFlinger Client control-block");
+
+    ctrlblk = static_cast<per_client_cblk_t *>(mCblkHeap->getBase());
+    if (ctrlblk) { // construct the shared structure in-place.
+        new(ctrlblk) per_client_cblk_t;
     }
 }
 
@@ -1685,7 +1683,7 @@ void Client::dump(const char* what)
 #pragma mark -
 #endif
 
-BClient::BClient(SurfaceFlinger *flinger, ClientID cid, const sp<IMemory>& cblk)
+BClient::BClient(SurfaceFlinger *flinger, ClientID cid, const sp<IMemoryHeap>& cblk)
     : mId(cid), mFlinger(flinger), mCblk(cblk)
 {
 }
@@ -1695,8 +1693,8 @@ BClient::~BClient() {
     mFlinger->destroyConnection(mId);
 }
 
-void BClient::getControlBlocks(sp<IMemory>* ctrl) const {
-    *ctrl = mCblk;
+sp<IMemoryHeap> BClient::getControlBlock() const {
+    return mCblk;
 }
 
 sp<ISurface> BClient::createSurface(

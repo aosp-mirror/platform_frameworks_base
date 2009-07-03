@@ -92,7 +92,7 @@ public:
     virtual sp<ISurfaceFlingerClient> createConnection() = 0;
 
     /* retrieve the control block */
-    virtual sp<IMemory> getCblk() const = 0;
+    virtual sp<IMemoryHeap> getCblk() const = 0;
 
     /* open/close transactions. recquires ACCESS_SURFACE_FLINGER permission */
     virtual void openGlobalTransaction() = 0;

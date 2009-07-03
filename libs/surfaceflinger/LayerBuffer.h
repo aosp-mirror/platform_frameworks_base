@@ -32,7 +32,6 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class MemoryDealer;
 class Region;
 class OverlayRef;
 

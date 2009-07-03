@@ -27,7 +27,7 @@
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 
-#include <binder/MemoryDealer.h>
+#include <binder/IMemory.h>
 #include <binder/Permission.h>
 
 #include <ui/PixelFormat.h>
@@ -76,9 +76,15 @@ public:
 
     inline  bool                    isValid(int32_t i) const;
     sp<LayerBaseClient>             getLayerUser(int32_t i) const;
-    const Vector< wp<LayerBaseClient> >& getLayers() const { return mLayers; }
-    const sp<IMemory>&              controlBlockMemory() const { return mCblkMemory; }
     void                            dump(const char* what);
+    
+    const Vector< wp<LayerBaseClient> >& getLayers() const { 
+        return mLayers; 
+    }
+    
+    const sp<IMemoryHeap>& getControlBlockMemory() const {
+        return mCblkHeap; 
+    }
     
     // pointer to this client's control block
     per_client_cblk_t*      ctrlblk;
@@ -86,15 +92,14 @@ public:
 
     
 private:
-    int                     getClientPid() const { return mPid; }
+    int getClientPid() const { return mPid; }
         
     int                             mPid;
     uint32_t                        mBitmap;
     SortedVector<uint8_t>           mInUse;
     Vector< wp<LayerBaseClient> >   mLayers;
-    sp<MemoryDealer>                mCblkHeap;
+    sp<IMemoryHeap>                 mCblkHeap;
     sp<SurfaceFlinger>              mFlinger;
-    sp<IMemory>                     mCblkMemory;
 };
 
 // ---------------------------------------------------------------------------
@@ -154,7 +159,7 @@ public:
 
     // ISurfaceComposer interface
     virtual sp<ISurfaceFlingerClient>   createConnection();
-    virtual sp<IMemory>                 getCblk() const;
+    virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
     virtual void                        openGlobalTransaction();
     virtual void                        closeGlobalTransaction();
@@ -317,8 +322,7 @@ private:
                 Vector< sp<Client> >                    mDisconnectedClients;
 
                 // constant members (no synchronization needed for access)
-                sp<MemoryDealer>            mServerHeap;
-                sp<IMemory>                 mServerCblkMemory;
+                sp<IMemoryHeap>             mServerHeap;
                 surface_flinger_cblk_t*     mServerCblk;
                 GLuint                      mWormholeTexName;
                 nsecs_t                     mBootTime;
@@ -377,11 +381,11 @@ class BClient : public BnSurfaceFlingerClient
 {
 public:
     BClient(SurfaceFlinger *flinger, ClientID cid,
-            const sp<IMemory>& cblk);
+            const sp<IMemoryHeap>& cblk);
     ~BClient();
 
     // ISurfaceFlingerClient interface
-    virtual void getControlBlocks(sp<IMemory>* ctrl) const;
+    virtual sp<IMemoryHeap> getControlBlock() const;
 
     virtual sp<ISurface> createSurface(
             surface_data_t* params, int pid,
@@ -394,7 +398,7 @@ public:
 private:
     ClientID            mId;
     SurfaceFlinger*     mFlinger;
-    sp<IMemory>         mCblk;
+    sp<IMemoryHeap>     mCblk;
 };
 
 // ---------------------------------------------------------------------------

@@ -64,12 +64,12 @@ public:
     {
     }
 
-    virtual void getControlBlocks(sp<IMemory>* ctl) const
+    virtual sp<IMemoryHeap> getControlBlock() const
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceFlingerClient::getInterfaceDescriptor());
         remote()->transact(GET_CBLK, data, &reply);
-        *ctl  = interface_cast<IMemory>(reply.readStrongBinder());
+        return interface_cast<IMemoryHeap>(reply.readStrongBinder());
     }
 
     virtual sp<ISurface> createSurface( surface_data_t* params,
@@ -126,8 +126,7 @@ status_t BnSurfaceFlingerClient::onTransact(
     switch(code) {
         case GET_CBLK: {
             CHECK_INTERFACE(ISurfaceFlingerClient, data, reply);
-            sp<IMemory> ctl;
-            getControlBlocks(&ctl);
+            sp<IMemoryHeap> ctl(getControlBlock());
             reply->writeStrongBinder(ctl->asBinder());
             return NO_ERROR;
         } break;

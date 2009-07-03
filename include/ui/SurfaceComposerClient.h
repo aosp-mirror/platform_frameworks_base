@@ -149,7 +149,7 @@ private:
                 // after assignment
                 status_t                    mStatus;
                 per_client_cblk_t*          mControl;
-                sp<IMemory>                 mControlMemory;
+                sp<IMemoryHeap>             mControlMemory;
                 sp<ISurfaceFlingerClient>   mClient;
                 SurfaceFlingerSynchro*      mSignalServer;
 };
