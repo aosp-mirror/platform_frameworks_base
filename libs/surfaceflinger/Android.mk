@@ -33,16 +33,15 @@ ifeq ($(TARGET_SIMULATOR),true)
 endif
 
 LOCAL_SHARED_LIBRARIES := \
+	libcutils \
+	libpixelflinger \
 	libhardware \
 	libutils \
-	libbinder \
-	libcutils \
-	libui \
 	libcorecg \
-	libsgl \
-	libpixelflinger \
 	libEGL \
-	libGLESv1_CM
+	libGLESv1_CM \
+	libbinder \
+	libui
 
 LOCAL_C_INCLUDES := \
 	$(call include-path-for, corecg graphics)
