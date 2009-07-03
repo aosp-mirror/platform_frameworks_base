@@ -2248,6 +2248,19 @@ public final class Settings {
         public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
         /**
+         * Controls whether data backup is enabled.
+         * Type: int ( 0 = disabled, 1 = enabled )
+         * @hide
+         */
+        public static final String BACKUP_ENABLED = "backup_enabled";
+
+        /**
+         * Component of the transport to use for backup/restore.
+         * @hide
+         */
+        public static final String BACKUP_TRANSPORT = "backup_transport";
+
+        /**
          * Helper method for determining if a location provider is enabled.
          * @param cr the content resolver to use
          * @param provider the location provider to query
