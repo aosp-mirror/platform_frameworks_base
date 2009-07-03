@@ -4,7 +4,6 @@
 
     <application android:allowClearUserData="false"
                  android:label="@string/app_label"
-                 android:backupAgent="SettingsBackupAgent"
                  android:icon="@drawable/ic_launcher_settings">
 
         <provider android:name="SettingsProvider" android:authorities="settings"
