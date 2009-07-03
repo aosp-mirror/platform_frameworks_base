@@ -140,7 +140,7 @@ public class ServiceCommand {
 
     private boolean writeCommand(int cmd, String _data) {
         byte buf[] = new byte[8];
-        byte[] data = _data.getBytes();
+        byte[] data = (_data == null) ? new byte[0] : _data.getBytes();
         int len = data.length;
         // the length of data
         buf[0] = (byte) (len & 0xff);
