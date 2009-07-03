@@ -27,7 +27,8 @@
 #define AES_KEY_LEN     128
 #define USER_KEY_LEN    (AES_KEY_LEN/8)
 #define IV_LEN          USER_KEY_LEN
-#define MAX_RETRY_COUNT 6
+#define MAX_RETRY_COUNT   6
+#define MIN_PASSWD_LENGTH 8
 
 #define gen_key(passwd, key, len) \
                 PKCS5_PBKDF2_HMAC_SHA1(passwd, strlen(passwd), \
