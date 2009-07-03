@@ -490,16 +490,15 @@ abstract class VpnService<E extends VpnProfile> {
         }
 
         private String getNotificationTitle(boolean connected) {
-            String connectedOrNot = connected
-                    ? mContext.getString(R.string.vpn_notification_connected)
+            String formatString = connected
+                    ? mContext.getString(
+                            R.string.vpn_notification_title_connected)
                     : mContext.getString(
-                            R.string.vpn_notification_disconnected);
-            return String.format(
-                    mContext.getString(R.string.vpn_notification_title),
-                    mProfile.getName(), connectedOrNot);
+                            R.string.vpn_notification_title_disconnected);
+            return String.format(formatString, mProfile.getName());
         }
 
-        private String getTimeFormat(long duration) {
+        private String getFormattedTime(long duration) {
             long hours = duration / 3600;
             StringBuilder sb = new StringBuilder();
             if (hours > 0) sb.append(hours).append(':');
@@ -511,11 +510,10 @@ abstract class VpnService<E extends VpnProfile> {
         private String getNotificationMessage(boolean connected) {
             if (connected) {
                 long time = (System.currentTimeMillis() - mStartTime) / 1000;
-                return String.format(mContext.getString(
-                        R.string.vpn_notification_connected_message),
-                        getTimeFormat(time));
+                return getFormattedTime(time);
             } else {
-                return "";
+                return mContext.getString(
+                        R.string.vpn_notification_hint_disconnected);
             }
         }
     }
