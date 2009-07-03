@@ -391,6 +391,7 @@ class BackupManagerService extends IBackupManager.Stub {
             case MSG_RUN_RESTORE:
             {
                 RestoreParams params = (RestoreParams)msg.obj;
+                Log.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 (new PerformRestoreThread(params.transport, params.observer, params.token)).start();
                 break;
             }
@@ -837,6 +838,7 @@ class BackupManagerService extends IBackupManager.Stub {
         PerformRestoreThread(IBackupTransport transport, IRestoreObserver observer,
                 long restoreSetToken) {
             mTransport = transport;
+            Log.d(TAG, "PerformRestoreThread mObserver=" + mObserver);
             mObserver = observer;
             mToken = restoreSetToken;
 
@@ -850,7 +852,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
-            if (DEBUG) Log.v(TAG, "Beginning restore process");
+            if (DEBUG) Log.v(TAG, "Beginning restore process mTransport=" + mTransport
+                    + " mObserver=" + mObserver + " mToken=" + mToken);
             /**
              * Restore sequence:
              *
@@ -1011,6 +1014,8 @@ class BackupManagerService extends IBackupManager.Stub {
                     Log.e(TAG, "Error finishing restore", e);
                 }
 
+                Log.d(TAG, "finishing restore mObserver=" + mObserver);
+
                 if (mObserver != null) {
                     try {
                         mObserver.restoreFinished(error);
@@ -1025,6 +1030,8 @@ class BackupManagerService extends IBackupManager.Stub {
         void processOneRestore(PackageInfo app, int appVersionCode, IBackupAgent agent) {
             // !!! TODO: actually run the restore through mTransport
             final String packageName = app.packageName;
+
+            Log.d(TAG, "processOneRestore packageName=" + packageName);
 
             // !!! TODO: get the dirs from the transport
             File backupDataName = new File(mDataDir, packageName + ".restore");
@@ -1186,7 +1193,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Report the name of the currently active transport
     public String getCurrentTransport() {
         mContext.enforceCallingPermission("android.permission.BACKUP", "getCurrentTransport");
-        Log.v(TAG, "getCurrentTransport() returning " + mCurrentTransport);
+        Log.v(TAG, "... getCurrentTransport() returning " + mCurrentTransport);
         return mCurrentTransport;
     }
 
@@ -1314,6 +1321,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 throws android.os.RemoteException {
             mContext.enforceCallingPermission("android.permission.BACKUP", "performRestore");
 
+            Log.d(TAG, "performRestore token=" + token + " observer=" + observer);
+
             if (mRestoreSets != null) {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
@@ -1332,6 +1341,8 @@ class BackupManagerService extends IBackupManager.Stub {
         public void endRestoreSession() throws android.os.RemoteException {
             mContext.enforceCallingPermission("android.permission.BACKUP",
                     "endRestoreSession");
+
+            Log.d(TAG, "endRestoreSession");
 
             mRestoreTransport.finishRestore();
             mRestoreTransport = null;
