@@ -35,15 +35,25 @@ public class ServiceCommand {
     public static final String SUCCESS = "0";
     public static final String FAILED = "-1";
 
+    // Opcodes for keystore commands.
+    public static final int LOCK = 0;
+    public static final int UNLOCK = 1;
+    public static final int PASSWD = 2;
+    public static final int GET_STATE = 3;
+    public static final int LIST_KEYS = 4;
+    public static final int GET_KEY = 5;
+    public static final int PUT_KEY = 6;
+    public static final int REMOVE_KEY = 7;
+    public static final int RESET = 8;
+    public static final int MAX_CMD_INDEX = 9;
+
+    public static final int BUFFER_LENGTH = 4096;
+
     private String mServiceName;
     private String mTag;
     private InputStream mIn;
     private OutputStream mOut;
     private LocalSocket mSocket;
-    private static final int BUFFER_LENGTH = 1024;
-
-    private byte buf[] = new byte[BUFFER_LENGTH];
-    private int buflen = 0;
 
     private boolean connect() {
         if (mSocket != null) {
@@ -104,35 +114,47 @@ public class ServiceCommand {
         return false;
     }
 
-    private boolean readReply() {
-        int len, ret;
-        buflen = 0;
+    private Reply readReply() {
+        byte buf[] = new byte[4];
+        Reply reply = new Reply();
 
-        if (!readBytes(buf, 2)) return false;
-        ret = (((int) buf[0]) & 0xff) | ((((int) buf[1]) & 0xff) << 8);
-        if (ret != 0) return false;
+        if (!readBytes(buf, 4)) return null;
+        reply.len = (((int) buf[0]) & 0xff) | ((((int) buf[1]) & 0xff) << 8) |
+                ((((int) buf[2]) & 0xff) << 16) |
+                ((((int) buf[3]) & 0xff) << 24);
 
-        if (!readBytes(buf, 2)) return false;
-        len = (((int) buf[0]) & 0xff) | ((((int) buf[1]) & 0xff) << 8);
-        if (len > BUFFER_LENGTH) {
-            Log.e(mTag,"invalid reply length (" + len + ")");
+        if (!readBytes(buf, 4)) return null;
+        reply.returnCode = (((int) buf[0]) & 0xff) |
+                ((((int) buf[1]) & 0xff) << 8) |
+                ((((int) buf[2]) & 0xff) << 16) |
+                ((((int) buf[3]) & 0xff) << 24);
+
+        if (reply.len > BUFFER_LENGTH) {
+            Log.e(mTag,"invalid reply length (" + reply.len + ")");
             disconnect();
-            return false;
+            return null;
         }
-        if (!readBytes(buf, len)) return false;
-        buflen = len;
-        return true;
+        if (!readBytes(reply.data, reply.len)) return null;
+        return reply;
     }
 
-    private boolean writeCommand(String _cmd) {
-        byte[] cmd = _cmd.getBytes();
-        int len = cmd.length;
-        if ((len < 1) || (len > BUFFER_LENGTH)) return false;
+    private boolean writeCommand(int cmd, String _data) {
+        byte buf[] = new byte[8];
+        byte[] data = _data.getBytes();
+        int len = data.length;
+        // the length of data
         buf[0] = (byte) (len & 0xff);
         buf[1] = (byte) ((len >> 8) & 0xff);
+        buf[2] = (byte) ((len >> 16) & 0xff);
+        buf[3] = (byte) ((len >> 24) & 0xff);
+        // the opcode of the command
+        buf[4] = (byte) (cmd & 0xff);
+        buf[5] = (byte) ((cmd >> 8) & 0xff);
+        buf[6] = (byte) ((cmd >> 16) & 0xff);
+        buf[7] = (byte) ((cmd >> 24) & 0xff);
         try {
-            mOut.write(buf, 0, 2);
-            mOut.write(cmd, 0, len);
+            mOut.write(buf, 0, 8);
+            mOut.write(data, 0, len);
         } catch (IOException ex) {
             Log.e(mTag,"write error");
             disconnect();
@@ -141,32 +163,28 @@ public class ServiceCommand {
         return true;
     }
 
-    private String executeCommand(String cmd) {
-        if (!writeCommand(cmd)) {
+    private Reply executeCommand(int cmd, String data) {
+        if (!writeCommand(cmd, data)) {
             /* If service died and restarted in the background
              * (unlikely but possible) we'll fail on the next
              * write (this one).  Try to reconnect and write
              * the command one more time before giving up.
              */
             Log.e(mTag, "write command failed? reconnect!");
-            if (!connect() || !writeCommand(cmd)) {
+            if (!connect() || !writeCommand(cmd, data)) {
                 return null;
             }
         }
-        if (readReply()) {
-            return new String(buf, 0, buflen);
-        } else {
-            return null;
-        }
+        return readReply();
     }
 
-    public synchronized String execute(String cmd) {
-      String result;
+    public synchronized Reply execute(int cmd, String data) {
+      Reply result;
       if (!connect()) {
           Log.e(mTag, "connection failed");
           return null;
       }
-      result = executeCommand(cmd);
+      result = executeCommand(cmd, data);
       disconnect();
       return result;
     }

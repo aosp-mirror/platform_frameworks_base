@@ -20,6 +20,7 @@ package android.security;
  * The Keystore class provides the functions to list the certs/keys in keystore.
  * {@hide}
  */
+
 public abstract class Keystore {
     private static final String TAG = "Keystore";
     private static final String[] NOTFOUND = new String[0];
@@ -30,25 +31,18 @@ public abstract class Keystore {
         return new FileKeystore();
     }
 
-    // for compatiblity, start from here
-    /**
-     */
-    public abstract String getUserkey(String key);
+    public abstract int lock();
+    public abstract int unlock(String password);
+    public abstract int getState();
+    public abstract int changePassword(String oldPassword, String newPassword);
+    public abstract int setPassword(String firstPassword);
+    public abstract String[] listKeys(String namespace);
+    public abstract int put(String namespace, String keyname, String value);
+    public abstract String get(String namespace, String keyname);
+    public abstract int remove(String namespace, String keyname);
+    public abstract int reset();
 
-    /**
-     */
-    public abstract String getCertificate(String key);
-
-    /**
-     */
-    public abstract String[] getAllCertificateKeys();
-
-    /**
-     */
-    public abstract String[] getAllUserkeyKeys();
-
-    // to here
-
+    // TODO: for migrating to the mini-keystore, clean up from here
     /**
      */
     public abstract String getCaCertificate(String key);
@@ -89,101 +83,41 @@ public abstract class Keystore {
             int keyStrengthIndex, String challenge, String organizations);
 
     public abstract void addCertificate(byte[] cert);
+    // to here
 
     private static class FileKeystore extends Keystore {
         private static final String SERVICE_NAME = "keystore";
-        private static final String LIST_CA_CERTIFICATES = "listcacerts";
-        private static final String LIST_USER_CERTIFICATES = "listusercerts";
-        private static final String GET_CA_CERTIFICATE = "getcacert";
-        private static final String GET_USER_CERTIFICATE = "getusercert";
-        private static final String GET_USER_KEY = "getuserkey";
-        private static final String ADD_CA_CERTIFICATE = "addcacert";
-        private static final String ADD_USER_CERTIFICATE = "addusercert";
-        private static final String ADD_USER_KEY = "adduserkey";
-        private static final String COMMAND_DELIMITER = "\t";
+        private static final String CA_CERTIFICATE = "CaCertificate";
+        private static final String USER_CERTIFICATE = "UserCertificate";
+        private static final String USER_KEY = "UserPrivateKey";
+        private static final String COMMAND_DELIMITER = " ";
         private static final ServiceCommand mServiceCommand =
                 new ServiceCommand(SERVICE_NAME);
 
-        // for compatiblity, start from here
-
-        private static final String LIST_CERTIFICATES = "listcerts";
-        private static final String LIST_USERKEYS = "listuserkeys";
-        private static final String PATH = "/data/misc/keystore/";
-        private static final String USERKEY_PATH = PATH + "userkeys/";
-        private static final String CERT_PATH = PATH + "certs/";
-
-        @Override
-        public String getUserkey(String key) {
-            return USERKEY_PATH + key;
-        }
-
-        @Override
-        public String getCertificate(String key) {
-            return CERT_PATH + key;
-        }
-
-        @Override
-        public String[] getAllCertificateKeys() {
-            try {
-                String result = mServiceCommand.execute(LIST_CERTIFICATES);
-                if (result != null) return result.split("\\s+");
-                return NOTFOUND;
-            } catch (NumberFormatException ex) {
-                return NOTFOUND;
-            }
-        }
-
-        @Override
-        public String[] getAllUserkeyKeys() {
-            try {
-                String result = mServiceCommand.execute(LIST_USERKEYS);
-                if (result != null) return result.split("\\s+");
-                return NOTFOUND;
-            } catch (NumberFormatException ex) {
-                return NOTFOUND;
-            }
-        }
-
-        // to here
-
+        // TODO: for migrating to the mini-keystore, start from here
         @Override
         public String getUserPrivateKey(String key) {
-            return mServiceCommand.execute(
-                    GET_USER_KEY + COMMAND_DELIMITER + key);
+            return "";
         }
 
         @Override
         public String getUserCertificate(String key) {
-            return mServiceCommand.execute(
-                    GET_USER_CERTIFICATE + COMMAND_DELIMITER + key);
+            return "";
         }
 
         @Override
         public String getCaCertificate(String key) {
-            return mServiceCommand.execute(
-                    GET_CA_CERTIFICATE + COMMAND_DELIMITER + key);
+            return "";
         }
 
         @Override
         public String[] getAllUserCertificateKeys() {
-            try {
-                String result = mServiceCommand.execute(LIST_USER_CERTIFICATES);
-                if (result != null) return result.split("\\s+");
-                return NOTFOUND;
-            } catch (NumberFormatException ex) {
-                return NOTFOUND;
-            }
+            return new String[0];
         }
 
         @Override
         public String[] getAllCaCertificateKeys() {
-            try {
-                String result = mServiceCommand.execute(LIST_CA_CERTIFICATES);
-                if (result != null) return result.split("\\s+");
-                return NOTFOUND;
-            } catch (NumberFormatException ex) {
-                return NOTFOUND;
-            }
+          return new String[0];
         }
 
         @Override
@@ -221,25 +155,77 @@ public abstract class Keystore {
             // TODO: real implementation
         }
 
-        private boolean addUserCertificate(String key, String certificate,
-                String privateKey) {
-            if(mServiceCommand.execute(ADD_USER_CERTIFICATE + COMMAND_DELIMITER
-                    + key + COMMAND_DELIMITER + certificate) != null) {
-                if (mServiceCommand.execute(ADD_USER_KEY + COMMAND_DELIMITER
-                        + key + COMMAND_DELIMITER + privateKey) != null) {
-                    return true;
-                }
-            }
-            return false;
+        // to here
+
+        @Override
+        public int lock() {
+            Reply result = mServiceCommand.execute(ServiceCommand.LOCK, null);
+            return (result != null) ? result.returnCode : -1;
         }
 
-        private boolean addCaCertificate(String key, String content) {
-            if (mServiceCommand.execute(ADD_CA_CERTIFICATE + COMMAND_DELIMITER
-                    + key + COMMAND_DELIMITER + content) != null) {
-                return true;
-            }
-            return false;
+        @Override
+        public int unlock(String password) {
+            Reply result = mServiceCommand.execute(ServiceCommand.UNLOCK,
+                    password);
+            return (result != null) ? result.returnCode : -1;
         }
 
+        @Override
+        public int getState() {
+            Reply result = mServiceCommand.execute(ServiceCommand.GET_STATE,
+                    null);
+            return (result != null) ? result.returnCode : -1;
+        }
+
+        @Override
+        public int changePassword(String oldPassword, String newPassword) {
+            Reply result = mServiceCommand.execute(ServiceCommand.PASSWD,
+                    oldPassword + " " + newPassword);
+            return (result != null) ? result.returnCode : -1;
+        }
+
+        @Override
+        public int setPassword(String firstPassword) {
+            Reply result = mServiceCommand.execute(ServiceCommand.PASSWD,
+                    firstPassword);
+            return (result != null) ? result.returnCode : -1;
+        }
+
+        @Override
+        public String[] listKeys(String namespace) {
+            Reply result = mServiceCommand.execute(ServiceCommand.LIST_KEYS,
+                    namespace);
+            return (result != null) ? ((result.returnCode != 0) ? NOTFOUND :
+                    new String(result.data, 0, result.len).split("\\s+"))
+                    : NOTFOUND;
+        }
+
+        @Override
+        public int put(String namespace, String keyname, String value) {
+            Reply result = mServiceCommand.execute(ServiceCommand.PUT_KEY,
+                    namespace + " " + keyname + " " + value);
+            return (result != null) ? result.returnCode : -1;
+        }
+
+        @Override
+        public String get(String namespace, String keyname) {
+            Reply result = mServiceCommand.execute(ServiceCommand.GET_KEY,
+                    namespace + " " + keyname);
+            return (result != null) ? ((result.returnCode != 0) ? null :
+                    new String(result.data, 0, result.len)) : null;
+        }
+
+        @Override
+        public int remove(String namespace, String keyname) {
+            Reply result = mServiceCommand.execute(ServiceCommand.REMOVE_KEY,
+                    namespace + " " + keyname);
+            return (result != null) ? result.returnCode : -1;
+        }
+
+        @Override
+        public int reset() {
+            Reply result = mServiceCommand.execute(ServiceCommand.RESET, null);
+            return (result != null) ? result.returnCode : -1;
+        }
     }
 }
