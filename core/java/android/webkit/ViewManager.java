@@ -61,11 +61,15 @@ class ViewManager {
                     if (mView.getParent() != null) {
                         mView.setLayoutParams(lp);
                     } else {
-                        mWebView.addView(mView, lp);
-                        mChildren.add(ChildView.this);
+                        attachViewOnUIThread(lp);
                     }
                 }
             });
+        }
+
+        void attachViewOnUIThread(AbsoluteLayout.LayoutParams lp) {
+            mWebView.addView(mView, lp);
+            mChildren.add(this);
         }
 
         void removeView() {
@@ -74,10 +78,14 @@ class ViewManager {
             }
             mWebView.mPrivateHandler.post(new Runnable() {
                 public void run() {
-                    mWebView.removeView(mView);
-                    mChildren.remove(ChildView.this);
+                    removeViewOnUIThread();
                 }
             });
+        }
+
+        void removeViewOnUIThread() {
+            mWebView.removeView(mView);
+            mChildren.remove(this);
         }
     }
 
