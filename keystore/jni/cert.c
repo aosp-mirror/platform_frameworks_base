@@ -144,6 +144,9 @@ int is_pkcs12(const char *buf, int bufLen)
 
     if (!buf || bufLen < 1) goto err;
 
+    bp = BIO_new(BIO_s_mem());
+    if (!bp) goto err;
+
     if (buf[0] != 48) goto err; // it is not DER.
 
     if (!BIO_write(bp, buf, bufLen)) goto err;

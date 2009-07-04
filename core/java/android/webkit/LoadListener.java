@@ -28,7 +28,7 @@ import android.net.http.SslError;
 
 import android.os.Handler;
 import android.os.Message;
-import android.security.Keystore;
+import android.security.CertTool;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
 import android.widget.Toast;
@@ -999,7 +999,7 @@ class LoadListener extends Handler implements EventHandler {
                 }
                 mDataBuilder.releaseChunk(c);
             }
-            Keystore.getInstance().addCertificate(cert);
+            CertTool.getInstance().addCertificate(cert, mContext);
             Toast.makeText(mContext, R.string.certificateSaved,
                     Toast.LENGTH_SHORT).show();
             mBrowserFrame.stopLoading();

@@ -63,6 +63,15 @@ public class CertTool {
     private native String getPrivateKeyPEM(int handle);
     private native void freeX509Certificate(int handle);
 
+    private static CertTool singleton = null;
+
+    public static final CertTool getInstance() {
+        if (singleton == null) {
+            singleton = new CertTool();
+        }
+        return singleton;
+    }
+
     public String getUserPrivateKey(String key) {
         return USER_KEY + KEYNAME_DELIMITER + key;
     }
