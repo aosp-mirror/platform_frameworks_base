@@ -115,9 +115,9 @@ static JNINativeMethod gCertToolMethods[] = {
     /* name, signature, funcPtr */
     {"generateCertificateRequest", "(ILjava/lang/String;)Ljava/lang/String;",
         (void*)android_security_CertTool_generateCertificateRequest},
-    {"isPkcs12Keystore", "(B[)I",
+    {"isPkcs12Keystore", "([B)Z",
         (void*)android_security_CertTool_isPkcs12Keystore},
-    {"generateX509Certificate", "(B[)I",
+    {"generateX509Certificate", "([B)I",
         (void*)android_security_CertTool_generateX509Certificate},
     {"isCaCertificate", "(I)Z",
         (void*)android_security_CertTool_isCaCertificate},

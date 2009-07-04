@@ -49,6 +49,8 @@ public class WifiConfiguration implements Parcelable {
     /** {@hide} */
     public static final String anonymousIdentityVarName = "anonymous_identity";
     /** {@hide} */
+    public static final String passwordVarName = "password";
+    /** {@hide} */
     public static final String clientCertVarName = "client_cert";
     /** {@hide} */
     public static final String caCertVarName = "ca_cert";
@@ -278,6 +280,8 @@ public class WifiConfiguration implements Parcelable {
     public String identity;
     /** {@hide} */
     public String anonymousIdentity;
+    /** {@hide} */
+    public String password;
     /** The path of the client certificate file.
      * {@hide}
      */
@@ -312,6 +316,7 @@ public class WifiConfiguration implements Parcelable {
         eap = null;
         identity = null;
         anonymousIdentity = null;
+        password = null;
         clientCert = null;
         caCert = null;
         privateKey = null;
@@ -402,6 +407,10 @@ public class WifiConfiguration implements Parcelable {
         if (this.anonymousIdentity != null) {
             sbuf.append(anonymousIdentity);
         }
+        sbuf.append('\n').append(" Password: ");
+        if (this.password != null) {
+            sbuf.append(password);
+        }
         sbuf.append('\n').append(" ClientCert: ");
         if (this.clientCert != null) {
             sbuf.append(clientCert);
@@ -479,6 +488,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(eap);
         dest.writeString(identity);
         dest.writeString(anonymousIdentity);
+        dest.writeString(password);
         dest.writeString(clientCert);
         dest.writeString(caCert);
         dest.writeString(privateKey);
@@ -508,6 +518,7 @@ public class WifiConfiguration implements Parcelable {
                 config.eap = in.readString();
                 config.identity = in.readString();
                 config.anonymousIdentity = in.readString();
+                config.password = in.readString();
                 config.clientCert = in.readString();
                 config.caCert = in.readString();
                 config.privateKey = in.readString();

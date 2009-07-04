@@ -1095,6 +1095,17 @@ public class WifiService extends IWifiManager.Stub {
                 break setVariables;
             }
 
+            if ((config.password != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.passwordVarName,
+                    config.password)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set password: "+
+                          config.password);
+                }
+                break setVariables;
+            }
+
             if ((config.clientCert != null) && !WifiNative.setNetworkVariableCommand(
                     netId,
                     WifiConfiguration.clientCertVarName,

@@ -30,6 +30,10 @@ import android.text.TextUtils;
  * {@hide}
  */
 public class CertTool {
+    static {
+        System.loadLibrary("certtool_jni");
+    }
+
     public static final String ACTION_ADD_CREDENTIAL =
             "android.security.ADD_CREDENTIAL";
     public static final String KEY_TYPE_NAME = "typeName";
@@ -52,7 +56,7 @@ public class CertTool {
     private static final String USER_KEY = "USRKEY";
 
     private static final String KEYNAME_DELIMITER = "_";
-    private static final Keystore keystore = Keystore.getInstance();
+    private static final Keystore sKeystore = Keystore.getInstance();
 
     private native String generateCertificateRequest(int bits, String subject);
     private native boolean isPkcs12Keystore(byte[] data);
@@ -64,6 +68,8 @@ public class CertTool {
     private native void freeX509Certificate(int handle);
 
     private static CertTool singleton = null;
+
+    private CertTool() { }
 
     public static final CertTool getInstance() {
         if (singleton == null) {
@@ -85,11 +91,11 @@ public class CertTool {
     }
 
     public String[] getAllUserCertificateKeys() {
-        return keystore.listKeys(USER_KEY);
+        return sKeystore.listKeys(USER_KEY);
     }
 
     public String[] getAllCaCertificateKeys() {
-        return keystore.listKeys(CA_CERTIFICATE);
+        return sKeystore.listKeys(CA_CERTIFICATE);
     }
 
     public String[] getSupportedKeyStrenghs() {
