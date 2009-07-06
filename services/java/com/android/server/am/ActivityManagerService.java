@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
 import com.android.server.ProcessStats;
@@ -61,7 +62,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -751,6 +751,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     int mFactoryTest;
 
+    boolean mCheckedForSetup;
+    
     /**
      * The time at which we will allow normal application switches again,
      * after a call to {@link #stopAppSwitches()}.
@@ -1780,6 +1782,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             r.stopped = true;
         }
 
+        // Launch the new version setup screen if needed.  We do this -after-
+        // launching the initial activity (that is, home), so that it can have
+        // a chance to initialize itself while in the background, making the
+        // switch back to it faster and look better.
+        startSetupActivityLocked();
+        
         return true;
     }
 
@@ -2361,6 +2369,96 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    private boolean startHomeActivityLocked() {
+        if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
+                && mTopAction == null) {
+            // We are running in factory test mode, but unable to find
+            // the factory test app, so just sit around displaying the
+            // error message and don't try to start anything.
+            return false;
+        }
+        Intent intent = new Intent(
+            mTopAction,
+            mTopData != null ? Uri.parse(mTopData) : null);
+        intent.setComponent(mTopComponent);
+        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            intent.addCategory(Intent.CATEGORY_HOME);
+        }
+        ActivityInfo aInfo =
+            intent.resolveActivityInfo(mContext.getPackageManager(),
+                    STOCK_PM_FLAGS);
+        if (aInfo != null) {
+            intent.setComponent(new ComponentName(
+                    aInfo.applicationInfo.packageName, aInfo.name));
+            // Don't do this if the home app is currently being
+            // instrumented.
+            ProcessRecord app = getProcessRecordLocked(aInfo.processName,
+                    aInfo.applicationInfo.uid);
+            if (app == null || app.instrumentationClass == null) {
+                intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivityLocked(null, intent, null, null, 0, aInfo,
+                        null, null, 0, 0, 0, false, false);
+            }
+        }
+        
+        
+        return true;
+    }
+    
+    /**
+     * Starts the "new version setup screen" if appropriate.
+     */
+    private void startSetupActivityLocked() {
+        // Only do this once per boot.
+        if (mCheckedForSetup) {
+            return;
+        }
+        
+        // We will show this screen if the current one is a different
+        // version than the last one shown, and we are not running in
+        // low-level factory test mode.
+        final ContentResolver resolver = mContext.getContentResolver();
+        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL &&
+                Settings.Secure.getInt(resolver,
+                        Settings.Secure.DEVICE_PROVISIONED, 0) != 0) {
+            mCheckedForSetup = true;
+            
+            // See if we should be showing the platform update setup UI.
+            Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
+            List<ResolveInfo> ris = mSelf.mContext.getPackageManager()
+                    .queryIntentActivities(intent, PackageManager.GET_META_DATA);
+            
+            // We don't allow third party apps to replace this.
+            ResolveInfo ri = null;
+            for (int i=0; ris != null && i<ris.size(); i++) {
+                if ((ris.get(i).activityInfo.applicationInfo.flags
+                        & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    ri = ris.get(i);
+                    break;
+                }
+            }
+            
+            if (ri != null) {
+                String vers = ri.activityInfo.metaData != null
+                        ? ri.activityInfo.metaData.getString(Intent.METADATA_SETUP_VERSION)
+                        : null;
+                if (vers == null && ri.activityInfo.applicationInfo.metaData != null) {
+                    vers = ri.activityInfo.applicationInfo.metaData.getString(
+                            Intent.METADATA_SETUP_VERSION);
+                }
+                String lastVers = Settings.Secure.getString(
+                        resolver, Settings.Secure.LAST_SETUP_SHOWN);
+                if (vers != null && !vers.equals(lastVers)) {
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setComponent(new ComponentName(
+                            ri.activityInfo.packageName, ri.activityInfo.name));
+                    startActivityLocked(null, intent, null, null, 0, ri.activityInfo,
+                            null, null, 0, 0, 0, false, false);
+                }
+            }
+        }
+    }
+    
     /**
      * Ensure that the top activity in the stack is resumed.
      *
@@ -2382,37 +2480,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (next == null) {
             // There are no more activities!  Let's just start up the
             // Launcher...
-            if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
-                    && mTopAction == null) {
-                // We are running in factory test mode, but unable to find
-                // the factory test app, so just sit around displaying the
-                // error message and don't try to start anything.
-                return false;
-            }
-            Intent intent = new Intent(
-                mTopAction,
-                mTopData != null ? Uri.parse(mTopData) : null);
-            intent.setComponent(mTopComponent);
-            if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-                intent.addCategory(Intent.CATEGORY_HOME);
-            }
-            ActivityInfo aInfo =
-                intent.resolveActivityInfo(mContext.getPackageManager(),
-                        STOCK_PM_FLAGS);
-            if (aInfo != null) {
-                intent.setComponent(new ComponentName(
-                        aInfo.applicationInfo.packageName, aInfo.name));
-                // Don't do this if the home app is currently being
-                // instrumented.
-                ProcessRecord app = getProcessRecordLocked(aInfo.processName,
-                        aInfo.applicationInfo.uid);
-                if (app == null || app.instrumentationClass == null) {
-                    intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivityLocked(null, intent, null, null, 0, aInfo,
-                            null, null, 0, 0, 0, false, false);
-                }
-            }
-            return true;
+            return startHomeActivityLocked();
         }
 
         next.delayedResume = false;
@@ -10757,6 +10825,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                             uninstallPackageLocked(ssp,
                                     intent.getIntExtra(Intent.EXTRA_UID, -1), false);
+                            AttributeCache ac = AttributeCache.instance();
+                            if (ac != null) {
+                                ac.removePackage(ssp);
+                            }
                         }
                     }
                 }
@@ -11807,6 +11879,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, false, false, MY_PID, Process.SYSTEM_UID);
+                
+                AttributeCache ac = AttributeCache.instance();
+                if (ac != null) {
+                    ac.updateConfiguration(mConfiguration);
+                }
             }
         }
         

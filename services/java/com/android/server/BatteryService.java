@@ -92,6 +92,7 @@ class BatteryService extends Binder {
     // This should probably be exposed in the API, though it's not critical
     private static final int BATTERY_PLUGGED_NONE = 0;
 
+    private static final int BATTERY_LEVEL_CLOSE_WARNING = 20;
     private static final int BATTERY_LEVEL_WARNING = 15;
 
     private final Context mContext;
@@ -122,6 +123,7 @@ class BatteryService extends Binder {
     private long mDischargeStartTime;
     private int mDischargeStartLevel;
     
+    private boolean mSentLowBatteryBroadcast = false;
     
     public BatteryService(Context context) {
         mContext = context;
@@ -286,7 +288,11 @@ class BatteryService extends Binder {
 
             sendIntent();
             if (sendBatteryLow) {
+                mSentLowBatteryBroadcast = true;
                 mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_LOW));
+            } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= BATTERY_LEVEL_CLOSE_WARNING) {
+                mSentLowBatteryBroadcast = false;
+                mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_OKAY));
             }
             
             // This needs to be done after sendIntent() so that we get the lastest battery stats.

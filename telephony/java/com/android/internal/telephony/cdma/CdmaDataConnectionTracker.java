@@ -96,6 +96,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      * Constants for the data connection activity:
      * physical link down/up
      */
+     private static final int DATA_CONNECTION_ACTIVE_PH_LINK_INACTIVE = 0;
      private static final int DATA_CONNECTION_ACTIVE_PH_LINK_DOWN = 1;
      private static final int DATA_CONNECTION_ACTIVE_PH_LINK_UP = 2;
 
@@ -832,7 +833,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
-    private void onCdmaDataAttached() {
+    private void onCdmaDataDetached() {
         if (state == State.CONNECTED) {
             startNetStatPoll();
             phone.notifyDataConnection(Phone.REASON_CDMA_DATA_DETACHED);
@@ -852,6 +853,14 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
+    private void writeEventLogCdmaDataDrop() {
+        CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
+        int bsid = (loc != null) ? loc.getBaseStationId() : -1;
+        EventLog.List val = new EventLog.List(bsid,
+                TelephonyManager.getDefault().getNetworkType());
+        EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_DROP, val);
+    }
+
     protected void onDataStateChanged (AsyncResult ar) {
         ArrayList<DataCallState> dataCallStates = (ArrayList<DataCallState>)(ar.result);
 
@@ -863,24 +872,37 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (state == State.CONNECTED) {
-            if (dataCallStates.get(0).active == DATA_CONNECTION_ACTIVE_PH_LINK_UP ) {
-                activity = Activity.NONE;
-                phone.notifyDataActivity();
-            } else if (dataCallStates.get(0).active == DATA_CONNECTION_ACTIVE_PH_LINK_DOWN ) {
-                activity = Activity.DORMANT;
-                phone.notifyDataActivity();
+            if (dataCallStates.size() >= 1) {
+                switch (dataCallStates.get(0).active) {
+                case DATA_CONNECTION_ACTIVE_PH_LINK_UP:
+                    Log.v(LOG_TAG, "onDataStateChanged: active=LINK_ACTIVE && CONNECTED, ignore");
+                    activity = Activity.NONE;
+                    phone.notifyDataActivity();
+                    break;
+                case DATA_CONNECTION_ACTIVE_PH_LINK_INACTIVE:
+                    Log.v(LOG_TAG,
+                    "onDataStateChanged active=LINK_INACTIVE && CONNECTED, disconnecting/cleanup");
+                    writeEventLogCdmaDataDrop();
+                    cleanUpConnection(true, null);
+                    break;
+                case DATA_CONNECTION_ACTIVE_PH_LINK_DOWN:
+                    Log.v(LOG_TAG, "onDataStateChanged active=LINK_DOWN && CONNECTED, dormant");
+                    activity = Activity.DORMANT;
+                    phone.notifyDataActivity();
+                    break;
+                default:
+                    Log.v(LOG_TAG, "onDataStateChanged: IGNORE unexpected DataCallState.active="
+                            + dataCallStates.get(0).active);
+                }
+            } else {
+                Log.v(LOG_TAG, "onDataStateChanged: network disconnected, clean up");
+                writeEventLogCdmaDataDrop();
+                cleanUpConnection(true, null);
             }
         } else {
-
-            CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
-            int bsid = (loc != null) ? loc.getBaseStationId() : -1;
-            EventLog.List val = new EventLog.List(bsid,
-                    TelephonyManager.getDefault().getNetworkType());
-            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_DROP, val);
-
-            cleanUpConnection(true, null);
+            // TODO: Do we need to do anything?
+            Log.i(LOG_TAG, "onDataStateChanged: not connected, state=" + state + " ignoring");
         }
-        Log.i(LOG_TAG, "Data connection has changed.");
     }
 
     String getInterfaceName() {
@@ -932,7 +954,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 break;
 
             case EVENT_CDMA_DATA_DETACHED:
-                onCdmaDataAttached();
+                onCdmaDataDetached();
                 break;
 
             case EVENT_DATA_STATE_CHANGED:

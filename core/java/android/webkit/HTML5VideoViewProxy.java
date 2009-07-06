@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.webkit.ViewManager.ChildView;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
@@ -46,8 +47,6 @@ class HTML5VideoViewProxy extends Handler {
 
     // The singleton instance.
     private static HTML5VideoViewProxy sInstance;
-    // The VideoView driven via this proxy.
-    private VideoView mVideoView;
     // The context object used to initialize the VideoView and the
     // MediaController.
     private Context mContext;
@@ -61,12 +60,6 @@ class HTML5VideoViewProxy extends Handler {
         super(Looper.getMainLooper());
         // Save the context object.
         mContext = context;
-        // Send a message to the UI thread to create the VideoView.
-        // This need to be done on the UI thread, or else the
-        // event Handlers used by the VideoView and MediaController
-        // will be attached to the wrong thread.
-        Message message = obtainMessage(INIT);
-        sendMessage(message);
     }
 
     @Override
@@ -74,25 +67,22 @@ class HTML5VideoViewProxy extends Handler {
         // This executes on the UI thread.
         switch (msg.what) {
             case INIT:
+                ChildView child = (ChildView) msg.obj;
                 // Create the video view and set a default controller.
-                mVideoView = new VideoView(mContext);
-                mVideoView.setMediaController(new MediaController(mContext));
+                VideoView v = new VideoView(mContext);
+                // This is needed because otherwise there will be a black square
+                // stuck on the screen.
+                v.setWillNotDraw(false);
+                v.setMediaController(new MediaController(mContext));
+                child.mView = v;
                 break;
             case PLAY:
-                // Check if the fullscreen video view is currently playing.
-                // If it is, ignore the message.
-                if (!mVideoView.isPlaying()) {
-                    HashMap<String, Object> map =
+                HashMap<String, Object> map =
                         (HashMap<String, Object>) msg.obj;
-                    String url = (String) map.get("url");
-                    WebView webview = (WebView) map.get("webview");
-                    WebChromeClient client = webview.getWebChromeClient();
-                    if (client != null) {
-                        mVideoView.setVideoURI(Uri.parse(url));
-                        mVideoView.start();
-                        client.onShowCustomView(mVideoView);
-                    }
-                }
+                String url = (String) map.get("url");
+                VideoView view = (VideoView) map.get("view");
+                view.setVideoURI(Uri.parse(url));
+                view.start();
                 break;
         }
     }
@@ -102,14 +92,33 @@ class HTML5VideoViewProxy extends Handler {
      * @param url is the URL of the video stream.
      * @param webview is the WebViewCore that is requesting the playback.
      */
-    public void play(String url, WebViewCore webviewCore) {
+    public void play(String url, ChildView child) {
         // We need to know the webview that is requesting the playback.
         Message message = obtainMessage(PLAY);
         HashMap<String, Object> map = new HashMap();
         map.put("url", url);
-        map.put("webview", webviewCore.getWebView());
+        map.put("view", child.mView);
         message.obj = map;
         sendMessage(message);
+    }
+
+    public ChildView createView(WebViewCore core) {
+        WebView w = core.getWebView();
+        if (w == null) {
+            return null;
+        }
+        ChildView child = w.mViewManager.createView();
+        sendMessage(obtainMessage(INIT, child));
+        return child;
+    }
+
+    public void attachView(ChildView child, int x, int y, int width,
+            int height) {
+        child.attachView(x, y, width, height);
+    }
+
+    public void removeView(ChildView child) {
+        child.removeView();
     }
 
     /**

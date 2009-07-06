@@ -279,7 +279,9 @@ public class RequestQueue implements RequestFeeder {
 
         public void startTiming() {
             for (int i = 0; i < mConnectionCount; i++) {
-                mThreads[i].mStartThreadTime = mThreads[i].mCurrentThreadTime;
+                ConnectionThread rt = mThreads[i];
+                rt.mCurrentThreadTime = -1;
+                rt.mTotalThreadTime = 0;
             }
             mTotalRequest = 0;
             mTotalConnection = 0;
@@ -289,12 +291,14 @@ public class RequestQueue implements RequestFeeder {
             int totalTime = 0;
             for (int i = 0; i < mConnectionCount; i++) {
                 ConnectionThread rt = mThreads[i];
-                totalTime += (rt.mCurrentThreadTime - rt.mStartThreadTime);
-                rt.mStartThreadTime = -1;
+                if (rt.mCurrentThreadTime != -1) {
+                    totalTime += rt.mTotalThreadTime;
+                }
+                rt.mCurrentThreadTime = 0;
             }
             Log.d("Http", "Http thread used " + totalTime + " ms " + " for "
                     + mTotalRequest + " requests and " + mTotalConnection
-                    + " connections");
+                    + " new connections");
         }
 
         void logState() {

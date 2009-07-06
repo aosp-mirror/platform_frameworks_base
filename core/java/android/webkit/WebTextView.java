@@ -93,6 +93,28 @@ import java.util.ArrayList;
         // Treat ACTION_DOWN and ACTION MULTIPLE the same
         boolean down = event.getAction() != KeyEvent.ACTION_UP;
         int keyCode = event.getKeyCode();
+
+        boolean isArrowKey = false;
+        switch(keyCode) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (!mWebView.nativeCursorMatchesFocus()) {
+                    return down ? mWebView.onKeyDown(keyCode, event) : mWebView
+                            .onKeyUp(keyCode, event);
+
+                }
+                isArrowKey = true;
+                break;
+        }
+
+        if (!isArrowKey && mWebView.nativeFocusNodePointer() != mNodePointer) {
+            mWebView.nativeClearCursor();
+            remove();
+            return mWebView.dispatchKeyEvent(event);
+        }
+
         Spannable text = (Spannable) getText();
         int oldLength = text.length();
         // Normally the delete key's dom events are sent via onTextChanged.
@@ -132,20 +154,6 @@ import java.util.ArrayList;
             }
             // Pass to super to handle longpress.
             return super.dispatchKeyEvent(event);
-        }
-        boolean isArrowKey = false;
-        switch(keyCode) {
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-            case KeyEvent.KEYCODE_DPAD_UP:
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (!mWebView.nativeCursorMatchesFocus()) {
-                    return down ? mWebView.onKeyDown(keyCode, event) : mWebView
-                            .onKeyUp(keyCode, event);
-
-                }
-                isArrowKey = true;
-                break;
         }
 
         // Ensure there is a layout so arrow keys are handled properly.

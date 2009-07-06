@@ -26,7 +26,6 @@ import android.widget.RemoteViews;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
@@ -40,7 +39,7 @@ public class AppWidgetHost {
     static final int HANDLE_UPDATE = 1;
     static final int HANDLE_PROVIDER_CHANGED = 2;
 
-    static Object sServiceLock = new Object();
+    final static Object sServiceLock = new Object();
     static IAppWidgetService sService;
 
     Context mContext;
@@ -85,7 +84,7 @@ public class AppWidgetHost {
 
     int mHostId;
     Callbacks mCallbacks = new Callbacks();
-    HashMap<Integer,AppWidgetHostView> mViews = new HashMap();
+    final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<Integer, AppWidgetHostView>();
 
     public AppWidgetHost(Context context, int hostId) {
         mContext = context;
@@ -104,8 +103,8 @@ public class AppWidgetHost {
      * becomes visible, i.e. from onStart() in your Activity.
      */
     public void startListening() {
-        int[] updatedIds = null;
-        ArrayList<RemoteViews> updatedViews = new ArrayList();
+        int[] updatedIds;
+        ArrayList<RemoteViews> updatedViews = new ArrayList<RemoteViews>();
         
         try {
             if (mPackageName == null) {
@@ -209,7 +208,7 @@ public class AppWidgetHost {
         synchronized (mViews) {
             mViews.put(appWidgetId, view);
         }
-        RemoteViews views = null;
+        RemoteViews views;
         try {
             views = sService.getAppWidgetViews(appWidgetId);
         } catch (RemoteException e) {
@@ -231,6 +230,7 @@ public class AppWidgetHost {
     /**
      * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
      */
+    @SuppressWarnings({"UnusedDeclaration"})
     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
     }
 

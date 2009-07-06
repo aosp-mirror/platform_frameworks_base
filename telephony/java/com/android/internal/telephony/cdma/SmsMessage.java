@@ -518,6 +518,7 @@ public class SmsMessage extends SmsMessageBase {
         originatingAddress = addr;
         env.origAddress = addr;
         mEnvelope = env;
+        mPdu = pdu;
 
         parseSms();
     }
@@ -728,9 +729,8 @@ public class SmsMessage extends SmsMessageBase {
             dos.close();
 
             /**
-             * TODO(cleanup) -- This is the only place where mPdu is
-             * defined, and this is not obviously the only place where
-             * it needs to be defined.  It would be much nicer if
+             * TODO(cleanup) -- The mPdu field is managed in
+             * a fragile manner, and it would be much nicer if
              * accessing the serialized representation used a less
              * fragile mechanism.  Maybe the getPdu method could
              * generate a representation if there was not yet one?

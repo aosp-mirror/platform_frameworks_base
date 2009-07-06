@@ -2332,6 +2332,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (!mDisplayFrozen) {
                 if (mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
                     mNextAppTransition = transit;
+                } else if (transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
+                        && mNextAppTransition == WindowManagerPolicy.TRANSIT_TASK_CLOSE) {
+                    // Opening a new task always supersedes a close for the anim.
+                    mNextAppTransition = transit;
+                } else if (transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
+                        && mNextAppTransition == WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE) {
+                    // Opening a new activity always supersedes a close for the anim.
+                    mNextAppTransition = transit;
                 }
                 mAppTransitionReady = false;
                 mAppTransitionTimeout = false;
@@ -3414,7 +3422,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 synchronized (mWindowMap) {
                     for (int i=0; i<mRotationWatchers.size(); i++) {
                         if (watcherBinder == mRotationWatchers.get(i).asBinder()) {
-                            mRotationWatchers.remove(i);
+                            IRotationWatcher removed = mRotationWatchers.remove(i);
+                            if (removed != null) {
+                                removed.asBinder().unlinkToDeath(this, 0);
+                            }
                             i--;
                         }
                     }
@@ -5491,6 +5502,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             } catch (RemoteException e) {
             }
             synchronized(mWindowMap) {
+                mClient.asBinder().unlinkToDeath(this, 0);
                 mClientDead = true;
                 killSessionLocked();
             }

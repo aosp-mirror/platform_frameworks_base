@@ -1093,6 +1093,17 @@ public class WifiService extends IWifiManager.Stub {
                 break setVariables;
             }
 
+            if ((config.password != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.passwordVarName,
+                    config.password)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set password: "+
+                          config.password);
+                }
+                break setVariables;
+            }
+
             if ((config.clientCert != null) && !WifiNative.setNetworkVariableCommand(
                     netId,
                     WifiConfiguration.clientCertVarName,
@@ -1883,7 +1894,9 @@ public class WifiService extends IWifiManager.Stub {
         private WifiLock removeLock(IBinder binder) {
             int index = findLockByBinder(binder);
             if (index >= 0) {
-                return mList.remove(index);
+                WifiLock ret = mList.remove(index);
+                ret.unlinkDeathRecipient();
+                return ret;
             } else {
                 return null;
             }
@@ -1995,6 +2008,10 @@ public class WifiService extends IWifiManager.Stub {
                 binderDied();
             }
         }
+
+        void unlinkDeathRecipient() {
+            mBinder.unlinkToDeath(this, 0);
+        }
     }
 
     private class Multicaster extends DeathRecipient {
@@ -2062,7 +2079,10 @@ public class WifiService extends IWifiManager.Stub {
 
     private void removeMulticasterLocked(int i, int uid)
     {
-        mMulticasters.remove(i);
+        Multicaster removed = mMulticasters.remove(i);
+        if (removed != null) {
+            removed.unlinkDeathRecipient();
+        }
         if (mMulticasters.size() == 0) {
             WifiNative.startPacketFiltering();
         }

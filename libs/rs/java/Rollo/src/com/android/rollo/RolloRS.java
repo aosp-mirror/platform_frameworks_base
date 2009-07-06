@@ -68,17 +68,21 @@ public class RolloRS {
     private RenderScript.ProgramFragment mPFImages;
     private RenderScript.ProgramVertex mPV;
     private ProgramVertexAlloc mPVAlloc;
+    private RenderScript.Allocation[] mIcons;
+    private RenderScript.Allocation mIconPlate;
 
     private int[] mAllocStateBuf;
     private RenderScript.Allocation mAllocState;
 
-    private float[] mBufferPos;
-    //private float[] mBufferPV;
+    private int[] mAllocIconIDBuf;
+    private RenderScript.Allocation mAllocIconID;
 
     private void initNamed() {
         mRS.samplerBegin();
         mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN,
-                       RenderScript.SamplerValue.LINEAR_MIP_LINEAR);
+                       RenderScript.SamplerValue.LINEAR);//_MIP_LINEAR);
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG,
+                       RenderScript.SamplerValue.LINEAR);
         mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_S,
                        RenderScript.SamplerValue.CLAMP);
         mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_T,
@@ -88,27 +92,22 @@ public class RolloRS {
 
         mRS.programFragmentBegin(null, null);
         mRS.programFragmentSetTexEnable(0, true);
+        //mRS.programFragmentSetTexEnable(1, true);
         //mRS.programFragmentSetEnvMode(0, RS_TEX_ENV_MODE_REPLACE);
+        //mRS.programFragmentSetEnvMode(1, RS_TEX_ENV_MODE_MODULATE);
         mPFImages = mRS.programFragmentCreate();
         mPFImages.setName("PF");
         mPFImages.bindSampler(mSampler, 0);
+        mPFImages.bindSampler(mSampler, 1);
 
         mRS.programFragmentStoreBegin(null, null);
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
-        mRS.programFragmentStoreDitherEnable(true);
-        mPFSBackground = mRS.programFragmentStoreCreate();
-        mPFSBackground.setName("PFSBackground");
-
-        /*
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.EQUAL);
         mRS.programFragmentStoreDitherEnable(false);
         mRS.programFragmentStoreDepthMask(false);
         mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.ONE, 
                                           RenderScript.BlendDstFunc.ONE);
-        mPFSImages = mRS.programFragmentStoreCreate();
-        mPFSImages.setName("PFSImages");
-*/
+        mPFSBackground = mRS.programFragmentStoreCreate();
+        mPFSBackground.setName("PFS");
 
 
         mPVAlloc = new ProgramVertexAlloc(mRS);
@@ -126,13 +125,72 @@ public class RolloRS {
 
 
         Log.e("rs", "Done loading named");
+
+
+        {
+            mIcons = new RenderScript.Allocation[4];
+            mAllocIconIDBuf = new int[mIcons.length];
+            mAllocIconID = mRS.allocationCreatePredefSized(
+                RenderScript.ElementPredefined.USER_I32, mAllocIconIDBuf.length);
+
+            
+            BitmapDrawable bd;
+            Bitmap b;
+            
+            bd = (BitmapDrawable)mRes.getDrawable(R.drawable.browser);
+            mIcons[0] = mRS.allocationCreateFromBitmap(bd.getBitmap(), RenderScript.ElementPredefined.RGB_565, true);
+
+            bd = (BitmapDrawable)mRes.getDrawable(R.drawable.market);
+            mIcons[1] = mRS.allocationCreateFromBitmap(bd.getBitmap(), RenderScript.ElementPredefined.RGB_565, true);
+
+            bd = (BitmapDrawable)mRes.getDrawable(R.drawable.photos);
+            mIcons[2] = mRS.allocationCreateFromBitmap(bd.getBitmap(), RenderScript.ElementPredefined.RGB_565, true);
+
+            bd = (BitmapDrawable)mRes.getDrawable(R.drawable.settings);
+            mIcons[3] = mRS.allocationCreateFromBitmap(bd.getBitmap(), RenderScript.ElementPredefined.RGB_565, true);
+
+            for(int ct=0; ct < mIcons.length; ct++) {
+                mIcons[ct].uploadToTexture(0);
+                mAllocIconIDBuf[ct] = mIcons[ct].getID();
+            }
+            mAllocIconID.data(mAllocIconIDBuf);
+
+            RenderScript.Element e = mRS.elementGetPredefined(RenderScript.ElementPredefined.RGB_565);
+            mRS.typeBegin(e);
+            mRS.typeAdd(RenderScript.Dimension.X, 64);
+            mRS.typeAdd(RenderScript.Dimension.Y, 64);
+            RenderScript.Type t = mRS.typeCreate();
+            mIconPlate = mRS.allocationCreateTyped(t);
+            //t.destroy();
+            //e.destroy();
+
+            int tmp[] = new int[64 * 32];
+            for(int ct = 0; ct < (64*32); ct++) {
+                tmp[ct] = 7 | (13 << 5) | (7 << 11);
+                tmp[ct] = tmp[ct] | (tmp[ct] << 16);
+            }
+            for(int ct = 0; ct < 32; ct++) {
+                tmp[ct] = 0;
+                tmp[ct + (63*32)] = 0;
+            }
+            for(int ct = 0; ct < 64; ct++) {
+                tmp[ct * 32] = 0;
+                tmp[ct * 32 + 31] = 0;
+            }
+            mIconPlate.data(tmp);
+            Log.e("xx", "plate");
+            mIconPlate.uploadToTexture(0);
+            mIconPlate.setName("Plate");
+            mPFImages.bindTexture(mIconPlate, 0);
+        }
+
     }
 
 
 
     private void initRS() {
         mRS.scriptCBegin();
-        mRS.scriptCSetClearColor(0.0f, 0.7f, 0.0f, 1.0f);
+        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.1f, 1.0f);
         mRS.scriptCSetScript(mRes, R.raw.rollo);
         mRS.scriptCSetRoot(true);
         mScript = mRS.scriptCCreate();
@@ -141,6 +199,7 @@ public class RolloRS {
         mAllocState = mRS.allocationCreatePredefSized(
             RenderScript.ElementPredefined.USER_I32, mAllocStateBuf.length);
         mScript.bindAllocation(mAllocState, 0);
+        mScript.bindAllocation(mAllocIconID, 1);
         setPosition(0, 0);
 
         mRS.contextBindRootScript(mScript);

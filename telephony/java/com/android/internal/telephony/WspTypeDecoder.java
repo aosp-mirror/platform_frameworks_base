@@ -187,22 +187,30 @@ public class WspTypeDecoder {
     }
 
     /**
-     * Decode the "Extension-media" type for WSP pdu
-     *
-     * @param startIndex The starting position of the "Extension-media" in this pdu
-     *
-     * @return false when error(not a Extension-media) occur
-     *         return value can be retrieved by getValueString() method
-     *         length of data in pdu can be retrieved by getValue32() method
-     */
+    * Decode the "Extension-media" type for WSP PDU.
+    *
+    * @param startIndex The starting position of the "Extension-media" in this PDU.
+    *
+    * @return false on error, such as if there is no Extension-media at startIndex.
+    * Side-effects: updates stringValue (available with getValueString()), which will be
+    * null on error. The length of the data in the PDU is available with getValue32(), 0
+    * on error.
+    */
     public boolean decodeExtensionMedia(int startIndex) {
         int index = startIndex;
-        while (wspData[index] != 0) {
+        dataLength = 0;
+        stringValue = null;
+        int length = wspData.length;
+        boolean rtrn = index < length;
+
+        while (index < length && wspData[index] != 0) {
             index++;
         }
+
         dataLength  = index - startIndex + 1;
         stringValue = new String(wspData, startIndex, dataLength - 1);
-        return true;
+
+        return rtrn;
     }
 
     /**

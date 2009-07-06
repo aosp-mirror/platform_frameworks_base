@@ -722,8 +722,14 @@ public final class MediaStore
          */
         public static String keyFor(String name) {
             if (name != null)  {
+                boolean sortfirst = false;
                 if (name.equals(android.media.MediaFile.UNKNOWN_STRING)) {
                     return "\001";
+                }
+                // Check if the first character is \001. We use this to
+                // force sorting of certain special files, like the silent ringtone.
+                if (name.startsWith("\001")) {
+                    sortfirst = true;
                 }
                 name = name.trim().toLowerCase();
                 if (name.startsWith("the ")) {
@@ -753,7 +759,11 @@ public final class MediaStore
                         b.append('.');
                     }
                     name = b.toString();
-                    return DatabaseUtils.getCollationKey(name);
+                    String key = DatabaseUtils.getCollationKey(name);
+                    if (sortfirst) {
+                        key = "\001" + key;
+                    }
+                    return key;
                } else {
                     return "";
                 }
@@ -800,7 +810,7 @@ public final class MediaStore
             /**
              * The default sort order for this table
              */
-            public static final String DEFAULT_SORT_ORDER = TITLE;
+            public static final String DEFAULT_SORT_ORDER = TITLE_KEY;
 
             /**
              * Activity Action: Start SoundRecorder application.
@@ -897,7 +907,7 @@ public final class MediaStore
                 /**
                  * The default sort order for this table
                  */
-                public static final String DEFAULT_SORT_ORDER = TITLE;
+                public static final String DEFAULT_SORT_ORDER = TITLE_KEY;
 
                 /**
                  * The ID of the audio file

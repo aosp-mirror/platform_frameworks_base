@@ -31,11 +31,10 @@ import java.util.Locale;
 
 /**
  *
- * Synthesizes speech from text.
+ * Synthesizes speech from text for immediate playback or to create a sound file.
  *
- * {@hide}
  */
-//TODO #TTS# review + complete javadoc + add links to constants
+//TODO complete javadoc + add links to constants
 public class TextToSpeech {
 
     /**
@@ -118,7 +117,12 @@ public class TextToSpeech {
         public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
         public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
         public static final int CHECK_VOICE_DATA_MISSING_DATA_NO_SDCARD = -3;
-        
+
+        // return codes for a TTS engine's check data activity
+        public static final String VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
+        public static final String VOICE_DATA_FILES = "dataFiles";
+        public static final String VOICE_DATA_FILES_INFO = "dataFilesInfo";
+
         // keys for the parameters passed with speak commands
         public static final String TTS_KEY_PARAM_RATE = "rate";
         public static final String TTS_KEY_PARAM_LANGUAGE = "language";
@@ -345,54 +349,6 @@ public class TextToSpeech {
             try {
                 // TODO support extra parameters, passing cache of current parameters for the moment
                 mITts.speak(text, queueMode, mCachedParams);
-                return TTS_SUCCESS;
-            } catch (RemoteException e) {
-                // TTS died; restart it.
-                mStarted = false;
-                initTts();
-            } catch (NullPointerException e) {
-                // TTS died; restart it.
-                mStarted = false;
-                initTts();
-            } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                mStarted = false;
-                initTts();
-            }
-            return TTS_ERROR;
-        }
-    }
-
-
-    /**
-     * Speaks the IPA string using the specified queuing strategy and speech
-     * parameters. Note that the speech parameters are not universally supported
-     * by all engines and will be treated as a hint. The TTS library will try to
-     * fulfill these parameters as much as possible, but there is no guarantee
-     * that the voice used will have the properties specified.
-     *
-     * @param ipaText
-     *            The string of IPA text to be spoken.
-     * @param queueMode
-     *            The queuing strategy to use.
-     *            See TTS_QUEUE_ADD and TTS_QUEUE_FLUSH.
-     * @param params
-     *            The hashmap of speech parameters to be used.
-     *
-     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
-     *
-     * {@hide}
-     */
-    public int speakIpa(String ipaText, int queueMode, HashMap<String,String> params)
-    {
-        synchronized (mStartLock) {
-            Log.i("TTS received: ", ipaText);
-            if (!mStarted) {
-                return TTS_ERROR;
-            }
-            try {
-                // TODO support extra parameters, passing cache of current parameters for the moment
-                mITts.speakIpa(ipaText, queueMode, mCachedParams);
                 return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -731,50 +687,6 @@ public class TextToSpeech {
             try {
                 // TODO support extra parameters, passing null for the moment
                 if (mITts.synthesizeToFile(text, null, filename)){
-                    return TTS_SUCCESS;
-                }
-            } catch (RemoteException e) {
-                // TTS died; restart it.
-                mStarted = false;
-                initTts();
-            } catch (NullPointerException e) {
-                // TTS died; restart it.
-                mStarted = false;
-                initTts();
-            } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                mStarted = false;
-                initTts();
-            }
-            return TTS_ERROR;
-        }
-    }
-
-
-    /**
-     * Synthesizes the given IPA text to a file using the specified parameters.
-     *
-     * @param text
-     *            The String of text that should be synthesized
-     * @param params
-     *            A hashmap of parameters.
-     * @param filename
-     *            The string that gives the full output filename; it should be
-     *            something like "/sdcard/myappsounds/mysound.wav".
-     *
-     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
-     *
-     * {@hide}
-     */
-    public int synthesizeIpaToFile(String ipaText,
-            HashMap<String,String> params, String filename) {
-        synchronized (mStartLock) {
-            if (!mStarted) {
-                return TTS_ERROR;
-            }
-            try {
-                // TODO support extra parameters, passing null for the moment
-                if (mITts.synthesizeIpaToFile(ipaText, null, filename)){
                     return TTS_SUCCESS;
                 }
             } catch (RemoteException e) {

@@ -641,7 +641,40 @@ class CallbackProxy extends Handler {
     //--------------------------------------------------------------------------
 
     // Performance probe
+    private static final boolean PERF_PROBE = false;
     private long mWebCoreThreadTime;
+    private long mWebCoreIdleTime;
+
+    /*
+     * If PERF_PROBE is true, this block needs to be added to MessageQueue.java.
+     * startWait() and finishWait() should be called before and after wait().
+
+    private WaitCallback mWaitCallback = null;
+    public static interface WaitCallback {
+        void startWait();
+        void finishWait();
+    }
+    public final void setWaitCallback(WaitCallback callback) {
+        mWaitCallback = callback;
+    }
+    */
+
+    // un-comment this block if PERF_PROBE is true
+    /*
+    private IdleCallback mIdleCallback = new IdleCallback();
+
+    private final class IdleCallback implements MessageQueue.WaitCallback {
+        private long mStartTime = 0;
+
+        public void finishWait() {
+            mWebCoreIdleTime += SystemClock.uptimeMillis() - mStartTime;
+        }
+
+        public void startWait() {
+            mStartTime = SystemClock.uptimeMillis();
+        }
+    }
+    */
 
     public void onPageStarted(String url, Bitmap favicon) {
         // Do an unsynchronized quick check to avoid posting if no callback has
@@ -650,9 +683,12 @@ class CallbackProxy extends Handler {
             return;
         }
         // Performance probe
-        if (false) {
+        if (PERF_PROBE) {
             mWebCoreThreadTime = SystemClock.currentThreadTimeMillis();
+            mWebCoreIdleTime = 0;
             Network.getInstance(mContext).startTiming();
+            // un-comment this if PERF_PROBE is true
+//            Looper.myQueue().setWaitCallback(mIdleCallback);
         }
         Message msg = obtainMessage(PAGE_STARTED);
         msg.obj = favicon;
@@ -667,10 +703,12 @@ class CallbackProxy extends Handler {
             return;
         }
         // Performance probe
-        if (false) {
+        if (PERF_PROBE) {
+            // un-comment this if PERF_PROBE is true
+//            Looper.myQueue().setWaitCallback(null);
             Log.d("WebCore", "WebCore thread used " + 
                     (SystemClock.currentThreadTimeMillis() - mWebCoreThreadTime)
-                    + " ms");
+                    + " ms and idled " + mWebCoreIdleTime + " ms");
             Network.getInstance(mContext).stopTiming();
         }
         Message msg = obtainMessage(PAGE_FINISHED, url);

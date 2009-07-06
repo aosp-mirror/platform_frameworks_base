@@ -38,7 +38,7 @@ class MtpdHelper {
         addPppArguments(vpnService, args, serverIp, username, password);
 
         AndroidServiceProxy mtpd = vpnService.startService(MTPD_SERVICE);
-        mtpd.sendCommand2(args.toArray(new String[args.size()]));
+        mtpd.sendCommand(args.toArray(new String[args.size()]));
     }
 
     private static void addPppArguments(VpnService<?> vpnService,

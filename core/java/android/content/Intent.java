@@ -1085,6 +1085,27 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
     
+    /**
+     * Activity Action: Setup wizard to launch after a platform update.  This
+     * activity should have a string meta-data field associated with it,
+     * {@link #METADATA_SETUP_VERSION}, which defines the current version of
+     * the platform for setup.  The activity will be launched only if
+     * {@link android.provider.Settings.Secure#LAST_SETUP_SHOWN} is not the
+     * same value.
+     * <p>Input: Nothing.
+     * <p>Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
+    
+    /**
+     * A string associated with a {@link #ACTION_UPGRADE_SETUP} activity
+     * describing the last run version of the platform that was setup.
+     * @hide
+     */
+    public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
@@ -1289,6 +1310,13 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
+    /**
+     * Broadcast Action:  Indicates the battery is now okay after being low.
+     * This will be sent after {@link #ACTION_BATTERY_LOW} once the battery has
+     * gone back up to an okay state.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_BATTERY_OKAY = "android.intent.action.BATTERY_OKAY";
     /**
      * Broadcast Action:  External power has been connected to the device.
      * This is intended for applications that wish to register specifically to this notification.

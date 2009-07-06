@@ -242,8 +242,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // Reset any stored values from last time dialog was shown.
         mStoredComponentName = null;
         mStoredAppSearchData = null;
-        
-        return doShow(initialQuery, selectInitialQuery, componentName, appSearchData, globalSearch);
+
+        boolean success = doShow(initialQuery, selectInitialQuery, componentName, appSearchData,
+                globalSearch);
+        if (success) {
+            // Display the drop down as soon as possible instead of waiting for the rest of the
+            // pending UI stuff to get done, so that things appear faster to the user.
+            mSearchAutoComplete.showDropDownAfterLayout();
+        }
+        return success;
     }
     
     /**

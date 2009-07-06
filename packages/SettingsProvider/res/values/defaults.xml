@@ -42,4 +42,7 @@
     <bool name="def_usb_mass_storage_enabled">true</bool>
     <bool name="def_wifi_on">false</bool>
     <bool name="def_networks_available_notification_on">true</bool>
+    
+    <bool name="def_backup_enabled">false</bool>
+    <string name="def_backup_transport"></string>
 </resources>

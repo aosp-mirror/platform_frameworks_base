@@ -111,6 +111,17 @@ public class LocalTransport extends IBackupTransport.Stub {
         }
     }
 
+    public boolean clearBackupData(PackageInfo packageInfo) {
+        if (DEBUG) Log.v(TAG, "clearBackupData() pkg=" + packageInfo.packageName);
+
+        File packageDir = new File(mDataDir, packageInfo.packageName);
+        for (File f : packageDir.listFiles()) {
+            f.delete();
+        }
+        packageDir.delete();
+        return true;
+    }
+
     public boolean finishBackup() throws RemoteException {
         if (DEBUG) Log.v(TAG, "finishBackup()");
         return true;

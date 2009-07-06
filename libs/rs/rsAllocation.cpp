@@ -164,6 +164,7 @@ RsAllocation rsi_AllocationCreateTyped(Context *rsc, RsType vtype)
     const Type * type = static_cast<const Type *>(vtype);
 
     Allocation * alloc = new Allocation(type);
+    alloc->incRef();
     return alloc;
 }
 

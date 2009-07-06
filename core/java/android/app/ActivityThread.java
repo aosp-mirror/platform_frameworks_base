@@ -3981,7 +3981,10 @@ public final class ActivityThread {
             ProviderRecord pr = mProviderMap.get(name);
             if (pr.mProvider.asBinder() == provider.asBinder()) {
                 Log.i(TAG, "Removing dead content provider: " + name);
-                mProviderMap.remove(name);
+                ProviderRecord removed = mProviderMap.remove(name);
+                if (removed != null) {
+                    removed.mProvider.asBinder().unlinkToDeath(removed, 0);
+                }
             }
         }
     }
@@ -3990,7 +3993,10 @@ public final class ActivityThread {
         ProviderRecord pr = mProviderMap.get(name);
         if (pr.mProvider.asBinder() == provider.asBinder()) {
             Log.i(TAG, "Removing dead content provider: " + name);
-            mProviderMap.remove(name);
+            ProviderRecord removed = mProviderMap.remove(name);
+            if (removed != null) {
+                removed.mProvider.asBinder().unlinkToDeath(removed, 0);
+            }
         }
     }
 

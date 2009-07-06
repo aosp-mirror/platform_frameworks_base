@@ -94,7 +94,6 @@ public final class SIMRecords extends IccRecords {
     byte[] mEfCfis = null;
 
 
-    String spn;
     int spnDisplayCondition;
     // Numeric network codes listed in TS 51.011 EF[SPDI]
     ArrayList<String> spdiNetworks = null;

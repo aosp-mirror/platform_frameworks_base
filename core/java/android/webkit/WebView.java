@@ -308,6 +308,9 @@ public class WebView extends AbsoluteLayout
     // more key events.
     private int mTextGeneration;
 
+    // Used by WebViewCore to create child views.
+    /* package */ final ViewManager mViewManager;
+
     // The list of loaded plugins.
     private static PluginList sPluginList;
 
@@ -346,6 +349,7 @@ public class WebView extends AbsoluteLayout
      * Helper class to get velocity for fling
      */
     VelocityTracker mVelocityTracker;
+    private int mMaximumFling;
 
     /**
      * Touch mode
@@ -710,6 +714,8 @@ public class WebView extends AbsoluteLayout
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new Scroller(context);
 
+        mViewManager = new ViewManager(this);
+
         mZoomButtonsController = new ZoomButtonsController(this);
         mZoomButtonsController.setOnZoomListener(mZoomListener);
         // ZoomButtonsController positions the buttons at the bottom, but in
@@ -749,7 +755,8 @@ public class WebView extends AbsoluteLayout
         setClickable(true);
         setLongClickable(true);
 
-        final int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        final ViewConfiguration configuration = ViewConfiguration.get(getContext());
+        final int slop = configuration.getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
         mMinLockSnapReverseDistance = slop;
         final float density = getContext().getResources().getDisplayMetrics().density;
@@ -765,6 +772,7 @@ public class WebView extends AbsoluteLayout
         DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
         mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
         mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+        mMaximumFling = configuration.getScaledMaximumFlingVelocity();
     }
 
     /* package */void updateDefaultZoomDensity(int zoomDensity) {
@@ -1688,7 +1696,7 @@ public class WebView extends AbsoluteLayout
         return Math.round(x * mInvActualScale);
     }
 
-    private int contentToView(int x) {
+    /*package*/ int contentToView(int x) {
         return Math.round(x * mActualScale);
     }
 
@@ -1778,6 +1786,9 @@ public class WebView extends AbsoluteLayout
                 }
                 mActualScale = scale;
                 mInvActualScale = 1 / scale;
+
+                // Scale all the child views
+                mViewManager.scaleAll();
 
                 // as we don't have animation for scaling, don't do animation
                 // for scrolling, as it causes weird intermediate state
@@ -2716,6 +2727,8 @@ public class WebView extends AbsoluteLayout
                         - (width >> 1), (int) (scrollFrame.centerY()
                         * mActualScale) - (height >> 1));
                 mTouchMode = TOUCH_DONE_MODE;
+                // Show all the child views once we are done.
+                mViewManager.showAll();
             } else {
                 mTouchMode = SCROLL_ZOOM_OUT;
             }
@@ -2879,6 +2892,8 @@ public class WebView extends AbsoluteLayout
             mTouchMode = TOUCH_DONE_MODE;
             return;
         }
+        // Hide the child views while in this mode.
+        mViewManager.hideAll();
         startZoomScrollOut();
         mTouchMode = SCROLL_ZOOM_ANIMATION_OUT;
         invalidate();
@@ -3625,6 +3640,7 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
+
         sendOurVisibleRect();
     }
 
@@ -4296,7 +4312,7 @@ public class WebView extends AbsoluteLayout
         int maxX = Math.max(computeHorizontalScrollRange() - getViewWidth(), 0);
         int maxY = Math.max(computeVerticalScrollRange() - getViewHeight(), 0);
 
-        mVelocityTracker.computeCurrentVelocity(1000);
+        mVelocityTracker.computeCurrentVelocity(1000, mMaximumFling);
         int vx = (int) mVelocityTracker.getXVelocity();
         int vy = (int) mVelocityTracker.getYVelocity();
 
@@ -4502,6 +4518,15 @@ public class WebView extends AbsoluteLayout
     // address, or phone number
     private void overrideLoading(String url) {
         mCallbackProxy.uiOverrideUrlLoading(url);
+    }
+
+    // called by JNI
+    private void sendPluginState(int state) {
+        WebViewCore.PluginStateData psd = new WebViewCore.PluginStateData();
+        psd.mFrame = nativeCursorFramePointer();
+        psd.mNode = nativeCursorNodePointer();
+        psd.mState = state;
+        mWebViewCore.sendMessage(EventHub.PLUGIN_STATE, psd);
     }
 
     @Override
@@ -4895,8 +4920,8 @@ public class WebView extends AbsoluteLayout
                     // sure the text edit box is still on the  screen.
                     if (inEditingMode() && nativeCursorIsTextInput()) {
                         mWebTextView.bringIntoView();
+                        rebuildWebTextView();
                     }
-                    rebuildWebTextView();
                     break;
                 case CLEAR_TEXT_ENTRY:
                     clearTextEntry();
@@ -5386,7 +5411,7 @@ public class WebView extends AbsoluteLayout
         nativeUpdateCachedTextfield(updatedText, mTextGeneration);
     }
 
-    private native void     nativeClearCursor();
+    /* package */ native void nativeClearCursor();
     private native void     nativeCreate(int ptr);
     private native int      nativeCursorFramePointer();
     private native Rect     nativeCursorNodeBounds();
@@ -5423,6 +5448,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native int nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
     private native int      nativeFocusCandidateTextSize();
+    /* package */ native int nativeFocusNodePointer();
     private native Rect     nativeGetCursorRingBounds();
     private native Region   nativeGetSelection();
     private native boolean  nativeHasCursorNode();
