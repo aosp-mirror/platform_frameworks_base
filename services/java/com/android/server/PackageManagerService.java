@@ -1921,7 +1921,7 @@ class PackageManagerService extends IPackageManager.Stub {
     
     private int performDexOptLI(PackageParser.Package pkg, boolean forceDex) {
         boolean performed = false;
-        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
+        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0 && mInstaller != null) {
             String path = pkg.mScanPath;
             int ret = 0;
             try {
