@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceFlinger"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -23,18 +21,23 @@
 
 #include <cutils/properties.h>
 
+#include <utils/RefBase.h>
 #include <utils/Log.h>
 
-#include <ui/EGLDisplaySurface.h>
+#include <ui/PixelFormat.h>
+#include <ui/FramebufferNativeWindow.h>
 
 #include <GLES/gl.h>
+#include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include <pixelflinger/pixelflinger.h>
 
 #include "DisplayHardware/DisplayHardware.h"
 
 #include <hardware/copybit.h>
 #include <hardware/overlay.h>
+#include <hardware/gralloc.h>
 
 using namespace android;
 
@@ -108,17 +111,28 @@ PixelFormat DisplayHardware::getFormat() const  { return mFormat; }
 
 void DisplayHardware::init(uint32_t dpy)
 {
+    hw_module_t const* module;
+
+    mNativeWindow = new FramebufferNativeWindow();
+
+    mOverlayEngine = NULL;
+    if (hw_get_module(OVERLAY_HARDWARE_MODULE_ID, &module) == 0) {
+        overlay_control_open(module, &mOverlayEngine);
+    }
+
+    framebuffer_device_t const * fbDev = mNativeWindow->getDevice();
+
+    PixelFormatInfo fbFormatInfo;
+    getPixelFormatInfo(PixelFormat(fbDev->format), &fbFormatInfo);
+
     // initialize EGL
     const EGLint attribs[] = {
-            EGL_RED_SIZE,       5,
-            EGL_GREEN_SIZE,     6,
-            EGL_BLUE_SIZE,      5,
+            EGL_BUFFER_SIZE,    fbFormatInfo.bitsPerPixel,
             EGL_DEPTH_SIZE,     0,
             EGL_NONE
     };
     EGLint w, h, dummy;
-    EGLint numConfigs, n;
-    EGLConfig config;
+    EGLint numConfigs=0, n=0;
     EGLSurface surface;
     EGLContext context;
     mFlags = 0;
@@ -129,7 +143,32 @@ void DisplayHardware::init(uint32_t dpy)
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(display, NULL, NULL);
     eglGetConfigs(display, NULL, 0, &numConfigs);
-    eglChooseConfig(display, attribs, &config, 1, &n);
+
+    // Get all the "potential match" configs...
+    EGLConfig* const configs = new EGLConfig[numConfigs];
+    eglChooseConfig(display, attribs, configs, numConfigs, &n);
+    LOGE_IF(n<=0, "no EGLConfig available!");
+    EGLConfig config = configs[0];
+    if (n > 1) {
+        // if there is more than one candidate, go through the list
+        // and pick one that matches our framebuffer format
+        int fbSzA = fbFormatInfo.getSize(PixelFormatInfo::INDEX_ALPHA);
+        int fbSzR = fbFormatInfo.getSize(PixelFormatInfo::INDEX_RED);
+        int fbSzG = fbFormatInfo.getSize(PixelFormatInfo::INDEX_GREEN);
+        int fbSzB = fbFormatInfo.getSize(PixelFormatInfo::INDEX_BLUE); 
+        for (int i=0 ; i<n ; i++) {
+            EGLint r,g,b,a;
+            eglGetConfigAttrib(display, configs[i], EGL_RED_SIZE,   &r);
+            eglGetConfigAttrib(display, configs[i], EGL_GREEN_SIZE, &g);
+            eglGetConfigAttrib(display, configs[i], EGL_BLUE_SIZE,  &b);
+            eglGetConfigAttrib(display, configs[i], EGL_ALPHA_SIZE, &a);
+            if (fbSzA == a && fbSzR == r && fbSzG == g && fbSzB  == b) {
+                config = configs[i];
+                break;
+            }
+        }
+    }
+    delete [] configs;
 
     /*
      * Gather EGL extensions
@@ -145,12 +184,11 @@ void DisplayHardware::init(uint32_t dpy)
     LOGI("extensions: %s", egl_extensions);
     LOGI("Client API: %s", eglQueryString(display, EGL_CLIENT_APIS)?:"Not Supported");
 
-    // TODO: get this from the devfb driver (probably should be HAL module)
-    mFlags |= SWAP_RECTANGLE_EXTENSION;
-    
-    // TODO: get the real "update_on_demand" behavior (probably should be HAL module)
-    mFlags |= UPDATE_ON_DEMAND;
 
+    if (mNativeWindow->isUpdateOnDemand()) {
+        mFlags |= UPDATE_ON_DEMAND;
+    }
+    
     if (eglGetConfigAttrib(display, config, EGL_CONFIG_CAVEAT, &dummy) == EGL_TRUE) {
         if (dummy == EGL_SLOW_CONFIG)
             mFlags |= SLOW_CONFIG;
@@ -160,33 +198,29 @@ void DisplayHardware::init(uint32_t dpy)
      * Create our main surface
      */
 
-    mDisplaySurface = new EGLDisplaySurface();
-
-    surface = eglCreateWindowSurface(display, config, mDisplaySurface.get(), NULL);
-    //checkEGLErrors("eglCreateDisplaySurfaceANDROID");
+    surface = eglCreateWindowSurface(display, config, mNativeWindow.get(), NULL);
+    checkEGLErrors("eglCreateWindowSurface");
 
     if (eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &dummy) == EGL_TRUE) {
         if (dummy == EGL_BUFFER_PRESERVED) {
             mFlags |= BUFFER_PRESERVED;
         }
     }
-    
-    GLint value = EGL_UNKNOWN;
-    eglQuerySurface(display, surface, EGL_HORIZONTAL_RESOLUTION, &value);
-    if (value == EGL_UNKNOWN) {
-        mDpiX = 160.0f;
-    } else {
-        mDpiX = 25.4f * float(value)/EGL_DISPLAY_SCALING;
+
+#ifdef EGL_ANDROID_swap_rectangle    
+    if (strstr(egl_extensions, "EGL_ANDROID_swap_rectangle")) {
+        mFlags |= SWAP_RECTANGLE;
     }
-    value = EGL_UNKNOWN;
-    eglQuerySurface(display, surface, EGL_VERTICAL_RESOLUTION, &value);
-    if (value == EGL_UNKNOWN) {
-        mDpiY = 160.0f;
-    } else {
-        mDpiY = 25.4f * float(value)/EGL_DISPLAY_SCALING;
-    }
-    mRefreshRate = 60.f;    // TODO: get the real refresh rate 
+    // when we have the choice between UPDATE_ON_DEMAND and SWAP_RECTANGLE
+    // choose UPDATE_ON_DEMAND, which is more efficient
+    if (mFlags & UPDATE_ON_DEMAND)
+        mFlags &= ~SWAP_RECTANGLE;
+#endif
     
+
+    mDpiX = mNativeWindow->xdpi;
+    mDpiX = mNativeWindow->ydpi;
+    mRefreshRate = fbDev->fps; 
     
     char property[PROPERTY_VALUE_MAX];
     /* Read density from build-specific ro.sf.lcd_density property
@@ -230,7 +264,10 @@ void DisplayHardware::init(uint32_t dpy)
     if (strstr(gl_extensions, "GL_OES_draw_texture")) {
         mFlags |= DRAW_TEXTURE_EXTENSION;
     }
-    if (strstr(gl_extensions, "GL_ANDROID_direct_texture")) {
+    if (strstr( gl_extensions, "GL_OES_EGL_image") &&
+        (strstr(egl_extensions, "EGL_KHR_image_base") || 
+                strstr(egl_extensions, "EGL_KHR_image")) &&
+        strstr(egl_extensions, "EGL_ANDROID_image_native_buffer")) {
         mFlags |= DIRECT_TEXTURE;
     }
 
@@ -241,19 +278,8 @@ void DisplayHardware::init(uint32_t dpy)
     mConfig  = config;
     mSurface = surface;
     mContext = context;
-    mFormat  = GGL_PIXEL_FORMAT_RGB_565;
-    
-    hw_module_t const* module;
-
-    mBlitEngine = NULL;
-    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
-        copybit_open(module, &mBlitEngine);
-    }
-
-    mOverlayEngine = NULL;
-    if (hw_get_module(OVERLAY_HARDWARE_MODULE_ID, &module) == 0) {
-        overlay_control_open(module, &mOverlayEngine);
-    }
+    mFormat  = fbDev->format;
+    mPageFlipCount = 0;
 }
 
 /*
@@ -267,7 +293,6 @@ void DisplayHardware::fini()
 {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglTerminate(mDisplay);
-    copybit_close(mBlitEngine);
     overlay_control_close(mOverlayEngine);
 }
 
@@ -281,28 +306,8 @@ void DisplayHardware::acquireScreen() const
     DisplayHardwareBase::acquireScreen();
 }
 
-void DisplayHardware::getDisplaySurface(copybit_image_t* img) const
-{
-    img->w      = mDisplaySurface->stride;
-    img->h      = mDisplaySurface->height;
-    img->format = mDisplaySurface->format;
-    img->offset = mDisplaySurface->offset;
-    img->base   = (void*)mDisplaySurface->base;
-    img->fd     = mDisplaySurface->fd;
-}
-
-void DisplayHardware::getDisplaySurface(GGLSurface* fb) const
-{
-    fb->version= sizeof(GGLSurface);
-    fb->width  = mDisplaySurface->width;
-    fb->height = mDisplaySurface->height;
-    fb->stride = mDisplaySurface->stride;
-    fb->format = mDisplaySurface->format;
-    fb->data   = (GGLubyte*)mDisplaySurface->base + mDisplaySurface->offset;
-}
-
 uint32_t DisplayHardware::getPageFlipCount() const {
-    return mDisplaySurface->getPageFlipCount();
+    return mPageFlipCount;
 }
 
 /*
@@ -316,21 +321,20 @@ void DisplayHardware::flip(const Region& dirty) const
     EGLDisplay dpy = mDisplay;
     EGLSurface surface = mSurface;
 
-    Region newDirty(dirty);
-    newDirty.andSelf(Rect(mWidth, mHeight));
-
-    if (mFlags & BUFFER_PRESERVED) {
-        const Region copyback(mDirty.subtract(newDirty));
-        mDirty = newDirty;
-        mDisplaySurface->copyFrontToBack(copyback);
-    } 
-
-    if (mFlags & SWAP_RECTANGLE_EXTENSION) {
-        const Rect& b(newDirty.bounds());
-        mDisplaySurface->setSwapRectangle(
+#ifdef EGL_ANDROID_swap_rectangle    
+    if (mFlags & SWAP_RECTANGLE) {
+        const Region newDirty(dirty.intersect(bounds()));
+        const Rect b(newDirty.getBounds());
+        eglSetSwapRectangleANDROID(dpy, surface,
                 b.left, b.top, b.width(), b.height());
+    } 
+#endif
+    
+    if (mFlags & UPDATE_ON_DEMAND) {
+        mNativeWindow->setUpdateRectangle(dirty.getBounds());
     }
-
+    
+    mPageFlipCount++;
     eglSwapBuffers(dpy, surface);
     checkEGLErrors("eglSwapBuffers");
 
@@ -347,12 +351,4 @@ uint32_t DisplayHardware::getFlags() const
 void DisplayHardware::makeCurrent() const
 {
     eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
-}
-
-void DisplayHardware::copyFrontToImage(const copybit_image_t& front) const {
-    mDisplaySurface->copyFrontToImage(front);
-}
-
-void DisplayHardware::copyBackToImage(const copybit_image_t& front) const {
-    mDisplaySurface->copyBackToImage(front);
 }

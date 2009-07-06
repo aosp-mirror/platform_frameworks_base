@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_LAYER_ORIENTATION_ANIM_H
-#define ANDROID_LAYER_ORIENTATION_ANIM_H
+#ifndef ANDROID_LAYER_ORIENTATION_ANIM_ROTATE_H
+#define ANDROID_LAYER_ORIENTATION_ANIM_ROTATE_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -30,19 +30,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 class OrientationAnimation;
 
-
-class LayerOrientationAnimBase : public LayerBase
-{
-public:
-    LayerOrientationAnimBase(SurfaceFlinger* flinger, DisplayID display)
-        : LayerBase(flinger, display) {
-    }
-    virtual void onOrientationCompleted() = 0;
-};
-
-// ---------------------------------------------------------------------------
-
-class LayerOrientationAnim : public LayerOrientationAnimBase
+class LayerOrientationAnimRotate : public LayerOrientationAnimBase
 {
 public:    
     static const uint32_t typeInfo;
@@ -50,11 +38,11 @@ public:
     virtual char const* getTypeID() const { return typeID; }
     virtual uint32_t getTypeInfo() const { return typeInfo; }
     
-                LayerOrientationAnim(SurfaceFlinger* flinger, DisplayID display,
+    LayerOrientationAnimRotate(SurfaceFlinger* flinger, DisplayID display,
                         OrientationAnimation* anim, 
-                        const LayerBitmap& bitmapIn,
-                        const LayerBitmap& bitmapOut);
-        virtual ~LayerOrientationAnim();
+                        const sp<Buffer>& bitmapIn,
+                        const sp<Buffer>& bitmapOut);
+        virtual ~LayerOrientationAnimRotate();
 
             void onOrientationCompleted();
 
@@ -64,49 +52,26 @@ public:
     virtual bool needsBlending() const;
     virtual bool isSecure() const       { return false; }
 private:
-    void drawScaled(float scale, float alphaIn, float alphaOut) const;
-
-    class Lerp {
-        float in;
-        float outMinusIn;
-    public:
-        Lerp() : in(0), outMinusIn(0) { }
-        Lerp(float in, float out) : in(in), outMinusIn(out-in) { }
-        float getIn() const { return in; };
-        float getOut() const { return in + outMinusIn; }
-        void set(float in, float out) { 
-            this->in = in; 
-            this->outMinusIn = out-in; 
-        }
-        void setIn(float in) { 
-            this->in = in; 
-        }
-        void setOut(float out) { 
-            this->outMinusIn = out - this->in; 
-        }
-        float operator()(float t) const { 
-            return outMinusIn*t + in; 
-        }
-    };
+    void drawScaled(float angle, float scale, float alpha) const;
     
     OrientationAnimation* mAnim;
-    LayerBitmap mBitmapIn;
-    LayerBitmap mBitmapOut;
+    sp<Buffer> mBitmapIn;
+    sp<Buffer> mBitmapOut;
     nsecs_t mStartTime;
     nsecs_t mFinishTime;
     bool mOrientationCompleted;
+    int mOriginalTargetOrientation;
     mutable bool mFirstRedraw;
     mutable float mLastNormalizedTime;
+    mutable float mLastAngle;
+    mutable float mLastScale;
     mutable GLuint  mTextureName;
     mutable GLuint  mTextureNameIn;
     mutable bool mNeedsBlending;
-    
-    mutable Lerp mAlphaInLerp;
-    mutable Lerp mAlphaOutLerp;
 };
 
 // ---------------------------------------------------------------------------
 
 }; // namespace android
 
-#endif // ANDROID_LAYER_ORIENTATION_ANIM_H
+#endif // ANDROID_LAYER_ORIENTATION_ANIM_ROTATE_H

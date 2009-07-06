@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <utils/Debug.h>
 #include <utils/threads.h>
 
 namespace android {
@@ -32,16 +33,12 @@ namespace android {
 
 struct surface_info_t { // 4 longs, 16 bytes
     enum {
-        eBufferDirty    = 0x01
+        eBufferDirty    = 0x01,
+        eNeedNewBuffer  = 0x02
     };
-    uint16_t    w;
-    uint16_t    h;
-    uint16_t    stride;
-    uint16_t    bpr;
-    uint16_t    reserved;
-    uint8_t     format;
+    uint8_t     reserved[11];
     uint8_t     flags;
-    ssize_t     bits_offset;
+    status_t    status;
 };
 
 // ---------------------------------------------------------------------------
@@ -110,8 +107,6 @@ struct per_client_cblk_t   // 4KB max
         INSPECT  = 0x00000002
     };
 
-    per_client_cblk_t();
-
     // these functions are used by the clients
     status_t validate(size_t i) const;
     int32_t lock_layer(size_t i, uint32_t flags);
@@ -138,30 +133,19 @@ struct display_cblk_t
 
 struct surface_flinger_cblk_t   // 4KB max
 {
-    surface_flinger_cblk_t();
-    
     uint8_t         connected;
     uint8_t         reserved[3];
     uint32_t        pad[7];
- 
     display_cblk_t  displays[NUM_DISPLAY_MAX];
 };
 
 // ---------------------------------------------------------------------------
 
-template<bool> struct CTA;
-template<> struct CTA<true> { };
+COMPILE_TIME_ASSERT(sizeof(layer_cblk_t) == 128)
+COMPILE_TIME_ASSERT(sizeof(per_client_cblk_t) <= 4096)
+COMPILE_TIME_ASSERT(sizeof(surface_flinger_cblk_t) <= 4096)
 
-// compile-time assertions. just to avoid catastrophes.
-inline void compile_time_asserts() {
-    CTA<sizeof(layer_cblk_t) == 128> sizeof__layer_cblk_t__eq_128;
-    (void)sizeof__layer_cblk_t__eq_128; // we don't want a warning
-    CTA<sizeof(per_client_cblk_t) <= 4096> sizeof__per_client_cblk_t__le_4096;
-    (void)sizeof__per_client_cblk_t__le_4096;  // we don't want a warning
-    CTA<sizeof(surface_flinger_cblk_t) <= 4096> sizeof__surface_flinger_cblk_t__le_4096;
-    (void)sizeof__surface_flinger_cblk_t__le_4096;  // we don't want a warning
-}
-
+// ---------------------------------------------------------------------------
 }; // namespace android
 
 #endif // ANDROID_UI_SHARED_STATE_H

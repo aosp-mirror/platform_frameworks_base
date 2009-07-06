@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceFlinger"
-
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
 
 #include <cutils/properties.h>
+#include <cutils/native_handle.h>
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
 
 #include <ui/PixelFormat.h>
-#include <ui/EGLDisplaySurface.h>
+#include <ui/Surface.h>
 
 #include "clz.h"
 #include "Layer.h"
 #include "LayerBitmap.h"
 #include "SurfaceFlinger.h"
-#include "VRamHeap.h"
 #include "DisplayHardware/DisplayHardware.h"
 
 
@@ -49,13 +47,12 @@ const char* const Layer::typeID = "Layer";
 
 // ---------------------------------------------------------------------------
 
-Layer::Layer(SurfaceFlinger* flinger, DisplayID display, Client* c, int32_t i)
+Layer::Layer(SurfaceFlinger* flinger, DisplayID display, const sp<Client>& c, int32_t i)
     :   LayerBaseClient(flinger, display, c, i),
         mSecure(false),
         mFrontBufferIndex(1),
         mNeedsBlending(true),
-        mResizeTransactionDone(false),
-        mTextureName(-1U), mTextureWidth(0), mTextureHeight(0)
+        mResizeTransactionDone(false)
 {
     // no OpenGL operation is possible here, since we might not be
     // in the OpenGL thread.
@@ -63,12 +60,25 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display, Client* c, int32_t i)
 
 Layer::~Layer()
 {
-    client->free(clientIndex());
-    // this should always be called from the OpenGL thread
-    if (mTextureName != -1U) {
-        //glDeleteTextures(1, &mTextureName);
-        deletedTextures.add(mTextureName);
+    destroy();
+    // the actual buffers will be destroyed here
+}
+
+void Layer::destroy()
+{
+    for (int i=0 ; i<NUM_BUFFERS ; i++) {
+        if (mTextures[i].name != -1U) {
+            glDeleteTextures(1, &mTextures[i].name);
+            mTextures[i].name = -1U;
+        }
+        if (mTextures[i].image != EGL_NO_IMAGE_KHR) {
+            EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+            eglDestroyImageKHR(dpy, mTextures[i].image);
+            mTextures[i].image = EGL_NO_IMAGE_KHR;
+        }
+        mBuffers[i].free();
     }
+    mSurface.clear();
 }
 
 void Layer::initStates(uint32_t w, uint32_t h, uint32_t flags)
@@ -79,148 +89,206 @@ void Layer::initStates(uint32_t w, uint32_t h, uint32_t flags)
         lcblk->flags |= eNoCopyBack;
 }
 
-sp<LayerBaseClient::Surface> Layer::getSurface() const
+sp<LayerBaseClient::Surface> Layer::createSurface() const
 {
     return mSurface;
 }
 
-status_t Layer::setBuffers( Client* client,
-                            uint32_t w, uint32_t h,
+status_t Layer::ditch()
+{
+    // the layer is not on screen anymore. free as much resources as possible
+    destroy();
+    return NO_ERROR;
+}
+
+status_t Layer::setBuffers( uint32_t w, uint32_t h,
                             PixelFormat format, uint32_t flags)
 {
     PixelFormatInfo info;
     status_t err = getPixelFormatInfo(format, &info);
     if (err) return err;
 
-    // TODO: if eHardware is explicitly requested, we should fail
-    // on systems where we can't allocate memory that can be used with
-    // DMA engines for instance.
-    
-    // FIXME: we always ask for hardware for now (this should come from copybit)
-    flags |= ISurfaceComposer::eHardware;
+    uint32_t bufferFlags = 0;
+    if (flags & ISurfaceComposer::eGPU)
+        bufferFlags |= Buffer::GPU;
 
-    const uint32_t memory_flags = flags & 
-            (ISurfaceComposer::eGPU | 
-             ISurfaceComposer::eHardware | 
-             ISurfaceComposer::eSecure);
-    
-    // pixel-alignment. the final alignment may be bigger because
-    // we always force a 4-byte aligned bpr.
-    uint32_t alignment = 1;
+    if (flags & ISurfaceComposer::eSecure)
+        bufferFlags |= Buffer::SECURE;
 
-    if ((flags & ISurfaceComposer::eGPU) && (mFlinger->getGPU() != 0)) {
-        // FIXME: this value should come from the h/w
-        alignment = 8; 
+    /* FIXME we need this code for msm7201A
+    if (bufferFlags & Buffer::GPU) {
         // FIXME: this is msm7201A specific, as its GPU only supports
         // BGRA_8888.
         if (format == PIXEL_FORMAT_RGBA_8888) {
             format = PIXEL_FORMAT_BGRA_8888;
         }
     }
+    */
 
-    mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
+    mSecure = (bufferFlags & Buffer::SECURE) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
-    sp<MemoryDealer> allocators[2];
     for (int i=0 ; i<2 ; i++) {
-        allocators[i] = client->createAllocator(memory_flags);
-        if (allocators[i] == 0)
-            return NO_MEMORY;
-        mBuffers[i].init(allocators[i]);
-        int err = mBuffers[i].setBits(w, h, alignment, format, LayerBitmap::SECURE_BITS);
-        if (err != NO_ERROR)
+        err = mBuffers[i].init(lcblk->surface + i, w, h, format, bufferFlags);
+        if (err != NO_ERROR) {
             return err;
-        mBuffers[i].clear(); // clear the bits for security
-        mBuffers[i].getInfo(lcblk->surface + i);
+        }
     }
-
-    mSurface = new Surface(clientIndex(),
-            allocators[0]->getMemoryHeap(),
-            allocators[1]->getMemoryHeap(),
-            mIdentity);
-
+    mSurface = new SurfaceLayer(mFlinger, clientIndex(), this);
     return NO_ERROR;
 }
 
 void Layer::reloadTexture(const Region& dirty)
 {
-    if (UNLIKELY(mTextureName == -1U)) {
-        // create the texture name the first time
-        // can't do that in the ctor, because it runs in another thread.
-        mTextureName = createTexture();
+    const sp<Buffer>& buffer(frontBuffer().getBuffer());
+    if (LIKELY(mFlags & DisplayHardware::DIRECT_TEXTURE)) {
+        int index = mFrontBufferIndex;
+        if (LIKELY(!mTextures[index].dirty)) {
+            glBindTexture(GL_TEXTURE_2D, mTextures[index].name);
+        } else {
+            // we need to recreate the texture
+            EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+            
+            // create the new texture name if needed
+            if (UNLIKELY(mTextures[index].name == -1U)) {
+                mTextures[index].name = createTexture();
+            } else {
+                glBindTexture(GL_TEXTURE_2D, mTextures[index].name);
+            }
+
+            // free the previous image
+            if (mTextures[index].image != EGL_NO_IMAGE_KHR) {
+                eglDestroyImageKHR(dpy, mTextures[index].image);
+                mTextures[index].image = EGL_NO_IMAGE_KHR;
+            }
+            
+            // construct an EGL_NATIVE_BUFFER_ANDROID
+            android_native_buffer_t* clientBuf = buffer->getNativeBuffer();
+            
+            // create the new EGLImageKHR
+            const EGLint attrs[] = { 
+                    EGL_IMAGE_PRESERVED_KHR,    EGL_TRUE, 
+                    EGL_NONE,                   EGL_NONE 
+            };
+            mTextures[index].image = eglCreateImageKHR(
+                    dpy, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
+                    (EGLClientBuffer)clientBuf, attrs);
+
+            LOGE_IF(mTextures[index].image == EGL_NO_IMAGE_KHR,
+                    "eglCreateImageKHR() failed. err=0x%4x",
+                    eglGetError());
+            
+            if (mTextures[index].image != EGL_NO_IMAGE_KHR) {
+                glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, 
+                        (GLeglImageOES)mTextures[index].image);
+                GLint error = glGetError();
+                if (UNLIKELY(error != GL_NO_ERROR)) {
+                    // this failed, for instance, because we don't support
+                    // NPOT.
+                    // FIXME: do something!
+                    mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
+                } else {
+                    // Everything went okay!
+                    mTextures[index].dirty  = false;
+                    mTextures[index].width  = clientBuf->width;
+                    mTextures[index].height = clientBuf->height;
+                }
+            }                
+        }
+    } else {
+        GGLSurface t;
+        status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_RARELY);
+        LOGE_IF(res, "error %d (%s) locking buffer %p",
+                res, strerror(res), buffer.get());
+        if (res == NO_ERROR) {
+            if (UNLIKELY(mTextures[0].name == -1U)) {
+                mTextures[0].name = createTexture();
+            }
+            loadTexture(&mTextures[0], mTextures[0].name, dirty, t);
+            buffer->unlock();
+        }
     }
-    const GGLSurface& t(frontBuffer().surface());
-    loadTexture(dirty, mTextureName, t, mTextureWidth, mTextureHeight);
 }
 
 
 void Layer::onDraw(const Region& clip) const
 {
-    if (UNLIKELY(mTextureName == -1LU)) {
-        //LOGW("Layer %p doesn't have a texture", this);
+    const int index = (mFlags & DisplayHardware::DIRECT_TEXTURE) ? 
+            mFrontBufferIndex : 0;
+    GLuint textureName = mTextures[index].name;
+
+    if (UNLIKELY(textureName == -1LU)) {
+        LOGW("Layer %p doesn't have a texture", this);
         // the texture has not been created yet, this Layer has
         // in fact never been drawn into. this happens frequently with
         // SurfaceView.
         clearWithOpenGL(clip);
         return;
     }
-
-    const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    const LayerBitmap& front(frontBuffer());
-    const GGLSurface& t(front.surface());
-
-    status_t err = NO_ERROR;
-    const int can_use_copybit = canUseCopybit();
-    if (can_use_copybit)  {
-        // StopWatch watch("copybit");
-        const State& s(drawingState());
-
-        copybit_image_t dst;
-        hw.getDisplaySurface(&dst);
-        const copybit_rect_t& drect
-            = reinterpret_cast<const copybit_rect_t&>(mTransformedBounds);
-
-        copybit_image_t src;
-        front.getBitmapSurface(&src);
-        copybit_rect_t srect = { 0, 0, t.width, t.height };
-
-        copybit_device_t* copybit = mFlinger->getBlitEngine();
-        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, getOrientation());
-        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
-        copybit->set_parameter(copybit, COPYBIT_DITHER,
-                s.flags & ISurfaceComposer::eLayerDither ?
-                        COPYBIT_ENABLE : COPYBIT_DISABLE);
-
-        region_iterator it(clip);
-        err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
-    }
-
-    if (!can_use_copybit || err) {
-        drawWithOpenGL(clip, mTextureName, t);
-    }
+    drawWithOpenGL(clip, mTextures[index]);
 }
 
-status_t Layer::reallocateBuffer(int32_t index, uint32_t w, uint32_t h)
+sp<SurfaceBuffer> Layer::peekBuffer()
 {
-    LOGD_IF(DEBUG_RESIZE,
-                "reallocateBuffer (layer=%p), "
-                "requested (%dx%d), "
-                "index=%d, (%dx%d), (%dx%d)",
-                this,
-                int(w), int(h),
-                int(index),
-                int(mBuffers[0].width()), int(mBuffers[0].height()),
-                int(mBuffers[1].width()), int(mBuffers[1].height()));
+    /*
+     * This is called from the client's Surface::lock(), after it locked
+     * the surface successfully. We're therefore guaranteed that the
+     * back-buffer is not in use by ourselves.
+     * Of course, we need to validate all this, which is not trivial.
+     *
+     * FIXME: A resize could happen at any time here. What to do about this?
+     *  - resize() form post()
+     *  - resize() from doTransaction()
+     *  
+     *  We'll probably need an internal lock for this.
+     *     
+     * 
+     * TODO: We need to make sure that post() doesn't swap
+     *       the buffers under us.
+     */
 
-    status_t err = mBuffers[index].resize(w, h);
-    if (err == NO_ERROR) {
-        mBuffers[index].getInfo(lcblk->surface + index);
-    } else {
-        LOGE("resizing buffer %d to (%u,%u) failed [%08x] %s",
-            index, w, h, err, strerror(err));
-        // XXX: what to do, what to do? We could try to free some
-        // hidden surfaces, instead of killing this one?
+    // it's okay to read swapState for the purpose of figuring out the 
+    // backbuffer index, which cannot change (since the app has locked it).
+    const uint32_t state = lcblk->swapState;
+    const int32_t backBufferIndex = layer_cblk_t::backBuffer(state);
+    
+    // get rid of the EGL image, since we shouldn't need it anymore
+    // (note that we're in a different thread than where it is being used)
+    if (mTextures[backBufferIndex].image != EGL_NO_IMAGE_KHR) {
+        EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+        eglDestroyImageKHR(dpy, mTextures[backBufferIndex].image);
+        mTextures[backBufferIndex].image = EGL_NO_IMAGE_KHR;
     }
-    return err;
+    
+    LayerBitmap& layerBitmap(mBuffers[backBufferIndex]);
+    sp<SurfaceBuffer> buffer = layerBitmap.allocate();
+    
+    LOGD_IF(DEBUG_RESIZE,
+            "Layer::getBuffer(this=%p), index=%d, (%d,%d), (%d,%d)",
+            this, backBufferIndex,
+            layerBitmap.getWidth(),
+            layerBitmap.getHeight(),
+            layerBitmap.getBuffer()->getWidth(),
+            layerBitmap.getBuffer()->getHeight());
+
+    if (UNLIKELY(buffer == 0)) {
+        // XXX: what to do, what to do?
+    } else {
+        // texture is now dirty...
+        mTextures[backBufferIndex].dirty = true;
+        // ... so it the visible region (because we consider the surface's
+        // buffer size for visibility calculations)
+        forceVisibilityTransaction();
+        mFlinger->setTransactionFlags(eTraversalNeeded);
+    }
+    return buffer;
+}
+
+void Layer::scheduleBroadcast()
+{
+    sp<Client> ourClient(client.promote());
+    if (ourClient != 0) {
+        mFlinger->scheduleBroadcast(ourClient);
+    }
 }
 
 uint32_t Layer::doTransaction(uint32_t flags)
@@ -232,7 +300,7 @@ uint32_t Layer::doTransaction(uint32_t flags)
     // that the size changed back to its previous value before the buffer
     // was resized (in the eLocked case below), in which case, we still
     // need to execute the code below so the clients have a chance to be
-    // release. resze() deals with the fact that the size can be the same.
+    // release. resize() deals with the fact that the size can be the same.
 
     /*
      *  Various states we could be in...
@@ -276,8 +344,8 @@ uint32_t Layer::doTransaction(uint32_t flags)
                 int(temp.w), int(temp.h),
                 int(drawingState().w), int(drawingState().h),
                 int(clientBackBufferIndex),
-                int(mBuffers[0].width()), int(mBuffers[0].height()),
-                int(mBuffers[1].width()), int(mBuffers[1].height()));
+                int(mBuffers[0].getWidth()), int(mBuffers[0].getHeight()),
+                int(mBuffers[1].getWidth()), int(mBuffers[1].getHeight()));
         // if we get there we're pretty screwed. the only reasonable
         // thing to do is to pretend we should do the resize since
         // backbufferChanged is set (this also will give a chance to
@@ -299,8 +367,8 @@ uint32_t Layer::doTransaction(uint32_t flags)
                     int(temp.w), int(temp.h),
                     int(drawingState().w), int(drawingState().h),
                     int(clientBackBufferIndex),
-                    int(mBuffers[0].width()), int(mBuffers[0].height()),
-                    int(mBuffers[1].width()), int(mBuffers[1].height()));
+                    int(mBuffers[0].getWidth()), int(mBuffers[0].getHeight()),
+                    int(mBuffers[1].getWidth()), int(mBuffers[1].getHeight()));
 
         if (state & eLocked) {
             // if the buffer is locked, we can't resize anything because
@@ -314,10 +382,11 @@ uint32_t Layer::doTransaction(uint32_t flags)
             status_t err =
                 resize(clientBackBufferIndex, temp.w, temp.h, "transaction");
             if (err == NO_ERROR) {
-                const uint32_t mask = clientBackBufferIndex ? eResizeBuffer1 : eResizeBuffer0;
+                const uint32_t mask = clientBackBufferIndex ?
+                        eResizeBuffer1 : eResizeBuffer0;
                 android_atomic_and(~mask, &(lcblk->swapState));
                 // since a buffer became available, we can let the client go...
-                mFlinger->scheduleBroadcast(client);
+                scheduleBroadcast();
                 mResizeTransactionDone = true;
 
                 // we're being resized and there is a freeze display request,
@@ -353,14 +422,15 @@ status_t Layer::resize(
 {
     /*
      * handle resize (backbuffer and frontbuffer reallocation)
+     * this is called from post() or from doTransaction()
      */
 
     const LayerBitmap& clientBackBuffer(mBuffers[clientBackBufferIndex]);
 
     // if the new (transaction) size is != from the the backbuffer
     // then we need to reallocate the backbuffer
-    bool backbufferChanged = (clientBackBuffer.width()  != width) ||
-                             (clientBackBuffer.height() != height);
+    bool backbufferChanged = (clientBackBuffer.getWidth()  != width) ||
+                             (clientBackBuffer.getHeight() != height);
 
     LOGD_IF(!backbufferChanged,
             "(%s) eResizeRequested (layer=%p), but size not changed: "
@@ -372,18 +442,28 @@ status_t Layer::resize(
             int(currentState().w), int(currentState().h),
             long(lcblk->swapState),
             int(clientBackBufferIndex),
-            int(mBuffers[0].width()), int(mBuffers[0].height()),
-            int(mBuffers[1].width()), int(mBuffers[1].height()));
+            int(mBuffers[0].getWidth()), int(mBuffers[0].getHeight()),
+            int(mBuffers[1].getWidth()), int(mBuffers[1].getHeight()));
 
     // this can happen when changing the size back and forth quickly
     status_t err = NO_ERROR;
     if (backbufferChanged) {
-        err = reallocateBuffer(clientBackBufferIndex, width, height);
-    }
-    if (UNLIKELY(err != NO_ERROR)) {
-        // couldn't reallocate the surface
-        android_atomic_write(eInvalidSurface, &lcblk->swapState);
-        memset(lcblk->surface+clientBackBufferIndex, 0, sizeof(surface_info_t));
+
+        LOGD_IF(DEBUG_RESIZE,
+                "resize (layer=%p), requested (%dx%d), "
+                "index=%d, (%dx%d), (%dx%d)",
+                this, int(width), int(height), int(clientBackBufferIndex),
+                int(mBuffers[0].getWidth()), int(mBuffers[0].getHeight()),
+                int(mBuffers[1].getWidth()), int(mBuffers[1].getHeight()));
+
+        err = mBuffers[clientBackBufferIndex].setSize(width, height);
+        if (UNLIKELY(err != NO_ERROR)) {
+            // This really should never happen
+            LOGE("resizing buffer %d to (%u,%u) failed [%08x] %s",
+                    clientBackBufferIndex, width, height, err, strerror(err));
+            // couldn't reallocate the surface
+            android_atomic_write(eInvalidSurface, &lcblk->swapState);
+        }
     }
     return err;
 }
@@ -415,7 +495,7 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     if (UNLIKELY(state & eInvalidSurface)) {
         // if eInvalidSurface is set, this means the surface
         // became invalid during a transaction (NO_MEMORY for instance)
-        mFlinger->scheduleBroadcast(client);
+        scheduleBroadcast();
         return;
     }
 
@@ -457,15 +537,21 @@ Region Layer::post(uint32_t* previousSate, bool& recomputeVisibleRegions)
 
     } while(android_atomic_cmpxchg(oldValue, newValue, &(lcblk->swapState)));
     *previousSate = oldValue;
-
+    
     const int32_t index = (newValue & eIndex) ^ 1;
     mFrontBufferIndex = index;
 
+    /* NOTE: it's safe to set this flag here because this is only touched
+     * from LayerBitmap::allocate(), which by construction cannot happen
+     * while we're in post().
+     */
+    lcblk->surface[index].flags &= ~surface_info_t::eBufferDirty;
+
     // ... post the new front-buffer
     Region dirty(lcblk->region + index);
-    dirty.andSelf(frontBuffer().bounds());
+    dirty.andSelf(frontBuffer().getBounds());
 
-    //LOGI("Did post oldValue=%08lx, newValue=%08lx, mFrontBufferIndex=%u\n",
+    //LOGD("Did post oldValue=%08lx, newValue=%08lx, mFrontBufferIndex=%u\n",
     //    oldValue, newValue, mFrontBufferIndex);
     //dirty.dump("dirty");
 
@@ -476,8 +562,8 @@ Region Layer::post(uint32_t* previousSate, bool& recomputeVisibleRegions)
                      "index=%d, (%dx%d), (%dx%d)",
                      this,  newValue,
                      int(1-index),
-                     int(mBuffers[0].width()), int(mBuffers[0].height()),
-                     int(mBuffers[1].width()), int(mBuffers[1].height()));
+                     int(mBuffers[0].getWidth()), int(mBuffers[0].getHeight()),
+                     int(mBuffers[1].getWidth()), int(mBuffers[1].getHeight()));
 
         // here, we just posted the surface and we have resolved
         // the front/back buffer indices. The client is blocked, so
@@ -522,8 +608,8 @@ Region Layer::post(uint32_t* previousSate, bool& recomputeVisibleRegions)
 
 Point Layer::getPhysicalSize() const
 {
-    const LayerBitmap& front(frontBuffer());
-    return Point(front.width(), front.height());
+    sp<const Buffer> front(frontBuffer().getBuffer());
+    return Point(front->getWidth(), front->getHeight());
 }
 
 void Layer::unlockPageFlip(
@@ -547,7 +633,7 @@ void Layer::unlockPageFlip(
 
         // client could be blocked, so signal them so they get a
         // chance to reevaluate their condition.
-        mFlinger->scheduleBroadcast(client);
+        scheduleBroadcast();
     }
 }
 
@@ -558,9 +644,30 @@ void Layer::finishPageFlip()
                 "layer %p wasn't locked!", this);
         android_atomic_and(~eBusy, &(lcblk->swapState));
     }
-    mFlinger->scheduleBroadcast(client);
+    scheduleBroadcast();
 }
 
+// ---------------------------------------------------------------------------
+
+Layer::SurfaceLayer::SurfaceLayer(const sp<SurfaceFlinger>& flinger,
+        SurfaceID id, const sp<Layer>& owner)
+    : Surface(flinger, id, owner->getIdentity(), owner)
+{
+}
+
+Layer::SurfaceLayer::~SurfaceLayer()
+{
+}
+
+sp<SurfaceBuffer> Layer::SurfaceLayer::getBuffer()
+{
+    sp<SurfaceBuffer> buffer = 0;
+    sp<Layer> owner(getOwner());
+    if (owner != 0) {
+        buffer = owner->peekBuffer();
+    }
+    return buffer;
+}
 
 // ---------------------------------------------------------------------------
 

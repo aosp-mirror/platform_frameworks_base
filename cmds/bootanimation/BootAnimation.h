@@ -34,7 +34,6 @@ class SkBitmap;
 namespace android {
 
 class AssetManager;
-class EGLNativeWindowSurface;
 
 // ---------------------------------------------------------------------------
 
@@ -68,8 +67,8 @@ private:
     EGLDisplay  mDisplay;
     EGLDisplay  mContext;
     EGLDisplay  mSurface;
+    sp<SurfaceControl> mFlingerSurfaceControl;
     sp<Surface> mFlingerSurface;
-    sp<EGLNativeWindowSurface> mNativeWindowSurface;
 };
 
 // ---------------------------------------------------------------------------

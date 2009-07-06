@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceFlinger"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -30,12 +28,10 @@
 #include <cutils/log.h>
 #include <cutils/properties.h>
 
-#include <binder/MemoryDealer.h>
-#include <binder/MemoryBase.h>
-#include <binder/MemoryHeapPmem.h>
-#include <binder/MemoryHeapBase.h>
-
-#include <EGL/eglnatives.h>
+#include <utils/MemoryDealer.h>
+#include <utils/MemoryBase.h>
+#include <utils/MemoryHeapPmem.h>
+#include <utils/MemoryHeapBase.h>
 
 #include "GPUHardware/GPUHardware.h"
 #include "SurfaceFlinger.h"
@@ -55,7 +51,7 @@ namespace android {
  * (PMEM is used for 2D acceleration)
  * 8 MB of address space per client should be enough.
  */
-static const int PMEM_SIZE = int(16 * 1024 * 1024);
+static const int PMEM_SIZE = int(8 * 1024 * 1024);
 
 int SurfaceHeapManager::global_pmem_heap = 0;
 
@@ -79,11 +75,7 @@ void SurfaceHeapManager::onFirstRef()
         mPMemHeap = new PMemHeap(device, PMEM_SIZE);
         if (mPMemHeap->base() == MAP_FAILED) {
             mPMemHeap.clear();
-            mPMemHeap = new PMemHeap(device, PMEM_SIZE/2);
-            if (mPMemHeap->base() == MAP_FAILED) {
-                mPMemHeap.clear();
-                global_pmem_heap = 0;
-            }
+            global_pmem_heap = 0;
         }
     }
 }
@@ -104,7 +96,7 @@ sp<MemoryDealer> SurfaceHeapManager::createHeap(
         }
     }
 
-    if ((flags & ISurfaceComposer::eGPU) && (mFlinger->getGPU() != 0)) {
+    if (flags & ISurfaceComposer::eGPU) {
         // FIXME: this is msm7201A specific, where gpu surfaces may not be secure
         if (!(flags & ISurfaceComposer::eSecure)) {
             // if GPU doesn't work, we try eHardware

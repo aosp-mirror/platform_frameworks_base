@@ -89,9 +89,10 @@ typedef Window   EGLNativeWindowType;
 
 #elif defined(ANDROID)
 
-#include <EGL/eglnatives.h>
+struct android_native_window_t;
+struct egl_native_pixmap_t;
 
-typedef struct egl_native_window_t*     EGLNativeWindowType;
+typedef struct android_native_window_t* EGLNativeWindowType;
 typedef struct egl_native_pixmap_t*     EGLNativePixmapType;
 typedef void*                           EGLNativeDisplayType;
 

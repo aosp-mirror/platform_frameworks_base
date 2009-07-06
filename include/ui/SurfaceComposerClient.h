@@ -62,7 +62,7 @@ public:
     // surface creation / destruction
 
     //! Create a surface
-    sp<Surface>   createSurface(
+    sp<SurfaceControl> createSurface(
             int pid,            //!< pid of the process the surfacec is for
             DisplayID display,  //!< Display to create this surface on
             uint32_t w,         //!< width in pixel
@@ -111,50 +111,34 @@ public:
 
 private:
     friend class Surface;
+    friend class SurfaceControl;
     
     SurfaceComposerClient(const sp<ISurfaceComposer>& sm, 
             const sp<IBinder>& conn);
 
-    status_t    hide(Surface* surface);
-    status_t    show(Surface* surface, int32_t layer = -1);
-    status_t    freeze(Surface* surface);
-    status_t    unfreeze(Surface* surface);
-    status_t    setFlags(Surface* surface, uint32_t flags, uint32_t mask);
-    status_t    setTransparentRegionHint(Surface* surface, const Region& transparent);
-    status_t    setLayer(Surface* surface, int32_t layer);
-    status_t    setAlpha(Surface* surface, float alpha=1.0f);
-    status_t    setFreezeTint(Surface* surface, uint32_t tint);
-    status_t    setMatrix(Surface* surface, float dsdx, float dtdx, float dsdy, float dtdy);
-    status_t    setPosition(Surface* surface, int32_t x, int32_t y);
-    status_t    setSize(Surface* surface, uint32_t w, uint32_t h);
+    status_t    hide(SurfaceID id);
+    status_t    show(SurfaceID id, int32_t layer = -1);
+    status_t    freeze(SurfaceID id);
+    status_t    unfreeze(SurfaceID id);
+    status_t    setFlags(SurfaceID id, uint32_t flags, uint32_t mask);
+    status_t    setTransparentRegionHint(SurfaceID id, const Region& transparent);
+    status_t    setLayer(SurfaceID id, int32_t layer);
+    status_t    setAlpha(SurfaceID id, float alpha=1.0f);
+    status_t    setFreezeTint(SurfaceID id, uint32_t tint);
+    status_t    setMatrix(SurfaceID id, float dsdx, float dtdx, float dsdy, float dtdy);
+    status_t    setPosition(SurfaceID id, int32_t x, int32_t y);
+    status_t    setSize(SurfaceID id, uint32_t w, uint32_t h);
     
-    //! Unlock the surface, and specify the dirty region if any
-    status_t    unlockAndPostSurface(Surface* surface);
-    status_t    unlockSurface(Surface* surface);
-
-    status_t    lockSurface(Surface* surface,
-                            Surface::SurfaceInfo* info,
-                            Region* dirty,
-                            bool blocking = true);
-
-    status_t    nextBuffer(Surface* surface,
-                            Surface::SurfaceInfo* info);
+    void        signalServer();
 
     status_t    destroySurface(SurfaceID sid);
 
     void        _init(const sp<ISurfaceComposer>& sm,
                     const sp<ISurfaceFlingerClient>& conn);
-    void        _signal_server();
-    static void _send_dirty_region(layer_cblk_t* lcblk, const Region& dirty);
 
-    inline layer_state_t*   _get_state_l(const sp<Surface>& surface);
-    layer_state_t*          _lockLayerState(const sp<Surface>& surface);
+    inline layer_state_t*   _get_state_l(SurfaceID id);
+    layer_state_t*          _lockLayerState(SurfaceID id);
     inline void             _unlockLayerState();
-
-    status_t validateSurface(
-            per_client_cblk_t const* cblk, Surface const * surface);
-
-    void pinHeap(const sp<IMemoryHeap>& heap);
 
     mutable     Mutex                               mLock;
                 layer_state_t*                      mPrebuiltLayerState;
@@ -165,11 +149,8 @@ private:
                 // after assignment
                 status_t                    mStatus;
                 per_client_cblk_t*          mControl;
-                sp<IMemory>                 mControlMemory;
+                sp<IMemoryHeap>             mControlMemory;
                 sp<ISurfaceFlingerClient>   mClient;
-                sp<IMemoryHeap>             mSurfaceHeap;
-                uint8_t*                    mSurfaceHeapBase;
-                void*                       mGL;
                 SurfaceFlingerSynchro*      mSignalServer;
 };
 

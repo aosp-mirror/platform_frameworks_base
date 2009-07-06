@@ -23,7 +23,6 @@
 #include <math.h>
 #include <utils/misc.h>
 
-#include <ui/EGLNativeWindowSurface.h>
 #include <ui/Surface.h>
 
 #include <core/SkBitmap.h>

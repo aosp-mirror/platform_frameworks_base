@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 #include <sys/types.h>
-#include <binder/MemoryDealer.h>
+#include <utils/MemoryDealer.h>
 
 namespace android {
 

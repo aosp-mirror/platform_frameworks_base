@@ -2,12 +2,12 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
+	BufferMapper.cpp \
 	Camera.cpp \
 	CameraParameters.cpp \
-	EGLDisplaySurface.cpp \
-	EGLNativeWindowSurface.cpp \
 	EventHub.cpp \
 	EventRecurrence.cpp \
+	FramebufferNativeWindow.cpp \
 	KeyLayoutMap.cpp \
 	KeyCharacterMap.cpp \
 	ICamera.cpp \
@@ -27,7 +27,6 @@ LOCAL_SRC_FILES:= \
 	SurfaceFlingerSynchro.cpp 
 
 LOCAL_SHARED_LIBRARIES := \
-	libcorecg \
 	libcutils \
 	libutils \
 	libbinder \

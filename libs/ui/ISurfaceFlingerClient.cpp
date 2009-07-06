@@ -64,12 +64,12 @@ public:
     {
     }
 
-    virtual void getControlBlocks(sp<IMemory>* ctl) const
+    virtual sp<IMemoryHeap> getControlBlock() const
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceFlingerClient::getInterfaceDescriptor());
         remote()->transact(GET_CBLK, data, &reply);
-        *ctl  = interface_cast<IMemory>(reply.readStrongBinder());
+        return interface_cast<IMemoryHeap>(reply.readStrongBinder());
     }
 
     virtual sp<ISurface> createSurface( surface_data_t* params,
@@ -126,8 +126,7 @@ status_t BnSurfaceFlingerClient::onTransact(
     switch(code) {
         case GET_CBLK: {
             CHECK_INTERFACE(ISurfaceFlingerClient, data, reply);
-            sp<IMemory> ctl;
-            getControlBlocks(&ctl);
+            sp<IMemoryHeap> ctl(getControlBlock());
             reply->writeStrongBinder(ctl->asBinder());
             return NO_ERROR;
         } break;
@@ -192,8 +191,6 @@ status_t ISurfaceFlingerClient::surface_data_t::readFromParcel(const Parcel& par
 {
     token = parcel.readInt32();
     identity  = parcel.readInt32();
-    heap[0] = interface_cast<IMemoryHeap>(parcel.readStrongBinder());
-    heap[1] = interface_cast<IMemoryHeap>(parcel.readStrongBinder());
     return NO_ERROR;
 }
 
@@ -201,8 +198,6 @@ status_t ISurfaceFlingerClient::surface_data_t::writeToParcel(Parcel* parcel) co
 {
     parcel->writeInt32(token);
     parcel->writeInt32(identity);
-    parcel->writeStrongBinder(heap[0]!=0 ? heap[0]->asBinder() : NULL);
-    parcel->writeStrongBinder(heap[1]!=0 ? heap[1]->asBinder() : NULL);
     return NO_ERROR;
 }
 

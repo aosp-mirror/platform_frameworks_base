@@ -20,6 +20,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #include "LayerBase.h"
 #include "LayerBitmap.h"
 
@@ -29,6 +32,11 @@ namespace android {
 
 class LayerDim : public LayerBaseClient
 {
+    static bool sUseTexture;
+    static GLuint sTexId;
+    static EGLImageKHR sImage;
+    static int32_t sWidth;
+    static int32_t sHeight;
 public:    
     static const uint32_t typeInfo;
     static const char* const typeID;
@@ -36,7 +44,7 @@ public:
     virtual uint32_t getTypeInfo() const { return typeInfo; }
     
                 LayerDim(SurfaceFlinger* flinger, DisplayID display,
-                        Client* client, int32_t i);
+                        const sp<Client>& client, int32_t i);
         virtual ~LayerDim();
 
     virtual void onDraw(const Region& clip) const;
@@ -44,10 +52,6 @@ public:
     virtual bool isSecure() const       { return false; }
 
     static void initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h);
-
-private:
-    static sp<MemoryDealer> mDimmerDealer;
-    static LayerBitmap mDimmerBitmap;
 };
 
 // ---------------------------------------------------------------------------

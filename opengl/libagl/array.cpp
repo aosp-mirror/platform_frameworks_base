@@ -1,16 +1,16 @@
-/* 
+/*
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -26,6 +26,9 @@
 #include "primitives.h"
 #include "texture.h"
 #include "BufferObjectManager.h"
+#ifdef LIBAGL_USE_GRALLOC_COPYBITS
+#include "copybit.h"
+#endif // LIBAGL_USE_GRALLOC_COPYBITS
 
 // ----------------------------------------------------------------------------
 
@@ -250,7 +253,7 @@ static void fetchExpand3s(ogles_context_t*, GLfixed* v, const GLshort* p) {
     v[2] = GGL_S_TO_X(p[2]);
 }
 
-typedef array_t::fetcher_t fn_t; 
+typedef array_t::fetcher_t fn_t;
 
 static const fn_t color_fct[2][16] = { // size={3,4}, type={ub,f,x}
     { 0, (fn_t)fetchExpand3ub, 0, 0, 0, 0,
@@ -334,7 +337,7 @@ void array_t::init(
     this->bounds = count;
 }
 
-inline void array_t::resolve() 
+inline void array_t::resolve()
 {
     physical_pointer = (bo) ? (bo->data + uintptr_t(pointer)) : pointer;
 }
@@ -465,7 +468,7 @@ vertex_t* cache_vertex(ogles_context_t* c, vertex_t* v, uint32_t index)
         // We compute directly the index of a "free" entry from the locked
         // state of v[2] and v[3].
         v = c->vc.vBuffer + 2;
-        v += v[0].locked | (v[1].locked<<1);       
+        v += v[0].locked | (v[1].locked<<1);
     }
     // note: compileElement clears v->flags
     c->arrays.compileElement(c, v, index);
@@ -480,7 +483,7 @@ vertex_t* fetch_vertex(ogles_context_t* c, size_t index)
 
 #if VC_CACHE_TYPE == VC_CACHE_TYPE_INDEXED
 
-    vertex_t* const v = c->vc.vCache + 
+    vertex_t* const v = c->vc.vCache +
             (index & (vertex_cache_t::VERTEX_CACHE_SIZE-1));
 
     if (ggl_likely(v->index == index)) {
@@ -491,7 +494,7 @@ vertex_t* fetch_vertex(ogles_context_t* c, size_t index)
 
 #elif VC_CACHE_TYPE == VC_CACHE_TYPE_LRU
 
-    vertex_t* v = c->vc.vCache + 
+    vertex_t* v = c->vc.vCache +
             (index & ((vertex_cache_t::VERTEX_CACHE_SIZE-1)>>1))*2;
 
     // always record LRU in v[0]
@@ -532,12 +535,12 @@ void drawPrimitivesPoints(ogles_context_t* c, GLint first, GLsizei count)
         return;
 
     // vertex cache size must be multiple of 1
-    const GLsizei vcs = 
+    const GLsizei vcs =
             (vertex_cache_t::VERTEX_BUFFER_SIZE +
              vertex_cache_t::VERTEX_CACHE_SIZE);
     do {
         vertex_t* v = c->vc.vBuffer;
-        GLsizei num = count > vcs ? vcs : count; 
+        GLsizei num = count > vcs ? vcs : count;
         c->arrays.cull = vertex_t::CLIP_ALL;
         c->arrays.compileElements(c, v, first, num);
         first += num;
@@ -569,13 +572,13 @@ void drawPrimitivesLineStrip(ogles_context_t* c, GLint first, GLsizei count)
     count -= 1;
 
     // vertex cache size must be multiple of 1
-    const GLsizei vcs = 
+    const GLsizei vcs =
         (vertex_cache_t::VERTEX_BUFFER_SIZE +
          vertex_cache_t::VERTEX_CACHE_SIZE - 1);
     do {
-        v0 = c->vc.vBuffer + 0; 
+        v0 = c->vc.vBuffer + 0;
         v  = c->vc.vBuffer + 1;
-        GLsizei num = count > vcs ? vcs : count; 
+        GLsizei num = count > vcs ? vcs : count;
         c->arrays.compileElements(c, v, first, num);
         first += num;
         count -= num;
@@ -602,7 +605,7 @@ void drawPrimitivesLineLoop(ogles_context_t* c, GLint first, GLsizei count)
         return;
     drawPrimitivesLineStrip(c, first, count);
     if (ggl_likely(count >= 3)) {
-        vertex_t* v0 = c->vc.vBuffer; 
+        vertex_t* v0 = c->vc.vBuffer;
         vertex_t* v1 = c->vc.vBuffer + 1;
         c->arrays.compileElement(c, v1, first);
         const uint32_t cc = v0->flags & v1->flags;
@@ -617,12 +620,12 @@ void drawPrimitivesLines(ogles_context_t* c, GLint first, GLsizei count)
         return;
 
     // vertex cache size must be multiple of 2
-    const GLsizei vcs = 
+    const GLsizei vcs =
         ((vertex_cache_t::VERTEX_BUFFER_SIZE +
         vertex_cache_t::VERTEX_CACHE_SIZE) / 2) * 2;
     do {
         vertex_t* v = c->vc.vBuffer;
-        GLsizei num = count > vcs ? vcs : count; 
+        GLsizei num = count > vcs ? vcs : count;
         c->arrays.cull = vertex_t::CLIP_ALL;
         c->arrays.compileElements(c, v, first, num);
         first += num;
@@ -662,14 +665,14 @@ static void drawPrimitivesTriangleFanOrStrip(ogles_context_t* c,
     // because it allows us to preserve the same winding when the whole
     // batch is culled. We also need 2 extra vertices in the array, because
     // we always keep the two first ones.
-    const GLsizei vcs = 
+    const GLsizei vcs =
         ((vertex_cache_t::VERTEX_BUFFER_SIZE +
           vertex_cache_t::VERTEX_CACHE_SIZE - 2) / 2) * 2;
     do {
-        v0 = c->vc.vBuffer + 0; 
-        v1 = c->vc.vBuffer + 1; 
+        v0 = c->vc.vBuffer + 0;
+        v1 = c->vc.vBuffer + 1;
         v  = c->vc.vBuffer + 2;
-        GLsizei num = count > vcs ? vcs : count; 
+        GLsizei num = count > vcs ? vcs : count;
         c->arrays.compileElements(c, v, first, num);
         first += num;
         count -= num;
@@ -697,13 +700,19 @@ static void drawPrimitivesTriangleFanOrStrip(ogles_context_t* c,
     } while (count > 0);
 }
 
-void drawPrimitivesTriangleStrip(ogles_context_t* c, 
+void drawPrimitivesTriangleStrip(ogles_context_t* c,
         GLint first, GLsizei count) {
     drawPrimitivesTriangleFanOrStrip(c, first, count, 1);
 }
 
 void drawPrimitivesTriangleFan(ogles_context_t* c,
         GLint first, GLsizei count) {
+#ifdef LIBAGL_USE_GRALLOC_COPYBITS
+    if (drawTriangleFanWithCopybit(c, first, count)) {
+        return;
+    }
+#endif // LIBAGL_USE_GRALLOC_COPYBITS
+
     drawPrimitivesTriangleFanOrStrip(c, first, count, 2);
 }
 
@@ -713,12 +722,12 @@ void drawPrimitivesTriangles(ogles_context_t* c, GLint first, GLsizei count)
         return;
 
     // vertex cache size must be multiple of 3
-    const GLsizei vcs = 
+    const GLsizei vcs =
         ((vertex_cache_t::VERTEX_BUFFER_SIZE +
         vertex_cache_t::VERTEX_CACHE_SIZE) / 3) * 3;
     do {
         vertex_t* v = c->vc.vBuffer;
-        GLsizei num = count > vcs ? vcs : count; 
+        GLsizei num = count > vcs ? vcs : count;
         c->arrays.cull = vertex_t::CLIP_ALL;
         c->arrays.compileElements(c, v, first, num);
         first += num;
@@ -779,11 +788,11 @@ void drawIndexedPrimitivesLineStrip(ogles_context_t* c,
 {
     if (ggl_unlikely(count < 2))
         return;
-    
+
     vertex_t * const v = c->vc.vBuffer;
     vertex_t* v0 = v;
     vertex_t* v1;
-    
+
     const int type = (c->arrays.indicesType == GL_UNSIGNED_BYTE);
     c->arrays.compileElement(c, v0, read_index(type, indices));
     count -= 1;
@@ -806,11 +815,11 @@ void drawIndexedPrimitivesLineLoop(ogles_context_t* c,
         drawIndexedPrimitivesLines(c, count, indices);
         return;
     }
- 
+
     vertex_t * const v = c->vc.vBuffer;
     vertex_t* v0 = v;
     vertex_t* v1;
-    
+
     const int type = (c->arrays.indicesType == GL_UNSIGNED_BYTE);
     c->arrays.compileElement(c, v0, read_index(type, indices));
     count -= 1;
@@ -825,7 +834,7 @@ void drawIndexedPrimitivesLineLoop(ogles_context_t* c,
     } while (count);
     v1->locked = 0;
 
-    v1 = c->vc.vBuffer; 
+    v1 = c->vc.vBuffer;
     const uint32_t cc = v0->flags & v1->flags;
     if (ggl_likely(!(cc & vertex_t::CLIP_ALL)))
         c->prims.renderLine(c, v0, v1);
@@ -861,7 +870,7 @@ static void drawIndexedPrimitivesTriangleFanOrStrip(ogles_context_t* c,
 
     if (ggl_unlikely(count < 3))
         return;
-    
+
     vertex_t * const v = c->vc.vBuffer;
     vertex_t* v0 = v;
     vertex_t* v1 = v+1;
@@ -985,17 +994,17 @@ void compileElements__3x_full(ogles_context_t* c,
     const GLfixed* vp = (const GLfixed*)c->arrays.vertex.element(first);
     const size_t stride = c->arrays.vertex.stride / 4;
 //    const GLfixed* const& m = c->transforms.mvp.matrix.m;
-    
+
     GLfixed m[16];
     memcpy(&m, c->transforms.mvp.matrix.m, sizeof(m));
-    
+
     do {
         const GLfixed rx = vp[0];
         const GLfixed ry = vp[1];
         const GLfixed rz = vp[2];
         vp += stride;
         v->index = first++;
-        v->clip.x = mla3a(rx, m[ 0], ry, m[ 4], rz, m[ 8], m[12]); 
+        v->clip.x = mla3a(rx, m[ 0], ry, m[ 4], rz, m[ 8], m[12]);
         v->clip.y = mla3a(rx, m[ 1], ry, m[ 5], rz, m[ 9], m[13]);
         v->clip.z = mla3a(rx, m[ 2], ry, m[ 6], rz, m[10], m[14]);
         v->clip.w = mla3a(rx, m[ 3], ry, m[ 7], rz, m[11], m[15]);
@@ -1023,7 +1032,7 @@ void compileElements__3x_full(ogles_context_t* c,
 #pragma mark clippers
 #endif
 
-static void clipVec4(vec4_t& nv, 
+static void clipVec4(vec4_t& nv,
         GLfixed t, const vec4_t& s, const vec4_t& p)
 {
     for (int i=0; i<4 ; i++)
@@ -1086,10 +1095,10 @@ void validate_arrays(ogles_context_t* c, GLenum mode)
     // automatically turn it off (in fact we could when the 4th coordinate
     // is not spcified in the vertex array).
     // W interpolation is never needed for points.
-    GLboolean perspective = 
+    GLboolean perspective =
         c->perspective && mode!=GL_POINTS && (enables & GGL_ENABLE_TMUS);
     c->rasterizer.procs.enableDisable(c, GGL_W_LERP, perspective);
-    
+
     // set anti-aliasing
     GLboolean smooth = GL_FALSE;
     switch (mode) {
@@ -1120,7 +1129,7 @@ void validate_arrays(ogles_context_t* c, GLenum mode)
     if (enables & GGL_ENABLE_TMUS) { // needs texture transforms
         want |= transform_state_t::TEXTURE;
     }
-    if (c->clipPlanes.enable || (enables & GGL_ENABLE_FOG)) { 
+    if (c->clipPlanes.enable || (enables & GGL_ENABLE_FOG)) {
         want |= transform_state_t::MODELVIEW; // needs eye coords
     }
     ogles_validate_transform(c, want);
@@ -1139,18 +1148,18 @@ void validate_arrays(ogles_context_t* c, GLenum mode)
 
     c->arrays.mv_transform =
         c->transforms.modelview.transform.pointv[c->arrays.vertex.size - 2];
-    
+
     /*
      * ***********************************************************************
      *  pick fetchers
      * ***********************************************************************
      */
-    
+
     array_machine_t& am = c->arrays;
     am.vertex.fetch = fetchNop;
     am.normal.fetch = currentNormal;
     am.color.fetch = currentColor;
-    
+
     if (am.vertex.enable) {
         am.vertex.resolve();
         if (am.vertex.bo || am.vertex.pointer) {
@@ -1366,8 +1375,17 @@ void glDrawArrays(GLenum mode, GLint first, GLsizei count)
     if ((c->cull.enable) && (c->cull.cullFace == GL_FRONT_AND_BACK))
         return; // all triangles are culled
 
+
     validate_arrays(c, mode);
+
+    const uint32_t enables = c->rasterizer.state.enables;
+    if (enables & GGL_ENABLE_TMUS)
+        ogles_lock_textures(c);
+
     drawArraysPrims[mode](c, first, count);
+
+    if (enables & GGL_ENABLE_TMUS)
+        ogles_unlock_textures(c);
 
 #if VC_CACHE_STATISTICS
     c->vc.total = count;
@@ -1413,15 +1431,23 @@ void glDrawElements(
     // clear the vertex-cache
     c->vc.clear();
     validate_arrays(c, mode);
-    
+
     // if indices are in a buffer object, the pointer is treated as an
     // offset in that buffer.
     if (c->arrays.element_array_buffer) {
         indices = c->arrays.element_array_buffer->data + uintptr_t(indices);
     }
 
-    drawElementsPrims[mode](c, count, indices);
+    const uint32_t enables = c->rasterizer.state.enables;
+    if (enables & GGL_ENABLE_TMUS)
+        ogles_lock_textures(c);
 
+    drawElementsPrims[mode](c, count, indices);
+    
+    if (enables & GGL_ENABLE_TMUS)
+        ogles_unlock_textures(c);
+
+    
 #if VC_CACHE_STATISTICS
     c->vc.total = count;
     c->vc.dump_stats(mode);
@@ -1448,7 +1474,7 @@ void glBindBuffer(GLenum target, GLuint buffer)
             return;
         }
     }
-    ((target == GL_ARRAY_BUFFER) ? 
+    ((target == GL_ARRAY_BUFFER) ?
             c->arrays.array_buffer : c->arrays.element_array_buffer) = bo;
 }
 
@@ -1467,7 +1493,7 @@ void glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usa
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
-    buffer_t const* bo = ((target == GL_ARRAY_BUFFER) ? 
+    buffer_t const* bo = ((target == GL_ARRAY_BUFFER) ?
             c->arrays.array_buffer : c->arrays.element_array_buffer);
 
     if (bo == 0) {
@@ -1497,7 +1523,7 @@ void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvo
         ogles_error(c, GL_INVALID_VALUE);
         return;
     }
-    buffer_t const* bo = ((target == GL_ARRAY_BUFFER) ? 
+    buffer_t const* bo = ((target == GL_ARRAY_BUFFER) ?
             c->arrays.array_buffer : c->arrays.element_array_buffer);
 
     if (bo == 0) {
@@ -1545,7 +1571,7 @@ void glDeleteBuffers(GLsizei n, const GLuint* buffers)
                 }
             }
         }
-    }    
+    }
     c->bufferObjectManager->deleteBuffers(n, buffers);
     c->bufferObjectManager->recycleTokens(n, buffers);
 }

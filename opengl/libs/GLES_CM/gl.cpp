@@ -14,8 +14,6 @@
  ** limitations under the License.
  */
 
-#define LOG_TAG "GLES_CM"
-
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
@@ -121,16 +119,25 @@ extern "C" {
 
 
 /*
- * These GL calls are special because they need to call into EGL to retrieve
- * some informations before they can execute.
+ * These GL calls are special because they need to EGL to retrieve some
+ * informations before they can execute.
  */
+
+extern "C" void __glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image);
+extern "C" void __glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image);
 
 
 void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
 {
+    GLeglImageOES implImage = 
+        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
+    __glEGLImageTargetTexture2DOES(target, implImage);
 }
 
 void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
 {
+    GLeglImageOES implImage = 
+        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
+    __glEGLImageTargetRenderbufferStorageOES(target, image);
 }
 

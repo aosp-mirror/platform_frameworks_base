@@ -31,12 +31,14 @@ struct gl_hooks_t;
 
 struct egl_connection_t
 {
-    void volatile *     dso;
+    void *              dso;
     gl_hooks_t *        hooks;
     EGLint              major;
     EGLint              minor;
     int                 unavailable;
 };
+
+EGLAPI EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
 
 // ----------------------------------------------------------------------------
 }; // namespace android

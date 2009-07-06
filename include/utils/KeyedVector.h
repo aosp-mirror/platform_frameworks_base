@@ -164,7 +164,7 @@ ssize_t KeyedVector<KEY,VALUE>::replaceValueFor(const KEY& key, const VALUE& val
 template<typename KEY, typename VALUE> inline
 ssize_t KeyedVector<KEY,VALUE>::replaceValueAt(size_t index, const VALUE& item) {
     if (index<size()) {
-        mVector.editValueAt(index).value = item;
+        mVector.editItemAt(index).value = item;
         return index;
     }
     return BAD_INDEX;

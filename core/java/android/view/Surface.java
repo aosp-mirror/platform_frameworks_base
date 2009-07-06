@@ -127,6 +127,8 @@ public class Surface implements Parcelable {
     @SuppressWarnings("unused")
     private int mSurface;
     @SuppressWarnings("unused")
+    private int mSurfaceControl;
+    @SuppressWarnings("unused")
     private int mSaveCount;
     @SuppressWarnings("unused")
     private Canvas mCanvas;
@@ -270,7 +272,7 @@ public class Surface implements Parcelable {
 
     @Override
     public String toString() {
-        return "Surface(native-token=" + mSurface + ")";
+        return "Surface(native-token=" + mSurfaceControl + ")";
     }
 
     private Surface(Parcel source) throws OutOfResourcesException {
@@ -283,7 +285,7 @@ public class Surface implements Parcelable {
 
     public native   void readFromParcel(Parcel source);
     public native   void writeToParcel(Parcel dest, int flags);
-
+    
     public static final Parcelable.Creator<Surface> CREATOR
             = new Parcelable.Creator<Surface>()
     {
@@ -304,7 +306,7 @@ public class Surface implements Parcelable {
     /* no user serviceable parts here ... */
     @Override
     protected void finalize() throws Throwable {
-        clear();
+        release();
     }
     
     private native void init(SurfaceSession s,
@@ -312,4 +314,6 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
 
     private native void init(Parcel source);
+    
+    private native void release();
 }

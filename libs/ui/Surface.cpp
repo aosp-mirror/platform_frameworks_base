@@ -23,202 +23,319 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/threads.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IMemory.h>
 #include <utils/Log.h>
 
+#include <ui/DisplayInfo.h>
+#include <ui/BufferMapper.h>
 #include <ui/ISurface.h>
 #include <ui/Surface.h>
 #include <ui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
 
+#include <pixelflinger/pixelflinger.h>
+
 #include <private/ui/SharedState.h>
 #include <private/ui/LayerState.h>
+#include <private/ui/SurfaceBuffer.h>
 
 namespace android {
 
-// ---------------------------------------------------------------------------
+// ============================================================================
+//  SurfaceBuffer
+// ============================================================================
 
-Surface::Surface(const sp<SurfaceComposerClient>& client, 
+SurfaceBuffer::SurfaceBuffer() 
+    : BASE(), mOwner(false), mBufferMapper(BufferMapper::get())
+{
+    width  = 
+    height = 
+    stride = 
+    format = 
+    usage  = 0;
+    handle = NULL;
+}
+
+SurfaceBuffer::SurfaceBuffer(const Parcel& data) 
+    : BASE(), mOwner(true), mBufferMapper(BufferMapper::get())
+{
+    // we own the handle in this case
+    width  = data.readInt32();
+    height = data.readInt32();
+    stride = data.readInt32();
+    format = data.readInt32();
+    usage  = data.readInt32();
+    handle = data.readNativeHandle();
+}
+
+SurfaceBuffer::~SurfaceBuffer()
+{
+    if (handle && mOwner) {
+        native_handle_close(handle);
+        native_handle_delete(const_cast<native_handle*>(handle));
+    }
+}
+
+status_t SurfaceBuffer::lock(uint32_t usage, void** vaddr)
+{
+    const Rect lockBounds(width, height);
+    status_t res = lock(usage, lockBounds, vaddr);
+    return res;
+}
+
+status_t SurfaceBuffer::lock(uint32_t usage, const Rect& rect, void** vaddr)
+{
+    status_t res = getBufferMapper().lock(handle, usage, rect, vaddr);
+    return res;
+}
+
+status_t SurfaceBuffer::unlock()
+{
+    status_t res = getBufferMapper().unlock(handle);
+    return res;
+}
+
+status_t SurfaceBuffer::writeToParcel(Parcel* reply, 
+        android_native_buffer_t const* buffer)
+{
+    reply->writeInt32(buffer->width);
+    reply->writeInt32(buffer->height);
+    reply->writeInt32(buffer->stride);
+    reply->writeInt32(buffer->format);
+    reply->writeInt32(buffer->usage);
+    reply->writeNativeHandle(buffer->handle);
+    return NO_ERROR;
+}
+
+// ----------------------------------------------------------------------
+
+static void copyBlt(
+        const sp<SurfaceBuffer>& dst, 
+        const sp<SurfaceBuffer>& src, 
+        const Region& reg)
+{
+    uint8_t const * src_bits;
+    src->lock(GRALLOC_USAGE_SW_READ_OFTEN, reg.bounds(), (void**)&src_bits);
+
+    uint8_t* dst_bits;
+    dst->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, reg.bounds(), (void**)&dst_bits);
+    
+    size_t c;
+    Rect const* const rects = reg.getArray(&c);
+    
+    if (c) {
+        // NOTE: dst and src must be the same format
+        const size_t bpp = bytesPerPixel(src->format);
+        const size_t dbpr = dst->stride * bpp;
+        const size_t sbpr = src->stride * bpp;
+
+        for (size_t i=0 ; i<c ; i++) {
+            const Rect& r = rects[i];
+            ssize_t h = r.height();
+            if (h <= 0) continue;
+            size_t size = r.width() * bpp;
+            uint8_t const * s = src_bits + (r.left + src->stride * r.top) * bpp;
+            uint8_t       * d = dst_bits + (r.left + dst->stride * r.top) * bpp;
+            if (dbpr==sbpr && size==sbpr) {
+                size *= h;
+                h = 1;
+            }
+            do {
+                memcpy(d, s, size);
+                d += dbpr;
+                s += sbpr;
+            } while (--h > 0);
+        }
+    }
+    
+    src->unlock();
+    dst->unlock();
+}
+
+// ============================================================================
+//  SurfaceControl
+// ============================================================================
+
+SurfaceControl::SurfaceControl(
+        const sp<SurfaceComposerClient>& client, 
         const sp<ISurface>& surface,
         const ISurfaceFlingerClient::surface_data_t& data,
-        uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
-        bool owner)
+        uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
     : mClient(client), mSurface(surface),
       mToken(data.token), mIdentity(data.identity),
-      mFormat(format), mFlags(flags), mOwner(owner)
+      mFormat(format), mFlags(flags)
 {
-    mSwapRectangle.makeInvalid();
-    mSurfaceHeapBase[0] = 0;
-    mSurfaceHeapBase[1] = 0;
-    mHeap[0] = data.heap[0]; 
-    mHeap[1] = data.heap[1];
+}
+        
+SurfaceControl::~SurfaceControl()
+{
+    destroy();
 }
 
-Surface::Surface(Surface const* rhs)
-    : mOwner(false)
+void SurfaceControl::destroy()
 {
-    mToken   = rhs->mToken;
-    mIdentity= rhs->mIdentity;
-    mClient  = rhs->mClient;
-    mSurface = rhs->mSurface;
-    mHeap[0] = rhs->mHeap[0];
-    mHeap[1] = rhs->mHeap[1];
-    mFormat  = rhs->mFormat;
-    mFlags   = rhs->mFlags;
-    mSurfaceHeapBase[0] = rhs->mSurfaceHeapBase[0];
-    mSurfaceHeapBase[1] = rhs->mSurfaceHeapBase[1];
-    mSwapRectangle.makeInvalid();
-}
-
-Surface::~Surface()
-{
-    if (mOwner && mToken>=0 && mClient!=0) {
+    if (isValid()) {
         mClient->destroySurface(mToken);
     }
+
+    // clear all references and trigger an IPC now, to make sure things
+    // happen without delay, since these resources are quite heavy.
     mClient.clear();
     mSurface.clear();
-    mHeap[0].clear();
-    mHeap[1].clear();
     IPCThreadState::self()->flushCommands();
 }
 
-sp<Surface> Surface::dup() const
+void SurfaceControl::clear() 
 {
-    Surface const * r = this;
-    if (this && mOwner) {
-        // the only reason we need to do this is because of Java's garbage
-        // collector: because we're creating a copy of the Surface
-        // instead of a reference, we can garantee that when our last
-        // reference goes away, the real surface will be deleted.
-        // Without this hack (the code is correct too), we'd have to
-        // wait for a GC for the surface to go away.
-        r = new Surface(this);        
+    // here, the window manager tells us explicitly that we should destroy
+    // the surface's resource. Soon after this call, it will also release
+    // its last reference (which will call the dtor); however, it is possible
+    // that a client living in the same process still holds references which
+    // would delay the call to the dtor -- that is why we need this explicit
+    // "clear()" call.
+    destroy();
+}
+
+bool SurfaceControl::isSameSurface(
+        const sp<SurfaceControl>& lhs, const sp<SurfaceControl>& rhs) 
+{
+    if (lhs == 0 || rhs == 0)
+        return false;
+    return lhs->mSurface->asBinder() == rhs->mSurface->asBinder();
+}
+
+status_t SurfaceControl::setLayer(int32_t layer) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setLayer(mToken, layer);
+}
+status_t SurfaceControl::setPosition(int32_t x, int32_t y) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setPosition(mToken, x, y);
+}
+status_t SurfaceControl::setSize(uint32_t w, uint32_t h) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setSize(mToken, w, h);
+}
+status_t SurfaceControl::hide() {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->hide(mToken);
+}
+status_t SurfaceControl::show(int32_t layer) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->show(mToken, layer);
+}
+status_t SurfaceControl::freeze() {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->freeze(mToken);
+}
+status_t SurfaceControl::unfreeze() {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->unfreeze(mToken);
+}
+status_t SurfaceControl::setFlags(uint32_t flags, uint32_t mask) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setFlags(mToken, flags, mask);
+}
+status_t SurfaceControl::setTransparentRegionHint(const Region& transparent) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setTransparentRegionHint(mToken, transparent);
+}
+status_t SurfaceControl::setAlpha(float alpha) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setAlpha(mToken, alpha);
+}
+status_t SurfaceControl::setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setMatrix(mToken, dsdx, dtdx, dsdy, dtdy);
+}
+status_t SurfaceControl::setFreezeTint(uint32_t tint) {
+    const sp<SurfaceComposerClient>& client(mClient);
+    if (client == 0) return NO_INIT;
+    status_t err = validate(client->mControl);
+    if (err < 0) return err;
+    return client->setFreezeTint(mToken, tint);
+}
+
+status_t SurfaceControl::validate(per_client_cblk_t const* cblk) const
+{
+    if (mToken<0 || mClient==0) {
+        LOGE("invalid token (%d, identity=%u) or client (%p)", 
+                mToken, mIdentity, mClient.get());
+        return NO_INIT;
     }
-    return const_cast<Surface*>(r);
+    if (cblk == 0) {
+        LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
+        return NO_INIT;
+    }
+    status_t err = cblk->validate(mToken);
+    if (err != NO_ERROR) {
+        LOGE("surface (id=%d, identity=%u) is invalid, err=%d (%s)",
+                mToken, mIdentity, err, strerror(-err));
+        return err;
+    }
+    if (mIdentity != uint32_t(cblk->layers[mToken].identity)) {
+        LOGE("using an invalid surface id=%d, identity=%u should be %d",
+                mToken, mIdentity, cblk->layers[mToken].identity);
+        return NO_INIT;
+    }
+    return NO_ERROR;
 }
 
-status_t Surface::nextBuffer(SurfaceInfo* info) {
-    return mClient->nextBuffer(this, info);
-}
-
-status_t Surface::lock(SurfaceInfo* info, bool blocking) {
-    return Surface::lock(info, NULL, blocking);
-}
-
-status_t Surface::lock(SurfaceInfo* info, Region* dirty, bool blocking) {
-    if (heapBase(0) == 0) return INVALID_OPERATION;
-    if (heapBase(1) == 0) return INVALID_OPERATION;
-    return mClient->lockSurface(this, info, dirty, blocking);
-}
-
-status_t Surface::unlockAndPost() {
-    if (heapBase(0) == 0) return INVALID_OPERATION;
-    if (heapBase(1) == 0) return INVALID_OPERATION;
-    return mClient->unlockAndPostSurface(this);
-}
-
-status_t Surface::unlock() {
-    if (heapBase(0) == 0) return INVALID_OPERATION;
-    if (heapBase(1) == 0) return INVALID_OPERATION;
-    return mClient->unlockSurface(this);
-}
-
-status_t Surface::setLayer(int32_t layer) {
-    return mClient->setLayer(this, layer);
-}
-status_t Surface::setPosition(int32_t x, int32_t y) {
-    return mClient->setPosition(this, x, y);
-}
-status_t Surface::setSize(uint32_t w, uint32_t h) {
-    return mClient->setSize(this, w, h);
-}
-status_t Surface::hide() {
-    return mClient->hide(this);
-}
-status_t Surface::show(int32_t layer) {
-    return mClient->show(this, layer);
-}
-status_t Surface::freeze() {
-    return mClient->freeze(this);
-}
-status_t Surface::unfreeze() {
-    return mClient->unfreeze(this);
-}
-status_t Surface::setFlags(uint32_t flags, uint32_t mask) {
-    return mClient->setFlags(this, flags, mask);
-}
-status_t Surface::setTransparentRegionHint(const Region& transparent) {
-    return mClient->setTransparentRegionHint(this, transparent);
-}
-status_t Surface::setAlpha(float alpha) {
-    return mClient->setAlpha(this, alpha);
-}
-status_t Surface::setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
-    return mClient->setMatrix(this, dsdx, dtdx, dsdy, dtdy);
-}
-status_t Surface::setFreezeTint(uint32_t tint) {
-    return mClient->setFreezeTint(this, tint);
-}
-
-Region Surface::dirtyRegion() const  {
-    return mDirtyRegion; 
-}
-void Surface::setDirtyRegion(const Region& region) const {
-    mDirtyRegion = region;
-}
-const Rect& Surface::swapRectangle() const {
-    return mSwapRectangle;
-}
-void Surface::setSwapRectangle(const Rect& r) {
-    mSwapRectangle = r;
-}
-
-sp<Surface> Surface::readFromParcel(Parcel* parcel)
+status_t SurfaceControl::writeSurfaceToParcel(
+        const sp<SurfaceControl>& control, Parcel* parcel)
 {
-    sp<SurfaceComposerClient> client;
-    ISurfaceFlingerClient::surface_data_t data;
-    sp<IBinder> clientBinder= parcel->readStrongBinder();
-    sp<ISurface> surface    = interface_cast<ISurface>(parcel->readStrongBinder());
-    data.heap[0]            = interface_cast<IMemoryHeap>(parcel->readStrongBinder());
-    data.heap[1]            = interface_cast<IMemoryHeap>(parcel->readStrongBinder());
-    data.token              = parcel->readInt32();
-    data.identity           = parcel->readInt32();
-    PixelFormat format      = parcel->readInt32();
-    uint32_t flags          = parcel->readInt32();
-
-    if (clientBinder != NULL)
-        client = SurfaceComposerClient::clientForConnection(clientBinder);
-
-    return new Surface(client, surface, data, 0, 0, format, flags, false);
-}
-
-status_t Surface::writeToParcel(const sp<Surface>& surface, Parcel* parcel)
-{
-    uint32_t flags=0;
-    uint32_t format=0;
+    uint32_t flags = 0;
+    uint32_t format = 0;
     SurfaceID token = -1;
     uint32_t identity = 0;
     sp<SurfaceComposerClient> client;
     sp<ISurface> sur;
-    sp<IMemoryHeap> heap[2];
-    if (surface->isValid()) {
-        token = surface->mToken;
-        identity = surface->mIdentity;
-        client = surface->mClient;
-        sur = surface->mSurface;
-        heap[0] = surface->mHeap[0];
-        heap[1] = surface->mHeap[1];
-        format = surface->mFormat;
-        flags = surface->mFlags;
+    if (SurfaceControl::isValid(control)) {
+        token    = control->mToken;
+        identity = control->mIdentity;
+        client   = control->mClient;
+        sur      = control->mSurface;
+        format   = control->mFormat;
+        flags    = control->mFlags;
     }
     parcel->writeStrongBinder(client!=0  ? client->connection() : NULL);
     parcel->writeStrongBinder(sur!=0     ? sur->asBinder()      : NULL);
-    parcel->writeStrongBinder(heap[0]!=0 ? heap[0]->asBinder()  : NULL);
-    parcel->writeStrongBinder(heap[1]!=0 ? heap[1]->asBinder()  : NULL);
     parcel->writeInt32(token);
     parcel->writeInt32(identity);
     parcel->writeInt32(format);
@@ -226,30 +343,348 @@ status_t Surface::writeToParcel(const sp<Surface>& surface, Parcel* parcel)
     return NO_ERROR;
 }
 
-bool Surface::isSameSurface(const sp<Surface>& lhs, const sp<Surface>& rhs) 
+sp<Surface> SurfaceControl::getSurface() const
+{
+    Mutex::Autolock _l(mLock);
+    if (mSurfaceData == 0) {
+        mSurfaceData = new Surface(const_cast<SurfaceControl*>(this));
+    }
+    return mSurfaceData;
+}
+
+// ============================================================================
+//  Surface
+// ============================================================================
+
+Surface::Surface(const sp<SurfaceControl>& surface)
+    : mClient(surface->mClient), mSurface(surface->mSurface),
+      mToken(surface->mToken), mIdentity(surface->mIdentity),
+      mFormat(surface->mFormat), mFlags(surface->mFlags),
+      mBufferMapper(BufferMapper::get())
+{
+    init();
+}
+
+Surface::Surface(const Parcel& parcel)
+    :  mBufferMapper(BufferMapper::get())
+{
+    sp<IBinder> clientBinder = parcel.readStrongBinder();
+    mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
+    mToken      = parcel.readInt32();
+    mIdentity   = parcel.readInt32();
+    mFormat     = parcel.readInt32();
+    mFlags      = parcel.readInt32();
+
+    if (clientBinder != NULL)
+        mClient = SurfaceComposerClient::clientForConnection(clientBinder);
+
+    init();
+}
+
+void Surface::init()
+{
+    android_native_window_t::setSwapInterval  = setSwapInterval;
+    android_native_window_t::dequeueBuffer    = dequeueBuffer;
+    android_native_window_t::lockBuffer       = lockBuffer;
+    android_native_window_t::queueBuffer      = queueBuffer;
+    mSwapRectangle.makeInvalid();
+    DisplayInfo dinfo;
+    SurfaceComposerClient::getDisplayInfo(0, &dinfo);
+    const_cast<float&>(android_native_window_t::xdpi) = dinfo.xdpi;
+    const_cast<float&>(android_native_window_t::ydpi) = dinfo.ydpi;
+    // FIXME: set real values here
+    const_cast<int&>(android_native_window_t::minSwapInterval) = 1;
+    const_cast<int&>(android_native_window_t::maxSwapInterval) = 1;
+    const_cast<uint32_t&>(android_native_window_t::flags) = 0;
+}
+
+
+Surface::~Surface()
+{
+    // this is a client-side operation, the surface is destroyed, unmap
+    // its buffers in this process.
+    for (int i=0 ; i<2 ; i++) {
+        if (mBuffers[i] != 0) {
+            getBufferMapper().unregisterBuffer(mBuffers[i]->handle);
+        }
+    }
+
+    // clear all references and trigger an IPC now, to make sure things
+    // happen without delay, since these resources are quite heavy.
+    mClient.clear();
+    mSurface.clear();
+    IPCThreadState::self()->flushCommands();
+}
+
+status_t Surface::validate(per_client_cblk_t const* cblk) const
+{
+    if (mToken<0 || mClient==0) {
+        LOGE("invalid token (%d, identity=%u) or client (%p)", 
+                mToken, mIdentity, mClient.get());
+        return NO_INIT;
+    }
+    if (cblk == 0) {
+        LOGE("cblk is null (surface id=%d, identity=%u)", mToken, mIdentity);
+        return NO_INIT;
+    }
+    status_t err = cblk->validate(mToken);
+    if (err != NO_ERROR) {
+        LOGE("surface (id=%d, identity=%u) is invalid, err=%d (%s)",
+                mToken, mIdentity, err, strerror(-err));
+        return err;
+    }
+    if (mIdentity != uint32_t(cblk->layers[mToken].identity)) {
+        LOGE("using an invalid surface id=%d, identity=%u should be %d",
+                mToken, mIdentity, cblk->layers[mToken].identity);
+        return NO_INIT;
+    }
+    return NO_ERROR;
+}
+
+
+bool Surface::isSameSurface(
+        const sp<Surface>& lhs, const sp<Surface>& rhs) 
 {
     if (lhs == 0 || rhs == 0)
         return false;
     return lhs->mSurface->asBinder() == rhs->mSurface->asBinder();
 }
 
-void* Surface::heapBase(int i) const 
+// ----------------------------------------------------------------------------
+
+int Surface::setSwapInterval(android_native_window_t* window, int interval)
 {
-    void* heapBase = mSurfaceHeapBase[i];
-    // map lazily so it doesn't get mapped in clients that don't need it
-    if (heapBase == 0) {
-        const sp<IMemoryHeap>& heap(mHeap[i]);
-        if (heap != 0) {
-            heapBase = static_cast<uint8_t*>(heap->base());
-            if (heapBase == MAP_FAILED) {
-                heapBase = NULL;
-                LOGE("Couldn't map Surface's heap (binder=%p, heap=%p)",
-                        heap->asBinder().get(), heap.get());
+    return 0;
+}
+
+int Surface::dequeueBuffer(android_native_window_t* window, 
+        android_native_buffer_t** buffer)
+{
+    Surface* self = getSelf(window);
+    return self->dequeueBuffer(buffer);
+}
+
+int Surface::lockBuffer(android_native_window_t* window, 
+        android_native_buffer_t* buffer)
+{
+    Surface* self = getSelf(window);
+    return self->lockBuffer(buffer);
+}
+
+int Surface::queueBuffer(android_native_window_t* window, 
+        android_native_buffer_t* buffer)
+{
+    Surface* self = getSelf(window);
+    return self->queueBuffer(buffer);
+}
+
+// ----------------------------------------------------------------------------
+
+status_t Surface::dequeueBuffer(sp<SurfaceBuffer>* buffer)
+{
+    android_native_buffer_t* out;
+    status_t err = dequeueBuffer(&out);
+    *buffer = SurfaceBuffer::getSelf(out);
+    return err;
+}
+
+status_t Surface::lockBuffer(const sp<SurfaceBuffer>& buffer)
+{
+    return lockBuffer(buffer.get());
+}
+
+status_t Surface::queueBuffer(const sp<SurfaceBuffer>& buffer)
+{
+    return queueBuffer(buffer.get());
+}
+
+// ----------------------------------------------------------------------------
+
+int Surface::dequeueBuffer(android_native_buffer_t** buffer)
+{
+    // FIXME: dequeueBuffer() needs proper implementation
+
+    Mutex::Autolock _l(mSurfaceLock);
+
+    per_client_cblk_t* const cblk = mClient->mControl;
+    status_t err = validate(cblk);
+    if (err != NO_ERROR)
+        return err;
+
+    SurfaceID index(mToken); 
+    
+    int32_t backIdx = cblk->lock_layer(size_t(index),
+            per_client_cblk_t::BLOCKING);
+
+    if (backIdx < 0)
+        return status_t(backIdx); 
+
+    mBackbufferIndex = backIdx;
+    layer_cblk_t* const lcblk = &(cblk->layers[index]);
+
+    volatile const surface_info_t* const back = lcblk->surface + backIdx;
+    if (back->flags & surface_info_t::eNeedNewBuffer) {
+        getBufferLocked(backIdx);
+    }
+
+    const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
+    mDirtyRegion.set(backBuffer->width, backBuffer->height);
+    *buffer = backBuffer.get();
+  
+    return NO_ERROR;
+}
+
+int Surface::lockBuffer(android_native_buffer_t* buffer)
+{
+    Mutex::Autolock _l(mSurfaceLock);
+
+    per_client_cblk_t* const cblk = mClient->mControl;
+    status_t err = validate(cblk);
+    if (err != NO_ERROR)
+        return err;
+
+    // FIXME: lockBuffer() needs proper implementation
+    return 0;
+}
+
+int Surface::queueBuffer(android_native_buffer_t* buffer)
+{   
+    Mutex::Autolock _l(mSurfaceLock);
+
+    per_client_cblk_t* const cblk = mClient->mControl;
+    status_t err = validate(cblk);
+    if (err != NO_ERROR)
+        return err;
+
+    if (mSwapRectangle.isValid()) {
+        mDirtyRegion.set(mSwapRectangle);
+    }
+    
+    // transmit the dirty region
+    SurfaceID index(mToken); 
+    layer_cblk_t* const lcblk = &(cblk->layers[index]);
+    _send_dirty_region(lcblk, mDirtyRegion);
+
+    uint32_t newstate = cblk->unlock_layer_and_post(size_t(index));
+    if (!(newstate & eNextFlipPending))
+        mClient->signalServer();
+
+    return NO_ERROR;
+}
+
+// ----------------------------------------------------------------------------
+
+status_t Surface::lock(SurfaceInfo* info, bool blocking) {
+    return Surface::lock(info, NULL, blocking);
+}
+
+status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking) 
+{
+    // FIXME: needs some locking here
+    
+    sp<SurfaceBuffer> backBuffer;
+    status_t err = dequeueBuffer(&backBuffer);
+    if (err == NO_ERROR) {
+        err = lockBuffer(backBuffer);
+        if (err == NO_ERROR) {
+            // we handle copy-back here...
+            
+            const Rect bounds(backBuffer->width, backBuffer->height);
+            Region scratch(bounds);
+            Region& newDirtyRegion(dirtyIn ? *dirtyIn : scratch);
+
+            per_client_cblk_t* const cblk = mClient->mControl;
+            layer_cblk_t* const lcblk = &(cblk->layers[SurfaceID(mToken)]);
+            volatile const surface_info_t* const back = lcblk->surface + mBackbufferIndex;
+            if (back->flags & surface_info_t::eBufferDirty) {
+                // content is meaningless in this case and the whole surface
+                // needs to be redrawn.
+                newDirtyRegion.set(bounds);
+            } else {
+                newDirtyRegion.andSelf(bounds);
+                if (!(lcblk->flags & eNoCopyBack)) {
+                    const sp<SurfaceBuffer>& frontBuffer(mBuffers[1-mBackbufferIndex]);
+                    const Region copyback(mOldDirtyRegion.subtract(newDirtyRegion));
+                    if (!copyback.isEmpty() && frontBuffer!=0) {
+                        // copy front to back
+                        copyBlt(backBuffer, frontBuffer, copyback);
+                    }
+                }
             }
-            mSurfaceHeapBase[i] = heapBase;
+            mDirtyRegion = newDirtyRegion;
+            mOldDirtyRegion = newDirtyRegion;
+
+            void* vaddr;
+            status_t res = backBuffer->lock(
+                    GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN,
+                    newDirtyRegion.bounds(), &vaddr);
+            
+            LOGW_IF(res, "failed locking buffer %d (%p)", 
+                    mBackbufferIndex, backBuffer->handle);
+
+            mLockedBuffer = backBuffer;
+            other->w      = backBuffer->width;
+            other->h      = backBuffer->height;
+            other->s      = backBuffer->stride;
+            other->usage  = backBuffer->usage;
+            other->format = backBuffer->format;
+            other->bits   = vaddr;
         }
     }
-    return heapBase;
+    return err;
+}
+    
+status_t Surface::unlockAndPost() 
+{
+    // FIXME: needs some locking here
+
+    if (mLockedBuffer == 0)
+        return BAD_VALUE;
+
+    status_t res = mLockedBuffer->unlock();
+    LOGW_IF(res, "failed unlocking buffer %d (%p)",
+            mBackbufferIndex, mLockedBuffer->handle);
+    
+    status_t err = queueBuffer(mLockedBuffer);
+    mLockedBuffer = 0;
+    return err;
+}
+
+void Surface::_send_dirty_region(
+        layer_cblk_t* lcblk, const Region& dirty)
+{
+    const int32_t index = (lcblk->flags & eBufferIndex) >> eBufferIndexShift;
+    flat_region_t* flat_region = lcblk->region + index;
+    status_t err = dirty.write(flat_region, sizeof(flat_region_t));
+    if (err < NO_ERROR) {
+        // region doesn't fit, use the bounds
+        const Region reg(dirty.bounds());
+        reg.write(flat_region, sizeof(flat_region_t));
+    }
+}
+
+void Surface::setSwapRectangle(const Rect& r) {
+    mSwapRectangle = r;
+}
+
+status_t Surface::getBufferLocked(int index)
+{
+    status_t err = NO_MEMORY;
+    sp<SurfaceBuffer> buffer = mSurface->getBuffer();
+    LOGE_IF(buffer==0, "ISurface::getBuffer() returned NULL");
+    if (buffer != 0) {
+        sp<SurfaceBuffer>& currentBuffer(mBuffers[index]);
+        if (currentBuffer != 0) {
+            getBufferMapper().unregisterBuffer(currentBuffer->handle);
+            currentBuffer.clear();
+        }
+        err = getBufferMapper().registerBuffer(buffer->handle);
+        LOGW_IF(err, "map(...) failed %d (%s)", err, strerror(-err));
+        if (err == NO_ERROR) {
+            currentBuffer = buffer;
+        }
+    }
+    return err; 
 }
 
 }; // namespace android

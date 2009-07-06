@@ -5,23 +5,25 @@ LOCAL_SRC_FILES:= \
     clz.cpp.arm \
     DisplayHardware/DisplayHardware.cpp \
     DisplayHardware/DisplayHardwareBase.cpp \
-    GPUHardware/GPUHardware.cpp \
     BlurFilter.cpp.arm \
-    CPUGauge.cpp \
+    BufferAllocator.cpp \
     Layer.cpp \
     LayerBase.cpp \
     LayerBuffer.cpp \
     LayerBlur.cpp \
     LayerBitmap.cpp \
     LayerDim.cpp \
-    LayerOrientationAnim.cpp \
-    LayerOrientationAnimRotate.cpp \
-    OrientationAnimation.cpp \
+    MessageQueue.cpp \
     SurfaceFlinger.cpp \
     Tokenizer.cpp \
-    Transform.cpp \
-    VRamHeap.cpp
+    Transform.cpp
 
+LOCAL_CFLAGS:= -DLOG_TAG=\"SurfaceFlinger\"
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
+
+ifeq ($(TARGET_BOARD_PLATFORM), msm7k)
+	LOCAL_CFLAGS += -DDIM_WITH_TEXTURE
+endif
 
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)
@@ -31,19 +33,20 @@ ifeq ($(TARGET_SIMULATOR),true)
 endif
 
 LOCAL_SHARED_LIBRARIES := \
+	libcutils \
+	libpixelflinger \
 	libhardware \
 	libutils \
-	libbinder \
-	libcutils \
-	libui \
 	libcorecg \
-	libsgl \
-	libpixelflinger \
 	libEGL \
-	libGLESv1_CM
+	libGLESv1_CM \
+	libbinder \
+	libui
 
 LOCAL_C_INCLUDES := \
 	$(call include-path-for, corecg graphics)
+
+LOCAL_C_INCLUDES += hardware/libhardware/modules/gralloc
 
 LOCAL_MODULE:= libsurfaceflinger
 

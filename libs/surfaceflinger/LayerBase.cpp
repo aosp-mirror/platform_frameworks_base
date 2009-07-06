@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceFlinger"
-
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -53,19 +53,13 @@ const char* const LayerBaseClient::typeID = "LayerBaseClient";
 
 // ---------------------------------------------------------------------------
 
-Vector<GLuint> LayerBase::deletedTextures; 
-
-int32_t LayerBase::sIdentity = 0;
-
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       mFlinger(flinger),
       mTransformed(false),
       mOrientation(0),
-      mCanUseCopyBit(false),
       mTransactionFlags(0),
       mPremultipliedAlpha(true),
-      mIdentity(uint32_t(android_atomic_inc(&sIdentity))),
       mInvalidate(0)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
@@ -265,43 +259,6 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
     mTransformed = transformed;
     mLeft = tr.tx();
     mTop  = tr.ty();
-
-    // see if we can/should use 2D h/w with the new configuration
-    mCanUseCopyBit = false;
-    copybit_device_t* copybit = mFlinger->getBlitEngine();
-    if (copybit) { 
-        const int step = copybit->get(copybit, COPYBIT_ROTATION_STEP_DEG);
-        const int scaleBits = copybit->get(copybit, COPYBIT_SCALING_FRAC_BITS);
-        mCanUseCopyBit = true;
-        if ((mOrientation < 0) && (step > 1)) {
-            // arbitrary orientations not supported
-            mCanUseCopyBit = false;
-        } else if ((mOrientation > 0) && (step > 90)) {
-            // 90 deg rotations not supported
-            mCanUseCopyBit = false;
-        } else if ((tr.getType() & SkMatrix::kScale_Mask) && (scaleBits < 12)) { 
-            // arbitrary scaling not supported
-            mCanUseCopyBit = false;
-        }
-#if HONOR_PREMULTIPLIED_ALPHA 
-        else if (needsBlending() && mPremultipliedAlpha) {
-            // pre-multiplied alpha not supported
-            mCanUseCopyBit = false;
-        }
-#endif
-        else {
-            // here, we determined we can use copybit
-            if (tr.getType() & SkMatrix::kScale_Mask) {
-                // and we have scaling
-                if (!transparentRegionScreen.isRect()) {
-                    // we punt because blending is cheap (h/w) and the region is
-                    // complex, which may causes artifacts when copying
-                    // scaled content
-                    transparentRegionScreen.clear();
-                }
-            }
-        }
-    }
 }
 
 void LayerBase::lockPageFlip(bool& recomputeVisibleRegions)
@@ -329,8 +286,9 @@ void LayerBase::invalidate()
 
 void LayerBase::drawRegion(const Region& reg) const
 {
-    Region::iterator iterator(reg);
-    if (iterator) {
+    Region::const_iterator it = reg.begin();
+    Region::const_iterator const end = reg.end();
+    if (it != end) {
         Rect r;
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         const int32_t fbWidth  = hw.getWidth();
@@ -338,7 +296,8 @@ void LayerBase::drawRegion(const Region& reg) const
         const GLshort vertices[][2] = { { 0, 0 }, { fbWidth, 0 }, 
                 { fbWidth, fbHeight }, { 0, fbHeight }  };
         glVertexPointer(2, GL_SHORT, 0, vertices);
-        while (iterator.iterate(&r)) {
+        while (it != end) {
+            const Rect& r = *it++;
             const GLint sy = fbHeight - (r.top + r.height());
             glScissor(r.left, sy, r.width(), r.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
@@ -403,12 +362,14 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
-    Rect r;
-    Region::iterator iterator(clip);
-    if (iterator) {
+
+    Region::const_iterator it = clip.begin();
+    Region::const_iterator const end = clip.end();
+    if (it != end) {
         glEnable(GL_SCISSOR_TEST);
         glVertexPointer(2, GL_FIXED, 0, mVertices);
-        while (iterator.iterate(&r)) {
+        while (it != end) {
+            const Rect& r = *it++;
             const GLint sy = fbHeight - (r.top + r.height());
             glScissor(r.left, sy, r.width(), r.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
@@ -416,15 +377,17 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
     }
 }
 
-void LayerBase::drawWithOpenGL(const Region& clip,
-        GLint textureName, const GGLSurface& t, int transform) const
+void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
     const State& s(drawingState());
-
+    
     // bind our texture
-    validateTexture(textureName);
+    validateTexture(texture.name);
+    uint32_t width  = texture.width; 
+    uint32_t height = texture.height;
+    
     glEnable(GL_TEXTURE_2D);
 
     // Dithering...
@@ -472,8 +435,9 @@ void LayerBase::drawWithOpenGL(const Region& clip,
             || !(mFlags & DisplayHardware::DRAW_TEXTURE_EXTENSION) )) 
     {
         //StopWatch watch("GL transformed");
-        Region::iterator iterator(clip);
-        if (iterator) {
+        Region::const_iterator it = clip.begin();
+        Region::const_iterator const end = clip.end();
+        if (it != end) {
             // always use high-quality filtering with fast configurations
             bool fast = !(mFlags & DisplayHardware::SLOW_CONFIG);
             if (!fast && s.flags & ISurfaceComposer::eLayerFilter) {
@@ -490,21 +454,23 @@ void LayerBase::drawWithOpenGL(const Region& clip,
             glMatrixMode(GL_TEXTURE);
             glLoadIdentity();
             
-            if (transform == HAL_TRANSFORM_ROT_90) {
+            // the texture's source is rotated
+            if (texture.transform == HAL_TRANSFORM_ROT_90) {
+                // TODO: handle the other orientations
                 glTranslatef(0, 1, 0);
                 glRotatef(-90, 0, 0, 1);
             }
 
             if (!(mFlags & DisplayHardware::NPOT_EXTENSION)) {
                 // find the smallest power-of-two that will accommodate our surface
-                GLuint tw = 1 << (31 - clz(t.width));
-                GLuint th = 1 << (31 - clz(t.height));
-                if (tw < t.width)  tw <<= 1;
-                if (th < t.height) th <<= 1;
+                GLuint tw = 1 << (31 - clz(width));
+                GLuint th = 1 << (31 - clz(height));
+                if (tw < width)  tw <<= 1;
+                if (th < height) th <<= 1;
                 // this divide should be relatively fast because it's
                 // a power-of-two (optimized path in libgcc)
-                GLfloat ws = GLfloat(t.width) /tw;
-                GLfloat hs = GLfloat(t.height)/th;
+                GLfloat ws = GLfloat(width) /tw;
+                GLfloat hs = GLfloat(height)/th;
                 glScalef(ws, hs, 1.0f);
             }
 
@@ -512,8 +478,8 @@ void LayerBase::drawWithOpenGL(const Region& clip,
             glVertexPointer(2, GL_FIXED, 0, mVertices);
             glTexCoordPointer(2, GL_FIXED, 0, texCoords);
 
-            Rect r;
-            while (iterator.iterate(&r)) {
+            while (it != end) {
+                const Rect& r = *it++;
                 const GLint sy = fbHeight - (r.top + r.height());
                 glScissor(r.left, sy, r.width(), r.height());
                 glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
@@ -526,18 +492,19 @@ void LayerBase::drawWithOpenGL(const Region& clip,
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         }
     } else {
-        Region::iterator iterator(clip);
-        if (iterator) {
-            Rect r;
-            GLint crop[4] = { 0, t.height, t.width, -t.height };
+        Region::const_iterator it = clip.begin();
+        Region::const_iterator const end = clip.end();
+        if (it != end) {
+            GLint crop[4] = { 0, height, width, -height };
             glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
             int x = tx();
             int y = ty();
-            y = fbHeight - (y + t.height);
-            while (iterator.iterate(&r)) {
+            y = fbHeight - (y + height);
+            while (it != end) {
+                const Rect& r = *it++;
                 const GLint sy = fbHeight - (r.top + r.height());
                 glScissor(r.left, sy, r.width(), r.height());
-                glDrawTexiOES(x, y, 0, t.width, t.height);
+                glDrawTexiOES(x, y, 0, width, height);
             }
         }
     }
@@ -550,13 +517,16 @@ void LayerBase::validateTexture(GLint textureName) const
     // this is currently done in loadTexture() below
 }
 
-void LayerBase::loadTexture(const Region& dirty,
-        GLint textureName, const GGLSurface& t,
-        GLuint& textureWidth, GLuint& textureHeight) const
+void LayerBase::loadTexture(Texture* texture, GLint textureName, 
+        const Region& dirty, const GGLSurface& t) const
 {
     // TODO: defer the actual texture reload until LayerBase::validateTexture
     // is called.
 
+    texture->name = textureName;
+    GLuint& textureWidth(texture->width);
+    GLuint& textureHeight(texture->height);
+    
     uint32_t flags = mFlags;
     glBindTexture(GL_TEXTURE_2D, textureName);
 
@@ -565,8 +535,7 @@ void LayerBase::loadTexture(const Region& dirty,
 
     /*
      * In OpenGL ES we can't specify a stride with glTexImage2D (however,
-     * GL_UNPACK_ALIGNMENT is 4, which in essence allows a limited form of
-     * stride).
+     * GL_UNPACK_ALIGNMENT is a limited form of stride).
      * So if the stride here isn't representable with GL_UNPACK_ALIGNMENT, we
      * need to do something reasonable (here creating a bigger texture).
      * 
@@ -579,9 +548,11 @@ void LayerBase::loadTexture(const Region& dirty,
      *
      * This should never be a problem with POT textures
      */
-
-    tw += (((t.stride - tw) * bytesPerPixel(t.format)) / 4);
-
+    
+    int unpack = __builtin_ctz(t.stride * bytesPerPixel(t.format));
+    unpack = 1 << ((unpack > 3) ? 3 : unpack);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, unpack);
+    
     /*
      * round to POT if needed 
      */
@@ -594,119 +565,98 @@ void LayerBase::loadTexture(const Region& dirty,
         texture_h = 1 << (31 - clz(t.height));
         if (texture_w < t.width)  texture_w <<= 1;
         if (texture_h < t.height) texture_h <<= 1;
-        if (texture_w != tw || texture_h != th) {
-            // we can't use DIRECT_TEXTURE since we changed the size
-            // of the texture
-            flags &= ~DisplayHardware::DIRECT_TEXTURE;
-        }
     }
-
-    if (flags & DisplayHardware::DIRECT_TEXTURE) {
-        // here we're guaranteed that texture_{w|h} == t{w|h}
-        if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
-            glTexImage2D(GL_DIRECT_TEXTURE_2D_QUALCOMM, 0,
-                    GL_RGB, tw, th, 0,
-                    GL_RGB, GL_UNSIGNED_SHORT_5_6_5, t.data);
-        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_4444) {
-            glTexImage2D(GL_DIRECT_TEXTURE_2D_QUALCOMM, 0,
-                    GL_RGBA, tw, th, 0,
-                    GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, t.data);
-        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888) {
-            glTexImage2D(GL_DIRECT_TEXTURE_2D_QUALCOMM, 0,
-                    GL_RGBA, tw, th, 0,
-                    GL_RGBA, GL_UNSIGNED_BYTE, t.data);
-        } else if (t.format == GGL_PIXEL_FORMAT_BGRA_8888) {
-            // TODO: add GL_BGRA extension
-        } else {
-            // oops, we don't handle this format, try the regular path
-            goto regular;
-        }
-        textureWidth = tw;
-        textureHeight = th;
-    } else {
+    
 regular:
-        Rect bounds(dirty.bounds());
-        GLvoid* data = 0;
-        if (texture_w!=textureWidth || texture_h!=textureHeight) {
-            // texture size changed, we need to create a new one
+    Rect bounds(dirty.bounds());
+    GLvoid* data = 0;
+    if (texture_w!=textureWidth || texture_h!=textureHeight) {
+        // texture size changed, we need to create a new one
 
-            if (!textureWidth || !textureHeight) {
-                // this is the first time, load the whole texture
-                if (texture_w==tw && texture_h==th) {
-                    // we can do it one pass
-                    data = t.data;
-                } else {
-                    // we have to create the texture first because it
-                    // doesn't match the size of the buffer
-                    bounds.set(Rect(tw, th));
-                }
-            }
-            
-            if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
-                glTexImage2D(GL_TEXTURE_2D, 0,
-                        GL_RGB, texture_w, texture_h, 0,
-                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data);
-            } else if (t.format == GGL_PIXEL_FORMAT_RGBA_4444) {
-                glTexImage2D(GL_TEXTURE_2D, 0,
-                        GL_RGBA, texture_w, texture_h, 0,
-                        GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data);
-            } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888) {
-                glTexImage2D(GL_TEXTURE_2D, 0,
-                        GL_RGBA, texture_w, texture_h, 0,
-                        GL_RGBA, GL_UNSIGNED_BYTE, data);
-            } else if ( t.format == GGL_PIXEL_FORMAT_YCbCr_422_SP ||
-                        t.format == GGL_PIXEL_FORMAT_YCbCr_420_SP) {
-                // just show the Y plane of YUV buffers
+        if (!textureWidth || !textureHeight) {
+            // this is the first time, load the whole texture
+            if (texture_w==tw && texture_h==th) {
+                // we can do it one pass
                 data = t.data;
-                glTexImage2D(GL_TEXTURE_2D, 0,
-                        GL_LUMINANCE, texture_w, texture_h, 0,
-                        GL_LUMINANCE, GL_UNSIGNED_BYTE, data);
             } else {
-                // oops, we don't handle this format!
-                LOGE("layer %p, texture=%d, using format %d, which is not "
-                     "supported by the GL", this, textureName, t.format);
-                textureName = -1;
+                // we have to create the texture first because it
+                // doesn't match the size of the buffer
+                bounds.set(Rect(tw, th));
             }
-            textureWidth = texture_w;
-            textureHeight = texture_h;
         }
-        if (!data && textureName>=0) {
-            if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
-                glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        0, bounds.top, t.width, bounds.height(),
-                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
-                        t.data + bounds.top*t.width*2);
-            } else if (t.format == GGL_PIXEL_FORMAT_RGBA_4444) {
-                glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        0, bounds.top, t.width, bounds.height(),
-                        GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4,
-                        t.data + bounds.top*t.width*2);
-            } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888) {
-                glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        0, bounds.top, t.width, bounds.height(),
-                        GL_RGBA, GL_UNSIGNED_BYTE,
-                        t.data + bounds.top*t.width*4);
-            }
+        
+        if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
+            glTexImage2D(GL_TEXTURE_2D, 0,
+                    GL_RGB, texture_w, texture_h, 0,
+                    GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data);
+        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_4444) {
+            glTexImage2D(GL_TEXTURE_2D, 0,
+                    GL_RGBA, texture_w, texture_h, 0,
+                    GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data);
+        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888) {
+            glTexImage2D(GL_TEXTURE_2D, 0,
+                    GL_RGBA, texture_w, texture_h, 0,
+                    GL_RGBA, GL_UNSIGNED_BYTE, data);
+        } else if ( t.format == GGL_PIXEL_FORMAT_YCbCr_422_SP ||
+                    t.format == GGL_PIXEL_FORMAT_YCbCr_420_SP) {
+            // just show the Y plane of YUV buffers
+            glTexImage2D(GL_TEXTURE_2D, 0,
+                    GL_LUMINANCE, texture_w, texture_h, 0,
+                    GL_LUMINANCE, GL_UNSIGNED_BYTE, data);
+        } else {
+            // oops, we don't handle this format!
+            LOGE("layer %p, texture=%d, using format %d, which is not "
+                 "supported by the GL", this, textureName, t.format);
+            textureName = -1;
+        }
+        textureWidth = texture_w;
+        textureHeight = texture_h;
+    }
+    if (!data && textureName>=0) {
+        if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
+            glTexSubImage2D(GL_TEXTURE_2D, 0,
+                    0, bounds.top, t.width, bounds.height(),
+                    GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
+                    t.data + bounds.top*t.stride*2);
+        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_4444) {
+            glTexSubImage2D(GL_TEXTURE_2D, 0,
+                    0, bounds.top, t.width, bounds.height(),
+                    GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4,
+                    t.data + bounds.top*t.stride*2);
+        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888) {
+            glTexSubImage2D(GL_TEXTURE_2D, 0,
+                    0, bounds.top, t.width, bounds.height(),
+                    GL_RGBA, GL_UNSIGNED_BYTE,
+                    t.data + bounds.top*t.stride*4);
+        } else if ( t.format == GGL_PIXEL_FORMAT_YCbCr_422_SP ||
+                    t.format == GGL_PIXEL_FORMAT_YCbCr_420_SP) {
+            // just show the Y plane of YUV buffers
+            glTexSubImage2D(GL_TEXTURE_2D, 0,
+                    0, bounds.top, t.width, bounds.height(),
+                    GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                    t.data + bounds.top*t.stride);
         }
     }
-}
-
-bool LayerBase::canUseCopybit() const
-{
-    return mCanUseCopyBit;
 }
 
 // ---------------------------------------------------------------------------
 
-LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
-        Client* c, int32_t i)
-    : LayerBase(flinger, display), client(c),
-      lcblk( c ? &(c->ctrlblk->layers[i]) : 0 ),
-      mIndex(i)
-{
-    if (client) {
-        client->bindLayer(this, i);
+int32_t LayerBaseClient::sIdentity = 0;
 
+LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
+        const sp<Client>& client, int32_t i)
+    : LayerBase(flinger, display), client(client),
+      lcblk( client!=0 ? &(client->ctrlblk->layers[i]) : 0 ),
+      mIndex(i),
+      mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
+{
+}
+
+void LayerBaseClient::onFirstRef()
+{    
+    sp<Client> client(this->client.promote());
+    if (client != 0) {
+        client->bindLayer(this, mIndex);
         // Initialize this layer's control block
         memset(this->lcblk, 0, sizeof(layer_cblk_t));
         this->lcblk->identity = mIdentity;
@@ -717,23 +667,121 @@ LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
 
 LayerBaseClient::~LayerBaseClient()
 {
-    if (client) {
+    sp<Client> client(this->client.promote());
+    if (client != 0) {
         client->free(mIndex);
     }
 }
 
-int32_t LayerBaseClient::serverIndex() const {
-    if (client) {
+int32_t LayerBaseClient::serverIndex() const 
+{
+    sp<Client> client(this->client.promote());
+    if (client != 0) {
         return (client->cid<<16)|mIndex;
     }
     return 0xFFFF0000 | mIndex;
 }
 
-sp<LayerBaseClient::Surface> LayerBaseClient::getSurface() const
+sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
 {
-    return new Surface(clientIndex(), mIdentity);
+    sp<Surface> s;
+    Mutex::Autolock _l(mLock);
+    s = mClientSurface.promote();
+    if (s == 0) {
+        s = createSurface();
+        mClientSurface = s;
+    }
+    return s;
 }
 
+sp<LayerBaseClient::Surface> LayerBaseClient::createSurface() const
+{
+    return new Surface(mFlinger, clientIndex(), mIdentity,
+            const_cast<LayerBaseClient *>(this));
+}
+
+// ---------------------------------------------------------------------------
+
+LayerBaseClient::Surface::Surface(
+        const sp<SurfaceFlinger>& flinger,
+        SurfaceID id, int identity, 
+        const sp<LayerBaseClient>& owner) 
+    : mFlinger(flinger), mToken(id), mIdentity(identity), mOwner(owner)
+{
+}
+
+
+LayerBaseClient::Surface::~Surface() 
+{
+    /*
+     * This is a good place to clean-up all client resources 
+     */
+
+    // destroy client resources
+    sp<LayerBaseClient> layer = getOwner();
+    if (layer != 0) {
+        mFlinger->destroySurface(layer);
+    }
+}
+
+sp<LayerBaseClient> LayerBaseClient::Surface::getOwner() const {
+    sp<LayerBaseClient> owner(mOwner.promote());
+    return owner;
+}
+
+
+void LayerBaseClient::Surface::getSurfaceData(
+        ISurfaceFlingerClient::surface_data_t* params) const 
+{
+    params->token = mToken;
+    params->identity = mIdentity;
+}
+
+status_t LayerBaseClient::Surface::onTransact(
+        uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
+{
+    switch (code) {
+        case REGISTER_BUFFERS:
+        case UNREGISTER_BUFFERS:
+        case CREATE_OVERLAY:
+        {
+            if (!mFlinger->mAccessSurfaceFlinger.checkCalling()) {
+                IPCThreadState* ipc = IPCThreadState::self();
+                const int pid = ipc->getCallingPid();
+                const int uid = ipc->getCallingUid();
+                LOGE("Permission Denial: "
+                        "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
+                return PERMISSION_DENIED;
+            }
+        }
+    }
+    return BnSurface::onTransact(code, data, reply, flags);
+}
+
+sp<SurfaceBuffer> LayerBaseClient::Surface::getBuffer() 
+{
+    return NULL; 
+}
+
+status_t LayerBaseClient::Surface::registerBuffers(
+        const ISurface::BufferHeap& buffers) 
+{ 
+    return INVALID_OPERATION; 
+}
+
+void LayerBaseClient::Surface::postBuffer(ssize_t offset) 
+{
+}
+
+void LayerBaseClient::Surface::unregisterBuffers() 
+{
+}
+
+sp<OverlayRef> LayerBaseClient::Surface::createOverlay(
+        uint32_t w, uint32_t h, int32_t format) 
+{
+    return NULL;
+};
 
 // ---------------------------------------------------------------------------
 

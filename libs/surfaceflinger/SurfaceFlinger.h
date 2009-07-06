@@ -25,7 +25,10 @@
 #include <utils/threads.h>
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
-#include <binder/MemoryDealer.h>
+#include <utils/RefBase.h>
+
+#include <binder/IMemory.h>
+#include <binder/Permission.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/ISurfaceComposer.h>
@@ -33,12 +36,12 @@
 
 #include <private/ui/SharedState.h>
 #include <private/ui/LayerState.h>
-#include <private/ui/SurfaceFlingerSynchro.h>
 
 #include "Barrier.h"
-#include "CPUGauge.h"
 #include "Layer.h"
 #include "Tokenizer.h"
+
+#include "MessageQueue.h"
 
 struct copybit_device_t;
 struct overlay_device_t;
@@ -51,13 +54,8 @@ class Client;
 class BClient;
 class DisplayHardware;
 class FreezeLock;
-class GPUHardwareInterface;
-class IGPUCallback;
 class Layer;
 class LayerBuffer;
-class LayerOrientationAnim;
-class OrientationAnimation;
-class SurfaceHeapManager;
 
 typedef int32_t ClientID;
 
@@ -66,7 +64,7 @@ typedef int32_t ClientID;
 
 // ---------------------------------------------------------------------------
 
-class Client
+class Client : public RefBase
 {
 public:
             Client(ClientID cid, const sp<SurfaceFlinger>& flinger);
@@ -74,17 +72,19 @@ public:
 
             int32_t                 generateId(int pid);
             void                    free(int32_t id);
-            status_t                bindLayer(LayerBaseClient* layer, int32_t id);
-            sp<MemoryDealer>        createAllocator(uint32_t memory_type);
+            status_t                bindLayer(const sp<LayerBaseClient>& layer, int32_t id);
 
     inline  bool                    isValid(int32_t i) const;
-    inline  const uint8_t*          inUseArray() const;
-    inline  size_t                  numActiveLayers() const;
-    LayerBaseClient*                getLayerUser(int32_t i) const;
-    const Vector<LayerBaseClient*>& getLayers() const { return mLayers; }
-    const sp<IMemory>&              controlBlockMemory() const { return mCblkMemory; }
+    sp<LayerBaseClient>             getLayerUser(int32_t i) const;
     void                            dump(const char* what);
-    const sp<SurfaceHeapManager>&   getSurfaceHeapManager() const;
+    
+    const Vector< wp<LayerBaseClient> >& getLayers() const { 
+        return mLayers; 
+    }
+    
+    const sp<IMemoryHeap>& getControlBlockMemory() const {
+        return mCblkHeap; 
+    }
     
     // pointer to this client's control block
     per_client_cblk_t*      ctrlblk;
@@ -92,17 +92,14 @@ public:
 
     
 private:
-    int                     getClientPid() const { return mPid; }
+    int getClientPid() const { return mPid; }
         
-    int                         mPid;
-    uint32_t                    mBitmap;
-    SortedVector<uint8_t>       mInUse;
-    Vector<LayerBaseClient*>    mLayers;
-    sp<MemoryDealer>            mCblkHeap;
-    sp<SurfaceFlinger>          mFlinger;
-    sp<MemoryDealer>            mSharedHeapAllocator;
-    sp<MemoryDealer>            mPMemAllocator;
-    sp<IMemory>                 mCblkMemory;
+    int                             mPid;
+    uint32_t                        mBitmap;
+    SortedVector<uint8_t>           mInUse;
+    Vector< wp<LayerBaseClient> >   mLayers;
+    sp<IMemoryHeap>                 mCblkHeap;
+    sp<SurfaceFlinger>              mFlinger;
 };
 
 // ---------------------------------------------------------------------------
@@ -125,6 +122,8 @@ public:
 
         const DisplayHardware&  displayHardware() const;
         const Transform&        transform() const;
+        EGLDisplay              getEGLDisplay() const;
+        
 private:
                                 GraphicPlane(const GraphicPlane&);
         GraphicPlane            operator = (const GraphicPlane&);
@@ -160,7 +159,7 @@ public:
 
     // ISurfaceComposer interface
     virtual sp<ISurfaceFlingerClient>   createConnection();
-    virtual sp<IMemory>                 getCblk() const;
+    virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
     virtual void                        openGlobalTransaction();
     virtual void                        closeGlobalTransaction();
@@ -168,28 +167,16 @@ public:
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
     virtual void                        signal() const;
-    virtual status_t requestGPU(const sp<IGPUCallback>& callback, 
-            gpu_info_t* gpu);
-    virtual status_t revokeGPU();
 
             void                        screenReleased(DisplayID dpy);
             void                        screenAcquired(DisplayID dpy);
 
-            const sp<SurfaceHeapManager>& getSurfaceHeapManager() const { 
-                return mSurfaceHeapManager; 
-            }
-
-            const sp<GPUHardwareInterface>& getGPU() const {
-                return mGPU; 
-            }
-
-            copybit_device_t* getBlitEngine() const;
             overlay_control_device_t* getOverlayEngine() const;
 
             
-    status_t removeLayer(LayerBase* layer);
-    status_t addLayer(LayerBase* layer);
-    status_t invalidateLayerVisibility(LayerBase* layer);
+    status_t removeLayer(const sp<LayerBase>& layer);
+    status_t addLayer(const sp<LayerBase>& layer);
+    status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
     
 private:
     friend class BClient;
@@ -198,26 +185,33 @@ private:
     friend class LayerBaseClient;
     friend class Layer;
     friend class LayerBlur;
+    friend class LayerDim;
 
     sp<ISurface> createSurface(ClientID client, int pid, 
             ISurfaceFlingerClient::surface_data_t* params,
             DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
             uint32_t flags);
 
-    LayerBaseClient* createNormalSurfaceLocked(Client* client, DisplayID display,
-            int32_t id, uint32_t w, uint32_t h, PixelFormat format, uint32_t flags);
+    sp<LayerBaseClient> createNormalSurfaceLocked(
+            const sp<Client>& client, DisplayID display,
+            int32_t id, uint32_t w, uint32_t h, 
+            PixelFormat format, uint32_t flags);
 
-    LayerBaseClient* createBlurSurfaceLocked(Client* client, DisplayID display,
+    sp<LayerBaseClient> createBlurSurfaceLocked(
+            const sp<Client>& client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
-    LayerBaseClient* createDimSurfaceLocked(Client* client, DisplayID display,
+    sp<LayerBaseClient> createDimSurfaceLocked(
+            const sp<Client>& client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
-    LayerBaseClient* createPushBuffersSurfaceLocked(Client* client, DisplayID display,
+    sp<LayerBaseClient> createPushBuffersSurfaceLocked(
+            const sp<Client>& client, DisplayID display,
             int32_t id, uint32_t w, uint32_t h, uint32_t flags);
 
-    status_t    destroySurface(SurfaceID surface_id);
-    status_t    setClientState(ClientID cid, int32_t count, const layer_state_t* states);
+    status_t removeSurface(SurfaceID surface_id);
+    status_t destroySurface(const sp<LayerBaseClient>& layer);
+    status_t setClientState(ClientID cid, int32_t count, const layer_state_t* states);
 
 
     class LayerVector {
@@ -225,15 +219,15 @@ private:
         inline              LayerVector() { }
                             LayerVector(const LayerVector&);
         inline size_t       size() const { return layers.size(); }
-        inline LayerBase*const* array() const { return layers.array(); }
-        ssize_t             add(LayerBase*, Vector<LayerBase*>::compar_t);
-        ssize_t             remove(LayerBase*);
-        ssize_t             reorder(LayerBase*, Vector<LayerBase*>::compar_t);
-        ssize_t             indexOf(LayerBase* key, size_t guess=0) const;
-        inline LayerBase*   operator [] (size_t i) const { return layers[i]; }
+        inline sp<LayerBase> const* array() const { return layers.array(); }
+        ssize_t             add(const sp<LayerBase>&, Vector< sp<LayerBase> >::compar_t);
+        ssize_t             remove(const sp<LayerBase>&);
+        ssize_t             reorder(const sp<LayerBase>&, Vector< sp<LayerBase> >::compar_t);
+        ssize_t             indexOf(const sp<LayerBase>& key, size_t guess=0) const;
+        inline sp<LayerBase> operator [] (size_t i) const { return layers[i]; }
     private:
-        KeyedVector<LayerBase*, size_t> lookup;
-        Vector<LayerBase*>              layers;
+        KeyedVector< sp<LayerBase> , size_t> lookup;
+        Vector< sp<LayerBase> >              layers;
     };
 
     struct State {
@@ -245,25 +239,6 @@ private:
         uint8_t         orientation;
         uint8_t         orientationType;
         uint8_t         freezeDisplay;
-    };
-
-    class DelayedTransaction : public Thread
-    {
-        friend class SurfaceFlinger;
-        sp<SurfaceFlinger>  mFlinger;
-        nsecs_t             mDelay;
-    public:
-        DelayedTransaction(const sp<SurfaceFlinger>& flinger, nsecs_t delay)
-            : Thread(false), mFlinger(flinger), mDelay(delay) {
-        }
-        virtual bool threadLoop() {
-            usleep(mDelay / 1000);
-            if (android_atomic_and(~1,
-                    &mFlinger->mDeplayedTransactionPending) == 1) {
-                mFlinger->signalEvent();
-            }
-            return false;
-        }
     };
 
     virtual bool        threadLoop();
@@ -279,6 +254,9 @@ private:
 
             void        handleConsoleEvents();
             void        handleTransaction(uint32_t transactionFlags);
+            void        handleTransactionLocked(
+                            uint32_t transactionFlags, 
+                            Vector< sp<LayerBase> >& ditchedLayers);
 
             void        computeVisibleRegions(
                             LayerVector& currentLayers,
@@ -289,8 +267,7 @@ private:
             bool        lockPageFlip(const LayerVector& currentLayers);
             void        unlockPageFlip(const LayerVector& currentLayers);
             void        handleRepaint();
-            void        handleDebugCpu();
-            void        scheduleBroadcast(Client* client);
+            void        scheduleBroadcast(const sp<Client>& client);
             void        executeScheduledBroadcasts();
             void        postFramebuffer();
             void        composeSurfaces(const Region& dirty);
@@ -298,10 +275,10 @@ private:
 
 
             void        destroyConnection(ClientID cid);
-            LayerBaseClient* getLayerUser_l(SurfaceID index) const;
-            status_t    addLayer_l(LayerBase* layer);
-            status_t    removeLayer_l(LayerBase* layer);
-            void        destroy_all_removed_layers_l();
+            sp<LayerBaseClient> getLayerUser_l(SurfaceID index) const;
+            status_t    addLayer_l(const sp<LayerBase>& layer);
+            status_t    removeLayer_l(const sp<LayerBase>& layer);
+            status_t    purgatorizeLayer_l(const sp<LayerBase>& layer);
             void        free_resources_l();
 
             uint32_t    getTransactionFlags(uint32_t flags);
@@ -323,6 +300,11 @@ private:
             void        debugShowFPS() const;
             void        drawWormhole() const;
            
+
+    mutable     MessageQueue    mEventQueue;
+    
+                
+                
                 // access must be protected by mStateLock
     mutable     Mutex                   mStateLock;
                 State                   mCurrentState;
@@ -330,53 +312,43 @@ private:
     volatile    int32_t                 mTransactionFlags;
     volatile    int32_t                 mTransactionCount;
                 Condition               mTransactionCV;
-
+                
                 // protected by mStateLock (but we could use another lock)
                 Tokenizer                               mTokens;
-                DefaultKeyedVector<ClientID, Client*>   mClientsMap;
-                DefaultKeyedVector<SurfaceID, LayerBaseClient*>   mLayerMap;
+                DefaultKeyedVector<ClientID, sp<Client> >   mClientsMap;
+                DefaultKeyedVector<SurfaceID, sp<LayerBaseClient> >   mLayerMap;
                 GraphicPlane                            mGraphicPlanes[1];
-                SortedVector<LayerBase*>                mRemovedLayers;
-                Vector<Client*>                         mDisconnectedClients;
+                bool                                    mLayersRemoved;
+                Vector< sp<Client> >                    mDisconnectedClients;
 
                 // constant members (no synchronization needed for access)
-                sp<MemoryDealer>            mServerHeap;
-                sp<IMemory>                 mServerCblkMemory;
+                sp<IMemoryHeap>             mServerHeap;
                 surface_flinger_cblk_t*     mServerCblk;
-                sp<SurfaceHeapManager>      mSurfaceHeapManager;
-                sp<GPUHardwareInterface>    mGPU;
                 GLuint                      mWormholeTexName;
                 nsecs_t                     mBootTime;
+                Permission                  mHardwareTest;
+                Permission                  mAccessSurfaceFlinger;
+                Permission                  mDump;
                 
                 // Can only accessed from the main thread, these members
                 // don't need synchronization
                 Region                      mDirtyRegion;
                 Region                      mInvalidRegion;
                 Region                      mWormholeRegion;
-                Client*                     mLastScheduledBroadcast;
-                SortedVector<Client*>       mScheduledBroadcasts;
+                wp<Client>                  mLastScheduledBroadcast;
+                SortedVector< wp<Client> >  mScheduledBroadcasts;
                 bool                        mVisibleRegionsDirty;
                 bool                        mDeferReleaseConsole;
                 bool                        mFreezeDisplay;
                 int32_t                     mFreezeCount;
                 nsecs_t                     mFreezeDisplayTime;
-                friend class OrientationAnimation;
-                OrientationAnimation*       mOrientationAnimation;
-
-                // access protected by mDebugLock
-    mutable     Mutex                       mDebugLock;
-                sp<CPUGauge>                mCpuGauge;
 
                 // don't use a lock for these, we don't care
                 int                         mDebugRegion;
-                int                         mDebugCpu;
-                int                         mDebugFps;
                 int                         mDebugBackground;
 
                 // these are thread safe
     mutable     Barrier                     mReadyToRunBarrier;
-    mutable     SurfaceFlingerSynchro       mSyncObject;
-    volatile    int32_t                     mDeplayedTransactionPending;
 
                 // atomic variables
                 enum {
@@ -409,11 +381,11 @@ class BClient : public BnSurfaceFlingerClient
 {
 public:
     BClient(SurfaceFlinger *flinger, ClientID cid,
-            const sp<IMemory>& cblk);
+            const sp<IMemoryHeap>& cblk);
     ~BClient();
 
     // ISurfaceFlingerClient interface
-    virtual void getControlBlocks(sp<IMemory>* ctrl) const;
+    virtual sp<IMemoryHeap> getControlBlock() const;
 
     virtual sp<ISurface> createSurface(
             surface_data_t* params, int pid,
@@ -426,7 +398,7 @@ public:
 private:
     ClientID            mId;
     SurfaceFlinger*     mFlinger;
-    sp<IMemory>         mCblk;
+    sp<IMemoryHeap>     mCblk;
 };
 
 // ---------------------------------------------------------------------------

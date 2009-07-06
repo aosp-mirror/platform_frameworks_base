@@ -21,10 +21,14 @@
 #include <string.h>
 #include <errno.h>
 
+#include <pthread.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #if !defined(__arm__)
 #define USE_SLOW_BINDING            1
@@ -76,11 +80,15 @@ enum {
 
 struct gl_hooks_t {
     struct gl_t {
-        #include "gl_entries.in"
-        #include "glext_entries.in"
+        #include "GLES_CM/gl_entries.in"
+        #include "GLES_CM/glext_entries.in"
     } gl;
+    struct gl2_t {
+        #include "GLES2/gl2_entries.in"
+        #include "GLES2/gl2ext_entries.in"
+    } gl2;
     struct egl_t {
-        #include "egl_entries.in"
+        #include "EGL/egl_entries.in"
     } egl;
     struct gl_ext_t {
         void (*extensions[MAX_NUMBER_OF_GL_EXTENSIONS])(void);
@@ -94,6 +102,13 @@ struct gl_hooks_t {
 
 extern gl_hooks_t gHooks[IMPL_NUM_IMPLEMENTATIONS];
 extern pthread_key_t gGLWrapperKey;
+extern "C" void gl_unimplemented();
+
+extern char const * const gl_names[];
+extern char const * const gl2_names[];
+extern char const * const egl_names[];
+
+// ----------------------------------------------------------------------------
 
 #if USE_FAST_TLS_KEY
 

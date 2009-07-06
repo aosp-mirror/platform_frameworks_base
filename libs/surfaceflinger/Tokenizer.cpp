@@ -162,9 +162,10 @@ void Tokenizer::dump() const
 {
     const run_t* ranges = mRanges.array();
     const size_t c = mRanges.size();
-    printf("Tokenizer (%p, size = %lu)\n", this, c);
+    printf("Tokenizer (%p, size = %d)\n", this, int(c));
     for (size_t i=0 ; i<c ; i++) {
-        printf("%lu: (%u, %u)\n", i, ranges[i].first, ranges[i].length);
+        printf("%u: (%u, %u)\n", i,
+                uint32_t(ranges[i].first), uint32_t(ranges[i].length));
     }
 }
 

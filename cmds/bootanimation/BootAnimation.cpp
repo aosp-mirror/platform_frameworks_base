@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "BootAnimation"
-
 #include <stdint.h>
 #include <sys/types.h>
 #include <math.h>
@@ -35,7 +33,7 @@
 #include <ui/DisplayInfo.h>
 #include <ui/ISurfaceComposer.h>
 #include <ui/ISurfaceFlingerClient.h>
-#include <ui/EGLNativeWindowSurface.h>
+#include <ui/FramebufferNativeWindow.h>
 
 #include <core/SkBitmap.h>
 #include <images/SkImageDecoder.h>
@@ -130,11 +128,14 @@ status_t BootAnimation::readyToRun() {
         return -1;
 
     // create the native surface
-    sp<Surface> s = session()->createSurface(getpid(), 0, dinfo.w, dinfo.h,
-            PIXEL_FORMAT_RGB_565, ISurfaceComposer::eGPU);
+    sp<SurfaceControl> control = session()->createSurface(
+            getpid(), 0, dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565,
+            ISurfaceComposer::eGPU);
     session()->openTransaction();
-    s->setLayer(0x40000000);
+    control->setLayer(0x40000000);
     session()->closeTransaction();
+
+    sp<Surface> s = control->getSurface();
 
     // initialize opengl and egl
     const EGLint attribs[] = { EGL_RED_SIZE, 5, EGL_GREEN_SIZE, 6,
@@ -150,9 +151,7 @@ status_t BootAnimation::readyToRun() {
     eglInitialize(display, 0, 0);
     eglChooseConfig(display, attribs, &config, 1, &numConfigs);
 
-    mNativeWindowSurface = new EGLNativeWindowSurface(s);
-    surface = eglCreateWindowSurface(display, config, 
-            mNativeWindowSurface.get(), NULL);
+    surface = eglCreateWindowSurface(display, config, s.get(), NULL);
 
     context = eglCreateContext(display, config, NULL, NULL);
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
@@ -163,6 +162,7 @@ status_t BootAnimation::readyToRun() {
     mSurface = surface;
     mWidth = w;
     mHeight = h;
+    mFlingerSurfaceControl = control;
     mFlingerSurface = s;
 
     // initialize GL
@@ -178,8 +178,8 @@ bool BootAnimation::threadLoop() {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(mDisplay, mContext);
     eglDestroySurface(mDisplay, mSurface);
-    mNativeWindowSurface.clear();
     mFlingerSurface.clear();
+    mFlingerSurfaceControl.clear();
     eglTerminate(mDisplay);
     IPCThreadState::self()->stopProcess();
     return r;
@@ -200,8 +200,7 @@ bool BootAnimation::android() {
     const Rect updateRect(xc, yc, xc + mAndroid[0].w, yc + mAndroid[0].h);
 
     // draw and update only what we need
-    mNativeWindowSurface->setSwapRectangle(updateRect.left,
-            updateRect.top, updateRect.width(), updateRect.height());
+    mFlingerSurface->setSwapRectangle(updateRect);
 
     glEnable(GL_SCISSOR_TEST);
     glScissor(updateRect.left, mHeight - updateRect.bottom, updateRect.width(),

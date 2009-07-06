@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceFlinger"
-
 #include <stdint.h>
 #include <sys/types.h>
 #include <limits.h>
@@ -24,7 +22,6 @@
 #include "LayerOrientationAnimRotate.h"
 #include "OrientationAnimation.h"
 #include "SurfaceFlinger.h"
-#include "VRamHeap.h"
 
 #include "DisplayHardware/DisplayHardware.h"
 
@@ -35,9 +32,6 @@ namespace android {
 OrientationAnimation::OrientationAnimation(const sp<SurfaceFlinger>& flinger)
     : mFlinger(flinger), mLayerOrientationAnim(NULL), mState(DONE)
 {
-    // allocate a memory-dealer for this the first time
-    mTemporaryDealer = mFlinger->getSurfaceHeapManager()->createHeap(
-            ISurfaceComposer::eHardware);
 }
 
 OrientationAnimation::~OrientationAnimation()
@@ -98,19 +92,14 @@ bool OrientationAnimation::prepare()
     const uint32_t w = hw.getWidth();
     const uint32_t h = hw.getHeight();
 
-    LayerBitmap bitmap;
-    bitmap.init(mTemporaryDealer);
-    bitmap.setBits(w, h, 1, hw.getFormat());
-
-    LayerBitmap bitmapIn;
-    bitmapIn.init(mTemporaryDealer);
-    bitmapIn.setBits(w, h, 1, hw.getFormat());
+    sp<Buffer> bitmap = new Buffer(w, h, hw.getFormat());
+    sp<Buffer> bitmapIn = new Buffer(w, h, hw.getFormat());
 
     copybit_image_t front;
-    bitmap.getBitmapSurface(&front);
-    hw.copyFrontToImage(front);
+    bitmap->getBitmapSurface(&front);
+    hw.copyFrontToImage(front); // FIXME: we need an extension to do this
 
-    LayerOrientationAnimBase* l;
+    sp<LayerOrientationAnimBase> l;
     
     if (mType & 0x80) {
         l = new LayerOrientationAnimRotate(
@@ -152,7 +141,7 @@ bool OrientationAnimation::finished()
 {
     mState = DONE;
     mFlinger->removeLayer(mLayerOrientationAnim);
-    mLayerOrientationAnim = NULL;
+    mLayerOrientationAnim.clear();
     return true;
 }
 

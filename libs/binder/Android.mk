@@ -29,6 +29,7 @@ LOCAL_SRC_FILES:= \
     MemoryHeapBase.cpp \
     MemoryHeapPmem.cpp \
 	Parcel.cpp \
+	Permission.cpp \
 	ProcessState.cpp \
 	Static.cpp
 

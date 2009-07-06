@@ -27,8 +27,6 @@
 
 #include <hardware/copybit.h>
 
-#include <core/SkRegion.h>
-
 namespace android {
 // ---------------------------------------------------------------------------
 
@@ -40,7 +38,6 @@ class Region
 public:
                         Region();
                         Region(const Region& rhs);
-    explicit            Region(const SkRegion& rhs);
     explicit            Region(const Rect& rhs);
     explicit            Region(const Parcel& parcel);
     explicit            Region(const void* buffer);
@@ -48,23 +45,37 @@ public:
                         
         Region& operator = (const Region& rhs);
 
-    inline  bool        isEmpty() const     { return mRegion.isEmpty(); }
-    inline  bool        isRect() const      { return mRegion.isRect(); }
+    inline  bool        isEmpty() const     { return mBounds.isEmpty();  }
+    inline  bool        isRect() const      { return mStorage.isEmpty(); }
 
-            Rect        bounds() const;
+    inline  Rect        getBounds() const   { return mBounds; }
+    inline  Rect        bounds() const      { return getBounds(); }
 
-            const SkRegion& toSkRegion() const;
-
+            // the region becomes its bounds
+            Region&     makeBoundsSelf();
+    
             void        clear();
             void        set(const Rect& r);
+            void        set(uint32_t w, uint32_t h);
         
             Region&     orSelf(const Rect& rhs);
             Region&     andSelf(const Rect& rhs);
+            Region&     subtractSelf(const Rect& rhs);
 
             // boolean operators, applied on this
             Region&     orSelf(const Region& rhs);
             Region&     andSelf(const Region& rhs);
             Region&     subtractSelf(const Region& rhs);
+
+            // boolean operators
+    const   Region      merge(const Rect& rhs) const;
+    const   Region      intersect(const Rect& rhs) const;
+    const   Region      subtract(const Rect& rhs) const;
+
+            // boolean operators
+    const   Region      merge(const Region& rhs) const;
+    const   Region      intersect(const Region& rhs) const;
+    const   Region      subtract(const Region& rhs) const;
 
             // these translate rhs first
             Region&     translateSelf(int dx, int dy);
@@ -72,41 +83,40 @@ public:
             Region&     andSelf(const Region& rhs, int dx, int dy);
             Region&     subtractSelf(const Region& rhs, int dx, int dy);
 
-            // boolean operators
-            Region      merge(const Region& rhs) const;
-            Region      intersect(const Region& rhs) const;
-            Region      subtract(const Region& rhs) const;
-
             // these translate rhs first
-            Region      translate(int dx, int dy) const;
-            Region      merge(const Region& rhs, int dx, int dy) const;
-            Region      intersect(const Region& rhs, int dx, int dy) const;
-            Region      subtract(const Region& rhs, int dx, int dy) const;
+    const   Region      translate(int dx, int dy) const;
+    const   Region      merge(const Region& rhs, int dx, int dy) const;
+    const   Region      intersect(const Region& rhs, int dx, int dy) const;
+    const   Region      subtract(const Region& rhs, int dx, int dy) const;
 
     // convenience operators overloads
-    inline  Region      operator | (const Region& rhs) const;
-    inline  Region      operator & (const Region& rhs) const;
-    inline  Region      operator - (const Region& rhs) const;
-    inline  Region      operator + (const Point& pt) const;
+    inline  const Region      operator | (const Region& rhs) const;
+    inline  const Region      operator & (const Region& rhs) const;
+    inline  const Region      operator - (const Region& rhs) const;
+    inline  const Region      operator + (const Point& pt) const;
 
     inline  Region&     operator |= (const Region& rhs);
     inline  Region&     operator &= (const Region& rhs);
     inline  Region&     operator -= (const Region& rhs);
     inline  Region&     operator += (const Point& pt);
 
-    class iterator {
-        SkRegion::Iterator  mIt;
-    public:
-        iterator(const Region& r);
-        inline operator bool () const { return !done(); }
-        int iterate(Rect* rect);
-    private:
-        inline bool done() const {
-            return const_cast<SkRegion::Iterator&>(mIt).done();
-        }
-    };
+    
+    /* various ways to access the rectangle list */
+    
+    typedef Rect const* const_iterator;
+    
+            const_iterator begin() const;
+            const_iterator end() const;
 
-            size_t      rects(Vector<Rect>& rectList) const;
+    /* no user serviceable parts here... */
+            
+            size_t      getRects(Vector<Rect>& rectList) const;
+            Rect const* getArray(size_t* count) const;
+
+            
+            // add a rectangle to the internal list. This rectangle must
+            // be sorted in Y and X and must not make the region invalid.
+            void        addRectUnchecked(int l, int t, int r, int b);
 
             // flatten/unflatten a region to/from a Parcel
             status_t    write(Parcel& parcel) const;
@@ -123,20 +133,46 @@ public:
     void        dump(const char* what, uint32_t flags=0) const;
 
 private:
-    SkRegion    mRegion;
+    class rasterizer;
+    friend class rasterizer;
+    
+    Region& operationSelf(const Rect& r, int op);
+    Region& operationSelf(const Region& r, int op);
+    Region& operationSelf(const Region& r, int dx, int dy, int op);
+    const Region operation(const Rect& rhs, int op) const;
+    const Region operation(const Region& rhs, int op) const;
+    const Region operation(const Region& rhs, int dx, int dy, int op) const;
+
+    static void boolean_operation(int op, Region& dst,
+            const Region& lhs, const Region& rhs, int dx, int dy);
+    static void boolean_operation(int op, Region& dst,
+            const Region& lhs, const Rect& rhs, int dx, int dy);
+
+    static void boolean_operation(int op, Region& dst,
+            const Region& lhs, const Region& rhs);
+    static void boolean_operation(int op, Region& dst,
+            const Region& lhs, const Rect& rhs);
+
+    static void translate(Region& reg, int dx, int dy);
+    static void translate(Region& dst, const Region& reg, int dx, int dy);
+
+    static bool validate(const Region& reg, const char* name);
+    
+    Rect            mBounds;
+    Vector<Rect>    mStorage;
 };
 
 
-Region Region::operator | (const Region& rhs) const {
+const Region Region::operator | (const Region& rhs) const {
     return merge(rhs);
 }
-Region Region::operator & (const Region& rhs) const {
+const Region Region::operator & (const Region& rhs) const {
     return intersect(rhs);
 }
-Region Region::operator - (const Region& rhs) const {
+const Region Region::operator - (const Region& rhs) const {
     return subtract(rhs);
 }
-Region Region::operator + (const Point& pt) const {
+const Region Region::operator + (const Point& pt) const {
     return translate(pt.x, pt.y);
 }
 
@@ -157,16 +193,23 @@ Region& Region::operator += (const Point& pt) {
 // ---------------------------------------------------------------------------
 
 struct region_iterator : public copybit_region_t {
-    region_iterator(const Region& region) : i(region) {
+    region_iterator(const Region& region)
+        : b(region.begin()), e(region.end()) {
         this->next = iterate;
     }
 private:
     static int iterate(copybit_region_t const * self, copybit_rect_t* rect) {
-        return static_cast<const region_iterator*>(self)
-        ->i.iterate(reinterpret_cast<Rect*>(rect));
+        region_iterator const* me = static_cast<region_iterator const*>(self);
+        if (me->b != me->e) {
+            *reinterpret_cast<Rect*>(rect) = *me->b++;
+            return 1;
+        }
+        return 0;
     }
-    mutable Region::iterator i;
+    mutable Region::const_iterator b;
+    Region::const_iterator const e;
 };
+
 // ---------------------------------------------------------------------------
 }; // namespace android
 

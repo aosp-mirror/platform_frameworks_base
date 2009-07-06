@@ -27,9 +27,14 @@
 #include <unistd.h>
 
 #include <string.h>
+
 #include <cutils/atomic.h>
+#include <cutils/properties.h>
+
+#include <utils/misc.h>
 
 #include <android_runtime/ActivityManager.h>
+
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/MemoryHeapBase.h>

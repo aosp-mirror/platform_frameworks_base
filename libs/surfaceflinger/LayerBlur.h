@@ -39,7 +39,7 @@ public:
     virtual uint32_t getTypeInfo() const { return typeInfo; }
     
                 LayerBlur(SurfaceFlinger* flinger, DisplayID display,
-                        Client* client, int32_t i);
+                        const sp<Client>& client, int32_t i);
         virtual ~LayerBlur();
 
     virtual void onDraw(const Region& clip) const;
