@@ -224,6 +224,7 @@ static void do_reset_keystore(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
     }
     reply->retcode = reset_keystore();
 }
+
 static void execute(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 {
     uint32_t cmd_max = sizeof(cmds)/sizeof(struct cmdinfo);

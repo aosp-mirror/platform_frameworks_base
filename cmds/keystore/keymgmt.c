@@ -185,6 +185,7 @@ static int change_passwd(char *data)
         p = strtok_r(NULL, delimiter, &context);
     }
     if (count != 2) return -1;
+    if (strlen(new_pass) < MIN_PASSWD_LENGTH) return -1;
     if ((ret = get_master_key(old_pass, master_key)) == 0) {
         ret = store_master_key(new_pass, master_key);
         retry_count = 0;
@@ -259,6 +260,11 @@ int list_keys(const char *namespace, char reply[BUFFER_MAX])
     DIR *d;
     struct dirent *de;
 
+    if (state != UNLOCKED) {
+        LOGE("Can not list key with current state %d\n", state);
+        return -1;
+    }
+
     if (!namespace || ((d = opendir("."))) == NULL) {
         LOGE("cannot open keystore dir or namespace is null\n");
         return -1;
@@ -287,6 +293,7 @@ int passwd(char *data)
 {
     if (state == UNINITIALIZED) {
         if (strchr(data, ' ')) return -1;
+        if (strlen(data) < MIN_PASSWD_LENGTH) return -1;
         return create_master_key(data);
     }
     return change_passwd(data);
