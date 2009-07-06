@@ -6,7 +6,7 @@
                  android:name=".TtsService"
                  android:label="TTS Service">
             <intent-filter>
-                <action android:name="android.intent.action.USE_TTS"/>
+                <action android:name="android.intent.action.START_TTS_SERVICE"/>
                 <category android:name="android.intent.category.TTS"/>
             </intent-filter>
         </service>

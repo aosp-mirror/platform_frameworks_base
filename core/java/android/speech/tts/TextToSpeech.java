@@ -207,7 +207,7 @@ public class TextToSpeech {
             }
         };
 
-        Intent intent = new Intent("android.intent.action.USE_TTS");
+        Intent intent = new Intent("android.intent.action.START_TTS_SERVICE");
         intent.addCategory("android.intent.category.TTS");
         mContext.bindService(intent, mServiceConnection,
                 Context.BIND_AUTO_CREATE);
