@@ -34,7 +34,7 @@ import android.media.AudioManager;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-
+import java.util.Set;
 import java.lang.ref.WeakReference;
 
 /**
@@ -431,6 +431,39 @@ import java.lang.ref.WeakReference;
  */
 public class MediaPlayer
 {
+    /**
+       Constant to retrieve only the new metadata since the last
+       call.
+       // FIXME: unhide.
+       // FIXME: add link to getMetadata(boolean, boolean)
+       {@hide}
+     */
+    public static final boolean METADATA_UPDATE_ONLY = true;
+
+    /**
+       Constant to retrieve all the metadata.
+       // FIXME: unhide.
+       // FIXME: add link to getMetadata(boolean, boolean)
+       {@hide}
+     */
+    public static final boolean METADATA_ALL = false;
+
+    /**
+       Constant to enable the metadata filter during retrieval.
+       // FIXME: unhide.
+       // FIXME: add link to getMetadata(boolean, boolean)
+       {@hide}
+     */
+    public static final boolean APPLY_METADATA_FILTER = true;
+
+    /**
+       Constant to disable the metadata filter during retrieval.
+       // FIXME: unhide.
+       // FIXME: add link to getMetadata(boolean, boolean)
+       {@hide}
+     */
+    public static final boolean BYPASS_METADATA_FILTER = false;
+
     static {
         System.loadLibrary("media_jni");
     }
@@ -880,6 +913,52 @@ public class MediaPlayer
     public native int getDuration();
 
     /**
+     * Gets the media metadata.
+     *
+     * @param update_only controls whether the full set of available
+     * metadata is returned or just the set that changed since the
+     * last call. See {@see #METADATA_UPDATE_ONLY} and {@see
+     * #METADATA_ALL}.
+     *
+     * @param apply_filter if true only metadata that matches the
+     * filter is returned. See {@see #APPLY_METADATA_FILTER} and {@see
+     * #BYPASS_METADATA_FILTER}.
+     *
+     * @return The metadata, possibly empty. null if an error occured.
+     // FIXME: unhide.
+     * {@hide}
+     */
+    public Metadata getMetadata(final boolean update_only,
+                                final boolean apply_filter) {
+        // FIXME: Implement.
+        return new Metadata();
+    }
+
+    /**
+     * Set a filter for the metadata update notification and update
+     * retrieval. The caller provides 2 set of metadata keys, allowed
+     * and disallowed. The disallow set always takes the precedence
+     * over the allowed one.
+     * Metadata.MATCH_ALL and Metadata.MATCH_NONE are 2 sets available as
+     * shorthands to allow/disallow all or no metadata.
+     *
+     * By default, there is no filter set.
+     *
+     * @param allow Is the set of metadata the client is interested
+     *              receiving new notifications for.
+     * @param disallow Is the set of metadata the client is not interested
+     *                 receiving new notifications for.
+     * @return The call status code.
+     *
+     // FIXME: unhide.
+     * {@hide}
+     */
+    public int setMetadataFilter(Set<Integer> allow, Set<Integer> disallow) {
+        // FIXME: Implement.
+        return 0;
+    }
+
+    /**
      * Releases resources associated with this MediaPlayer object.
      * It is considered good practice to call this method when you're
      * done using the MediaPlayer.
@@ -1306,6 +1385,11 @@ public class MediaPlayer
      */
     public static final int MEDIA_INFO_NOT_SEEKABLE = 801;
 
+    /** A new set of metadata is available.
+     * @see android.media.MediaPlayer.OnInfoListener
+     */
+    public static final int MEDIA_INFO_METADATA_UPDATE = 802;
+
     /**
      * Interface definition of a callback to be invoked to communicate some
      * info and/or warning about the media or its playback.
@@ -1322,6 +1406,7 @@ public class MediaPlayer
          * <li>{@link #MEDIA_INFO_VIDEO_TRACK_LAGGING}
          * <li>{@link #MEDIA_INFO_BAD_INTERLEAVING}
          * <li>{@link #MEDIA_INFO_NOT_SEEKABLE}
+         * <li>{@link #MEDIA_INFO_METADATA_UPDATE}
          * </ul>
          * @param extra an extra code, specific to the info. Typically
          * implementation dependant.
