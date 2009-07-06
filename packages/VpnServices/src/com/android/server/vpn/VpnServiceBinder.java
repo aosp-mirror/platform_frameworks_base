@@ -20,7 +20,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.net.vpn.IVpnService;
 import android.net.vpn.L2tpIpsecProfile;
+import android.net.vpn.L2tpIpsecPskProfile;
 import android.net.vpn.L2tpProfile;
+import android.net.vpn.PptpProfile;
 import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
@@ -83,15 +85,25 @@ public class VpnServiceBinder extends Service {
 
     private VpnService<? extends VpnProfile> createService(VpnProfile p) {
         switch (p.getType()) {
-            case L2TP_IPSEC:
-                L2tpIpsecService l2tpIpsec = new L2tpIpsecService();
-                l2tpIpsec.setContext(this, (L2tpIpsecProfile) p);
-                return l2tpIpsec;
-
             case L2TP:
                 L2tpService l2tp = new L2tpService();
                 l2tp.setContext(this, (L2tpProfile) p);
                 return l2tp;
+
+            case PPTP:
+                PptpService pptp = new PptpService();
+                pptp.setContext(this, (PptpProfile) p);
+                return pptp;
+
+            case L2TP_IPSEC_PSK:
+                L2tpIpsecPskService psk = new L2tpIpsecPskService();
+                psk.setContext(this, (L2tpIpsecPskProfile) p);
+                return psk;
+
+            case L2TP_IPSEC:
+                L2tpIpsecService l2tpIpsec = new L2tpIpsecService();
+                l2tpIpsec.setContext(this, (L2tpIpsecProfile) p);
+                return l2tpIpsec;
 
             default:
                 return null;
