@@ -316,6 +316,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Add a transport to our set of available backends
     private void registerTransport(String name, IBackupTransport transport) {
         synchronized (mTransports) {
+            if (DEBUG) Log.v(TAG, "Registering transport " + name + " = " + transport);
             mTransports.put(name, transport);
         }
     }
@@ -1341,7 +1342,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Report all known, available backup transports
     public String[] listAllTransports() {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "listAllTransports");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "listAllTransports");
 
         String[] list = null;
         ArrayList<String> known = new ArrayList<String>();
@@ -1503,6 +1504,8 @@ class BackupManagerService extends IBackupManager.Stub {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
+            long oldId = Binder.clearCallingIdentity();
+
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled"));
             pw.println("Available transports:");
             for (String t : listAllTransports()) {
@@ -1524,6 +1527,8 @@ class BackupManagerService extends IBackupManager.Stub {
             for (BackupRequest req : mPendingBackups.values()) {
                 pw.println("    " + req);
             }
+
+            Binder.restoreCallingIdentity(oldId);
         }
     }
 }
