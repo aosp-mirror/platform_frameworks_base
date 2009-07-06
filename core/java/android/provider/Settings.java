@@ -2269,11 +2269,18 @@ public final class Settings {
         public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
         /**
-         * Controls whether data backup is enabled.
+         * Controls whether settings backup is enabled.
          * Type: int ( 0 = disabled, 1 = enabled )
          * @hide
          */
         public static final String BACKUP_ENABLED = "backup_enabled";
+
+        /**
+         * Indicates whether settings backup has been fully provisioned.
+         * Type: int ( 0 = unprovisioned, 1 = fully provisioned )
+         * @hide
+         */
+        public static final String BACKUP_PROVISIONED = "backup_provisioned";
 
         /**
          * Component of the transport to use for backup/restore.
