@@ -88,7 +88,7 @@ of any XML files. </p>
 <p>You will create and store your resource files under the appropriate
 subdirectory under the <code>res/</code> directory in your project. Android
 has a resource compiler (aapt) that compiles resources according to which
-subfolder they are in, and the format of the file. Table 1 shows a llist of the file
+subfolder they are in, and the format of the file. Table 1 shows a list of the file
 types for each resource. See the 
 <a href="available-resources.html">Available Resources</a> for
 descriptions of each type of object, the syntax, and the format or syntax of
@@ -465,7 +465,7 @@ MyApp/
     </tr>
     <tr>
       <td>MCC and MNC</td>
-      <td>The <a href="http://en.wikipedia.org/wiki/Mobile_country_code">mobile country code</a> and <a href="http://en.wikipedia.org/wiki/Mobile_Network_Code">mobile network code</a> from the SIM in the device. For example  <code>mcc310-mnc004</code> (U.S., Verizon brand); <code>mcc208-mnc00</code> (France, Orange brand); <code>mcc234-mnc00</code> (U.K., BT brand). <br>
+      <td>The mobile country code and mobile network code from the SIM in the device. For example  <code>mcc310-mnc004</code> (U.S., Verizon brand); <code>mcc208-mnc00</code> (France, Orange brand); <code>mcc234-mnc00</code> (U.K., BT brand). <br>
         <br>
         If the device uses a radio connection  (GSM phone), the MCC will come from the SIM, and the MNC will come from the  network to which the device is attached. You might sometimes use the MCC alone, for example to include country-specific legal resources in your application. If your application specifies resources for a MCC/MNC  combination, those resources can only be used if both the MCC and the MNC match. </td>
   </tr>
