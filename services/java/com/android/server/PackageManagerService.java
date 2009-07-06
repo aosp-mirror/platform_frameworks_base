@@ -5808,24 +5808,15 @@ class PackageManagerService extends IPackageManager.Stub {
                     // Check to see if its a disabled system app
                     PackageSetting ps = mDisabledSysPackages.get(name);
                     if((ps != null) && ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
-                        // Could be a replaced system package
-                        // Note that if the user replaced a system app, the user has to physically
-                        // delete the new one in order to revert to the system app. So even
-                        // if the user updated the system app via an update, the user still
-                        // has to delete the one installed in the data partition in order to pick up the
-                        // new system package.
+                        // This is an updated system app with versions in both system
+                        // and data partition. Just let the most recent version
+                        // take precedence.
                         return p;
-                    } else if ((p.pkg != null) && (p.pkg.applicationInfo != null) &&
-                                ((p.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)) {
-                        // Check for non-system apps
+                    } else if ((p.pkg != null) && (p.pkg.applicationInfo != null)) {
+                        // Let the app continue with previous uid if code path changes.
                         reportSettingsProblem(Log.WARN,
                                 "Package " + name + " codePath changed from " + p.codePath
                                 + " to " + codePath + "; Retaining data and using new code");
-                    } else {
-                        reportSettingsProblem(Log.WARN,
-                                "Package " + name + " codePath changed from " + p.codePath
-                                + " to " + codePath + "; replacing with new");
-                        p = null;
                     }
                 } else if (p.sharedUser != sharedUser) {
                     reportSettingsProblem(Log.WARN,
