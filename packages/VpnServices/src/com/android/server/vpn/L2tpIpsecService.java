@@ -17,7 +17,7 @@
 package com.android.server.vpn;
 
 import android.net.vpn.L2tpIpsecProfile;
-import android.security.Keystore;
+import android.security.CertTool;
 
 import java.io.IOException;
 
@@ -48,17 +48,17 @@ class L2tpIpsecService extends VpnService<L2tpIpsecProfile> {
     }
 
     private String getCaCertPath() {
-        return Keystore.getInstance().getCaCertificate(
+        return CertTool.getInstance().getCaCertificate(
                 getProfile().getCaCertificate());
     }
 
     private String getUserCertPath() {
-        return Keystore.getInstance().getUserCertificate(
+        return CertTool.getInstance().getUserCertificate(
                 getProfile().getUserCertificate());
     }
 
     private String getUserkeyPath() {
-        return Keystore.getInstance().getUserPrivateKey(
+        return CertTool.getInstance().getUserPrivateKey(
                 getProfile().getUserCertificate());
     }
 }
