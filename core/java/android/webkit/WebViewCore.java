@@ -370,7 +370,8 @@ final class WebViewCore {
 
     // Start: functions that deal with text editing
     private native void nativeReplaceTextfieldText(
-            int oldStart, int oldEnd, String replace, int newStart, int newEnd);
+            int oldStart, int oldEnd, String replace, int newStart, int newEnd,
+            int textGeneration);
 
     private native void passToJs(int gen,
             String currentText, int keyCode, int keyValue, boolean down,
@@ -415,8 +416,10 @@ final class WebViewCore {
      *  order, swap them.
      *  @param  start   Beginning of selection to delete.
      *  @param  end     End of selection to delete.
+     *  @param  textGeneration Text generation number when delete was pressed.
      */
-    private native void nativeDeleteSelection(int start, int end);
+    private native void nativeDeleteSelection(int start, int end,
+            int textGeneration);
 
     /**
      *  Set the selection to (start, end) in the focused textfield. If start and
@@ -551,10 +554,17 @@ final class WebViewCore {
         byte[] mPostData;
     }
 
+    static class DeleteSelectionData {
+        int mStart;
+        int mEnd;
+        int mTextGeneration;
+    }
+
     static class ReplaceTextData {
         String mReplace;
         int mNewStart;
         int mNewEnd;
+        int mTextGeneration;
     }
 
     static class TouchUpData {
@@ -920,7 +930,8 @@ final class WebViewCore {
                         case REPLACE_TEXT:
                             ReplaceTextData rep = (ReplaceTextData) msg.obj;
                             nativeReplaceTextfieldText(msg.arg1, msg.arg2,
-                                    rep.mReplace, rep.mNewStart, rep.mNewEnd);
+                                    rep.mReplace, rep.mNewStart, rep.mNewEnd,
+                                    rep.mTextGeneration);
                             break;
 
                         case PASS_TO_JS: {
@@ -1029,7 +1040,11 @@ final class WebViewCore {
                             break;
 
                         case DELETE_SELECTION:
-                            nativeDeleteSelection(msg.arg1, msg.arg2);
+                            DeleteSelectionData deleteSelectionData
+                                    = (DeleteSelectionData) msg.obj;
+                            nativeDeleteSelection(deleteSelectionData.mStart,
+                                    deleteSelectionData.mEnd,
+                                    deleteSelectionData.mTextGeneration);
                             break;
 
                         case SET_SELECTION:

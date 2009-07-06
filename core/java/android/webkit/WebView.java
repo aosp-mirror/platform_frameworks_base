@@ -3024,7 +3024,12 @@ public class WebView extends AbsoluteLayout
      */
     /* package */ void deleteSelection(int start, int end) {
         mTextGeneration++;
-        mWebViewCore.sendMessage(EventHub.DELETE_SELECTION, start, end);
+        WebViewCore.DeleteSelectionData data
+                = new WebViewCore.DeleteSelectionData();
+        data.mStart = start;
+        data.mEnd = end;
+        data.mTextGeneration = mTextGeneration;
+        mWebViewCore.sendMessage(EventHub.DELETE_SELECTION, data);
     }
 
     /**
@@ -4672,6 +4677,7 @@ public class WebView extends AbsoluteLayout
         arg.mNewStart = newStart;
         arg.mNewEnd = newEnd;
         mTextGeneration++;
+        arg.mTextGeneration = mTextGeneration;
         mWebViewCore.sendMessage(EventHub.REPLACE_TEXT, oldStart, oldEnd, arg);
     }
 
