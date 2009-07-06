@@ -1197,11 +1197,11 @@
     <string name="lockscreen_pattern_wrong">Sorry, try again</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
-         is not fully sharted, show the current charge %.  -->
+         is not fully charged, show the current charge %.  -->
     <string name="lockscreen_plugged_in">Charging (<xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>)</string>
     <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
          charged, say that it is charged. -->
-    <string name="lockscreen_charged">Charged</string>
+    <string name="lockscreen_charged">Charged.</string>
 
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
