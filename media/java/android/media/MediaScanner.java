@@ -544,7 +544,10 @@ public class MediaScanner
                                 
         public void handleStringTag(String name, String value) {
             if (name.equalsIgnoreCase("title") || name.startsWith("title;")) {
-                mTitle = value.trim();
+                // Don't trim() here, to preserve the special \001 character
+                // used to force sorting. The media provider will trim() before
+                // inserting the title in to the database.
+                mTitle = value;
             } else if (name.equalsIgnoreCase("artist") || name.startsWith("artist;")) {
                 mArtist = value.trim();
             } else if (name.equalsIgnoreCase("albumartist") || name.startsWith("albumartist;")) {
