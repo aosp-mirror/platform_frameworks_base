@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.util.List;
+import java.io.File;
 
 /**
      * A mock context which prevents its users from talking to the rest of the device while
@@ -100,5 +101,9 @@ public class IsolatedContext extends ContextWrapper {
                 Handler handler, boolean updateImmediately) {
             // do nothing
         }
+    }
+    @Override
+    public File getFilesDir() {
+        return new File("/dev/null");
     }
 }
