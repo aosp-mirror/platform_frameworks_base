@@ -237,6 +237,7 @@ public class WebView extends AbsoluteLayout
      * Helper class to get velocity for fling
      */
     VelocityTracker mVelocityTracker;
+    private int mMaximumFling;
 
     /**
      * Touch mode
@@ -676,7 +677,8 @@ public class WebView extends AbsoluteLayout
         setClickable(true);
         setLongClickable(true);
 
-        final int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        final ViewConfiguration configuration = ViewConfiguration.get(getContext());
+        final int slop = configuration.getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
         mMinLockSnapReverseDistance = slop;
         final float density = getContext().getResources().getDisplayMetrics().density;
@@ -692,6 +694,7 @@ public class WebView extends AbsoluteLayout
         DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
         mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
         mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+        mMaximumFling = configuration.getScaledMaximumFlingVelocity();
     }
 
     /* package */void updateDefaultZoomDensity(int zoomDensity) {
@@ -4157,7 +4160,7 @@ public class WebView extends AbsoluteLayout
         int maxX = Math.max(computeHorizontalScrollRange() - getViewWidth(), 0);
         int maxY = Math.max(computeVerticalScrollRange() - getViewHeight(), 0);
 
-        mVelocityTracker.computeCurrentVelocity(1000);
+        mVelocityTracker.computeCurrentVelocity(1000, mMaximumFling);
         int vx = (int) mVelocityTracker.getXVelocity();
         int vy = (int) mVelocityTracker.getYVelocity();
 

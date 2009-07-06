@@ -165,7 +165,17 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             pastTime[i] = 0;
         }
     }
-    
+
+    /**
+     * Equivalent to invoking {@link #computeCurrentVelocity(int, float)} with a maximum
+     * velocity of Float.MAX_VALUE.
+     * 
+     * @see #computeCurrentVelocity(int, float) 
+     */
+    public void computeCurrentVelocity(int units) {
+        computeCurrentVelocity(units, Float.MAX_VALUE);
+    }
+
     /**
      * Compute the current velocity based on the points that have been
      * collected.  Only call this when you actually want to retrieve velocity
@@ -175,8 +185,11 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * 
      * @param units The units you would like the velocity in.  A value of 1
      * provides pixels per millisecond, 1000 provides pixels per second, etc.
+     * @param maxVelocity The maximum velocity that can be computed by this method.
+     * This value must be declared in the same unit as the units parameter. This value
+     * must be positive.
      */
-    public void computeCurrentVelocity(int units) {
+    public void computeCurrentVelocity(int units, float maxVelocity) {
         final float[] pastX = mPastX;
         final float[] pastY = mPastY;
         final long[] pastTime = mPastTime;
@@ -210,8 +223,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
             if (accumY == 0) accumY = vel;
             else accumY = (accumY + vel) * .5f;
         }
-        mXVelocity = accumX;
-        mYVelocity = accumY;
+        mXVelocity = accumX < 0.0f ? Math.max(accumX, -maxVelocity) : Math.min(accumX, maxVelocity);
+        mYVelocity = accumY < 0.0f ? Math.max(accumY, -maxVelocity) : Math.min(accumY, maxVelocity);
         
         if (localLOGV) Log.v(TAG, "Y velocity=" + mYVelocity +" X velocity="
                 + mXVelocity + " N=" + N);
