@@ -1573,6 +1573,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         
         /**
+         * We override this method to avoid an extra onItemClick being called on the
+         * drop-down's OnItemClickListener by {@link AutoCompleteTextView#onKeyUp(int, KeyEvent)}
+         * when an item is clicked with the trackball.
+         */
+        @Override
+        public void performCompletion() {
+        }
+        
+        /**
          * We override this method so that we can allow a threshold of zero, which ACTV does not.
          */
         @Override
