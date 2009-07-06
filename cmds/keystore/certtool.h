@@ -26,21 +26,29 @@
 #include "common.h"
 #include "netkeystore.h"
 
+#define CERT_NAME_LEN (2 * MAX_KEY_NAME_LENGTH + 2)
+
 /*
  * The specific function 'get_cert' is used in daemons to get the key value
  * from keystore. Caller should allocate the buffer and the length of the buffer
  * should be MAX_KEY_VALUE_LENGTH.
  */
-static inline int get_cert(char *certname, unsigned char *value, int *size)
+static inline int get_cert(const char *certname, unsigned char *value, int *size)
 {
     int count, fd, ret = -1;
     LPC_MARSHAL cmd;
     char delimiter[] = "_";
     char *namespace, *keyname;
     char *context = NULL;
+    char cname[CERT_NAME_LEN];
 
-    if (value == NULL) {
-        LOGE("get_cert: value is null\n");
+    if ((certname == NULL) || (value == NULL)) {
+        LOGE("get_cert: certname or value is null\n");
+        return -1;
+    }
+
+    if (strlcpy(cname, certname, CERT_NAME_LEN) >= CERT_NAME_LEN) {
+        LOGE("get_cert: keyname is too long\n");
         return -1;
     }
 
@@ -53,7 +61,7 @@ static inline int get_cert(char *certname, unsigned char *value, int *size)
     }
 
     cmd.opcode = GET;
-    if (((namespace = strtok_r(certname, delimiter, &context)) == NULL) ||
+    if (((namespace = strtok_r(cname, delimiter, &context)) == NULL) ||
         ((keyname = strtok_r(NULL, delimiter, &context)) == NULL)) {
         goto err;
     }
