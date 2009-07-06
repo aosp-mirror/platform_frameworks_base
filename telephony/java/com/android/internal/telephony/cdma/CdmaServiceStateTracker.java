@@ -592,7 +592,10 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 }
 
                 mRegistrationState = registrationState;
-                mCdmaRoaming = regCodeIsRoaming(registrationState);
+                // mCdmaRoaming is true when registration state is roaming and TSB58 roaming
+                // indicator is not in the carrier-specified list of ERIs for home system
+                mCdmaRoaming =
+                        regCodeIsRoaming(registrationState) && !isRoamIndForHomeSystem(states[10]);
                 newSS.setState (regCodeToServiceState(registrationState));
 
                 this.newCdmaDataConnectionState = radioTechnologyToDataServiceState(radioTechnology);
@@ -1166,6 +1169,33 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     regCodeIsRoaming (int code) {
         // 5 is  "in service -- roam"
         return 5 == code;
+    }
+
+    /**
+     * Determine whether a roaming indicator is in the carrier-specified list of ERIs for
+     * home system
+     *
+     * @param roamInd roaming indicator in String
+     * @return true if the roamInd is in the carrier-specified list of ERIs for home network
+     */
+    private boolean isRoamIndForHomeSystem(String roamInd) {
+        // retrieve the carrier-specified list of ERIs for home system
+        String homeRoamIndcators = SystemProperties.get("ro.cdma.homesystem");
+
+        if (!TextUtils.isEmpty(homeRoamIndcators)) {
+            // searches through the comma-separated list for a match,
+            // return true if one is found.
+            for (String homeRoamInd : homeRoamIndcators.split(",")) {
+                if (homeRoamInd.equals(roamInd)) {
+                    return true;
+                }
+            }
+            // no matches found against the list!
+            return false;
+        }
+
+        // no system property found for the roaming indicators for home system
+        return false;
     }
 
     /**
