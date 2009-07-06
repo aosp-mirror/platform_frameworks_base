@@ -37,7 +37,7 @@ PNG, and JPEG files. The XML files have very different formats depending
 on what they describe. This document describes what kinds of files are
 supported, and the syntax or format of each.</p>
 <p>Resources are externalized from source code, and XML files are compiled into
-a binary, fast loading format for efficiency reasons. Strings, likewise are compressed
+a binary, fast loading format for efficiency reasons. Strings, likewise, are compressed
 into a more efficient storage form. It is for these reasons that we have these
 different resource types in the Android platform.</p>
 
@@ -88,12 +88,12 @@ of any XML files. </p>
 <p>You will create and store your resource files under the appropriate
 subdirectory under the <code>res/</code> directory in your project. Android
 has a resource compiler (aapt) that compiles resources according to which
-subfolder they are in, and the format of the file. Here is a list of the file
+subfolder they are in, and the format of the file. Table 1 shows a list of the file
 types for each resource. See the 
 <a href="available-resources.html">Available Resources</a> for
 descriptions of each type of object, the syntax, and the format or syntax of
 the containing file.</p>
-
+<p class="caption">Table 1</p>
 <table width="100%" border="1">
     <tr>
         <th scope="col">Directory</th>
@@ -410,7 +410,7 @@ public class MyActivity extends Activity
 <a name="AlternateResources" id="AlternateResources"></a>
 <h2>Alternate Resources (for alternate languages and configurations)</h2>
 
-<p>You can supply different resources for your product according to the UI
+<p>You can supply different resources for your application to use depending on the UI
 language or hardware configuration on the device. Note that although you can
 include different string, layout, and other resources, the SDK does not expose
 methods to let you specify which alternate resource set to load. Android
@@ -436,7 +436,7 @@ MyApp/
 Append these to the end of the resource folder name, separated by dashes. You
 can add multiple qualifiers to each folder name, but they must appear in the
 order they are listed here. For example, a folder containing drawable
-resources for a fully specified configuration would look like:</p>
+resources for a fully specified configuration would look like this:</p>
 
 <pre>
 MyApp/
@@ -444,8 +444,7 @@ MyApp/
         drawable-en-rUS-port-160dpi-finger-keysexposed-qwerty-dpad-480x320/
 </pre>
 
-<p>More typically, you will only specify a few specific configuration options
-that a resource is defined for. You may drop any of the values from the
+<p>More typically, you will only specify a few specific configuration options. You may drop any of the values from the
 complete list, as long as the remaining values are still in the same
 order:</p>
 
@@ -457,41 +456,46 @@ MyApp/
         drawable-port-160dpi/
         drawable-qwerty/
 </pre>
-
+<p>Table 2 lists the valid folder-name qualifiers, in order of precedence. Qualifiers that are listed higher in the table take precedence over those listed lower, as described in <a href="#best-match">How Android finds the best matching directory</a>. </p>
+<p class="caption" id="table2">Table 2</p>
 <table border="1">
     <tr>
         <th> Qualifier </th>
         <th> Values </th>
     </tr>
     <tr>
-        <td>Language</td>
-        <td>The two letter <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
-                639-1</a> language code in lowercase. For example: 
-                <code>en</code>, <code>fr</code>, <code>es</code> </td>
-    </tr>
+      <td>MCC and MNC</td>
+      <td>The mobile country code and mobile network code from the SIM in the device. For example  <code>mcc310-mnc004</code> (U.S., Verizon brand); <code>mcc208-mnc00</code> (France, Orange brand); <code>mcc234-mnc00</code> (U.K., BT brand). <br>
+        <br>
+        If the device uses a radio connection  (GSM phone), the MCC will come from the SIM, and the MNC will come from the  network to which the device is attached. You might sometimes use the MCC alone, for example to include country-specific legal resources in your application. If your application specifies resources for a MCC/MNC  combination, those resources can only be used if both the MCC and the MNC match. </td>
+  </tr>
     <tr>
-        <td>Region</td>
-        <td>The two letter
-        <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
-                3166-1-alpha-2</a> language code in uppercase preceded by a lowercase
-            &quot;r&quot;. For example: <code>rUS</code>, <code>rFR</code>, <code>rES</code></td>
-    </tr>
+        <td>Language and region</td>
+        <td>The two letter <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
+                639-1</a> language code and two letter
+                <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
+                3166-1-alpha-2</a> region code (preceded by lowercase &quot;r&quot;). For example 
+                <code>en-rUS</code>, <code>fr-rFR</code>, <code>es-rES</code>. <br>
+                <br>
+          The codes are case-sensitive: The language code is lowercase, and the country code is uppercase. You cannot specify a region alone, but you can specify a language alone, for example <code>en</code>, <code>fr</code>, <code>es</code>. </td>
+  </tr>
     <tr>
         <td>Screen orientation</td>
         <td><code>port</code>, <code>land</code>, <code>square</code> </td>
     </tr>
     <tr>
         <td>Screen pixel density</td>
-        <td><code>92dpi</code>, <code>108dpi</code>, etc. </td>
-    </tr>
+        <td><code>92dpi</code>, <code>108dpi</code>, etc. When Android selects which resource files to use, it handles screen density  differently than the other qualifiers. In step 1 of <a href="#best-match">How Android finds the best matching directory</a> (below),  screen density is always  considered to be a match. In step 4, if the qualifier being considered is screen density, Android will select the best final match at that point, without any need to move on to step 5. </td>
+  </tr>
     <tr>
         <td>Touchscreen type</td>
         <td><code>notouch</code>, <code>stylus</code>, <code>finger</code></td>
     </tr>
     <tr>
         <td>Whether the keyboard is available to the user</td>
-        <td><code>keysexposed</code>, <code>keyshidden</code> </td>
-    </tr>
+        <td><code>keysexposed</code>, <code>keyshidden</code>, <code>keyssoft</code> <br>
+          If your application has specific resources that should only be used with a soft keyboard, use the <code>keyssoft</code> value. If no <code>keyssoft</code> resources are available (only <code>keysexposed</code> and <code>keyshidden</code>) and the device  shows a soft keyboard,  the system will use <code>keysexposed</code> resources. </td>
+  </tr>
     <tr>
         <td>Primary text input method</td>
         <td><code>nokeys</code>, <code>qwerty</code>, <code>12key</code> </td>
@@ -506,6 +510,14 @@ MyApp/
         <td><code>320x240</code>, <code>640x480</code>, etc. The larger dimension
             must be specified first. </td>
     </tr>
+    <tr>
+      <td>SDK version</td>
+      <td>The SDK version supported by the device, for example <code>v3</code>. The Android 1.0 SDK is <code>v1, </code> the 1.1 SDK is <code>v2</code>, and the 1.5 SDK is <code>v3</code>.</td>
+  </tr>
+    <tr>
+      <td>(Minor version)</td>
+      <td>(You cannot currently    specify minor version. It is always set to 0.)</td>
+  </tr>
 </table>
 
 <p>This list does not include device-specific parameters such as carrier,
@@ -513,92 +525,84 @@ branding, device/hardware, or manufacturer. Everything that an application
 needs to know about the device that it is running on is encoded via the
 resource qualifiers in the table above.</p>
 
-<p>Here are some general guidelines on qualified resource directory names:</p>
+<p>All resource directories, qualified and unqualified, live under the <code>res/</code> folder. Here are some  guidelines on qualified resource directory names:</p>
 
 <ul>
-    <li>Values are separated by a dash (as well as a dash after the base directory
-        name) </li>
-    <li>Values are case-sensitive (even though they must be unique across all folder
-        names in a case-insensitive way)<br />For example,</li>
-    <ul>
-        <li>A portrait-specific <code>drawable</code> directory must be named
-            <code>drawable-port</code>, not <code>drawable-PORT</code>.</li>
-        <li>You may not have two directories named <code>drawable-port</code>
-            and <code>drawable-PORT</code>, even if you had intended "port" and
-            "PORT" to refer to different parameter values.</li>
-    </ul>
-    <li>Only one value for each qualifier type is supported (that is, you cannot
-        specify <code>drawable-rEN-rFR/</code>)</li>
-    <li>You can specify multiple parameters to define specific configurations,
-        but they must always be in the order listed above.
-        For example, <code>drawable-en-rUS-land</code> will apply to landscape view,
-        US-English devices. </li>
-    <li>Android will try to find the most specific matching directory for the current
-        configuration, as described below</li>
-    <li>The order of parameters listed in this table is used to break a tie in case
-        of multiple qualified directories (see the example given below) </li>
-    <li>All directories, both qualified and unqualified, live under the <code>res/</code> folder.
-        Qualified directories cannot be nested (you cannot have <code>res/drawable/drawable-en</code>) </li>
-    <li>All resources will be referenced in code or resource reference syntax by
-        their simple, undecorated name. So if a resource is named this:<br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>MyApp/res/drawable-port-92dp/myimage.png</code><br />
-        It would be referenced as this:<br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>R.drawable.myimage</code> (code)<br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>&#064;drawable/myimage</code> (XML)</li>
+    <li>You can specify multiple qualifiers, separated by dashes. For example, <code>drawable-en-rUS-land</code> will apply to US-English
+    devices in landscape orientation. </li>
+    <li>The qualifiers must  be in the order listed in <a href="#table2">Table 2</a> above. For example:
+      <ul>
+        <li>Correct: <code>values-mcc460-nokeys/</code></li>
+        <li>Incorrect: <code>values-nokeys-mcc460/</code></li>
+      </ul>
+    </li>
+    <li>Values are case-sensitive. For example, a portrait-specific <code>drawable</code> directory must be named
+    <code>drawable-port</code>, not <code>drawable-PORT</code> or <code>drawable-Port</code>.</li>
+    <li>Only one value for each qualifier type is supported. For example, if you want to use exactly the same drawable files for Spain and France, you will need two  resource directories, such as <code>drawable-rES/</code> and <code>drawable-rFR/</code>, containing identical files. You cannot 
+        have a directory named <code>drawable-rES-rFR/</code>. </li>
+    <li>Qualified directories cannot be nested. For example, you cannot have <code>res/drawable/drawable-en</code>. </li>
 </ul>
 
-<h3>How Android finds the best matching directory </h3>
+<h3>How resources are referenced in code</h3>
+<p>All resources will be referenced in code or resource reference syntax by
+    their simple, undecorated names. So if a resource were named this:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>MyApp/res/drawable-port-92dpi/myimage.png</code><br />
+  It would be referenced as this:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>R.drawable.myimage</code> (code)<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>&#064;drawable/myimage</code> (XML)</p>
+<p>If several drawable directories are available, Android will select one of them (as described below) and load  <code>myimage.png</code> from it.</p>
+<h3 id="best-match">How Android finds the best matching directory </h3>
 
 <p>Android will pick which of the various underlying resource files should be
-used at runtime, depending on the current configuration. The selection process
-is as follows:</p>
-
+used at runtime, depending on the current configuration of the device. The example used here assumes the following device configuration:</p>
+<blockquote>
+  <p>Locale = <code>en-GB</code><br>
+  Screen orientation = <code>port</code><br>
+  Screen pixel density = <code>108dpi</code><br>
+    Touchscreen type = <code>notouch</code><br>
+    Primary text input method = <code>12key</code><br>
+  </p>
+</blockquote>
+<p>Here is how  Android  makes the selection: </p>
 <ol>
     <li>
-            Eliminate any resources whose configuration does not match the current
-            device configuration. For example, if the screen pixel density is 108dpi,
-            this would eliminate only <code>MyApp/res/drawable-port-92dpi/</code>.
-        <blockquote>
-            <pre>
-MyApp/res/drawable/myimage.png
-MyApp/res/drawable-en/myimage.png
-MyApp/res/drawable-port/myimage.png
-<strike>MyApp/res/drawable-port-92dpi/myimage.png</strike>
-</pre>
-        </blockquote>
-    </li>
-    <li>
-            Pick the resources with the highest number of matching configurations.
-            For example, if our locale is en-GB and orientation is port, then we
-            have two candidates with one matching configuration each: 
-            <code>MyApp/res/drawable-en/</code> and <code>MyApp/res/drawable-port/</code>.
-            The directory <code>MyApp/res/drawable/</code> is eliminated because
-            it has zero matching configurations, while the others have one matching
-            configuration.
-        <blockquote>
-            <pre>
-<strike>MyApp/res/drawable/myimage.png</strike>
-MyApp/res/drawable-en/myimage.png
-MyApp/res/drawable-port/myimage.png
-</pre>
-        </blockquote>
-    </li>
-    <li>
-            Pick the final matching file based on configuration precedence, which
-            is the order of parameters listed in the table above. That is, it is
-            more important to match the language than the orientation, so we break
-            the tie by picking the language-specific file, <code>MyApp/res/drawable-en/</code>.
-        <blockquote>
-            <pre>MyApp/res/drawable-en/myimage.png
-<strike>MyApp/res/drawable-port/myimage.png</strike>
-</pre>
-        </blockquote>
-    </li>
+            Eliminate  resource files that contradict the 
+            device configuration. For example, assume that the following resource directories are available for drawables. The <code>drawable-fr-rCA/</code> directory will be eliminated, because it contradicts the locale of the device.<br>
+<pre>MyApp/res/drawable/
+MyApp/res/drawable-en/
+<strike>MyApp/res/drawable-fr-rCA/</strike>
+MyApp/res/drawable-en-port/
+MyApp/res/drawable-en-notouch-12key/
+MyApp/res/drawable-port-92dpi/
+MyApp/res/drawable-port-notouch-12key</pre>
+      <strong>Exception: </strong>Screen pixel density is the one qualifier that is not used to eliminate files. Even though the screen density of the device is 108 dpi, <code>drawable-port-92dpi/</code> is not  eliminated from the list, because every screen density is considered to be a 
+        match at this point.</li>
+    <li>From <a href="#table2">Table 2</a>, pick the   highest-precedence qualifier that remains in the list. (Start with MCC, then move down through the list.) </li>
+  <li>Do any of the available resource directories include this qualifier?  </li>
+  <ul>
+    <li>If No, return to step 2 and look at the next qualifier listed in Table 2. In our example, the answer is &quot;no&quot; until we reach Language.</li>
+    <li>If Yes, move on to step 4.</li>
+  </ul>
+  <li>Eliminate resource directories that do not include this qualifier. In our example, we eliminate all the directories that do not include a language qualifier. </li>
+  <pre><strike>MyApp/res/drawable/</strike>
+MyApp/res/drawable-en/
+MyApp/res/drawable-en-port/
+MyApp/res/drawable-en-notouch-12key/
+<strike>MyApp/res/drawable-port-92dpi/</strike>
+<strike>MyApp/res/drawable-port-notouch-12key</strike></pre>
+  <strong>Exception:</strong> If the qualifier in question  is screen pixel density, Android will select the option that most closely matches the device, and the selection process will be complete. In general, Android will prefer scaling down a larger original image to scaling  up a smaller original image.<br><br></li>
+
+<li>Go back and repeat steps 2, 3, and 4 until only one choice remains. In the example, screen orientation is the next qualifier in the table for which we have any matches.
+    Eliminate resources that do not specify a screen orientation. </p>
+    <pre><strike>MyApp/res/drawable-en/</strike>
+MyApp/res/drawable-en-port/
+<strike>MyApp/res/drawable-en-notouch-12key/</strike></pre>
+  Only one choice remains, so that's it. When drawables are called for in this example application, the Android system will load resources from the <code>MyApp/res/drawable-en-port/</code> directory.
 </ol>
-
-<a name="ResourcesTerminology"></a>
-<h2>Terminology</h2>
-
+<p class="note"><strong>Tip:</strong> The <em>precedence</em> of the qualifiers is more important than the number of qualifiers that exactly match the device. For example, in step 4 above, the last choice on the list includes three qualifiers that exactly match the device (orientation, touchscreen type, and input method), while <code>drawable-en</code> has only one parameter that matches (language). However, language has a higher precedence, so <code>drawable-port-notouch-12key</code> is out.</p>
+<p>This flowchart summarizes how Android selects resource directories to load.</p>
+<p><img src="res-selection-flowchart.png" alt="resource-selection" width="461" height="471" style="margin:15px"></p>
+<h3>Terminology</h3>
 <p>The resource system brings a number of different pieces together to
 form the final complete resource functionality.  To help understand the
 overall system, here are some brief definitions of the core concepts and
@@ -671,7 +675,7 @@ information is applied as approriate) and load them into its instance.</p>
 <p><strong>Configuration</strong>: For any particular resource identifier, there may be
 multiple different available values depending on the current configuration.
 The configuration includes the locale (language and country), screen
-orientation, screen density, etc.  The current configuration is used to
+orientation, etc.  The current configuration is used to
 select which resource values are in effect when the resource table is
 loaded.</p>
 
@@ -710,4 +714,3 @@ SDK matures, this section will contain information on the Internationalization
 and Localization features of the Android platform. In the meantime, it is a good
 idea to start by externalizing all strings, and practicing good structure in
 creating and using resources.</p>
-
