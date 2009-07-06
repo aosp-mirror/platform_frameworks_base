@@ -102,7 +102,7 @@ public class TtsService extends Service implements OnCompletionListener {
     private static final int MAX_SPEECH_ITEM_CHAR_LENGTH = 4000;
     private static final int MAX_FILENAME_LENGTH = 250;
 
-    private static final String ACTION = "android.intent.action.USE_TTS";
+    private static final String ACTION = "android.intent.action.START_TTS_SERVICE";
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
 
