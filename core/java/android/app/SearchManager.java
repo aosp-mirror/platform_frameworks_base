@@ -20,7 +20,6 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -1727,59 +1726,6 @@ public class SearchManager
     }
     public void onDismiss(DialogInterface dialog) {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Saves the state of the search UI.
-     *
-     * @return A Bundle containing the state of the search dialog, or {@code null}
-     *         if the search UI is not visible.
-     *
-     * @hide
-     */
-    public Bundle saveSearchDialog() {
-        if (DBG) debug("saveSearchDialog(), mIsShowing=" + mIsShowing);
-        if (!mIsShowing) return null;
-        try {
-            return mService.onSaveInstanceState();
-        } catch (RemoteException ex) {
-            Log.e(TAG, "onSaveInstanceState() failed: " + ex);
-            return null;
-        }
-    }
-
-    /**
-     * Restores the state of the search dialog.
-     *
-     * @param searchDialogState Bundle to read the state from.
-     *
-     * @hide
-     */
-    public void restoreSearchDialog(Bundle searchDialogState) {
-        if (DBG) debug("restoreSearchDialog(" + searchDialogState + ")");
-        if (searchDialogState == null) return;
-        try {
-            mService.onRestoreInstanceState(searchDialogState);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "onRestoreInstanceState() failed: " + ex);
-        }
-    }
-
-    /**
-     * Update the search dialog after a configuration change.
-     *
-     * @param newConfig The new configuration.
-     *
-     * @hide
-     */
-    public void onConfigurationChanged(Configuration newConfig) {
-        if (DBG) debug("onConfigurationChanged(" + newConfig + "), mIsShowing=" + mIsShowing);
-        if (!mIsShowing) return;
-        try {
-            mService.onConfigurationChanged(newConfig);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "onConfigurationChanged() failed:" + ex);
-        }
     }
 
     /**
