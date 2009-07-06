@@ -298,7 +298,7 @@ android_tts_SynthProxy_isLanguageAvailable(JNIEnv *env, jobject thiz, jint jniDa
     const char *langNativeString = env->GetStringUTFChars(language, 0);
     const char *countryNativeString = env->GetStringUTFChars(country, 0);
     const char *variantNativeString = env->GetStringUTFChars(variant, 0);
-    // TODO check return codes
+
     if (pSynthData->mNativeSynthInterface) {
         result = pSynthData->mNativeSynthInterface->isLanguageAvailable(langNativeString,
                 countryNativeString, variantNativeString);
@@ -310,61 +310,70 @@ android_tts_SynthProxy_isLanguageAvailable(JNIEnv *env, jobject thiz, jint jniDa
 }
 
 
-static void
+static int
 android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
         jstring language, jstring country, jstring variant)
 {
+    int result = TTS_LANG_NOT_SUPPORTED;
+
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setLanguage(): invalid JNI data");
-        return;
+        return result;
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     const char *langNativeString = env->GetStringUTFChars(language, 0);
     const char *countryNativeString = env->GetStringUTFChars(country, 0);
     const char *variantNativeString = env->GetStringUTFChars(variant, 0);
-    // TODO check return codes
+
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->setLanguage(langNativeString, countryNativeString,
-                variantNativeString);
+        result = pSynthData->mNativeSynthInterface->setLanguage(langNativeString,
+                countryNativeString, variantNativeString);
     }
     env->ReleaseStringUTFChars(language, langNativeString);
     env->ReleaseStringUTFChars(country, countryNativeString);
     env->ReleaseStringUTFChars(variant, variantNativeString);
+    return result;
 }
 
 
-static void
+static int
 android_tts_SynthProxy_loadLanguage(JNIEnv *env, jobject thiz, jint jniData,
         jstring language, jstring country, jstring variant)
 {
+    int result = TTS_LANG_NOT_SUPPORTED;
+
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_loadLanguage(): invalid JNI data");
-        return;
+        return result;
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     const char *langNativeString = env->GetStringUTFChars(language, 0);
     const char *countryNativeString = env->GetStringUTFChars(country, 0);
     const char *variantNativeString = env->GetStringUTFChars(variant, 0);
-    // TODO check return codes
+
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->loadLanguage(langNativeString, countryNativeString,
-                variantNativeString);
+        result = pSynthData->mNativeSynthInterface->loadLanguage(langNativeString,
+                countryNativeString, variantNativeString);
     }
     env->ReleaseStringUTFChars(language, langNativeString);
     env->ReleaseStringUTFChars(country, countryNativeString);
     env->ReleaseStringUTFChars(variant, variantNativeString);
+
+    return result;
 }
 
 
-static void
+static int
 android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
         jint speechRate)
 {
+    int result = TTS_FAILURE;
+
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setSpeechRate(): invalid JNI data");
-        return;
+        return result;
     }
 
     int bufSize = 10;
@@ -373,20 +382,24 @@ android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     LOGI("setting speech rate to %d", speechRate);
-    // TODO check return codes
+
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->setProperty("rate", buffer, bufSize);
+        result = pSynthData->mNativeSynthInterface->setProperty("rate", buffer, bufSize);
     }
+
+    return result;
 }
 
 
-static void
+static int
 android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
         jint pitch)
 {
+    int result = TTS_FAILURE;
+
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_setPitch(): invalid JNI data");
-        return;
+        return result;
     }
 
     int bufSize = 10;
@@ -395,26 +408,30 @@ android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     LOGI("setting pitch to %d", pitch);
-    // TODO check return codes
+
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->setProperty("pitch", buffer, bufSize);
+        result = pSynthData->mNativeSynthInterface->setProperty("pitch", buffer, bufSize);
     }
+
+    return result;
 }
 
 
-static void
+static int
 android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
         jstring textJavaString, jstring filenameJavaString)
 {
+    int result = TTS_FAILURE;
+
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_synthesizeToFile(): invalid JNI data");
-        return;
+        return result;
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     if (!pSynthData->mNativeSynthInterface) {
         LOGE("android_tts_SynthProxy_synthesizeToFile(): invalid engine handle");
-        return;
+        return result;
     }
 
     // Retrieve audio parameters before writing the file header
@@ -425,7 +442,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     if ((encoding != AudioSystem::PCM_16_BIT) && (encoding != AudioSystem::PCM_8_BIT)) {
         LOGE("android_tts_SynthProxy_synthesizeToFile(): engine uses invalid format");
-        return;
+        return result;
     }
 
     const char *filenameNativeString =
@@ -441,7 +458,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
     if (pForAfter->outputFile == NULL) {
         LOGE("android_tts_SynthProxy_synthesizeToFile(): error creating output file");
         delete pForAfter;
-        return;
+        return result;
     }
 
     // Write 44 blank bytes for WAV header, then come back and fill them in
@@ -451,9 +468,8 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     unsigned int unique_identifier;
 
-    // TODO check return codes
-    pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer,
-            pSynthData->mBufferSize, (void *)pForAfter);
+    result = pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
+            pSynthData->mBuffer, pSynthData->mBufferSize, (void *)pForAfter);
 
     long filelen = ftell(pForAfter->outputFile);
 
@@ -503,16 +519,20 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     env->ReleaseStringUTFChars(textJavaString, textNativeString);
     env->ReleaseStringUTFChars(filenameJavaString, filenameNativeString);
+
+    return result;
 }
 
 
-static void
+static int
 android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
         jstring textJavaString)
 {
+    int result = TTS_FAILURE;
+
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_speak(): invalid JNI data");
-        return;
+        return result;
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
@@ -528,29 +548,35 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 
     if (pSynthData->mNativeSynthInterface) {
         const char *textNativeString = env->GetStringUTFChars(textJavaString, 0);
-        pSynthData->mNativeSynthInterface->synthesizeText(textNativeString, pSynthData->mBuffer,
-                pSynthData->mBufferSize, (void *)pForAfter);
+        result = pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
+                pSynthData->mBuffer, pSynthData->mBufferSize, (void *)pForAfter);
         env->ReleaseStringUTFChars(textJavaString, textNativeString);
     }
+
+    return result;
 }
 
 
-static void
+static int
 android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
 {
+    int result = TTS_FAILURE;
+
     if (jniData == 0) {
         LOGE("android_tts_SynthProxy_stop(): invalid JNI data");
-        return;
+        return result;
     }
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
     if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->stop();
+        result = pSynthData->mNativeSynthInterface->stop();
     }
     if (pSynthData->mAudioOut) {
         pSynthData->mAudioOut->stop();
     }
+
+    return result;
 }
 
 
@@ -642,15 +668,15 @@ android_tts_SynthProxy_getRate(JNIEnv *env, jobject thiz, jint jniData)
 // Dalvik VM type signatures
 static JNINativeMethod gMethods[] = {
     {   "native_stop",
-        "(I)V",
+        "(I)I",
         (void*)android_tts_SynthProxy_stop
     },
     {   "native_speak",
-        "(ILjava/lang/String;)V",
+        "(ILjava/lang/String;)I",
         (void*)android_tts_SynthProxy_speak
     },
     {   "native_synthesizeToFile",
-        "(ILjava/lang/String;Ljava/lang/String;)V",
+        "(ILjava/lang/String;Ljava/lang/String;)I",
         (void*)android_tts_SynthProxy_synthesizeToFile
     },
     {   "native_isLanguageAvailable",
@@ -658,19 +684,19 @@ static JNINativeMethod gMethods[] = {
         (void*)android_tts_SynthProxy_isLanguageAvailable
     },
     {   "native_setLanguage",
-        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
         (void*)android_tts_SynthProxy_setLanguage
     },
     {   "native_loadLanguage",
-        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+        "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
         (void*)android_tts_SynthProxy_loadLanguage
     },
     {   "native_setSpeechRate",
-        "(II)V",
+        "(II)I",
         (void*)android_tts_SynthProxy_setSpeechRate
     },
     {   "native_setPitch",
-        "(II)V",
+        "(II)I",
         (void*)android_tts_SynthProxy_setPitch
     },
     {   "native_playAudioBuffer",
