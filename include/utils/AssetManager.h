@@ -251,6 +251,9 @@ private:
         Asset* getResourceTableAsset();
         Asset* setResourceTableAsset(Asset* asset);
 
+        ResTable* getResourceTable();
+        ResTable* setResourceTable(ResTable* res);
+        
         bool isUpToDate();
         
     protected:
@@ -265,6 +268,7 @@ private:
         time_t mModWhen;
 
         Asset* mResourceTableAsset;
+        ResTable* mResourceTable;
 
         static Mutex gLock;
         static DefaultKeyedVector<String8, wp<SharedZip> > gOpen;
@@ -288,8 +292,11 @@ private:
          */
         ZipFileRO* getZip(const String8& path);
 
-        Asset* getZipResourceTable(const String8& path);
-        Asset* setZipResourceTable(const String8& path, Asset* asset);
+        Asset* getZipResourceTableAsset(const String8& path);
+        Asset* setZipResourceTableAsset(const String8& path, Asset* asset);
+
+        ResTable* getZipResourceTable(const String8& path);
+        ResTable* setZipResourceTable(const String8& path, ResTable* res);
 
         // generate path, e.g. "common/en-US-noogle.zip"
         static String8 getPathName(const char* path);
