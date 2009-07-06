@@ -430,4 +430,9 @@ public class ContextWrapper extends Context {
         throws PackageManager.NameNotFoundException {
         return mBase.createPackageContext(packageName, flags);
     }
+
+    @Override
+    public boolean isRestricted() {
+        return mBase.isRestricted();
+    }
 }

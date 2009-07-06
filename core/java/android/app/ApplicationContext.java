@@ -184,6 +184,7 @@ class ApplicationContext extends Context {
     private StatusBarManager mStatusBarManager = null;
     private TelephonyManager mTelephonyManager = null;
     private ClipboardManager mClipboardManager = null;
+    private boolean mRestricted;
 
     private final Object mSync = new Object();
 
@@ -1336,6 +1337,7 @@ class ApplicationContext extends Context {
             mMainThread.getPackageInfo(packageName, flags);
         if (pi != null) {
             ApplicationContext c = new ApplicationContext();
+            c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
             c.init(pi, null, mMainThread);
             if (c.mResources != null) {
                 return c;
@@ -1345,6 +1347,11 @@ class ApplicationContext extends Context {
         // Should be a better exception.
         throw new PackageManager.NameNotFoundException(
             "Application package " + packageName + " not found");
+    }
+
+    @Override
+    public boolean isRestricted() {
+        return mRestricted;
     }
 
     private File getDataDirFile() {
