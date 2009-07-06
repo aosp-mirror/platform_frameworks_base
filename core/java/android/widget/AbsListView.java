@@ -438,6 +438,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private InputConnectionWrapper mPublicInputConnection;
 
     private Runnable mClearScrollingCache;
+    private int mMinimumVelocity;
+    private int mMaximumVelocity;
 
     /**
      * Interface definition for a callback to be invoked when the list or grid
@@ -549,7 +551,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         setAlwaysDrawnWithCacheEnabled(false);
         setScrollingCacheEnabled(true);
 
-        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        final ViewConfiguration configuration = ViewConfiguration.get(mContext);
+        mTouchSlop = configuration.getScaledTouchSlop();
+        mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
+        mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mDensityScale = getContext().getResources().getDisplayMetrics().density;
     }
 
@@ -2058,12 +2063,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 break;
             case TOUCH_MODE_SCROLL:
                 final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000);
-                int initialVelocity = (int)velocityTracker.getYVelocity();
-
-                if ((Math.abs(initialVelocity) >
-                        ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity()) &&
-                        (getChildCount() > 0)) {
+                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                final int initialVelocity = (int) velocityTracker.getYVelocity();
+                if (Math.abs(initialVelocity) > mMinimumVelocity && (getChildCount() > 0)) {
                     if (mFlingRunnable == null) {
                         mFlingRunnable = new FlingRunnable();
                     }
