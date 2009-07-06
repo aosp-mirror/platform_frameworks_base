@@ -156,24 +156,24 @@ public class SynthProxy {
 
     private native final void native_finalize(int jniData);
 
-    private native final void native_stop(int jniData);
+    private native final int native_stop(int jniData);
 
-    private native final void native_speak(int jniData, String text);
+    private native final int native_speak(int jniData, String text);
 
-    private native final void native_synthesizeToFile(int jniData, String text, String filename);
+    private native final int native_synthesizeToFile(int jniData, String text, String filename);
 
     private native final int  native_isLanguageAvailable(int jniData, String language,
             String country, String variant);
 
-    private native final void native_setLanguage(int jniData, String language, String country,
+    private native final int native_setLanguage(int jniData, String language, String country,
             String variant);
 
-    private native final void native_loadLanguage(int jniData, String language, String country,
+    private native final int native_loadLanguage(int jniData, String language, String country,
             String variant);
 
-    private native final void native_setSpeechRate(int jniData, int speechRate);
+    private native final int native_setSpeechRate(int jniData, int speechRate);
 
-    private native final void native_setPitch(int jniData, int speechRate);
+    private native final int native_setPitch(int jniData, int speechRate);
 
     // TODO add buffer format
     private native final void native_playAudioBuffer(int jniData, int bufferPointer, int bufferSize);
