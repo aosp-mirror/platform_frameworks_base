@@ -45,15 +45,15 @@ public class SynthProxy {
     /**
      * Stops and clears the AudioTrack.
      */
-    public void stop() {
-        native_stop(mJniData);
+    public int stop() {
+        return native_stop(mJniData);
     }
 
     /**
      * Synthesize speech and speak it directly using AudioTrack.
      */
-    public void speak(String text) {
-        native_speak(mJniData, text);
+    public int speak(String text) {
+        return native_speak(mJniData, text);
     }
 
     /**
@@ -61,11 +61,9 @@ public class SynthProxy {
      * WAV file to the given path, assuming it is writable. Something like
      * "/sdcard/???.wav" is recommended.
      */
-    public void synthesizeToFile(String text, String filename) {
-        native_synthesizeToFile(mJniData, text, filename);
+    public int synthesizeToFile(String text, String filename) {
+        return native_synthesizeToFile(mJniData, text, filename);
     }
-
-    // TODO add IPA methods
 
     /**
      * Queries for language support.
@@ -78,29 +76,29 @@ public class SynthProxy {
     /**
      * Sets the language.
      */
-    public void setLanguage(String language, String country, String variant) {
-        native_setLanguage(mJniData, language, country, variant);
+    public int setLanguage(String language, String country, String variant) {
+        return native_setLanguage(mJniData, language, country, variant);
     }
 
     /**
      * Loads the language: it's not set, but prepared for use later.
      */
-    public void loadLanguage(String language, String country, String variant) {
-        native_loadLanguage(mJniData, language, country, variant);
+    public int loadLanguage(String language, String country, String variant) {
+        return native_loadLanguage(mJniData, language, country, variant);
     }
 
     /**
      * Sets the speech rate.
      */
-    public final void setSpeechRate(int speechRate) {
-        native_setSpeechRate(mJniData, speechRate);
+    public final int setSpeechRate(int speechRate) {
+        return native_setSpeechRate(mJniData, speechRate);
     }
 
     /**
      * Sets the pitch of the synthesized voice.
      */
-    public final void setPitch(int pitch) {
-        native_setPitch(mJniData, pitch);
+    public final int setPitch(int pitch) {
+        return native_setPitch(mJniData, pitch);
     }
 
     /**

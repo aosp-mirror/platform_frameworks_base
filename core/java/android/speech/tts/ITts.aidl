@@ -27,15 +27,15 @@ import android.content.Intent;
  * {@hide}
  */
 interface ITts {
-    void setSpeechRate(in int speechRate);
+    int setSpeechRate(in int speechRate);
 
-    void setPitch(in int pitch);
+    int setPitch(in int pitch);
 
-    void speak(in String text, in int queueMode, in String[] params);
+    int speak(in String text, in int queueMode, in String[] params);
 
     boolean isSpeaking();
 
-    void stop();
+    int stop();
 
     void addSpeech(in String text, in String packageName, in int resId);
 
@@ -45,11 +45,11 @@ interface ITts {
 
     int isLanguageAvailable(in String language, in String country, in String variant);
 
-    void setLanguage(in String language, in String country, in String variant);
+    int setLanguage(in String language, in String country, in String variant);
 
     boolean synthesizeToFile(in String text, in String[] params, in String outputDirectory);
 
-    void playEarcon(in String earcon, in int queueMode, in String[] params);
+    int playEarcon(in String earcon, in int queueMode, in String[] params);
 
     void addEarcon(in String earcon, in String packageName, in int resId);
 
@@ -59,5 +59,5 @@ interface ITts {
 
     void unregisterCallback(ITtsCallback cb);
 
-    void playSilence(in long duration, in int queueMode, in String[] params);
+    int playSilence(in long duration, in int queueMode, in String[] params);
 }

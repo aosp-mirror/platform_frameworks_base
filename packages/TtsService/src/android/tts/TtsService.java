@@ -212,17 +212,17 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
 
-    private void setSpeechRate(int rate) {
+    private int setSpeechRate(int rate) {
         if (isDefaultEnforced()) {
-            nativeSynth.setSpeechRate(getDefaultRate());
+            return nativeSynth.setSpeechRate(getDefaultRate());
         } else {
-            nativeSynth.setSpeechRate(rate);
+            return nativeSynth.setSpeechRate(rate);
         }
     }
 
 
-    private void setPitch(int pitch) {
-        nativeSynth.setPitch(pitch);
+    private int setPitch(int pitch) {
+        return nativeSynth.setPitch(pitch);
     }
 
 
@@ -237,13 +237,13 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
 
-    private void setLanguage(String lang, String country, String variant) {
+    private int setLanguage(String lang, String country, String variant) {
         Log.v("TTS", "TtsService.setLanguage(" + lang + ", " + country + ", " + variant + ")");
         if (isDefaultEnforced()) {
-            nativeSynth.setLanguage(getDefaultLanguage(), getDefaultCountry(),
+            return nativeSynth.setLanguage(getDefaultLanguage(), getDefaultCountry(),
                     getDefaultLocVariant());
         } else {
-            nativeSynth.setLanguage(lang, country, variant);
+            return nativeSynth.setLanguage(lang, country, variant);
         }
     }
 
@@ -314,7 +314,7 @@ public class TtsService extends Service implements OnCompletionListener {
      *            An ArrayList of parameters. This is not implemented for all
      *            engines.
      */
-    private void speak(String text, int queueMode, ArrayList<String> params) {
+    private int speak(String text, int queueMode, ArrayList<String> params) {
         if (queueMode == 0) {
             stop();
         }
@@ -322,6 +322,7 @@ public class TtsService extends Service implements OnCompletionListener {
         if (!mIsSpeaking) {
             processSpeechQueue();
         }
+        return TextToSpeech.TTS_SUCCESS;
     }
 
     /**
@@ -336,7 +337,7 @@ public class TtsService extends Service implements OnCompletionListener {
      *            An ArrayList of parameters. This is not implemented for all
      *            engines.
      */
-    private void playEarcon(String earcon, int queueMode,
+    private int playEarcon(String earcon, int queueMode,
             ArrayList<String> params) {
         if (queueMode == 0) {
             stop();
@@ -345,16 +346,17 @@ public class TtsService extends Service implements OnCompletionListener {
         if (!mIsSpeaking) {
             processSpeechQueue();
         }
+        return TextToSpeech.TTS_SUCCESS;
     }
 
     /**
      * Stops all speech output and removes any utterances still in the queue.
      */
-    private void stop() {
+    private int stop() {
         Log.i("TTS", "Stopping");
         mSpeechQueue.clear();
 
-        nativeSynth.stop();
+        int result = nativeSynth.stop();
         mIsSpeaking = false;
         if (mPlayer != null) {
             try {
@@ -364,13 +366,14 @@ public class TtsService extends Service implements OnCompletionListener {
             }
         }
         Log.i("TTS", "Stopped");
+        return result;
     }
 
     public void onCompletion(MediaPlayer arg0) {
         processSpeechQueue();
     }
 
-    private void playSilence(long duration, int queueMode,
+    private int playSilence(long duration, int queueMode,
             ArrayList<String> params) {
         if (queueMode == 0) {
             stop();
@@ -379,6 +382,7 @@ public class TtsService extends Service implements OnCompletionListener {
         if (!mIsSpeaking) {
             processSpeechQueue();
         }
+        return TextToSpeech.TTS_SUCCESS;
     }
 
     private void silence(final long duration) {
@@ -725,12 +729,12 @@ public class TtsService extends Service implements OnCompletionListener {
          *            An ArrayList of parameters. The first element of this
          *            array controls the type of voice to use.
          */
-        public void speak(String text, int queueMode, String[] params) {
+        public int speak(String text, int queueMode, String[] params) {
             ArrayList<String> speakingParams = new ArrayList<String>();
             if (params != null) {
                 speakingParams = new ArrayList<String>(Arrays.asList(params));
             }
-            mSelf.speak(text, queueMode, speakingParams);
+            return mSelf.speak(text, queueMode, speakingParams);
         }
 
         /**
@@ -744,12 +748,12 @@ public class TtsService extends Service implements OnCompletionListener {
          * @param params
          *            An ArrayList of parameters.
          */
-        public void playEarcon(String earcon, int queueMode, String[] params) {
+        public int playEarcon(String earcon, int queueMode, String[] params) {
             ArrayList<String> speakingParams = new ArrayList<String>();
             if (params != null) {
                 speakingParams = new ArrayList<String>(Arrays.asList(params));
             }
-            mSelf.playEarcon(earcon, queueMode, speakingParams);
+            return mSelf.playEarcon(earcon, queueMode, speakingParams);
         }
 
         /**
@@ -763,20 +767,20 @@ public class TtsService extends Service implements OnCompletionListener {
          * @param params
          *            An ArrayList of parameters.
          */
-        public void playSilence(long duration, int queueMode, String[] params) {
+        public int playSilence(long duration, int queueMode, String[] params) {
             ArrayList<String> speakingParams = new ArrayList<String>();
             if (params != null) {
                 speakingParams = new ArrayList<String>(Arrays.asList(params));
             }
-            mSelf.playSilence(duration, queueMode, speakingParams);
+            return mSelf.playSilence(duration, queueMode, speakingParams);
         }
 
         /**
          * Stops all speech output and removes any utterances still in the
          * queue.
          */
-        public void stop() {
-            mSelf.stop();
+        public int stop() {
+            return mSelf.stop();
         }
 
         /**
@@ -849,8 +853,8 @@ public class TtsService extends Service implements OnCompletionListener {
          * @param speechRate
          *            The speech rate that should be used
          */
-        public void setSpeechRate(int speechRate) {
-            mSelf.setSpeechRate(speechRate);
+        public int setSpeechRate(int speechRate) {
+            return mSelf.setSpeechRate(speechRate);
         }
 
         /**
@@ -860,8 +864,8 @@ public class TtsService extends Service implements OnCompletionListener {
          * @param pitch
          *            The pitch that should be used for the synthesized voice
          */
-        public void setPitch(int pitch) {
-            mSelf.setPitch(pitch);
+        public int setPitch(int pitch) {
+            return mSelf.setPitch(pitch);
         }
 
         /**
@@ -895,8 +899,8 @@ public class TtsService extends Service implements OnCompletionListener {
          * @param country  the three letter ISO country code.
          * @param variant  the variant code associated with the country and language pair.
          */
-        public void setLanguage(String lang, String country, String variant) {
-            mSelf.setLanguage(lang, country, variant);
+        public int setLanguage(String lang, String country, String variant) {
+            return mSelf.setLanguage(lang, country, variant);
         }
 
         /**
