@@ -81,6 +81,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;
+    private static final int MSG_RUN_CLEAR = 4;
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -145,6 +146,16 @@ class BackupManagerService extends IBackupManager.Stub {
             transport = _transport;
             observer = _obs;
             token = _token;
+        }
+    }
+
+    private class ClearParams {
+        public IBackupTransport transport;
+        public PackageInfo packageInfo;
+
+        ClearParams(IBackupTransport _transport, PackageInfo _info) {
+            transport = _transport;
+            packageInfo = _info;
         }
     }
 
@@ -384,6 +395,13 @@ class BackupManagerService extends IBackupManager.Stub {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Log.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 (new PerformRestoreThread(params.transport, params.observer, params.token)).start();
+                break;
+            }
+
+            case MSG_RUN_CLEAR:
+            {
+                ClearParams params = (ClearParams)msg.obj;
+                (new PerformClearThread(params.transport, params.packageInfo)).start();
                 break;
             }
             }
@@ -1071,6 +1089,37 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    class PerformClearThread extends Thread {
+        IBackupTransport mTransport;
+        PackageInfo mPackage;
+
+        PerformClearThread(IBackupTransport transport, PackageInfo packageInfo) {
+            mTransport = transport;
+            mPackage = packageInfo;
+        }
+
+        @Override
+        public void run() {
+            try {
+                // Clear the on-device backup state to ensure a full backup next time
+                File stateDir = new File(mBaseStateDir, mTransport.transportDirName());
+                File stateFile = new File(stateDir, mPackage.packageName);
+                stateFile.delete();
+
+                // Tell the transport to remove all the persistent storage for the app
+                mTransport.clearBackupData(mPackage);
+            } catch (RemoteException e) {
+                // can't happen; the transport is local
+            } finally {
+                try {
+                    mTransport.finishBackup();
+                } catch (RemoteException e) {
+                    // can't happen; the transport is local
+                }
+            }
+        }
+    }
+
 
     // ----- IBackupManager binder interface -----
 
@@ -1138,6 +1187,52 @@ class BackupManagerService extends IBackupManager.Stub {
                 Log.e(TAG, "Error writing to backup journal");
                 mJournalStream = null;
                 mJournal = null;
+            }
+        }
+    }
+
+    // Clear the given package's backup data from the current transport
+    public void clearBackupData(String packageName) {
+        if (DEBUG) Log.v(TAG, "clearBackupData() of " + packageName);
+        PackageInfo info;
+        try {
+            info = mPackageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+        } catch (NameNotFoundException e) {
+            Log.d(TAG, "No such package '" + packageName + "' - not clearing backup data");
+            return;
+        }
+
+        // If the caller does not hold the BACKUP permission, it can only request a
+        // wipe of its own backed-up data.
+        HashSet<ApplicationInfo> apps;
+        if ((mContext.checkPermission("android.permission.BACKUP", Binder.getCallingPid(),
+                Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
+            apps = mBackupParticipants.get(Binder.getCallingUid());
+        } else {
+            // a caller with full permission can ask to back up any participating app
+            // !!! TODO: allow data-clear of ANY app?
+            if (DEBUG) Log.v(TAG, "Privileged caller, allowing clear of other apps");
+            apps = new HashSet<ApplicationInfo>();
+            int N = mBackupParticipants.size();
+            for (int i = 0; i < N; i++) {
+                HashSet<ApplicationInfo> s = mBackupParticipants.valueAt(i);
+                if (s != null) {
+                    apps.addAll(s);
+                }
+            }
+        }
+
+        // now find the given package in the set of candidate apps
+        for (ApplicationInfo app : apps) {
+            if (app.packageName.equals(packageName)) {
+                if (DEBUG) Log.v(TAG, "Found the app - running clear process");
+                // found it; fire off the clear request
+                synchronized (mQueueLock) {
+                    Message msg = mBackupHandler.obtainMessage(MSG_RUN_CLEAR,
+                            new ClearParams(getTransport(mCurrentTransport), info));
+                    mBackupHandler.sendMessage(msg);
+                }
+                break;
             }
         }
     }
