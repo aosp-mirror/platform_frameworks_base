@@ -4904,8 +4904,8 @@ public class WebView extends AbsoluteLayout
                     // sure the text edit box is still on the  screen.
                     if (inEditingMode() && nativeCursorIsTextInput()) {
                         mWebTextView.bringIntoView();
+                        rebuildWebTextView();
                     }
-                    rebuildWebTextView();
                     break;
                 case CLEAR_TEXT_ENTRY:
                     clearTextEntry();
@@ -5395,7 +5395,7 @@ public class WebView extends AbsoluteLayout
         nativeUpdateCachedTextfield(updatedText, mTextGeneration);
     }
 
-    private native void     nativeClearCursor();
+    /* package */ native void nativeClearCursor();
     private native void     nativeCreate(int ptr);
     private native int      nativeCursorFramePointer();
     private native Rect     nativeCursorNodeBounds();
@@ -5432,6 +5432,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native int nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
     private native int      nativeFocusCandidateTextSize();
+    /* package */ native int nativeFocusNodePointer();
     private native Rect     nativeGetCursorRingBounds();
     private native Region   nativeGetSelection();
     private native boolean  nativeHasCursorNode();
