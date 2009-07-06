@@ -76,6 +76,12 @@ enum {
     CAMERA_MSG_COMPRESSED_IMAGE
 };
 
+// camera fatal errors
+enum {
+    CAMERA_ERROR_UKNOWN  = 1,
+    CAMERA_ERROR_SERVER_DIED = 100
+};
+
 class ICameraService;
 class ICamera;
 class Surface;

@@ -371,7 +371,7 @@ public class Camera {
     }
     private native final void native_takePicture();
 
-    // These match the enum in libs/android_runtime/android_hardware_Camera.cpp
+    // These match the enum in include/ui/Camera.h
     /** Unspecified camerar error.  @see #ErrorCallback */
     public static final int CAMERA_ERROR_UNKNOWN = 1;
     /** Media server died. In this case, the application must release the
