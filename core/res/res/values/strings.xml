@@ -1195,6 +1195,7 @@
     <!-- When the lock screen is showing and the phone plugged in, show the current
          charge %.  -->
     <string name="lockscreen_plugged_in">Charging (<xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>)</string>
+    <string name="lockscreen_charged">Charged</string>
 
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
@@ -1271,7 +1272,7 @@
 
     <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. -->
-    <string name="status_bar_clear_all_button">Clear notifications</string>
+    <string name="status_bar_clear_all_button">Clear</string>
 
     <!-- The label in the bar at the top of the status bar when there are no notifications
          showing. -->
