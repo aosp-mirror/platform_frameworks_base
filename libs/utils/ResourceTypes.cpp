@@ -1136,8 +1136,9 @@ status_t ResXMLTree::validateNode(const ResXMLTree_node* node) const
 
 struct ResTable::Header
 {
-    Header() : ownedData(NULL), header(NULL) { }
+    Header(ResTable* _owner) : owner(_owner), ownedData(NULL), header(NULL) { }
 
+    ResTable* const                 owner;
     void*                           ownedData;
     const ResTable_header*          header;
     size_t                          size;
@@ -1163,8 +1164,8 @@ struct ResTable::Type
 
 struct ResTable::Package
 {
-    Package(const Header* _header, const ResTable_package* _package)
-        : header(_header), package(_package) { }
+    Package(ResTable* _owner, const Header* _header, const ResTable_package* _package)
+        : owner(_owner), header(_header), package(_package) { }
     ~Package()
     {
         size_t i = types.size();
@@ -1174,10 +1175,14 @@ struct ResTable::Package
         }
     }
     
+    ResTable* const                 owner;
     const Header* const             header;
     const ResTable_package* const   package;
     Vector<Type*>                   types;
 
+    ResStringPool                   typeStrings;
+    ResStringPool                   keyStrings;
+    
     const Type* getType(size_t idx) const {
         return idx < types.size() ? types[idx] : NULL;
     }
@@ -1188,13 +1193,16 @@ struct ResTable::Package
 // table that defined the package); the ones after are skins on top of it.
 struct ResTable::PackageGroup
 {
-    PackageGroup(const String16& _name, uint32_t _id)
-        : name(_name), id(_id), typeCount(0), bags(NULL) { }
+    PackageGroup(ResTable* _owner, const String16& _name, uint32_t _id)
+        : owner(_owner), name(_name), id(_id), typeCount(0), bags(NULL) { }
     ~PackageGroup() {
         clearBagCache();
         const size_t N = packages.size();
         for (size_t i=0; i<N; i++) {
-            delete packages[i];
+            Package* pkg = packages[i];
+            if (pkg->owner == owner) {
+                delete pkg;
+            }
         }
     }
 
@@ -1225,15 +1233,17 @@ struct ResTable::PackageGroup
         }
     }
     
+    ResTable* const                 owner;
     String16 const                  name;
     uint32_t const                  id;
     Vector<Package*>                packages;
+    
+    // This is for finding typeStrings and other common package stuff.
+    Package*                        basePackage;
 
-    // Taken from the root package.
-    ResStringPool                   typeStrings;
-    ResStringPool                   keyStrings;
+    // For quick access.
     size_t                          typeCount;
-
+    
     // Computed attribute bags, first indexed by the type and second
     // by the entry in that type.
     bag_set***                      bags;
@@ -1560,11 +1570,36 @@ status_t ResTable::add(Asset* asset, void* cookie, bool copyData)
     return add(data, size, cookie, asset, copyData);
 }
 
+status_t ResTable::add(ResTable* src)
+{
+    mError = src->mError;
+    mParams = src->mParams;
+    
+    for (size_t i=0; i<src->mHeaders.size(); i++) {
+        mHeaders.add(src->mHeaders[i]);
+    }
+    
+    for (size_t i=0; i<src->mPackageGroups.size(); i++) {
+        PackageGroup* srcPg = src->mPackageGroups[i];
+        PackageGroup* pg = new PackageGroup(this, srcPg->name, srcPg->id);
+        for (size_t j=0; j<srcPg->packages.size(); j++) {
+            pg->packages.add(srcPg->packages[j]);
+        }
+        pg->basePackage = srcPg->basePackage;
+        pg->typeCount = srcPg->typeCount;
+        mPackageGroups.add(pg);
+    }
+    
+    memcpy(mPackageMap, src->mPackageMap, sizeof(mPackageMap));
+    
+    return mError;
+}
+
 status_t ResTable::add(const void* data, size_t size, void* cookie,
                        Asset* asset, bool copyData)
 {
     if (!data) return NO_ERROR;
-    Header* header = new Header;
+    Header* header = new Header(this);
     header->index = mHeaders.size();
     header->cookie = cookie;
     mHeaders.add(header);
@@ -1682,10 +1717,12 @@ void ResTable::uninit()
     N = mHeaders.size();
     for (size_t i=0; i<N; i++) {
         Header* header = mHeaders[i];
-        if (header->ownedData) {
-            free(header->ownedData);
+        if (header->owner == this) {
+            if (header->ownedData) {
+                free(header->ownedData);
+            }
+            delete header;
         }
-        delete header;
     }
 
     mPackageGroups.clear();
@@ -1728,8 +1765,8 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
 
         outName->package = grp->name.string();
         outName->packageLen = grp->name.size();
-        outName->type = grp->typeStrings.stringAt(t, &outName->typeLen);
-        outName->name = grp->keyStrings.stringAt(
+        outName->type = grp->basePackage->typeStrings.stringAt(t, &outName->typeLen);
+        outName->name = grp->basePackage->keyStrings.stringAt(
             dtohl(entry->key.index), &outName->nameLen);
         return true;
     }
@@ -2331,13 +2368,13 @@ nope:
             continue;
         }
 
-        const ssize_t ti = group->typeStrings.indexOfString(type, typeLen);
+        const ssize_t ti = group->basePackage->typeStrings.indexOfString(type, typeLen);
         if (ti < 0) {
             TABLE_NOISY(printf("Type not found in package %s\n", String8(group->name).string()));
             continue;
         }
 
-        const ssize_t ei = group->keyStrings.indexOfString(name, nameLen);
+        const ssize_t ei = group->basePackage->keyStrings.indexOfString(name, nameLen);
         if (ei < 0) {
             TABLE_NOISY(printf("Name not found in package %s\n", String8(group->name).string()));
             continue;
@@ -3630,25 +3667,36 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     PackageGroup* group = NULL;
     uint32_t id = dtohl(pkg->id);
     if (id != 0 && id < 256) {
+    
+        package = new Package(this, header, pkg);
+        if (package == NULL) {
+            return (mError=NO_MEMORY);
+        }
+        
         size_t idx = mPackageMap[id];
         if (idx == 0) {
             idx = mPackageGroups.size()+1;
 
             char16_t tmpName[sizeof(pkg->name)/sizeof(char16_t)];
             strcpy16_dtoh(tmpName, pkg->name, sizeof(pkg->name)/sizeof(char16_t));
-            group = new PackageGroup(String16(tmpName), id);
+            group = new PackageGroup(this, String16(tmpName), id);
             if (group == NULL) {
+                delete package;
                 return (mError=NO_MEMORY);
             }
 
-            err = group->typeStrings.setTo(base+dtohl(pkg->typeStrings),
+            err = package->typeStrings.setTo(base+dtohl(pkg->typeStrings),
                                            header->dataEnd-(base+dtohl(pkg->typeStrings)));
             if (err != NO_ERROR) {
+                delete group;
+                delete package;
                 return (mError=err);
             }
-            err = group->keyStrings.setTo(base+dtohl(pkg->keyStrings),
+            err = package->keyStrings.setTo(base+dtohl(pkg->keyStrings),
                                           header->dataEnd-(base+dtohl(pkg->keyStrings)));
             if (err != NO_ERROR) {
+                delete group;
+                delete package;
                 return (mError=err);
             }
 
@@ -3657,16 +3705,14 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             if (err < NO_ERROR) {
                 return (mError=err);
             }
+            group->basePackage = package;
+            
             mPackageMap[id] = (uint8_t)idx;
         } else {
             group = mPackageGroups.itemAt(idx-1);
             if (group == NULL) {
                 return (mError=UNKNOWN_ERROR);
             }
-        }
-        package = new Package(header, pkg);
-        if (package == NULL) {
-            return (mError=NO_MEMORY);
         }
         err = group->packages.add(package);
         if (err < NO_ERROR) {

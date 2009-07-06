@@ -1580,6 +1580,7 @@ public:
                  bool copyData=false);
     status_t add(Asset* asset, void* cookie,
                  bool copyData=false);
+    status_t add(ResTable* src);
 
     status_t getError() const;
 
