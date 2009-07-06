@@ -16,6 +16,9 @@
 
 package com.android.providers.settings;
 
+import java.io.FileNotFoundException;
+
+import android.backup.IBackupManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -27,14 +30,13 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.DrmStore;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-
-import java.io.FileNotFoundException;
 
 public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
@@ -135,6 +137,17 @@ public class SettingsProvider extends ContentProvider {
             long version = SystemProperties.getLong(property, 0) + 1;
             if (LOCAL_LOGV) Log.v(TAG, "property: " + property + "=" + version);
             SystemProperties.set(property, Long.toString(version));
+        }
+
+        // Inform the backup manager about a data change
+        IBackupManager ibm = IBackupManager.Stub.asInterface(
+                ServiceManager.getService(Context.BACKUP_SERVICE));
+        if (ibm != null) {
+            try {
+                ibm.dataChanged(getContext().getPackageName());
+            } catch (Exception e) {
+                // Try again later
+            }
         }
 
         // Now send the notification through the content framework.
