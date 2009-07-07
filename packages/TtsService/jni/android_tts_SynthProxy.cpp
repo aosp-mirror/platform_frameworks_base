@@ -168,7 +168,7 @@ void prepAudioTrack(SynthProxyJniStorage* pJniData,
 static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
                            AudioSystem::audio_format format, int channel,
                            int8_t *&wav, size_t &bufferSize, tts_synth_status status) {
-    LOGV("ttsSynthDoneCallback: %d bytes", bufferSize);
+    //LOGV("ttsSynthDoneCallback: %d bytes", bufferSize);
 
     if (userdata == NULL){
         LOGE("userdata == NULL");
