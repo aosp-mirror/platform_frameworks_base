@@ -985,8 +985,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Verify that the backup set includes metadata.  If not, we can't do
                 // signature/version verification etc, so we simply do not proceed with
                 // the restore operation.
-                Metadata pmMeta = pmAgent.getRestoredMetadata(packageName);
-                if (pmMeta == null) {
+                if (!pmAgent.hasMetadata()) {
                     Log.i(TAG, "No restore metadata available, so not restoring settings");
                     return;
                 }
