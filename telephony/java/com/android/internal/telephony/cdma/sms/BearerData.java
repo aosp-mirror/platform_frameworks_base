@@ -455,7 +455,14 @@ public final class BearerData {
         }
     }
 
-    private static byte[] encode7bitGsm(String msg)
+    private static int calcUdhSeptetPadding(int userDataHeaderLen) {
+        int udhBits = userDataHeaderLen * 8;
+        int udhSeptets = (udhBits + 6) / 7;
+        int paddingBits = (udhSeptets * 7) - udhBits;
+        return paddingBits;
+    }
+
+    private static byte[] encode7bitGsm(String msg, int paddingBits)
         throws CodingException
     {
         try {
@@ -464,11 +471,9 @@ public final class BearerData {
              * an option to produce just the data without prepending
              * the length.
              */
-            byte []fullData = GsmAlphabet.stringToGsm7BitPacked(msg);
+            byte []fullData = GsmAlphabet.stringToGsm7BitPacked(msg, 0, -1, paddingBits, true);
             byte []data = new byte[fullData.length - 1];
-            for (int i = 0; i < data.length; i++) {
-                data[i] = fullData[i + 1];
-            }
+            System.arraycopy(fullData, 1, data, 0, fullData.length - 1);
             return data;
         } catch (com.android.internal.telephony.EncodeException ex) {
             throw new CodingException("7bit GSM encode failed: " + ex);
@@ -478,9 +483,11 @@ public final class BearerData {
     private static void encodeUserDataPayload(UserData uData)
         throws CodingException
     {
+        // TODO(cleanup): UDH can only occur in EMS mode, meaning
+        // encapsulation of GSM encoding, and so the logic here should
+        // be refactored to more cleanly reflect this constraint.
+
         byte[] headerData = null;
-        // TODO: if there is a header, meaning EMS mode, we probably
-        // also want the total UD length prior to the UDH length...
         if (uData.userDataHeader != null) headerData = SmsHeader.toByteArray(uData.userDataHeader);
         int headerDataLen = (headerData == null) ? 0 : headerData.length + 1;  // + length octet
 
@@ -502,8 +509,9 @@ public final class BearerData {
                     uData.payloadStr = "";
                 }
                 if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
-                    payloadData = encode7bitGsm(uData.payloadStr);
-                    codeUnitCount = (payloadData.length * 8) / 7;
+                    int paddingBits = calcUdhSeptetPadding(headerDataLen);
+                    payloadData = encode7bitGsm(uData.payloadStr, paddingBits);
+                    codeUnitCount = ((payloadData.length + headerDataLen) * 8) / 7;
                 } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
                     payloadData = encode7bitAscii(uData.payloadStr, true);
                     codeUnitCount = uData.payloadStr.length();
@@ -528,8 +536,9 @@ public final class BearerData {
                 } else {
                     // If there is a header, we are in EMS mode, in
                     // which case we use GSM encodings.
-                    payloadData = encode7bitGsm(uData.payloadStr);
-                    codeUnitCount = (payloadData.length * 8) / 7;
+                    int paddingBits = calcUdhSeptetPadding(headerDataLen);
+                    payloadData = encode7bitGsm(uData.payloadStr, paddingBits);
+                    codeUnitCount = ((payloadData.length + headerDataLen) * 8) / 7;
                     uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
                 }
             } catch (CodingException ex) {
@@ -880,7 +889,12 @@ public final class BearerData {
     private static String decode7bitGsm(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields);
+        int paddingBits = calcUdhSeptetPadding(offset);
+        numFields -= (((offset * 8) + paddingBits) / 7);
+        // TODO: It seems wrong that only Gsm7 bit encodings would
+        // take into account the header in numFields calculations.
+        // This should be verified.
+        String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields, paddingBits);
         if (result == null) {
             throw new CodingException("7bit GSM decoding failed");
         }
