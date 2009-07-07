@@ -52,6 +52,8 @@ public class BackupTestActivity extends ListActivity
     static final String PREF_KEY = "pref";
     static final String FILE_NAME = "file.txt";
 
+    BackupManager sBm = new BackupManager(this);
+
     Test[] mTests = new Test[] {
         new Test("Show File") {
             void run() {
@@ -85,8 +87,7 @@ public class BackupTestActivity extends ListActivity
                         output.close();
                     }
                 }
-                BackupManager bm = new BackupManager(BackupTestActivity.this);
-                bm.dataChanged();
+                sBm.dataChanged();
             }
         },
         new Test("Clear File") {
@@ -100,14 +101,12 @@ public class BackupTestActivity extends ListActivity
                         output.close();
                     }
                 }
-                BackupManager bm = new BackupManager(BackupTestActivity.this);
-                bm.dataChanged();
+                sBm.dataChanged();
             }
         },
         new Test("Poke") {
             void run() {
-                BackupManager bm = new BackupManager(BackupTestActivity.this);
-                bm.dataChanged();
+                sBm.dataChanged();
             }
         },
         new Test("Show Shared Pref") {
@@ -126,8 +125,7 @@ public class BackupTestActivity extends ListActivity
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putInt(PREF_KEY, val+1);
                 editor.commit();
-                BackupManager bm = new BackupManager(BackupTestActivity.this);
-                bm.dataChanged();
+                sBm.dataChanged();
             }
         },
         new Test("Backup Helpers") {
