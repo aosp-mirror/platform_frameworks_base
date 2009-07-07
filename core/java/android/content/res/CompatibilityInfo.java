@@ -159,14 +159,32 @@ public class CompatibilityInfo {
         }
     }
 
-    private CompatibilityInfo() {
-        appFlags = ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
-                | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
-                | ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
-        applicationScale = applicationInvertedScale = 1.0f;
-        mCompatibilityFlags = EXPANDABLE | CONFIGURED_EXPANDABLE;
+    private CompatibilityInfo(int appFlags, int compFlags, float scale, float invertedScale) {
+        this.appFlags = appFlags;
+        mCompatibilityFlags = compFlags;
+        applicationScale = scale;
+        applicationInvertedScale = invertedScale;
     }
 
+    private CompatibilityInfo() {
+        this(ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
+                | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
+                | ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS,
+                EXPANDABLE | CONFIGURED_EXPANDABLE,
+                1.0f,
+                1.0f);
+    }
+
+    /**
+     * Returns the copy of this instance.
+     */
+    public CompatibilityInfo copy() {
+        CompatibilityInfo info = new CompatibilityInfo(appFlags, mCompatibilityFlags,
+                applicationScale, applicationInvertedScale);
+        info.setVisibleRect(mXOffset, mWidth, mHeight);
+        return info;
+    }
+ 
     /**
      * Sets the application's visible rect in compatibility mode.
      * @param xOffset the application's x offset that is added to center the content.
