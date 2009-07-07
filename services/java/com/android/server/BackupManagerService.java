@@ -1212,10 +1212,12 @@ class BackupManagerService extends IBackupManager.Stub {
                         // Add the caller to the set of pending backups.  If there is
                         // one already there, then overwrite it, but no harm done.
                         BackupRequest req = new BackupRequest(app, false);
-                        mPendingBackups.put(app, req);
-
-                        // Journal this request in case of crash
-                        writeToJournalLocked(packageName);
+                        if (mPendingBackups.put(app, req) == null) {
+                            // Journal this request in case of crash.  The put()
+                            // operation returned null when this package was not already
+                            // in the set; we want to avoid touching the disk redundantly.
+                            writeToJournalLocked(packageName);
+                        }
                     }
                 }
 
