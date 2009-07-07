@@ -67,6 +67,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
     private final HashSet<String> mExisting = new HashSet<String>();
     private int mStoredSdkVersion;
     private String mStoredIncrementalVersion;
+    private boolean mHasMetadata;
 
     public class Metadata {
         public int versionCode;
@@ -84,6 +85,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
         mPackageManager = packageMgr;
         mAllPackages = packages;
         mRestoredSignatures = null;
+        mHasMetadata = false;
+    }
+
+    public boolean hasMetadata() {
+        return mHasMetadata;
     }
 
     public Metadata getRestoredMetadata(String packageName) {
@@ -259,6 +265,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 }
                 mStoredSdkVersion = storedSdkVersion;
                 mStoredIncrementalVersion = in.readUTF();
+                mHasMetadata = true;
                 // !!! TODO: remove this debugging output
                 if (DEBUG) {
                     Log.i(TAG, "Restore set version " + storedSystemVersion
