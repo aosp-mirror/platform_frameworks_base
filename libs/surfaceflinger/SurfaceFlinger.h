@@ -183,6 +183,7 @@ private:
     friend class LayerBase;
     friend class LayerBuffer;
     friend class LayerBaseClient;
+    friend class LayerBaseClient::Surface;
     friend class Layer;
     friend class LayerBlur;
     friend class LayerDim;
