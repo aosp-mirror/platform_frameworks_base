@@ -36,6 +36,8 @@ public:
         };
         size_t frameCount;
     };
+
+    virtual ~AudioBufferProvider() {}
     
     virtual status_t getNextBuffer(Buffer* buffer) = 0;
     virtual void releaseBuffer(Buffer* buffer) = 0;
