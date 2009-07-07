@@ -38,6 +38,7 @@ import android.net.wifi.WifiNative;
 import android.net.wifi.WifiStateTracker;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.SupplicantState;
 import android.net.NetworkStateTracker;
 import android.net.DhcpInfo;
 import android.os.Binder;
