@@ -81,6 +81,10 @@ class BackupManagerService extends IBackupManager.Stub {
     // trigger an immediate pass.
     private static final long BACKUP_INTERVAL = AlarmManager.INTERVAL_HOUR;
 
+    // The amount of time between the initial provisioning of the device and
+    // the first backup pass.
+    private static final long FIRST_BACKUP_INTERVAL = 12 * AlarmManager.INTERVAL_HOUR;
+
     private static final String RUN_BACKUP_ACTION = "_backup_run_";
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
@@ -97,6 +101,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private AlarmManager mAlarmManager;
 
     private boolean mEnabled;   // access to this is synchronized on 'this'
+    private boolean mProvisioned;
     private PowerManager.WakeLock mWakelock;
     private final BackupHandler mBackupHandler = new BackupHandler();
     private PendingIntent mRunBackupIntent;
@@ -188,6 +193,9 @@ class BackupManagerService extends IBackupManager.Stub {
         // Set up our bookkeeping
         boolean areEnabled = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.BACKUP_ENABLED, 0) != 0;
+        // !!! TODO: mProvisioned needs to default to 0, not 1.
+        mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.BACKUP_PROVISIONED, 1) != 0;
         mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mDataDir = Environment.getDownloadCacheDirectory();
 
@@ -1301,7 +1309,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    // Enable/disable the backup transport
+    // Enable/disable the backup service
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
@@ -1314,16 +1322,44 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         synchronized (mQueueLock) {
-            if (enable && !wasEnabled) {
+            if (enable && !wasEnabled && mProvisioned) {
                 // if we've just been enabled, start scheduling backup passes
-                long when = System.currentTimeMillis() + BACKUP_INTERVAL;
-                mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, when,
-                        BACKUP_INTERVAL, mRunBackupIntent);
+                startBackupAlarmsLocked(BACKUP_INTERVAL);
             } else if (!enable) {
                 // No longer enabled, so stop running backups
                 mAlarmManager.cancel(mRunBackupIntent);
             }
         }
+    }
+
+    // Mark the backup service as having been provisioned
+    public void setBackupProvisioned(boolean available) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "setBackupProvisioned");
+
+        boolean wasProvisioned = mProvisioned;
+        synchronized (this) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.BACKUP_PROVISIONED, available ? 1 : 0);
+            mProvisioned = available;
+        }
+
+        synchronized (mQueueLock) {
+            if (available && !wasProvisioned && mEnabled) {
+                // we're now good to go, so start the backup alarms
+                startBackupAlarmsLocked(FIRST_BACKUP_INTERVAL);
+            } else if (!available) {
+                // No longer enabled, so stop running backups
+                Log.w(TAG, "Backup service no longer provisioned");
+                mAlarmManager.cancel(mRunBackupIntent);
+            }
+        }
+    }
+
+    private void startBackupAlarmsLocked(long delayBeforeFirstBackup) {
+        long when = System.currentTimeMillis() + delayBeforeFirstBackup;
+        mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, when,
+                BACKUP_INTERVAL, mRunBackupIntent);
     }
 
     // Report whether the backup mechanism is currently enabled
@@ -1506,7 +1542,8 @@ class BackupManagerService extends IBackupManager.Stub {
         synchronized (mQueueLock) {
             long oldId = Binder.clearCallingIdentity();
 
-            pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled"));
+            pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
+                    + " / " + (!mProvisioned ? "not " : "") + "provisioned");
             pw.println("Available transports:");
             for (String t : listAllTransports()) {
                 String pad = (t.equals(mCurrentTransport)) ? "  * " : "    ";
