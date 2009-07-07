@@ -1664,6 +1664,13 @@ public abstract class Context {
      * with extreme care!
      */
     public static final int CONTEXT_IGNORE_SECURITY = 0x00000002;
+    
+    /**
+     * Flag for use with {@link #createPackageContext}: a restricted context may
+     * disable specific features. For instance, a View associated with a restricted
+     * context would ignore particular XML attributes.
+     */
+    public static final int CONTEXT_RESTRICTED = 0x00000004;
 
     /**
      * Return a new Context object for the given application name.  This
@@ -1692,4 +1699,15 @@ public abstract class Context {
      */
     public abstract Context createPackageContext(String packageName,
             int flags) throws PackageManager.NameNotFoundException;
+
+    /**
+     * Indicates whether this Context is restricted.
+     * 
+     * @return True if this Context is restricted, false otherwise.
+     * 
+     * @see #CONTEXT_RESTRICTED
+     */
+    public boolean isRestricted() {
+        return false;
+    }
 }

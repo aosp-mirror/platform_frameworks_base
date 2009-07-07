@@ -1996,6 +1996,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     mMinHeight = a.getDimensionPixelSize(attr, 0);
                     break;
                 case R.styleable.View_onClick:
+                    if (context.isRestricted()) {
+                        throw new IllegalStateException("The android:onClick attribute cannot " 
+                                + "be used within a restricted context");
+                    }
+
                     final String handlerName = a.getString(attr);
                     if (handlerName != null) {
                         setOnClickListener(new OnClickListener() {

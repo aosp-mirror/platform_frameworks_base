@@ -269,7 +269,7 @@ public class AppWidgetHostView extends FrameLayout {
         try {
             if (mInfo != null) {
                 Context theirContext = mContext.createPackageContext(
-                        mInfo.provider.getPackageName(), 0 /* no flags */);
+                        mInfo.provider.getPackageName(), Context.CONTEXT_RESTRICTED);
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 inflater = inflater.cloneInContext(theirContext);

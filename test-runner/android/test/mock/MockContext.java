@@ -397,4 +397,9 @@ public class MockContext extends Context {
             throws PackageManager.NameNotFoundException {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean isRestricted() {
+        throw new UnsupportedOperationException();        
+    }
 }
