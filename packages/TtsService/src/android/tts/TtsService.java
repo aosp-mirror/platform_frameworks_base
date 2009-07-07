@@ -52,7 +52,7 @@ public class TtsService extends Service implements OnCompletionListener {
         public static final int EARCON = 1;
         public static final int SILENCE = 2;
         public static final int TEXT_TO_FILE = 3;
-        public String mText = null;
+        public String mText = "";
         public ArrayList<String> mParams = null;
         public int mType = TEXT;
         public long mDuration = 0;
@@ -66,6 +66,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
         public SpeechItem(long silenceTime) {
             mDuration = silenceTime;
+            mType = SILENCE;
         }
 
         public SpeechItem(String text, ArrayList<String> params, int itemType, String filename) {
@@ -125,7 +126,7 @@ public class TtsService extends Service implements OnCompletionListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i("TTS", "TTS starting");
+        //Log.i("TTS", "TTS starting");
 
         mResolver = getContentResolver();
 
@@ -231,7 +232,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private int isLanguageAvailable(String lang, String country, String variant) {
-        Log.v("TTS", "TtsService.isLanguageAvailable(" + lang + ", " + country + ", " +variant+")");
+        //Log.v("TTS", "TtsService.isLanguageAvailable(" + lang + ", " + country + ", " +variant+")");
         return nativeSynth.isLanguageAvailable(lang, country, variant);
     }
 
@@ -242,7 +243,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private int setLanguage(String lang, String country, String variant) {
-        Log.v("TTS", "TtsService.setLanguage(" + lang + ", " + country + ", " + variant + ")");
+        //Log.v("TTS", "TtsService.setLanguage(" + lang + ", " + country + ", " + variant + ")");
         if (isDefaultEnforced()) {
             return nativeSynth.setLanguage(getDefaultLanguage(), getDefaultCountry(),
                     getDefaultLocVariant());
