@@ -609,7 +609,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     try {
                         registrationState = Integer.parseInt(states[0]);
                         radioTechnology = Integer.parseInt(states[3]);
-                        baseStationId = Integer.parseInt(states[4], 16);
+                        baseStationId = Integer.parseInt(states[4]);
                         baseStationLatitude = Integer.parseInt(states[5], 16);
                         baseStationLongitude = Integer.parseInt(states[6], 16);
                         cssIndicator = Integer.parseInt(states[7]);
@@ -649,7 +649,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
                 // values are -1 if not available
                 newCellLoc.setCellLocationData(baseStationId, baseStationLatitude,
-                        baseStationLongitude);
+                        baseStationLongitude, systemId, networkId);
 
                 if (reasonForDenial == 0) {
                     mRegistrationDeniedReason = ServiceStateTracker.REGISTRATION_DENIED_GEN;
