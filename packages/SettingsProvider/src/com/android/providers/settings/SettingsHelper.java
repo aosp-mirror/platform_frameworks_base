@@ -16,16 +16,22 @@
 
 package com.android.providers.settings;
 
+import java.util.Locale;
+
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.backup.BackupDataInput;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
+import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.IHardwareService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class SettingsHelper {
@@ -110,7 +116,6 @@ public class SettingsHelper {
         }
     }
 
-    /* TODO: Get a list of all sync providers and save/restore the settings */
     byte[] getSyncProviders() {
         byte[] sync = new byte[1 + PROVIDERS.length];
         try {
@@ -140,5 +145,54 @@ public class SettingsHelper {
         } catch (java.io.IOException ioe) {
             Log.w(TAG, "Unable to read sync settings");
         }
+    }
+
+    byte[] getLocaleData() {
+        Configuration conf = mContext.getResources().getConfiguration();
+        final Locale loc = conf.locale;
+        String localeString = loc.getLanguage();
+        String country = loc.getCountry();
+        if (!TextUtils.isEmpty(country)) {
+            localeString += "_" + country;
+        }
+        return localeString.getBytes();
+    }
+
+    /**
+     * Sets the locale specified. Input data is the equivalent of "ll_cc".getBytes(), where
+     * "ll" is the language code and "cc" is the country code.
+     * @param data the locale string in bytes.
+     */
+    void setLocaleData(byte[] data) {
+        // Check if locale was set by the user:
+        Configuration conf = mContext.getResources().getConfiguration();
+        Locale loc = conf.locale;
+        if (conf.userSetLocale) return; // Don't change if user set it in the SetupWizard
+
+        final String[] availableLocales = mContext.getAssets().getLocales();
+        String localeCode = new String(data);
+        String language = new String(data, 0, 2);
+        String country = data.length > 4 ? new String(data, 3, 2) : "";
+        loc = null;
+        for (int i = 0; i < availableLocales.length; i++) {
+            if (availableLocales[i].equals(localeCode)) {
+                loc = new Locale(language, country);
+                break;
+            }
+        }
+        if (loc == null) return; // Couldn't find the saved locale in this version of the software
+
+        try {
+            IActivityManager am = ActivityManagerNative.getDefault();
+            Configuration config = am.getConfiguration();
+            config.locale = loc;
+            // indicate this isn't some passing default - the user wants this remembered
+            config.userSetLocale = true;
+
+            am.updateConfiguration(config);
+        } catch (RemoteException e) {
+            // Intentionally left blank
+        }
+
     }
 }
