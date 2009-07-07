@@ -342,14 +342,14 @@ public class TextToSpeech {
     public int speak(String text, int queueMode, HashMap<String,String> params)
     {
         synchronized (mStartLock) {
+            int result = TTS_ERROR;
             Log.i("TTS received: ", text);
             if (!mStarted) {
-                return TTS_ERROR;
+                return result;
             }
             try {
                 // TODO support extra parameters, passing cache of current parameters for the moment
-                mITts.speak(text, queueMode, mCachedParams);
-                return TTS_SUCCESS;
+                result = mITts.speak(text, queueMode, mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -362,8 +362,9 @@ public class TextToSpeech {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_ERROR;
         }
     }
 
@@ -383,13 +384,13 @@ public class TextToSpeech {
     public int playEarcon(String earcon, int queueMode,
             HashMap<String,String> params) {
         synchronized (mStartLock) {
+            int result = TTS_ERROR;
             if (!mStarted) {
-                return TTS_ERROR;
+                return result;
             }
             try {
                 // TODO support extra parameters, passing null for the moment
-                mITts.playEarcon(earcon, queueMode, null);
-                return TTS_SUCCESS;
+                result = mITts.playEarcon(earcon, queueMode, null);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -402,8 +403,9 @@ public class TextToSpeech {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_ERROR;
         }
     }
 
@@ -420,13 +422,13 @@ public class TextToSpeech {
      */
     public int playSilence(long durationInMs, int queueMode) {
         synchronized (mStartLock) {
+            int result = TTS_ERROR;
             if (!mStarted) {
-                return TTS_ERROR;
+                return result;
             }
             try {
                 // TODO support extra parameters, passing cache of current parameters for the moment
-                mITts.playSilence(durationInMs, queueMode, mCachedParams);
-                return TTS_SUCCESS;
+                result = mITts.playSilence(durationInMs, queueMode, mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -439,8 +441,9 @@ public class TextToSpeech {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_ERROR;
         }
     }
 
@@ -482,12 +485,12 @@ public class TextToSpeech {
      */
     public int stop() {
         synchronized (mStartLock) {
+            int result = TTS_ERROR;
             if (!mStarted) {
-                return TTS_ERROR;
+                return result;
             }
             try {
-                mITts.stop();
-                return TTS_SUCCESS;
+                result = mITts.stop();
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -500,8 +503,9 @@ public class TextToSpeech {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_ERROR;
         }
     }
 
@@ -523,22 +527,23 @@ public class TextToSpeech {
      */
     public int setSpeechRate(float speechRate) {
         synchronized (mStartLock) {
+            int result = TTS_ERROR;
             if (!mStarted) {
-                return TTS_SUCCESS;
+                return result;
             }
             try {
                 if (speechRate > 0) {
                     mCachedRate = (int)(speechRate*100);
                     updateCachedParamArray();
-                    mITts.setSpeechRate(mCachedRate);
-                    return TTS_SUCCESS;
+                    result = mITts.setSpeechRate(mCachedRate);
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_ERROR;
         }
     }
 
@@ -560,20 +565,21 @@ public class TextToSpeech {
      */
     public int setPitch(float pitch) {
         synchronized (mStartLock) {
+            int result = TTS_ERROR;
             if (!mStarted) {
-                return TTS_ERROR;
+                return result;
             }
             try {
                 if (pitch > 0) {
-                    mITts.setPitch((int)(pitch*100));
-                    return TTS_SUCCESS;
+                    result = mITts.setPitch((int)(pitch*100));
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_ERROR;
         }
     }
 
@@ -588,26 +594,27 @@ public class TextToSpeech {
      * @param loc
      *            The locale describing the language to be used.
      *
-     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
+     * @return Code indicating the support status for the locale. See the TTS_LANG_ codes.
      */
     public int setLanguage(Locale loc) {
         synchronized (mStartLock) {
+            int result = TTS_LANG_NOT_SUPPORTED;
             if (!mStarted) {
-                return TTS_ERROR;
+                return result;
             }
             try {
                 mCachedLang = loc.getISO3Language();
                 mCachedCountry = loc.getISO3Country();
                 mCachedVariant = loc.getVariant();
                 updateCachedParamArray();
-                mITts.setLanguage(mCachedLang, mCachedCountry, mCachedVariant);
-                return TTS_SUCCESS;
+                result = mITts.setLanguage(mCachedLang, mCachedCountry, mCachedVariant);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_ERROR;
         }
     }
 
@@ -649,18 +656,20 @@ public class TextToSpeech {
      */
     public int isLanguageAvailable(Locale loc) {
         synchronized (mStartLock) {
+            int result = TTS_LANG_NOT_SUPPORTED;
             if (!mStarted) {
-                return TTS_LANG_NOT_SUPPORTED;
+                return result;
             }
             try {
-                return mITts.isLanguageAvailable(loc.getISO3Language(), loc.getISO3Country(),
-                        loc.getVariant());
+                result = mITts.isLanguageAvailable(loc.getISO3Language(),
+                        loc.getISO3Country(), loc.getVariant());
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_LANG_NOT_SUPPORTED;
         }
     }
 
@@ -681,13 +690,14 @@ public class TextToSpeech {
     public int synthesizeToFile(String text, HashMap<String,String> params,
             String filename) {
         synchronized (mStartLock) {
+            int result = TTS_ERROR;
             if (!mStarted) {
-                return TTS_ERROR;
+                return result;
             }
             try {
                 // TODO support extra parameters, passing null for the moment
                 if (mITts.synthesizeToFile(text, null, filename)){
-                    return TTS_SUCCESS;
+                    result = TTS_SUCCESS;
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -701,8 +711,9 @@ public class TextToSpeech {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
+            } finally {
+              return result;
             }
-            return TTS_ERROR;
         }
     }
 
