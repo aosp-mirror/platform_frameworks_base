@@ -1577,8 +1577,9 @@ public class WifiService extends IWifiManager.Stub {
                  * or plugged in to AC).
                  */
                 if (!shouldWifiStayAwake(stayAwakeConditions, mPluggedType)) {
-                    if (!mWifiStateTracker.hasIpAddress()) {
-                        // do not keep Wifi awake when screen is off if Wifi is not fully active
+                    WifiInfo info = mWifiStateTracker.requestConnectionInfo();
+                    if (info.getSupplicantState() != SupplicantState.COMPLETED) {
+                        // do not keep Wifi awake when screen is off if Wifi is not associated
                         mDeviceIdle = true;
                         updateWifiState();
                     } else {
