@@ -19,6 +19,7 @@ package android.backup;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
 
 /**
  * BackupManager is the interface to the system's backup service.
@@ -39,14 +40,17 @@ import android.os.ServiceManager;
  * @hide pending API solidification
  */
 public class BackupManager {
-    private Context mContext;
-    private IBackupManager mService;
+    private static final String TAG = "BackupManager";
 
-    /**
-     * Defined backup transports understood by {@link IBackupManager.selectBackupTransport}.
-     */
-    public static final int TRANSPORT_LOCAL = 1;
-    public static final int TRANSPORT_GOOGLE = 2;
+    private Context mContext;
+    private static IBackupManager sService;
+
+    private static void checkServiceBinder() {
+        if (sService == null) {
+            sService = IBackupManager.Stub.asInterface(
+                    ServiceManager.getService(Context.BACKUP_SERVICE));
+        }
+    }
 
     /**
      * Constructs a BackupManager object through which the application can
@@ -58,8 +62,6 @@ public class BackupManager {
      */
     public BackupManager(Context context) {
         mContext = context;
-        mService = IBackupManager.Stub.asInterface(
-                ServiceManager.getService(Context.BACKUP_SERVICE));
     }
 
     /**
@@ -68,10 +70,31 @@ public class BackupManager {
      * {@link android.app.BackupAgent} subclass will be scheduled when you call this method.
      */
     public void dataChanged() {
-        if (mService != null) {
+        checkServiceBinder();
+        if (sService != null) {
             try {
-                mService.dataChanged(mContext.getPackageName());
+                sService.dataChanged(mContext.getPackageName());
             } catch (RemoteException e) {
+                Log.d(TAG, "dataChanged() couldn't connect");
+            }
+        }
+    }
+
+    /**
+     * Convenience method for callers who need to indicate that some other package
+     * needs a backup pass.  This can be relevant in the case of groups of packages
+     * that share a uid, for example.
+     *
+     * This method requires that the application hold the "android.permission.BACKUP"
+     * permission if the package named in the argument is not the caller's own.
+     */
+    public static void dataChanged(String packageName) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.dataChanged(packageName);
+            } catch (RemoteException e) {
+                Log.d(TAG, "dataChanged(pkg) couldn't connect");
             }
         }
     }
@@ -85,10 +108,12 @@ public class BackupManager {
      */
     public IRestoreSession beginRestoreSession(String transport) {
         IRestoreSession binder = null;
-        if (mService != null) {
+        checkServiceBinder();
+        if (sService != null) {
             try {
-                binder = mService.beginRestoreSession(transport);
+                binder = sService.beginRestoreSession(transport);
             } catch (RemoteException e) {
+                Log.d(TAG, "beginRestoreSession() couldn't connect");
             }
         }
         return binder;
