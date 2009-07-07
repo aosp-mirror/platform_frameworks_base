@@ -1181,8 +1181,6 @@ class BackupManagerService extends IBackupManager.Stub {
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
 
-        Log.d(TAG, "dataChanged packageName=" + packageName);
-
         // If the caller does not hold the BACKUP permission, it can only request a
         // backup of its own data.
         HashSet<ApplicationInfo> targets;
@@ -1192,7 +1190,6 @@ class BackupManagerService extends IBackupManager.Stub {
         } else {
             // a caller with full permission can ask to back up any participating app
             // !!! TODO: allow backup of ANY app?
-            if (DEBUG) Log.v(TAG, "Privileged caller, allowing backup of other apps");
             targets = new HashSet<ApplicationInfo>();
             int N = mBackupParticipants.size();
             for (int i = 0; i < N; i++) {
@@ -1217,20 +1214,20 @@ class BackupManagerService extends IBackupManager.Stub {
                             // operation returned null when this package was not already
                             // in the set; we want to avoid touching the disk redundantly.
                             writeToJournalLocked(packageName);
-                        }
-                    }
-                }
 
-                if (DEBUG) {
-                    int numKeys = mPendingBackups.size();
-                    Log.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
-                    for (BackupRequest b : mPendingBackups.values()) {
-                        Log.d(TAG, "    + " + b + " agent=" + b.appInfo.backupAgentName);
+                            if (DEBUG) {
+                                int numKeys = mPendingBackups.size();
+                                Log.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
+                                for (BackupRequest b : mPendingBackups.values()) {
+                                    Log.d(TAG, "    + " + b + " agent=" + b.appInfo.backupAgentName);
+                                }
+                            }
+                        }
                     }
                 }
             }
         } else {
-            Log.w(TAG, "dataChanged but no participant pkg " + packageName);
+            Log.w(TAG, "dataChanged but no participant pkg='" + packageName + "'");
         }
     }
 
