@@ -56,7 +56,8 @@ public abstract class Connection {
         CDMA_RETRY_ORDER,               /* requeseted service is rejected, retry delay is set */
         CDMA_ACCESS_FAILURE,
         CDMA_PREEMPTED,
-        CDMA_NOT_EMERGENCY              /* not an emergency call */
+        CDMA_NOT_EMERGENCY,              /* not an emergency call */
+        ERROR_UNSPECIFIED
     }
 
     Object userData;

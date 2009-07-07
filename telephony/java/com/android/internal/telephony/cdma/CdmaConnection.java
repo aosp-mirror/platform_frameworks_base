@@ -435,8 +435,10 @@ public class CdmaConnection extends Connection {
                 } else if (phone.mCM.getRadioState() != CommandsInterface.RadioState.NV_READY
                         && phone.getIccCard().getState() != RuimCard.State.READY) {
                     return DisconnectCause.ICC_ERROR;
-                } else {
+                } else if (causeCode==CallFailCause.NORMAL_CLEARING) {
                     return DisconnectCause.NORMAL;
+                } else {
+                    return DisconnectCause.ERROR_UNSPECIFIED;
                 }
         }
     }
