@@ -369,7 +369,7 @@ void compute_iterators_t::iterators0032(int32_t* it,
         int32_t c0, int32_t c1, int32_t c2) const
 {
     int64_t it64[3];
-    iterators0032(it, c0, c1, c2);
+    iterators0032(it64, c0, c1, c2);
     it[0] = it64[0];
     it[1] = it64[1];
     it[2] = it64[2];
