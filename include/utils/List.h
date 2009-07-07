@@ -154,9 +154,9 @@ protected:
 
         inline _NodePtr getNode() const { return mpNode; }
 
+        _NodePtr mpNode;    /* should be private, but older gcc fails */
     private:
         friend class List;
-        _NodePtr mpNode;
     };
 
 public:
