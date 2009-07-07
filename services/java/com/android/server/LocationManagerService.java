@@ -648,14 +648,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private void checkPermissionsSafe(String provider) {
         if (LocationManager.GPS_PROVIDER.equals(provider)
-            && (mContext.checkCallingPermission(ACCESS_FINE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
         }
         if (LocationManager.NETWORK_PROVIDER.equals(provider)
-            && (mContext.checkCallingPermission(ACCESS_FINE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
-            && (mContext.checkCallingPermission(ACCESS_COARSE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             throw new SecurityException(
                 "Requires ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permission");
@@ -664,14 +664,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private boolean isAllowedProviderSafe(String provider) {
         if (LocationManager.GPS_PROVIDER.equals(provider)
-            && (mContext.checkCallingPermission(ACCESS_FINE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             return false;
         }
         if (LocationManager.NETWORK_PROVIDER.equals(provider)
-            && (mContext.checkCallingPermission(ACCESS_FINE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
-            && (mContext.checkCallingPermission(ACCESS_COARSE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             return false;
         }
@@ -1075,7 +1075,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (mGpsStatusProvider == null) {
             return false;
         }
-        if (mContext.checkCallingPermission(ACCESS_FINE_LOCATION) !=
+        if (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
         }
@@ -1103,7 +1103,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         // first check for permission to the provider
         checkPermissionsSafe(provider);
         // and check for ACCESS_LOCATION_EXTRA_COMMANDS
-        if ((mContext.checkCallingPermission(ACCESS_LOCATION_EXTRA_COMMANDS)
+        if ((mContext.checkCallingOrSelfPermission(ACCESS_LOCATION_EXTRA_COMMANDS)
                 != PackageManager.PERMISSION_GRANTED)) {
             throw new SecurityException("Requires ACCESS_LOCATION_EXTRA_COMMANDS permission");
         }
