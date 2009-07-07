@@ -122,10 +122,10 @@ home=true
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"SDK 1.5 r2",
+      'name':"SDK 1.5 r3",
       'img':"sdk-large.png",
       'title':"Android 1.5 SDK",
-      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r2/index.html'>Download Android 1.5 SDK</a></p>"
+      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r3/index.html'>Download Android 1.5 SDK</a></p>"
     },
 
     'mapskey': {
@@ -135,15 +135,6 @@ home=true
       'img':"maps-large.png",
       'title':"Maps API Key",
       'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='http://code.google.com/android/add-ons/google-apis/maps-overview.html'>Learn more &raquo;</a></p>"
-    },
-
-    'market': {
-      'layout':"imgTop",
-      'icon':"market-small.png",
-      'name':"Android Market",
-      'img':"market-large.png",
-      'title':"",
-      'desc': "<p>Android Market helps you get your applications into the hands of users. The beta version of Market is now open and you can begin sharing your applications with users of the first Android-powered phone, the T-Mobile G1.</p><p><a href='http://market.android.com/publish/'>Publish your Android app on Market &raquo;</a></p>"
     },
 
     'devphone': {
