@@ -197,7 +197,6 @@ public:
 
    /* getters, see constructor */
 
-            uint32_t    sampleRate() const;
             int         format() const;
             int         channelCount() const;
             uint32_t    frameCount() const;
@@ -217,7 +216,7 @@ public:
             status_t    stop();
             bool        stopped() const;
 
-    /* get sample rate for this track
+    /* get sample rate for this record track
      */
             uint32_t    getSampleRate();
 
@@ -323,7 +322,6 @@ private:
     sp<ClientRecordThread>  mClientRecordThread;
     Mutex                   mRecordThreadLock;
 
-    uint32_t                mSampleRate;
     uint32_t                mFrameCount;
 
     audio_track_cblk_t*     mCblk;

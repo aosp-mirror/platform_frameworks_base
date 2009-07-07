@@ -185,7 +185,6 @@ status_t AudioRecord::set(
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
     mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
     mCblk->out = 0;
-    mSampleRate = sampleRate;
     mFormat = format;
     // Update buffer size in case it has been limited by AudioFlinger during track creation
     mFrameCount = mCblk->frameCount;
@@ -196,7 +195,7 @@ status_t AudioRecord::set(
     mRemainingFrames = notificationFrames;
     mUserData = user;
     // TODO: add audio hardware input latency here
-    mLatency = (1000*mFrameCount) / mSampleRate;
+    mLatency = (1000*mFrameCount) / sampleRate;
     mMarkerPosition = 0;
     mMarkerReached = false;
     mNewPosition = 0;
@@ -216,11 +215,6 @@ status_t AudioRecord::initCheck() const
 uint32_t AudioRecord::latency() const
 {
     return mLatency;
-}
-
-uint32_t AudioRecord::sampleRate() const
-{
-    return mSampleRate;
 }
 
 int AudioRecord::format() const
@@ -319,6 +313,11 @@ status_t AudioRecord::stop()
 bool AudioRecord::stopped() const
 {
     return !mActive;
+}
+
+uint32_t AudioRecord::getSampleRate()
+{
+    return mCblk->sampleRate;
 }
 
 status_t AudioRecord::setMarkerPosition(uint32_t marker)

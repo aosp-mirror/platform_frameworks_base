@@ -539,16 +539,17 @@ static jint android_media_AudioTrack_get_native_frame_count(JNIEnv *env,  jobjec
 
 
 // ----------------------------------------------------------------------------
-static void android_media_AudioTrack_set_playback_rate(JNIEnv *env,  jobject thiz,
+static jint android_media_AudioTrack_set_playback_rate(JNIEnv *env,  jobject thiz,
         jint sampleRateInHz) {
     AudioTrack *lpTrack = (AudioTrack *)env->GetIntField(
                 thiz, javaAudioTrackFields.nativeTrackInJavaObj);
 
     if (lpTrack) {
-        lpTrack->setSampleRate(sampleRateInHz);   
+        return android_media_translateErrorCode(lpTrack->setSampleRate(sampleRateInHz));
     } else {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for setSampleRate()");
+        return AUDIOTRACK_ERROR;
     }
 }
 
@@ -788,7 +789,7 @@ static JNINativeMethod gMethods[] = {
     {"native_get_native_frame_count",
                              "()I",      (void *)android_media_AudioTrack_get_native_frame_count},
     {"native_set_playback_rate",
-                             "(I)V",     (void *)android_media_AudioTrack_set_playback_rate},
+                             "(I)I",     (void *)android_media_AudioTrack_set_playback_rate},
     {"native_get_playback_rate",
                              "()I",      (void *)android_media_AudioTrack_get_playback_rate},
     {"native_set_marker_pos","(I)I",     (void *)android_media_AudioTrack_set_marker_pos},
