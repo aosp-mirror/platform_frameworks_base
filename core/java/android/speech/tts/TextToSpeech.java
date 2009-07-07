@@ -144,10 +144,10 @@ public class TextToSpeech {
     private OnInitListener mInitListener = null;
     private boolean mStarted = false;
     private final Object mStartLock = new Object();
-    private int mCachedRate = Engine.FALLBACK_TTS_DEFAULT_RATE;
-    private String mCachedLang = Engine.FALLBACK_TTS_DEFAULT_LANG;
-    private String mCachedCountry = Engine.FALLBACK_TTS_DEFAULT_COUNTRY;
-    private String mCachedVariant = Engine.FALLBACK_TTS_DEFAULT_VARIANT;
+    /**
+     * Used to store the cached parameters sent along with each synthesis request to the
+     * TTS service.
+     */
     private String[] mCachedParams;
 
     /**
@@ -163,22 +163,21 @@ public class TextToSpeech {
         mContext = context;
         mInitListener = listener;
 
-        mCachedParams = new String[2*4]; //4 parameters, store key and value
+        mCachedParams = new String[2*4]; // 4 parameters, store key and value
         mCachedParams[Engine.TTS_PARAM_POSITION_RATE] = Engine.TTS_KEY_PARAM_RATE;
         mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE] = Engine.TTS_KEY_PARAM_LANGUAGE;
         mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY] = Engine.TTS_KEY_PARAM_COUNTRY;
         mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT] = Engine.TTS_KEY_PARAM_VARIANT;
-        updateCachedParamArray();
+
+        mCachedParams[Engine.TTS_PARAM_POSITION_RATE + 1] =
+                String.valueOf(Engine.FALLBACK_TTS_DEFAULT_RATE);
+        // initialize the language cached parameters with the current Locale
+        Locale defaultLoc = Locale.getDefault();
+        mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1] = defaultLoc.getISO3Language();
+        mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1] = defaultLoc.getISO3Country();
+        mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] = defaultLoc.getVariant();
 
         initTts();
-    }
-
-
-    private void updateCachedParamArray() {
-        mCachedParams[Engine.TTS_PARAM_POSITION_RATE+1] = String.valueOf(mCachedRate);
-        mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE+1] = mCachedLang;
-        mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY+1] = mCachedCountry;
-        mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT+1] = mCachedVariant;
     }
 
 
@@ -533,9 +532,9 @@ public class TextToSpeech {
             }
             try {
                 if (speechRate > 0) {
-                    mCachedRate = (int)(speechRate*100);
-                    updateCachedParamArray();
-                    result = mITts.setSpeechRate(mCachedRate);
+                    int rate = (int)(speechRate*100);
+                    mCachedParams[Engine.TTS_PARAM_POSITION_RATE + 1] = String.valueOf(rate);
+                    result = mITts.setSpeechRate(rate);
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -603,12 +602,12 @@ public class TextToSpeech {
                 return result;
             }
             try {
-                mCachedLang = loc.getISO3Language();
-                mCachedCountry = loc.getISO3Country();
-                mCachedVariant = loc.getVariant();
-                updateCachedParamArray();
-                result = mITts.setLanguage(mCachedLang, mCachedCountry, mCachedVariant);
-            } catch (RemoteException e) {
+                mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1] = loc.getISO3Language();
+                mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1] = loc.getISO3Country();
+                mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] = loc.getVariant();
+                result = mITts.setLanguage(mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1],
+                        mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1],
+                        mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] );
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
