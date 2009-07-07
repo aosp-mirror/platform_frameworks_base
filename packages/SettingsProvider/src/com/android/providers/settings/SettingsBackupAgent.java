@@ -166,11 +166,12 @@ public class SettingsBackupAgent extends BackupHelperAgent {
             pos += length;
             if (!TextUtils.isEmpty(settingName) && !TextUtils.isEmpty(settingValue)) {
                 //Log.i(TAG, "Restore " + settingName + " = " + settingValue);
-                cv.clear();
-                cv.put(Settings.NameValueTable.NAME, settingName);
-                cv.put(Settings.NameValueTable.VALUE, settingValue);
-                getContentResolver().insert(contentUri, cv);
-                mSettingsHelper.restoreValue(settingName, settingValue);
+                if (mSettingsHelper.restoreValue(settingName, settingValue)) {
+                    cv.clear();
+                    cv.put(Settings.NameValueTable.NAME, settingName);
+                    cv.put(Settings.NameValueTable.VALUE, settingValue);
+                    getContentResolver().insert(contentUri, cv);
+                }
             }
         }
     }

@@ -19,12 +19,13 @@ package com.android.providers.settings;
 import android.backup.BackupDataInput;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.IContentService;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.IHardwareService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
-import android.content.IContentService;
 import android.util.Log;
 
 public class SettingsHelper {
@@ -33,10 +34,10 @@ public class SettingsHelper {
     private Context mContext;
     private AudioManager mAudioManager;
     private IContentService mContentService;
-    private static final String SYNC_AUTO = "auto_sync";
-    private static final String SYNC_MAIL = "gmail-ls_sync";
-    private static final String SYNC_CALENDAR = "calendar_sync";
-    private static final String SYNC_CONTACTS = "contacts_sync";
+    private static final String[] PROVIDERS = { "gmail-ls", "calendar", "contacts" };
+
+    private boolean mSilent;
+    private boolean mVibrate;
 
     public SettingsHelper(Context context) {
         mContext = context;
@@ -45,15 +46,43 @@ public class SettingsHelper {
         mContentService = ContentResolver.getContentService();
     }
 
-    public void restoreValue(String name, String value) {
+    /**
+     * Sets the property via a call to the appropriate API, if any, and returns
+     * whether or not the setting should be saved to the database as well.
+     * @param name the name of the setting
+     * @param value the string value of the setting
+     * @return whether to continue with writing the value to the database. In
+     * some cases the data will be written by the call to the appropriate API,
+     * and in some cases the property value needs to be modified before setting.
+     */
+    public boolean restoreValue(String name, String value) {
         if (Settings.System.SCREEN_BRIGHTNESS.equals(name)) {
             setBrightness(Integer.parseInt(value));
         } else if (Settings.System.SOUND_EFFECTS_ENABLED.equals(name)) {
-            if (Integer.parseInt(value) == 1) {
-                mAudioManager.loadSoundEffects();
-            } else {
-                mAudioManager.unloadSoundEffects();
-            }
+            setSoundEffects(Integer.parseInt(value) == 1);
+        } else if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
+            setGpsLocation(value);
+            return false;
+        }
+        return true;
+    }
+
+    private void setGpsLocation(String value) {
+        final String GPS = LocationManager.GPS_PROVIDER;
+        boolean enabled = 
+                GPS.equals(value) ||
+                value.startsWith(GPS + ",") ||
+                value.endsWith("," + GPS) ||
+                value.contains("," + GPS + ",");
+        Settings.Secure.setLocationProviderEnabled(
+                mContext.getContentResolver(), GPS, enabled);
+    }
+
+    private void setSoundEffects(boolean enable) {
+        if (enable) {
+            mAudioManager.loadSoundEffects();
+        } else {
+            mAudioManager.unloadSoundEffects();
         }
     }
 
@@ -69,8 +98,19 @@ public class SettingsHelper {
         }
     }
 
-    static final String[] PROVIDERS = { "gmail-ls", "calendar", "contacts" };
-    
+    private void setRingerMode() {
+        if (mSilent) {
+            mAudioManager.setRingerMode(mVibrate ? AudioManager.RINGER_MODE_VIBRATE :
+                AudioManager.RINGER_MODE_SILENT);
+        } else {
+            mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            mAudioManager.setVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER,
+                    mVibrate ? AudioManager.VIBRATE_SETTING_ON
+                            : AudioManager.VIBRATE_SETTING_OFF);
+        }
+    }
+
+    /* TODO: Get a list of all sync providers and save/restore the settings */
     byte[] getSyncProviders() {
         byte[] sync = new byte[1 + PROVIDERS.length];
         try {
@@ -85,7 +125,7 @@ public class SettingsHelper {
         }
         return sync;
     }
-    
+
     void setSyncProviders(BackupDataInput backup) {
         byte[] sync = new byte[backup.getDataSize()];
 
