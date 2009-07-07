@@ -553,13 +553,16 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (DEBUG_DRAW) Log.v(TAG, "Invalidate child: " + dirty);
         if (mCurScrollY != 0 || mTranslator != null) {
             mTempRect.set(dirty);
+            dirty = mTempRect;
             if (mCurScrollY != 0) {
-               mTempRect.offset(0, -mCurScrollY);
+               dirty.offset(0, -mCurScrollY);
             }
             if (mTranslator != null) {
-                mTranslator.translateRectInAppWindowToScreen(mTempRect);
+                mTranslator.translateRectInAppWindowToScreen(dirty);
             }
-            dirty = mTempRect;
+            if (mAttachInfo.mScalingRequired) {
+                dirty.inset(-1, -1);
+            }
         }
         mDirty.union(dirty);
         if (!mWillDrawSoon) {
