@@ -73,7 +73,7 @@ import java.util.List;
  *   </ul>
  * </li>
  * <li> '\n': 1 byte - an automatically generated newline, used to help detect and recover from log
- *                     corruption and enable stansard unix tools like grep, tail and wc to operate
+ *                     corruption and enable standard unix tools like grep, tail and wc to operate
  *                     on event logs. </li>
  * </ul>
  *
@@ -288,5 +288,14 @@ public class EventLog {
      * @throws IOException if something goes wrong reading events
      */
     public static native void readEvents(int[] tags, Collection<Event> output)
+            throws IOException;
+
+    /**
+     * Read events from a file.
+     * @param path to read from
+     * @param output container to add events into
+     * @throws IOException if something goes wrong reading events
+     */
+    public static native void readEvents(String path, Collection<Event> output)
             throws IOException;
 }
