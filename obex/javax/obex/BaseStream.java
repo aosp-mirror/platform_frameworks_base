@@ -47,7 +47,7 @@ public interface BaseStream {
      *
      * @throws IOException if the object is closed
      */
-    public void ensureOpen() throws IOException;
+    void ensureOpen() throws IOException;
 
     /**
      * Verifies that additional information may be sent.  In other words, the
@@ -55,7 +55,7 @@ public interface BaseStream {
      *
      * @throws IOException if the operation is completed
      */
-    public void ensureNotDone() throws IOException;
+    void ensureNotDone() throws IOException;
 
     /**
      * Continues the operation since there is no data to read.
@@ -69,7 +69,7 @@ public interface BaseStream {
      *
      * @throws IOException if an IO error occurs
      */
-    public boolean continueOperation(boolean sendEmpty, boolean inStream) throws IOException;
+    boolean continueOperation(boolean sendEmpty, boolean inStream) throws IOException;
 
     /**
      * Called when the output or input stream is closed.
@@ -79,5 +79,5 @@ public interface BaseStream {
      *
      * @throws IOException if an IO error occurs
      */
-    public void streamClosed(boolean inStream) throws IOException;
+    void streamClosed(boolean inStream) throws IOException;
 }

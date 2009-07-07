@@ -48,15 +48,17 @@ import java.util.TimeZone;
  */
 public final class ObexHelper {
 
-    /** Prevent object construction of helper class */
-    private ObexHelper() {}
-
     /**
-     * Defines the OBEX CONTINUE response code.
-     * <P>
-     * The value of <code>OBEX_HTTP_CONTINUE</code> is 0x90 (144).
+     * Defines the basic packet length used by OBEX.  Every OBEX packet has the
+     * same basic format:<BR>
+     * Byte 0: Request or Response Code
+     * Byte 1&2: Length of the packet.
      */
-    public static final int OBEX_HTTP_CONTINUE = 0x90;
+    public static final int BASE_PACKET_LENGTH = 3;
+
+    /** Prevent object construction of helper class */
+    private ObexHelper() {
+    }
 
     /**
      * The maximum packet size for OBEX packets that this client can handle.
@@ -72,6 +74,48 @@ public final class ObexHelper {
      *  set as 0xFFFE to match remote MPS
      */
     public static final int MAX_PACKET_SIZE_INT = 0xFFFE;
+
+    public static final int OBEX_OPCODE_CONNECT = 0x80;
+
+    public static final int OBEX_OPCODE_DISCONNECT = 0x81;
+
+    public static final int OBEX_OPCODE_PUT = 0x02;
+
+    public static final int OBEX_OPCODE_PUT_FINAL = 0x82;
+
+    public static final int OBEX_OPCODE_GET = 0x03;
+
+    public static final int OBEX_OPCODE_GET_FINAL = 0x83;
+
+    public static final int OBEX_OPCODE_RESERVED = 0x04;
+
+    public static final int OBEX_OPCODE_RESERVED_FINAL = 0x84;
+
+    public static final int OBEX_OPCODE_SETPATH = 0x85;
+
+    public static final int OBEX_OPCODE_ABORT = 0xFF;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ASCII = 0x00;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_1 = 0x01;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_2 = 0x02;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_3 = 0x03;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_4 = 0x04;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_5 = 0x05;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_6 = 0x06;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_7 = 0x07;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_8 = 0x08;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_9 = 0x09;
+
+    public static final int OBEX_AUTH_REALM_CHARSET_UNICODE = 0xFF;
 
     /**
      * Updates the HeaderSet with the headers received in the byte array
@@ -153,37 +197,25 @@ public final class ObexHelper {
                                                 value.length - 1, "ISO8859_1"));
                                     }
                                 } catch (UnsupportedEncodingException e) {
-                                    throw new RuntimeException("ISO8859_1 is not supported"
-                                            + e.getMessage());
+                                    throw e;
                                 }
                                 break;
 
-                            // This is the constant for the authentication challenge header
-                            // This header does not have a constant defined in the Java
-                            // OBEX API
-                            case 0x4D:
-                                headerImpl.authChall = new byte[length];
-                                System.arraycopy(headerArray, index, headerImpl.authChall, 0,
+                            case HeaderSet.AUTH_CHALLENGE:
+                                headerImpl.mAuthChall = new byte[length];
+                                System.arraycopy(headerArray, index, headerImpl.mAuthChall, 0,
                                         length);
                                 break;
 
-                            // This is the constant for the authentication response header
-                            // This header does not have a constant defined in the Java
-                            // OBEX API
-                            case 0x4E:
-                                headerImpl.authResp = new byte[length];
-                                System
-                                        .arraycopy(headerArray, index, headerImpl.authResp, 0,
-                                                length);
+                            case HeaderSet.AUTH_RESPONSE:
+                                headerImpl.mAuthResp = new byte[length];
+                                System.arraycopy(headerArray, index, headerImpl.mAuthResp, 0,
+                                        length);
                                 break;
 
-                            /*
-                            * These two case statements are for the body (0x48)
-                             * and end of body (0x49) headers.
-                            */
-                            case 0x48:
+                            case HeaderSet.BODY:
                                 /* Fall Through */
-                            case 0x49:
+                            case HeaderSet.END_OF_BODY:
                                 body = new byte[length + 1];
                                 body[0] = (byte)headerID;
                                 System.arraycopy(headerArray, index, body, 1, length);
@@ -211,24 +243,16 @@ public final class ObexHelper {
                                             .substring(13, 15)));
                                     headerImpl.setHeader(HeaderSet.TIME_ISO_8601, temp);
                                 } catch (UnsupportedEncodingException e) {
-                                    throw new RuntimeException("ISO8859_1 is not supported"
-                                            + e.getMessage());
-                                } catch (Exception e) {
-                                    throw new IOException(
-                                            "Time Header does not follow ISO 8601 standard");
+                                    throw e;
                                 }
                                 break;
 
                             default:
-                                try {
-                                    if ((headerID & 0xC0) == 0x00) {
-                                        headerImpl.setHeader(headerID, ObexHelper.convertToUnicode(
-                                                value, true));
-                                    } else {
-                                        headerImpl.setHeader(headerID, value);
-                                    }
-                                } catch (Exception e) {
-                                    // Not a valid header so ignore
+                                if ((headerID & 0xC0) == 0x00) {
+                                    headerImpl.setHeader(headerID, ObexHelper.convertToUnicode(
+                                            value, true));
+                                } else {
+                                    headerImpl.setHeader(headerID, value);
                                 }
                         }
 
@@ -262,9 +286,9 @@ public final class ObexHelper {
                             if (headerID != HeaderSet.TIME_4_BYTE) {
                                 // Determine if it is a connection ID.  These
                                 // need to be handled differently
-                                if (headerID == 0xCB) {
-                                    headerImpl.connectionID = new byte[4];
-                                    System.arraycopy(value, 0, headerImpl.connectionID, 0, 4);
+                                if (headerID == HeaderSet.CONNECTION_ID) {
+                                    headerImpl.mConnectionID = new byte[4];
+                                    System.arraycopy(value, 0, headerImpl.mConnectionID, 0, 4);
                                 } else {
                                     headerImpl.setHeader(headerID, Long
                                             .valueOf(convertToLong(value)));
@@ -328,10 +352,10 @@ public final class ObexHelper {
              * Determine if there is a connection ID to send.  If there is,
              * then it should be the first header in the packet.
              */
-            if ((headImpl.connectionID != null) && (headImpl.getHeader(HeaderSet.TARGET) == null)) {
+            if ((headImpl.mConnectionID != null) && (headImpl.getHeader(HeaderSet.TARGET) == null)) {
 
-                out.write((byte)0xCB);
-                out.write(headImpl.connectionID);
+                out.write((byte)HeaderSet.CONNECTION_ID);
+                out.write(headImpl.mConnectionID);
             }
 
             // Count Header
@@ -351,8 +375,8 @@ public final class ObexHelper {
                 out.write((byte)HeaderSet.NAME);
                 value = ObexHelper.convertToUnicodeByteArray(stringHeader);
                 length = value.length + 3;
-                lengthArray[0] = (byte)(255 & (length >> 8));
-                lengthArray[1] = (byte)(255 & length);
+                lengthArray[0] = (byte)(0xFF & (length >> 8));
+                lengthArray[1] = (byte)(0xFF & length);
                 out.write(lengthArray);
                 out.write(value);
                 if (nullOut) {
@@ -367,7 +391,7 @@ public final class ObexHelper {
                 try {
                     value = stringHeader.getBytes("ISO8859_1");
                 } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException("Unsupported Encoding Scheme: " + e.getMessage());
+                    throw e;
                 }
 
                 length = value.length + 4;
@@ -440,7 +464,7 @@ public final class ObexHelper {
                 try {
                     value = buffer.toString().getBytes("ISO8859_1");
                 } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException("UnsupportedEncodingException: " + e.getMessage());
+                    throw e;
                 }
 
                 length = value.length + 3;
@@ -612,28 +636,28 @@ public final class ObexHelper {
             }
 
             // Add the authentication challenge header
-            if (headImpl.authChall != null) {
-                out.write((byte)0x4D);
-                length = headImpl.authChall.length + 3;
+            if (headImpl.mAuthChall != null) {
+                out.write((byte)HeaderSet.AUTH_CHALLENGE);
+                length = headImpl.mAuthChall.length + 3;
                 lengthArray[0] = (byte)(255 & (length >> 8));
                 lengthArray[1] = (byte)(255 & length);
                 out.write(lengthArray);
-                out.write(headImpl.authChall);
+                out.write(headImpl.mAuthChall);
                 if (nullOut) {
-                    headImpl.authChall = null;
+                    headImpl.mAuthChall = null;
                 }
             }
 
             // Add the authentication response header
-            if (headImpl.authResp != null) {
-                out.write((byte)0x4E);
-                length = headImpl.authResp.length + 3;
+            if (headImpl.mAuthResp != null) {
+                out.write((byte)HeaderSet.AUTH_RESPONSE);
+                length = headImpl.mAuthResp.length + 3;
                 lengthArray[0] = (byte)(255 & (length >> 8));
                 lengthArray[1] = (byte)(255 & length);
                 out.write(lengthArray);
-                out.write(headImpl.authResp);
+                out.write(headImpl.mAuthResp);
                 if (nullOut) {
-                    headImpl.authResp = null;
+                    headImpl.mAuthResp = null;
                 }
             }
 

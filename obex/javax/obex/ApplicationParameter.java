@@ -37,9 +37,11 @@ package javax.obex;
  */
 public final class ApplicationParameter {
 
-    private byte[] b_array;
-    private int length;
-    private int max_length = 1000;
+    private byte[] mArray;
+
+    private int mLength;
+
+    private int mMaxLength = 1000;
 
     public static class TRIPLET_TAGID {
         public static final byte ORDER_TAGID = 0x01;
@@ -91,7 +93,6 @@ public final class ApplicationParameter {
     public static class TRIPLET_LENGTH {
         public static final byte ORDER_LENGTH = 1;
 
-        //public final byte SEARCH_VALUE_LENGTH = 0x02;
         public static final byte SEARCH_ATTRIBUTE_LENGTH = 1;
 
         public static final byte MAXLISTCOUNT_LENGTH = 2;
@@ -107,34 +108,27 @@ public final class ApplicationParameter {
         public static final byte NEWMISSEDCALLS_LENGTH = 1;
     }
 
-    /*
-    public class TRIPLET_STRUCTURE{
-        TRIPLET_TAGID id;
-        TRIPLET_LENGTH length;
-        byte[] value;
-    }
-    */
     public ApplicationParameter() {
-        b_array = new byte[max_length];
-        length = 0;
+        mArray = new byte[mMaxLength];
+        mLength = 0;
     }
 
     public void addAPPHeader(byte tag, byte len, byte[] value) {
-        if ((length + len + 2) > max_length) {
-            byte[] array_tmp = new byte[length + 4 * len];
-            System.arraycopy(b_array, 0, array_tmp, 0, length);
-            b_array = array_tmp;
-            max_length = length + 4 * len;
+        if ((mLength + len + 2) > mMaxLength) {
+            byte[] array_tmp = new byte[mLength + 4 * len];
+            System.arraycopy(mArray, 0, array_tmp, 0, mLength);
+            mArray = array_tmp;
+            mMaxLength = mLength + 4 * len;
         }
-        b_array[length++] = tag;
-        b_array[length++] = len;
-        System.arraycopy(value, 0, b_array, length, len);
-        length += len;
+        mArray[mLength++] = tag;
+        mArray[mLength++] = len;
+        System.arraycopy(value, 0, mArray, mLength, len);
+        mLength += len;
     }
 
     public byte[] getAPPparam() {
-        byte[] para = new byte[length];
-        System.arraycopy(b_array, 0, para, 0, length);
+        byte[] para = new byte[mLength];
+        System.arraycopy(mArray, 0, para, 0, mLength);
         return para;
     }
 }

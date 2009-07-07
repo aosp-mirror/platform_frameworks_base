@@ -118,6 +118,20 @@ public final class HeaderSet {
     public static final int HTTP = 0x47;
 
     /**
+     * Represents the OBEX BODY header.
+     * <P>
+     * The value of <code>BODY</code> is 0x48 (72).
+     */
+    public static final int BODY = 0x48;
+
+    /**
+     * Represents the OBEX End of BODY header.
+     * <P>
+     * The value of <code>BODY</code> is 0x49 (73).
+     */
+    public static final int END_OF_BODY = 0x49;
+
+    /**
      * Represents the OBEX Who header.  Identifies the OBEX application to
      * determine if the two peers are talking to each other.
      * <P>
@@ -126,12 +140,13 @@ public final class HeaderSet {
     public static final int WHO = 0x4A;
 
     /**
-     * Represents the OBEX Object Class header.  This header specifies the
-     * OBEX object class of the object.
+     * Represents the OBEX Connection ID header. Identifies used for OBEX
+     * connection multiplexing.
      * <P>
-     * The value of <code>OBJECT_CLASS</code> is 0x4F (79).
+     * The value of <code>CONNECTION_ID</code> is 0xCB (203).
      */
-    public static final int OBJECT_CLASS = 0x4F;
+
+    public static final int CONNECTION_ID = 0xCB;
 
     /**
      * Represents the OBEX Application Parameter header.  This header specifies
@@ -141,49 +156,71 @@ public final class HeaderSet {
      */
     public static final int APPLICATION_PARAMETER = 0x4C;
 
-    private Long count; // 4 byte unsigned integer
+    /**
+     * Represents the OBEX authentication digest-challenge.
+     * <P>
+     * The value of <code>AUTH_CHALLENGE</code> is 0x4D (77).
+     */
+    public static final int AUTH_CHALLENGE = 0x4D;
 
-    private String name; // null terminated Unicode text string
+    /**
+     * Represents the OBEX authentication digest-response.
+     * <P>
+     * The value of <code>AUTH_RESPONSE</code> is 0x4E (78).
+     */
+    public static final int AUTH_RESPONSE = 0x4E;
 
-    private String type; // null terminated ASCII text string
+    /**
+     * Represents the OBEX Object Class header.  This header specifies the
+     * OBEX object class of the object.
+     * <P>
+     * The value of <code>OBJECT_CLASS</code> is 0x4F (79).
+     */
+    public static final int OBJECT_CLASS = 0x4F;
 
-    private Long length; // 4 byte unsigend integer
+    private Long mCount; // 4 byte unsigned integer
 
-    private Calendar isoTime; // String of the form YYYYMMDDTHHMMSSZ
+    private String mName; // null terminated Unicode text string
 
-    private Calendar byteTime; // 4 byte unsigned integer
+    private String mType; // null terminated ASCII text string
 
-    private String description; // null terminated Unicode text String
+    private Long mLength; // 4 byte unsigend integer
 
-    private byte[] target; // byte sequence
+    private Calendar mIsoTime; // String of the form YYYYMMDDTHHMMSSZ
 
-    private byte[] http; // byte sequence
+    private Calendar mByteTime; // 4 byte unsigned integer
 
-    private byte[] who; // length prefixed byte sequence
+    private String mDescription; // null terminated Unicode text String
 
-    private byte[] appParam; // byte sequence of the form tag length value
+    private byte[] mTarget; // byte sequence
 
-    public byte[] authChall; // The authentication challenge header
+    private byte[] mHttpHeader; // byte sequence
 
-    public byte[] authResp; // The authentication response header
+    private byte[] mWho; // length prefixed byte sequence
 
-    public byte[] connectionID; // THe connection ID
+    private byte[] mAppParam; // byte sequence of the form tag length value
 
-    private byte[] objectClass; // byte sequence
+    public byte[] mAuthChall; // The authentication challenge header
 
-    private String[] unicodeUserDefined; //null terminated unicode string
+    public byte[] mAuthResp; // The authentication response header
 
-    private byte[][] sequenceUserDefined; // byte sequence user defined
+    public byte[] mConnectionID; // THe connection ID
 
-    private Byte[] byteUserDefined; // 1 byte
+    private byte[] mObjectClass; // byte sequence
 
-    private Long[] integerUserDefined; // 4 byte unsigned integer
+    private String[] mUnicodeUserDefined; //null terminated unicode string
 
-    /*package*/ int responseCode;
+    private byte[][] mSequenceUserDefined; // byte sequence user defined
 
-    /*package*/ byte[] nonce;
+    private Byte[] mByteUserDefined; // 1 byte
 
-    private final Random random;
+    private Long[] mIntegerUserDefined; // 4 byte unsigned integer
+
+    /*package*/int responseCode;
+
+    /*package*/byte[] nonce;
+
+    private final Random mRandom;
 
     /**
      * Creates new <code>HeaderSet</code> object.
@@ -191,12 +228,12 @@ public final class HeaderSet {
      * @param size the max packet size for this connection
      */
     public HeaderSet() {
-        unicodeUserDefined = new String[16];
-        sequenceUserDefined = new byte[16][];
-        byteUserDefined = new Byte[16];
-        integerUserDefined = new Long[16];
+        mUnicodeUserDefined = new String[16];
+        mSequenceUserDefined = new byte[16][];
+        mByteUserDefined = new Byte[16];
+        mIntegerUserDefined = new Long[16];
         responseCode = -1;
-        random = new Random();
+        mRandom = new Random();
     }
 
     /**
@@ -222,7 +259,7 @@ public final class HeaderSet {
             case COUNT:
                 if (!(headerValue instanceof Long)) {
                     if (headerValue == null) {
-                        count = null;
+                        mCount = null;
                         break;
                     }
                     throw new IllegalArgumentException("Count must be a Long");
@@ -231,24 +268,24 @@ public final class HeaderSet {
                 if ((temp < 0L) || (temp > 0xFFFFFFFFL)) {
                     throw new IllegalArgumentException("Count must be between 0 and 0xFFFFFFFF");
                 }
-                count = (Long)headerValue;
+                mCount = (Long)headerValue;
                 break;
             case NAME:
                 if ((headerValue != null) && (!(headerValue instanceof String))) {
                     throw new IllegalArgumentException("Name must be a String");
                 }
-                name = (String)headerValue;
+                mName = (String)headerValue;
                 break;
             case TYPE:
                 if ((headerValue != null) && (!(headerValue instanceof String))) {
                     throw new IllegalArgumentException("Type must be a String");
                 }
-                type = (String)headerValue;
+                mType = (String)headerValue;
                 break;
             case LENGTH:
                 if (!(headerValue instanceof Long)) {
                     if (headerValue == null) {
-                        length = null;
+                        mLength = null;
                         break;
                     }
                     throw new IllegalArgumentException("Length must be a Long");
@@ -257,84 +294,84 @@ public final class HeaderSet {
                 if ((temp < 0L) || (temp > 0xFFFFFFFFL)) {
                     throw new IllegalArgumentException("Length must be between 0 and 0xFFFFFFFF");
                 }
-                length = (Long)headerValue;
+                mLength = (Long)headerValue;
                 break;
             case TIME_ISO_8601:
                 if ((headerValue != null) && (!(headerValue instanceof Calendar))) {
                     throw new IllegalArgumentException("Time ISO 8601 must be a Calendar");
                 }
-                isoTime = (Calendar)headerValue;
+                mIsoTime = (Calendar)headerValue;
                 break;
             case TIME_4_BYTE:
                 if ((headerValue != null) && (!(headerValue instanceof Calendar))) {
                     throw new IllegalArgumentException("Time 4 Byte must be a Calendar");
                 }
-                byteTime = (Calendar)headerValue;
+                mByteTime = (Calendar)headerValue;
                 break;
             case DESCRIPTION:
                 if ((headerValue != null) && (!(headerValue instanceof String))) {
                     throw new IllegalArgumentException("Description must be a String");
                 }
-                description = (String)headerValue;
+                mDescription = (String)headerValue;
                 break;
             case TARGET:
                 if (headerValue == null) {
-                    target = null;
+                    mTarget = null;
                 } else {
                     if (!(headerValue instanceof byte[])) {
                         throw new IllegalArgumentException("Target must be a byte array");
                     } else {
-                        target = new byte[((byte[])headerValue).length];
-                        System.arraycopy(headerValue, 0, target, 0, target.length);
+                        mTarget = new byte[((byte[])headerValue).length];
+                        System.arraycopy(headerValue, 0, mTarget, 0, mTarget.length);
                     }
                 }
                 break;
             case HTTP:
                 if (headerValue == null) {
-                    http = null;
+                    mHttpHeader = null;
                 } else {
                     if (!(headerValue instanceof byte[])) {
                         throw new IllegalArgumentException("HTTP must be a byte array");
                     } else {
-                        http = new byte[((byte[])headerValue).length];
-                        System.arraycopy(headerValue, 0, http, 0, http.length);
+                        mHttpHeader = new byte[((byte[])headerValue).length];
+                        System.arraycopy(headerValue, 0, mHttpHeader, 0, mHttpHeader.length);
                     }
                 }
                 break;
             case WHO:
                 if (headerValue == null) {
-                    who = null;
+                    mWho = null;
                 } else {
                     if (!(headerValue instanceof byte[])) {
                         throw new IllegalArgumentException("WHO must be a byte array");
                     } else {
-                        who = new byte[((byte[])headerValue).length];
-                        System.arraycopy(headerValue, 0, who, 0, who.length);
+                        mWho = new byte[((byte[])headerValue).length];
+                        System.arraycopy(headerValue, 0, mWho, 0, mWho.length);
                     }
                 }
                 break;
             case OBJECT_CLASS:
                 if (headerValue == null) {
-                    objectClass = null;
+                    mObjectClass = null;
                 } else {
                     if (!(headerValue instanceof byte[])) {
                         throw new IllegalArgumentException("Object Class must be a byte array");
                     } else {
-                        objectClass = new byte[((byte[])headerValue).length];
-                        System.arraycopy(headerValue, 0, objectClass, 0, objectClass.length);
+                        mObjectClass = new byte[((byte[])headerValue).length];
+                        System.arraycopy(headerValue, 0, mObjectClass, 0, mObjectClass.length);
                     }
                 }
                 break;
             case APPLICATION_PARAMETER:
                 if (headerValue == null) {
-                    appParam = null;
+                    mAppParam = null;
                 } else {
                     if (!(headerValue instanceof byte[])) {
                         throw new IllegalArgumentException(
                                 "Application Parameter must be a byte array");
                     } else {
-                        appParam = new byte[((byte[])headerValue).length];
-                        System.arraycopy(headerValue, 0, appParam, 0, appParam.length);
+                        mAppParam = new byte[((byte[])headerValue).length];
+                        System.arraycopy(headerValue, 0, mAppParam, 0, mAppParam.length);
                     }
                 }
                 break;
@@ -345,7 +382,7 @@ public final class HeaderSet {
                         throw new IllegalArgumentException(
                                 "Unicode String User Defined must be a String");
                     }
-                    unicodeUserDefined[headerID - 0x30] = (String)headerValue;
+                    mUnicodeUserDefined[headerID - 0x30] = (String)headerValue;
 
                     break;
                 }
@@ -353,15 +390,15 @@ public final class HeaderSet {
                 if ((headerID >= 0x70) && (headerID <= 0x7F)) {
 
                     if (headerValue == null) {
-                        sequenceUserDefined[headerID - 0x70] = null;
+                        mSequenceUserDefined[headerID - 0x70] = null;
                     } else {
                         if (!(headerValue instanceof byte[])) {
                             throw new IllegalArgumentException(
                                     "Byte Sequence User Defined must be a byte array");
                         } else {
-                            sequenceUserDefined[headerID - 0x70] = new byte[((byte[])headerValue).length];
-                            System.arraycopy(headerValue, 0, sequenceUserDefined[headerID - 0x70],
-                                    0, sequenceUserDefined[headerID - 0x70].length);
+                            mSequenceUserDefined[headerID - 0x70] = new byte[((byte[])headerValue).length];
+                            System.arraycopy(headerValue, 0, mSequenceUserDefined[headerID - 0x70],
+                                    0, mSequenceUserDefined[headerID - 0x70].length);
                         }
                     }
                     break;
@@ -371,7 +408,7 @@ public final class HeaderSet {
                     if ((headerValue != null) && (!(headerValue instanceof Byte))) {
                         throw new IllegalArgumentException("ByteUser Defined must be a Byte");
                     }
-                    byteUserDefined[headerID - 0xB0] = (Byte)headerValue;
+                    mByteUserDefined[headerID - 0xB0] = (Byte)headerValue;
 
                     break;
                 }
@@ -380,7 +417,7 @@ public final class HeaderSet {
                 if ((headerID >= 0xF0) && (headerID <= 0xFF)) {
                     if (!(headerValue instanceof Long)) {
                         if (headerValue == null) {
-                            integerUserDefined[headerID - 0xF0] = null;
+                            mIntegerUserDefined[headerID - 0xF0] = null;
                             break;
                         }
                         throw new IllegalArgumentException("Integer User Defined must be a Long");
@@ -390,7 +427,7 @@ public final class HeaderSet {
                         throw new IllegalArgumentException(
                                 "Integer User Defined must be between 0 and 0xFFFFFFFF");
                     }
-                    integerUserDefined[headerID - 0xF0] = (Long)headerValue;
+                    mIntegerUserDefined[headerID - 0xF0] = (Long)headerValue;
                     break;
                 }
                 throw new IllegalArgumentException("Invalid Header Identifier");
@@ -417,45 +454,45 @@ public final class HeaderSet {
 
         switch (headerID) {
             case COUNT:
-                return count;
+                return mCount;
             case NAME:
-                return name;
+                return mName;
             case TYPE:
-                return type;
+                return mType;
             case LENGTH:
-                return length;
+                return mLength;
             case TIME_ISO_8601:
-                return isoTime;
+                return mIsoTime;
             case TIME_4_BYTE:
-                return byteTime;
+                return mByteTime;
             case DESCRIPTION:
-                return description;
+                return mDescription;
             case TARGET:
-                return target;
+                return mTarget;
             case HTTP:
-                return http;
+                return mHttpHeader;
             case WHO:
-                return who;
+                return mWho;
             case OBJECT_CLASS:
-                return objectClass;
+                return mObjectClass;
             case APPLICATION_PARAMETER:
-                return appParam;
+                return mAppParam;
             default:
                 // Verify that it was not a Unicode String user Defined
                 if ((headerID >= 0x30) && (headerID <= 0x3F)) {
-                    return unicodeUserDefined[headerID - 0x30];
+                    return mUnicodeUserDefined[headerID - 0x30];
                 }
                 // Verify that it was not a byte sequence user defined header
                 if ((headerID >= 0x70) && (headerID <= 0x7F)) {
-                    return sequenceUserDefined[headerID - 0x70];
+                    return mSequenceUserDefined[headerID - 0x70];
                 }
                 // Verify that it was not a byte user defined header
                 if ((headerID >= 0xB0) && (headerID <= 0xBF)) {
-                    return byteUserDefined[headerID - 0xB0];
+                    return mByteUserDefined[headerID - 0xB0];
                 }
-                // Verify that it was not a itneger user defined header
+                // Verify that it was not a integer user defined header
                 if ((headerID >= 0xF0) && (headerID <= 0xFF)) {
-                    return integerUserDefined[headerID - 0xF0];
+                    return mIntegerUserDefined[headerID - 0xF0];
                 }
                 throw new IllegalArgumentException("Invalid Header Identifier");
         }
@@ -478,63 +515,63 @@ public final class HeaderSet {
     public int[] getHeaderList() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        if (count != null) {
+        if (mCount != null) {
             out.write(COUNT);
         }
-        if (name != null) {
+        if (mName != null) {
             out.write(NAME);
         }
-        if (type != null) {
+        if (mType != null) {
             out.write(TYPE);
         }
-        if (length != null) {
+        if (mLength != null) {
             out.write(LENGTH);
         }
-        if (isoTime != null) {
+        if (mIsoTime != null) {
             out.write(TIME_ISO_8601);
         }
-        if (byteTime != null) {
+        if (mByteTime != null) {
             out.write(TIME_4_BYTE);
         }
-        if (description != null) {
+        if (mDescription != null) {
             out.write(DESCRIPTION);
         }
-        if (target != null) {
+        if (mTarget != null) {
             out.write(TARGET);
         }
-        if (http != null) {
+        if (mHttpHeader != null) {
             out.write(HTTP);
         }
-        if (who != null) {
+        if (mWho != null) {
             out.write(WHO);
         }
-        if (appParam != null) {
+        if (mAppParam != null) {
             out.write(APPLICATION_PARAMETER);
         }
-        if (objectClass != null) {
+        if (mObjectClass != null) {
             out.write(OBJECT_CLASS);
         }
 
         for (int i = 0x30; i < 0x40; i++) {
-            if (unicodeUserDefined[i - 0x30] != null) {
+            if (mUnicodeUserDefined[i - 0x30] != null) {
                 out.write(i);
             }
         }
 
         for (int i = 0x70; i < 0x80; i++) {
-            if (sequenceUserDefined[i - 0x70] != null) {
+            if (mSequenceUserDefined[i - 0x70] != null) {
                 out.write(i);
             }
         }
 
         for (int i = 0xB0; i < 0xC0; i++) {
-            if (byteUserDefined[i - 0xB0] != null) {
+            if (mByteUserDefined[i - 0xB0] != null) {
                 out.write(i);
             }
         }
 
         for (int i = 0xF0; i < 0x100; i++) {
-            if (integerUserDefined[i - 0xF0] != null) {
+            if (mIntegerUserDefined[i - 0xF0] != null) {
                 out.write(i);
             }
         }
@@ -572,18 +609,20 @@ public final class HeaderSet {
      * @param access if <code>true</code> then full access will be granted if
      * successful; if <code>false</code> then read-only access will be granted
      * if successful
+     * @throws IOException
      */
-    public void createAuthenticationChallenge(String realm, boolean userID, boolean access) {
+    public void createAuthenticationChallenge(String realm, boolean userID, boolean access)
+            throws IOException {
 
         try {
             nonce = new byte[16];
             for (int i = 0; i < 16; i++) {
-                nonce[i] = (byte)random.nextInt();
+                nonce[i] = (byte)mRandom.nextInt();
             }
 
-            authChall = ObexHelper.computeAuthenticationChallenge(nonce, realm, access, userID);
+            mAuthChall = ObexHelper.computeAuthenticationChallenge(nonce, realm, access, userID);
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw e;
         }
     }
 

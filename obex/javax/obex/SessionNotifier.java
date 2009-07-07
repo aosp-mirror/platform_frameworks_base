@@ -61,7 +61,7 @@ public interface SessionNotifier {
      * does not have a <code>ServiceRecord</code> in the SDDB, the
      * <code>ServiceRecord</code> for this object will be added to the SDDB.
      * This method requests the BCC to put the
-     * local device in connectable mode so that it will respond to
+     * local device in connectible mode so that it will respond to
      * connection attempts by clients.
      * <P>
      * The following checks are done to verify that the service record
@@ -101,10 +101,10 @@ public interface SessionNotifier {
      * be due to insufficient disk space, database locks, etc.
      *
      * @throws BluetoothStateException if the server device could
-     * not be placed in connectable mode because the device user has
-     * configured the device to be non-connectable
+     * not be placed in connectible mode because the device user has
+     * configured the device to be non-connectible
      */
-    public ObexSession acceptAndOpen(ServerRequestHandler handler) throws IOException;
+    ObexSession acceptAndOpen(ServerRequestHandler handler) throws IOException;
 
     /**
      * Waits for a transport layer connection to be established and specifies
@@ -117,7 +117,7 @@ public interface SessionNotifier {
      * does not have a <code>ServiceRecord</code> in the SDDB, the
      * <code>ServiceRecord</code> for this object will be added to the SDDB.
      * This method requests the BCC to put the
-     * local device in connectable mode so that it will respond to
+     * local device in connectible mode so that it will respond to
      * connection attempts by clients.
      * <P>
      * The following checks are done to verify that the service record
@@ -160,9 +160,8 @@ public interface SessionNotifier {
      * be due to insufficient disk space, database locks, etc.
      *
      * @throws BluetoothStateException if the server device could
-     * not be placed in connectable mode because the device user has
-     * configured the device to be non-connectable
+     * not be placed in connectible mode because the device user has
+     * configured the device to be non-connectible
      */
-    public ObexSession acceptAndOpen(ServerRequestHandler handler, Authenticator auth)
-            throws IOException;
+    ObexSession acceptAndOpen(ServerRequestHandler handler, Authenticator auth) throws IOException;
 }

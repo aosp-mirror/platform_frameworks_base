@@ -137,7 +137,7 @@ public interface Operation {
      * @throws IOException if the transaction has already ended or if an
      * OBEX server calls this method
      */
-    public void abort() throws IOException;
+    void abort() throws IOException;
 
     /**
      * Returns the headers that have been received during the operation.
@@ -148,7 +148,7 @@ public interface Operation {
      *
      * @throws IOException if this <code>Operation</code> has been closed
      */
-    public HeaderSet getReceivedHeaders() throws IOException;
+    HeaderSet getReceivedHeader() throws IOException;
 
     /**
      * Specifies the headers that should be sent in the next OBEX message that
@@ -165,7 +165,7 @@ public interface Operation {
      *
      * @throws NullPointerException if <code>headers</code> if <code>null</code>
      */
-    public void sendHeaders(HeaderSet headers) throws IOException;
+    void sendHeaders(HeaderSet headers) throws IOException;
 
     /**
      * Returns the response code received from the server.  Response codes
@@ -178,23 +178,23 @@ public interface Operation {
      * @throws IOException if an error occurred in the transport layer during
      * the transaction; if this object was created by an OBEX server
      */
-    public int getResponseCode() throws IOException;
+    int getResponseCode() throws IOException;
 
-    public String getEncoding();
+    String getEncoding();
 
-    public long getLength();
+    long getLength();
 
-    public String getType();
+    String getType();
 
-    public InputStream openInputStream() throws IOException;
+    InputStream openInputStream() throws IOException;
 
-    public DataInputStream openDataInputStream() throws IOException;
+    DataInputStream openDataInputStream() throws IOException;
 
-    public OutputStream openOutputStream() throws IOException;
+    OutputStream openOutputStream() throws IOException;
 
-    public DataOutputStream openDataOutputStream() throws IOException;
+    DataOutputStream openDataOutputStream() throws IOException;
 
-    public void close() throws IOException;
+    void close() throws IOException;
 
-    public int getMaxPacketSize();
+    int getMaxPacketSize();
 }

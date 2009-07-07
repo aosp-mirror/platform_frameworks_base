@@ -39,23 +39,17 @@ import java.io.IOException;
  * This object provides an input stream to the Operation objects used in this
  * package.
  *
- * TODO: Include the other read() methods defined in InputStream.
- *
  * @hide
  */
-public class PrivateInputStream extends InputStream {
+public final class PrivateInputStream extends InputStream {
 
-    private BaseStream parent;
+    private BaseStream mParent;
 
-    private byte[] data;
+    private byte[] mData;
 
-    private int index;
+    private int mIndex;
 
-    private boolean isOpen;
-
-    public PrivateInputStream() {
-
-    }
+    private boolean mOpen;
 
     /**
      * Creates an input stream for the <code>Operation</code> to read from
@@ -63,10 +57,10 @@ public class PrivateInputStream extends InputStream {
      * @param p the connection this input stream is for
      */
     public PrivateInputStream(BaseStream p) {
-        parent = p;
-        data = new byte[0];
-        index = 0;
-        isOpen = true;
+        mParent = p;
+        mData = new byte[0];
+        mIndex = 0;
+        mOpen = true;
     }
 
     /**
@@ -83,7 +77,7 @@ public class PrivateInputStream extends InputStream {
     @Override
     public synchronized int available() throws IOException {
         ensureOpen();
-        return data.length - index;
+        return mData.length - mIndex;
     }
 
     /**
@@ -101,12 +95,12 @@ public class PrivateInputStream extends InputStream {
     @Override
     public synchronized int read() throws IOException {
         ensureOpen();
-        while (data.length == index) {
-            if (!parent.continueOperation(true, true)) {
+        while (mData.length == mIndex) {
+            if (!mParent.continueOperation(true, true)) {
                 return -1;
             }
         }
-        return (data[index++] & 0xFF);
+        return (mData[mIndex++] & 0xFF);
     }
 
     @Override
@@ -118,33 +112,33 @@ public class PrivateInputStream extends InputStream {
     public synchronized int read(byte[] b, int offset, int length) throws IOException {
 
         if (b == null) {
-            throw new NullPointerException("buffer is null");
+            throw new IOException("buffer is null");
         }
         if ((offset | length) < 0 || length > b.length - offset) {
             throw new ArrayIndexOutOfBoundsException("index outof bound");
         }
         ensureOpen();
 
-        int currentDataLength = data.length - index;
+        int currentDataLength = mData.length - mIndex;
         int remainReadLength = length;
         int offset1 = offset;
         int result = 0;
 
         while (currentDataLength <= remainReadLength) {
-            System.arraycopy(data, index, b, offset1, currentDataLength);
-            index += currentDataLength;
+            System.arraycopy(mData, mIndex, b, offset1, currentDataLength);
+            mIndex += currentDataLength;
             offset1 += currentDataLength;
             result += currentDataLength;
             remainReadLength -= currentDataLength;
 
-            if (!parent.continueOperation(true, true)) {
+            if (!mParent.continueOperation(true, true)) {
                 return result == 0 ? -1 : result;
             }
-            currentDataLength = data.length - index;
+            currentDataLength = mData.length - mIndex;
         }
         if (remainReadLength > 0) {
-            System.arraycopy(data, index, b, offset1, remainReadLength);
-            index += remainReadLength;
+            System.arraycopy(mData, mIndex, b, offset1, remainReadLength);
+            mIndex += remainReadLength;
             result += remainReadLength;
         }
         return result;
@@ -160,14 +154,14 @@ public class PrivateInputStream extends InputStream {
      */
     public synchronized void writeBytes(byte[] body, int start) {
 
-        int length = (body.length - start) + (data.length - index);
+        int length = (body.length - start) + (mData.length - mIndex);
         byte[] temp = new byte[length];
 
-        System.arraycopy(data, index, temp, 0, data.length - index);
-        System.arraycopy(body, start, temp, data.length - index, body.length - start);
+        System.arraycopy(mData, mIndex, temp, 0, mData.length - mIndex);
+        System.arraycopy(body, start, temp, mData.length - mIndex, body.length - start);
 
-        data = temp;
-        index = 0;
+        mData = temp;
+        mIndex = 0;
         notifyAll();
     }
 
@@ -177,8 +171,8 @@ public class PrivateInputStream extends InputStream {
      * @throws IOException if the stream is not open
      */
     private void ensureOpen() throws IOException {
-        parent.ensureOpen();
-        if (!isOpen) {
+        mParent.ensureOpen();
+        if (!mOpen) {
             throw new IOException("Input stream is closed");
         }
     }
@@ -191,7 +185,7 @@ public class PrivateInputStream extends InputStream {
      */
     @Override
     public void close() throws IOException {
-        isOpen = false;
-        parent.streamClosed(true);
+        mOpen = false;
+        mParent.streamClosed(true);
     }
 }
