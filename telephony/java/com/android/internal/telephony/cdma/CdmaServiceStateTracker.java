@@ -456,7 +456,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
             msg.arg1 = 1; // tearDown is true
             msg.obj = CDMAPhone.REASON_RADIO_TURNED_OFF;
-            sendMessage(msg);
+            dcTracker.sendMessage(msg);
 
             // Poll data state up to 15 times, with a 100ms delay
             // totaling 1.5 sec. Normal data disable action will finish in 100ms.
