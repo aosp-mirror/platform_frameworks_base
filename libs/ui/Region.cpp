@@ -16,6 +16,8 @@
 
 #define LOG_TAG "Region"
 
+#include <limits.h>
+
 #include <utils/Log.h>
 #include <utils/String8.h>
 
