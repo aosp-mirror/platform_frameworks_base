@@ -36,6 +36,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -183,7 +184,8 @@ public class TtsService extends Service implements OnCompletionListener {
         String defaultLang = android.provider.Settings.Secure.getString(mResolver,
                 android.provider.Settings.Secure.TTS_DEFAULT_LANG);
         if (defaultLang == null) {
-            return TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_LANG;
+            // no setting found, use the current Locale to determine the default language
+            return Locale.getDefault().getISO3Language();
         } else {
             return defaultLang;
         }
@@ -194,7 +196,8 @@ public class TtsService extends Service implements OnCompletionListener {
         String defaultCountry = android.provider.Settings.Secure.getString(mResolver,
                 android.provider.Settings.Secure.TTS_DEFAULT_COUNTRY);
         if (defaultCountry == null) {
-            return TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_COUNTRY;
+            // no setting found, use the current Locale to determine the default country
+            return Locale.getDefault().getISO3Country();
         } else {
             return defaultCountry;
         }
@@ -205,7 +208,8 @@ public class TtsService extends Service implements OnCompletionListener {
         String defaultVar = android.provider.Settings.Secure.getString(mResolver,
                 android.provider.Settings.Secure.TTS_DEFAULT_VARIANT);
         if (defaultVar == null) {
-            return TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_VARIANT;
+            // no setting found, use the current Locale to determine the default variant
+            return Locale.getDefault().getVariant();
         } else {
             return defaultVar;
         }
