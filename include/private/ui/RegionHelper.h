@@ -62,6 +62,8 @@ public:
     class region_rasterizer {
         friend class region_operator;
         virtual void operator()(const RECT& rect) = 0;
+    public:
+        virtual ~region_rasterizer() { };
     };
     
     inline region_operator(int op, const region& lhs, const region& rhs) 
