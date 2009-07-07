@@ -945,15 +945,25 @@ public class PackageParser {
                         >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
         }
-        
+        int densities[] = null;
         int size = pkg.supportsDensityList.size();
         if (size > 0) {
-            int densities[] = pkg.supportsDensities = new int[size];
+            densities = pkg.supportsDensities = new int[size];
             List<Integer> densityList = pkg.supportsDensityList;
             for (int i = 0; i < size; i++) {
                 densities[i] = densityList.get(i);
             }
         }
+        /**
+         * TODO: enable this before code freeze. b/1967935
+         * *
+        if ((densities == null || densities.length == 0)
+                && (pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.supportsDensities = ApplicationInfo.ANY_DENSITIES_ARRAY;
+        }
+         */
+
         return pkg;
     }
 

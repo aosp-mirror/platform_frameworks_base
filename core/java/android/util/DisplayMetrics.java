@@ -109,7 +109,6 @@ public class DisplayMetrics {
      */
     public void updateMetrics(CompatibilityInfo compatibilityInfo, int orientation,
             int screenLayout) {
-        int xOffset = 0;
         if (!compatibilityInfo.isConfiguredExpandable()) {
             // Note: this assume that configuration is updated before calling
             // updateMetrics method.
@@ -142,7 +141,6 @@ public class DisplayMetrics {
                 
                 if (defaultWidth < widthPixels) {
                     // content/window's x offset in original pixels
-                    xOffset = ((widthPixels - defaultWidth) / 2);
                     widthPixels = defaultWidth;
                 }
                 if (defaultHeight < heightPixels) {
@@ -154,7 +152,6 @@ public class DisplayMetrics {
                 compatibilityInfo.setExpandable(true);
             }
         }
-        compatibilityInfo.setVisibleRect(xOffset, widthPixels, heightPixels);
         if (compatibilityInfo.isScalingRequired()) {
             float invertedRatio = compatibilityInfo.applicationInvertedScale;
             density *= invertedRatio;

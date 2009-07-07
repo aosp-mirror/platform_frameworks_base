@@ -173,7 +173,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@hide}
      */
     public static final int ANY_DENSITY = -1;
-    private static final int[] ANY_DENSITIES_ARRAY = { ANY_DENSITY };
+    static final int[] ANY_DENSITIES_ARRAY = { ANY_DENSITY };
 
     /**
      * Flags associated with the application.  Any combination of

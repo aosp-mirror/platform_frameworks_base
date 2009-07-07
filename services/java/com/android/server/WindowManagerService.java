@@ -53,6 +53,7 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -417,7 +418,13 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
     final Configuration mTempConfiguration = new Configuration();
     int screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
-    
+
+    // The frame use to limit the size of the app running in compatibility mode.
+    Rect mCompatibleScreenFrame = new Rect();
+    // The surface used to fill the outer rim of the app running in compatibility mode.
+    Surface mBackgroundFillerSurface = null;
+    boolean mBackgroundFillerShown = false;
+
     public static WindowManagerService main(Context context,
             PowerManagerService pm, boolean haveInputMethods) {
         WMThread thr = new WMThread(context, pm, haveInputMethods);
@@ -3738,12 +3745,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
         config.orientation = orientation;
         
+        DisplayMetrics dm = new DisplayMetrics();
+        mDisplay.getMetrics(dm);
+        CompatibilityInfo.updateCompatibleScreenFrame(dm, orientation, mCompatibleScreenFrame);
+
         if (screenLayout == Configuration.SCREENLAYOUT_UNDEFINED) {
             // Note we only do this once because at this point we don't
             // expect the screen to change in this way at runtime, and want
             // to avoid all of this computation for every config change.
-            DisplayMetrics dm = new DisplayMetrics();
-            mDisplay.getMetrics(dm);
             int longSize = dw;
             int shortSize = dh;
             if (longSize < shortSize) {
@@ -3753,7 +3762,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             }
             longSize = (int)(longSize/dm.density);
             shortSize = (int)(shortSize/dm.density);
-            
+
             // These semi-magic numbers define our compatibility modes for
             // applications with different screens.  Don't change unless you
             // make sure to test lots and lots of apps!
@@ -5845,8 +5854,19 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         public void computeFrameLw(Rect pf, Rect df, Rect cf, Rect vf) {
             mHaveFrame = true;
 
-            final int pw = pf.right-pf.left;
-            final int ph = pf.bottom-pf.top;
+            final Rect container = mContainingFrame;
+            container.set(pf);
+
+            final Rect display = mDisplayFrame;
+            display.set(df);
+
+            if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW) != 0) {
+                container.intersect(mCompatibleScreenFrame);
+                display.intersect(mCompatibleScreenFrame);
+            }
+
+            final int pw = container.right - container.left;
+            final int ph = container.bottom - container.top;
 
             int w,h;
             if ((mAttrs.flags & mAttrs.FLAG_SCALED) != 0) {
@@ -5856,12 +5876,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 w = mAttrs.width == mAttrs.FILL_PARENT ? pw : mRequestedWidth;
                 h = mAttrs.height== mAttrs.FILL_PARENT ? ph : mRequestedHeight;
             }
-
-            final Rect container = mContainingFrame;
-            container.set(pf);
-
-            final Rect display = mDisplayFrame;
-            display.set(df);
 
             final Rect content = mContentFrame;
             content.set(cf);
@@ -5882,7 +5896,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
             // Now make sure the window fits in the overall display.
             Gravity.applyDisplay(mAttrs.gravity, df, frame);
-
+            
             // Make sure the content and visible frames are inside of the
             // final window frame.
             if (content.left < frame.left) content.left = frame.left;
@@ -6573,16 +6587,29 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             return false;
         }
 
-        boolean isFullscreenOpaque(int screenWidth, int screenHeight) {
-            if (mAttrs.format != PixelFormat.OPAQUE || mSurface == null
-                    || mAnimation != null || mDrawPending || mCommitDrawPending) {
-                return false;
-            }
-            if (mFrame.left <= 0 && mFrame.top <= 0 &&
-                mFrame.right >= screenWidth && mFrame.bottom >= screenHeight) {
-                return true;
-            }
-            return false;
+        /**
+         * Return true if the window is opaque and fully drawn.
+         */
+        boolean isOpaqueDrawn() {
+            return mAttrs.format == PixelFormat.OPAQUE && mSurface != null
+                    && mAnimation == null && !mDrawPending && !mCommitDrawPending;
+        }
+
+        boolean needsBackgroundFiller(int screenWidth, int screenHeight) {
+            return
+                 // only if the application is requesting compatible window
+                 (mAttrs.flags & mAttrs.FLAG_COMPATIBLE_WINDOW) != 0 &&
+                 // and only if the application wanted to fill the screen
+                 mAttrs.width == mAttrs.FILL_PARENT &&
+                 mAttrs.height == mAttrs.FILL_PARENT &&
+                 // and only if the screen is bigger
+                 ((mFrame.right - mFrame.right) < screenWidth ||
+                         (mFrame.bottom - mFrame.top) < screenHeight);
+        }
+
+        boolean isFullscreen(int screenWidth, int screenHeight) {
+            return mFrame.left <= 0 && mFrame.top <= 0 &&
+                mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
         }
 
         void removeLocked() {
@@ -8102,6 +8129,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             boolean dimming = false;
             boolean covered = false;
             boolean syswin = false;
+            boolean backgroundFillerShown = false;
 
             for (i=N-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
@@ -8371,11 +8399,39 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                             syswin = true;
                         }
                     }
-                    if (w.isFullscreenOpaque(dw, dh)) {
+
+                    boolean opaqueDrawn = w.isOpaqueDrawn();
+                    if (opaqueDrawn && w.isFullscreen(dw, dh)) {
                         // This window completely covers everything behind it,
                         // so we want to leave all of them as unblurred (for
                         // performance reasons).
                         obscured = true;
+                    } else if (opaqueDrawn && w.needsBackgroundFiller(dw, dh)) {
+                        if (SHOW_TRANSACTIONS) Log.d(TAG, "showing background filler");
+                                                // This window is in compatibility mode, and needs background filler. 
+                        obscured = true;
+                        if (mBackgroundFillerSurface == null) {
+                            try {
+                                mBackgroundFillerSurface = new Surface(mFxSession, 0,
+                                        0, dw, dh,
+                                        PixelFormat.OPAQUE,
+                                        Surface.FX_SURFACE_NORMAL);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Exception creating filler surface", e);
+                            }
+                        }
+                        try {
+                            mBackgroundFillerSurface.setPosition(0, 0);
+                            mBackgroundFillerSurface.setSize(dw, dh);
+                            // Using the same layer as Dim because they will never be shown at the
+                            // same time.
+                            mBackgroundFillerSurface.setLayer(w.mAnimLayer - 1);
+                            mBackgroundFillerSurface.show();
+                        } catch (RuntimeException e) {
+                            Log.e(TAG, "Exception showing filler surface");
+                        }
+                        backgroundFillerShown = true;
+                        mBackgroundFillerShown = true;
                     } else if (canBeSeen && !obscured &&
                             (attrFlags&FLAG_BLUR_BEHIND|FLAG_DIM_BEHIND) != 0) {
                         if (localLOGV) Log.v(TAG, "Win " + w
@@ -8470,6 +8526,16 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                             mBlurSurface.setLayer(w.mAnimLayer-2);
                         }
                     }
+                }
+            }
+            
+            if (backgroundFillerShown == false && mBackgroundFillerShown) {
+                mBackgroundFillerShown = false;
+                if (SHOW_TRANSACTIONS) Log.d(TAG, "hiding background filler");
+                try {
+                    mBackgroundFillerSurface.hide();
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Exception hiding filler surface", e);
                 }
             }
 

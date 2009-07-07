@@ -385,6 +385,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (mView == null) {
                 mView = view;
                 mWindowAttributes.copyFrom(attrs);
+                attrs = mWindowAttributes;
 
                 CompatibilityInfo compatibilityInfo =
                         mView.getContext().getResources().getCompatibilityInfo();
@@ -397,11 +398,14 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
                 if (DEBUG_LAYOUT) Log.d(TAG, "WindowLayout in setView:" + attrs);
 
+                if (!compatibilityInfo.supportsScreen()) {
+                    attrs.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                }
+
                 mSoftInputMode = attrs.softInputMode;
                 mWindowAttributesChanged = true;
                 mAttachInfo.mRootView = view;
-                mAttachInfo.mScalingRequired =
-                        mTranslator == null ? false : mTranslator.scalingRequired;
+                mAttachInfo.mScalingRequired = mTranslator == null ? false : true;
                 mAttachInfo.mApplicationScale =
                         mTranslator == null ? 1.0f : mTranslator.applicationScale;
                 if (panelParentView != null) {
