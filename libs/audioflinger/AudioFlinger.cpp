@@ -1288,7 +1288,7 @@ sp<AudioFlinger::MixerThread::Track>  AudioFlinger::MixerThread::createTrack_l(
     status_t lStatus;
     
     // Resampler implementation limits input sampling rate to 2 x output sampling rate.
-    if (sampleRate > MAX_SAMPLE_RATE || sampleRate > mSampleRate*2) {
+    if (sampleRate > mSampleRate*2) {
         LOGE("Sample rate out of range: %d mSampleRate %d", sampleRate, mSampleRate);
         lStatus = BAD_VALUE;
         goto Exit;
@@ -1603,8 +1603,8 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
                 new(mCblk) audio_track_cblk_t();
                 // clear all buffers
                 mCblk->frameCount = frameCount;
-                mCblk->sampleRate = (uint16_t)sampleRate;
-                mCblk->channels = (uint16_t)channelCount;
+                mCblk->sampleRate = sampleRate;
+                mCblk->channels = (uint8_t)channelCount;
                 if (sharedBuffer == 0) {
                     mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
                     memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
@@ -1627,8 +1627,8 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
            new(mCblk) audio_track_cblk_t();
            // clear all buffers
            mCblk->frameCount = frameCount;
-           mCblk->sampleRate = (uint16_t)sampleRate;
-           mCblk->channels = (uint16_t)channelCount;
+           mCblk->sampleRate = sampleRate;
+           mCblk->channels = (uint8_t)channelCount;
            mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
            memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
            // Force underrun condition to avoid false underrun callback until first data is
@@ -1689,7 +1689,7 @@ int AudioFlinger::MixerThread::TrackBase::sampleRate() const {
 }
 
 int AudioFlinger::MixerThread::TrackBase::channelCount() const {
-    return mCblk->channels;
+    return (int)mCblk->channels;
 }
 
 void* AudioFlinger::MixerThread::TrackBase::getBuffer(uint32_t offset, uint32_t frames) const {
@@ -2270,12 +2270,6 @@ sp<IAudioRecord> AudioFlinger::openRecord(
 
     if (uint32_t(inputSource) >= AudioRecord::NUM_INPUT_SOURCES) {
         LOGE("invalid stream type");
-        lStatus = BAD_VALUE;
-        goto Exit;
-    }
-
-    if (sampleRate > MAX_SAMPLE_RATE) {
-        LOGE("Sample rate out of range");
         lStatus = BAD_VALUE;
         goto Exit;
     }
