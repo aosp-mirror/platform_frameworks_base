@@ -108,6 +108,21 @@ public class CdmaSmsTest extends AndroidTestCase {
         userData.payloadStr = "More @ testing\nis great^|^~woohoo";
         revBearerData = BearerData.decode(BearerData.encode(bearerData));
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+        concatRef.refNumber = 0xEE;
+        concatRef.msgCount = 2;
+        concatRef.seqNumber = 2;
+        concatRef.isEightBits = true;
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.concatRef = concatRef;
+        byte[] encodedHeader = SmsHeader.toByteArray(smsHeader);
+        userData.userDataHeader = smsHeader;
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        SmsHeader decodedHeader = revBearerData.userData.userDataHeader;
+        assertEquals(decodedHeader.concatRef.refNumber, concatRef.refNumber);
+        assertEquals(decodedHeader.concatRef.msgCount, concatRef.msgCount);
+        assertEquals(decodedHeader.concatRef.seqNumber, concatRef.seqNumber);
     }
 
     @SmallTest
