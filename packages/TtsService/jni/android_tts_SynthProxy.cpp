@@ -133,7 +133,7 @@ class SynthProxyJniStorage {
               delete mAudioOut;
               mAudioOut = NULL;
             } else {
-              LOGI("AudioTrack OK");
+              //LOGI("AudioTrack OK");
               mAudioOut->start();
               LOGI("AudioTrack started");
             }
@@ -178,7 +178,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
     SynthProxyJniStorage* pJniData = (SynthProxyJniStorage*)(pForAfter->jniStorage);
 
     if (pForAfter->usageMode == USAGEMODE_PLAY_IMMEDIATELY){
-        LOGV("Direct speech");
+        //LOGV("Direct speech");
 
         if (wav == NULL) {
             delete pForAfter;
@@ -610,7 +610,7 @@ LOGI("android_tts_SynthProxy_playAudioBuffer");
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     short* wav = (short*) bufferPointer;
     pSynthData->mAudioOut->write(wav, bufferSize);
-    LOGI("AudioTrack wrote: %d bytes", bufferSize);
+    //LOGI("AudioTrack wrote: %d bytes", bufferSize);
 }
 
 
