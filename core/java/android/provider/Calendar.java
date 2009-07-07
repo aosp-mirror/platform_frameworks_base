@@ -693,6 +693,8 @@ public final class Calendar {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI = Uri.parse("content://calendar/instances/when");
+        public static final Uri CONTENT_BY_DAY_URI =
+            Uri.parse("content://calendar/instances/whenbyday");
 
         /**
          * The default sort order for this table.
