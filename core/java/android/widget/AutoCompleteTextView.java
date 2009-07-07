@@ -837,6 +837,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public void setListSelection(int position) {
         if (mPopup.isShowing() && (mDropDownList != null)) {
+            mDropDownList.mListSelectionHidden = false;
             mDropDownList.setSelection(position);
             // ListView.setSelection() will call requestLayout()
         }
