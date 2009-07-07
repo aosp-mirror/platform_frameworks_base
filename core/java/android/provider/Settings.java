@@ -2671,6 +2671,12 @@ public final class Settings {
         public static final String GMAIL_DISCARD_ERROR_UPHILL_OP = "gmail_discard_error_uphill_op";
 
         /**
+         * Controls how many attempts Gmail will try to upload an uphill operations before it
+         * abandons the operation. Defaults to 20.
+         */
+        public static final String GMAIL_NUM_RETRY_UPHILL_OP = "gmail_discard_error_uphill_op";
+
+        /**
          * the transcoder URL for mobile devices.
          */
         public static final String TRANSCODER_URL = "mobile_transcoder_url";
