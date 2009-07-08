@@ -1,0 +1,281 @@
+page.title=Installieren das Android SDK
+@jd:body
+
+
+<p>Diese Seite beschreibt die Installation des SDK von Android und die Einrichtung Ihrer Entwicklungsumgebung. 
+Wenn Sie das SDK noch nicht heruntergeladen haben, können Sie dies auf der Seite <a href="{@docRoot}sdk/{@sdkCurrent}/index.html">Download</a> tun. 
+Kehren Sie hierhin zurück, nachdem Sie das SDK heruntergeladen haben.
+</p>
+
+<p>Wenn während der Installation Probleme auftreten, lesen Sie unten auf der Seite die <a href="#installnotes">Hinweise zur Installation</a>.</p>
+
+<h4 style="margin-top">Möchten Sie ein Upgrade ausführen?</h4>
+<p>Wenn Sie bereits Anwendungen mit einer früheren Version des SDK entwickelt haben, lesen Sie stattdessen die Informationen unter <a href="upgrading.html"><strong>Ein Upgrade des SDK ausführen</strong></a></b>.
+
+</p>
+
+
+<h2 id="setup">Vorbereitung der Installation</h2>
+
+<p>Bevor Sie mit der Installation beginnen, sollten Sie bestätigen, dass Ihr Computer die <a href="requirements.html">Systemanforderungen</a> erfüllt.
+</p>
+
+<p>Wenn Sie auf Eclipse mit dem Android Development Tools (ADT)-Plug-in entwickeln (der empfohlenen Methode, wenn Sie neu bei Android sind), müssen Sie sicherstellen, dass Sie eine geeignete Version von Eclipse auf Ihrem Computer installiert haben (3.3 oder höher). 
+Wenn Sie Eclipse installieren müssen, können Sie das Programm hier herunterladen: </p>
+
+<p style="margin-left:2em;"><a href=
+"http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>.</p>
+
+<p>Wir empfehlen eine Java- oder RCP-Version von Eclipse. </p>
+
+<h2 id="installingsdk">Das SDK installieren</h2>
+
+<p>Nachdem Sie das SDK heruntergeladen haben, entpacken Sie das ZIP-Archiv an einem geeigneten Speicherort auf Ihrem Computer. 
+Standardmäßig werden die SDK-Dateien in einem Verzeichnis mit der Bezeichnung <code>android_sdk_<em>&lt;platform</em>&gt;_<em>&lt;release&gt;</em></code> entpackt. 
+Das Verzeichnis enthält eine lokale Kopie der Dokumentation (Sie können darauf zugreifen, indem Sie <code>documentation.html</code> in Ihrem Browser öffnen) sowie die Unterverzeichnisse <code>tools/</code>, <code>add-ons/</code>, <code>platforms/</code> und andere. In jedem Unterverzeichnis von <code>platforms/</code> finden Sie <code>samples/</code>, die Codebeispiele speziell für jede Version der Plattform enthalten.</p>
+
+<p>Machen Sie sich eine Notiz zum Namen und Speicherort des entpackten SDK-Verzeichnisses auf Ihrem System, da Sie später auf das SDK-Verzeichnis zugreifen müssen, um das Android-Plug-in einzurichten oder die SDK-Tools zu verwenden.
+</p>
+
+<p>Alternativ sollten Sie den Speicherort des SDK-Hauptverzeichnisses <code>tools</code> zu Ihrem Systempfad hinzufügen. Das Hauptverzeichnis <code>tools/</code> befindet sich ganz oben im SDK-Ordner. Wenn Sie <code>tools</code> zu Ihrem Pfad hinzufügen, können Sie Android Debug Bridge (adb) und die anderen Befehlszeilen-<a href="{@docRoot}guide/developing/tools/index.html">Tools</a> ausführen, ohne den vollständigen Pfad zum Tools-Verzeichnis angeben zu müssen.
+ </p>
+<ul>
+    <li>Bearbeiten Sie in Linux Ihre <code>~/.bash_profile</code>- oder <code>~/.bashrc</code>-Datei. Suchen Sie nach der Zeile, die die Umgebungsvariable PATH festlegt, und fügen Sie den vollständigen Pfad zu dem Verzeichnis <code>tools/</code> hinzu. 
+Wenn Sie keine Zeile sehen, in der der Pfad angezeigt wird, können Sie eine Zeile hinzufügen:
+</li>
+
+    <ul><code>export PATH=${PATH}:<em>&lt;your_sdk_dir&gt;</em>/tools</code></ul>
+
+    <li>Wenn Sie einen Mac verwenden, suchen Sie in Ihrem Basisverzeichnis nach <code>.bash_profile</code> und fahren Sie gemäß den Anweisungen für Linux fort. 
+Sie können <code>.bash_profile</code> erstellen, wenn Sie dies nicht bereits auf Ihrem Computer getan haben.
+ </li>
+
+    <li>Klicken Sie in Windows mit der rechten Maustaste auf den Arbeitsplatz und wählen Sie "Eigenschaften" aus. 
+Klicken Sie auf der Registerkarte "Erweitert" auf die Schaltfläche "Umgebungsvariablen" und doppelklicken Sie in dem daraufhin angezeigten Dialogfeld auf "Pfad" (unter "Systemvariablen"). Fügen Sie dem Verzeichnis <code>tools/</code> den vollständigen Pfad hinzu. </li>
+  </ul>
+
+<p>Beachten Sie, dass wenn Sie Ihr SDK zukünftig aktualisieren, Sie auch Ihre Einstellungen für PATH so aktualisieren solten, dass sie immer auf den neuen Speicherort hinweisen, falls sich dieser geändert hat.
+</p>
+
+<p>Wenn Sie die Eclipse-IDE als Entwicklungsumgebung verwenden, beschreibt der nächste Abschnitt, wie Sie das Android Development Tool-Plug-in installieren und Eclipse einrichten. 
+Wenn Sie sich für Eclipse entscheiden, können Sie Android-Anwendungen in einer IDE Ihrer Wahl entwickeln und anschließend mithilfe der im SDK enthaltenen Tools kompilieren, debuggen und bereitstellen (fahren Sie mit <a href="#next">Nächste Schritte</a> fort).
+</p>
+
+
+<h2 id="installingplugin">Das ADT-Plug-in für Eclipse installieren
+</h2>
+
+<p>Android bietet ein benutzerdefiniertes Plug-in für die Eclipse-IDE mit der Bezeichnung Android Development Tools (ADT), das entwickelt wurde, um Ihnen eine leistungsfähige und integrierte Umgebung zu bieten, in der Sie Android-Anwendungen erstellen können. 
+Es erweitert die Funktionen von Eclipse, sodass Sie neue Android-Projekte schnell und einfach einrichten, eine Anwendungs-UI erstellen, Komponenten auf der Basis des Android-Framework hinzufügen, Ihre Anwendungen mit den Android SDK-Tools debuggen und sogar signierte (oder unsignierte) APKs exportieren können, um Ihre Anwendung zu verbreiten.
+</p>
+
+<p>Im Allgemeinen empfehlen wir die Verwendung von Eclipse mit ADT für die Android-Entwicklung, da diese Methode den schnellsten Weg zum Einstieg in die Materie darstellt. 
+Wenn Sie bevorzugen, in einer anderen IDE als Eclipse zu arbeiten, müssen Sie Eclipse oder ADT nicht installieren. Stattdessen können Sie die SDK-Tools direkt zum Erstellen und Debuggen Ihrer Anwendung verwenden.
+</p>
+
+<p>Sobald Sie Eclipse wie unter <a href="#setup">Vorbereitung der Installation</a> beschrieben installiert haben, folgen Sie den unten dargestellten Anweisungen, um das ADT-Plug-in herunterzuladen und es in Ihrer Eclipse-Umgebung zu installieren.
+ </p>
+
+<table style="font-size:100%">
+<tr><th>Eclipse 3.3 (Europa)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
+<tr>
+<td width="45%">
+<!-- 3.3 steps -->
+<ol>
+    <li>Starten Sie Eclipse und wählen Sie dann <strong>Hilfe</strong> &gt; <strong>Softwareupdates</strong> &gt; <strong>Suchen und Installieren...</strong> aus.
+ </li>
+    <li>Wählen Sie im angezeigten Dialogfeld <strong>Nach neu zu installierenden Funktionen suchen</strong> und klicken Sie auf <strong>Weiter</strong>.
+ </li>
+    <li>Klicken Sie auf <strong>Neue Remote-Website</strong>.
+ </li>
+    <li>Geben Sie in dem anschließend angezeigten Dialogfeld einen Namen für die Remote-Website an (z.&nbsp;B. "Android-Plug-in") und fügen Sie die URL hinzu:
+
+        <pre>https://dl-ssl.google.com/android/eclipse/</pre>
+        <p>Wenn Sie Probleme beim Abrufen des Plug-ins haben, versuchen Sie, "http" statt "https" in der URL anzugeben ("https" wird aus Sicherheitsgründen bevorzugt).
+</p>
+        <p>Klicken Sie auf <strong>OK</strong>.</p> </li>
+    <li>Sie sollten nun die neue, aktivierte Website in Ihrer Suchliste sehen. 
+Klicken Sie auf <strong>Fertig stellen</strong>. </li>
+    <li>Wählen Sie in dem daraufhin angezeigten Dialogfeld "Suchergebnisse" das Kontrollkästchen für das "Android-Plug-in" aus. 
+Auf diese Weise werden die geschachtelten Tools "Android DDMS" und "Android Development Tools" ausgewählt. 
+Klicken Sie auf <strong>Weiter</strong>.</li>
+    <li>Lesen und akzeptieren Sie die Lizenzvereinbarung und klicken Sie auf <strong>Weiter</strong>.
+ </li>
+    <li>Klicken Sie im folgenden Installationsfenster auf <strong>Fertig stellen</strong>. </li>
+    <li>Das ADT-Plug-in hat keine digitale Signatur. 
+Akzeptieren Sie die Installation, indem Sie auf <strong>Alle installieren</strong> klicken. </li>
+    <li>Starten Sie Eclipse neu. </li>
+</ol>
+
+</td>
+<td>
+
+<!-- 3.4 steps -->
+<ol>
+    <li>Starten Sie Eclipse und wählen Sie dann <strong>Hilfe</strong> &gt; <strong>Softwareupdates...</strong>.</li>
+    <li>Klicken Sie im angezeigten Dialogfeld auf die Registerkarte <strong>Verfügbare Software</strong>.
+ </li>
+    <li>Klicken Sie auf <strong>Website hinzufügen...</strong>.
+ </li>
+    <li>Geben Sie den Speicherort ein:
+      <pre>https://dl-ssl.google.com/android/eclipse/</pre>
+        <p>Wenn Sie Probleme beim Abrufen des Plug-ins haben, versuchen Sie, "http" statt "https" in der URL anzugeben ("https" wird aus Sicherheitsgründen bevorzugt).
+</p>   
+      <p>Klicken Sie auf <strong>OK</strong>.</p></li>
+    <li>Zurück in der Ansicht "Verfügbare Software" sollten Sie jetzt das Plug-in aufgelistet nach URL und die darin eingebetteten "Tools für Entwickler" sehen. 
+Aktivieren Sie das Kontrollkästchen neben "Tools für Entwickler" und klicken Sie auf <strong>Installieren...</strong>.
+</li>
+    <li>Im folgenden Installationsfenster sollten die Optionen "Android DDMS" und "Android Development Tools" ausgewählt sein. Klicken Sie auf <strong>Weiter</strong>. </li>
+    <li>Lesen und akzeptieren Sie die Lizenzvereinbarung und klicken Sie auf <strong>Fertig stellen</strong>.
+</li>
+    <li>Starten Sie Eclipse neu. </li>
+</ol>
+
+</td>
+</tr>
+</table>
+
+<p>Ändern Sie jetzt Ihre Eclipse-Einstellungen so, dass das Android SDK-Verzeichnis angezeigt wird:
+</p>
+<ol>
+    <li>Wählen Sie <strong>Windows</strong> &gt; <strong>Einstellungen...</strong>, um den Bereich zum Bearbeiten der Einstellungen zu öffnen (Mac: <strong>Eclipse</strong> &gt; <strong>Einstellungen</strong>).
+</li>
+    <li>Wählen Sie im linken Feld <strong>Android</strong> aus.
+ </li>
+    <li>Klicken Sie für den <em>SDK-Speicherort</em> im Hauptbereich auf <strong>Durchsuchen...</strong> und suchen Sie nach Ihrem Verzeichnis mit dem heruntergeladenen SDK.
+ </li>
+    <li>Klicken Sie auf <strong>Übernehmen</strong> und dann auf <strong>OK</strong>.</li>
+</ol>
+
+<p>Fertig! Wenn keine Probleme aufgetreten sind, können Sie jetzt mit der Entwicklung von Android-Anwendungen beginnen. Vorschläge für Ihr weiteres Vorgehen finden Sie unter <a href="#next">Nächste Schritte</a>. </p>
+
+
+<h3 id="troubleshooting">Fehlerbehebung bei der ADT-Installation</h3>
+<p> 
+Wenn Sie Probleme beim Herunterladen des ADT-Plug-ins auch nach der Befolgung der zuvor genannten Schritte haben, bieten wir Ihnen hier einige Lösungsvorschläge:
+ </p>
+
+<ul>
+  <li>Wenn Eclipse die Remote-Website, die das ADT-Plug-in enthält, nicht finden kann, versuchen Sie, die URL der Remote-Website von "https" in "http" zu ändern. 
+Legen Sie also den Speicherort für die Remote-Website folgendermaßen fest:
+
+  <pre>http://dl-ssl.google.com/android/eclipse/</pre></li>
+  <li>Wenn Sie eine Firewall verwenden (wie beispielsweise eine Unternehmens-Firewall), sollten Sie sicherstellen, dass Sie Ihre Proxy-Einstellungen in Eclipse richtig konfiguriert haben. 
+In Eclipse 3.3/3.4 können Sie Proxy-Informationen im Hauptmenü unter <strong>Windows</strong> (auf einem Mac unter <strong>Eclipse</strong>) &gt; <strong>Einstellungen</strong> &gt; <strong>Allgemein</strong> &gt; <strong>Netzwerkverbindungen</strong> konfigurieren.
+</li>
+</ul>
+<p> 
+Wenn Sie noch immer nicht in der Lage sind, Eclipse zum Herunterladen des ADT-Plug-ins als eine Remote-Website zu verwenden, können Sie die ADT-ZIP-Datei auf Ihren lokalen Computer herunterladen und manuell installieren:
+
+</p>
+<ol>
+  <li><a href="{@docRoot}sdk/adt_download.html">Laden Sie die ADT-ZIP-Datei herunter</a> (nicht entpacken).</li>
+  <li>Folgen Sie Schritt 1 und 2 in den Standardinstallationsanweisungen (siehe oben).</li>
+  <li>Klicken Sie in Eclipse 3.3 auf <strong>Neue Archivwebsite...</strong>. <br/> Klicken Sie in Eclipse 3.4 auf <strong>Website hinzufügen...</strong> und dann auf <strong>Archiv...</strong></li>
+  <li>Führen Sie eine Suche durch und wählen Sie die heruntergeladene ZIP-Datei aus.
+</li>
+  <li>Folgen Sie den weiteren Schritten, beginnend ab Schritt 5.</li>
+</ol>
+<p>Um Ihr Plug-In zu installieren, nachdem Sie es mithilfe der ZIP-Datei installiert haben, müssen Sie diese Schritte erneut durchführen. Folgen Sie nicht den Standardanweisungen zur Aktualisierung.
+</p>
+
+<h4>Andere Fehler bei der Installation</h4>
+
+<p>Beachten Sie, dass für einige Funktionen von ADT zusätzliche Eclipse-Komponenten erforderlich sind (zum Beispiel WST). Wenn bei der Installation von ADT Fehler auftreten, enthält Ihre Eclipse-Installation diese Komponenten möglicherweise nicht. Informationen, wie Sie die erforderlichen Komponenten schnell und einfach zu Ihrer Eclipse-Installation hinzufügen können, finden Sie unter dem Thema <a href="{@docRoot}guide/appendix/faq/troubleshooting.html#installeclipsecomponents">ADT-Installationsfehler: "plug-in org.eclipse.wst.sse.ui erforderlich"</a> zur Fehlerbehebung.
+</p>
+
+<h4>Für Linux-Nutzer</h4>
+<p>Wenn folgender Fehler bei der Installation des ADT-Plug-ins für Eclipse auftritt: 
+<pre>
+An error occurred during provisioning.
+Cannot connect to keystore.
+JKS</pre>
+<p>
+... fehlt auf Ihrem Entwicklungscomputer eine geeignete Java VM. Wenn Sie Sun Java 6 installieren, können Sie dieses Problem beheben und das ADT-Plug-in neu installieren.
+</p>
+
+
+<h2 id="next">Nächste Schritte</h2>
+<p>Sobald Sie die Installation abgeschlossen haben, können Sie mit der Entwicklung von Anwendungen beginnen. 
+Hier einige Vorschläge für Ihre weitere Vorgehensweise:
+ </p>
+
+<p><strong>Informationen zu Android</strong></p>
+<ul>
+  <li>Werfen Sie einen Blick in das <a href="{@docRoot}guide/index.html">Entwicklerhandbuch</a> und die darin enthaltenen Informationen.
+</li>
+  <li>Lesen Sie eine Einführung in Android als Plattform unter <a
+  href="{@docRoot}guide/basics/what-is-android.html">Was ist Android?</a></li>
+  <li>Informationen zum Android-Framework und wie Sie Anwendungen ausführen können erhalten Sie in den <a href="{@docRoot}guide/topics/fundamentals.html">Anwendungsgrundlagen</a>.
+</li>
+  <li>Werfen Sie einen Blick in die Spezifikationen des Android-Framework-API auf der Registerkarte <a
+  href="{@docRoot}reference/packages.html">Referenzen</a>.
+</li>
+</ul>
+
+<p><strong>Lernen Sie das SDK kennen.</strong></p>
+<ul>
+  <li>Erhalten Sie einen Überblick über die Ihnen zur Verfügung stehenden <a
+  href="{@docRoot}guide/developing/tools/index.html">Entwicklungstools</a>.
+</li>
+  <li>Sie erhalten Informationen zur Entwicklung von Anwendungen in <a
+  href="{@docRoot}guide/developing/eclipse-adt.html">Eclipse/ADT</a> oder <a href="{@docRoot}guide/developing/other-ide.html">in anderen IDEs</a>.
+  </li>
+</ul>
+
+<p><strong>Lernen Sie einige Codebeispiele kennen.</strong></p>
+<ul>
+  <li>Richten Sie eine<a href="{@docRoot}guide/tutorials/hello-world.html">Hello World-Anwendung</a> ein (dringend empfohlen, besonders für Eclipse-Nutzer).
+</li>
+  <li>Folgen Sie dem <a href="{@docRoot}guide/tutorials/notepad/index.html">Editor-Lernprogramm</a>, um eine vollständige Android-Anwendung zu erstellen.
+ </li>
+  <li>Erstellen Sie ein neues Projekt für eine der Beispielanwendungen in <code><em>&lt;sdk&gt;</em>/platforms/<em>&lt;platfrom&gt;</em>/samples</code>. Kompilieren Sie das Projekt anschließend und führen Sie es in Ihrer Entwicklungsumgebung aus.
+</li>
+</ul>
+
+<p><strong>Besuchen Sie die Android-Entwicklergruppen.</strong></p>
+<ul>
+  <li>Werfen Sie einen Blick auf die Registerkarte <a
+  href="{@docRoot}community/index.html">Community</a>, um eine Liste der Android-Entwicklergruppen anzuzeigen. 
+Insbesondere sollten Sie einen Blick in die Gruppe der <a href="http://groups.google.com/group/android-developers">Android-Entwickler</a> werfen, um ein Gespür dafür zu bekommen, wie die Android-Entwicklercommunity aufgebaut ist.
+</li>
+</ul>
+
+
+<h2 id="installnotes">Hinweise zur Installation</h2>
+
+<h3>Hinweise zu Ubuntu Linux</h3>
+
+<ul>
+  <li>Wenn Sie Hilfe bei der Installation und Konfiguration von Java auf Ihrem Entwicklungscomputer benötigen, finden Sie diese Informationen möglicherweise sehr hilfreich.
+ 
+    <ul>
+      <li><a href="https://help.ubuntu.com/community/Java">https://help.ubuntu.com/community/Java</a></li>
+      <li><a href="https://help.ubuntu.com/community/Java">https://help.ubuntu.com/community/JavaInstallation</a></li>
+    </ul>
+  </li>
+  <li>Im Folgenden finden Sie die Schritte, die zur Installation von Java und Eclipse vor der Installation des Android-SDK und des ADT-Plug-ins erforderlich sind.
+
+    <ol>
+      <li>Wenn Sie eine 64-Bit-Verteilung auf Ihrem Entwicklungscomputer ausführen, müssen Sie das <code>ia32-libs</code>-Paket mithilfe von <code>apt-get:</code> installieren:
+
+      <pre>apt-get install ia32-libs</pre>
+      </li>
+      <li>Installieren Sie anschließend Java: <pre>apt-get install sun-java6-bin</pre></li>
+      <li>Der Ubuntu-Paketmanager bietet derzeit keine Eclipse 3.3-Version zum Download an. Daher empfehlen wir, Eclipse von eclipse.org (<a
+      href="http://www.eclipse.org/downloads/">http://www.eclipse.org/ downloads/</a>) herunterzuladen. Wir empfehlen eine Java- oder RCP-Version von Eclipse.</li>
+      <li>Folgen Sie den Anweisungen aus den vorherigen Abschnitten, um das SDK und das ADT-Plug-in zu installieren.
+ </li>
+    </ol>
+  </li>
+</ul>
+
+<h3>Andere Hinweise zu Linux</h3>
+
+<ul>
+  <li>Wenn JDK bereits auf Ihrem Entwicklungscomputer installiert ist, sollten Sie sicherstellen, dass das Programm die Versionsanforderungen erfüllt, die unter <a href="requirements.html">Systemanforderungen</a> aufgelistet sind. 
+Beachten Sie insbesondere, dass einige Linux-Verteilungen JDK 1.4 oder Gnu Compiler für Java enthalten. Beide Programme werden nicht für die Android-Entwicklung unterstützt.</li>
+</ul>
+
+
+
