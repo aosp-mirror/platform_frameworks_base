@@ -777,7 +777,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
 
         public void afterTextChanged(Editable s) {
-            if (!mSearchAutoComplete.isPerformingCompletion()) {
+            if (mSearchable.autoUrlDetect() && !mSearchAutoComplete.isPerformingCompletion()) {
                 // The user changed the query, check if it is a URL and if so change the search
                 // button in the soft keyboard to the 'Go' button.
                 int options = (mSearchAutoComplete.getImeOptions() & (~EditorInfo.IME_MASK_ACTION));
@@ -987,17 +987,19 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                         && event.getAction() == KeyEvent.ACTION_UP) {
                     v.cancelLongPress();
 
-                    // If this is a url entered by the user and we displayed the 'Go' button which
-                    // the user clicked, launch the url instead of using it as a search query.
-                    if ((mSearchAutoCompleteImeOptions & EditorInfo.IME_MASK_ACTION)
-                            == EditorInfo.IME_ACTION_GO) {
-                        Uri uri = Uri.parse(fixUrl(mSearchAutoComplete.getText().toString()));
-                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        launchIntent(intent);
-                    } else {
-                        // Launch as a regular search.
-                        launchQuerySearch();
+                    if (mSearchable.autoUrlDetect()) {
+                        // If this is a url entered by the user & we displayed the 'Go' button which
+                        // the user clicked, launch the url instead of using it as a search query.
+                        if ((mSearchAutoCompleteImeOptions & EditorInfo.IME_MASK_ACTION)
+                                == EditorInfo.IME_ACTION_GO) {
+                            Uri uri = Uri.parse(fixUrl(mSearchAutoComplete.getText().toString()));
+                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            launchIntent(intent);
+                        } else {
+                            // Launch as a regular search.
+                            launchQuerySearch();
+                        }
                     }
                     return true;
                 }
