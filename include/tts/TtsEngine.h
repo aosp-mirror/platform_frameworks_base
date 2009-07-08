@@ -80,6 +80,8 @@ enum tts_support_result {
 class TtsEngine
 {
 public:
+    virtual ~TtsEngine() {}
+
     // Initialize the TTS engine and returns whether initialization succeeded.
     // @param synthDoneCBPtr synthesis callback function pointer
     // @return TTS_SUCCESS, or TTS_FAILURE
