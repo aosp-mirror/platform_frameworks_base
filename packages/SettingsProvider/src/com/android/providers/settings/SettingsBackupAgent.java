@@ -50,6 +50,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
     private static final String KEY_SYNC = "sync_providers";
+    private static final String KEY_LOCALE = "locale";
 
     private static String[] sortedSystemKeys = null;
     private static String[] sortedSecureKeys = null;
@@ -85,6 +86,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
         byte[] syncProviders = mSettingsHelper.getSyncProviders();
+        byte[] locale = mSettingsHelper.getLocaleData();
         
         data.writeEntityHeader(KEY_SYSTEM, systemSettingsData.length);
         data.writeEntityData(systemSettingsData, systemSettingsData.length);
@@ -94,7 +96,10 @@ public class SettingsBackupAgent extends BackupHelperAgent {
 
         data.writeEntityHeader(KEY_SYNC, syncProviders.length);
         data.writeEntityData(syncProviders, syncProviders.length);
-        
+
+        data.writeEntityHeader(KEY_LOCALE, locale.length);
+        data.writeEntityData(locale, locale.length);
+
         backupFile(FILE_WIFI_SUPPLICANT, data);
     }
 
@@ -107,14 +112,20 @@ public class SettingsBackupAgent extends BackupHelperAgent {
 
         while (data.readNextHeader()) {
             final String key = data.getKey();
+            final int size = data.getDataSize();
             if (KEY_SYSTEM.equals(key)) {
                 restoreSettings(data, Settings.System.CONTENT_URI);
             } else if (KEY_SECURE.equals(key)) {
                 restoreSettings(data, Settings.Secure.CONTENT_URI);
-            } else if (FILE_WIFI_SUPPLICANT.equals(key)) {
-                restoreFile(FILE_WIFI_SUPPLICANT, data);
+// TODO: Re-enable WIFI restore when we figure out a solution for the permissions
+//            } else if (FILE_WIFI_SUPPLICANT.equals(key)) {
+//                restoreFile(FILE_WIFI_SUPPLICANT, data);
             } else if (KEY_SYNC.equals(key)) {
                 mSettingsHelper.setSyncProviders(data);
+            } else if (KEY_LOCALE.equals(key)) {
+                byte[] localeData = new byte[size];
+                data.readEntityData(localeData, 0, size);
+                mSettingsHelper.setLocaleData(localeData);
             } else {
                 data.skipEntityData();
             }

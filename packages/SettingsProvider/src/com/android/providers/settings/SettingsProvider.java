@@ -18,7 +18,7 @@ package com.android.providers.settings;
 
 import java.io.FileNotFoundException;
 
-import android.backup.IBackupManager;
+import android.backup.BackupManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -46,6 +46,7 @@ public class SettingsProvider extends ContentProvider {
     private static final String TABLE_OLD_FAVORITES = "old_favorites";
 
     protected DatabaseHelper mOpenHelper;
+    private BackupManager mBackupManager;
 
     /**
      * Decode a content URL into the table, projection, and arguments
@@ -140,16 +141,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         // Inform the backup manager about a data change
-        IBackupManager ibm = IBackupManager.Stub.asInterface(
-                ServiceManager.getService(Context.BACKUP_SERVICE));
-        if (ibm != null) {
-            try {
-                ibm.dataChanged(getContext().getPackageName());
-            } catch (Exception e) {
-                // Try again later
-            }
-        }
-
+        mBackupManager.dataChanged();
         // Now send the notification through the content framework.
 
         String notify = uri.getQueryParameter("notify");
@@ -189,6 +181,7 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         mOpenHelper = new DatabaseHelper(getContext());
+        mBackupManager = new BackupManager(getContext());
         return true;
     }
 
