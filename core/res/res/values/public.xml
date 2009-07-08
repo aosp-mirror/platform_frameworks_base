@@ -1124,6 +1124,7 @@
   <public type="attr" name="progressBarStyleSmallInverse" />
   <public type="attr" name="progressBarStyleLargeInverse" /> 
   <public type="attr" name="searchSettingsDescription" />
+  <public type="attr" name="textColorPrimaryInverseDisableOnly" />
 
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 

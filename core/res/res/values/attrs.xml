@@ -68,6 +68,9 @@
         <!-- Bright text color. Only differentiates based on the disabled state. -->
         <attr name="textColorPrimaryDisableOnly" format="reference|color" />
 
+        <!-- Bright inverse text color. Only differentiates based on the disabled state. -->
+        <attr name="textColorPrimaryInverseDisableOnly" format="reference|color" />
+
         <!-- Bright text color. This does not differentiate the disabled state. As an example,
              buttons use this since they display the disabled state via the background and not the
              foreground text color. -->
