@@ -606,7 +606,6 @@ public class Activity extends ContextThemeWrapper
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
-    private static final String SAVED_SEARCH_DIALOG_KEY = "android:search_dialog";
 
     private SparseArray<Dialog> mManagedDialogs;
 
@@ -630,7 +629,6 @@ public class Activity extends ContextThemeWrapper
     /*package*/ int mConfigChangeFlags;
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
-    private Bundle mSearchDialogState = null;
 
     private Window mWindow;
 
@@ -808,13 +806,6 @@ public class Activity extends ContextThemeWrapper
     final void performRestoreInstanceState(Bundle savedInstanceState) {
         onRestoreInstanceState(savedInstanceState);
         restoreManagedDialogs(savedInstanceState);
-        
-        // Also restore the state of a search dialog (if any)
-        // TODO more generic than just this manager
-        Bundle searchState = savedInstanceState.getBundle(SAVED_SEARCH_DIALOG_KEY);
-        if (searchState != null) {
-            mSearchManager.restoreSearchDialog(searchState);
-        }
     }
 
     /**
@@ -1030,14 +1021,6 @@ public class Activity extends ContextThemeWrapper
     final void performSaveInstanceState(Bundle outState) {
         onSaveInstanceState(outState);
         saveManagedDialogs(outState);
-
-        // Also save the state of a search dialog (if any)
-        // TODO more generic than just this manager
-        // onPause() should always be called before this method, so mSearchManagerState
-        // should be up to date.
-        if (mSearchDialogState != null) {
-            outState.putBundle(SAVED_SEARCH_DIALOG_KEY, mSearchDialogState);
-        }
     }
 
     /**
@@ -1317,10 +1300,6 @@ public class Activity extends ContextThemeWrapper
                 c.mCursor.close();
             }
         }
-
-        // Clear any search state saved in performPause(). If the state may be needed in the
-        // future, it will have been saved by performSaveInstanceState()
-        mSearchDialogState = null;
     }
 
     /**
@@ -1341,11 +1320,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onConfigurationChanged(Configuration newConfig) {
         mCalled = true;
-        
-        // also update search dialog if showing
-        // TODO more generic than just this manager
-        mSearchManager.onConfigurationChanged(newConfig);
-        
+
         if (mWindow != null) {
             // Pass the configuration changed event to the window
             mWindow.onConfigurationChanged(newConfig);
@@ -3575,20 +3550,12 @@ public class Activity extends ContextThemeWrapper
                 "Activity " + mComponent.toShortString() +
                 " did not call through to super.onPostResume()");
         }
-
-        // restore search dialog, if any
-        if (mSearchDialogState != null) {
-            mSearchManager.restoreSearchDialog(mSearchDialogState);
-        }
-        mSearchDialogState = null;
     }
 
     final void performPause() {
         onPause();
 
-        // save search dialog state if the search dialog is open,
-        // and then dismiss the search dialog
-        mSearchDialogState = mSearchManager.saveSearchDialog();
+        // dismiss the search dialog if it is open
         mSearchManager.stopSearch();
     }
     

@@ -36,8 +36,4 @@ interface ISearchManager {
             boolean globalSearch,
             ISearchManagerCallback searchManagerCallback);
     void stopSearch();
-    boolean isVisible();
-    Bundle onSaveInstanceState();
-    void onRestoreInstanceState(in Bundle savedInstanceState);
-    void onConfigurationChanged(in Configuration newConfig);
 }
