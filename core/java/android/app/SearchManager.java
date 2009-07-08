@@ -1719,11 +1719,16 @@ public class SearchManager
 
     }
 
-    // TODO: remove the DialogInterface interfaces from SearchManager.
-    // This changes the public API, so I'll do it in a separate change.
+    /**
+     * @deprecated This method is an obsolete internal implementation detail. Do not use.
+     */
     public void onCancel(DialogInterface dialog) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @deprecated This method is an obsolete internal implementation detail. Do not use.
+     */
     public void onDismiss(DialogInterface dialog) {
         throw new UnsupportedOperationException();
     }
