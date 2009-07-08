@@ -33,7 +33,7 @@ home=true
                                       <!-- populated by buildCarousel() -->
                                     </div>
                                 </div><!-- end list-clip -->
-                                <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-on"></a>
+                                <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-off"></a>
                                 <div class="clearer"></div>
                             </div><!-- end app-list container -->
                         </div><!-- end carousel -->
