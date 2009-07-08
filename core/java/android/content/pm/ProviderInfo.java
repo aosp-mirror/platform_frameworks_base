@@ -28,6 +28,7 @@ import android.os.PatternMatcher;
  */
 public final class ProviderInfo extends ComponentInfo
         implements Parcelable {
+    
     /** The name provider is published under content:// */
     public String authority = null;
     
@@ -56,6 +57,14 @@ public final class ProviderInfo extends ComponentInfo
      */
     public PatternMatcher[] uriPermissionPatterns = null;
     
+    /**
+     * If non-null, these are path-specific permissions that are allowed for
+     * accessing the provider.  Any permissions listed here will allow a
+     * holding client to access the provider, and the provider will check
+     * the URI it provides when making calls against the patterns here.
+     */
+    public PathPermission[] pathPermissions = null;
+    
     /** If true, this content provider allows multiple instances of itself
      *  to run in different process.  If false, a single instances is always
      *  run in {@link #processName}. */
@@ -78,6 +87,7 @@ public final class ProviderInfo extends ComponentInfo
         writePermission = orig.writePermission;
         grantUriPermissions = orig.grantUriPermissions;
         uriPermissionPatterns = orig.uriPermissionPatterns;
+        pathPermissions = orig.pathPermissions;
         multiprocess = orig.multiprocess;
         initOrder = orig.initOrder;
         isSyncable = orig.isSyncable;
@@ -94,6 +104,7 @@ public final class ProviderInfo extends ComponentInfo
         out.writeString(writePermission);
         out.writeInt(grantUriPermissions ? 1 : 0);
         out.writeTypedArray(uriPermissionPatterns, parcelableFlags);
+        out.writeTypedArray(pathPermissions, parcelableFlags);
         out.writeInt(multiprocess ? 1 : 0);
         out.writeInt(initOrder);
         out.writeInt(isSyncable ? 1 : 0);
@@ -122,6 +133,7 @@ public final class ProviderInfo extends ComponentInfo
         writePermission = in.readString();
         grantUriPermissions = in.readInt() != 0;
         uriPermissionPatterns = in.createTypedArray(PatternMatcher.CREATOR);
+        pathPermissions = in.createTypedArray(PathPermission.CREATOR);
         multiprocess = in.readInt() != 0;
         initOrder = in.readInt();
         isSyncable = in.readInt() != 0;

@@ -56,6 +56,7 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -7072,6 +7073,27 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 == PackageManager.PERMISSION_GRANTED) {
             return null;
         }
+        
+        PathPermission[] pps = cpi.pathPermissions;
+        if (pps != null) {
+            int i = pps.length;
+            while (i > 0) {
+                i--;
+                PathPermission pp = pps[i];
+                if (checkComponentPermission(pp.getReadPermission(), callingPid, callingUid,
+                        cpi.exported ? -1 : cpi.applicationInfo.uid)
+                        == PackageManager.PERMISSION_GRANTED
+                        && mode == ParcelFileDescriptor.MODE_READ_ONLY || mode == -1) {
+                    return null;
+                }
+                if (checkComponentPermission(pp.getWritePermission(), callingPid, callingUid,
+                        cpi.exported ? -1 : cpi.applicationInfo.uid)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    return null;
+                }
+            }
+        }
+        
         String msg = "Permission Denial: opening provider " + cpi.name
                 + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
                 + ", uid=" + callingUid + ") requires "

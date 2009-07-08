@@ -1918,6 +1918,7 @@ public class PackageParser {
                         outInfo.metaData, outError)) == null) {
                     return false;
                 }
+                
             } else if (parser.getName().equals("grant-uri-permission")) {
                 TypedArray sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestGrantUriPermission);
@@ -1941,7 +1942,7 @@ public class PackageParser {
                 if (str != null) {
                     pa = new PatternMatcher(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
                 }
-
+                
                 sa.recycle();
 
                 if (pa != null) {
@@ -1956,6 +1957,101 @@ public class PackageParser {
                         outInfo.info.uriPermissionPatterns = newp;
                     }
                     outInfo.info.grantUriPermissions = true;
+                } else {
+                    if (!RIGID_PARSER) {
+                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
+                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>");
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+                    outError[0] = "No path, pathPrefix, or pathPattern for <path-permission>";
+                    return false;
+                }
+                XmlUtils.skipCurrentTag(parser);
+
+            } else if (parser.getName().equals("path-permission")) {
+                TypedArray sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestPathPermission);
+
+                PathPermission pa = null;
+
+                String permission = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_permission);
+                String readPermission = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_readPermission);
+                if (readPermission == null) {
+                    readPermission = permission;
+                }
+                String writePermission = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_writePermission);
+                if (writePermission == null) {
+                    writePermission = permission;
+                }
+                
+                boolean havePerm = false;
+                if (readPermission != null) {
+                    readPermission = readPermission.intern();
+                    havePerm = true;
+                }
+                if (writePermission != null) {
+                    writePermission = readPermission.intern();
+                    havePerm = true;
+                }
+
+                if (!havePerm) {
+                    if (!RIGID_PARSER) {
+                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
+                        Log.w(TAG, "No readPermission or writePermssion for <path-permission>");
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+                    outError[0] = "No readPermission or writePermssion for <path-permission>";
+                    return false;
+                }
+                
+                String path = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_path);
+                if (path != null) {
+                    pa = new PathPermission(path,
+                            PatternMatcher.PATTERN_LITERAL, readPermission, writePermission);
+                }
+
+                path = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathPrefix);
+                if (path != null) {
+                    pa = new PathPermission(path,
+                            PatternMatcher.PATTERN_PREFIX, readPermission, writePermission);
+                }
+
+                path = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathPattern);
+                if (path != null) {
+                    pa = new PathPermission(path,
+                            PatternMatcher.PATTERN_SIMPLE_GLOB, readPermission, writePermission);
+                }
+
+                sa.recycle();
+
+                if (pa != null) {
+                    if (outInfo.info.pathPermissions == null) {
+                        outInfo.info.pathPermissions = new PathPermission[1];
+                        outInfo.info.pathPermissions[0] = pa;
+                    } else {
+                        final int N = outInfo.info.pathPermissions.length;
+                        PathPermission[] newp = new PathPermission[N+1];
+                        System.arraycopy(outInfo.info.pathPermissions, 0, newp, 0, N);
+                        newp[N] = pa;
+                        outInfo.info.pathPermissions = newp;
+                    }
+                } else {
+                    if (!RIGID_PARSER) {
+                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
+                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>");
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+                    outError[0] = "No path, pathPrefix, or pathPattern for <path-permission>";
+                    return false;
                 }
                 XmlUtils.skipCurrentTag(parser);
 

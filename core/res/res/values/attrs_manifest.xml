@@ -953,6 +953,20 @@
         <attr name="pathPattern" format="string" />
     </declare-styleable>
     
+    <!-- Attributes that can be supplied in an AndroidManifest.xml
+         <code>path-permission</code> tag, a child of the
+         {@link #AndroidManifestProvider provider} tag, describing a permission
+         that allows access to a specific path in the provider.  This tag can be
+         specified multiple time to supply multiple paths. -->
+    <declare-styleable name="AndroidManifestPathPermission"  parent="AndroidManifestProvider">
+        <attr name="path" />
+        <attr name="pathPrefix" />
+        <attr name="pathPattern" />
+        <attr name="permission" />
+        <attr name="readPermission" />
+        <attr name="writePermission" />
+    </declare-styleable>
+    
     <!-- The <code>service</code> tag declares a
          {@link android.app.Service} class that is available
          as part of the package's application components, implementing
