@@ -71,4 +71,5 @@ interface IAudioService {
   
     oneway void unloadSoundEffects();
 
+    oneway void reloadAudioSettings();
 }
