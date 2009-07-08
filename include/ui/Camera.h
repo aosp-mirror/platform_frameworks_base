@@ -18,6 +18,7 @@
 #ifndef ANDROID_HARDWARE_CAMERA_H
 #define ANDROID_HARDWARE_CAMERA_H
 
+#include <utils/Timers.h>
 #include <ui/ICameraClient.h>
 
 namespace android {
@@ -94,6 +95,7 @@ class CameraListener: virtual public RefBase
 public:
     virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2) = 0;
     virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr) = 0;
+    virtual void postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr) = 0;
 };
 
 class Camera : public BnCameraClient, public IBinder::DeathRecipient
@@ -155,6 +157,7 @@ public:
     // ICameraClient interface
     virtual void        notifyCallback(int32_t msgType, int32_t ext, int32_t ext2);
     virtual void        dataCallback(int32_t msgType, const sp<IMemory>& dataPtr);
+    virtual void        dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
 
     sp<ICamera>         remote();
 
