@@ -606,6 +606,7 @@ public class TextToSpeech {
                 result = mITts.setLanguage(mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1],
                         mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1],
                         mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] );
+            } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
                 initTts();
