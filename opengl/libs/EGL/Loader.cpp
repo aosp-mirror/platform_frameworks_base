@@ -139,7 +139,7 @@ void* Loader::open(EGLNativeDisplayType display, int impl, gl_hooks_t* hooks)
     char path[PATH_MAX];
     int index = int(display);
     driver_t* hnd = 0;
-    const char* const format = "egl/lib%s_%s.so";
+    const char* const format = "/system/lib/egl/lib%s_%s.so";
     
     char const* tag = getTag(index, impl);
     if (tag) {
