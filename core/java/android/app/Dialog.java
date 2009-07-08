@@ -292,8 +292,10 @@ public class Dialog implements DialogInterface, Window.Callback,
     // internal method to make sure mcreated is set properly without requiring
     // users to call through to super in onCreate
     void dispatchOnCreate(Bundle savedInstanceState) {
-        onCreate(savedInstanceState);
-        mCreated = true;
+        if (!mCreated) {
+            onCreate(savedInstanceState);
+            mCreated = true;
+        }
     }
 
     /**
