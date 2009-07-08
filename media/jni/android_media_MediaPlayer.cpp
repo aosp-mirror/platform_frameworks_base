@@ -455,17 +455,33 @@ android_media_MediaPlayer_invoke(JNIEnv *env, jobject thiz,
     sp<MediaPlayer> media_player = getMediaPlayer(env, thiz);
     if (media_player == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return UNKNOWN_ERROR;
     }
 
 
     Parcel *request = parcelForJavaObject(env, java_request);
     Parcel *reply = parcelForJavaObject(env, java_reply);
 
-    const status_t status = media_player->invoke(*request, reply);
     // Don't use process_media_player_call which use the async loop to
     // report errors, instead returns the status.
-    return status;
+    return media_player->invoke(*request, reply);
 }
+
+// Sends the new filter to the client.
+static jint
+android_media_MediaPlayer_setMetadataFilter(JNIEnv *env, jobject thiz, jobject request)
+{
+    sp<MediaPlayer> media_player = getMediaPlayer(env, thiz);
+    if (media_player == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return UNKNOWN_ERROR;
+    }
+
+    Parcel *filter = parcelForJavaObject(env, request);
+
+    return media_player->setMetadataFilter(*filter);
+}
+
 
 static void
 android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
@@ -529,6 +545,7 @@ static JNINativeMethod gMethods[] = {
     {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
     {"getFrameAt",          "(I)Landroid/graphics/Bitmap;",     (void *)android_media_MediaPlayer_getFrameAt},
     {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
+    {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
 };

@@ -97,6 +97,8 @@ enum media_info_type {
     MEDIA_INFO_BAD_INTERLEAVING = 800,
     // The media is not seekable (e.g live stream).
     MEDIA_INFO_NOT_SEEKABLE = 801,
+    // New media metadata is available.
+    MEDIA_INFO_METADATA_UPDATE = 802,
 };
 
 
@@ -152,6 +154,7 @@ public:
     static  sp<IMemory>     decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     static  sp<IMemory>     decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
             status_t        invoke(const Parcel& request, Parcel *reply);
+            status_t        setMetadataFilter(const Parcel& filter);
 private:
             void            clear_l();
             status_t        seekTo_l(int msec);

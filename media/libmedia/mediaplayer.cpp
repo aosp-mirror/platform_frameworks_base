@@ -208,7 +208,16 @@ status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
     return INVALID_OPERATION;
 }
 
-
+status_t MediaPlayer::setMetadataFilter(const Parcel& filter)
+{
+    LOGD("setMetadataFilter");
+    Mutex::Autolock _l(mLock);
+    if (mPlayer == NULL)
+    {
+        return NO_INIT;
+    }
+    return mPlayer->setMetadataFilter(filter);
+}
 
 status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
 {

@@ -41,6 +41,7 @@ enum {
     SET_LOOPING,
     SET_VOLUME,
     INVOKE,
+    SET_METADATA_FILTER,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -178,6 +179,15 @@ public:
         status_t retcode = remote()->transact(INVOKE, request, reply);
         return retcode;
     }
+
+    status_t setMetadataFilter(const Parcel& request)
+    {
+        Parcel reply;
+        // Avoid doing any extra copy of the request. The interface
+        // descriptor should have been set by MediaPlayer.java.
+        remote()->transact(SET_METADATA_FILTER, request, &reply);
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
@@ -271,6 +281,11 @@ status_t BnMediaPlayer::onTransact(
         case INVOKE: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             invoke(data, reply);
+            return NO_ERROR;
+        } break;
+        case SET_METADATA_FILTER: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            reply->writeInt32(setMetadataFilter(data));
             return NO_ERROR;
         } break;
         default:

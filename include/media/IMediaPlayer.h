@@ -52,8 +52,13 @@ public:
     // @param request Parcel that must start with the media player
     // interface token.
     // @param[out] reply Parcel to hold the reply data. Cannot be null.
-    // @return OK if the invocation was made. PERMISSION_DENIED otherwise.
+    // @return OK if the invocation was made successfully.
     virtual status_t        invoke(const Parcel& request, Parcel *reply) = 0;
+
+    // Set a new metadata filter.
+    // @param filter A set of allow and drop rules serialized in a Parcel.
+    // @return OK if the invocation was made successfully.
+    virtual status_t        setMetadataFilter(const Parcel& filter) = 0;
 };
 
 // ----------------------------------------------------------------------------
