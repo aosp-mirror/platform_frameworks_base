@@ -55,6 +55,7 @@ public:
     ~JNICameraContext() { release(); }
     virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2);
     virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr);
+    virtual void postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
     sp<Camera> getCamera() { Mutex::Autolock _l(mLock); return mCamera; }
     void release();
 
@@ -186,6 +187,12 @@ void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
         copyAndPost(env, dataPtr, msgType);
         break;
     }
+}
+
+void JNICameraContext::postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr)
+{
+    // TODO: plumb up to Java. For now, just drop the timestamp
+    postData(msgType, dataPtr);
 }
 
 // connect to camera service
