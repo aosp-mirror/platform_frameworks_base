@@ -122,10 +122,10 @@ home=true
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"SDK 1.5 r3",
+      'name':"SDK 1.5 r2",
       'img':"sdk-large.png",
       'title':"Android 1.5 SDK",
-      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r3/index.html'>Download Android 1.5 SDK</a></p>"
+      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r2/index.html'>Download Android 1.5 SDK</a></p>"
     },
 
     'mapskey': {
