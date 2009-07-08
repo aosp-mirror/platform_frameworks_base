@@ -19,13 +19,11 @@ package android.app;
 import static android.app.SuggestionsAdapter.getColumnString;
 
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -33,8 +31,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -95,11 +93,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
     private static final int SEARCH_PLATE_LEFT_PADDING_GLOBAL = 12;
     private static final int SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL = 7;
-    
-    // interaction with runtime
-    private IntentFilter mCloseDialogsFilter;
-    private IntentFilter mPackageFilter;
-    
+
     // views & widgets
     private TextView mBadgeLabel;
     private ImageView mAppIcon;
@@ -210,15 +204,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
         // Touching outside of the search dialog will dismiss it 
         setCanceledOnTouchOutside(true);
-        
-        // Set up broadcast filters
-        mCloseDialogsFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mPackageFilter = new IntentFilter();
-        mPackageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        mPackageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        mPackageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        mPackageFilter.addDataScheme("package");
-        
+
         // Save voice intent for later queries/launching
         mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
         mVoiceWebSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -382,15 +368,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         
         return true;
     }
-    
-    @Override
-    protected void onStart() {
-        super.onStart();
-        
-        // receive broadcasts
-        getContext().registerReceiver(mBroadcastReceiver, mCloseDialogsFilter);
-        getContext().registerReceiver(mBroadcastReceiver, mPackageFilter);
-    }
 
     /**
      * The search dialog is being dismissed, so handle all of the local shutdown operations.
@@ -401,14 +378,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     @Override
     public void onStop() {
         super.onStop();
-        
-        // stop receiving broadcasts (throws exception if none registered)
-        try {
-            getContext().unregisterReceiver(mBroadcastReceiver);
-        } catch (RuntimeException e) {
-            // This is OK - it just means we didn't have any registered
-        }
-        
+
         closeSuggestionsAdapter();
         
         // dump extra memory we're hanging on to
@@ -455,12 +425,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     /**
      * Save the minimal set of data necessary to recreate the search
      * 
-     * @return A bundle with the state of the dialog.
+     * @return A bundle with the state of the dialog, or {@code null} if the search
+     *         dialog is not showing.
      */
     @Override
     public Bundle onSaveInstanceState() {
+        if (!isShowing()) return null;
+
         Bundle bundle = new Bundle();
-        
+
         // setup info so I can recreate this particular search       
         bundle.putParcelable(INSTANCE_KEY_COMPONENT, mLaunchComponent);
         bundle.putBundle(INSTANCE_KEY_APPDATA, mAppSearchData);
@@ -483,6 +456,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState == null) return;
+
         ComponentName launchComponent = savedInstanceState.getParcelable(INSTANCE_KEY_COMPONENT);
         Bundle appSearchData = savedInstanceState.getBundle(INSTANCE_KEY_APPDATA);
         boolean globalSearch = savedInstanceState.getBoolean(INSTANCE_KEY_GLOBALSEARCH);
@@ -509,7 +484,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     /**
      * Called after resources have changed, e.g. after screen rotation or locale change.
      */
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged() {
         if (isShowing()) {
             // Redraw (resources may have changed)
             updateSearchButton();
@@ -1014,35 +989,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return false;
         }
     };
-        
-    /**
-     * When the ACTION_CLOSE_SYSTEM_DIALOGS intent is received, we should close ourselves 
-     * immediately, in order to allow a higher-priority UI to take over
-     * (e.g. phone call received).
-     * 
-     * When a package is added, removed or changed, our current context
-     * may no longer be valid.  This would only happen if a package is installed/removed exactly
-     * when the search bar is open.  So for now we're just going to close the search
-     * bar.  
-     * Anything fancier would require some checks to see if the user's context was still valid.
-     * Which would be messier.
-     */
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                cancel();
-            } else if (Intent.ACTION_PACKAGE_ADDED.equals(action)
-                    || Intent.ACTION_PACKAGE_REMOVED.equals(action)
-                    || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
-                cancel();
-            }
-        }
-    };
 
     @Override
     public void cancel() {
+        if (!isShowing()) return;
+
         // We made sure the IME was displayed, so also make sure it is closed
         // when we go away.
         InputMethodManager imm = (InputMethodManager)getContext()
