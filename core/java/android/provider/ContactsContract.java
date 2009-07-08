@@ -22,6 +22,7 @@ import java.util.List;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 
 /**
  * The contract between the contacts provider and applications. Contains definitions
@@ -159,6 +160,12 @@ public final class ContactsContract {
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
         public static final String PHOTO_ID = "photo_id";
+
+        /**
+         * Lookup value that reflects the {@link Groups#MEMBERS_VISIBLE} state
+         * of any {@link GroupMembership} for this aggregate.
+         */
+        public static final String IN_VISIBLE_GROUP = "in_visible_group";
     }
 
     /**
@@ -259,7 +266,6 @@ public final class ContactsContract {
             public static final String MAX_SUGGESTIONS = "max_suggestions";
         }
     }
-
 
     /**
      * Constants for the contacts table, which contains the base contact information.
@@ -963,6 +969,103 @@ public final class ContactsContract {
              */
             public static final String GROUP_SOURCE_ID = "data2";
         }
+    }
+
+    public interface GroupsColumns {
+        /**
+         * The package name that owns this group.
+         */
+        public static final String PACKAGE = "package";
+
+        /**
+         * A unique identifier for the package that owns this group.
+         */
+        public static final String PACKAGE_ID = "package_id";
+
+        /**
+         * The display title of this group.
+         * <p>
+         * Type: TEXT
+         */
+        public static final String TITLE = "title";
+
+        /**
+         * The display title of this group to load as a resource from
+         * {@link #PACKAGE}, which may be localized.
+         * <p>
+         * Type: TEXT
+         */
+        public static final String TITLE_RESOURCE = "title_res";
+
+        /**
+         * The total number of {@link Aggregates} that have
+         * {@link GroupMembership} in this group. Read-only value that is only
+         * present when querying {@link Groups#CONTENT_SUMMARY_URI}.
+         * <p>
+         * Type: INTEGER
+         */
+        public static final String SUMMARY_COUNT = "summ_count";
+
+        /**
+         * The total number of {@link Aggregates} that have both
+         * {@link GroupMembership} in this group, and also have phone numbers.
+         * Read-only value that is only present when querying
+         * {@link Groups#CONTENT_SUMMARY_URI}.
+         * <p>
+         * Type: INTEGER
+         */
+        public static final String SUMMARY_WITH_PHONES = "summ_phones";
+
+        /**
+         * A reference to the {@link Accounts#_ID} that this data belongs to.
+         */
+        public static final String ACCOUNTS_ID = "accounts_id";
+
+        /**
+         * A string that uniquely identifies this contact to its source, which is referred to
+         * by the {@link #ACCOUNTS_ID}
+         */
+        public static final String SOURCE_ID = "sourceid";
+
+        /**
+         * Flag indicating if the contacts belonging to this group should be
+         * visible in any user interface.
+         * <p>
+         * Type: INTEGER
+         */
+        public static final String GROUP_VISIBLE = "group_visible";
+    }
+
+    /**
+     * Constants for the groups table.
+     */
+    public static final class Groups implements BaseColumns, GroupsColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Groups()  {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "groups");
+
+        /**
+         * The content:// style URI for this table joined with details data from
+         * {@link Data} and {@link Presence}.
+         */
+        public static final Uri CONTENT_SUMMARY_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "groups_summary");
+
+        /**
+         * The MIME type of a directory of groups.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/group";
+
+        /**
+         * The MIME type of a single group.
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/group";
     }
 
     /**
