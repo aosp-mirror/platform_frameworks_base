@@ -307,7 +307,7 @@ public class SurfaceView extends View {
 
         // Use original size if the app specified the size of the view,
         // and let the flinger to scale up.
-        if (mRequestedWidth <= 0 && mTranslator != null && mTranslator.scalingRequired) {
+        if (mRequestedWidth <= 0 && mTranslator != null) {
             myWidth *= appScale;
             myHeight *= appScale;
         }
