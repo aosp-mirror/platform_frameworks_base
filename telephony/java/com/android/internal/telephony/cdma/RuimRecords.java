@@ -342,7 +342,7 @@ public final class RuimRecords extends IccRecords {
 
         recordsLoadedRegistrants.notifyRegistrants(
             new AsyncResult(null, null, null));
-        ((CDMAPhone) phone).mRuimCard.broadcastRuimStateChangedIntent(
+        ((CDMAPhone) phone).mRuimCard.broadcastIccStateChangedIntent(
                 RuimCard.INTENT_VALUE_ICC_LOADED, null);
     }
 
@@ -351,7 +351,7 @@ public final class RuimRecords extends IccRecords {
           READY is sent before IMSI ready
         */
 
-        ((CDMAPhone) phone).mRuimCard.broadcastRuimStateChangedIntent(
+        ((CDMAPhone) phone).mRuimCard.broadcastIccStateChangedIntent(
                 RuimCard.INTENT_VALUE_ICC_READY, null);
 
         fetchRuimRecords();

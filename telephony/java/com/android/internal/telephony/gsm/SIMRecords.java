@@ -16,41 +16,29 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.app.ActivityManagerNative;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
 import android.app.AlarmManager;
-import android.app.IActivityManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
-import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.os.Registrant;
 import android.provider.Settings;
 import android.util.Log;
-import java.util.ArrayList;
-
-
-import static com.android.internal.telephony.TelephonyProperties.*;
 
 import com.android.internal.telephony.AdnRecord;
 import com.android.internal.telephony.AdnRecordCache;
 import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.CommandsInterface;
-import com.android.internal.telephony.gsm.SimCard;
-import com.android.internal.telephony.gsm.SmsMessage;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccRecords;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.IccVmFixedException;
 import com.android.internal.telephony.IccVmNotSupportedException;
-import com.android.internal.telephony.PhoneProxy;
 
-
-
-
-
+import java.util.ArrayList;
 
 
 /**
@@ -577,7 +565,7 @@ public final class SIMRecords extends IccRecords {
 
                 Log.d(LOG_TAG, "IMSI: " + imsi.substring(0, 6) + "xxxxxxxxx");
                 ((GSMPhone) phone).mSimCard.updateImsiConfiguration(imsi);
-                ((GSMPhone) phone).mSimCard.broadcastSimStateChangedIntent(
+                ((GSMPhone) phone).mSimCard.broadcastIccStateChangedIntent(
                         SimCard.INTENT_VALUE_ICC_IMSI, null);
 
                 int mcc = Integer.parseInt(imsi.substring(0, 3));
@@ -1204,7 +1192,7 @@ public final class SIMRecords extends IccRecords {
 
         recordsLoadedRegistrants.notifyRegistrants(
             new AsyncResult(null, null, null));
-        ((GSMPhone) phone).mSimCard.broadcastSimStateChangedIntent(
+        ((GSMPhone) phone).mSimCard.broadcastIccStateChangedIntent(
                 SimCard.INTENT_VALUE_ICC_LOADED, null);
     }
 
@@ -1229,7 +1217,7 @@ public final class SIMRecords extends IccRecords {
         /* broadcast intent SIM_READY here so that we can make sure
           READY is sent before IMSI ready
         */
-        ((GSMPhone) phone).mSimCard.broadcastSimStateChangedIntent(
+        ((GSMPhone) phone).mSimCard.broadcastIccStateChangedIntent(
                 SimCard.INTENT_VALUE_ICC_READY, null);
 
         fetchSimRecords();

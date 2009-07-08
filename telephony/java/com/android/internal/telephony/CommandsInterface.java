@@ -82,15 +82,6 @@ public interface CommandsInterface {
         }
     }
 
-    enum IccStatus {
-        ICC_ABSENT,
-        ICC_NOT_READY,
-        ICC_READY,
-        ICC_PIN,
-        ICC_PUK,
-        ICC_NETWORK_PERSONALIZATION
-    }
-
     //***** Constants
 
     // Used as parameter to dial() and setCLIR() below
@@ -532,15 +523,6 @@ public interface CommandsInterface {
       */
      void registerForCdmaOtaProvision(Handler h,int what, Object obj);
      void unregisterForCdmaOtaProvision(Handler h);
-
-    /**
-     * Returns current ICC status.
-     *
-     * AsyncResult.result is IccStatus
-     *
-     */
-
-    void getIccStatus(Message result);
 
     /**
      * Supply the ICC PIN to the ICC card
@@ -1366,4 +1348,12 @@ public interface CommandsInterface {
      * @param response callback message
      */
     public void exitEmergencyCallbackMode(Message response);
+
+    /**
+     * Request the status of the ICC and UICC cards.
+     *
+     * @param response
+     *          Callback message containing {@link IccCardStatus} structure for the card.
+     */
+    public void getIccCardStatus(Message result);
 }
