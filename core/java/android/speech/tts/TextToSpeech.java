@@ -107,9 +107,7 @@ public class TextToSpeech {
         public static final int FALLBACK_TTS_DEFAULT_RATE = 100; // 1x
         public static final int FALLBACK_TTS_DEFAULT_PITCH = 100;// 1x
         public static final int FALLBACK_TTS_USE_DEFAULTS = 0; // false
-        public static final String FALLBACK_TTS_DEFAULT_LANG = "eng";
-        public static final String FALLBACK_TTS_DEFAULT_COUNTRY = "";
-        public static final String FALLBACK_TTS_DEFAULT_VARIANT = "";
+        public static final String FALLBACK_TTS_DEFAULT_SYNTH = "com.svox.pico";
 
         // return codes for a TTS engine's check data activity
         public static final int CHECK_VOICE_DATA_PASS = 1;
