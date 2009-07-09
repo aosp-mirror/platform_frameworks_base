@@ -1573,7 +1573,6 @@ status_t ResTable::add(Asset* asset, void* cookie, bool copyData)
 status_t ResTable::add(ResTable* src)
 {
     mError = src->mError;
-    mParams = src->mParams;
     
     for (size_t i=0; i<src->mHeaders.size(); i++) {
         mHeaders.add(src->mHeaders[i]);
