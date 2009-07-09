@@ -167,6 +167,9 @@ public class SettingsHelper {
         // Check if locale was set by the user:
         Configuration conf = mContext.getResources().getConfiguration();
         Locale loc = conf.locale;
+        // TODO: The following is not working as intended because the network is forcing a locale
+        // change after registering. Need to find some other way to detect if the user manually
+        // changed the locale
         if (conf.userSetLocale) return; // Don't change if user set it in the SetupWizard
 
         final String[] availableLocales = mContext.getAssets().getLocales();
@@ -193,6 +196,14 @@ public class SettingsHelper {
         } catch (RemoteException e) {
             // Intentionally left blank
         }
+    }
 
+    /**
+     * Informs the audio service of changes to the settings so that
+     * they can be re-read and applied.
+     */
+    void applyAudioSettings() {
+        AudioManager am = new AudioManager(mContext);
+        am.reloadAudioSettings();
     }
 }
