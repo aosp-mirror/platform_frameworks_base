@@ -70,7 +70,7 @@ writeEntityData_native(JNIEnv* env, jobject clazz, int w, jbyteArray data, int s
     int err;
     BackupDataWriter* writer = (BackupDataWriter*)w;
 
-    if (env->GetArrayLength(data) > size) {
+    if (env->GetArrayLength(data) < size) {
         // size mismatch
         return -1;
     }
