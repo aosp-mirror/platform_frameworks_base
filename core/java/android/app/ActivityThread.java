@@ -2545,32 +2545,39 @@ public final class ActivityThread {
             classname = "android.app.FullBackupAgent";
         }
         try {
-            java.lang.ClassLoader cl = packageInfo.getClassLoader();
-            agent = (BackupAgent) cl.loadClass(data.appInfo.backupAgentName).newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to instantiate backup agent "
-                    + data.appInfo.backupAgentName + ": " + e.toString(), e);
-        }
-        
-        // set up the agent's context
-        try {
-            if (DEBUG_BACKUP) Log.v(TAG, "Initializing BackupAgent "
-                    + data.appInfo.backupAgentName);
-            
-            ApplicationContext context = new ApplicationContext();
-            context.init(packageInfo, null, this);
-            context.setOuterContext(agent);
-            agent.attach(context);
-            agent.onCreate();
+            IBinder binder = null;
+            try {
+                java.lang.ClassLoader cl = packageInfo.getClassLoader();
+                agent = (BackupAgent) cl.loadClass(data.appInfo.backupAgentName).newInstance();
+
+                // set up the agent's context
+                if (DEBUG_BACKUP) Log.v(TAG, "Initializing BackupAgent "
+                        + data.appInfo.backupAgentName);
+
+                ApplicationContext context = new ApplicationContext();
+                context.init(packageInfo, null, this);
+                context.setOuterContext(agent);
+                agent.attach(context);
+
+                agent.onCreate();
+                binder = agent.onBind();
+                mBackupAgents.put(packageName, agent);
+            } catch (Exception e) {
+                // If this is during restore, fail silently; otherwise go
+                // ahead and let the user see the crash.
+                Log.e(TAG, "Agent threw during creation: " + e);
+                if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE) {
+                    throw e;
+                }
+                // falling through with 'binder' still null
+            }
 
             // tell the OS that we're live now
-            IBinder binder = agent.onBind();
             try {
                 ActivityManagerNative.getDefault().backupAgentCreated(packageName, binder);
             } catch (RemoteException e) {
                 // nothing to do.
             }
-            mBackupAgents.put(packageName, agent);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create BackupAgent "
                     + data.appInfo.backupAgentName + ": " + e.toString(), e);
