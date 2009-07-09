@@ -1328,7 +1328,7 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
-        
+
         /**
          * Whether live web suggestions while the user types into search dialogs are
          * enabled. Browsers and other search UIs should respect this, as it allows
@@ -2300,7 +2300,7 @@ public final class Settings {
          * @hide
          */
         public static final String BACKUP_TRANSPORT = "backup_transport";
-        
+
         /**
          * Version for which the setup wizard was last shown.  Bumped for
          * each release when there is new setup information to show.
@@ -2952,6 +2952,13 @@ public final class Settings {
          */
         public static final String VENDING_PENDING_DOWNLOAD_RESEND_FREQUENCY_MS =
                 "vending_pd_resend_frequency_ms";
+
+        /**
+         * Frequency in milliseconds at which we should cycle through the promoted applications
+         * on the home screen or the categories page.
+         */
+        public static final String VENDING_PROMO_REFRESH_FREQUENCY_MS =
+                "vending_promo_refresh_freq_ms";
 
         /**
          * URL that points to the legal terms of service to display in Settings.
