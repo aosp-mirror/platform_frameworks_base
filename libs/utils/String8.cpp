@@ -681,7 +681,7 @@ size_t strnlen32(const char32_t *s, size_t maxlen)
   return ss-s;
 }
 
-size_t utf8_codepoint_count(const char *src)
+size_t utf8_length(const char *src)
 {
     const char *cur = src;
     size_t ret = 0;
