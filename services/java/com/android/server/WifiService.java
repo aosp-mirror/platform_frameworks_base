@@ -436,7 +436,7 @@ public class WifiService extends IWifiManager.Stub {
      * see {@link android.net.wifi.WifiManager#startScan()}
      * @return {@code true} if the operation succeeds
      */
-    public boolean startScan() {
+    public boolean startScan(boolean forceActive) {
         enforceChangePermission();
         synchronized (mWifiStateTracker) {
             switch (mWifiStateTracker.getSupplicantState()) {
@@ -450,7 +450,7 @@ public class WifiService extends IWifiManager.Stub {
                             WifiStateTracker.SUPPL_SCAN_HANDLING_LIST_ONLY);
                     break;
             }
-            return WifiNative.scanCommand();
+            return WifiNative.scanCommand(forceActive);
         }
     }
 
