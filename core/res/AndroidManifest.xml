@@ -995,6 +995,29 @@
         android:description="@string/permdesc_changeBackgroundDataSetting"
         android:label="@string/permlab_changeBackgroundDataSetting" />
 
+    <!-- This permission can be used on content providers to allow the global
+         search system to access their data.  Typically it used when the
+         provider has some permissions protecting it (which global search
+         would not be expected to hold), and added as a read-only permission
+         to the path in the provider where global search queries are
+         performed.  This permission can not be held by regular applications;
+         it is used by applications to protect themselves from everyone else
+         besides global search. -->
+    <permission android:name="android.permission.GLOBAL_SEARCH"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signatureOrSystem" />
+
+    <!-- Internal permission protecting access to the global search
+         system: ensures that only the system can access the provider
+         to perform queries (since this otherwise provides unrestricted
+         access to a variety of content providers), and to write the
+         search statistics (to keep applications from gaming the source
+         ranking).
+         @hide -->
+    <permission android:name="android.permission.GLOBAL_SEARCH_CONTROL"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
