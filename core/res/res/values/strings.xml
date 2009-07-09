@@ -1884,6 +1884,13 @@
     <!-- This string appears (on two lines) when you type a number into contacts search, to let you create a contact whose phone number is the number you typed.  The first line will be in bigger type than the second. -->
     <string name="create_contact_using">Create contact\nusing <xliff:g id="number" example="555">%s</xliff:g></string>
 
+    <!-- various string resources for Contacts -->
+    <string-array name="common_nicknames"></string-array>
+    <string name="common_name_prefixes"></string>
+    <string name="common_name_suffixes"></string>
+    <string name="common_last_name_prefixes"></string>
+    <string name="common_name_conjunctions"></string>
+
     <!-- This string array should be overridden by the manufacture to present a list of carrier-id,locale,wifi-channel sets.  This is used at startup to set system defaults by checking the system property ro.carrier for the carrier-id and searching through this array -->
     <!-- An Array of [[Carrier-ID]                     -->
     <!--              [default-locale]                 -->
