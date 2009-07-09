@@ -81,6 +81,11 @@ public final class Calendar {
     public interface CalendarsColumns
     {
         /**
+         * A string that uniquely identifies this contact to its source
+         */
+        public static final String SOURCE_ID = "sourceid";
+
+        /**
          * The color of the calendar
          * <P>Type: INTEGER (color value)</P>
          */
@@ -125,6 +130,12 @@ public final class Calendar {
          * <p>Type: INTEGER (boolean)</p>
          */
         public static final String SYNC_EVENTS = "sync_events";
+
+        /**
+         * Sync state data.
+         * <p>Type: String (blob)</p>
+         */
+        public static final String SYNC_STATE = "sync_state";
     }
 
     /**
