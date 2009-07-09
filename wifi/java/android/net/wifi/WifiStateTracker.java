@@ -1129,7 +1129,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                             } else {
                                 // In some situations, supplicant needs to be kickstarted to
                                 // start the background scanning
-                                WifiNative.scanCommand();
+                                WifiNative.scanCommand(true);
                             }
                         }
                     }
