@@ -247,7 +247,12 @@ public class Searchables {
             for (int i = 0; i < webSearchInfoList.size(); ++i) {
                 ActivityInfo ai = webSearchInfoList.get(i).activityInfo;
                 ComponentName component = new ComponentName(ai.packageName, ai.name);
-                newSearchablesForWebSearchList.add(newSearchablesMap.get(component));
+                SearchableInfo searchable = newSearchablesMap.get(component);
+                if (searchable == null) {
+                    Log.w(LOG_TAG, "did not find component in searchables: " + component);
+                } else {
+                    newSearchablesForWebSearchList.add(searchable);
+                }
             }
         }
 
