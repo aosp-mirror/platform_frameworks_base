@@ -846,6 +846,16 @@ status_t MediaPlayerService::Client::setMetadataFilter(const Parcel& filter)
     return status;
 }
 
+status_t MediaPlayerService::Client::getMetadata(bool update_only, bool apply_filter, Parcel *metadata)
+{
+    status_t status;
+    metadata->writeInt32(-1);  // Placeholder for the return code
+
+    // FIXME: Implement, query the native player and do the optional filtering, etc...
+    status = OK;
+    return status;
+}
+
 status_t MediaPlayerService::Client::prepareAsync()
 {
     LOGV("[%d] prepareAsync", mConnId);

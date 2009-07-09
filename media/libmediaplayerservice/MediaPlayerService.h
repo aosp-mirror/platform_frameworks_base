@@ -191,6 +191,7 @@ private:
         virtual status_t        setVolume(float leftVolume, float rightVolume);
         virtual status_t        invoke(const Parcel& request, Parcel *reply);
         virtual status_t        setMetadataFilter(const Parcel& filter);
+        virtual status_t        getMetadata(bool update_only, bool apply_filter, Parcel *metadata);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
                 status_t        setDataSource(const char *url);

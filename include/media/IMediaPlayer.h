@@ -59,6 +59,23 @@ public:
     // @param filter A set of allow and drop rules serialized in a Parcel.
     // @return OK if the invocation was made successfully.
     virtual status_t        setMetadataFilter(const Parcel& filter) = 0;
+
+    // Retrieve a set of metadata.
+    // @param update_only Include only the metadata that have changed
+    //                    since the last invocation of getMetadata.
+    //                    The set is built using the unfiltered
+    //                    notifications the native player sent to the
+    //                    MediaPlayerService during that period of
+    //                    time. If false, all the metadatas are considered.
+    // @param apply_filter If true, once the metadata set has been built based
+    //                     on the value update_only, the current filter is
+    //                     applied.
+    // @param[out] metadata On exit contains a set (possibly empty) of metadata.
+    //                      Valid only if the call returned OK.
+    // @return OK if the invocation was made successfully.
+    virtual status_t        getMetadata(bool update_only,
+                                        bool apply_filter,
+                                        Parcel *metadata) = 0;
 };
 
 // ----------------------------------------------------------------------------

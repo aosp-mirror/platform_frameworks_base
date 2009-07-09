@@ -42,6 +42,7 @@ enum {
     SET_VOLUME,
     INVOKE,
     SET_METADATA_FILTER,
+    GET_METADATA,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -176,8 +177,7 @@ public:
     status_t invoke(const Parcel& request, Parcel *reply)
     { // Avoid doing any extra copy. The interface descriptor should
       // have been set by MediaPlayer.java.
-        status_t retcode = remote()->transact(INVOKE, request, reply);
-        return retcode;
+        return remote()->transact(INVOKE, request, reply);
     }
 
     status_t setMetadataFilter(const Parcel& request)
@@ -187,6 +187,17 @@ public:
         // descriptor should have been set by MediaPlayer.java.
         remote()->transact(SET_METADATA_FILTER, request, &reply);
         return reply.readInt32();
+    }
+
+    status_t getMetadata(bool update_only, bool apply_filter, Parcel *reply)
+    {
+        Parcel request;
+        request.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        // TODO: Burning 2 ints for 2 boolean. Should probably use flags in an int here.
+        request.writeInt32(update_only);
+        request.writeInt32(apply_filter);
+        remote()->transact(GET_METADATA, request, reply);
+        return reply->readInt32();
     }
 };
 
@@ -286,6 +297,14 @@ status_t BnMediaPlayer::onTransact(
         case SET_METADATA_FILTER: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(setMetadataFilter(data));
+            return NO_ERROR;
+        } break;
+        case GET_METADATA: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            const status_t retcode = getMetadata(data.readInt32(), data.readInt32(), reply);
+            reply->setDataPosition(0);
+            reply->writeInt32(retcode);
+            reply->setDataPosition(0);
             return NO_ERROR;
         } break;
         default:

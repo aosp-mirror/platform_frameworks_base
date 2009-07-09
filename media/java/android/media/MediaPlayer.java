@@ -930,8 +930,21 @@ public class MediaPlayer
      */
     public Metadata getMetadata(final boolean update_only,
                                 final boolean apply_filter) {
-        // FIXME: Implement.
-        return new Metadata();
+        Parcel reply = Parcel.obtain();
+        Metadata data = new Metadata();
+
+        if (!native_getMetadata(update_only, apply_filter, reply)) {
+            reply.recycle();
+            return null;
+        }
+
+        // Metadata takes over the parcel, don't recycle it unless
+        // there is an error.
+        if (!data.parse(reply)) {
+            reply.recycle();
+            return null;
+        }
+        return data;
     }
 
     /**
@@ -1064,10 +1077,28 @@ public class MediaPlayer
      * @param request Parcel destinated to the media player. The
      *                Interface token must be set to the IMediaPlayer
      *                one to be routed correctly through the system.
-     * @param reply Parcel that will contain the reply.
+     * @param reply[out] Parcel that will contain the reply.
      * @return The status code.
      */
     private native final int native_invoke(Parcel request, Parcel reply);
+
+
+    /**
+     * @param update_only If true fetch only the set of metadata that have
+     *                    changed since the last invocation of getMetadata.
+     *                    The set is built using the unfiltered
+     *                    notifications the native player sent to the
+     *                    MediaPlayerService during that period of
+     *                    time. If false, all the metadatas are considered.
+     * @param apply_filter  If true, once the metadata set has been built based on
+     *                     the value update_only, the current filter is applied.
+     * @param reply[out] On return contains the serialized
+     *                   metadata. Valid only if the call was successful.
+     * @return The status code.
+     */
+    private native final boolean native_getMetadata(boolean update_only,
+                                                    boolean apply_filter,
+                                                    Parcel reply);
 
     /**
      * @param request Parcel with the 2 serialized lists of allowed
