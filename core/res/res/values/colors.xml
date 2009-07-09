@@ -74,7 +74,9 @@
     <color name="perms_normal_perm_color">#c0c0c0</color>
     
     <!-- For search-related UIs -->
-    <color name="search_url_text">#7fa87f</color>
+    <color name="search_url_text_normal">#7fa87f</color>
+    <color name="search_url_text_selected">@android:color/black</color>
+    <color name="search_url_text_pressed">@android:color/black</color>
     <color name="search_widget_corpus_item_background">@android:color/lighter_gray</color>
 
 </resources>
