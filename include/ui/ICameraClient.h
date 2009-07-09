@@ -21,6 +21,7 @@
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
 #include <binder/IMemory.h>
+#include <utils/Timers.h>
 
 namespace android {
 
@@ -31,7 +32,7 @@ public:
 
     virtual void            notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) = 0;
     virtual void            dataCallback(int32_t msgType, const sp<IMemory>& data) = 0;
-
+    virtual void            dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& data) = 0;
 };
 
 // ----------------------------------------------------------------------------
