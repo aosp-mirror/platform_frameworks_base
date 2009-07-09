@@ -57,11 +57,6 @@ public class Gesture implements Parcelable {
         mGestureID = GESTURE_ID_BASE + sGestureCount++;
     }
 
-    void recycle() {
-        mStrokes.clear();
-        mBoundingBox.setEmpty();
-    }
-
     /**
      * @return all the strokes of the gesture
      */
@@ -159,20 +154,6 @@ public class Gesture implements Parcelable {
      */
     public long getID() {
         return mGestureID;
-    }
-
-    /**
-     * draw the gesture
-     * 
-     * @param canvas
-     */
-    void draw(Canvas canvas, Paint paint) {
-        final ArrayList<GestureStroke> strokes = mStrokes;
-        final int count = strokes.size();
-
-        for (int i = 0; i < count; i++) {
-            strokes.get(i).draw(canvas, paint);
-        }
     }
 
     /**
