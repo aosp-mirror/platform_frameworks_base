@@ -672,9 +672,6 @@ public class TtsService extends Service implements OnCompletionListener {
             if (mSpeechQueue.size() > 0) {
                 mSpeechQueue.remove(0);
             }
-        } catch (InterruptedException e) {
-            Log.e("TTS processSpeechQueue", "tryLock interrupted");
-            e.printStackTrace();
         } finally {
             // This check is needed because finally will always run; even if the
             // method returns somewhere in the try block.
