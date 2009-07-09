@@ -14,33 +14,31 @@
  * limitations under the License.
  */
 
-#include "rsContext.h"
+#ifndef ANDROID_RS_FILE_A3D_DECLS_H
+#define ANDROID_RS_FILE_A3D_DECLS_H
 
-using namespace android;
-using namespace android::renderscript;
 
-#include <GLES/gl.h>
-#include <GLES/glext.h>
+#define A3D_MAGIC_KEY "Android3D_ff"
 
-Mesh::Mesh()
-{
-    mVerticies = NULL;
-    mVerticiesCount = 0;
-    mPrimitives = NULL;
-    mPrimitivesCount = 0;
+namespace android {
+namespace renderscript {
+
+    enum A3DChunkType {
+        CHUNK_EMPTY,
+
+        CHUNK_ELEMENT,
+        CHUNK_ELEMENT_SOURCE,
+        CHUNK_VERTICIES,
+        CHUNK_MESH,
+        CHUNK_PRIMITIVE,
+
+        CHUNK_LAST
+    };
+
+
 }
-
-Mesh::~Mesh()
-{
 }
+#endif //ANDROID_RS_FILE_A3D_H
 
 
-
-MeshContext::MeshContext()
-{
-}
-
-MeshContext::~MeshContext()
-{
-}
 

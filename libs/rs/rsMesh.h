@@ -32,10 +32,11 @@ public:
     Mesh();
     ~Mesh();
 
-    struct VertexSource_t
+    struct Verticies_t
     {
-        const Element * mVertexElement;
-        void * mVertexData;
+        Allocation ** mAllocations;
+        uint32_t mAllocationCount;
+
         size_t mVertexDataSize;
 
         size_t mOffsetCoord;
@@ -52,16 +53,19 @@ public:
     struct Primitive_t
     {
         RsPrimitive mType;
-        const Element * mIndexElement;
-        void * mVertexData;
-        size_t mIndexDataSize;
+        Verticies_t *mVerticies;
 
-        uint32_t mBufferObject;
+        uint32_t mIndexCount;
+        uint16_t *mIndicies;
     };
 
-    VertexSource_t * mSources;
-    Primitive_t * mPrimitives;
-    uint32_t mPrimitiveCount;
+    Verticies_t * mVerticies;
+    uint32_t mVerticiesCount;
+
+    Primitive_t ** mPrimitives;
+    uint32_t mPrimitivesCount;
+
+
 
     void analyzeElement();
 protected:

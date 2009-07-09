@@ -436,3 +436,10 @@ LightSetColor {
 	param float b
 	}
 
+FileOpen {
+	ret RsFile
+	param const char *name
+	param size_t len
+	}
+
+

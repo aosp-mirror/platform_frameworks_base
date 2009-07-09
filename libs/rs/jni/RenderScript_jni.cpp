@@ -75,6 +75,19 @@ nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
 }
 
 
+static jint
+nFileOpen(JNIEnv *_env, jobject _this, jbyteArray str)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nFileOpen, con(%p)", con);
+
+    jint len = _env->GetArrayLength(str);
+    jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
+    jint ret = (jint)rsFileOpen((const char *)cptr, len);
+    _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
+    return ret;
+}
+
 // ---------------------------------------------------------------------------
 
 static jint
@@ -954,6 +967,8 @@ static JNINativeMethod methods[] = {
 {"nContextCreate",                 "(ILandroid/view/Surface;I)I",          (void*)nContextCreate },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
+
+{"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
 
 {"nElementBegin",                  "()V",                                  (void*)nElementBegin },
 {"nElementAddPredefined",          "(I)V",                                 (void*)nElementAddPredefined },

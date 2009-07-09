@@ -33,6 +33,7 @@ typedef void * RsAllocation;
 typedef void * RsContext;
 typedef void * RsDevice;
 typedef void * RsElement;
+typedef void * RsFile;
 typedef void * RsSampler;
 typedef void * RsScript;
 typedef void * RsScriptBasicTemp;

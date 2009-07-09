@@ -70,6 +70,7 @@ public class RenderScript {
     native private void nContextBindProgramVertex(int pf);
 
     native private void nAssignName(int obj, byte[] name);
+    native private int  nFileOpen(byte[] name);
 
     native private void nElementBegin();
     native private void nElementAddPredefined(int predef);
@@ -915,6 +916,36 @@ public class RenderScript {
         int id = nLightCreate();
         return new Light(id);
     }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // File
+
+    public class File extends BaseObj {
+        File(int id) {
+            mID = id;
+        }
+
+        public void destroy() {
+            //nLightDestroy(mID);
+            mID = 0;
+        }
+    }
+
+    public File fileOpen(String s) throws IllegalStateException, IllegalArgumentException
+    {
+        if(s.length() < 1) {
+            throw new IllegalArgumentException("fileOpen does not accept a zero length string.");
+        }
+
+        try {
+            byte[] bytes = s.getBytes("UTF-8");
+            int id = nFileOpen(bytes);
+            return new File(id);
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Root state
