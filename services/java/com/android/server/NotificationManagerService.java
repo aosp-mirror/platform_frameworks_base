@@ -49,6 +49,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Power;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -945,6 +946,9 @@ class NotificationManagerService extends INotificationManager.Stub
     // to accidentally lose.
     private void updateAdbNotification() {
         if (mAdbEnabled && mBatteryPlugged == BatteryManager.BATTERY_PLUGGED_USB) {
+            if ("0".equals(SystemProperties.get("persist.adb.notify"))) {
+                return;
+            }
             if (!mAdbNotificationShown) {
                 NotificationManager notificationManager = (NotificationManager) mContext
                         .getSystemService(Context.NOTIFICATION_SERVICE);
