@@ -189,7 +189,7 @@ abstract class VpnService<E extends VpnProfile> {
 
             mServiceHelper.stop();
         } catch (Throwable e) {
-            Log.e(TAG, "onError()", e);
+            Log.e(TAG, "onDisconnect()", e);
             onFinalCleanUp();
         }
     }
@@ -219,21 +219,28 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     private void waitUntilConnectedOrTimedout() {
-        sleep(2000); // 2 seconds
-        for (int i = 0; i < 60; i++) {
-            if (VPN_IS_UP.equals(SystemProperties.get(VPN_UP))) {
-                onConnected();
-                return;
-            }
-            sleep(500); // 0.5 second
-        }
+        // Run this in the background thread to not block UI
+        new Thread(new Runnable() {
+            public void run() {
+                sleep(2000); // 2 seconds
+                for (int i = 0; i < 60; i++) {
+                    if (VPN_IS_UP.equals(SystemProperties.get(VPN_UP))) {
+                        onConnected();
+                        return;
+                    } else if (mState != VpnState.CONNECTING) {
+                        break;
+                    }
+                    sleep(500); // 0.5 second
+                }
 
-        synchronized (this) {
-            if (mState == VpnState.CONNECTING) {
-                Log.d(TAG, "       connecting timed out !!");
-                onError();
+                synchronized (VpnService.this) {
+                    if (mState == VpnState.CONNECTING) {
+                        Log.d(TAG, "       connecting timed out !!");
+                        onError();
+                    }
+                }
             }
-        }
+        }).start();
     }
 
     private synchronized void onConnected() {
