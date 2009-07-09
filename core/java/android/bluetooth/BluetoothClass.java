@@ -46,6 +46,10 @@ public class BluetoothClass {
     /** Indicates the Bluetooth API could not retrieve the class */
     public static final int ERROR = 0xFF000000;
 
+    public static final int PROFILE_HEADSET = 0;
+    public static final int PROFILE_A2DP = 1;
+    public static final int PROFILE_OPP = 2;
+
     /** Every Bluetooth device has zero or more service classes */
     public static class Service {
         public static final int BITMASK                 = 0xFFE000;
@@ -185,6 +189,75 @@ public class BluetoothClass {
                 return ERROR;
             }
             return (btClass & Device.BITMASK);
+        }
+    }
+
+    /**
+     * Check class bits for possible bluetooth profile support.
+     * This is a simple heuristic that tries to guess if a device with the
+     * given class bits might support specified profile. It is not accurate for all
+     * devices. It tries to err on the side of false positives.
+     * @param btClass The class
+     * @param profile The profile to be checked
+     * @return True if this device might support specified profile.
+     */
+    public static boolean doesClassMatch(int btClass, int profile) {
+        if (profile == PROFILE_A2DP) {
+            if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.RENDER)) {
+                return true;
+            }
+            // By the A2DP spec, sinks must indicate the RENDER service.
+            // However we found some that do not (Chordette). So lets also
+            // match on some other class bits.
+            switch (BluetoothClass.Device.getDevice(btClass)) {
+                case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
+                case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
+                case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
+                case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+                    return true;
+                default:
+                    return false;
+            }
+        } else if (profile == PROFILE_HEADSET) {
+            // The render service class is required by the spec for HFP, so is a
+            // pretty good signal
+            if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.RENDER)) {
+                return true;
+            }
+            // Just in case they forgot the render service class
+            switch (BluetoothClass.Device.getDevice(btClass)) {
+                case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+                case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+                case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+                    return true;
+                default:
+                    return false;
+            }
+        } else if (profile == PROFILE_OPP) {
+            if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.OBJECT_TRANSFER)) {
+                return true;
+            }
+
+            switch (BluetoothClass.Device.getDevice(btClass)) {
+                case BluetoothClass.Device.COMPUTER_UNCATEGORIZED:
+                case BluetoothClass.Device.COMPUTER_DESKTOP:
+                case BluetoothClass.Device.COMPUTER_SERVER:
+                case BluetoothClass.Device.COMPUTER_LAPTOP:
+                case BluetoothClass.Device.COMPUTER_HANDHELD_PC_PDA:
+                case BluetoothClass.Device.COMPUTER_PALM_SIZE_PC_PDA:
+                case BluetoothClass.Device.COMPUTER_WEARABLE:
+                case BluetoothClass.Device.PHONE_UNCATEGORIZED:
+                case BluetoothClass.Device.PHONE_CELLULAR:
+                case BluetoothClass.Device.PHONE_CORDLESS:
+                case BluetoothClass.Device.PHONE_SMART:
+                case BluetoothClass.Device.PHONE_MODEM_OR_GATEWAY:
+                case BluetoothClass.Device.PHONE_ISDN:
+                    return true;
+                default:
+                    return false;
+            }
+        } else {
+            return false;
         }
     }
 }

@@ -55,6 +55,16 @@ public final class BluetoothDevice implements Parcelable {
      *  @hide */
     public static final int BOND_BONDING = 2;
 
+    /** Ask device picker to show all kinds of BT devices.
+     *  @hide */
+    public static final int DEVICE_PICKER_FILTER_TYPE_ALL = 0;
+    /** Ask device picker to show BT devices that support AUDIO profiles.
+     *  @hide */
+    public static final int DEVICE_PICKER_FILTER_TYPE_AUDIO = 1;
+    /** Ask device picker to show BT devices that support Object Transfer.
+     *  @hide */
+    public static final int DEVICE_PICKER_FILTER_TYPE_TRANSFER = 2;
+
     //TODO: Unify these result codes in BluetoothResult or BluetoothError
     /** A bond attempt failed because pins did not match, or remote device did
      * not respond to pin request in time 

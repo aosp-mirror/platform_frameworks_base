@@ -62,6 +62,35 @@ public interface BluetoothIntent {
     public static final String PASSKEY =
         "android.bluetooth.intent.PASSKEY";
 
+    public static final String DEVICE_PICKER_NEED_AUTH =
+        "android.bluetooth.intent.DEVICE_PICKER_NEED_AUTH";
+    public static final String DEVICE_PICKER_FILTER_TYPE =
+        "android.bluetooth.intent.DEVICE_PICKER_FILTER_TYPE";
+    public static final String DEVICE_PICKER_LAUNCH_PACKAGE =
+        "android.bluetooth.intent.DEVICE_PICKER_LAUNCH_PACKAGE";
+    public static final String DEVICE_PICKER_LAUNCH_CLASS =
+        "android.bluetooth.intent.DEVICE_PICKER_LAUNCH_CLASS";
+
+     /**
+     * Broadcast when one BT device is selected from BT device picker screen.
+     * Selected BT device address is contained in extra string "BluetoothIntent.ADDRESS".
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String DEVICE_PICKER_DEVICE_SELECTED =
+        "android.bluetooth.intent.action.DEVICE_SELECTED";
+
+    /**
+     * Broadcast when someone want to select one BT device from devices list.
+     * This intent contains below extra data:
+     * - BluetoothIntent.DEVICE_PICKER_NEED_AUTH (boolean): if need authentication
+     * - BluetoothIntent.DEVICE_PICKER_FILTER_TYPE (int): what kinds of device should be listed
+     * - BluetoothIntent.DEVICE_PICKER_LAUNCH_PACKAGE (string): where(which package) this intent come from
+     * - BluetoothIntent.DEVICE_PICKER_LAUNCH_CLASS (string): where(which class) this intent come from
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String DEVICE_PICKER_DEVICE_PICKER =
+        "android.bluetooth.intent.action.DEVICE_PICKER";
+
     /** Broadcast when the local Bluetooth device state changes, for example
      *  when Bluetooth is enabled. Will contain int extra's BLUETOOTH_STATE and
      *  BLUETOOTH_PREVIOUS_STATE. */

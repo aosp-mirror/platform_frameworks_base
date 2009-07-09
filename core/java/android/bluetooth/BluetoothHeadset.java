@@ -356,30 +356,6 @@ public final class BluetoothHeadset {
         return -1;
     }
 
-    /**
-     * Check class bits for possible HSP or HFP support.
-     * This is a simple heuristic that tries to guess if a device with the
-     * given class bits might support HSP or HFP. It is not accurate for all
-     * devices. It tries to err on the side of false positives.
-     * @return True if this device might support HSP or HFP.
-     */
-    public static boolean doesClassMatch(int btClass) {
-        // The render service class is required by the spec for HFP, so is a
-        // pretty good signal
-        if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.RENDER)) {
-            return true;
-        }
-        // Just in case they forgot the render service class
-        switch (BluetoothClass.Device.getDevice(btClass)) {
-        case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-        case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
-        case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
-            return true;
-        default:
-            return false;
-        }
-    }
-
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
