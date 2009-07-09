@@ -38,6 +38,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  * @hide Synthesizes speech from text. This is implemented as a service so that
@@ -358,20 +360,38 @@ public class TtsService extends Service implements OnCompletionListener {
      * Stops all speech output and removes any utterances still in the queue.
      */
     private int stop() {
-        Log.i("TTS", "Stopping");
-        mSpeechQueue.clear();
+        int result = TextToSpeech.TTS_ERROR;
+        boolean speechQueueAvailable = false;
+        try{
+            // If the queue is locked for more than 1 second,
+            // something has gone very wrong with processSpeechQueue.
+            speechQueueAvailable = speechQueueLock.tryLock(1000, TimeUnit.MILLISECONDS);
+            if (speechQueueAvailable) {
+                Log.i("TTS", "Stopping");
+                mSpeechQueue.clear();
 
-        int result = nativeSynth.stop();
-        mIsSpeaking = false;
-        if (mPlayer != null) {
-            try {
-                mPlayer.stop();
-            } catch (IllegalStateException e) {
-                // Do nothing, the player is already stopped.
+                result = nativeSynth.stop();
+                mIsSpeaking = false;
+                if (mPlayer != null) {
+                    try {
+                        mPlayer.stop();
+                    } catch (IllegalStateException e) {
+                        // Do nothing, the player is already stopped.
+                    }
+                }
+                Log.i("TTS", "Stopped");
             }
+        } catch (InterruptedException e) {
+          Log.e("TTS stop", "tryLock interrupted");
+          e.printStackTrace();
+        } finally {
+            // This check is needed because finally will always run; even if the
+            // method returns somewhere in the try block.
+            if (speechQueueAvailable) {
+                speechQueueLock.unlock();
+            }
+            return result;
         }
-        Log.i("TTS", "Stopped");
-        return result;
     }
 
     public void onCompletion(MediaPlayer arg0) {
@@ -443,6 +463,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     }
                     nativeSynth.speak(text);
                 } catch (InterruptedException e) {
+                    Log.e("TTS speakInternalOnly", "tryLock interrupted");
                     e.printStackTrace();
                 } finally {
                     // This check is needed because finally will always run;
@@ -497,6 +518,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     }
                     nativeSynth.synthesizeToFile(text, filename);
                 } catch (InterruptedException e) {
+                    Log.e("TTS synthToFileInternalOnly", "tryLock interrupted");
                     e.printStackTrace();
                 } finally {
                     // This check is needed because finally will always run;
@@ -650,6 +672,9 @@ public class TtsService extends Service implements OnCompletionListener {
             if (mSpeechQueue.size() > 0) {
                 mSpeechQueue.remove(0);
             }
+        } catch (InterruptedException e) {
+            Log.e("TTS processSpeechQueue", "tryLock interrupted");
+            e.printStackTrace();
         } finally {
             // This check is needed because finally will always run; even if the
             // method returns somewhere in the try block.
