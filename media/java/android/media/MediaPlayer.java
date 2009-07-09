@@ -937,25 +937,49 @@ public class MediaPlayer
     /**
      * Set a filter for the metadata update notification and update
      * retrieval. The caller provides 2 set of metadata keys, allowed
-     * and disallowed. The disallow set always takes the precedence
-     * over the allowed one.
+     * and blocked. The blocked set always takes precedence over the
+     * allowed one.
      * Metadata.MATCH_ALL and Metadata.MATCH_NONE are 2 sets available as
-     * shorthands to allow/disallow all or no metadata.
+     * shorthands to allow/block all or no metadata.
      *
      * By default, there is no filter set.
      *
      * @param allow Is the set of metadata the client is interested
-     *              receiving new notifications for.
-     * @param disallow Is the set of metadata the client is not interested
-     *                 receiving new notifications for.
+     *              in receiving new notifications for.
+     * @param block Is the set of metadata the client is not interested
+     *              in receiving new notifications for.
      * @return The call status code.
      *
      // FIXME: unhide.
      * {@hide}
      */
-    public int setMetadataFilter(Set<Integer> allow, Set<Integer> disallow) {
-        // FIXME: Implement.
-        return 0;
+    public int setMetadataFilter(Set<Integer> allow, Set<Integer> block) {
+        // Do our serialization manually instead of calling
+        // Parcel.writeArray since the sets are made of the same type
+        // we avoid paying the price of calling writeValue (used by
+        // writeArray) which burns an extra int per element to encode
+        // the type.
+        Parcel request =  newRequest();
+
+        // The parcel starts already with an interface token. There
+        // are 2 filters. Each one starts with a 4bytes number to
+        // store the len followed by a number of int (4 bytes as well)
+        // representing the metadata type.
+        int capacity = request.dataSize() + 4 * (1 + allow.size() + 1 + block.size());
+
+        if (request.dataCapacity() < capacity) {
+            request.setDataCapacity(capacity);
+        }
+
+        request.writeInt(allow.size());
+        for(Integer t: allow) {
+            request.writeInt(t);
+        }
+        request.writeInt(block.size());
+        for(Integer t: block) {
+            request.writeInt(t);
+        }
+        return native_setMetadataFilter(request);
     }
 
     /**
@@ -1044,6 +1068,15 @@ public class MediaPlayer
      * @return The status code.
      */
     private native final int native_invoke(Parcel request, Parcel reply);
+
+    /**
+     * @param request Parcel with the 2 serialized lists of allowed
+     *                metadata types followed by the one to be
+     *                dropped. Each list starts with an integer
+     *                indicating the number of metadata type elements.
+     * @return The status code.
+     */
+    private native final int native_setMetadataFilter(Parcel request);
 
     private native final void native_setup(Object mediaplayer_this);
     private native final void native_finalize();

@@ -56,6 +56,7 @@ public class Metadata
     //
 
     public static final int ANY = 0;  // Never used for metadata returned, only for filtering.
+                                      // Keep in sync with kAny in MediaPlayerService.cpp
 
     // TODO: Should we use numbers compatible with the metadata retriever?
     public static final int TITLE = 1;           // String

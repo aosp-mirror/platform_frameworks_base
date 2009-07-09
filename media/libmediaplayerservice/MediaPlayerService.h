@@ -23,6 +23,7 @@
 #include <utils/List.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
+#include <utils/Vector.h>
 #include <ui/SurfaceComposerClient.h>
 
 #include <media/IMediaPlayerService.h>
@@ -143,7 +144,7 @@ class MediaPlayerService : public BnMediaPlayerService
         sp<MemoryHeapBase>  mHeap;
         float               mMsecsPerFrame;
         uint16_t            mChannelCount;
-        uint16_t			mFormat;
+        uint16_t            mFormat;
         ssize_t             mFrameCount;
         uint32_t            mSampleRate;
         uint32_t            mSize;
@@ -168,6 +169,7 @@ public:
 
             void                removeClient(wp<Client> client);
 
+
 private:
 
     class Client : public BnMediaPlayer {
@@ -188,6 +190,7 @@ private:
         virtual status_t        setLooping(int loop);
         virtual status_t        setVolume(float leftVolume, float rightVolume);
         virtual status_t        invoke(const Parcel& request, Parcel *reply);
+        virtual status_t        setMetadataFilter(const Parcel& filter);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
                 status_t        setDataSource(const char *url);
@@ -210,6 +213,12 @@ private:
 
         sp<MediaPlayerBase>     getPlayer() const { Mutex::Autolock lock(mLock); return mPlayer; }
 
+
+        /**
+         * @return true if the metadata should be dropped.
+         */
+        bool shouldDropMetadata(int code) const;
+
         mutable     Mutex                       mLock;
                     sp<MediaPlayerBase>         mPlayer;
                     sp<MediaPlayerService>      mService;
@@ -219,6 +228,10 @@ private:
                     status_t                    mStatus;
                     bool                        mLoop;
                     int32_t                     mConnId;
+        // FIXME: Replace Vector<> with std::set<> when available. std::set support find.
+        // Metadata filters.
+                    Vector<int32_t>             mMetadataAllow;  // protected by mLock
+                    Vector<int32_t>             mMetadataDrop;  // protected by mLock
 #if CALLBACK_ANTAGONIZER
                     Antagonizer*                mAntagonizer;
 #endif

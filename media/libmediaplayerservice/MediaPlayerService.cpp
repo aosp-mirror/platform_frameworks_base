@@ -69,6 +69,150 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
+namespace {
+using android::status_t;
+using android::OK;
+using android::BAD_VALUE;
+using android::NOT_ENOUGH_DATA;
+using android::Parcel;
+using android::Vector;
+
+// Max number of entries in the filter.
+const int kMaxFilterSize = 64;  // I pulled that out of thin air.
+
+// Keep in sync with ANY in Metadata.java
+const int32_t kAny = 0;
+
+// To order the metadata types in the vector-filter.
+int lessThan(const int32_t *lhs, const int32_t *rhs)
+{
+    return *lhs < *rhs ? 0 : 1;
+}
+
+// Unmarshall a filter from a Parcel.
+// Filter format in a parcel:
+//
+//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                       number of entries (n)                   |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                       metadata type 1                         |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                       metadata type 2                         |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//  ....
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                       metadata type n                         |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+// @param p Parcel that should start with a filter.
+// @param[out] filter On exit contains the list of metadata type to be
+//                    filtered.
+// @param[out] status On exit contains the status code to be returned.
+// @return true if the parcel starts with a valid filter.
+bool unmarshallFilter(const Parcel& p,
+                      Vector<int32_t> *filter,
+                      status_t *status)
+{
+    int32_t s;
+    if (p.readInt32(&s) != OK)
+    {
+        LOGE("Failed to read filter's length");
+        *status = NOT_ENOUGH_DATA;
+        return false;
+    }
+
+    if( s > kMaxFilterSize || s < 0)
+    {
+        LOGE("Invalid filter len %d", s);
+        *status = BAD_VALUE;
+        return false;
+    }
+
+    size_t size = s;
+
+    filter->clear();
+    filter->setCapacity(size);
+
+    s *= sizeof(int32_t);
+
+    if (p.dataAvail() < static_cast<size_t>(s))
+    {
+        LOGE("Filter too short expected %d but got %d", s, p.dataAvail());
+        *status = NOT_ENOUGH_DATA;
+        return false;
+    }
+
+    const int32_t *data = static_cast<const int32_t*>(p.readInplace(s));
+
+    if (NULL == data )
+    {
+        LOGE("Filter had no data");
+        *status = BAD_VALUE;
+        return false;
+    }
+
+    // TODO: The stl impl of vector would be more efficient here
+    // because it degenerates into a memcpy on pod types. Try to
+    // replace later or use stl::set.
+    for (size_t i = 0; i < size; ++i)
+    {
+        filter->push(*data);
+        ++data;
+    }
+    *status = OK;
+    return true;
+}
+
+bool unmarshallBothFilters(const Parcel& p,
+                           Vector<int32_t> *allow,
+                           Vector<int32_t> *block,
+                           status_t *status)
+{
+    if (!(unmarshallFilter(p, allow, status) && unmarshallFilter(p, block, status)))
+    {
+        return false;
+    }
+    allow->sort(lessThan);
+    block->sort(lessThan);
+    return true;
+}
+
+// @param filter Should be sorted in ascending order.
+// @param val To be searched.
+// @return true if a match was found.
+bool findMetadata(const Vector<int32_t> filter, const int32_t val)
+{
+    // Deal with empty and ANY right away
+    if (filter.isEmpty()) return false;
+    if (filter[0] == kAny) return true;
+
+    ssize_t min = 0;
+    ssize_t max = filter.size() - 1;
+    ssize_t mid;
+    do
+    {
+        mid = (min + max) / 2;
+        if (val > filter[mid])
+        {
+            min = mid + 1;
+        }
+        else
+        {
+            max = mid - 1;
+        }
+        if (filter[mid] == val)
+        {
+            return true;
+        }
+    }
+    while(min <= max);
+    return false;
+}
+
+}  // anonymous namespace
+
+
 namespace android {
 
 // TODO: Temp hack until we can register players
@@ -686,6 +830,22 @@ status_t MediaPlayerService::Client::invoke(const Parcel& request,
     return p->invoke(request, reply);
 }
 
+// This call doesn't need to access the native player.
+status_t MediaPlayerService::Client::setMetadataFilter(const Parcel& filter)
+{
+    status_t status;
+    Vector<int32_t> allow, drop;
+
+    if (unmarshallBothFilters(filter, &allow, &drop, &status))
+    {
+        Mutex::Autolock l(mLock);
+
+        mMetadataAllow = allow;
+        mMetadataDrop = drop;
+    }
+    return status;
+}
+
 status_t MediaPlayerService::Client::prepareAsync()
 {
     LOGV("[%d] prepareAsync", mConnId);
@@ -808,8 +968,33 @@ status_t MediaPlayerService::Client::setVolume(float leftVolume, float rightVolu
 void MediaPlayerService::Client::notify(void* cookie, int msg, int ext1, int ext2)
 {
     Client* client = static_cast<Client*>(cookie);
+
+    if (MEDIA_INFO == msg &&
+        MEDIA_INFO_METADATA_UPDATE == ext1 &&
+        client->shouldDropMetadata(ext2 /* metadata type */)) {
+        return;
+    }
     LOGV("[%d] notify (%p, %d, %d, %d)", client->mConnId, cookie, msg, ext1, ext2);
     client->mClient->notify(msg, ext1, ext2);
+}
+
+bool MediaPlayerService::Client::shouldDropMetadata(int code) const
+{
+    Mutex::Autolock l(mLock);
+
+    if (findMetadata(mMetadataDrop, code))
+    {
+        return true;
+    }
+
+    if (mMetadataAllow.isEmpty() || findMetadata(mMetadataAllow, code))
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 #if CALLBACK_ANTAGONIZER
