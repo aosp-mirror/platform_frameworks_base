@@ -991,7 +991,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     };
 
     @Override
-    public void cancel() {
+    public void dismiss() {
         if (!isShowing()) return;
 
         // We made sure the IME was displayed, so also make sure it is closed
@@ -1003,7 +1003,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     getWindow().getDecorView().getWindowToken(), 0);
         }
         
-        super.cancel();
+        super.dismiss();
     }
     
     /**
