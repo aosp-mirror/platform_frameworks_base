@@ -45,13 +45,29 @@ public class WebChromeClient {
     public void onReceivedIcon(WebView view, Bitmap icon) {}
 
     /**
-     * Notify the host application that the current page would
-     * like to show a custom View.
-     * @param view is the View object to be shown.
+     * A callback interface used by the host application to notify
+     * the current page that its custom view has been dismissed.
      *
      * @hide pending council approval
      */
-    public void onShowCustomView(View view) {}
+    public interface CustomViewCallback {
+        /**
+         * Invoked when the host application dismisses the
+         * custom view.
+         */
+        public void onCustomViewHidden();
+    }
+
+    /**
+     * Notify the host application that the current page would
+     * like to show a custom View.
+     * @param view is the View object to be shown.
+     * @param callback is the callback to be invoked if and when the view
+     * is dismissed.
+     *
+     * @hide pending council approval
+     */
+    public void onShowCustomView(View view, CustomViewCallback callback) {};
 
     /**
      * Notify the host application that the current page would
