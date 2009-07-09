@@ -151,7 +151,8 @@ public final class ViewRoot extends Handler implements ViewParent,
     boolean mWindowAttributesChanged = false;
 
     // These can be accessed by any thread, must be protected with a lock.
-    Surface mSurface;
+    // Surface can never be reassigned or cleared (use Surface.clear()).
+    private final Surface mSurface = new Surface();
 
     boolean mAdded;
     boolean mAddedTouchMode;
@@ -231,7 +232,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         mTransparentRegion = new Region();
         mPreviousTransparentRegion = new Region();
         mFirst = true; // true for the first time the view is added
-        mSurface = new Surface();
         mAdded = false;
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
@@ -1533,10 +1533,12 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         mView = null;
         mAttachInfo.mRootView = null;
+        mAttachInfo.mSurface = null;
 
         if (mUseGL) {
             destroyGL();
         }
+        mSurface.clear();
 
         try {
             sWindowSession.remove(mWindow);
@@ -2495,7 +2497,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                 }
 
-                mSurface = null;
+                mSurface.clear();
             }
             if (mAdded) {
                 mAdded = false;
