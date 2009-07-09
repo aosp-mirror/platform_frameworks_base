@@ -1336,12 +1336,7 @@ public class WebSettings {
         if (!BROWSER_PACKAGE_NAME.equals(mContext.getPackageName())) {
             return;
         }
-        // Is the pluginsPath sane?
-        if (mPluginsPath == null || mPluginsPath.length() == 0) {
-            // We don't yet have a meaningful plugin path, so
-            // we can't do anything about the Gears permissions.
-            return;
-        }
+
         // Remember we checked the Gears permissions.
         mCheckedGearsPermissions = true;
         // Get the current system settings.
@@ -1372,10 +1367,12 @@ public class WebSettings {
         int gearsPermission = (systemPermission == 1 ? 1 : 2);
         // Build the path to the Gears library.
 
-        File file = new File(mPluginsPath).getParentFile();
+        // hack for now
+        File file = mContext.getDir("plugins", 0);
         if (file == null) {
             return;
         }
+        file = file.getParentFile();
         // Build the Gears database file name.
         file = new File(file.getAbsolutePath() + File.separator 
                 + GEARS_DATABASE_DIR + File.separator + GEARS_DATABASE_FILE);
