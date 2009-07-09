@@ -129,53 +129,30 @@ public class Resources {
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
             Configuration config) {
-        this(assets, metrics, config, (ApplicationInfo) null);
+        this(assets, metrics, config, (CompatibilityInfo) null);
     }
 
     /**
-     * Creates a new Resources object with ApplicationInfo.
+     * Creates a new Resources object with CompatibilityInfo.
      * 
      * @param assets Previously created AssetManager. 
      * @param metrics Current display metrics to consider when 
      *                selecting/computing resource values.
      * @param config Desired device configuration to consider when 
      *               selecting/computing resource values (optional).
-     * @param appInfo this resource's application info.
+     * @param compInfo this resource's compatibility info. It will use the default compatibility
+     *  info when it's null.
      * @hide
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
-            Configuration config, ApplicationInfo appInfo) {
+            Configuration config, CompatibilityInfo compInfo) {
         mAssets = assets;
-        mConfiguration.setToDefaults();
         mMetrics.setToDefaults();
-        if (appInfo != null) {
-            mCompatibilityInfo = new CompatibilityInfo(appInfo);
-            if (DEBUG_CONFIG) {
-                Log.d(TAG, "compatibility for " + appInfo.packageName + " : " + mCompatibilityInfo);
-            }
-        } else {
+        if (compInfo == null) {
             mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
-        }
-        updateConfiguration(config, metrics);
-        assets.ensureStringBlocks();
-        if (mCompatibilityInfo.isScalingRequired()) {
-            mPreloadedDrawables = emptySparseArray();
         } else {
-            mPreloadedDrawables = sPreloadedDrawables;
+            mCompatibilityInfo = compInfo;
         }
-    }
-
-    /**
-     * Creates a new resources that uses the given compatibility info. Used to create
-     * a context for widgets using the container's compatibility info.
-     * {@see ApplicationContext#createPackageCotnext}.
-     * @hide
-     */
-    public Resources(AssetManager assets, DisplayMetrics metrics,
-            Configuration config, CompatibilityInfo info) {
-        mAssets = assets;
-        mMetrics.setToDefaults();
-        mCompatibilityInfo = info;
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
         if (mCompatibilityInfo.isScalingRequired()) {
