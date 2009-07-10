@@ -319,14 +319,14 @@ public class TtsService extends Service implements OnCompletionListener {
      * @param text
      *            The text that should be spoken
      * @param queueMode
-     *            0 for no queue (interrupts all previous utterances), 1 for
-     *            queued
+     *            TextToSpeech.TTS_QUEUE_FLUSH for no queue (interrupts all previous utterances),
+     *            TextToSpeech.TTS_QUEUE_ADD for queued
      * @param params
      *            An ArrayList of parameters. This is not implemented for all
      *            engines.
      */
     private int speak(String callingApp, String text, int queueMode, ArrayList<String> params) {
-        if (queueMode == 0) {
+        if (queueMode == TextToSpeech.TTS_QUEUE_FLUSH) {
             stop(callingApp);
         }
         mSpeechQueue.add(new SpeechItem(callingApp, text, params, SpeechItem.TEXT));
@@ -342,15 +342,15 @@ public class TtsService extends Service implements OnCompletionListener {
      * @param earcon
      *            The earcon that should be played
      * @param queueMode
-     *            0 for no queue (interrupts all previous utterances), 1 for
-     *            queued
+     *            TextToSpeech.TTS_QUEUE_FLUSH for no queue (interrupts all previous utterances),
+     *            TextToSpeech.TTS_QUEUE_ADD for queued
      * @param params
      *            An ArrayList of parameters. This is not implemented for all
      *            engines.
      */
     private int playEarcon(String callingApp, String earcon, int queueMode,
             ArrayList<String> params) {
-        if (queueMode == 0) {
+        if (queueMode == TextToSpeech.TTS_QUEUE_FLUSH) {
             stop(callingApp);
         }
         mSpeechQueue.add(new SpeechItem(callingApp, earcon, params, SpeechItem.EARCON));
@@ -408,7 +408,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private int playSilence(String callingApp, long duration, int queueMode,
             ArrayList<String> params) {
-        if (queueMode == 0) {
+        if (queueMode == TextToSpeech.TTS_QUEUE_FLUSH) {
             stop(callingApp);
         }
         mSpeechQueue.add(new SpeechItem(callingApp, duration));
@@ -759,8 +759,8 @@ public class TtsService extends Service implements OnCompletionListener {
          * @param text
          *            The text that should be spoken
          * @param queueMode
-         *            0 for no queue (interrupts all previous utterances), 1 for
-         *            queued
+         *            TextToSpeech.TTS_QUEUE_FLUSH for no queue (interrupts all previous utterances)
+         *            TextToSpeech.TTS_QUEUE_ADD for queued
          * @param params
          *            An ArrayList of parameters. The first element of this
          *            array controls the type of voice to use.
@@ -779,8 +779,8 @@ public class TtsService extends Service implements OnCompletionListener {
          * @param earcon
          *            The earcon that should be played
          * @param queueMode
-         *            0 for no queue (interrupts all previous utterances), 1 for
-         *            queued
+         *            TextToSpeech.TTS_QUEUE_FLUSH for no queue (interrupts all previous utterances)
+         *            TextToSpeech.TTS_QUEUE_ADD for queued
          * @param params
          *            An ArrayList of parameters.
          */
@@ -798,8 +798,8 @@ public class TtsService extends Service implements OnCompletionListener {
          * @param duration
          *            The duration of the silence that should be played
          * @param queueMode
-         *            0 for no queue (interrupts all previous utterances), 1 for
-         *            queued
+         *            TextToSpeech.TTS_QUEUE_FLUSH for no queue (interrupts all previous utterances)
+         *            TextToSpeech.TTS_QUEUE_ADD for queued
          * @param params
          *            An ArrayList of parameters.
          */
