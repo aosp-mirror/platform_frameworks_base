@@ -37,7 +37,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libpixelflinger \
 	libhardware \
 	libutils \
-	libcorecg \
+	libskia \
 	libEGL \
 	libGLESv1_CM \
 	libbinder \

@@ -158,8 +158,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libnetutils \
 	libui \
 	libskiagl \
-	libsgl \
-	libcorecg \
+	libskia \
 	libsqlite \
 	libdvm \
 	libEGL \

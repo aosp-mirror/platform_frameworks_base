@@ -18,8 +18,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
     libui \
-	libcorecg \
-	libsgl \
+	libskia \
     libEGL \
     libGLESv1_CM
 
