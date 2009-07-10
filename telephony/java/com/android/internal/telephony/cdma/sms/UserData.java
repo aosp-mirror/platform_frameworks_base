@@ -35,7 +35,7 @@ public class UserData {
     //public static final int ENCODING_SHIFT_JIS                  = 0x05;
     //public static final int ENCODING_KOREAN                     = 0x06;
     //public static final int ENCODING_LATIN_HEBREW               = 0x07;
-    //public static final int ENCODING_LATIN                      = 0x08;
+    public static final int ENCODING_LATIN                      = 0x08;
     public static final int ENCODING_GSM_7BIT_ALPHABET          = 0x09;
     public static final int ENCODING_GSM_DCS                    = 0x0A;
 

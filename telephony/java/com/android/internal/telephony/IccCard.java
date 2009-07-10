@@ -122,8 +122,8 @@ public abstract class IccCard {
                     return State.UNKNOWN;
                 case SIM_READY:
                 case RUIM_READY:
-                    return State.READY;
                 case NV_READY:
+                    return State.READY;
                 case NV_NOT_READY:
                     return State.ABSENT;
             }
