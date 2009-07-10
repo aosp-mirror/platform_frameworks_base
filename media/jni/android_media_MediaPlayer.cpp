@@ -101,10 +101,9 @@ void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2)
 
 // ----------------------------------------------------------------------------
 
-static sp<Surface> get_surface(JNIEnv* env, jobject clazz)
+static Surface* get_surface(JNIEnv* env, jobject clazz)
 {
-    Surface* const p = (Surface*)env->GetIntField(clazz, fields.surface_native);
-    return sp<Surface>(p);
+    return (Surface*)env->GetIntField(clazz, fields.surface_native);
 }
 
 static sp<MediaPlayer> getMediaPlayer(JNIEnv* env, jobject thiz)
@@ -205,7 +204,7 @@ static void setVideoSurface(const sp<MediaPlayer>& mp, JNIEnv *env, jobject thiz
 {
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
-        const sp<Surface>& native_surface = get_surface(env, surface);
+        const sp<Surface> native_surface = get_surface(env, surface);
         LOGV("prepare: surface=%p (id=%d)",
              native_surface.get(), native_surface->ID());
         mp->setVideoSurface(native_surface);
@@ -245,7 +244,7 @@ android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
     }
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
-        const sp<Surface>& native_surface = get_surface(env, surface);
+        const sp<Surface> native_surface = get_surface(env, surface);
         LOGV("prepareAsync: surface=%p (id=%d)",
              native_surface.get(), native_surface->ID());
         mp->setVideoSurface(native_surface);
