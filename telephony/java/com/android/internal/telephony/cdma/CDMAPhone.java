@@ -392,7 +392,7 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public String getCdmaPrlVersion(){
-        return mRuimRecords.getPrlVersion();
+        return mSST.getPrlVersion();
     }
 
     public String getCdmaMIN() {

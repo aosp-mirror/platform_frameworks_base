@@ -127,6 +127,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private int mHomeSystemId;
     private int mHomeNetworkId;
     private String mMin;
+    private String mPrlVersion;
 
     private boolean isEriTextLoaded = false;
     private boolean isSubscriptionFromRuim = false;
@@ -178,6 +179,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
         cm.registerForNVReady(this, EVENT_NV_READY, null);
         phone.registerForEriFileLoaded(this, EVENT_ERI_FILE_LOADED, null);
+        cm.registerForCdmaOtaProvision(this,EVENT_OTA_PROVISION_STATUS_CHANGE, null);
 
         // system setting property AIRPLANE_MODE_ON is set in Settings.
         int airplaneMode = Settings.System.getInt(
@@ -201,6 +203,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         cm.unregisterForNetworkStateChanged(this);
         cm.unregisterForRUIMReady(this);
         cm.unregisterForNVReady(this);
+        cm.unregisterForCdmaOtaProvision(this);
         phone.unregisterForEriFileLoaded(this);
         phone.mRuimRecords.unregisterForRecordsLoaded(this);
         cm.unSetOnSignalStrengthUpdate(this);
@@ -302,6 +305,10 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
         case EVENT_NV_READY:
             isSubscriptionFromRuim = false;
+            // For Non-RUIM phones, the subscription information is stored in
+            // Non Volatile. Here when Non-Volatile is ready, we can poll the CDMA
+            // subscription info.
+            cm.getCDMASubscription( obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
             pollState();
             // Signal strength polling stops when radio is off
             queueNextSignalStrengthPoll();
@@ -379,9 +386,27 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
         case EVENT_POLL_STATE_REGISTRATION_CDMA:
         case EVENT_POLL_STATE_OPERATOR_CDMA:
-        case EVENT_POLL_STATE_CDMA_SUBSCRIPTION:
             ar = (AsyncResult) msg.obj;
             handlePollStateResult(msg.what, ar);
+            break;
+
+        case EVENT_POLL_STATE_CDMA_SUBSCRIPTION: // Handle RIL_CDMA_SUBSCRIPTION
+            ar = (AsyncResult) msg.obj;
+
+            if (ar.exception == null) {
+                String cdmaSubscription[] = (String[])ar.result;
+                if (cdmaSubscription != null && cdmaSubscription.length >= 5) {
+                    mMdn = cdmaSubscription[0];
+                    mHomeSystemId = Integer.parseInt(cdmaSubscription[1], 16);
+                    mHomeNetworkId = Integer.parseInt(cdmaSubscription[2], 16);
+                    mMin = cdmaSubscription[3];
+                    mPrlVersion = cdmaSubscription[4];
+                    Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION MDN=" + mMdn);
+                } else {
+                    Log.w(LOG_TAG,"error parsing cdmaSubscription params num="
+                            + cdmaSubscription.length);
+                }
+            }
             break;
 
         case EVENT_POLL_SIGNAL_STRENGTH:
@@ -428,6 +453,19 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             // Repoll the state once the ERI file has been loaded
             if (DBG) log("[CdmaServiceStateTracker] ERI file has been loaded, repolling.");
             pollState();
+            break;
+
+        case EVENT_OTA_PROVISION_STATUS_CHANGE:
+            ar = (AsyncResult)msg.obj;
+            if (ar.exception == null) {
+                ints = (int[]) ar.result;
+                int otaStatus = ints[0];
+                if (otaStatus == phone.CDMA_OTA_PROVISION_STATUS_COMMITTED
+                    || otaStatus == phone.CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED) {
+                    Log.d(LOG_TAG, "Received OTA_PROGRAMMING Complete,Reload MDN ");
+                    cm.getCDMASubscription( obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
+                }
+            }
             break;
 
         default:
@@ -663,20 +701,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 }
                 break;
 
-            case EVENT_POLL_STATE_CDMA_SUBSCRIPTION: // Handle RIL_CDMA_SUBSCRIPTION
-                String cdmaSubscription[] = (String[])ar.result;
-
-                if (cdmaSubscription != null && cdmaSubscription.length >= 4) {
-                    mMdn = cdmaSubscription[0];
-                    mHomeSystemId = Integer.parseInt(cdmaSubscription[1], 16);
-                    mHomeNetworkId = Integer.parseInt(cdmaSubscription[2], 16);
-                    mMin = cdmaSubscription[3];
-
-                } else {
-                    Log.w(LOG_TAG, "error parsing cdmaSubscription");
-                }
-                break;
-
             default:
                 Log.e(LOG_TAG, "RIL response handle in wrong phone!"
                     + " Expected CDMA RIL request and get GSM RIL request.");
@@ -791,11 +815,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             // Issue all poll-related commands at once
             // then count down the responses, which
             // are allowed to arrive out-of-order
-
-            pollingContext[0]++;
-            // RIL_REQUEST_CDMA_SUBSCRIPTION is necessary for CDMA
-            cm.getCDMASubscription(
-                    obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION, pollingContext));
 
             pollingContext[0]++;
             // RIL_REQUEST_OPERATOR is necessary for CDMA
@@ -1465,6 +1484,11 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     public String getCdmaMin() {
          return mMin;
+    }
+
+    /** Returns null if NV is not yet ready */
+    public String getPrlVersion() {
+        return mPrlVersion;
     }
 
 }
