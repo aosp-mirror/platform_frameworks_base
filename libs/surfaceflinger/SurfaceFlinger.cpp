@@ -1236,6 +1236,13 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
 {
     LayerBaseClient* layer = 0;
     sp<LayerBaseClient::Surface> surfaceHandle;
+
+    if (int32_t(w|h) < 0) {
+        LOGE("createSurface() failed, w or h is negative (w=%d, h=%d)",
+                int(w), int(h));
+        return surfaceHandle;
+    }
+    
     Mutex::Autolock _l(mStateLock);
     Client* const c = mClientsMap.valueFor(clientId);
     if (UNLIKELY(!c)) {
