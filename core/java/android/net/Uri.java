@@ -1083,7 +1083,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         /** Used in parcelling. */
         static final int TYPE_ID = 3;
 
-        private final String scheme;
+        private final String scheme; // can be null
         private final Part authority;
         private final PathPart path;
         private final Part query;
@@ -1092,10 +1092,10 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         private HierarchicalUri(String scheme, Part authority, PathPart path,
                 Part query, Part fragment) {
             this.scheme = scheme;
-            this.authority = authority;
-            this.path = path;
-            this.query = query;
-            this.fragment = fragment;
+            this.authority = Part.nonNull(authority);
+            this.path = path == null ? PathPart.NULL : path;
+            this.query = Part.nonNull(query);
+            this.fragment = Part.nonNull(fragment);
         }
 
         static Uri readFrom(Parcel parcel) {
@@ -1158,21 +1158,18 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
 
         private void appendSspTo(StringBuilder builder) {
-            if (authority != null) {
-                String encodedAuthority = authority.getEncoded();
-                if (encodedAuthority != null) {
-                    // Even if the authority is "", we still want to append "//".
-                    builder.append("//").append(encodedAuthority);
-                }
+            String encodedAuthority = authority.getEncoded();
+            if (encodedAuthority != null) {
+                // Even if the authority is "", we still want to append "//".
+                builder.append("//").append(encodedAuthority);
             }
 
-            // path is never null.
             String encodedPath = path.getEncoded();
             if (encodedPath != null) {
                 builder.append(encodedPath);
             }
 
-            if (query != null && !query.isEmpty()) {
+            if (!query.isEmpty()) {
                 builder.append('?').append(query.getEncoded());
             }
         }
@@ -1232,7 +1229,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
             appendSspTo(builder);
 
-            if (fragment != null && !fragment.isEmpty()) {
+            if (!fragment.isEmpty()) {
                 builder.append('#').append(fragment.getEncoded());
             }
 
@@ -1506,7 +1503,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             throw new UnsupportedOperationException(NOT_HIERARCHICAL);
         }
 
-        String query = getQuery();
+        String query = getEncodedQuery();
         if (query == null) {
             return Collections.emptyList();
         }
@@ -1569,7 +1566,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             throw new UnsupportedOperationException(NOT_HIERARCHICAL);
         }
 
-        String query = getQuery();
+        String query = getEncodedQuery();
 
         if (query == null) {
             return null;
